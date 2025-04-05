@@ -1,0 +1,9 @@
+{
+	"id":"wfg_ltv_econ",
+	"name":"LTV Economy",
+	"author":"WolframSegler",
+	"version": "0.1.0",
+	"description":"Changes the economic system and how colonies are managed. This mod aims to make the economy interesting.",
+	"gameVersion":"0.97a-RC11",
+	"utility": false
+}
