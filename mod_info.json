@@ -4,6 +4,10 @@
 	"author":"WolframSegler",
 	"version": "0.1.0",
 	"description":"Changes the economic system and how colonies are managed. This mod aims to make the economy interesting.",
-	"gameVersion":"0.97a-RC11",
-	"utility": false
+	"gameVersion":"0.98a-RC7",
+	"utility": false,
+	"jars": [
+        "jars/ltv_economy.jar"
+    ],
+	"modPlugin": "wfg_ltv_econ.LtvEconomyModPlugin"
 }
