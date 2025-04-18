@@ -1,0 +1,2 @@
+name,id,tags,planetary,decivRemove,script,desc,icon,order
+No Automatic Stockpiling,no_restock_condition,,TRUE,,"wfg_ltv_econ.NoRestockCondition","Prevents automatic commodity restocking on this market.",graphics/icons/markets/wfg_ltv_econ_small.png,200

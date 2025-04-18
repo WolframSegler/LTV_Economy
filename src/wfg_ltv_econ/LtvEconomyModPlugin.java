@@ -2,6 +2,7 @@ package wfg_ltv_econ;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
@@ -17,6 +18,10 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
-        //Global.getLogger(this.getClass()).info("Game loaded. LTV Economy active.");
+
+        // Apply to ALL existing markets
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            market.addCondition("no_restock_condition");
+        }
     }
 }

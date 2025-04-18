@@ -264,20 +264,22 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			MutableStat commodity_supply = getSupply(commodity.getKey()).getQuantity();
 			commodity_supply.unmodifyMult("ltv_weighted_deficit"); // clear previous deficit modifier
 
-			float totalReduction = 1f; // 1 means no reduction. 0 means complete reduction
+			float supplyMultiplier = 1f; // 1 means no reduction. 0 means complete reduction
 
 			for (Pair<String, Float> element : commodity.getValue()) {
 				float demand = getDemand(element.one).getQuantity().getModifiedValue();
-				int avaliable = market.getCommodityData(element.one).getAvailable();
-				float deficit = Math.min(avaliable / demand, 1); // rate of deficit compared to total demand
-				totalReduction = Math.min(element.two * deficit, totalReduction); // Resource weight * Resource deficit = effective reduction
+				if (demand <= 0) continue;
+
+				int available = market.getCommodityData(element.one).getAvailable();
+				float availabilityRatio  = Math.min(available / demand, 1); // rate of deficit compared to total demand
+				float deficitImpact = element.two * (1f - availabilityRatio); // Weight × shortage
+
+				// Apply the worst-case deficit
+				supplyMultiplier = Math.min(supplyMultiplier, 1f - deficitImpact);
 			}
 
-			if(totalReduction < 0.1f) {
-				commodity_supply.modifyMult("ltv_weighted_deficit", 0.1f);
-			} else {
-				commodity_supply.modifyMult("ltv_weighted_deficit", totalReduction);
-			}
+			supplyMultiplier = Math.max(supplyMultiplier, 0.1f); // Minimum 10% production
+			commodity_supply.modifyMult("ltv_weighted_deficit", supplyMultiplier);
 		}
 	}
 	
