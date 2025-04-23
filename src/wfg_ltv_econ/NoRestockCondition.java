@@ -25,12 +25,6 @@ public class NoRestockCondition extends BaseMarketConditionPlugin {
             // Remove base restock and multipliers
             commodity.getAvailableStat().unmodify("base");
             commodity.getAvailableStat().unmodify("mult");
-            
-
-            // Store current availability to prevent overwrites
-            //float currentStock = commodity.getAvailable(); 
-            //commodity.getAvailableStat().unmodify("base");  // Remove auto-restock
-            //commodity.getAvailableStat().setBaseValue(currentStock); // Lock value
         }
     }
 }

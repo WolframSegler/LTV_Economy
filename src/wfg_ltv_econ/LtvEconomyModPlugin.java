@@ -8,7 +8,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onApplicationLoad() throws Exception {
-        //Global.getLogger(this.getClass()).info("LTV Economy Mod loaded!");
+       
     }
 
     @Override
@@ -24,4 +24,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             market.addCondition("no_restock_condition");
         }
     }
+
+    
 }

@@ -25,10 +25,10 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public static float DAYS_BEFORE_POLLUTION = 0f;
 	public static float DAYS_BEFORE_POLLUTION_PERMANENT = 180f;
 
-	public static int DAILY_BASE_PROD_HEAVY_MACHINERY = 13;// 150$
-	public static int DAILY_BASE_PROD_SUPPLIES = 20; 		// 100$
-	public static int DAILY_BASE_PROD_HAND_WEAPONS = 4;	// 500$
-	public static int DAILY_BASE_PROD_SHIPS = 6;			// 300$
+	public static int DAILY_BASE_PROD_HEAVY_MACHINERY = 1; //13;// 150$
+	public static int DAILY_BASE_PROD_SUPPLIES = 1; //20; 		// 100$
+	public static int DAILY_BASE_PROD_HAND_WEAPONS = 1; //4;	// 500$
+	public static int DAILY_BASE_PROD_SHIPS = 1; //6;			// 300$
 
 	public static float METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.8f;
 	public static float RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.2f;
@@ -125,11 +125,6 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		}
 		return super.wantsToUseSpecialItem(data);
 	}
-
-	protected boolean permaPollution = false;
-	protected boolean addedPollution = false;
-	protected float daysWithNanoforge = 0f;
-	float TimeSinceLoop = 0f;
 	
 	public void apply() {
 		super.apply();
@@ -174,25 +169,28 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		}
 
 		daysWithNanoforge = 0f;
-		TimeSinceLoop = 0f;
+		dayTracker = -1;
 		
 		market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).unmodifyFlat(getModId(0));
 		market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).unmodifyFlat(getModId(1));
 	}
 
+	protected boolean permaPollution = false;
+	protected boolean addedPollution = false;
+	protected float daysWithNanoforge = 0f;
+	protected int dayTracker = -1;
+
 	@Override
 	public void advance(float amount) {
 		super.advance(amount);
 
-		float days = Global.getSector().getClock().convertToDays(amount);
-		TimeSinceLoop += Global.getSector().getClock().convertToDays(amount);
+		int day = Global.getSector().getClock().getDay();
 
-		if (special != null && !isPermaPollution()) {
-			daysWithNanoforge += days;
-			updatePollutionStatus();
+		if (dayTracker == -1) { // if not initialized
+			dayTracker = day;
 		}
 
-		if (TimeSinceLoop >= 1) { // Consumption&Production
+		if (dayTracker != day) { // Consumption&Production
 
 			ltv_WeightedDeficitModifiers(CommodityList);
 
@@ -201,7 +199,12 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 			ltv_produce(CommodityList);
 			
-			TimeSinceLoop = 0f;
+			dayTracker = day;
+
+			if (special != null && !isPermaPollution()) {
+				daysWithNanoforge++;
+				updatePollutionStatus();
+			}
 		}
 	}
 	

@@ -257,6 +257,13 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return modIds[index];
 	}
 
+	public boolean isPlayerOwned(MarketAPI market) {
+		if (market == null) return false;
+		
+		FactionAPI playerFaction = Global.getSector().getPlayerFaction();
+		return market.getFaction().equals(playerFaction);
+	}
+
 	protected void ltv_WeightedDeficitModifiers(Map<String, List<Pair<String, Float>>> CommodityList) {
 	// The List<Float> contains the weight of resources (between 0 and 1) needed for each commodity inside the Map
 
@@ -304,7 +311,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			if (!demandReduction.isUnmodified()) {
 				getDemand(commodityId).getQuantity().modifyMult("ind_dr", demandReduction.getMult());
 			} else {
-				getDemand(commodityId).getQuantity().unmodifyFlat("ind_dr");
+				getDemand(commodityId).getQuantity().unmodifyMult("ind_dr");
 			}
 		}
 	}
@@ -312,12 +319,18 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	public void ltv_consume(String resource) {
 		float consumption_amount = getDemand(resource).getQuantity().getModifiedValue();
 
+		if(market == null) return;
 		// Consume the commodity from the market’s stockpile
-    	if (market != null && market.getSubmarket(Submarkets.SUBMARKET_OPEN) != null) {
-        	float available = market.getCommodityData(resource).getStockpile();
-        	consumption_amount = Math.min(consumption_amount, available); // only take what’s available
+		float available = market.getCommodityData(resource).getStockpile();
+        consumption_amount = Math.min(consumption_amount, available); // only take what’s available
 
-        	// Remove from the market's generic submarket stockpile
+		if(isPlayerOwned(market) && market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
+        	market.getSubmarket(Submarkets.LOCAL_RESOURCES).getCargo()
+			.removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
+			return;
+		}
+
+    	if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) != null) {
         	market.getSubmarket(Submarkets.SUBMARKET_OPEN).getCargo()
 			.removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
 		}
@@ -353,7 +366,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			if (!supplyBonus.isUnmodified()) {
 				getSupply(commodityId).getQuantity().modifyMult("ind_sb", supplyBonus.getMult());
 			} else {
-				getSupply(commodityId).getQuantity().unmodifyFlat("ind_sb");
+				getSupply(commodityId).getQuantity().unmodifyMult("ind_sb");
 			}
 		}
 	}
@@ -364,8 +377,11 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 			if (ProductionAmount <= 0 || market == null) { return;}
 
+			if(isPlayerOwned(market) && market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
+				market.getSubmarket(Submarkets.LOCAL_RESOURCES).getCargo().addCommodity(commodities.getKey(), ProductionAmount);
+			}
 			if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) != null) {
-        		market.getSubmarket(Submarkets.SUBMARKET_OPEN).getCargo().addCommodity("wfg_ltv_econ", ProductionAmount);
+        		market.getSubmarket(Submarkets.SUBMARKET_OPEN).getCargo().addCommodity(commodities.getKey(), ProductionAmount);
     		}
 		}
     }

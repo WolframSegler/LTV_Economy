@@ -5,7 +5,7 @@
       "desc": "Prevents automatic commodity restocking on this market.",
       "icon": "graphics/icons/markets/wfg_ltv_econ_small.png",
       "script": "wfg_ltv_econ.NoRestockCondition",
-      "hidden": false,
+      "hidden": true,
       "preventRemoval": true,
       "durationDays": -1,
       "tooltipText": [
