@@ -4,8 +4,14 @@ do not include this file in release
 Starsector api jar file path for my pc:
     E:\Games\Starsector\starsector-core\starfarer.api.jar
 
-1. Compile the .java files to .class navigate to LTV_ECONOMY/ through the console and use the command:
-    javac -classpath "E:\Games\Starsector\starsector-core\starfarer.api.jar" -d src/compiled/ src/wfg_ltv_econ/*.java
+Log4j api jar file path for my pc:
+    E:\Games\Starsector\starsector-core\log4j-1.2.9.jar
+
+Lwjgl_util api jar file path for my pc:
+    E:\Games\Starsector\starsector-core\lwjgl_util.jar
+
+1. Compile the .java files to .class: navigate to LTV_ECONOMY/ through the console and use the command:
+    javac -classpath "E:\Games\Starsector\starsector-core\starfarer.api.jar;E:\Games\Starsector\starsector-core\log4j-1.2.9.jar;E:\Games\Starsector\starsector-core\lwjgl_util.jar" -d src/compiled/ src/wfg_ltv_econ/*.java
 
 2. Create a jar file using the command:
     jar cf jars/ltv_economy.jar -C src/compiled .

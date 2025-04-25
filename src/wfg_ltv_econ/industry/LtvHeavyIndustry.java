@@ -1,4 +1,4 @@
-package wfg_ltv_econ;
+package wfg_ltv_econ.industry;
 
 import java.awt.Color;
 import com.fs.starfarer.api.Global;
@@ -39,9 +39,9 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public static float METALS_WEIGHT_FOR_SHIPS = 0.6f;
 	public static float RARE_METALS_WEIGHT_FOR_SHIPS = 0.4f;
 
-	Map<String, List<Pair<String, Float>>> CommodityList = new HashMap<>();
+	protected static final Map<String, List<Pair<String, Float>>> CommodityList = new HashMap<>();
 
-	public LtvHeavyIndustry() {
+	static {  // The Map is a constant
 		List<Pair<String, Float>> _Commodity_Info = new ArrayList<Pair<String,Float>>();
 
 		// Inserts relevant info into a list 

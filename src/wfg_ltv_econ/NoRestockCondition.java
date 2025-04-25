@@ -14,8 +14,6 @@ public class NoRestockCondition extends BaseMarketConditionPlugin {
     @Override
     public void advance(float amount) {
         super.advance(amount);
-        // Re-freeze every day (in case other mods try to restock)
-        // freezeAllCommodities();
     }
 
     private void freezeAllCommodities() {

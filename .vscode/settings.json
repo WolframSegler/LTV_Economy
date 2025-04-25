@@ -1,3 +1,11 @@
 {
-    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.referencedLibraries": [
+        "e:\\Games\\Starsector Mod Testing\\starsector-core\\lwjgl_util.jar",
+        "e:\\Games\\Starsector Mod Testing\\starsector-core\\starfarer.api.jar",
+        "e:\\Games\\Starsector Mod Testing\\starsector-core\\log4j-1.2.9.jar"
+    ]
 }
