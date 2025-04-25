@@ -14,6 +14,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -21,14 +22,14 @@ import java.util.List;
 public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 	public static float ORBITAL_WORKS_QUALITY_BONUS = 0.2f;
-	
+
 	public static float DAYS_BEFORE_POLLUTION = 0f;
 	public static float DAYS_BEFORE_POLLUTION_PERMANENT = 180f;
 
-	public static int DAILY_BASE_PROD_HEAVY_MACHINERY = 13;	// 150$
-	public static int DAILY_BASE_PROD_SUPPLIES = 20; 		// 100$
-	public static int DAILY_BASE_PROD_HAND_WEAPONS = 4;		// 500$
-	public static int DAILY_BASE_PROD_SHIPS = 6;			// 300$
+	public static int DAILY_BASE_PROD_HEAVY_MACHINERY = 13; // 150$
+	public static int DAILY_BASE_PROD_SUPPLIES = 20; // 100$
+	public static int DAILY_BASE_PROD_HAND_WEAPONS = 4; // 500$
+	public static int DAILY_BASE_PROD_SHIPS = 6; // 300$
 
 	public static float METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.8f;
 	public static float RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.2f;
@@ -39,38 +40,36 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public static float METALS_WEIGHT_FOR_SHIPS = 0.6f;
 	public static float RARE_METALS_WEIGHT_FOR_SHIPS = 0.4f;
 
-	protected static final Map<String, List<Pair<String, Float>>> CommodityList = new HashMap<>();
+	protected static final Map<String, List<Pair<String, Float>>> COMMODITY_LIST = new HashMap<>();
 
-	static {  // The Map is a constant
-		List<Pair<String, Float>> _Commodity_Info = new ArrayList<Pair<String,Float>>();
+	static {
+		// Heavy Machinery
+		COMMODITY_LIST.put(Commodities.HEAVY_MACHINERY, Arrays.asList(
+				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_HEAVY_MACHINERY),
+				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY)));
 
-		// Inserts relevant info into a list 
-		_Commodity_Info.add(new Pair<String,Float>(Commodities.METALS, METALS_WEIGHT_FOR_HEAVY_MACHINERY));
-		_Commodity_Info.add(new Pair<String,Float>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY));
-		CommodityList.put(Commodities.HEAVY_MACHINERY, new ArrayList<>(_Commodity_Info));
-		_Commodity_Info.clear();
+		// Supplies
+		COMMODITY_LIST.put(Commodities.SUPPLIES, Arrays.asList(
+				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_SUPPLIES),
+				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SUPPLIES)));
 
-		_Commodity_Info.add(new Pair<String,Float>(Commodities.METALS, METALS_WEIGHT_FOR_SUPPLIES));
-		_Commodity_Info.add(new Pair<String,Float>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SUPPLIES));
-		CommodityList.put(Commodities.SUPPLIES, new ArrayList<>(_Commodity_Info));
-		_Commodity_Info.clear();
+		// Hand Weapons
+		COMMODITY_LIST.put(Commodities.HAND_WEAPONS, Arrays.asList(
+				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_HAND_WEAPONS),
+				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HAND_WEAPONS)));
 
-		_Commodity_Info.add(new Pair<String,Float>(Commodities.METALS, METALS_WEIGHT_FOR_HAND_WEAPONS));
-		_Commodity_Info.add(new Pair<String,Float>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HAND_WEAPONS));
-		CommodityList.put(Commodities.HAND_WEAPONS, new ArrayList<>(_Commodity_Info));
-		_Commodity_Info.clear();
-
-		_Commodity_Info.add(new Pair<String,Float>(Commodities.METALS, METALS_WEIGHT_FOR_SHIPS));
-		_Commodity_Info.add(new Pair<String,Float>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SHIPS));
-		CommodityList.put(Commodities.SHIPS, new ArrayList<>(_Commodity_Info));
-		_Commodity_Info.clear();
+		// Ships
+		COMMODITY_LIST.put(Commodities.SHIPS, Arrays.asList(
+				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_SHIPS),
+				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SHIPS)));
 	}
 
-	public void HeavyIndustryModifiers(){
+	public void HeavyIndustryModifiers() {
 		boolean OrbitalWorks = Industries.ORBITALWORKS.equals(getId());
 
 		if (OrbitalWorks) {
-			market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).modifyFlat(getModId(1), ORBITAL_WORKS_QUALITY_BONUS, "Orbital works");
+			market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).modifyFlat(getModId(1),
+					ORBITAL_WORKS_QUALITY_BONUS, "Orbital works");
 		}
 
 		// Adjust qualityBonus dependent on Stability
@@ -78,26 +77,26 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		if (stability < 5) {
 			float stabilityMod = (stability - 5f) / 5f;
 			stabilityMod *= 0.5f; // Stability penalty affect Fleet Quality half as much
-			market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).modifyFlat(getModId(0), stabilityMod, getNameForModifier() + " - low stability");
+			market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).modifyFlat(getModId(0), stabilityMod,
+					getNameForModifier() + " - low stability");
 		}
 	}
 
-	
 	@Override
 	protected void addPostDemandSection(TooltipMakerAPI tooltip, boolean hasDemand, IndustryTooltipMode mode) {
-	
-		if (mode != IndustryTooltipMode.NORMAL || isFunctional()) {			
+
+		if (mode != IndustryTooltipMode.NORMAL || isFunctional()) {
 			if (Industries.ORBITALWORKS.equals(getId())) {
-				String totalStr = "+" + (int)Math.round(ORBITAL_WORKS_QUALITY_BONUS * 100f) + "%";
+				String totalStr = "+" + (int) Math.round(ORBITAL_WORKS_QUALITY_BONUS * 100f) + "%";
 				Color h = Misc.getHighlightColor();
 				if (ORBITAL_WORKS_QUALITY_BONUS < 0) {
 					h = Misc.getNegativeHighlightColor();
-					totalStr = "" + (int)Math.round(ORBITAL_WORKS_QUALITY_BONUS * 100f) + "%";
+					totalStr = "" + (int) Math.round(ORBITAL_WORKS_QUALITY_BONUS * 100f) + "%";
 				}
 				float opad = 10f;
 				if (ORBITAL_WORKS_QUALITY_BONUS >= 0) {
 					tooltip.addPara("Ship quality: %s", opad, h, totalStr);
-					tooltip.addPara("*Quality bonus only applies for the largest ship producer in the faction.", 
+					tooltip.addPara("*Quality bonus only applies for the largest ship producer in the faction.",
 							Misc.getGrayColor(), opad);
 				}
 			}
@@ -116,7 +115,7 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	protected boolean canImproveToIncreaseProduction() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean wantsToUseSpecialItem(SpecialItemData data) {
 		if (special != null && Items.CORRUPTED_NANOFORGE.equals(special.getId()) &&
@@ -125,23 +124,21 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		}
 		return super.wantsToUseSpecialItem(data);
 	}
-	
+
 	public void apply() {
 		super.apply();
 
 		demand(Commodities.METALS, Math.round(ltv_precalculateconsumption(
-			DAILY_BASE_PROD_HEAVY_MACHINERY*METALS_WEIGHT_FOR_HEAVY_MACHINERY,
-			DAILY_BASE_PROD_SUPPLIES*METALS_WEIGHT_FOR_SUPPLIES,
-			DAILY_BASE_PROD_HAND_WEAPONS*METALS_WEIGHT_FOR_HAND_WEAPONS,
-			DAILY_BASE_PROD_SHIPS*METALS_WEIGHT_FOR_SHIPS
-		)));
+				DAILY_BASE_PROD_HEAVY_MACHINERY * METALS_WEIGHT_FOR_HEAVY_MACHINERY,
+				DAILY_BASE_PROD_SUPPLIES * METALS_WEIGHT_FOR_SUPPLIES,
+				DAILY_BASE_PROD_HAND_WEAPONS * METALS_WEIGHT_FOR_HAND_WEAPONS,
+				DAILY_BASE_PROD_SHIPS * METALS_WEIGHT_FOR_SHIPS)));
 
 		demand(Commodities.RARE_METALS, Math.round(ltv_precalculateconsumption(
-			DAILY_BASE_PROD_HEAVY_MACHINERY*RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY,
-			DAILY_BASE_PROD_SUPPLIES*RARE_METALS_WEIGHT_FOR_SUPPLIES,
-			DAILY_BASE_PROD_HAND_WEAPONS*RARE_METALS_WEIGHT_FOR_HAND_WEAPONS,
-			DAILY_BASE_PROD_SHIPS*RARE_METALS_WEIGHT_FOR_SHIPS
-		)));
+				DAILY_BASE_PROD_HEAVY_MACHINERY * RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY,
+				DAILY_BASE_PROD_SUPPLIES * RARE_METALS_WEIGHT_FOR_SUPPLIES,
+				DAILY_BASE_PROD_HAND_WEAPONS * RARE_METALS_WEIGHT_FOR_HAND_WEAPONS,
+				DAILY_BASE_PROD_SHIPS * RARE_METALS_WEIGHT_FOR_SHIPS)));
 
 		supply(Commodities.HEAVY_MACHINERY, DAILY_BASE_PROD_HEAVY_MACHINERY);
 		supply(Commodities.SUPPLIES, DAILY_BASE_PROD_SUPPLIES);
@@ -149,7 +146,7 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		supply(Commodities.SHIPS, DAILY_BASE_PROD_SHIPS);
 
 		HeavyIndustryModifiers();
-		
+
 		if (!isFunctional()) {
 			supply.clear();
 			unapply();
@@ -170,7 +167,7 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 		daysWithNanoforge = 0f;
 		dayTracker = -1;
-		
+
 		market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).unmodifyFlat(getModId(0));
 		market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).unmodifyFlat(getModId(1));
 	}
@@ -192,13 +189,13 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 		if (dayTracker != day) { // Consumption&Production
 
-			ltv_WeightedDeficitModifiers(CommodityList);
+			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
 
 			ltv_consume(Commodities.METALS);
 			ltv_consume(Commodities.RARE_METALS);
 
-			ltv_produce(CommodityList);
-			
+			ltv_produce(COMMODITY_LIST);
+
 			dayTracker = day;
 
 			if (special != null && !isPermaPollution()) {
@@ -207,10 +204,11 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 			}
 		}
 	}
-	
+
 	protected void updatePollutionStatus() {
-		if (!market.hasCondition(Conditions.HABITABLE)) return;
-		
+		if (!market.hasCondition(Conditions.HABITABLE))
+			return;
+
 		if (special != null) {
 			if (!addedPollution && daysWithNanoforge >= DAYS_BEFORE_POLLUTION) {
 				if (market.hasCondition(Conditions.POLLUTION)) {
@@ -258,7 +256,7 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	@Override
 	public void setSpecialItem(SpecialItemData special) {
 		super.setSpecialItem(special);
-		
+
 		updatePollutionStatus();
 	}
 }

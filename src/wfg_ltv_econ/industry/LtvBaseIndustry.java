@@ -276,7 +276,13 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				float demand = getDemand(element.one).getQuantity().getModifiedValue();
 				if (demand <= 0) continue;
 
-				int available = market.getCommodityData(element.one).getAvailable();
+				String Submarket = Submarkets.SUBMARKET_OPEN;
+				if (market.isPlayerOwned() && market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
+					Submarket = Submarkets.LOCAL_RESOURCES;
+				} else if(market.getSubmarket(Submarkets.SUBMARKET_OPEN) == null){
+					return;
+				}
+				float available = market.getSubmarket(Submarket).getCargo().getCommodityQuantity(element.one);
 				float availabilityRatio  = Math.min(available / demand, 1); // rate of deficit compared to total demand
 				float deficitImpact = element.two * (1f - availabilityRatio); // Weight × shortage
 
@@ -320,19 +326,18 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 		if(market == null) return;
 		// Consume the commodity from the market’s stockpile
-		float available = market.getCommodityData(resource).getStockpile();
-        consumption_amount = Math.min(consumption_amount, available); // only take what’s available
-
-		if(isPlayerOwned(market) && market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
-        	market.getSubmarket(Submarkets.LOCAL_RESOURCES).getCargo()
-			.removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
+		String Submarket = Submarkets.SUBMARKET_OPEN;
+		if (market.isPlayerOwned() && market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
+			Submarket = Submarkets.LOCAL_RESOURCES;
+		} else if(market.getSubmarket(Submarkets.SUBMARKET_OPEN) == null){
 			return;
 		}
 
-    	if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) != null) {
-        	market.getSubmarket(Submarkets.SUBMARKET_OPEN).getCargo()
-			.removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
-		}
+		float available = market.getSubmarket(Submarket).getCargo().getCommodityQuantity(resource);
+        consumption_amount = Math.min(consumption_amount, available); // only take what’s available
+
+        market.getSubmarket(Submarket).getCargo()
+		.removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
 	}
 
 	public float ltv_precalculateconsumption(float... costlist) {

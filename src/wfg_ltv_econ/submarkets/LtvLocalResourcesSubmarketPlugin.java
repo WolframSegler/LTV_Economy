@@ -84,7 +84,8 @@ public class LtvLocalResourcesSubmarketPlugin extends LtvBaseSubmarketPlugin
 		}
 		daysSinceLastUpdate = day;
 		// need to add to stockpiles every day because the player can see stockpiles in the "market info" screen and updateCargoPrePlayerInteraction() doesn't get called from there
-		addAndRemoveStockpiledResources(amount, true, false, true);
+		// Not needed for LTV Economy
+		//addAndRemoveStockpiledResources(amount, true, false, true);
 	}
 
 	public boolean shouldHaveCommodity(CommodityOnMarketAPI commodity) {
@@ -173,16 +174,11 @@ public class LtvLocalResourcesSubmarketPlugin extends LtvBaseSubmarketPlugin
 	}
 
 	public void commodityUpdated(String commodityId) {
-		if (Global.getSector().isPaused()) {
-			CommodityOnMarketAPI com = market.getCommodityData(commodityId);
-			addAndRemoveStockpiledResources(com, 0f, true, false, false);
-		}
+		
 	}
 
 	public void economyUpdated() {
-		if (Global.getSector().isPaused()) { // to apply shortage-countering during economy steps in UI operations
-			addAndRemoveStockpiledResources(0f, true, false, false);
-		}
+		
 	}
 
 	public boolean isEconomyListenerExpired() {
