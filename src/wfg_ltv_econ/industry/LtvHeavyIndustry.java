@@ -13,8 +13,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -40,28 +38,27 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public static float METALS_WEIGHT_FOR_SHIPS = 0.6f;
 	public static float RARE_METALS_WEIGHT_FOR_SHIPS = 0.4f;
 
-	protected static final Map<String, List<Pair<String, Float>>> COMMODITY_LIST = new HashMap<>();
+	protected static Map<String, List<Pair<String, Float>>> COMMODITY_LIST;
 
 	static {
-		// Heavy Machinery
-		COMMODITY_LIST.put(Commodities.HEAVY_MACHINERY, Arrays.asList(
-				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_HEAVY_MACHINERY),
-				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY)));
-
-		// Supplies
-		COMMODITY_LIST.put(Commodities.SUPPLIES, Arrays.asList(
+		COMMODITY_LIST = Map.of(
+    		Commodities.HEAVY_MACHINERY, List.of(
+    	    	new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_HEAVY_MACHINERY),
+    	    	new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY)
+    		),
+			Commodities.SUPPLIES, List.of(
 				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_SUPPLIES),
-				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SUPPLIES)));
-
-		// Hand Weapons
-		COMMODITY_LIST.put(Commodities.HAND_WEAPONS, Arrays.asList(
+				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SUPPLIES)
+			),
+			Commodities.HAND_WEAPONS, List.of(
 				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_HAND_WEAPONS),
-				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HAND_WEAPONS)));
-
-		// Ships
-		COMMODITY_LIST.put(Commodities.SHIPS, Arrays.asList(
+				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HAND_WEAPONS)
+			),
+			Commodities.SHIPS, List.of(
 				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_SHIPS),
-				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SHIPS)));
+				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SHIPS)
+			)
+		);
 	}
 
 	public void HeavyIndustryModifiers() {

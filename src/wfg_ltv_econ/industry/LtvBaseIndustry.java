@@ -377,14 +377,14 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	public void ltv_produce(Map<String, List<Pair<String, Float>>> production) { // Commodity and the amount to produce
 		for (Map.Entry<String, List<Pair<String,Float>>> commodity : production.entrySet()) {
-			if (market.getCommodityData(commodity.getKey()).isMeta()) { return;}
+			//if (market.getCommodityData(commodity.getKey()).isMeta()) { return;}
 			int ProductionAmount = getSupply(commodity.getKey()).getQuantity().getModifiedInt();
 
-			if (ProductionAmount <= 0 || market == null) { return;}
+			if (ProductionAmount <= 0 || market == null) { continue;}
 
 			if(isPlayerOwned(market) && market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
 				market.getSubmarket(Submarkets.LOCAL_RESOURCES).getCargo().addCommodity(commodity.getKey(), ProductionAmount);
-				return;
+				continue;
 			}
 			if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) != null) {
         		market.getSubmarket(Submarkets.SUBMARKET_OPEN).getCargo().addCommodity(commodity.getKey(), ProductionAmount);
