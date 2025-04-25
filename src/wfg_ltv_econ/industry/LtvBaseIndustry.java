@@ -377,7 +377,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	public void ltv_produce(Map<String, List<Pair<String, Float>>> production) { // Commodity and the amount to produce
 		for (Map.Entry<String, List<Pair<String,Float>>> commodity : production.entrySet()) {
-			//if (market.getCommodityData(commodity.getKey()).isMeta()) { return;}
+			if (market.getCommodityData(commodity.getKey()).isMeta()) { continue;}
 			int ProductionAmount = getSupply(commodity.getKey()).getQuantity().getModifiedInt();
 
 			if (ProductionAmount <= 0 || market == null) { continue;}
@@ -887,8 +887,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		FactionAPI faction = market.getFaction();
 		Color color = faction.getBaseUIColor();
 		Color dark = faction.getDarkUIColor();
-		//Color grid = faction.getGridUIColor();
-		//Color bright = faction.getBrightUIColor();
 		
 		Color gray = Misc.getGrayColor();
 		Color highlight = Misc.getHighlightColor();
@@ -906,7 +904,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		
 		market = copy;
 		boolean needToAddIndustry = !market.hasIndustry(getId());
-		//addDialogMode = true;
+
 		if (needToAddIndustry) market.getIndustries().add(this);
 		
 		if (mode != IndustryTooltipMode.NORMAL) {
@@ -986,7 +984,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			if (left == 1) days = "day";
 			
 			tooltip.addPara("Operations disrupted! %s " + days + " until return to normal function.",
-					opad, Misc.getNegativeHighlightColor(), highlight, "" + left);
+					opad, Misc.getNegativeHighlightColor(), highlight, Integer.toString(left));
 		}
 		
 		if (DebugFlags.COLONY_DEBUG || market.isPlayerOwned()) {
@@ -1003,20 +1001,18 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			tooltip.addPara("Click to remove or adjust position in queue", Misc.getPositiveHighlightColor(), opad);
 			tooltip.addPara("Currently queued for construction. Does not have any impact on the colony.", opad);
 			
-			int left = (int) (getSpec().getBuildTime());
-			if (left < 1) left = 1;
+			int left = Math.round((getSpec().getBuildTime()));
 			String days = "days";
-			if (left == 1) days = "day";
+			if (left < 2) days = "day";
 			tooltip.addPara("Requires %s " + days + " to build.", opad, highlight, "" + left);
 			
 			//return;
 		} else if (!isFunctional() && mode == IndustryTooltipMode.NORMAL && !isDisrupted()) {
 			tooltip.addPara("Currently under construction and not producing anything or providing other benefits.", opad);
 			
-			int left = (int) (buildTime - buildProgress);
-			if (left < 1) left = 1;
+			int left = Math.round((buildTime - buildProgress));
 			String days = "days";
-			if (left == 1) days = "day";
+			if (left < 2) days = "day";
 			tooltip.addPara("Requires %s more " + days + " to finish building.", opad, highlight, "" + left);
 		}
 		
@@ -1047,12 +1043,12 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				LabelAPI label = null;
 				if (mode == IndustryTooltipMode.UPGRADE) {
 					label = tooltip.addPara("%s and %s " + daysStr + " to upgrade. You have %s.", opad, 
-											highlight, costStr, "" + days, creditsStr);
+											highlight, costStr, Integer.toString(days), creditsStr);
 				} else {
 					label = tooltip.addPara("%s and %s " + daysStr + " to build. You have %s.", opad, 
-											highlight, costStr, "" + days, creditsStr);
+											highlight, costStr, Integer.toString(days), creditsStr);
 				}
-				label.setHighlight(costStr, "" + days, creditsStr);
+				label.setHighlight(costStr, Integer.toString(days), creditsStr);
 				if (credits >= cost) {
 					label.setHighlightColors(highlight, highlight, highlight);
 				} else {
@@ -1062,7 +1058,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				if (getSpec().getUpgrade() != null) {
 					float refundFraction = Global.getSettings().getFloat("industryRefundFraction");
 					
-					//int cost = (int) (getBuildCost() * refundFraction);
 					IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(getSpec().getUpgrade());
 					int cost = (int) (spec.getCost() * refundFraction);
 					String refundStr = Misc.getDGSCredits(cost);
@@ -1104,54 +1099,37 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			
 			boolean hasSupply = false;
 			for (MutableCommodityQuantity curr : supply.values()) {
-				int qty = curr.getQuantity().getModifiedInt();
-				if (qty <= 0) continue;
+				int quantity = curr.getQuantity().getModifiedInt();
+				if (quantity <= 0) continue;
 				hasSupply = true;
 				break;
 			}
 			boolean hasDemand = false;
 			for (MutableCommodityQuantity curr : demand.values()) {
-				int qty = curr.getQuantity().getModifiedInt();
-				if (qty <= 0) continue;
+				int quantity = curr.getQuantity().getModifiedInt();
+				if (quantity <= 0) continue;
 				hasDemand = true;
 				break;
 			}
 			
-			float maxIconsPerRow = 10f;
+			float maxIconsPerRow = 2f;
 			if (hasSupply) {
 				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
-				tooltip.beginIconGroup();
-				tooltip.setIconSpacingMedium();
-				float icons = 0;
+
+				tooltip.beginGrid(200f, 2);
+
 				for (MutableCommodityQuantity curr : supply.values()) {
-					int qty = curr.getQuantity().getModifiedInt();
-					//if (qty <= 0) continue;
-					
-					int normal = qty;
-					if (normal > 0) {
-						tooltip.addIcons(market.getCommodityData(curr.getCommodityId()), normal, IconRenderMode.NORMAL);
-					}
-					
-					int plus = 0;
-					int minus = 0;
-					for (StatMod mod : curr.getQuantity().getFlatMods().values()) {
-						if (mod.value > 0) {
-							plus += (int) mod.value;
-						} else if (mod.desc != null && mod.desc.contains("shortage")) {
-							minus += (int) Math.abs(mod.value);
-						}
-					}
-					minus = Math.min(minus, plus);
-					if (minus > 0 && mode == IndustryTooltipMode.NORMAL) {
-						tooltip.addIcons(market.getCommodityData(curr.getCommodityId()), minus, IconRenderMode.DIM_RED);
-					}
-					icons += normal + Math.max(0, minus);
+					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
+					int quantity = curr.getQuantity().getModifiedInt();
+
+					TooltipMakerAPI row = tooltip.beginImageWithText(commodity.getIconName(), 32f);
+
+					tooltip.setParaOrbitronVeryLarge();
+					row.addPara(Integer.toString(quantity) + "/Day",highlight, 0f);
+
+					tooltip.addImageWithText(opad/2);
+
 				}
-				int rows = (int) Math.ceil(icons / maxIconsPerRow);
-				rows = 3;
-				tooltip.addIconGroup(32, rows, opad);
-				
-				
 			}
 			
 			addPostSupplySection(tooltip, hasSupply, mode);
