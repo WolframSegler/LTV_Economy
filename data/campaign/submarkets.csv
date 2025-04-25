@@ -20,4 +20,4 @@ Will buy locally illegal goods as part of a no-questions-asked buyback program.
 
 Selling enough of a commodity will temporarily resolve a shortage.",com.fs.starfarer.api.impl.campaign.submarkets.MilitarySubmarketPlugin,,100
 local_resources,"Resource
-Stockpiles",,,com.fs.starfarer.api.impl.campaign.submarkets.LocalResourcesSubmarketPlugin,,200
+Stockpiles",,,wfg_ltv_econ.submarkets.LtvLocalResourcesSubmarketPlugin,,200

@@ -25,10 +25,10 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public static float DAYS_BEFORE_POLLUTION = 0f;
 	public static float DAYS_BEFORE_POLLUTION_PERMANENT = 180f;
 
-	public static int DAILY_BASE_PROD_HEAVY_MACHINERY = 1; //13;// 150$
-	public static int DAILY_BASE_PROD_SUPPLIES = 1; //20; 		// 100$
-	public static int DAILY_BASE_PROD_HAND_WEAPONS = 1; //4;	// 500$
-	public static int DAILY_BASE_PROD_SHIPS = 1; //6;			// 300$
+	public static int DAILY_BASE_PROD_HEAVY_MACHINERY = 13;	// 150$
+	public static int DAILY_BASE_PROD_SUPPLIES = 20; 		// 100$
+	public static int DAILY_BASE_PROD_HAND_WEAPONS = 4;		// 500$
+	public static int DAILY_BASE_PROD_SHIPS = 6;			// 300$
 
 	public static float METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.8f;
 	public static float RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.2f;

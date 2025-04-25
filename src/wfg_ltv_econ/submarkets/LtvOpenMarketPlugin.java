@@ -43,10 +43,11 @@ public class LtvOpenMarketPlugin extends LtvBaseSubmarketPlugin {
     }
 
     public void updateCargoPrePlayerInteraction() {
-        float seconds = Global.getSector().getClock().convertToSeconds(sinceLastCargoUpdate);
-        float days = Global.getSector().getClock().convertToDays(seconds);
 
-        addAndRemoveStockpiledResources(days, false, true, true);
+        // No automatic commodity stockpiling, works normally if uncommented
+        //float seconds = Global.getSector().getClock().convertToSeconds(sinceLastCargoUpdate);
+        //addAndRemoveStockpiledResources(seconds, false, true, true);
+        
         sinceLastCargoUpdate = 0.0F;
         if (okToUpdateShipsAndWeapons()) {
             sinceSWUpdate = 0.0F;
