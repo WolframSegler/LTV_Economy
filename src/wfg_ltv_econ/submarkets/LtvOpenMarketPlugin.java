@@ -141,6 +141,7 @@ public class LtvOpenMarketPlugin extends LtvBaseSubmarketPlugin {
         return getBaseStockpileLimit(commodity);
     }
 
+    @Override
     public SubmarketPlugin.PlayerEconomyImpactMode getPlayerEconomyImpactMode() {
         return PlayerEconomyImpactMode.BOTH;
     }

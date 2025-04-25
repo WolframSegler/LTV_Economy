@@ -25,6 +25,7 @@ import com.fs.starfarer.api.impl.campaign.DModManager;
 import com.fs.starfarer.api.impl.campaign.fleets.DefaultFleetInflater;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
+import com.fs.starfarer.api.impl.campaign.shared.PlayerTradeDataForSubmarket;
 import com.fs.starfarer.api.impl.campaign.shared.SharedData;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.HullModSpecAPI;
@@ -93,8 +94,9 @@ public class LtvBaseSubmarketPlugin implements SubmarketPlugin {
       // Runs Logic at the beginning of every day
       int day = Global.getSector().getClock().getDay();
 
-      if (dayTracker == day)
+      if (dayTracker == day) {
          return;
+      }
       dayTracker = day; // Automatic initialization if dayTracker is -1
 
       sinceLastCargoUpdate++;
@@ -106,15 +108,11 @@ public class LtvBaseSubmarketPlugin implements SubmarketPlugin {
    }
 
    public void addAllCargo(CargoAPI otherCargo) {
-      Iterator<CargoStackAPI> var3 = otherCargo.getStacksCopy().iterator();
-
-      while (var3.hasNext()) {
-         CargoStackAPI stack = (CargoStackAPI) var3.next();
+      for (CargoStackAPI stack : otherCargo.getStacksCopy()) {
          if (!stack.isNull()) {
             getCargo().addItems(stack.getType(), stack.getData(), stack.getSize());
          }
       }
-
    }
 
    public float getTariff() {
@@ -170,68 +168,62 @@ public class LtvBaseSubmarketPlugin implements SubmarketPlugin {
    }
 
    public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
-      if (isParticipatesInEconomy()) {
-         SubmarketPlugin.PlayerEconomyImpactMode mode = getPlayerEconomyImpactMode();
-         SharedData.getData().getPlayerActivityTracker().getPlayerTradeData(submarket).addTransaction(transaction);
-         Iterator<CargoStackAPI> var4 = transaction.getSold().getStacksCopy().iterator();
-
-         while (true) {
-            while (true) {
-               CargoStackAPI stack;
-               float qty;
-               CommodityOnMarketAPI com;
-               do {
-                  do {
-                     if (!var4.hasNext()) {
-                        var4 = transaction.getBought().getStacksCopy().iterator();
-
-                        while (true) {
-                           while (true) {
-                              do {
-                                 do {
-                                    if (!var4.hasNext()) {
-                                       return;
-                                    }
-
-                                    stack = (CargoStackAPI) var4.next();
-                                 } while (!stack.isCommodityStack());
-
-                                 qty = stack.getSize() * getPlayerTradeImpactMult();
-                              } while (qty <= 0.0F);
-
-                              com = market.getCommodityData(stack.getCommodityId());
-                              if (mode == PlayerEconomyImpactMode.BOTH) {
-                                 com.addTradeMod("buy_" + Misc.genUID(), -qty, TRADE_IMPACT_DAYS);
-                              } else if (mode != PlayerEconomyImpactMode.PLAYER_SELL_ONLY
-                                    && mode != PlayerEconomyImpactMode.NONE) {
-                                 if (mode == PlayerEconomyImpactMode.PLAYER_BUY_ONLY) {
-                                    com.addTradeModMinus("buy_" + Misc.genUID(), -qty, TRADE_IMPACT_DAYS);
-                                 }
-                              } else {
-                                 com.addTradeModPlus("buy_" + Misc.genUID(), -qty, TRADE_IMPACT_DAYS);
-                              }
-                           }
-                        }
-                     }
-
-                     stack = (CargoStackAPI) var4.next();
-                  } while (!stack.isCommodityStack());
-
-                  qty = stack.getSize() * getPlayerTradeImpactMult();
-               } while (qty <= 0.0F);
-
-               com = market.getCommodityData(stack.getCommodityId());
-               if (mode == PlayerEconomyImpactMode.BOTH) {
-                  com.addTradeMod("sell_" + Misc.genUID(), qty, TRADE_IMPACT_DAYS);
-               } else if (mode == PlayerEconomyImpactMode.PLAYER_SELL_ONLY) {
-                  com.addTradeModPlus("sell_" + Misc.genUID(), qty, TRADE_IMPACT_DAYS);
-               } else if (mode == PlayerEconomyImpactMode.PLAYER_BUY_ONLY || mode == PlayerEconomyImpactMode.NONE) {
-                  com.addTradeModMinus("sell_" + Misc.genUID(), qty, TRADE_IMPACT_DAYS);
-               }
-            }
-         }
+      if (!isParticipatesInEconomy()) {
+          return;
       }
-   }
+  
+      final PlayerEconomyImpactMode mode = getPlayerEconomyImpactMode();
+      SharedData.getData().getPlayerActivityTracker().getPlayerTradeData(submarket).addTransaction(transaction);
+  
+      processTransactionStacks(transaction.getSold().getStacksCopy(), mode, false);
+      processTransactionStacks(transaction.getBought().getStacksCopy(), mode, true);
+  }
+  
+  private void processTransactionStacks(List<CargoStackAPI> stacks, PlayerEconomyImpactMode mode, boolean isBuyOperation) {
+      for (CargoStackAPI stack : stacks) {
+          if (!stack.isCommodityStack()) {
+              continue;
+          }
+  
+          final float baseQuantity = stack.getSize();
+          final float adjustedQuantity = baseQuantity * getPlayerTradeImpactMult();
+          
+          if (adjustedQuantity <= 0f) {
+              continue;
+          }
+  
+          final CommodityOnMarketAPI commodity = market.getCommodityData(stack.getCommodityId());
+          applyMarketImpact(commodity, adjustedQuantity, mode, isBuyOperation);
+      }
+  }
+  
+  private void applyMarketImpact(CommodityOnMarketAPI commodity, float quantity, PlayerEconomyImpactMode mode, boolean isBuy) {
+      final String operationPrefix = isBuy ? "buy_" : "sell_";
+      final String modifierId = operationPrefix + Misc.genUID();
+      final float impactQuantity = isBuy ? -quantity : quantity;
+  
+      switch (mode) {
+          case BOTH:
+              commodity.addTradeMod(modifierId, impactQuantity, TRADE_IMPACT_DAYS);
+              break;
+              
+          case PLAYER_SELL_ONLY:
+              if (!isBuy) {
+                  commodity.addTradeModPlus(modifierId, impactQuantity, TRADE_IMPACT_DAYS);
+              }
+              break;
+              
+          case PLAYER_BUY_ONLY:
+              if (isBuy) {
+                  commodity.addTradeModMinus(modifierId, impactQuantity, TRADE_IMPACT_DAYS);
+              }
+              break;
+              
+          case NONE:
+          default:
+              break;
+      }
+  }
 
    public boolean isMilitaryMarket() {
       return false;
