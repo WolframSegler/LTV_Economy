@@ -912,6 +912,31 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return 400f;
 	}
 
+	// Helper method for creating individual commodity displays
+	private void addCommodityToPanel(CustomPanelAPI panel,
+			MutableCommodityQuantity curr,
+			float xPos,
+			float width,
+			float iconSize) {
+		// Create container for one commodity
+		CustomPanelAPI cell = Global.getSettings().createCustom(width, 38f, null);
+		TooltipMakerAPI cellTooltip = cell.createUIElement(width, 38f, false);
+
+		// Add icon
+		cellTooltip.addImage(market.getCommodityData(curr.getCommodityId())
+				.getCommodity().getIconName(),
+				iconSize, iconSize, 0f);
+
+		// Add text next to icon
+		cellTooltip.addPara(curr.getQuantity().getModifiedInt() + "/day",
+				3f,
+				Misc.getTextColor());
+
+		// Position in parent panel
+		cell.render(xPos);
+		panel.addComponent(cell);
+	}
+
 	protected transient IndustryTooltipMode currTooltipMode = null;
 
 	public void createTooltip(IndustryTooltipMode mode, TooltipMakerAPI tooltip, boolean expanded) {
@@ -1141,6 +1166,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				int upkeep = getUpkeep().getModifiedInt();
 				tooltip.addPara("Monthly upkeep: %s", opad, highlight, Misc.getDGSCredits(upkeep));
 				tooltip.addStatModGrid(300, 65, 10, pad, getUpkeep(), true, new StatModValueGetter() {
+
 					public String getPercentValue(StatMod mod) {
 						return null;
 					}
@@ -1177,41 +1203,33 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				hasDemand = true;
 				break;
 			}
+
 			if (hasSupply) {
 				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
-
-				MutableCommodityQuantity[] commodities = supply.values()
-						.toArray(new MutableCommodityQuantity[supply.values().size()]);
-
-				float iconSize = 32f;
-				float padBetweenItems = 10f;
-
-				for (int i = 0; i < commodities.length; i += 2) {
-					// Create horizontal container
-					CustomPanelAPI row = Global.getSettings().createCustom(400f, 40f, null);
-					TooltipMakerAPI rowTooltip = row.createUIElement(400f, 40f, false);
-
-					// First item
-					MutableCommodityQuantity curr1 = commodities[i];
-					CommoditySpecAPI com1 = market.getCommodityData(curr1.getCommodityId()).getCommodity();
-
-					TooltipMakerAPI imgText1 = rowTooltip.beginImageWithText(com1.getIconName(), iconSize);
-					imgText1.addPara(curr1.getQuantity().getModifiedInt() + "/day", 0f);
-					rowTooltip.addImageWithText(0f);
-
-					// Second item if exists
-					if (i + 1 < commodities.length) {
-						MutableCommodityQuantity curr2 = commodities[i+1];
-						CommoditySpecAPI com2 = market.getCommodityData(curr2.getCommodityId()).getCommodity();
-
-						TooltipMakerAPI imgText2 = rowTooltip.beginImageWithText(com2.getIconName(), iconSize);
-						imgText2.addPara(curr2.getQuantity().getModifiedInt() + "/day", 0f);
-						rowTooltip.addImageWithText(0f);
-					}
-
-					row.addUIElement(rowTooltip);
-					tooltip.addCustom(row, padBetweenItems);
+				
+				// 2 columns: [icon+text] [icon+text]
+				float gridWidth = 400f; // Total width for 2 columns
+				int numColumns = 2;
+				tooltip.beginGrid(gridWidth, numColumns);
+				
+				List<MutableCommodityQuantity> commodities = new ArrayList<>(supply.values());
+				for (int i = 0; i < commodities.size(); i++) {
+					MutableCommodityQuantity curr = commodities.get(i);
+					CommoditySpecAPI com = market.getCommodityData(curr.getCommodityId()).getCommodity();
+					
+					// Create cell content
+					TooltipMakerAPI cell = tooltip.beginImageWithText(com.getIconName(), 32f);
+					cell.addPara(curr.getQuantity().getModifiedInt() + " / day", 0f);
+					
+					// Add to grid - calculates row/column automatically
+					int row = i / numColumns;
+					int col = i % numColumns;
+					//tooltip.addToGrid(col, row, "", cell);
+					cell.addToGrid(col, row, "", "cell");
 				}
+				
+				tooltip.addGrid(opad);
+				tooltip.setParaFontDefault();
 			}
 
 			if (hasSupply) {
@@ -1275,7 +1293,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			addPostDemandSection(tooltip, hasDemand, mode);
 
 			if (!needToAddIndustry) {
-				// addAICoreSection(tooltip, AICoreDescriptionMode.TOOLTIP);
 				addInstalledItemsSection(mode, tooltip, expanded);
 				addImprovedSection(mode, tooltip, expanded);
 
