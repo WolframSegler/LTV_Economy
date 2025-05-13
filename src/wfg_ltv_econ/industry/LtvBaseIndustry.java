@@ -50,6 +50,7 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidDangerLe
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -638,6 +639,13 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		buildNextInQueue(market);
 	}
 
+	public static final int firstDigit(int x) {
+    while (x > 9) {
+        x /= 10;
+    }
+    return x;
+	}
+
 	public static void buildNextInQueue(MarketAPI market) {
 		ConstructionQueueItem next = null;
 		Iterator<ConstructionQueueItem> iter = market.getConstructionQueue().getItems().iterator();
@@ -912,31 +920,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return 400f;
 	}
 
-	// Helper method for creating individual commodity displays
-	private void addCommodityToPanel(CustomPanelAPI panel,
-			MutableCommodityQuantity curr,
-			float xPos,
-			float width,
-			float iconSize) {
-		// Create container for one commodity
-		CustomPanelAPI cell = Global.getSettings().createCustom(width, 38f, null);
-		TooltipMakerAPI cellTooltip = cell.createUIElement(width, 38f, false);
-
-		// Add icon
-		cellTooltip.addImage(market.getCommodityData(curr.getCommodityId())
-				.getCommodity().getIconName(),
-				iconSize, iconSize, 0f);
-
-		// Add text next to icon
-		cellTooltip.addPara(curr.getQuantity().getModifiedInt() + "/day",
-				3f,
-				Misc.getTextColor());
-
-		// Position in parent panel
-		cell.render(xPos);
-		panel.addComponent(cell);
-	}
-
 	protected transient IndustryTooltipMode currTooltipMode = null;
 
 	public void createTooltip(IndustryTooltipMode mode, TooltipMakerAPI tooltip, boolean expanded) {
@@ -1206,50 +1189,54 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 			if (hasSupply) {
 				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
-				
-				// 2 columns: [icon+text] [icon+text]
-				float gridWidth = 400f; // Total width for 2 columns
-				int numColumns = 2;
-				tooltip.beginGrid(gridWidth, numColumns);
-				
-				List<MutableCommodityQuantity> commodities = new ArrayList<>(supply.values());
-				for (int i = 0; i < commodities.size(); i++) {
-					MutableCommodityQuantity curr = commodities.get(i);
-					CommoditySpecAPI com = market.getCommodityData(curr.getCommodityId()).getCommodity();
-					
-					// Create cell content
-					TooltipMakerAPI cell = tooltip.beginImageWithText(com.getIconName(), 32f);
-					cell.addPara(curr.getQuantity().getModifiedInt() + " / day", 0f);
-					
-					// Add to grid - calculates row/column automatically
-					int row = i / numColumns;
-					int col = i % numColumns;
-					//tooltip.addToGrid(col, row, "", cell);
-					cell.addToGrid(col, row, "", "cell");
-				}
-				
-				tooltip.addGrid(opad);
-				tooltip.setParaFontDefault();
-			}
 
-			if (hasSupply) {
-				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
+				float iconSize = 32f;
+				float startY = tooltip.getHeightSoFar() + opad;
 
-				tooltip.setParaOrbitronLarge();
-				tooltip.beginGrid(200f, 4);
+				float x = opad;
+				float y = startY;
+				int itemsPerRow = 3;
+				float sectionWidth = getTooltipWidth()/itemsPerRow;
+				int count = 0;
 
 				for (MutableCommodityQuantity curr : supply.values()) {
-					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
-					int quantity = curr.getQuantity().getModifiedInt();
+					String icon = market.getCommodityData(curr.getCommodityId()).getCommodity().getIconName();
+					int pAmount = curr.getQuantity().getModifiedInt();
 
-					TooltipMakerAPI row = tooltip.beginImageWithText(commodity.getIconName(), 32f);
+					// draw icon
+					tooltip.addImage(icon, iconSize, iconSize, 0f);
+					UIComponentAPI iconComp = tooltip.getPrev();
+					iconComp.getPosition().inTL(x, y);
 
-					row.addPara(Integer.toString(quantity) + " / Day", highlight, 0f);
+					String txt = "";
+					switch (firstDigit(pAmount)) {
+						case 1:
+							txt = ""+pAmount;
+							break;
+						default:
+							txt = " "+pAmount;
+					}
 
-					tooltip.addImageWithText(opad / 2);
+					// draw text
+					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
+					UIComponentAPI lblComp = tooltip.getPrev();
+					float textH = lbl.computeTextHeight(txt);
+					float textX = x + iconSize + pad;
+					float textY = y + (iconSize - textH) * 0.5f;
+					lblComp.getPosition().inTL(textX, textY);
 
+					// advance X
+					x+= sectionWidth + opad + pad;
+					count++;
+
+					// wrap to next line if needed
+					if (count % itemsPerRow == 0) {
+						x = opad;
+						y += iconSize + 5f; // line height + padding between rows
+					}
 				}
-				tooltip.setParaFontDefault();
+				tooltip.setHeightSoFar(y);
+				resetFlowLeft(tooltip, opad);
 			}
 
 			addPostSupplySection(tooltip, hasSupply, mode);
@@ -1351,6 +1338,11 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		tooltip.addImageWithText(opad);
 
 		return true;
+	}
+
+	private static final void resetFlowLeft(TooltipMakerAPI tooltip, float opad) {
+		LabelAPI alignReset = tooltip.addPara("", 0f);
+		alignReset.getPosition().inTL(opad/2, tooltip.getHeightSoFar());
 	}
 
 	public List<SpecialItemData> getVisibleInstalledItems() {
