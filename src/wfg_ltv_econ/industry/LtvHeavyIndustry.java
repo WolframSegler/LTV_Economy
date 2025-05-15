@@ -179,12 +179,11 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 			dayTracker = day;
 		}
 
-		if (dayTracker != day) { // Consumption&Production
+		if (dayTracker != day) { //Production
 
 			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
 
-			ltv_consume(Commodities.METALS);
-			ltv_consume(Commodities.RARE_METALS);
+			//All the consumption is done by Population and Infrastructure
 
 			ltv_produce(COMMODITY_LIST);
 

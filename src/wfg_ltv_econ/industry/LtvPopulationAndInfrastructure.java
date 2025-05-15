@@ -2,7 +2,7 @@ package wfg_ltv_econ.industry;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
 import java.awt.Color;
 
 import org.json.JSONArray;
@@ -57,10 +57,8 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 	public final static float ADMIN_BASE_PROB = Global.getSettings().getFloat("adminBaseProb");
 	public final static float ADMIN_PROB_PER_SIZE = Global.getSettings().getFloat("adminProbPerColonySize");
 	public final static float BASE_STABILITY = Global.getSettings().getFloat("stabilityBaseValue");
-	public final static float IN_FACTION_IMPORT_BONUS = Global.getSettings()
-			.getFloat("upkeepReductionFromInFactionImports");
-	public final static int MAX_PLAYER_CONTROLLED_PLANETS = Global.getSector().getCharacterData().getPerson().getStats()
-			.getOutpostNumber().getModifiedInt();
+	public final static float IN_FACTION_IMPORT_BONUS = Global.getSettings().getFloat("upkeepReductionFromInFactionImports");
+	public final static int MAX_PLAYER_CONTROLLED_PLANETS = Global.getSector().getCharacterData().getPerson().getStats().getOutpostNumber().getModifiedInt();
 
 	public final static int IMPROVE_STABILITY_BONUS = 1;
 
@@ -69,6 +67,31 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 	public final static int DAILY_BASE_PROD_CREW = 12; // 50$
 	public final static int DAILY_BASE_PROD_DRUGS = 3; // 200$
 	public final static int DAILY_BASE_PROD_ORGANS = 2;// 300$
+
+	public final static float FOOD_WEIGHT_FOR_CREW = 0.4f;
+	public final static float DOMESTIC_GOODS_WEIGHT_FOR_CREW = 0.2f;
+	public final static float LUXURY_GOODS_WEIGHT_FOR_CREW = 0.1f;
+	public final static float SUPPLIES_WEIGHT_FOR_CREW = 0.1f;
+	public final static float DOMESTIC_GOODS_WEIGHT_FOR_DRUGS = 0.5f;
+	public final static float FOOD_WEIGHT_FOR_ORGANS = 0.7f;
+
+	protected static Map<String, List<Pair<String, Float>>> COMMODITY_LIST;
+
+	static {
+		COMMODITY_LIST = Map.of(
+				Commodities.CREW, List.of(
+    	    	new Pair<>(Commodities.FOOD, FOOD_WEIGHT_FOR_CREW),
+    	    	new Pair<>(Commodities.DOMESTIC_GOODS, DOMESTIC_GOODS_WEIGHT_FOR_CREW),
+				new Pair<>(Commodities.LUXURY_GOODS, LUXURY_GOODS_WEIGHT_FOR_CREW),
+    	    	new Pair<>(Commodities.SUPPLIES, SUPPLIES_WEIGHT_FOR_CREW)
+    		),
+				Commodities.DRUGS, List.of(
+					new Pair<>(Commodities.DOMESTIC_GOODS, DOMESTIC_GOODS_WEIGHT_FOR_DRUGS)
+				),
+				Commodities.ORGANS, List.of(
+					new Pair<>(Commodities.FOOD, FOOD_WEIGHT_FOR_ORGANS)
+				));
+	}
 
 	public void apply() {
 		modifyStability(this, market, getModId(3));
@@ -285,6 +308,41 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		unmodifyStability(market, getModId(3));
 
 		market.removeTransientImmigrationModifier(this);
+	}
+
+	protected int dayTracker = -1;
+
+	@Override
+	public void advance(float amount) {
+		super.advance(amount);
+
+		int day = Global.getSector().getClock().getDay();
+
+		if (dayTracker == -1) { // if not initialized
+			dayTracker = day;
+		}
+
+		if (dayTracker != day) { // Consumption&Production
+			// All the industries set their own demand.
+			// But only Population and Infrastructure consume the demanded items.
+			// This way the industries don't have to keep track of their demands.
+			// This works, because WieghtedDeficitModifiers only looks at the total demand
+			// and not the individual demands of industries.
+
+			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
+
+			// Consume all commodities with demand
+			for (CommodityOnMarketAPI com : market.getAllCommodities()) {
+				int demand = com.getMaxDemand();
+				if (demand > 0) {
+					ltv_consume(com.getId());
+				}
+			}
+
+			ltv_produce(COMMODITY_LIST);
+
+			dayTracker = day;
+		}
 	}
 
 	protected boolean hasPostDemandSection(boolean hasDemand, IndustryTooltipMode mode) {
@@ -796,11 +854,19 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 			}
 
 			if (p.two > LtvItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS) {
-				text.addPara("The nearest coronal tap is located in the " + p.one.getContainingLocation().getNameWithLowercaseType() + ", %s " + lights + " away. The maximum range at a portal can connect to a tap is %s light-years.", opad, h,
+				text.addPara(
+						"The nearest coronal tap is located in the "
+								+ p.one.getContainingLocation().getNameWithLowercaseType() + ", %s " + lights
+								+ " away. The maximum range at a portal can connect to a tap is %s light-years.",
+						opad, h,
 						Misc.getRoundedValueMaxOneAfterDecimal(p.two),
 						Integer.toString(LtvItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS));
 			} else {
-				text.addPara("The nearest coronal tap is located in the " + p.one.getContainingLocation().getNameWithLowercaseType() + ", %s " + lights + " away, allowing " + "a coronal portal located here to connect to it.", opad, h,
+				text.addPara(
+						"The nearest coronal tap is located in the "
+								+ p.one.getContainingLocation().getNameWithLowercaseType() + ", %s " + lights
+								+ " away, allowing " + "a coronal portal located here to connect to it.",
+						opad, h,
 						Misc.getRoundedValueMaxOneAfterDecimal(p.two));
 			}
 		}

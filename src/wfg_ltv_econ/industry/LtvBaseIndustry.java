@@ -274,11 +274,12 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 			for (Pair<String, Float> element : commodity.getValue()) {
 				float demand = getDemand(element.one).getQuantity().getModifiedValue();
-				if (demand <= 0)
+				if (demand <= 0) {
 					continue;
+				}
 
 				String Submarket = Submarkets.SUBMARKET_OPEN;
-				if (market.isPlayerOwned() && market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
+				if (market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
 					Submarket = Submarkets.LOCAL_RESOURCES;
 				} else if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) == null) {
 					return;
