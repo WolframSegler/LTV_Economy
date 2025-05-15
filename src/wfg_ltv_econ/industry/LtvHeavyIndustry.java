@@ -13,7 +13,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
@@ -62,11 +61,8 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	}
 
 	public void HeavyIndustryModifiers() {
-		boolean OrbitalWorks = Industries.ORBITALWORKS.equals(getId());
-
-		if (OrbitalWorks) {
-			market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).modifyFlat(getModId(1),
-					ORBITAL_WORKS_QUALITY_BONUS, "Orbital works");
+		if (Industries.ORBITALWORKS.equals(getId())) {
+			market.getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD).modifyFlat(getModId(1), ORBITAL_WORKS_QUALITY_BONUS, "Orbital works");
 		}
 
 		// Adjust qualityBonus dependent on Stability
@@ -115,8 +111,7 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 	@Override
 	public boolean wantsToUseSpecialItem(SpecialItemData data) {
-		if (special != null && Items.CORRUPTED_NANOFORGE.equals(special.getId()) &&
-				data != null && Items.PRISTINE_NANOFORGE.equals(data.getId())) {
+		if (special != null && Items.CORRUPTED_NANOFORGE.equals(special.getId()) && data != null && Items.PRISTINE_NANOFORGE.equals(data.getId())) {
 			return true;
 		}
 		return super.wantsToUseSpecialItem(data);

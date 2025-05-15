@@ -50,33 +50,30 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidDangerLe
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.ButtonAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
-	public static int SIZE_FOR_SMALL_IMAGE = 3;
-	public static int SIZE_FOR_LARGE_IMAGE = 6;
+	public static final int SIZE_FOR_SMALL_IMAGE = 3;
+	public static final int SIZE_FOR_LARGE_IMAGE = 6;
 
-	public static float DEFAULT_IMPROVE_PRODUCTION_BONUS = 1.3f; // +30% output
-	public static float DEFAULT_INPUT_REDUCTION_BONUS = 0.8f; // +20% output
+	public static final float DEFAULT_IMPROVE_PRODUCTION_BONUS = 1.3f; // +30% output
+	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 1.2f; // +20% output
 
-	public static float ALPHA_CORE_PRODUCTION_BOOST = 1.3f; // +30% output
+	public static final float ALPHA_CORE_PRODUCTION_BOOST = 1.3f; // +30% output
 
-	public static float ALPHA_CORE_UPKEEP_REDUCTION = 0.8f; // -20% upkeep
-	public static float BETA_CORE_UPKEEP_REDUCTION = 0.8f; // -20% upkeep
+	public static final float ALPHA_CORE_UPKEEP_REDUCTION_MULT = 0.8f; // -20% upkeep
+	public static final float BETA_CORE_UPKEEP_REDUCTION_MULT = 0.8f; // -20% upkeep
 
-	public static float ALPHA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
-	public static float BETA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
-	public static float GAMMA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
+	public static final float ALPHA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
+	public static final float BETA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
+	public static final float GAMMA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
 
 	@Override
 	protected LtvBaseIndustry clone() {
@@ -88,8 +85,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 		return copy;
 	}
-
-	// public static final float ORBITAL_HAZARD = 1f;
 
 	public static final String BASE_VALUE_TEXT = "Base value for colony size";
 
@@ -210,8 +205,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		updateSupplyAndDemandModifiers();
 
 		updateIncomeAndUpkeep();
-
 		applyModifiers();
+
 		applyImproveModifiers();
 
 		if (this instanceof MarketImmigrationModifier) {
@@ -328,8 +323,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (quantity > 0) {
 			if (!demandReduction.isUnmodified()) {
 				getDemand(commodityId).getQuantity().modifyMult("ind_dr", demandReduction.getMult());
+				getDemand(commodityId).getQuantity().modifyFlat("ind_dr", demandReduction.getFlatMod());
 			} else {
 				getDemand(commodityId).getQuantity().unmodifyMult("ind_dr");
+				getDemand(commodityId).getQuantity().unmodifyFlat("ind_dr");
 			}
 		}
 	}
@@ -350,8 +347,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		float available = market.getSubmarket(Submarket).getCargo().getCommodityQuantity(resource);
 		consumption_amount = Math.min(consumption_amount, available); // only take what’s available
 
-		market.getSubmarket(Submarket).getCargo()
-				.removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
+		market.getSubmarket(Submarket).getCargo().removeItems(CargoAPI.CargoItemType.RESOURCES, resource,
+				consumption_amount);
 	}
 
 	public float ltv_precalculateconsumption(float... costlist) {
@@ -384,8 +381,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (quantity > 0) {
 			if (!supplyBonus.isUnmodified()) {
 				getSupply(commodityId).getQuantity().modifyMult("ind_sb", supplyBonus.getMult());
+				getSupply(commodityId).getQuantity().modifyFlat("ind_sb", supplyBonus.getFlatMod());
 			} else {
 				getSupply(commodityId).getQuantity().unmodifyMult("ind_sb");
+				getSupply(commodityId).getQuantity().unmodifyFlat("ind_sb");
 			}
 		}
 	}
@@ -640,10 +639,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	}
 
 	public static final int firstDigit(int x) {
-    while (x > 9) {
-        x /= 10;
-    }
-    return x;
+		while (x > 9) {
+			x /= 10;
+		}
+		return x;
 	}
 
 	public static void buildNextInQueue(MarketAPI market) {
@@ -656,8 +655,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			Industry ind = market.instantiateIndustry(next.id);
 			int num = Misc.getNumIndustries(market);
 			int max = Misc.getMaxIndustries(market);
-			if (ind.isAvailableToBuild() && (num <= max || !ind.isIndustry())) { // <= because num includes what's
-																					// queued
+			if (ind.isAvailableToBuild() && (num <= max || !ind.isIndustry())) { // <= because num includes what's queued
 				break;
 			} else {
 				if (market.isPlayerOwned()) {
@@ -931,8 +929,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 		currTooltipMode = mode;
 
-		float pad = 3f;
-		float opad = 10f;
+		final float pad = 3f;
+		final float opad = 10f;
 
 		FactionAPI faction = market.getFaction();
 		Color color = faction.getBaseUIColor();
@@ -1187,37 +1185,40 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				break;
 			}
 
+			final float iconSize = 32f;
+			final int itemsPerRow = 3;
+
 			if (hasSupply) {
 				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
 
-				float iconSize = 32f;
 				float startY = tooltip.getHeightSoFar() + opad;
 
 				float x = opad;
 				float y = startY;
-				int itemsPerRow = 3;
-				float sectionWidth = getTooltipWidth()/itemsPerRow;
+				float sectionWidth = getTooltipWidth() / itemsPerRow;
 				int count = 0;
 
 				for (MutableCommodityQuantity curr : supply.values()) {
-					String icon = market.getCommodityData(curr.getCommodityId()).getCommodity().getIconName();
+					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
 					int pAmount = curr.getQuantity().getModifiedInt();
 
 					// draw icon
-					tooltip.addImage(icon, iconSize, iconSize, 0f);
+					tooltip.beginIconGroup();
+					tooltip.setIconSpacingMedium();
+					tooltip.addIcons(commodity, 1, IconRenderMode.NORMAL);
+					tooltip.addIconGroup(0f);
 					UIComponentAPI iconComp = tooltip.getPrev();
 					iconComp.getPosition().inTL(x, y);
 
+					// draw text
 					String txt = "";
 					switch (firstDigit(pAmount)) {
 						case 1:
-							txt = ""+pAmount;
+							txt = Strings.X + pAmount;
 							break;
 						default:
-							txt = " "+pAmount;
+							txt = " " + Strings.X + pAmount;
 					}
-
-					// draw text
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 					UIComponentAPI lblComp = tooltip.getPrev();
 					float textH = lbl.computeTextHeight(txt);
@@ -1226,7 +1227,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					lblComp.getPosition().inTL(textX, textY);
 
 					// advance X
-					x+= sectionWidth + opad + pad;
+					x += sectionWidth + opad;
 					count++;
 
 					// wrap to next line if needed
@@ -1244,37 +1245,60 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			if (hasDemand || hasPostDemandSection(hasDemand, mode)) {
 				tooltip.addSectionHeading("Demand & effects", color, dark, Alignment.MID, opad);
 			}
+
 			if (hasDemand) {
-				tooltip.beginIconGroup();
-				tooltip.setIconSpacingMedium();
-				float icons = 0;
+				float startY = tooltip.getHeightSoFar() + opad*2 + pad;
+
+				float x = opad + pad;
+				float y = startY;
+				float sectionWidth = getTooltipWidth() / itemsPerRow;
+				int count = 0;
+
 				for (MutableCommodityQuantity curr : demand.values()) {
-					int qty = curr.getQuantity().getModifiedInt();
-					if (qty <= 0)
-						continue;
+					CommodityOnMarketAPI commodity = orig.getCommodityData(curr.getCommodityId());
+					int dAmount = curr.getQuantity().getModifiedInt();
+					int available = commodity.getAvailable();
 
-					CommodityOnMarketAPI com = orig.getCommodityData(curr.getCommodityId());
-					int available = com.getAvailable();
+					// draw icon
+					tooltip.beginIconGroup();
+					tooltip.setIconSpacingMedium();
+					if (dAmount > available) {
+						tooltip.addIcons(commodity, 1, IconRenderMode.DIM_RED);
+					} else {
+						tooltip.addIcons(commodity, 1, IconRenderMode.NORMAL);
+					}
+					tooltip.addIconGroup(0f);
+					UIComponentAPI iconComp = tooltip.getPrev();
+					iconComp.getPosition().inTL(x, y);
 
-					int normal = Math.min(available, qty);
-					int red = Math.max(0, qty - available);
+					// draw text
+					String txt = "";
+					switch (firstDigit(dAmount)) {
+						case 1:
+							txt = Strings.X + dAmount;
+							break;
+						default:
+							txt = " " + Strings.X + dAmount;
+					}
+					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
+					UIComponentAPI lblComp = tooltip.getPrev();
+					float textH = lbl.computeTextHeight(txt);
+					float textX = x + iconSize + pad;
+					float textY = y + (iconSize - textH) * 0.5f;
+					lblComp.getPosition().inTL(textX, textY);
 
-					if (mode != IndustryTooltipMode.NORMAL) {
-						normal = qty;
-						red = 0;
+					// advance X
+					x += sectionWidth + opad + pad;
+					count++;
+
+					// wrap to next line if needed
+					if (count % itemsPerRow == 0) {
+						x = opad;
+						y += iconSize + 5f; // line height + padding between rows
 					}
-					if (normal > 0) {
-						tooltip.addIcons(com, normal, IconRenderMode.NORMAL);
-					}
-					if (red > 0) {
-						tooltip.addIcons(com, red, IconRenderMode.DIM_RED);
-					}
-					icons += normal + Math.max(0, red);
 				}
-				int rows = (int) Math.ceil(icons / 2);
-				rows = 3;
-				rows = 1;
-				tooltip.addIconGroup(32, rows, opad);
+				tooltip.setHeightSoFar(y);
+				resetFlowLeft(tooltip, opad);
 			}
 
 			addPostDemandSection(tooltip, hasDemand, mode);
@@ -1289,6 +1313,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			tooltip.addPara(
 					"*Shown production and demand values are already adjusted based on current market size and local conditions.",
 					gray, opad);
+			tooltip.addSpacer(opad + pad);
 		}
 
 		if (needToAddIndustry) {
@@ -1342,7 +1367,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	private static final void resetFlowLeft(TooltipMakerAPI tooltip, float opad) {
 		LabelAPI alignReset = tooltip.addPara("", 0f);
-		alignReset.getPosition().inTL(opad/2, tooltip.getHeightSoFar());
+		alignReset.getPosition().inTL(opad / 2, tooltip.getHeightSoFar());
 	}
 
 	public List<SpecialItemData> getVisibleInstalledItems() {
@@ -1408,19 +1433,19 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
 			CommoditySpecAPI coreSpec = Global.getSettings().getCommoditySpec(aiCoreId);
 			TooltipMakerAPI text = tooltip.beginImageWithText(coreSpec.getIconName(), 48);
-			text.addPara(pre + "Reduces upkeep cost by %s. Reduces demand by %s. " +
-					"Increases production by %s.", 0f, highlight,
+			text.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. " +
+					"Increases production by %s. All modifiers are multiplicative", 0f, highlight,
 					String.valueOf(Math.round((1f - ALPHA_CORE_INPUT_REDUCTION) * 100f)) + "%",
-					String.valueOf(Math.round((1f - ALPHA_CORE_UPKEEP_REDUCTION) * 100f)) + "%",
+					String.valueOf(Math.round((1f - ALPHA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%",
 					String.valueOf(Math.round((ALPHA_CORE_PRODUCTION_BOOST - 1f) * 100f)) + "%");
 			tooltip.addImageWithText(opad);
 			return;
 		}
 
-		tooltip.addPara(pre + "Reduces upkeep cost by %s. Reduces demand by %s. " +
-				"Increases production by %s.", 0f, highlight,
+		tooltip.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. " +
+				"Increases production by %s. All modifiers are multiplicative", 0f, highlight,
 				String.valueOf(Math.round((1f - ALPHA_CORE_INPUT_REDUCTION) * 100f)) + "%",
-				String.valueOf(Math.round((1f - ALPHA_CORE_UPKEEP_REDUCTION) * 100f)) + "%",
+				String.valueOf(Math.round((1f - ALPHA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%",
 				String.valueOf(Math.round((ALPHA_CORE_PRODUCTION_BOOST - 1f) * 100f)) + "%");
 	}
 
@@ -1435,16 +1460,16 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
 			CommoditySpecAPI coreSpec = Global.getSettings().getCommoditySpec(aiCoreId);
 			TooltipMakerAPI text = tooltip.beginImageWithText(coreSpec.getIconName(), 48);
-			text.addPara(pre + "Reduces upkeep cost by %s. Reduces demand by %s.", opad, highlight,
+			text.addPara(pre + "Reduces demand by %s.Reduces upkeep cost by %s. All modifiers are multiplicative", opad, highlight,
 					String.valueOf(Math.round((1f - BETA_CORE_INPUT_REDUCTION) * 100f)) + "%",
-					String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION) * 100f)) + "%");
+					String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%");
 			tooltip.addImageWithText(opad);
 			return;
 		}
 
-		tooltip.addPara(pre + "Reduces upkeep cost by %s. Reduces demand by %s.", opad, highlight,
+		tooltip.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. All modifiers are multiplicative", opad, highlight,
 				String.valueOf(Math.round((1f - BETA_CORE_INPUT_REDUCTION) * 100f)) + "%",
-				String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION) * 100f)) + "%");
+				String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%");
 	}
 
 	protected void addGammaCoreDescription(TooltipMakerAPI tooltip, AICoreDescriptionMode mode) {
@@ -1459,13 +1484,13 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			CommoditySpecAPI coreSpec = Global.getSettings().getCommoditySpec(aiCoreId);
 			TooltipMakerAPI text = tooltip.beginImageWithText(coreSpec.getIconName(), 48);
 
-			text.addPara(pre + "Reduces demand by %s.", opad, highlight,
+			text.addPara(pre + "Reduces demand by %s. All modifiers are multiplicative", opad, highlight,
 					String.valueOf(Math.round((1f - GAMMA_CORE_INPUT_REDUCTION) * 100f)) + "%");
 			tooltip.addImageWithText(opad);
 			return;
 		}
 
-		tooltip.addPara(pre + "Reduces demand by %s.", opad, highlight,
+		tooltip.addPara(pre + "Reduces demand by %s. All modifiers are multiplicative", opad, highlight,
 				String.valueOf(Math.round((1f - GAMMA_CORE_INPUT_REDUCTION) * 100f)) + "%");
 	}
 
@@ -1527,10 +1552,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 
 		if (aiCoreId.equals(Commodities.ALPHA_CORE)) {
-			getUpkeep().modifyMult("ind_core", ALPHA_CORE_UPKEEP_REDUCTION, "Alpha Core assigned");
+			getUpkeep().modifyMult("ind_core", ALPHA_CORE_UPKEEP_REDUCTION_MULT, "Alpha Core assigned");
 
 		} else if (aiCoreId.equals(Commodities.BETA_CORE)) {
-			getUpkeep().modifyMult("ind_core", BETA_CORE_UPKEEP_REDUCTION, "Beta Core assigned");
+			getUpkeep().modifyMult("ind_core", BETA_CORE_UPKEEP_REDUCTION_MULT, "Beta Core assigned");
 
 		}
 	}
@@ -1548,7 +1573,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			demandReduction.modifyMult(getModId(0), BETA_CORE_INPUT_REDUCTION, "Beta core");
 
 		} else if (aiCoreId.equals(Commodities.GAMMA_CORE)) {
-			demandReduction.modifyMult(getModId(0), GAMMA_CORE_INPUT_REDUCTION * 1, "Gamma core");
+			demandReduction.modifyMult(getModId(0), GAMMA_CORE_INPUT_REDUCTION, "Gamma core");
 		}
 	}
 
@@ -1985,17 +2010,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		float opad = 10f;
 		boolean addedSomething = false;
 		if (canImproveToIncreaseProduction()) {
-			String unit = "unit";
-			if (getImproveProductionBonus() != 1) {
-				unit = "units";
-			}
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
-				info.addPara("Production increased by %s " + unit + ".", initPad, Misc.getHighlightColor(),
-						"" + getImproveProductionBonus());
+				info.addPara("Production increased by %s.", initPad, Misc.getHighlightColor(), Strings.X + getImproveProductionBonus());
 			} else {
-				info.addPara("Increases production by %s " + unit + ".", initPad, Misc.getHighlightColor(),
-						"" + getImproveProductionBonus());
-
+				info.addPara("Increases production by %s.", initPad, Misc.getHighlightColor(), Strings.X + getImproveProductionBonus());
 			}
 			initPad = opad;
 			addedSomething = true;
