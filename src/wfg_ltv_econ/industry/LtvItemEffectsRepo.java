@@ -1,4 +1,4 @@
-package com.fs.starfarer.api.impl.campaign.econ.impl; //ignore error. My file is not where it is supposed to be
+package wfg_ltv_econ.industry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,13 +27,10 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import wfg_ltv_econ.industry.LtvBaseIndustry;
-import wfg_ltv_econ.industry.LtvBoostIndustryInstallableItemEffect;
 import com.fs.starfarer.api.combat.MutableStat.StatModType;
 
 import com.fs.starfarer.api.impl.campaign.econ.impl.InstallableItemEffect;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseInstallableItemEffect;
-import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 
 @SuppressWarnings("serial")
 public class LtvItemEffectsRepo {
@@ -71,8 +68,8 @@ public class LtvItemEffectsRepo {
 	public final static float CORRUPTED_NANOFORGE_QUALITY_BONUS = 0.2f;
 	public final static float PRISTINE_NANOFORGE_QUALITY_BONUS = 0.5f;
 
-	public final static int CORRUPTED_NANOFORGE_PROD = 30; // +30% output perct
-	public final static int PRISTINE_NANOFORGE_PROD = 90; // +90% output perct
+	public final static float CORRUPTED_NANOFORGE_PROD = 1.20f; // +20% output mult
+	public final static float PRISTINE_NANOFORGE_PROD = 1.60f; // +60% output mult
 
 	public final static int SYNCHROTRON_FUEL_BONUS = 100; // +100% output perct
 
@@ -121,8 +118,7 @@ public class LtvItemEffectsRepo {
 					}
 					if (industry instanceof LtvBaseIndustry) {
 						LtvBaseIndustry b = (LtvBaseIndustry) industry;
-						b.demand(9, Commodities.VOLATILES, FUSION_LAMP_VOLATILES,
-								Misc.ucFirst(spec.getName().toLowerCase()));
+						b.demand(9, Commodities.VOLATILES, FUSION_LAMP_VOLATILES, Misc.ucFirst(spec.getName().toLowerCase()));
 
 						MemoryAPI memory = getLampMemory(industry);
 						float h = getShortageHazard(industry);
@@ -232,7 +228,7 @@ public class LtvItemEffectsRepo {
 
 			});
 			put(Items.CORRUPTED_NANOFORGE, new LtvBoostIndustryInstallableItemEffect(Items.CORRUPTED_NANOFORGE,
-					CORRUPTED_NANOFORGE_PROD, 0, StatModType.PERCENT) {
+					CORRUPTED_NANOFORGE_PROD, 0, StatModType.MULT) {
 				public void apply(Industry industry) {
 					super.apply(industry);
 					industry.getMarket().getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD)
@@ -256,12 +252,12 @@ public class LtvItemEffectsRepo {
 							"Increases " + heavyIndustry + "production by %s. " +
 							"On habitable worlds, causes pollution which becomes permanent.",
 							pad, Misc.getHighlightColor(),
-							"" + (int) Math.round(CORRUPTED_NANOFORGE_QUALITY_BONUS * 100f) + "%",
-							"" + (int) Math.round(CORRUPTED_NANOFORGE_PROD) + "%");
+							"" + (int) (CORRUPTED_NANOFORGE_QUALITY_BONUS * 100f) + "%",
+							Integer.toString((int)((CORRUPTED_NANOFORGE_PROD - 1f) * 100f)) + "%");
 				}
 			});
 			put(Items.PRISTINE_NANOFORGE, new LtvBoostIndustryInstallableItemEffect(Items.PRISTINE_NANOFORGE,
-					PRISTINE_NANOFORGE_PROD, 0, StatModType.PERCENT) {
+					PRISTINE_NANOFORGE_PROD, 0, StatModType.MULT) {
 				public void apply(Industry industry) {
 					super.apply(industry);
 					industry.getMarket().getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD)
@@ -283,8 +279,8 @@ public class LtvItemEffectsRepo {
 							"Increases " + heavyIndustry + "production by %s. " +
 							"On habitable worlds, causes pollution which becomes permanent.",
 							pad, Misc.getHighlightColor(),
-							"" + (int) Math.round(PRISTINE_NANOFORGE_QUALITY_BONUS * 100f) + "%",
-							"" + (int) Math.round(PRISTINE_NANOFORGE_PROD) + "%");
+							"" + (int) (PRISTINE_NANOFORGE_QUALITY_BONUS * 100f) + "%",
+							Integer.toString((int)((PRISTINE_NANOFORGE_PROD - 1f) * 100f)) + "%");
 				}
 			});
 			put(Items.SYNCHROTRON, new LtvBoostIndustryInstallableItemEffect(Items.SYNCHROTRON, SYNCHROTRON_FUEL_BONUS,
@@ -325,7 +321,7 @@ public class LtvItemEffectsRepo {
 						for (String curr : list) {
 							int new_amount = (int)industry.getSupply(curr).getQuantity().getBaseValue();
 							new_amount += (int)industry.getSupply(curr).getQuantity().getBaseValue() * (MANTLE_BORE_MINING_BONUS/100);
-							b.supply(spec.getId(), curr, MANTLE_BORE_MINING_BONUS, Misc.ucFirst(spec.getName().toLowerCase()));
+							b.supply(spec.getId(), curr, new_amount, Misc.ucFirst(spec.getName().toLowerCase()));
 						}
 					}
 				}
@@ -382,7 +378,7 @@ public class LtvItemEffectsRepo {
 						for (String curr : list) {
 							int new_amount = (int)industry.getSupply(curr).getQuantity().getBaseValue();
 							new_amount += (int)industry.getSupply(curr).getQuantity().getBaseValue() * (PLASMA_DYNAMO_MINING_BONUS/100);
-							b.supply(spec.getId(), curr, PLASMA_DYNAMO_MINING_BONUS, Misc.ucFirst(spec.getName().toLowerCase()));
+							b.supply(spec.getId(), curr, new_amount, Misc.ucFirst(spec.getName().toLowerCase()));
 						}
 					}
 				}

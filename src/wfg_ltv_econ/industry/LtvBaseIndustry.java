@@ -33,9 +33,7 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.SharedUnlockData;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.InstallableItemEffect;
-import com.fs.starfarer.api.impl.campaign.econ.impl.ItemEffectsRepo;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
-import com.fs.starfarer.api.impl.campaign.econ.impl.GenericInstallableItemPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
@@ -214,7 +212,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 
 		if (special != null) {
-			InstallableItemEffect effect = ItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
+			InstallableItemEffect effect = LtvItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
 			if (effect != null) {
 				List<String> unmet = effect.getUnmetRequirements(this);
 				if (unmet == null || unmet.isEmpty()) {
@@ -238,7 +236,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 
 		if (special != null) {
-			InstallableItemEffect effect = ItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
+			InstallableItemEffect effect = LtvItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
 			if (effect != null) {
 				effect.unapply(this);
 			}
@@ -1358,7 +1356,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(special.getId());
 
 		TooltipMakerAPI text = tooltip.beginImageWithText(spec.getIconName(), 48);
-		InstallableItemEffect effect = ItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
+		InstallableItemEffect effect = LtvItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
 		effect.addItemDescription(this, text, special, InstallableItemDescriptionMode.INDUSTRY_TOOLTIP);
 		tooltip.addImageWithText(opad);
 
@@ -1878,7 +1876,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	public void setSpecialItem(SpecialItemData special) {
 		if (this.special != null) {
-			InstallableItemEffect effect = ItemEffectsRepo.ITEM_EFFECTS.get(this.special.getId());
+			InstallableItemEffect effect = LtvItemEffectsRepo.ITEM_EFFECTS.get(this.special.getId());
 			if (effect != null) {
 				effect.unapply(this);
 			}
@@ -2117,7 +2115,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 		ArrayList<InstallableIndustryItemPlugin> list = new ArrayList<InstallableIndustryItemPlugin>();
 		if (found) {
-			list.add(new GenericInstallableItemPlugin(this));
+			list.add(new LtvGenericInstallableItemPlugin(this));
 		}
 		return list;
 	}

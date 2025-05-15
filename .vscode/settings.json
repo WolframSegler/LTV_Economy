@@ -4,9 +4,10 @@
         "src"
     ],
     "java.project.referencedLibraries": [
-        "e:\\Games\\Starsector Mod Testing\\starsector-core\\lwjgl_util.jar",
+        "e:\\Games\\Starsector Mod Testing\\starsector-core\\json.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\starfarer.api.jar",
-        "e:\\Games\\Starsector Mod Testing\\starsector-core\\log4j-1.2.9.jar"
+        "e:\\Games\\Starsector Mod Testing\\starsector-core\\log4j-1.2.9.jar",
+        "e:\\Games\\Starsector Mod Testing\\starsector-core\\lwjgl_util.jar"
     ],
     "java.configuration.updateBuildConfiguration": "automatic"
 }
