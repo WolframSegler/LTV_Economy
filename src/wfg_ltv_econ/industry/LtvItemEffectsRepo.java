@@ -157,8 +157,8 @@ public class LtvItemEffectsRepo {
 				}
 
 				protected MemoryAPI getLampMemory(Industry industry) {
-					if (industry instanceof PopulationAndInfrastructure) {
-						PopulationAndInfrastructure b = (PopulationAndInfrastructure) industry;
+					if (industry instanceof LtvPopulationAndInfrastructure) {
+						LtvPopulationAndInfrastructure b = (LtvPopulationAndInfrastructure) industry;
 						if (b.lamp != null) {
 							return b.lamp.getMemoryWithoutUpdate();
 						}

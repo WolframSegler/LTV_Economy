@@ -18,24 +18,24 @@ import java.util.List;
 
 public class LtvHeavyIndustry extends LtvBaseIndustry {
 
-	public static float ORBITAL_WORKS_QUALITY_BONUS = 0.2f;
+	public final static float ORBITAL_WORKS_QUALITY_BONUS = 0.2f;
 
-	public static float DAYS_BEFORE_POLLUTION = 0f;
-	public static float DAYS_BEFORE_POLLUTION_PERMANENT = 180f;
+	public final static float DAYS_BEFORE_POLLUTION = 0f;
+	public final static float DAYS_BEFORE_POLLUTION_PERMANENT = 180f;
 
-	public static int DAILY_BASE_PROD_HEAVY_MACHINERY = 13; // 150$
-	public static int DAILY_BASE_PROD_SUPPLIES = 20; // 100$
-	public static int DAILY_BASE_PROD_HAND_WEAPONS = 4; // 500$
-	public static int DAILY_BASE_PROD_SHIPS = 6; // 300$
+	public final static int DAILY_BASE_PROD_HEAVY_MACHINERY = 13; // 150$
+	public final static int DAILY_BASE_PROD_SUPPLIES = 20; // 100$
+	public final static int DAILY_BASE_PROD_HAND_WEAPONS = 4; // 500$
+	public final static int DAILY_BASE_PROD_SHIPS = 6; // 300$
 
-	public static float METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.8f;
-	public static float RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.2f;
-	public static float METALS_WEIGHT_FOR_SUPPLIES = 0.9f;
-	public static float RARE_METALS_WEIGHT_FOR_SUPPLIES = 0.1f;
-	public static float METALS_WEIGHT_FOR_HAND_WEAPONS = 0.4f;
-	public static float RARE_METALS_WEIGHT_FOR_HAND_WEAPONS = 0.6f;
-	public static float METALS_WEIGHT_FOR_SHIPS = 0.6f;
-	public static float RARE_METALS_WEIGHT_FOR_SHIPS = 0.4f;
+	public final static float METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.8f;
+	public final static float RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.2f;
+	public final static float METALS_WEIGHT_FOR_SUPPLIES = 0.9f;
+	public final static float RARE_METALS_WEIGHT_FOR_SUPPLIES = 0.1f;
+	public final static float METALS_WEIGHT_FOR_HAND_WEAPONS = 0.4f;
+	public final static float RARE_METALS_WEIGHT_FOR_HAND_WEAPONS = 0.6f;
+	public final static float METALS_WEIGHT_FOR_SHIPS = 0.6f;
+	public final static float RARE_METALS_WEIGHT_FOR_SHIPS = 0.4f;
 
 	protected static Map<String, List<Pair<String, Float>>> COMMODITY_LIST;
 

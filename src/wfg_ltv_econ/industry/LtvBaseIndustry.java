@@ -58,9 +58,6 @@ import com.fs.starfarer.api.util.Pair;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
-	public static final int SIZE_FOR_SMALL_IMAGE = 3;
-	public static final int SIZE_FOR_LARGE_IMAGE = 6;
-
 	public static final float DEFAULT_IMPROVE_PRODUCTION_BONUS = 1.3f; // +30% output
 	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 1.2f; // +20% output
 
