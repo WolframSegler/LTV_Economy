@@ -18,7 +18,7 @@ import java.util.List;
 
 public class LtvHeavyIndustry extends LtvBaseIndustry {
 
-	public final static float ORBITAL_WORKS_QUALITY_BONUS = 0.2f;
+	public static float ORBITAL_WORKS_QUALITY_BONUS = 0.2f;
 
 	public final static float DAYS_BEFORE_POLLUTION = 0f;
 	public final static float DAYS_BEFORE_POLLUTION_PERMANENT = 180f;
@@ -118,7 +118,7 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	}
 
 	public void apply() {
-		super.apply();
+		super.apply(true);
 
 		demand(Commodities.METALS, Math.round(ltv_precalculateconsumption(
 				DAILY_BASE_PROD_HEAVY_MACHINERY * METALS_WEIGHT_FOR_HEAVY_MACHINERY,

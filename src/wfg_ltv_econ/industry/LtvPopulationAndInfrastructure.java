@@ -47,9 +47,6 @@ import com.fs.starfarer.api.util.Pair;
 
 public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements MarketImmigrationModifier {
 
-	public static final int SIZE_FOR_SMALL_IMAGE = 3;
-	public static final int SIZE_FOR_LARGE_IMAGE = 6;
-
 	public final static float OFFICER_BASE_PROB = Global.getSettings().getFloat("officerBaseProb");
 	public final static float OFFICER_PROB_PER_SIZE = Global.getSettings().getFloat("officerProbPerColonySize");
 	public final static float OFFICER_ADDITIONAL_BASE_PROB = Global.getSettings().getFloat("officerAdditionalBaseProb");
@@ -58,7 +55,6 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 	public final static float ADMIN_PROB_PER_SIZE = Global.getSettings().getFloat("adminProbPerColonySize");
 	public final static float BASE_STABILITY = Global.getSettings().getFloat("stabilityBaseValue");
 	public final static float IN_FACTION_IMPORT_BONUS = Global.getSettings().getFloat("upkeepReductionFromInFactionImports");
-	public final static int MAX_PLAYER_CONTROLLED_PLANETS = Global.getSector().getCharacterData().getPerson().getStats().getOutpostNumber().getModifiedInt();
 
 	public final static int IMPROVE_STABILITY_BONUS = 1;
 
@@ -79,24 +75,25 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 
 	static {
 		COMMODITY_LIST = Map.of(
-				Commodities.CREW, List.of(
-    	    	new Pair<>(Commodities.FOOD, FOOD_WEIGHT_FOR_CREW),
-    	    	new Pair<>(Commodities.DOMESTIC_GOODS, DOMESTIC_GOODS_WEIGHT_FOR_CREW),
-				new Pair<>(Commodities.LUXURY_GOODS, LUXURY_GOODS_WEIGHT_FOR_CREW),
-    	    	new Pair<>(Commodities.SUPPLIES, SUPPLIES_WEIGHT_FOR_CREW)
-    		),
-				Commodities.DRUGS, List.of(
+			Commodities.CREW, List.of(
+					new Pair<>(Commodities.FOOD, FOOD_WEIGHT_FOR_CREW),
+					new Pair<>(Commodities.DOMESTIC_GOODS, DOMESTIC_GOODS_WEIGHT_FOR_CREW),
+					new Pair<>(Commodities.LUXURY_GOODS, LUXURY_GOODS_WEIGHT_FOR_CREW),
+					new Pair<>(Commodities.SUPPLIES, SUPPLIES_WEIGHT_FOR_CREW)
+					),
+			Commodities.DRUGS, List.of(
 					new Pair<>(Commodities.DOMESTIC_GOODS, DOMESTIC_GOODS_WEIGHT_FOR_DRUGS)
-				),
-				Commodities.ORGANS, List.of(
+					),
+			Commodities.ORGANS, List.of(
 					new Pair<>(Commodities.FOOD, FOOD_WEIGHT_FOR_ORGANS)
-				));
+					)
+				);
 	}
 
 	public void apply() {
 		modifyStability(this, market, getModId(3));
 
-		super.apply();
+		super.apply(true);
 
 		int size = market.getSize();
 		if (!market.hasCondition(Conditions.HABITABLE)) {
@@ -110,7 +107,7 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		demand(Commodities.LUXURY_GOODS, (int) Math.max(Math.pow(10, (size - 2) - luxuryThreshold), 0));
 		demand(Commodities.DRUGS, (int) Math.pow(DAILY_BASE_PROD_DRUGS, size - 2));
 		demand(Commodities.ORGANS, (int) Math.max(Math.pow(DAILY_BASE_PROD_DRUGS, size - 3), 0));
-		demand(Commodities.SUPPLIES, Math.min(size, 3));
+		demand(Commodities.SUPPLIES, (int) Math.pow(5, size - 2));
 
 		supply(Commodities.CREW, DAILY_BASE_PROD_CREW);
 		supply(Commodities.DRUGS, DAILY_BASE_PROD_DRUGS);
@@ -287,8 +284,7 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyFlat(getModId());
 		market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyMult(getModId());
 		if (HAZARD_INCREASES_DEFENSE) {
-			market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyMult(getModId(1)); // hazard value
-																										// modifier
+			market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyMult(getModId(1)); // hazard value modifier
 		}
 
 		market.getStats().getDynamic().getMod(Stats.MAX_INDUSTRIES).unmodifyFlat(getModId());
@@ -436,7 +432,7 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 			}
 		}
 
-		int overOutposts = outposts - MAX_PLAYER_CONTROLLED_PLANETS;
+		int overOutposts = outposts - Global.getSector().getCharacterData().getPerson().getStats().getOutpostNumber().getModifiedInt();
 
 		int penaltyOrBonus = (int) (overOutposts * Misc.getOutpostPenalty());
 
@@ -568,8 +564,7 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 			cid = "population_" + size;
 			MarketConditionSpecAPI mcs = Global.getSettings().getMarketConditionSpec(cid);
 			if (mcs != null) {
-				return spec.getDesc() + "\n\n" + mcs.getDesc().replaceAll("\\$marketName", market.getName())
-						.replaceAll("\\$MarketName", market.getName());
+				return spec.getDesc() + "\n\n" + mcs.getDesc().replaceAll("\\$marketName", market.getName()).replaceAll("\\$MarketName", market.getName());
 			}
 		}
 		return super.getDescriptionOverride();

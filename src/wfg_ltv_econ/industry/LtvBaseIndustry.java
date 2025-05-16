@@ -33,6 +33,7 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.SharedUnlockData;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.InstallableItemEffect;
+import com.fs.starfarer.api.impl.campaign.econ.impl.ItemEffectsRepo;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
@@ -57,6 +58,9 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {
+
+	public static final int SIZE_FOR_SMALL_IMAGE = 3;
+	public static final int SIZE_FOR_LARGE_IMAGE = 6;
 
 	public static final float DEFAULT_IMPROVE_PRODUCTION_BONUS = 1.3f; // +30% output
 	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 1.2f; // +20% output
@@ -196,10 +200,12 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return this;
 	}
 
-	public void apply() {
+	public void apply(Boolean updateIncomeAndUpkeep) {
 		updateSupplyAndDemandModifiers();
 
-		updateIncomeAndUpkeep();
+		if (updateIncomeAndUpkeep) {
+			updateIncomeAndUpkeep();
+		}
 		applyModifiers();
 
 		applyImproveModifiers();
@@ -223,17 +229,18 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	public void unapply() {
 		applyNoAICoreModifiers();
-
+		
 		Boolean wasImproved = improved;
 		improved = null;
+		applyImproveModifiers(); // to unapply them
 		improved = wasImproved;
-
-		if (this instanceof MarketImmigrationModifier) {
+		
+		if (this instanceof MarketImmigrationModifier && market != null) {
 			market.removeTransientImmigrationModifier((MarketImmigrationModifier) this);
 		}
-
+		
 		if (special != null) {
-			InstallableItemEffect effect = LtvItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
+			InstallableItemEffect effect = ItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
 			if (effect != null) {
 				effect.unapply(this);
 			}
@@ -343,8 +350,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		float available = market.getSubmarket(Submarket).getCargo().getCommodityQuantity(resource);
 		consumption_amount = Math.min(consumption_amount, available); // only take what’s available
 
-		market.getSubmarket(Submarket).getCargo().removeItems(CargoAPI.CargoItemType.RESOURCES, resource,
-				consumption_amount);
+		market.getSubmarket(Submarket).getCargo().removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
 	}
 
 	public float ltv_precalculateconsumption(float... costlist) {
@@ -1167,7 +1173,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			boolean hasSupply = false;
 			for (MutableCommodityQuantity curr : supply.values()) {
 				int quantity = curr.getQuantity().getModifiedInt();
-				if (quantity <= 0)
+				if (quantity < 1)
 					continue;
 				hasSupply = true;
 				break;
@@ -1175,7 +1181,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			boolean hasDemand = false;
 			for (MutableCommodityQuantity curr : demand.values()) {
 				int quantity = curr.getQuantity().getModifiedInt();
-				if (quantity <= 0)
+				if (quantity < 1)
 					continue;
 				hasDemand = true;
 				break;
@@ -1183,6 +1189,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 			final float iconSize = 32f;
 			final int itemsPerRow = 3;
+
 
 			if (hasSupply) {
 				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
@@ -1192,11 +1199,20 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				float x = opad;
 				float y = startY;
 				float sectionWidth = getTooltipWidth() / itemsPerRow;
-				int count = 0;
+				int count = -1;
 
 				for (MutableCommodityQuantity curr : supply.values()) {
 					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
 					int pAmount = curr.getQuantity().getModifiedInt();
+
+					if (pAmount < 1) {continue;}
+
+					// wrap to next line if needed
+					count++;
+					if (count % itemsPerRow == 0 && count !=0) {
+						x = opad;
+						y += iconSize + 5f; // line height + padding between rows
+					}
 
 					// draw icon
 					tooltip.beginIconGroup();
@@ -1224,13 +1240,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 					// advance X
 					x += sectionWidth + opad;
-					count++;
-
-					// wrap to next line if needed
-					if (count % itemsPerRow == 0) {
-						x = opad;
-						y += iconSize + 5f; // line height + padding between rows
-					}
 				}
 				tooltip.setHeightSoFar(y);
 				resetFlowLeft(tooltip, opad);
@@ -1245,15 +1254,24 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			if (hasDemand) {
 				float startY = tooltip.getHeightSoFar() + opad*2 + pad;
 
-				float x = opad + pad;
+				float x = opad;
 				float y = startY;
 				float sectionWidth = getTooltipWidth() / itemsPerRow;
-				int count = 0;
+				int count = -1;
 
 				for (MutableCommodityQuantity curr : demand.values()) {
 					CommodityOnMarketAPI commodity = orig.getCommodityData(curr.getCommodityId());
 					int dAmount = curr.getQuantity().getModifiedInt();
 					int available = commodity.getAvailable();
+
+					if (dAmount < 1) {continue;}
+
+					// wrap to next line if needed
+					count++;
+					if (count % itemsPerRow == 0 && count !=0) {
+						x = opad;
+						y += iconSize + 5f; // line height + padding between rows
+					}
 
 					// draw icon
 					tooltip.beginIconGroup();
@@ -1284,14 +1302,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					lblComp.getPosition().inTL(textX, textY);
 
 					// advance X
-					x += sectionWidth + opad + pad;
-					count++;
-
-					// wrap to next line if needed
-					if (count % itemsPerRow == 0) {
-						x = opad;
-						y += iconSize + 5f; // line height + padding between rows
-					}
+					x += sectionWidth + opad;
 				}
 				tooltip.setHeightSoFar(y);
 				resetFlowLeft(tooltip, opad);
@@ -1391,10 +1402,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	public void addAICoreSection(TooltipMakerAPI tooltip, String coreId, AICoreDescriptionMode mode) {
 		float opad = 10f;
-
-		// FactionAPI faction = market.getFaction();
-		// Color color = faction.getBaseUIColor();
-		// Color dark = faction.getDarkUIColor();
 
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
 			if (coreId == null) {
