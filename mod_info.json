@@ -9,5 +9,5 @@
 	"jars": [
         "jars/ltv_economy.jar"
     ],
-	"modPlugin": "wfg_ltv_econ.LtvEconomyModPlugin"
+	"modPlugin": "wfg_ltv_econ.plugins.LtvEconomyModPlugin"
 }

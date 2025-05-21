@@ -11,7 +11,7 @@ Lwjgl_util api jar file path for my pc:
     E:\Games\Starsector\starsector-core\lwjgl_util.jar
 
 1. Compile the .java files to .class: navigate to LTV_ECONOMY/ through the console and use the command:
-    javac -classpath "E:\Games\Starsector\starsector-core\starfarer.api.jar;E:\Games\Starsector\starsector-core\log4j-1.2.9.jar;E:\Games\Starsector\starsector-core\lwjgl_util.jar;E:\Games\Starsector\starsector-core\json.jar" -d src/compiled/ src/wfg_ltv_econ/*.java src/wfg_ltv_econ/submarkets/*.java src/wfg_ltv_econ/industry/*.java
+    javac -classpath "E:\Games\Starsector\starsector-core\starfarer.api.jar;E:\Games\Starsector\starsector-core\log4j-1.2.9.jar;E:\Games\Starsector\starsector-core\lwjgl_util.jar;E:\Games\Starsector\starsector-core\json.jar;E:\Games\Starsector\starsector-core\starfarer_obf.jar;E:\Games\Starsector\starsector-core\fs.common_obf.jar" -d src/compiled/ src/wfg_ltv_econ/submarkets/*.java src/wfg_ltv_econ/industry/*.java src/wfg_ltv_econ/plugins/*.java src/wfg_ltv_econ/util/*.java
 
 2. Create a jar file using the command:
     jar cf jars/ltv_economy.jar -C src/compiled .
