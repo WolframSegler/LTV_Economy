@@ -9,8 +9,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg_ltv_econ.industry.BuildingWidget;
-
-
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 
 import java.lang.reflect.Constructor;
@@ -40,12 +38,12 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         // Find the master UI Panel
         UIPanelAPI master = null;
 
-        Object dialog = Reflection.invoke("getEncounterDialog", state);
+        Object dialog = ReflectionUtils.invoke(state, "getEncounterDialog");
         if (dialog != null) {
-            master = (UIPanelAPI) Reflection.invoke("getCoreUI", dialog);
+            master = (UIPanelAPI) ReflectionUtils.invoke(dialog, "getCoreUI");
         }
         if (master == null) {
-            master = (UIPanelAPI) Reflection.invoke("getCore", state);
+            master = (UIPanelAPI) ReflectionUtils.invoke(state, "getCore");
         }
         if (master == null) {
             return;
@@ -55,40 +53,40 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         // Find IndustryListPanel
         UIPanelAPI industryPanel = null;
 
-        Object masterTab = Reflection.invoke("getCurrentTab", master);
+        Object masterTab = ReflectionUtils.invoke(master, "getCurrentTab");
         if (!(masterTab instanceof UIPanelAPI)) {
             return;
         }
 
         UIPanelAPI masterPanel = (UIPanelAPI) masterTab;
-        List<?> tabChildren = (List<?>) Reflection.invoke("getChildren", masterPanel);
+        List<?> tabChildren = (List<?>) ReflectionUtils.invoke(masterPanel, "getChildren");
         UIPanelAPI outpostPanel = tabChildren.stream()
-                .filter(child -> Reflection.hasMethodOfName("getOutpostPanelParams", child))
+                .filter(child -> !ReflectionUtils.getMethodsMatching(child, "getOutpostPanelParams").isEmpty())
                 .map(child -> (UIPanelAPI) child)
                 .findFirst().orElse(null);
         if (outpostPanel == null) {
             return;
         }
 
-        List<?> outpostChildren = (List<?>) Reflection.invoke("getChildren", outpostPanel);
+        List<?> outpostChildren = (List<?>) ReflectionUtils.invoke(outpostPanel, "getChildren");
         UIPanelAPI overviewPanel = outpostChildren.stream()
-                .filter(child -> Reflection.hasMethodOfName("showOverview", child))
+                .filter(child -> !ReflectionUtils.getMethodsMatching(child, "showOverview").isEmpty())
                 .map(child -> (UIPanelAPI) child)
                 .findFirst().orElse(null);
         if (overviewPanel == null) {
             return;
         }
 
-        List<?> overviewChildren = (List<?>) Reflection.invoke("getChildren", overviewPanel);
+        List<?> overviewChildren = (List<?>) ReflectionUtils.invoke(overviewPanel, "getChildren");
         UIPanelAPI managementPanel = overviewChildren.stream()
-                .filter(child -> Reflection.hasMethodOfName("recreateWithEconUpdate", child))
+                .filter(child -> !ReflectionUtils.getMethodsMatching(child, "recreateWithEconUpdate").isEmpty())
                 .map(child -> (UIPanelAPI) child)
                 .findFirst().orElse(null);
         if (managementPanel == null) {
             return;
         }
 
-        List<?> managementChildren = (List<?>) Reflection.invoke("getChildren", managementPanel);
+        List<?> managementChildren = (List<?>) ReflectionUtils.invoke(managementPanel, "getChildren");
         industryPanel = managementChildren.stream()
                 .filter(child -> child instanceof IndustryListPanel)
                 .map(child -> (IndustryListPanel) child)
@@ -107,13 +105,13 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             return;
         }
 
-        List<?> originalWidgets = (List<?>) Reflection.get("widgets", (IndustryListPanel) industryPanel);
+        List<?> originalWidgets = (List<?>) ReflectionUtils.get((IndustryListPanel) industryPanel, "widgets", List.class);
 
         List<BuildingWidget> LtvWidgets = new ArrayList<>();
         for (Object widget : originalWidgets) {
-            MarketAPI widgetMarket = (MarketAPI) Reflection.get("market", widget);
-            Industry industry = (Industry) Reflection.get("øôöO00", widget); // Industry
-            Integer queueIndex = (Integer) Reflection.get("ÖõöO00", widget); // var4
+            MarketAPI widgetMarket = (MarketAPI) ReflectionUtils.get(widget, "market");
+            Industry industry = (Industry) ReflectionUtils.get(widget, "øôöO00"); // Industry
+            Integer queueIndex = (Integer) ReflectionUtils.get(widget, "ÖõöO00"); // var4
 
             if (industry == null || widgetMarket == null) {
                 continue;
@@ -136,7 +134,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             }
         }
 
-        Reflection.set("widgets", industryPanel, LtvWidgets);
+        ReflectionUtils.set(industryPanel, "widgets", LtvWidgets);
     }
 
     private void repopulateWidgetsList(UIPanelAPI industryPanel) {
@@ -148,13 +146,13 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             return;
         }
 
-        List<?> originalWidgets = (List<?>) Reflection.get("widgets", (IndustryListPanel) industryPanel);
+        List<?> originalWidgets = (List<?>) ReflectionUtils.get((IndustryListPanel) industryPanel, "widgets", List.class);
 
-        List<intnew> LtvWidgets = new ArrayList<>();
+        List<BuildingWidget> LtvWidgets = new ArrayList<>();
         for (Object widget : originalWidgets) {
-            MarketAPI widgetMarket = (MarketAPI) Reflection.get("market", widget);
-            Industry industry = (Industry) Reflection.get("øôöO00", widget); // Industry
-            Integer queueIndex = (Integer) Reflection.get("ÖõöO00", widget); // var4
+            MarketAPI widgetMarket = (MarketAPI) ReflectionUtils.get(widget, "market");
+            Industry industry = (Industry) ReflectionUtils.get(widget, "øôöO00"); // Industry
+            Integer queueIndex = (Integer) ReflectionUtils.get(widget, "ÖõöO00"); // var4
 
             if (industry == null || widgetMarket == null) {
                 continue;
@@ -167,17 +165,17 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
                 Constructor<?> ctor = intnew.class.getConstructor(MarketAPI.class, Industry.class, IndustryListPanel.class, int.class);
                 Object newWidget = ctor.newInstance(widgetMarket, industry, industryPanel, queueIndex);
 
-                if (newWidget instanceof intnew) {
-                    LtvWidgets.add((intnew) newWidget);
+                if (newWidget instanceof BuildingWidget) {
+                    LtvWidgets.add((BuildingWidget) newWidget);
                 }
 
-                Global.getLogger(intnew.class).info("gloryToLife: " + industry.getId());
+                Global.getLogger(BuildingWidget.class).info("gloryToLife: " + industry.getId());
             } catch (Exception e) {
                 Global.getLogger(LtvMarketWidgetReplacer.class).error("Widget instantiation failed", e);
             }
         }
 
-        Reflection.set("widgets", industryPanel, LtvWidgets);
+        ReflectionUtils.set(industryPanel, "widgets", LtvWidgets);
     }
 
     @Override

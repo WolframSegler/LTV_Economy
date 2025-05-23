@@ -4,17 +4,17 @@ Word Wrap shortcut: Alt + Z
 Starsector api jar file path for my pc:
     E:\Games\Starsector\starsector-core\starfarer.api.jar
 
-Log4j api jar file path for my pc:
-    E:\Games\Starsector\starsector-core\log4j-1.2.9.jar
+1. Compile the ReflectionUtils.kt:
+    kotlinc src/wfg_ltv_econ/util/ReflectionUtils.kt -d src/compiled/
 
-Lwjgl_util api jar file path for my pc:
-    E:\Games\Starsector\starsector-core\lwjgl_util.jar
+2. Package it as a jar:
+    jar cf jars/reflection.jar -C src/compiled .
 
-1. Compile the .java files to .class: navigate to LTV_ECONOMY/ through the console and use the command:
-    javac -classpath "E:\Games\Starsector\starsector-core\starfarer.api.jar;E:\Games\Starsector\starsector-core\log4j-1.2.9.jar;E:\Games\Starsector\starsector-core\lwjgl_util.jar;E:\Games\Starsector\starsector-core\json.jar;E:\Games\Starsector\starsector-core\starfarer_obf.jar;E:\Games\Starsector\starsector-core\fs.common_obf.jar" -d src/compiled/ src/wfg_ltv_econ/submarkets/*.java src/wfg_ltv_econ/industry/*.java src/wfg_ltv_econ/plugins/*.java src/wfg_ltv_econ/util/*.java
+3. Compile the project files to .class: navigate to LTV_ECONOMY/ through the console and use the command:
+    javac -classpath "E:\Games\Starsector\starsector-core\starfarer.api.jar;E:\Games\Starsector\starsector-core\log4j-1.2.9.jar;E:\Games\Starsector\starsector-core\lwjgl_util.jar;E:\Games\Starsector\starsector-core\json.jar;E:\Games\Starsector\starsector-core\starfarer_obf.jar;E:\Games\Starsector\starsector-core\fs.common_obf.jar" -d src/compiled/ src/wfg_ltv_econ/submarkets/*.java src/wfg_ltv_econ/industry/*.java src/wfg_ltv_econ/plugins/*.java src/wfg_ltv_econ/util/*.java src/wfg_ltv_econ/util/*.kt
 
-2. Create a jar file using the command:
+4. Create a jar file using the command:
     jar cf jars/ltv_economy.jar -C src/compiled .
 
-3. Commands to use for dev testing in Starsector 
+5. Commands to use for dev testing in Starsector 
     addIndustry ltv_heavyindustry
