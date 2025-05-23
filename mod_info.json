@@ -7,7 +7,8 @@
 	"gameVersion":"0.98a-RC7",
 	"utility": false,
 	"jars": [
-        "jars/ltv_economy.jar"
+        "jars/ltv_economy.jar",
+		"jars/reflection.jar"
     ],
 	"modPlugin": "wfg_ltv_econ.plugins.LtvEconomyModPlugin"
 }

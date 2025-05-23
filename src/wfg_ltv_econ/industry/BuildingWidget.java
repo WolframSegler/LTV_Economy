@@ -1,6 +1,5 @@
 package wfg_ltv_econ.industry;
 
-import com.fs.graphics.A.D;
 import com.fs.graphics.A.F;
 import com.fs.graphics.util.B;
 import com.fs.graphics.util.Fader;
@@ -34,7 +33,6 @@ import wfg_ltv_econ.util.ReflectionUtils;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.ooO0;
