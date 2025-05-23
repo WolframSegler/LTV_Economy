@@ -1,6 +1,7 @@
 package wfg_ltv_econ.industry;
 
 import com.fs.graphics.A.D;
+import com.fs.graphics.A.F;
 import com.fs.graphics.util.B;
 import com.fs.graphics.util.Fader;
 import com.fs.starfarer.O0OO;
@@ -27,10 +28,9 @@ import com.fs.starfarer.ui.d;
 import com.fs.starfarer.ui.n;
 import com.fs.starfarer.ui.oo0O;
 import com.fs.starfarer.ui.x;
-import com.fs.starfarer.util.A.C;
-
+// import com.fs.starfarer.util.A.C; //Cannot import. Because there is also a .class file named A.clas 
 import wfg_ltv_econ.util.LtvMarketWidgetReplacer;
-
+import wfg_ltv_econ.util.Reflection;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -45,24 +45,19 @@ import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 
 public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o */ {
    private Industry currentIndustry;
-   private x industryIcon;
-   private n constructionActionButton;
-   private ooO0 commodityDeficitIconGroup;
-   private ooO0 specialItemGroup;
-   private intnew.o tradeInfoPanel;
-   private IndustryListPanel IndustryPanel;
-   private int constructionQueueIndex;
-   protected final List<d> labels = new ArrayList<>();
-   private Fader glowFader;
-   private d buildingTitleHeader;
-   private d constructionStatusText;
-   private Oo constructionMode;
-
+   private x industryIcon; // private x ÓõöO00;
+   private n constructionActionButton; // private n ôôöO00;
+   private ooO0 commodityDeficitIconGroup; // private ooO0 void.private$float;
+   private ooO0 specialItemGroup; // private ooO0 ÕõöO00;
+   private intnew.o tradeInfoPanel; // com.fs.starfarer.campaign.ui.marketinfo.intnew.o ÒõöO00;
+   private IndustryListPanel IndustryPanel; // IndustryListPanel if.private$float;
+   private int constructionQueueIndex; // private int ÖõöO00;
+   protected final List<d> labels = new ArrayList<>(); // protected List<d> labels;
+   private Fader glowFader; // private Fader OõöO00;
+   private d buildingTitleHeader; // private d do.private$float;
+   private d constructionStatusText; // private d õôöO00;
+   private Oo constructionMode; // com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo private.private$float;
    private static final String DEFAULT_FONT = "defaultFont";
-
-   static {
-      HEIGHT = IMAGE_HEIGHT + FONT_HEIGHT + PAD;
-   }
 
    public BuildingWidget(MarketAPI market, Industry currentIndustry, IndustryListPanel IndustryPanel) {
       this(market, currentIndustry, IndustryPanel, -1);
@@ -71,7 +66,9 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
    public BuildingWidget(MarketAPI market, Industry currentIndustry, IndustryListPanel IndustryPanel, int queue) {
       super(market, currentIndustry, IndustryPanel, queue);
       this.glowFader = new Fader(0.0F, 0.2F, 0.2F, false, true);
-      this.constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ó00000;
+      // this.constructionMode =
+      // com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ó00000;
+      this.constructionMode = (intnew.Oo) Reflection.getStatic("Ó00000", intnew.Oo.class);
       this.currentIndustry = currentIndustry;
       this.IndustryPanel = IndustryPanel;
       this.constructionQueueIndex = queue;
@@ -81,7 +78,7 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
       clearChildren();
       super.sizeChanged(var1, var2);
       buildingTitleHeader = d.createSmallInsigniaLabel(currentIndustry.getCurrentName(), Alignment.LMID);
-      buildingTitleHeader = new d(" " + currentIndustry.getCurrentName(), DEFAULT_FONT, color, true, Alignment.LMID); // "defaultFont might change in the future"
+      buildingTitleHeader = new d(" " + currentIndustry.getCurrentName(), DEFAULT_FONT, color, true, Alignment.LMID);
       buildingTitleHeader.setColor(color);
       if (currentIndustry.isImproved()) {
          buildingTitleHeader.setColor(Misc.getStoryOptionColor());
@@ -102,16 +99,13 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
 
       try {
          // constructionActionButton.getLogic().o00000(com.fs.starfarer.ui.int.o.String);
-         Class<?> enumClass = Class.forName("com.fs.starfarer.ui.int$o");
-         Object enumConstant = Enum.class.getMethod("valueOf", Class.class, String.class) .invoke(null, enumClass, "String");
-         Method getLogicMethod = constructionActionButton.getClass().getMethod("getLogic");
-         Object logic = getLogicMethod.invoke(constructionActionButton);
-         Method method = logic.getClass().getMethod("o00000", enumClass);
-         method.invoke(logic, enumConstant);
+         Object logicInstance = Reflection.invokeExact("getLogic", constructionActionButton, new Class<?>[0]);
+         Reflection.invokeStatic("o00000", logicInstance.getClass(), void.class,
+               new Class<?>[] { Class.forName("com.fs.starfarer.ui.int.o") },
+               Class.forName("com.fs.starfarer.ui.int.o").getField("String").get(null));
       } catch (Exception e) {
          Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
       }
-
       if (!currentIndustry.isFunctional() || constructionQueueIndex >= 0) {
          industryIcon.setImageColor(dark);
       }
@@ -127,8 +121,21 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
       int var3 = 0;
       for (Pair<String, Integer> deficitEntry : currentIndustry.getAllDeficit()) {
          CommodityOnMarketAPI var6 = market.getCommodityData(deficitEntry.one);
-         commodityDeficitIconGroup.addGroup((CommodityOnMarket) var6, deficitEntry.two, 1.0F,
-               com.fs.starfarer.campaign.ui.marketinfo.f.o.õ00000, null);
+         try {
+         // commodityDeficitIconGroup.addGroup((CommodityOnMarket) var6,
+         // deficitEntry.two, 1.0F, com.fs.starfarer.campaign.ui.marketinfo.f.o.õ00000,
+         // null);
+         Reflection.invokeExact("addGroup", commodityDeficitIconGroup,
+               new Class<?>[] { CommodityOnMarket.class, Integer.class, float.class,
+                     Class.forName("com.fs.starfarer.campaign.ui.marketinfo.f.o").getField("õ00000").get(null)
+                           .getClass(),
+                     Object.class },
+               var6, deficitEntry.two, 1.0F,
+               Reflection.getStatic("õ00000", Class.forName("com.fs.starfarer.campaign.ui.marketinfo.f.o")), null);
+         } catch (Exception e) {
+            Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
+         }
+         
          if (deficitEntry.two > var3) {
             var3 = deficitEntry.two;
          }
@@ -139,7 +146,8 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
       commodityDeficitIconGroup.autoSizeWithAdjust(var17, var18, var17, var17);
       d var19 = d.createSmallInsigniaLabel("-" + var3, Alignment.LMID);
       var19 = new d("-" + var3, "graphics/fonts/insignia21LTaa.fnt", color, true, Alignment.LMID);
-      var19.setColor(O0OO.ÒÓ0000);
+      // var19.setColor(O0OO.ÒÓ0000);
+      var19.setColor((Color) Reflection.getStatic("ÒÓ0000", O0OO.class));
 
       try {
          // var19.getRenderer().int(true);
@@ -149,7 +157,6 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
       } catch (Exception e) {
          Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
       }
-      
 
       var19.autoSize();
       var19.setOpacity(0.0F);
@@ -197,7 +204,9 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
          }
 
          N var24 = new N((String) null, 0.0F, 100.0F);
-         var24.getValue().getRenderer().o00000(D.Ò00000("graphics/fonts/victor10.fnt"));
+         // var24.getValue().getRenderer().o00000(D.Ò00000("graphics/fonts/victor10.fnt"));
+         var24.getValue().getRenderer().o00000((F) Reflection.invokeStatic("Ò00000", D.class, F.class,
+               new Class<?>[] { String.class }, "graphics/fonts/victor10.fnt"));
          var24.getValue().getPosition().setYAlignOffset(1.0F);
          var24.setBarColor(Misc.interpolateColor(color, dark, 0.5F));
          var24.setTextColor(color);
@@ -262,7 +271,8 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
       labels.add(var1);
       add(var1).aboveMid(constructionStatusText, 0.0F);
       constructionActionButton.highlight();
-      constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ò00000;
+      // constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ò00000;
+      constructionMode = (intnew.Oo) Reflection.getStatic("Ò00000", intnew.Oo.class);
       addCostTimeLabels();
    }
 
@@ -279,7 +289,8 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
       constructionStatusText.autoSize();
       add(constructionStatusText).inMid().setYAlignOffset(-buildingTitleHeader.getHeight() / 2.0F);
       constructionActionButton.unhighlight();
-      constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ó00000;
+      // constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ó00000;
+      constructionMode = (intnew.Oo) Reflection.getStatic("Ó00000", intnew.Oo.class);
       addCostTimeLabels();
    }
 
@@ -333,14 +344,20 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
       }
 
       if (currentIndustry.isIndustry()) {
-         O.Ó00000(var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F, var9, var1);
+         // O.Ó00000(var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F,
+         // var9, var1);
+         Reflection.invokeStatic("Ó00000", O.class, void.class,
+               new Class<?>[] { float.class, float.class, float.class, float.class, float.class, float.class },
+               var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F, var9, var1);
       }
 
       O.o00000(var4, var5, var6, var7, 1.0F, true, true, true, true, var9, var1);
       float var10 = glowFader.getBrightness();
       var10 = constructionActionButton.getGlowAmount();
       if (var10 > 0.0F) {
-         Color aColor = B.Ô00000(Color.white, var10 * 0.33F);
+         // Color aColor = B.Ô00000(Color.white, var10 * 0.33F);
+         Color aColor = (Color) Reflection.invokeStatic("Ô00000", B.class, Color.class,
+               new Class<?>[] { Color.class, float.class }, Color.white, var10 * 0.33F);
          buildingTitleHeader.setAdditiveColor(aColor);
          if (constructionStatusText != null) {
             constructionStatusText.setAdditiveColor(aColor);
@@ -360,7 +377,11 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
 
       super.renderImpl(var1);
       if (currentIndustry.isIndustry() && var10 > 0.0F) {
-         O.Ô00000(var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F, dark, var1 * var10 * 0.33F);
+         // O.Ô00000(var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F,
+         // dark, var1 * var10 * 0.33F);
+         Reflection.invokeStatic("Ô00000", O.class, void.class,
+               new Class<?>[] { float.class, float.class, float.class, float.class, Color.class, float.class }, var4,
+               var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F, dark, var1 * var10 * 0.33F);
       }
 
    }
@@ -375,46 +396,42 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
       if (tradeInfoPanel == null) {
          BuildingWidget var9;
          if (constructionQueueIndex >= 0) {
-            Iterator var5;
-            BuildingWidget var10;
-            if (var1 instanceof C) {
-               C var3 = (C) var1;
-               if (var3.isRMBEvent()) {
-                  var5 = IndustryPanel.getWidgets().iterator();
+            try {
+               Class<?> cClass = Class.forName("com.fs.starfarer.util.A.C");
 
-                  while (var5.hasNext()) {
-                     var10 = (BuildingWidget) var5.next();
-                     if (var10.getQueueIndex() >= 0) {
-                        var10.setNormalMode();
+               if (cClass.isInstance(var1)) {
+                  Object var3 = cClass.cast(var1);
+
+                  if ((boolean) cClass.getMethod("isRMBEvent").invoke(var3)) {
+                     for (intnew widget : IndustryPanel.getWidgets()) {
+                        if (((BuildingWidget)widget).getQueueIndex() >= 0) {
+                           ((BuildingWidget)widget).setNormalMode();
+                        }
                      }
-                  }
 
-                  return;
+                     return;
+                  }
                }
+            } catch (Exception e) {
+               Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
             }
 
-            if (constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ó00000) {
-               Iterator var4 = IndustryPanel.getWidgets().iterator();
-
-               while (var4.hasNext()) {
-                  var9 = (BuildingWidget) var4.next();
-                  if (var9.getQueueIndex() >= 0) {
-                     if (var9 == this) {
-                        var9.setRemoveMode();
+            if (constructionMode == (intnew.Oo) Reflection.getStatic("Ó00000", intnew.Oo.class)) {
+               for (intnew widget : IndustryPanel.getWidgets()) {
+                  if (((BuildingWidget)widget).getQueueIndex() >= 0) {
+                     if (((BuildingWidget)widget) == this) {
+                        ((BuildingWidget)widget).setRemoveMode();
                      } else {
-                        var9.setSwapMode();
+                        ((BuildingWidget)widget).setSwapMode();
                      }
                   }
                }
-            } else if (constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ò00000) {
+            } else if (constructionMode == (intnew.Oo) Reflection.getStatic("Ò00000", intnew.Oo.class)) {
                var9 = null;
-               var5 = IndustryPanel.getWidgets().iterator();
 
-               while (var5.hasNext()) {
-                  var10 = (BuildingWidget) var5.next();
-                  if (var10.getQueueIndex() >= 0
-                        && var10.constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.String) {
-                     var9 = var10;
+               for (intnew widget : IndustryPanel.getWidgets()) {
+                  if (((BuildingWidget)widget).getQueueIndex() >= 0 && ((BuildingWidget)widget).constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.String) {
+                     var9 = (BuildingWidget)widget;
                      break;
                   }
                }
@@ -438,7 +455,7 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
                      IndustryPanel.recreateOverview();
                   }
                }
-            } else if (constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.String) {
+            } else if (constructionMode == (intnew.Oo) Reflection.getStatic("String", intnew.Oo.class)) {
                List<ConstructionQueueItem> var11 = market.getConstructionQueue().getItems();
                if (constructionQueueIndex < var11.size() && constructionQueueIndex >= 0) {
                   ConstructionQueue.ConstructionQueueItem var13 = (ConstructionQueue.ConstructionQueueItem) var11
@@ -458,27 +475,39 @@ public class BuildingWidget extends intnew/* interfacenew implements U, oo0O.o *
                }
             }
          } else {
-            Iterator var4 = IndustryPanel.getWidgets().iterator();
-
-            while (var4.hasNext()) {
-               var9 = (BuildingWidget) var4.next();
-               if (var9.getQueueIndex() >= 0) {
-                  var9.setNormalMode();
+            for (intnew widget : IndustryPanel.getWidgets()) {
+               if (widget instanceof BuildingWidget && ((BuildingWidget) widget).getQueueIndex() >= 0) {
+                  ((BuildingWidget) widget).setNormalMode();
                }
             }
 
-            MarketAPI.MarketInteractionMode var14 = MarketInteractionMode.LOCAL;
-            if (IndustryPanel.getOverview().getInfoPanel().getTradePanel().getOutpostPanelParams() != null) {
-               var14 = IndustryPanel.getOverview().getInfoPanel().getTradePanel().getOutpostPanelParams().Õ00000;
+            try {
+               Class<?> classCls = Class.forName("com.fs.starfarer.something.class");
+               Object infoPanel = IndustryPanel.getOverview().getInfoPanel();
+               Method getTradePanelMethod = infoPanel.getClass().getMethod("getTradePanel");
+               Object tradePanel = classCls.cast(getTradePanelMethod.invoke(infoPanel));
+
+               Object outpostPanelParams = Reflection.invokeExact(
+                     "getOutpostPanelParams",
+                     tradePanel,
+                     new Class<?>[0], // no parameters
+                     new Object[0], // no arguments
+                     true // use declared methods (including private/protected)
+               );
+
+               MarketAPI.MarketInteractionMode var14 = MarketInteractionMode.LOCAL;
+               if (outpostPanelParams != null) {
+                  var14 = (MarketInteractionMode) Reflection.get("Õ00000", outpostPanelParams);
+               }
+
+               b var17 = new b(currentIndustry, (intnew) this, var14,
+                     CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
+               var17.show(0.0F, 0.0F);
+               tradeInfoPanel = com.fs.starfarer.campaign.ui.marketinfo.intnew.o.o00000;
+            } catch (Exception e) {
+               Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
             }
-
-            b var17 = new b(currentIndustry, (intnew) this, var14,
-                  CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
-            // b(com.fs.starfarer.ui.oo0O.o var5) {
-            var17.show(0.0F, 0.0F);
-            tradeInfoPanel = com.fs.starfarer.campaign.ui.marketinfo.intnew.o.o00000;
          }
-
       }
    }
 

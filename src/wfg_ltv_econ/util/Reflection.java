@@ -21,14 +21,17 @@ public class Reflection {
     static {
         try {
             fieldClass = Class.forName("java.lang.reflect.Field", false, Class.class.getClassLoader());
-            setFieldHandle = lookup.findVirtual(fieldClass, "set", MethodType.methodType(void.class, Object.class, Object.class));
+            setFieldHandle = lookup.findVirtual(fieldClass, "set",
+                    MethodType.methodType(void.class, Object.class, Object.class));
             getFieldHandle = lookup.findVirtual(fieldClass, "get", MethodType.methodType(Object.class, Object.class));
             getFieldNameHandle = lookup.findVirtual(fieldClass, "getName", MethodType.methodType(String.class));
-            setFieldAccessibleHandle = lookup.findVirtual(fieldClass, "setAccessible", MethodType.methodType(void.class, boolean.class));
+            setFieldAccessibleHandle = lookup.findVirtual(fieldClass, "setAccessible",
+                    MethodType.methodType(void.class, boolean.class));
 
             methodClass = Class.forName("java.lang.reflect.Method", false, Class.class.getClassLoader());
             getMethodNameHandle = lookup.findVirtual(methodClass, "getName", MethodType.methodType(String.class));
-            invokeMethodHandle = lookup.findVirtual(methodClass, "invoke", MethodType.methodType(Object.class, Object.class, Object[].class));
+            invokeMethodHandle = lookup.findVirtual(methodClass, "invoke",
+                    MethodType.methodType(Object.class, Object.class, Object[].class));
         } catch (Throwable t) {
             throw new RuntimeException("Failed to initialize Reflection.java", t);
         }
@@ -64,6 +67,21 @@ public class Reflection {
         }
     }
 
+    public static Object getStatic(String fieldName, Class<?> clazz) {
+        try {
+            Field field;
+            try {
+                field = clazz.getField(fieldName);
+            } catch (NoSuchFieldException e) {
+                field = clazz.getDeclaredField(fieldName);
+            }
+            field.setAccessible(true);
+            return field.get(null); // null because static field
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static boolean hasMethodOfName(String name, Object instance, boolean contains) {
         Method[] methods = instance.getClass().getDeclaredMethods();
         for (Method m : methods) {
@@ -72,7 +90,8 @@ public class Reflection {
                 if (contains ? methodName.contains(name) : methodName.equals(name)) {
                     return true;
                 }
-            } catch (Throwable ignored) {}
+            } catch (Throwable ignored) {
+            }
         }
         return false;
     }
@@ -89,7 +108,8 @@ public class Reflection {
                 if (fieldName.equals(name)) {
                     return true;
                 }
-            } catch (Throwable ignored) {}
+            } catch (Throwable ignored) {
+            }
         }
         return false;
     }
@@ -119,7 +139,8 @@ public class Reflection {
         }
     }
 
-    public static Object invokeStatic(String methodName, Class<?> cls, Class<?> returnType, Class<?>[] paramTypes, Object... arguments) {
+    public static Object invokeStatic(String methodName, Class<?> cls, Class<?> returnType, Class<?>[] paramTypes,
+            Object... arguments) {
         try {
             MethodType methodType = MethodType.methodType(returnType, paramTypes);
             MethodHandle staticMethod = lookup.findStatic(cls, methodName, methodType);
@@ -133,7 +154,8 @@ public class Reflection {
         return invokeExact(methodName, instance, paramTypes, arguments, false);
     }
 
-    public static Object invokeExact(String methodName, Object instance, Class<?>[] paramTypes, Object[] arguments, boolean declared) {
+    public static Object invokeExact(String methodName, Object instance, Class<?>[] paramTypes, Object[] arguments,
+            boolean declared) {
         try {
             Method method = null;
             if (!declared) {
@@ -178,4 +200,5 @@ public class Reflection {
             throw new RuntimeException(t);
         }
     }
+
 }

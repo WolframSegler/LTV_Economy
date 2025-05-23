@@ -11,7 +11,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg_ltv_econ.industry.BuildingWidget;
-import wfg_ltv_econ.plugins.WidgetSniffer;
 
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 
@@ -107,7 +106,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         repopulateWidgetsList(industryPanel, market);
     }
 
-    private void repopulateWidgetsList(UIPanelAPI industryPanel, MarketAPI market) {
+    private void repopulateWidgetsLista(UIPanelAPI industryPanel, MarketAPI market) {
         if (industryPanel == null || !(industryPanel instanceof IndustryListPanel)) {
             return;
         }
@@ -116,7 +115,6 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
 
         List<BuildingWidget> LtvWidgets = new ArrayList<>();
         for (Object widget : originalWidgets) {
-            // intnew(MarketAPI var1, Industry var2, IndustryListPanel var3, int var4)
             MarketAPI widgetMarket = (MarketAPI) Reflection.get("market", widget);
             Industry industry = (Industry) Reflection.get("øôöO00", widget); // Industry
             Integer queueIndex = (Integer) Reflection.get("ÖõöO00", widget); // var4
@@ -135,6 +133,45 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
                 if (newWidget instanceof BuildingWidget) {
                     LtvWidgets.add((BuildingWidget) newWidget);
                 }
+
+                Global.getLogger(BuildingWidget.class).info("gloryToLife: " + industry.getId());
+            } catch (Exception e) {
+                Global.getLogger(LtvMarketWidgetReplacer.class).error("Widget instantiation failed", e);
+            }
+        }
+
+        Reflection.set("widgets", industryPanel, LtvWidgets);
+    }
+
+    private void repopulateWidgetsList(UIPanelAPI industryPanel, MarketAPI market) {
+        if (industryPanel == null || !(industryPanel instanceof IndustryListPanel)) {
+            return;
+        }
+
+        List<?> originalWidgets = (List<?>) Reflection.get("widgets", (IndustryListPanel) industryPanel);
+
+        List<intnew> LtvWidgets = new ArrayList<>();
+        for (Object widget : originalWidgets) {
+            MarketAPI widgetMarket = (MarketAPI) Reflection.get("market", widget);
+            Industry industry = (Industry) Reflection.get("øôöO00", widget); // Industry
+            Integer queueIndex = (Integer) Reflection.get("ÖõöO00", widget); // var4
+
+            if (industry == null || widgetMarket == null) {
+                continue;
+            }
+            if (queueIndex == null) {
+                queueIndex = -1;
+            }
+
+            try {
+                Constructor<?> ctor = intnew.class.getConstructor(MarketAPI.class, Industry.class, IndustryListPanel.class, int.class);
+                Object newWidget = ctor.newInstance(widgetMarket, industry, industryPanel, queueIndex);
+
+                if (newWidget instanceof intnew) {
+                    LtvWidgets.add((intnew) newWidget);
+                }
+
+                Global.getLogger(intnew.class).info("gloryToLife: " + industry.getId());
             } catch (Exception e) {
                 Global.getLogger(LtvMarketWidgetReplacer.class).error("Widget instantiation failed", e);
             }
