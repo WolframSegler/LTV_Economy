@@ -4,6 +4,8 @@ import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
+import wfg_ltv_econ.util.LtvMarketWidgetReplacer;
+
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
     // Global.getLogger(this.getClass()).info("message");
@@ -26,6 +28,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
             market.addCondition("no_restock_condition");
         }
+
+        Global.getSector().addTransientScript(new LtvMarketWidgetReplacer());
     }
 
     

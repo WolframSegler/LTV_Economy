@@ -2,15 +2,14 @@ package wfg_ltv_econ.util;
 
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.ModPlugin;
 import com.fs.state.AppDriver;
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
-import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg_ltv_econ.industry.BuildingWidget;
+
 
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 
@@ -29,11 +28,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             frames = 0;
             return;
         }
-        if (Global.getSector().getCampaignUI().isShowingDialog()
-                || Global.getSector().getCampaignUI().getCurrentCoreTab() == null) {
-            return;
-        }
-        if (Global.getSector().getCampaignUI().getCurrentCoreTab() != CoreUITabId.OUTPOSTS) {
+        if (Global.getSector().getCampaignUI().isShowingDialog()) {
             return;
         }
 
@@ -44,10 +39,6 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
 
         // Find the master UI Panel
         UIPanelAPI master = null;
-        MarketAPI market = Global.getSector().getCurrentlyOpenMarket();
-        if (market == null) {
-            return;
-        }
 
         Object dialog = Reflection.invoke("getEncounterDialog", state);
         if (dialog != null) {
@@ -59,6 +50,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         if (master == null) {
             return;
         }
+        Global.getLogger(LtvMarketWidgetReplacer.class).info("passed stage 6");
 
         // Find IndustryListPanel
         UIPanelAPI industryPanel = null;
@@ -103,11 +95,15 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
                 .findFirst().orElse(null);
 
         // Get the "widgets" List and replace it with the custom List
-        repopulateWidgetsList(industryPanel, market);
+        repopulateWidgetsList(industryPanel);
     }
 
-    private void repopulateWidgetsLista(UIPanelAPI industryPanel, MarketAPI market) {
+    private void repopulateWidgetsLista(UIPanelAPI industryPanel) {
         if (industryPanel == null || !(industryPanel instanceof IndustryListPanel)) {
+            return;
+        }
+        MarketAPI market = Global.getSector().getCurrentlyOpenMarket();
+        if (market == null) {
             return;
         }
 
@@ -143,8 +139,12 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         Reflection.set("widgets", industryPanel, LtvWidgets);
     }
 
-    private void repopulateWidgetsList(UIPanelAPI industryPanel, MarketAPI market) {
+    private void repopulateWidgetsList(UIPanelAPI industryPanel) {
         if (industryPanel == null || !(industryPanel instanceof IndustryListPanel)) {
+            return;
+        }
+        MarketAPI market = Global.getSector().getCurrentlyOpenMarket();
+        if (market == null) {
             return;
         }
 

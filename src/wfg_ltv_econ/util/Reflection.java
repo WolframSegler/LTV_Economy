@@ -6,6 +6,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+@Deprecated
 public class Reflection {
     private static final Class<?> fieldClass;
     private static final MethodHandle setFieldHandle;
