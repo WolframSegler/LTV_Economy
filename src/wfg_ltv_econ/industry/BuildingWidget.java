@@ -1,6 +1,6 @@
 package wfg_ltv_econ.industry;
 
-import com.fs.graphics.A.F;
+import com.fs.graphics.A.D;
 import com.fs.graphics.util.B;
 import com.fs.graphics.util.Fader;
 import com.fs.starfarer.O0OO;
@@ -8,13 +8,13 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
-import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
@@ -26,13 +26,9 @@ import com.fs.starfarer.ui.OO0O;
 import com.fs.starfarer.ui.Q;
 import com.fs.starfarer.ui.U;
 import com.fs.starfarer.ui.d;
-import com.fs.starfarer.ui.interfacenew;
 import com.fs.starfarer.ui.n;
 import com.fs.starfarer.ui.oo0O;
 import com.fs.starfarer.ui.x;
-import com.fs.starfarer.ui.impl.StandardTooltipV2;
-
-// import com.fs.starfarer.util.A.C; //Cannot import. Because there is also a .class file named A.clas 
 import wfg_ltv_econ.util.LtvMarketWidgetReplacer;
 import wfg_ltv_econ.util.ReflectionUtils;
 import java.awt.Color;
@@ -45,15 +41,15 @@ import com.fs.starfarer.campaign.ui.marketinfo.S;
 import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
-import com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo;
 import com.fs.starfarer.util.K;
+// import com.fs.starfarer.util.A.C; //Cannot import. Because there is also a .class file named A.clas 
 
 // A replacement for com.fs.starfarer.campaign.ui.marketinfo.intnew
 public class BuildingWidget extends intnew {
-   public static float WIDTH = 190.0F;
-   public static float PAD = 3.0F;
-   public static float FONT_HEIGHT = 15.0F;
-   public static float IMAGE_HEIGHT = 95.0F;
+   public final static float WIDTH = 190.0F;
+   public final static float PAD = 3.0F;
+   public final static float FONT_HEIGHT = 15.0F;
+   public final static float IMAGE_HEIGHT = 95.0F;
    public static float HEIGHT;
    protected MarketAPI market;
    protected Faction faction;
@@ -74,7 +70,6 @@ public class BuildingWidget extends intnew {
    private d buildingTitleHeader; // private d do.private$float;
    private d constructionStatusText; // private d õôöO00;
    private Oo constructionMode; // com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo private.private$float;
-   private static final String DEFAULT_FONT = "defaultFont";
 
    static {
       HEIGHT = IMAGE_HEIGHT + FONT_HEIGHT + PAD;
@@ -93,7 +88,7 @@ public class BuildingWidget extends intnew {
       this.constructionQueueIndex = queue;
       this.glowFader = new Fader(0.0F, 0.2F, 0.2F, false, true);
       this.market = market;
-      this.faction = (Faction)market.getFaction();
+      this.faction = (Faction) market.getFaction();
       this.color = this.faction.getBaseUIColor();
       this.dark = this.faction.getDarkUIColor();
       this.grid = this.faction.getGridUIColor();
@@ -108,18 +103,17 @@ public class BuildingWidget extends intnew {
          this.afterSizeFirstChanged(var1, var2);
          this.created = true;
       }
-      /*function copy */
+      /* function copy */
 
-      buildingTitleHeader = new d(" " + currentIndustry.getCurrentName() + "asa", DEFAULT_FONT, color, true, Alignment.LMID);
+      buildingTitleHeader = new d(" " + currentIndustry.getCurrentName() + "asa", Fonts.DEFAULT_SMALL, color, true,
+            Alignment.LMID);
       buildingTitleHeader.setColor(color);
       if (currentIndustry.isImproved()) {
          buildingTitleHeader.setColor(Misc.getStoryOptionColor());
       }
       try {
          // buildingTitleHeader.getRenderer().int(true);
-         Method intMethod = buildingTitleHeader.getRenderer().getClass().getDeclaredMethod("int", boolean.class);
-         intMethod.setAccessible(true);
-         intMethod.invoke(buildingTitleHeader.getRenderer(), true);
+         ReflectionUtils.invoke(buildingTitleHeader.getRenderer(), "int", true);
       } catch (Exception e) {
          Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
       }
@@ -131,11 +125,13 @@ public class BuildingWidget extends intnew {
 
       try {
          // constructionActionButton.getLogic().o00000(com.fs.starfarer.ui.int.o.String);
+         Class<?> clazz = Class.forName("com.fs.starfarer.ui.int$o");
+         Object stringFieldValue = ReflectionUtils.getFieldsMatching(clazz, "String", null, null)
+               .get(0)
+               .get(null); // null because it's a static field
+
          Object logicInstance = ReflectionUtils.invoke(constructionActionButton, "getLogic");
-         ReflectionUtils.invoke(
-               logicInstance.getClass(), "o00000",
-               new Object[] { Class.forName("com.fs.starfarer.ui.int.o"),
-                     Class.forName("com.fs.starfarer.ui.int.o").getField("String").get(null) });
+         ReflectionUtils.invoke(logicInstance, "o00000", stringFieldValue);
       } catch (Exception e) {
          Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
       }
@@ -156,8 +152,8 @@ public class BuildingWidget extends intnew {
          CommodityOnMarketAPI var6 = market.getCommodityData(deficitEntry.one);
 
          commodityDeficitIconGroup.addGroup((CommodityOnMarket) var6,
-         deficitEntry.two, 1.0F, com.fs.starfarer.campaign.ui.marketinfo.f.o.values()[3], // õ00000
-         null);
+               deficitEntry.two, 1.0F, com.fs.starfarer.campaign.ui.marketinfo.f.o.values()[3], // õ00000
+               null);
 
          if (deficitEntry.two > var3) {
             var3 = deficitEntry.two;
@@ -169,14 +165,11 @@ public class BuildingWidget extends intnew {
       commodityDeficitIconGroup.autoSizeWithAdjust(var17, var18, var17, var17);
       d var19 = d.createSmallInsigniaLabel("-" + var3, Alignment.LMID);
       var19 = new d("-" + var3, "graphics/fonts/insignia21LTaa.fnt", color, true, Alignment.LMID);
-      // var19.setColor(O0OO.ÒÓ0000);
-      var19.setColor((Color) ReflectionUtils.get(BuildingWidget.class, "ÒÓ0000", O0OO.class));
+      var19.setColor(O0OO.ÒÓ0000);
 
       try {
          // var19.getRenderer().int(true);
-         Method intMethod = buildingTitleHeader.getRenderer().getClass().getDeclaredMethod("int", boolean.class);
-         intMethod.setAccessible(true);
-         intMethod.invoke(var19.getRenderer(), true);
+         ReflectionUtils.invoke(var19.getRenderer(), "int", true);
       } catch (Exception e) {
          Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
       }
@@ -206,8 +199,7 @@ public class BuildingWidget extends intnew {
       }
 
       var22 = 3.0F;
-      float var13 = IMAGE_HEIGHT;
-      add(constructionActionButton).setSize(var1, var13).inBL(0.0F, 0.0F);
+      add(constructionActionButton).setSize(var1, IMAGE_HEIGHT).inBL(0.0F, 0.0F);
       add(buildingTitleHeader).inTL(0.0F, 0.0F);
       add(commodityDeficitIconGroup).inBL(var22 + 2.0F, var22);
       add(specialItemGroup).inTR(var22 + 2.0F, var22 + buildingTitleHeader.getHeight() + var22);
@@ -215,8 +207,6 @@ public class BuildingWidget extends intnew {
          add(var19).inBR(var22 + 2.0F, var22 + (var17 - var19.getHeight()) / 2.0F);
       }
 
-      float var14 = 18.0F;
-      var14 = 12.0F;
       boolean var15 = currentIndustry.isBuilding() || currentIndustry.isDisrupted();
       if (var15) {
          if (currentIndustry.isBuilding() && !currentIndustry.isUpgrading() && !currentIndustry.isDisrupted()) {
@@ -227,15 +217,15 @@ public class BuildingWidget extends intnew {
          }
 
          N var24 = new N((String) null, 0.0F, 100.0F);
-         // var24.getValue().getRenderer().o00000(D.Ò00000("graphics/fonts/victor10.fnt"));
-         var24.getValue().getRenderer().o00000((F) ReflectionUtils.invoke(var24.getValue().getRenderer().getClass(),
-               "Ò00000", "graphics/fonts/victor10.fnt"));
+         // Thanks to UTF-8, no need for reflection
+         var24.getValue().getRenderer().o00000(D.Ò00000("graphics/fonts/victor10.fnt"));
          var24.getValue().getPosition().setYAlignOffset(1.0F);
          var24.setBarColor(Misc.interpolateColor(color, dark, 0.5F));
          var24.setTextColor(color);
          var24.setProgress(currentIndustry.getBuildOrUpgradeProgress() * 100.0F);
          var24.setText(currentIndustry.getBuildOrUpgradeProgressText());
          var24.setShowLabelOnly(true);
+         float var14 = 12.0F;
          add(var24).setSize(var1, var14).inBL(0.0F, -var14 - 2.0F);
       }
 
@@ -278,8 +268,8 @@ public class BuildingWidget extends intnew {
 
       if (var1 != null) {
          clearLabels();
-         d var2 = d.create("Click to remove", DEFAULT_FONT, color);
-         d var3 = d.create(Misc.getDGSCredits((float) var1.cost) + " refund", DEFAULT_FONT, color);
+         d var2 = d.create("Click to remove", Fonts.DEFAULT_SMALL, color);
+         d var3 = d.create(Misc.getDGSCredits((float) var1.cost) + " refund", Fonts.DEFAULT_SMALL, color);
          var3.highlightFirst(Misc.getDGSCredits((float) var1.cost));
          var3.setHighlightColor(Misc.getHighlightColor());
          labels.add(var2);
@@ -295,12 +285,11 @@ public class BuildingWidget extends intnew {
    @Override
    public void setSwapMode() {
       clearLabels();
-      d var1 = d.create("Click to swap", DEFAULT_FONT, color);
+      d var1 = d.create("Click to swap", Fonts.DEFAULT_SMALL, color);
       labels.add(var1);
       add(var1).aboveMid(constructionStatusText, 0.0F);
       constructionActionButton.highlight();
-      // constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ò00000;
-      constructionMode = (intnew.Oo) ReflectionUtils.get(BuildingWidget.class, "Ò00000", intnew.Oo.class);
+      constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ò00000;
       addCostTimeLabels();
    }
 
@@ -317,8 +306,7 @@ public class BuildingWidget extends intnew {
       constructionStatusText.autoSize();
       add(constructionStatusText).inMid().setYAlignOffset(-buildingTitleHeader.getHeight() / 2.0F);
       constructionActionButton.unhighlight();
-      // constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ó00000;
-      constructionMode = (intnew.Oo) ReflectionUtils.get(null, "Ó00000", intnew.Oo.class);
+      constructionMode = com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.Ó00000;
       addCostTimeLabels();
    }
 
@@ -336,10 +324,10 @@ public class BuildingWidget extends intnew {
 
             Color var4 = Misc.interpolateColor(Misc.getHighlightColor(), Color.black, 0.5F);
             Color var5 = Misc.interpolateColor(color, dark, 0.5F);
-            d var6 = d.create(var2 + " " + var3, DEFAULT_FONT, var5);
+            d var6 = d.create(var2 + " " + var3, Fonts.DEFAULT_SMALL, var5);
             var6.highlightFirst("" + var2);
             var6.setHighlightColor(var4);
-            d var7 = d.create(Misc.getDGSCredits((float) var1.cost), DEFAULT_FONT, var5);
+            d var7 = d.create(Misc.getDGSCredits((float) var1.cost), Fonts.DEFAULT_SMALL, var5);
             var7.highlightFirst(Misc.getDGSCredits((float) var1.cost));
             var7.setHighlightColor(var4);
             labels.add(var6);
@@ -355,7 +343,6 @@ public class BuildingWidget extends intnew {
 
    @Override
    protected void renderImpl(float var1) {
-      Global.getLogger(BuildingWidget.class).info("RendererCalled");
       float var2 = 0.0F;
       var2 = FONT_HEIGHT + PAD;
       OO0O var3 = getPosition();
@@ -392,7 +379,7 @@ public class BuildingWidget extends intnew {
       if (var10 > 0.0F) {
          // Color aColor = B.Ô00000(Color.white, var10 * 0.33F);
          Color aColor = (Color) ReflectionUtils.invoke(B.class, "Ô00000",
-            new Class<?>[] { Color.class, float.class }, Color.white, var10 * 0.33F);
+               new Class<?>[] { Color.class, float.class }, Color.white, var10 * 0.33F);
          buildingTitleHeader.setAdditiveColor(aColor);
          if (constructionStatusText != null) {
             constructionStatusText.setAdditiveColor(aColor);
@@ -419,7 +406,7 @@ public class BuildingWidget extends intnew {
             float posY = position.getY();
             float width = position.getWidth();
             float height = position.getHeight();
-            K.o00000((int)posX, (int)posY, (int)width, (int)height);
+            K.o00000((int) posX, (int) posY, (int) width, (int) height);
          }
 
          for (com.fs.starfarer.ui.c instance : this.copy) {
@@ -429,14 +416,15 @@ public class BuildingWidget extends intnew {
          if (this.isClipping()) {
             K.o00000();
          }
-         /*function copy */
+         /* function copy */
       }
 
       if (currentIndustry.isIndustry() && var10 > 0.0F) {
          // O.Ô00000(var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F,
          // dark, var1 * var10 * 0.33F);
          ReflectionUtils.invoke(O.class, "Ô00000",
-            new Class<?>[] { float.class, float.class, float.class, float.class, Color.class, float.class}, var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F, dark, var1 * var10 * 0.33F);
+               new Class<?>[] { float.class, float.class, float.class, float.class, Color.class, float.class }, var4,
+               var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F, dark, var1 * var10 * 0.33F);
       }
 
    }
@@ -449,119 +437,132 @@ public class BuildingWidget extends intnew {
 
    @Override
    public void actionPerformed(Object var1, Object var2) {
-      if (tradeInfoPanel == null) {
-         BuildingWidget var9;
-         if (constructionQueueIndex >= 0) {
-            try {
-               Class<?> cClass = Class.forName("com.fs.starfarer.util.A.C");
+      Global.getLogger(BuildingWidget.class).info("Passed Stage Start");
+      if (tradeInfoPanel != null) {
+         return;
+      }
+      BuildingWidget var9;
+      if (constructionQueueIndex >= 0) {
+         Global.getLogger(BuildingWidget.class).info("Passed Stage 0");
+         try {
+            Class<?> cClass = Class.forName("com.fs.starfarer.util.A.C");
 
-               if (cClass.isInstance(var1)) {
-                  Object var3 = cClass.cast(var1);
+            if (cClass.isInstance(var1)) {
+               Global.getLogger(BuildingWidget.class).info("Passed Stage 1");
 
-                  if ((boolean) cClass.getMethod("isRMBEvent").invoke(var3)) {
-                     for (intnew widget : IndustryPanel.getWidgets()) {
-                        if (((BuildingWidget) widget).getQueueIndex() >= 0) {
-                           ((BuildingWidget) widget).setNormalMode();
-                        }
-                     }
+               Object var3 = cClass.cast(var1);
 
-                     return;
-                  }
-               }
-            } catch (Exception e) {
-               Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
-            }
+               Object a = cClass.getMethod("isRMBEvent").invoke(var3);
+               Global.getLogger(BuildingWidget.class).info("Passed Stage 2");
 
-            if (constructionMode == (intnew.Oo) ReflectionUtils.get(null, "Ó00000", intnew.Oo.class)) {
-               for (intnew widget : IndustryPanel.getWidgets()) {
-                  if (((BuildingWidget) widget).getQueueIndex() >= 0) {
-                     if (((BuildingWidget) widget) == this) {
-                        ((BuildingWidget) widget).setRemoveMode();
-                     } else {
-                        ((BuildingWidget) widget).setSwapMode();
+               if ((boolean) a) {
+                  Global.getLogger(BuildingWidget.class).info("Passed Stage 3");
+                  for (intnew widget : IndustryPanel.getWidgets()) {
+                     if (((BuildingWidget) widget).getQueueIndex() >= 0) {
+                        ((BuildingWidget) widget).setNormalMode();
+                        Global.getLogger(BuildingWidget.class).info("Passed Stage 4");
                      }
                   }
-               }
-            } else if (constructionMode == (intnew.Oo) ReflectionUtils.get(null, "Ò00000", intnew.Oo.class)) {
-               var9 = null;
 
-               for (intnew widget : IndustryPanel.getWidgets()) {
-                  if (((BuildingWidget) widget).getQueueIndex() >= 0
-                        && ((BuildingWidget) widget).constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.String) {
-                     var9 = (BuildingWidget) widget;
-                     break;
-                  }
-               }
-
-               List<ConstructionQueueItem> var12 = market.getConstructionQueue().getItems();
-               if (var9 != null && var9.constructionQueueIndex >= 0 && var9.constructionQueueIndex < var12.size()
-                     && constructionQueueIndex < var12.size() && constructionQueueIndex >= 0) {
-                  ConstructionQueue.ConstructionQueueItem var15 = (ConstructionQueue.ConstructionQueueItem) var12
-                        .get(constructionQueueIndex);
-                  ConstructionQueue.ConstructionQueueItem var6 = (ConstructionQueue.ConstructionQueueItem) var12
-                        .get(var9.constructionQueueIndex);
-                  String var7 = var15.id;
-                  int var8 = var15.cost;
-                  var15.id = var6.id;
-                  var15.cost = var6.cost;
-                  var6.id = var7;
-                  var6.cost = var8;
-                  if (var12.indexOf(var15) != 0 && var12.indexOf(var6) != 0) {
-                     IndustryPanel.recreateOverviewNoEconStep();
-                  } else {
-                     IndustryPanel.recreateOverview();
-                  }
-               }
-            } else if (constructionMode == (intnew.Oo) ReflectionUtils.get(null, "String", intnew.Oo.class)) {
-               List<ConstructionQueueItem> var11 = market.getConstructionQueue().getItems();
-               if (constructionQueueIndex < var11.size() && constructionQueueIndex >= 0) {
-                  ConstructionQueue.ConstructionQueueItem var13 = (ConstructionQueue.ConstructionQueueItem) var11
-                        .get(constructionQueueIndex);
-                  market.getConstructionQueue().removeItem(var13.id);
-                  int var16 = var13.cost;
-                  if (var16 > 0) {
-                     Global.getSector().getPlayerFleet().getCargo().getCredits().add((float) var16);
-                     Misc.addCreditsMessage("Received %s", var16);
-                  }
-
-                  if (constructionQueueIndex == 0) {
-                     IndustryPanel.recreateOverview();
-                  } else {
-                     IndustryPanel.recreateOverviewNoEconStep();
-                  }
+                  return;
                }
             }
-         } else {
+         } catch (Exception e) {
+            Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
+         }
+
+         if (constructionMode == intnew.Oo.Ó00000) {
+            Global.getLogger(BuildingWidget.class).info("Passed Stage 5");
             for (intnew widget : IndustryPanel.getWidgets()) {
-               if (widget instanceof BuildingWidget && ((BuildingWidget) widget).getQueueIndex() >= 0) {
-                  ((BuildingWidget) widget).setNormalMode();
+               if (((BuildingWidget) widget).getQueueIndex() >= 0) {
+                  if (((BuildingWidget) widget) == this) {
+                     ((BuildingWidget) widget).setRemoveMode();
+                     Global.getLogger(BuildingWidget.class).info("Passed Stage 6");
+                  } else {
+                     ((BuildingWidget) widget).setSwapMode();
+                     Global.getLogger(BuildingWidget.class).info("Passed Stage 6");
+                  }
+               }
+            }
+         } else if (constructionMode == intnew.Oo.Ò00000) {
+            var9 = null;
+
+            for (intnew widget : IndustryPanel.getWidgets()) {
+               if (((BuildingWidget) widget).getQueueIndex() >= 0
+                     && ((BuildingWidget) widget).constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.String) {
+                  var9 = (BuildingWidget) widget;
+                  break;
                }
             }
 
-            try {
-               Class<?> classCls = Class.forName("com.fs.starfarer.something.class");
-               Object infoPanel = IndustryPanel.getOverview().getInfoPanel();
-               Method getTradePanelMethod = infoPanel.getClass().getMethod("getTradePanel");
-               Object tradePanel = classCls.cast(getTradePanelMethod.invoke(infoPanel));
+            List<ConstructionQueueItem> var12 = market.getConstructionQueue().getItems();
+            if (var9 != null && var9.constructionQueueIndex >= 0 && var9.constructionQueueIndex < var12.size()
+                  && constructionQueueIndex < var12.size() && constructionQueueIndex >= 0) {
+               ConstructionQueue.ConstructionQueueItem var15 = (ConstructionQueue.ConstructionQueueItem) var12
+                     .get(constructionQueueIndex);
+               ConstructionQueue.ConstructionQueueItem var6 = (ConstructionQueue.ConstructionQueueItem) var12
+                     .get(var9.constructionQueueIndex);
+               String var7 = var15.id;
+               int var8 = var15.cost;
+               var15.id = var6.id;
+               var15.cost = var6.cost;
+               var6.id = var7;
+               var6.cost = var8;
+               if (var12.indexOf(var15) != 0 && var12.indexOf(var6) != 0) {
+                  IndustryPanel.recreateOverviewNoEconStep();
+               } else {
+                  IndustryPanel.recreateOverview();
+               }
+            }
+         } else if (constructionMode == intnew.Oo.String) {
+            List<ConstructionQueueItem> var11 = market.getConstructionQueue().getItems();
+            if (constructionQueueIndex < var11.size() && constructionQueueIndex >= 0) {
+               ConstructionQueue.ConstructionQueueItem var13 = (ConstructionQueue.ConstructionQueueItem) var11
+                     .get(constructionQueueIndex);
+               market.getConstructionQueue().removeItem(var13.id);
+               int var16 = var13.cost;
+               if (var16 > 0) {
+                  Global.getSector().getPlayerFleet().getCargo().getCredits().add((float) var16);
+                  Misc.addCreditsMessage("Received %s", var16);
+               }
 
-               Object outpostPanelParams = ReflectionUtils.invoke(
+               if (constructionQueueIndex == 0) {
+                  IndustryPanel.recreateOverview();
+               } else {
+                  IndustryPanel.recreateOverviewNoEconStep();
+               }
+            }
+         }
+      } else {
+         for (intnew widget : IndustryPanel.getWidgets()) {
+            if (widget instanceof BuildingWidget && ((BuildingWidget) widget).getQueueIndex() >= 0) {
+               ((BuildingWidget) widget).setNormalMode();
+            }
+         }
+
+         try {
+            Class<?> classCls = Class.forName("com.fs.starfarer.something.class");
+            Object infoPanel = IndustryPanel.getOverview().getInfoPanel();
+            Method getTradePanelMethod = infoPanel.getClass().getMethod("getTradePanel");
+            Object tradePanel = classCls.cast(getTradePanelMethod.invoke(infoPanel));
+
+            Object outpostPanelParams = ReflectionUtils.invoke(
                   tradePanel,
                   "getOutpostPanelParams",
                   true // use declared methods (including private/protected)
-               );
+            );
 
-               MarketAPI.MarketInteractionMode var14 = MarketInteractionMode.LOCAL;
-               if (outpostPanelParams != null) {
-                  var14 = (MarketInteractionMode) ReflectionUtils.get(outpostPanelParams, "Õ00000");
-               }
-
-               b var17 = new b(currentIndustry, (intnew)((Object) this), var14,
-                     CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
-               var17.show(0.0F, 0.0F);
-               tradeInfoPanel = com.fs.starfarer.campaign.ui.marketinfo.intnew.o.o00000;
-            } catch (Exception e) {
-               Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
+            MarketAPI.MarketInteractionMode var14 = MarketInteractionMode.LOCAL;
+            if (outpostPanelParams != null) {
+               var14 = (MarketInteractionMode) ReflectionUtils.get(outpostPanelParams, "Õ00000");
             }
+
+            b var17 = new b(currentIndustry, (intnew) ((Object) this), var14,
+                  CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
+            var17.show(0.0F, 0.0F);
+            tradeInfoPanel = com.fs.starfarer.campaign.ui.marketinfo.intnew.o.o00000;
+         } catch (Exception e) {
+            Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
          }
       }
    }

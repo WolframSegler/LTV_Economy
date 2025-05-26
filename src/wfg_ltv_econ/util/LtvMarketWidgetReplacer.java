@@ -9,7 +9,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg_ltv_econ.industry.BuildingWidget;
-
+import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.ui.newui.o0Oo;
 
 import java.util.ArrayList;
@@ -103,6 +103,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         repopulateWidgetsList(industryPanel);
     }
 
+    @SuppressWarnings("unchecked")
     private void repopulateWidgetsList(UIPanelAPI UIindustryPanel) {
         if (UIindustryPanel == null || !(UIindustryPanel instanceof IndustryListPanel)) {
             return;
@@ -136,12 +137,29 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
 
             BuildingWidget newWidget = new BuildingWidget(widgetMarket, industry, industryPanel, queueIndex);
 
+            // Correct missing variables
+            ReflectionUtils.set(newWidget, "constructionActionButton", ((intnew)widget).getButton());
+
+
             if (newWidget instanceof BuildingWidget) {
                 LtvWidgets.add((BuildingWidget) newWidget);
             }
         }
-        Global.getLogger(LtvMarketWidgetReplacer.class).info("Replaced IndustryListPanel widgets");
+        if (Global.getSettings().isDevMode()) {
+            Global.getLogger(LtvMarketWidgetReplacer.class).info("Replaced IndustryListPanel widgets");
+        }
         ReflectionUtils.set(UIindustryPanel, "widgets", LtvWidgets);
+        List<?> newWidgets = (List<?>) ReflectionUtils.get((IndustryListPanel) UIindustryPanel, "widgets",
+                List.class);
+
+        // force a refresh
+        try {
+            for (BuildingWidget widget : (List<BuildingWidget>)newWidgets) {
+            widget.notifySizeChanged();
+        } 
+        } catch (Exception e) {
+            Global.getLogger(LtvMarketWidgetReplacer.class).error("Replaced IndustryListPanel widgets refresh failed: ", e);
+        }
     }
 
     @Override
