@@ -31,6 +31,7 @@ import com.fs.starfarer.ui.oo0O;
 import com.fs.starfarer.ui.x;
 import wfg_ltv_econ.util.LtvMarketWidgetReplacer;
 import wfg_ltv_econ.util.ReflectionUtils;
+import com.fs.starfarer.campaign.ui.marketinfo.T;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import com.fs.starfarer.util.K;
 public class BuildingWidget extends intnew {
    public final static float WIDTH = 190.0F;
    public final static float PAD = 3.0F;
+   public final static float ICON_SIZE = 32.0F;
    public final static float FONT_HEIGHT = 15.0F;
    public final static float IMAGE_HEIGHT = 95.0F;
    public static float HEIGHT;
@@ -192,19 +194,16 @@ public class BuildingWidget extends intnew {
          ++var7;
       }
 
-      float var22;
       if (var7 > 0) {
-         var22 = 32.0F;
-         specialItemGroup.autoSizeWithAdjust(var22, var22 * (float) var7, var22, var22);
+         specialItemGroup.autoSizeWithAdjust(ICON_SIZE, ICON_SIZE * (float) var7, ICON_SIZE, ICON_SIZE);
       }
 
-      var22 = 3.0F;
       add(constructionActionButton).setSize(var1, IMAGE_HEIGHT).inBL(0.0F, 0.0F);
       add(buildingTitleHeader).inTL(0.0F, 0.0F);
-      add(commodityDeficitIconGroup).inBL(var22 + 2.0F, var22);
-      add(specialItemGroup).inTR(var22 + 2.0F, var22 + buildingTitleHeader.getHeight() + var22);
+      add(commodityDeficitIconGroup).inBL(PAD + 2.0F, PAD);
+      add(specialItemGroup).inTR(PAD + 2.0F, PAD + buildingTitleHeader.getHeight() + PAD);
       if (var3 != 0) {
-         add(var19).inBR(var22 + 2.0F, var22 + (var17 - var19.getHeight()) / 2.0F);
+         add(var19).inBR(PAD + 2.0F, PAD + (var17 - var19.getHeight()) / 2.0F);
       }
 
       boolean var15 = currentIndustry.isBuilding() || currentIndustry.isDisrupted();
@@ -378,8 +377,7 @@ public class BuildingWidget extends intnew {
 
       if (var10 > 0.0F) {
          // Color aColor = B.Ô00000(Color.white, var10 * 0.33F);
-         Color aColor = (Color) ReflectionUtils.invoke(B.class, "Ô00000",
-               new Class<?>[] { Color.class, float.class }, Color.white, var10 * 0.33F);
+         Color aColor = (Color) ReflectionUtils.invoke(B.class, "Ô00000", Color.white, var10 * 0.33F);
          buildingTitleHeader.setAdditiveColor(aColor);
          if (constructionStatusText != null) {
             constructionStatusText.setAdditiveColor(aColor);
@@ -422,9 +420,8 @@ public class BuildingWidget extends intnew {
       if (currentIndustry.isIndustry() && var10 > 0.0F) {
          // O.Ô00000(var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F,
          // dark, var1 * var10 * 0.33F);
-         ReflectionUtils.invoke(O.class, "Ô00000",
-               new Class<?>[] { float.class, float.class, float.class, float.class, Color.class, float.class }, var4,
-               var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F, dark, var1 * var10 * 0.33F);
+         ReflectionUtils.invoke(O.class, "Ô00000", var4, var5 + var7, var6,
+         buildingTitleHeader.getHeight() + 3.0F, dark, var1 * var10 * 0.33F);
       }
 
    }
@@ -437,7 +434,6 @@ public class BuildingWidget extends intnew {
 
    @Override
    public void actionPerformed(Object var1, Object var2) {
-      Global.getLogger(BuildingWidget.class).info("Passed Stage Start");
       if (tradeInfoPanel != null) {
          return;
       }
@@ -541,16 +537,9 @@ public class BuildingWidget extends intnew {
          }
 
          try {
-            Class<?> classCls = Class.forName("com.fs.starfarer.something.class");
-            Object infoPanel = IndustryPanel.getOverview().getInfoPanel();
-            Method getTradePanelMethod = infoPanel.getClass().getMethod("getTradePanel");
-            Object tradePanel = classCls.cast(getTradePanelMethod.invoke(infoPanel));
-
-            Object outpostPanelParams = ReflectionUtils.invoke(
-                  tradePanel,
-                  "getOutpostPanelParams",
-                  true // use declared methods (including private/protected)
-            );
+            T infoPanel = IndustryPanel.getOverview().getInfoPanel();
+            Object a = ReflectionUtils.invoke(infoPanel, "getTradePanel");
+            Object outpostPanelParams = ReflectionUtils.invoke(a, "getOutpostPanelParams");
 
             MarketAPI.MarketInteractionMode var14 = MarketInteractionMode.LOCAL;
             if (outpostPanelParams != null) {
