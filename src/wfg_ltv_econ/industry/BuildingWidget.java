@@ -46,19 +46,9 @@ import com.fs.starfarer.util.K;
 // import com.fs.starfarer.util.A.C; //Cannot import. Because there is also a .class file named A.clas 
 
 // A replacement for com.fs.starfarer.campaign.ui.marketinfo.intnew
+// The widget class inside of List<intnew> widgets, which is a member of IndustryListItem
 public class BuildingWidget extends intnew {
-   public final static float WIDTH = 190.0F;
-   public final static float PAD = 3.0F;
    public final static float ICON_SIZE = 32.0F;
-   public final static float FONT_HEIGHT = 15.0F;
-   public final static float IMAGE_HEIGHT = 95.0F;
-   public static float HEIGHT;
-   protected MarketAPI market;
-   protected Faction faction;
-   protected Color color;
-   protected Color dark;
-   protected Color grid;
-   protected Color bright;
    private Industry currentIndustry;
    private x industryIcon; // private x ÓõöO00;
    private n constructionActionButton; // private n ôôöO00;
@@ -73,10 +63,6 @@ public class BuildingWidget extends intnew {
    private d constructionStatusText; // private d õôöO00;
    private Oo constructionMode; // com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo private.private$float;
 
-   static {
-      HEIGHT = IMAGE_HEIGHT + FONT_HEIGHT + PAD;
-   }
-
    public BuildingWidget(MarketAPI market, Industry currentIndustry, IndustryListPanel IndustryPanel) {
       this(market, currentIndustry, IndustryPanel, -1);
    }
@@ -89,12 +75,6 @@ public class BuildingWidget extends intnew {
       this.IndustryPanel = IndustryPanel;
       this.constructionQueueIndex = queue;
       this.glowFader = new Fader(0.0F, 0.2F, 0.2F, false, true);
-      this.market = market;
-      this.faction = (Faction) market.getFaction();
-      this.color = this.faction.getBaseUIColor();
-      this.dark = this.faction.getDarkUIColor();
-      this.grid = this.faction.getGridUIColor();
-      this.bright = this.faction.getBrightUIColor();
    }
 
    @Override
@@ -147,14 +127,14 @@ public class BuildingWidget extends intnew {
       }
 
       commodityDeficitIconGroup = new ooO0((U) null);
-      commodityDeficitIconGroup.setWideSpacing(true);
       commodityDeficitIconGroup.setMediumSpacing(true);
       int var3 = 0;
       for (Pair<String, Integer> deficitEntry : currentIndustry.getAllDeficit()) {
-         CommodityOnMarketAPI var6 = market.getCommodityData(deficitEntry.one);
+         CommodityOnMarketAPI commodity = market.getCommodityData(deficitEntry.one);
 
-         commodityDeficitIconGroup.addGroup((CommodityOnMarket) var6,
-               deficitEntry.two, 1.0F, com.fs.starfarer.campaign.ui.marketinfo.f.o.values()[3], // õ00000
+         if (deficitEntry.two < 1) { continue;}
+         commodityDeficitIconGroup.addGroup((CommodityOnMarket)commodity,
+               2, 1.0F, com.fs.starfarer.campaign.ui.marketinfo.f.o.values()[3], // õ00000
                null);
 
          if (deficitEntry.two > var3) {
@@ -165,19 +145,7 @@ public class BuildingWidget extends intnew {
       float var17 = 24.0F;
       float var18 = 150.0F;
       commodityDeficitIconGroup.autoSizeWithAdjust(var17, var18, var17, var17);
-      d var19 = d.createSmallInsigniaLabel("-" + var3, Alignment.LMID);
-      var19 = new d("-" + var3, "graphics/fonts/insignia21LTaa.fnt", color, true, Alignment.LMID);
-      var19.setColor(O0OO.ÒÓ0000);
 
-      try {
-         // var19.getRenderer().int(true);
-         ReflectionUtils.invoke(var19.getRenderer(), "int", true);
-      } catch (Exception e) {
-         Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
-      }
-
-      var19.autoSize();
-      var19.setOpacity(0.0F);
       specialItemGroup = new ooO0((U) null);
       specialItemGroup.setWideSpacing(true);
       int var7 = 0;
@@ -202,9 +170,6 @@ public class BuildingWidget extends intnew {
       add(buildingTitleHeader).inTL(0.0F, 0.0F);
       add(commodityDeficitIconGroup).inBL(PAD + 2.0F, PAD);
       add(specialItemGroup).inTR(PAD + 2.0F, PAD + buildingTitleHeader.getHeight() + PAD);
-      if (var3 != 0) {
-         add(var19).inBR(PAD + 2.0F, PAD + (var17 - var19.getHeight()) / 2.0F);
-      }
 
       boolean var15 = currentIndustry.isBuilding() || currentIndustry.isDisrupted();
       if (var15) {
@@ -433,7 +398,7 @@ public class BuildingWidget extends intnew {
    }
 
    @Override
-   public void actionPerformed(Object var1, Object var2) {
+   public void actionPerformed(Object objEventHandler, Object var2) {
       if (tradeInfoPanel != null) {
          return;
       }
@@ -442,11 +407,9 @@ public class BuildingWidget extends intnew {
          try {
             Class<?> cClass = Class.forName("com.fs.starfarer.util.A.C");
 
-            if (cClass.isInstance(var1)) {
-
-               Object var3 = cClass.cast(var1);
-
-               Object a = cClass.getMethod("isRMBEvent").invoke(var3);
+            if (cClass.isInstance(objEventHandler)) {
+               Object eventHandler = cClass.cast(objEventHandler);
+               Object a = ReflectionUtils.invoke(eventHandler, "isRMBEvent");
 
                if ((boolean) a) {
                   for (intnew widget : IndustryPanel.getWidgets()) {

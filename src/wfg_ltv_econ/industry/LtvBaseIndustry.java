@@ -62,8 +62,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	public static final int SIZE_FOR_SMALL_IMAGE = 3;
 	public static final int SIZE_FOR_LARGE_IMAGE = 6;
 
+	public static final String BASE_VALUE_TEXT = "Base value for colony size";
+
 	public static final float DEFAULT_IMPROVE_PRODUCTION_BONUS = 1.3f; // +30% output
-	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 1.2f; // +20% output
+	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 0.8f; // -20% input
 
 	public static final float ALPHA_CORE_PRODUCTION_BOOST = 1.3f; // +30% output
 
@@ -84,8 +86,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 		return copy;
 	}
-
-	public static final String BASE_VALUE_TEXT = "Base value for colony size";
 
 	public static String getDeficitText(String commodityId) {
 		if (commodityId == null) {
@@ -201,6 +201,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	}
 
 	public void apply(Boolean updateIncomeAndUpkeep) {
+		// Increased Production also increases the Demand
 		updateSupplyAndDemandModifiers();
 
 		if (updateIncomeAndUpkeep) {
@@ -1262,7 +1263,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				for (MutableCommodityQuantity curr : demand.values()) {
 					CommodityOnMarketAPI commodity = orig.getCommodityData(curr.getCommodityId());
 					int dAmount = curr.getQuantity().getModifiedInt();
-					int available = commodity.getAvailable();
+					int allDeficit = commodity.getDeficitQuantity();
 
 					if (dAmount < 1) {continue;}
 
@@ -1276,7 +1277,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					// draw icon
 					tooltip.beginIconGroup();
 					tooltip.setIconSpacingMedium();
-					if (dAmount > available) {
+					if (allDeficit > 0) {
 						tooltip.addIcons(commodity, 1, IconRenderMode.DIM_RED);
 					} else {
 						tooltip.addIcons(commodity, 1, IconRenderMode.NORMAL);
@@ -1571,6 +1572,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (aiCoreId.equals(Commodities.ALPHA_CORE)) {
 			supplyBonus.modifyMult(getModId(0), ALPHA_CORE_PRODUCTION_BOOST, "Alpha core");
 			demandReduction.modifyMult(getModId(0), ALPHA_CORE_INPUT_REDUCTION, "Alpha core");
+			demandReduction.modifyMult(getModId(7) + "increased_production", ALPHA_CORE_PRODUCTION_BOOST);
 
 		} else if (aiCoreId.equals(Commodities.BETA_CORE)) {
 			demandReduction.modifyMult(getModId(0), BETA_CORE_INPUT_REDUCTION, "Beta core");
@@ -1593,7 +1595,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (admin != null && admin.getStats() != null) {
 
 			if (admin.getStats().getDynamic().getValue(Stats.SUPPLY_BONUS_MOD, 0) != 0) {
-				supplyBonus.modifyMult(getModId(1), DEFAULT_IMPROVE_PRODUCTION_BONUS, "Administrator");
+				supplyBonus.modifyMult(getModId(1), getImproveProductionBonus(), "Administrator");
+				demandReduction.modifyMult(getModId(9) + "increased_production", getImproveProductionBonus());
 			}
 
 			if (admin.getStats().getDynamic().getValue(Stats.DEMAND_REDUCTION_MOD, 0) != 0) {
@@ -1603,6 +1606,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 		if (supplyBonusFromOther != null) {
 			supplyBonus.applyMods(supplyBonusFromOther);
+			demandReduction.applyMods(supplyBonusFromOther);
 		}
 		if (demandReductionFromOther != null) {
 			demandReduction.applyMods(demandReductionFromOther);
@@ -2064,6 +2068,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			return;
 
 		supplyBonus.modifyMult(getModId(3), getImproveProductionBonus(), getImprovementsDescForModifiers());
+		demandReduction.modifyMult(getModId(8) + "increased_production", getImproveProductionBonus());
 	}
 
 	public void addImprovedSection(IndustryTooltipMode mode, TooltipMakerAPI tooltip, boolean expanded) {

@@ -27,9 +27,10 @@ public abstract class LtvBoostIndustryInstallableItemEffect extends BaseInstalla
 				case PERCENT:
 					industry.getSupplyBonus().modifyPercent(spec.getId(), supplyIncrease, Misc.ucFirst(spec.getName().toLowerCase()));
 					break;
-				default:
+				case FLAT:
 					industry.getSupplyBonus().modifyFlat(spec.getId(), supplyIncrease, Misc.ucFirst(spec.getName().toLowerCase()));
 					break;
+				default:
 			}
 		}
 		if (demandIncrease != 0) {
@@ -40,9 +41,10 @@ public abstract class LtvBoostIndustryInstallableItemEffect extends BaseInstalla
 				case PERCENT:
 					industry.getSupplyBonus().modifyPercent(spec.getId(), -demandIncrease, Misc.ucFirst(spec.getName().toLowerCase()));
 					break;
-				default:
+				case FLAT:
 					industry.getSupplyBonus().modifyFlat(spec.getId(), -demandIncrease, Misc.ucFirst(spec.getName().toLowerCase()));
 					break;
+				default:
 			}
 		}
 	}

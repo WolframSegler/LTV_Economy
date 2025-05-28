@@ -34,6 +34,7 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.BaseInstallableItemEffect;
 
 @SuppressWarnings("serial")
 public class LtvItemEffectsRepo {
+	// I modified the items so that an increase in Production also increases the Demand
 
 	public final static String NOT_A_GAS_GIANT = "not a gas giant";
 	public final static String NOT_HABITABLE = "not habitable";
@@ -228,7 +229,7 @@ public class LtvItemEffectsRepo {
 
 			});
 			put(Items.CORRUPTED_NANOFORGE, new LtvBoostIndustryInstallableItemEffect(Items.CORRUPTED_NANOFORGE,
-					CORRUPTED_NANOFORGE_PROD, 0, StatModType.MULT) {
+					CORRUPTED_NANOFORGE_PROD, CORRUPTED_NANOFORGE_PROD, StatModType.MULT) {
 				public void apply(Industry industry) {
 					super.apply(industry);
 					industry.getMarket().getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD)
@@ -257,7 +258,7 @@ public class LtvItemEffectsRepo {
 				}
 			});
 			put(Items.PRISTINE_NANOFORGE, new LtvBoostIndustryInstallableItemEffect(Items.PRISTINE_NANOFORGE,
-					PRISTINE_NANOFORGE_PROD, 0, StatModType.MULT) {
+					PRISTINE_NANOFORGE_PROD, PRISTINE_NANOFORGE_PROD, StatModType.MULT) {
 				public void apply(Industry industry) {
 					super.apply(industry);
 					industry.getMarket().getStats().getDynamic().getMod(Stats.PRODUCTION_QUALITY_MOD)
@@ -284,7 +285,7 @@ public class LtvItemEffectsRepo {
 				}
 			});
 			put(Items.SYNCHROTRON, new LtvBoostIndustryInstallableItemEffect(Items.SYNCHROTRON, SYNCHROTRON_FUEL_BONUS,
-					0, StatModType.PERCENT) {
+					SYNCHROTRON_FUEL_BONUS, StatModType.PERCENT) {
 				protected void addItemDescriptionImpl(Industry industry, TooltipMakerAPI text, SpecialItemData data,
 						InstallableItemDescriptionMode mode, String pre, float pad) {
 					text.addPara(pre + "Increases fuel production output by %s.", pad, Misc.getHighlightColor(),
@@ -411,7 +412,7 @@ public class LtvItemEffectsRepo {
 				}
 			});
 			put(Items.BIOFACTORY_EMBRYO, new LtvBoostIndustryInstallableItemEffect(Items.BIOFACTORY_EMBRYO,
-					BIOFACTORY_PROD_BONUS, 0, StatModType.PERCENT) {
+					BIOFACTORY_PROD_BONUS, BIOFACTORY_PROD_BONUS, StatModType.PERCENT) {
 				protected void addItemDescriptionImpl(Industry industry, TooltipMakerAPI text, SpecialItemData data,
 						InstallableItemDescriptionMode mode, String pre, float pad) {
 					text.addPara(pre + "Increases light industry production by %s.",
@@ -425,7 +426,7 @@ public class LtvItemEffectsRepo {
 				}
 			});
 			put(Items.CATALYTIC_CORE, new LtvBoostIndustryInstallableItemEffect(Items.CATALYTIC_CORE,
-					CATALYTIC_CORE_BONUS, 0, StatModType.PERCENT) {
+					CATALYTIC_CORE_BONUS, CATALYTIC_CORE_BONUS, StatModType.PERCENT) {
 				protected void addItemDescriptionImpl(Industry industry, TooltipMakerAPI text, SpecialItemData data,
 						InstallableItemDescriptionMode mode, String pre, float pad) {
 					text.addPara(pre + "Increases refining production by %s.",
@@ -461,7 +462,7 @@ public class LtvItemEffectsRepo {
 				}
 			});
 			put(Items.SOIL_NANITES, new LtvBoostIndustryInstallableItemEffect(Items.SOIL_NANITES,
-					SOIL_NANITES_BONUS_MULT, 0, StatModType.MULT) {
+					SOIL_NANITES_BONUS_MULT, SOIL_NANITES_BONUS_MULT, StatModType.MULT) {
 				protected void addItemDescriptionImpl(Industry industry, TooltipMakerAPI text, SpecialItemData data,
 						InstallableItemDescriptionMode mode, String pre, float pad) {
 					text.addPara(pre + "Increases farming production by %s.",
