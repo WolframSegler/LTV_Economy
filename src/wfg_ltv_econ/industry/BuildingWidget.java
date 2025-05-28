@@ -107,7 +107,7 @@ public class BuildingWidget extends intnew {
       }
       /* function copy */
 
-      buildingTitleHeader = new d(" " + currentIndustry.getCurrentName() + "asa", Fonts.DEFAULT_SMALL, color, true,
+      buildingTitleHeader = new d(" " + currentIndustry.getCurrentName(), Fonts.DEFAULT_SMALL, color, true,
             Alignment.LMID);
       buildingTitleHeader.setColor(color);
       if (currentIndustry.isImproved()) {
@@ -183,14 +183,14 @@ public class BuildingWidget extends intnew {
       int var7 = 0;
       List<SpecialItemData> visibleItems = currentIndustry.getVisibleInstalledItems();
       for (SpecialItemData item : visibleItems) {
-         String comIdItem = new S(item).getCommodity().getId();
-         specialItemGroup.addIconGroup(comIdItem, IconRenderMode.NORMAL, var7, color);
+         S commodity = new S(item);
+         specialItemGroup.addGroup(commodity, 1, 1f, com.fs.starfarer.campaign.ui.marketinfo.f.o.values()[7]/*if*/, color);
          var7++;
       }
 
       if (currentIndustry.getAICoreId() != null) {
-         String comIdAICore = market.getCommodityData(currentIndustry.getAICoreId()).getId();
-         specialItemGroup.addIconGroup(comIdAICore, IconRenderMode.NORMAL, var7, color);
+         CommodityOnMarketAPI AICore = market.getCommodityData(currentIndustry.getAICoreId());
+         specialItemGroup.addGroup((CommodityOnMarket)AICore, 1, 1f, com.fs.starfarer.campaign.ui.marketinfo.f.o.values()[7]/*if*/, color);
          ++var7;
       }
 
@@ -360,7 +360,7 @@ public class BuildingWidget extends intnew {
       }
 
       if (buildingTitleHeader == null) {
-         buildingTitleHeader = d.createSmallInsigniaLabel(currentIndustry.getCurrentName() + "asa", Alignment.LMID);
+         buildingTitleHeader = d.createSmallInsigniaLabel(currentIndustry.getCurrentName(), Alignment.LMID);
       }
 
       if (currentIndustry.isIndustry()) {
@@ -439,24 +439,19 @@ public class BuildingWidget extends intnew {
       }
       BuildingWidget var9;
       if (constructionQueueIndex >= 0) {
-         Global.getLogger(BuildingWidget.class).info("Passed Stage 0");
          try {
             Class<?> cClass = Class.forName("com.fs.starfarer.util.A.C");
 
             if (cClass.isInstance(var1)) {
-               Global.getLogger(BuildingWidget.class).info("Passed Stage 1");
 
                Object var3 = cClass.cast(var1);
 
                Object a = cClass.getMethod("isRMBEvent").invoke(var3);
-               Global.getLogger(BuildingWidget.class).info("Passed Stage 2");
 
                if ((boolean) a) {
-                  Global.getLogger(BuildingWidget.class).info("Passed Stage 3");
                   for (intnew widget : IndustryPanel.getWidgets()) {
                      if (((BuildingWidget) widget).getQueueIndex() >= 0) {
                         ((BuildingWidget) widget).setNormalMode();
-                        Global.getLogger(BuildingWidget.class).info("Passed Stage 4");
                      }
                   }
 
@@ -468,15 +463,12 @@ public class BuildingWidget extends intnew {
          }
 
          if (constructionMode == intnew.Oo.Ó00000) {
-            Global.getLogger(BuildingWidget.class).info("Passed Stage 5");
             for (intnew widget : IndustryPanel.getWidgets()) {
                if (((BuildingWidget) widget).getQueueIndex() >= 0) {
                   if (((BuildingWidget) widget) == this) {
                      ((BuildingWidget) widget).setRemoveMode();
-                     Global.getLogger(BuildingWidget.class).info("Passed Stage 6");
                   } else {
                      ((BuildingWidget) widget).setSwapMode();
-                     Global.getLogger(BuildingWidget.class).info("Passed Stage 6");
                   }
                }
             }
