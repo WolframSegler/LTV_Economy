@@ -104,9 +104,6 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
 
         // Replace the Panel which holds the widgets
         replaceIndustryListPanel(managementPanel, industryPanel);
-
-        // Get the "widgets" List and replace it with the custom List
-        // repopulateWidgetsList(industryPanel);
     }
 
     private void replaceIndustryListPanel(UIPanelAPI managementPanel, UIPanelAPI industryPanel) {
