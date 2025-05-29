@@ -39,6 +39,11 @@ public class LtvIndustryListPanel extends IndustryListPanel {
    }
 
    @Override
+   public void recreate() {
+      this.sizeChanged(this.getWidth(), this.getHeight());
+   }
+
+   @Override
    public void sizeChanged(float var1, float var2) {
       clearChildren();
       super.sizeChanged(var1, var2);

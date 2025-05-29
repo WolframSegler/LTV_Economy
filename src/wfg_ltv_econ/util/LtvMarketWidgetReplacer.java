@@ -7,7 +7,6 @@ import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg_ltv_econ.industry.BuildingWidget;
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
@@ -120,17 +119,17 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             s sInstance = (s)ReflectionUtils.get(industryPanel, null, s.class);
 
             LtvIndustryListPanel replacement = new LtvIndustryListPanel(market, lInstance, sInstance);
-            float x = industryPanel.getPosition().getX();
-            float y = industryPanel.getPosition().getY();
+
             float width = industryPanel.getPosition().getWidth();
             float height = industryPanel.getPosition().getHeight();
 
             managementPanel.removeComponent(industryPanel);
 
-            managementPanel.addComponent(replacement).setLocation(x, y).setSize(width, height);
-            // replacement.recreate(); // Required for complete initialization
-            replacement.sizeChanged(replacement.getWidth(), replacement.getHeight());
-            
+            managementPanel.addComponent(replacement).setSize(width, height);
+            replacement.setOpacity(0.5f);
+
+            Global.getLogger(LtvMarketWidgetReplacer.class).error(replacement.getWidgets().size() + "size");
+
         } catch (Exception e) {
             Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace IndustryListPanel", e);
         }
