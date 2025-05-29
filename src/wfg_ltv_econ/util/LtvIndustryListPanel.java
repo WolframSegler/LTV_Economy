@@ -21,7 +21,6 @@ import com.fs.starfarer.api.ui.Alignment;
 
 import wfg_ltv_econ.industry.BuildingWidget;
 
-import java.util.Iterator;
 import java.util.Collections;
 
 public class LtvIndustryListPanel extends IndustryListPanel {
@@ -48,32 +47,30 @@ public class LtvIndustryListPanel extends IndustryListPanel {
       Collections.sort(industries, getIndustryOrderComparator());
       List<ConstructionQueueItem> queuedIndustries = market.getConstructionQueue().getItems();
       float opad = 20.0F;
-      float var8 = BuildingWidget.WIDTH;
-      float var9 = BuildingWidget.HEIGHT;
-      byte var10 = 3;
-      byte var11 = 4;
+      byte rowAmount = 3;
+      byte colunmAmount = 4;
 
-      for (int i = 0; i < var11; i++) {
-         for (int j = 0; j < var10; j++) {
-            int var14 = j * var11 + i;
-            if (var14 < industries.size() + queuedIndustries.size()) {
-               if (var14 < industries.size()) {
-                  Industry var15 = (Industry) industries.get(var14);
-                  BuildingWidget var16 = new BuildingWidget(market, var15, this);
-                  widgets.add(var16);
-                  add(var16).setSize(var8, var9).inTL((float) i * (var8 + opad), (float) j * (var9 + opad));
-                  StandardTooltipV2Expandable.addTooltipRight(var16,
-                        BuildingWidget.createIndustryTooltip(IndustryTooltipMode.NORMAL, var15));
-               } else {
-                  var14 -= industries.size();
-                  ConstructionQueueItem var21 = (ConstructionQueueItem) queuedIndustries.get(var14);
-                  Industry var23 = market.instantiateIndustry(var21.id);
-                  BuildingWidget var17 = new BuildingWidget(market, var23, this, var14);
-                  widgets.add(var17);
-                  add(var17).setSize(var8, var9).inTL((float) i * (var8 + opad), (float) j * (var9 + opad));
-                  StandardTooltipV2Expandable.addTooltipRight(var17,
-                        BuildingWidget.createIndustryTooltip(IndustryTooltipMode.QUEUED, var23));
-               }
+      for (int i = 0; i < colunmAmount; i++) {
+         for (int j = 0; j < rowAmount; j++) {
+            int var14 = j * colunmAmount + i;
+            if (var14 >= (industries.size() + queuedIndustries.size())) {
+               continue;
+            }
+            if (var14 < industries.size()) {
+               Industry var15 = (Industry) industries.get(var14);
+               BuildingWidget var16 = new BuildingWidget(market, var15, this);
+               widgets.add(var16);
+               add(var16).setSize(BuildingWidget.WIDTH, BuildingWidget.HEIGHT).inTL((float) i * (BuildingWidget.WIDTH + opad), (float) j * (BuildingWidget.HEIGHT + opad));
+               StandardTooltipV2Expandable.addTooltipRight(var16,
+                     BuildingWidget.createIndustryTooltip(IndustryTooltipMode.NORMAL, var15));
+            } else {
+               var14 -= industries.size();
+               ConstructionQueueItem var21 = (ConstructionQueueItem) queuedIndustries.get(var14);
+               Industry var23 = market.instantiateIndustry(var21.id);
+               BuildingWidget var17 = new BuildingWidget(market, var23, this, var14);
+               widgets.add(var17);
+               add(var17).setSize(BuildingWidget.WIDTH, BuildingWidget.HEIGHT).inTL((float) i * (BuildingWidget.WIDTH + opad), (float) j * (BuildingWidget.HEIGHT + opad));
+               StandardTooltipV2Expandable.addTooltipRight(var17, BuildingWidget.createIndustryTooltip(IndustryTooltipMode.QUEUED, var23));
             }
          }
       }
