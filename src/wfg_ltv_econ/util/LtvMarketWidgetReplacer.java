@@ -126,9 +126,6 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             managementPanel.removeComponent(industryPanel);
 
             managementPanel.addComponent(replacement).setSize(width, height);
-            replacement.setOpacity(0.5f);
-
-            Global.getLogger(LtvMarketWidgetReplacer.class).error(replacement.getWidgets().size() + "size");
 
         } catch (Exception e) {
             Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace IndustryListPanel", e);

@@ -56,6 +56,8 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
+import wfg_ltv_econ.util.LtvNumFormat;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
@@ -641,13 +643,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		buildNextInQueue(market);
 	}
 
-	public static final int firstDigit(int x) {
-		while (x > 9) {
-			x /= 10;
-		}
-		return x;
-	}
-
 	public static void buildNextInQueue(MarketAPI market) {
 		ConstructionQueueItem next = null;
 		Iterator<ConstructionQueueItem> iter = market.getConstructionQueue().getItems().iterator();
@@ -1199,11 +1194,12 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 				float x = opad;
 				float y = startY;
-				float sectionWidth = getTooltipWidth() / itemsPerRow;
+				float sectionWidth = (getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
 				for (MutableCommodityQuantity curr : supply.values()) {
 					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
+					CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
 					int pAmount = curr.getQuantity().getModifiedInt();
 
 					if (pAmount < 1) {continue;}
@@ -1221,18 +1217,15 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					tooltip.addIcons(commodity, 1, IconRenderMode.NORMAL);
 					tooltip.addIconGroup(0f);
 					UIComponentAPI iconComp = tooltip.getPrev();
-					iconComp.getPosition().inTL(x, y);
+
+					// Add extra padding for thinner icons
+					float actualIconWidth = iconSize * commoditySpec.getIconWidthMult();
+					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth)*0.5f), y);
 
 					// draw text
-					String txt = "";
-					switch (firstDigit(pAmount)) {
-						case 1:
-							txt = Strings.X + pAmount;
-							break;
-						default:
-							txt = " " + Strings.X + pAmount;
-					}
+					String txt = Strings.X + LtvNumFormat.formatWithMaxDigits(pAmount);
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
+
 					UIComponentAPI lblComp = tooltip.getPrev();
 					float textH = lbl.computeTextHeight(txt);
 					float textX = x + iconSize + pad;
@@ -1240,7 +1233,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					lblComp.getPosition().inTL(textX, textY);
 
 					// advance X
-					x += sectionWidth + opad;
+					x += sectionWidth + pad;
 				}
 				tooltip.setHeightSoFar(y);
 				resetFlowLeft(tooltip, opad);
@@ -1257,11 +1250,12 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 				float x = opad;
 				float y = startY;
-				float sectionWidth = getTooltipWidth() / itemsPerRow;
+				float sectionWidth = (getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
 				for (MutableCommodityQuantity curr : demand.values()) {
-					CommodityOnMarketAPI commodity = orig.getCommodityData(curr.getCommodityId());
+					CommodityOnMarketAPI commodity = market.getCommodityData(curr.getCommodityId());
+					CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
 					int dAmount = curr.getQuantity().getModifiedInt();
 					int allDeficit = commodity.getDeficitQuantity();
 
@@ -1284,18 +1278,15 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					}
 					tooltip.addIconGroup(0f);
 					UIComponentAPI iconComp = tooltip.getPrev();
-					iconComp.getPosition().inTL(x, y);
+
+					// Add extra padding for thinner icons
+					float actualIconWidth = iconSize * commoditySpec.getIconWidthMult();
+					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth)*0.5f), y);
 
 					// draw text
-					String txt = "";
-					switch (firstDigit(dAmount)) {
-						case 1:
-							txt = Strings.X + dAmount;
-							break;
-						default:
-							txt = " " + Strings.X + dAmount;
-					}
+					String txt = Strings.X + LtvNumFormat.formatWithMaxDigits(dAmount);
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
+
 					UIComponentAPI lblComp = tooltip.getPrev();
 					float textH = lbl.computeTextHeight(txt);
 					float textX = x + iconSize + pad;
@@ -1303,7 +1294,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					lblComp.getPosition().inTL(textX, textY);
 
 					// advance X
-					x += sectionWidth + opad;
+					x += sectionWidth + pad;
 				}
 				tooltip.setHeightSoFar(y);
 				resetFlowLeft(tooltip, opad);

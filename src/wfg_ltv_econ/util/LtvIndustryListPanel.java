@@ -46,7 +46,12 @@ public class LtvIndustryListPanel extends IndustryListPanel {
    @Override
    public void sizeChanged(float var1, float var2) {
       clearChildren();
-      super.sizeChanged(var1, var2);
+      // super.sizeChanged(var1, var2);
+      if (!this.created) {
+         this.afterSizeFirstChanged(var1, var2);
+         this.created = true;
+      }
+      /* Grandparent Code Block */
       widgets.clear();
       List<Industry> industries = getVisibleIndustries();
       Collections.sort(industries, getIndustryOrderComparator());
