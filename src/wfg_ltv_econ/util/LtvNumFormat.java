@@ -14,6 +14,7 @@ public class LtvNumFormat {
      * Examples (maxDigits = 3):
      *   924 -> "924"
      *   9245 -> "9.25K"
+     *   79245 -> "79.2K"
      *   1_000_000_000L -> "1.00B"
      */
     public static final String formatWithMaxDigits(int value) {

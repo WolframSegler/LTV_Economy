@@ -102,12 +102,12 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 
 		int luxuryThreshold = 3;
 
-		demand(Commodities.FOOD, (int) Math.pow(10, size - 1));
-		demand(Commodities.DOMESTIC_GOODS, (int) Math.pow(10, size - 2));
-		demand(Commodities.LUXURY_GOODS, (int) Math.max(Math.pow(10, (size - 2) - luxuryThreshold), 0));
-		demand(Commodities.DRUGS, (int) Math.pow(DAILY_BASE_PROD_DRUGS, size - 2));
-		demand(Commodities.ORGANS, (int) Math.max(Math.pow(DAILY_BASE_PROD_DRUGS, size - 3), 0));
-		demand(Commodities.SUPPLIES, (int) Math.pow(5, size - 2));
+		demand(Commodities.FOOD, (int) (2.696*Math.pow(10, size - 3)));
+		demand(Commodities.DOMESTIC_GOODS, (int) (0.53916*Math.pow(10, size - 3)));
+		demand(Commodities.LUXURY_GOODS, (int) (0.0539*Math.pow(10, size - luxuryThreshold)));
+		demand(Commodities.SUPPLIES, (int) (1.0784*Math.pow(10, size - 3)));
+		demand(Commodities.DRUGS, (int) (0.04044*Math.pow(10, size - 3)));
+		demand(Commodities.ORGANS, (int) (0.008986*Math.pow(10, size - 3)));
 
 		supply(Commodities.CREW, DAILY_BASE_PROD_CREW);
 		supply(Commodities.DRUGS, DAILY_BASE_PROD_DRUGS);
