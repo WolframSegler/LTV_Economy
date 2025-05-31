@@ -60,9 +60,7 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 
 	public final static boolean HAZARD_INCREASES_DEFENSE = false;
 
-	public final static int DAILY_BASE_PROD_CREW = 12; // 50$
-	public final static int DAILY_BASE_PROD_DRUGS = 3; // 200$
-	public final static int DAILY_BASE_PROD_ORGANS = 2;// 300$
+	public final static int DAILY_BASE_PROD_CREW = 5; // 50$
 
 	public final static float FOOD_WEIGHT_FOR_CREW = 0.4f;
 	public final static float DOMESTIC_GOODS_WEIGHT_FOR_CREW = 0.2f;
@@ -108,9 +106,9 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 			demand(Commodities.ORGANICS, (int) ((1/6)*Math.pow(10, size - 3)));
 		}
 
-		supply(Commodities.CREW, DAILY_BASE_PROD_CREW);
-		supply(Commodities.DRUGS, DAILY_BASE_PROD_DRUGS);
-		supply(Commodities.ORGANS, DAILY_BASE_PROD_ORGANS);
+		supply(Commodities.CREW, (int) (DAILY_BASE_PROD_CREW*Math.pow(10, size - 3)));
+		supply(Commodities.DRUGS, (int) ((0.025)*Math.pow(10, size - 5)));
+		supply(Commodities.ORGANS, (int) ((1/180)*Math.pow(10, size - 5)));
 
 		AccessModifierSpaceport(size);
 
