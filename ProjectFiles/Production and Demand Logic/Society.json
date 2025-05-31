@@ -5,29 +5,29 @@
       "percentageOfPop": 0.3
     },
     "farmer": {
-      "wage": 2,
+      "wage": 1.25,
       "percentageOfPop": 0.1
     },
     "industry_worker": {
-      "wage": 4,
-      "percentageOfPop": 0.44
+      "wage": 2.011627907,
+      "percentageOfPop": 0.43
     },
     "white_collar": {
-      "wage": 6,
+      "wage": 2.50,
       "percentageOfPop": 0.1
+    },
+    "manager": {
+      "wage": 6,
+      "percentageOfPop": 0.01
     },
     "crew_member": {
       "wage": 10,
       "percentageOfPop": 0.05
     },
-    "manager": {
-      "wage": 15,
-      "percentageOfPop": 0.005
-    },
     "marine": {
       "wage": 20,
-      "percentageOfPop": 0.005
+      "percentageOfPop": 0.01
     }
   },
-  "Average Income": 3.235
+  "Average Income": 2
 }

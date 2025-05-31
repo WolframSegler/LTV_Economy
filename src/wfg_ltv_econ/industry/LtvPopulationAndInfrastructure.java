@@ -96,18 +96,17 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		super.apply(true);
 
 		int size = market.getSize();
-		if (!market.hasCondition(Conditions.HABITABLE)) {
-			demand(Commodities.ORGANICS, (int) Math.pow(10, size - 1));
-		}
-
 		int luxuryThreshold = 3;
 
-		demand(Commodities.FOOD, (int) (2.696*Math.pow(10, size - 3)));
-		demand(Commodities.DOMESTIC_GOODS, (int) (0.53916*Math.pow(10, size - 3)));
-		demand(Commodities.LUXURY_GOODS, (int) (0.0539*Math.pow(10, size - luxuryThreshold)));
-		demand(Commodities.SUPPLIES, (int) (1.0784*Math.pow(10, size - 3)));
-		demand(Commodities.DRUGS, (int) (0.04044*Math.pow(10, size - 3)));
-		demand(Commodities.ORGANS, (int) (0.008986*Math.pow(10, size - 3)));
+		demand(Commodities.FOOD, (int) ((5/3)*Math.pow(10, size - 3)));
+		demand(Commodities.DOMESTIC_GOODS, (int) ((1/3)*Math.pow(10, size - 3)));
+		demand(Commodities.LUXURY_GOODS, (int) ((1/30)*Math.pow(10, size - luxuryThreshold)));
+		demand(Commodities.SUPPLIES, (int) ((1/15)*Math.pow(10, size - 3)));
+		demand(Commodities.DRUGS, (int) ((0.025)*Math.pow(10, size - 3)));
+		demand(Commodities.ORGANS, (int) ((1/180)*Math.pow(10, size - 3)));
+		if (!market.hasCondition(Conditions.HABITABLE)) {
+			demand(Commodities.ORGANICS, (int) ((1/6)*Math.pow(10, size - 3)));
+		}
 
 		supply(Commodities.CREW, DAILY_BASE_PROD_CREW);
 		supply(Commodities.DRUGS, DAILY_BASE_PROD_DRUGS);
