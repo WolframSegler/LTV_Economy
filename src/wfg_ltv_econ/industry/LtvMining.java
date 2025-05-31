@@ -13,9 +13,16 @@ import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Pair;
+import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 
 
 public class LtvMining extends LtvBaseIndustry {
+
+	public final static float MINING_NONE = 0;
+	public final static float MINING_SPARSE = 0.5f;
+	public final static float MINING_ABUNDANT = 1.5f;
+	public final static float MINING_RICH = 2f;
+	public final static float MINING_ULTRARICH = 3f;
 
     public final static float DAILY_BASE_PROD_ORE = 2;
     public final static float DAILY_BASE_PROD_RARE_ORE = 0.4f;
@@ -67,13 +74,133 @@ public class LtvMining extends LtvBaseIndustry {
         supply(Commodities.RARE_ORE, (int) (DAILY_BASE_PROD_RARE_ORE*workersAssigned));
         supply(Commodities.ORGANICS, (int) (DAILY_BASE_PROD_ORGANICS*workersAssigned));
         supply(Commodities.VOLATILES, (int) (DAILY_BASE_PROD_VOLATILES*workersAssigned));
+
+		applyConditionModifiers();
 		
 		if (!isFunctional()) {
 			supply.clear();
 		}
 	}
 
-	
+	protected void applyConditionModifiers() {
+		for(MarketConditionAPI condition : market.getConditions()) {
+			String id = condition.getId();
+
+			if (id.startsWith(Commodities.ORE)) {
+				switch (id) {
+            case Conditions.ORE_SPARSE:
+                applyCommodityModifier(Commodities.ORE, id, MINING_SPARSE, "Sparse ore deposits");
+                break;
+
+			case Conditions.ORE_MODERATE:
+                break;
+
+			case Conditions.ORE_ABUNDANT:
+				applyCommodityModifier(Commodities.ORE, id, MINING_ABUNDANT, "Abundant ore deposits");
+                break;
+
+			case Conditions.ORE_RICH:
+                applyCommodityModifier(Commodities.ORE, id, MINING_RICH, "Rich ore deposits");
+                break;
+
+			case Conditions.ORE_ULTRARICH:
+                applyCommodityModifier(Commodities.ORE, id, MINING_ULTRARICH, "Ultrarich ore deposits");
+                break;
+
+            default:
+                applyCommodityModifier(Commodities.ORE, id, MINING_NONE, "No ore deposits");
+                break;
+        	}
+			continue;
+			}
+
+			if (id.startsWith(Commodities.RARE_ORE)) {
+				switch (id) {
+            case Conditions.RARE_ORE_SPARSE:
+                applyCommodityModifier(Commodities.RARE_ORE, id, MINING_SPARSE, "Sparse rare ore deposits");
+                break;
+			
+			case Conditions.RARE_ORE_MODERATE:
+                break;
+
+			case Conditions.RARE_ORE_ABUNDANT:
+				applyCommodityModifier(Commodities.RARE_ORE, id, MINING_ABUNDANT, "Abundant rare ore deposits");
+                break;
+
+			case Conditions.RARE_ORE_RICH:
+                applyCommodityModifier(Commodities.RARE_ORE, id, MINING_RICH, "Rich rare ore deposits");
+                break;
+
+			case Conditions.RARE_ORE_ULTRARICH:
+                applyCommodityModifier(Commodities.RARE_ORE, id, MINING_ULTRARICH, "Ultrarich rare ore deposits");
+                break;
+
+            default:
+                applyCommodityModifier(Commodities.RARE_ORE, id, MINING_NONE, "No rare ore deposits");
+                break;
+        	}
+			continue;
+			}
+
+			if (id.startsWith(Commodities.ORGANICS)) {
+				switch (id) {
+            case Conditions.ORGANICS_TRACE:
+                applyCommodityModifier(Commodities.ORGANICS, id, MINING_SPARSE, "Sparse organics deposits");
+                break;
+
+			case Conditions.ORGANICS_COMMON:
+                break;
+
+			case Conditions.ORGANICS_ABUNDANT:
+				applyCommodityModifier(Commodities.ORGANICS, id, MINING_ABUNDANT, "Abundant organics deposits");
+                break;
+
+			case Conditions.ORGANICS_PLENTIFUL:
+                applyCommodityModifier(Commodities.ORGANICS, id, MINING_RICH, "Rich organics deposits");
+                break;
+
+            default:
+                applyCommodityModifier(Commodities.ORGANICS, id, MINING_NONE, "No organics deposits");
+                break;
+        	}
+			continue;
+			}
+
+			if (id.startsWith(Commodities.VOLATILES)) {
+				switch (id) {
+            case Conditions.VOLATILES_TRACE:
+                applyCommodityModifier(Commodities.VOLATILES, id, MINING_SPARSE, "Sparse volatiles deposits");
+                break;
+
+			case Conditions.VOLATILES_DIFFUSE:
+                break;
+
+			case Conditions.VOLATILES_ABUNDANT:
+				applyCommodityModifier(Commodities.VOLATILES, id, MINING_ABUNDANT, "Abundant volatiles deposits");
+                break;
+
+			case Conditions.VOLATILES_PLENTIFUL:
+                applyCommodityModifier(Commodities.VOLATILES, id, MINING_RICH, "Rich volatiles deposits");
+                break;
+
+            default:
+                applyCommodityModifier(Commodities.VOLATILES, id, MINING_NONE, "No volatiles deposits");
+                break;
+        	}
+			continue;
+			}
+		}
+	}
+
+	private void applyCommodityModifier(String commodity, String id, float multiplier, String description) {
+		// Remove vanilla modifiers
+    	getSupply(commodity).getQuantity().unmodifyFlat(id + "_0");
+    	getSupply(commodity).getQuantity().unmodifyFlat(id + "_1");
+
+		// Custom modifiers
+    	getSupply(commodity).getQuantity().modifyMult(id + "_ltv_" + commodity, multiplier, description);
+	}
+
 	@Override
 	public void unapply() {
 		super.unapply();

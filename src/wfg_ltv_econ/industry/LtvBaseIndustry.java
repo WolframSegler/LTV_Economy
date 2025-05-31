@@ -1246,7 +1246,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			if (hasDemand) {
 				float startY = tooltip.getHeightSoFar() + opad;
 				if (hasSupply) {
-					startY += opad + pad;
+					startY += opad*1.5f;
 				}
 
 				float x = opad;
