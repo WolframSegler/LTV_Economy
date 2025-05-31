@@ -3,11 +3,14 @@ package wfg_ltv_econ.industry;
 import java.awt.Color;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
+import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
@@ -86,10 +89,8 @@ public class LtvMining extends LtvBaseIndustry {
 		for(MarketConditionAPI condition : market.getConditions()) {
 			String id = condition.getId();
 
-			Global.getLogger(getClass()).error("id of condition: " + id);
-
 			if (id.startsWith(Commodities.ORE)) {
-				switch (id) {
+			switch (id) {
             case Conditions.ORE_SPARSE:
                 applyCommodityModifier(Commodities.ORE, id, MINING_SPARSE, "Sparse ore deposits");
                 break;
@@ -118,7 +119,7 @@ public class LtvMining extends LtvBaseIndustry {
 			}
 
 			if (id.startsWith(Commodities.RARE_ORE)) {
-				switch (id) {
+			switch (id) {
             case Conditions.RARE_ORE_SPARSE:
                 applyCommodityModifier(Commodities.RARE_ORE, id, MINING_SPARSE, "Sparse rare ore deposits");
                 break;
@@ -147,7 +148,7 @@ public class LtvMining extends LtvBaseIndustry {
 			}
 
 			if (id.startsWith(Commodities.ORGANICS)) {
-				switch (id) {
+			switch (id) {
             case Conditions.ORGANICS_TRACE:
                 applyCommodityModifier(Commodities.ORGANICS, id, MINING_SPARSE, "Sparse organics deposits");
                 break;
@@ -172,7 +173,7 @@ public class LtvMining extends LtvBaseIndustry {
 			}
 
 			if (id.startsWith(Commodities.VOLATILES)) {
-				switch (id) {
+			switch (id) {
             case Conditions.VOLATILES_TRACE:
                 applyCommodityModifier(Commodities.VOLATILES, id, 1, "Sparse volatiles deposits");
                 break;
@@ -200,8 +201,12 @@ public class LtvMining extends LtvBaseIndustry {
 
 	private void applyCommodityModifier(String commodity, String id, float multiplier, String description) {
 		// Remove vanilla modifiers
-    	getSupply(commodity).getQuantity().unmodifyFlat(id + "_0");
-    	getSupply(commodity).getQuantity().unmodifyFlat(id + "_1");
+		MutableStat commodityStat = getSupply(commodity).getQuantity();
+		for (String modId : new ArrayList<>(commodityStat.getFlatMods().keySet())) {
+    		if (modId.startsWith(id)) {
+        		commodityStat.unmodifyFlat(modId);
+    		}
+		}
 
 		// Custom modifiers
     	getSupply(commodity).getQuantity().modifyMult(id + "_ltv_" + commodity, multiplier, description);
