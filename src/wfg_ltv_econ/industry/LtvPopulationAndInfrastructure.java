@@ -60,7 +60,7 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 
 	public final static boolean HAZARD_INCREASES_DEFENSE = false;
 
-	public final static int DAILY_BASE_PROD_CREW = 5; // 50$
+	public final static float DAILY_BASE_PROD_CREW = 3000f/(25f*365f*20f*10f);
 
 	public final static float FOOD_WEIGHT_FOR_CREW = 0.4f;
 	public final static float DOMESTIC_GOODS_WEIGHT_FOR_CREW = 0.2f;
@@ -96,19 +96,19 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		int size = market.getSize();
 		int luxuryThreshold = 3;
 
-		demand(Commodities.FOOD, (int) ((5/3)*Math.pow(10, size - 3)));
-		demand(Commodities.DOMESTIC_GOODS, (int) ((1/3)*Math.pow(10, size - 3)));
-		demand(Commodities.LUXURY_GOODS, (int) ((1/30)*Math.pow(10, size - luxuryThreshold)));
-		demand(Commodities.SUPPLIES, (int) ((1/15)*Math.pow(10, size - 3)));
+		demand(Commodities.FOOD, (int) ((5.0/3.0)*Math.pow(10, size - 3)));
+		demand(Commodities.DOMESTIC_GOODS, (int) ((1.0/3.0)*Math.pow(10, size - 3)));
+		demand(Commodities.LUXURY_GOODS, (int) ((1.0/30.0)*Math.pow(10, size - luxuryThreshold)));
+		demand(Commodities.SUPPLIES, (int) ((1.0/15.0)*Math.pow(10, size - 3)));
 		demand(Commodities.DRUGS, (int) ((0.025)*Math.pow(10, size - 3)));
-		demand(Commodities.ORGANS, (int) ((1/180)*Math.pow(10, size - 3)));
+		demand(Commodities.ORGANS, (int) ((1.0/180.0)*Math.pow(10, size - 3)));
 		if (!market.hasCondition(Conditions.HABITABLE)) {
-			demand(Commodities.ORGANICS, (int) ((1/6)*Math.pow(10, size - 3)));
+			demand(Commodities.ORGANICS, (int) ((1.0/6.0)*Math.pow(10, size - 3)));
 		}
 
 		supply(Commodities.CREW, (int) (DAILY_BASE_PROD_CREW*Math.pow(10, size - 3)));
 		supply(Commodities.DRUGS, (int) ((0.025)*Math.pow(10, size - 5)));
-		supply(Commodities.ORGANS, (int) ((1/180)*Math.pow(10, size - 5)));
+		supply(Commodities.ORGANS, (int) ((1.0/180.0)*Math.pow(10, size - 5)));
 
 		AccessModifierSpaceport(size);
 

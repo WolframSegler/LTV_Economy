@@ -1,0 +1,8 @@
+{
+  "SUPPLY": {
+    "ORE": "While much of the Sector suffers from decaying infrastructure, mining remains one of the few activities that justifies the deployment of heavy equipment, even in remote colonies. Miners typically operate industrial drills, automated diggers, and gravity-fed conveyors. Though labor-intensive, each miner is part of a semi-mechanized operation, capable of producing around 2 metric tons of common ore per workday under standard gravity. Extraction rates vary depending on terrain and local conditions.",
+    "TRANSPLUTONICS": "Rare ore extraction is highly infrastructure-dependent and often occurs under hazardous conditions such as irradiated zones or tectonic hotspots. Each worker supports high-precision tools—particle beams, plasma lances, and isolators—often under strict handling protocols. While still slow and selective, these conditions yield an average of 400kg of transplutonic ore per worker per day, assuming a functioning industrial base.",
+    "ORGANICS": "Organic resource harvesting involves collecting fossil biomass, volatile-rich soils, or exotic crystalline growths. Semi-automated strip-miners and filtration rigs are common even in modest settlements. Each miner handles around 900kg of raw organic material per day, with final yield depending on sorting, moisture content, and contamination.",
+    "VOLATILES": "Volatile compounds require careful containment and typically involve drilling into frozen crusts or gas seeps using atmospheric stabilizers and deep-cycle pumps. With basic industrial tools, a trained extractor can isolate around 100kg of usable volatiles per day. The process is dangerous and slow without full-scale automated extractors."
+  }
+}

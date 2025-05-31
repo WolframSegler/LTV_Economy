@@ -57,7 +57,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 import wfg_ltv_econ.util.LtvNumFormat;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
@@ -67,16 +66,16 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	public static final String BASE_VALUE_TEXT = "Base value for colony size";
 
 	public static final float DEFAULT_IMPROVE_PRODUCTION_BONUS = 1.3f; // +30% output
-	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 0.8f; // -20% input
+	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 0.75f; // -20% input
 
 	public static final float ALPHA_CORE_PRODUCTION_BOOST = 1.3f; // +30% output
 
-	public static final float ALPHA_CORE_UPKEEP_REDUCTION_MULT = 0.8f; // -20% upkeep
-	public static final float BETA_CORE_UPKEEP_REDUCTION_MULT = 0.8f; // -20% upkeep
+	public static final float ALPHA_CORE_UPKEEP_REDUCTION_MULT = 0.75f; // -20% upkeep
+	public static final float BETA_CORE_UPKEEP_REDUCTION_MULT = 0.75f; // -20% upkeep
 
-	public static final float ALPHA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
-	public static final float BETA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
-	public static final float GAMMA_CORE_INPUT_REDUCTION = 0.8f; // -20% input
+	public static final float ALPHA_CORE_INPUT_REDUCTION = 0.75f; // -20% input
+	public static final float BETA_CORE_INPUT_REDUCTION = 0.75f; // -20% input
+	public static final float GAMMA_CORE_INPUT_REDUCTION = 0.75f; // -20% input
 
 	@Override
 	protected LtvBaseIndustry clone() {
@@ -97,9 +96,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return Misc.ucFirst(spec.getName().toLowerCase() + " shortage");
 	}
 
-	// want to have some ability to add random supply/demand to industries
-	// e.g. market condition adding Volturnian Lobster supply to Volturn's
-	// Farming/Aquaculture
 	protected Map<String, MutableCommodityQuantity> supply = new LinkedHashMap<String, MutableCommodityQuantity>();
 	protected Map<String, MutableCommodityQuantity> demand = new LinkedHashMap<String, MutableCommodityQuantity>();
 
@@ -124,6 +120,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	protected transient MutableStat demandReductionFromOther = new MutableStat(0);
 	protected transient MutableStat supplyBonusFromOther = new MutableStat(0);
+
+	protected int workersAssigned = 1000;
 
 	public LtvBaseIndustry() {
 
@@ -1233,7 +1231,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					lblComp.getPosition().inTL(textX, textY);
 
 					// advance X
-					x += sectionWidth + pad;
+					x += sectionWidth + 5f;
 				}
 				tooltip.setHeightSoFar(y);
 				resetFlowLeft(tooltip, opad);
@@ -1246,7 +1244,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			}
 
 			if (hasDemand) {
-				float startY = tooltip.getHeightSoFar() + opad*2 + pad;
+				float startY = tooltip.getHeightSoFar() + opad;
+				if (hasSupply) {
+					startY += opad + pad;
+				}
 
 				float x = opad;
 				float y = startY;
@@ -1294,7 +1295,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					lblComp.getPosition().inTL(textX, textY);
 
 					// advance X
-					x += sectionWidth + pad;
+					x += sectionWidth + 5f;
 				}
 				tooltip.setHeightSoFar(y);
 				resetFlowLeft(tooltip, opad);
@@ -1657,9 +1658,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 
 		for (String str : params) {
-			// if (Items.PRISTINE_NANOFORGE.equals(str)) {
-			// System.out.println("wefwefew");
-			// }
 			SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(str);
 			if (spec == null)
 				continue;
