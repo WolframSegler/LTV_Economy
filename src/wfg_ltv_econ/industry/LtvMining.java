@@ -86,6 +86,8 @@ public class LtvMining extends LtvBaseIndustry {
 		for(MarketConditionAPI condition : market.getConditions()) {
 			String id = condition.getId();
 
+			Global.getLogger(getClass()).error("id of condition: " + id);
+
 			if (id.startsWith(Commodities.ORE)) {
 				switch (id) {
             case Conditions.ORE_SPARSE:
@@ -93,6 +95,7 @@ public class LtvMining extends LtvBaseIndustry {
                 break;
 
 			case Conditions.ORE_MODERATE:
+				applyCommodityModifier(Commodities.ORE, id, 1, "Moderate ore deposits");
                 break;
 
 			case Conditions.ORE_ABUNDANT:
@@ -121,6 +124,7 @@ public class LtvMining extends LtvBaseIndustry {
                 break;
 			
 			case Conditions.RARE_ORE_MODERATE:
+                applyCommodityModifier(Commodities.RARE_ORE, id, 1, "Moderate rare ore deposits");
                 break;
 
 			case Conditions.RARE_ORE_ABUNDANT:
@@ -149,6 +153,7 @@ public class LtvMining extends LtvBaseIndustry {
                 break;
 
 			case Conditions.ORGANICS_COMMON:
+                applyCommodityModifier(Commodities.ORGANICS, id, 1, "Common organics deposits");
                 break;
 
 			case Conditions.ORGANICS_ABUNDANT:
@@ -169,10 +174,11 @@ public class LtvMining extends LtvBaseIndustry {
 			if (id.startsWith(Commodities.VOLATILES)) {
 				switch (id) {
             case Conditions.VOLATILES_TRACE:
-                applyCommodityModifier(Commodities.VOLATILES, id, MINING_SPARSE, "Sparse volatiles deposits");
+                applyCommodityModifier(Commodities.VOLATILES, id, 1, "Sparse volatiles deposits");
                 break;
 
 			case Conditions.VOLATILES_DIFFUSE:
+				applyCommodityModifier(Commodities.VOLATILES, id, 1, "Diffuse volatiles deposits");
                 break;
 
 			case Conditions.VOLATILES_ABUNDANT:
