@@ -127,26 +127,27 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 	}
 
 	public void StabilityModifierDemand(int luxuryThreshold) {
-		Pair<String, Integer> deficit = getMaxDeficit(Commodities.DOMESTIC_GOODS);
-		if (deficit.two <= 0) {
+		Pair<String, Float> deficit = ltv_getMaxDeficit(Commodities.DOMESTIC_GOODS);
+		if (deficit.two <= 0.1) { // If 90% or more is satisfied
 			market.getStability().modifyFlat(getModId(0), 1, "Domestic goods demand met");
 		} else {
 			market.getStability().unmodifyFlat(getModId(0));
 		}
 
-		deficit = getMaxDeficit(Commodities.LUXURY_GOODS);
-		if (deficit.two <= 0 && market.getSize() > luxuryThreshold) {
+		deficit = ltv_getMaxDeficit(Commodities.LUXURY_GOODS);
+		if (deficit.two <= 0.1 && market.getSize() > luxuryThreshold) { // If 90% or more is satisfied
 			market.getStability().modifyFlat(getModId(1), 1, "Luxury goods demand met");
 		} else {
 			market.getStability().unmodifyFlat(getModId(1));
 		}
 
-		deficit = getMaxDeficit(Commodities.FOOD);
+		deficit = ltv_getMaxDeficit(Commodities.FOOD);
 		if (!market.hasCondition(Conditions.HABITABLE)) {
-			deficit = getMaxDeficit(Commodities.FOOD, Commodities.ORGANICS);
+			deficit = ltv_getMaxDeficit(Commodities.FOOD, Commodities.ORGANICS);
 		}
-		if (deficit.two > 0) {
-			market.getStability().modifyFlat(getModId(2), -3/* stability deficit */ , getDeficitText(deficit.one));
+		if (deficit.two > 0.1) { // If less than 90% is satisfied
+			int stabilityPenalty = deficit.two > 0.7f ? -3 : deficit.two > 0.4f ? -2 : deficit.two > 0.1f ? -1 : 0;
+			market.getStability().modifyFlat(getModId(2), stabilityPenalty, getDeficitText(deficit.one));
 		} else {
 			market.getStability().unmodifyFlat(getModId(2));
 		}

@@ -286,13 +286,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					continue;
 				}
 
-				String Submarket = Submarkets.SUBMARKET_OPEN;
-				if (market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
-					Submarket = Submarkets.LOCAL_RESOURCES;
-				} else if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) == null) {
-					return;
-				}
-				float available = market.getSubmarket(Submarket).getCargo().getCommodityQuantity(element.one);
+				float available = ltv_getAvaliableInCargo(element.one).two;
 				float availabilityRatio = Math.min(available / demand, 1); // rate of deficit compared to total demand
 				float deficitImpact = element.two * (1f - availabilityRatio); // Weight × shortage
 
@@ -341,17 +335,11 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (market == null)
 			return;
 		// Consume the commodity from the market’s stockpile
-		String Submarket = Submarkets.SUBMARKET_OPEN;
-		if (market.isPlayerOwned() && market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
-			Submarket = Submarkets.LOCAL_RESOURCES;
-		} else if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) == null) {
-			return;
-		}
 
-		float available = market.getSubmarket(Submarket).getCargo().getCommodityQuantity(resource);
+		float available = ltv_getAvaliableInCargo(resource).two;
 		consumption_amount = Math.min(consumption_amount, available); // only take what’s available
 
-		market.getSubmarket(Submarket).getCargo().removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
+		market.getSubmarket(ltv_getAvaliableInCargo(resource).one).getCargo().removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
 	}
 
 	public float ltv_precalculatecost(float... costlist) {
@@ -814,6 +802,37 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	public MarketAPI getMarket() {
 		return market;
+	}
+
+	public Pair<String, Integer> ltv_getAvaliableInCargo(String commodityId) {
+		String submarket = Submarkets.SUBMARKET_OPEN;
+		if (market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
+			submarket = Submarkets.LOCAL_RESOURCES;
+		} else if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) == null) {
+			return new Pair<String, Integer>(submarket, 0);
+		}
+
+		return new Pair<String, Integer>(submarket ,(int) market.getSubmarket(submarket).getCargo().getCommodityQuantity(commodityId));
+	}
+
+	public Pair<String, Float> ltv_getMaxDeficit(String... commodityIds) {
+		// Returns a Pair with the item with the highest deficit and the percentage of deficit
+		// 0 is no deficit and 1 is 100% deficit
+		Pair<String, Float> result = new Pair<String, Float>();
+		result.two = 0f;
+		if (Global.CODEX_TOOLTIP_MODE)
+			return result;
+		for (String id : commodityIds) {
+			int demand = (int) getDemand(id).getQuantity().getModifiedValue();
+			int available = ltv_getAvaliableInCargo(id).two;
+
+			float deficit = 1f - Math.min((available/demand), 1);
+			if (deficit > result.two) {
+				result.one = id;
+				result.two = deficit;
+			}
+		}
+		return result;
 	}
 
 	public Pair<String, Integer> getMaxDeficit(String... commodityIds) {
@@ -1882,7 +1901,9 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		this.special = special;
 	}
 
+	@Deprecated
 	protected float getDeficitMult(String... commodities) {
+		// Use ltv_getMaxDeficit instead
 		float deficit = getMaxDeficit(commodities).two;
 		float demand = 0f;
 
@@ -1914,11 +1935,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		fake.modifyFlat("1", bonus, getNameForModifier());
 
 		if (commodities != null) {
-			float mult = getDeficitMult(commodities);
-			// mult = 0.89f;
-			if (mult != 1) {
+			float mult = ltv_getMaxDeficit(commodities).two;
+			if (mult != 0) {
 				String com = getMaxDeficit(commodities).one;
-				fake.modifyFlat("2", -(1f - mult) * bonus, getDeficitText(com));
+				fake.modifyFlat("2", -mult * bonus, getDeficitText(com));
 			}
 		}
 
