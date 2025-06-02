@@ -823,8 +823,11 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (Global.CODEX_TOOLTIP_MODE)
 			return result;
 		for (String id : commodityIds) {
-			int demand = (int) getDemand(id).getQuantity().getModifiedValue();
-			int available = ltv_getAvaliableInCargo(id).two;
+			float demand = (int) getDemand(id).getQuantity().getModifiedValue();
+			if (demand == 0) {
+				continue; // Then the deficit is 0. Skip this iteration.
+			}
+			float available = ltv_getAvaliableInCargo(id).two;
 
 			float deficit = 1f - Math.min((available/demand), 1);
 			if (deficit > result.two) {

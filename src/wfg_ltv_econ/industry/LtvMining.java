@@ -16,7 +16,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
-import com.fs.starfarer.api.campaign.econ.Industry;
 
 
 public class LtvMining extends LtvBaseIndustry {
@@ -79,10 +78,6 @@ public class LtvMining extends LtvBaseIndustry {
 		
 		if (!isFunctional()) {
 			supply.clear();
-		}
-
-		for (Industry industry : market.getIndustries()) {
-			Global.getLogger(getClass()).error("Industry: " + industry);
 		}
 	}
 

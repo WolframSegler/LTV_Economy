@@ -88,10 +88,13 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 				);
 	}
 
+	// The apply() methods are called according to their order inside the market. This means the apply() of PopulationAndInfrastructure gets called first
 	public void apply() {
+		super.apply(true);
 		modifyStability(this, market, getModId(3));
 
-		super.apply(true);
+		market.getStats().getDynamic().getMod(Stats.MAX_INDUSTRIES).modifyFlat(getModId(), getMaxIndustries(), null);
+		market.addTransientImmigrationModifier(this);
 
 		int size = market.getSize();
 		int luxuryThreshold = 3;
@@ -121,9 +124,6 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		FleetSizeMultipliers(stability);
 
 		SpawnAdminsAndOfficers();
-
-		market.getStats().getDynamic().getMod(Stats.MAX_INDUSTRIES).modifyFlat(getModId(), getMaxIndustries(), null);
-		market.addTransientImmigrationModifier(this);
 	}
 
 	public void StabilityModifierDemand(int luxuryThreshold) {
@@ -146,7 +146,7 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 			deficit = ltv_getMaxDeficit(Commodities.FOOD, Commodities.ORGANICS);
 		}
 		if (deficit.two > 0.1) { // If less than 90% is satisfied
-			int stabilityPenalty = deficit.two > 0.7f ? -3 : deficit.two > 0.4f ? -2 : deficit.two > 0.1f ? -1 : 0;
+			int stabilityPenalty = deficit.two > 0.7f ? -3 : (deficit.two > 0.4f ? -2 : (deficit.two > 0.1f ? -1 : 0));
 			market.getStability().modifyFlat(getModId(2), stabilityPenalty, getDeficitText(deficit.one));
 		} else {
 			market.getStability().unmodifyFlat(getModId(2));
@@ -438,9 +438,9 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 	}
 
 	public static void StabilityModifierIndustryCap(Industry industry, MarketAPI market, String modId) {
+
 		if (Misc.getNumIndustries(market) > Misc.getMaxIndustries(market)) {
-			market.getStability().modifyFlat("_" + modId + "_overmax", -Misc.OVER_MAX_INDUSTRIES_PENALTY,
-					"Maximum number of industries exceeded");
+			market.getStability().modifyFlat("_" + modId + "_overmax", -Misc.OVER_MAX_INDUSTRIES_PENALTY, "Maximum number of industries exceeded");
 		} else {
 			market.getStability().unmodifyFlat("_" + modId + "_overmax");
 		}
