@@ -101,14 +101,14 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		demand(Commodities.LUXURY_GOODS, (int) ((1.0/30.0)*Math.pow(10, size - luxuryThreshold)));
 		demand(Commodities.SUPPLIES, (int) ((1.0/15.0)*Math.pow(10, size - 3)));
 		demand(Commodities.DRUGS, (int) ((0.025)*Math.pow(10, size - 3)));
-		demand(Commodities.ORGANS, (int) ((1.0/180.0)*Math.pow(10, size - 3)));
+		demand(Commodities.ORGANS, (int) ((3.0/233.0)*Math.pow(10, size - 5)));
 		if (!market.hasCondition(Conditions.HABITABLE)) {
 			demand(Commodities.ORGANICS, (int) ((1.0/6.0)*Math.pow(10, size - 3)));
 		}
 
 		supply(Commodities.CREW, (int) (DAILY_BASE_PROD_CREW*Math.pow(10, size - 3)));
 		supply(Commodities.DRUGS, (int) ((0.025)*Math.pow(10, size - 5)));
-		supply(Commodities.ORGANS, (int) ((1.0/180.0)*Math.pow(10, size - 5)));
+		supply(Commodities.ORGANS, (int) ((3.0/1168.0)*Math.pow(10, size - 5)));
 
 		AccessModifierSpaceport(size);
 

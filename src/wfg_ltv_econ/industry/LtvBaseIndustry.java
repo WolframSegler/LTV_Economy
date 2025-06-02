@@ -354,7 +354,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		market.getSubmarket(Submarket).getCargo().removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
 	}
 
-	public float ltv_precalculateconsumption(float... costlist) {
+	public float ltv_precalculatecost(float... costlist) {
 		float cost = 0f;
 		for (float elementcost : costlist) {
 			cost += elementcost;

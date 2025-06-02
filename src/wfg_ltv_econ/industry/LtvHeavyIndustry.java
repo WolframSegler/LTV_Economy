@@ -120,13 +120,13 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public void apply() {
 		super.apply(true);
 
-		demand(Commodities.METALS, Math.round(ltv_precalculateconsumption(
+		demand(Commodities.METALS, Math.round(ltv_precalculatecost(
 				DAILY_BASE_PROD_HEAVY_MACHINERY * METALS_WEIGHT_FOR_HEAVY_MACHINERY,
 				DAILY_BASE_PROD_SUPPLIES * METALS_WEIGHT_FOR_SUPPLIES,
 				DAILY_BASE_PROD_HAND_WEAPONS * METALS_WEIGHT_FOR_HAND_WEAPONS,
 				DAILY_BASE_PROD_SHIPS * METALS_WEIGHT_FOR_SHIPS)));
 
-		demand(Commodities.RARE_METALS, Math.round(ltv_precalculateconsumption(
+		demand(Commodities.RARE_METALS, Math.round(ltv_precalculatecost(
 				DAILY_BASE_PROD_HEAVY_MACHINERY * RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY,
 				DAILY_BASE_PROD_SUPPLIES * RARE_METALS_WEIGHT_FOR_SUPPLIES,
 				DAILY_BASE_PROD_HAND_WEAPONS * RARE_METALS_WEIGHT_FOR_HAND_WEAPONS,

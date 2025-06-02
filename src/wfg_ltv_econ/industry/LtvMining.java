@@ -9,7 +9,6 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
-import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
@@ -17,6 +16,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
+import com.fs.starfarer.api.campaign.econ.Industry;
 
 
 public class LtvMining extends LtvBaseIndustry {
@@ -32,10 +32,13 @@ public class LtvMining extends LtvBaseIndustry {
     public final static float DAILY_BASE_PROD_ORGANICS = 0.9f;
     public final static float DAILY_BASE_PROD_VOLATILES = 0.1f;
 
-    public final static float HEAVY_MACHINERY_WEIGHT_FOR_MINING = 0.3f;
+    public final static float HEAVY_MACHINERY_WEIGHT_FOR_MINING = 0.4f;
     public final static float DRUGS_WEIGHT_FOR_MINING = 0.4f;
 
 	protected static Map<String, List<Pair<String, Float>>> COMMODITY_LIST;
+	protected static Map<String, Float> MINING_RESOURCES;
+	public float demandCostHeavyMachinery = 0;
+	public float demandCostDrugs = 0;
 
     static {
 		COMMODITY_LIST = Map.of(
@@ -55,33 +58,31 @@ public class LtvMining extends LtvBaseIndustry {
 					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
 					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
 					)
-				);
+		);
+
+		MINING_RESOURCES = Map.of(
+			Commodities.ORE, DAILY_BASE_PROD_ORE,
+			Commodities.RARE_ORE, DAILY_BASE_PROD_RARE_ORE,
+			Commodities.ORGANICS, DAILY_BASE_PROD_ORGANICS,
+            Commodities.VOLATILES, DAILY_BASE_PROD_VOLATILES
+		);
 	}
 
 	public void apply() {
 		super.apply(true);
 
-        demand(Commodities.HEAVY_MACHINERY, Math.round(ltv_precalculateconsumption(
-				DAILY_BASE_PROD_ORE * HEAVY_MACHINERY_WEIGHT_FOR_MINING,
-				DAILY_BASE_PROD_RARE_ORE * HEAVY_MACHINERY_WEIGHT_FOR_MINING,
-				DAILY_BASE_PROD_ORGANICS * HEAVY_MACHINERY_WEIGHT_FOR_MINING,
-				DAILY_BASE_PROD_VOLATILES * HEAVY_MACHINERY_WEIGHT_FOR_MINING)));
-
-        demand(Commodities.DRUGS, Math.round(ltv_precalculateconsumption(
-				DAILY_BASE_PROD_ORE * DRUGS_WEIGHT_FOR_MINING,
-				DAILY_BASE_PROD_RARE_ORE * DRUGS_WEIGHT_FOR_MINING,
-				DAILY_BASE_PROD_ORGANICS * DRUGS_WEIGHT_FOR_MINING,
-				DAILY_BASE_PROD_VOLATILES * DRUGS_WEIGHT_FOR_MINING)));
-
-        supply(Commodities.ORE, (int) (DAILY_BASE_PROD_ORE*workersAssigned));
-        supply(Commodities.RARE_ORE, (int) (DAILY_BASE_PROD_RARE_ORE*workersAssigned));
-        supply(Commodities.ORGANICS, (int) (DAILY_BASE_PROD_ORGANICS*workersAssigned));
-        supply(Commodities.VOLATILES, (int) (DAILY_BASE_PROD_VOLATILES*workersAssigned));
-
 		applyConditionModifiers();
+
+		// Supply before demand, because demand depends on supply in this case
+		demand(Commodities.HEAVY_MACHINERY, Math.round(demandCostHeavyMachinery));
+        demand(Commodities.DRUGS, Math.round(demandCostDrugs));
 		
 		if (!isFunctional()) {
 			supply.clear();
+		}
+
+		for (Industry industry : market.getIndustries()) {
+			Global.getLogger(getClass()).error("Industry: " + industry);
 		}
 	}
 
@@ -208,13 +209,20 @@ public class LtvMining extends LtvBaseIndustry {
     		}
 		}
 
-		// Custom modifiers
+		// Ltv modifiers
+		supply(commodity, (int) (MINING_RESOURCES.get(commodity)*workersAssigned));
     	getSupply(commodity).getQuantity().modifyMult(id + "_ltv_" + commodity, multiplier, description);
+
+		demandCostHeavyMachinery = MINING_RESOURCES.get(commodity)*HEAVY_MACHINERY_WEIGHT_FOR_MINING;
+		demandCostDrugs = MINING_RESOURCES.get(commodity)*DRUGS_WEIGHT_FOR_MINING;
 	}
 
 	@Override
 	public void unapply() {
 		super.unapply();
+
+		demandCostHeavyMachinery = 0;
+		demandCostDrugs = 0;
 	}
 
     protected int dayTracker = -1;
