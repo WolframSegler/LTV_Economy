@@ -137,5 +137,6 @@ public class LtvIndustryListPanel extends IndustryListPanel {
          }
       }
 
+      ltv_recalculateMaxDemandAndSupply();
    }
 }
