@@ -517,6 +517,10 @@ public class BuildingWidget extends intnew {
       return constructionActionButton;
    }
 
+   public Industry getIndustry() {
+      return currentIndustry;
+   }
+
    @Override
    public IndustryListPanel getIndustryPanel() {
       return IndustryPanel;

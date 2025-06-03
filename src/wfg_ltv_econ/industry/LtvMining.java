@@ -208,8 +208,8 @@ public class LtvMining extends LtvBaseIndustry {
 		supply(commodity, (int) (MINING_RESOURCES.get(commodity)*workersAssigned));
     	getSupply(commodity).getQuantity().modifyMult(id + "_ltv_" + commodity, multiplier, description);
 
-		demandCostHeavyMachinery = MINING_RESOURCES.get(commodity)*HEAVY_MACHINERY_WEIGHT_FOR_MINING;
-		demandCostDrugs = MINING_RESOURCES.get(commodity)*DRUGS_WEIGHT_FOR_MINING;
+		demandCostHeavyMachinery += MINING_RESOURCES.get(commodity)*HEAVY_MACHINERY_WEIGHT_FOR_MINING*workersAssigned;
+		demandCostDrugs += MINING_RESOURCES.get(commodity)*DRUGS_WEIGHT_FOR_MINING*workersAssigned;
 	}
 
 	@Override

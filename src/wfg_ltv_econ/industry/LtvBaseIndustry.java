@@ -712,6 +712,27 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 	}
 
+	/*
+	 * updates the max demand to be cumulative rather than taking the highest demand
+	 */
+	protected void ltv_updateMaxDemand() {
+		for (Map.Entry<String, MutableCommodityQuantity> commodity : demand.entrySet()) {
+			CommodityOnMarketAPI com = market.getCommodityData(commodity.getKey());
+			com.setMaxDemand(com.getMaxDemand() + commodity.getValue().getQuantity().getModifiedInt());
+		}
+		for (Map.Entry<String, MutableCommodityQuantity> commodity : supply.entrySet()) {
+			CommodityOnMarketAPI com = market.getCommodityData(commodity.getKey());
+			com.setMaxSupply(com.getMaxSupply() + commodity.getValue().getQuantity().getModifiedInt());
+		}
+	}
+
+	protected void ltv_resetMaxDemand() {
+		for (CommodityOnMarketAPI com : market.getCommoditiesCopy()) {
+			com.setMaxDemand(0);
+			com.setMaxSupply(0);
+		}
+	}
+
 	protected CargoAPI getCargoForInteractionMode(MarketInteractionMode mode) {
 		CargoAPI cargo = null;
 		if (mode == null)

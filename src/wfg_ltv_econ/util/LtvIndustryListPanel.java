@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -18,6 +19,7 @@ import com.fs.starfarer.ui.newui.L;
 import com.fs.starfarer.ui.d;
 import com.fs.starfarer.ui.Q;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 
 import wfg_ltv_econ.industry.BuildingWidget;
 
@@ -36,6 +38,26 @@ public class LtvIndustryListPanel extends IndustryListPanel {
 
    public static Comparator<Industry> getIndustryOrderComparator() {
       return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
+   }
+
+   public void ltv_recalculateMaxDemandAndSupply() {
+      // Resets Max Demand & Supply
+      for (CommodityOnMarketAPI com : market.getAllCommodities()) {
+         com.setMaxDemand(0);
+         com.setMaxSupply(0);
+      }
+
+      for (Industry industry : getVisibleIndustries()) {
+         for (MutableCommodityQuantity demand : industry.getAllDemand()) {
+            CommodityOnMarketAPI com = market.getCommodityData(demand.getCommodityId());
+			   com.setMaxDemand(com.getMaxDemand() + demand.getQuantity().getModifiedInt());
+         }
+
+         for (MutableCommodityQuantity supply : industry.getAllSupply()) {
+            CommodityOnMarketAPI com = market.getCommodityData(supply.getCommodityId());
+			   com.setMaxSupply(com.getMaxSupply() + supply.getQuantity().getModifiedInt());
+         }
+      }
    }
 
    @Override
