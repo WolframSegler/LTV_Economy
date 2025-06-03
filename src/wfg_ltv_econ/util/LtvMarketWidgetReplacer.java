@@ -29,6 +29,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             frames = 0;
             return;
         }
+
         if (!Global.getSector().getCampaignUI().isShowingDialog()) {
             return;
         }
@@ -45,21 +46,18 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         // Find the master UI Panel
         UIPanelAPI master = null;
         o0Oo dialog = ((CampaignState) state).getEncounterDialog();
-        if (dialog == null || dialog.getCoreUI() == null) {
-            return;
+        if (dialog != null && dialog.getCoreUI() != null) {
+            master = (UIPanelAPI) dialog.getCoreUI();
         }
-        master = (UIPanelAPI) dialog.getCoreUI();
         if (master == null) {
             master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
-            // Access to the Market from the Game Menu or smh
+            // Access to the Market from the Command menu
         }
         if (master == null) {
             return;
         }
 
         // Find IndustryListPanel
-        UIPanelAPI industryPanel = null;
-
         Object masterTab = ReflectionUtils.invoke(master, "getCurrentTab", new Object[0]);
         if (!(masterTab instanceof UIPanelAPI)) {
             return;
@@ -98,7 +96,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         }
 
         List<?> managementChildren = (List<?>) ReflectionUtils.invoke(managementPanel, "getChildrenCopy");
-        industryPanel = managementChildren.stream()
+        UIPanelAPI industryPanel = managementChildren.stream()
                 .filter(child -> child instanceof IndustryListPanel)
                 .map(child -> (IndustryListPanel) child)
                 .findFirst().orElse(null);
