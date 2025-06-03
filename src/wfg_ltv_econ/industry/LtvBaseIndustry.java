@@ -230,6 +230,9 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	public void unapply() {
 		applyNoAICoreModifiers();
+
+		demand.clear();
+		supply.clear();
 		
 		Boolean wasImproved = improved;
 		improved = null;

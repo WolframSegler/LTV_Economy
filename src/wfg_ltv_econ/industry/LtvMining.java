@@ -205,6 +205,9 @@ public class LtvMining extends LtvBaseIndustry {
 		}
 
 		// Ltv modifiers
+		if (multiplier == 0) {
+			return;
+		}
 		supply(commodity, (int) (MINING_RESOURCES.get(commodity)*workersAssigned));
     	getSupply(commodity).getQuantity().modifyMult(id + "_ltv_" + commodity, multiplier, description);
 

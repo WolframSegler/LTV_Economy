@@ -107,7 +107,6 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         replaceIndustryListPanel(managementPanel, industryPanel);
     }
 
-    @SuppressWarnings("unchecked")
     private static final void replaceIndustryListPanel(UIPanelAPI managementPanel, UIPanelAPI industryPanel) {
         if (industryPanel instanceof LtvIndustryListPanel) {
             return;
