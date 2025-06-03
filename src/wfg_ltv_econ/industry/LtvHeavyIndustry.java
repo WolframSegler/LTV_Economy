@@ -149,9 +149,6 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public void unapply() {
 		super.unapply();
 
-		supply.clear();
-		demand.clear();
-
 		if (addedPollution && !permaPollution) {
 			market.removeCondition(Conditions.POLLUTION);
 			addedPollution = false;

@@ -12,46 +12,75 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 
     protected static Map<String, List<Pair<String, Float>>> COMMODITY_LIST;
 
+    static {
+		COMMODITY_LIST = Map.of(
+			Commodities.ORE, List.of(
+					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
+					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
+					),
+			Commodities.RARE_ORE, List.of(
+					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
+					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
+					),
+			Commodities.ORGANICS, List.of(
+					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
+					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
+					),
+            Commodities.VOLATILES, List.of(
+					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
+					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
+					)
+		);
+	}
+
 	public void apply() {
 		super.apply(true);
 		
 		int size = market.getSize();
 		
-		demand(Commodities.ORGANICS, size);
+		
 		
 		supply(Commodities.DOMESTIC_GOODS, size);
-		//supply(Commodities.SUPPLIES, size - 3);
-			
-		//if (!market.getFaction().isIllegal(Commodities.LUXURY_GOODS)) {
 		if (!market.isIllegal(Commodities.LUXURY_GOODS)) {
 			supply(Commodities.LUXURY_GOODS, size - 2);
-		} else {
-			supply(Commodities.LUXURY_GOODS, 0);
 		}
-		//if (!market.getFaction().isIllegal(Commodities.DRUGS)) {
 		if (!market.isIllegal(Commodities.DRUGS)) {
 			supply(Commodities.DRUGS, size - 2);
-		} else {
-			supply(Commodities.DRUGS, 0);
 		}
-		
-		Pair<String, Integer> deficit = getMaxDeficit(Commodities.ORGANICS);
-		
-		applyDeficitToProduction(1, deficit,
-					Commodities.DOMESTIC_GOODS,
-					Commodities.LUXURY_GOODS,
-					//Commodities.SUPPLIES,
-					Commodities.DRUGS);
+        
+        demand(Commodities.ORGANICS, size);
 		
 		if (!isFunctional()) {
 			supply.clear();
 		}
 	}
 
-	
 	@Override
 	public void unapply() {
 		super.unapply();
+	}
+
+    protected int dayTracker = -1;
+    @Override
+	public void advance(float amount) {
+		super.advance(amount);
+
+		int day = Global.getSector().getClock().getDay();
+
+		if (dayTracker == -1) { // if not initialized
+			dayTracker = day;
+		}
+
+		if (dayTracker != day) { //Production
+
+			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
+
+			//All the consumption is done by Population and Infrastructure
+
+			ltv_produce(COMMODITY_LIST);
+
+			dayTracker = day;
+		}
 	}
 	
 	@Override
