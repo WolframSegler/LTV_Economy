@@ -226,13 +226,8 @@ public class LtvMining extends LtvBaseIndustry {
     protected int dayTracker = -1;
     @Override
 	public void advance(float amount) {
-		super.advance(amount);
-
 		int day = Global.getSector().getClock().getDay();
-
-		if (dayTracker == -1) { // if not initialized
-			dayTracker = day;
-		}
+		super.advance(day);
 
 		if (dayTracker != day) { //Production
 
@@ -242,7 +237,7 @@ public class LtvMining extends LtvBaseIndustry {
 
 			ltv_produce(COMMODITY_LIST);
 
-			dayTracker = day;
+			dayTracker = day; // Do this at the end of the advance() method
 		}
 	}
 

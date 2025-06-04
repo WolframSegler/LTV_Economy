@@ -168,13 +168,8 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 	@Override
 	public void advance(float amount) {
-		super.advance(amount);
-
 		int day = Global.getSector().getClock().getDay();
-
-		if (dayTracker == -1) { // if not initialized
-			dayTracker = day;
-		}
+		super.advance(day);
 
 		if (dayTracker != day) { //Production
 
@@ -184,12 +179,12 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 			ltv_produce(COMMODITY_LIST);
 
-			dayTracker = day;
-
 			if (special != null && !isPermaPollution()) {
 				daysWithNanoforge++;
 				updatePollutionStatus();
 			}
+
+			dayTracker = day; // Do this at the end of the advance() method
 		}
 	}
 

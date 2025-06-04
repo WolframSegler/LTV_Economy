@@ -10,25 +10,24 @@ import com.fs.starfarer.api.util.Pair;
 
 public class LtvLightIndustry extends LtvBaseIndustry {
 
+	public static final float DAILY_BASE_PROD_DOMESTIC_GOODS = 0.4f;
+	public static final float DAILY_BASE_PROD_LUXURY_GOODS = 0.2f;
+	public static final float DAILY_BASE_PROD_DRUGS = 0.1f;
+
+	public static final float ORGANICS_WEIGHT_FOR_LIGHT_INDUSTRY = 1;
     protected static Map<String, List<Pair<String, Float>>> COMMODITY_LIST;
+	public float demandCostOrganics = 0;
 
     static {
 		COMMODITY_LIST = Map.of(
-			Commodities.ORE, List.of(
-					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
-					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
+			Commodities.DOMESTIC_GOODS, List.of(
+					new Pair<>(Commodities.ORGANICS, ORGANICS_WEIGHT_FOR_LIGHT_INDUSTRY)
 					),
-			Commodities.RARE_ORE, List.of(
-					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
-					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
+			Commodities.LUXURY_GOODS, List.of(
+					new Pair<>(Commodities.ORGANICS, ORGANICS_WEIGHT_FOR_LIGHT_INDUSTRY)
 					),
-			Commodities.ORGANICS, List.of(
-					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
-					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
-					),
-            Commodities.VOLATILES, List.of(
-					new Pair<>(Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_WEIGHT_FOR_MINING),
-					new Pair<>(Commodities.DRUGS, DRUGS_WEIGHT_FOR_MINING)
+			Commodities.DRUGS, List.of(
+					new Pair<>(Commodities.ORGANICS, ORGANICS_WEIGHT_FOR_LIGHT_INDUSTRY)
 					)
 		);
 	}
@@ -36,19 +35,18 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 	public void apply() {
 		super.apply(true);
 		
-		int size = market.getSize();
-		
-		
-		
-		supply(Commodities.DOMESTIC_GOODS, size);
+		supply(Commodities.DOMESTIC_GOODS, (int) DAILY_BASE_PROD_DOMESTIC_GOODS*workersAssigned);
+		demandCostOrganics += DAILY_BASE_PROD_DOMESTIC_GOODS*workersAssigned;
 		if (!market.isIllegal(Commodities.LUXURY_GOODS)) {
-			supply(Commodities.LUXURY_GOODS, size - 2);
+			supply(Commodities.LUXURY_GOODS, (int) DAILY_BASE_PROD_LUXURY_GOODS*workersAssigned);
+			demandCostOrganics += DAILY_BASE_PROD_LUXURY_GOODS*workersAssigned;
 		}
 		if (!market.isIllegal(Commodities.DRUGS)) {
-			supply(Commodities.DRUGS, size - 2);
+			supply(Commodities.DRUGS, (int) DAILY_BASE_PROD_DRUGS*workersAssigned);
+			demandCostOrganics += DAILY_BASE_PROD_DRUGS*workersAssigned;
 		}
         
-        demand(Commodities.ORGANICS, size);
+        demand(Commodities.ORGANICS, (int)demandCostOrganics);
 		
 		if (!isFunctional()) {
 			supply.clear();
@@ -58,18 +56,13 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 	@Override
 	public void unapply() {
 		super.unapply();
+		demandCostOrganics = 0;
 	}
 
-    protected int dayTracker = -1;
     @Override
 	public void advance(float amount) {
-		super.advance(amount);
-
 		int day = Global.getSector().getClock().getDay();
-
-		if (dayTracker == -1) { // if not initialized
-			dayTracker = day;
-		}
+		super.advance(day);
 
 		if (dayTracker != day) { //Production
 
@@ -79,7 +72,7 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 
 			ltv_produce(COMMODITY_LIST);
 
-			dayTracker = day;
+			dayTracker = day; // Do this at the end of the advance() method
 		}
 	}
 	

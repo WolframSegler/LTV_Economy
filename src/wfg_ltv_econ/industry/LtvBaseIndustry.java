@@ -473,22 +473,25 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 	protected boolean wasDisrupted = false;
 
-	public void advance(float amount) {
-		boolean disrupted = isDisrupted();
-		if (!disrupted && wasDisrupted) {
-			disruptionFinished();
+	protected int dayTracker = -1;
+	public void advance(int day) {
+
+		if (dayTracker == -1) { // if not initialized
+			dayTracker = day;
 		}
-		wasDisrupted = disrupted;
-
-		if (building && !disrupted) {
-			float days = Global.getSector().getClock().convertToDays(amount);
-			if (DebugFlags.COLONY_DEBUG) {
-				days *= 100f;
+		if (dayTracker != day) {
+			boolean disrupted = isDisrupted();
+			if (!disrupted && wasDisrupted) {
+				disruptionFinished();
 			}
-			buildProgress += days;
+			wasDisrupted = disrupted;
 
-			if (buildProgress >= buildTime) {
-				finishBuildingOrUpgrading();
+			if (building && !disrupted) {
+				buildProgress++;
+
+				if ((buildProgress >= buildTime) || DebugFlags.COLONY_DEBUG) {
+					finishBuildingOrUpgrading();
+				}
 			}
 		}
 	}

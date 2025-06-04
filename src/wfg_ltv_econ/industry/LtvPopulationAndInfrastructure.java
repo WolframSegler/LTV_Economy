@@ -308,13 +308,8 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 
 	@Override
 	public void advance(float amount) {
-		super.advance(amount);
-
 		int day = Global.getSector().getClock().getDay();
-
-		if (dayTracker == -1) { // if not initialized
-			dayTracker = day;
-		}
+		super.advance(day);
 
 		if (dayTracker != day) { // Consumption&Production
 			// All the industries set their own demand.
@@ -335,7 +330,7 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 
 			ltv_produce(COMMODITY_LIST);
 
-			dayTracker = day;
+			dayTracker = day; // Do this at the end of the advance() method
 		}
 	}
 

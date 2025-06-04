@@ -1,0 +1,10 @@
+{
+    "DEMAND": {
+        "ORGANICS": "The demand for organics is fully dependent on the production amount of goods."
+    },
+    "SUPPLY": {
+        "DOMESTIC_GOODS": "",
+        "LUXURY_GOODS": "",
+        "DRUGS": ""
+    }
+}
