@@ -17,10 +17,10 @@ public class LtvNumFormat {
      *   79245 -> "79.2K"
      *   1_000_000_000L -> "1.00B"
      */
-    public static final String formatWithMaxDigits(int value) {
+    public static final String formatWithMaxDigits(long value) {
 
         if (value < 1000) {
-            return Integer.toString(value);
+            return Long.toString(value);
         }
 
         int suffix = (int)(Math.log10(value) / 3);

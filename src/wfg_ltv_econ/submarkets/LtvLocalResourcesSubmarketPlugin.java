@@ -538,7 +538,7 @@ public class LtvLocalResourcesSubmarketPlugin extends LtvBaseSubmarketPlugin
 			// Misc.getWithDGS(curr) + " / " + Misc.getWithDGS(limit));
 		}
 
-		tooltip.addPara("A portion of the resources produced by the colony will be made available here. " +
+		tooltip.addPara("All the resources produced by the colony can be managed here. " +
 				"These resources can be extracted from the colony's economy for a cost equal to %s of their base value. "
 				+
 				"This cost will be deducted at the end of the month.", opad,

@@ -121,21 +121,21 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		super.apply(true);
 
 		demand(Commodities.METALS, Math.round(ltv_precalculatecost(
-				DAILY_BASE_PROD_HEAVY_MACHINERY * METALS_WEIGHT_FOR_HEAVY_MACHINERY,
-				DAILY_BASE_PROD_SUPPLIES * METALS_WEIGHT_FOR_SUPPLIES,
-				DAILY_BASE_PROD_HAND_WEAPONS * METALS_WEIGHT_FOR_HAND_WEAPONS,
-				DAILY_BASE_PROD_SHIPS * METALS_WEIGHT_FOR_SHIPS)));
+				DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned() * METALS_WEIGHT_FOR_HEAVY_MACHINERY,
+				DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned() * METALS_WEIGHT_FOR_SUPPLIES,
+				DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned() * METALS_WEIGHT_FOR_HAND_WEAPONS,
+				DAILY_BASE_PROD_SHIPS*getWorkerAssigned() * METALS_WEIGHT_FOR_SHIPS)));
 
 		demand(Commodities.RARE_METALS, Math.round(ltv_precalculatecost(
-				DAILY_BASE_PROD_HEAVY_MACHINERY * RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY,
-				DAILY_BASE_PROD_SUPPLIES * RARE_METALS_WEIGHT_FOR_SUPPLIES,
-				DAILY_BASE_PROD_HAND_WEAPONS * RARE_METALS_WEIGHT_FOR_HAND_WEAPONS,
-				DAILY_BASE_PROD_SHIPS * RARE_METALS_WEIGHT_FOR_SHIPS)));
+				DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY,
+				DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_SUPPLIES,
+				DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_HAND_WEAPONS,
+				DAILY_BASE_PROD_SHIPS*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_SHIPS)));
 
-		supply(Commodities.HEAVY_MACHINERY, DAILY_BASE_PROD_HEAVY_MACHINERY);
-		supply(Commodities.SUPPLIES, DAILY_BASE_PROD_SUPPLIES);
-		supply(Commodities.HAND_WEAPONS, DAILY_BASE_PROD_HAND_WEAPONS);
-		supply(Commodities.SHIPS, DAILY_BASE_PROD_SHIPS);
+		supply(Commodities.HEAVY_MACHINERY, (int)(DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned()));
+		supply(Commodities.SUPPLIES, (int)(DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned()));
+		supply(Commodities.HAND_WEAPONS, (int)(DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned()));
+		supply(Commodities.SHIPS, (int)(DAILY_BASE_PROD_SHIPS*getWorkerAssigned()));
 
 		HeavyIndustryModifiers();
 
@@ -222,6 +222,11 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 	public boolean isAddedPollution() {
 		return addedPollution;
+	}
+
+	@Override
+	public boolean isWorkerAssignable() {
+		return true;
 	}
 
 	public void setAddedPollution(boolean addedPollution) {

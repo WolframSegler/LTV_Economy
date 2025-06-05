@@ -35,15 +35,15 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 	public void apply() {
 		super.apply(true);
 		
-		supply(Commodities.DOMESTIC_GOODS, (int) DAILY_BASE_PROD_DOMESTIC_GOODS*workersAssigned);
-		demandCostOrganics += DAILY_BASE_PROD_DOMESTIC_GOODS*workersAssigned;
+		supply(Commodities.DOMESTIC_GOODS, (int) (DAILY_BASE_PROD_DOMESTIC_GOODS*getWorkerAssigned()));
+		demandCostOrganics += DAILY_BASE_PROD_DOMESTIC_GOODS*getWorkerAssigned();
 		if (!market.isIllegal(Commodities.LUXURY_GOODS)) {
-			supply(Commodities.LUXURY_GOODS, (int) DAILY_BASE_PROD_LUXURY_GOODS*workersAssigned);
-			demandCostOrganics += DAILY_BASE_PROD_LUXURY_GOODS*workersAssigned;
+			supply(Commodities.LUXURY_GOODS, (int) (DAILY_BASE_PROD_LUXURY_GOODS*getWorkerAssigned()));
+			demandCostOrganics += DAILY_BASE_PROD_LUXURY_GOODS*getWorkerAssigned();
 		}
 		if (!market.isIllegal(Commodities.DRUGS)) {
-			supply(Commodities.DRUGS, (int) DAILY_BASE_PROD_DRUGS*workersAssigned);
-			demandCostOrganics += DAILY_BASE_PROD_DRUGS*workersAssigned;
+			supply(Commodities.DRUGS, (int) (DAILY_BASE_PROD_DRUGS*getWorkerAssigned()));
+			demandCostOrganics += DAILY_BASE_PROD_DRUGS*getWorkerAssigned();
 		}
         
         demand(Commodities.ORGANICS, (int)demandCostOrganics);
@@ -104,6 +104,11 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 
 	@Override
 	protected boolean canImproveToIncreaseProduction() {
+		return true;
+	}
+
+	@Override
+	public boolean isWorkerAssignable() {
 		return true;
 	}
 }

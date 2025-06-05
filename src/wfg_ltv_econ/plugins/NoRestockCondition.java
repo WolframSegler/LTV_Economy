@@ -28,6 +28,11 @@ public class NoRestockCondition extends BaseMarketConditionPlugin {
         }
     }
 
+    @Override
+    public boolean showIcon() {
+        return false;
+    }
+
     public final static void initialize() {
         // All existing markets
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {

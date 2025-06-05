@@ -22,6 +22,7 @@ import com.fs.starfarer.api.campaign.econ.InstallableIndustryItemPlugin;
 import com.fs.starfarer.api.campaign.econ.InstallableIndustryItemPlugin.InstallableItemDescriptionMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
+import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.campaign.impl.items.GenericSpecialItemPlugin;
@@ -56,6 +57,8 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
+
+import wfg_ltv_econ.plugins.WorkerPoolCondition;
 import wfg_ltv_econ.util.LtvNumFormat;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {
@@ -121,7 +124,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	protected transient MutableStat demandReductionFromOther = new MutableStat(0);
 	protected transient MutableStat supplyBonusFromOther = new MutableStat(0);
 
-	protected int workersAssigned = 1000;
+	public float workersAssigned = 0;
 
 	public LtvBaseIndustry() {
 
@@ -233,16 +236,16 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 		demand.clear();
 		supply.clear();
-		
+
 		Boolean wasImproved = improved;
 		improved = null;
 		applyImproveModifiers(); // to unapply them
 		improved = wasImproved;
-		
+
 		if (this instanceof MarketImmigrationModifier && market != null) {
 			market.removeTransientImmigrationModifier((MarketImmigrationModifier) this);
 		}
-		
+
 		if (special != null) {
 			InstallableItemEffect effect = ItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
 			if (effect != null) {
@@ -342,7 +345,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		float available = ltv_getAvaliableInCargo(resource).two;
 		consumption_amount = Math.min(consumption_amount, available); // only take what’s available
 
-		market.getSubmarket(ltv_getAvaliableInCargo(resource).one).getCargo().removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
+		market.getSubmarket(ltv_getAvaliableInCargo(resource).one).getCargo()
+				.removeItems(CargoAPI.CargoItemType.RESOURCES, resource, consumption_amount);
 	}
 
 	public float ltv_precalculatecost(float... costlist) {
@@ -474,6 +478,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	protected boolean wasDisrupted = false;
 
 	protected int dayTracker = -1;
+
 	public void advance(int day) {
 
 		if (dayTracker == -1) { // if not initialized
@@ -635,6 +640,45 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		buildNextInQueue(market);
 	}
 
+	public int getWorkerAssigned() {
+		MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
+		if (workerPoolCondition == null) {
+			return 0;
+		}
+		WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+		return (int) (workersAssigned * pool.getWorkerPool());
+	}
+
+	public void setWorkersAssigned(float newAmount) {
+		if (0 > newAmount || newAmount > 1 || market == null) {
+			return;
+		}
+		MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
+		if (workerPoolCondition == null) {
+			return;
+		}
+		WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+
+		float delta = newAmount - workersAssigned;
+
+		if (delta > 0f) {
+			// Attempting to assign more workers
+			if (pool.isWorkerRatioAssignable(delta)) {
+				pool.assignFreeWorkers(delta);
+				workersAssigned = newAmount;
+			}
+			// else not enough workers available; do nothing or handle failure
+		} else if (delta < 0f) {
+			// Releasing workers
+			pool.assignFreeWorkers(pool.getFreeWorkerRatio() - delta); // delta is negative
+			workersAssigned = newAmount;
+		}
+	}
+
+	public boolean isWorkerAssignable() {
+		return false;
+	}
+
 	public static void buildNextInQueue(MarketAPI market) {
 		ConstructionQueueItem next = null;
 		Iterator<ConstructionQueueItem> iter = market.getConstructionQueue().getItems().iterator();
@@ -645,7 +689,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			Industry ind = market.instantiateIndustry(next.id);
 			int num = Misc.getNumIndustries(market);
 			int max = Misc.getMaxIndustries(market);
-			if (ind.isAvailableToBuild() && (num <= max || !ind.isIndustry())) { // <= because num includes what's queued
+			if (ind.isAvailableToBuild() && (num <= max || !ind.isIndustry())) { // <= because num includes what's
+																					// queued
 				break;
 			} else {
 				if (market.isPlayerOwned()) {
@@ -818,11 +863,13 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			return new Pair<String, Integer>(submarket, 0);
 		}
 
-		return new Pair<String, Integer>(submarket ,(int) market.getSubmarket(submarket).getCargo().getCommodityQuantity(commodityId));
+		return new Pair<String, Integer>(submarket,
+				(int) market.getSubmarket(submarket).getCargo().getCommodityQuantity(commodityId));
 	}
 
 	public Pair<String, Float> ltv_getMaxDeficit(String... commodityIds) {
-		// Returns a Pair with the item with the highest deficit and the percentage of deficit
+		// Returns a Pair with the item with the highest deficit and the percentage of
+		// deficit
 		// 0 is no deficit and 1 is 100% deficit
 		Pair<String, Float> result = new Pair<String, Float>();
 		result.two = 0f;
@@ -835,7 +882,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			}
 			float available = ltv_getAvaliableInCargo(id).two;
 
-			float deficit = 1f - Math.min((available/demand), 1);
+			float deficit = 1f - Math.min((available / demand), 1);
 			if (deficit > result.two) {
 				result.one = id;
 				result.two = deficit;
@@ -1212,7 +1259,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			final float iconSize = 32f;
 			final int itemsPerRow = 3;
 
-
 			if (hasSupply) {
 				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
 
@@ -1228,11 +1274,13 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
 					int pAmount = curr.getQuantity().getModifiedInt();
 
-					if (pAmount < 1) {continue;}
+					if (pAmount < 1) {
+						continue;
+					}
 
 					// wrap to next line if needed
 					count++;
-					if (count % itemsPerRow == 0 && count !=0) {
+					if (count % itemsPerRow == 0 && count != 0) {
 						x = opad;
 						y += iconSize + 5f; // line height + padding between rows
 					}
@@ -1246,7 +1294,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 					// Add extra padding for thinner icons
 					float actualIconWidth = iconSize * commoditySpec.getIconWidthMult();
-					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth)*0.5f), y);
+					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
 					String txt = Strings.X + LtvNumFormat.formatWithMaxDigits(pAmount);
@@ -1274,7 +1322,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			if (hasDemand) {
 				float startY = tooltip.getHeightSoFar() + opad;
 				if (hasSupply) {
-					startY += opad*1.5f;
+					startY += opad * 1.5f;
 				}
 
 				float x = opad;
@@ -1288,11 +1336,13 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					int dAmount = curr.getQuantity().getModifiedInt();
 					int allDeficit = commodity.getDeficitQuantity();
 
-					if (dAmount < 1) {continue;}
+					if (dAmount < 1) {
+						continue;
+					}
 
 					// wrap to next line if needed
 					count++;
-					if (count % itemsPerRow == 0 && count !=0) {
+					if (count % itemsPerRow == 0 && count != 0) {
 						x = opad;
 						y += iconSize + 5f; // line height + padding between rows
 					}
@@ -1310,7 +1360,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 					// Add extra padding for thinner icons
 					float actualIconWidth = iconSize * commoditySpec.getIconWidthMult();
-					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth)*0.5f), y);
+					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
 					String txt = Strings.X + LtvNumFormat.formatWithMaxDigits(dAmount);
@@ -1484,14 +1534,16 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
 			CommoditySpecAPI coreSpec = Global.getSettings().getCommoditySpec(aiCoreId);
 			TooltipMakerAPI text = tooltip.beginImageWithText(coreSpec.getIconName(), 48);
-			text.addPara(pre + "Reduces demand by %s.Reduces upkeep cost by %s. All modifiers are multiplicative", opad, highlight,
+			text.addPara(pre + "Reduces demand by %s.Reduces upkeep cost by %s. All modifiers are multiplicative", opad,
+					highlight,
 					String.valueOf(Math.round((1f - BETA_CORE_INPUT_REDUCTION) * 100f)) + "%",
 					String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%");
 			tooltip.addImageWithText(opad);
 			return;
 		}
 
-		tooltip.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. All modifiers are multiplicative", opad, highlight,
+		tooltip.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. All modifiers are multiplicative", opad,
+				highlight,
 				String.valueOf(Math.round((1f - BETA_CORE_INPUT_REDUCTION) * 100f)) + "%",
 				String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%");
 	}
@@ -2036,9 +2088,11 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		boolean addedSomething = false;
 		if (canImproveToIncreaseProduction()) {
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
-				info.addPara("Production increased by %s.", initPad, Misc.getHighlightColor(), Strings.X + getImproveProductionBonus());
+				info.addPara("Production increased by %s.", initPad, Misc.getHighlightColor(),
+						Strings.X + getImproveProductionBonus());
 			} else {
-				info.addPara("Increases production by %s.", initPad, Misc.getHighlightColor(), Strings.X + getImproveProductionBonus());
+				info.addPara("Increases production by %s.", initPad, Misc.getHighlightColor(),
+						Strings.X + getImproveProductionBonus());
 			}
 			initPad = opad;
 			addedSomething = true;

@@ -208,11 +208,11 @@ public class LtvMining extends LtvBaseIndustry {
 		if (multiplier == 0) {
 			return;
 		}
-		supply(commodity, (int) (MINING_RESOURCES.get(commodity)*workersAssigned));
+		supply(commodity, (int) (MINING_RESOURCES.get(commodity)*getWorkerAssigned()));
     	getSupply(commodity).getQuantity().modifyMult(id + "_ltv_" + commodity, multiplier, description);
 
-		demandCostHeavyMachinery += MINING_RESOURCES.get(commodity)*HEAVY_MACHINERY_WEIGHT_FOR_MINING*workersAssigned;
-		demandCostDrugs += MINING_RESOURCES.get(commodity)*DRUGS_WEIGHT_FOR_MINING*workersAssigned;
+		demandCostHeavyMachinery += MINING_RESOURCES.get(commodity)*HEAVY_MACHINERY_WEIGHT_FOR_MINING*getWorkerAssigned();
+		demandCostDrugs += MINING_RESOURCES.get(commodity)*DRUGS_WEIGHT_FOR_MINING*getWorkerAssigned();
 	}
 
 	@Override
@@ -274,6 +274,11 @@ public class LtvMining extends LtvBaseIndustry {
 		if (!super.isAvailableToBuild()) return super.getUnavailableReason();
 		
 		return "Requires resource deposits";
+	}
+
+	@Override
+	public boolean isWorkerAssignable() {
+		return true;
 	}
 	
 	@Override

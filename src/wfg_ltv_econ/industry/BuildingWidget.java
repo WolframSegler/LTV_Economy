@@ -4,6 +4,7 @@ import com.fs.graphics.A.D;
 import com.fs.graphics.util.B;
 import com.fs.graphics.util.Fader;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -12,8 +13,15 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
+import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.Fonts;
+import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
@@ -24,10 +32,12 @@ import com.fs.starfarer.ui.OO0O;
 import com.fs.starfarer.ui.Q;
 import com.fs.starfarer.ui.U;
 import com.fs.starfarer.ui.d;
+import com.fs.starfarer.ui.c;
 import com.fs.starfarer.ui.n;
 import com.fs.starfarer.ui.oo0O;
 import com.fs.starfarer.ui.x;
 import wfg_ltv_econ.util.LtvMarketWidgetReplacer;
+import wfg_ltv_econ.util.LtvNumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
 import com.fs.starfarer.campaign.ui.marketinfo.T;
 import java.awt.Color;
@@ -122,6 +132,19 @@ public class BuildingWidget extends intnew {
          constructionActionButton.setEnabled(false);
       }
 
+      LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
+      if (currentIndustry instanceof LtvBaseIndustry) {
+         int assigned = ((LtvBaseIndustry) currentIndustry).getWorkerAssigned();
+         if (((LtvBaseIndustry)currentIndustry).isWorkerAssignable()) {
+            String assignedStr = LtvNumFormat.formatWithMaxDigits(assigned);
+
+            workerCountLabel.setText(assignedStr);
+            workerCountLabel.setHighlightColor(Misc.getHighlightColor());
+            workerCountLabel.highlightFirst(assignedStr);
+            workerCountLabel.setOpacity(0.9f);
+         }
+      }
+
       commodityDeficitIconGroup = new ooO0((U) null);
       commodityDeficitIconGroup.setMediumSpacing(true);
       int var3 = 0;
@@ -166,6 +189,7 @@ public class BuildingWidget extends intnew {
       add(buildingTitleHeader).inTL(0.0F, 0.0F);
       add(commodityDeficitIconGroup).inBL(PAD + 2.0F, PAD);
       add(specialItemGroup).inTR(PAD + 2.0F, PAD + buildingTitleHeader.getHeight() + PAD);
+      add((d)workerCountLabel).inTL(PAD + 4f, PAD + 25f);
 
       boolean var15 = currentIndustry.isBuilding() || currentIndustry.isDisrupted();
       if (var15) {
@@ -318,10 +342,6 @@ public class BuildingWidget extends intnew {
       Color var9 = dark;
       if (currentIndustry.isImproved()) {
          var9 = Misc.getStoryDarkColor();
-      }
-
-      if (buildingTitleHeader == null) {
-         buildingTitleHeader = d.createSmallInsigniaLabel(currentIndustry.getCurrentName(), Alignment.LMID);
       }
 
       if (currentIndustry.isIndustry()) {

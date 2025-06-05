@@ -16,11 +16,14 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void onNewGame() {
         NoRestockCondition.initialize();
+        WorkerPoolCondition.initialize();
     }
 
     @Override
     public void onGameLoad(boolean newGame) {
         NoRestockCondition.initialize();
+        WorkerPoolCondition.initialize();
+        Global.getSector().getListenerManager().addListener(new AddWorkerIndustryOption(), true);
 
         Global.getSector().addTransientScript(new LtvMarketWidgetReplacer());
     }
