@@ -679,6 +679,16 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return false;
 	}
 
+	public int getWorkerCap() {
+		MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
+		if (workerPoolCondition == null) {
+			return 0;
+		}
+		WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+
+		return (int)(pool.getWorkerPool()*0.2);
+	}
+
 	public static void buildNextInQueue(MarketAPI market) {
 		ConstructionQueueItem next = null;
 		Iterator<ConstructionQueueItem> iter = market.getConstructionQueue().getItems().iterator();

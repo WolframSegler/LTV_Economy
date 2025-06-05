@@ -79,5 +79,6 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
         }
 
         // On Click
+        ui.showDialog(520f, 320f, new AssignWorkersDialog(opt.ind));
     }
 }
