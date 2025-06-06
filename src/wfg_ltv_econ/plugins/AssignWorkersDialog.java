@@ -3,7 +3,6 @@ package wfg_ltv_econ.plugins;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.api.ui.ValueDisplayMode;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
@@ -17,9 +16,8 @@ import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.ui.impl.Q;
-import com.fs.starfarer.campaign.ui.N; //Current slider class (v.0.98 R8). Do not use directly
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ScanResult;
+import com.fs.starfarer.campaign.ui.N; //Current slider class (v.0.98 R8).
+// Here is a unique method it has: public float getShowNotchOnIfBelowProgress()
 
 public class AssignWorkersDialog implements CustomDialogDelegate {
 
@@ -38,13 +36,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
         // Create the slider
-        Class<?> sliderClass = findSlider();
-        if (sliderClass == null) {
-            return;
-        }
-
         // public N(String LabelText, float MinValue, float MaxValue)
-        Object slider = ReflectionUtils.getConstructorsMatching(sliderClass).get(0).newInstance("Workers", (float)0, (float)maxWorkers);
+        N slider = new N("Workers", 0, maxWorkers);
 
         TooltipMakerAPI ui = panel.createUIElement(500f, 300f, true);
 
@@ -107,27 +100,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
     }
 
     public CustomUIPanelPlugin getCustomPanelPlugin() {
-        return null;
-    }
-
-    protected static Class<?> findSlider() {
-        ClassGraph classGraph = new ClassGraph().enableClassInfo().acceptPackages("com.fs.starfarer.campaign.ui");
-
-        try (ScanResult scanResult = classGraph.scan()) {
-            List<String> classNames = scanResult.getAllClasses().getNames();
-    
-            for (String className : classNames) {
-
-                Class<?> clazz = Class.forName(className);
-
-                if(!ReflectionUtils.getMethodsMatching(clazz, "getShowNotchOnIfBelowProgress", float.class).isEmpty()) {
-                    return clazz; // The class has said method. It should be the slider class
-                }
-
-            }
-        } catch (Exception e) {
-            Global.getLogger(AssignWorkersDialog.class).error("Could not find the slider class: ", e);
-        }
         return null;
     }
 }

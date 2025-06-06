@@ -16,3 +16,8 @@ Word Wrap shortcut: Alt + Z
     jar cf jars/ltv_economy.jar -C src/compiled .
 
 6. Delete the logs from starsector_core/starsector.log
+
+Extra Instructions:
+
+- Use VisualVM OQL Console to look for strings in the game to find and update broken obfuscated code
+  -> select s from java.lang.String s where s.toString().contains("your_target_string")
