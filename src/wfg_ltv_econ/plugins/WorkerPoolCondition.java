@@ -26,7 +26,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
     public void recalculateWorkerPool() {
         setWorkerPool((long)(0.64 * Math.pow(10, market.getSize())));
 
-        long totalAssigned = 0;
+        float totalAssigned = 0;
         for (Industry ind : market.getIndustries()) {
             if (ind instanceof LtvBaseIndustry) {
                 totalAssigned += ((LtvBaseIndustry) ind).workersAssigned;

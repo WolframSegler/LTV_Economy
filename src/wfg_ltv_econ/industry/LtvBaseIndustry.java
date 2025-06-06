@@ -129,6 +129,12 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	public LtvBaseIndustry() {
 
 	}
+	public Map<String, MutableCommodityQuantity> getSupply() {
+		return supply;
+	}
+	public Map<String, MutableCommodityQuantity> getDemand() {
+		return demand;
+	}
 
 	public MutableStat getDemandReduction() {
 		return demandReduction;
@@ -638,6 +644,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	protected void buildingFinished() {
 		sendBuildOrUpgradeMessage();
 		buildNextInQueue(market);
+	}
+
+	public float getWorkerAssignedRatio() {
+		return workersAssigned;
 	}
 
 	public int getWorkerAssigned() {

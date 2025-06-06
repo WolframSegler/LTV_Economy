@@ -79,6 +79,8 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
         }
 
         // On Click
-        ui.showDialog(520f, 320f, new AssignWorkersDialog(opt.ind));
+        final int panelWidth = 540;
+        final int panelHeight = 400;
+        ui.showDialog(panelWidth, panelHeight, new AssignWorkersDialog(opt.ind, panelWidth, panelHeight));
     }
 }
