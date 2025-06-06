@@ -4,12 +4,13 @@
         "src"
     ],
     "java.project.referencedLibraries": [
-        "jars\\reflection.jar",
+        "jars\\classgraph.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\starfarer.api.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\log4j-1.2.9.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\lwjgl_util.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\json.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\fs.common_obf.jar",
+        "e:\\Games\\Starsector Mod Testing\\mods\\LTV_Economy\\jars\\reflection.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\starfarer_obf.jar"
     ],
     "java.configuration.updateBuildConfiguration": "automatic"

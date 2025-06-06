@@ -26,4 +26,5 @@ replay_pid*
 # Custom
 /src/com/
 /src/com_core/
+/src/org/
 /ProjectFiles/Diagrams

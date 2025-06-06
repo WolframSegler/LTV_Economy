@@ -11,6 +11,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onApplicationLoad() throws Exception {
+        
     }
 
     @Override
@@ -24,9 +25,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         NoRestockCondition.initialize();
         WorkerPoolCondition.initialize();
         Global.getSector().getListenerManager().addListener(new AddWorkerIndustryOption(), true);
-
+        
         Global.getSector().addTransientScript(new LtvMarketWidgetReplacer());
     }
-
-    
 }
