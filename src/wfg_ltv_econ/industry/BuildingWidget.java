@@ -139,9 +139,11 @@ public class BuildingWidget extends intnew {
             String assignedStr = LtvNumFormat.formatWithMaxDigits(assigned);
 
             workerCountLabel.setText(assignedStr);
+            workerCountLabel.setHighlight(0, 5);
             workerCountLabel.setHighlightColor(Misc.getHighlightColor());
             workerCountLabel.highlightFirst(assignedStr);
             workerCountLabel.setOpacity(0.9f);
+            ((d)workerCountLabel).autoSizeToWidth(100f);
          }
       }
 
@@ -189,7 +191,7 @@ public class BuildingWidget extends intnew {
       add(buildingTitleHeader).inTL(0.0F, 0.0F);
       add(commodityDeficitIconGroup).inBL(PAD + 2.0F, PAD);
       add(specialItemGroup).inTR(PAD + 2.0F, PAD + buildingTitleHeader.getHeight() + PAD);
-      add((d)workerCountLabel).inTL(PAD + 4f, PAD + 25f);
+      add(((d)workerCountLabel)).inTL(PAD + 4f, PAD + 25f);
 
       boolean var15 = currentIndustry.isBuilding() || currentIndustry.isDisrupted();
       if (var15) {
