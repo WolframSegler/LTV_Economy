@@ -49,10 +49,10 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         if (dialog != null && dialog.getCoreUI() != null) {
             master = (UIPanelAPI) dialog.getCoreUI();
         }
-        // if (master == null) {
-        //     master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
-        //     // Access to the Market from the Command menu
-        // }
+        if (master == null) {
+            master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
+            // Access to the Market from the Command menu
+        }
         if (master == null) {
             return;
         }
@@ -121,7 +121,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             float width = industryPanel.getPosition().getWidth();
             float height = industryPanel.getPosition().getHeight();
 
-            managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 20);
+            managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 25);
             
             managementPanel.removeComponent(industryPanel);
 
