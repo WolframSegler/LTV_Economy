@@ -49,10 +49,10 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         if (dialog != null && dialog.getCoreUI() != null) {
             master = (UIPanelAPI) dialog.getCoreUI();
         }
-        if (master == null) {
-            master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
-            // Access to the Market from the Command menu
-        }
+        // if (master == null) {
+        //     master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
+        //     // Access to the Market from the Command menu
+        // }
         if (master == null) {
             return;
         }
@@ -100,12 +100,13 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
                 .filter(child -> child instanceof IndustryListPanel)
                 .map(child -> (IndustryListPanel) child)
                 .findFirst().orElse(null);
+        UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0); //The Panel with the player portrait
 
         // Replace the Panel which holds the widgets
-        replaceIndustryListPanel(managementPanel, industryPanel);
+        replaceIndustryListPanel(managementPanel, industryPanel, managementPanelChild1);
     }
 
-    private static final void replaceIndustryListPanel(UIPanelAPI managementPanel, UIPanelAPI industryPanel) {
+    private static final void replaceIndustryListPanel(UIPanelAPI managementPanel, UIPanelAPI industryPanel, UIPanelAPI managementPanelChild1) {
         if (industryPanel instanceof LtvIndustryListPanel) {
             return;
         }
@@ -120,9 +121,9 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             float width = industryPanel.getPosition().getWidth();
             float height = industryPanel.getPosition().getHeight();
 
+            managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 20);
+            
             managementPanel.removeComponent(industryPanel);
-
-            managementPanel.addComponent(replacement).setSize(width, height);
 
         } catch (Exception e) {
             Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace IndustryListPanel", e);
