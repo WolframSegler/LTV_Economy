@@ -32,7 +32,6 @@ import com.fs.starfarer.campaign.ui.N; //Current slider class (v.0.98 R8).
 public class AssignWorkersDialog implements CustomDialogDelegate {
 
     private final Industry industry;
-    private int maxWorkers;
     private final MarketAPI market;
     private final int panelWidth;
     private final int panelHeight;
@@ -42,7 +41,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
     public AssignWorkersDialog(Industry industry, int panelWidth, int panelHeight) {
         this.industry = industry;
-        this.maxWorkers = ((LtvBaseIndustry) industry).getWorkerCap();
         this.market = ((LtvBaseIndustry) industry).getMarket();
         this.panelWidth = panelWidth;
         this.panelHeight = panelHeight;
@@ -143,10 +141,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
             int pAmount = curr.getQuantity().getModifiedInt();
 
-            if (pAmount < 1) {
-                continue;
-            }
-
             // wrap to next line if needed
             count++;
             if (count % itemsPerRow == 0 && count != 0) {
@@ -179,7 +173,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             x += sectionWidth + 5f;
         }
         tooltip.setHeightSoFar(y);
-        panel.addUIElement(tooltip).inTL(opad/2, lastHeight);
+        panel.addUIElement(tooltip).inTL(opad/2, lastHeight + opad);
 
         tooltip = panel.createUIElement((panelWidth/2) - opad, panelHeight, false);
         tooltip.addSectionHeading("Demand", color, dark, Alignment.MID, opad);
@@ -194,10 +188,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
             int dAmount = curr.getQuantity().getModifiedInt();
             int allDeficit = commodity.getDeficitQuantity();
-
-            if (dAmount < 1) {
-                continue;
-            }
 
             // wrap to next line if needed
             count++;
@@ -235,7 +225,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             x += sectionWidth + 5f;
         }
         tooltip.setHeightSoFar(y);
-        panel.addUIElement(tooltip).inTR(opad/2, lastHeight);
+        panel.addUIElement(tooltip).inTR(opad/2, lastHeight + opad);
 
     }
 

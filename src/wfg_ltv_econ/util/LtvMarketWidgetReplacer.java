@@ -150,28 +150,28 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
 
         try {
             // Steal the members for the constructor
+            MarketAPI market = (MarketAPI)ReflectionUtils.get(commodityPanel, null, MarketAPI.class);
+            L lInstance = (L)ReflectionUtils.get(commodityPanel, null, L.class);
+
+            LtvCommodityPanel replacement = new LtvCommodityPanel(market, lInstance);
+
+            float width = commodityPanel.getPosition().getWidth();
+            float height = commodityPanel.getPosition().getHeight();
+            // The Panel with the player portrait
+            UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
+
+            // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
+            // Might automate the getY() difference later
+            managementPanel.addComponent(replacement).setSize(width, height).belowRight(managementPanelChild1, -43);
             
-            // MarketAPI market = (MarketAPI)ReflectionUtils.get(commodityPanel, null, MarketAPI.class);
-            // L lInstance = (L)ReflectionUtils.get(commodityPanel, null, L.class);
-            // s sInstance = (s)ReflectionUtils.get(commodityPanel, null, s.class);
-
-            // LtvIndustryListPanel replacement = new LtvIndustryListPanel(market, lInstance, sInstance);
-
-            // float width = commodityPanel.getPosition().getWidth();
-            // float height = commodityPanel.getPosition().getHeight();
-            // // The Panel with the player portrait
-            // UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
-
-            // managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 25);
-            
-            // managementPanel.removeComponent(commodityPanel);
+            managementPanel.removeComponent(commodityPanel);
 
         } catch (Exception e) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace IndustryListPanel", e);
+            Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace CommodityPanel", e);
         }
 
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).info("Replaced IndustryListPanel");
+            Global.getLogger(LtvMarketWidgetReplacer.class).info("Replaced CommodityPanel");
         }
     }
 

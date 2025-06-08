@@ -101,15 +101,19 @@ public class LtvCommodityPanel extends CommodityPanel {
             StandardTooltipV2Expandable comTooltip = (StandardTooltipV2Expandable) ReflectionUtils.invoke(CommodityTooltipFactory.class, "super", commodity);
             comRow.setTooltip(0.0F, comTooltip);
 
+            // Required for Lambda
+            final n finalRow = comRow;
+            final StandardTooltipV2Expandable finalTooltip = comTooltip;
+
             // comTooltip.setBeforeShowing(new 2(this, comRow, comTooltip));
-            comTooltip.setBeforeShowing(() -> {
-                comRow.setTooltipPositionRelativeToAnchor(
-                    -comTooltip.getWidth(),
-                    -(comTooltip.getHeight() - this.getHeight()),
+            finalTooltip.setBeforeShowing(() -> {
+                finalRow.setTooltipPositionRelativeToAnchor(
+                    -finalTooltip.getWidth(),
+                    -(finalTooltip.getHeight() - this.getHeight()),
                     this
                 );
             });
-            comRow.setEnabled(canViewPrices);
+            finalRow.setEnabled(canViewPrices);
 
             previousRow = comRow;
         }
