@@ -1,4 +1,4 @@
-package wfg_ltv_econ.industry;
+package wfg_ltv_econ.util;
 
 import com.fs.graphics.A.D;
 import com.fs.graphics.util.B;
@@ -28,8 +28,8 @@ import com.fs.starfarer.ui.d;
 import com.fs.starfarer.ui.n;
 import com.fs.starfarer.ui.oo0O;
 import com.fs.starfarer.ui.x;
-import wfg_ltv_econ.util.LtvMarketWidgetReplacer;
-import wfg_ltv_econ.util.LtvNumFormat;
+
+import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.util.ReflectionUtils;
 import com.fs.starfarer.campaign.ui.marketinfo.T;
 import java.awt.Color;

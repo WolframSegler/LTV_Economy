@@ -21,8 +21,6 @@ import com.fs.starfarer.ui.Q;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 
-import wfg_ltv_econ.industry.BuildingWidget;
-
 import java.util.Collections;
 
 public class LtvIndustryListPanel extends IndustryListPanel {

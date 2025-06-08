@@ -8,9 +8,9 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import wfg_ltv_econ.industry.BuildingWidget;
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.ui.newui.o0Oo;
+import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 import com.fs.starfarer.ui.newui.L;
 import com.fs.starfarer.campaign.ui.marketinfo.s;
@@ -51,13 +51,13 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         }
         if (master == null) {
             master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
-            // Access to the Market from the Command menu
+            // Access the Market from the Command menu (remote access)
         }
         if (master == null) {
             return;
         }
 
-        // Find IndustryListPanel
+        // Find managementPanel
         Object masterTab = ReflectionUtils.invoke(master, "getCurrentTab", new Object[0]);
         if (!(masterTab instanceof UIPanelAPI)) {
             return;
@@ -96,20 +96,23 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
         }
 
         List<?> managementChildren = (List<?>) ReflectionUtils.invoke(managementPanel, "getChildrenCopy");
+
+        // Replace the Panel which holds the widgets
+        replaceIndustryListPanel(managementPanel, managementChildren);
+
+        // Replace the Commodity Panel which shows the total imports and exports
+        replaceCommodityPanel(managementPanel, managementChildren);
+    }
+
+    private static final void replaceIndustryListPanel(UIPanelAPI managementPanel, List<?> managementChildren) {
         UIPanelAPI industryPanel = managementChildren.stream()
                 .filter(child -> child instanceof IndustryListPanel)
                 .map(child -> (IndustryListPanel) child)
                 .findFirst().orElse(null);
-        UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0); //The Panel with the player portrait
-
-        // Replace the Panel which holds the widgets
-        replaceIndustryListPanel(managementPanel, industryPanel, managementPanelChild1);
-    }
-
-    private static final void replaceIndustryListPanel(UIPanelAPI managementPanel, UIPanelAPI industryPanel, UIPanelAPI managementPanelChild1) {
         if (industryPanel instanceof LtvIndustryListPanel) {
             return;
         }
+
         try {
             // Steal the members for the constructor
             MarketAPI market = (MarketAPI)ReflectionUtils.get(industryPanel, null, MarketAPI.class);
@@ -120,10 +123,48 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
 
             float width = industryPanel.getPosition().getWidth();
             float height = industryPanel.getPosition().getHeight();
+            // The Panel with the player portrait
+            UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
             managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 25);
             
             managementPanel.removeComponent(industryPanel);
+
+        } catch (Exception e) {
+            Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace IndustryListPanel", e);
+        }
+
+        if (Global.getSettings().isDevMode()) {
+            Global.getLogger(LtvMarketWidgetReplacer.class).info("Replaced IndustryListPanel");
+        }
+    }
+
+    private static final void replaceCommodityPanel(UIPanelAPI managementPanel, List<?> managementChildren) {
+        UIPanelAPI commodityPanel = managementChildren.stream()
+                .filter(child -> child instanceof CommodityPanel)
+                .map(child -> (CommodityPanel) child)
+                .findFirst().orElse(null);
+        if (commodityPanel instanceof LtvCommodityPanel) {
+            return;
+        }
+
+        try {
+            // Steal the members for the constructor
+            
+            // MarketAPI market = (MarketAPI)ReflectionUtils.get(commodityPanel, null, MarketAPI.class);
+            // L lInstance = (L)ReflectionUtils.get(commodityPanel, null, L.class);
+            // s sInstance = (s)ReflectionUtils.get(commodityPanel, null, s.class);
+
+            // LtvIndustryListPanel replacement = new LtvIndustryListPanel(market, lInstance, sInstance);
+
+            // float width = commodityPanel.getPosition().getWidth();
+            // float height = commodityPanel.getPosition().getHeight();
+            // // The Panel with the player portrait
+            // UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
+
+            // managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 25);
+            
+            // managementPanel.removeComponent(commodityPanel);
 
         } catch (Exception e) {
             Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace IndustryListPanel", e);
