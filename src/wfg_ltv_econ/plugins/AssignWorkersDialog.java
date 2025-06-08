@@ -67,7 +67,13 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         tooltip.setParaFontDefault();
 
         // Draw Production
-        drawProductionAndConsumption(panel, pad, opad, (int)(tooltip.getHeightSoFar() + lbl.computeTextHeight(txt)));
+        drawProductionAndConsumption(panel, pad, opad, (int) (tooltip.getHeightSoFar() + lbl.computeTextHeight(txt)));
+
+        // Draw separator line
+        final Color gray = new Color(100, 100, 100);
+        LabelAPI separator = tooltip.addSectionHeading(null, gray, gray, Alignment.MID, 0);
+        separator.getPosition().inTL(0, sliderY - sliderHeight);
+        separator.getPosition().setSize(panelWidth, 1);
 
         // Draw text left of the slider
         tooltip.setParaInsigniaLarge();
@@ -98,7 +104,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
         panel.addComponent((UIPanelAPI) slider).inTL((panelWidth - sliderWidth - opad), sliderY);
 
-        // At the end
+        // Add the tooltip to the main Panel at the end
         panel.addUIElement(tooltip);
     }
 
@@ -127,7 +133,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final Color color = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
 
-        TooltipMakerAPI tooltip = panel.createUIElement((panelWidth/2) - opad, panelHeight, false);
+        TooltipMakerAPI tooltip = panel.createUIElement((panelWidth / 2) - opad, panelHeight, false);
         tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
         float startY = tooltip.getHeightSoFar() + opad;
 
@@ -173,9 +179,9 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             x += sectionWidth + 5f;
         }
         tooltip.setHeightSoFar(y);
-        panel.addUIElement(tooltip).inTL(opad/2, lastHeight + opad);
+        panel.addUIElement(tooltip).inTL(opad / 2, lastHeight + opad);
 
-        tooltip = panel.createUIElement((panelWidth/2) - opad, panelHeight, false);
+        tooltip = panel.createUIElement((panelWidth / 2) - opad, panelHeight, false);
         tooltip.addSectionHeading("Demand", color, dark, Alignment.MID, opad);
 
         // Demand
@@ -225,7 +231,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             x += sectionWidth + 5f;
         }
         tooltip.setHeightSoFar(y);
-        panel.addUIElement(tooltip).inTR(opad/2, lastHeight + opad);
+        panel.addUIElement(tooltip).inTR(opad / 2, lastHeight + opad);
 
     }
 
