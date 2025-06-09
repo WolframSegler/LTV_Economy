@@ -7,17 +7,18 @@ import java.util.List;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.campaign.econ.CommodityOnMarket;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityTooltipFactory;
-import com.fs.starfarer.ui.supersuper;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 import com.fs.starfarer.ui.newui.L;
 import com.fs.starfarer.ui.n;
 import com.fs.starfarer.ui.Q;
+import com.fs.starfarer.ui.OOOo;
 import com.fs.starfarer.campaign.ui.marketinfo.ooOo;
+import com.fs.starfarer.ui.c;
+import com.fs.starfarer.ui.m.Oo;
 
 public class LtvCommodityPanel extends CommodityPanel {
     public LtvCommodityPanel(MarketAPI market, L parentPanel) {
@@ -63,8 +64,8 @@ public class LtvCommodityPanel extends CommodityPanel {
             }
         }
 
-        final float pad = 3.0f;
-        final float opad = 10.0f;
+        final float pad = 3f;
+        final float opad = 10f;
 
         float newHeight = panelHeight - titleHeight - opad - pad;
         float rowHeight = newHeight / (float)commodities.size();
@@ -82,30 +83,30 @@ public class LtvCommodityPanel extends CommodityPanel {
         boolean canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
 
         n previousRow = null;
-        n comRow;
+        n commodityWrapper;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            ooOo comWrapper = new ooOo((CommodityOnMarket) commodity);
-            comRow = Q.o00000(comWrapper, this);
+            ooOo commodityRow = new CommodityRow(commodity);
+            commodityWrapper = Q.o00000(commodityRow, this);
 
-            comRow.setQuickMode(false);
-            comRow.setSize(panelWidth - opad * 2.0F, rowHeight);
+            commodityWrapper.setQuickMode(false);
+            commodityWrapper.setSize(panelWidth - opad * 2.0F, rowHeight);
 
             if (previousRow == null) {
-                add(comRow).inTL(opad, getTitleHeight() + opad);
+                add(commodityWrapper).inTL(opad, getTitleHeight() + opad);
             } else {
-                add(comRow).belowLeft(previousRow, pad);
+                add(commodityWrapper).belowLeft(previousRow, pad);
             }
 
             // StandardTooltipV2Expandable comTooltip = CommodityTooltipFactory.super(commodity);
             StandardTooltipV2Expandable comTooltip = (StandardTooltipV2Expandable) ReflectionUtils.invoke(CommodityTooltipFactory.class, "super", commodity);
-            comRow.setTooltip(0.0F, comTooltip);
+            commodityWrapper.setTooltip(0.0F, comTooltip);
 
             // Required for Lambda
-            final n finalRow = comRow;
+            final n finalRow = commodityWrapper;
             final StandardTooltipV2Expandable finalTooltip = comTooltip;
 
-            // comTooltip.setBeforeShowing(new 2(this, comRow, comTooltip));
+            // comTooltip.setBeforeShowing(new 2(this, commodityWrapper, comTooltip));
             finalTooltip.setBeforeShowing(() -> {
                 finalRow.setTooltipPositionRelativeToAnchor(
                     -finalTooltip.getWidth(),
@@ -115,7 +116,7 @@ public class LtvCommodityPanel extends CommodityPanel {
             });
             finalRow.setEnabled(canViewPrices);
 
-            previousRow = comRow;
+            previousRow = commodityWrapper;
         }
     }
 }
