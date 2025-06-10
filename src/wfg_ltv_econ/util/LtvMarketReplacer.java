@@ -18,7 +18,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.s;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LtvMarketWidgetReplacer implements EveryFrameScript {
+public class LtvMarketReplacer implements EveryFrameScript {
 
     private int frames = 0;
 
@@ -131,11 +131,11 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             managementPanel.removeComponent(industryPanel);
 
         } catch (Exception e) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace IndustryListPanel", e);
+            Global.getLogger(LtvMarketReplacer.class).error("Failed to replace IndustryListPanel", e);
         }
 
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).info("Replaced IndustryListPanel");
+            Global.getLogger(LtvMarketReplacer.class).info("Replaced IndustryListPanel");
         }
     }
 
@@ -167,11 +167,11 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             managementPanel.removeComponent(commodityPanel);
 
         } catch (Exception e) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).error("Failed to replace CommodityPanel", e);
+            Global.getLogger(LtvMarketReplacer.class).error("Failed to replace CommodityPanel", e);
         }
 
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).info("Replaced CommodityPanel");
+            Global.getLogger(LtvMarketReplacer.class).info("Replaced CommodityPanel");
         }
     }
 
@@ -218,7 +218,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             }
         }
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).info("Replaced IndustryListPanel widgets");
+            Global.getLogger(LtvMarketReplacer.class).info("Replaced IndustryListPanel widgets");
         }
         ReflectionUtils.set((IndustryListPanel)UIindustryPanel, "widgets", LtvWidgets);
         List<?> newWidgets = ((IndustryListPanel)UIindustryPanel).getWidgets();
@@ -229,7 +229,7 @@ public class LtvMarketWidgetReplacer implements EveryFrameScript {
             widget.notifySizeChanged();
         } 
         } catch (Exception e) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).error("Replaced IndustryListPanel widgets refresh failed: ", e);
+            Global.getLogger(LtvMarketReplacer.class).error("Replaced IndustryListPanel widgets refresh failed: ", e);
         }
     }
 

@@ -3,7 +3,7 @@ package wfg_ltv_econ.plugins;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 
-import wfg_ltv_econ.util.LtvMarketWidgetReplacer;
+import wfg_ltv_econ.util.LtvMarketReplacer;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
@@ -26,6 +26,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         WorkerPoolCondition.initialize();
         Global.getSector().getListenerManager().addListener(new AddWorkerIndustryOption(), true);
         
-        Global.getSector().addTransientScript(new LtvMarketWidgetReplacer());
+        Global.getSector().addTransientScript(new LtvMarketReplacer());
     }
 }

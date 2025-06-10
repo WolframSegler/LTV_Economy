@@ -95,7 +95,7 @@ public class BuildingWidget extends intnew {
          // buildingTitleHeader.getRenderer().int(true);
          ReflectionUtils.invoke(buildingTitleHeader.getRenderer(), "int", true);
       } catch (Exception e) {
-         Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
+         Global.getLogger(LtvMarketReplacer.class).error("Custom Widget failed", e);
       }
 
       buildingTitleHeader.autoSize();
@@ -113,7 +113,7 @@ public class BuildingWidget extends intnew {
          Object logicInstance = ReflectionUtils.invoke(constructionActionButton, "getLogic");
          ReflectionUtils.invoke(logicInstance, "o00000", stringFieldValue);
       } catch (Exception e) {
-         Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
+         Global.getLogger(LtvMarketReplacer.class).error("Custom Widget failed", e);
       }
       if (!currentIndustry.isFunctional() || constructionQueueIndex >= 0) {
          industryIcon.setImageColor(dark);
@@ -342,7 +342,7 @@ public class BuildingWidget extends intnew {
          try {
             O.o00000(var4, var5 + var7, var6, buildingTitleHeader.getHeight() + 3.0F, var9, var1, false);
          } catch (Exception e) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
+            Global.getLogger(LtvMarketReplacer.class).error("Custom Widget failed", e);
          }
       }
 
@@ -432,7 +432,7 @@ public class BuildingWidget extends intnew {
                }
             }
          } catch (Exception e) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
+            Global.getLogger(LtvMarketReplacer.class).error("Custom Widget failed", e);
          }
 
          if (constructionMode == intnew.Oo.Ó00000) {
@@ -516,7 +516,7 @@ public class BuildingWidget extends intnew {
             var17.show(0.0F, 0.0F);
             tradeInfoPanel = com.fs.starfarer.campaign.ui.marketinfo.intnew.o.o00000;
          } catch (Exception e) {
-            Global.getLogger(LtvMarketWidgetReplacer.class).error("Custom Widget failed", e);
+            Global.getLogger(LtvMarketReplacer.class).error("Custom Widget failed", e);
          }
       }
    }

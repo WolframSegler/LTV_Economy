@@ -15,10 +15,8 @@ import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 import com.fs.starfarer.ui.newui.L;
 import com.fs.starfarer.ui.n;
 import com.fs.starfarer.ui.Q;
-import com.fs.starfarer.ui.OOOo;
 import com.fs.starfarer.campaign.ui.marketinfo.ooOo;
 import com.fs.starfarer.ui.c;
-import com.fs.starfarer.ui.m.Oo;
 
 public class LtvCommodityPanel extends CommodityPanel {
     public LtvCommodityPanel(MarketAPI market, L parentPanel) {
@@ -64,8 +62,8 @@ public class LtvCommodityPanel extends CommodityPanel {
             }
         }
 
-        final float pad = 3f;
-        final float opad = 10f;
+        final int pad = 3;
+        final int opad = 10;
 
         float newHeight = panelHeight - titleHeight - opad - pad;
         float rowHeight = newHeight / (float)commodities.size();
@@ -86,11 +84,18 @@ public class LtvCommodityPanel extends CommodityPanel {
         n commodityWrapper;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            ooOo commodityRow = new CommodityRow(commodity);
+            ooOo commodityRow = new ooOo((CommodityOnMarket)commodity);
             commodityWrapper = Q.o00000(commodityRow, this);
 
             commodityWrapper.setQuickMode(false);
             commodityWrapper.setSize(panelWidth - opad * 2.0F, rowHeight);
+            // CommodityRow comRow = new CommodityRow(commodity, this, (int)(panelWidth - opad * 2), (int)rowHeight);
+
+            // if (previousRow == null) {
+            //     add((c)comRow.getPanel()).inTL(opad, getTitleHeight() + opad);
+            // } else {
+            //     add((c)(comRow.getPanel())).belowLeft(previousRow, pad);
+            // }
 
             if (previousRow == null) {
                 add(commodityWrapper).inTL(opad, getTitleHeight() + opad);

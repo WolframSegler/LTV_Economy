@@ -1,5 +1,5 @@
 # LTV_Economy
-Changes the economic system and how colonies are managed. This mod aims to make the economy interesting.
+Overhauls the economic system and how colonies are managed. This mod aims to make the economy interesting.
 
 
 # Credits
