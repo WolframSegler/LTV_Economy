@@ -153,16 +153,16 @@ public class LtvMarketReplacer implements EveryFrameScript {
             MarketAPI market = (MarketAPI)ReflectionUtils.get(commodityPanel, null, MarketAPI.class);
             L lInstance = (L)ReflectionUtils.get(commodityPanel, null, L.class);
 
-            LtvCommodityPanel replacement = new LtvCommodityPanel(market, lInstance);
-
-            float width = commodityPanel.getPosition().getWidth();
-            float height = commodityPanel.getPosition().getHeight();
+            int width = (int) commodityPanel.getPosition().getWidth();
+            int height = (int) commodityPanel.getPosition().getHeight();
             // The Panel with the player portrait
             UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
+            LtvCommodityPanel replacement = new LtvCommodityPanel(managementPanel, width, height, market, lInstance);
+
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later
-            managementPanel.addComponent(replacement).setSize(width, height).belowRight(managementPanelChild1, -43);
+            managementPanel.addComponent(replacement.getPanel()).setSize(width, height).belowRight(managementPanelChild1, -43);
             
             managementPanel.removeComponent(commodityPanel);
 

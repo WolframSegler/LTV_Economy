@@ -3,9 +3,7 @@ package wfg_ltv_econ.util;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySourceType;
-import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -20,7 +18,8 @@ import com.fs.starfarer.campaign.econ.reach.CommodityMarketData;
 import com.fs.starfarer.campaign.econ.reach.MarketShareData;
 
 import java.awt.Color;
-
+import java.util.HashMap;
+import java.util.Map;
 public class CommodityRow{
 
     private CustomPanelAPI m_panel;
@@ -33,6 +32,8 @@ public class CommodityRow{
         this.m_parent = parent;
         m_panel = Global.getSettings().createCustom(width, height, null);
         this.m_parent.addComponent(m_panel);
+
+        createRow();
     }
 
     public CustomPanelAPI getPanel() {
@@ -42,26 +43,27 @@ public class CommodityRow{
         return m_panel.getPosition();
     }
 
-    public void createRow(float var1, float var2) {
-        final float pad = 3f;
-        final float opad = 10f;
-        final int iconSize = 32;
+    public void createRow() {
+        final int pad = 3;
+        final int opad = 10;
+        final int iconSize = 24;
+        final int textWidth = 55;
         final Color baseColor = m_com.getMarket().getFaction().getBaseUIColor();
         final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
         final float rowHeight = getPanelPos().getHeight();
-        
-        tooltip.setParaFont(Fonts.ORBITRON_12);
-        LabelAPI amountLabel = tooltip.addPara(m_com.getAvailable() + Strings.X, pad);
-        amountLabel.setAlignment(Alignment.MID);
-        amountLabel.setColor(baseColor);
-        amountLabel.getPosition().setSize(iconSize, amountLabel.computeTextHeight(amountLabel.getText()));
 
-        final float labelWidth = amountLabel.getPosition().getWidth() + pad;
+        tooltip.setParaSmallInsignia();
+        LabelAPI amountTxt = tooltip.addPara(LtvNumFormat.formatWithMaxDigits(m_com.getAvailable()) + Strings.X, pad);
+        final int textHeight = (int) amountTxt.computeTextHeight(amountTxt.getText());
+        amountTxt.setColor(baseColor);
+        amountTxt.getPosition().setSize(textWidth, textHeight);
+
+        final float labelWidth = amountTxt.getPosition().getWidth() + pad;
         final UIComponentAPI lblComp = tooltip.getPrev();
-        lblComp.getPosition().inLMid(rowHeight + pad);
+        lblComp.getPosition().inBL(pad, (rowHeight - textHeight)/2);
 
-        handleIconGroup(tooltip);
-        tooltip.getPrev().getPosition().inLMid(rowHeight + pad + labelWidth);
+        handleIconGroup(tooltip, iconSize);
+        tooltip.getPrev().getPosition().inBL(labelWidth, (rowHeight - iconSize)/2);
 
         CommodityMarketData commodityData = (CommodityMarketData) m_com.getCommodityMarketData();
         getPanel().addComponent(getSourceIcon(tooltip, m_com, baseColor, commodityData)).setSize(rowHeight, rowHeight).inBL(0, 0);
@@ -73,7 +75,7 @@ public class CommodityRow{
             getPanel().addComponent(m_sourceIcon).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
         }
 
-        getPanel().addUIElement(tooltip);
+        getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
     }
 
     private i getSourceIcon(TooltipMakerAPI tooltip, CommodityOnMarketAPI com, Color baseColor, CommodityMarketData commodityData) {
@@ -102,7 +104,7 @@ public class CommodityRow{
         }
     }
 
-    private void handleIconGroup(TooltipMakerAPI tooltip) {
+    private void handleIconGroup(TooltipMakerAPI tooltip, int iconSize) {
         float available = (float)m_com.getAvailableStat().getModifiedValue();
         float totalDemand = m_com.getMaxDemand();
         float totalSupply = m_com.getMaxSupply();
@@ -110,14 +112,14 @@ public class CommodityRow{
         float totalTarget = Math.max(Math.max(totalDemand, totalSupply), available);
         final int totalIcons = 6;
 
-        CommodityIconCounts iconCount = new CommodityIconCounts(m_com);
-        final int demandMetLocal = iconCount.demandMetWithLocal;
-        int demandMetInFactionImports = (int)Math.min(iconCount.inFactionOnlyExport, totalDemand);
+        CommodityIconCounts iconsCount = new CommodityIconCounts(m_com);
+        final int demandMetLocal = iconsCount.demandMetWithLocal;
+        int demandMetInFactionImports = (int)Math.min(iconsCount.inFactionOnlyExport, totalDemand);
 
-        final int nonDemandExport = iconCount.nonDemandExport;
-        final int imports = iconCount.imports;
-        final int extra = iconCount.extra;
-        final int deficit = iconCount.deficit;
+        final int nonDemandExport = iconsCount.nonDemandExport;
+        final int imports = iconsCount.imports;
+        final int extra = iconsCount.extra;
+        final int deficit = iconsCount.deficit;
 
         float localProducedRatio = demandMetLocal/totalTarget;
         float inFactionImportRatio = demandMetInFactionImports/totalTarget;
@@ -125,25 +127,39 @@ public class CommodityRow{
         float exportedRatio = extra/totalTarget;
         float deficitRatio = deficit/totalTarget;
 
-        int iconsForLocal = Math.round(totalIcons * localProducedRatio);
-        int iconsForInFactionImport = Math.round(totalIcons * inFactionImportRatio);
-        int iconsForOutFactionImport = Math.round(totalIcons * externalImportRatio);
-        int iconsForExport = Math.round(totalIcons * exportedRatio);
-        int iconsForDeficit = Math.round(totalIcons * deficitRatio);
+        final HashMap<IconRenderMode, Integer> iconMap = new HashMap<IconRenderMode, Integer>();
+        iconMap.put(IconRenderMode.GREEN, Math.round(totalIcons * exportedRatio));
+        iconMap.put(IconRenderMode.OUTLINE_GREEN, Math.round(totalIcons * localProducedRatio));
+        iconMap.put(IconRenderMode.NORMAL, Math.round(totalIcons * inFactionImportRatio));
+        iconMap.put(IconRenderMode.OUTLINE_RED, Math.round(totalIcons * externalImportRatio));
+        iconMap.put(IconRenderMode.DIM_RED, Math.round(totalIcons * deficitRatio));
+
+        float totalIconCount = 0;
+        IconRenderMode smallestIconMode = null;
+        float smallestIconCount = 10f;
+        for (Map.Entry<IconRenderMode, Integer> icon : iconMap.entrySet()) {
+            totalIconCount += icon.getValue();
+            if (icon.getValue() < smallestIconCount) {
+                smallestIconCount = icon.getValue();
+                smallestIconMode = icon.getKey();
+            }
+        }
+        if (totalIconCount > 6) {
+            iconMap.remove(smallestIconMode);
+        }
 
         tooltip.beginIconGroup();
-        addIconsToGroup(tooltip, m_com, iconsForExport, IconRenderMode.GREEN);
-        addIconsToGroup(tooltip, m_com, iconsForLocal, IconRenderMode.OUTLINE_GREEN);
-        addIconsToGroup(tooltip, m_com, iconsForInFactionImport, IconRenderMode.NORMAL);
-        addIconsToGroup(tooltip, m_com, iconsForOutFactionImport, IconRenderMode.OUTLINE_CUSTOM);
-        addIconsToGroup(tooltip, m_com, iconsForDeficit, IconRenderMode.DIM_RED);
+        tooltip.setIconSpacingMedium();
+        for (Map.Entry<IconRenderMode, Integer> icon : iconMap.entrySet()) {
+            addIconsToGroup(tooltip, m_com, icon.getValue(), icon.getKey());
+        }
 
-        tooltip.addIconGroup(3);
+        tooltip.addIconGroup(iconSize,1, -3);
     }
 
     private int addIconsToGroup(TooltipMakerAPI tooltip, CommodityOnMarketAPI com, int count, IconRenderMode mode) {
         for (int i = 0; i < count; i++) {
-            tooltip.addIcons(com, i, mode);
+            tooltip.addIcons(com, 1, mode);
         }
         return count;
     }
