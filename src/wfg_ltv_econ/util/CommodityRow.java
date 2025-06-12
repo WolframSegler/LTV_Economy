@@ -12,6 +12,9 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.i;
 import com.fs.starfarer.settings.StarfarerSettings;
+
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
+
 import com.fs.starfarer.api.impl.campaign.econ.CommodityIconCounts;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.campaign.econ.reach.CommodityMarketData;
@@ -20,18 +23,24 @@ import com.fs.starfarer.campaign.econ.reach.MarketShareData;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+
 public class CommodityRow{
 
     private CustomPanelAPI m_panel;
-    private CommodityOnMarketAPI m_com;
+    final private CommodityOnMarketAPI m_com;
     private i m_sourceIcon;
     final private UIPanelAPI m_parent;
+    public boolean m_canViewPrices;
 
     public CommodityRow(CommodityOnMarketAPI com, UIPanelAPI parent, int width, int height) {
         this.m_com = com;
         this.m_parent = parent;
-        m_panel = Global.getSettings().createCustom(width, height, null);
+        m_panel = Global.getSettings().createCustom(width, height, new LtvCustomPanelPlugin());
+        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, true, true, true);
         this.m_parent.addComponent(m_panel);
+
+        boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
+        this.m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
 
         createRow();
     }
@@ -42,10 +51,15 @@ public class CommodityRow{
     public PositionAPI getPanelPos() {
         return m_panel.getPosition();
     }
+    public CommodityOnMarketAPI getCommodity() {
+        return m_com;
+    }
+    public UIPanelAPI getParent() {
+        return m_parent;
+    }
 
     public void createRow() {
         final int pad = 3;
-        final int opad = 10;
         final int iconSize = 24;
         final int textWidth = 55;
         final Color baseColor = m_com.getMarket().getFaction().getBaseUIColor();
@@ -116,7 +130,6 @@ public class CommodityRow{
         final int demandMetLocal = iconsCount.demandMetWithLocal;
         int demandMetInFactionImports = (int)Math.min(iconsCount.inFactionOnlyExport, totalDemand);
 
-        final int nonDemandExport = iconsCount.nonDemandExport;
         final int imports = iconsCount.imports;
         final int extra = iconsCount.extra;
         final int deficit = iconsCount.deficit;

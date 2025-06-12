@@ -17,13 +17,6 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
-import com.fs.starfarer.campaign.ui.marketinfo.CommodityTooltipFactory;
-import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
-import com.fs.starfarer.ui.newui.L;
-import com.fs.starfarer.ui.n;
-import com.fs.starfarer.ui.Q;
-import com.fs.starfarer.campaign.ui.marketinfo.ooOo;
 
 public class LtvCommodityPanel{
     final private UIPanelAPI m_parent;
@@ -37,19 +30,18 @@ public class LtvCommodityPanel{
     public final Color gridColor;
     public final Color brightColor;
 
-    public LtvCommodityPanel(UIPanelAPI managementPanel, int width, int height, MarketAPI market, L parentPanel) {
+    public LtvCommodityPanel(UIPanelAPI managementPanel, int width, int height, MarketAPI market) {
         this.m_parent = managementPanel;
         this.m_market = market;
 
         this.faction = market.getFaction();
         this.baseColor = this.faction.getBaseUIColor();
         this.darkColor = this.faction.getDarkUIColor();
-        this.BgColor = new Color(5, 5, 5, 220);
+        this.BgColor = new Color(0, 0, 0, 220);
         this.gridColor = this.faction.getGridUIColor();
         this.brightColor = this.faction.getBrightUIColor();
         
         m_panel = Global.getSettings().createCustom(width, height, null);
-        this.m_parent.addComponent(m_panel);
 
         createPanel();
     }
@@ -78,7 +70,7 @@ public class LtvCommodityPanel{
         UIComponentAPI BgRect = BgTooltip.createRect(BgColor, getPanelPos().getWidth());
         BgTooltip.addCustom(BgRect, opad).getPosition().setSize(getPanelPos().getWidth(), getPanelPos().getHeight()).inTL(0, 0);
         BgTooltip.sendToBottom(BgRect);
-        BgRect.setOpacity(0.1f);
+        BgRect.setOpacity(0.2f);
         
         getPanel().addUIElement(BgTooltip);
 
@@ -95,9 +87,9 @@ public class LtvCommodityPanel{
             }
         }
 
-        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
-        tooltip.addSectionHeading("Commodities", Alignment.MID, pad);
-        final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
+        final TooltipMakerAPI FgTooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
+        FgTooltip.addSectionHeading("Commodities", Alignment.MID, pad);
+        final int headerHeight = (int) FgTooltip.getPrev().getPosition().getHeight();
 
         // Determine row height
         float rowHeight = getPanelPos().getHeight() - headerHeight - opad - pad;
@@ -112,18 +104,9 @@ public class LtvCommodityPanel{
         }
 
         // Add Rows to the panel
-        boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
-        boolean canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
-
         CustomPanelAPI previousRow = null;
-        // n commodityWrapper;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            // ooOo commodityRow = new ooOo((CommodityOnMarket)commodity);
-            // commodityWrapper = Q.o00000(commodityRow, this);
-
-            // commodityWrapper.setQuickMode(false);
-            // commodityWrapper.setSize(getPanelPos().getWidth() - opad * 2.0F, rowHeight);
             CommodityRow comRow = new CommodityRow(commodity, getPanel(), (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight);
             comRow.getPanelPos().setSize(getPanelPos().getWidth() - opad * 2.0F, rowHeight);
 
@@ -133,32 +116,8 @@ public class LtvCommodityPanel{
                 getPanel().addComponent(comRow.getPanel()).belowLeft(previousRow, pad);
             }
 
-            // if (previousRow == null) {
-            //     add(commodityWrapper).inTL(opad, getTitleHeight() + opad);
-            // } else {
-            //     add(commodityWrapper).belowLeft(previousRow, pad);
-            // }
-
-            // // StandardTooltipV2Expandable comTooltip = CommodityTooltipFactory.super(commodity);
-            // StandardTooltipV2Expandable comTooltip = (StandardTooltipV2Expandable) ReflectionUtils.invoke(CommodityTooltipFactory.class, "super", commodity);
-            // commodityWrapper.setTooltip(0.0F, comTooltip);
-
-            // // Required for Lambda
-            // final n finalRow = commodityWrapper;
-            // final StandardTooltipV2Expandable finalTooltip = comTooltip;
-
-            // // comTooltip.setBeforeShowing(new 2(this, commodityWrapper, comTooltip));
-            // finalTooltip.setBeforeShowing(() -> {
-            //     finalRow.setTooltipPositionRelativeToAnchor(
-            //         -finalTooltip.getWidth(),
-            //         -(finalTooltip.getHeight() - getPanelPos().getHeight()),
-            //         this
-            //     );
-            // });
-            // finalRow.setEnabled(canViewPrices);
-
             previousRow = comRow.getPanel();
         }
-        getPanel().addUIElement(tooltip);
+        getPanel().addUIElement(FgTooltip);
     }
 }

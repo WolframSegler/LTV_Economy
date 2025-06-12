@@ -49,10 +49,10 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (dialog != null && dialog.getCoreUI() != null) {
             master = (UIPanelAPI) dialog.getCoreUI();
         }
-        if (master == null) {
-            master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
-            // Access the Market from the Command menu (remote access)
-        }
+        // if (master == null) {
+        //     master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
+        //     // Access the Market from the Command menu (remote access)
+        // }
         if (master == null) {
             return;
         }
@@ -144,21 +144,20 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 .filter(child -> child instanceof CommodityPanel)
                 .map(child -> (CommodityPanel) child)
                 .findFirst().orElse(null);
-        if (commodityPanel instanceof LtvCommodityPanel) {
+        if (commodityPanel == null || commodityPanel instanceof LtvCommodityPanel) {
             return;
         }
 
         try {
             // Steal the members for the constructor
-            MarketAPI market = (MarketAPI)ReflectionUtils.get(commodityPanel, null, MarketAPI.class);
-            L lInstance = (L)ReflectionUtils.get(commodityPanel, null, L.class);
+            MarketAPI market = (MarketAPI)(ReflectionUtils.get(commodityPanel, null, MarketAPI.class));
 
             int width = (int) commodityPanel.getPosition().getWidth();
             int height = (int) commodityPanel.getPosition().getHeight();
             // The Panel with the player portrait
             UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
-            LtvCommodityPanel replacement = new LtvCommodityPanel(managementPanel, width, height, market, lInstance);
+            LtvCommodityPanel replacement = new LtvCommodityPanel(managementPanel, width, height, market);
 
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later
