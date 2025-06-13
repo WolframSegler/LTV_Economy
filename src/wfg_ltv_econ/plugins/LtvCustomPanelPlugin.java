@@ -85,7 +85,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         LtvRenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_comPanel.m_faction.getBaseUIColor(), glowAmount);
 
         if (m_clickedThisFrame) {
-            LtvRenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_comPanel.m_faction.getBaseUIColor(), glowAmount);
+            LtvRenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_comPanel.m_faction.getBaseUIColor(), glowAmount/2);
         }
     }
 

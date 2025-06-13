@@ -2,8 +2,10 @@ package wfg_ltv_econ.ui;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.econ.CommodityMarketDataAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySourceType;
+import com.fs.starfarer.api.campaign.econ.MarketShareDataAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -11,18 +13,14 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.campaign.ui.marketinfo.i;
 import com.fs.starfarer.settings.StarfarerSettings;
+import com.fs.starfarer.api.impl.campaign.econ.CommodityIconCounts;
+import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
 import wfg_ltv_econ.plugins.CommodityRowIconPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.util.LtvNumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
-
-import com.fs.starfarer.api.impl.campaign.econ.CommodityIconCounts;
-import com.fs.starfarer.api.impl.campaign.ids.Strings;
-import com.fs.starfarer.campaign.econ.reach.CommodityMarketData;
-import com.fs.starfarer.campaign.econ.reach.MarketShareData;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -34,7 +32,6 @@ public class CommodityRowPanel{
     private final CommodityOnMarketAPI m_com;
     private final UIPanelAPI m_parent;
     public final FactionAPI m_faction;
-    private i m_sourceIcon;
     public boolean m_canViewPrices;
 
     public CommodityRowPanel(CommodityOnMarketAPI com, UIPanelAPI parent, int width, int height, FactionAPI faction) {
@@ -89,43 +86,46 @@ public class CommodityRowPanel{
         tooltip.getPrev().getPosition().inBL(labelWidth, (rowHeight - iconSize)/2);
 
         // Source Icon
-        CommodityMarketData commodityData = (CommodityMarketData) m_com.getCommodityMarketData();
-        getPanel().addComponent(getSourceIcon(tooltip, baseColor, commodityData)).setSize(rowHeight, rowHeight).inBL(0, 0);
+        CommodityMarketDataAPI commodityData = m_com.getCommodityMarketData();
+        getPanel().addComponent(getSourceIcon(baseColor, commodityData, iconSize)).setSize(rowHeight, rowHeight).inBL(0, 0);
 
         if (commodityData.getExportIncome(m_com) > 0) {
-            m_sourceIcon = new i(
-                    (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "exports"),
-                    baseColor, false);
-            getPanel().addComponent(m_sourceIcon).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
+            String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "exports");
+            CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize, new CommodityRowIconPlugin(iconPath, baseColor, false));
+            ((CommodityRowIconPlugin)iconPanel.getPlugin()).init(iconPanel);
+            getPanel().addComponent(iconPanel).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
         }
 
         getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
     }
 
-    private i getSourceIcon(TooltipMakerAPI tooltip, Color baseColor, CommodityMarketData commodityData) {
-        MarketShareData marketData = commodityData.getMarketShareData(m_com.getMarket());
+    private CustomPanelAPI getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int iconSize) {
+        MarketShareDataAPI marketData = commodityData.getMarketShareData(m_com.getMarket());
         boolean isSourceIllegal = marketData.isSourceIsIllegal();
 
         CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(m_com.getMarket()).getSource();
         String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
             "imports");
-
-        CustomPanelAPI iconPanel = m_panel.createCustomPanel(32f, 32f, new CommodityRowIconPlugin(iconPath, baseColor, isSourceIllegal));
+        Color baseColor = color;
 
         switch (source) {
             case GLOBAL:
-                return new i(iconPath, baseColor, isSourceIllegal);
+                break;
             case IN_FACTION:
                 iconPath = m_com.getMarket().getFaction().getCrest();
-                return new i(iconPath, null, isSourceIllegal);
+                baseColor = null;
+                break;
             case LOCAL:
             case NONE:
                 iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
-                        "production");
-                return new i(iconPath, baseColor, isSourceIllegal);
+                    "production");
+                break;
             default:
-                return new i(iconPath, baseColor, isSourceIllegal);
         }
+
+        CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize, new CommodityRowIconPlugin(iconPath, baseColor, isSourceIllegal));
+        ((CommodityRowIconPlugin)iconPanel.getPlugin()).init(iconPanel);
+        return iconPanel;
     }
 
     private void handleIconGroup(TooltipMakerAPI tooltip, int iconSize) {

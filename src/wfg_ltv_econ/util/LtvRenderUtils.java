@@ -4,7 +4,7 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 public class LtvRenderUtils {
-    public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult) {
+    public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult, int mode) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -15,7 +15,7 @@ public class LtvRenderUtils {
                 (byte) color.getBlue(),
                 (byte) (color.getAlpha() * alphaMult));
 
-        GL11.glBegin(GL11.GL_LINE_LOOP);
+        GL11.glBegin(mode);
         GL11.glVertex2f(x, y);
         GL11.glVertex2f(x + w, y);
         GL11.glVertex2f(x + w, y + h);
