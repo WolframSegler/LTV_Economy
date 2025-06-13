@@ -1,4 +1,4 @@
-package wfg_ltv_econ.plugins;
+package wfg_ltv_econ.conditions;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;

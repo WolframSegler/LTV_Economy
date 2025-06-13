@@ -1,4 +1,4 @@
-package wfg_ltv_econ.util;
+package wfg_ltv_econ.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,27 +19,21 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 public class LtvCommodityPanel{
-    final private UIPanelAPI m_parent;
-    final private CustomPanelAPI m_panel;
-    final public MarketAPI m_market;
+    private final UIPanelAPI m_parent;
+    private final CustomPanelAPI m_panel;
+    public final MarketAPI m_market;
 
     public final FactionAPI faction;
-    public final Color baseColor;
-    public final Color darkColor;
     public final Color BgColor;
     public final Color gridColor;
-    public final Color brightColor;
 
     public LtvCommodityPanel(UIPanelAPI managementPanel, int width, int height, MarketAPI market) {
         this.m_parent = managementPanel;
         this.m_market = market;
 
         this.faction = market.getFaction();
-        this.baseColor = this.faction.getBaseUIColor();
-        this.darkColor = this.faction.getDarkUIColor();
         this.BgColor = new Color(0, 0, 0, 220);
         this.gridColor = this.faction.getGridUIColor();
-        this.brightColor = this.faction.getBrightUIColor();
         
         m_panel = Global.getSettings().createCustom(width, height, null);
 
@@ -51,6 +45,9 @@ public class LtvCommodityPanel{
     }
     public PositionAPI getPanelPos() {
         return m_panel.getPosition();
+    }
+    public UIPanelAPI getParent() {
+        return m_parent;
     }
 
     public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {
@@ -107,7 +104,7 @@ public class LtvCommodityPanel{
         CustomPanelAPI previousRow = null;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            CommodityRow comRow = new CommodityRow(commodity, getPanel(), (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight);
+            CommodityRowPanel comRow = new CommodityRowPanel(commodity, getPanel(), (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, faction);
             comRow.getPanelPos().setSize(getPanelPos().getWidth() - opad * 2.0F, rowHeight);
 
             if (previousRow == null) {

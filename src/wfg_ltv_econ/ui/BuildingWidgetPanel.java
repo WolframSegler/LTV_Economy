@@ -1,4 +1,4 @@
-package wfg_ltv_econ.util;
+package wfg_ltv_econ.ui;
 
 import com.fs.graphics.A.D;
 import com.fs.graphics.util.B;
@@ -30,6 +30,8 @@ import com.fs.starfarer.ui.oo0O;
 import com.fs.starfarer.ui.x;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.util.LtvMarketReplacer;
+import wfg_ltv_econ.util.LtvNumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
 import com.fs.starfarer.campaign.ui.marketinfo.T;
 import java.awt.Color;
@@ -45,7 +47,7 @@ import com.fs.starfarer.util.K;
 
 // A replacement for com.fs.starfarer.campaign.ui.marketinfo.intnew
 // The widget class inside of List<intnew> widgets, which is a member of IndustryListItem
-public class BuildingWidget extends intnew {
+public class BuildingWidgetPanel extends intnew {
    public final static float ICON_SIZE = 32.0F;
    private Industry currentIndustry;
    private x industryIcon; // private x ÓõöO00;
@@ -61,11 +63,11 @@ public class BuildingWidget extends intnew {
    private d constructionStatusText; // private d õôöO00;
    private Oo constructionMode; // com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo private.private$float;
 
-   public BuildingWidget(MarketAPI market, Industry currentIndustry, IndustryListPanel IndustryPanel) {
+   public BuildingWidgetPanel(MarketAPI market, Industry currentIndustry, IndustryListPanel IndustryPanel) {
       this(market, currentIndustry, IndustryPanel, -1);
    }
 
-   public BuildingWidget(MarketAPI market, Industry currentIndustry, IndustryListPanel IndustryPanel, int queue) {
+   public BuildingWidgetPanel(MarketAPI market, Industry currentIndustry, IndustryListPanel IndustryPanel, int queue) {
       super(market, currentIndustry, IndustryPanel, queue);
       this.glowFader = new Fader(0.0F, 0.2F, 0.2F, false, true);
       this.constructionMode = intnew.Oo.values()[0]; // Ó00000
@@ -412,7 +414,7 @@ public class BuildingWidget extends intnew {
       if (tradeInfoPanel != null) {
          return;
       }
-      BuildingWidget var9;
+      BuildingWidgetPanel var9;
       if (constructionQueueIndex >= 0) {
          try {
             Class<?> cClass = Class.forName("com.fs.starfarer.util.A.C");
@@ -423,8 +425,8 @@ public class BuildingWidget extends intnew {
 
                if ((boolean) a) {
                   for (intnew widget : IndustryPanel.getWidgets()) {
-                     if (((BuildingWidget) widget).getQueueIndex() >= 0) {
-                        ((BuildingWidget) widget).setNormalMode();
+                     if (((BuildingWidgetPanel) widget).getQueueIndex() >= 0) {
+                        ((BuildingWidgetPanel) widget).setNormalMode();
                      }
                   }
 
@@ -437,11 +439,11 @@ public class BuildingWidget extends intnew {
 
          if (constructionMode == intnew.Oo.Ó00000) {
             for (intnew widget : IndustryPanel.getWidgets()) {
-               if (((BuildingWidget) widget).getQueueIndex() >= 0) {
-                  if (((BuildingWidget) widget) == this) {
-                     ((BuildingWidget) widget).setRemoveMode();
+               if (((BuildingWidgetPanel) widget).getQueueIndex() >= 0) {
+                  if (((BuildingWidgetPanel) widget) == this) {
+                     ((BuildingWidgetPanel) widget).setRemoveMode();
                   } else {
-                     ((BuildingWidget) widget).setSwapMode();
+                     ((BuildingWidgetPanel) widget).setSwapMode();
                   }
                }
             }
@@ -449,9 +451,9 @@ public class BuildingWidget extends intnew {
             var9 = null;
 
             for (intnew widget : IndustryPanel.getWidgets()) {
-               if (((BuildingWidget) widget).getQueueIndex() >= 0
-                     && ((BuildingWidget) widget).constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.String) {
-                  var9 = (BuildingWidget) widget;
+               if (((BuildingWidgetPanel) widget).getQueueIndex() >= 0
+                     && ((BuildingWidgetPanel) widget).constructionMode == com.fs.starfarer.campaign.ui.marketinfo.intnew.Oo.String) {
+                  var9 = (BuildingWidgetPanel) widget;
                   break;
                }
             }
@@ -496,8 +498,8 @@ public class BuildingWidget extends intnew {
          }
       } else {
          for (intnew widget : IndustryPanel.getWidgets()) {
-            if (widget instanceof BuildingWidget && ((BuildingWidget) widget).getQueueIndex() >= 0) {
-               ((BuildingWidget) widget).setNormalMode();
+            if (widget instanceof BuildingWidgetPanel && ((BuildingWidgetPanel) widget).getQueueIndex() >= 0) {
+               ((BuildingWidgetPanel) widget).setNormalMode();
             }
          }
 

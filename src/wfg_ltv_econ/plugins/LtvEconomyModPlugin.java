@@ -3,6 +3,8 @@ package wfg_ltv_econ.plugins;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 
+import wfg_ltv_econ.conditions.NoRestockCondition;
+import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.util.LtvMarketReplacer;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {

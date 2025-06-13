@@ -1,6 +1,7 @@
 package wfg_ltv_econ.plugins;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.ui.AssignWorkersDialog;
 import wfg_ltv_econ.util.LtvNumFormat;
 
 import com.fs.starfarer.api.campaign.econ.Industry;

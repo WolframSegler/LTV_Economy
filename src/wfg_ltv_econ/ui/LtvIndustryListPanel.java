@@ -1,4 +1,4 @@
-package wfg_ltv_econ.util;
+package wfg_ltv_econ.ui;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,6 +16,9 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.s;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 import com.fs.starfarer.ui.newui.L;
+
+import wfg_ltv_econ.util.ReflectionUtils;
+
 import com.fs.starfarer.ui.d;
 import com.fs.starfarer.ui.Q;
 import com.fs.starfarer.api.ui.Alignment;
@@ -88,19 +91,19 @@ public class LtvIndustryListPanel extends IndustryListPanel {
             }
             if (var14 < industries.size()) {
                Industry var15 = (Industry) industries.get(var14);
-               BuildingWidget var16 = new BuildingWidget(market, var15, this);
+               BuildingWidgetPanel var16 = new BuildingWidgetPanel(market, var15, this);
                widgets.add(var16);
-               add(var16).setSize(BuildingWidget.WIDTH, BuildingWidget.HEIGHT).inTL((float) i * (BuildingWidget.WIDTH + opad), (float) j * (BuildingWidget.HEIGHT + opad));
+               add(var16).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
                StandardTooltipV2Expandable.addTooltipRight(var16,
-                     BuildingWidget.createIndustryTooltip(IndustryTooltipMode.NORMAL, var15));
+                     BuildingWidgetPanel.createIndustryTooltip(IndustryTooltipMode.NORMAL, var15));
             } else {
                var14 -= industries.size();
                ConstructionQueueItem var21 = (ConstructionQueueItem) queuedIndustries.get(var14);
                Industry var23 = market.instantiateIndustry(var21.id);
-               BuildingWidget var17 = new BuildingWidget(market, var23, this, var14);
+               BuildingWidgetPanel var17 = new BuildingWidgetPanel(market, var23, this, var14);
                widgets.add(var17);
-               add(var17).setSize(BuildingWidget.WIDTH, BuildingWidget.HEIGHT).inTL((float) i * (BuildingWidget.WIDTH + opad), (float) j * (BuildingWidget.HEIGHT + opad));
-               StandardTooltipV2Expandable.addTooltipRight(var17, BuildingWidget.createIndustryTooltip(IndustryTooltipMode.QUEUED, var23));
+               add(var17).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
+               StandardTooltipV2Expandable.addTooltipRight(var17, BuildingWidgetPanel.createIndustryTooltip(IndustryTooltipMode.QUEUED, var23));
             }
          }
       }

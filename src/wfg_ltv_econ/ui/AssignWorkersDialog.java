@@ -1,4 +1,4 @@
-package wfg_ltv_econ.plugins;
+package wfg_ltv_econ.ui;
 
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -9,6 +9,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.util.LtvNumFormat;
 

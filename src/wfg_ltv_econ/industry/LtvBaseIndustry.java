@@ -58,7 +58,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
-import wfg_ltv_econ.plugins.WorkerPoolCondition;
+import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.util.LtvNumFormat;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {

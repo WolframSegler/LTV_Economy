@@ -3,6 +3,11 @@ package wfg_ltv_econ.util;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.state.AppDriver;
+
+import wfg_ltv_econ.ui.BuildingWidgetPanel;
+import wfg_ltv_econ.ui.LtvCommodityPanel;
+import wfg_ltv_econ.ui.LtvIndustryListPanel;
+
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -174,8 +179,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Deprecated
+    @SuppressWarnings("unused")
     private void repopulateWidgetsList(UIPanelAPI UIindustryPanel) {
         if (UIindustryPanel == null || !(UIindustryPanel instanceof IndustryListPanel)) {
             return;
@@ -188,11 +193,11 @@ public class LtvMarketReplacer implements EveryFrameScript {
         List<intnew> currentWidgets = ((IndustryListPanel)UIindustryPanel).getWidgets();
 
         // If all the widgets are already my custom widget
-        if (currentWidgets.stream().allMatch(widget -> widget instanceof BuildingWidget)) {
+        if (currentWidgets.stream().allMatch(widget -> widget instanceof BuildingWidgetPanel)) {
             return;
         }
 
-        List<BuildingWidget> LtvWidgets = new ArrayList<>();
+        List<BuildingWidgetPanel> LtvWidgets = new ArrayList<>();
         for (Object widget : currentWidgets) {
             MarketAPI widgetMarket = (MarketAPI) ReflectionUtils.get(widget, "market");
             Industry industry = (Industry) ReflectionUtils.get(widget, null, Industry.class, true); // "øôöO00"
@@ -206,14 +211,14 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 queueIndex = -1;
             }
 
-            BuildingWidget newWidget = new BuildingWidget(widgetMarket, industry, industryPanel, queueIndex);
+            BuildingWidgetPanel newWidget = new BuildingWidgetPanel(widgetMarket, industry, industryPanel, queueIndex);
 
             // Correct missing variables
             ReflectionUtils.set(newWidget, "constructionActionButton", ((intnew)widget).getButton());
 
 
-            if (newWidget instanceof BuildingWidget) {
-                LtvWidgets.add((BuildingWidget) newWidget);
+            if (newWidget instanceof BuildingWidgetPanel) {
+                LtvWidgets.add((BuildingWidgetPanel) newWidget);
             }
         }
         if (Global.getSettings().isDevMode()) {
@@ -224,7 +229,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         // force a refresh
         try {
-            for (BuildingWidget widget : (List<BuildingWidget>)newWidgets) {
+            for (BuildingWidgetPanel widget : (List<BuildingWidgetPanel>)newWidgets) {
             widget.notifySizeChanged();
         } 
         } catch (Exception e) {
