@@ -1,15 +1,14 @@
 package wfg_ltv_econ.ui;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityMarketDataAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySourceType;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketShareDataAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -26,43 +25,30 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CommodityRowPanel{
+public class CommodityRowPanel extends LtvCustomPanel{
 
-    private final CustomPanelAPI m_panel;
     private final CommodityOnMarketAPI m_com;
-    private final UIPanelAPI m_parent;
-    public final FactionAPI m_faction;
     public boolean m_canViewPrices;
 
-    public CommodityRowPanel(CommodityOnMarketAPI com, UIPanelAPI parent, int width, int height, FactionAPI faction) {
+    public CommodityRowPanel(CommodityOnMarketAPI com, UIPanelAPI parent, int width, int height, MarketAPI market) {
+        super(parent, width, height, new LtvCustomPanelPlugin(), market);
         this.m_com = com;
-        this.m_parent = parent;
-        m_panel = Global.getSettings().createCustom(width, height, new LtvCustomPanelPlugin());
-        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, true, true, true);
-        this.m_parent.addComponent(m_panel);
-
-        this.m_faction = faction;
 
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
         this.m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
 
-        createRow();
+        createPanel();
     }
 
-    public CustomPanelAPI getPanel() {
-        return m_panel;
-    }
-    public PositionAPI getPanelPos() {
-        return m_panel.getPosition();
-    }
     public CommodityOnMarketAPI getCommodity() {
         return m_com;
     }
-    public UIPanelAPI getParent() {
-        return m_parent;
+
+    public void initializePanel(boolean hasPlugin) {
+        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, true, true, true, m_com, false, false);
     }
 
-    public void createRow() {
+    public void createPanel() {
         final int pad = 3;
         final int iconSize = 24;
         final int textWidth = 55;

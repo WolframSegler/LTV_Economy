@@ -4,6 +4,14 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 public class LtvRenderUtils {
+    public static void drawQuad(float x, float y, float w, float h, Color color, float alphaMult) {
+        drawRect(x, y, w, h, color, alphaMult, GL11.GL_QUADS);
+    }
+
+    public static void drawOutline(float x, float y, float w, float h, Color color, float alphaMult) {
+        drawRect(x, y, w, h, color, alphaMult, GL11.GL_LINES);
+    }
+
     public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult, int mode) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);

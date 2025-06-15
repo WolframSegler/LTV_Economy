@@ -4,6 +4,7 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.state.AppDriver;
 
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.BuildingWidgetPanel;
 import wfg_ltv_econ.ui.LtvCommodityPanel;
 import wfg_ltv_econ.ui.LtvIndustryListPanel;
@@ -162,7 +163,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             // The Panel with the player portrait
             UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
-            LtvCommodityPanel replacement = new LtvCommodityPanel(managementPanel, width, height, market);
+            LtvCommodityPanel replacement = new LtvCommodityPanel(managementPanel, width, height, market, new LtvCustomPanelPlugin());
 
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later
