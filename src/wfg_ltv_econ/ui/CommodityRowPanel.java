@@ -37,6 +37,7 @@ public class CommodityRowPanel extends LtvCustomPanel{
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
         this.m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
 
+        initializePanel(hasPlugin);
         createPanel();
     }
 

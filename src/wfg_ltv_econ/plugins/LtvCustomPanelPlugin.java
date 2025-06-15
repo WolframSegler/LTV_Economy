@@ -59,19 +59,17 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public TooltipMakerAPI showTooltip() {
-        if (m_tooltip == null && m_commodity != null) {
+        if (m_tooltip == null) {
             m_tooltip = (StandardTooltipV2Expandable) ReflectionUtils.invoke(CommodityTooltipFactory.class,
                     "super", m_commodity);
         }
         if (ReflectionUtils.invoke(m_panel.getPanel(), "getTooltip") != m_tooltip) {
             ReflectionUtils.invoke(m_panel.getPanel(), "setTooltip", 0f, m_tooltip);
         }
-        // Must be called each frame
-        if (m_tooltip == null) {
-            return null;
-        }
 
+        // Must be called each frame
         m_tooltip.getPosition().leftOfTop(m_panel.getParent(), 0);
+        
         return m_tooltip;
     }
 

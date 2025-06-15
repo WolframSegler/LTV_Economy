@@ -20,6 +20,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     public LtvCommodityPanel(UIPanelAPI managementPanel, int width, int height, MarketAPI market, CustomUIPanelPlugin plugin) {
         super(managementPanel, width, height, plugin, market);
 
+        initializePanel(hasPlugin);
         createPanel();
     }
 

@@ -20,9 +20,9 @@ public abstract class LtvCustomPanel{
     protected boolean hasPlugin = false;
 
     /*
-     * The child SHALL NOT add himself to the parent.
-     * Only the parent UIPanelAPI may add the child to itself.
+     * The child panel SHALL NOT add himself to the parent. The parent UIPanelAPI will add the child.
      * The parent SHALL NOT call createPanel(). Only the children may call it.
+     * The parent SHALL NOT call initializePanel(). It may use members only the child has.
      */
     public LtvCustomPanel(UIPanelAPI parent, int width, int height, CustomUIPanelPlugin plugin, MarketAPI market) {
         this.m_parent = parent;
@@ -38,8 +38,6 @@ public abstract class LtvCustomPanel{
         } else {
             m_panel = Global.getSettings().createCustom(width, height, null);
         }
-
-        initializePanel(hasPlugin);
     }
 
     public CustomPanelAPI getPanel() {
