@@ -52,7 +52,7 @@ public class CommodityRowPanel extends LtvCustomPanel{
         final int pad = 3;
         final int iconSize = 24;
         final int textWidth = 55;
-        final Color baseColor = m_com.getMarket().getFaction().getBaseUIColor();
+        final Color baseColor = getFaction().getBaseUIColor();
         final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
         final float rowHeight = getPanelPos().getHeight();
 
@@ -86,10 +86,10 @@ public class CommodityRowPanel extends LtvCustomPanel{
     }
 
     private CustomPanelAPI getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int iconSize) {
-        MarketShareDataAPI marketData = commodityData.getMarketShareData(m_com.getMarket());
+        MarketShareDataAPI marketData = commodityData.getMarketShareData(m_market);
         boolean isSourceIllegal = marketData.isSourceIsIllegal();
 
-        CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(m_com.getMarket()).getSource();
+        CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(m_market).getSource();
         String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
             "imports");
         Color baseColor = color;
@@ -98,7 +98,7 @@ public class CommodityRowPanel extends LtvCustomPanel{
             case GLOBAL:
                 break;
             case IN_FACTION:
-                iconPath = m_com.getMarket().getFaction().getCrest();
+                iconPath = m_market.getFaction().getCrest();
                 baseColor = null;
                 break;
             case LOCAL:

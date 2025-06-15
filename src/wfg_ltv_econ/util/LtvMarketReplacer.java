@@ -5,23 +5,19 @@ import com.fs.starfarer.api.Global;
 import com.fs.state.AppDriver;
 
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.ui.BuildingWidgetPanel;
 import wfg_ltv_econ.ui.LtvCommodityPanel;
 import wfg_ltv_econ.ui.LtvIndustryListPanel;
 
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.ui.newui.o0Oo;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 import com.fs.starfarer.ui.newui.L;
 import com.fs.starfarer.campaign.ui.marketinfo.s;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LtvMarketReplacer implements EveryFrameScript {
@@ -177,64 +173,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         if (Global.getSettings().isDevMode()) {
             Global.getLogger(LtvMarketReplacer.class).info("Replaced CommodityPanel");
-        }
-    }
-
-    @Deprecated
-    @SuppressWarnings("unused")
-    private void repopulateWidgetsList(UIPanelAPI UIindustryPanel) {
-        if (UIindustryPanel == null || !(UIindustryPanel instanceof IndustryListPanel)) {
-            return;
-        }
-        MarketAPI market = Global.getSector().getCurrentlyOpenMarket();
-        if (market == null) {
-            return;
-        }
-
-        List<intnew> currentWidgets = ((IndustryListPanel)UIindustryPanel).getWidgets();
-
-        // If all the widgets are already my custom widget
-        if (currentWidgets.stream().allMatch(widget -> widget instanceof BuildingWidgetPanel)) {
-            return;
-        }
-
-        List<BuildingWidgetPanel> LtvWidgets = new ArrayList<>();
-        for (Object widget : currentWidgets) {
-            MarketAPI widgetMarket = (MarketAPI) ReflectionUtils.get(widget, "market");
-            Industry industry = (Industry) ReflectionUtils.get(widget, null, Industry.class, true); // "øôöO00"
-            IndustryListPanel industryPanel = (IndustryListPanel) ReflectionUtils.invoke(widget, "getIndustryPanel");
-            Integer queueIndex = (Integer) ReflectionUtils.invoke(widget, "getQueueIndex");
-
-            if (industry == null || widgetMarket == null) {
-                continue;
-            }
-            if (queueIndex == null) {
-                queueIndex = -1;
-            }
-
-            BuildingWidgetPanel newWidget = new BuildingWidgetPanel(widgetMarket, industry, industryPanel, queueIndex);
-
-            // Correct missing variables
-            ReflectionUtils.set(newWidget, "constructionActionButton", ((intnew)widget).getButton());
-
-
-            if (newWidget instanceof BuildingWidgetPanel) {
-                LtvWidgets.add((BuildingWidgetPanel) newWidget);
-            }
-        }
-        if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketReplacer.class).info("Replaced IndustryListPanel widgets");
-        }
-        ReflectionUtils.set((IndustryListPanel)UIindustryPanel, "widgets", LtvWidgets);
-        List<?> newWidgets = ((IndustryListPanel)UIindustryPanel).getWidgets();
-
-        // force a refresh
-        try {
-            for (BuildingWidgetPanel widget : (List<BuildingWidgetPanel>)newWidgets) {
-            widget.notifySizeChanged();
-        } 
-        } catch (Exception e) {
-            Global.getLogger(LtvMarketReplacer.class).error("Replaced IndustryListPanel widgets refresh failed: ", e);
         }
     }
 

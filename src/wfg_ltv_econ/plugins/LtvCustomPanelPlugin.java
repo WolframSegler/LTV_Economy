@@ -33,6 +33,10 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     private boolean hasOutline = false;
 
     private float hoverTime = 0f;
+    private int offsetX = 0;
+    private int offsetY = 0;
+    private int offsetW = 0;
+    private int offsetH = 0;
 
     public void init(LtvCustomPanel panel, boolean glowEnabled, boolean hasTooltip, boolean displayPrices, CommodityOnMarketAPI commodity, boolean hasBackground, boolean hasOutline) {
         this.m_panel = panel;
@@ -55,7 +59,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public TooltipMakerAPI showTooltip() {
-        if (m_tooltip == null) {
+        if (m_tooltip == null && m_commodity != null) {
             m_tooltip = (StandardTooltipV2Expandable) ReflectionUtils.invoke(CommodityTooltipFactory.class,
                     "super", m_commodity);
         }
@@ -63,8 +67,11 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             ReflectionUtils.invoke(m_panel.getPanel(), "setTooltip", 0f, m_tooltip);
         }
         // Must be called each frame
-        m_tooltip.getPosition().leftOfTop(m_panel.getParent(), 0);
+        if (m_tooltip == null) {
+            return null;
+        }
 
+        m_tooltip.getPosition().leftOfTop(m_panel.getParent(), 0);
         return m_tooltip;
     }
 
@@ -77,12 +84,26 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     }
 
+    public void setOffsets(int x, int y, int width, int height) {
+        offsetX = x;
+        offsetY = y;
+        offsetW = width;
+        offsetH = height;
+    }
+
     public void renderBelow(float alphaMult) {
+        PositionAPI pos = m_panel.getPanelPos();
+
         if (hasBackground) {
-            LtvRenderUtils.drawQuad(0, 0, m_panel.getPanelPos().getWidth(), m_panel.getPanelPos().getHeight(), m_panel.BgColor, 0.2f);
+            int x = (int)pos.getX() + offsetX;
+            int y = (int)pos.getY() + offsetY;
+            int w = (int)pos.getWidth() + offsetW;
+            int h = (int)pos.getHeight() + offsetH;
+            LtvRenderUtils.drawQuad(x, y, w, h, m_panel.BgColor, alphaMult*0.65f);
+            // Looks vanilla like with 0.65f
         }
         if (hasOutline) {
-            LtvRenderUtils.drawOutline(0, 0, m_panel.getPanelPos().getWidth(), m_panel.getPanelPos().getHeight(), m_panel.gridColor, 0.2f);
+            LtvRenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_panel.getFaction().getGridUIColor(), alphaMult);
         }
     }
 

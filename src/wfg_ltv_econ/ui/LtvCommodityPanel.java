@@ -34,19 +34,6 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     public void createPanel() {
         final int pad = 3;
         final int opad = 10;
-        final TooltipMakerAPI BgTooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
-
-        // // Grid color
-        // UIComponentAPI panelGrid = BgTooltip.createRect(gridColor, 1f);
-        // BgTooltip.addCustom(panelGrid, opad).getPosition().setSize(getPanelPos().getWidth(), getPanelPos().getHeight()).inTL(0, 0);
-
-        // // Background Color
-        // UIComponentAPI BgRect = BgTooltip.createRect(BgColor, getPanelPos().getWidth());
-        // BgTooltip.addCustom(BgRect, opad).getPosition().setSize(getPanelPos().getWidth(), getPanelPos().getHeight()).inTL(0, 0);
-        // BgTooltip.sendToBottom(BgRect);
-        // BgRect.setOpacity(0.2f);
-        
-        getPanel().addUIElement(BgTooltip);
 
         // Select relevant commodities
         List<CommodityOnMarketAPI> commodities = m_market.getCommoditiesCopy();
@@ -64,6 +51,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         final TooltipMakerAPI FgTooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
         FgTooltip.addSectionHeading("Commodities", Alignment.MID, pad);
         final int headerHeight = (int) FgTooltip.getPrev().getPosition().getHeight();
+        ((LtvCustomPanelPlugin)m_panel.getPlugin()).setOffsets(0, 0, 0, -headerHeight);
 
         // Determine row height
         float rowHeight = getPanelPos().getHeight() - headerHeight - opad - pad;

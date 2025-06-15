@@ -15,14 +15,14 @@ public abstract class LtvCustomPanel{
     protected final CustomPanelAPI m_panel;
     protected MarketAPI m_market = null;
     protected FactionAPI m_faction = null;
-    public final Color gridColor;
-    public Color BgColor = new Color(0, 0, 0, 220);
+    public Color BgColor = new Color(0, 0, 0, 255);
 
     protected boolean hasPlugin = false;
 
     /*
      * The child SHALL NOT add himself to the parent.
      * Only the parent UIPanelAPI may add the child to itself.
+     * The parent SHALL NOT call createPanel(). Only the children may call it.
      */
     public LtvCustomPanel(UIPanelAPI parent, int width, int height, CustomUIPanelPlugin plugin, MarketAPI market) {
         this.m_parent = parent;
@@ -30,7 +30,6 @@ public abstract class LtvCustomPanel{
         if (market != null) {
             this.m_faction = market.getFaction();
         }
-        this.gridColor = getFaction().getGridUIColor();
 
         hasPlugin = plugin != null;
         
@@ -41,7 +40,6 @@ public abstract class LtvCustomPanel{
         }
 
         initializePanel(hasPlugin);
-        createPanel();
     }
 
     public CustomPanelAPI getPanel() {

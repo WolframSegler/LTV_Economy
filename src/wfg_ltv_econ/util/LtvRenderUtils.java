@@ -9,7 +9,7 @@ public class LtvRenderUtils {
     }
 
     public static void drawOutline(float x, float y, float w, float h, Color color, float alphaMult) {
-        drawRect(x, y, w, h, color, alphaMult, GL11.GL_LINES);
+        drawRect(x, y, w, h, color, alphaMult, GL11.GL_LINE_LOOP);
     }
 
     public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult, int mode) {
