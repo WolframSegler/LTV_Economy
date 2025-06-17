@@ -6,12 +6,14 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySourceType;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketShareDataAPI;
+import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.settings.StarfarerSettings;
 import com.fs.starfarer.api.impl.campaign.econ.CommodityIconCounts;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -25,7 +27,7 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CommodityRowPanel extends LtvCustomPanel{
+public class CommodityRowPanel extends LtvCustomPanel {
 
     private final CommodityOnMarketAPI m_com;
     public boolean m_canViewPrices;
@@ -46,7 +48,7 @@ public class CommodityRowPanel extends LtvCustomPanel{
     }
 
     public void initializePanel(boolean hasPlugin) {
-        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, true, true, true, m_com, false, false);
+        ((LtvCustomPanelPlugin) m_panel.getPlugin()).init(this, true, true, true, false, false);
     }
 
     public void createPanel() {
@@ -54,7 +56,8 @@ public class CommodityRowPanel extends LtvCustomPanel{
         final int iconSize = 24;
         final int textWidth = 55;
         final Color baseColor = getFaction().getBaseUIColor();
-        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
+        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(),
+                false);
         final float rowHeight = getPanelPos().getHeight();
 
         // Amount label
@@ -66,20 +69,23 @@ public class CommodityRowPanel extends LtvCustomPanel{
 
         final float labelWidth = amountTxt.getPosition().getWidth() + pad;
         final UIComponentAPI lblComp = tooltip.getPrev();
-        lblComp.getPosition().inBL(pad, (rowHeight - textHeight)/2);
+        lblComp.getPosition().inBL(pad, (rowHeight - textHeight) / 2);
 
         // Icons
         handleIconGroup(tooltip, iconSize);
-        tooltip.getPrev().getPosition().inBL(labelWidth, (rowHeight - iconSize)/2);
+        tooltip.getPrev().getPosition().inBL(labelWidth, (rowHeight - iconSize) / 2);
 
         // Source Icon
         CommodityMarketDataAPI commodityData = m_com.getCommodityMarketData();
-        getPanel().addComponent(getSourceIcon(baseColor, commodityData, iconSize)).setSize(rowHeight, rowHeight).inBL(0, 0);
+        getPanel().addComponent(getSourceIcon(baseColor, commodityData, iconSize)).setSize(rowHeight, rowHeight).inBL(0,
+                0);
 
         if (commodityData.getExportIncome(m_com) > 0) {
-            String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "exports");
-            CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize, new CommodityRowIconPlugin(iconPath, baseColor, false));
-            ((CommodityRowIconPlugin)iconPanel.getPlugin()).init(iconPanel);
+            String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
+                    "exports");
+            CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize,
+                    new CommodityRowIconPlugin(iconPath, baseColor, false));
+            ((CommodityRowIconPlugin) iconPanel.getPlugin()).init(iconPanel);
             getPanel().addComponent(iconPanel).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
         }
 
@@ -92,7 +98,7 @@ public class CommodityRowPanel extends LtvCustomPanel{
 
         CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(m_market).getSource();
         String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
-            "imports");
+                "imports");
         Color baseColor = color;
 
         switch (source) {
@@ -105,18 +111,19 @@ public class CommodityRowPanel extends LtvCustomPanel{
             case LOCAL:
             case NONE:
                 iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
-                    "production");
+                        "production");
                 break;
             default:
         }
 
-        CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize, new CommodityRowIconPlugin(iconPath, baseColor, isSourceIllegal));
-        ((CommodityRowIconPlugin)iconPanel.getPlugin()).init(iconPanel);
+        CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize,
+                new CommodityRowIconPlugin(iconPath, baseColor, isSourceIllegal));
+        ((CommodityRowIconPlugin) iconPanel.getPlugin()).init(iconPanel);
         return iconPanel;
     }
 
     private void handleIconGroup(TooltipMakerAPI tooltip, int iconSize) {
-        float available = (float)m_com.getAvailableStat().getModifiedValue();
+        float available = (float) m_com.getAvailableStat().getModifiedValue();
         float totalDemand = m_com.getMaxDemand();
         float totalSupply = m_com.getMaxSupply();
 
@@ -125,17 +132,17 @@ public class CommodityRowPanel extends LtvCustomPanel{
 
         CommodityIconCounts iconsCount = new CommodityIconCounts(m_com);
         final int demandMetLocal = iconsCount.demandMetWithLocal;
-        int demandMetInFactionImports = (int)Math.min(iconsCount.inFactionOnlyExport, totalDemand);
+        int demandMetInFactionImports = (int) Math.min(iconsCount.inFactionOnlyExport, totalDemand);
 
         final int imports = iconsCount.imports;
         final int extra = iconsCount.extra;
         final int deficit = iconsCount.deficit;
 
-        float localProducedRatio = demandMetLocal/totalTarget;
-        float inFactionImportRatio = demandMetInFactionImports/totalTarget;
-        float externalImportRatio = (imports-demandMetInFactionImports)/totalTarget;
-        float exportedRatio = extra/totalTarget;
-        float deficitRatio = deficit/totalTarget;
+        float localProducedRatio = demandMetLocal / totalTarget;
+        float inFactionImportRatio = demandMetInFactionImports / totalTarget;
+        float externalImportRatio = (imports - demandMetInFactionImports) / totalTarget;
+        float exportedRatio = extra / totalTarget;
+        float deficitRatio = deficit / totalTarget;
 
         final HashMap<IconRenderMode, Integer> iconMap = new HashMap<IconRenderMode, Integer>();
         iconMap.put(IconRenderMode.GREEN, Math.round(totalIcons * exportedRatio));
@@ -164,7 +171,7 @@ public class CommodityRowPanel extends LtvCustomPanel{
             addIconsToGroup(tooltip, m_com, icon.getValue(), icon.getKey());
         }
 
-        tooltip.addIconGroup(iconSize,1, -3);
+        tooltip.addIconGroup(iconSize, 1, -3);
     }
 
     private int addIconsToGroup(TooltipMakerAPI tooltip, CommodityOnMarketAPI com, int count, IconRenderMode mode) {
@@ -173,4 +180,50 @@ public class CommodityRowPanel extends LtvCustomPanel{
         }
         return count;
     }
+
+    public void initTooltip(TooltipMakerAPI tooltip) {
+        Color highlight = Misc.getHighlightColor();
+        Color gray = Misc.getGrayColor();
+        Color positive = Misc.getPositiveHighlightColor();
+        Color negative = Misc.getNegativeHighlightColor();
+        float pad = 3f;
+        float opad = 10f;
+
+        // Title
+        tooltip.addSectionHeading("Domestic Goods", Alignment.MID, 3);
+        tooltip.addPara(
+                "These are the mass-produced clothing, gadgets, wares, and goods that have enabled people to live a comfortable life...",
+                opad);
+
+        // View global market
+        tooltip.setParaSmallInsignia();
+        tooltip.addPara("Click to view global market info", pad, highlight);
+
+        // Divider
+        tooltip.addSectionHeading("Production, imports, and demand", Alignment.MID, opad);
+
+        // Production
+        tooltip.addPara("Available: %s", pad, highlight, "256");
+        tooltip.addPara("+256 Base value for colony size (Light Industry)", pad, positive);
+
+        // Demand
+        tooltip.addPara("Maximum demand: %s", opad, highlight, "3");
+        tooltip.addPara("3 Needed by Population & Infrastructure", pad);
+
+        // Divider
+        tooltip.addSectionHeading("Exports", Alignment.MID, opad);
+
+        // Export stats
+        tooltip.addPara(
+                "Pair is profitably exporting %s units of Domestic Goods and controls %s of the global market share.",
+                pad, highlight, "8", "9%");
+        tooltip.addPara("Exports bring in %s per month.", pad, positive, "0c");
+        tooltip.addPara("Exports are reduced by %s due to insufficient accessibility.", pad, negative, "248");
+
+        // Bottom tip
+        tooltip.addPara(
+                "Increasing production and colony accessibility will both increase the export market share and income.",
+                pad, gray);
+    }
+
 }

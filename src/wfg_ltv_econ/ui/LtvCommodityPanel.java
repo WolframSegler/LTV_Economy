@@ -25,7 +25,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     }
 
     public void initializePanel(boolean hasPlugin) {
-        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, false, false, false, null, true, true);
+        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, false, false, false, true, true);
     }
 
     public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {
@@ -83,4 +83,6 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         }
         getPanel().addUIElement(FgTooltip);
     }
+
+    public void initTooltip(TooltipMakerAPI tooltip) {}
 }

@@ -2,28 +2,21 @@ package wfg_ltv_econ.plugins;
 
 import java.util.List;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.campaign.ui.marketinfo.CommodityTooltipFactory;
-import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.util.LtvRenderUtils;
-import wfg_ltv_econ.util.ReflectionUtils;
 
 public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     private LtvCustomPanel m_panel;
-    private StandardTooltipV2Expandable m_tooltip = null;
+    private TooltipMakerAPI m_tooltip = null;
     private boolean m_hasTooltip = false;
-    private CommodityOnMarketAPI m_commodity = null;
 
     final private float highlightBrightness = 0.85f;
-    final private float tooltipDelay = 0.35f;
+    final private float tooltipDelay = 0.3f;
     private boolean glowEnabled = false;
     private float glowFade = 0f;
     private boolean hoveredLastFrame = false;
@@ -38,14 +31,11 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     private int offsetW = 0;
     private int offsetH = 0;
 
-    public void init(LtvCustomPanel panel, boolean glowEnabled, boolean hasTooltip, boolean displayPrices, CommodityOnMarketAPI commodity, boolean hasBackground, boolean hasOutline) {
+    public void init(LtvCustomPanel panel, boolean glowEnabled, boolean hasTooltip, boolean displayPrices, boolean hasBackground, boolean hasOutline) {
         this.m_panel = panel;
         this.glowEnabled = glowEnabled;
         this.m_hasTooltip = hasTooltip;
         this.displayPrices = displayPrices;
-        if (hasTooltip && commodity != null) {
-            m_commodity = commodity;
-        }
         this.hasBackground = hasBackground;
         this.hasOutline = hasOutline;
     }
@@ -60,22 +50,19 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     public TooltipMakerAPI showTooltip() {
         if (m_tooltip == null) {
-            m_tooltip = (StandardTooltipV2Expandable) ReflectionUtils.invoke(CommodityTooltipFactory.class,
-                    "super", m_commodity);
-        }
-        if (ReflectionUtils.invoke(m_panel.getPanel(), "getTooltip") != m_tooltip) {
-            ReflectionUtils.invoke(m_panel.getPanel(), "setTooltip", 0f, m_tooltip);
-        }
+            m_tooltip = m_panel.getPanel().createUIElement(500f, 400f, false);
+            m_panel.initTooltip(m_tooltip);
+            m_panel.getPanel().addUIElement(m_tooltip);
 
-        // Must be called each frame
-        m_tooltip.getPosition().leftOfTop(m_panel.getParent(), 0);
+            m_tooltip.getPosition().leftOfTop(m_panel.getParent(), 0);
+        }
         
         return m_tooltip;
     }
 
     public void hideTooltip() {
+        m_panel.getPanel().removeComponent(m_tooltip);
         m_tooltip = null;
-        ReflectionUtils.invoke(m_panel.getPanel(), "setTooltip", 0f, null);
     }
 
     public void positionChanged(PositionAPI position) {
@@ -128,7 +115,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         // Glow Logic
         if (glowEnabled) {
             float target = hoveredLastFrame ? 1f : 0f;
-            float speed = 5f;
+            final float speed = 15f;
             glowFade += (target - glowFade) * amount * speed;
         }
 
@@ -168,12 +155,9 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
             if (hoveredLastFrame && (event.isLMBUpEvent())) {
                 clickedThisFrame = false;
-            }
 
-            if (displayPrices && event.isLMBEvent()) {
-                MarketAPI globalMarket = Global.getSector().getEconomy().getMarket("global");
-                if (globalMarket != null) {
-                    Global.getSector().setCurrentlyOpenMarket(globalMarket);
+                if (displayPrices) {
+                    // Open Dialog Panel showing Prices
                 }
             }
         }

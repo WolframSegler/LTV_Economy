@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 public abstract class LtvCustomPanel{
@@ -19,8 +20,8 @@ public abstract class LtvCustomPanel{
 
     protected boolean hasPlugin = false;
 
-    /*
-     * The child panel SHALL NOT add himself to the parent. The parent UIPanelAPI will add the child.
+    /**
+     * The child SHALL NOT add himself to the parent. The parent UIPanelAPI will add the child.
      * The parent SHALL NOT call createPanel(). Only the children may call it.
      * The parent SHALL NOT call initializePanel(). It may use members only the child has.
      */
@@ -49,6 +50,10 @@ public abstract class LtvCustomPanel{
     public UIPanelAPI getParent() {
         return m_parent;
     }
+
+    /**
+     * Has a default value for null faction.
+     */
     public FactionAPI getFaction() {
         if (m_faction == null) {
             return Global.getSettings().createBaseFaction("LtvCustomPanelWrapperFaction");
@@ -58,11 +63,20 @@ public abstract class LtvCustomPanel{
         }
     }
 
-    /*
+    /**
      * The child must initialize the Plugin.
-     * Leave it empty for no Plugin 
+     * Leave it empty for no Plugin.
      */
     public abstract void initializePanel(boolean hasPlugin);
 
+    /**
+     * The method for populating the main panel.
+     */
     public abstract void createPanel();
+
+    /**
+     * The Custom Plugin will call this method to create a tooltip.
+     * The method can be left empty for cases where a tooltip is not needed.
+     */
+    public abstract void initTooltip(TooltipMakerAPI tooltip);
 }
