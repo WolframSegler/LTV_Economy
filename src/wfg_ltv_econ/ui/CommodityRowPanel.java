@@ -26,6 +26,7 @@ import com.fs.starfarer.api.loading.Description.Type;
 import wfg_ltv_econ.plugins.CommodityRowIconPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.plugins.infobarPlugin;
+import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.LtvNumFormat;
 import wfg_ltv_econ.util.LtvUiUtils;
 import wfg_ltv_econ.util.ReflectionUtils;
@@ -137,34 +138,22 @@ public class CommodityRowPanel extends LtvCustomPanel {
     }
 
     private void handleInfoBar(TooltipMakerAPI tooltip, int barHeight) {
-        float available = (float) m_com.getAvailableStat().getModifiedValue();
-        float totalDemand = m_com.getMaxDemand();
-        float totalSupply = m_com.getMaxSupply();
+        CommodityStats comStats = new CommodityStats(m_com, m_market);
 
-        float totalTarget = Math.max(Math.max(totalDemand, totalSupply), available);
-
-        CommodityIconCounts iconsCount = new CommodityIconCounts(m_com);
-        final int demandMetLocal = iconsCount.demandMetWithLocal;
-        int demandMetInFactionImports = (int) Math.min(iconsCount.inFactionOnlyExport, totalDemand);
-
-        final int imports = iconsCount.imports;
-        final int extra = iconsCount.extra;
-        final int deficit = iconsCount.deficit;
-
-        float localProducedRatio = demandMetLocal / totalTarget;
-        float inFactionImportRatio = demandMetInFactionImports / totalTarget;
-        float externalImportRatio = (imports - demandMetInFactionImports) / totalTarget;
-        float exportedRatio = extra / totalTarget;
-        float deficitRatio = deficit / totalTarget;
+        float localProducedRatio = comStats.demandMetWithLocal / comStats.available;
+        float inFactionImportRatio = comStats.inFactionImports / comStats.available;
+        float externalImportRatio = comStats.externalImports / comStats.available;
+        float exportedRatio = comStats.totalExports / comStats.available;
+        float deficitRatio = comStats.localDeficit / comStats.available;
 
         final HashMap<Color, Float> barMap = new HashMap<Color, Float>();
         barMap.put(new Color(170, 46, 46), deficitRatio);
-        barMap.put(new	Color(225, 170, 76), externalImportRatio);
-        barMap.put(new	Color(210, 210, 76), inFactionImportRatio);
+        barMap.put(new Color(225, 170, 76), externalImportRatio);
+        barMap.put(new Color(210, 210, 76), inFactionImportRatio);
         barMap.put(new Color(122, 200, 122), localProducedRatio);
         barMap.put(new Color(63, 175, 63), exportedRatio);
 
-        CustomPanelAPI infoBar = Global.getSettings().createCustom(80, barHeight, new infobarPlugin());
+        CustomPanelAPI infoBar = Global.getSettings().createCustom(85, barHeight, new infobarPlugin());
         ((infobarPlugin)infoBar.getPlugin()).init(infoBar, true, barMap, m_faction);
 
         tooltip.addCustom(infoBar, 3);
@@ -275,7 +264,11 @@ public class CommodityRowPanel extends LtvCustomPanel {
 				UIComponentAPI lblComp = tooltip.getPrev();
 				float textH = lbl.computeTextHeight(valueTxt);
 				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
-                y += textH + pad;
+                if (firstPara) {
+                    firstPara = false;
+                } else {
+                    y += textH + pad;
+                }
 
 				lblComp.getPosition().inTL(textX, y);
 
@@ -307,7 +300,11 @@ public class CommodityRowPanel extends LtvCustomPanel {
 				UIComponentAPI lblComp = tooltip.getPrev();
 				float textH = lbl.computeTextHeight(valueTxt);
 				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
-                y += textH + pad;
+                if (firstPara) {
+                    firstPara = false;
+                } else {
+                    y += textH + pad;
+                }
 
 				lblComp.getPosition().inTL(textX, y);
 
@@ -344,7 +341,11 @@ public class CommodityRowPanel extends LtvCustomPanel {
 			UIComponentAPI lblComp = tooltip.getPrev();
 			float textH = lbl.computeTextHeight(valueTxt);
 			float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
-            y += textH + pad;
+            if (firstPara) {
+                firstPara = false;
+            } else {
+                y += textH + pad;
+            }
 
 			lblComp.getPosition().inTL(textX, y);
   
