@@ -60,6 +60,7 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.util.LtvNumFormat;
+import wfg_ltv_econ.util.LtvUiUtils;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
@@ -1329,20 +1330,22 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					// advance X
 					x += sectionWidth + 5f;
 				}
-				tooltip.setHeightSoFar(y);
-				resetFlowLeft(tooltip, opad);
+				tooltip.setHeightSoFar(y + opad*1.5f);
+				LtvUiUtils.resetFlowLeft(tooltip, opad);
 			}
 
 			addPostSupplySection(tooltip, hasSupply, mode);
 
+			float headerHeight = 0;
 			if (hasDemand || hasPostDemandSection(hasDemand, mode)) {
 				tooltip.addSectionHeading("Demand & effects", color, dark, Alignment.MID, opad);
+				headerHeight = tooltip.getPrev().getPosition().getHeight();
 			}
 
 			if (hasDemand) {
 				float startY = tooltip.getHeightSoFar() + opad;
 				if (hasSupply) {
-					startY += opad * 1.5f;
+					startY += headerHeight;
 				}
 
 				float x = opad;
@@ -1395,8 +1398,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					// advance X
 					x += sectionWidth + 5f;
 				}
-				tooltip.setHeightSoFar(y);
-				resetFlowLeft(tooltip, opad);
+				tooltip.setHeightSoFar(y + opad*1.5f);
+				LtvUiUtils.resetFlowLeft(tooltip, opad);
 			}
 
 			addPostDemandSection(tooltip, hasDemand, mode);
@@ -1461,11 +1464,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		tooltip.addImageWithText(opad);
 
 		return true;
-	}
-
-	private static final void resetFlowLeft(TooltipMakerAPI tooltip, float opad) {
-		LabelAPI alignReset = tooltip.addPara("", 0f);
-		alignReset.getPosition().inTL(opad / 2, tooltip.getHeightSoFar());
 	}
 
 	public List<SpecialItemData> getVisibleInstalledItems() {
@@ -1664,7 +1662,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (aiCoreId.equals(Commodities.ALPHA_CORE)) {
 			supplyBonus.modifyMult(getModId(0), ALPHA_CORE_PRODUCTION_BOOST, "Alpha core");
 			demandReduction.modifyMult(getModId(0), ALPHA_CORE_INPUT_REDUCTION, "Alpha core");
-			demandReduction.modifyMult(getModId(7) + "increased_production", ALPHA_CORE_PRODUCTION_BOOST);
+			demandReduction.modifyMult(getModId(7), ALPHA_CORE_PRODUCTION_BOOST, "Alpha core");
 
 		} else if (aiCoreId.equals(Commodities.BETA_CORE)) {
 			demandReduction.modifyMult(getModId(0), BETA_CORE_INPUT_REDUCTION, "Beta core");
@@ -1688,7 +1686,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 			if (admin.getStats().getDynamic().getValue(Stats.SUPPLY_BONUS_MOD, 0) != 0) {
 				supplyBonus.modifyMult(getModId(1), getImproveProductionBonus(), "Administrator");
-				demandReduction.modifyMult(getModId(9) + "increased_production", getImproveProductionBonus());
+				demandReduction.modifyMult(getModId(9), getImproveProductionBonus(), "Administrator");
 			}
 
 			if (admin.getStats().getDynamic().getValue(Stats.DEMAND_REDUCTION_MOD, 0) != 0) {
@@ -2160,7 +2158,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			return;
 
 		supplyBonus.modifyMult(getModId(3), getImproveProductionBonus(), getImprovementsDescForModifiers());
-		demandReduction.modifyMult(getModId(8) + "increased_production", getImproveProductionBonus());
+		demandReduction.modifyMult(getModId(8) + "increased_production", getImproveProductionBonus(),  getImprovementsDescForModifiers());
 	}
 
 	public void addImprovedSection(IndustryTooltipMode mode, TooltipMakerAPI tooltip, boolean expanded) {
@@ -2168,7 +2166,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (!isImproved())
 			return;
 
-		float opad = 10f;
+		final int opad = 10;
 
 		tooltip.addSectionHeading("Improvements made", Misc.getStoryOptionColor(),
 				Misc.getStoryDarkColor(), Alignment.MID, opad);

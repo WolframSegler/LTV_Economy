@@ -8,16 +8,18 @@ public class LtvNumFormat {
 
     /**
      * Format a positive number so that:
-     *  - If it has <= maxDigits digits, it’s printed in full (no decimals).
-     *  - Otherwise it’s printed in scientific notation with maxDigits significant digits.
+     *  - If it has less than 4 digits, it’s printed in full.
+     *  - Otherwise it’s printed in engineer notation with 3 significant digits.
      *
-     * Examples (maxDigits = 3):
+     * Examples:
      *   924 -> "924"
      *   9245 -> "9.25K"
      *   79245 -> "79.2K"
-     *   1_000_000_000L -> "1.00B"
+     *   1_000_000_000 -> "1.00B"
      */
-    public static final String formatWithMaxDigits(long value) {
+    public static final String formatWithMaxDigits(long input) {
+
+        long value = Math.abs(input);
 
         if (value < 1000) {
             return Long.toString(value);
@@ -38,6 +40,9 @@ public class LtvNumFormat {
         }
 
         DecimalFormat df = new DecimalFormat(pattern.toString());
+        if (input < 0) {
+            return "\u2212" + df.format(scaled) + SUFFIXES[suffix]; // large minus sign
+        }
         return df.format(scaled) + SUFFIXES[suffix];
     }
 

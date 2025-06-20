@@ -84,5 +84,5 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         getPanel().addUIElement(FgTooltip);
     }
 
-    public void initTooltip(TooltipMakerAPI tooltip) {}
+    public void createTooltip(TooltipMakerAPI tooltip) {}
 }

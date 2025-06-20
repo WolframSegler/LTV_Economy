@@ -26,10 +26,10 @@ public abstract class LtvCustomPanel{
      * The parent SHALL NOT call initializePanel(). It may use members only the child has.
      */
     public LtvCustomPanel(UIPanelAPI parent, int width, int height, CustomUIPanelPlugin plugin, MarketAPI market) {
-        this.m_parent = parent;
-        this.m_market = market;
+        m_parent = parent;
+        m_market = market;
         if (market != null) {
-            this.m_faction = market.getFaction();
+            m_faction = market.getFaction();
         }
 
         hasPlugin = plugin != null;
@@ -78,5 +78,5 @@ public abstract class LtvCustomPanel{
      * The Custom Plugin will call this method to create a tooltip.
      * The method can be left empty for cases where a tooltip is not needed.
      */
-    public abstract void initTooltip(TooltipMakerAPI tooltip);
+    public abstract void createTooltip(TooltipMakerAPI tooltip);
 }

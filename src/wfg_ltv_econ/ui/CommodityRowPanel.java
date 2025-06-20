@@ -4,10 +4,14 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityMarketDataAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySourceType;
+import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketShareDataAPI;
+import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -17,10 +21,13 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.settings.StarfarerSettings;
 import com.fs.starfarer.api.impl.campaign.econ.CommodityIconCounts;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.loading.Description.Type;
 
 import wfg_ltv_econ.plugins.CommodityRowIconPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.plugins.infobarPlugin;
 import wfg_ltv_econ.util.LtvNumFormat;
+import wfg_ltv_econ.util.LtvUiUtils;
 import wfg_ltv_econ.util.ReflectionUtils;
 
 import java.awt.Color;
@@ -34,10 +41,10 @@ public class CommodityRowPanel extends LtvCustomPanel {
 
     public CommodityRowPanel(CommodityOnMarketAPI com, UIPanelAPI parent, int width, int height, MarketAPI market) {
         super(parent, width, height, new LtvCustomPanelPlugin(), market);
-        this.m_com = com;
+        m_com = com;
 
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
-        this.m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
+        m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
 
         initializePanel(hasPlugin);
         createPanel();
@@ -53,11 +60,11 @@ public class CommodityRowPanel extends LtvCustomPanel {
 
     public void createPanel() {
         final int pad = 3;
+        final int opad = 10;
         final int iconSize = 24;
-        final int textWidth = 55;
+        final int textWidth = 60;
         final Color baseColor = getFaction().getBaseUIColor();
-        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(),
-                false);
+        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
         final float rowHeight = getPanelPos().getHeight();
 
         // Amount label
@@ -72,8 +79,18 @@ public class CommodityRowPanel extends LtvCustomPanel {
         lblComp.getPosition().inBL(pad, (rowHeight - textHeight) / 2);
 
         // Icons
-        handleIconGroup(tooltip, iconSize);
-        tooltip.getPrev().getPosition().inBL(labelWidth, (rowHeight - iconSize) / 2);
+		tooltip.beginIconGroup();
+		tooltip.setIconSpacingMedium();
+		tooltip.addIcons(m_com, 1, IconRenderMode.NORMAL);
+		tooltip.addIconGroup(iconSize ,0f);
+
+		float actualIconWidth = iconSize * m_com.getCommodity().getIconWidthMult();
+		tooltip.getPrev().getPosition().inBL(labelWidth + ((iconSize - actualIconWidth) * 0.5f),
+            (rowHeight - iconSize) / 2);
+
+        // Info Bar
+        handleInfoBar(tooltip, iconSize);
+        tooltip.getPrev().getPosition().inBL(labelWidth + iconSize + opad/2, (rowHeight - iconSize) / 2);
 
         // Source Icon
         CommodityMarketDataAPI commodityData = m_com.getCommodityMarketData();
@@ -81,8 +98,7 @@ public class CommodityRowPanel extends LtvCustomPanel {
                 0);
 
         if (commodityData.getExportIncome(m_com) > 0) {
-            String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
-                    "exports");
+            String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "exports");
             CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize,
                     new CommodityRowIconPlugin(iconPath, baseColor, false));
             ((CommodityRowIconPlugin) iconPanel.getPlugin()).init(iconPanel);
@@ -97,8 +113,7 @@ public class CommodityRowPanel extends LtvCustomPanel {
         boolean isSourceIllegal = marketData.isSourceIsIllegal();
 
         CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(m_market).getSource();
-        String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
-                "imports");
+        String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "imports");
         Color baseColor = color;
 
         switch (source) {
@@ -110,8 +125,7 @@ public class CommodityRowPanel extends LtvCustomPanel {
                 break;
             case LOCAL:
             case NONE:
-                iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers",
-                        "production");
+                iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "production");
                 break;
             default:
         }
@@ -122,13 +136,12 @@ public class CommodityRowPanel extends LtvCustomPanel {
         return iconPanel;
     }
 
-    private void handleIconGroup(TooltipMakerAPI tooltip, int iconSize) {
+    private void handleInfoBar(TooltipMakerAPI tooltip, int barHeight) {
         float available = (float) m_com.getAvailableStat().getModifiedValue();
         float totalDemand = m_com.getMaxDemand();
         float totalSupply = m_com.getMaxSupply();
 
         float totalTarget = Math.max(Math.max(totalDemand, totalSupply), available);
-        final int totalIcons = 6;
 
         CommodityIconCounts iconsCount = new CommodityIconCounts(m_com);
         final int demandMetLocal = iconsCount.demandMetWithLocal;
@@ -144,86 +157,321 @@ public class CommodityRowPanel extends LtvCustomPanel {
         float exportedRatio = extra / totalTarget;
         float deficitRatio = deficit / totalTarget;
 
-        final HashMap<IconRenderMode, Integer> iconMap = new HashMap<IconRenderMode, Integer>();
-        iconMap.put(IconRenderMode.GREEN, Math.round(totalIcons * exportedRatio));
-        iconMap.put(IconRenderMode.OUTLINE_GREEN, Math.round(totalIcons * localProducedRatio));
-        iconMap.put(IconRenderMode.NORMAL, Math.round(totalIcons * inFactionImportRatio));
-        iconMap.put(IconRenderMode.OUTLINE_RED, Math.round(totalIcons * externalImportRatio));
-        iconMap.put(IconRenderMode.DIM_RED, Math.round(totalIcons * deficitRatio));
+        final HashMap<Color, Float> barMap = new HashMap<Color, Float>();
+        barMap.put(new Color(170, 46, 46), deficitRatio);
+        barMap.put(new	Color(225, 170, 76), externalImportRatio);
+        barMap.put(new	Color(210, 210, 76), inFactionImportRatio);
+        barMap.put(new Color(122, 200, 122), localProducedRatio);
+        barMap.put(new Color(63, 175, 63), exportedRatio);
 
-        float totalIconCount = 0;
-        IconRenderMode smallestIconMode = null;
-        float smallestIconCount = 10f;
-        for (Map.Entry<IconRenderMode, Integer> icon : iconMap.entrySet()) {
-            totalIconCount += icon.getValue();
-            if (icon.getValue() < smallestIconCount) {
-                smallestIconCount = icon.getValue();
-                smallestIconMode = icon.getKey();
-            }
-        }
-        if (totalIconCount > 6) {
-            iconMap.remove(smallestIconMode);
-        }
+        CustomPanelAPI infoBar = Global.getSettings().createCustom(80, barHeight, new infobarPlugin());
+        ((infobarPlugin)infoBar.getPlugin()).init(infoBar, true, barMap, m_faction);
 
-        tooltip.beginIconGroup();
-        tooltip.setIconSpacingMedium();
-        for (Map.Entry<IconRenderMode, Integer> icon : iconMap.entrySet()) {
-            addIconsToGroup(tooltip, m_com, icon.getValue(), icon.getKey());
-        }
-
-        tooltip.addIconGroup(iconSize, 1, -3);
+        tooltip.addCustom(infoBar, 3);
     }
 
-    private int addIconsToGroup(TooltipMakerAPI tooltip, CommodityOnMarketAPI com, int count, IconRenderMode mode) {
-        for (int i = 0; i < count; i++) {
-            tooltip.addIcons(com, 1, mode);
+    public void createTooltip(TooltipMakerAPI tooltip) {
+        final Color highlight = Misc.getHighlightColor();
+        final Color gray = new Color(100, 100, 100);
+        final Color positive = Misc.getPositiveHighlightColor();
+        final Color negative = Misc.getNegativeHighlightColor();
+        final int pad = 3;
+        final int opad = 10;
+
+        tooltip.createRect(BgColor, tooltip.getPosition().getWidth());
+
+        final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
+
+        tooltip.setParaFont(Fonts.ORBITRON_12);
+        tooltip.addPara(m_com.getCommodity().getName(), getFaction().getBaseUIColor(), pad);
+
+        tooltip.setParaFontDefault();
+        tooltip.addPara(comDesc, opad);
+
+        if (m_canViewPrices) {
+            final String text = "Click to view global market info";
+            tooltip.addPara(text, opad, positive, text);
+        } else {
+            final String text = "Must be in range of a comm relay to view global market info";
+            tooltip.addPara(text, opad, negative, text);
         }
-        return count;
-    }
 
-    public void initTooltip(TooltipMakerAPI tooltip) {
-        Color highlight = Misc.getHighlightColor();
-        Color gray = Misc.getGrayColor();
-        Color positive = Misc.getPositiveHighlightColor();
-        Color negative = Misc.getNegativeHighlightColor();
-        float pad = 3f;
-        float opad = 10f;
-
-        // Title
-        tooltip.addSectionHeading("Domestic Goods", Alignment.MID, 3);
-        tooltip.addPara(
-                "These are the mass-produced clothing, gadgets, wares, and goods that have enabled people to live a comfortable life...",
-                opad);
-
-        // View global market
-        tooltip.setParaSmallInsignia();
-        tooltip.addPara("Click to view global market info", pad, highlight);
-
-        // Divider
-        tooltip.addSectionHeading("Production, imports, and demand", Alignment.MID, opad);
+        tooltip.setParaFont(Fonts.ORBITRON_12);
+        tooltip.addSectionHeading("Production, imports and demand", Alignment.MID, opad);
 
         // Production
-        tooltip.addPara("Available: %s", pad, highlight, "256");
-        tooltip.addPara("+256 Base value for colony size (Light Industry)", pad, positive);
+        {
+        tooltip.setParaFontDefault();
+        tooltip.addPara("Available: %s", pad, highlight,
+            LtvNumFormat.formatWithMaxDigits(m_com.getMaxSupply()));
 
+        final int valueTxtWidth = 45 + pad;
+        boolean firstPara = true;
+		float y = tooltip.getHeightSoFar() + pad;
+
+        for(Industry industry : m_com.getMarket().getIndustries()) {
+            if(industry.getSupply(m_com.getId()).getQuantity().getModifiedInt() < 1) {
+                continue;
+            }
+            
+            MutableStat baseProd = industry.getSupply(m_com.getId()).getQuantity();
+            MutableStat prodBonus = industry.getSupplyBonus();
+
+            // Flat mods
+            for (Map.Entry<String, MutableStat.StatMod> entry : baseProd.getFlatMods().entrySet()) {
+                MutableStat.StatMod mod = entry.getValue();
+
+                float value = mod.getValue();
+                String desc = mod.getDesc();
+
+                if (desc == null || value < 1) {
+                    continue;
+                }
+
+                // draw text
+                String valueTxt = "+" + LtvNumFormat.formatWithMaxDigits((long)value);
+
+                String industryDesc = industry.getNameForModifier();
+                String text =  desc + " (" + industryDesc + ")";
+
+				LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
+
+				UIComponentAPI lblComp = tooltip.getPrev();
+				float textH = lbl.computeTextHeight(valueTxt);
+				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad;
+                if (firstPara) {
+                    firstPara = false;
+                } else {
+                    y += textH + pad;
+                }
+
+				lblComp.getPosition().inTL(textX, y);
+
+                
+                lbl = tooltip.addPara(text, pad);
+                lblComp = tooltip.getPrev();
+				textX = valueTxtWidth + opad; 
+				lblComp.getPosition().inTL(textX, y);
+            }
+            // Flat bonuses
+            for (Map.Entry<String, MutableStat.StatMod> entry : prodBonus.getFlatMods().entrySet()) {
+                MutableStat.StatMod mod = entry.getValue();
+
+                float value = mod.getValue();
+                String desc = mod.getDesc();
+
+                if (desc == null || value < 1) {
+                    continue;
+                }
+
+                // draw text
+                String valueTxt = "+" + LtvNumFormat.formatWithMaxDigits((long)value);
+
+                String industryDesc = industry.getNameForModifier();
+                String text =  desc + " (" + industryDesc + ")";
+
+				LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
+
+				UIComponentAPI lblComp = tooltip.getPrev();
+				float textH = lbl.computeTextHeight(valueTxt);
+				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
+                y += textH + pad;
+
+				lblComp.getPosition().inTL(textX, y);
+
+                
+                lbl = tooltip.addPara(text, pad);
+                lblComp = tooltip.getPrev();
+				textX = valueTxtWidth + opad; 
+				lblComp.getPosition().inTL(textX, y);
+            }
+            // Mult bonuses
+            for (Map.Entry<String, MutableStat.StatMod> entry : prodBonus.getMultMods().entrySet()) {
+                MutableStat.StatMod mod = entry.getValue();
+
+                float value = mod.getValue();
+                String desc = mod.getDesc();
+
+                if (desc == null || value < 0) {
+                    continue;
+                }
+
+                // draw text
+                String valueTxt = Strings.X + value;
+
+                String industryDesc = industry.getNameForModifier();
+                String text =  desc + " (" + industryDesc + ")";
+
+				LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
+
+				UIComponentAPI lblComp = tooltip.getPrev();
+				float textH = lbl.computeTextHeight(valueTxt);
+				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
+                y += textH + pad;
+
+				lblComp.getPosition().inTL(textX, y);
+
+                
+                lbl = tooltip.addPara(text, pad);
+                lblComp = tooltip.getPrev();
+				textX = valueTxtWidth + opad; 
+				lblComp.getPosition().inTL(textX, y);
+            }
+        }
+        // Import mods
+        HashMap<String, StatMod> imports = m_com.getAvailableStat().getFlatMods();
+
+        for (Map.Entry<String, MutableStat.StatMod> entry : imports.entrySet()) {
+            MutableStat.StatMod mod = entry.getValue();
+
+            float value = mod.getValue();
+            String desc = mod.getDesc();
+
+            if (desc == null ||!desc.contains("faction")) {
+                continue;
+            }
+
+            // draw text
+            String valueTxt = "+" + LtvNumFormat.formatWithMaxDigits((long)value);
+            Color valueColor = highlight;
+            if (value < 0) {
+                valueTxt = valueTxt.replace("+", "");
+                valueColor = negative;
+            }
+                
+			LabelAPI lbl = tooltip.addPara(valueTxt, pad, valueColor, valueTxt);
+
+			UIComponentAPI lblComp = tooltip.getPrev();
+			float textH = lbl.computeTextHeight(valueTxt);
+			float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
+            y += textH + pad;
+
+			lblComp.getPosition().inTL(textX, y);
+  
+            lbl = tooltip.addPara(desc, pad);
+            lblComp = tooltip.getPrev();
+			textX = valueTxtWidth + opad; 
+			lblComp.getPosition().inTL(textX, y);
+        }
+
+        tooltip.setHeightSoFar(y);
+        LtvUiUtils.resetFlowLeft(tooltip, opad);
+        }
+        
+
+        tooltip.addPara("All production sources contribute cumulatively to the commodity's availability. Imports and smuggling add to supply to help meet demand.", gray ,pad);
+
+        
         // Demand
-        tooltip.addPara("Maximum demand: %s", opad, highlight, "3");
-        tooltip.addPara("3 Needed by Population & Infrastructure", pad);
+        {
+        tooltip.addPara("Total demand: %s", opad, negative,
+            LtvNumFormat.formatWithMaxDigits((long)m_com.getMaxDemand()));
+
+        final int valueTxtWidth = 45 + pad;
+        boolean firstPara = true;
+		float y = tooltip.getHeightSoFar() + pad;
+
+        for(Industry industry : m_com.getMarket().getIndustries()) {
+            if(industry.getDemand(m_com.getId()).getQuantity().getModifiedInt() < 1) {
+                continue;
+            }
+            
+            MutableStat baseProd = industry.getDemand(m_com.getId()).getQuantity();
+
+            // Flat mods
+            for (Map.Entry<String, MutableStat.StatMod> entry : baseProd.getFlatMods().entrySet()) {
+                MutableStat.StatMod mod = entry.getValue();
+
+                float value = mod.getValue();
+
+                if (value < 1) {
+                    continue;
+                }
+
+                // draw text
+                String valueTxt = LtvNumFormat.formatWithMaxDigits((long)value);
+
+                String industryDesc = industry.getNameForModifier();
+                String text =  "Needed by " + industryDesc;
+
+				LabelAPI lbl = tooltip.addPara(valueTxt, pad, negative, valueTxt);
+
+				UIComponentAPI lblComp = tooltip.getPrev();
+				float textH = lbl.computeTextHeight(valueTxt);
+				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad;
+                if (firstPara) {
+                    firstPara = false;
+                    y += textH;
+                } else {
+                    y += textH + pad;
+                }
+
+				lblComp.getPosition().inTL(textX, y);
+
+                
+                lbl = tooltip.addPara(text, pad);
+                lblComp = tooltip.getPrev();
+				textX = valueTxtWidth + opad; 
+				lblComp.getPosition().inTL(textX, y);
+            }
+        }
+        tooltip.setHeightSoFar(y);
+        LtvUiUtils.resetFlowLeft(tooltip, opad);
+        }
 
         // Divider
         tooltip.addSectionHeading("Exports", Alignment.MID, opad);
 
         // Export stats
-        tooltip.addPara(
-                "Pair is profitably exporting %s units of Domestic Goods and controls %s of the global market share.",
-                pad, highlight, "8", "9%");
-        tooltip.addPara("Exports bring in %s per month.", pad, positive, "0c");
-        tooltip.addPara("Exports are reduced by %s due to insufficient accessibility.", pad, negative, "248");
+        int exportIncome = m_com.getCommodityMarketData().getExportIncome(m_com);
+        int exportAmount = m_com.getCommodityMarketData().getMaxExportGlobal();
+        boolean isIllegal = m_market.isIllegal(m_com);
+        String commodityName = m_com.getCommodity().getName();
+
+        if (exportAmount < 1) {
+            tooltip.addPara("No local production to export.", opad);
+        } else
+        if (isIllegal) {
+            tooltip.addPara(
+            m_market.getName() + " controls %s of the export market share for " + commodityName + ".This trade brings in no income due to being underground.",
+            opad, highlight,
+            m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%"
+        );
+        } else 
+        if (exportIncome < 1) {
+            tooltip.addPara(
+            m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. Exports of" + commodityName + "bring in no income.",
+            opad, highlight,
+            m_com.getCommodityMarketData().getMaxExportGlobal() + "",
+            m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%"
+        );
+        } else {
+            tooltip.addPara(
+            m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. Exports bring in %s per month.",
+            opad, highlight,
+            m_com.getCommodityMarketData().getMaxExportGlobal() + "",
+            m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%",
+            exportIncome + Strings.C
+        );
+
+            int available = new CommodityIconCounts(m_com).extra;
+            float accessibility = m_market.getAccessibilityMod().getFlatBonus();
+            int exportable = Math.round(available * accessibility);
+            int penalty = available - exportable;
+
+            if (penalty > 0) {
+                tooltip.addPara(
+                "Exports are reduced by %s due to insufficient accessibility.",
+                pad, negative, Integer.toString(penalty)
+            );
+            }
+        }
 
         // Bottom tip
         tooltip.addPara(
-                "Increasing production and colony accessibility will both increase the export market share and income.",
-                pad, gray);
+        "Increasing production and colony accessibility will both increase the export market share and income.", gray, opad);
+
+        tooltip.addSpacer(opad*1.5f);
     }
 
 }
