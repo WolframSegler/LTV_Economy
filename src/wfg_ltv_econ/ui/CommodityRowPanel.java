@@ -19,7 +19,6 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.settings.StarfarerSettings;
-import com.fs.starfarer.api.impl.campaign.econ.CommodityIconCounts;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.loading.Description.Type;
 
@@ -139,19 +138,28 @@ public class CommodityRowPanel extends LtvCustomPanel {
 
     private void handleInfoBar(TooltipMakerAPI tooltip, int barHeight) {
         CommodityStats comStats = new CommodityStats(m_com, m_market);
+        comStats.printAllInfo();
 
-        float localProducedRatio = comStats.demandMetWithLocal / comStats.available;
-        float inFactionImportRatio = comStats.inFactionImports / comStats.available;
-        float externalImportRatio = comStats.externalImports / comStats.available;
-        float exportedRatio = comStats.totalExports / comStats.available;
-        float deficitRatio = comStats.localDeficit / comStats.available;
+        float localProducedRatio = (float)comStats.demandMetWithLocal / (float)comStats.totalActivity;
+        float inFactionImportRatio = (float)comStats.inFactionImports / (float)comStats.totalActivity;
+        float externalImportRatio = (float)comStats.externalImports / (float)comStats.totalActivity;
+        float exportedRatio = (float)comStats.totalExports / (float)comStats.totalActivity;
+        float notExportedRatio = (float)comStats.canNotExport / (float)comStats.totalActivity;
+        float deficitRatio = (float)comStats.localDeficit / (float)comStats.totalActivity;
 
         final HashMap<Color, Float> barMap = new HashMap<Color, Float>();
-        barMap.put(new Color(170, 46, 46), deficitRatio);
+        barMap.put(new Color(170, 46,  46), deficitRatio);
         barMap.put(new Color(225, 170, 76), externalImportRatio);
         barMap.put(new Color(210, 210, 76), inFactionImportRatio);
         barMap.put(new Color(122, 200, 122), localProducedRatio);
-        barMap.put(new Color(63, 175, 63), exportedRatio);
+        barMap.put(new Color(63,  175, 63), exportedRatio);
+        barMap.put(new Color(100, 140, 180), notExportedRatio);
+
+        for (Map.Entry<Color, Float> barPiece : barMap.entrySet()) {
+            if (barPiece.getValue() < 0) {
+                barPiece.setValue(0f);
+            }
+        }
 
         CustomPanelAPI infoBar = Global.getSettings().createCustom(85, barHeight, new infobarPlugin());
         ((infobarPlugin)infoBar.getPlugin()).init(infoBar, true, barMap, m_faction);
@@ -455,15 +463,12 @@ public class CommodityRowPanel extends LtvCustomPanel {
             exportIncome + Strings.C
         );
 
-            int available = new CommodityIconCounts(m_com).extra;
-            float accessibility = m_market.getAccessibilityMod().getFlatBonus();
-            int exportable = Math.round(available * accessibility);
-            int penalty = available - exportable;
+            long notExportable = new CommodityStats(m_com, m_market).canNotExport;
 
-            if (penalty > 0) {
+            if (notExportable > 0) {
                 tooltip.addPara(
                 "Exports are reduced by %s due to insufficient accessibility.",
-                pad, negative, Integer.toString(penalty)
+                pad, negative, Long.toString(notExportable)
             );
             }
         }

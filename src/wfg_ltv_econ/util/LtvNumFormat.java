@@ -52,4 +52,30 @@ public class LtvNumFormat {
 		}
 		return x;
 	}
+
+    public static int min(int... values) {
+        if (values == null || values.length == 0) {
+            throw new IllegalArgumentException("At least one value must be provided");
+        }
+        int min = values[0];
+        for (int i = 1; i < values.length; i++) {
+            if (values[i] < min) {
+                min = values[i];
+            }
+        }
+        return min;
+    }
+
+    public static float min(float... values) {
+        if (values == null || values.length == 0) {
+            throw new IllegalArgumentException("At least one value must be provided");
+        }
+        float min = values[0];
+        for (int i = 1; i < values.length; i++) {
+            if (values[i] < min) {
+                min = values[i];
+            }
+        }
+        return min;
+    }
 }
