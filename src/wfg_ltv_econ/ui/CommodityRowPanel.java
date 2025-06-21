@@ -138,7 +138,6 @@ public class CommodityRowPanel extends LtvCustomPanel {
 
     private void handleInfoBar(TooltipMakerAPI tooltip, int barHeight) {
         CommodityStats comStats = new CommodityStats(m_com, m_market);
-        comStats.printAllInfo();
 
         float localProducedRatio = (float)comStats.demandMetWithLocal / (float)comStats.totalActivity;
         float inFactionImportRatio = (float)comStats.inFactionImports / (float)comStats.totalActivity;
@@ -175,6 +174,7 @@ public class CommodityRowPanel extends LtvCustomPanel {
         final int pad = 3;
         final int opad = 10;
 
+        CommodityStats comStats = new CommodityStats(m_com, m_market);
         tooltip.createRect(BgColor, tooltip.getPosition().getWidth());
 
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
@@ -200,7 +200,7 @@ public class CommodityRowPanel extends LtvCustomPanel {
         {
         tooltip.setParaFontDefault();
         tooltip.addPara("Available: %s", pad, highlight,
-            LtvNumFormat.formatWithMaxDigits(m_com.getMaxSupply()));
+            LtvNumFormat.formatWithMaxDigits(comStats.available));
 
         final int valueTxtWidth = 45 + pad;
         boolean firstPara = true;
@@ -374,7 +374,7 @@ public class CommodityRowPanel extends LtvCustomPanel {
         // Demand
         {
         tooltip.addPara("Total demand: %s", opad, negative,
-            LtvNumFormat.formatWithMaxDigits((long)m_com.getMaxDemand()));
+            LtvNumFormat.formatWithMaxDigits(comStats.localDemand));
 
         final int valueTxtWidth = 45 + pad;
         boolean firstPara = true;
@@ -433,11 +433,10 @@ public class CommodityRowPanel extends LtvCustomPanel {
 
         // Export stats
         int exportIncome = m_com.getCommodityMarketData().getExportIncome(m_com);
-        int exportAmount = m_com.getCommodityMarketData().getMaxExportGlobal();
         boolean isIllegal = m_market.isIllegal(m_com);
         String commodityName = m_com.getCommodity().getName();
 
-        if (exportAmount < 1) {
+        if (comStats.totalExports < 1) {
             tooltip.addPara("No local production to export.", opad);
         } else
         if (isIllegal) {
@@ -449,26 +448,24 @@ public class CommodityRowPanel extends LtvCustomPanel {
         } else 
         if (exportIncome < 1) {
             tooltip.addPara(
-            m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. Exports of" + commodityName + "bring in no income.",
+            m_market.getName() + " is exporting %s units of " + commodityName + " and controls %s of the global market share. Exports of " + commodityName + " bring in no income.",
             opad, highlight,
-            m_com.getCommodityMarketData().getMaxExportGlobal() + "",
+            comStats.globalExport + "",
             m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%"
         );
         } else {
             tooltip.addPara(
             m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. Exports bring in %s per month.",
             opad, highlight,
-            m_com.getCommodityMarketData().getMaxExportGlobal() + "",
+            comStats.globalExport + "",
             m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%",
             exportIncome + Strings.C
-        );
+            );
 
-            long notExportable = new CommodityStats(m_com, m_market).canNotExport;
-
-            if (notExportable > 0) {
+            if (comStats.canNotExport > 0) {
                 tooltip.addPara(
                 "Exports are reduced by %s due to insufficient accessibility.",
-                pad, negative, Long.toString(notExportable)
+                pad, negative, LtvNumFormat.formatWithMaxDigits(comStats.canNotExport)
             );
             }
         }

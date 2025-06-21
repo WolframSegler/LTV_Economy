@@ -148,6 +148,10 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
             int pAmount = curr.getQuantity().getModifiedInt();
 
+            if (pAmount < 1) {
+                continue;
+            }
+
             // wrap to next line if needed
             count++;
             if (count % itemsPerRow == 0 && count != 0) {
@@ -195,6 +199,10 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
             int dAmount = curr.getQuantity().getModifiedInt();
             int allDeficit = commodity.getDeficitQuantity();
+
+            if (dAmount < 1) {
+                continue;
+            }
 
             // wrap to next line if needed
             count++;

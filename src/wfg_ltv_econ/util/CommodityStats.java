@@ -14,10 +14,8 @@ public class CommodityStats {
     public final CommodityOnMarketAPI com;
     public final MarketAPI market;
 
-    /**
-     * Maximum of Demand and avaliability
-     */
     public long totalActivity = 0;
+    public long available = 0;
 
     public long localProduction = 0;
     public long localDemand = 0;
@@ -36,10 +34,6 @@ public class CommodityStats {
     public long demandMetWithLocal = 0;
     public long demandMetNotWithLocal = 0;
 
-    /**
-     * localProduction + totalImports
-     */
-    public long available = 0;
 
     public CommodityStats(CommodityOnMarketAPI com, MarketAPI market) {
         this.com = com;
@@ -123,7 +117,6 @@ public class CommodityStats {
             int localDemand = com.getMaxDemand();
             int localSupply = Math.min(com.getMaxSupply(), com.getAvailable());
 
-            // Unmet demand that cannot be fulfilled by local production
             int unmet = localDemand - localSupply;
 
             if (unmet > 0) {
