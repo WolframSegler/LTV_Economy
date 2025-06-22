@@ -10,34 +10,34 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.ui.impl.StandardTooltipV2;
 
 import wfg_ltv_econ.ui.LtvCustomPanel;
-import wfg_ltv_econ.util.LtvRenderUtils;
+import wfg_ltv_econ.ui.LtvUIState;
+import wfg_ltv_econ.ui.LtvUIState.UIStateType;
+import wfg_ltv_econ.util.RenderUtils;
 
 public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
-    private LtvCustomPanel m_panel;
-    private TooltipMakerAPI m_tooltip = null;
-    private boolean m_hasTooltip = false;
+    protected LtvCustomPanel m_panel;
+    protected TooltipMakerAPI m_tooltip = null;
+    protected boolean m_hasTooltip = false;
 
-    final private float highlightBrightness = 1.1f;
-    final private float tooltipDelay = 0.3f;
-    private boolean glowEnabled = false;
-    private float glowFade = 0f;
-    private boolean hoveredLastFrame = false;
-    private boolean displayPrices = false;
-    private boolean clickedThisFrame = false;
-    private boolean hasBackground = false;
-    private boolean hasOutline = false;
+    final protected float highlightBrightness = 1.1f;
+    protected float tooltipDelay = 0.3f;
+    protected boolean glowEnabled = false;
+    protected float glowFade = 0f;
+    protected boolean hoveredLastFrame = false;
+    protected boolean clickedThisFrame = false;
+    protected boolean hasBackground = false;
+    protected boolean hasOutline = false;
 
-    private float hoverTime = 0f;
-    private int offsetX = 0;
-    private int offsetY = 0;
-    private int offsetW = 0;
-    private int offsetH = 0;
+    protected float hoverTime = 0f;
+    protected int offsetX = 0;
+    protected int offsetY = 0;
+    protected int offsetW = 0;
+    protected int offsetH = 0;
 
-    public void init(LtvCustomPanel panel, boolean glowEnabled, boolean hasTooltip, boolean displayPrices, boolean hasBackground, boolean hasOutline) {
+    public void init(LtvCustomPanel panel, boolean glowEnabled, boolean hasTooltip, boolean hasBackground, boolean hasOutline) {
         m_panel = panel;
         m_hasTooltip = hasTooltip;
         this.glowEnabled = glowEnabled;
-        this.displayPrices = displayPrices;
         this.hasBackground = hasBackground;
         this.hasOutline = hasOutline;
     }
@@ -72,6 +72,10 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         m_tooltip = null;
     }
 
+    public void setTooltipDelay(float tooltipDelay) {
+        this.tooltipDelay = tooltipDelay;
+    }
+
     public void positionChanged(PositionAPI position) {
 
     }
@@ -91,21 +95,21 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             int y = (int)pos.getY() + offsetY;
             int w = (int)pos.getWidth() + offsetW;
             int h = (int)pos.getHeight() + offsetH;
-            LtvRenderUtils.drawQuad(x, y, w, h, m_panel.BgColor, alphaMult*0.65f);
+            RenderUtils.drawQuad(x, y, w, h, m_panel.BgColor, alphaMult*0.65f);
             // Looks vanilla like with 0.65f
         }
         if (hasOutline) {
-            LtvRenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_panel.getFaction().getGridUIColor(), alphaMult);
+            RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_panel.getFaction().getGridUIColor(), alphaMult);
         }
 
         if (glowEnabled && glowFade > 0) {
             float glowAmount = highlightBrightness * glowFade * alphaMult;
 
-            LtvRenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
+            RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
             m_panel.getFaction().getBaseUIColor(), glowAmount);
 
             if (clickedThisFrame) {
-                LtvRenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
+                RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
                 m_panel.getFaction().getBaseUIColor(), glowAmount / 2);
             }
         }
@@ -121,11 +125,17 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             float target = hoveredLastFrame ? 1f : 0f;
             final float speed = 15f;
             glowFade += (target - glowFade) * amount * speed;
+
+            if (!LtvUIState.is(UIStateType.NONE)) {
+                glowFade = 0;
+            }
         }
+
+        
 
         // Tooltip Logic
         if (m_hasTooltip) {
-            if (hoveredLastFrame) {
+            if (hoveredLastFrame && !clickedThisFrame && !LtvUIState.is(UIStateType.DETAIL_DIALOG)) {
                 hoverTime += amount;
                 if (hoverTime > tooltipDelay) {
                     showTooltip();
@@ -153,16 +163,12 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
                 hoveredLastFrame = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
             }
 
-            if (hoveredLastFrame && (event.isLMBDownEvent())) {
+            if (hoveredLastFrame && event.isLMBDownEvent()) {
                 clickedThisFrame = true;
             }
 
-            if (hoveredLastFrame && (event.isLMBUpEvent())) {
+            if (event.isLMBUpEvent()) {
                 clickedThisFrame = false;
-
-                if (displayPrices) {
-                    // Open Dialog Panel showing Prices
-                }
             }
         }
     }

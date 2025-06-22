@@ -59,8 +59,8 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
-import wfg_ltv_econ.util.LtvNumFormat;
-import wfg_ltv_econ.util.LtvUiUtils;
+import wfg_ltv_econ.util.NumFormat;
+import wfg_ltv_econ.util.UiUtils;
 
 public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
@@ -1318,7 +1318,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					String txt = Strings.X + LtvNumFormat.formatWithMaxDigits(pAmount);
+					String txt = Strings.X + NumFormat.formatWithMaxDigits(pAmount);
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
 					UIComponentAPI lblComp = tooltip.getPrev();
@@ -1331,7 +1331,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					x += sectionWidth + 5f;
 				}
 				tooltip.setHeightSoFar(y + opad*1.5f);
-				LtvUiUtils.resetFlowLeft(tooltip, opad);
+				UiUtils.resetFlowLeft(tooltip, opad);
 			}
 
 			addPostSupplySection(tooltip, hasSupply, mode);
@@ -1386,7 +1386,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					String txt = Strings.X + LtvNumFormat.formatWithMaxDigits(dAmount);
+					String txt = Strings.X + NumFormat.formatWithMaxDigits(dAmount);
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
 					UIComponentAPI lblComp = tooltip.getPrev();
@@ -1399,7 +1399,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					x += sectionWidth + 5f;
 				}
 				tooltip.setHeightSoFar(y + opad*1.5f);
-				LtvUiUtils.resetFlowLeft(tooltip, opad);
+				UiUtils.resetFlowLeft(tooltip, opad);
 			}
 
 			addPostDemandSection(tooltip, hasDemand, mode);

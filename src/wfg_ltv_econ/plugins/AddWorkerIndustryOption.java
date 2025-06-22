@@ -2,7 +2,7 @@ package wfg_ltv_econ.plugins;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.ui.AssignWorkersDialog;
-import wfg_ltv_econ.util.LtvNumFormat;
+import wfg_ltv_econ.util.NumFormat;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -63,7 +63,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
             Misc.getHighlightColor(),
             Misc.getBasePlayerColor()
         },
-        LtvNumFormat.formatWithMaxDigits(((LtvBaseIndustry)industry).getWorkerAssigned()),
+        NumFormat.formatWithMaxDigits(((LtvBaseIndustry)industry).getWorkerAssigned()),
         industry.getCurrentName()
         );
     }

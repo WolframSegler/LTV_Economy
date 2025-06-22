@@ -3,7 +3,7 @@ package wfg_ltv_econ.util;
 import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
-public class LtvRenderUtils {
+public class RenderUtils {
     public static void drawQuad(float x, float y, float w, float h, Color color, float alphaMult) {
         drawRect(x, y, w, h, color, alphaMult, GL11.GL_QUADS);
     }

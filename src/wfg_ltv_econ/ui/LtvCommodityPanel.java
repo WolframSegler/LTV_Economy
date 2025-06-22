@@ -25,7 +25,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     }
 
     public void initializePanel(boolean hasPlugin) {
-        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, false, false, false, true, true);
+        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, false, false, true, true);
     }
 
     public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {
@@ -70,7 +70,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         CustomPanelAPI previousRow = null;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            CommodityRowPanel comRow = new CommodityRowPanel(commodity, getPanel(), (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, m_market);
+            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(commodity, getPanel(), (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, m_market);
             comRow.getPanelPos().setSize(getPanelPos().getWidth() - opad * 2.0F, rowHeight);
 
             if (previousRow == null) {

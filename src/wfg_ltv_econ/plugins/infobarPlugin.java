@@ -11,7 +11,7 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
-import wfg_ltv_econ.util.LtvRenderUtils;
+import wfg_ltv_econ.util.RenderUtils;
 
 
 public class infobarPlugin implements CustomUIPanelPlugin {
@@ -40,12 +40,12 @@ public class infobarPlugin implements CustomUIPanelPlugin {
         float h = pos.getHeight();
 
         for (Map.Entry<Color, Float> mapEntry : m_barMap.entrySet()) {
-            LtvRenderUtils.drawQuad(x, y, w*mapEntry.getValue(), h, mapEntry.getKey(), alphaMult*0.65f);
+            RenderUtils.drawQuad(x, y, w*mapEntry.getValue(), h, mapEntry.getKey(), alphaMult*0.65f);
             x += w*mapEntry.getValue();
         }
 
         if (hasOutline) {
-            LtvRenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_faction.getGridUIColor(), alphaMult);
+            RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_faction.getGridUIColor(), alphaMult);
         }
     }
 	

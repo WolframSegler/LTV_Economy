@@ -7,7 +7,7 @@ import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import wfg_ltv_econ.util.LtvNumFormat;
+import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 
 public class WorkerPoolCondition extends BaseMarketConditionPlugin {
@@ -77,9 +77,9 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         final float pad = 10f;
 
         tooltip.addPara("Total Workers: %s", pad, Misc.getHighlightColor(),
-                LtvNumFormat.formatWithMaxDigits(getWorkerPool()));
+                NumFormat.formatWithMaxDigits(getWorkerPool()));
         tooltip.addPara("Free Workers: %s", pad, Misc.getHighlightColor(),
-                LtvNumFormat.formatWithMaxDigits((long)(freeWorkerRatio*getWorkerPool())));
+                NumFormat.formatWithMaxDigits((long)(freeWorkerRatio*getWorkerPool())));
     }
 
     @Override

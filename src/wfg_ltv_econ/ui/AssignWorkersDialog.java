@@ -11,7 +11,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
-import wfg_ltv_econ.util.LtvNumFormat;
+import wfg_ltv_econ.util.NumFormat;
 
 import java.awt.Color;
 import java.util.Map;
@@ -171,7 +171,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
-            String txt = Strings.X + LtvNumFormat.formatWithMaxDigits(pAmount);
+            String txt = Strings.X + NumFormat.formatWithMaxDigits(pAmount);
             LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
             UIComponentAPI lblComp = tooltip.getPrev();
@@ -227,7 +227,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
-            String txt = Strings.X + LtvNumFormat.formatWithMaxDigits(dAmount);
+            String txt = Strings.X + NumFormat.formatWithMaxDigits(dAmount);
             LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
             UIComponentAPI lblComp = tooltip.getPrev();

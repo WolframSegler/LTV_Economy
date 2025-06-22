@@ -13,9 +13,9 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.util.LtvRenderUtils;
+import wfg_ltv_econ.util.RenderUtils;
 
-public class CommodityRowIconPlugin implements CustomUIPanelPlugin {
+public class LtvCommodityRowIconPlugin implements CustomUIPanelPlugin {
     private UIPanelAPI panel;
     private SpriteAPI sprite;
     private Color color;
@@ -24,7 +24,7 @@ public class CommodityRowIconPlugin implements CustomUIPanelPlugin {
     private final float padding = 2f;
     private final float borderThickness = 2f;
 
-    public CommodityRowIconPlugin(String spriteId, Color color, boolean isIllegal) {
+    public LtvCommodityRowIconPlugin(String spriteId, Color color, boolean isIllegal) {
         this.spriteId = spriteId;
         this.color = color;
         this.drawBorder = isIllegal;
@@ -58,13 +58,13 @@ public class CommodityRowIconPlugin implements CustomUIPanelPlugin {
 
     private void drawFramedBorder(float x, float y, float size, float thickness, Color color, float alphaMult) {
         // Top
-        LtvRenderUtils.drawRect(x, y + size - thickness, size, thickness, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y + size - thickness, size, thickness, color, alphaMult, GL11.GL_QUADS);
         // Bottom
-        LtvRenderUtils.drawRect(x, y, size, thickness, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y, size, thickness, color, alphaMult, GL11.GL_QUADS);
         // Left
-        LtvRenderUtils.drawRect(x, y, thickness, size, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y, thickness, size, color, alphaMult, GL11.GL_QUADS);
         // Right
-        LtvRenderUtils.drawRect(x + size - thickness, y, thickness, size, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x + size - thickness, y, thickness, size, color, alphaMult, GL11.GL_QUADS);
     }
 
     @Override

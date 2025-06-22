@@ -31,7 +31,7 @@ import com.fs.starfarer.ui.x;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.util.LtvMarketReplacer;
-import wfg_ltv_econ.util.LtvNumFormat;
+import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
 import com.fs.starfarer.campaign.ui.marketinfo.T;
 import java.awt.Color;
@@ -130,7 +130,7 @@ public class BuildingWidgetPanel extends intnew {
       if (currentIndustry instanceof LtvBaseIndustry) {
          int assigned = ((LtvBaseIndustry) currentIndustry).getWorkerAssigned();
          if (((LtvBaseIndustry)currentIndustry).isWorkerAssignable()) {
-            String assignedStr = LtvNumFormat.formatWithMaxDigits(assigned);
+            String assignedStr = NumFormat.formatWithMaxDigits(assigned);
 
             workerCountLabel.setText(assignedStr);
             workerCountLabel.setHighlight(0, 5);

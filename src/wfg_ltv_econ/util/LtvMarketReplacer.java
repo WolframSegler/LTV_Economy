@@ -12,7 +12,6 @@ import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.ui.newui.o0Oo;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 import com.fs.starfarer.ui.newui.L;
@@ -47,9 +46,9 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         // Find the master UI Panel
         UIPanelAPI master = null;
-        o0Oo dialog = ((CampaignState) state).getEncounterDialog();
-        if (dialog != null && dialog.getCoreUI() != null) {
-            master = (UIPanelAPI) dialog.getCoreUI();
+        Object dialog = ((CampaignState) state).getEncounterDialog();
+        if (dialog != null) {
+            master = (UIPanelAPI) ReflectionUtils.invoke(dialog, "getCoreUI");
         }
         // if (master == null) {
         //     master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");

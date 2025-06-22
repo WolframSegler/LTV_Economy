@@ -2,7 +2,7 @@ package wfg_ltv_econ.util;
 
 import java.text.DecimalFormat;
 
-public class LtvNumFormat {
+public class NumFormat {
 
     private static final String[] SUFFIXES = {"", "K", "M", "B", "T", "P", "E"};
 
