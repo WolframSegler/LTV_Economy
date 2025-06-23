@@ -28,10 +28,9 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
             InteractionDialogAPI dialog = Global.getSector().getCampaignUI()
                     .getCurrentInteractionDialog();
 
-            final int panelW = 1100;
-            final int panelH = 600;
             if (dialog != null) {
-                dialog.showCustomDialog(panelW, panelH, new LtvCommodityDetailDialog(panelW, panelH));
+                LtvCommodityDetailDialog dialogPanel = new LtvCommodityDetailDialog();
+                dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
             }
 
             hasClickedBefore = false;

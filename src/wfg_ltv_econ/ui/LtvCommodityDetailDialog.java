@@ -35,43 +35,64 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     // The window that opens when you click on a commodity while inside the range
     // of a comms network
 
-    // // Notes about the original window. Using VisualVM
-    // // new Color(181, 230, 255, 255)
-    // // new Color(70, 200, 255, 255)
-    // // new Color(31, 94, 112, 255)
-    // // new Color(170, 222, 255, 255)
-    // // int 1756
-    final static int pad = 3;
-    final static int opad = 10;
+    // Notes about the original window. Using VisualVM
+    // new Color(181, 230, 255, 255)
+    // new Color(70, 200, 255, 255)
+    // new Color(31, 94, 112, 255)
+    // new Color(170, 222, 255, 255)
 
-    private final int PANEL_WIDTH;
-    private final int PANEL_HEIGHT;
+    public final static int pad = 3;
+    public final static int opad = 10;
 
-    final float SECT1_WIDTH; // CommodityInfo
-    final float SECT2_WIDTH; // Sector Map
-    final float SECT3_WIDTH; // Prod&Consump Tables
-    final float SECT4_WIDTH; // Commodity Panel
+    // this.PANEL_W = 1206; // Exact width acquired using VisualVM. Includes padding.
+    // this.PANEL_H = 728;  // Exact height acquired using VisualVM. Includes padding.
 
-    final float SECT1_HEIGHT; // CommodityInfo
-    final float SECT2_HEIGHT; // Sector Map
-    final float SECT3_HEIGHT; // Prod&Consump Tables
-    final float SECT4_HEIGHT; // Commodity Panel
+    public final int PANEL_W;
+    public final int PANEL_H; 
+
+    public final float SECT1_WIDTH;
+    public final float SECT2_WIDTH;
+    public final float SECT3_WIDTH;
+    public final float SECT4_WIDTH;
+
+    public final float SECT1_HEIGHT;
+    public final float SECT2_HEIGHT;
+    public final float SECT3_HEIGHT;
+    public final float SECT4_HEIGHT;
+
+    public LtvCommodityDetailDialog() {
+        // Measured using very precise tools!! (my eyes)
+        this.PANEL_W = 1166;
+        this.PANEL_H = 658;
+
+        SECT1_WIDTH = PANEL_W * 0.75f;
+        SECT1_HEIGHT = PANEL_H * 0.25f;
+
+        SECT2_WIDTH = PANEL_W * 0.25f;
+        SECT2_HEIGHT = PANEL_H * 0.25f;
+
+        SECT3_WIDTH = PANEL_W * 0.75f;
+        SECT3_HEIGHT = PANEL_H * 0.7f;
+
+        SECT4_WIDTH = PANEL_W * 0.25f;
+        SECT4_HEIGHT = PANEL_H * 0.7f;
+    }
 
     public LtvCommodityDetailDialog(int panelW, int panelH) {
-        this.PANEL_WIDTH = panelW;
-        this.PANEL_HEIGHT = panelH;
+        this.PANEL_W = panelW;
+        this.PANEL_H = panelH;
 
-        SECT1_WIDTH = panelW * 0.75f;
-        SECT1_HEIGHT = panelH * 0.25f;
+        SECT1_WIDTH = PANEL_W * 0.75f;
+        SECT1_HEIGHT = PANEL_H * 0.25f;
 
-        SECT2_WIDTH = panelW * 0.25f;
-        SECT2_HEIGHT = panelH * 0.25f;
+        SECT2_WIDTH = PANEL_W * 0.25f;
+        SECT2_HEIGHT = PANEL_H * 0.25f;
 
-        SECT3_WIDTH = panelW * 0.75f;
-        SECT3_HEIGHT = panelH * 0.7f;
+        SECT3_WIDTH = PANEL_W * 0.75f;
+        SECT3_HEIGHT = PANEL_H * 0.7f;
 
-        SECT4_WIDTH = panelW * 0.25f;
-        SECT4_HEIGHT = panelH * 0.7f;
+        SECT4_WIDTH = PANEL_W * 0.25f;
+        SECT4_HEIGHT = PANEL_H * 0.7f;
     }
 
     @Override
@@ -91,10 +112,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         TooltipMakerAPI tooltip3 = section3.createUIElement(SECT3_WIDTH, SECT3_HEIGHT, true);
         TooltipMakerAPI tooltip4 = section4.createUIElement(SECT4_WIDTH, SECT4_HEIGHT, false);
 
-        createSection1(section1, tooltip1, highlight);
-        createSection2(section2, tooltip2);
-        createSection3(section3, tooltip3);
-        createSection4(section4, tooltip4);
+        createSection1(section1, tooltip1, highlight);  // CommodityInfo
+        createSection2(section2, tooltip2);             // Sector Map
+        createSection3(section3, tooltip3);             // Prod&Consump Tables
+        createSection4(section4, tooltip4);             // Commodity Panel
 
         section1.addUIElement(tooltip1).inTL(0, 0);
         section2.addUIElement(tooltip2).inTL(0, 0);
@@ -108,7 +129,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         // Footer
         // "Only show colonies with excess stockpiles or shortages (Q)"
-        TooltipMakerAPI footer = panel.createUIElement(PANEL_WIDTH, footerH, false);
+        TooltipMakerAPI footer = panel.createUIElement(PANEL_W, footerH, false);
         footer.addCheckbox(20, 20, "", "stockpile_toggle", Fonts.ORBITRON_12, highlight, 
         UICheckboxSize.SMALL, 0);
         footer.getPrev().getPosition().inBL(0, 0);
@@ -118,7 +139,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         int TextY = (int) txt.computeTextHeight(txt.getText()); 
         footer.getPrev().getPosition().inBL(20 + pad, (20-TextY)/2);
 
-        panel.addUIElement(footer).inBL(pad, -opad*3);
+        panel.addUIElement(footer).inBL(pad, -opad*3.5f);
     }
 
     private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip, Color highlight) {
@@ -144,15 +165,15 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
     @Override
     public void customDialogCancel() {
-
+        LtvUIState.setState(UIStateType.NONE);
     }
 
     public float getCustomDialogWidth() {
-        return PANEL_WIDTH;
+        return PANEL_W;
     }
 
     public float getCustomDialogHeight() {
-        return PANEL_HEIGHT;
+        return PANEL_H;
     }
 
     public String getCancelText() {

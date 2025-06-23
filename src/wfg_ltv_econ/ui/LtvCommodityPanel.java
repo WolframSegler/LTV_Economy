@@ -17,6 +17,8 @@ import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 
 public class LtvCommodityPanel extends LtvCustomPanel{
 
+    public static int STANDARD_WIDTH = 264;
+
     public LtvCommodityPanel(UIPanelAPI managementPanel, int width, int height, MarketAPI market, CustomUIPanelPlugin plugin) {
         super(managementPanel, width, height, plugin, market);
 

@@ -11,8 +11,8 @@ import com.fs.starfarer.ui.impl.StandardTooltipV2;
 
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvUIState;
-import wfg_ltv_econ.ui.LtvUIState.UIStateType;
 import wfg_ltv_econ.util.RenderUtils;
+import wfg_ltv_econ.ui.LtvUIState.UIStateType;
 
 public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     protected LtvCustomPanel m_panel;
