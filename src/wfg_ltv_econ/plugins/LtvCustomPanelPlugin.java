@@ -2,11 +2,13 @@ package wfg_ltv_econ.plugins;
 
 import java.util.List;
 
+import com.fs.starfarer.api.util.FaderUtil.State;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.ui.impl.StandardTooltipV2;
 
 import wfg_ltv_econ.ui.LtvCustomPanel;
@@ -18,15 +20,16 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     protected LtvCustomPanel m_panel;
     protected TooltipMakerAPI m_tooltip = null;
     protected boolean m_hasTooltip = false;
+    protected FaderUtil m_fader;
 
-    final protected float highlightBrightness = 1.1f;
+    final protected float highlightBrightness = 1.2f;
     protected float tooltipDelay = 0.3f;
     protected boolean glowEnabled = false;
-    protected float glowFade = 0f;
     protected boolean hoveredLastFrame = false;
     protected boolean clickedThisFrame = false;
     protected boolean hasBackground = false;
     protected boolean hasOutline = false;
+    protected boolean ignoreUIState = false;
 
     protected float hoverTime = 0f;
     protected int offsetX = 0;
@@ -40,10 +43,26 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         this.glowEnabled = glowEnabled;
         this.hasBackground = hasBackground;
         this.hasOutline = hasOutline;
+
+        if (glowEnabled) {
+            m_fader = new FaderUtil(0, 0, 0.2f, true, true);
+        }
     }
 
     public boolean getGlowEnabled() {
         return glowEnabled;
+    }
+
+    public FaderUtil getFader() {
+        return m_fader;
+    }
+
+    public void setIgnoreUIState(boolean a) {
+        ignoreUIState = a;
+    }
+
+    public boolean isValidUIContext() {
+        return LtvUIState.is(UIStateType.NONE) || ignoreUIState; 
     }
 
     public void setGlowEnabled(boolean a) {
@@ -102,8 +121,8 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_panel.getFaction().getGridUIColor(), alphaMult);
         }
 
-        if (glowEnabled && glowFade > 0) {
-            float glowAmount = highlightBrightness * glowFade * alphaMult;
+        if (glowEnabled && m_fader.getBrightness() > 0) {
+            float glowAmount = highlightBrightness * m_fader.getBrightness() * alphaMult;
 
             RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
             m_panel.getFaction().getBaseUIColor(), glowAmount);
@@ -120,22 +139,20 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public void advance(float amount) {
-        // Glow Logic
         if (glowEnabled) {
-            float target = hoveredLastFrame ? 1f : 0f;
-            final float speed = 15f;
-            glowFade += (target - glowFade) * amount * speed;
+            State target = hoveredLastFrame ? State.IN : State.OUT;
+            m_fader.setState(target);
 
-            if (!LtvUIState.is(UIStateType.NONE)) {
-                glowFade = 0;
+            if (!isValidUIContext()) {
+                m_fader.setState(State.OUT);
             }
-        }
 
-        
+            m_fader.advance(amount);
+        }
 
         // Tooltip Logic
         if (m_hasTooltip) {
-            if (hoveredLastFrame && !clickedThisFrame && !LtvUIState.is(UIStateType.DETAIL_DIALOG)) {
+            if (hoveredLastFrame && !clickedThisFrame && isValidUIContext()) {
                 hoverTime += amount;
                 if (hoverTime > tooltipDelay) {
                     showTooltip();

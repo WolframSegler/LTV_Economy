@@ -18,9 +18,16 @@ import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 public class LtvCommodityPanel extends LtvCustomPanel{
 
     public static int STANDARD_WIDTH = 264;
+    public String m_headerTxt;
 
-    public LtvCommodityPanel(UIPanelAPI managementPanel, int width, int height, MarketAPI market, CustomUIPanelPlugin plugin) {
-        super(managementPanel, width, height, plugin, market);
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market, CustomUIPanelPlugin plugin) {
+        this(parent, width, height, market, plugin, "Commodities");
+    }
+
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market, CustomUIPanelPlugin plugin, String headerTxt) {
+        super(parent, width, height, plugin, market);
+
+        m_headerTxt = headerTxt;
 
         initializePanel(hasPlugin);
         createPanel();
@@ -50,9 +57,9 @@ public class LtvCommodityPanel extends LtvCustomPanel{
                 commodities.remove(com);
             }
         }
-
         final TooltipMakerAPI FgTooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
-        FgTooltip.addSectionHeading("Commodities", Alignment.MID, pad);
+        FgTooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
+
         final int headerHeight = (int) FgTooltip.getPrev().getPosition().getHeight();
         ((LtvCustomPanelPlugin)m_panel.getPlugin()).setOffsets(0, 0, 0, -headerHeight);
 
@@ -83,7 +90,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
 
             previousRow = comRow.getPanel();
         }
-        getPanel().addUIElement(FgTooltip);
+        getPanel().addUIElement(FgTooltip).inTL(0, 0);
     }
 
     public void createTooltip(TooltipMakerAPI tooltip) {}

@@ -1,23 +1,23 @@
 package wfg_ltv_econ.ui;
 
-import java.util.Map;
-
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
-import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.MapParams;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -27,6 +27,8 @@ import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
@@ -41,58 +43,54 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     // new Color(31, 94, 112, 255)
     // new Color(170, 222, 255, 255)
 
-    public final static int pad = 3;
-    public final static int opad = 10;
-
     // this.PANEL_W = 1206; // Exact width acquired using VisualVM. Includes padding.
     // this.PANEL_H = 728;  // Exact height acquired using VisualVM. Includes padding.
 
     public final int PANEL_W;
     public final int PANEL_H; 
 
-    public final float SECT1_WIDTH;
-    public final float SECT2_WIDTH;
-    public final float SECT3_WIDTH;
-    public final float SECT4_WIDTH;
+    public final int SECT1_WIDTH;
+    public final int SECT2_WIDTH;
+    public final int SECT3_WIDTH;
+    public final int SECT4_WIDTH;
 
-    public final float SECT1_HEIGHT;
-    public final float SECT2_HEIGHT;
-    public final float SECT3_HEIGHT;
-    public final float SECT4_HEIGHT;
+    public final int SECT1_HEIGHT;
+    public final int SECT2_HEIGHT;
+    public final int SECT3_HEIGHT;
+    public final int SECT4_HEIGHT;
 
-    public LtvCommodityDetailDialog() {
+    public final static int pad = 3;
+    public final static int opad = 10;
+
+    private final LtvCustomPanel m_parent;
+    private final LtvCommodityDetailDialogPlugin m_plugin;
+    private ButtonAPI m_checkbox;
+    private CommodityOnMarketAPI m_com;
+
+    public LtvCommodityDetailDialog(LtvCustomPanel parent, CommodityOnMarketAPI com) {
         // Measured using very precise tools!! (my eyes)
-        this.PANEL_W = 1166;
-        this.PANEL_H = 658;
-
-        SECT1_WIDTH = PANEL_W * 0.75f;
-        SECT1_HEIGHT = PANEL_H * 0.25f;
-
-        SECT2_WIDTH = PANEL_W * 0.25f;
-        SECT2_HEIGHT = PANEL_H * 0.25f;
-
-        SECT3_WIDTH = PANEL_W * 0.75f;
-        SECT3_HEIGHT = PANEL_H * 0.7f;
-
-        SECT4_WIDTH = PANEL_W * 0.25f;
-        SECT4_HEIGHT = PANEL_H * 0.7f;
+        this(parent, com, 1166, 658 + 20);
     }
 
-    public LtvCommodityDetailDialog(int panelW, int panelH) {
+    public LtvCommodityDetailDialog(LtvCustomPanel parent, CommodityOnMarketAPI com, int panelW, int panelH) {
         this.PANEL_W = panelW;
         this.PANEL_H = panelH;
 
-        SECT1_WIDTH = PANEL_W * 0.75f;
-        SECT1_HEIGHT = PANEL_H * 0.25f;
+        SECT1_WIDTH = (int) (PANEL_W * 0.76f - opad);
+        SECT1_HEIGHT = (int) (PANEL_H * 0.28f - opad);
 
-        SECT2_WIDTH = PANEL_W * 0.25f;
-        SECT2_HEIGHT = PANEL_H * 0.25f;
+        SECT2_WIDTH = (int) (PANEL_W * 0.24f - opad);
+        SECT2_HEIGHT = (int) (PANEL_H * 0.28f - opad);
 
-        SECT3_WIDTH = PANEL_W * 0.75f;
-        SECT3_HEIGHT = PANEL_H * 0.7f;
+        SECT3_WIDTH = (int) (PANEL_W * 0.76f - opad);
+        SECT3_HEIGHT = (int) (PANEL_H * 0.72f - opad);
 
-        SECT4_WIDTH = PANEL_W * 0.25f;
-        SECT4_HEIGHT = PANEL_H * 0.7f;
+        SECT4_WIDTH = (int) (PANEL_W * 0.24f - opad);
+        SECT4_HEIGHT = (int) (PANEL_H * 0.72f - opad);
+
+        m_plugin = new LtvCommodityDetailDialogPlugin(parent);
+        m_parent = parent;
+        m_com = com;
     }
 
     @Override
@@ -123,16 +121,15 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         section4.addUIElement(tooltip4).inTL(0, 0);
 
         panel.addComponent(section1).inTL(pad, pad);
-        panel.addComponent(section2).aboveRight(section1, pad);
-        panel.addComponent(section3).belowLeft(section1, pad);
-        panel.addComponent(section4).belowLeft(section2, pad);
+        panel.addComponent(section2).rightOfTop(section1, opad);
+        panel.addComponent(section3).belowLeft(section1, opad);
+        panel.addComponent(section4).belowLeft(section2, opad);
 
         // Footer
-        // "Only show colonies with excess stockpiles or shortages (Q)"
         TooltipMakerAPI footer = panel.createUIElement(PANEL_W, footerH, false);
-        footer.addCheckbox(20, 20, "", "stockpile_toggle", Fonts.ORBITRON_12, highlight, 
+        m_checkbox = footer.addCheckbox(20, 20, "", "stockpile_toggle", Fonts.ORBITRON_12, highlight, 
         UICheckboxSize.SMALL, 0);
-        footer.getPrev().getPosition().inBL(0, 0);
+        m_checkbox.getPosition().inBL(0, 0);
 
         footer.setParaFont(Fonts.ORBITRON_12);
         LabelAPI txt = footer.addPara("Only show colonies with excess stockpiles or shortages (%s)", 0f, highlight, "Q");
@@ -140,14 +137,24 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         footer.getPrev().getPosition().inBL(20 + pad, (20-TextY)/2);
 
         panel.addUIElement(footer).inBL(pad, -opad*3.5f);
+        m_plugin.init(false, false, false, panel, m_checkbox);
     }
 
     private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip, Color highlight) {
-
+        if (m_com == null) {
+            return;
+        }
+        tooltip.addSectionHeading(m_com.getCommodity().getName(), Alignment.MID, pad);
     }
 
     private void createSection2(CustomPanelAPI section, TooltipMakerAPI tooltip) {
+        StarSystemAPI starSystem = m_parent.m_market.getStarSystem();
+        starSystem.setName(m_parent.m_market.getName());
+
+        UIPanelAPI map = tooltip.addSectorMap(section.getPosition().getWidth(),
+        section.getPosition().getHeight()-2*opad, starSystem, 0);
         
+        map.getPosition().inTL(0, 0);
     }
 
     private void createSection3(CustomPanelAPI section, TooltipMakerAPI tooltip) {
@@ -155,7 +162,19 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     }
 
     private void createSection4(CustomPanelAPI section, TooltipMakerAPI tooltip) {
-        
+        CustomUIPanelPlugin comPanelPlugin = new LtvCustomPanelPlugin();
+        ((LtvCustomPanelPlugin)comPanelPlugin).setIgnoreUIState(true);
+
+        LtvCommodityPanel comPanel = new LtvCommodityPanel(
+            (UIPanelAPI)section,
+            (int) section.getPosition().getWidth(),
+            (int) section.getPosition().getHeight(),
+            m_parent.m_market,
+            comPanelPlugin,
+            m_parent.m_market.getName() + " - Commodities"
+        );
+
+        tooltip.addComponent(comPanel.getPanel()).inTL(0, 0);
     }
 
     @Override
@@ -189,6 +208,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     }
 
     public CustomUIPanelPlugin getCustomPanelPlugin() {
-        return null;
+        return m_plugin;
     }
 }

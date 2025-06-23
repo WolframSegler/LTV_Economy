@@ -2,8 +2,10 @@ package wfg_ltv_econ.plugins;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 
 import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
+import wfg_ltv_econ.ui.LtvCommodityRowPanel;
 
 public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
 
@@ -29,7 +31,9 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
                     .getCurrentInteractionDialog();
 
             if (dialog != null) {
-                LtvCommodityDetailDialog dialogPanel = new LtvCommodityDetailDialog();
+                CommodityOnMarketAPI com = ((LtvCommodityRowPanel)m_panel).getCommodity();
+                LtvCommodityDetailDialog dialogPanel = new LtvCommodityDetailDialog(m_panel, com);
+
                 dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
             }
 
