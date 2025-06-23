@@ -39,7 +39,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
     private final CommodityOnMarketAPI m_com;
     public boolean m_canViewPrices;
 
-    public LtvCommodityRowPanel(CommodityOnMarketAPI com, UIPanelAPI parent, int width, int height, MarketAPI market) {
+    public LtvCommodityRowPanel(CommodityOnMarketAPI com, UIPanelAPI parent, int width, int height,
+        MarketAPI market, boolean childrenIgnoreUIState) {
         super(parent, width, height, new LtvCommodityRowPanelPlugin(), market);
         m_com = com;
 
@@ -48,6 +49,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
 
         initializePanel(hasPlugin);
         createPanel();
+
+        ((LtvCommodityRowPanelPlugin)m_panel.getPlugin()).setIgnoreUIState(childrenIgnoreUIState);
     }
 
     public CommodityOnMarketAPI getCommodity() {

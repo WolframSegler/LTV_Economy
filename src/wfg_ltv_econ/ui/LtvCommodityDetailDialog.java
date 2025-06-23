@@ -163,7 +163,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
     private void createSection4(CustomPanelAPI section, TooltipMakerAPI tooltip) {
         CustomUIPanelPlugin comPanelPlugin = new LtvCustomPanelPlugin();
-        ((LtvCustomPanelPlugin)comPanelPlugin).setIgnoreUIState(true);
 
         LtvCommodityPanel comPanel = new LtvCommodityPanel(
             (UIPanelAPI)section,
@@ -171,7 +170,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             (int) section.getPosition().getHeight(),
             m_parent.m_market,
             comPanelPlugin,
-            m_parent.m_market.getName() + " - Commodities"
+            m_parent.m_market.getName() + " - Commodities",
+            true
         );
 
         tooltip.addComponent(comPanel.getPanel()).inTL(0, 0);

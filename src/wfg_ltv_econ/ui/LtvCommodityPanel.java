@@ -20,14 +20,29 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     public static int STANDARD_WIDTH = 264;
     public String m_headerTxt;
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market, CustomUIPanelPlugin plugin) {
-        this(parent, width, height, market, plugin, "Commodities");
+    public boolean childrenIgnoreUIState = false;
+
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+        CustomUIPanelPlugin plugin, String headerTxt) {
+        this(parent, width, height, market, plugin, headerTxt, false);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market, CustomUIPanelPlugin plugin, String headerTxt) {
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+        CustomUIPanelPlugin plugin) {
+        this(parent, width, height, market, plugin, "Commodities", false);
+    }
+
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+        CustomUIPanelPlugin plugin, boolean childrenIgnoreUIState) {
+        this(parent, width, height, market, plugin, "Commodities", false);
+    }
+
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+        CustomUIPanelPlugin plugin, String headerTxt, boolean childrenIgnoreUIState) {
         super(parent, width, height, plugin, market);
 
         m_headerTxt = headerTxt;
+        this.childrenIgnoreUIState = childrenIgnoreUIState;
 
         initializePanel(hasPlugin);
         createPanel();
@@ -79,7 +94,9 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         CustomPanelAPI previousRow = null;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(commodity, getPanel(), (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, m_market);
+            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(commodity, getPanel(),
+                (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, m_market, childrenIgnoreUIState);
+
             comRow.getPanelPos().setSize(getPanelPos().getWidth() - opad * 2.0F, rowHeight);
 
             if (previousRow == null) {
