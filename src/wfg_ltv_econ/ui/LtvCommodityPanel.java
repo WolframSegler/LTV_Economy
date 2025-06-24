@@ -13,14 +13,19 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg_ltv_econ.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.LtvCommodityDetailDialog.CommoditySelectionListener;
 
 public class LtvCommodityPanel extends LtvCustomPanel{
+
+    protected List<LtvCommodityRowPanel> commodityRows = new ArrayList<>();
 
     public static int STANDARD_WIDTH = 264;
     public String m_headerTxt;
 
     public boolean childrenIgnoreUIState = false;
+    public boolean isRowSelectable = false;
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
         CustomUIPanelPlugin plugin, String headerTxt) {
@@ -54,6 +59,10 @@ public class LtvCommodityPanel extends LtvCustomPanel{
 
     public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {
         return Comparator.comparingDouble(com -> com.getCommodity().getOrder());
+    }
+
+    public void setRowSelectable(boolean a) {
+        isRowSelectable = a;
     }
 
     public void createPanel() {
@@ -94,7 +103,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         CustomPanelAPI previousRow = null;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(commodity, getPanel(),
+            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(commodity, getPanel(), this,
                 (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, m_market, childrenIgnoreUIState);
 
             comRow.getPanelPos().setSize(getPanelPos().getWidth() - opad * 2.0F, rowHeight);
@@ -106,9 +115,22 @@ public class LtvCommodityPanel extends LtvCustomPanel{
             }
 
             previousRow = comRow.getPanel();
+            commodityRows.add(comRow);
         }
         getPanel().addUIElement(FgTooltip).inTL(0, 0);
     }
 
     public void createTooltip(TooltipMakerAPI tooltip) {}
+
+    public void selectRow(LtvCommodityRowPanel selectedRow) {
+        for (LtvCommodityRowPanel row : commodityRows) {
+            LtvCommodityRowPanelPlugin plugin = ((LtvCommodityRowPanelPlugin)row.getPanel().getPlugin());
+            plugin.setPersistentGlow(row == selectedRow);
+        }
+    }
+
+    public CommoditySelectionListener selectionListener;
+    public void setCommoditySelectionListener(CommoditySelectionListener listener) {
+        this.selectionListener = listener;
+    }
 }

@@ -37,12 +37,15 @@ import java.util.Map;
 public class LtvCommodityRowPanel extends LtvCustomPanel {
 
     private final CommodityOnMarketAPI m_com;
+    private final LtvCommodityPanel m_parentWrapper;
+
     public boolean m_canViewPrices;
 
-    public LtvCommodityRowPanel(CommodityOnMarketAPI com, UIPanelAPI parent, int width, int height,
-        MarketAPI market, boolean childrenIgnoreUIState) {
+    public LtvCommodityRowPanel(CommodityOnMarketAPI com, UIPanelAPI parent, LtvCommodityPanel parentWrapper,
+        int width, int height, MarketAPI market, boolean childrenIgnoreUIState) {
         super(parent, width, height, new LtvCommodityRowPanelPlugin(), market);
         m_com = com;
+        m_parentWrapper = parentWrapper;
 
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
         m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
@@ -55,6 +58,10 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
 
     public CommodityOnMarketAPI getCommodity() {
         return m_com;
+    }
+
+    public LtvCommodityPanel getParentWrapper() {
+        return m_parentWrapper;
     }
 
     public void initializePanel(boolean hasPlugin) {

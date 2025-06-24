@@ -2,7 +2,6 @@ package wfg_ltv_econ.plugins;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 
 import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
 import wfg_ltv_econ.ui.LtvCommodityRowPanel;
@@ -19,8 +18,20 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
     @Override
     public void advance(float amount) {
         super.advance(amount);
+
+        LtvCommodityRowPanel panel = (LtvCommodityRowPanel)m_panel;
+
         if (clickedThisFrame) {
             hasClickedBefore = true;
+            
+            if (panel.getParentWrapper().isRowSelectable) {
+                setPersistentGlow(!persistentGlow);
+                panel.getParentWrapper().selectRow(panel);
+
+                if (panel.getParentWrapper().selectionListener != null) {
+                    panel.getParentWrapper().selectionListener.onCommoditySelected(panel.getCommodity());
+                }
+            }
         }
         if (!hoveredLastFrame) {
             hasClickedBefore = false;
@@ -31,8 +42,8 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
                     .getCurrentInteractionDialog();
 
             if (dialog != null) {
-                CommodityOnMarketAPI com = ((LtvCommodityRowPanel)m_panel).getCommodity();
-                LtvCommodityDetailDialog dialogPanel = new LtvCommodityDetailDialog(m_panel, com);
+                LtvCommodityDetailDialog dialogPanel = new LtvCommodityDetailDialog(m_panel,
+                panel.getCommodity());
 
                 dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
             }

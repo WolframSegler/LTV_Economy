@@ -25,6 +25,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     final protected float highlightBrightness = 1.2f;
     protected float tooltipDelay = 0.3f;
     protected boolean glowEnabled = false;
+    protected boolean persistentGlow = false;
     protected boolean hoveredLastFrame = false;
     protected boolean clickedThisFrame = false;
     protected boolean hasBackground = false;
@@ -51,6 +52,9 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     public boolean getGlowEnabled() {
         return glowEnabled;
+    }
+    public void setPersistentGlow(boolean a) {
+        persistentGlow = a;
     }
 
     public FaderUtil getFader() {
@@ -141,12 +145,15 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     public void advance(float amount) {
         if (glowEnabled) {
             State target = hoveredLastFrame ? State.IN : State.OUT;
-            m_fader.setState(target);
-
+            
             if (!isValidUIContext()) {
-                m_fader.setState(State.OUT);
+                target = State.OUT;
             }
-
+            if (persistentGlow) {
+                target = State.IN;
+            }
+            
+            m_fader.setState(target);
             m_fader.advance(amount);
         }
 

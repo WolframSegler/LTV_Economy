@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.FaderUtil.State;
 
+import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
@@ -20,6 +21,7 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
     protected LtvCustomPanel m_parent;
     protected FaderUtil m_fader;
     protected ButtonAPI m_checkbox;
+    protected LtvCommodityDetailDialog m_dialog;
 
     final protected float highlightBrightness = 1.2f;
     protected boolean glowEnabled = false;
@@ -34,11 +36,13 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
     protected int offsetW = 0;
     protected int offsetH = 0;
 
-    public LtvCommodityDetailDialogPlugin(LtvCustomPanel parent) {
+    public LtvCommodityDetailDialogPlugin(LtvCustomPanel parent, LtvCommodityDetailDialog dialog) {
         m_parent = parent;
+        m_dialog = dialog;
     }
 
-    public void init(boolean glowEnabled, boolean hasBackground, boolean hasOutline, CustomPanelAPI panel, ButtonAPI checkbox) {
+    public void init(boolean glowEnabled, boolean hasBackground, boolean hasOutline, CustomPanelAPI panel,
+        ButtonAPI checkbox) {
         m_panel = panel;
         m_checkbox = checkbox;
         this.glowEnabled = glowEnabled;
@@ -108,12 +112,12 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
     public void advance(float amount) {
         if (glowEnabled) {
             State target = hoveredLastFrame ? State.IN : State.OUT;
-            m_fader.setState(target);
-
+            
             if (!LtvUIState.is(UIStateType.NONE)) {
-                m_fader.setState(State.OUT);
+                target = State.OUT;
             }
 
+            m_fader.setState(target);
             m_fader.advance(amount);
         }
     }
@@ -148,6 +152,7 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
                     event.consume();
                     
                     m_checkbox.setChecked(!m_checkbox.isChecked());
+                    m_dialog.updateSection3();
                 }
                 continue;
             }
