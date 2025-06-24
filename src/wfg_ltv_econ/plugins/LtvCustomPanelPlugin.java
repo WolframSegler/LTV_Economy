@@ -3,6 +3,7 @@ package wfg_ltv_econ.plugins;
 import java.util.List;
 
 import com.fs.starfarer.api.util.FaderUtil.State;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -27,10 +28,14 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     protected boolean glowEnabled = false;
     protected boolean persistentGlow = false;
     protected boolean hoveredLastFrame = false;
-    protected boolean clickedThisFrame = false;
+    protected boolean LMBDownLastFrame = false;
+    protected boolean LMBUpLastFrame = false;
+    protected boolean hasClickedBefore = false;
     protected boolean hasBackground = false;
     protected boolean hasOutline = false;
     protected boolean ignoreUIState = false;
+    protected boolean soundEnabled = false;
+    protected boolean playedUIHoverSound = false;
 
     protected float hoverTime = 0f;
     protected int offsetX = 0;
@@ -63,6 +68,10 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     public void setIgnoreUIState(boolean a) {
         ignoreUIState = a;
+    }
+
+    public void setSoundEnabled(boolean a) {
+        soundEnabled = a;
     }
 
     public boolean isValidUIContext() {
@@ -131,7 +140,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
             m_panel.getFaction().getBaseUIColor(), glowAmount);
 
-            if (clickedThisFrame) {
+            if (hasClickedBefore) {
                 RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
                 m_panel.getFaction().getBaseUIColor(), glowAmount / 2);
             }
@@ -143,6 +152,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public void advance(float amount) {
+        // GLow Logic
         if (glowEnabled) {
             State target = hoveredLastFrame ? State.IN : State.OUT;
             
@@ -157,9 +167,20 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             m_fader.advance(amount);
         }
 
+        // Audio Logic
+        if (hoveredLastFrame && soundEnabled && isValidUIContext()) {
+            if (!playedUIHoverSound) {
+                Global.getSoundPlayer().playUISound("ui_button_mouseover", 1, 1);
+                playedUIHoverSound = true;
+            }
+            if (LMBUpLastFrame) {
+                Global.getSoundPlayer().playUISound("ui_button_pressed", 1, 1);
+            }
+        }
+
         // Tooltip Logic
         if (m_hasTooltip) {
-            if (hoveredLastFrame && !clickedThisFrame && isValidUIContext()) {
+            if (hoveredLastFrame && !LMBDownLastFrame && isValidUIContext()) {
                 hoverTime += amount;
                 if (hoverTime > tooltipDelay) {
                     showTooltip();
@@ -172,7 +193,11 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public void processInput(List<InputEventAPI> events) {
+        LMBDownLastFrame = false;
+        LMBUpLastFrame = false;
+
         for (InputEventAPI event : events) {
+
             if (event.isMouseMoveEvent()) {
                 float mouseX = event.getX();
                 float mouseY = event.getY();
@@ -187,12 +212,18 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
                 hoveredLastFrame = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
             }
 
-            if (hoveredLastFrame && event.isLMBDownEvent()) {
-                clickedThisFrame = true;
+            if (!hoveredLastFrame) {
+                playedUIHoverSound = false;
+                hasClickedBefore = false;
             }
 
-            if (event.isLMBUpEvent()) {
-                clickedThisFrame = false;
+            if (hoveredLastFrame && hasClickedBefore && event.isLMBUpEvent()) {
+                LMBUpLastFrame = true;
+            }
+
+            if (hoveredLastFrame && event.isLMBDownEvent()) {
+                LMBDownLastFrame = true;
+                hasClickedBefore = true;
             }
         }
     }

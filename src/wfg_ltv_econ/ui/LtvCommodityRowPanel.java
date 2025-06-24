@@ -68,6 +68,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         LtvCommodityRowPanelPlugin plugin = ((LtvCommodityRowPanelPlugin) m_panel.getPlugin());
         plugin.init(this, true, true, false, false);
         plugin.setDisplayPrices(m_canViewPrices);
+        plugin.setSoundEnabled(true);
     }
 
     public void createPanel() {
@@ -76,8 +77,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         final int iconSize = 24;
         final int textWidth = 60;
         final Color baseColor = getFaction().getBaseUIColor();
-        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
-        final float rowHeight = getPanelPos().getHeight();
+        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(),
+            getPanelPos().getHeight(), false);
+        final float rowHeight = getPanelPos().getHeight();  
 
         // Amount label
         tooltip.setParaSmallInsignia();

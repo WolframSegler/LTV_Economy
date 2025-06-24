@@ -113,7 +113,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         TooltipMakerAPI footer = panel.createUIElement(PANEL_W, footerH, false);
         ButtonAPI m_checkbox = footer.addCheckbox(20, 20, "", "stockpile_toggle",
             Fonts.ORBITRON_12, highlight, UICheckboxSize.SMALL, 0);
-            
+
         m_checkbox.getPosition().inBL(0, 0);
         m_checkbox.setShortcut(Keyboard.KEY_Q, false);
 
@@ -391,7 +391,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             CommodityStats stats = new CommodityStats(comOnMarket, market);
 
             total += stats.globalExport;
-            Global.getLogger(getClass()).error(stats.globalExport);
         }
 
         return total;

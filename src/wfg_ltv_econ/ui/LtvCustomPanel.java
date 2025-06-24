@@ -44,9 +44,11 @@ public abstract class LtvCustomPanel{
     public CustomPanelAPI getPanel() {
         return m_panel;
     }
+
     public PositionAPI getPanelPos() {
         return m_panel.getPosition();
     }
+
     public UIPanelAPI getParent() {
         return m_parent;
     }

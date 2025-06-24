@@ -9,7 +9,6 @@ import wfg_ltv_econ.ui.LtvCommodityRowPanel;
 public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
 
     private boolean displayPrices = false;
-    private boolean hasClickedBefore = false;
 
     public void setDisplayPrices(boolean displayPrices) {
         this.displayPrices = displayPrices;
@@ -21,23 +20,16 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
 
         LtvCommodityRowPanel panel = (LtvCommodityRowPanel)m_panel;
 
-        if (clickedThisFrame) {
-            hasClickedBefore = true;
-            
-            if (panel.getParentWrapper().isRowSelectable) {
-                setPersistentGlow(!persistentGlow);
-                panel.getParentWrapper().selectRow(panel);
+        if (LMBDownLastFrame && panel.getParentWrapper().isRowSelectable) {
+            setPersistentGlow(!persistentGlow);
+            panel.getParentWrapper().selectRow(panel);
 
-                if (panel.getParentWrapper().selectionListener != null) {
-                    panel.getParentWrapper().selectionListener.onCommoditySelected(panel.getCommodity());
-                }
+            if (panel.getParentWrapper().selectionListener != null) {
+                panel.getParentWrapper().selectionListener.onCommoditySelected(panel.getCommodity());
             }
         }
-        if (!hoveredLastFrame) {
-            hasClickedBefore = false;
-        }
 
-        if (displayPrices && hoveredLastFrame && !clickedThisFrame && hasClickedBefore) {
+        if (displayPrices && hoveredLastFrame && LMBUpLastFrame) {
             InteractionDialogAPI dialog = Global.getSector().getCampaignUI()
                     .getCurrentInteractionDialog();
 
