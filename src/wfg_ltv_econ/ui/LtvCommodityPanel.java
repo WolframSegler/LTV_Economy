@@ -15,7 +15,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.ui.LtvCommodityDetailDialog.CommoditySelectionListener;
+import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog.CommoditySelectionListener;
 
 public class LtvCommodityPanel extends LtvCustomPanel{
 

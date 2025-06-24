@@ -14,8 +14,8 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 public abstract class LtvCustomPanel{
     protected final UIPanelAPI m_parent;
     protected final CustomPanelAPI m_panel;
-    protected MarketAPI m_market = null;
-    protected FactionAPI m_faction = null;
+    public MarketAPI m_market = null;
+    public FactionAPI m_faction = null;
     public Color BgColor = new Color(0, 0, 0, 255);
 
     protected boolean hasPlugin = false;

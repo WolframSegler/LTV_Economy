@@ -180,7 +180,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
         // Tooltip Logic
         if (m_hasTooltip) {
-            if (hoveredLastFrame && !LMBDownLastFrame && isValidUIContext()) {
+            if (hoveredLastFrame && !hasClickedBefore && isValidUIContext()) {
                 hoverTime += amount;
                 if (hoverTime > tooltipDelay) {
                     showTooltip();

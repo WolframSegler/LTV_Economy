@@ -4,16 +4,15 @@ import java.util.List;
 
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.FaderUtil.State;
 
-import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
+import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog;
 import wfg_ltv_econ.util.RenderUtils;
 
 public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {

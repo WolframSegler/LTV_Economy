@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.com_detail_dialog;
 
 import java.awt.Color;
 
@@ -23,10 +23,14 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.campaign.ui.S;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.LtvCommodityPanel;
+import wfg_ltv_econ.ui.LtvCustomPanel;
+import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
 import wfg_ltv_econ.util.CommodityStats;
 
@@ -206,21 +210,12 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         tooltip.addSectionHeading(m_com.getCommodity().getName(), Alignment.MID, pad);
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
 
-        final int iconSize = (int) (section.getPosition().getHeight() / 2.2f);
-        float actualIconWidth = iconSize * m_com.getCommodity().getIconWidthMult();
-
         // Icons
-        tooltip.beginIconGroup();
-        tooltip.addIcons(m_com, 1, IconRenderMode.NORMAL);
-        tooltip.addIconGroup(iconSize, 1, 0);
-        tooltip.getPrev().getPosition().inTL(opad * 3 + ((iconSize - actualIconWidth) * 0.5f),
-                (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
-
-        tooltip.beginIconGroup();
-        tooltip.addIcons(m_com, 1, IconRenderMode.NORMAL);
-        tooltip.addIconGroup(iconSize, 1, 0);
-        tooltip.getPrev().getPosition().inTL(SECT1_WIDTH - 0.5f * (iconSize + actualIconWidth) - opad * 3,
-                (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
+        int width = (int) section.getPosition().getWidth();
+        int height = (int) section.getPosition().getHeight();
+        
+        new Section1Icons((UIPanelAPI)section, tooltip, headerHeight, m_parentWrapper.m_market,
+            width, height, new LtvCustomPanelPlugin(), m_com);
 
         // Text
         final int baseY = (int) (headerHeight + opad * 1.5f);
@@ -229,6 +224,9 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             int y = baseY;
             String txt = "Global market value";
             String valueTxt = Misc.getWithDGS(m_com.getCommodityMarketData().getMarketValue()) + Strings.C;
+            if (m_com.getCommodityMarketData().getMarketValue() < 1) {
+                valueTxt = "---";
+            }
 
             tooltip.setParaFontColor(baseColor);
             tooltip.setParaFont(Fonts.ORBITRON_12);

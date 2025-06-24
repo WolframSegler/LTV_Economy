@@ -3,8 +3,8 @@ package wfg_ltv_econ.plugins;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 
-import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
 import wfg_ltv_econ.ui.LtvCommodityRowPanel;
+import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog;
 
 public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
 
