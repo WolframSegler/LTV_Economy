@@ -5,11 +5,10 @@ import java.awt.Color;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
-import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
-import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
@@ -17,7 +16,6 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.MapParams;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -25,13 +23,10 @@ import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 
-import wfg_ltv_econ.conditions.WorkerPoolCondition;
-import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.util.NumFormat;
-import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
+import wfg_ltv_econ.util.CommodityStats;
 
 public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
@@ -144,35 +139,48 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         m_dialogPanel.removeComponent(section1);
 
         section1 = Global.getSettings().createCustom(SECT1_WIDTH, SECT1_HEIGHT, null);
+
         TooltipMakerAPI tooltip = section1.createUIElement(SECT1_WIDTH, SECT1_HEIGHT, false);
+        section1.addUIElement(tooltip).inTL(0, 0);
 
         createSection1(section1, tooltip, highlight);
-
-        section1.addUIElement(tooltip).inTL(0, 0);
         m_dialogPanel.addComponent(section1).inTL(pad, pad);
+
+        // Update anchors
+        if (section2 == null || section3 == null) {
+            return;
+        }
+        section2.getPosition().rightOfTop(section1, opad * 1.5f);
+        section3.getPosition().rightOfTop(section1, opad * 1.5f);
     }
 
     public void updateSection2() {
         m_dialogPanel.removeComponent(section2);
 
         section2 = Global.getSettings().createCustom(SECT2_WIDTH, SECT2_HEIGHT, null);
+
         TooltipMakerAPI tooltip = section2.createUIElement(SECT2_WIDTH, SECT2_HEIGHT, false);
+        section2.addUIElement(tooltip).inTL(0, 0);
 
         createSection2(section2, tooltip);
-
-        section2.addUIElement(tooltip).inTL(0, 0);
         m_dialogPanel.addComponent(section2).rightOfTop(section1, opad * 1.5f);
+
+        // Update anchors
+        if (section4 == null) {
+            return;
+        }
+        section4.getPosition().belowLeft(section2, opad);
     }
 
     public void updateSection3() {
         m_dialogPanel.removeComponent(section3);
 
         section3 = Global.getSettings().createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
+
         TooltipMakerAPI tooltip = section3.createUIElement(SECT3_WIDTH, SECT3_HEIGHT, true);
+        section3.addUIElement(tooltip).inTL(0, 0);
 
         createSection3(section3, tooltip);
-
-        section3.addUIElement(tooltip).inTL(0, 0);
         m_dialogPanel.addComponent(section3).belowLeft(section1, opad);
     }
 
@@ -180,11 +188,11 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         m_dialogPanel.removeComponent(section4);
 
         section4 = Global.getSettings().createCustom(SECT4_WIDTH, SECT4_HEIGHT, null);
+
         TooltipMakerAPI tooltip = section4.createUIElement(SECT4_WIDTH, SECT4_HEIGHT, false);
+        section4.addUIElement(tooltip).inTL(0, 0);
 
         createSection4(section4);
-
-        section4.addUIElement(tooltip).inTL(0, 0);
         m_dialogPanel.addComponent(section4).belowLeft(section2, opad);
     }
 
@@ -193,6 +201,140 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             return;
         }
         tooltip.addSectionHeading(m_com.getCommodity().getName(), Alignment.MID, pad);
+        final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
+
+        final int iconSize = (int) (section.getPosition().getHeight() / 2.2f);
+        float actualIconWidth = iconSize * m_com.getCommodity().getIconWidthMult();
+
+        // Icons
+        tooltip.beginIconGroup();
+        tooltip.addIcons(m_com, 1, IconRenderMode.NORMAL);
+        tooltip.addIconGroup(iconSize, 1, 0);
+        tooltip.getPrev().getPosition().inTL(opad * 3 + ((iconSize - actualIconWidth) * 0.5f),
+                (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
+
+        tooltip.beginIconGroup();
+        tooltip.addIcons(m_com, 1, IconRenderMode.NORMAL);
+        tooltip.addIconGroup(iconSize, 1, 0);
+        tooltip.getPrev().getPosition().inTL(SECT1_WIDTH - 0.5f * (iconSize + actualIconWidth) - opad * 3,
+                (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
+
+        // Text
+        final int baseY = (int) (headerHeight + opad * 1.5f);
+        Color baseColor = m_parentWrapper.m_faction.getBaseUIColor();
+        { // Global market value
+            int y = baseY;
+            String txt = "Global market value";
+            String valueTxt = Misc.getWithDGS(m_com.getCommodityMarketData().getMarketValue()) + Strings.C;
+
+            tooltip.setParaFontColor(baseColor);
+            tooltip.setParaFont(Fonts.ORBITRON_12);
+            LabelAPI lbl1 = tooltip.addPara(txt, pad);
+            UIComponentAPI lblComp1 = tooltip.getPrev();
+
+            tooltip.setParaFontColor(highlight);
+            tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
+            LabelAPI lbl2 = tooltip.addPara(valueTxt, highlight, pad);
+            UIComponentAPI lblComp2 = tooltip.getPrev();
+
+            float textH1 = lblComp1.getPosition().getHeight();
+            float textW1 = lbl1.computeTextWidth(txt);
+            float textX1 = (SECT1_WIDTH / 3f) - textW1;
+
+            lblComp1.getPosition().inTL(textX1, y);
+
+            y += textH1 + pad;
+            float textW2 = lbl2.computeTextWidth(valueTxt);
+            float textX2 = (textX1 + (textW1 / 2)) - (textW2 / 2);
+
+            lblComp2.getPosition().inTL(textX2, y);
+        }
+        { // Total global exports
+            int y = baseY;
+            String txt = "Total global exports";
+
+            String valueTxt = Integer.toString(getTotalGlobalExports(m_com));
+
+            tooltip.setParaFontColor(baseColor);
+            tooltip.setParaFont(Fonts.ORBITRON_12);
+            LabelAPI lbl1 = tooltip.addPara(txt, pad);
+            UIComponentAPI lblComp1 = tooltip.getPrev();
+
+            tooltip.setParaFontColor(highlight);
+            tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
+            LabelAPI lbl2 = tooltip.addPara(valueTxt, highlight, pad);
+            UIComponentAPI lblComp2 = tooltip.getPrev();
+
+            float textH1 = lblComp1.getPosition().getHeight();
+            float textW1 = lbl1.computeTextWidth(txt);
+            float textX1 = (SECT1_WIDTH / 2f) - (textW1 / 2);
+
+            lblComp1.getPosition().inTL(textX1, y);
+
+            y += textH1 + pad;
+            float textW2 = lbl2.computeTextWidth(valueTxt);
+            float textX2 = (textX1 + (textW1 / 2)) - (textW2 / 2);
+
+            lblComp2.getPosition().inTL(textX2, y);
+        }
+        { // Total faction exports
+            int y = baseY;
+            String factionName = m_parentWrapper.m_faction.getDisplayNameLong();
+            String txt = "Total " + factionName + " exports";
+
+            String valueTxt = Integer.toString(getTotalFactionImports(m_com, m_parentWrapper.m_faction));
+
+            tooltip.setParaFontColor(baseColor);
+            tooltip.setParaFont(Fonts.ORBITRON_12);
+            LabelAPI lbl1 = tooltip.addPara(txt, pad);
+            UIComponentAPI lblComp1 = tooltip.getPrev();
+
+            tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
+            LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
+            UIComponentAPI lblComp2 = tooltip.getPrev();
+
+            float textH1 = lblComp1.getPosition().getHeight();
+            float textW1 = lbl1.computeTextWidth(txt);
+            float textX1 = SECT1_WIDTH * 2 / 3f;
+
+            lblComp1.getPosition().inTL(textX1, y);
+
+            y += textH1 + pad;
+            float textW2 = lbl2.computeTextWidth(valueTxt);
+            float textX2 = (textX1 + (textW1 / 2)) - (textW2 / 2);
+
+            lblComp2.getPosition().inTL(textX2, y);
+        }
+        { // Faction market share
+            int y = baseY*3 + pad;
+            String factionName = m_parentWrapper.m_faction.getDisplayNameLong();
+            String txt = factionName + " market share";
+
+            String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.m_faction)  
+                            + "%";
+
+            tooltip.setParaFontColor(baseColor);
+            tooltip.setParaFont(Fonts.ORBITRON_12);
+            LabelAPI lbl1 = tooltip.addPara(txt, pad);
+            UIComponentAPI lblComp1 = tooltip.getPrev();
+
+            tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
+            LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
+            UIComponentAPI lblComp2 = tooltip.getPrev();
+
+            float textH1 = lblComp1.getPosition().getHeight();
+            float textW1 = lbl1.computeTextWidth(txt);
+            float textX1 = (SECT1_WIDTH / 2f) - (textW1 / 2);
+
+            lblComp1.getPosition().inTL(textX1, y);
+
+            y += textH1 + pad;
+            float textW2 = lbl2.computeTextWidth(valueTxt);
+            float textX2 = (textX1 + (textW1 / 2)) - (textW2 / 2);
+
+            lblComp2.getPosition().inTL(textX2, y);
+        }
+
     }
 
     private void createSection2(CustomPanelAPI section, TooltipMakerAPI tooltip) {
@@ -234,6 +376,33 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         });
 
         section.addComponent(comPanel.getPanel());
+    }
+
+    int getTotalGlobalExports(CommodityOnMarketAPI com) {
+        int total = 0;
+
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            CommodityStats stats = new CommodityStats(com, market);
+
+            total += stats.globalExport;
+        }
+
+        return total;
+    }
+
+    int getTotalFactionImports(CommodityOnMarketAPI com, FactionAPI faction) {
+        int total = 0;
+
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            if (!market.getFaction().getId().equals(faction.getId())) {
+                continue;
+            }
+
+            CommodityStats stats = new CommodityStats(com, market);
+            total += stats.globalExport;
+        }
+
+        return total;
     }
 
     @Override
