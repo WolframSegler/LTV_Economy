@@ -20,7 +20,6 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
     protected CustomPanelAPI m_panel;
     protected LtvCustomPanel m_parent;
     protected FaderUtil m_fader;
-    protected ButtonAPI m_checkbox;
     protected LtvCommodityDetailDialog m_dialog;
 
     final protected float highlightBrightness = 1.2f;
@@ -41,10 +40,8 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
         m_dialog = dialog;
     }
 
-    public void init(boolean glowEnabled, boolean hasBackground, boolean hasOutline, CustomPanelAPI panel,
-        ButtonAPI checkbox) {
+    public void init(boolean glowEnabled, boolean hasBackground, boolean hasOutline, CustomPanelAPI panel) {
         m_panel = panel;
-        m_checkbox = checkbox;
         this.glowEnabled = glowEnabled;
         this.hasBackground = hasBackground;
         this.hasOutline = hasOutline;
@@ -146,16 +143,6 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
                 }
                 continue;
             }            
-
-            if (event.isKeyboardEvent()) {
-                if((event.getEventChar() == 'Q' || event.getEventChar() == 'q') && event.isKeyDownEvent()) {
-                    event.consume();
-                    
-                    m_checkbox.setChecked(!m_checkbox.isChecked());
-                    m_dialog.updateSection3();
-                }
-                continue;
-            }
         }
     }
 

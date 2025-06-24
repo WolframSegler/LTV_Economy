@@ -2,6 +2,8 @@ package wfg_ltv_econ.ui;
 
 import java.awt.Color;
 
+import org.lwjgl.input.Keyboard;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -70,7 +72,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     private final LtvCommodityDetailDialogPlugin m_plugin;
     private final Color highlight = Misc.getHighlightColor();
     private CustomPanelAPI m_dialogPanel;
-    private ButtonAPI m_checkbox;
     public CommodityOnMarketAPI m_com;
 
     public LtvCommodityDetailDialog(LtvCustomPanel parent, CommodityOnMarketAPI com) {
@@ -110,9 +111,11 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         final int footerH = 40;
 
         TooltipMakerAPI footer = panel.createUIElement(PANEL_W, footerH, false);
-        m_checkbox = footer.addCheckbox(20, 20, "", "stockpile_toggle", Fonts.ORBITRON_12, highlight,
-                UICheckboxSize.SMALL, 0);
+        ButtonAPI m_checkbox = footer.addCheckbox(20, 20, "", "stockpile_toggle",
+            Fonts.ORBITRON_12, highlight, UICheckboxSize.SMALL, 0);
+            
         m_checkbox.getPosition().inBL(0, 0);
+        m_checkbox.setShortcut(Keyboard.KEY_Q, false);
 
         footer.setParaFont(Fonts.ORBITRON_12);
         LabelAPI txt = footer.addPara("Only show colonies with excess stockpiles or shortages (%s)", 0f, highlight,
@@ -121,7 +124,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         footer.getPrev().getPosition().inBL(20 + pad, (20 - TextY) / 2);
 
         panel.addUIElement(footer).inBL(pad, -opad * 3.5f);
-        m_plugin.init(false, false, false, panel, m_checkbox);
+        m_plugin.init(false, false, false, panel);
     }
 
     public void createSections() {
@@ -253,7 +256,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             int y = baseY;
             String txt = "Total global exports";
 
-            String valueTxt = Integer.toString(getTotalGlobalExports(m_com));
+            String valueTxt = Integer.toString(getTotalGlobalExports(m_com.getId()));
 
             tooltip.setParaFontColor(baseColor);
             tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -282,7 +285,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             String factionName = m_parentWrapper.m_faction.getDisplayNameLong();
             String txt = "Total " + factionName + " exports";
 
-            String valueTxt = Integer.toString(getTotalFactionImports(m_com, m_parentWrapper.m_faction));
+            String valueTxt = Integer.toString(getTotalFactionImports(m_com.getId(),
+                m_parentWrapper.m_faction));
 
             tooltip.setParaFontColor(baseColor);
             tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -378,27 +382,31 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         section.addComponent(comPanel.getPanel());
     }
 
-    int getTotalGlobalExports(CommodityOnMarketAPI com) {
+    int getTotalGlobalExports(String comID) {
         int total = 0;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            CommodityStats stats = new CommodityStats(com, market);
+            CommodityOnMarketAPI comOnMarket = market.getCommodityData(comID);
+
+            CommodityStats stats = new CommodityStats(comOnMarket, market);
 
             total += stats.globalExport;
+            Global.getLogger(getClass()).error(stats.globalExport);
         }
 
         return total;
     }
 
-    int getTotalFactionImports(CommodityOnMarketAPI com, FactionAPI faction) {
+    int getTotalFactionImports(String comID, FactionAPI faction) {
         int total = 0;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
             if (!market.getFaction().getId().equals(faction.getId())) {
                 continue;
             }
+            CommodityOnMarketAPI comOnMarket = market.getCommodityData(comID);
 
-            CommodityStats stats = new CommodityStats(com, market);
+            CommodityStats stats = new CommodityStats(comOnMarket, market);
             total += stats.globalExport;
         }
 
