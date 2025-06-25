@@ -1,6 +1,8 @@
 package wfg_ltv_econ.util;
 
 import org.lwjgl.opengl.GL11;
+
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import java.awt.Color;
 
 public class RenderUtils {
@@ -53,5 +55,35 @@ public class RenderUtils {
         GL11.glEnd();
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
+    }
+
+    public static void drawAdditiveGlow(SpriteAPI sprite, float x, float y, Color glowColor,
+            float intensity) {
+        if (sprite == null || intensity <= 0f) {
+            return;
+        }
+
+        x += sprite.getTexX();
+        y += sprite.getTexY();
+
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glPushMatrix();
+
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE); // Additive blending
+
+        Color base = new Color(
+                Math.min(255, (int) (glowColor.getRed() * intensity)),
+                Math.min(255, (int) (glowColor.getGreen() * intensity)),
+                Math.min(255, (int) (glowColor.getBlue() * intensity)),
+                Math.min(255, (int) (255 * intensity)));
+        sprite.setColor(base);
+        sprite.setAdditiveBlend();
+        sprite.render(x, y);
+
+        sprite.setNormalBlend();
+        sprite.setColor(Color.white); // Reset
+        GL11.glPopMatrix();
+        GL11.glPopAttrib();
     }
 }

@@ -7,52 +7,54 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.util.RenderUtils;
 
-public class LtvCommodityRowIconPlugin implements CustomUIPanelPlugin {
-    private UIPanelAPI panel;
+public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
     private SpriteAPI sprite;
     private Color color;
-    private String spriteId;
     private boolean drawBorder;
     private final float padding = 2f;
     private final float borderThickness = 2f;
 
-    public LtvCommodityRowIconPlugin(String spriteId, Color color, boolean isIllegal) {
-        this.spriteId = spriteId;
-        this.color = color;
-        this.drawBorder = isIllegal;
-    }
-
-    public void init(UIPanelAPI panel) {
-        this.panel = panel;
+    public void init(String spriteId, Color color, boolean drawBorder) {
         this.sprite = Global.getSettings().getSprite(spriteId);
+
+        this.color = color;
+        this.drawBorder = drawBorder;
     }
 
     @Override
     public void render(float alphaMult) {
-        if (sprite == null)
+        if (sprite == null) {
             return;
+        }
+        
+        if (color != null) {
+            sprite.setColor(color);
+        }
 
-        PositionAPI pos = panel.getPosition();
+        PositionAPI pos = m_panel.getPanelPos();
         float x = pos.getX() + padding;
         float y = pos.getY() + padding;
         float size = pos.getHeight() - padding*2;
 
-        if (color != null) {
-            sprite.setColor(color);
-        }
         sprite.setSize(size, size);
         sprite.renderAtCenter(x + size / 2, y + size / 2);
 
+        
         if (drawBorder) {
             drawFramedBorder(x - borderThickness, y - borderThickness, size + borderThickness * 2, borderThickness, Color.RED, alphaMult);
+        }
+
+        if (glowType == GlowType.ADDITIVE && m_fader.getBrightness() > 0) {
+            float glowAmount = highlightBrightness * m_fader.getBrightness() * alphaMult;
+
+            RenderUtils.drawAdditiveGlow(sprite, pos.getX(), pos.getY(), m_panel.getFaction().getBaseUIColor(),
+                glowAmount);
         }
     }
 
@@ -77,10 +79,12 @@ public class LtvCommodityRowIconPlugin implements CustomUIPanelPlugin {
 
     @Override
     public void advance(float amount) {
+        super.advance(amount);
     }
 
     @Override
     public void processInput(List<InputEventAPI> events) {
+        super.processInput(events);
     }
 
     @Override

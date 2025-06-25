@@ -22,9 +22,10 @@ import com.fs.starfarer.settings.StarfarerSettings;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.loading.Description.Type;
 
-import wfg_ltv_econ.plugins.LtvCommodityRowIconPlugin;
+import wfg_ltv_econ.plugins.LtvIconPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.plugins.infobarPlugin;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
@@ -66,7 +67,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
 
     public void initializePanel(boolean hasPlugin) {
         LtvCommodityRowPanelPlugin plugin = ((LtvCommodityRowPanelPlugin) m_panel.getPlugin());
-        plugin.init(this, true, true, false, false);
+        plugin.init(this, GlowType.OVERLAY, true, false, false);
         plugin.setDisplayPrices(m_canViewPrices);
         plugin.setSoundEnabled(true);
     }
@@ -108,21 +109,22 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
 
         // Source Icon
         CommodityMarketDataAPI commodityData = m_com.getCommodityMarketData();
-        getPanel().addComponent(getSourceIcon(baseColor, commodityData, iconSize))
+        getPanel().addComponent(
+            getSourceIcon(baseColor, commodityData, iconSize, m_panel).getPanel())
             .setSize(rowHeight, rowHeight).inBL(0, 0);
 
         if (commodityData.getExportIncome(m_com) > 0) {
             String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "exports");
-            CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize,
-                    new LtvCommodityRowIconPlugin(iconPath, baseColor, false));
-            ((LtvCommodityRowIconPlugin) iconPanel.getPlugin()).init(iconPanel);
-            getPanel().addComponent(iconPanel).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
+            LtvIconPanel iconPanel = new LtvIconPanel(m_panel, m_market, iconSize, iconSize,
+                    new LtvIconPanelPlugin(), iconPath, null, false);
+            getPanel().addComponent(iconPanel.getPanel()).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
         }
 
         getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
     }
 
-    private CustomPanelAPI getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int iconSize) {
+    private LtvIconPanel getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int iconSize,
+        UIPanelAPI parent) {
         MarketShareDataAPI marketData = commodityData.getMarketShareData(m_market);
         boolean isSourceIllegal = marketData.isSourceIsIllegal();
 
@@ -144,9 +146,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
             default:
         }
 
-        CustomPanelAPI iconPanel = m_panel.createCustomPanel(iconSize, iconSize,
-                new LtvCommodityRowIconPlugin(iconPath, baseColor, isSourceIllegal));
-        ((LtvCommodityRowIconPlugin) iconPanel.getPlugin()).init(iconPanel);
+        LtvIconPanel iconPanel = new LtvIconPanel(parent, m_market, iconSize, iconSize,
+                    new LtvIconPanelPlugin(), iconPath, baseColor, isSourceIllegal);
         return iconPanel;
     }
 

@@ -18,14 +18,20 @@ import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
 
 public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
+    public enum GlowType {
+        NONE,
+        ADDITIVE,
+        OVERLAY
+    }
     protected LtvCustomPanel m_panel;
     protected TooltipMakerAPI m_tooltip = null;
     protected boolean m_hasTooltip = false;
     protected FaderUtil m_fader;
+    protected UIStateType targetUIState = UIStateType.NONE;
+    protected GlowType glowType = GlowType.NONE;
 
     final protected float highlightBrightness = 1.2f;
     protected float tooltipDelay = 0.3f;
-    protected boolean glowEnabled = false;
     protected boolean persistentGlow = false;
     protected boolean hoveredLastFrame = false;
     protected boolean LMBDownLastFrame = false;
@@ -43,20 +49,20 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     protected int offsetW = 0;
     protected int offsetH = 0;
 
-    public void init(LtvCustomPanel panel, boolean glowEnabled, boolean hasTooltip, boolean hasBackground, boolean hasOutline) {
+    public void init(LtvCustomPanel panel, GlowType gT, boolean hasTooltip, boolean hasBackground, boolean hasOutline) {
         m_panel = panel;
         m_hasTooltip = hasTooltip;
-        this.glowEnabled = glowEnabled;
+        this.glowType = gT;
         this.hasBackground = hasBackground;
         this.hasOutline = hasOutline;
 
-        if (glowEnabled) {
+        if (glowType != GlowType.NONE) {
             m_fader = new FaderUtil(0, 0, 0.2f, true, true);
         }
     }
 
-    public boolean getGlowEnabled() {
-        return glowEnabled;
+    public GlowType getGlowType() {
+        return glowType;
     }
     public void setPersistentGlow(boolean a) {
         persistentGlow = a;
@@ -64,6 +70,10 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     public FaderUtil getFader() {
         return m_fader;
+    }
+
+    public void setTargetUIState(UIStateType a) {
+        targetUIState = a;
     }
 
     public void setIgnoreUIState(boolean a) {
@@ -78,8 +88,8 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         return LtvUIState.is(UIStateType.NONE) || ignoreUIState; 
     }
 
-    public void setGlowEnabled(boolean a) {
-        glowEnabled = a;
+    public void setGlowType(GlowType a) {
+        glowType = a;
     }
 
     public TooltipMakerAPI showTooltip() {
@@ -134,7 +144,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_panel.getFaction().getGridUIColor(), alphaMult);
         }
 
-        if (glowEnabled && m_fader.getBrightness() > 0) {
+        if (glowType == GlowType.OVERLAY && m_fader.getBrightness() > 0) {
             float glowAmount = highlightBrightness * m_fader.getBrightness() * alphaMult;
 
             RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
@@ -153,7 +163,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     public void advance(float amount) {
         // GLow Logic
-        if (glowEnabled) {
+        if (glowType != GlowType.NONE) {
             State target = hoveredLastFrame ? State.IN : State.OUT;
             
             if (!isValidUIContext()) {
@@ -162,7 +172,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             if (persistentGlow) {
                 target = State.IN;
             }
-            
+                
             m_fader.setState(target);
             m_fader.advance(amount);
         }

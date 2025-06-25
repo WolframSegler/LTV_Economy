@@ -16,20 +16,20 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.campaign.ui.S;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
+import wfg_ltv_econ.plugins.LtvIconPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.LtvCommodityPanel;
 import wfg_ltv_econ.ui.LtvCustomPanel;
+import wfg_ltv_econ.ui.LtvIconPanel;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
 import wfg_ltv_econ.util.CommodityStats;
@@ -211,11 +211,26 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
 
         // Icons
-        int width = (int) section.getPosition().getWidth();
-        int height = (int) section.getPosition().getHeight();
-        
-        new Section1Icons((UIPanelAPI)section, tooltip, headerHeight, m_parentWrapper.m_market,
-            width, height, new LtvCustomPanelPlugin(), m_com);
+        final int iconSize = (int) (section.getPosition().getHeight() / 2.2f);
+        final float actualIconWidth = iconSize * m_com.getCommodity().getIconWidthMult();
+
+        String comID = m_com.getCommodity().getIconName();
+
+        LtvIconPanel iconLeft = new LtvIconPanel(section, m_parentWrapper.m_market, iconSize, iconSize,
+                new LtvIconPanelPlugin(), comID, null, false);
+        iconLeft.setCommodity(m_com);
+
+        iconLeft.getPanelPos().inTL(opad * 3 + ((iconSize - actualIconWidth) * 0.5f),
+                (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
+        section.addComponent(iconLeft.getPanel());
+
+        LtvIconPanel iconRight = new LtvIconPanel(section, m_parentWrapper.m_market, iconSize, iconSize,
+                new LtvIconPanelPlugin(), comID, null, false);
+        iconRight.setCommodity(m_com);
+
+        iconRight.getPanelPos().inTL(SECT1_WIDTH - 0.5f * (iconSize + actualIconWidth) - opad * 3,
+                (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
+        section.addComponent(iconRight.getPanel());
 
         // Text
         final int baseY = (int) (headerHeight + opad * 1.5f);
