@@ -33,6 +33,7 @@ import wfg_ltv_econ.ui.LtvIconPanel;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
 import wfg_ltv_econ.util.CommodityStats;
+import wfg_ltv_econ.util.NumFormat;
 
 public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
@@ -212,7 +213,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         // Icons
         final int iconSize = (int) (section.getPosition().getHeight() / 2.2f);
-        final float actualIconWidth = iconSize * m_com.getCommodity().getIconWidthMult();
 
         String comID = m_com.getCommodity().getIconName();
 
@@ -220,7 +220,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 new LtvIconPanelPlugin(), comID, null, false);
         iconLeft.setCommodity(m_com);
 
-        iconLeft.getPanelPos().inTL(opad * 3 + ((iconSize - actualIconWidth) * 0.5f),
+        iconLeft.getPanelPos().inTL(opad * 3,
                 (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconLeft.getPanel());
 
@@ -228,7 +228,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 new LtvIconPanelPlugin(), comID, null, false);
         iconRight.setCommodity(m_com);
 
-        iconRight.getPanelPos().inTL(SECT1_WIDTH - 0.5f * (iconSize + actualIconWidth) - opad * 3,
+        iconRight.getPanelPos().inTL(SECT1_WIDTH - iconSize - opad * 3,
                 (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconRight.getPanel());
 
@@ -269,7 +269,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             int y = baseY;
             String txt = "Total global exports";
 
-            String valueTxt = Integer.toString(getTotalGlobalExports(m_com.getId()));
+            String valueTxt = NumFormat.notateEng(getTotalGlobalExports(m_com.getId()));
 
             tooltip.setParaFontColor(baseColor);
             tooltip.setParaFont(Fonts.ORBITRON_12);

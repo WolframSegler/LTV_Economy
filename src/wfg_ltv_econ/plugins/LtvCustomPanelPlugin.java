@@ -6,13 +6,13 @@ import com.fs.starfarer.api.util.FaderUtil.State;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.ui.impl.StandardTooltipV2;
 
 import wfg_ltv_econ.ui.LtvCustomPanel;
+import wfg_ltv_econ.ui.LtvCustomPanel.TooltipProvider;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
@@ -30,7 +30,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     protected UIStateType targetUIState = UIStateType.NONE;
     protected GlowType glowType = GlowType.NONE;
 
-    final protected float highlightBrightness = 1.2f;
+    final protected float overlayBrightness = 1.2f;
     protected float tooltipDelay = 0.3f;
     protected boolean persistentGlow = false;
     protected boolean hoveredLastFrame = false;
@@ -93,13 +93,9 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public TooltipMakerAPI showTooltip() {
-        if (m_tooltip == null) {
-            final int opad = 10;
-            m_tooltip = ((CustomPanelAPI)m_panel.getParent()).createUIElement(500f, 400f, false);
-            m_panel.createTooltip(m_tooltip);
-            ((CustomPanelAPI)m_panel.getParent()).addUIElement(m_tooltip);
-
-            m_tooltip.getPosition().inTL(-(m_tooltip.getPosition().getWidth() + opad), 0);
+        if (m_panel instanceof LtvCustomPanel.TooltipProvider && m_tooltip == null) {
+        
+            m_tooltip = ((TooltipProvider) m_panel).createTooltip();
 
             // Might break later. Then just use RenderUtils
             ((StandardTooltipV2)m_tooltip).setShowBackground(true);
@@ -110,8 +106,16 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public void hideTooltip() {
-        ((CustomPanelAPI)m_panel.getParent()).removeComponent(m_tooltip);
+        if (!(m_panel instanceof LtvCustomPanel.TooltipProvider)) {
+            return;
+        }
+
+        ((TooltipProvider) m_panel).removeTooltip(m_tooltip);
         m_tooltip = null;
+    }
+
+    public void setTooltipActive(boolean a) {
+        m_hasTooltip = a;
     }
 
     public void setTooltipDelay(float tooltipDelay) {
@@ -145,7 +149,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         }
 
         if (glowType == GlowType.OVERLAY && m_fader.getBrightness() > 0) {
-            float glowAmount = highlightBrightness * m_fader.getBrightness() * alphaMult;
+            float glowAmount = overlayBrightness * m_fader.getBrightness() * alphaMult;
 
             RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
             m_panel.getFaction().getBaseUIColor(), glowAmount);

@@ -1318,7 +1318,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					String txt = Strings.X + NumFormat.formatWithMaxDigits(pAmount);
+					String txt = Strings.X + NumFormat.notateEng(pAmount);
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
 					UIComponentAPI lblComp = tooltip.getPrev();
@@ -1386,7 +1386,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					String txt = Strings.X + NumFormat.formatWithMaxDigits(dAmount);
+					String txt = Strings.X + NumFormat.notateEng(dAmount);
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
 					UIComponentAPI lblComp = tooltip.getPrev();

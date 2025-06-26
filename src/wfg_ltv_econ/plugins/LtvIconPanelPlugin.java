@@ -19,6 +19,7 @@ public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
     private boolean drawBorder;
     private final float padding = 2f;
     private final float borderThickness = 2f;
+    private final float outlineBrightness = 0.6f;
 
     public void init(String spriteId, Color color, boolean drawBorder) {
         this.sprite = Global.getSettings().getSprite(spriteId);
@@ -28,7 +29,8 @@ public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
     }
 
     @Override
-    public void render(float alphaMult) {
+    public void renderBelow(float alphaMult) {
+        super.renderBelow(alphaMult);
         if (sprite == null) {
             return;
         }
@@ -51,9 +53,9 @@ public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
         }
 
         if (glowType == GlowType.ADDITIVE && m_fader.getBrightness() > 0) {
-            float glowAmount = highlightBrightness * m_fader.getBrightness() * alphaMult;
+            float glowAmount = outlineBrightness * m_fader.getBrightness() * alphaMult;
 
-            RenderUtils.drawAdditiveGlow(sprite, pos.getX(), pos.getY(), m_panel.getFaction().getBaseUIColor(),
+            RenderUtils.drawAdditiveGlow(sprite, x, y, m_panel.getFaction().getBaseUIColor(),
                 glowAmount);
         }
     }
@@ -71,10 +73,6 @@ public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
 
     @Override
     public void positionChanged(PositionAPI position) {
-    }
-
-    @Override
-    public void renderBelow(float alphaMult) {
     }
 
     @Override

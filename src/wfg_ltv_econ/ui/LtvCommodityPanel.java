@@ -13,8 +13,6 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.plugins.LtvCommodityRowPanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
 import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog.CommoditySelectionListener;
 
@@ -50,12 +48,12 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         m_headerTxt = headerTxt;
         this.childrenIgnoreUIState = childrenIgnoreUIState;
 
-        initializePanel(hasPlugin);
+        initializePlugin(hasPlugin);
         createPanel();
     }
 
-    public void initializePanel(boolean hasPlugin) {
-        ((LtvCustomPanelPlugin)m_panel.getPlugin()).init(this, GlowType.NONE, false, true, true);
+    public void initializePlugin(boolean hasPlugin) {
+        getPlugin().init(this, GlowType.NONE, false, true, true);
     }
 
     public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {
@@ -86,7 +84,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         FgTooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
         final int headerHeight = (int) FgTooltip.getPrev().getPosition().getHeight();
-        ((LtvCustomPanelPlugin)m_panel.getPlugin()).setOffsets(0, 0, 0, -headerHeight);
+        getPlugin().setOffsets(0, 0, 0, -headerHeight);
 
         // Determine row height
         float rowHeight = getPanelPos().getHeight() - headerHeight - opad - pad;
@@ -121,12 +119,9 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         getPanel().addUIElement(FgTooltip).inTL(0, 0);
     }
 
-    public void createTooltip(TooltipMakerAPI tooltip) {}
-
     public void selectRow(LtvCommodityRowPanel selectedRow) {
         for (LtvCommodityRowPanel row : commodityRows) {
-            LtvCommodityRowPanelPlugin plugin = ((LtvCommodityRowPanelPlugin)row.getPanel().getPlugin());
-            plugin.setPersistentGlow(row == selectedRow);
+            row.getPlugin().setPersistentGlow(row == selectedRow);
         }
     }
 

@@ -35,7 +35,7 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LtvCommodityRowPanel extends LtvCustomPanel {
+public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
 
     private final CommodityOnMarketAPI m_com;
     private final LtvCommodityPanel m_parentWrapper;
@@ -51,10 +51,10 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
         m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
 
-        initializePanel(hasPlugin);
+        initializePlugin(hasPlugin);
         createPanel();
 
-        ((LtvCommodityRowPanelPlugin)m_panel.getPlugin()).setIgnoreUIState(childrenIgnoreUIState);
+        getPlugin().setIgnoreUIState(childrenIgnoreUIState);
     }
 
     public CommodityOnMarketAPI getCommodity() {
@@ -65,7 +65,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         return m_parentWrapper;
     }
 
-    public void initializePanel(boolean hasPlugin) {
+    public void initializePlugin(boolean hasPlugin) {
         LtvCommodityRowPanelPlugin plugin = ((LtvCommodityRowPanelPlugin) m_panel.getPlugin());
         plugin.init(this, GlowType.OVERLAY, true, false, false);
         plugin.setDisplayPrices(m_canViewPrices);
@@ -84,7 +84,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
 
         // Amount label
         tooltip.setParaSmallInsignia();
-        LabelAPI amountTxt = tooltip.addPara(NumFormat.formatWithMaxDigits(m_com.getAvailable()) + Strings.X, pad);
+        LabelAPI amountTxt = tooltip.addPara(NumFormat.notateEng(m_com.getAvailable()) + Strings.X, pad);
         final int textHeight = (int) amountTxt.computeTextHeight(amountTxt.getText());
         amountTxt.setColor(baseColor);
         amountTxt.getPosition().setSize(textWidth, textHeight);
@@ -117,6 +117,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
             String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "exports");
             LtvIconPanel iconPanel = new LtvIconPanel(m_panel, m_market, iconSize, iconSize,
                     new LtvIconPanelPlugin(), iconPath, null, false);
+            iconPanel.getPlugin().setGlowType(GlowType.NONE);
+            iconPanel.getPlugin().setTooltipActive(false);
+
             getPanel().addComponent(iconPanel.getPanel()).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
         }
 
@@ -148,6 +151,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
 
         LtvIconPanel iconPanel = new LtvIconPanel(parent, m_market, iconSize, iconSize,
                     new LtvIconPanelPlugin(), iconPath, baseColor, isSourceIllegal);
+        iconPanel.getPlugin().setGlowType(GlowType.NONE);
+        iconPanel.getPlugin().setTooltipActive(false);
         return iconPanel;
     }
 
@@ -181,7 +186,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         tooltip.addCustom(infoBar, 3);
     }
 
-    public void createTooltip(TooltipMakerAPI tooltip) {
+    @Override
+    public TooltipMakerAPI createTooltip() {
         final Color highlight = Misc.getHighlightColor();
         final Color gray = new Color(100, 100, 100);
         final Color positive = Misc.getPositiveHighlightColor();
@@ -189,7 +195,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         final int pad = 3;
         final int opad = 10;
 
+        TooltipMakerAPI tooltip = ((CustomPanelAPI)getParent()).createUIElement(500f, 0,false);
         CommodityStats comStats = new CommodityStats(m_com, m_market);
+
         tooltip.createRect(BgColor, tooltip.getPosition().getWidth());
 
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
@@ -215,7 +223,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         {
         tooltip.setParaFontDefault();
         tooltip.addPara("Available: %s", pad, highlight,
-            NumFormat.formatWithMaxDigits(comStats.available));
+            NumFormat.notateEng(comStats.available));
 
         final int valueTxtWidth = 45 + pad;
         boolean firstPara = true;
@@ -241,7 +249,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
                 }
 
                 // draw text
-                String valueTxt = "+" + NumFormat.formatWithMaxDigits((long)value);
+                String valueTxt = "+" + NumFormat.notateEng((long)value);
 
                 String industryDesc = industry.getNameForModifier();
                 String text =  desc + " (" + industryDesc + ")";
@@ -277,7 +285,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
                 }
 
                 // draw text
-                String valueTxt = "+" + NumFormat.formatWithMaxDigits((long)value);
+                String valueTxt = "+" + NumFormat.notateEng((long)value);
 
                 String industryDesc = industry.getNameForModifier();
                 String text =  desc + " (" + industryDesc + ")";
@@ -352,7 +360,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
             }
 
             // draw text
-            String valueTxt = "+" + NumFormat.formatWithMaxDigits((long)value);
+            String valueTxt = "+" + NumFormat.notateEng((long)value);
             Color valueColor = highlight;
             if (value < 0) {
                 valueTxt = valueTxt.replace("+", "");
@@ -380,7 +388,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
 
         if (comStats.externalImports > 0) {
             // draw text
-            String valueTxt = "+" + NumFormat.formatWithMaxDigits(comStats.externalImports);
+            String valueTxt = "+" + NumFormat.notateEng(comStats.externalImports);
 			LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
 
 			UIComponentAPI lblComp = tooltip.getPrev();
@@ -417,7 +425,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         }
         
         tooltip.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.formatWithMaxDigits(comStats.localDemand));
+            NumFormat.notateEng(comStats.localDemand));
 
         final int valueTxtWidth = 45 + pad;
         boolean firstPara = true;
@@ -441,7 +449,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
                 }
 
                 // draw text
-                String valueTxt = NumFormat.formatWithMaxDigits((long)value);
+                String valueTxt = NumFormat.notateEng((long)value);
 
                 String industryDesc = industry.getNameForModifier();
                 String text =  "Needed by " + industryDesc;
@@ -508,7 +516,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
             if (comStats.canNotExport > 0) {
                 tooltip.addPara(
                 "Exports are reduced by %s due to insufficient accessibility.",
-                pad, negative, NumFormat.formatWithMaxDigits(comStats.canNotExport)
+                pad, negative, NumFormat.notateEng(comStats.canNotExport)
             );
             }
         }
@@ -518,6 +526,16 @@ public class LtvCommodityRowPanel extends LtvCustomPanel {
         "Increasing production and colony accessibility will both increase the export market share and income.", gray, opad);
 
         tooltip.addSpacer(opad*1.5f);
+
+        ((CustomPanelAPI)getParent()).addUIElement(tooltip);
+        tooltip.getPosition().inTL(-(tooltip.getPosition().getWidth() + opad), 0);
+
+        return tooltip;
+    }
+
+    @Override
+    public void removeTooltip(TooltipMakerAPI tooltip) {
+        ((CustomPanelAPI)getParent()).removeComponent(tooltip);
     }
 
 }

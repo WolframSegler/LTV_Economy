@@ -6,15 +6,19 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.loading.Description.Type;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.plugins.LtvIconPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.util.TooltipUtils;
 
-public class LtvIconPanel extends LtvCustomPanel {
+public class LtvIconPanel extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
 
     public final String m_spriteID;
     public Color color;
@@ -29,7 +33,7 @@ public class LtvIconPanel extends LtvCustomPanel {
         this.color = color;
         this.drawBorder = drawBorder;
 
-        initializePanel(hasPlugin);
+        initializePlugin(hasPlugin);
         createPanel();
     }
 
@@ -37,10 +41,7 @@ public class LtvIconPanel extends LtvCustomPanel {
         m_com = a;
     }
 
-    public void setTooltip(boolean a) {
-    }
-
-    public void initializePanel(boolean hasPlugin) {
+    public void initializePlugin(boolean hasPlugin) {
         LtvIconPanelPlugin plugin = ((LtvIconPanelPlugin) m_panel.getPlugin());
         plugin.init(this, GlowType.ADDITIVE, true, false, false);
         plugin.init(m_spriteID, color, drawBorder);
@@ -57,13 +58,18 @@ public class LtvIconPanel extends LtvCustomPanel {
         m_panel.addUIElement(tooltip).inTL(0, 0);
     }
 
-    public void createTooltip(TooltipMakerAPI tooltip) {
+    @Override
+    public TooltipMakerAPI createTooltip() {
         if (m_com == null) {
-            return;
+            return null;
         }
 
         final int pad = 3;
         final int opad = 10;
+        final Color gray = new Color(100, 100, 100);
+
+        TooltipMakerAPI tooltip = m_panel.createUIElement(500, 0, false);
+
         tooltip.createRect(BgColor, tooltip.getPosition().getWidth());
 
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
@@ -73,5 +79,20 @@ public class LtvIconPanel extends LtvCustomPanel {
 
         tooltip.setParaFontDefault();
         tooltip.addPara(comDesc, opad);
+
+        String basePrice = ((int)m_com.getCommodity().getBasePrice()) + Strings.C;
+        tooltip.addPara("Base value: %s per unit.", pad, Misc.getHighlightColor(), basePrice);
+        
+        tooltip.addPara("Expand to see remote price data.", gray, pad);
+
+        m_panel.addUIElement(tooltip);
+        TooltipUtils.mouseCornerPos(tooltip, opad);
+
+        return tooltip;
+    }
+
+    @Override
+    public void removeTooltip(TooltipMakerAPI tooltip) {
+        m_panel.removeComponent(tooltip);
     }
 }
