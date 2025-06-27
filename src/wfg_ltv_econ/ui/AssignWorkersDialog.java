@@ -171,7 +171,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
-            String txt = Strings.X + NumFormat.notateEng(pAmount);
+            String txt = Strings.X + NumFormat.engNotation(pAmount);
             LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
             UIComponentAPI lblComp = tooltip.getPrev();
@@ -227,7 +227,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
-            String txt = Strings.X + NumFormat.notateEng(dAmount);
+            String txt = Strings.X + NumFormat.engNotation(dAmount);
             LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
             UIComponentAPI lblComp = tooltip.getPrev();

@@ -14,6 +14,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 
 public abstract class LtvCustomPanel{
+    private final UIPanelAPI m_root;
     protected final UIPanelAPI m_parent;
     protected final CustomPanelAPI m_panel;
     protected final CustomUIPanelPlugin m_plugin;
@@ -28,7 +29,9 @@ public abstract class LtvCustomPanel{
      * The parent SHALL NOT call createPanel(). Only the children may call it.
      * The parent SHALL NOT call initializePanel(). It may use members only the child has.
      */
-    public LtvCustomPanel(UIPanelAPI parent, int width, int height, CustomUIPanelPlugin plugin, MarketAPI market) {
+    public LtvCustomPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, CustomUIPanelPlugin plugin,
+        MarketAPI market) {
+        m_root = root;
         m_parent = parent;
         m_plugin = plugin;
         m_market = market;
@@ -55,6 +58,10 @@ public abstract class LtvCustomPanel{
 
     public UIPanelAPI getParent() {
         return m_parent;
+    }
+
+    public UIPanelAPI getRoot() {
+        return m_root == null ? m_panel : m_root;
     }
 
     public LtvCustomPanelPlugin getPlugin() {

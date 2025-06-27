@@ -130,7 +130,7 @@ public class BuildingWidgetPanel extends intnew {
       if (currentIndustry instanceof LtvBaseIndustry) {
          int assigned = ((LtvBaseIndustry) currentIndustry).getWorkerAssigned();
          if (((LtvBaseIndustry)currentIndustry).isWorkerAssignable()) {
-            String assignedStr = NumFormat.notateEng(assigned);
+            String assignedStr = NumFormat.engNotation(assigned);
 
             workerCountLabel.setText(assignedStr);
             workerCountLabel.setHighlight(0, 5);

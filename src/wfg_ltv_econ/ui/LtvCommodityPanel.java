@@ -26,24 +26,24 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     public boolean childrenIgnoreUIState = false;
     public boolean isRowSelectable = false;
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
         CustomUIPanelPlugin plugin, String headerTxt) {
-        this(parent, width, height, market, plugin, headerTxt, false);
+        this(root, parent, width, height, market, plugin, headerTxt, false);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
         CustomUIPanelPlugin plugin) {
-        this(parent, width, height, market, plugin, "Commodities", false);
+        this(root, parent, width, height, market, plugin, "Commodities", false);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
         CustomUIPanelPlugin plugin, boolean childrenIgnoreUIState) {
-        this(parent, width, height, market, plugin, "Commodities", false);
+        this(root, parent, width, height, market, plugin, "Commodities", childrenIgnoreUIState);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
         CustomUIPanelPlugin plugin, String headerTxt, boolean childrenIgnoreUIState) {
-        super(parent, width, height, plugin, market);
+        super(root, parent, width, height, plugin, market);
 
         m_headerTxt = headerTxt;
         this.childrenIgnoreUIState = childrenIgnoreUIState;
@@ -102,8 +102,8 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         CustomPanelAPI previousRow = null;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(commodity, getPanel(), this,
-                (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, m_market, childrenIgnoreUIState);
+            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(getRoot(), getPanel(), m_market, commodity,
+            this, (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, childrenIgnoreUIState);
 
             comRow.getPanelPos().setSize(getPanelPos().getWidth() - opad * 2.0F, rowHeight);
 

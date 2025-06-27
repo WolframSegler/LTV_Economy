@@ -10,4 +10,12 @@ public class UiUtils {
 		alignReset.getPosition().inTL(opad / 2, prevHeight);
 		tooltip.setHeightSoFar(prevHeight);
 	}
+
+	public static final void positionCodexLabel(TooltipMakerAPI tooltip, int opad, int pad) {
+		// LabelAPI F2Label = ((StandardTooltipV2Expandable) tooltip).expandLabel;
+        LabelAPI F2Label = (LabelAPI)ReflectionUtils.get(tooltip, "expandLabel", LabelAPI.class, true);
+        if (F2Label != null) {
+            F2Label.getPosition().inBL(opad + pad, -pad*6);
+        }
+	}
 }

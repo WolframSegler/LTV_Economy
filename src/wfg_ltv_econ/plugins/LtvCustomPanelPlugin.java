@@ -9,7 +9,7 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.FaderUtil;
-import com.fs.starfarer.ui.impl.StandardTooltipV2;
+import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvCustomPanel.TooltipProvider;
@@ -98,8 +98,8 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             m_tooltip = ((TooltipProvider) m_panel).createTooltip();
 
             // Might break later. Then just use RenderUtils
-            ((StandardTooltipV2)m_tooltip).setShowBackground(true);
-            ((StandardTooltipV2)m_tooltip).setShowBorder(true);
+            ((StandardTooltipV2Expandable)m_tooltip).setShowBackground(true);
+            ((StandardTooltipV2Expandable)m_tooltip).setShowBorder(true);
         }
         
         return m_tooltip;

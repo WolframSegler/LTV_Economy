@@ -17,7 +17,7 @@ public class NumFormat {
      *   79245 -> "79.2K"
      *   1_000_000_000 -> "1.00B"
      */
-    public static final String notateEng(long input) {
+    public static final String engNotation(long input) {
 
         long value = Math.abs(input);
 

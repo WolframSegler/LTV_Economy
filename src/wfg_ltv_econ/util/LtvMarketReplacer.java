@@ -158,7 +158,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
             // The Panel with the player portrait
             UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
-            LtvCommodityPanel replacement = new LtvCommodityPanel(managementPanel, width, height, market, new LtvCustomPanelPlugin());
+            LtvCommodityPanel replacement = new LtvCommodityPanel(null ,managementPanel, width, height,
+                market, new LtvCustomPanelPlugin());
 
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later

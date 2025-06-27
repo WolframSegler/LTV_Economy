@@ -216,16 +216,16 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         String comID = m_com.getCommodity().getIconName();
 
-        LtvIconPanel iconLeft = new LtvIconPanel(section, m_parentWrapper.m_market, iconSize, iconSize,
-                new LtvIconPanelPlugin(), comID, null, false);
+        LtvIconPanel iconLeft = new LtvIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.m_market,
+            iconSize, iconSize, new LtvIconPanelPlugin(), comID, null, false);
         iconLeft.setCommodity(m_com);
 
         iconLeft.getPanelPos().inTL(opad * 3,
                 (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconLeft.getPanel());
 
-        LtvIconPanel iconRight = new LtvIconPanel(section, m_parentWrapper.m_market, iconSize, iconSize,
-                new LtvIconPanelPlugin(), comID, null, false);
+        LtvIconPanel iconRight = new LtvIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.m_market,
+            iconSize, iconSize, new LtvIconPanelPlugin(), comID, null, false);
         iconRight.setCommodity(m_com);
 
         iconRight.getPanelPos().inTL(SECT1_WIDTH - iconSize - opad * 3,
@@ -269,7 +269,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             int y = baseY;
             String txt = "Total global exports";
 
-            String valueTxt = NumFormat.notateEng(getTotalGlobalExports(m_com.getId()));
+            String valueTxt = NumFormat.engNotation(getTotalGlobalExports(m_com.getId()));
 
             tooltip.setParaFontColor(baseColor);
             tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -372,6 +372,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         CustomUIPanelPlugin comPanelPlugin = new LtvCustomPanelPlugin();
 
         LtvCommodityPanel comPanel = new LtvCommodityPanel(
+                m_parentWrapper.getRoot(),
                 (UIPanelAPI) section,
                 (int) section.getPosition().getWidth(),
                 (int) section.getPosition().getHeight(),
