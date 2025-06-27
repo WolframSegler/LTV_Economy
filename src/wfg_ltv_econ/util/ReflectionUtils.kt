@@ -1,4 +1,4 @@
-package org.scy
+package wfg_ltv_econ.util
 
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles

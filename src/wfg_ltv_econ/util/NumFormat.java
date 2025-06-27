@@ -13,9 +13,9 @@ public class NumFormat {
      *
      * Examples:
      *   924 -> "924"
-     *   9245 -> "9.25K"
-     *   79245 -> "79.2K"
-     *   1_000_000_000 -> "1.00B"
+     *   9,245 -> "9.25K"
+     *   79,245 -> "79.2K"
+     *   1,000,000,000 -> "1.00B"
      */
     public static final String engNotation(long input) {
 

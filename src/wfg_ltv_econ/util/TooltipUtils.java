@@ -15,11 +15,16 @@ import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.Fonts;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
+import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
+
+import wfg_ltv_econ.ui.LtvCustomPanel;
 
 public class TooltipUtils {
 
@@ -88,32 +93,21 @@ public class TooltipUtils {
         pos.setXAlignOffset(offsetX);
         pos.setYAlignOffset(offsetY);
     }
-
     /**
-     * 
-     * @param tooltip
-     * @param pad
-     * @param com
-     * @param rowsPerTable
-     * @param showExplanation
-     * @param showBestSell
-     * @param showBestBuy
+     * Reflectively calls the original factory method
      */
     public static void cargoTooltipFactory(TooltipMakerAPI tooltip, float pad, CommoditySpecAPI com,
             int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy) {
 
-        ReflectionUtils.invoke(CargoTooltipFactory.class, tooltip, pad, com, rowsPerTable, showExplanation,
-                showBestSell, showBestBuy);
+        ReflectionUtils.invoke(CargoTooltipFactory.class, "super", tooltip, pad, com, rowsPerTable, showExplanation, showBestSell, showBestBuy);
     }
 
     /**
      * Literally copied this from com.fs.starfarer.ui.impl.CargoTooltipFactory.
      * Only modified the parts that concern me. All hail Alex, the Lion of Sindria.
-     * @param tooltip
-     * @param pad
-     * @param comSpec
-     * @param rowsPerTable
      * @param showExplanation
+     * Displays explanation paragraphs
+     * 
      * @param showBestSell
      * Shows the best places to make a profit selling the commodity.
      * 
@@ -321,6 +315,43 @@ public class TooltipUtils {
             final Color txtColor = Misc.setAlpha(highlight, 155);
             tooltip.addPara("*Per unit prices assume buying or selling a batch of %s units. Each unit bought costs more as the market's supply is reduced, and each unit sold brings in less as demand is fulfilled.", opad, gray, txtColor, new String[]{"" + econUnit});
         }
+    }
+
+    /**
+     * The Codex is static and its labels must be updated manually
+     */
+    public static void customCodexBuilder(TooltipMakerAPI tooltip, TooltipMakerAPI codexTooltip,
+        LtvCustomPanel panel, String codexEntryID, String codexF1, String codexF2) {
+
+        final int opad = 10;
+        final Color gray = new Color(100, 100, 100);
+        final Color highlight = Misc.getHighlightColor();
+        
+        // Add the codex ID reflectively to avoid adding a footer
+        ReflectionUtils.set(tooltip, "String codexEntryId", codexEntryID);
+        
+        // Create the custom Footer
+        codexTooltip = ((CustomPanelAPI)panel.getParent()).createUIElement(300, 100, false);
+        ((CustomPanelAPI)panel.getParent()).addUIElement(codexTooltip);
+        codexTooltip.getPosition().belowLeft(tooltip, 0);
+
+        codexTooltip.setParaFont(Fonts.ORBITRON_12);
+        ((StandardTooltipV2Expandable)codexTooltip).setShowBackground(true);
+        ((StandardTooltipV2Expandable)codexTooltip).setShowBorder(true);
+
+        codexTooltip.setParaFontColor(gray);
+        LabelAPI lbl1 = codexTooltip.addPara(codexF1, 0, highlight, "F1");
+        LabelAPI lbl2 = codexTooltip.addPara(codexF2, 0, highlight, "F2");
+
+        lbl1.getPosition().inTL(opad/2f, -2);
+        int lbl2X = (int) (lbl1.computeTextWidth(lbl1.getText()) + opad);
+        lbl2.getPosition().inTL(lbl2X, -2);
+
+        int tooltipW = (int) (lbl1.computeTextWidth(lbl1.getText() + lbl2.getText()) + opad*4);
+        int tooltipH = (int) lbl1.computeTextHeight(lbl1.getText()) + 8;
+        codexTooltip.getPosition().setSize(tooltipW, tooltipH);
+
+        codexTooltip.setHeightSoFar(tooltipH);
     }
 
     private static Comparator<MarketAPI> createSellComparator(String comID, int econUnit) {
