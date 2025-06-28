@@ -100,9 +100,17 @@ public abstract class LtvCustomPanel{
         TooltipMakerAPI createTooltip();
 
         /**
-         * Remove the provided Tooltip from its owner.
+         * Remove the provided Tooltip and codexTooltip from its owner.
          * The custom Plugin does not know its owner.
          */
         void removeTooltip(TooltipMakerAPI tooltip);
+
+        /**
+         * Set any codexTooltip variables to the parameter here.
+         * Used by TooltipUtils.
+         * May also be used to attach Codex Tooltip to the primary tooltip depending on circumstance.
+         * This is because variables in Java cannot be passed by reference.
+         */
+        void attachCodexTooltip(TooltipMakerAPI codexTooltip);
     }
 }

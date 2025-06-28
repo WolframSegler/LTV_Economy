@@ -545,4 +545,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         ((CustomPanelAPI)getParent()).removeComponent(tooltip);
     }
 
+    @Override 
+    public void attachCodexTooltip(TooltipMakerAPI codex) {
+
+    }
+
 }

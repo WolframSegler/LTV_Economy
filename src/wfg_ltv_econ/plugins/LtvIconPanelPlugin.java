@@ -2,6 +2,7 @@ package wfg_ltv_econ.plugins;
 
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
@@ -11,6 +12,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
+import wfg_ltv_econ.ui.LtvIconPanel;
 import wfg_ltv_econ.util.RenderUtils;
 
 public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
@@ -83,6 +85,25 @@ public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
     @Override
     public void processInput(List<InputEventAPI> events) {
         super.processInput(events);
+
+        if (!m_hasTooltip || !hoveredLastFrame) {
+            ((LtvIconPanel)m_panel).isExpanded = false;
+            
+            return;
+        }
+
+        for (InputEventAPI event : events) {
+            if (event.isMouseEvent()) {
+                continue;
+            }
+
+            if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F1) {
+                ((LtvIconPanel)m_panel).isExpanded = !((LtvIconPanel)m_panel).isExpanded;
+                hideTooltip();
+
+                event.consume();
+            }
+        }
     }
 
     @Override

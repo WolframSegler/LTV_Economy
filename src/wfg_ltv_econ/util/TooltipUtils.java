@@ -100,6 +100,7 @@ public class TooltipUtils {
             int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy) {
 
         ReflectionUtils.invoke(CargoTooltipFactory.class, "super", tooltip, pad, com, rowsPerTable, showExplanation, showBestSell, showBestBuy);
+        tooltip.getPosition().setSize(1000, 0);
     }
 
     /**
@@ -318,22 +319,22 @@ public class TooltipUtils {
     }
 
     /**
-     * The Codex is static and its labels must be updated manually
+     * The Codex is static and its labels must be updated manually.
+     * The Codex must also be attached manually.
      */
-    public static void customCodexBuilder(TooltipMakerAPI tooltip, TooltipMakerAPI codexTooltip,
+    public static void createCustomCodex(TooltipMakerAPI tooltip, TooltipMakerAPI codexTooltip,
         LtvCustomPanel panel, String codexEntryID, String codexF1, String codexF2) {
 
+        final int pad = 3;
         final int opad = 10;
         final Color gray = new Color(100, 100, 100);
         final Color highlight = Misc.getHighlightColor();
         
         // Add the codex ID reflectively to avoid adding a footer
-        ReflectionUtils.set(tooltip, "String codexEntryId", codexEntryID);
+        ReflectionUtils.set(tooltip, "codexEntryId", codexEntryID, true);
         
         // Create the custom Footer
-        codexTooltip = ((CustomPanelAPI)panel.getParent()).createUIElement(300, 100, false);
-        ((CustomPanelAPI)panel.getParent()).addUIElement(codexTooltip);
-        codexTooltip.getPosition().belowLeft(tooltip, 0);
+        codexTooltip = ((CustomPanelAPI)panel.getParent()).createUIElement(210, 0, false);
 
         codexTooltip.setParaFont(Fonts.ORBITRON_12);
         ((StandardTooltipV2Expandable)codexTooltip).setShowBackground(true);
@@ -344,14 +345,16 @@ public class TooltipUtils {
         LabelAPI lbl2 = codexTooltip.addPara(codexF2, 0, highlight, "F2");
 
         lbl1.getPosition().inTL(opad/2f, -2);
-        int lbl2X = (int) (lbl1.computeTextWidth(lbl1.getText()) + opad);
+        int lbl2X = (int) (lbl1.computeTextWidth(lbl1.getText()) + opad + pad);
         lbl2.getPosition().inTL(lbl2X, -2);
 
-        int tooltipW = (int) (lbl1.computeTextWidth(lbl1.getText() + lbl2.getText()) + opad*4);
-        int tooltipH = (int) lbl1.computeTextHeight(lbl1.getText()) + 8;
-        codexTooltip.getPosition().setSize(tooltipW, tooltipH);
+        int tooltipH = (int) lbl1.computeTextHeight(lbl1.getText()) - opad/2;
 
         codexTooltip.setHeightSoFar(tooltipH);
+
+        if (panel instanceof LtvCustomPanel.TooltipProvider) {
+            ((LtvCustomPanel.TooltipProvider)panel).attachCodexTooltip(codexTooltip);
+        }
     }
 
     private static Comparator<MarketAPI> createSellComparator(String comID, int econUnit) {
