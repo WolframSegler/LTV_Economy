@@ -25,7 +25,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
-import wfg_ltv_econ.plugins.LtvIconPanelPlugin;
+import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.LtvCommodityPanel;
 import wfg_ltv_econ.ui.LtvCustomPanel;
@@ -217,7 +217,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         String comID = m_com.getCommodity().getIconName();
 
         LtvIconPanel iconLeft = new LtvIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.m_market,
-            iconSize, iconSize, new LtvIconPanelPlugin(), comID, null, false);
+            iconSize, iconSize, new LtvSpritePanelPlugin(), comID, null, false);
         iconLeft.setCommodity(m_com);
 
         iconLeft.getPanelPos().inTL(opad * 3,
@@ -225,7 +225,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         section.addComponent(iconLeft.getPanel());
 
         LtvIconPanel iconRight = new LtvIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.m_market,
-            iconSize, iconSize, new LtvIconPanelPlugin(), comID, null, false);
+            iconSize, iconSize, new LtvSpritePanelPlugin(), comID, null, false);
         iconRight.setCommodity(m_com);
 
         iconRight.getPanelPos().inTL(SECT1_WIDTH - iconSize - opad * 3,

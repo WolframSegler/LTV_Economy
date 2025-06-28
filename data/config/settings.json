@@ -19,5 +19,11 @@
     "coreWorlds": [],
     "fringeWorlds": [],
     "allMarkets": ["no_restock_condition"]
+  },
+
+  "graphics": {
+    "ui": {
+      "cargoTooltipArrow": "graphics/ui/cargoTooltipArrow.png"
+    }
   }
 }

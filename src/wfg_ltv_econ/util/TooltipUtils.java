@@ -3,6 +3,9 @@ package wfg_ltv_econ.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import org.lwjgl.util.vector.Vector2f;
+
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
@@ -11,6 +14,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
 import com.fs.starfarer.api.ui.Alignment;
@@ -19,14 +23,23 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
+import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.ui.LtvCustomPanel;
+import wfg_ltv_econ.ui.LtvSpritePanel;
 
 public class TooltipUtils {
+
+    private final static String cargoTooltipArrow_PATH;
+
+    static {
+        cargoTooltipArrow_PATH = Global.getSettings().getSpriteName("ui", "cargoTooltipArrow");
+    }
 
     public static void dynamicPos(TooltipMakerAPI tooltip, CustomPanelAPI anchor, int opad) {
         PositionAPI pos = tooltip.getPosition();
@@ -156,13 +169,14 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
                         CommodityOnMarketAPI com = market.getCommodityData(comID);
+                        CommodityStats comStat = new CommodityStats(com, market);
                         long marketDemand = com.getMaxDemand() - com.getPlayerTradeNetQuantity();
                         if (marketDemand < 0) {
                             marketDemand = 0;
                         }
 
                         int unitPrice = (int)market.getDemandPrice(comID, 1, true);
-                        int deficit = com.getDeficitQuantity();
+                        long deficit = comStat.localDeficit;
                         Color labelColor = highlight;
                         Color deficitColor = gray;
                         String quantityLabel = "---";
@@ -208,6 +222,25 @@ public class TooltipUtils {
                                 highlight, 
                                 Misc.getRoundedValueMaxOneAfterDecimal(distanceToPlayer)
                             });
+
+                            // Arrow Sprite
+                            SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
+
+                            LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
+                            (int)24, (int)24, new LtvSpritePanelPlugin(), "", null, false);
+                            LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin)arrowPanel.getPlugin());
+
+                            plugin.setSprite(arrow);
+
+                            Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocation();
+                            Vector2f targetLoc = market.getStarSystem().getLocation();
+                            Vector2f delta = Vector2f.sub(targetLoc, playerLoc, null);
+                            float angle = (float) Math.toDegrees(Math.atan2(delta.y, delta.x));
+
+                            arrow.setAngle(angle);
+
+                            final UIComponentAPI prevChild = tooltip.getPrev();
+                            tooltip.addComponent(arrowPanel.getPanel()).inTL(opad, opad);
 
                             ++rowCount;
                             if (rowCount >= rowsPerTable) {
@@ -313,8 +346,8 @@ public class TooltipUtils {
         if (showExplanation) {
             tooltip.addPara("All values approximate. Prices do not include tariffs, which can be avoided through black market trade.", Misc.getGrayColor(), opad);
 
-            final Color txtColor = Misc.setAlpha(highlight, 155);
-            tooltip.addPara("*Per unit prices assume buying or selling a batch of %s units. Each unit bought costs more as the market's supply is reduced, and each unit sold brings in less as demand is fulfilled.", opad, gray, txtColor, new String[]{"" + econUnit});
+            // final Color txtColor = Misc.setAlpha(highlight, 155);
+            // tooltip.addPara("*Per unit prices assume buying or selling a batch of %s units. Each unit bought costs more as the market's supply is reduced, and each unit sold brings in less as demand is fulfilled.", opad, gray, txtColor, new String[]{"" + econUnit});
         }
     }
 

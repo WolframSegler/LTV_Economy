@@ -15,8 +15,8 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import wfg_ltv_econ.ui.LtvIconPanel;
 import wfg_ltv_econ.util.RenderUtils;
 
-public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
-    private SpriteAPI sprite;
+public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
+    private SpriteAPI m_sprite;
     private Color color;
     private boolean drawBorder;
     private final float padding = 2f;
@@ -24,41 +24,52 @@ public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
     private final float outlineBrightness = 0.6f;
 
     public void init(String spriteId, Color color, boolean drawBorder) {
-        this.sprite = Global.getSettings().getSprite(spriteId);
+        this.m_sprite = Global.getSettings().getSprite(spriteId);
 
         this.color = color;
         this.drawBorder = drawBorder;
     }
 
+    public void init(SpriteAPI sprite, Color color, boolean drawBorder) {
+        this.m_sprite = sprite;
+
+        this.color = color;
+        this.drawBorder = drawBorder;
+    }
+
+    public void setSprite(SpriteAPI sprite) {
+        m_sprite = sprite;
+    }
+
     @Override
-    public void renderBelow(float alphaMult) {
-        super.renderBelow(alphaMult);
-        if (sprite == null) {
+    public void render(float alphaMult) {
+        super.render(alphaMult);
+        if (m_sprite == null) {
             return;
         }
-        
+
         if (color != null) {
-            sprite.setColor(color);
+            m_sprite.setColor(color);
         }
 
         PositionAPI pos = m_panel.getPanelPos();
         float x = pos.getX() + padding;
         float y = pos.getY() + padding;
-        float size = pos.getHeight() - padding*2;
+        float size = pos.getHeight() - padding * 2;
 
-        sprite.setSize(size, size);
-        sprite.renderAtCenter(x + size / 2, y + size / 2);
+        m_sprite.setSize(size, size);
+        m_sprite.renderAtCenter(x + size / 2, y + size / 2);
 
-        
         if (drawBorder) {
-            drawFramedBorder(x - borderThickness, y - borderThickness, size + borderThickness * 2, borderThickness, Color.RED, alphaMult);
+            drawFramedBorder(x - borderThickness, y - borderThickness, size + borderThickness * 2, borderThickness,
+                    Color.RED, alphaMult);
         }
 
         if (glowType == GlowType.ADDITIVE && m_fader.getBrightness() > 0) {
             float glowAmount = outlineBrightness * m_fader.getBrightness() * alphaMult;
 
-            RenderUtils.drawAdditiveGlow(sprite, x, y, m_panel.getFaction().getBaseUIColor(),
-                glowAmount);
+            RenderUtils.drawAdditiveGlow(m_sprite, x, y, m_panel.getFaction().getBaseUIColor(),
+                    glowAmount);
         }
     }
 
@@ -86,24 +97,27 @@ public class LtvIconPanelPlugin extends LtvCustomPanelPlugin {
     public void processInput(List<InputEventAPI> events) {
         super.processInput(events);
 
-        if (!m_hasTooltip || !hoveredLastFrame) {
-            ((LtvIconPanel)m_panel).isExpanded = false;
-            
-            return;
-        }
+        if (m_panel instanceof LtvIconPanel) {
+            if (!m_hasTooltip || !hoveredLastFrame) {
+                ((LtvIconPanel) m_panel).isExpanded = false;
 
-        for (InputEventAPI event : events) {
-            if (event.isMouseEvent()) {
-                continue;
+                return;
             }
 
-            if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F1) {
-                ((LtvIconPanel)m_panel).isExpanded = !((LtvIconPanel)m_panel).isExpanded;
-                hideTooltip();
+            for (InputEventAPI event : events) {
+                if (event.isMouseEvent()) {
+                    continue;
+                }
 
-                event.consume();
+                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F1) {
+                    ((LtvIconPanel) m_panel).isExpanded = !((LtvIconPanel) m_panel).isExpanded;
+                    hideTooltip();
+
+                    event.consume();
+                }
             }
         }
+
     }
 
     @Override

@@ -23,7 +23,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 
-import wfg_ltv_econ.plugins.LtvIconPanelPlugin;
+import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.plugins.infobarPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
@@ -117,7 +117,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         if (commodityData.getExportIncome(m_com) > 0) {
             String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "exports");
             LtvIconPanel iconPanel = new LtvIconPanel(getRoot(), m_panel, m_market, iconSize, iconSize,
-                    new LtvIconPanelPlugin(), iconPath, null, false);
+                    new LtvSpritePanelPlugin(), iconPath, null, false);
             iconPanel.getPlugin().setGlowType(GlowType.NONE);
             iconPanel.getPlugin().setTooltipActive(false);
 
@@ -151,7 +151,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         }
 
         LtvIconPanel iconPanel = new LtvIconPanel(getRoot(), parent, m_market, iconSize, iconSize,
-                    new LtvIconPanelPlugin(), iconPath, baseColor, isSourceIllegal);
+                    new LtvSpritePanelPlugin(), iconPath, baseColor, isSourceIllegal);
         iconPanel.getPlugin().setGlowType(GlowType.NONE);
         iconPanel.getPlugin().setTooltipActive(false);
         return iconPanel;

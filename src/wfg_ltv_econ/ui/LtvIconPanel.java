@@ -15,46 +15,38 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg_ltv_econ.plugins.LtvIconPanelPlugin;
+import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
 import wfg_ltv_econ.util.TooltipUtils;
 
-public class LtvIconPanel extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
+public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.TooltipProvider {
 
-    private TooltipMakerAPI codexTooltip;
     private static final String notExpandedCodexF1 = "F1 more info";
     private static final String ExpandedCodexF1 = "F1 hide";
     private static final String codexF2 = "F2 open Codex";
-    public boolean isExpanded = false;
+    private TooltipMakerAPI codexTooltip;
 
-    public final String m_spriteID;
-    public Color color;
-    public boolean drawBorder;
+    public boolean isExpanded = false;
     public CommodityOnMarketAPI m_com;
 
     public LtvIconPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
         CustomUIPanelPlugin plugin, String spriteID, Color color, boolean drawBorder) {
-        super(root, parent, width, height, plugin, market);
-
-        m_spriteID = spriteID;
-        this.color = color;
-        this.drawBorder = drawBorder;
-
-        initializePlugin(hasPlugin);
-        createPanel();
+        super(root, parent, market, width, height, plugin, spriteID, color, drawBorder);;
     }
 
     public void setCommodity(CommodityOnMarketAPI a) {
         m_com = a;
     }
 
+    @Override
     public void initializePlugin(boolean hasPlugin) {
-        LtvIconPanelPlugin plugin = ((LtvIconPanelPlugin) m_panel.getPlugin());
+        LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) m_panel.getPlugin());
         plugin.init(this, GlowType.ADDITIVE, true, false, false);
         plugin.init(m_spriteID, color, drawBorder);
         plugin.setIgnoreUIState(true);
     }
 
+    @Override
     public void createPanel() {}
 
     @Override
@@ -89,7 +81,7 @@ public class LtvIconPanel extends LtvCustomPanel implements LtvCustomPanel.Toolt
         } else {
             tooltip.addSpacer(opad);
 
-            TooltipUtils.cargoTooltipFactory(tooltip, pad, m_com.getCommodity(), 5,
+            TooltipUtils.cargoComTooltip(tooltip, pad, opad, m_com.getCommodity(), 5,
                 true, true, true);
 
             TooltipUtils.createCustomCodex(tooltip, codexTooltip, this,
