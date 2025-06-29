@@ -64,8 +64,13 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     public GlowType getGlowType() {
         return glowType;
     }
+
     public void setPersistentGlow(boolean a) {
         persistentGlow = a;
+    }
+
+    public void setOutline(boolean a) {
+        hasOutline = a;
     }
 
     public FaderUtil getFader() {

@@ -20,28 +20,45 @@ import wfg_ltv_econ.util.TooltipUtils;
 
 public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
     private SpriteAPI m_sprite;
-    private Color color;
+    private Color m_color;
+    private Color m_fillColor;
     private boolean drawBorder;
     private final float padding = 2f;
     private final float borderThickness = 2f;
     private final float outlineBrightness = 0.6f;
 
-    public void init(String spriteId, Color color, boolean drawBorder) {
+    private boolean isDrawFilledQuad = false;
+
+    public void init(String spriteId, Color color, Color fillColor, boolean drawBorder) {
         this.m_sprite = Global.getSettings().getSprite(spriteId);
 
-        this.color = color;
+        m_color = color;
+        m_fillColor = fillColor;
         this.drawBorder = drawBorder;
+
+        if (fillColor != null) {
+            isDrawFilledQuad = true;
+        }
     }
 
-    public void init(SpriteAPI sprite, Color color, boolean drawBorder) {
+    public void init(SpriteAPI sprite, Color color, Color fillColor, boolean drawBorder) {
         this.m_sprite = sprite;
 
-        this.color = color;
+        this.m_color = color;
+        m_fillColor = fillColor;
         this.drawBorder = drawBorder;
+
+        if (fillColor != null) {
+            isDrawFilledQuad = true;
+        }
     }
 
     public void setSprite(SpriteAPI sprite) {
         m_sprite = sprite;
+    }
+
+    public void setDrawFilledQuad(boolean a) {
+        isDrawFilledQuad = a;
     }
 
     @Override
@@ -51,8 +68,8 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
             return;
         }
 
-        if (color != null) {
-            m_sprite.setColor(color);
+        if (m_color != null) {
+            m_sprite.setColor(m_color);
         }
 
         PositionAPI pos = m_panel.getPanelPos();
@@ -62,6 +79,11 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
 
         m_sprite.setSize(size, size);
         m_sprite.render(x, y);
+
+        if (isDrawFilledQuad && m_fillColor != null) {
+            m_sprite.setColor(m_fillColor);
+            RenderUtils.drawQuad(x, y, size, size, m_fillColor, alphaMult);
+        }
 
         if (drawBorder) {
             drawFramedBorder(x - borderThickness, y - borderThickness, size + borderThickness * 2, borderThickness,

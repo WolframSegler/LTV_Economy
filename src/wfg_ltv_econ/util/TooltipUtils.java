@@ -229,7 +229,7 @@ public class TooltipUtils {
                             SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                             LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
-                            20, 20, new LtvSpritePanelPlugin(), "", null, false);
+                            20, 20, new LtvSpritePanelPlugin(), "", null, null, false);
                             LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin)arrowPanel.getPlugin());
 
                             plugin.setSprite(arrow);
@@ -337,7 +337,7 @@ public class TooltipUtils {
                         SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                         LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
-                        20, 20, new LtvSpritePanelPlugin(), "", null, false);
+                        20, 20, new LtvSpritePanelPlugin(), "", null, null, false);
                         LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin)arrowPanel.getPlugin());
 
                         plugin.setSprite(arrow);

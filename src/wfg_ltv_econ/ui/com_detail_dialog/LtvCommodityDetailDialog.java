@@ -217,7 +217,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         String comID = m_com.getCommodity().getIconName();
 
         LtvIconPanel iconLeft = new LtvIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.m_market,
-            iconSize, iconSize, new LtvSpritePanelPlugin(), comID, null, false);
+            iconSize, iconSize, new LtvSpritePanelPlugin(), comID, null, null, false);
         iconLeft.setCommodity(m_com);
 
         iconLeft.getPanelPos().inTL(opad * 3,
@@ -225,7 +225,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         section.addComponent(iconLeft.getPanel());
 
         LtvIconPanel iconRight = new LtvIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.m_market,
-            iconSize, iconSize, new LtvSpritePanelPlugin(), comID, null, false);
+            iconSize, iconSize, new LtvSpritePanelPlugin(), comID, null, null, false);
         iconRight.setCommodity(m_com);
 
         iconRight.getPanelPos().inTL(SECT1_WIDTH - iconSize - opad * 3,

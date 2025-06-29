@@ -16,22 +16,24 @@ public class LtvSpritePanel extends LtvCustomPanel {
     public final SpriteAPI m_sprite;
     public final String m_spriteID;
     public Color color;
+    public Color fillColor;
     public boolean drawBorder;
 
     public LtvSpritePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        CustomUIPanelPlugin plugin, String spriteID, Color color, boolean drawBorder) {
+        CustomUIPanelPlugin plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
         this(root, parent, market, width, height, plugin, spriteID,
         Global.getSettings().getSprite(spriteID), 
-        color, drawBorder);
+        color, fillColor, drawBorder);
     }
 
     public LtvSpritePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        CustomUIPanelPlugin plugin, String spriteID, SpriteAPI sprite, Color color, boolean drawBorder) {
+        CustomUIPanelPlugin plugin, String spriteID, SpriteAPI sprite, Color color, Color fillColor, boolean drawBorder) {
         super(root, parent, width, height, plugin, market);
 
         m_spriteID = spriteID;
         m_sprite = sprite;
         this.color = color;
+        this.fillColor = fillColor;
         this.drawBorder = drawBorder;
 
         initializePlugin(hasPlugin);
@@ -41,7 +43,7 @@ public class LtvSpritePanel extends LtvCustomPanel {
     public void initializePlugin(boolean hasPlugin) {
         LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) m_panel.getPlugin());
         plugin.init(this, GlowType.NONE, false, false, false);
-        plugin.init(m_spriteID, color, drawBorder);
+        plugin.init(m_spriteID, color, fillColor, drawBorder);
         plugin.setIgnoreUIState(true);
     }
 

@@ -6,7 +6,6 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySourceType;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketShareDataAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.ui.Alignment;
@@ -36,14 +35,22 @@ import java.util.Map;
 
 public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
 
-    private final CommodityOnMarketAPI m_com;
-    private final LtvCommodityPanel m_parentWrapper;
+    public static final Color COLOR_DEFICIT = new Color(140, 15, 15);
+    public static final Color COLOR_IMPORT = new Color(200, 140, 60);
+    public static final Color COLOR_FACTION_IMPORT = new Color(240, 240, 100);
+    public static final Color COLOR_LOCAL_PROD = new Color(122, 200, 122);
+    public static final Color COLOR_EXPORT = new Color(63,  175, 63);
+    public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
 
     private static final int iconSize = 24;
     private static final String notExpandedCodexF1 = "F1 show legend";
     private static final String ExpandedCodexF1 = "F1 go back";
     private static final String codexF2 = "F2 open Codex";
     private TooltipMakerAPI codexTooltip;
+
+    private final CommodityOnMarketAPI m_com;
+    private final LtvCommodityPanel m_parentWrapper;
+    private final CommodityStats m_comStats;
 
     public boolean isExpanded = false;
 
@@ -54,6 +61,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         super(root, parent, width, height, new LtvCommodityRowPanelPlugin(), market);
         m_com = com;
         m_parentWrapper = parentWrapper;
+        m_comStats = new CommodityStats(com, market);
 
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
         m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
@@ -121,10 +129,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         if (commodityData.getExportIncome(m_com) > 0) {
             String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
-            LtvIconPanel iconPanel = new LtvIconPanel(getRoot(), m_panel, m_market, iconSize, iconSize,
-                    new LtvSpritePanelPlugin(), iconPath, null, false);
+            LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, iconSize, iconSize,
+                    new LtvSpritePanelPlugin(), iconPath, null, null, false);
             iconPanel.getPlugin().setGlowType(GlowType.NONE);
-            iconPanel.getPlugin().setTooltipActive(false);
 
             getPanel().addComponent(iconPanel.getPanel()).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
         }
@@ -132,10 +139,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
     }
 
-    private LtvIconPanel getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int iconSize,
+    private LtvSpritePanel getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int iconSize,
         UIPanelAPI parent) {
-        MarketShareDataAPI marketData = commodityData.getMarketShareData(m_market);
-        boolean isSourceIllegal = marketData.isSourceIsIllegal();
+        boolean isSourceIllegal = commodityData.getMarketShareData(m_market).isSourceIsIllegal();
 
         CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(m_market).getSource();
         String iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
@@ -155,30 +161,28 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             default:
         }
 
-        LtvIconPanel iconPanel = new LtvIconPanel(getRoot(), parent, m_market, iconSize, iconSize,
-                    new LtvSpritePanelPlugin(), iconPath, baseColor, isSourceIllegal);
+        LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), parent, m_market, iconSize, iconSize,
+                    new LtvSpritePanelPlugin(), iconPath, baseColor, null, isSourceIllegal);
         iconPanel.getPlugin().setGlowType(GlowType.NONE);
-        iconPanel.getPlugin().setTooltipActive(false);
         return iconPanel;
     }
 
     private void handleInfoBar(TooltipMakerAPI tooltip, int barHeight) {
-        CommodityStats comStats = new CommodityStats(m_com, m_market);
 
-        float localProducedRatio = (float)comStats.demandMetWithLocal / (float)comStats.totalActivity;
-        float inFactionImportRatio = (float)comStats.inFactionImports / (float)comStats.totalActivity;
-        float externalImportRatio = (float)comStats.externalImports / (float)comStats.totalActivity;
-        float exportedRatio = (float)comStats.totalExports / (float)comStats.totalActivity;
-        float notExportedRatio = (float)comStats.canNotExport / (float)comStats.totalActivity;
-        float deficitRatio = (float)comStats.localDeficit / (float)comStats.totalActivity;
+        float localProducedRatio = (float)m_comStats.demandMetWithLocal / (float)m_comStats.totalActivity;
+        float inFactionImportRatio = (float)m_comStats.inFactionImports / (float)m_comStats.totalActivity;
+        float externalImportRatio = (float)m_comStats.externalImports / (float)m_comStats.totalActivity;
+        float exportedRatio = (float)m_comStats.totalExports / (float)m_comStats.totalActivity;
+        float notExportedRatio = (float)m_comStats.canNotExport / (float)m_comStats.totalActivity;
+        float deficitRatio = (float)m_comStats.localDeficit / (float)m_comStats.totalActivity;
 
         final HashMap<Color, Float> barMap = new HashMap<Color, Float>();
-        barMap.put(new Color(170, 46,  46), deficitRatio);
-        barMap.put(new Color(225, 170, 76), externalImportRatio);
-        barMap.put(new Color(210, 210, 76), inFactionImportRatio);
-        barMap.put(new Color(122, 200, 122), localProducedRatio);
-        barMap.put(new Color(63,  175, 63), exportedRatio);
-        barMap.put(new Color(100, 140, 180), notExportedRatio);
+        barMap.put(COLOR_DEFICIT, deficitRatio);
+        barMap.put(COLOR_IMPORT, externalImportRatio);
+        barMap.put(COLOR_FACTION_IMPORT, inFactionImportRatio);
+        barMap.put(COLOR_LOCAL_PROD, localProducedRatio);
+        barMap.put(COLOR_EXPORT, exportedRatio);
+        barMap.put(COLOR_NOT_EXPORTED, notExportedRatio);
 
         for (Map.Entry<Color, Float> barPiece : barMap.entrySet()) {
             if (barPiece.getValue() < 0) {
@@ -203,7 +207,6 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         final int opad = 10;
 
         TooltipMakerAPI tooltip = ((CustomPanelAPI)getParent()).createUIElement(500f, 0,false);
-        CommodityStats comStats = new CommodityStats(m_com, m_market);
 
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
 
@@ -229,7 +232,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         {
         tooltip.setParaFontDefault();
         tooltip.addPara("Available: %s", pad, highlight,
-            NumFormat.engNotation(comStats.available));
+            NumFormat.engNotation(m_comStats.available));
 
         final int valueTxtWidth = 45 + pad;
         boolean firstPara = true;
@@ -392,9 +395,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 			lblComp.getPosition().inTL(textX, y);
         }
 
-        if (comStats.externalImports > 0) {
+        if (m_comStats.externalImports > 0) {
             // draw text
-            String valueTxt = "+" + NumFormat.engNotation(comStats.externalImports);
+            String valueTxt = "+" + NumFormat.engNotation(m_comStats.externalImports);
 			LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
 
 			UIComponentAPI lblComp = tooltip.getPrev();
@@ -426,12 +429,12 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         // Demand
         {
         Color valueColor = highlight;
-        if (comStats.available < comStats.localDemand) {
+        if (m_comStats.available < m_comStats.localDemand) {
             valueColor = negative;
         }
         
         tooltip.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation(comStats.localDemand));
+            NumFormat.engNotation(m_comStats.localDemand));
 
         final int valueTxtWidth = 45 + pad;
         boolean firstPara = true;
@@ -493,7 +496,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         boolean isIllegal = m_market.isIllegal(m_com);
         String commodityName = m_com.getCommodity().getName();
 
-        if (comStats.totalExports < 1) {
+        if (m_comStats.totalExports < 1) {
             tooltip.addPara("No local production to export.", opad);
         } else
         if (isIllegal) {
@@ -507,22 +510,22 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             tooltip.addPara(
             m_market.getName() + " is exporting %s units of " + commodityName + " and controls %s of the global market share. Exports of " + commodityName + " bring in no income.",
             opad, highlight,
-            comStats.globalExport + "",
+            m_comStats.globalExport + "",
             m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%"
         );
         } else {
             tooltip.addPara(
             m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. Exports bring in %s per month.",
             opad, highlight,
-            comStats.globalExport + "",
+            m_comStats.globalExport + "",
             m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%",
             exportIncome + Strings.C
             );
 
-            if (comStats.canNotExport > 0) {
+            if (m_comStats.canNotExport > 0) {
                 tooltip.addPara(
                 "Exports are reduced by %s due to insufficient accessibility.",
-                pad, negative, NumFormat.engNotation(comStats.canNotExport)
+                pad, negative, NumFormat.engNotation(m_comStats.canNotExport)
             );
             }
         }
@@ -546,35 +549,77 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
             int y = (int)tooltip.getHeightSoFar() + opad + pad;
 
+            // START ICON RENDERING
+
             String iconPath = Global.getSettings().getSpriteName("commodity_markers", "production");
 			String desc = "Demand met through local production.";
-            legendRowHelper(tooltip, y, iconPath, desc, false, lgdIconSize);
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, null);
 
             y += lgdIconSize + pad;
 
             iconPath = m_market.getFaction().getCrest();
 			desc = "Demand met through in-faction imports.";
-            legendRowHelper(tooltip, y, iconPath, desc, false, lgdIconSize);
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, null);
 
             y += lgdIconSize + pad;
 
             iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
-			desc = "Demand met through imports from outside the imports.";
-            legendRowHelper(tooltip, y, iconPath, desc, false, lgdIconSize);
+			desc = "Demand met through imports from outside the faction.";
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, null);
             
-             y += lgdIconSize + pad;
+            y += lgdIconSize + pad;
 
             iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
 			desc = "Excess local production that is exported.";
-            legendRowHelper(tooltip, y, iconPath, desc, false, lgdIconSize);
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, null);
             
-             y += lgdIconSize + pad;
+            y += lgdIconSize + pad;
 
             iconPath = "";
 			desc = "Smuggled or produced by an illegal enterprise. No income from exports.";
-            legendRowHelper(tooltip, y, iconPath, desc, true, lgdIconSize);
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, true, null);
             
-             y += lgdIconSize + pad;
+            y += lgdIconSize + pad;
+
+            iconPath = "";
+			desc = "Local production that could not be exported.";
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, COLOR_NOT_EXPORTED);
+            
+            y += lgdIconSize + pad;
+
+            iconPath = "";
+			desc = "Proportion of locally produced goods that were exported globally.";
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, COLOR_EXPORT);
+            
+            y += lgdIconSize + pad;
+
+            iconPath = "";
+			desc = "Production used for local demand or exports.";
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, COLOR_LOCAL_PROD);
+            
+            y += lgdIconSize + pad;
+
+            iconPath = "";
+			desc = "Proportion of available goods that were imported in-faction.";
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, COLOR_FACTION_IMPORT);
+            
+            y += lgdIconSize + pad;
+
+            iconPath = "";
+			desc = "Imported or available through one-time trade or events.";
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, COLOR_IMPORT);
+            
+            y += lgdIconSize + pad;
+
+            iconPath = "";
+			desc = "Deficit - in demand, but not available. Higher prices.";
+            legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, COLOR_DEFICIT);
+            
+            y += lgdIconSize + pad;
+
+            // END ICON RENDERING
+
+            tooltip.setHeightSoFar(y);
 
             final int codexW = 200; 
             
@@ -604,16 +649,15 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         codexTooltip = codex;
     }
 
-    private void legendRowHelper(TooltipMakerAPI tooltip, int y, String iconPath, String desc,
-        boolean drawRedBorder, int lgdIconSize) {
+    private void legendRowHelper(TooltipMakerAPI tooltip, int y, String iconPath, String desc, int lgdIconSize,
+        boolean drawRedBorder, Color drawFilledIcon) {
         final int pad = 3;
         final int opad = 10;
 
-        LtvIconPanel iconPanel = new LtvIconPanel(getRoot(), m_panel, m_market, iconSize, iconSize,
-                    new LtvSpritePanelPlugin(), iconPath, null, drawRedBorder);
+        LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, lgdIconSize, lgdIconSize,
+            new LtvSpritePanelPlugin(), iconPath, null, drawFilledIcon, drawRedBorder);
         iconPanel.getPlugin().setGlowType(GlowType.NONE);
-        iconPanel.getPlugin().setTooltipActive(false);
-
+            
         tooltip.addComponent(iconPanel.getPanel()).setSize(lgdIconSize, lgdIconSize).inTL(pad + opad/2f, y);
 
         // Explanation Label
