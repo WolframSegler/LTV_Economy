@@ -1321,11 +1321,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					String txt = Strings.X + NumFormat.engNotation(pAmount);
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
-					UIComponentAPI lblComp = tooltip.getPrev();
 					float textH = lbl.computeTextHeight(txt);
 					float textX = x + iconSize + pad;
 					float textY = y + (iconSize - textH) * 0.5f;
-					lblComp.getPosition().inTL(textX, textY);
+					lbl.getPosition().inTL(textX, textY);
 
 					// advance X
 					x += sectionWidth + 5f;
@@ -1389,11 +1388,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 					String txt = Strings.X + NumFormat.engNotation(dAmount);
 					LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
-					UIComponentAPI lblComp = tooltip.getPrev();
 					float textH = lbl.computeTextHeight(txt);
 					float textX = x + iconSize + pad;
 					float textY = y + (iconSize - textH) * 0.5f;
-					lblComp.getPosition().inTL(textX, textY);
+					lbl.getPosition().inTL(textX, textY);
 
 					// advance X
 					x += sectionWidth + 5f;

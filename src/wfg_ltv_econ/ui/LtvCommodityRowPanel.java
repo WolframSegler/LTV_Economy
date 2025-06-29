@@ -18,9 +18,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.settings.StarfarerSettings;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
-import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
@@ -30,7 +28,7 @@ import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
-import wfg_ltv_econ.util.ReflectionUtils;
+import wfg_ltv_econ.util.TooltipUtils;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -40,6 +38,14 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
     private final CommodityOnMarketAPI m_com;
     private final LtvCommodityPanel m_parentWrapper;
+
+    private static final int iconSize = 24;
+    private static final String notExpandedCodexF1 = "F1 show legend";
+    private static final String ExpandedCodexF1 = "F1 go back";
+    private static final String codexF2 = "F2 open Codex";
+    private TooltipMakerAPI codexTooltip;
+
+    public boolean isExpanded = false;
 
     public boolean m_canViewPrices;
 
@@ -76,7 +82,6 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
     public void createPanel() {
         final int pad = 3;
         final int opad = 10;
-        final int iconSize = 24;
         final int textWidth = 60;
         final Color baseColor = getFaction().getBaseUIColor();
         final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(),
@@ -115,7 +120,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             .setSize(rowHeight, rowHeight).inBL(0, 0);
 
         if (commodityData.getExportIncome(m_com) > 0) {
-            String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "exports");
+            String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
             LtvIconPanel iconPanel = new LtvIconPanel(getRoot(), m_panel, m_market, iconSize, iconSize,
                     new LtvSpritePanelPlugin(), iconPath, null, false);
             iconPanel.getPlugin().setGlowType(GlowType.NONE);
@@ -133,7 +138,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         boolean isSourceIllegal = marketData.isSourceIsIllegal();
 
         CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(m_market).getSource();
-        String iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "imports");
+        String iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
         Color baseColor = color;
 
         switch (source) {
@@ -145,7 +150,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
                 break;
             case LOCAL:
             case NONE:
-                iconPath = (String) ReflectionUtils.invoke(StarfarerSettings.class, "new", "commodity_markers", "production");
+                iconPath = Global.getSettings().getSpriteName("commodity_markers", "production");
                 break;
             default:
         }
@@ -200,8 +205,6 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         TooltipMakerAPI tooltip = ((CustomPanelAPI)getParent()).createUIElement(500f, 0,false);
         CommodityStats comStats = new CommodityStats(m_com, m_market);
 
-        tooltip.createRect(BgColor, tooltip.getPosition().getWidth());
-
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
 
         tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -217,6 +220,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             final String text = "Must be in range of a comm relay to view global market info";
             tooltip.addPara(text, opad, negative, text);
         }
+        if (!isExpanded) {
 
         tooltip.setParaFont(Fonts.ORBITRON_12);
         tooltip.addSectionHeading("Production, imports and demand", Alignment.MID, opad);
@@ -529,25 +533,93 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         tooltip.addSpacer(opad*1.5f);
 
+        final int codexW = 240; 
+
+        TooltipUtils.createCustomCodex(tooltip, codexTooltip, this, notExpandedCodexF1, codexF2, codexW);
+
+        } else {
+            tooltip.setParaFont(Fonts.ORBITRON_12);
+            tooltip.addSectionHeading("Legend", Alignment.MID, opad);
+            tooltip.setParaFontDefault();
+
+            final int lgdIconSize = iconSize + 4;
+
+            int y = (int)tooltip.getHeightSoFar() + opad + pad;
+
+            String iconPath = Global.getSettings().getSpriteName("commodity_markers", "production");
+			String desc = "Demand met through local production.";
+            legendRowHelper(tooltip, y, iconPath, desc, false, lgdIconSize);
+
+            y += lgdIconSize + pad;
+
+            iconPath = m_market.getFaction().getCrest();
+			desc = "Demand met through in-faction imports.";
+            legendRowHelper(tooltip, y, iconPath, desc, false, lgdIconSize);
+
+            y += lgdIconSize + pad;
+
+            iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
+			desc = "Demand met through imports from outside the imports.";
+            legendRowHelper(tooltip, y, iconPath, desc, false, lgdIconSize);
+            
+             y += lgdIconSize + pad;
+
+            iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
+			desc = "Excess local production that is exported.";
+            legendRowHelper(tooltip, y, iconPath, desc, false, lgdIconSize);
+            
+             y += lgdIconSize + pad;
+
+            iconPath = "";
+			desc = "Smuggled or produced by an illegal enterprise. No income from exports.";
+            legendRowHelper(tooltip, y, iconPath, desc, true, lgdIconSize);
+            
+             y += lgdIconSize + pad;
+
+            final int codexW = 200; 
+            
+            TooltipUtils.createCustomCodex(tooltip, codexTooltip, this, ExpandedCodexF1, codexF2, codexW);  
+        }
+
         ((CustomPanelAPI)getParent()).addUIElement(tooltip);
-        tooltip.getPosition().inTL(-(tooltip.getPosition().getWidth() + opad), 0);
+        tooltip.getPosition().inTL(-tooltip.getPosition().getWidth() - opad, 0);
 
-        // Codex and F1
-        tooltip.setCodexEntryId(CodexDataV2.getCommodityEntryId(m_com.getId()));
-
-        UiUtils.positionCodexLabel(tooltip, opad, pad);
+        ((CustomPanelAPI)getParent()).addUIElement(codexTooltip);
+        codexTooltip.getPosition().belowLeft(tooltip, opad*1.5f - 1);
+        // Idk why I need to do opad*1.5f to begin with. I hate the tooltip
 
         return tooltip;
     }
 
     @Override
     public void removeTooltip(TooltipMakerAPI tooltip) {
+        if (codexTooltip != null) {
+            ((CustomPanelAPI)getParent()).removeComponent(codexTooltip);
+        }
         ((CustomPanelAPI)getParent()).removeComponent(tooltip);
     }
 
     @Override 
     public void attachCodexTooltip(TooltipMakerAPI codex) {
-
+        codexTooltip = codex;
     }
 
+    private void legendRowHelper(TooltipMakerAPI tooltip, int y, String iconPath, String desc,
+        boolean drawRedBorder, int lgdIconSize) {
+        final int pad = 3;
+        final int opad = 10;
+
+        LtvIconPanel iconPanel = new LtvIconPanel(getRoot(), m_panel, m_market, iconSize, iconSize,
+                    new LtvSpritePanelPlugin(), iconPath, null, drawRedBorder);
+        iconPanel.getPlugin().setGlowType(GlowType.NONE);
+        iconPanel.getPlugin().setTooltipActive(false);
+
+        tooltip.addComponent(iconPanel.getPanel()).setSize(lgdIconSize, lgdIconSize).inTL(pad + opad/2f, y);
+
+        // Explanation Label
+		LabelAPI lbl = tooltip.addPara(desc, pad);
+
+		float textX = opad + lgdIconSize;
+		lbl.getPosition().inTL(textX, y);
+    }
 }

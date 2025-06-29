@@ -7,7 +7,6 @@ import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
-import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
@@ -76,16 +75,20 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
         if (!isExpanded) {
             tooltip.addPara("Expand to see remote price data.", gray, opad);
 
+            final int codexW = 210;
+
             TooltipUtils.createCustomCodex(tooltip, codexTooltip, this,
-                CodexDataV2.getCommodityEntryId(m_com.getId()), notExpandedCodexF1, codexF2);
+                notExpandedCodexF1, codexF2, codexW);
         } else {
             tooltip.addSpacer(opad);
+
+            final int codexW = 180;
 
             TooltipUtils.cargoComTooltip(tooltip, pad, opad, m_com.getCommodity(), 5,
                 true, true, true);
 
             TooltipUtils.createCustomCodex(tooltip, codexTooltip, this,
-                CodexDataV2.getCommodityEntryId(m_com.getId()), ExpandedCodexF1, codexF2);  
+                ExpandedCodexF1, codexF2, codexW);  
         }
         
         ((CustomPanelAPI)getParent()).addUIElement(tooltip);

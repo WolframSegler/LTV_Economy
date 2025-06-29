@@ -25,6 +25,7 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.codex2.CodexDialog;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
@@ -228,7 +229,7 @@ public class TooltipUtils {
                             SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                             LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
-                            22, 22, new LtvSpritePanelPlugin(), "", null, false);
+                            20, 20, new LtvSpritePanelPlugin(), "", null, false);
                             LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin)arrowPanel.getPlugin());
 
                             plugin.setSprite(arrow);
@@ -336,7 +337,7 @@ public class TooltipUtils {
                         SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                         LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
-                        22, 22, new LtvSpritePanelPlugin(), "", null, false);
+                        20, 20, new LtvSpritePanelPlugin(), "", null, false);
                         LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin)arrowPanel.getPlugin());
 
                         plugin.setSprite(arrow);
@@ -369,22 +370,21 @@ public class TooltipUtils {
     }
 
     /**
+     * Creates a static Codex footer with no functionality. 
      * The Codex is static and its labels must be updated manually.
-     * The Codex must also be attached manually.
+     * The Codex must be attached manually.
+     * The F1 and F2 events must be handled using the Plugin.
      */
     public static void createCustomCodex(TooltipMakerAPI tooltip, TooltipMakerAPI codexTooltip,
-        LtvCustomPanel panel, String codexEntryID, String codexF1, String codexF2) {
+        LtvCustomPanel panel, String codexF1, String codexF2, int codexW) {
 
         final int pad = 3;
         final int opad = 10;
         final Color gray = new Color(100, 100, 100);
         final Color highlight = Misc.getHighlightColor();
         
-        // Add the codex ID reflectively to avoid adding a footer
-        ReflectionUtils.set(tooltip, "codexEntryId", codexEntryID, true);
-        
         // Create the custom Footer
-        codexTooltip = ((CustomPanelAPI)panel.getParent()).createUIElement(210, 0, false);
+        codexTooltip = ((CustomPanelAPI)panel.getParent()).createUIElement(codexW, 0, false);
 
         codexTooltip.setParaFont(Fonts.ORBITRON_12);
         ((StandardTooltipV2Expandable)codexTooltip).setShowBackground(true);
@@ -417,6 +417,10 @@ public class TooltipUtils {
         float angleDegrees = (float) Math.toDegrees(Math.atan2(delta.y, delta.x));
 
         return angleDegrees;
+    }
+
+    public static void openCodexPage(String codexID) {
+        CodexDialog.show(codexID);
     }
 
     private static Comparator<MarketAPI> createSellComparator(String comID, int econUnit) {

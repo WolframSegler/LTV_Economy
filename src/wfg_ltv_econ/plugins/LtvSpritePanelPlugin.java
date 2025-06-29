@@ -8,12 +8,15 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
 import wfg_ltv_econ.ui.LtvIconPanel;
 import wfg_ltv_econ.util.RenderUtils;
+import wfg_ltv_econ.util.TooltipUtils;
 
 public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
     private SpriteAPI m_sprite;
@@ -58,7 +61,7 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
         float size = pos.getHeight() - padding * 2;
 
         m_sprite.setSize(size, size);
-        m_sprite.renderAtCenter(x + size / 2, y + size / 2);
+        m_sprite.render(x, y);
 
         if (drawBorder) {
             drawFramedBorder(x - borderThickness, y - borderThickness, size + borderThickness * 2, borderThickness,
@@ -114,6 +117,19 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
                     hideTooltip();
 
                     event.consume();
+
+                    continue;
+                }
+
+                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2) {
+                    CommodityOnMarketAPI com = ((LtvIconPanel) m_panel).m_com;
+                    String codexID = CodexDataV2.getCommodityEntryId(com.getId());
+                    TooltipUtils.openCodexPage(codexID);
+                    hideTooltip();
+
+                    event.consume();
+
+                    continue;
                 }
             }
         }
