@@ -23,7 +23,6 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
@@ -133,6 +132,7 @@ public class TooltipUtils {
 
         final Color gray = Misc.getGrayColor();
         final Color highlight = Misc.getHighlightColor();
+        final int rowH = 20;
 
         if (!Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay()) {
             if (showExplanation) {
@@ -161,7 +161,8 @@ public class TooltipUtils {
             Collections.sort(marketList, createSellComparator(comID, econUnit));
             if (!marketList.isEmpty()) {
                 tooltip.addPara("Best places to sell:", pad);
-                tooltip.beginTable(Global.getSector().getPlayerFaction(), 20, new java.lang.Object[]{"Price", 100, "Demand", 70, "Deficit", 70, "Location", 230, "Star system", 140, "Dist (ly)", 80});
+                int relativeY = (int) tooltip.getPosition().getY() - (int) tooltip.getPrev().getPosition().getY();
+                tooltip.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[]{"Price", 100, "Demand", 70, "Deficit", 70, "Location", 230, "Star system", 140, "Dist (ly)", 80});
                 countingMap.clear();
                 
                 int rowCount = 0;
@@ -227,20 +228,18 @@ public class TooltipUtils {
                             SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                             LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
-                            (int)24, (int)24, new LtvSpritePanelPlugin(), "", null, false);
+                            22, 22, new LtvSpritePanelPlugin(), "", null, false);
                             LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin)arrowPanel.getPlugin());
 
                             plugin.setSprite(arrow);
 
-                            Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocation();
+                            Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                             Vector2f targetLoc = market.getStarSystem().getLocation();
-                            Vector2f delta = Vector2f.sub(targetLoc, playerLoc, null);
-                            float angle = (float) Math.toDegrees(Math.atan2(delta.y, delta.x));
 
-                            arrow.setAngle(angle);
+                            arrow.setAngle(rotateSprite(playerLoc, targetLoc));
 
-                            final UIComponentAPI prevChild = tooltip.getPrev();
-                            tooltip.addComponent(arrowPanel.getPanel()).inTL(opad, opad);
+                            int arrowY = relativeY + rowH * (2 + rowCount);
+                            tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
 
                             ++rowCount;
                             if (rowCount >= rowsPerTable) {
@@ -272,6 +271,7 @@ public class TooltipUtils {
                 int dynaOpad = showBestSell ? opad*2 : opad;
 
                 tooltip.addPara("Best places to buy:", dynaOpad);
+                int relativeY = (int) tooltip.getPosition().getY() - (int) tooltip.getPrev().getPosition().getY();
                 tooltip.beginTable(Global.getSector().getPlayerFaction(), 20, new java.lang.Object[]{"Price", 100, "Available", 70, "Excess", 70, "Location", 230, "Star system", 140, "Dist (ly)", 80});
                 countingMap.clear();
 
@@ -332,6 +332,23 @@ public class TooltipUtils {
                             Misc.getRoundedValueMaxOneAfterDecimal(distance)
                         });
 
+                        // Arrow Sprite
+                        SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
+
+                        LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
+                        22, 22, new LtvSpritePanelPlugin(), "", null, false);
+                        LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin)arrowPanel.getPlugin());
+
+                        plugin.setSprite(arrow);
+
+                        Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
+                        Vector2f targetLoc = market.getStarSystem().getLocation();
+
+                        arrow.setAngle(rotateSprite(playerLoc, targetLoc));
+
+                        int arrowY = relativeY + rowH * (2 + rowCount);
+                        tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
+
                         rowCount++;
                         if (rowCount >= rowsPerTable) {
                             break;
@@ -390,6 +407,18 @@ public class TooltipUtils {
         }
     }
 
+    /**
+     * This function assumes that the sprite is pointing right.
+     * In other words, it's directed towards the positive x-axis in Hyperspace.
+     */
+    public static float rotateSprite(Vector2f origin, Vector2f target) {
+        Vector2f delta = Vector2f.sub(target, origin, null);
+
+        float angleDegrees = (float) Math.toDegrees(Math.atan2(delta.y, delta.x));
+
+        return angleDegrees;
+    }
+
     private static Comparator<MarketAPI> createSellComparator(String comID, int econUnit) {
         return (m1, m2) -> {
             int price1 = (int) (m1.getDemandPrice(comID, (double)econUnit, true) / econUnit);
@@ -403,6 +432,6 @@ public class TooltipUtils {
         int price1 = (int) (m1.getSupplyPrice(comID, (double)econUnit, true) / econUnit);
         int price2 = (int) (m2.getSupplyPrice(comID, (double)econUnit, true) / econUnit);
         return Integer.compare(price1, price2);
-    };
-}
+        };
+    }
 }
