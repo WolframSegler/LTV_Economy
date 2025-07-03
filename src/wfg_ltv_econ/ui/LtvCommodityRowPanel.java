@@ -545,7 +545,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             tooltip.addSectionHeading("Legend", Alignment.MID, opad);
             tooltip.setParaFontDefault();
 
-            final int lgdIconSize = iconSize + 4;
+            final int lgdIconSize = iconSize + 2;
 
             int y = (int)tooltip.getHeightSoFar() + opad + pad;
 
@@ -614,12 +614,10 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             iconPath = "";
 			desc = "Deficit - in demand, but not available. Higher prices.";
             legendRowHelper(tooltip, y, iconPath, desc, lgdIconSize, false, COLOR_DEFICIT);
-            
-            y += lgdIconSize + pad;
 
             // END ICON RENDERING
 
-            tooltip.setHeightSoFar(y);
+            tooltip.setHeightSoFar(y + opad*2);
 
             final int codexW = 200; 
             
@@ -627,9 +625,11 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         }
 
         ((CustomPanelAPI)getParent()).addUIElement(tooltip);
+        ((CustomPanelAPI)getParent()).bringComponentToTop(tooltip);
         tooltip.getPosition().inTL(-tooltip.getPosition().getWidth() - opad, 0);
 
         ((CustomPanelAPI)getParent()).addUIElement(codexTooltip);
+        ((CustomPanelAPI)getParent()).bringComponentToTop(codexTooltip);
         codexTooltip.getPosition().belowLeft(tooltip, opad*1.5f - 1);
         // Idk why I need to do opad*1.5f to begin with. I hate the tooltip
 

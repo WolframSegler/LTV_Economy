@@ -12,6 +12,8 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.util.ReflectionUtils;
+import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
 
 public abstract class LtvCustomPanel{
     private final UIPanelAPI m_root;
@@ -66,6 +68,15 @@ public abstract class LtvCustomPanel{
 
     public LtvCustomPanelPlugin getPlugin() {
         return (LtvCustomPanelPlugin)m_plugin;
+    }
+
+    /**
+     * This is the realest way to do this. Do not judge.
+     */
+    public void setPlugin(CustomUIPanelPlugin newPlugin) {
+        ReflectedField plugin = ReflectionUtils.getFieldsMatching(m_panel, null, CustomUIPanelPlugin.class).get(0);
+
+        plugin.set(m_panel, newPlugin);
     }
 
     /**

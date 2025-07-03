@@ -1,26 +1,4 @@
 {
-  "marketConditions": {
-    "no_restock_condition": {
-      "name": "No Automatic Stockpiling",
-      "desc": "Prevents automatic commodity restocking on this market.",
-      "icon": "graphics/icons/markets/wfg_ltv_econ_small.png",
-      "script": "wfg_ltv_econ.plugins.NoRestockCondition",
-      "hidden": true,
-      "preventRemoval": true,
-      "durationDays": -1,
-      "tooltipText": [
-        "Prevents all automatic commodity restocking",
-        "Controlled by LTV Economy"
-      ],
-      "iconColor": [255, 100, 100, 255]
-    }
-  },
-  "autospawnConditions": {
-    "coreWorlds": [],
-    "fringeWorlds": [],
-    "allMarkets": ["no_restock_condition"]
-  },
-
   "graphics": {
     "ui": {
       "cargoTooltipArrow": "graphics/ui/cargoTooltipArrow.png"

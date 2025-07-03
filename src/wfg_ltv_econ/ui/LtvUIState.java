@@ -4,8 +4,8 @@ public class LtvUIState {
     public enum UIStateType {
         NONE,
         DETAIL_DIALOG,
-        OVERVIEW_DIALOG_OPEN,
-        SETTINGS_DIALOG_OPEN,
+        MARKET_DETAIL_SCREEN,
+        CAMPAIGN
     }
 
     private static UIStateType currentState = UIStateType.NONE;

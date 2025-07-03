@@ -59,18 +59,18 @@ public class CommodityStats {
 
         // Scan availability mods for same-faction foreign sources
         inFactionImports = 0;
-        for (StatMod mod : com.getAvailableStat().getFlatMods().values()) {
-            Object source = mod.getSource();
-            if (source instanceof String) {
-                String sourceId = (String) source;
-                MarketAPI sourceMarket = Global.getSector().getEconomy().getMarket(sourceId);
-                if (sourceMarket != null &&
-                        !sourceMarket.getId().equals(market.getId()) &&
-                        sourceMarket.getFactionId().equals(market.getFactionId())) {
-                    inFactionImports += mod.value;
-                }
-            }
-        }
+        // for (StatMod mod : com.getAvailableStat().getFlatMods().values()) {
+        //     Object source = mod.getSource();
+        //     if (source instanceof String) {
+        //         String sourceId = (String) source;
+        //         MarketAPI sourceMarket = Global.getSector().getEconomy().getMarket(sourceId);
+        //         if (sourceMarket != null &&
+        //                 !sourceMarket.getId().equals(market.getId()) &&
+        //                 sourceMarket.getFactionId().equals(market.getFactionId())) {
+        //             inFactionImports += mod.value;
+        //         }
+        //     }
+        // }
 
         inFactionImports = Math.min(inFactionImports, totalImports);
         externalImports = totalImports - inFactionImports;

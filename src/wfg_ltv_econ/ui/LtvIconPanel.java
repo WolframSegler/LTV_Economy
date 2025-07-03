@@ -92,9 +92,11 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
         }
         
         ((CustomPanelAPI)getParent()).addUIElement(tooltip);
+        ((CustomPanelAPI)getParent()).bringComponentToTop(tooltip);
         TooltipUtils.mouseCornerPos(tooltip, opad);
 
         ((CustomPanelAPI)getParent()).addUIElement(codexTooltip);
+        ((CustomPanelAPI)getParent()).bringComponentToTop(codexTooltip);
         codexTooltip.getPosition().belowLeft(tooltip, 0);
 
         return tooltip;

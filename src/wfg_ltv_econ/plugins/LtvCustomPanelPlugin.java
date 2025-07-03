@@ -90,7 +90,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public boolean isValidUIContext() {
-        return LtvUIState.is(UIStateType.NONE) || ignoreUIState; 
+        return LtvUIState.is(targetUIState) || ignoreUIState; 
     }
 
     public void setGlowType(GlowType a) {
