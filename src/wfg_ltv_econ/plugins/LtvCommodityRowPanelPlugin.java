@@ -12,7 +12,7 @@ import com.fs.starfarer.api.input.InputEventAPI;
 
 import wfg_ltv_econ.ui.LtvCommodityRowPanel;
 import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog;
-import wfg_ltv_econ.util.TooltipUtils;
+import wfg_ltv_econ.util.UiUtils;
 
 public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
 
@@ -80,7 +80,7 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
                 if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2) {
                     CommodityOnMarketAPI com = ((LtvCommodityRowPanel) m_panel).getCommodity();
                     String codexID = CodexDataV2.getCommodityEntryId(com.getId());
-                    TooltipUtils.openCodexPage(codexID);
+                    UiUtils.openCodexPage(codexID);
                     hideTooltip();
 
                     event.consume();

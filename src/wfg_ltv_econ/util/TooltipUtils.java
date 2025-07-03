@@ -25,7 +25,6 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.codex2.CodexDialog;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
@@ -163,7 +162,8 @@ public class TooltipUtils {
             if (!marketList.isEmpty()) {
                 tooltip.addPara("Best places to sell:", pad);
                 int relativeY = (int) tooltip.getPosition().getY() - (int) tooltip.getPrev().getPosition().getY();
-                tooltip.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[]{"Price", 100, "Demand", 70, "Deficit", 70, "Location", 230, "Star system", 140, "Dist (ly)", 80});
+                tooltip.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[]
+                {"Price", 100, "Demand", 70, "Deficit", 70, "Location", 230, "Star system", 140, "Dist (ly)", 80});
                 countingMap.clear();
                 
                 int rowCount = 0;
@@ -237,7 +237,7 @@ public class TooltipUtils {
                             Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                             Vector2f targetLoc = market.getStarSystem().getLocation();
 
-                            arrow.setAngle(rotateSprite(playerLoc, targetLoc));
+                            arrow.setAngle(UiUtils.rotateSprite(playerLoc, targetLoc));
 
                             int arrowY = relativeY + rowH * (2 + rowCount);
                             tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
@@ -345,7 +345,7 @@ public class TooltipUtils {
                         Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                         Vector2f targetLoc = market.getStarSystem().getLocation();
 
-                        arrow.setAngle(rotateSprite(playerLoc, targetLoc));
+                        arrow.setAngle(UiUtils.rotateSprite(playerLoc, targetLoc));
 
                         int arrowY = relativeY + rowH * (2 + rowCount);
                         tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
@@ -405,22 +405,6 @@ public class TooltipUtils {
         if (panel instanceof LtvCustomPanel.TooltipProvider) {
             ((LtvCustomPanel.TooltipProvider)panel).attachCodexTooltip(codexTooltip);
         }
-    }
-
-    /**
-     * This function assumes that the sprite is pointing right.
-     * In other words, it's directed towards the positive x-axis in Hyperspace.
-     */
-    public static float rotateSprite(Vector2f origin, Vector2f target) {
-        Vector2f delta = Vector2f.sub(target, origin, null);
-
-        float angleDegrees = (float) Math.toDegrees(Math.atan2(delta.y, delta.x));
-
-        return angleDegrees;
-    }
-
-    public static void openCodexPage(String codexID) {
-        CodexDialog.show(codexID);
     }
 
     private static Comparator<MarketAPI> createSellComparator(String comID, int econUnit) {

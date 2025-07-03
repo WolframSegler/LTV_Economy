@@ -16,7 +16,7 @@ import com.fs.starfarer.api.ui.PositionAPI;
 
 import wfg_ltv_econ.ui.LtvIconPanel;
 import wfg_ltv_econ.util.RenderUtils;
-import wfg_ltv_econ.util.TooltipUtils;
+import wfg_ltv_econ.util.UiUtils;
 
 public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
     private SpriteAPI m_sprite;
@@ -146,7 +146,7 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
                 if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2) {
                     CommodityOnMarketAPI com = ((LtvIconPanel) m_panel).m_com;
                     String codexID = CodexDataV2.getCommodityEntryId(com.getId());
-                    TooltipUtils.openCodexPage(codexID);
+                    UiUtils.openCodexPage(codexID);
                     hideTooltip();
 
                     event.consume();

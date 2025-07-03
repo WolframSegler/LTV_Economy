@@ -58,7 +58,7 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
         final int opad = 10;
         final Color gray = new Color(100, 100, 100);
 
-        TooltipMakerAPI tooltip = ((CustomPanelAPI)getParent()).createUIElement(720, 0, false);
+        TooltipMakerAPI tooltip = ((CustomPanelAPI)getParent()).createUIElement(700, 0, false);
 
         tooltip.createRect(BgColor, tooltip.getPosition().getWidth());
 

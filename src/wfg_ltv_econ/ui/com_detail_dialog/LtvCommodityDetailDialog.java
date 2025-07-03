@@ -12,18 +12,19 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.MapParams;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
-import com.fs.starfarer.ui.impl.StandardTooltipV2;
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
@@ -75,7 +76,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     private CustomPanelAPI m_dialogPanel;
 
     public CommodityOnMarketAPI m_com;
-    public FactionAPI m_selectedFaction = null; 
+    public MarketAPI m_selectedMarket = null; 
 
     public LtvCommodityDetailDialog(LtvCustomPanel parent, CommodityOnMarketAPI com) {
         // Measured using very precise tools!! (my eyes)
@@ -448,19 +449,25 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
                     String factionName = m_parentWrapper.m_faction.getDisplayNameLong();
+                    Color factionColor = baseColor;
+                    if (m_selectedMarket != null) {
+                        factionName = m_selectedMarket.getFaction().getDisplayNameLong();
+                        factionColor = m_selectedMarket.getFaction().getBaseUIColor();
+                    }
+
                     String txt = "Total " + factionName + " exports";
 
                     String valueTxt = Integer.toString(getTotalFactionImports(m_com.getId(),
                     m_parentWrapper.m_faction));
 
-                    tooltip.setParaFontColor(baseColor);
+                    tooltip.setParaFontColor(factionColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
                     LabelAPI lbl1 = tooltip.addPara(txt, pad);
                     lbl1.setHighlightOnMouseover(true);
 
-                    tooltip.setParaFontColor(highlight);
+                    tooltip.setParaFontColor(factionColor);
                     tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    LabelAPI lbl2 = tooltip.addPara(valueTxt, highlight, pad);
+                    LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
                     lbl2.setHighlightOnMouseover(true);
 
                     float textH1 = lbl1.getPosition().getHeight();
@@ -514,7 +521,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         final int baseRow2Y = baseY * 3 + pad;
 
-        if (m_selectedFaction == null) { // Faction market share
+        if (m_selectedMarket == null) { // Faction market share
             LtvTextPanel textPanel = new LtvTextPanel(
                     m_parentWrapper.getRoot(), section, m_parentWrapper.m_market, 210, 0,
                     new LtvCustomPanelPlugin(), m_parentWrapper.getFaction().getBaseUIColor()) {
@@ -599,17 +606,17 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void createPanel() {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
-                    String factionName = m_selectedFaction.getDisplayNameLong();
+                    String factionName = m_selectedMarket.getFaction().getDisplayNameLong();
                     String txt = factionName + " market share";
 
-                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_selectedFaction) + "%";
+                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_selectedMarket.getFaction()) + "%";
 
-                    tooltip.setParaFontColor(m_selectedFaction.getBaseUIColor());
+                    tooltip.setParaFontColor(m_selectedMarket.getFaction().getBaseUIColor());
                     tooltip.setParaFont(Fonts.ORBITRON_12);
                     LabelAPI lbl1 = tooltip.addPara(txt, pad);
                     lbl1.setHighlightOnMouseover(true);
 
-                    tooltip.setParaFontColor(m_selectedFaction.getBaseUIColor());
+                    tooltip.setParaFontColor(m_selectedMarket.getFaction().getBaseUIColor());
                     tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
                     LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
                     lbl2.setHighlightOnMouseover(true);
@@ -635,7 +642,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
 
                     tooltip.addPara(
-                        "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + m_selectedFaction.getDisplayNameLong() + " control.",
+                        "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayNameLong() + " control.",
                         pad);
 
                     final float tpX = textX1 + textW1 + opad;
@@ -739,12 +746,34 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     }
 
     private void createSection2(CustomPanelAPI section, TooltipMakerAPI tooltip) {
+        final int mapHeight = (int) section.getPosition().getHeight() - 2 * opad;
+
         StarSystemAPI starSystem = m_parentWrapper.m_market.getStarSystem();
-        starSystem.setName(m_parentWrapper.m_market.getName());
+        String title = m_parentWrapper.m_market.getName();
 
-        UIPanelAPI map = tooltip.addSectorMap(section.getPosition().getWidth(),
-                section.getPosition().getHeight() - 2 * opad, starSystem, 0);
+        MapParams params = new MapParams();
+        params.showFilter = false;
+        params.showTabs = false;
+        params.withLayInCourse = false;
+        params.starSelectionRadiusMult = 0f;
 
+        params.showSystem(starSystem);
+
+        if (m_selectedMarket != null) {
+            title += " and " + m_selectedMarket.getName();
+
+            params.showSystem(m_selectedMarket.getStarSystem());
+            params.positionToShowAllMarkersAndSystems(false, mapHeight);
+        }
+
+        UIPanelAPI map = tooltip.createSectorMap(
+            section.getPosition().getWidth(),
+            mapHeight,
+            params,
+            title
+        );
+
+        tooltip.addCustom(map, 0);
         map.getPosition().inTL(0, 0);
     }
 

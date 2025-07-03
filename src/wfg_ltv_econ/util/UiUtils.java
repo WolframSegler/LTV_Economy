@@ -1,7 +1,10 @@
 package wfg_ltv_econ.util;
 
+import org.lwjgl.util.vector.Vector2f;
+
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.codex2.CodexDialog;
 
 public class UiUtils {
     public static final void resetFlowLeft(TooltipMakerAPI tooltip, float opad) {
@@ -18,4 +21,20 @@ public class UiUtils {
             F2Label.getPosition().inBL(opad + pad, -pad*6);
         }
 	}
+
+	/**
+     * This function assumes that the sprite is pointing right.
+     * In other words, it's directed towards the positive x-axis in Hyperspace.
+     */
+    public static float rotateSprite(Vector2f origin, Vector2f target) {
+        Vector2f delta = Vector2f.sub(target, origin, null);
+
+        float angleDegrees = (float) Math.toDegrees(Math.atan2(delta.y, delta.x));
+
+        return angleDegrees;
+    }
+
+	public static void openCodexPage(String codexID) {
+        CodexDialog.show(codexID);
+    }
 }
