@@ -67,7 +67,7 @@ public class SortableTable extends LtvCustomPanel {
         m_headerHeight = headerHeight;
         m_rowHeight = rowHeight;
 
-        createPanel();
+        // The Table itself will not draw itself
         initializePlugin(hasPlugin);
     }
 
@@ -231,7 +231,7 @@ public class SortableTable extends LtvCustomPanel {
         }
     }
 
-    private class RowManager extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
+    public class RowManager extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
         protected final List<Object> m_cellData = new ArrayList<>();
         protected final List<Alignment> m_cellAlignment = new ArrayList<>();
         protected String codexID = null;
@@ -387,7 +387,7 @@ public class SortableTable extends LtvCustomPanel {
      * The call order of addCell must match the order of Columns.
      * CodexID is optional.
      */
-    public void addCell(Object cell, Alignment alg, String codexID) {
+    public void addCell(Object cell, Alignment alg) {
         if (pendingRow == null) {
             pendingRow = new RowManager(
                     getRoot(),
@@ -404,14 +404,13 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         pendingRow.addCell(cell, alg);
-        pendingRow.setCodexId(codexID);
     }
 
     /**
      * Uses the added cells to create a row and clears the rowInStack.
      * The amount of cells must match the column amount.
      */
-    public void pushRow() {
+    public void pushRow(String codexID) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
                     + "Call addCell() before pushRow().");
@@ -421,6 +420,9 @@ public class SortableTable extends LtvCustomPanel {
                     + "The number of cells must match the number of columns.");
 
         }
+        pendingRow.setCodexId(codexID);
+
+
         m_rows.add(pendingRow);
 
         pendingRow = null;

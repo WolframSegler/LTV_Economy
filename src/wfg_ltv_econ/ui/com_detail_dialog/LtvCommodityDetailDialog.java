@@ -13,6 +13,7 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -35,6 +36,7 @@ import wfg_ltv_econ.ui.LtvSpritePanel;
 import wfg_ltv_econ.ui.LtvTextPanel;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
+import wfg_ltv_econ.ui.SortableTable;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 
@@ -237,10 +239,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         section3 = Global.getSettings().createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
 
-        TooltipMakerAPI tooltip = section3.createUIElement(SECT3_WIDTH, SECT3_HEIGHT, true);
-        section3.addUIElement(tooltip).inTL(0, 0);
-
-        createSection3(section3, tooltip);
+        createSection3(section3);
         m_dialogPanel.addComponent(section3).belowLeft(section1, opad);
     }
 
@@ -776,7 +775,26 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         map.getPosition().inTL(0, 0);
     }
 
-    private void createSection3(CustomPanelAPI section, TooltipMakerAPI tooltip) {
+    private void createSection3(CustomPanelAPI section) {
+        SortableTable table = new SortableTable(
+            m_parentWrapper.getRoot(),
+            section,
+            SECT3_WIDTH,
+            SECT3_HEIGHT,
+            m_parentWrapper.m_market
+        );
+
+        table.addHeaders(
+            "", 32, null,
+            "Colony", 160, "Colony name.",
+            "Size", 60, "Colony size.",
+            "Faction", 120, "Faction that controls this colony.",
+            "Quantity", 140, "Shows units of the commodity that can be exported.",
+            "Access", 100, "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.",
+            "Mkt Share", 110, "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.",
+            "Income", 120, "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share."
+        );
+
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
 
             String iconPath = market.getFaction().getCrest();
@@ -796,9 +814,12 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
 
             float accessibility = market.getAccessibilityMod().getFlatBonus();
+            float maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
 
-            float marketSharePercent = market.getCommodityData(m_com.getId())
-                    .getCommodityMarketData().getMarketValuePercent(market);
+            String access = accessibility + "(" + maxExportCapacity + ")";
+
+            String marketSharePercent = market.getCommodityData(m_com.getId())
+                    .getCommodityMarketData().getMarketValuePercent(market) + "%";
 
             String incomeText = "---";
             if (market.isPlayerOwned()) {
@@ -807,7 +828,24 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 incomeText = Misc.getDGSCredits(exportIncome) + Strings.C;
             }
 
+            table.addCell(iconPanel, Alignment.LMID);
+            table.addCell(marketName, Alignment.LMID);
+            table.addCell(marketSize, Alignment.MID);
+            table.addCell(factionName, Alignment.MID);
+            table.addCell(production, Alignment.LMID);
+            table.addCell(access, Alignment.MID);
+            table.addCell(marketSharePercent, Alignment.MID);
+            table.addCell(incomeText, Alignment.MID);
+            table.pushRow(CodexDataV2.getCommodityEntryId(m_com.getId()));
         }
+
+        section.addComponent(table.getPanel()).inTL(0,0);
+
+        table.createPanel();
+
+        table.setRowSelectionListener(selectedRow -> {
+            m_selectedMarket = selectedRow.m_market;
+        });
     }
 
     private void createSection4(CustomPanelAPI section) {
