@@ -30,7 +30,7 @@ public class SortableTable extends LtvCustomPanel {
     private final List<ColumnManager> m_columns = new ArrayList<>();
     private final List<RowManager> m_rows = new ArrayList<>();
 
-    private RowManager rowInStack = null;
+    private RowManager pendingRow = null;
 
     private final int m_headerHeight;
     private final int m_rowHeight;
@@ -40,6 +40,7 @@ public class SortableTable extends LtvCustomPanel {
     private boolean ascending = true;
 
     RowSelectionListener selectionListener;
+
     public interface RowSelectionListener {
         void onRowSelected(RowManager selectedRow);
     }
@@ -49,6 +50,9 @@ public class SortableTable extends LtvCustomPanel {
     }
 
     private RowManager m_selectedRow;
+
+    private TooltipMakerAPI m_headerContainer = null;
+    private TooltipMakerAPI m_rowContainer = null;
 
     public final static int pad = 3;
     public final static int opad = 10;
@@ -62,53 +66,80 @@ public class SortableTable extends LtvCustomPanel {
         super(root, parent, width, height, null, market);
         m_headerHeight = headerHeight;
         m_rowHeight = rowHeight;
+
+        createPanel();
+        initializePlugin(hasPlugin);
     }
 
     public void initializePlugin(boolean hasPlugin) {
     }
 
     public void createPanel() {
+        // Clear previous Titles
+        getPanel().removeComponent(m_headerContainer);
+
         // Create headers
         int cumulativeXOffset = 0;
-        for (ColumnManager column : m_columns) {
+        for (int i = 0; i < m_columns.size(); i++) {
+            ColumnManager column = m_columns.get(i);
 
-            LtvCustomPanel columnPanel = null;
+            m_headerContainer = getPanel().createUIElement(
+                getPanelPos().getWidth(),
+                m_headerHeight,
+                true);
             if (column.tooltipText == null) {
-                columnPanel = new HeaderPanel(
-                        getRoot(), getPanel(), column.width, m_headerHeight, m_market, column);
+                m_headerContainer.addComponent((new HeaderPanel(getRoot(), getPanel(), column.width, 
+                    m_headerHeight, m_market, column, i).getPanel())).inTL(cumulativeXOffset, pad);
             } else {
-                columnPanel = new HeaderPanelWithTooltip(
-                        getRoot(), getPanel(), column.width, m_headerHeight, m_market, column);
+                m_headerContainer.addComponent((new HeaderPanelWithTooltip(getRoot(), getPanel(), column.width, 
+                    m_headerHeight, m_market, column, i).getPanel())).inTL(cumulativeXOffset, pad);
             }
-
-            getPanel().addComponent(columnPanel.getPanel()).inTL(
-                    cumulativeXOffset, pad);
 
             cumulativeXOffset += column.width + pad;
         }
+        getPanel().addComponent(m_headerContainer).inTL(0,0);
+
+        // Clear previous rows
+        getPanel().removeComponent(m_rowContainer);
 
         // Create rows
-        TooltipMakerAPI rowContainer = getPanel().createUIElement(
+        m_rowContainer = getPanel().createUIElement(
                 getPanelPos().getWidth(),
                 getPanelPos().getHeight() - m_headerHeight - pad,
                 true);
 
         int cumulativeYOffset = 0;
         for (RowManager row : m_rows) {
-            rowContainer.addComponent(row.getPanel()).inTL(
+            m_rowContainer.addComponent(row.getPanel()).inTL(
                     0, pad + cumulativeYOffset);
 
             cumulativeYOffset += pad + m_rowHeight;
         }
+
+        getPanel().addUIElement(m_rowContainer);
     }
 
     private class HeaderPanel extends LtvCustomPanel {
         protected final ColumnManager column;
+        public int listIndex = -1;
 
         public HeaderPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
-                ColumnManager column) {
-            super(root, parent, width, height, new LtvCustomPanelPlugin(), market);
+                ColumnManager column, int listIndex) {
+            super(root, parent, width, height, new LtvCustomPanelPlugin() {
+                @Override
+                public void advance(float amount) {
+                    super.advance(amount);
+
+                    if (LMBUpLastFrame && hasClickedBefore) {
+                        SortableTable.this.sortRows(((HeaderPanel) m_panel).listIndex);
+                    }
+                }
+            }, market);
             this.column = column;
+            this.listIndex = listIndex;
+
+            createPanel();
+            initializePlugin(hasPlugin);
         }
 
         @Override
@@ -146,18 +177,19 @@ public class SortableTable extends LtvCustomPanel {
 
     private class HeaderPanelWithTooltip extends HeaderPanel implements LtvCustomPanel.TooltipProvider {
         public HeaderPanelWithTooltip(UIPanelAPI root, UIPanelAPI parent, int width, int height,
-                MarketAPI market, ColumnManager column) {
-            super(root, parent, width, height, market, column);
+                MarketAPI market, ColumnManager column, int listIndex) {
+            super(root, parent, width, height, market, column, listIndex);
         }
 
         public TooltipMakerAPI createTooltip() {
             TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(
-                    getPanelPos().getWidth(), getPanelPos().getHeight(), false);
+                    400, 0, false);
 
             tooltip.addPara(column.tooltipText, pad);
 
             ((CustomPanelAPI) getParent()).addUIElement(tooltip);
             ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
+            tooltip.getPosition().aboveLeft(getPanel(), pad);
 
             return tooltip;
         }
@@ -178,13 +210,13 @@ public class SortableTable extends LtvCustomPanel {
         return m_rows;
     }
 
-    public RowManager getM_selectedRow() {
+    public RowManager getSelectedRow() {
         return m_selectedRow;
     }
 
     private class ColumnManager {
         public static String sortIconPath;
-        {
+        static {
             sortIconPath = Global.getSettings().getSpriteName("ui", "sortIcon");
         }
 
@@ -201,11 +233,11 @@ public class SortableTable extends LtvCustomPanel {
 
     private class RowManager extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
         protected final List<Object> m_cellData = new ArrayList<>();
-        protected final List<Alignment> m_cellAlg = new ArrayList<>();
+        protected final List<Alignment> m_cellAlignment = new ArrayList<>();
         protected String codexID = null;
 
         public RowManager(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
-            RowSelectionListener listener) {
+                RowSelectionListener listener) {
             super(root, parent, width, height, new LtvCustomPanelPlugin() {
                 @Override
                 public void advance(float amount) {
@@ -213,16 +245,20 @@ public class SortableTable extends LtvCustomPanel {
 
                     RowManager panel = (RowManager) m_panel;
 
-                    if (LMBDownLastFrame) {
-                        setPersistentGlow(!persistentGlow);
+                    if (LMBUpLastFrame && hasClickedBefore) {
                         panel.getParentWrapper().selectRow(panel);
 
                         if (panel.getParentWrapper().selectionListener != null) {
                             panel.getParentWrapper().selectionListener.onRowSelected(panel);
                         }
+
+                        hasClickedBefore = false;
                     }
                 }
             }, market);
+
+            createPanel();
+            initializePlugin(hasPlugin);
         }
 
         public void initializePlugin(boolean hasPlugin) {
@@ -230,14 +266,14 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         public SortableTable getParentWrapper() {
-            return (SortableTable)m_parent;
+            return (SortableTable) m_parent;
         }
 
         public void createPanel() {
             int cumulativeXOffset = 0;
             for (int i = 0; i < m_cellData.size(); i++) {
                 Object cell = m_cellData.get(i);
-                Alignment alignment = m_cellAlg.get(i);
+                Alignment alignment = m_cellAlignment.get(i);
                 float colWidth = getColumns().get(i).width;
 
                 UIComponentAPI comp;
@@ -288,7 +324,7 @@ public class SortableTable extends LtvCustomPanel {
 
         public TooltipMakerAPI createTooltip() {
             TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(
-                    getPanelPos().getWidth(), getPanelPos().getHeight(), false);
+                    400, 0, false);
 
             ((CustomPanelAPI) getParent()).addUIElement(tooltip);
             ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
@@ -310,7 +346,7 @@ public class SortableTable extends LtvCustomPanel {
 
         public void addCell(Object cell, Alignment alg) {
             m_cellData.add(cell);
-            m_cellAlg.add(alg);
+            m_cellAlignment.add(alg);
         }
     }
 
@@ -326,20 +362,34 @@ public class SortableTable extends LtvCustomPanel {
             throw new IllegalArgumentException("headerDatas must be triplets of {String, int, String}");
         }
         for (int i = 0; i < headerDatas.length; i += 3) {
+            Object titleObj = headerDatas[i];
+            Object widthObj = headerDatas[i + 1];
+            Object tooltipObj = headerDatas[i + 2];
+
+            if (!(titleObj instanceof String)) {
+                throw new IllegalArgumentException("Header title must be String.");
+            }
+            if (!(widthObj instanceof Number)) {
+                throw new IllegalArgumentException("Header width must be int.");
+            }
+            if (tooltipObj != null && !(tooltipObj instanceof String)) {
+                throw new IllegalArgumentException("Tooltip text must be String or null.");
+            }
             m_columns.add(
                     new ColumnManager(
-                            (String) headerDatas[i],
-                            ((Number) headerDatas[i + 1]).intValue(),
-                            (String) headerDatas[i + 2]));
+                            (String) titleObj,
+                            ((Number) widthObj).intValue(),
+                            (String) tooltipObj));
         }
     }
 
     /**
-     * CodexID is optional, but nice to have
+     * The call order of addCell must match the order of Columns.
+     * CodexID is optional.
      */
     public void addCell(Object cell, Alignment alg, String codexID) {
-        if (rowInStack == null) {
-            rowInStack = new RowManager(
+        if (pendingRow == null) {
+            pendingRow = new RowManager(
                     getRoot(),
                     getParent(),
                     (int) getPanelPos().getWidth(),
@@ -353,8 +403,8 @@ public class SortableTable extends LtvCustomPanel {
                     });
         }
 
-        rowInStack.addCell(cell, alg);
-        rowInStack.setCodexId(codexID);
+        pendingRow.addCell(cell, alg);
+        pendingRow.setCodexId(codexID);
     }
 
     /**
@@ -362,19 +412,18 @@ public class SortableTable extends LtvCustomPanel {
      * The amount of cells must match the column amount.
      */
     public void pushRow() {
-        if (rowInStack == null || rowInStack.m_cellData.isEmpty()) {
+        if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
                     + "Call addCell() before pushRow().");
 
-        } else if (rowInStack.m_cellData.size() != m_columns.size()) {
+        } else if (pendingRow.m_cellData.size() != m_columns.size()) {
             throw new IllegalStateException("Cannot push row: cell count mismatch. "
                     + "The number of cells must match the number of columns.");
 
-        } else {
-            rowInStack.createPanel();
         }
+        m_rows.add(pendingRow);
 
-        rowInStack = null;
+        pendingRow = null;
     }
 
     public void sortRows(int index) {
@@ -406,6 +455,8 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         prevSelectedSortColumnIndex = index;
+
+        createPanel();
     }
 
     private Comparator<RowManager> stringComparator = (a, b) -> {

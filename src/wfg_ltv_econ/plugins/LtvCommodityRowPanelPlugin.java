@@ -29,7 +29,6 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {
         LtvCommodityRowPanel panel = (LtvCommodityRowPanel)m_panel;
 
         if (LMBDownLastFrame && panel.getParentWrapper().isRowSelectable) {
-            setPersistentGlow(!persistentGlow);
             panel.getParentWrapper().selectRow(panel);
 
             if (panel.getParentWrapper().selectionListener != null) {
