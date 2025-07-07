@@ -213,7 +213,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             return;
         }
         section2.getPosition().rightOfTop(section1, opad * 1.5f);
-        section3.getPosition().rightOfTop(section1, opad * 1.5f);
+        section3.getPosition().belowLeft(section1, opad);
     }
 
     public void updateSection2() {
@@ -446,10 +446,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void createPanel() {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
-                    String factionName = m_parentWrapper.m_faction.getDisplayNameLong();
+                    String factionName = m_parentWrapper.m_faction.getDisplayName();
                     Color factionColor = baseColor;
                     if (m_selectedMarket != null) {
-                        factionName = m_selectedMarket.getFaction().getDisplayNameLong();
+                        factionName = m_selectedMarket.getFaction().getDisplayName();
                         factionColor = m_selectedMarket.getFaction().getBaseUIColor();
                     }
 
@@ -528,7 +528,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void createPanel() {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
-                    String factionName = m_parentWrapper.m_faction.getDisplayNameLong();
+                    String factionName = m_parentWrapper.m_faction.getDisplayName();
                     String txt = factionName + " market share";
 
                     String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.m_faction) + "%";
@@ -604,7 +604,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void createPanel() {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
-                    String factionName = m_selectedMarket.getFaction().getDisplayNameLong();
+                    String factionName = m_selectedMarket.getFaction().getDisplayName();
                     String txt = factionName + " market share";
 
                     String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_selectedMarket.getFaction()) + "%";
@@ -640,7 +640,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
 
                     tooltip.addPara(
-                        "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayNameLong() + " control.",
+                        "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
                         pad);
 
                     final float tpX = textX1 + textW1 + opad;
@@ -674,7 +674,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void createPanel() {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
-                    String factionName = m_parentWrapper.m_faction.getDisplayNameLong();
+                    String factionName = m_parentWrapper.m_faction.getDisplayName();
                     String txt = factionName + " market share";
 
                     String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.m_faction) + "%";
@@ -847,7 +847,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             table.addCell(access, Alignment.MID, accessibility);
             table.addCell(marketSharePercent, Alignment.MID, marketShare);
             table.addCell(incomeText, Alignment.MID, exportIncome);
-            table.pushRow(CodexDataV2.getCommodityEntryId(m_com.getId()));
+            table.pushRow(CodexDataV2.getCommodityEntryId(m_com.getId()), market);
         }
 
         section.addComponent(table.getPanel()).inTL(0,0);
@@ -856,6 +856,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         table.setRowSelectionListener(selectedRow -> {
             m_selectedMarket = selectedRow.m_market;
+            updateSection1();
+            updateSection2();
         });
     }
 

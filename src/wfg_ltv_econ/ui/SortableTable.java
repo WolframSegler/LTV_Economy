@@ -115,15 +115,23 @@ public class SortableTable extends LtvCustomPanel {
             null
         );
 
+        TooltipMakerAPI tp = m_rowContainer.createUIElement(
+            getPanelPos().getWidth(),
+            getPanelPos().getHeight() - (m_headerHeight + pad),
+            true
+        );
+
         int cumulativeYOffset = 0;
         for (RowManager row : m_rows) {
-            m_rowContainer.addComponent(row.getPanel()).inTL(
+            tp.addComponent(row.getPanel()).inTL(
                     0, cumulativeYOffset);
 
             cumulativeYOffset += pad + m_rowHeight;
         }
 
-        // m_rowContainer.setHeightSoFar(cumulativeYOffset);
+        tp.setHeightSoFar(cumulativeYOffset);
+
+        m_rowContainer.addUIElement(tp).inTL(0, 0);
         getPanel().addComponent(m_rowContainer).inTL(0, m_headerHeight + pad);
     }
 
@@ -256,13 +264,12 @@ public class SortableTable extends LtvCustomPanel {
                 public void advance(float amount) {
                     super.advance(amount);
 
-                    RowManager panel = (RowManager) m_panel;
-
                     if (LMBUpLastFrame && hasClickedBefore) {
-                        panel.getParentWrapper().selectRow(panel);
+                        SortableTable table = SortableTable.this;
+                        table.selectRow((RowManager) m_panel);
 
-                        if (panel.getParentWrapper().selectionListener != null) {
-                            panel.getParentWrapper().selectionListener.onRowSelected(panel);
+                        if (table.selectionListener != null) {
+                            table.selectionListener.onRowSelected((RowManager) m_panel);
                         }
 
                         hasClickedBefore = false;
@@ -276,10 +283,6 @@ public class SortableTable extends LtvCustomPanel {
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this, GlowType.OVERLAY, true, false, false);
             getPlugin().setTargetUIState(UIStateType.DETAIL_DIALOG);
-        }
-
-        public SortableTable getParentWrapper() {
-            return (SortableTable) m_parent;
         }
 
         public void createPanel() {
@@ -348,7 +351,7 @@ public class SortableTable extends LtvCustomPanel {
             if (m_sortValues.get(columnIndex) == null) {
                 return m_cellData.get(columnIndex);
             }
-            
+
             return m_sortValues.get(columnIndex);
         }
 
@@ -445,8 +448,9 @@ public class SortableTable extends LtvCustomPanel {
     /**
      * Uses the added cells to create a row and clears the rowInStack.
      * The amount of cells must match the column amount.
+     * The market is used for colors and max exports.
      */
-    public void pushRow(String codexID) {
+    public void pushRow(String codexID, MarketAPI market) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
                     + "Call addCell() before pushRow().");
@@ -457,8 +461,9 @@ public class SortableTable extends LtvCustomPanel {
 
         }
         pendingRow.setCodexId(codexID);
+        pendingRow.m_market = market;
+        
         pendingRow.createPanel();
-
         m_rows.add(pendingRow);
 
         pendingRow = null;
