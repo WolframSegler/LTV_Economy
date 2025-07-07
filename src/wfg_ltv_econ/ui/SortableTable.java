@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import java.awt.Color;
-
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -19,7 +17,9 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.ui.LtvUIState.UIStateType;
 import wfg_ltv_econ.util.TooltipUtils;
+import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 
 /**
@@ -51,14 +51,19 @@ public class SortableTable extends LtvCustomPanel {
 
     private RowManager m_selectedRow;
 
-    private TooltipMakerAPI m_headerContainer = null;
-    private TooltipMakerAPI m_rowContainer = null;
+    private CustomPanelAPI m_headerContainer = null;
+    private CustomPanelAPI m_rowContainer = null;
 
     public final static int pad = 3;
     public final static int opad = 10;
 
+    public final static String sortIconPath;
+    static {
+        sortIconPath = Global.getSettings().getSpriteName("ui", "sortIcon");
+    }
+
     public SortableTable(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market) {
-        this(root, parent, width, height, market, 40, 20);
+        this(root, parent, width, height, market, 18, 28);
     }
 
     public SortableTable(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
@@ -67,7 +72,7 @@ public class SortableTable extends LtvCustomPanel {
         m_headerHeight = headerHeight;
         m_rowHeight = rowHeight;
 
-        // The Table itself will not draw itself
+        // The Table itself needs to be created after the rows are ready
         initializePlugin(hasPlugin);
     }
 
@@ -75,48 +80,51 @@ public class SortableTable extends LtvCustomPanel {
     }
 
     public void createPanel() {
-        // Clear previous Titles
+        // Clear previous Panels
         getPanel().removeComponent(m_headerContainer);
+        getPanel().removeComponent(m_rowContainer);
 
         // Create headers
+        m_headerContainer = Global.getSettings().createCustom(
+            getPanelPos().getWidth(),
+            m_headerHeight,
+            null
+        );
+
         int cumulativeXOffset = 0;
         for (int i = 0; i < m_columns.size(); i++) {
             ColumnManager column = m_columns.get(i);
 
-            m_headerContainer = getPanel().createUIElement(
-                getPanelPos().getWidth(),
-                m_headerHeight,
-                true);
             if (column.tooltipText == null) {
                 m_headerContainer.addComponent((new HeaderPanel(getRoot(), getPanel(), column.width, 
-                    m_headerHeight, m_market, column, i).getPanel())).inTL(cumulativeXOffset, pad);
+                    m_headerHeight, m_market, column, i).getPanel())).inTL(cumulativeXOffset, 0);
             } else {
                 m_headerContainer.addComponent((new HeaderPanelWithTooltip(getRoot(), getPanel(), column.width, 
-                    m_headerHeight, m_market, column, i).getPanel())).inTL(cumulativeXOffset, pad);
+                    m_headerHeight, m_market, column, i).getPanel())).inTL(cumulativeXOffset, 0);
             }
 
             cumulativeXOffset += column.width + pad;
+
         }
         getPanel().addComponent(m_headerContainer).inTL(0,0);
 
-        // Clear previous rows
-        getPanel().removeComponent(m_rowContainer);
-
         // Create rows
-        m_rowContainer = getPanel().createUIElement(
-                getPanelPos().getWidth(),
-                getPanelPos().getHeight() - m_headerHeight - pad,
-                true);
+        m_rowContainer = Global.getSettings().createCustom(
+            getPanelPos().getWidth(),
+            getPanelPos().getHeight() - (m_headerHeight + pad),
+            null
+        );
 
         int cumulativeYOffset = 0;
         for (RowManager row : m_rows) {
             m_rowContainer.addComponent(row.getPanel()).inTL(
-                    0, pad + cumulativeYOffset);
+                    0, cumulativeYOffset);
 
             cumulativeYOffset += pad + m_rowHeight;
         }
 
-        getPanel().addUIElement(m_rowContainer);
+        // m_rowContainer.setHeightSoFar(cumulativeYOffset);
+        getPanel().addComponent(m_rowContainer).inTL(0, m_headerHeight + pad);
     }
 
     private class HeaderPanel extends LtvCustomPanel {
@@ -145,11 +153,13 @@ public class SortableTable extends LtvCustomPanel {
         @Override
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this, GlowType.OVERLAY, false, true, true);
+            getPlugin().setTargetUIState(UIStateType.DETAIL_DIALOG);
         }
 
         @Override
         public void createPanel() {
-            TooltipMakerAPI tooltip = getPanel().createUIElement(
+            CustomPanelAPI panel = SortableTable.HeaderPanel.this.getPanel();
+            TooltipMakerAPI tooltip = panel.createUIElement(
                     getPanelPos().getWidth(), getPanelPos().getHeight(), false);
 
             LabelAPI lbl = tooltip.addPara(column.title, pad);
@@ -159,19 +169,19 @@ public class SortableTable extends LtvCustomPanel {
 
             LtvSpritePanel sortIcon = new LtvSpritePanel(
                     getRoot(),
-                    getPanel(),
+                    panel,
                     m_market,
-                    m_headerHeight - pad, m_headerHeight - pad,
+                    m_headerHeight + 2, m_headerHeight + 2,
                     new LtvSpritePanelPlugin(),
-                    ColumnManager.sortIconPath,
+                    sortIconPath,
                     getFaction().getBaseUIColor(),
-                    Color.WHITE,
+                    null,
                     false);
             sortIcon.getPlugin().setGlowType(GlowType.NONE);
 
             tooltip.addComponent(sortIcon.getPanel()).inBR(pad, pad);
 
-            getPanel().addUIElement(tooltip).inBL(0, 0);
+            panel.addUIElement(tooltip).inBL(0, 0);
         }
     }
 
@@ -179,6 +189,12 @@ public class SortableTable extends LtvCustomPanel {
         public HeaderPanelWithTooltip(UIPanelAPI root, UIPanelAPI parent, int width, int height,
                 MarketAPI market, ColumnManager column, int listIndex) {
             super(root, parent, width, height, market, column, listIndex);
+        }
+
+        @Override
+        public void initializePlugin(boolean hasPlugin) {
+            getPlugin().init(this, GlowType.OVERLAY, true, true, true);
+            getPlugin().setTargetUIState(UIStateType.DETAIL_DIALOG);
         }
 
         public TooltipMakerAPI createTooltip() {
@@ -189,7 +205,7 @@ public class SortableTable extends LtvCustomPanel {
 
             ((CustomPanelAPI) getParent()).addUIElement(tooltip);
             ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
-            tooltip.getPosition().aboveLeft(getPanel(), pad);
+            tooltip.getPosition().aboveLeft(getPanel(), pad*2);
 
             return tooltip;
         }
@@ -215,10 +231,6 @@ public class SortableTable extends LtvCustomPanel {
     }
 
     private class ColumnManager {
-        public static String sortIconPath;
-        static {
-            sortIconPath = Global.getSettings().getSpriteName("ui", "sortIcon");
-        }
 
         public String title;
         public int width;
@@ -234,6 +246,7 @@ public class SortableTable extends LtvCustomPanel {
     public class RowManager extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
         protected final List<Object> m_cellData = new ArrayList<>();
         protected final List<Alignment> m_cellAlignment = new ArrayList<>();
+        protected final List<Object> m_sortValues = new ArrayList<>();
         protected String codexID = null;
 
         public RowManager(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
@@ -257,12 +270,12 @@ public class SortableTable extends LtvCustomPanel {
                 }
             }, market);
 
-            createPanel();
             initializePlugin(hasPlugin);
         }
 
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this, GlowType.OVERLAY, true, false, false);
+            getPlugin().setTargetUIState(UIStateType.DETAIL_DIALOG);
         }
 
         public SortableTable getParentWrapper() {
@@ -270,7 +283,10 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         public void createPanel() {
+
+            CustomPanelAPI panel = SortableTable.RowManager.this.getPanel();
             int cumulativeXOffset = 0;
+
             for (int i = 0; i < m_cellData.size(); i++) {
                 Object cell = m_cellData.get(i);
                 Alignment alignment = m_cellAlignment.get(i);
@@ -278,26 +294,40 @@ public class SortableTable extends LtvCustomPanel {
 
                 UIComponentAPI comp;
                 float compWidth;
+                float compHeight;
 
-                if (cell instanceof String) {
+                if (cell instanceof Number) {
+                    LabelAPI label = Global.getSettings().createLabel(String.valueOf(cell), Fonts.DEFAULT_SMALL);
+                    comp = (UIComponentAPI) label;
+                    compWidth = label.computeTextWidth(label.getText());
+                    compHeight = label.computeTextHeight(label.getText());
+
+                } else if (cell instanceof String) {
                     LabelAPI label = Global.getSettings().createLabel((String) cell, Fonts.DEFAULT_SMALL);
                     comp = (UIComponentAPI) label;
                     compWidth = label.computeTextWidth(label.getText());
+                    compHeight = label.computeTextHeight(label.getText());
+
                 } else if (cell instanceof LtvSpritePanel) {
-                    comp = (UIComponentAPI) cell;
+                    comp = (UIComponentAPI) ((LtvSpritePanel)cell).getPanel();
                     compWidth = ((LtvSpritePanel) cell).getPanelPos().getWidth();
+                    compHeight = ((LtvSpritePanel) cell).getPanelPos().getHeight();
+
                 } else if (cell instanceof LabelAPI) {
                     LabelAPI label = (LabelAPI) cell;
                     comp = (UIComponentAPI) label;
                     compWidth = label.computeTextWidth(label.getText());
+                    compHeight = label.computeTextHeight(label.getText());
+
                 } else {
                     throw new IllegalArgumentException("Unsupported cell type: " + cell.getClass());
                 }
 
                 float xOffset = calcXOffset(cumulativeXOffset, colWidth, compWidth, alignment);
-                getPanel().addComponent(comp).inBL(xOffset, 0f);
+                float yOffset = (m_rowHeight/2) - (compHeight/2);
+                panel.addComponent(comp).inBL(xOffset, yOffset);
 
-                cumulativeXOffset += colWidth;
+                cumulativeXOffset += colWidth + pad;
             }
         }
 
@@ -315,7 +345,11 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         public Object getSortValue(int columnIndex) {
-            return m_cellData.get(columnIndex);
+            if (m_sortValues.get(columnIndex) == null) {
+                return m_cellData.get(columnIndex);
+            }
+            
+            return m_sortValues.get(columnIndex);
         }
 
         public void setCodexId(String codex) {
@@ -332,6 +366,7 @@ public class SortableTable extends LtvCustomPanel {
 
             if (codexID != null) {
                 tooltip.setCodexEntryId(codexID);
+                UiUtils.positionCodexLabel(tooltip, opad, pad);
             }
 
             return tooltip;
@@ -344,9 +379,10 @@ public class SortableTable extends LtvCustomPanel {
         public void attachCodexTooltip(TooltipMakerAPI codex) {
         }
 
-        public void addCell(Object cell, Alignment alg) {
+        public void addCell(Object cell, Alignment alg, Object sort) {
             m_cellData.add(cell);
             m_cellAlignment.add(alg);
+            m_sortValues.add(sort);
         }
     }
 
@@ -387,7 +423,7 @@ public class SortableTable extends LtvCustomPanel {
      * The call order of addCell must match the order of Columns.
      * CodexID is optional.
      */
-    public void addCell(Object cell, Alignment alg) {
+    public void addCell(Object cell, Alignment alg, Object sort) {
         if (pendingRow == null) {
             pendingRow = new RowManager(
                     getRoot(),
@@ -403,7 +439,7 @@ public class SortableTable extends LtvCustomPanel {
                     });
         }
 
-        pendingRow.addCell(cell, alg);
+        pendingRow.addCell(cell, alg, sort);
     }
 
     /**
@@ -421,7 +457,7 @@ public class SortableTable extends LtvCustomPanel {
 
         }
         pendingRow.setCodexId(codexID);
-
+        pendingRow.createPanel();
 
         m_rows.add(pendingRow);
 

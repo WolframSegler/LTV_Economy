@@ -797,6 +797,14 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
 
+            if (market.isHidden()) {
+                continue;
+            }
+            CommodityStats comStats = new CommodityStats(m_com, market);
+            if (comStats.globalExport < 1) {
+                continue;
+            }
+
             String iconPath = market.getFaction().getCrest();
             LtvSpritePanel iconPanel = new LtvSpritePanel(m_parentWrapper.getRoot(), section, market, iconSize,
                     iconSize, new LtvSpritePanelPlugin(), iconPath, null, null, false);
@@ -813,35 +821,38 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 production += industry.getSupply(m_com.getId()).getQuantity().getModifiedInt();
             }
 
-            float accessibility = market.getAccessibilityMod().getFlatBonus();
+            float accessibility = market.getAccessibilityMod().getFlatBonus() * 100;
             float maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
 
-            String access = accessibility + "(" + maxExportCapacity + ")";
+            String access = ((int)accessibility) + "% (" + maxExportCapacity + ")";
 
-            String marketSharePercent = market.getCommodityData(m_com.getId())
-                    .getCommodityMarketData().getMarketValuePercent(market) + "%";
+            int marketShare = market.getCommodityData(m_com.getId())
+                    .getCommodityMarketData().getMarketValuePercent(market);
+            String marketSharePercent = marketShare + "%";
 
             String incomeText = "---";
-            if (market.isPlayerOwned()) {
-                int exportIncome = market.getCommodityData(m_com.getId()).getExportIncome();
+            int exportIncome = 0;
 
-                incomeText = Misc.getDGSCredits(exportIncome) + Strings.C;
+            if (market.isPlayerOwned()) {
+
+                exportIncome = market.getCommodityData(m_com.getId()).getExportIncome();
+                incomeText = Misc.getDGSCredits(exportIncome);
             }
 
-            table.addCell(iconPanel, Alignment.LMID);
-            table.addCell(marketName, Alignment.LMID);
-            table.addCell(marketSize, Alignment.MID);
-            table.addCell(factionName, Alignment.MID);
-            table.addCell(production, Alignment.LMID);
-            table.addCell(access, Alignment.MID);
-            table.addCell(marketSharePercent, Alignment.MID);
-            table.addCell(incomeText, Alignment.MID);
+            table.addCell(iconPanel, Alignment.LMID, null);
+            table.addCell(marketName, Alignment.LMID, null);
+            table.addCell(marketSize, Alignment.MID, null);
+            table.addCell(factionName, Alignment.MID, null);
+            table.addCell(production, Alignment.LMID, null);
+            table.addCell(access, Alignment.MID, accessibility);
+            table.addCell(marketSharePercent, Alignment.MID, marketShare);
+            table.addCell(incomeText, Alignment.MID, exportIncome);
             table.pushRow(CodexDataV2.getCommodityEntryId(m_com.getId()));
         }
 
         section.addComponent(table.getPanel()).inTL(0,0);
 
-        table.createPanel();
+        table.sortRows(6);
 
         table.setRowSelectionListener(selectedRow -> {
             m_selectedMarket = selectedRow.m_market;
