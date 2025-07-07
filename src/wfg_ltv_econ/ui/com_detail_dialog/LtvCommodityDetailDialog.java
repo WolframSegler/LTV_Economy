@@ -519,7 +519,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         final int baseRow2Y = baseY * 3 + pad;
 
-        if (m_selectedMarket == null) { // Faction market share
+        if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
             LtvTextPanel textPanel = new LtvTextPanel(
                     m_parentWrapper.getRoot(), section, m_parentWrapper.m_market, 210, 0,
                     new LtvCustomPanelPlugin(), m_parentWrapper.getFaction().getBaseUIColor()) {
@@ -821,8 +821,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 production += industry.getSupply(m_com.getId()).getQuantity().getModifiedInt();
             }
 
-            float accessibility = market.getAccessibilityMod().getFlatBonus() * 100;
-            float maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
+            String productionTxt = NumFormat.engNotation(production);
+
+            int accessibility = (int) market.getAccessibilityMod().getFlatBonus() * 100;
+            int maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
 
             String access = ((int)accessibility) + "% (" + maxExportCapacity + ")";
 
@@ -839,15 +841,19 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 incomeText = Misc.getDGSCredits(exportIncome);
             }
 
-            table.addCell(iconPanel, Alignment.LMID, null);
-            table.addCell(marketName, Alignment.LMID, null);
-            table.addCell(marketSize, Alignment.MID, null);
-            table.addCell(factionName, Alignment.MID, null);
-            table.addCell(production, Alignment.LMID, null);
-            table.addCell(access, Alignment.MID, accessibility);
-            table.addCell(marketSharePercent, Alignment.MID, marketShare);
-            table.addCell(incomeText, Alignment.MID, exportIncome);
-            table.pushRow(CodexDataV2.getCommodityEntryId(m_com.getId()), market);
+            table.addCell(iconPanel, Alignment.LMID, null, false);
+            table.addCell(marketName, Alignment.LMID, null, true);
+            table.addCell(marketSize, Alignment.MID, null, true);
+            table.addCell(factionName, Alignment.MID, null, true);
+            table.addCell(productionTxt, Alignment.MID, production, false);
+            table.addCell(access, Alignment.MID, accessibility, false);
+            table.addCell(marketSharePercent, Alignment.MID, marketShare, false);
+            table.addCell(incomeText, Alignment.MID, exportIncome, false);
+            table.pushRow(CodexDataV2.getCommodityEntryId(
+                m_com.getId()),
+                market,
+                market.getFaction().getBaseUIColor()
+            );
         }
 
         section.addComponent(table.getPanel()).inTL(0,0);

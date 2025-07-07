@@ -1,5 +1,6 @@
 package wfg_ltv_econ.ui;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -170,6 +171,8 @@ public class SortableTable extends LtvCustomPanel {
             TooltipMakerAPI tooltip = panel.createUIElement(
                     getPanelPos().getWidth(), getPanelPos().getHeight(), false);
 
+            tooltip.setParaFontColor(m_market.getFaction().getBaseUIColor());
+
             LabelAPI lbl = tooltip.addPara(column.title, pad);
             final int lblWidth = (int) lbl.computeTextWidth(lbl.getText());
 
@@ -187,7 +190,7 @@ public class SortableTable extends LtvCustomPanel {
                     false);
             sortIcon.getPlugin().setGlowType(GlowType.NONE);
 
-            tooltip.addComponent(sortIcon.getPanel()).inBR(pad, pad);
+            tooltip.addComponent(sortIcon.getPanel()).inBR(1, 0);
 
             panel.addUIElement(tooltip).inBL(0, 0);
         }
@@ -255,7 +258,10 @@ public class SortableTable extends LtvCustomPanel {
         protected final List<Object> m_cellData = new ArrayList<>();
         protected final List<Alignment> m_cellAlignment = new ArrayList<>();
         protected final List<Object> m_sortValues = new ArrayList<>();
+        protected final List<Boolean> m_useColor = new ArrayList<>();
         protected String codexID = null;
+
+        public Color textColor = getFaction().getBaseUIColor();
 
         public RowManager(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
                 RowSelectionListener listener) {
@@ -293,6 +299,7 @@ public class SortableTable extends LtvCustomPanel {
             for (int i = 0; i < m_cellData.size(); i++) {
                 Object cell = m_cellData.get(i);
                 Alignment alignment = m_cellAlignment.get(i);
+                boolean useColor = m_useColor.get(i);
                 float colWidth = getColumns().get(i).width;
 
                 UIComponentAPI comp;
@@ -305,11 +312,23 @@ public class SortableTable extends LtvCustomPanel {
                     compWidth = label.computeTextWidth(label.getText());
                     compHeight = label.computeTextHeight(label.getText());
 
+                    if (useColor) {
+                        label.setColor(textColor);
+                    } else {
+                        label.setColor(SortableTable.this.getFaction().getBaseUIColor());
+                    }
+
                 } else if (cell instanceof String) {
                     LabelAPI label = Global.getSettings().createLabel((String) cell, Fonts.DEFAULT_SMALL);
                     comp = (UIComponentAPI) label;
                     compWidth = label.computeTextWidth(label.getText());
                     compHeight = label.computeTextHeight(label.getText());
+
+                    if (useColor) {
+                        label.setColor(textColor);
+                    } else {
+                        label.setColor(SortableTable.this.getFaction().getBaseUIColor());
+                    }
 
                 } else if (cell instanceof LtvSpritePanel) {
                     comp = (UIComponentAPI) ((LtvSpritePanel)cell).getPanel();
@@ -321,6 +340,12 @@ public class SortableTable extends LtvCustomPanel {
                     comp = (UIComponentAPI) label;
                     compWidth = label.computeTextWidth(label.getText());
                     compHeight = label.computeTextHeight(label.getText());
+
+                    if (useColor) {
+                        label.setColor(textColor);
+                    } else {
+                        label.setColor(SortableTable.this.getFaction().getBaseUIColor());
+                    }
 
                 } else {
                     throw new IllegalArgumentException("Unsupported cell type: " + cell.getClass());
@@ -359,6 +384,10 @@ public class SortableTable extends LtvCustomPanel {
             codexID = codex;
         }
 
+        public void setTextColor(Color color) {
+            textColor = color;
+        }
+
         public TooltipMakerAPI createTooltip() {
             TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(
                     400, 0, false);
@@ -382,10 +411,11 @@ public class SortableTable extends LtvCustomPanel {
         public void attachCodexTooltip(TooltipMakerAPI codex) {
         }
 
-        public void addCell(Object cell, Alignment alg, Object sort) {
+        public void addCell(Object cell, Alignment alg, Object sort, boolean useColor) {
             m_cellData.add(cell);
             m_cellAlignment.add(alg);
             m_sortValues.add(sort);
+            m_useColor.add(useColor);
         }
     }
 
@@ -426,7 +456,7 @@ public class SortableTable extends LtvCustomPanel {
      * The call order of addCell must match the order of Columns.
      * CodexID is optional.
      */
-    public void addCell(Object cell, Alignment alg, Object sort) {
+    public void addCell(Object cell, Alignment alg, Object sort, boolean useColor) {
         if (pendingRow == null) {
             pendingRow = new RowManager(
                     getRoot(),
@@ -442,15 +472,15 @@ public class SortableTable extends LtvCustomPanel {
                     });
         }
 
-        pendingRow.addCell(cell, alg, sort);
+        pendingRow.addCell(cell, alg, sort, useColor);
     }
 
     /**
      * Uses the added cells to create a row and clears the rowInStack.
      * The amount of cells must match the column amount.
-     * The market is used for colors and max exports.
+     * The market is used for certain colors and location info.
      */
-    public void pushRow(String codexID, MarketAPI market) {
+    public void pushRow(String codexID, MarketAPI market, Color textColor) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
                     + "Call addCell() before pushRow().");
@@ -461,7 +491,8 @@ public class SortableTable extends LtvCustomPanel {
 
         }
         pendingRow.setCodexId(codexID);
-        pendingRow.m_market = market;
+        pendingRow.setMarket(market);
+        pendingRow.setTextColor(textColor);
         
         pendingRow.createPanel();
         m_rows.add(pendingRow);

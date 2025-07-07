@@ -80,15 +80,26 @@ public abstract class LtvCustomPanel{
     }
 
     /**
-     * Has a default value for null faction.
+     * Has a default value for no faction.
      */
     public FactionAPI getFaction() {
         if (m_faction == null) {
-            return Global.getSettings().createBaseFaction("LtvCustomPanelWrapperFaction");
+            final String factionID = "LtvCustomPanelWrapperFaction";
+
+            if (Global.getSector().getFaction(factionID) == null) {
+                return Global.getSettings().createBaseFaction(factionID);
+            }
+
+            return Global.getSector().getFaction(factionID);
         }
         else {
             return m_faction;
         }
+    }
+
+    public void setMarket(MarketAPI market) {
+        m_market = market;
+        m_faction = market.getFaction();
     }
 
     /**
