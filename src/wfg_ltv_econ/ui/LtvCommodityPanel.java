@@ -63,6 +63,10 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     public void setRowSelectable(boolean a) {
         isRowSelectable = a;
     }
+    
+    public List<LtvCommodityRowPanel> getCommodityRows() {
+        return commodityRows;
+    }
 
     public void createPanel() {
         final int pad = 3;
@@ -117,6 +121,13 @@ public class LtvCommodityPanel extends LtvCustomPanel{
             commodityRows.add(comRow);
         }
         getPanel().addUIElement(FgTooltip).inTL(0, 0);
+    }
+
+    public void selectRow(String comID) {
+        CommodityOnMarketAPI com = m_market.getCommodityData(comID);
+        for (LtvCommodityRowPanel row : commodityRows) {
+            row.getPlugin().setPersistentGlow(row.getCommodity() == com);
+        }
     }
 
     public void selectRow(LtvCommodityRowPanel selectedRow) {

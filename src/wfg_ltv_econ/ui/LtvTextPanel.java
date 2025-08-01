@@ -20,7 +20,8 @@ public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.Toolt
     public Color m_textColor;
 
     /**
-     * Used by anonymous classes to transmit data
+     * Used by anonymous classes to transmit data.
+     * Do not crucify me for this.
      */
     public ButtonAPI m_checkbox;
     public float textX1 = 0;

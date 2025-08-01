@@ -32,6 +32,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     final protected float overlayBrightness = 1.2f;
     protected float tooltipDelay = 0.3f;
+    protected float backgroundTransparency = 0.65f;
     protected boolean persistentGlow = false;
     protected boolean hoveredLastFrame = false;
     protected boolean LMBDownLastFrame = false;
@@ -69,7 +70,11 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         persistentGlow = a;
     }
 
-    public void setOutline(boolean a) {
+    public void setHasBackground(boolean a) {
+        hasBackground = a;
+    }
+
+    public void setHasOutline(boolean a) {
         hasOutline = a;
     }
 
@@ -138,6 +143,15 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         offsetH = height;
     }
 
+    /**
+     * 1 for opaque.
+     * 0 for transparent.
+     * @param a
+     */
+    public void setBackgroundTransparency(float a) {
+        backgroundTransparency = a;
+    }
+
     public void renderBelow(float alphaMult) {
         PositionAPI pos = m_panel.getPanelPos();
 
@@ -146,7 +160,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             int y = (int)pos.getY() + offsetY;
             int w = (int)pos.getWidth() + offsetW;
             int h = (int)pos.getHeight() + offsetH;
-            RenderUtils.drawQuad(x, y, w, h, m_panel.BgColor, alphaMult*0.65f);
+            RenderUtils.drawQuad(x, y, w, h, m_panel.BgColor, alphaMult*backgroundTransparency);
             // Looks vanilla like with 0.65f
         }
         if (hasOutline) {
@@ -157,11 +171,11 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             float glowAmount = overlayBrightness * m_fader.getBrightness() * alphaMult;
 
             RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
-            m_panel.getFaction().getBaseUIColor(), glowAmount);
+            m_panel.glowColor, glowAmount);
 
             if (hasClickedBefore) {
                 RenderUtils.drawGlowOverlay(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
-                m_panel.getFaction().getBaseUIColor(), glowAmount / 2);
+                m_panel.glowColor, glowAmount / 2);
             }
         }
     }

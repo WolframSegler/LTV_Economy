@@ -29,6 +29,7 @@ import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.ui.LtvBasePanel;
 import wfg_ltv_econ.ui.LtvCommodityPanel;
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvIconPanel;
@@ -108,7 +109,21 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
         LtvUIState.setState(UIStateType.DETAIL_DIALOG);
-        m_dialogPanel = panel;
+
+        // Panel for black BG
+        LtvBasePanel BgPanel = new LtvBasePanel(
+            m_parentWrapper.getRoot(),
+            panel,
+            m_parentWrapper.m_market,
+            (int) panel.getPosition().getWidth(),
+            (int) panel.getPosition().getHeight(),
+            new LtvCustomPanelPlugin()
+        );
+        BgPanel.setBgColor(new Color(0, 0, 0));
+        BgPanel.getPlugin().setBackgroundTransparency(1);
+
+        panel.addComponent(BgPanel.getPanel()).inBL(0, 0);
+        m_dialogPanel = BgPanel.getPanel();
 
         createSections();
 
@@ -131,7 +146,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         };
 
         LtvTextPanel footerPanel = new LtvTextPanel(
-                m_parentWrapper.getRoot(), panel, m_parentWrapper.m_market, 400, footerH,
+                m_parentWrapper.getRoot(), BgPanel.getPanel(), m_parentWrapper.m_market, 400, footerH,
                 fPlugin, m_parentWrapper.getFaction().getBaseUIColor()) {
 
             @Override
@@ -182,8 +197,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
         };
 
-        panel.addComponent(footerPanel.getPanel()).inBL(pad, -opad * 3.5f);
-        m_plugin.init(false, false, false, panel);
+        BgPanel.getPanel().addComponent(footerPanel.getPanel()).inBL(pad, -opad * 3.5f);
+        m_plugin.init(false, false, false, BgPanel.getPanel());
     }
 
     public void createSections() {
@@ -785,14 +800,14 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         );
 
         table.addHeaders(
-            "", 32, null,
-            "Colony", 160, "Colony name.",
-            "Size", 60, "Colony size.",
-            "Faction", 120, "Faction that controls this colony.",
-            "Quantity", 140, "Shows units of the commodity that can be exported.",
-            "Access", 100, "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.",
-            "Mkt Share", 110, "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.",
-            "Income", 120, "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share."
+            "", (int)(0.04 * SECT3_WIDTH), null, true, false, 1,
+            "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", true, true, 1,
+            "Size", (int)(0.08 * SECT3_WIDTH), "Colony size.", true, false, 1,
+            "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", true, false, 1,
+            "Quantity", (int)(0.16 * SECT3_WIDTH), "Shows units of the commodity that can be exported.", false, false, -1,
+            "Access", (int)(0.12 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
+            "Mkt Share", (int)(0.13 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
+            "Income", (int)(0.12 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1
         );
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
@@ -841,19 +856,26 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 incomeText = Misc.getDGSCredits(exportIncome);
             }
 
-            table.addCell(iconPanel, Alignment.LMID, null, false);
-            table.addCell(marketName, Alignment.LMID, null, true);
-            table.addCell(marketSize, Alignment.MID, null, true);
-            table.addCell(factionName, Alignment.MID, null, true);
-            table.addCell(productionTxt, Alignment.MID, production, false);
-            table.addCell(access, Alignment.MID, accessibility, false);
-            table.addCell(marketSharePercent, Alignment.MID, marketShare, false);
-            table.addCell(incomeText, Alignment.MID, exportIncome, false);
+            Color textColor = market.getFaction().getBaseUIColor();
+
+            table.addCell(iconPanel, Alignment.LMID, null, null);
+            table.addCell(marketName, Alignment.LMID, null, textColor);
+            table.addCell(marketSize, Alignment.MID, null, textColor);
+            table.addCell(factionName, Alignment.MID, null, textColor);
+            table.addCell(productionTxt, Alignment.MID, production, null);
+            table.addCell(access, Alignment.MID, accessibility, null);
+            table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
+            table.addCell(incomeText, Alignment.MID, exportIncome, null);
             table.pushRow(CodexDataV2.getCommodityEntryId(
                 m_com.getId()),
                 market,
-                market.getFaction().getBaseUIColor()
+                market.getFaction().getBaseUIColor(),
+                m_parentWrapper.getFaction().getDarkUIColor()
             );
+
+            if (m_parentWrapper.m_market == market) {
+                table.selectLastRow();
+            }
         }
 
         section.addComponent(table.getPanel()).inTL(0,0);
@@ -880,6 +902,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 m_parentWrapper.m_market.getName() + " - Commodities",
                 true);
         comPanel.setRowSelectable(true);
+        comPanel.selectRow(m_com.getId());
 
         comPanel.setCommoditySelectionListener(new CommoditySelectionListener() {
             @Override

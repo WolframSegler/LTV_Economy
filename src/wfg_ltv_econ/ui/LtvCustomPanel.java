@@ -23,6 +23,7 @@ public abstract class LtvCustomPanel{
     public MarketAPI m_market = null;
     public FactionAPI m_faction = null;
     public Color BgColor = new Color(0, 0, 0, 255);
+    public Color glowColor = getFaction().getBaseUIColor();
 
     protected boolean hasPlugin = false;
 
@@ -84,7 +85,7 @@ public abstract class LtvCustomPanel{
      */
     public FactionAPI getFaction() {
         if (m_faction == null) {
-            final String factionID = "LtvCustomPanelWrapperFaction";
+            final String factionID = "player";
 
             if (Global.getSector().getFaction(factionID) == null) {
                 return Global.getSettings().createBaseFaction(factionID);
@@ -100,6 +101,16 @@ public abstract class LtvCustomPanel{
     public void setMarket(MarketAPI market) {
         m_market = market;
         m_faction = market.getFaction();
+    }
+
+    public void setBgColor(Color color) {
+        BgColor = color;
+
+        getPlugin().setHasBackground(true);
+    }
+
+    public void setGlowColor(Color color) {
+        glowColor = color;
     }
 
     /**
