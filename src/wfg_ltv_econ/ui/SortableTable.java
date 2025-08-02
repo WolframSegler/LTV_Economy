@@ -95,7 +95,7 @@ public class SortableTable extends LtvCustomPanel {
         for (int i = 0; i < m_columns.size(); i++) {
             ColumnManager column = m_columns.get(i);
 
-            int lastHeaderPad = i + 1 == m_columns.size() ? pad : 0;
+            int lastHeaderPad = i + 1 == m_columns.size() ? pad*3 : 0;
 
             // Handle merged headers
             if (column.isMerged()) {

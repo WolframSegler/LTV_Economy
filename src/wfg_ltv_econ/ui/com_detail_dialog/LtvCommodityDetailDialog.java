@@ -804,10 +804,15 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", true, true, 1,
             "Size", (int)(0.08 * SECT3_WIDTH), "Colony size.", true, false, 1,
             "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", true, false, 1,
-            "Quantity", (int)(0.16 * SECT3_WIDTH), "Shows units of the commodity that can be exported.", false, false, -1,
-            "Access", (int)(0.12 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
-            "Mkt Share", (int)(0.13 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
-            "Income", (int)(0.12 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1
+            "Quantity", (int)(0.15 * SECT3_WIDTH), "Shows units of the commodity that can be exported.", false, false, -1,
+            "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
+            "Mkt Share", (int)(0.05 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
+            "Income", (int)(0.04 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1,
+
+            "Mkt Share", (int)(0.05 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
+            "Income", (int)(0.04 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1,
+            "Mkt Share", (int)(0.05 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
+            "Income", (int)(0.04 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1
         );
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
@@ -866,8 +871,13 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             table.addCell(access, Alignment.MID, accessibility, null);
             table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
             table.addCell(incomeText, Alignment.MID, exportIncome, null);
-            table.pushRow(CodexDataV2.getCommodityEntryId(
-                m_com.getId()),
+
+            table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
+            table.addCell(incomeText, Alignment.MID, exportIncome, null);
+            table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
+            table.addCell(incomeText, Alignment.MID, exportIncome, null);
+            table.pushRow(
+                CodexDataV2.getCommodityEntryId(m_com.getId()),
                 market,
                 market.getFaction().getBaseUIColor(),
                 m_parentWrapper.getFaction().getDarkUIColor()
