@@ -213,9 +213,13 @@ public class SortableTable extends LtvCustomPanel {
             tooltip.setParaFont(Fonts.ORBITRON_12);
 
             LabelAPI lbl = tooltip.addPara(column.title, pad);
-            final int lblWidth = (int) lbl.computeTextWidth(lbl.getText());
+            final float lblWidth = lbl.computeTextWidth(lbl.getText());
+            final float lblHeight = lbl.computeTextHeight(lbl.getText());
 
-            lbl.getPosition().inBL((getPanelPos().getWidth() / 2f) - (lblWidth / 2f), pad);
+            lbl.getPosition().inTL(
+                (getPanelPos().getWidth() / 2f) - (lblWidth / 2f),
+                (getPanelPos().getHeight() / 2f) - (lblHeight / 2f) 
+            );
 
             LtvSpritePanel sortIcon = new LtvSpritePanel(
                     getRoot(),
@@ -319,7 +323,8 @@ public class SortableTable extends LtvCustomPanel {
         protected final List<Object> m_sortValues = new ArrayList<>();
         protected final List<Color> m_useColor = new ArrayList<>();
         protected String codexID = null;
-
+        
+        public TooltipMakerAPI m_tooltip = null;
         public Color textColor = getFaction().getBaseUIColor();
 
         public RowManager(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
@@ -448,23 +453,25 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         public TooltipMakerAPI createTooltip() {
-            TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(
+            if (m_tooltip == null) {
+                m_tooltip = ((CustomPanelAPI) getParent()).createUIElement(
                     400, 0, false);
-
-            ((CustomPanelAPI) getParent()).addUIElement(tooltip);
-            ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
-            TooltipUtils.mouseCornerPos(tooltip, opad);
-
-            if (codexID != null) {
-                tooltip.setCodexEntryId(codexID);
-                UiUtils.positionCodexLabel(tooltip, opad, pad);
             }
 
-            return tooltip;
+            (SortableTable.this.getPanel()).addUIElement(m_tooltip);
+            (SortableTable.this.getPanel()).bringComponentToTop(m_tooltip);
+            TooltipUtils.mouseCornerPos(m_tooltip, opad);
+
+            if (codexID != null) {
+                m_tooltip.setCodexEntryId(codexID);
+                UiUtils.positionCodexLabel(m_tooltip, opad, pad);
+            }
+
+            return m_tooltip;
         }
 
         public void removeTooltip(TooltipMakerAPI tooltip) {
-            ((CustomPanelAPI) getParent()).removeComponent(tooltip);
+            (SortableTable.this.getPanel()).removeComponent(tooltip);
         }
 
         public void attachCodexTooltip(TooltipMakerAPI codex) {
@@ -540,7 +547,7 @@ public class SortableTable extends LtvCustomPanel {
             pendingRow = new RowManager(
                     getRoot(),
                     getParent(),
-                    (int) getPanelPos().getWidth() - 1,
+                    (int) getPanelPos().getWidth(),
                     m_rowHeight,
                     m_market,
                     new RowSelectionListener() {
@@ -559,8 +566,9 @@ public class SortableTable extends LtvCustomPanel {
      * The amount of cells must match the column amount.
      * The {@code market} is used for certain colors and location info.
      * {@code glowClr} can be null.
+     * The {@code tp} can be null. It must be attached to the SortableTable instance due to a design limitation.
      */
-    public void pushRow(String codexID, MarketAPI market, Color textColor, Color glowClr) {
+    public void pushRow(String codexID, MarketAPI market, Color textColor, Color glowClr, TooltipMakerAPI tp) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
                     + "Call addCell() before pushRow().");
@@ -581,6 +589,8 @@ public class SortableTable extends LtvCustomPanel {
         if (m_market == market) {
             pendingRow.getPlugin().setOutline(Outline.THIN);
         }
+
+        pendingRow.m_tooltip = tp;
         
         pendingRow.createPanel();
         m_rows.add(pendingRow);

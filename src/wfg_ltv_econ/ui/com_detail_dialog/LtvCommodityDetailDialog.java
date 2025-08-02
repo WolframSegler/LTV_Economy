@@ -24,6 +24,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.campaign.ui.d;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
@@ -768,18 +769,20 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         params.showFilter = false;
         params.showTabs = false;
         params.withLayInCourse = false;
+        params.skipCurrLocMarkerRendering = true;
         params.starSelectionRadiusMult = 0f;
 
         params.showSystem(starSystem);
+        params.showMarket(m_parentWrapper.m_market, 1);
 
         if (m_selectedMarket != null) {
             title += " and " + m_selectedMarket.getName();
 
             params.showSystem(m_selectedMarket.getStarSystem());
-            params.positionToShowAllMarkersAndSystems(false, mapHeight);
-
             params.showMarket(m_selectedMarket, 1);
         }
+        
+        params.positionToShowAllMarkersAndSystems(false, mapHeight);
 
         UIPanelAPI map = tooltip.createSectorMap(
             section.getPosition().getWidth(),
@@ -868,11 +871,18 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             table.addCell(access, Alignment.MID, accessibility, null);
             table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
             table.addCell(incomeText, Alignment.MID, exportIncome, null);
+
+            // Tooltip
+            TooltipMakerAPI tp = createSection3RowsTooltip(
+                table, market, marketName, textColor
+            );
+
             table.pushRow(
                 CodexDataV2.getCommodityEntryId(m_com.getId()),
                 market,
                 market.getFaction().getBaseUIColor(),
-                m_parentWrapper.getFaction().getDarkUIColor()
+                m_parentWrapper.getFaction().getDarkUIColor(),
+                tp
             );
 
             if (m_parentWrapper.m_market == market) {
@@ -920,7 +930,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         section.addComponent(comPanel.getPanel());
     }
 
-    int getTotalGlobalExports(String comID) {
+    private int getTotalGlobalExports(String comID) {
         int total = 0;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
@@ -934,7 +944,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         return total;
     }
 
-    int getTotalFactionImports(String comID, FactionAPI faction) {
+    private int getTotalFactionImports(String comID, FactionAPI faction) {
         int total = 0;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
@@ -948,6 +958,223 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         }
 
         return total;
+    }
+
+    private TooltipMakerAPI createSection3RowsTooltip(SortableTable table, MarketAPI market,
+        String marketName, Color baseColor) {
+
+        TooltipMakerAPI tp = table.getPanel().createUIElement(
+            450, 0, false);
+
+            final Color highlight = Misc.getHighlightColor();
+            final FactionAPI faction = market.getFaction();
+            final Color darkColor = faction.getDarkUIColor();
+
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.addPara(marketName + " - " + m_com.getCommodity().getName(), baseColor, opad);
+            tp.setParaFontDefault();
+
+            String locString = "in the " + market.getContainingLocation().getNameWithLowercaseType();
+            if (market.getContainingLocation().isHyperspace()) {
+               locString = "in hyperspace";
+            }
+
+            tp.addPara(market.getName() + " is a size %s %s colony located " + locString +
+                ". Its current stability is %s.", opad, new Color[]{
+                    highlight, baseColor, highlight
+                }, new String[]{
+                    "" + market.getSize(),
+                    market.getFaction().getPersonNamePrefix(),
+                    "" + (int)market.getStabilityValue()
+                }
+            );
+
+            tp.addPara("Income modifiers:", opad);
+
+            tp.addStatModGrid(tp.getPosition().getWidth(), 50.0F, opad, pad,
+                market.getIncomeMult(), null
+            );
+
+            tp.addSectionHeading(m_com.getCommodity().getName() + " production & availability", baseColor, darkColor, Alignment.MID, opad);
+            
+            ArrayList var16 = new ArrayList();
+            ArrayList var17 = new ArrayList();
+            Iterator var19 = var0.getIndustries().iterator();
+
+            while(var19.hasNext()) {
+               Industry var18 = (Industry)var19.next();
+               int var20 = var18.getSupply(m_com.getId()).getQuantity().getModifiedInt();
+               CommodityTooltipFactory.o var21;
+               if (var20 > 0) {
+                  var21 = new CommodityTooltipFactory.o();
+                  var21.new = var18;
+                  var21.o00000 = var20;
+                  var16.add(var21);
+               }
+
+               var20 = var18.getDemand(m_com.getId()).getQuantity().getModifiedInt();
+               if (var20 > 0) {
+                  var21 = new CommodityTooltipFactory.o();
+                  var21.new = var18;
+                  var21.o00000 = var20;
+                  var17.add(var21);
+               }
+            }
+
+            Collections.sort(var16, new Comparator<CommodityTooltipFactory.o>() {
+               public int o00000(CommodityTooltipFactory.o var1x, CommodityTooltipFactory.o pad) {
+                  return pad.o00000 - var1x.o00000;
+               }
+            });
+            Collections.sort(var17, new Comparator<CommodityTooltipFactory.o>() {
+               public int super(CommodityTooltipFactory.o var1x, CommodityTooltipFactory.o pad) {
+                  return pad.o00000 - var1x.o00000;
+               }
+            });
+            CommodityMarketData var36 = ((CommodityOnMarket)var1).getCommodityMarketData();
+            var36.getMarketShareData(var1.getMarket());
+            java.lang.String var37 = "";
+            int var38 = var1.getAvailable();
+            this.addPara("Available: %s" + var37, opad, highlight, new java.lang.String[]{"" + var38});
+            MutableStat var22 = new MutableStat(0.0F);
+            Iterator var26;
+            java.lang.String var27;
+            if (!var16.isEmpty() && ((CommodityTooltipFactory.o)var16.get(0)).new != null) {
+               Industry var23 = ((CommodityTooltipFactory.o)var16.get(0)).new;
+               MutableStat var24 = var23.getSupply(var1.getId()).getQuantity();
+               var26 = var24.getFlatMods().values().iterator();
+
+               StatMod var25;
+               while(var26.hasNext()) {
+                  var25 = (StatMod)var26.next();
+                  if (!"ind_sb".equals(var25.source)) {
+                     var27 = N.o00000(var25.desc + " (" + var23.getCurrentName() + ")", StarfarerSettings.float.new, 290.0F);
+                     var22.modifyFlat("supply_ " + var25.source, var25.value, var27);
+                  }
+               }
+
+               var26 = var23.getSupplyBonus().getFlatMods().values().iterator();
+
+               while(var26.hasNext()) {
+                  var25 = (StatMod)var26.next();
+                  var27 = N.o00000(var25.desc + " (" + var23.getCurrentName() + ")", StarfarerSettings.float.new, 290.0F);
+                  var22.modifyFlat("bonus_ " + var25.source, var25.value, var27);
+               }
+            }
+
+            Iterator var41 = var1.getAvailableStat().getFlatMods().values().iterator();
+
+            while(var41.hasNext()) {
+               StatMod var39 = (StatMod)var41.next();
+               if (!CommodityMarketData.KEY_LOCAL.equals(var39.source)) {
+                  java.lang.String var43 = N.o00000(var39.desc, StarfarerSettings.float.new, 290.0F);
+                  var22.modifyFlat("available_ " + var39.source, var39.value, var43);
+               }
+            }
+
+            if (!var22.isUnmodified()) {
+               this.addStatModGrid(400.0F, 30.0F, 10.0F, pad, var22, new StatModValueGetter() {
+                  public java.lang.String getPercentValue(StatMod var1x) {
+                     return null;
+                  }
+
+                  public java.lang.String getMultValue(StatMod var1x) {
+                     return null;
+                  }
+
+                  public java.lang.String getFlatValue(StatMod var1x) {
+                     return var1x.desc != null && !var1x.desc.isEmpty() ? null : "";
+                  }
+
+                  public Color getModColor(StatMod var1x) {
+                     return var1x.getValue() < 0.0F ? O0OO.ÒÓ0000 : null;
+                  }
+               });
+            }
+
+            A.o var10000 = A.o.new;
+            int var42;
+            if (var1.getMaxDemand() <= 0) {
+               this.addPara("No local demand.", opad);
+            } else {
+               Color var40 = O0OO.ÕO0000;
+               if (var1.getMaxDemand() > var38) {
+                  var40 = O0OO.ÒÓ0000;
+               }
+
+               this.addPara("Maximum demand: %s", opad, var40, new java.lang.String[]{"" + var1.getMaxDemand()});
+               this.beginGridFlipped(450.0F, 1, 30.0F, opad);
+               var42 = 0;
+               var26 = var17.iterator();
+
+               while(var26.hasNext()) {
+                  CommodityTooltipFactory.o var45 = (CommodityTooltipFactory.o)var26.next();
+                  var40 = O0OO.ÕO0000;
+                  if (var45.o00000 > var38) {
+                     var40 = O0OO.ÒÓ0000;
+                  }
+
+                  var27 = N.o00000(var45.Ò00000(), StarfarerSettings.float.new, 290.0F);
+                  this.addToGrid(0, var42++, var27, "" + var45.o00000, var40);
+               }
+
+               this.addGrid(pad);
+            }
+
+            int var44 = (int)var1.getCommodity().getEconUnit();
+            var42 = (int)var0.getDemandPrice(var1.getId(), (double)var44, true) / var44;
+            int var46 = (int)var0.getSupplyPrice(var1.getId(), (double)var44, true) / var44;
+            int var47 = var1.getDeficitQuantity();
+            int var48 = var1.getExcessQuantity();
+            Color var28 = Misc.getHighlightColor();
+            if (!var1.isMeta()) {
+               if (var48 > 0) {
+                  this.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), var28, new java.lang.String[]{Misc.getWithDGS((float)var48)});
+               } else if (var47 > 0) {
+                  this.addPara("Local deficit: %s units.", opad, Misc.getNegativeHighlightColor(), var28, new java.lang.String[]{Misc.getWithDGS((float)var47)});
+               }
+
+               this.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new java.lang.String[]{Misc.getDGSCredits((float)var46), Misc.getDGSCredits((float)var42), Misc.getWithDGS((float)var44)});
+            }
+
+            this.addSectionHeading("Colony accessibility", baseColor, darkColor, Alignment.MID, opad);
+            int var29 = Math.round(var0.getAccessibilityMod().computeEffective(0.0F) * 100.0F);
+            Color var30 = highlight;
+            if (var29 <= 0) {
+               var30 = O0OO.ÒÓ0000;
+            }
+
+            this.addPara("Accessibility: %s", opad, var30, new java.lang.String[]{var29 + "%"});
+            this.addStatModGrid(this.width, 50.0F, opad, pad, var0.getAccessibilityMod(), new StatModValueGetter() {
+               public java.lang.String getPercentValue(StatMod var1x) {
+                  return null;
+               }
+
+               public java.lang.String getMultValue(StatMod var1x) {
+                  return null;
+               }
+
+               public Color getModColor(StatMod var1x) {
+                  return var1x.value < 0.0F ? O0OO.ÒÓ0000 : null;
+               }
+
+               public java.lang.String getFlatValue(StatMod var1x) {
+                  return var1x.value >= 0.0F ? "+" + Math.round(var1x.value * 100.0F) + "%" : Math.round(var1x.value * 100.0F) + "%";
+               }
+            });
+            java.lang.String var31 = "   - ";
+            int var33 = CommodityMarketData.getShippingCapacity(var0, false);
+            int var34 = CommodityMarketData.getShippingCapacity(var0, true);
+            this.addPara(var31 + "Same-faction imports and exports limited to %s units", opad, highlight, new java.lang.String[]{"" + var34});
+            this.addPara(var31 + "Other imports and exports limited to %s units", 0.0F, highlight, new java.lang.String[]{"" + var33});
+            float var35 = (float)var29;
+            if (var35 < 0.0F) {
+               var35 = 0.0F;
+            }
+
+            this.addPara(var31 + "Market share of exports multiplied by %s", 0.0F, highlight, new java.lang.String[]{"×" + Misc.getRoundedValue(var35 / 100.0F)});
+            this.addPara("The same-faction export bonus does not increase market share or income from exports.", opad);
+        return tp;
     }
 
     @Override
