@@ -21,7 +21,7 @@ public abstract class LtvCustomPanel{
     protected final CustomPanelAPI m_panel;
     protected final CustomUIPanelPlugin m_plugin;
     public MarketAPI m_market = null;
-    public FactionAPI m_faction = null;
+    private FactionAPI m_faction = null;
     public Color BgColor = new Color(0, 0, 0, 255);
     public Color glowColor = getFaction().getBaseUIColor();
 

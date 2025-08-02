@@ -75,19 +75,26 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
         PositionAPI pos = m_panel.getPanelPos();
         float x = pos.getX() + padding;
         float y = pos.getY() + padding;
-        float size = pos.getHeight() - padding * 2;
+        float width = pos.getWidth() - padding * 2;
+        float height = pos.getHeight() - padding * 2;
 
-        m_sprite.setSize(size, size);
+        m_sprite.setSize(width, height);
         m_sprite.render(x, y);
 
         if (isDrawFilledQuad && m_fillColor != null) {
             m_sprite.setColor(m_fillColor);
-            RenderUtils.drawQuad(x, y, size, size, m_fillColor, alphaMult);
+            RenderUtils.drawQuad(x, y, width, height, m_fillColor, alphaMult);
         }
 
         if (drawBorder) {
-            drawFramedBorder(x - borderThickness, y - borderThickness, size + borderThickness * 2, borderThickness,
-                    Color.RED, alphaMult);
+            drawFramedBorder(
+                x - borderThickness,
+                y - borderThickness,
+                width + borderThickness * 2,
+                height + borderThickness * 2,
+                borderThickness,
+                Color.RED, alphaMult
+            );
         }
 
         if (glowType == GlowType.ADDITIVE && m_fader.getBrightness() > 0) {
@@ -98,15 +105,16 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
         }
     }
 
-    private void drawFramedBorder(float x, float y, float size, float thickness, Color color, float alphaMult) {
+    private void drawFramedBorder(float x, float y, float width, float height, float thickness, Color color,
+        float alphaMult) {
         // Top
-        RenderUtils.drawRect(x, y + size - thickness, size, thickness, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y + height - thickness, width, thickness, color, alphaMult, GL11.GL_QUADS);
         // Bottom
-        RenderUtils.drawRect(x, y, size, thickness, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y, width, thickness, color, alphaMult, GL11.GL_QUADS);
         // Left
-        RenderUtils.drawRect(x, y, thickness, size, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y, thickness, height, color, alphaMult, GL11.GL_QUADS);
         // Right
-        RenderUtils.drawRect(x + size - thickness, y, thickness, size, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x + width - thickness, y, thickness, height, color, alphaMult, GL11.GL_QUADS);
     }
 
     @Override

@@ -15,6 +15,7 @@ import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvCustomPanel.TooltipProvider;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.util.RenderUtils;
+import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.ui.LtvUIState.UIStateType;
 
 public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
@@ -33,6 +34,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     final protected float overlayBrightness = 1.2f;
     protected float tooltipDelay = 0.3f;
     protected float backgroundTransparency = 0.65f;
+    protected int outlineThickness = 1;
     protected boolean persistentGlow = false;
     protected boolean hoveredLastFrame = false;
     protected boolean LMBDownLastFrame = false;
@@ -49,6 +51,8 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     protected int offsetY = 0;
     protected int offsetW = 0;
     protected int offsetH = 0;
+
+    private final static int pad = 3;
 
     public void init(LtvCustomPanel panel, GlowType gT, boolean hasTooltip, boolean hasBackground, boolean hasOutline) {
         m_panel = panel;
@@ -76,6 +80,10 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     public void setHasOutline(boolean a) {
         hasOutline = a;
+    }
+
+    public void setOutlineThickness(int a) {
+        outlineThickness = a;
     }
 
     public FaderUtil getFader() {
@@ -146,14 +154,13 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     /**
      * 1 for opaque.
      * 0 for transparent.
-     * @param a
      */
     public void setBackgroundTransparency(float a) {
         backgroundTransparency = a;
     }
 
     public void renderBelow(float alphaMult) {
-        PositionAPI pos = m_panel.getPanelPos();
+        final PositionAPI pos = m_panel.getPanelPos();
 
         if (hasBackground) {
             int x = (int)pos.getX() + offsetX;
@@ -162,9 +169,6 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
             int h = (int)pos.getHeight() + offsetH;
             RenderUtils.drawQuad(x, y, w, h, m_panel.BgColor, alphaMult*backgroundTransparency);
             // Looks vanilla like with 0.65f
-        }
-        if (hasOutline) {
-            RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_panel.getFaction().getGridUIColor(), alphaMult);
         }
 
         if (glowType == GlowType.OVERLAY && m_fader.getBrightness() > 0) {
@@ -181,7 +185,20 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     }
 
     public void render(float alphaMult) {
-
+        final PositionAPI pos = m_panel.getPanelPos();
+        
+        if (hasOutline) {
+            UiUtils.drawRoundedBorder(
+                pos.getX() - pad,
+                pos.getY() - pad,
+                pos.getWidth() + pad*2,
+                pos.getHeight() + pad*2,
+                1,
+                "ui_border4",
+                4,
+                m_panel.getFaction().getBaseUIColor()
+            );
+        }
     }
 
     public void advance(float amount) {

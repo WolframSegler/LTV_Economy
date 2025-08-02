@@ -191,7 +191,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         }
 
         CustomPanelAPI infoBar = Global.getSettings().createCustom(85, barHeight, new infobarPlugin());
-        ((infobarPlugin)infoBar.getPlugin()).init(infoBar, true, barMap, m_faction);
+        ((infobarPlugin)infoBar.getPlugin()).init(infoBar, true, barMap, getFaction());
 
         tooltip.addCustom(infoBar, 3);
     }

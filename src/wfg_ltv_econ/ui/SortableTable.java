@@ -220,7 +220,7 @@ public class SortableTable extends LtvCustomPanel {
                     getRoot(),
                     panel,
                     m_market,
-                    m_headerHeight + 2, m_headerHeight + 2,
+                    m_headerHeight, m_headerHeight + 2,
                     new LtvSpritePanelPlugin(),
                     sortIconPath,
                     getFaction().getBaseUIColor(),
@@ -539,7 +539,7 @@ public class SortableTable extends LtvCustomPanel {
             pendingRow = new RowManager(
                     getRoot(),
                     getParent(),
-                    (int) getPanelPos().getWidth(),
+                    (int) getPanelPos().getWidth() - 1,
                     m_rowHeight,
                     m_market,
                     new RowSelectionListener() {

@@ -300,7 +300,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         // Text
         final int baseY = (int) (headerHeight + opad * 1.5f);
-        Color baseColor = m_parentWrapper.m_faction.getBaseUIColor();
+        Color baseColor = m_parentWrapper.getFaction().getBaseUIColor();
         { // Global market value
             LtvTextPanel textPanel = new LtvTextPanel(
                     m_parentWrapper.getRoot(), section, m_parentWrapper.m_market, 170, 0,
@@ -461,7 +461,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void createPanel() {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
-                    String factionName = m_parentWrapper.m_faction.getDisplayName();
+                    String factionName = m_parentWrapper.getFaction().getDisplayName();
                     Color factionColor = baseColor;
                     if (m_selectedMarket != null) {
                         factionName = m_selectedMarket.getFaction().getDisplayName();
@@ -471,7 +471,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     String txt = "Total " + factionName + " exports";
 
                     String valueTxt = Integer.toString(getTotalFactionImports(m_com.getId(),
-                    m_parentWrapper.m_faction));
+                    m_parentWrapper.getFaction()));
 
                     tooltip.setParaFontColor(factionColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -504,7 +504,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
 
                     tooltip.addPara(
-                            "Maximum number of units capable of being exported by a single producer under " + m_parentWrapper.m_faction.getPersonNamePrefix() + " control, to another " + "colony controlled by " + m_parentWrapper.m_faction.getDisplayNameWithArticle() + ".\n\n" + "Either this or the maximum global export will be used, depending on which one " + "is higher given the colony's accessibility-based shipping limits." + "\n\nIn-faction shipping limits are higher.",
+                            "Maximum number of units capable of being exported by a single producer under " + m_parentWrapper.getFaction().getPersonNamePrefix() + " control, to another " + "colony controlled by " + m_parentWrapper.getFaction().getDisplayNameWithArticle() + ".\n\n" + "Either this or the maximum global export will be used, depending on which one " + "is higher given the colony's accessibility-based shipping limits." + "\n\nIn-faction shipping limits are higher.",
                             pad);
 
                     final float tpX = textX1 - 460 - opad*2;
@@ -543,10 +543,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void createPanel() {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
-                    String factionName = m_parentWrapper.m_faction.getDisplayName();
+                    String factionName = m_parentWrapper.getFaction().getDisplayName();
                     String txt = factionName + " market share";
 
-                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.m_faction) + "%";
+                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.getFaction()) + "%";
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -578,8 +578,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public TooltipMakerAPI createTooltip() {
                     TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
 
-                    String marketOwner = m_parentWrapper.m_faction.isPlayerFaction() ?
-                        "your" : m_parentWrapper.m_faction.getPersonNamePrefix(); 
+                    String marketOwner = m_parentWrapper.getFaction().isPlayerFaction() ?
+                        "your" : m_parentWrapper.getFaction().getPersonNamePrefix(); 
 
                     tooltip.addPara(
                             "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + marketOwner + " control.",
@@ -689,10 +689,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void createPanel() {
                     TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
 
-                    String factionName = m_parentWrapper.m_faction.getDisplayName();
+                    String factionName = m_parentWrapper.getFaction().getDisplayName();
                     String txt = factionName + " market share";
 
-                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.m_faction) + "%";
+                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.getFaction()) + "%";
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -724,8 +724,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public TooltipMakerAPI createTooltip() {
                     TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
 
-                    String marketOwner = m_parentWrapper.m_faction.isPlayerFaction() ?
-                        "your" : m_parentWrapper.m_faction.getPersonNamePrefix(); 
+                    String marketOwner = m_parentWrapper.getFaction().isPlayerFaction() ?
+                        "your" : m_parentWrapper.getFaction().getPersonNamePrefix(); 
 
                     tooltip.addPara(
                             "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + marketOwner + " control.",
@@ -800,19 +800,14 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         );
 
         table.addHeaders(
-            "", (int)(0.04 * SECT3_WIDTH), null, false, false, 1,
-            "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", false, false, 1,
-            "Size", (int)(0.08 * SECT3_WIDTH), "Colony size.", false, false, 1,
-            "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, 1,
+            "", (int)(0.04 * SECT3_WIDTH), null, true, false, 1,
+            "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", true, true, 1,
+            "Size", (int)(0.09 * SECT3_WIDTH), "Colony size.", false, false, -1,
+            "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
             "Quantity", (int)(0.15 * SECT3_WIDTH), "Shows units of the commodity that can be exported.", false, false, -1,
             "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
-            "Mkt Share", (int)(0.05 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
-            "Income", (int)(0.04 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1,
-
-            "Mkt Share", (int)(0.05 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
-            "Income", (int)(0.04 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1,
-            "Mkt Share", (int)(0.05 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
-            "Income", (int)(0.04 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1
+            "Mkt Share", (int)(0.14 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
+            "Income", (int)(0.12 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1
         );
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
@@ -869,11 +864,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             table.addCell(factionName, Alignment.MID, null, textColor);
             table.addCell(productionTxt, Alignment.MID, production, null);
             table.addCell(access, Alignment.MID, accessibility, null);
-            table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
-            table.addCell(incomeText, Alignment.MID, exportIncome, null);
-
-            table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
-            table.addCell(incomeText, Alignment.MID, exportIncome, null);
             table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
             table.addCell(incomeText, Alignment.MID, exportIncome, null);
             table.pushRow(
