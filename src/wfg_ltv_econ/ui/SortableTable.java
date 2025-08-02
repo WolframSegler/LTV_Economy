@@ -105,7 +105,7 @@ public class SortableTable extends LtvCustomPanel {
                     continue;
                 }
                 // Calculate total width of all merged columns in this set
-                int mergedWidth = lastHeaderPad - pad;
+                int mergedWidth = lastHeaderPad;
                 for (ColumnManager col : m_columns) {
                     if (col.isMerged() && col.getSetID() == setID) {
                         mergedWidth += col.width;
@@ -130,12 +130,12 @@ public class SortableTable extends LtvCustomPanel {
             } else {
                 if (column.tooltipText == null) {
                     m_headerContainer.addComponent(new HeaderPanel(
-                        getRoot(), getPanel(), column.width - pad + lastHeaderPad, m_headerHeight,
+                        getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         m_market, column, i
                     ).getPanel()).inTL(cumulativeXOffset, 0);
                 } else {
                     m_headerContainer.addComponent(new HeaderPanelWithTooltip(
-                        getRoot(), getPanel(), column.width - pad + lastHeaderPad, m_headerHeight,
+                        getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         m_market, column, i
                     ).getPanel()).inTL(cumulativeXOffset, 0);
                 }
