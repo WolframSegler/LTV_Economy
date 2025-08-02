@@ -17,8 +17,9 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
-import wfg_ltv_econ.ui.LtvUIState.UIStateType;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
@@ -198,8 +199,8 @@ public class SortableTable extends LtvCustomPanel {
 
         @Override
         public void initializePlugin(boolean hasPlugin) {
-            getPlugin().init(this, GlowType.OVERLAY, false, true, true);
-            getPlugin().setTargetUIState(UIStateType.DETAIL_DIALOG);
+            getPlugin().init(this, Glow.OVERLAY, false, true, Outline.LINE);
+            getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
         }
 
         @Override
@@ -226,7 +227,7 @@ public class SortableTable extends LtvCustomPanel {
                     getFaction().getBaseUIColor(),
                     null,
                     false);
-            sortIcon.getPlugin().setGlowType(GlowType.NONE);
+            sortIcon.getPlugin().setGlow(Glow.NONE);
 
             tooltip.addComponent(sortIcon.getPanel()).inBR(1, 0);
 
@@ -242,8 +243,8 @@ public class SortableTable extends LtvCustomPanel {
 
         @Override
         public void initializePlugin(boolean hasPlugin) {
-            getPlugin().init(this, GlowType.OVERLAY, true, true, true);
-            getPlugin().setTargetUIState(UIStateType.DETAIL_DIALOG);
+            getPlugin().init(this, Glow.OVERLAY, true, true, Outline.LINE);
+            getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
         }
 
         public TooltipMakerAPI createTooltip() {
@@ -345,8 +346,8 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         public void initializePlugin(boolean hasPlugin) {
-            getPlugin().init(this, GlowType.OVERLAY, true, false, false);
-            getPlugin().setTargetUIState(UIStateType.DETAIL_DIALOG);
+            getPlugin().init(this, Glow.OVERLAY, true, false, Outline.NONE);
+            getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
         }
 
         public void createPanel() {
@@ -578,7 +579,7 @@ public class SortableTable extends LtvCustomPanel {
 
         // Selected Colony has an outline
         if (m_market == market) {
-            pendingRow.getPlugin().setHasOutline(true);
+            pendingRow.getPlugin().setOutline(Outline.THIN);
         }
         
         pendingRow.createPanel();

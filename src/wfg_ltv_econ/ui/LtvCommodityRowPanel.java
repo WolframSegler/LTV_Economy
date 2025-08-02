@@ -23,7 +23,8 @@ import com.fs.starfarer.api.loading.Description.Type;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.plugins.infobarPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
@@ -82,7 +83,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
     public void initializePlugin(boolean hasPlugin) {
         LtvCommodityRowPanelPlugin plugin = ((LtvCommodityRowPanelPlugin) m_panel.getPlugin());
-        plugin.init(this, GlowType.OVERLAY, true, false, false);
+        plugin.init(this, Glow.OVERLAY, true, false, Outline.NONE);
         plugin.setDisplayPrices(m_canViewPrices);
         plugin.setSoundEnabled(true);
     }
@@ -131,7 +132,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
             LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, iconSize, iconSize,
                     new LtvSpritePanelPlugin(), iconPath, null, null, false);
-            iconPanel.getPlugin().setGlowType(GlowType.NONE);
+            iconPanel.getPlugin().setGlow(Glow.NONE);
 
             getPanel().addComponent(iconPanel.getPanel()).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
         }
@@ -163,7 +164,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), parent, m_market, iconSize, iconSize,
                     new LtvSpritePanelPlugin(), iconPath, baseColor, null, isSourceIllegal);
-        iconPanel.getPlugin().setGlowType(GlowType.NONE);
+        iconPanel.getPlugin().setGlow(Glow.NONE);
         return iconPanel;
     }
 
@@ -656,7 +657,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, lgdIconSize, lgdIconSize,
             new LtvSpritePanelPlugin(), iconPath, null, drawFilledIcon, drawRedBorder);
-        iconPanel.getPlugin().setGlowType(GlowType.NONE);
+        iconPanel.getPlugin().setGlow(Glow.NONE);
             
         tooltip.addComponent(iconPanel.getPanel()).setSize(lgdIconSize, lgdIconSize).inTL(pad + opad/2f, y);
 

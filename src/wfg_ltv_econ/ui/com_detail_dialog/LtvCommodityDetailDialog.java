@@ -28,7 +28,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
 import wfg_ltv_econ.ui.LtvBasePanel;
 import wfg_ltv_econ.ui.LtvCommodityPanel;
 import wfg_ltv_econ.ui.LtvCustomPanel;
@@ -36,7 +36,7 @@ import wfg_ltv_econ.ui.LtvIconPanel;
 import wfg_ltv_econ.ui.LtvSpritePanel;
 import wfg_ltv_econ.ui.LtvTextPanel;
 import wfg_ltv_econ.ui.LtvUIState;
-import wfg_ltv_econ.ui.LtvUIState.UIStateType;
+import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.SortableTable;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
@@ -108,7 +108,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
-        LtvUIState.setState(UIStateType.DETAIL_DIALOG);
+        LtvUIState.setState(UIState.DETAIL_DIALOG);
 
         // Panel for black BG
         LtvBasePanel BgPanel = new LtvBasePanel(
@@ -193,7 +193,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             public void initializePlugin(boolean hasPlugin) {
                 super.initializePlugin(hasPlugin);
 
-                ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIStateType.DETAIL_DIALOG);
+                ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
             }
         };
 
@@ -375,7 +375,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIStateType.DETAIL_DIALOG);
+                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -446,7 +446,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIStateType.DETAIL_DIALOG);
+                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -525,7 +525,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIStateType.DETAIL_DIALOG);
+                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -603,7 +603,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIStateType.DETAIL_DIALOG);
+                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -676,7 +676,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIStateType.DETAIL_DIALOG);
+                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -749,7 +749,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIStateType.DETAIL_DIALOG);
+                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -761,7 +761,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     private void createSection2(CustomPanelAPI section, TooltipMakerAPI tooltip) {
         final int mapHeight = (int) section.getPosition().getHeight() - 2 * opad;
 
-        StarSystemAPI starSystem = m_parentWrapper.m_market.getStarSystem();
+        final StarSystemAPI starSystem = m_parentWrapper.m_market.getStarSystem();
         String title = m_parentWrapper.m_market.getName();
 
         MapParams params = new MapParams();
@@ -777,6 +777,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
             params.showSystem(m_selectedMarket.getStarSystem());
             params.positionToShowAllMarkersAndSystems(false, mapHeight);
+
+            params.showMarket(m_selectedMarket, 1);
         }
 
         UIPanelAPI map = tooltip.createSectorMap(
@@ -823,7 +825,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             String iconPath = market.getFaction().getCrest();
             LtvSpritePanel iconPanel = new LtvSpritePanel(m_parentWrapper.getRoot(), section, market, iconSize,
                     iconSize, new LtvSpritePanelPlugin(), iconPath, null, null, false);
-            iconPanel.getPlugin().setGlowType(GlowType.NONE);
+            iconPanel.getPlugin().setGlow(Glow.NONE);
 
             String marketName = market.getName();
 
@@ -950,12 +952,12 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
     @Override
     public void customDialogConfirm() {
-        LtvUIState.setState(UIStateType.NONE);
+        LtvUIState.setState(UIState.NONE);
     }
 
     @Override
     public void customDialogCancel() {
-        LtvUIState.setState(UIStateType.NONE);
+        LtvUIState.setState(UIState.NONE);
     }
 
     public float getCustomDialogWidth() {

@@ -11,7 +11,7 @@ import com.fs.starfarer.api.util.FaderUtil.State;
 
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvUIState;
-import wfg_ltv_econ.ui.LtvUIState.UIStateType;
+import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog;
 import wfg_ltv_econ.util.RenderUtils;
 
@@ -109,7 +109,7 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
         if (glowEnabled) {
             State target = hoveredLastFrame ? State.IN : State.OUT;
             
-            if (!LtvUIState.is(UIStateType.NONE)) {
+            if (!LtvUIState.is(UIState.NONE)) {
                 target = State.OUT;
             }
 

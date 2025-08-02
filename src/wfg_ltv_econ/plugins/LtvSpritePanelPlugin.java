@@ -97,7 +97,7 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
             );
         }
 
-        if (glowType == GlowType.ADDITIVE && m_fader.getBrightness() > 0) {
+        if (glowType == Glow.ADDITIVE && m_fader.getBrightness() > 0) {
             float glowAmount = outlineBrightness * m_fader.getBrightness() * alphaMult;
 
             RenderUtils.drawAdditiveGlow(m_sprite, x, y, m_panel.getFaction().getBaseUIColor(),

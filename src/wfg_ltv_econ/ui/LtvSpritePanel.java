@@ -8,7 +8,8 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 
 public class LtvSpritePanel extends LtvCustomPanel {
@@ -42,7 +43,7 @@ public class LtvSpritePanel extends LtvCustomPanel {
 
     public void initializePlugin(boolean hasPlugin) {
         LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) m_panel.getPlugin());
-        plugin.init(this, GlowType.NONE, false, false, false);
+        plugin.init(this, Glow.NONE, false, false, Outline.NONE);
         plugin.init(m_spriteID, color, fillColor, drawBorder);
         plugin.setIgnoreUIState(true);
     }

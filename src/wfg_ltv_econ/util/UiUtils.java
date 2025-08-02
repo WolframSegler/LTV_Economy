@@ -2,6 +2,7 @@ package wfg_ltv_econ.util;
 
 import java.awt.Color;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import com.fs.starfarer.api.Global;
@@ -71,6 +72,9 @@ public class UiUtils {
             sprite.setColor(color);
         }
 
+        // The outline overflows the panel
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+
         // Draw corners
         nw.render(x, y + h - textureSize);
         ne.render(x + w - textureSize, y + h - textureSize);
@@ -88,5 +92,7 @@ public class UiUtils {
         s.render(x + textureSize, y);
         wSprite.render(x, y + textureSize);
         e.render(x + w - textureSize, y + textureSize);
+
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
     }
 }

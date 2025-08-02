@@ -8,7 +8,8 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 
 /**
@@ -45,7 +46,7 @@ public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.Toolt
 
     public void initializePlugin(boolean hasPlugin) {
         LtvCustomPanelPlugin plugin = ((LtvCustomPanelPlugin) m_panel.getPlugin());
-        plugin.init(this, GlowType.NONE, true, false, false);
+        plugin.init(this, Glow.NONE, true, false, Outline.NONE);
     }
 
     public void createPanel() {

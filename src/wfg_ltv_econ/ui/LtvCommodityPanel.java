@@ -13,7 +13,8 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog.CommoditySelectionListener;
 
 public class LtvCommodityPanel extends LtvCustomPanel{
@@ -53,7 +54,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     }
 
     public void initializePlugin(boolean hasPlugin) {
-        getPlugin().init(this, GlowType.NONE, false, true, true);
+        getPlugin().init(this, Glow.NONE, false, true, Outline.LINE);
     }
 
     public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {

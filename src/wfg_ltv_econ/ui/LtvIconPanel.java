@@ -15,7 +15,8 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.GlowType;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.TooltipUtils;
 
 public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.TooltipProvider {
@@ -40,7 +41,7 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
     @Override
     public void initializePlugin(boolean hasPlugin) {
         LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) m_panel.getPlugin());
-        plugin.init(this, GlowType.ADDITIVE, true, false, false);
+        plugin.init(this, Glow.ADDITIVE, true, false, Outline.NONE);
         plugin.init(m_spriteID, color, fillColor, drawBorder);
         plugin.setIgnoreUIState(true);
     }
@@ -58,7 +59,7 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
         final int opad = 10;
         final Color gray = new Color(100, 100, 100);
 
-        TooltipMakerAPI tooltip = ((CustomPanelAPI)getParent()).createUIElement(700, 0, false);
+        TooltipMakerAPI tooltip = ((CustomPanelAPI)getParent()).createUIElement(720, 0, false);
 
         tooltip.createRect(BgColor, tooltip.getPosition().getWidth());
 
