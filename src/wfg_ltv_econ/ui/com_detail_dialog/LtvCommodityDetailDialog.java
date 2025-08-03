@@ -17,6 +17,7 @@ import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.MapParams;
@@ -41,6 +42,7 @@ import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.SortableTable;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
+import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 
@@ -84,6 +86,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     public MarketAPI m_selectedMarket = null;
 
     public LtvTextPanel footerPanel = null;
+    public ButtonAPI producerButton = null;
+    public ButtonAPI consumerButton = null;
 
     public LtvCommodityDetailDialog(LtvCustomPanel parent, CommodityOnMarketAPI com) {
         // Measured using very precise tools!! (my eyes)
@@ -165,9 +169,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
                 footer.setParaFont(Fonts.ORBITRON_12);
                 footer.setParaFontColor(m_parentWrapper.getFaction().getBaseUIColor());
-                LabelAPI txt = footer.addPara("Only show colonies with excess stockpiles or shortages (%s)", 0f,
-                        highlight,
-                        "Q");
+                LabelAPI txt = footer.addPara("Only show colonies with excess stockpiles or shortages (%s)", 0f, highlight, "Q");
                 txt.setHighlightOnMouseover(true);
 
                 int TextY = (int) txt.computeTextHeight(txt.getText());
@@ -204,7 +206,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         };
 
         BgPanel.getPanel().addComponent(footerPanel.getPanel()).inBL(pad, -opad * 3.5f);
-        m_plugin.init(false, false, false, BgPanel.getPanel());
+        m_plugin.init(false, false, BgPanel.getPanel());
     }
 
     public void createSections() {
@@ -214,7 +216,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         updateSection1();
         updateSection2();
-        updateSection3();
+        updateSection3(0);
         updateSection4();
     }
 
@@ -255,12 +257,22 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         section4.getPosition().belowLeft(section2, opad);
     }
 
-    public void updateSection3() {
+    /**
+     *  MODE_0: Displays the Producers <br></br>
+     *  MODE_1: Displays the Consumers
+     */
+    public void updateSection3(int mode) {
+        if (section3 != null) {
+            // Otherwise the anchor of the tooltips gets removed before the tooltips, causing a crash.
+            ReflectionUtils.invoke(section3, "clearChildren");
+        }
         m_dialogPanel.removeComponent(section3);
 
         section3 = Global.getSettings().createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
+        TooltipMakerAPI tooltip = section3.createUIElement(SECT3_WIDTH, SECT3_HEIGHT, false);
+        section3.addUIElement(tooltip).inTL(0, 0);
 
-        createSection3(section3);
+        createSection3(section3, tooltip, mode);
         m_dialogPanel.addComponent(section3).belowLeft(section1, opad);
     }
 
@@ -818,7 +830,49 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         map.getPosition().inTL(0, 0);
     }
 
-    private void createSection3(CustomPanelAPI section) {
+    private void createSection3(CustomPanelAPI section, TooltipMakerAPI tooltip, int mode) {
+
+        // Table buttons
+        final int btnWidth = 200;
+        final int btnHeight = 18;
+
+        producerButton = tooltip.addButton(
+            "Producers",
+            null,
+            Misc.getBasePlayerColor(),
+            Misc.getDarkPlayerColor(),
+            Alignment.MID,
+            CutStyle.TOP,
+            btnWidth, btnHeight, pad
+        );
+        consumerButton = tooltip.addButton(
+            "Consumers",
+            null,
+            Misc.getBasePlayerColor(),
+            Misc.getDarkPlayerColor(),
+            Alignment.MID,
+            CutStyle.TOP,
+            btnWidth, btnHeight, pad
+        );
+
+        producerButton.setShortcut(Keyboard.KEY_1, false);
+        consumerButton.setShortcut(Keyboard.KEY_2, false);
+
+        producerButton.getPosition().inTL(0, -btnHeight);
+        consumerButton.getPosition().inTL(btnWidth, -btnHeight);
+        
+        if (mode == 0) {
+            producerButton.setChecked(true);
+            consumerButton.setChecked(false);
+
+            producerButton.highlight();
+        } else if (mode == 1) {
+            producerButton.setChecked(false);
+            consumerButton.setChecked(true);
+
+            consumerButton.highlight();
+        }
+
         SortableTable table = new SortableTable(
             m_parentWrapper.getRoot(),
             section,
@@ -827,6 +881,17 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             m_parentWrapper.m_market
         );
 
+        final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
+        final String creditHeader = mode == 0 ? "Income" : "Value";
+
+        final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
+        :
+        "The portion of the global market value that this colony contributes.\n\nIncludes player-controlled colonies, whose market value does not contribue to the global market value the player can gain export income from.";
+        
+        final String creditTpDesc = mode == 0 ? "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share." 
+        :
+        "How much the colony's demand contributes to the global market value for the commodity.";
+
         table.addHeaders(
             "", (int)(0.04 * SECT3_WIDTH), null, true, false, 1,
             "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", true, true, 1,
@@ -834,8 +899,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
             "Quantity", (int)(0.15 * SECT3_WIDTH), "Shows units of the commodity that can be exported.", false, false, -1,
             "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
-            "Mkt Share", (int)(0.14 * SECT3_WIDTH), "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility.", false, false, -1,
-            "Income", (int)(0.12 * SECT3_WIDTH), "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share.", false, false, -1
+            marketHeader, (int)(0.15 * SECT3_WIDTH), marketTpDesc, false, false, -1,
+            creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
         );
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
@@ -946,7 +1011,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
                 // Update UI
                 updateSection1();
-                updateSection3();
+                
+                final int mode = producerButton.isChecked() ? 0 : 1;
+
+                updateSection3(mode);
             }
         });
 
