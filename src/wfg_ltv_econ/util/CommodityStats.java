@@ -10,7 +10,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 public class CommodityStats {
 
-    public final CommodityOnMarketAPI com;
+    public final CommodityOnMarketAPI m_com;
     public final MarketAPI market;
 
     public long totalActivity = 0;
@@ -35,16 +35,16 @@ public class CommodityStats {
 
 
     public CommodityStats(CommodityOnMarketAPI com, MarketAPI market) {
-        this.com = com;
+        this.m_com = market.getCommodityData(com.getId());
         this.market = market;
 
         int shippingGlobal = Global.getSettings().getShippingCapacity(market, false);
         int shippingInFaction = Global.getSettings().getShippingCapacity(market, true);
 
-        localProduction = getLocalProduction(market, com.getId());
-        available = Math.max(com.getAvailable(), localProduction);
+        localProduction = getLocalProduction(market, m_com.getId());
+        available = Math.max(m_com.getAvailable(), localProduction);
 
-        localDemand = com.getMaxDemand();
+        localDemand = m_com.getMaxDemand();
         localDeficit = Math.max(0, localDemand - available);
 
         demandMet = Math.min(localDemand, available);
@@ -58,7 +58,7 @@ public class CommodityStats {
 
         // Scan availability mods for same-faction foreign sources
         inFactionImports = 0;
-        // for (StatMod mod : com.getAvailableStat().getFlatMods().values()) {
+        // for (StatMod mod : m_com.getAvailableStat().getFlatMods().values()) {
         //     Object source = mod.getSource();
         //     if (source instanceof String) {
         //         String sourceId = (String) source;
@@ -78,7 +78,7 @@ public class CommodityStats {
         long totalExportable = Math.max(0, localProduction - localDemand);
 
         List<MarketAPI> factionMarkets = getFactionMarkets(market.getFactionId());
-        int totalFactionDemand = getUnmetLocalDemand(factionMarkets, com.getId());
+        int totalFactionDemand = getUnmetLocalDemand(factionMarkets, m_com.getId());
         int inFactionExportable = Math.min(totalFactionDemand, shippingInFaction);
         inFactionExport = Math.min(totalExportable, inFactionExportable);
 
@@ -138,7 +138,7 @@ public class CommodityStats {
     }
 
     public void printAllInfo() {
-        Global.getLogger(getClass()).error("Commodity: " + com.getCommodity().getName());
+        Global.getLogger(getClass()).error("Commodity: " + m_com.getCommodity().getName());
         Global.getLogger(getClass()).error("totalActivity: " + totalActivity);
         Global.getLogger(getClass()).error("localProduction: " + localProduction);
         Global.getLogger(getClass()).error("localDemand: " + localDemand);

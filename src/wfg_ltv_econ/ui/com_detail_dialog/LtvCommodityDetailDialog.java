@@ -884,6 +884,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
+        final String QuantityDesc = mode == 0 ? "Shows units of the commodity that could be exported."
+        :
+        "Shows demand for a commodity.";
+
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
         :
         "The portion of the global market value that this colony contributes.\n\nIncludes player-controlled colonies, whose market value does not contribue to the global market value the player can gain export income from.";
@@ -897,7 +901,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", true, true, 1,
             "Size", (int)(0.09 * SECT3_WIDTH), "Colony size.", false, false, -1,
             "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
-            "Quantity", (int)(0.15 * SECT3_WIDTH), "Shows units of the commodity that can be exported.", false, false, -1,
+            "Quantity", (int)(0.15 * SECT3_WIDTH), QuantityDesc, false, false, -1,
             "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
             marketHeader, (int)(0.15 * SECT3_WIDTH), marketTpDesc, false, false, -1,
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
@@ -909,7 +913,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 continue;
             }
             final CommodityStats comStats = new CommodityStats(m_com, market);
-            if (comStats.globalExport < 1) {
+            if (comStats.globalExport < 1 && mode == 0 || comStats.localDeficit < 1 && mode == 1) {
                 continue;
             }
 
@@ -919,8 +923,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
 
             String iconPath = market.getFaction().getCrest();
-            LtvSpritePanel iconPanel = new LtvSpritePanel(m_parentWrapper.getRoot(), section, market, iconSize,
-                    iconSize, new LtvSpritePanelPlugin(), iconPath, null, null, false);
+            LtvSpritePanel iconPanel = new LtvSpritePanel(
+                m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new LtvSpritePanelPlugin(), 
+                iconPath, null, null, comStats.localDeficit > 0
+            );
             iconPanel.getPlugin().setGlow(Glow.NONE);
 
             String marketName = market.getName();
@@ -929,7 +935,9 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
             String factionName = market.getFaction().getDisplayName();
 
-            String productionTxt = NumFormat.engNotation(comStats.globalExport);
+            String quantityTxt = NumFormat.engNotation(
+                mode == 0 ? comStats.globalExport : comStats.externalImports
+            );
 
             int accessibility = (int) market.getAccessibilityMod().getFlatBonus() * 100;
             int maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
@@ -955,7 +963,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             table.addCell(marketName, Alignment.LMID, null, textColor);
             table.addCell(marketSize, Alignment.MID, null, textColor);
             table.addCell(factionName, Alignment.MID, null, textColor);
-            table.addCell(productionTxt, Alignment.MID, comStats.globalExport, null);
+            table.addCell(quantityTxt, Alignment.MID, comStats.globalExport, null);
             table.addCell(access, Alignment.MID, accessibility, null);
             table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
             table.addCell(incomeText, Alignment.MID, exportIncome, null);
@@ -1072,19 +1080,20 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         String marketName, Color baseColor) {
 
         final int tpWidth = 450;
+        final CommodityOnMarketAPI com = market.getCommodityData(m_com.getId());
 
         TooltipMakerAPI tp = table.getPanel().createUIElement(
             tpWidth, 0, false);
 
         final FactionAPI faction = market.getFaction();
-        final CommodityStats comStats = new CommodityStats(m_com, market);
+        final CommodityStats comStats = new CommodityStats(com, market);
 
         final Color highlight = Misc.getHighlightColor();
         final Color negative = Misc.getNegativeHighlightColor();
         final Color darkColor = faction.getDarkUIColor();
 
         tp.setParaFont(Fonts.ORBITRON_12);
-        tp.addPara(marketName + " - " + m_com.getCommodity().getName(), baseColor, pad);
+        tp.addPara(marketName + " - " + com.getCommodity().getName(), baseColor, pad);
         tp.setParaFontDefault();
 
         String locString = "in the " + market.getContainingLocation().getNameWithLowercaseType();
@@ -1108,24 +1117,24 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             market.getIncomeMult(), null
         );
 
-        tp.addSectionHeading(m_com.getCommodity().getName() + " production & availability",
+        tp.addSectionHeading(com.getCommodity().getName() + " production & availability",
         baseColor, darkColor, Alignment.MID, opad);
             
         TooltipUtils.createCommodityProductionBreakdown(
-            tp, m_com, comStats, highlight, negative
+            tp, com, comStats, highlight, negative
         );
 
         TooltipUtils.createCommodityDemandBreakdown(
-            tp, m_com, comStats, highlight, negative
+            tp, com, comStats, highlight, negative
         );
 
-        final int econUnit = (int)m_com.getCommodity().getEconUnit();
+        final int econUnit = (int)com.getCommodity().getEconUnit();
         final int sellPrice = (int)market.getDemandPrice(
-            m_com.getId(), (double)econUnit, true) / econUnit;
+            com.getId(), (double)econUnit, true) / econUnit;
         final int buyPrice = (int)market.getSupplyPrice(
-            m_com.getId(), (double)econUnit, true) / econUnit;
+            com.getId(), (double)econUnit, true) / econUnit;
 
-        if (!m_com.isMeta()) {
+        if (!com.isMeta()) {
             if (comStats.totalExports > 0) {
                 tp.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), 
                 highlight, NumFormat.engNotation(comStats.totalExports));
