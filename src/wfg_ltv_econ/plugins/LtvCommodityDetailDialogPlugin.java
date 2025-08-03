@@ -27,6 +27,7 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
     protected boolean clickedThisFrame = false;
     protected boolean hasBackground = false;
     protected boolean hasOutline = false;
+    protected boolean isFooterButtonChecked = false;
 
     protected float hoverTime = 0f;
     protected int offsetX = 0;
@@ -115,6 +116,12 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
 
             m_fader.setState(target);
             m_fader.advance(amount);
+        }
+
+        if (m_dialog.footerPanel.m_checkbox.isChecked() != isFooterButtonChecked) {
+            isFooterButtonChecked = !isFooterButtonChecked;
+
+            m_dialog.updateSection3();
         }
     }
 

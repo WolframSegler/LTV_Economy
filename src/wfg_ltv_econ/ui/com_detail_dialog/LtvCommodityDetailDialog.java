@@ -25,7 +25,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.campaign.econ.reach.CommodityMarketData;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
@@ -82,7 +81,9 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     private CustomPanelAPI m_dialogPanel;
 
     public CommodityOnMarketAPI m_com;
-    public MarketAPI m_selectedMarket = null; 
+    public MarketAPI m_selectedMarket = null;
+
+    public LtvTextPanel footerPanel = null;
 
     public LtvCommodityDetailDialog(LtvCustomPanel parent, CommodityOnMarketAPI com) {
         // Measured using very precise tools!! (my eyes)
@@ -149,7 +150,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
         };
 
-        LtvTextPanel footerPanel = new LtvTextPanel(
+        footerPanel = new LtvTextPanel(
                 m_parentWrapper.getRoot(), BgPanel.getPanel(), m_parentWrapper.m_market, 400, footerH,
                 fPlugin, m_parentWrapper.getFaction().getBaseUIColor()) {
 
@@ -184,6 +185,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                         pad);
 
                 m_panel.addUIElement(tooltip).inBL(0, getPanelPos().getHeight());
+                m_panel.bringComponentToTop(tooltip);
 
                 return tooltip;
             }
@@ -522,10 +524,11 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
 
                     tooltip.addPara(
-                        "The total number of units exported by all producers globally, as well as the total exported within the faction under " + getFaction().getPersonNamePrefix() + " control.\n\n" +
-                        "Global exports are limited by the colony’s accessibility and cannot exceed the maximum global export capacity.\n\n" +
+                        "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + getFaction().getPersonNamePrefix() + " control.\n\n" +
+                        "Global exports are limited by the colony's accessibility and cannot exceed the maximum global export capacity.\n\n" +
                         "In-faction exports benefit from higher shipping limits.",
-                        pad
+                        pad, new Color[] {Misc.getBasePlayerColor(), UiUtils.getInFactionColor()},
+                        new String[] {"all consumers globally", "within the faction"}
                     );
 
                     final float tpX = textX1 - 460 - opad*2;
@@ -845,6 +848,11 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 continue;
             }
 
+            if (footerPanel != null && footerPanel.m_checkbox.isChecked() &&
+                (comStats.canNotExport > 0 || comStats.localDeficit > 0)) {
+                continue;
+            }
+
             String iconPath = market.getFaction().getCrest();
             LtvSpritePanel iconPanel = new LtvSpritePanel(m_parentWrapper.getRoot(), section, market, iconSize,
                     iconSize, new LtvSpritePanelPlugin(), iconPath, null, null, false);
@@ -1108,7 +1116,9 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         tp.addPara(
             "The same-faction export bonus does not increase market share or income from exports.", opad
         );
-        
+
+        tp.addSpacer(opad + pad);
+
         return tp;
     }
 

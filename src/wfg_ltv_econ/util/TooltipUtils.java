@@ -111,6 +111,13 @@ public class TooltipUtils {
             offsetY += tooltipH + mouseSize + correction;
         }
 
+        // If top overflow
+        final int screenH = (int) Global.getSettings().getScreenHeight();
+
+        if (tooltipY + offsetY + tooltipH > screenH - opad) {
+            offsetY = screenH - tooltipY - tooltipH - opad*2;
+        }
+
         pos.setXAlignOffset(offsetX);
         pos.setYAlignOffset(offsetY);
     }
@@ -618,7 +625,7 @@ public class TooltipUtils {
             valueColor = negative;
         }
         
-        tooltip.addPara("Total demand: %s", opad, valueColor,
+        LabelAPI title = tooltip.addPara("Total demand: %s", opad, valueColor,
             NumFormat.engNotation(comStats.localDemand));
 
         final int valueTxtWidth = 50;
@@ -654,6 +661,12 @@ public class TooltipUtils {
                 );
             }
         }
+
+        if (firstPara) {
+            title.setText("No local demand.");
+            title.setHighlight("");
+        }
+
         tooltip.setHeightSoFar(y);
         UiUtils.resetFlowLeft(tooltip, opad);
     }
