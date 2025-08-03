@@ -15,6 +15,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
@@ -155,22 +156,22 @@ public class SortableTable extends LtvCustomPanel {
         );
 
         TooltipMakerAPI tp = m_rowContainer.createUIElement(
-            getPanelPos().getWidth(),
+            getPanelPos().getWidth() + pad,
             getPanelPos().getHeight() - (m_headerHeight + pad),
             true
         );
 
-        int cumulativeYOffset = 0;
+        int cumulativeYOffset = pad; // The first row should still have a gap
         for (RowManager row : m_rows) {
             tp.addComponent(row.getPanel()).inTL(
-                    0, cumulativeYOffset);
+                    pad, cumulativeYOffset);
 
             cumulativeYOffset += pad + m_rowHeight;
         }
 
         tp.setHeightSoFar(cumulativeYOffset);
 
-        m_rowContainer.addUIElement(tp).inTL(0, 0);
+        m_rowContainer.addUIElement(tp).inTL(-pad, 0);
         getPanel().addComponent(m_rowContainer).inTL(0, m_headerHeight + pad);
     }
 
@@ -325,7 +326,7 @@ public class SortableTable extends LtvCustomPanel {
         protected String codexID = null;
         
         public TooltipMakerAPI m_tooltip = null;
-        public Color textColor = getFaction().getBaseUIColor();
+        public Color textColor = Misc.getBasePlayerColor();
 
         public RowManager(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
                 RowSelectionListener listener) {
@@ -449,7 +450,9 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         public void setTextColor(Color color) {
-            textColor = color;
+            if (color != null) {
+                textColor = color;
+            }
         }
 
         public TooltipMakerAPI createTooltip() {
@@ -547,7 +550,7 @@ public class SortableTable extends LtvCustomPanel {
             pendingRow = new RowManager(
                     getRoot(),
                     getParent(),
-                    (int) getPanelPos().getWidth(),
+                    (int) getPanelPos().getWidth() - 2,
                     m_rowHeight,
                     m_market,
                     new RowSelectionListener() {
@@ -564,6 +567,7 @@ public class SortableTable extends LtvCustomPanel {
     /**
      * Uses the added cells to create a row and clears the {@code pendingRow}.
      * The amount of cells must match the column amount.
+     * The {@code textColor} sets all the cells to that color.
      * The {@code market} is used for certain colors and location info.
      * {@code glowClr} can be null.
      * The {@code tp} can be null. It must be attached to the SortableTable instance due to a design limitation.

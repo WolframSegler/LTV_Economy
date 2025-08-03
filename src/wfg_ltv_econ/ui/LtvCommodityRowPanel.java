@@ -4,10 +4,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityMarketDataAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySourceType;
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.combat.MutableStat;
-import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
@@ -27,7 +24,6 @@ import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
-import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.util.TooltipUtils;
 
 import java.awt.Color;
@@ -229,265 +225,18 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         tooltip.setParaFont(Fonts.ORBITRON_12);
         tooltip.addSectionHeading("Production, imports and demand", Alignment.MID, opad);
 
-        // Production
-        {
-        tooltip.setParaFontDefault();
-        tooltip.addPara("Available: %s", pad, highlight,
-            NumFormat.engNotation(m_comStats.available));
-
-        final int valueTxtWidth = 45 + pad;
-        boolean firstPara = true;
-		float y = tooltip.getHeightSoFar() + pad;
-
-        for(Industry industry : m_com.getMarket().getIndustries()) {
-            if(industry.getSupply(m_com.getId()).getQuantity().getModifiedInt() < 1) {
-                continue;
-            }
-            
-            MutableStat baseProd = industry.getSupply(m_com.getId()).getQuantity();
-            MutableStat prodBonus = industry.getSupplyBonus();
-
-            // Flat mods
-            for (Map.Entry<String, MutableStat.StatMod> entry : baseProd.getFlatMods().entrySet()) {
-                MutableStat.StatMod mod = entry.getValue();
-
-                float value = mod.getValue();
-                String desc = mod.getDesc();
-
-                if (desc == null || value < 1) {
-                    continue;
-                }
-
-                // draw text
-                String valueTxt = "+" + NumFormat.engNotation((long)value);
-
-                String industryDesc = industry.getNameForModifier();
-                String text =  desc + " (" + industryDesc + ")";
-
-				LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
-
-				UIComponentAPI lblComp = tooltip.getPrev();
-				float textH = lbl.computeTextHeight(valueTxt);
-				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad;
-                if (firstPara) {
-                    firstPara = false;
-                } else {
-                    y += textH + pad;
-                }
-
-				lblComp.getPosition().inTL(textX, y);
-
-                
-                lbl = tooltip.addPara(text, pad);
-                lblComp = tooltip.getPrev();
-				textX = valueTxtWidth + opad; 
-				lblComp.getPosition().inTL(textX, y);
-            }
-            // Flat bonuses
-            for (Map.Entry<String, MutableStat.StatMod> entry : prodBonus.getFlatMods().entrySet()) {
-                MutableStat.StatMod mod = entry.getValue();
-
-                float value = mod.getValue();
-                String desc = mod.getDesc();
-
-                if (desc == null || value < 1) {
-                    continue;
-                }
-
-                // draw text
-                String valueTxt = "+" + NumFormat.engNotation((long)value);
-
-                String industryDesc = industry.getNameForModifier();
-                String text =  desc + " (" + industryDesc + ")";
-
-				LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
-
-				UIComponentAPI lblComp = tooltip.getPrev();
-				float textH = lbl.computeTextHeight(valueTxt);
-				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
-                if (firstPara) {
-                    firstPara = false;
-                } else {
-                    y += textH + pad;
-                }
-
-				lblComp.getPosition().inTL(textX, y);
-
-                
-                lbl = tooltip.addPara(text, pad);
-                lblComp = tooltip.getPrev();
-				textX = valueTxtWidth + opad; 
-				lblComp.getPosition().inTL(textX, y);
-            }
-            // Mult bonuses
-            for (Map.Entry<String, MutableStat.StatMod> entry : prodBonus.getMultMods().entrySet()) {
-                MutableStat.StatMod mod = entry.getValue();
-
-                float value = mod.getValue();
-                String desc = mod.getDesc();
-
-                if (desc == null || value < 0) {
-                    continue;
-                }
-
-                // draw text
-                String valueTxt = Strings.X + value;
-
-                String industryDesc = industry.getNameForModifier();
-                String text =  desc + " (" + industryDesc + ")";
-
-				LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
-
-				UIComponentAPI lblComp = tooltip.getPrev();
-				float textH = lbl.computeTextHeight(valueTxt);
-				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
-                if (firstPara) {
-                    firstPara = false;
-                } else {
-                    y += textH + pad;
-                }
-
-				lblComp.getPosition().inTL(textX, y);
-
-                
-                lbl = tooltip.addPara(text, pad);
-                lblComp = tooltip.getPrev();
-				textX = valueTxtWidth + opad; 
-				lblComp.getPosition().inTL(textX, y);
-            }
-        }
-        // Import mods
-        HashMap<String, StatMod> imports = m_com.getAvailableStat().getFlatMods();
-
-        for (Map.Entry<String, MutableStat.StatMod> entry : imports.entrySet()) {
-            MutableStat.StatMod mod = entry.getValue();
-
-            float value = mod.getValue();
-            String desc = mod.getDesc();
-
-            if (desc == null ||!desc.contains("faction")) {
-                continue;
-            }
-
-            // draw text
-            String valueTxt = "+" + NumFormat.engNotation((long)value);
-            Color valueColor = highlight;
-            if (value < 0) {
-                valueTxt = valueTxt.replace("+", "");
-                valueColor = negative;
-            }
-                
-			LabelAPI lbl = tooltip.addPara(valueTxt, pad, valueColor, valueTxt);
-
-			UIComponentAPI lblComp = tooltip.getPrev();
-			float textH = lbl.computeTextHeight(valueTxt);
-			float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
-            if (firstPara) {
-                firstPara = false;
-            } else {
-                y += textH + pad;
-            }
-
-			lblComp.getPosition().inTL(textX, y);
-  
-            lbl = tooltip.addPara(desc, pad);
-            lblComp = tooltip.getPrev();
-			textX = valueTxtWidth + opad; 
-			lblComp.getPosition().inTL(textX, y);
-        }
-
-        if (m_comStats.externalImports > 0) {
-            // draw text
-            String valueTxt = "+" + NumFormat.engNotation(m_comStats.externalImports);
-			LabelAPI lbl = tooltip.addPara(valueTxt, pad, highlight, valueTxt);
-
-			UIComponentAPI lblComp = tooltip.getPrev();
-			float textH = lbl.computeTextHeight(valueTxt);
-			float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad; 
-            if (firstPara) {
-                firstPara = false;
-            } else {
-                y += textH + pad;
-            }
-            
-			lblComp.getPosition().inTL(textX, y);
-            
-            String desc = "Desired import volume";
-            lbl = tooltip.addPara(desc, pad);
-            lblComp = tooltip.getPrev();
-			textX = valueTxtWidth + opad; 
-			lblComp.getPosition().inTL(textX, y);
-        }
-
-        tooltip.setHeightSoFar(y);
-        UiUtils.resetFlowLeft(tooltip, opad);
-        }
+        // // Production
+        // {
+        TooltipUtils.createCommodityProductionBreakdown(
+            tooltip, m_com, m_comStats, highlight, negative
+        );
         
-
         tooltip.addPara("All production sources contribute cumulatively to the commodity's availability. Imports and smuggling add to supply to help meet demand.", gray ,pad);
 
-        
         // Demand
-        {
-        Color valueColor = highlight;
-        if (m_comStats.available < m_comStats.localDemand) {
-            valueColor = negative;
-        }
-        
-        tooltip.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation(m_comStats.localDemand));
-
-        final int valueTxtWidth = 45 + pad;
-        boolean firstPara = true;
-		float y = tooltip.getHeightSoFar() + pad;
-
-        for(Industry industry : m_com.getMarket().getIndustries()) {
-            if(industry.getDemand(m_com.getId()).getQuantity().getModifiedInt() < 1) {
-                continue;
-            }
-            
-            MutableStat baseProd = industry.getDemand(m_com.getId()).getQuantity();
-
-            // Flat mods
-            for (Map.Entry<String, MutableStat.StatMod> entry : baseProd.getFlatMods().entrySet()) {
-                MutableStat.StatMod mod = entry.getValue();
-
-                float value = mod.getValue();
-
-                if (value < 1) {
-                    continue;
-                }
-
-                // draw text
-                String valueTxt = NumFormat.engNotation((long)value);
-
-                String industryDesc = industry.getNameForModifier();
-                String text =  "Needed by " + industryDesc;
-
-				LabelAPI lbl = tooltip.addPara(valueTxt, pad, valueColor, valueTxt);
-
-				UIComponentAPI lblComp = tooltip.getPrev();
-				float textH = lbl.computeTextHeight(valueTxt);
-				float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad;
-                if (firstPara) {
-                    firstPara = false;
-                    y += textH;
-                } else {
-                    y += textH + pad;
-                }
-
-				lblComp.getPosition().inTL(textX, y);
-
-                
-                lbl = tooltip.addPara(text, pad);
-                lblComp = tooltip.getPrev();
-				textX = valueTxtWidth + opad; 
-				lblComp.getPosition().inTL(textX, y);
-            }
-        }
-        tooltip.setHeightSoFar(y);
-        UiUtils.resetFlowLeft(tooltip, opad);
-        }
+        TooltipUtils.createCommodityDemandBreakdown(
+            tooltip, m_com, m_comStats, highlight, negative
+        );
 
         // Divider
         tooltip.addSectionHeading("Exports", Alignment.MID, opad);
