@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -103,7 +104,7 @@ public class SortableTable extends LtvCustomPanel {
 
             int lastHeaderPad = i + 1 == m_columns.size() ? pad*3 : 0;
 
-            UIPanelAPI panel = null;
+            HeaderPanel panel = null;
 
             // Merged headers
             if (column.isMerged()) {
@@ -123,14 +124,14 @@ public class SortableTable extends LtvCustomPanel {
                 if (column.tooltip == null) {
                     panel = new HeaderPanel(
                         getRoot(), getPanel(), mergedWidth - pad, m_headerHeight, m_market, column, i
-                    ).getPanel();
+                    );
                 } else {
                     panel = new HeaderPanelWithTooltip(
                         getRoot(), getPanel(), mergedWidth - pad, m_headerHeight, m_market, column, i
-                    ).getPanel();
+                    );
                 }
 
-                m_headerContainer.addComponent(panel).inTL(cumulativeXOffset, 0);
+                m_headerContainer.addComponent(panel.getPanel()).inTL(cumulativeXOffset, 0);
 
                 cumulativeXOffset += mergedWidth;
 
@@ -140,15 +141,15 @@ public class SortableTable extends LtvCustomPanel {
                     panel = new HeaderPanel(
                         getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         m_market, column, i
-                    ).getPanel();
+                    );
                 } else {
                     panel = new HeaderPanelWithTooltip(
                         getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         m_market, column, i
-                    ).getPanel();
+                    );
                 }
 
-                m_headerContainer.addComponent(panel).inTL(cumulativeXOffset, 0);
+                m_headerContainer.addComponent(panel.getPanel()).inTL(cumulativeXOffset, 0);
 
                 cumulativeXOffset += column.width;
             }
@@ -252,7 +253,7 @@ public class SortableTable extends LtvCustomPanel {
         }
     }
 
-    private class HeaderPanelWithTooltip extends HeaderPanel implements LtvCustomPanel.TooltipProvider {
+    public class HeaderPanelWithTooltip extends HeaderPanel implements LtvCustomPanel.TooltipProvider {
         public HeaderPanelWithTooltip(UIPanelAPI root, UIPanelAPI parent, int width, int height,
                 MarketAPI market, ColumnManager column, int listIndex) {
             super(root, parent, width, height, market, column, listIndex);
@@ -277,7 +278,7 @@ public class SortableTable extends LtvCustomPanel {
     
                 tooltip.addPara((String) column.tooltip, pad);
             } else if (column.getTooltipType() == PendingTooltip.class) {
-                tooltip = ((PendingTooltip) column.tooltip).tooltip;
+                tooltip = ((PendingTooltip) column.tooltip).factory.get();
             } else {
                 throw new IllegalArgumentException(
                     "Tooltip for header '" + column.title + "' has an illegal type."
@@ -286,7 +287,7 @@ public class SortableTable extends LtvCustomPanel {
 
             ((CustomPanelAPI) getParent()).addUIElement(tooltip);
             ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
-            tooltip.getPosition().aboveLeft(getPanel(), pad*2);
+            TooltipUtils.dynamicPos(tooltip, getPanel(), opad);
 
             return tooltip;
         }
@@ -317,7 +318,7 @@ public class SortableTable extends LtvCustomPanel {
         public int width;
         public Object tooltip;
         
-        private UIPanelAPI panel = null;
+        private HeaderPanel headerPanel = null;
         private boolean isMerged = false;
         private boolean isParent = false;
         private int mergeSetID = 0;
@@ -356,12 +357,12 @@ public class SortableTable extends LtvCustomPanel {
             return mergeSetID;
         }
 
-        public UIPanelAPI getHeaderPanel() {
-            return panel;
+        public HeaderPanel getHeaderPanel() {
+            return headerPanel;
         }
 
-        public void setHeaderPanel(UIPanelAPI a) {
-            panel = a;
+        public void setHeaderPanel(HeaderPanel a) {
+            headerPanel = a;
         }
     }
 
@@ -725,9 +726,9 @@ public class SortableTable extends LtvCustomPanel {
      * Used to pass null checks during UI construction. Actual content is added after
      * panel instantiation.
      *
-     * Used internally by SortableTable. Use this when creating a custom tooltip for a header.
+     * Used internally by SortableTable. Use the factory when creating a custom tooltip for a header.
      */
     public static class PendingTooltip {
-        public TooltipMakerAPI tooltip = null;
+        public Supplier<TooltipMakerAPI> factory = null;
     }
 }

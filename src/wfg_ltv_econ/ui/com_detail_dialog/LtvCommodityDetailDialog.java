@@ -42,6 +42,7 @@ import wfg_ltv_econ.ui.LtvTextPanel;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.SortableTable.ColumnManager;
+import wfg_ltv_econ.ui.SortableTable.HeaderPanelWithTooltip;
 import wfg_ltv_econ.ui.SortableTable.PendingTooltip;
 import wfg_ltv_econ.ui.SortableTable;
 import wfg_ltv_econ.util.CommodityStats;
@@ -888,8 +889,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
-        // Must be initialized after the construction of the table. Its attachment panel does not exist yet.
-        PendingTooltip QuantityTooltip = new PendingTooltip();
+        PendingTooltip quantityTooltip = new PendingTooltip();
+        createSection3QuantityHeaderTooltipFactory(mode, table, quantityTooltip);
 
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
         :
@@ -904,7 +905,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", true, true, 1,
             "Size", (int)(0.09 * SECT3_WIDTH), "Colony size.", false, false, -1,
             "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
-            "Quantity", (int)(0.15 * SECT3_WIDTH), QuantityTooltip, false, false, -1,
+            "Quantity", (int)(0.15 * SECT3_WIDTH), quantityTooltip, false, false, -1,
             "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
             marketHeader, (int)(0.15 * SECT3_WIDTH), marketTpDesc, false, false, -1,
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
@@ -1006,10 +1007,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             updateSection1();
             updateSection2();
         });
-
-        // Initializing empty tooltips
-
-        createSection3QuantityHeaderTooltip(mode, table, QuantityTooltip);
     }
 
     private void createSection4(CustomPanelAPI section) {
@@ -1214,35 +1211,36 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         return tp;
     }
 
-    private void createSection3QuantityHeaderTooltip(int mode, SortableTable table,
-        PendingTooltip wrapper) {
+    private void createSection3QuantityHeaderTooltipFactory(int mode, SortableTable table, PendingTooltip wrapper) {
+        final String quantityDesc = mode == 0
+            ? "Shows units of the commodity that could be exported."
+            : "Shows demand for a commodity.";
 
-        final String QuantityDesc = mode == 0 ? "Shows units of the commodity that could be exported."
-        :
-        "Shows demand for a commodity.";
+        wrapper.factory = () -> {
+            UIPanelAPI attachmentPoint = null;
 
-        UIPanelAPI attachmentPoint = null;
-
-        for (ColumnManager column : table.getColumns()) {
-            if (column.title.equals("Quantity")) {
-                attachmentPoint = column.getHeaderPanel();
-                break;
+            for (ColumnManager column : table.getColumns()) {
+                if ("Quantity".equals(column.title)) {
+                    attachmentPoint = ((HeaderPanelWithTooltip) column.getHeaderPanel())
+                    .getTooltipAttachmentPoint();
+                    break;
+                }
             }
-        }
 
-        TooltipMakerAPI tp = ((CustomPanelAPI)attachmentPoint).createUIElement(
-            SortableTable.headerTooltipWidth, 0, false
-        );
+            TooltipMakerAPI tp = ((CustomPanelAPI) attachmentPoint).createUIElement(
+                SortableTable.headerTooltipWidth, 0, false
+            );
 
-        tp.addPara(QuantityDesc, pad);
+            tp.addPara(quantityDesc, pad);
 
-        AtomicInteger y = new AtomicInteger((int)tp.getHeightSoFar() + pad);
+            AtomicInteger y = new AtomicInteger((int) tp.getHeightSoFar() + pad);
 
-        LtvCommodityRowPanel.legendRowCreator(
-            tp, y, 26, m_parentWrapper.getRoot(), m_parentWrapper.getPanel(), m_parentWrapper.m_market
-        );
+            LtvCommodityRowPanel.legendRowCreator(
+                tp, y, 26, m_parentWrapper.getRoot(), m_parentWrapper.getPanel(), m_parentWrapper.m_market
+            );
 
-        wrapper.tooltip = tp;
+            return tp;
+        };
     }
     
     @Override
