@@ -59,6 +59,7 @@ public class SortableTable extends LtvCustomPanel {
 
     public final static int pad = 3;
     public final static int opad = 10;
+    public final static int headerTooltipWidth = 450;
 
     public final static String sortIconPath;
     static {
@@ -98,6 +99,8 @@ public class SortableTable extends LtvCustomPanel {
 
             int lastHeaderPad = i + 1 == m_columns.size() ? pad*3 : 0;
 
+            UIPanelAPI panel = null;
+
             // Merged headers
             if (column.isMerged()) {
                 int setID = column.getSetID();
@@ -114,35 +117,39 @@ public class SortableTable extends LtvCustomPanel {
                 }
 
                 if (column.tooltip == null) {
-                    m_headerContainer.addComponent(new HeaderPanel(
-                        getRoot(), getPanel(), mergedWidth - pad, m_headerHeight,
-                        m_market, column, i
-                    ).getPanel()).inTL(cumulativeXOffset, 0);
+                    panel = new HeaderPanel(
+                        getRoot(), getPanel(), mergedWidth - pad, m_headerHeight, m_market, column, i
+                    ).getPanel();
                 } else {
-                    m_headerContainer.addComponent(new HeaderPanelWithTooltip(
-                        getRoot(), getPanel(), mergedWidth - pad, m_headerHeight,
-                        m_market, column, i
-                    ).getPanel()).inTL(cumulativeXOffset, 0);
+                    panel = new HeaderPanelWithTooltip(
+                        getRoot(), getPanel(), mergedWidth - pad, m_headerHeight, m_market, column, i
+                    ).getPanel();
                 }
+
+                m_headerContainer.addComponent(panel).inTL(cumulativeXOffset, 0);
 
                 cumulativeXOffset += mergedWidth;
 
             // Standalone header
             } else {
                 if (column.tooltip == null) {
-                    m_headerContainer.addComponent(new HeaderPanel(
+                    panel = new HeaderPanel(
                         getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         m_market, column, i
-                    ).getPanel()).inTL(cumulativeXOffset, 0);
+                    ).getPanel();
                 } else {
-                    m_headerContainer.addComponent(new HeaderPanelWithTooltip(
+                    panel = new HeaderPanelWithTooltip(
                         getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         m_market, column, i
-                    ).getPanel()).inTL(cumulativeXOffset, 0);
+                    ).getPanel();
                 }
+
+                m_headerContainer.addComponent(panel).inTL(cumulativeXOffset, 0);
 
                 cumulativeXOffset += column.width;
             }
+
+            column.setHeaderPanel(panel);
         }
 
         getPanel().addComponent(m_headerContainer).inTL(0,0);
@@ -253,12 +260,16 @@ public class SortableTable extends LtvCustomPanel {
             getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
         }
 
+        public UIPanelAPI getTooltipAttachmentPoint() {
+            return getParent();
+        }
+
         public TooltipMakerAPI createTooltip() {
             final TooltipMakerAPI tooltip;
 
             if (column.getTooltipType() == String.class) {
                 tooltip = ((CustomPanelAPI) getParent()).createUIElement(
-                        400, 0, false);
+                        headerTooltipWidth, 0, false);
     
                 tooltip.addPara((String) column.tooltip, pad);
             } else if (column.getTooltipType() == TooltipMakerAPI.class) {
@@ -296,12 +307,13 @@ public class SortableTable extends LtvCustomPanel {
         return m_selectedRow;
     }
 
-    private class ColumnManager {
+    public class ColumnManager {
 
         public String title;
         public int width;
         public Object tooltip;
-
+        
+        private UIPanelAPI panel = null;
         private boolean isMerged = false;
         private boolean isParent = false;
         private int mergeSetID = 0;
@@ -335,8 +347,17 @@ public class SortableTable extends LtvCustomPanel {
         public boolean isParent() {
             return isParent;
         }
+
         public int getSetID() {
             return mergeSetID;
+        }
+
+        public UIPanelAPI getHeaderPanel() {
+            return panel;
+        }
+
+        public void setHeaderPanel(UIPanelAPI a) {
+            panel = a;
         }
     }
 
@@ -477,10 +498,14 @@ public class SortableTable extends LtvCustomPanel {
             }
         }
 
+        public UIPanelAPI getTooltipAttachmentPoint() {
+            return getParent();
+        }
+        
         public TooltipMakerAPI createTooltip() {
             if (m_tooltip == null) {
                 m_tooltip = ((CustomPanelAPI) getParent()).createUIElement(
-                    400, 0, false);
+                    headerTooltipWidth, 0, false);
             }
 
             (SortableTable.this.getPanel()).addUIElement(m_tooltip);

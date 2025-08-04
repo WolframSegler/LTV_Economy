@@ -125,6 +125,13 @@ public abstract class LtvCustomPanel{
     public abstract void createPanel();
 
     public static interface TooltipProvider {
+
+        /**
+        * Return the panel the tooltip should be attached to.
+        * Must return a non-null UIPanelAPI.
+        */
+        UIPanelAPI getTooltipAttachmentPoint();
+
         /**
         * The LtvCustomPanelPlugin will call this.
         * Can be left empty for no tooltip.

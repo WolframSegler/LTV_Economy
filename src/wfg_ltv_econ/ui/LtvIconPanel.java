@@ -50,6 +50,11 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
     public void createPanel() {}
 
     @Override
+    public UIPanelAPI getTooltipAttachmentPoint() {
+        return getParent();
+    }
+
+    @Override
     public TooltipMakerAPI createTooltip() {
         if (m_com == null) {
             return null;

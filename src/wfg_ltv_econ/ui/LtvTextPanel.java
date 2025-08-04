@@ -14,7 +14,7 @@ import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 
 /**
  * Each instance implements createPanel, createTooltip etc. when creating the class.
- * The class just serves as a template.
+ * The class just serves as a template for anonymous classes.
  */
 public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
 
@@ -51,6 +51,11 @@ public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.Toolt
 
     public void createPanel() {
 
+    }
+
+    @Override
+    public UIPanelAPI getTooltipAttachmentPoint() {
+        return null;
     }
 
     @Override
