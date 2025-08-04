@@ -7,8 +7,8 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
+import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
 import wfg_ltv_econ.ui.LtvCustomPanel;
-import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog;
 import wfg_ltv_econ.util.RenderUtils;
 
 public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {

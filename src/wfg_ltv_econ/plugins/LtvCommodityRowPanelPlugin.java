@@ -10,8 +10,8 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.input.InputEventAPI;
 
+import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
 import wfg_ltv_econ.ui.LtvCommodityRowPanel;
-import wfg_ltv_econ.ui.com_detail_dialog.LtvCommodityDetailDialog;
 import wfg_ltv_econ.util.UiUtils;
 
 public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {

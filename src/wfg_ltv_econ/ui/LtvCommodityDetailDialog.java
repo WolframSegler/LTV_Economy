@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.com_detail_dialog;
+package wfg_ltv_econ.ui;
 
 import java.awt.Color;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,19 +31,10 @@ import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.LtvBasePanel;
-import wfg_ltv_econ.ui.LtvCommodityPanel;
-import wfg_ltv_econ.ui.LtvCommodityRowPanel;
-import wfg_ltv_econ.ui.LtvCustomPanel;
-import wfg_ltv_econ.ui.LtvIconPanel;
-import wfg_ltv_econ.ui.LtvSpritePanel;
-import wfg_ltv_econ.ui.LtvTextPanel;
-import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.SortableTable.ColumnManager;
 import wfg_ltv_econ.ui.SortableTable.HeaderPanelWithTooltip;
 import wfg_ltv_econ.ui.SortableTable.PendingTooltip;
-import wfg_ltv_econ.ui.SortableTable;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
