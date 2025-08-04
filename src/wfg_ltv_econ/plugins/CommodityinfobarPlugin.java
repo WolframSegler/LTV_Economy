@@ -6,10 +6,10 @@ import java.util.Map;
 import java.awt.Color;
 
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
-import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.util.RenderUtils;
 
@@ -18,13 +18,11 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
 
     private CustomPanelAPI m_panel;
     private HashMap<Color, Float> m_barMap;
-    private FactionAPI m_faction;
     private boolean hasOutline = false;
 
-    public void init(CustomPanelAPI panel, boolean hasOutline, HashMap<Color, Float> barMap, FactionAPI faction) {
+    public void init(CustomPanelAPI panel, boolean hasOutline, HashMap<Color, Float> barMap) {
         m_panel = panel;
         m_barMap = barMap;
-        m_faction = faction;
         this.hasOutline = hasOutline;
     }
    
@@ -45,7 +43,7 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
         }
 
         if (hasOutline) {
-            RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_faction.getGridUIColor(), alphaMult);
+            RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), Misc.getDarkPlayerColor(), alphaMult);
         }
     }
 	

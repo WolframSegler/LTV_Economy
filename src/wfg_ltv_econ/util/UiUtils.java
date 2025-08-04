@@ -106,7 +106,13 @@ public class UiUtils {
     public static final Color COLOR_EXPORT = new Color(63,  175, 63);
     public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
 
-    public static void CommodityInfoBar(TooltipMakerAPI tooltip, int barHeight, CommodityStats comStats) {
+    public static void CommodityInfoBar(TooltipMakerAPI tooltip, int barHeight, int barWidth, CommodityStats comStats) {
+        final CustomPanelAPI infoBar = CommodityInfoBar(barHeight, barWidth, comStats);
+
+        tooltip.addCustom(infoBar, 3);
+    }
+
+    public static CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStats comStats) {
 
         float localProducedRatio = (float)comStats.demandMetWithLocal / (float)comStats.totalActivity;
         float inFactionImportRatio = (float)comStats.inFactionImports / (float)comStats.totalActivity;
@@ -129,11 +135,13 @@ public class UiUtils {
             }
         }
 
-        CustomPanelAPI infoBar = Global.getSettings().createCustom(85, barHeight, new CommodityinfobarPlugin());
+        CustomPanelAPI infoBar = Global.getSettings().createCustom(
+            barWidth, barHeight, new CommodityinfobarPlugin()
+        );
         ((CommodityinfobarPlugin)infoBar.getPlugin()).init(
-            infoBar, true, barMap, comStats.market.getFaction()
+            infoBar, true, barMap
         );
 
-        tooltip.addCustom(infoBar, 3);
+        return infoBar;
     }
 }

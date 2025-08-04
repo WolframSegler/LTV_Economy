@@ -446,8 +446,8 @@ public class SortableTable extends LtvCustomPanel {
 
                 } else if (cell instanceof UIPanelAPI) {
                     comp = (UIComponentAPI) cell;
-                    compWidth = ((LtvSpritePanel) cell).getPanelPos().getWidth();
-                    compHeight = ((LtvSpritePanel) cell).getPanelPos().getHeight();
+                    compWidth = ((UIComponentAPI) cell).getPosition().getWidth();
+                    compHeight = ((UIComponentAPI) cell).getPosition().getHeight();
 
                 } else if (cell instanceof LabelAPI) {
                     LabelAPI label = (LabelAPI) cell;

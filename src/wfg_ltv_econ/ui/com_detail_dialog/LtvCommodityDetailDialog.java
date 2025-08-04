@@ -945,6 +945,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             );
             long quantityValue = mode == 0 ? comStats.globalExport : comStats.externalImports;
 
+            CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, comStats);
+
             int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
             int maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
 
@@ -975,7 +977,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             table.addCell(marketSize, Alignment.MID, null, textColor);
             table.addCell(factionName, Alignment.MID, null, textColor);
             table.addCell(quantityTxt, Alignment.MID, quantityValue, null);
-            table.addCell(quantityTxt, Alignment.MID, quantityValue, null);
+            table.addCell(infoBar, Alignment.MID, null, null);
             table.addCell(access, Alignment.MID, accessibility, null);
             table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
             table.addCell(incomeText, Alignment.MID, incomeValue, null);

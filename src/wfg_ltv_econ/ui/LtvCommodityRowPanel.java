@@ -108,7 +108,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             (rowHeight - iconSize) / 2);
 
         // Info Bar
-        UiUtils.CommodityInfoBar(tooltip, iconSize, m_comStats);
+        UiUtils.CommodityInfoBar(tooltip, iconSize, 85, m_comStats);
         tooltip.getPrev().getPosition().inBL(labelWidth + iconSize + opad/2, (rowHeight - iconSize) / 2);
 
         // Source Icon
