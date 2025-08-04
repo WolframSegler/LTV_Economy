@@ -7,6 +7,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 
 public class CommodityStats {
 
@@ -33,15 +34,18 @@ public class CommodityStats {
     public long demandMetWithLocal = 0;
     public long demandMetNotWithLocal = 0;
 
-
     public CommodityStats(CommodityOnMarketAPI com, MarketAPI market) {
-        this.m_com = market.getCommodityData(com.getId());
+        final String comID = com.getId();
+
+        this.m_com = market.getCommodityData(comID);
         this.market = market;
+
+        recalculateTotalDemandSupplyForCommodity(market, comID);
 
         int shippingGlobal = Global.getSettings().getShippingCapacity(market, false);
         int shippingInFaction = Global.getSettings().getShippingCapacity(market, true);
 
-        localProduction = getLocalProduction(market, m_com.getId());
+        localProduction = getLocalProduction(market, comID);
         available = Math.max(m_com.getAvailable(), localProduction);
 
         localDemand = m_com.getMaxDemand();
@@ -59,16 +63,16 @@ public class CommodityStats {
         // Scan availability mods for same-faction foreign sources
         inFactionImports = 0;
         // for (StatMod mod : m_com.getAvailableStat().getFlatMods().values()) {
-        //     Object source = mod.getSource();
-        //     if (source instanceof String) {
-        //         String sourceId = (String) source;
-        //         MarketAPI sourceMarket = Global.getSector().getEconomy().getMarket(sourceId);
-        //         if (sourceMarket != null &&
-        //                 !sourceMarket.getId().equals(market.getId()) &&
-        //                 sourceMarket.getFactionId().equals(market.getFactionId())) {
-        //             inFactionImports += mod.value;
-        //         }
-        //     }
+        // Object source = mod.getSource();
+        // if (source instanceof String) {
+        // String sourceId = (String) source;
+        // MarketAPI sourceMarket = Global.getSector().getEconomy().getMarket(sourceId);
+        // if (sourceMarket != null &&
+        // !sourceMarket.getId().equals(market.getId()) &&
+        // sourceMarket.getFactionId().equals(market.getFactionId())) {
+        // inFactionImports += mod.value;
+        // }
+        // }
         // }
 
         inFactionImports = Math.min(inFactionImports, totalImports);
@@ -78,7 +82,7 @@ public class CommodityStats {
         long totalExportable = Math.max(0, localProduction - localDemand);
 
         List<MarketAPI> factionMarkets = getFactionMarkets(market.getFactionId());
-        int totalFactionDemand = getUnmetLocalDemand(factionMarkets, m_com.getId());
+        int totalFactionDemand = getUnmetLocalDemand(factionMarkets, comID);
         int inFactionExportable = Math.min(totalFactionDemand, shippingInFaction);
         inFactionExport = Math.min(totalExportable, inFactionExportable);
 
@@ -88,22 +92,25 @@ public class CommodityStats {
 
         canNotExport = totalExportable - (inFactionExport + globalExport);
 
-        if (inFactionExport < 0) inFactionExport = 0;
+        if (inFactionExport < 0)
+            inFactionExport = 0;
 
-        if (externalImports < 0) externalImports = 0;
+        if (externalImports < 0)
+            externalImports = 0;
 
-        if (demandMetWithLocal < 0) demandMetWithLocal = 0;
+        if (demandMetWithLocal < 0)
+            demandMetWithLocal = 0;
     }
 
     public static List<MarketAPI> getFactionMarkets(String factionId) {
         List<MarketAPI> result = new ArrayList<>();
-        
+
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
             if (market.getFactionId().equals(factionId) && market.isPlanetConditionMarketOnly() == false) {
                 result.add(market);
             }
         }
-        
+
         return result;
     }
 
@@ -128,13 +135,56 @@ public class CommodityStats {
 
     public static int getLocalProduction(MarketAPI market, String comID) {
         int totalProd = 0;
-        for(Industry industry : market.getIndustries()) {
-            if(industry.getSupply(comID).getQuantity().getModifiedInt() < 1) {
+        for (Industry industry : market.getIndustries()) {
+            if (industry.getSupply(comID).getQuantity().getModifiedInt() < 1) {
                 continue;
             }
             totalProd += industry.getSupply(comID).getQuantity().getModifiedInt();
         }
         return totalProd;
+    }
+
+    public static List<Industry> getVisibleIndustries(MarketAPI market) {
+        List<Industry> industries = new ArrayList<>(market.getIndustries());
+        industries.removeIf(Industry::isHidden);
+        return industries;
+    }
+
+    public static void recalculateTotalDemandSupplyForCommodity(MarketAPI market, String comID) {
+        CommodityOnMarketAPI com = market.getCommodityData(comID);
+
+        com.setMaxDemand(0);
+        com.setMaxSupply(0);
+
+        for (Industry industry : getVisibleIndustries(market)) {
+
+            // Ensure that the demand uses the ID of the commodity
+            int demand = industry.getDemand(comID).getQuantity().getModifiedInt();
+            com.setMaxDemand(com.getMaxDemand() + demand);
+
+            int supply = industry.getSupply(comID).getQuantity().getModifiedInt();
+            com.setMaxSupply(com.getMaxSupply() + supply);
+        }
+    }
+
+    public static void recalculateMaxDemandAndSupplyForAll(MarketAPI market) {
+        // Resets Max Demand & Supply
+        for (CommodityOnMarketAPI com : market.getAllCommodities()) {
+            com.setMaxDemand(0);
+            com.setMaxSupply(0);
+        }
+
+        for (Industry industry : getVisibleIndustries(market)) {
+            for (MutableCommodityQuantity demand : industry.getAllDemand()) {
+                CommodityOnMarketAPI com = market.getCommodityData(demand.getCommodityId());
+                com.setMaxDemand(com.getMaxDemand() + demand.getQuantity().getModifiedInt());
+            }
+
+            for (MutableCommodityQuantity supply : industry.getAllSupply()) {
+                CommodityOnMarketAPI com = market.getCommodityData(supply.getCommodityId());
+                com.setMaxSupply(com.getMaxSupply() + supply.getQuantity().getModifiedInt());
+            }
+        }
     }
 
     public void printAllInfo() {
@@ -155,7 +205,7 @@ public class CommodityStats {
         Global.getLogger(getClass()).error("demandMetNotWithLocal: " + demandMetNotWithLocal);
         Global.getLogger(getClass()).error("available: " + available);
 
-        float total1 = demandMetWithLocal +inFactionExport + globalExport + canNotExport;
+        float total1 = demandMetWithLocal + inFactionExport + globalExport + canNotExport;
         total1 += inFactionImports + externalImports + localDeficit;
 
         float total1Ratio = total1 / totalActivity;

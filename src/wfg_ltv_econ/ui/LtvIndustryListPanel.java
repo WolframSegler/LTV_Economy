@@ -17,6 +17,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.s;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 import com.fs.starfarer.ui.newui.L;
 
+import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.ReflectionUtils;
 
 import com.fs.starfarer.ui.d;
@@ -31,34 +32,8 @@ public class LtvIndustryListPanel extends IndustryListPanel {
       super(var1, var2, var3);
    }
 
-   private List<Industry> getVisibleIndustries() {
-      List<Industry> industries = new ArrayList<>(market.getIndustries());
-      industries.removeIf(Industry::isHidden);
-      return industries;
-   }
-
    public static Comparator<Industry> getIndustryOrderComparator() {
       return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
-   }
-
-   public void ltv_recalculateMaxDemandAndSupply() {
-      // Resets Max Demand & Supply
-      for (CommodityOnMarketAPI com : market.getAllCommodities()) {
-         com.setMaxDemand(0);
-         com.setMaxSupply(0);
-      }
-
-      for (Industry industry : getVisibleIndustries()) {
-         for (MutableCommodityQuantity demand : industry.getAllDemand()) {
-            CommodityOnMarketAPI com = market.getCommodityData(demand.getCommodityId());
-			   com.setMaxDemand(com.getMaxDemand() + demand.getQuantity().getModifiedInt());
-         }
-
-         for (MutableCommodityQuantity supply : industry.getAllSupply()) {
-            CommodityOnMarketAPI com = market.getCommodityData(supply.getCommodityId());
-			   com.setMaxSupply(com.getMaxSupply() + supply.getQuantity().getModifiedInt());
-         }
-      }
    }
 
    @Override
@@ -76,7 +51,7 @@ public class LtvIndustryListPanel extends IndustryListPanel {
       }
       /* Grandparent Code Block */
       widgets.clear();
-      List<Industry> industries = getVisibleIndustries();
+      List<Industry> industries = CommodityStats.getVisibleIndustries(market);
       Collections.sort(industries, getIndustryOrderComparator());
       List<ConstructionQueueItem> queuedIndustries = market.getConstructionQueue().getItems();
       float opad = 20.0F;
@@ -138,6 +113,6 @@ public class LtvIndustryListPanel extends IndustryListPanel {
          }
       }
 
-      ltv_recalculateMaxDemandAndSupply();
+      CommodityStats.recalculateMaxDemandAndSupplyForAll(market);
    }
 }

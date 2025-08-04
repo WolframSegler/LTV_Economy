@@ -939,10 +939,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 mode == 0 ? comStats.globalExport : comStats.externalImports
             );
 
-            int accessibility = (int) market.getAccessibilityMod().getFlatBonus() * 100;
+            int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
             int maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
 
-            String access = ((int)accessibility) + "% (" + maxExportCapacity + ")";
+            String access = (accessibility) + "% (" + maxExportCapacity + ")";
 
             int marketShare = market.getCommodityData(m_com.getId())
                     .getCommodityMarketData().getMarketValuePercent(market);
@@ -1150,7 +1150,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         tp.addSectionHeading("Colony accessibility", baseColor, darkColor, Alignment.MID, opad);
 
-        int stability = Math.round(market.getAccessibilityMod().computeEffective(0) * 100);
+        int stability = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
         Color valueColor = highlight;
         if (stability <= 0) {
             valueColor = negative;
