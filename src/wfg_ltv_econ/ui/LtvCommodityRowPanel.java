@@ -266,9 +266,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
             AtomicInteger y = new AtomicInteger((int)tooltip.getHeightSoFar() + opad + pad);
 
-            legendRowCreator(tooltip, y, legendIconSize, getRoot(), m_panel, m_market);
-
-            tooltip.setHeightSoFar(y.get() + opad*2);
+            legendRowCreator(0, tooltip, y, legendIconSize, getRoot(), m_panel, m_market);
 
             final int codexW = 200; 
             
@@ -302,44 +300,47 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
     /**
      * Renders the legend icons and their descriptions in the given tooltip at the specified starting y-position.
-     *
-     * @param tooltip The TooltipMakerAPI instance to add components to.
-     * @param startY The initial vertical position (y-coordinate) to start rendering the icons.
-     * @param iconSize The size (width and height) of each legend icon.
-     * @param pad The vertical padding between each legend row.
+     * 
+     * <br></br> MODE_0: shows everything.
+     * <br></br> MODE_1: shows only the CommodityInfoBar relevant info.
      */
-    public static void legendRowCreator(TooltipMakerAPI tooltip, AtomicInteger y, int iconSize,
+    public static void legendRowCreator(int mode, TooltipMakerAPI tooltip, AtomicInteger y, int iconSize,
         UIPanelAPI root, UIPanelAPI panel, MarketAPI market) {
 
-        String iconPath = Global.getSettings().getSpriteName("commodity_markers", "production");
-        String desc = "Demand met through local production.";
-        legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, null, root, panel, market);
+        String iconPath;
+        String desc;
 
-        y.addAndGet(iconSize + pad);
-
-        iconPath = market.getFaction().getCrest();
-        desc = "Demand met through in-faction imports.";
-        legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, null, root, panel, market);
-
-        y.addAndGet(iconSize + pad);
-
-        iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
-        desc = "Demand met through imports from outside the faction.";
-        legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, null, root, panel, market);
-        
-        y.addAndGet(iconSize + pad);
-
-        iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
-        desc = "Excess local production that is exported.";
-        legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, null, root, panel, market);
-        
-        y.addAndGet(iconSize + pad);
-
-        iconPath = "";
-        desc = "Smuggled or produced by an illegal enterprise. No income from exports.";
-        legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, true, null, root, panel, market);
-        
-        y.addAndGet(iconSize + pad);
+        if (mode == 0) {
+            iconPath = Global.getSettings().getSpriteName("commodity_markers", "production");
+            desc = "Demand met through local production.";
+            legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, null, root, panel, market);
+    
+            y.addAndGet(iconSize + pad);
+    
+            iconPath = market.getFaction().getCrest();
+            desc = "Demand met through in-faction imports.";
+            legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, null, root, panel, market);
+    
+            y.addAndGet(iconSize + pad);
+    
+            iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
+            desc = "Demand met through imports from outside the faction.";
+            legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, null, root, panel, market);
+            
+            y.addAndGet(iconSize + pad);
+    
+            iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
+            desc = "Excess local production that is exported.";
+            legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, null, root, panel, market);
+            
+            y.addAndGet(iconSize + pad);
+    
+            iconPath = "";
+            desc = "Smuggled or produced by an illegal enterprise. No income from exports.";
+            legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, true, null, root, panel, market);
+            
+            y.addAndGet(iconSize + pad);
+        }
 
         iconPath = "";
         desc = "Local production that could not be exported.";
@@ -374,6 +375,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         iconPath = "";
         desc = "Deficit - in demand, but not available. Higher prices.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_DEFICIT, root, panel, market);
+    
+        tooltip.setHeightSoFar(y.get() + opad*2);
     }
 
     private static void legendRowHelper(TooltipMakerAPI tooltip, int y, String iconPath, String desc, int lgdIconSize,

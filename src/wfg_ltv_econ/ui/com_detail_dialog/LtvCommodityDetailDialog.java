@@ -1233,10 +1233,16 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
             tp.addPara(quantityDesc, pad);
 
-            AtomicInteger y = new AtomicInteger((int) tp.getHeightSoFar() + pad);
+            AtomicInteger y = new AtomicInteger((int) tp.getHeightSoFar() + pad + opad);
 
             LtvCommodityRowPanel.legendRowCreator(
-                tp, y, 26, m_parentWrapper.getRoot(), m_parentWrapper.getPanel(), m_parentWrapper.m_market
+                1,
+                tp,
+                y,
+                26,
+                m_parentWrapper.getRoot(),
+                m_parentWrapper.getPanel(),
+                m_parentWrapper.m_market
             );
 
             return tp;
