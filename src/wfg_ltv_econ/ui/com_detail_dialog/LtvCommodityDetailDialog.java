@@ -1,6 +1,7 @@
 package wfg_ltv_econ.ui.com_detail_dialog;
 
 import java.awt.Color;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.lwjgl.input.Keyboard;
 
@@ -41,6 +42,7 @@ import wfg_ltv_econ.ui.LtvTextPanel;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.SortableTable.ColumnManager;
+import wfg_ltv_econ.ui.SortableTable.PendingTooltip;
 import wfg_ltv_econ.ui.SortableTable;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
@@ -887,7 +889,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
         // Must be initialized after the construction of the table. Its attachment panel does not exist yet.
-        TooltipMakerAPI QuantityTooltip = null;
+        PendingTooltip QuantityTooltip = new PendingTooltip();
 
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
         :
@@ -1007,7 +1009,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         // Initializing empty tooltips
 
-        QuantityTooltip = createSection3QuantityHeaderTooltip(mode, table);
+        createSection3QuantityHeaderTooltip(mode, table, QuantityTooltip);
     }
 
     private void createSection4(CustomPanelAPI section) {
@@ -1212,7 +1214,9 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         return tp;
     }
 
-    private TooltipMakerAPI createSection3QuantityHeaderTooltip(int mode, SortableTable table) {
+    private void createSection3QuantityHeaderTooltip(int mode, SortableTable table,
+        PendingTooltip wrapper) {
+
         final String QuantityDesc = mode == 0 ? "Shows units of the commodity that could be exported."
         :
         "Shows demand for a commodity.";
@@ -1220,7 +1224,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         UIPanelAPI attachmentPoint = null;
 
         for (ColumnManager column : table.getColumns()) {
-            if (column.title == "Quantity") {
+            if (column.title.equals("Quantity")) {
                 attachmentPoint = column.getHeaderPanel();
                 break;
             }
@@ -1232,13 +1236,13 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         tp.addPara(QuantityDesc, pad);
 
-        int y = (int)tp.getHeightSoFar() + pad;
+        AtomicInteger y = new AtomicInteger((int)tp.getHeightSoFar() + pad);
 
         LtvCommodityRowPanel.legendRowCreator(
             tp, y, 26, m_parentWrapper.getRoot(), m_parentWrapper.getPanel(), m_parentWrapper.m_market
         );
 
-        return tp;
+        wrapper.tooltip = tp;
     }
     
     @Override

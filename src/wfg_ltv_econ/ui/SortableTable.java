@@ -52,6 +52,10 @@ public class SortableTable extends LtvCustomPanel {
         selectionListener = a;
     }
 
+    public RowManager getPendingRow() {
+        return pendingRow;
+    }
+
     private RowManager m_selectedRow;
 
     private CustomPanelAPI m_headerContainer = null;
@@ -272,11 +276,11 @@ public class SortableTable extends LtvCustomPanel {
                         headerTooltipWidth, 0, false);
     
                 tooltip.addPara((String) column.tooltip, pad);
-            } else if (column.getTooltipType() == TooltipMakerAPI.class) {
-                tooltip = (TooltipMakerAPI) column.tooltip;
+            } else if (column.getTooltipType() == PendingTooltip.class) {
+                tooltip = ((PendingTooltip) column.tooltip).tooltip;
             } else {
                 throw new IllegalArgumentException(
-                    "Tooltip for header '" + column.title + "' has an illega type."
+                    "Tooltip for header '" + column.title + "' has an illegal type."
                 );
             }
 
@@ -333,8 +337,8 @@ public class SortableTable extends LtvCustomPanel {
             if (tooltip instanceof String) {
                 return String.class;
             }
-            if (tooltip instanceof TooltipMakerAPI) {
-                return TooltipMakerAPI.class;
+            if (tooltip instanceof PendingTooltip) {
+                return PendingTooltip.class;
             }
 
             return Object.class;
@@ -533,13 +537,18 @@ public class SortableTable extends LtvCustomPanel {
             m_sortValues.add(sort);
             m_useColor.add(textColor);
         }
+
+        public List<Object> getCellData() {
+            return m_cellData;
+        }
     }
 
     /**
      * Each set must contain the title of the header, its width, the text of the
-     * tooltip or any tooltip, whether if it is merged, if it is the parent and the ID of the mergeSet.
-     * The expected input is {String, int, String, Bool, Bool, int}.
-     * Or alternatively {String, int, TooltipMakerAPI, Bool, Bool, int}
+     * tooltip or a PendingTooltip, whether if it is merged, if it is the parent and the ID of the mergeSet.
+     * A merged non-parent header will not display a tooltip.
+     * <br></br> The expected input is {String, int, String, Bool, Bool, int}.
+     * Or alternatively {String, int, PendingTooltip, Bool, Bool, int}.
      * The tooltip and mergeSetID can be left empty:
      * {String, int, null, Bool, Bool, null}.
      */
@@ -564,8 +573,8 @@ public class SortableTable extends LtvCustomPanel {
             if (!(widthObj instanceof Number)) {
                 throw new IllegalArgumentException("Header width must be int.");
             }
-            if (tooltipObj != null && !(tooltipObj instanceof String) || !(tooltipObj instanceof TooltipMakerAPI)) {
-                throw new IllegalArgumentException("Tooltip text must be String, TooltipMakerAPI or null.");
+            if (tooltipObj != null && !(tooltipObj instanceof String || tooltipObj instanceof PendingTooltip)) {
+                throw new IllegalArgumentException("Tooltip text must be String, PendingTooltip or null.");
             }
             if (!(isMergedObj instanceof Boolean)) {
                 throw new IllegalArgumentException("isMerged must be Boolean.");
@@ -583,15 +592,6 @@ public class SortableTable extends LtvCustomPanel {
                             (String) titleObj,
                             ((Number) widthObj).intValue(),
                             (Object) tooltipObj,
-                            (Boolean) isMergedObj,
-                            (Boolean) isParentObj,
-                            mergeSetID));
-
-            m_columns.add(
-                    new ColumnManager(
-                            (String) titleObj,
-                            ((Number) widthObj).intValue(),
-                            (String) tooltipObj,
                             (Boolean) isMergedObj,
                             (Boolean) isParentObj,
                             mergeSetID));
@@ -718,5 +718,16 @@ public class SortableTable extends LtvCustomPanel {
         for (RowManager row : m_rows) {
             row.getPlugin().setPersistentGlow(row == selectedRow);
         }
+    }
+
+    /**
+     * A TooltipMakerAPI implementation that acts as a mutable shell.
+     * Used to pass null checks during UI construction. Actual content is added after
+     * panel instantiation.
+     *
+     * Used internally by SortableTable. Use this when creating a custom tooltip for a header.
+     */
+    public static class PendingTooltip {
+        public TooltipMakerAPI tooltip = null;
     }
 }
