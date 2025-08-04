@@ -26,10 +26,6 @@ import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 
-/**
- * Supports the following types:
- * String, LabelAPI, LtvSpritePanel
- */
 public class SortableTable extends LtvCustomPanel {
     private final List<ColumnManager> m_columns = new ArrayList<>();
     private final List<RowManager> m_rows = new ArrayList<>();
@@ -64,7 +60,7 @@ public class SortableTable extends LtvCustomPanel {
 
     public final static int pad = 3;
     public final static int opad = 10;
-    public final static int headerTooltipWidth = 450;
+    public final static int headerTooltipWidth = 250;
 
     public final static String sortIconPath;
     static {
@@ -373,7 +369,7 @@ public class SortableTable extends LtvCustomPanel {
         protected final List<Color> m_useColor = new ArrayList<>();
         protected String codexID = null;
         
-        public TooltipMakerAPI m_tooltip = null;
+        public PendingTooltip m_tooltip = null;
         public Color textColor = Misc.getBasePlayerColor();
 
         public RowManager(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
@@ -448,6 +444,11 @@ public class SortableTable extends LtvCustomPanel {
                     compWidth = ((LtvSpritePanel) cell).getPanelPos().getWidth();
                     compHeight = ((LtvSpritePanel) cell).getPanelPos().getHeight();
 
+                } else if (cell instanceof UIPanelAPI) {
+                    comp = (UIComponentAPI) cell;
+                    compWidth = ((LtvSpritePanel) cell).getPanelPos().getWidth();
+                    compHeight = ((LtvSpritePanel) cell).getPanelPos().getHeight();
+
                 } else if (cell instanceof LabelAPI) {
                     LabelAPI label = (LabelAPI) cell;
                     comp = (UIComponentAPI) label;
@@ -509,20 +510,23 @@ public class SortableTable extends LtvCustomPanel {
         
         public TooltipMakerAPI createTooltip() {
             if (m_tooltip == null) {
-                m_tooltip = ((CustomPanelAPI) getParent()).createUIElement(
+                // Invisible header
+                return ((CustomPanelAPI) getParent()).createUIElement(
                     headerTooltipWidth, 0, false);
             }
 
-            (SortableTable.this.getPanel()).addUIElement(m_tooltip);
-            (SortableTable.this.getPanel()).bringComponentToTop(m_tooltip);
-            TooltipUtils.mouseCornerPos(m_tooltip, opad);
+            TooltipMakerAPI tooltip = m_tooltip.factory.get();
+
+            (SortableTable.this.getPanel()).addUIElement(tooltip);
+            (SortableTable.this.getPanel()).bringComponentToTop(tooltip);
+            TooltipUtils.mouseCornerPos(tooltip, opad);
 
             if (codexID != null) {
-                m_tooltip.setCodexEntryId(codexID);
-                UiUtils.positionCodexLabel(m_tooltip, opad, pad);
+                tooltip.setCodexEntryId(codexID);
+                UiUtils.positionCodexLabel(tooltip, opad, pad);
             }
 
-            return m_tooltip;
+            return tooltip;
         }
 
         public void removeTooltip(TooltipMakerAPI tooltip) {
@@ -601,7 +605,8 @@ public class SortableTable extends LtvCustomPanel {
 
     /**
      * The call order of addCell must match the order of Columns.
-     * CodexID is optional.
+     * Supports the following types:
+     * String, LabelAPI, LtvSpritePanel, UIPanelAPI, CustomPanelAPI
      */
     public void addCell(Object cell, Alignment alg, Object sort, Color textColor) {
         if (pendingRow == null) {
@@ -628,9 +633,10 @@ public class SortableTable extends LtvCustomPanel {
      * The {@code textColor} sets all the cells to that color.
      * The {@code market} is used for certain colors and location info.
      * {@code glowClr} can be null.
-     * The {@code tp} can be null. It must be attached to the SortableTable instance due to a design limitation.
+     * {@code codexID} is optional.
+     * The {@code PendingTooltip} can be null.
      */
-    public void pushRow(String codexID, MarketAPI market, Color textColor, Color glowClr, TooltipMakerAPI tp) {
+    public void pushRow(String codexID, MarketAPI market, Color textColor, Color glowClr, PendingTooltip tp) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
                     + "Call addCell() before pushRow().");
@@ -726,7 +732,8 @@ public class SortableTable extends LtvCustomPanel {
      * Used to pass null checks during UI construction. Actual content is added after
      * panel instantiation.
      *
-     * Used internally by SortableTable. Use the factory when creating a custom tooltip for a header.
+     * Used internally by SortableTable.
+     * Use the factory when creating a custom tooltip for headers and rows.
      */
     public static class PendingTooltip {
         public Supplier<TooltipMakerAPI> factory = null;

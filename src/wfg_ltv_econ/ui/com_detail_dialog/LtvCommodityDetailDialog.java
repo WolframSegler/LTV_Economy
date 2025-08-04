@@ -905,7 +905,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", true, true, 1,
             "Size", (int)(0.09 * SECT3_WIDTH), "Colony size.", false, false, -1,
             "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
-            "Quantity", (int)(0.15 * SECT3_WIDTH), quantityTooltip, false, false, -1,
+            "Quantity", (int)(0.05 * SECT3_WIDTH), quantityTooltip, true, true, 2,
+            "", (int)(0.1 * SECT3_WIDTH), null, true, false, 2,
             "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
             marketHeader, (int)(0.15 * SECT3_WIDTH), marketTpDesc, false, false, -1,
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
@@ -974,13 +975,15 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             table.addCell(marketSize, Alignment.MID, null, textColor);
             table.addCell(factionName, Alignment.MID, null, textColor);
             table.addCell(quantityTxt, Alignment.MID, quantityValue, null);
+            table.addCell(quantityTxt, Alignment.MID, quantityValue, null);
             table.addCell(access, Alignment.MID, accessibility, null);
             table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
             table.addCell(incomeText, Alignment.MID, incomeValue, null);
 
             // Tooltip
-            TooltipMakerAPI tp = createSection3RowsTooltip(
-                table, market, marketName, textColor
+            PendingTooltip tp = new PendingTooltip();
+            createSection3RowsTooltip(
+                table, market, marketName, textColor, tp
             );
 
             table.pushRow(
@@ -1088,133 +1091,136 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         return total;
     }
 
-    private TooltipMakerAPI createSection3RowsTooltip(SortableTable table, MarketAPI market,
-        String marketName, Color baseColor) {
+    private void createSection3RowsTooltip(SortableTable table, MarketAPI market,
+        String marketName, Color baseColor, PendingTooltip wrapper) {
 
-        final int tpWidth = 450;
-        final CommodityOnMarketAPI com = market.getCommodityData(m_com.getId());
+        wrapper.factory = () -> {
 
-        TooltipMakerAPI tp = table.getPanel().createUIElement(
-            tpWidth, 0, false);
-
-        final FactionAPI faction = market.getFaction();
-        final CommodityStats comStats = new CommodityStats(com, market);
-
-        final Color highlight = Misc.getHighlightColor();
-        final Color negative = Misc.getNegativeHighlightColor();
-        final Color darkColor = faction.getDarkUIColor();
-
-        tp.setParaFont(Fonts.ORBITRON_12);
-        tp.addPara(marketName + " - " + com.getCommodity().getName(), baseColor, pad);
-        tp.setParaFontDefault();
-
-        String locString = "in the " + market.getContainingLocation().getNameWithLowercaseType();
-        if (market.getContainingLocation().isHyperspace()) {
-           locString = "in hyperspace";
-        }
-
-        tp.addPara(market.getName() + " is a size %s %s colony located " + locString +
-            ". Its current stability is %s.", opad, new Color[]{
-                highlight, baseColor, highlight
-            }, new String[]{
-                "" + market.getSize(),
-                market.getFaction().getPersonNamePrefix(),
-                "" + (int)market.getStabilityValue()
+            final int tpWidth = 450;
+            final CommodityOnMarketAPI com = market.getCommodityData(m_com.getId());
+    
+            TooltipMakerAPI tp = table.getPanel().createUIElement(
+                tpWidth, 0, false);
+    
+            final FactionAPI faction = market.getFaction();
+            final CommodityStats comStats = new CommodityStats(com, market);
+    
+            final Color highlight = Misc.getHighlightColor();
+            final Color negative = Misc.getNegativeHighlightColor();
+            final Color darkColor = faction.getDarkUIColor();
+    
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.addPara(marketName + " - " + com.getCommodity().getName(), baseColor, pad);
+            tp.setParaFontDefault();
+    
+            String locString = "in the " + market.getContainingLocation().getNameWithLowercaseType();
+            if (market.getContainingLocation().isHyperspace()) {
+               locString = "in hyperspace";
             }
-        );
-
-        tp.addPara("Income modifiers:", opad);
-
-        tp.addStatModGrid(tpWidth, 50, opad, pad,
-            market.getIncomeMult(), null
-        );
-
-        tp.addSectionHeading(com.getCommodity().getName() + " production & availability",
-        baseColor, darkColor, Alignment.MID, opad);
-            
-        TooltipUtils.createCommodityProductionBreakdown(
-            tp, com, comStats, highlight, negative
-        );
-
-        TooltipUtils.createCommodityDemandBreakdown(
-            tp, com, comStats, highlight, negative
-        );
-
-        final int econUnit = (int)com.getCommodity().getEconUnit();
-        final int sellPrice = (int)market.getDemandPrice(
-            com.getId(), (double)econUnit, true) / econUnit;
-        final int buyPrice = (int)market.getSupplyPrice(
-            com.getId(), (double)econUnit, true) / econUnit;
-
-        if (!com.isMeta()) {
-            if (comStats.totalExports > 0) {
-                tp.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), 
-                highlight, NumFormat.engNotation(comStats.totalExports));
-            } else if (comStats.localDeficit > 0) {
-                tp.addPara("Local deficit: %s units.", opad, negative, 
-                highlight, NumFormat.engNotation(comStats.localDeficit));
+    
+            tp.addPara(market.getName() + " is a size %s %s colony located " + locString +
+                ". Its current stability is %s.", opad, new Color[]{
+                    highlight, baseColor, highlight
+                }, new String[]{
+                    "" + market.getSize(),
+                    market.getFaction().getPersonNamePrefix(),
+                    "" + (int)market.getStabilityValue()
+                }
+            );
+    
+            tp.addPara("Income modifiers:", opad);
+    
+            tp.addStatModGrid(tpWidth, 50, opad, pad,
+                market.getIncomeMult(), null
+            );
+    
+            tp.addSectionHeading(com.getCommodity().getName() + " production & availability",
+            baseColor, darkColor, Alignment.MID, opad);
+                
+            TooltipUtils.createCommodityProductionBreakdown(
+                tp, com, comStats, highlight, negative
+            );
+    
+            TooltipUtils.createCommodityDemandBreakdown(
+                tp, com, comStats, highlight, negative
+            );
+    
+            final int econUnit = (int)com.getCommodity().getEconUnit();
+            final int sellPrice = (int)market.getDemandPrice(
+                com.getId(), (double)econUnit, true) / econUnit;
+            final int buyPrice = (int)market.getSupplyPrice(
+                com.getId(), (double)econUnit, true) / econUnit;
+    
+            if (!com.isMeta()) {
+                if (comStats.totalExports > 0) {
+                    tp.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), 
+                    highlight, NumFormat.engNotation(comStats.totalExports));
+                } else if (comStats.localDeficit > 0) {
+                    tp.addPara("Local deficit: %s units.", opad, negative, 
+                    highlight, NumFormat.engNotation(comStats.localDeficit));
+                }
+    
+                tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{
+                    Misc.getDGSCredits(buyPrice), Misc.getDGSCredits(sellPrice), Misc.getWithDGS(econUnit)
+                });
             }
-
-            tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{
-                Misc.getDGSCredits(buyPrice), Misc.getDGSCredits(sellPrice), Misc.getWithDGS(econUnit)
+    
+            tp.addSectionHeading("Colony accessibility", baseColor, darkColor, Alignment.MID, opad);
+    
+            int stability = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
+            Color valueColor = highlight;
+            if (stability <= 0) {
+                valueColor = negative;
+            }
+    
+            tp.addPara("Accessibility: %s", opad, valueColor, stability + "%");
+    
+            tp.addStatModGrid(tpWidth, 50.0F, opad, pad, market.getAccessibilityMod(),
+                new StatModValueGetter() {
+                public String getPercentValue(StatMod value) {
+                    return null;
+                }
+    
+                public String getMultValue(StatMod value) {
+                    return null;
+                }
+    
+                public Color getModColor(StatMod value) {
+                    return value.value < 0 ? negative : null;
+                }
+    
+                public String getFlatValue(StatMod value) {
+                    return value.value >= 0 ? "+" + Math.round(value.value * 100) + "%" : Math.round(value.value * 100) + "%";
+                }
             });
-        }
-
-        tp.addSectionHeading("Colony accessibility", baseColor, darkColor, Alignment.MID, opad);
-
-        int stability = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
-        Color valueColor = highlight;
-        if (stability <= 0) {
-            valueColor = negative;
-        }
-
-        tp.addPara("Accessibility: %s", opad, valueColor, stability + "%");
-
-        tp.addStatModGrid(tpWidth, 50.0F, opad, pad, market.getAccessibilityMod(),
-            new StatModValueGetter() {
-            public String getPercentValue(StatMod value) {
-                return null;
-            }
-
-            public String getMultValue(StatMod value) {
-                return null;
-            }
-
-            public Color getModColor(StatMod value) {
-                return value.value < 0 ? negative : null;
-            }
-
-            public String getFlatValue(StatMod value) {
-                return value.value >= 0 ? "+" + Math.round(value.value * 100) + "%" : Math.round(value.value * 100) + "%";
-            }
-        });
-
-        final String seperator = "   - ";
-        int shippingGlobal = Global.getSettings().getShippingCapacity(market, false);
-        int shippingInFaction = Global.getSettings().getShippingCapacity(market, true);
-
-        tp.addPara(seperator + "Same-faction imports and exports limited to %s units",
-            opad, highlight, NumFormat.engNotation(shippingInFaction));
-        tp.addPara(seperator + "Other imports and exports limited to %s units",
-            0, highlight, NumFormat.engNotation(shippingGlobal));
-
-        stability = Math.max(stability, 0);
-        
-        tp.addPara(seperator + "Market share of exports multiplied by %s",
-            0, highlight, Strings.X + Misc.getRoundedValue(stability / 100.0F));
-        tp.addPara(
-            "The same-faction export bonus does not increase market share or income from exports.", opad
-        );
-
-        tp.addSpacer(opad + pad);
-
-        return tp;
+    
+            final String seperator = "   - ";
+            int shippingGlobal = Global.getSettings().getShippingCapacity(market, false);
+            int shippingInFaction = Global.getSettings().getShippingCapacity(market, true);
+    
+            tp.addPara(seperator + "Same-faction imports and exports limited to %s units",
+                opad, highlight, NumFormat.engNotation(shippingInFaction));
+            tp.addPara(seperator + "Other imports and exports limited to %s units",
+                0, highlight, NumFormat.engNotation(shippingGlobal));
+    
+            stability = Math.max(stability, 0);
+            
+            tp.addPara(seperator + "Market share of exports multiplied by %s",
+                0, highlight, Strings.X + Misc.getRoundedValue(stability / 100.0F));
+            tp.addPara(
+                "The same-faction export bonus does not increase market share or income from exports.", opad
+            );
+    
+            tp.addSpacer(opad + pad);
+    
+            return tp;
+        };
     }
 
     private void createSection3QuantityHeaderTooltipFactory(int mode, SortableTable table, PendingTooltip wrapper) {
         final String quantityDesc = mode == 0
             ? "Shows units of the commodity that could be exported."
-            : "Shows demand for a commodity.";
+            : "Shows demand for the commodity.";
 
         wrapper.factory = () -> {
             UIPanelAPI attachmentPoint = null;
@@ -1228,7 +1234,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
 
             TooltipMakerAPI tp = ((CustomPanelAPI) attachmentPoint).createUIElement(
-                SortableTable.headerTooltipWidth, 0, false
+                SortableTable.headerTooltipWidth*2, 0, false
             );
 
             tp.addPara(quantityDesc, pad);
