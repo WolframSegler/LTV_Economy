@@ -27,7 +27,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.campaign.ui.marketinfo.CommodityDetailDialog;
 import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
@@ -918,7 +917,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 continue;
             }
             final CommodityStats comStats = new CommodityStats(m_com, market);
-            if (comStats.globalExport < 1 && mode == 0 || comStats.localDeficit < 1 && mode == 1) {
+            if (comStats.globalExport < 1 && mode == 0 || comStats.localDemand < 1 && mode == 1) {
                 continue;
             }
 
