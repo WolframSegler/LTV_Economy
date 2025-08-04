@@ -82,7 +82,6 @@ public class SortableTable extends LtvCustomPanel {
     public void initializePlugin(boolean hasPlugin) {}
 
     public void createPanel() {
-        // Clear previous Panels
         getPanel().removeComponent(m_headerContainer);
         getPanel().removeComponent(m_rowContainer);
 
@@ -99,7 +98,7 @@ public class SortableTable extends LtvCustomPanel {
 
             int lastHeaderPad = i + 1 == m_columns.size() ? pad*3 : 0;
 
-            // Handle merged headers
+            // Merged headers
             if (column.isMerged()) {
                 int setID = column.getSetID();
 
@@ -128,7 +127,7 @@ public class SortableTable extends LtvCustomPanel {
 
                 cumulativeXOffset += mergedWidth;
 
-            // Render standalone header
+            // Standalone header
             } else {
                 if (column.tooltipText == null) {
                     m_headerContainer.addComponent(new HeaderPanel(
@@ -631,8 +630,6 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         prevSelectedSortColumnIndex = index;
-
-        createPanel();
     }
 
     private Comparator<RowManager> stringComparator = (a, b) -> {

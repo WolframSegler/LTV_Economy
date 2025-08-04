@@ -990,6 +990,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         table.sortRows(6);
 
+        table.createPanel();
+
         table.setRowSelectionListener(selectedRow -> {
             m_selectedMarket = selectedRow.m_market;
             updateSection1();
