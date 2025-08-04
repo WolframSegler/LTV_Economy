@@ -111,7 +111,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         return LtvUIState.is(targetUIState) || ignoreUIState; 
     }
 
-    public void setGlow(Glow a) {
+    public void setHasGlow(Glow a) {
         glowType = a;
     }
 

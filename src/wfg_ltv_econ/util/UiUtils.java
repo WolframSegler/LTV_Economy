@@ -1,14 +1,19 @@
 package wfg_ltv_econ.util;
 
 import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.lwjgl.util.vector.Vector2f;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.codex2.CodexDialog;
+
+import wfg_ltv_econ.plugins.CommodityinfobarPlugin;
 
 public class UiUtils {
     public static final void resetFlowLeft(TooltipMakerAPI tooltip, float opad) {
@@ -92,5 +97,43 @@ public class UiUtils {
 
     public static Color getInFactionColor() {
         return new Color(35, 70, 130, 255);
+    }
+
+    public static final Color COLOR_DEFICIT = new Color(140, 15, 15);
+    public static final Color COLOR_IMPORT = new Color(200, 140, 60);
+    public static final Color COLOR_FACTION_IMPORT = new Color(240, 240, 100);
+    public static final Color COLOR_LOCAL_PROD = new Color(122, 200, 122);
+    public static final Color COLOR_EXPORT = new Color(63,  175, 63);
+    public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
+
+    public static void CommodityInfoBar(TooltipMakerAPI tooltip, int barHeight, CommodityStats comStats) {
+
+        float localProducedRatio = (float)comStats.demandMetWithLocal / (float)comStats.totalActivity;
+        float inFactionImportRatio = (float)comStats.inFactionImports / (float)comStats.totalActivity;
+        float externalImportRatio = (float)comStats.externalImports / (float)comStats.totalActivity;
+        float exportedRatio = (float)comStats.totalExports / (float)comStats.totalActivity;
+        float notExportedRatio = (float)comStats.canNotExport / (float)comStats.totalActivity;
+        float deficitRatio = (float)comStats.localDeficit / (float)comStats.totalActivity;
+
+        final HashMap<Color, Float> barMap = new HashMap<Color, Float>();
+        barMap.put(COLOR_DEFICIT, deficitRatio);
+        barMap.put(COLOR_IMPORT, externalImportRatio);
+        barMap.put(COLOR_FACTION_IMPORT, inFactionImportRatio);
+        barMap.put(COLOR_LOCAL_PROD, localProducedRatio);
+        barMap.put(COLOR_EXPORT, exportedRatio);
+        barMap.put(COLOR_NOT_EXPORTED, notExportedRatio);
+
+        for (Map.Entry<Color, Float> barPiece : barMap.entrySet()) {
+            if (barPiece.getValue() < 0) {
+                barPiece.setValue(0f);
+            }
+        }
+
+        CustomPanelAPI infoBar = Global.getSettings().createCustom(85, barHeight, new CommodityinfobarPlugin());
+        ((CommodityinfobarPlugin)infoBar.getPlugin()).init(
+            infoBar, true, barMap, comStats.market.getFaction()
+        );
+
+        tooltip.addCustom(infoBar, 3);
     }
 }

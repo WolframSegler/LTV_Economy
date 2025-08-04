@@ -113,7 +113,7 @@ public class SortableTable extends LtvCustomPanel {
                     }
                 }
 
-                if (column.tooltipText == null) {
+                if (column.tooltip == null) {
                     m_headerContainer.addComponent(new HeaderPanel(
                         getRoot(), getPanel(), mergedWidth - pad, m_headerHeight,
                         m_market, column, i
@@ -129,7 +129,7 @@ public class SortableTable extends LtvCustomPanel {
 
             // Standalone header
             } else {
-                if (column.tooltipText == null) {
+                if (column.tooltip == null) {
                     m_headerContainer.addComponent(new HeaderPanel(
                         getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         m_market, column, i
@@ -201,6 +201,8 @@ public class SortableTable extends LtvCustomPanel {
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this, Glow.OVERLAY, false, true, Outline.LINE);
             getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+
+            glowColor = Misc.getTooltipTitleAndLightHighlightColor();
         }
 
         @Override
@@ -231,7 +233,7 @@ public class SortableTable extends LtvCustomPanel {
                     getFaction().getBaseUIColor(),
                     null,
                     false);
-            sortIcon.getPlugin().setGlow(Glow.NONE);
+            sortIcon.getPlugin().setHasGlow(Glow.NONE);
 
             tooltip.addComponent(sortIcon.getPanel()).inBR(1, 0);
 
@@ -252,10 +254,20 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         public TooltipMakerAPI createTooltip() {
-            TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(
-                    400, 0, false);
+            final TooltipMakerAPI tooltip;
 
-            tooltip.addPara(column.tooltipText, pad);
+            if (column.getTooltipType() == String.class) {
+                tooltip = ((CustomPanelAPI) getParent()).createUIElement(
+                        400, 0, false);
+    
+                tooltip.addPara((String) column.tooltip, pad);
+            } else if (column.getTooltipType() == TooltipMakerAPI.class) {
+                tooltip = (TooltipMakerAPI) column.tooltip;
+            } else {
+                throw new IllegalArgumentException(
+                    "Tooltip for header '" + column.title + "' has an illega type."
+                );
+            }
 
             ((CustomPanelAPI) getParent()).addUIElement(tooltip);
             ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
@@ -288,21 +300,32 @@ public class SortableTable extends LtvCustomPanel {
 
         public String title;
         public int width;
-        public String tooltipText;
+        public Object tooltip;
 
         private boolean isMerged = false;
         private boolean isParent = false;
         private int mergeSetID = 0;
 
-        public ColumnManager(String title, int width, String tooltipText,
+        public ColumnManager(String title, int width, Object tooltip,
             boolean isMerged, boolean isParent, int mergeSetID) {
             this.title = title;
             this.width = width;
-            this.tooltipText = tooltipText;
+            this.tooltip = tooltip;
 
             this.isMerged = isMerged;
             this.isParent = isParent;
             this.mergeSetID = mergeSetID;
+        }
+
+        public Class<?> getTooltipType() {
+            if (tooltip instanceof String) {
+                return String.class;
+            }
+            if (tooltip instanceof TooltipMakerAPI) {
+                return TooltipMakerAPI.class;
+            }
+
+            return Object.class;
         }
 
         public boolean isMerged() {
@@ -489,8 +512,9 @@ public class SortableTable extends LtvCustomPanel {
 
     /**
      * Each set must contain the title of the header, its width, the text of the
-     * tooltip, if it is merged, if it is the parent and the ID of the mergeSet.
+     * tooltip or any tooltip, whether if it is merged, if it is the parent and the ID of the mergeSet.
      * The expected input is {String, int, String, Bool, Bool, int}.
+     * Or alternatively {String, int, TooltipMakerAPI, Bool, Bool, int}
      * The tooltip and mergeSetID can be left empty:
      * {String, int, null, Bool, Bool, null}.
      */
@@ -515,8 +539,8 @@ public class SortableTable extends LtvCustomPanel {
             if (!(widthObj instanceof Number)) {
                 throw new IllegalArgumentException("Header width must be int.");
             }
-            if (tooltipObj != null && !(tooltipObj instanceof String)) {
-                throw new IllegalArgumentException("Tooltip text must be String or null.");
+            if (tooltipObj != null && !(tooltipObj instanceof String) || !(tooltipObj instanceof TooltipMakerAPI)) {
+                throw new IllegalArgumentException("Tooltip text must be String, TooltipMakerAPI or null.");
             }
             if (!(isMergedObj instanceof Boolean)) {
                 throw new IllegalArgumentException("isMerged must be Boolean.");
@@ -528,6 +552,15 @@ public class SortableTable extends LtvCustomPanel {
                 throw new IllegalArgumentException("mergeSetID must be int or null.");
             }
             final int mergeSetID = mergeSetIdObj != null ? ((Number) mergeSetIdObj).intValue() : -1;
+
+            m_columns.add(
+                    new ColumnManager(
+                            (String) titleObj,
+                            ((Number) widthObj).intValue(),
+                            (Object) tooltipObj,
+                            (Boolean) isMergedObj,
+                            (Boolean) isParentObj,
+                            mergeSetID));
 
             m_columns.add(
                     new ColumnManager(
@@ -630,6 +663,8 @@ public class SortableTable extends LtvCustomPanel {
         }
 
         prevSelectedSortColumnIndex = index;
+
+        createPanel(); // Refresh the table
     }
 
     private Comparator<RowManager> stringComparator = (a, b) -> {

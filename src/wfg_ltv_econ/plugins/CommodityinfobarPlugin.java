@@ -14,7 +14,7 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import wfg_ltv_econ.util.RenderUtils;
 
 
-public class infobarPlugin implements CustomUIPanelPlugin {
+public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
 
     private CustomPanelAPI m_panel;
     private HashMap<Color, Float> m_barMap;

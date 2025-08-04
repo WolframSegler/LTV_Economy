@@ -927,7 +927,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new LtvSpritePanelPlugin(), 
                 iconPath, null, null, comStats.localDeficit > 0
             );
-            iconPanel.getPlugin().setGlow(Glow.NONE);
+            iconPanel.getPlugin().setHasGlow(Glow.NONE);
 
             String marketName = market.getName();
 
@@ -938,6 +938,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             String quantityTxt = NumFormat.engNotation(
                 mode == 0 ? comStats.globalExport : comStats.externalImports
             );
+            long quantityValue = mode == 0 ? comStats.globalExport : comStats.externalImports;
 
             int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
             int maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
@@ -945,16 +946,21 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             String access = (accessibility) + "% (" + maxExportCapacity + ")";
 
             int marketShare = market.getCommodityData(m_com.getId())
-                    .getCommodityMarketData().getMarketValuePercent(market);
+                    .getCommodityMarketData().getExportMarketSharePercent(market);
             String marketSharePercent = marketShare + "%";
 
             String incomeText = "---";
-            int exportIncome = 0;
+            int incomeValue = 0;
 
-            if (market.isPlayerOwned()) {
+            if (mode == 0) {
+                incomeValue = market.getCommodityData(m_com.getId()).getExportIncome();
 
-                exportIncome = market.getCommodityData(m_com.getId()).getExportIncome();
-                incomeText = Misc.getDGSCredits(exportIncome);
+                incomeText = market.isPlayerOwned() ? Misc.getDGSCredits(incomeValue) : "---";
+
+            } else if (mode == 1) {
+                incomeValue = market.getCommodityData(m_com.getId()).getDemandValue();
+
+                incomeText = market.isPlayerOwned() ? "---" : Misc.getDGSCredits(incomeValue);
             }
 
             Color textColor = market.getFaction().getBaseUIColor();
@@ -963,10 +969,10 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             table.addCell(marketName, Alignment.LMID, null, textColor);
             table.addCell(marketSize, Alignment.MID, null, textColor);
             table.addCell(factionName, Alignment.MID, null, textColor);
-            table.addCell(quantityTxt, Alignment.MID, comStats.globalExport, null);
+            table.addCell(quantityTxt, Alignment.MID, quantityValue, null);
             table.addCell(access, Alignment.MID, accessibility, null);
             table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
-            table.addCell(incomeText, Alignment.MID, exportIncome, null);
+            table.addCell(incomeText, Alignment.MID, incomeValue, null);
 
             // Tooltip
             TooltipMakerAPI tp = createSection3RowsTooltip(
@@ -1201,6 +1207,14 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         return tp;
     }
 
+    private TooltipMakerAPI createSection3QuantityHeaderTooltip(SortableTable table, MarketAPI market,
+        String marketName, Color baseColor) {
+
+        
+
+        return null;
+    }
+    
     @Override
     public void customDialogConfirm() {
         LtvUIState.setState(UIState.NONE);
