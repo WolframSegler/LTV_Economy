@@ -33,6 +33,7 @@ import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
 import wfg_ltv_econ.ui.LtvBasePanel;
 import wfg_ltv_econ.ui.LtvCommodityPanel;
+import wfg_ltv_econ.ui.LtvCommodityRowPanel;
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvIconPanel;
 import wfg_ltv_econ.ui.LtvSpritePanel;
@@ -1229,9 +1230,15 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             SortableTable.headerTooltipWidth, 0, false
         );
 
-        
+        tp.addPara(QuantityDesc, pad);
 
-        return null;
+        int y = (int)tp.getHeightSoFar() + pad;
+
+        LtvCommodityRowPanel.legendRowCreator(
+            tp, y, 26, m_parentWrapper.getRoot(), m_parentWrapper.getPanel(), m_parentWrapper.m_market
+        );
+
+        return tp;
     }
     
     @Override
