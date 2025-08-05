@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.campaign.CampaignEngine;
 
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.util.ReflectionUtils;
@@ -64,7 +65,8 @@ public abstract class LtvCustomPanel{
     }
 
     public UIPanelAPI getRoot() {
-        return m_root == null ? m_panel : m_root;
+        final UIPanelAPI defaultRoot = CampaignEngine.getInstance().getCampaignUI().getDialogParent();
+        return m_root == null ? defaultRoot : m_root;
     }
 
     public LtvCustomPanelPlugin getPlugin() {

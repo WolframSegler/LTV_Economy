@@ -83,7 +83,7 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
 
         if (isDrawFilledQuad && m_fillColor != null) {
             m_sprite.setColor(m_fillColor);
-            RenderUtils.drawQuad(x, y, width, height, m_fillColor, alphaMult);
+            RenderUtils.drawQuad(x, y, width, height, m_fillColor, alphaMult, false);
         }
 
         if (drawBorder) {
@@ -108,13 +108,13 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
     private void drawFramedBorder(float x, float y, float width, float height, float thickness, Color color,
         float alphaMult) {
         // Top
-        RenderUtils.drawRect(x, y + height - thickness, width, thickness, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y + height - thickness, width, thickness, color, alphaMult, GL11.GL_QUADS, false);
         // Bottom
-        RenderUtils.drawRect(x, y, width, thickness, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y, width, thickness, color, alphaMult, GL11.GL_QUADS, false);
         // Left
-        RenderUtils.drawRect(x, y, thickness, height, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x, y, thickness, height, color, alphaMult, GL11.GL_QUADS, false);
         // Right
-        RenderUtils.drawRect(x + width - thickness, y, thickness, height, color, alphaMult, GL11.GL_QUADS);
+        RenderUtils.drawRect(x + width - thickness, y, thickness, height, color, alphaMult, GL11.GL_QUADS, false);
     }
 
     @Override

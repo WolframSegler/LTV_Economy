@@ -48,7 +48,13 @@ import com.fs.starfarer.util.K;
 // A replacement for com.fs.starfarer.campaign.ui.marketinfo.intnew
 // The widget class inside of List<intnew> widgets, which is a member of IndustryListItem
 public class BuildingWidgetPanel extends intnew {
-   public final static float ICON_SIZE = 32.0F;
+
+   public final static int PAD = 3;
+   public final static int PANEL_WIDTH = 190;
+   public final static int TITLE_HEIGHT = 15;
+   public final static int IMAGE_HEIGHT = 95;
+   public final static int ICON_SIZE = 32;
+   
    private Industry currentIndustry;
    private x industryIcon; // private x ÓõöO00;
    private n constructionActionButton; // private n ôôöO00;

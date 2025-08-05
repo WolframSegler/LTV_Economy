@@ -48,5 +48,9 @@ public class LtvSpritePanel extends LtvCustomPanel {
         plugin.setIgnoreUIState(true);
     }
 
+    public void setColor(Color a) {
+        color = a;
+    }
+
     public void createPanel() {}
 }

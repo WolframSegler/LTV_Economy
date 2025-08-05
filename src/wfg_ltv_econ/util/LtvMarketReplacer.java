@@ -7,10 +7,13 @@ import com.fs.state.AppDriver;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.LtvCommodityPanel;
 import wfg_ltv_econ.ui.LtvIndustryListPanel;
+import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
 
+import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
@@ -129,6 +132,29 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
             managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 25);
             
+            // Acquire the popup class from one of the widgets
+            Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
+
+            // Now the popup class is a child of: 
+            // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
+            ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
+
+            List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
+
+            UIPanelAPI indOps = children.stream()
+                .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
+                .map(child -> (UIPanelAPI) child)
+                .findFirst().orElse(null);
+
+            ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
+                indOps.getClass(), 5).get(0);
+
+            LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
+
+            // Delete the indOpsPanel after getting its constructor
+            children.remove(indOps);
+            
+            // No need for the old panel
             managementPanel.removeComponent(industryPanel);
 
         } catch (Exception e) {

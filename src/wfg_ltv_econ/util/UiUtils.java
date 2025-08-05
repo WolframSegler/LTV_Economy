@@ -144,4 +144,17 @@ public class UiUtils {
 
         return infoBar;
     }
+
+    public static Color adjustAlpha(Color color, float alphaMult) {
+        int newAplha = (int) (color.getAlpha() * alphaMult);
+        if (newAplha > 255) {
+            newAplha = 255;
+        }
+
+        if (newAplha < 0) {
+            newAplha = 0;
+        }
+
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), newAplha);
+    }
 }

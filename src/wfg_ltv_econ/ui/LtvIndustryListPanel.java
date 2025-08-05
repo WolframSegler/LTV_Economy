@@ -12,22 +12,28 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.ui.CutStyle;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.s;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 import com.fs.starfarer.ui.newui.L;
 
+import wfg_ltv_econ.plugins.IndustryPanelPlugin;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.ReflectionUtils;
+import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
 
 import com.fs.starfarer.ui.d;
 import com.fs.starfarer.ui.Q;
+import com.fs.starfarer.ui.c;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 
 import java.util.Collections;
 
 public class LtvIndustryListPanel extends IndustryListPanel {
+   static ReflectedConstructor indOptConstr = null;
+
    public LtvIndustryListPanel(MarketAPI var1, L var2, s var3) {
       super(var1, var2, var3);
    }
@@ -39,6 +45,16 @@ public class LtvIndustryListPanel extends IndustryListPanel {
    @Override
    public void recreate() {
       this.sizeChanged(this.getWidth(), this.getHeight());
+   }
+
+   public List<LtvIndustryPanel> getWidgetsNew() {
+      return new ArrayList<LtvIndustryPanel>();
+   }
+
+   public static void setindustryOptionsPanelConstructor(ReflectedConstructor a) {
+      indOptConstr = a;
+
+      Global.getLogger(LtvIndustryListPanel.class).error(a.getClass());
    }
 
    @Override
@@ -67,6 +83,10 @@ public class LtvIndustryListPanel extends IndustryListPanel {
             if (var14 < industries.size()) {
                Industry var15 = (Industry) industries.get(var14);
                BuildingWidgetPanel var16 = new BuildingWidgetPanel(market, var15, this);
+               LtvIndustryPanel panelo = new LtvIndustryPanel(
+                  this, this, new IndustryPanelPlugin(), market, var15, this
+               );
+               add((c)panelo.getPanel()).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad) + 30, (float) j * (BuildingWidgetPanel.HEIGHT + opad) - 20);
                widgets.add(var16);
                add(var16).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
                StandardTooltipV2Expandable.addTooltipRight(var16,

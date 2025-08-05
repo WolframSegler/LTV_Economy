@@ -6,18 +6,24 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import java.awt.Color;
 
 public class RenderUtils {
-    public static void drawQuad(float x, float y, float w, float h, Color color, float alphaMult) {
-        drawRect(x, y, w, h, color, alphaMult, GL11.GL_QUADS);
+    public static void drawQuad(float x, float y, float w, float h, Color color, float alphaMult,
+        boolean additive) {
+            
+        drawRect(x, y, w, h, color, alphaMult, GL11.GL_QUADS, additive);
     }
 
     public static void drawOutline(float x, float y, float w, float h, Color color, float alphaMult) {
-        drawRect(x, y, w, h, color, alphaMult, GL11.GL_LINE_LOOP);
+        drawRect(x, y, w, h, color, alphaMult, GL11.GL_LINE_LOOP, false);
     }
 
-    public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult, int mode) {
+    public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult, int mode,
+        boolean additive) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glBlendFunc(
+            GL11.GL_SRC_ALPHA,
+            additive ? GL11.GL_ONE : GL11.GL_ONE_MINUS_SRC_ALPHA
+        );
 
         GL11.glColor4ub(
                 (byte) color.getRed(),

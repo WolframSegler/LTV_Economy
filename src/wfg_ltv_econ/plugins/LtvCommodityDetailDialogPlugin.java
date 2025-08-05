@@ -56,7 +56,7 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
             int y = (int)pos.getY() + offsetY;
             int w = (int)pos.getWidth() + offsetW;
             int h = (int)pos.getHeight() + offsetH;
-            RenderUtils.drawQuad(x, y, w, h, m_parent.BgColor, alphaMult*0.65f);
+            RenderUtils.drawQuad(x, y, w, h, m_parent.BgColor, alphaMult*0.65f, false);
             // Looks vanilla like with 0.65f
         }
         if (hasOutline) {

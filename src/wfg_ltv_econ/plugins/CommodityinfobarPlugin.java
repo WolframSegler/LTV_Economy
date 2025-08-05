@@ -38,7 +38,7 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
         float h = pos.getHeight();
 
         for (Map.Entry<Color, Float> mapEntry : m_barMap.entrySet()) {
-            RenderUtils.drawQuad(x, y, w*mapEntry.getValue(), h, mapEntry.getKey(), alphaMult*0.65f);
+            RenderUtils.drawQuad(x, y, w*mapEntry.getValue(), h, mapEntry.getKey(), alphaMult*0.65f, false);
             x += w*mapEntry.getValue();
         }
 

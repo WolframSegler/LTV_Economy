@@ -913,7 +913,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
 
             if (footerPanel != null && footerPanel.m_checkbox.isChecked() &&
-                (comStats.canNotExport > 0 || comStats.localDeficit > 0)) {
+                !(comStats.canNotExport > 0 || comStats.localDeficit > 0)) {
                 continue;
             }
 
