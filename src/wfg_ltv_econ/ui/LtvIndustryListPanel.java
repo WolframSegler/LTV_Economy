@@ -47,8 +47,8 @@ public class LtvIndustryListPanel extends IndustryListPanel {
       this.sizeChanged(this.getWidth(), this.getHeight());
    }
 
-   public List<LtvIndustryPanel> getWidgetsNew() {
-      return new ArrayList<LtvIndustryPanel>();
+   public List<LtvIndustryWidget> getWidgetsNew() {
+      return new ArrayList<LtvIndustryWidget>();
    }
 
    public static void setindustryOptionsPanelConstructor(ReflectedConstructor a) {
@@ -83,12 +83,12 @@ public class LtvIndustryListPanel extends IndustryListPanel {
             if (var14 < industries.size()) {
                Industry var15 = (Industry) industries.get(var14);
                BuildingWidgetPanel var16 = new BuildingWidgetPanel(market, var15, this);
-               LtvIndustryPanel panelo = new LtvIndustryPanel(
+               LtvIndustryWidget panelo = new LtvIndustryWidget(
                   this, this, new IndustryPanelPlugin(), market, var15, this
                );
-               add((c)panelo.getPanel()).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad) + 30, (float) j * (BuildingWidgetPanel.HEIGHT + opad) - 20);
-               widgets.add(var16);
-               add(var16).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
+               add((c)panelo.getPanel()).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
+               // widgets.add(var16);
+               // add(var16).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
                StandardTooltipV2Expandable.addTooltipRight(var16,
                      BuildingWidgetPanel.createIndustryTooltip(IndustryTooltipMode.NORMAL, var15));
             } else {

@@ -132,27 +132,27 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
             managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 25);
             
-            // Acquire the popup class from one of the widgets
-            Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
+            // // Acquire the popup class from one of the widgets
+            // Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
 
-            // Now the popup class is a child of: 
-            // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
-            ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
+            // // Now the popup class is a child of: 
+            // // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
+            // ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
 
-            List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
+            // List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
 
-            UIPanelAPI indOps = children.stream()
-                .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
-                .map(child -> (UIPanelAPI) child)
-                .findFirst().orElse(null);
+            // UIPanelAPI indOps = children.stream()
+            //     .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
+            //     .map(child -> (UIPanelAPI) child)
+            //     .findFirst().orElse(null);
 
-            ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
-                indOps.getClass(), 5).get(0);
+            // ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
+            //     indOps.getClass(), 5).get(0);
 
-            LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
+            // LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
 
-            // Delete the indOpsPanel after getting its constructor
-            children.remove(indOps);
+            // // Delete the indOpsPanel after getting its constructor
+            // children.remove(indOps);
             
             // No need for the old panel
             managementPanel.removeComponent(industryPanel);

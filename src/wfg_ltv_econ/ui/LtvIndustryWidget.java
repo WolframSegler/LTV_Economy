@@ -47,7 +47,7 @@ import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 
-public class LtvIndustryPanel extends LtvCustomPanel implements ActionListenerDelegate, DismissDialogDelegate {
+public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerDelegate, DismissDialogDelegate {
 
     public final static int pad = 3;
     public final static int opad = 10;
@@ -72,13 +72,13 @@ public class LtvIndustryPanel extends LtvCustomPanel implements ActionListenerDe
     private ConstructionMode constructionMode;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
-    public LtvIndustryPanel(UIPanelAPI root, UIPanelAPI parent, CustomUIPanelPlugin plugin,
+    public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, CustomUIPanelPlugin plugin,
             MarketAPI market, Industry ind, LtvIndustryListPanel indPanel) {
 
         this(root, parent, plugin, market, ind, indPanel, -1);
     }
 
-    public LtvIndustryPanel(UIPanelAPI root, UIPanelAPI parent, CustomUIPanelPlugin plugin,
+    public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, CustomUIPanelPlugin plugin,
             MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, int queue) {
         super(root, parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin, market);
 
@@ -138,8 +138,8 @@ public class LtvIndustryPanel extends LtvCustomPanel implements ActionListenerDe
         constructionActionButton = tp.addButton(
             "",
             null,
-            baseColor,
-            BgColor,
+            new Color(0, 0, 0, 0),
+            new Color(0, 0, 0, 0),
             Alignment.MID,
             CutStyle.ALL,
             PANEL_WIDTH,
@@ -207,6 +207,8 @@ public class LtvIndustryPanel extends LtvCustomPanel implements ActionListenerDe
         .setSize(PANEL_WIDTH, IMAGE_HEIGHT).inBL(0, 0);
 
         buildingTitleHeader.getPosition().inTL(0, 0);
+
+        getPanel().addComponent(industryIcon.getPanel()).inBL(0, 0);
 
         workerCountLabel.getPosition().inTL(pad + 4, pad + 20);
 
@@ -374,12 +376,12 @@ public class LtvIndustryPanel extends LtvCustomPanel implements ActionListenerDe
         }
 
         final InputEventAPI event = (InputEventAPI) data;
-        LtvIndustryPanel targetInd;
+        LtvIndustryWidget targetInd;
 
         if (constructionQueueIndex >= 0) {
 
             if (event.isRMBEvent()) {
-                for (LtvIndustryPanel widget : IndustryPanel.getWidgetsNew()) {
+                for (LtvIndustryWidget widget : IndustryPanel.getWidgetsNew()) {
                     if (widget.getQueueIndex() >= 0) {
                         widget.setNormalMode();
                     }
@@ -389,7 +391,7 @@ public class LtvIndustryPanel extends LtvCustomPanel implements ActionListenerDe
             }
 
             if (constructionMode == ConstructionMode.NORMAL) {
-                for (LtvIndustryPanel widget : IndustryPanel.getWidgetsNew()) {
+                for (LtvIndustryWidget widget : IndustryPanel.getWidgetsNew()) {
                 if (widget.getQueueIndex() >= 0) {
                     if (widget == this) {
                         widget.setRemoveMode();
@@ -401,7 +403,7 @@ public class LtvIndustryPanel extends LtvCustomPanel implements ActionListenerDe
             } else if (constructionMode == ConstructionMode.SWAP) {
                 targetInd = null;
 
-                for (LtvIndustryPanel widget : IndustryPanel.getWidgetsNew()) {
+                for (LtvIndustryWidget widget : IndustryPanel.getWidgetsNew()) {
                     if (widget.getQueueIndex() >= 0
                             && widget.constructionMode == ConstructionMode.REMOVE) {
                         targetInd = widget;
@@ -453,7 +455,7 @@ public class LtvIndustryPanel extends LtvCustomPanel implements ActionListenerDe
                 }
             }
         } else {
-            for (LtvIndustryPanel widget : IndustryPanel.getWidgetsNew()) {
+            for (LtvIndustryWidget widget : IndustryPanel.getWidgetsNew()) {
                 if (widget.getQueueIndex() >= 0) {
                     widget.setNormalMode();
                 }
