@@ -34,7 +34,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
     public static final int pad = 3;
     public static final int opad = 10;
 
-    private static final int iconSize = 28;
+    private static final int iconSize = 24;
     private static final String notExpandedCodexF1 = "F1 show legend";
     private static final String ExpandedCodexF1 = "F1 go back";
     private static final String codexF2 = "F2 open Codex";
@@ -101,7 +101,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 		tooltip.beginIconGroup();
 		tooltip.setIconSpacingMedium();
 		tooltip.addIcons(m_com, 1, IconRenderMode.NORMAL);
-		tooltip.addIconGroup(iconSize ,0f);
+		tooltip.addIconGroup(iconSize + pad,0f);
 
 		float actualIconWidth = iconSize * m_com.getCommodity().getIconWidthMult();
 		tooltip.getPrev().getPosition().inBL(labelWidth + ((iconSize - actualIconWidth) * 0.5f),

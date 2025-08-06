@@ -211,6 +211,8 @@ public class SortableTable extends LtvCustomPanel {
 
             setGlowColor(Misc.getTooltipTitleAndLightHighlightColor());
             setOutlineColor(getFaction().getGridUIColor());
+
+            getPlugin().setSoundEnabled(true);
         }
 
         @Override
@@ -235,7 +237,7 @@ public class SortableTable extends LtvCustomPanel {
                     getRoot(),
                     panel,
                     m_market,
-                    m_headerHeight, m_headerHeight + 2,
+                    m_headerHeight - 2, m_headerHeight,
                     new LtvSpritePanelPlugin(),
                     sortIconPath,
                     getFaction().getBaseUIColor(),

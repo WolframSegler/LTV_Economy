@@ -1,7 +1,8 @@
 {
   "graphics": {
     "ui": {
-      "cargoTooltipArrow": "graphics/ui/cargoTooltipArrow.png"
+      "cargoTooltipArrow": "graphics/ui/cargoTooltipArrow.png",
+      "glow_bg": "graphics/ui/text_glow.png"
     }
   }
 }
