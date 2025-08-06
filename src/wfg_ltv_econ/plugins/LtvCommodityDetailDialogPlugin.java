@@ -60,7 +60,10 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
             // Looks vanilla like with 0.65f
         }
         if (hasOutline) {
-            RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), m_parent.getFaction().getGridUIColor(), alphaMult);
+            RenderUtils.drawFramedBorder(
+                pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
+                1, m_parent.getFaction().getGridUIColor(), alphaMult
+            );
         }
     }
 

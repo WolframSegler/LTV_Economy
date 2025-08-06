@@ -121,7 +121,6 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
             LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, iconSize - 4, iconSize - 4,
                     new LtvSpritePanelPlugin(), iconPath, null, null, false);
-            iconPanel.getPlugin().setHasGlow(Glow.NONE);
 
             getPanel().addComponent(iconPanel.getPanel()).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
         }
@@ -129,7 +128,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
     }
 
-    private LtvSpritePanel getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int iconSize,
+    private LtvSpritePanel getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int size,
         UIPanelAPI parent) {
         boolean isSourceIllegal = commodityData.getMarketShareData(m_market).isSourceIsIllegal();
 
@@ -151,9 +150,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             default:
         }
 
-        LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), parent, m_market, iconSize, iconSize,
+        LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), parent, m_market, size, size,
                     new LtvSpritePanelPlugin(), iconPath, baseColor, null, isSourceIllegal);
-        iconPanel.getPlugin().setHasGlow(Glow.NONE);
         return iconPanel;
     }
 

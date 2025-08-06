@@ -659,7 +659,7 @@ public class SortableTable extends LtvCustomPanel {
 
         // Selected Colony has an outline
         if (m_market == market) {
-            pendingRow.getPlugin().setOutline(Outline.THIN);
+            pendingRow.getPlugin().setOutline(Outline.TEX_VERY_THIN);
         }
 
         pendingRow.m_tooltip = tp;

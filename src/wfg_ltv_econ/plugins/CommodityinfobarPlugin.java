@@ -43,7 +43,10 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
         }
 
         if (hasOutline) {
-            RenderUtils.drawOutline(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), Misc.getDarkPlayerColor(), alphaMult);
+            RenderUtils.drawFramedBorder(
+                pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
+                1, Misc.getDarkPlayerColor(), alphaMult
+            );
         }
     }
 	

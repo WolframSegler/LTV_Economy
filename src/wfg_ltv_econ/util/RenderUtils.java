@@ -12,8 +12,43 @@ public class RenderUtils {
         drawRect(x, y, w, h, color, alphaMult, GL11.GL_QUADS, additive);
     }
 
-    public static void drawOutline(float x, float y, float w, float h, Color color, float alphaMult) {
-        drawRect(x, y, w, h, color, alphaMult, GL11.GL_LINE_LOOP, false);
+    public static void drawFramedBorder(float x, float y, float w, float h, float thickness, Color       
+        color, float alphaMult) {
+        // TOP
+        RenderUtils.drawRect(
+            x - thickness, 
+            y + h, 
+            w + thickness * 2, 
+            thickness, 
+            color, alphaMult, GL11.GL_QUADS, false
+        );
+
+        // BOTTOM
+        RenderUtils.drawRect(
+            x - thickness, 
+            y - thickness, 
+            w + thickness * 2, 
+            thickness, 
+            color, alphaMult, GL11.GL_QUADS, false
+        );
+
+        // LEFT
+        RenderUtils.drawRect(
+            x - thickness, 
+            y, 
+            thickness, 
+            h, 
+            color, alphaMult, GL11.GL_QUADS, false
+        );
+
+        // RIGHT
+        RenderUtils.drawRect(
+            x + w, 
+            y, 
+            thickness, 
+            h, 
+            color, alphaMult, GL11.GL_QUADS, false
+        );
     }
 
     public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult, int mode,
@@ -25,11 +60,7 @@ public class RenderUtils {
             additive ? GL11.GL_ONE : GL11.GL_ONE_MINUS_SRC_ALPHA
         );
 
-        GL11.glColor4ub(
-                (byte) color.getRed(),
-                (byte) color.getGreen(),
-                (byte) color.getBlue(),
-                (byte) (color.getAlpha() * alphaMult));
+        setGLColor(color, alphaMult);
 
         GL11.glBegin(mode);
         GL11.glVertex2f(x, y);
@@ -47,11 +78,7 @@ public class RenderUtils {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        GL11.glColor4ub(
-                (byte) baseClr.getRed(),
-                (byte) baseClr.getGreen(),
-                (byte) baseClr.getBlue(),
-                (byte) baseClr.getAlpha());
+        setGLColor(baseClr, alphaMult);
 
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex2f(x, y);
@@ -91,5 +118,14 @@ public class RenderUtils {
         sprite.setColor(Color.white); // Reset
         GL11.glPopMatrix();
         GL11.glPopAttrib();
+    }
+
+    public static final void setGLColor(Color color, float alphaMult) {
+        GL11.glColor4ub(
+            (byte) color.getRed(),
+            (byte) color.getGreen(),
+            (byte) color.getBlue(),
+            (byte) (color.getAlpha() * alphaMult)
+        );
     }
 }

@@ -3,7 +3,6 @@ package wfg_ltv_econ.plugins;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
@@ -23,22 +22,15 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
     private Color m_color;
     private Color m_fillColor;
     private boolean drawBorder;
-    private final int padding = 2;
+    private final int padding = 1;
     private final int borderThickness = 2;
     private final float outlineBrightness = 0.6f;
 
     private boolean isDrawFilledQuad = false;
 
     public void init(String spriteId, Color color, Color fillColor, boolean drawBorder) {
-        this.m_sprite = Global.getSettings().getSprite(spriteId);
 
-        m_color = color;
-        m_fillColor = fillColor;
-        this.drawBorder = drawBorder;
-
-        if (fillColor != null) {
-            isDrawFilledQuad = true;
-        }
+        this.init(Global.getSettings().getSprite(spriteId), color, fillColor, drawBorder);
     }
 
     public void init(SpriteAPI sprite, Color color, Color fillColor, boolean drawBorder) {
@@ -87,13 +79,14 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
         }
 
         if (drawBorder) {
-            drawFramedBorder(
-                x - borderThickness - padding,
-                y - borderThickness - padding,
-                width + (borderThickness + padding) * 2,
-                height + (borderThickness + padding) * 2,
+            RenderUtils.drawFramedBorder(
+                x - padding,
+                y - padding,
+                width + padding*2,
+                height + padding*2,
                 borderThickness,
-                Color.RED, alphaMult
+                Color.RED,
+                alphaMult
             );
         }
 
@@ -103,18 +96,6 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
             RenderUtils.drawAdditiveGlow(m_sprite, x, y, m_panel.getFaction().getBaseUIColor(),
                     glowAmount);
         }
-    }
-
-    private void drawFramedBorder(float x, float y, float width, float height, float thickness, Color color,
-        float alphaMult) {
-        // Top
-        RenderUtils.drawRect(x, y + height - thickness, width, thickness, color, alphaMult, GL11.GL_QUADS, false);
-        // Bottom
-        RenderUtils.drawRect(x, y, width, thickness, color, alphaMult, GL11.GL_QUADS, false);
-        // Left
-        RenderUtils.drawRect(x, y, thickness, height, color, alphaMult, GL11.GL_QUADS, false);
-        // Right
-        RenderUtils.drawRect(x + width - thickness, y, thickness, height, color, alphaMult, GL11.GL_QUADS, false);
     }
 
     @Override

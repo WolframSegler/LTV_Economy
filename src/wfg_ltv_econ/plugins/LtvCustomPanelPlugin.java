@@ -30,7 +30,11 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
         VERY_THIN,
         THIN,
         MEDIUM,
-        THICK
+        THICK,
+        TEX_VERY_THIN,
+        TEX_THIN,
+        TEX_MEDIUM,
+        TEX_THICK
     }
 
     protected LtvCustomPanel m_panel;
@@ -196,30 +200,70 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     public void render(float alphaMult) {
         final PositionAPI pos = m_panel.getPanelPos();
 
-        if (outlineType == Outline.LINE) {
-            RenderUtils.drawOutline(
-                pos.getX(),
-                pos.getY(),
-                pos.getWidth(),
-                pos.getHeight(),
-                m_panel.getFaction().getGridUIColor(),
-                alphaMult
-            );
+        if (outlineType != Outline.NONE) {
+            String textureID = null;
+            int textureSize = 4;
+            int borderThickness = 0;
+
+            switch (outlineType) {
+                case LINE:
+                    borderThickness = 1;
+                    break;
+                case VERY_THIN:
+                    borderThickness = 2;
+                    break;
+                case THIN:
+                    borderThickness = 3;
+                    break;
+                case MEDIUM:
+                    borderThickness = 4;
+                    break;
+                case THICK:
+                    borderThickness = 8;
+                    break;
+                case TEX_VERY_THIN:
+                    textureID = "ui_border4";
+                    break;
+                case TEX_THIN:
+                    textureID = "ui_border3";
+                    break;
+                case TEX_MEDIUM:
+                    textureID = "ui_border1";
+                    textureSize = 8;
+                    break;
+                case TEX_THICK:
+                    textureID = "ui_border2";
+                    textureSize = 24;
+                    break;
+                default:
+                    break;
+            }
+            if (borderThickness != 0) {
+                RenderUtils.drawFramedBorder(
+                    pos.getX(),
+                    pos.getY(),
+                    pos.getWidth(),
+                    pos.getHeight(),
+                    borderThickness,
+                    m_panel.getFaction().getGridUIColor(),
+                    alphaMult
+                );
+            }
+            if (textureID != null) {
+                UiUtils.drawRoundedBorder(
+                    pos.getX() - pad,
+                    pos.getY() - pad,
+                    pos.getWidth() + pad*2,
+                    pos.getHeight() + pad*2,
+                    1,
+                    textureID,
+                    textureSize,
+                    m_panel.getFaction().getBaseUIColor()
+                );
+            }
         }
 
-        if (outlineType == Outline.VERY_THIN) {
-            UiUtils.drawRoundedBorder(
-                pos.getX() - pad,
-                pos.getY() - pad,
-                pos.getWidth() + pad*2,
-                pos.getHeight() + pad*2,
-                1,
-                "ui_border4",
-                4,
-                m_panel.getFaction().getBaseUIColor()
-            );
-        }
-
+       
         if (outlineType == Outline.THIN) {
             UiUtils.drawRoundedBorder(
                 pos.getX() - pad,
