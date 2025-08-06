@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -364,7 +363,7 @@ public class SortableTable extends LtvCustomPanel {
 
     public class RowManager extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
         protected final List<Object> m_cellData = new ArrayList<>();
-        protected final List<Alignment> m_cellAlignment = new ArrayList<>();
+        protected final List<cellAlg> m_cellAlignment = new ArrayList<>();
         protected final List<Object> m_sortValues = new ArrayList<>();
         protected final List<Color> m_useColor = new ArrayList<>();
         protected String codexID = null;
@@ -407,7 +406,7 @@ public class SortableTable extends LtvCustomPanel {
 
             for (int i = 0; i < m_cellData.size(); i++) {
                 Object cell = m_cellData.get(i);
-                Alignment alignment = m_cellAlignment.get(i);
+                cellAlg alignment = m_cellAlignment.get(i);
                 Color useColor = m_useColor.get(i);
                 float colWidth = getColumns().get(i).width;
 
@@ -473,14 +472,19 @@ public class SortableTable extends LtvCustomPanel {
             }
         }
 
-        private float calcXOffset(float baseX, float colWidth, float compWidth, Alignment alignment) {
+        private float calcXOffset(float baseX, float colWidth, float compWidth, cellAlg alignment) {
             final int pad = 3; // define pad somewhere appropriate
 
             switch (alignment) {
-                case BL, TL, LMID:
+                case LEFT:
                     return baseX;
-                case BR, TR, RMID:
+                case RIGHT:
+                    return baseX + colWidth - compWidth;
+                case LEFTPAD:
+                    return baseX + pad;
+                case RIGHTPAD:
                     return baseX + colWidth - compWidth - pad;
+                case MID:
                 default:
                     return baseX + (colWidth / 2f) - (compWidth / 2f);
             }
@@ -536,7 +540,7 @@ public class SortableTable extends LtvCustomPanel {
         public void attachCodexTooltip(TooltipMakerAPI codex) {
         }
 
-        public void addCell(Object cell, Alignment alg, Object sort, Color textColor) {
+        public void addCell(Object cell, cellAlg alg, Object sort, Color textColor) {
             m_cellData.add(cell);
             m_cellAlignment.add(alg);
             m_sortValues.add(sort);
@@ -608,7 +612,7 @@ public class SortableTable extends LtvCustomPanel {
      * Supports the following types:
      * String, LabelAPI, LtvSpritePanel, UIPanelAPI, CustomPanelAPI
      */
-    public void addCell(Object cell, Alignment alg, Object sort, Color textColor) {
+    public void addCell(Object cell, cellAlg alg, Object sort, Color textColor) {
         if (pendingRow == null) {
             pendingRow = new RowManager(
                     getRoot(),
@@ -737,5 +741,16 @@ public class SortableTable extends LtvCustomPanel {
      */
     public static class PendingTooltip {
         public Supplier<TooltipMakerAPI> factory = null;
+    }
+
+    /**
+     * Determines how the panels inside a cell are positioned
+     */
+    public enum cellAlg {
+        LEFT,
+        MID,
+        RIGHT,
+        LEFTPAD,
+        RIGHTPAD,
     }
 }

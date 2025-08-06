@@ -23,8 +23,8 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
     private Color m_color;
     private Color m_fillColor;
     private boolean drawBorder;
-    private final float padding = 2f;
-    private final float borderThickness = 2f;
+    private final int padding = 2;
+    private final int borderThickness = 2;
     private final float outlineBrightness = 0.6f;
 
     private boolean isDrawFilledQuad = false;
@@ -73,10 +73,10 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
         }
 
         PositionAPI pos = m_panel.getPanelPos();
-        float x = pos.getX() + padding;
-        float y = pos.getY() + padding;
-        float width = pos.getWidth() - padding * 2;
-        float height = pos.getHeight() - padding * 2;
+        float x = pos.getX();
+        float y = pos.getY();
+        float width = pos.getWidth();
+        float height = pos.getHeight();
 
         m_sprite.setSize(width, height);
         m_sprite.render(x, y);
@@ -88,10 +88,10 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
 
         if (drawBorder) {
             drawFramedBorder(
-                x - borderThickness,
-                y - borderThickness,
-                width + borderThickness * 2,
-                height + borderThickness * 2,
+                x - borderThickness - padding,
+                y - borderThickness - padding,
+                width + (borderThickness + padding) * 2,
+                height + (borderThickness + padding) * 2,
                 borderThickness,
                 Color.RED, alphaMult
             );

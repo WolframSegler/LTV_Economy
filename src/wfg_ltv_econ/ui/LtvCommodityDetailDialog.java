@@ -35,6 +35,7 @@ import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.SortableTable.ColumnManager;
 import wfg_ltv_econ.ui.SortableTable.HeaderPanelWithTooltip;
 import wfg_ltv_econ.ui.SortableTable.PendingTooltip;
+import wfg_ltv_econ.ui.SortableTable.cellAlg;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
@@ -70,7 +71,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
     public final static int pad = 3;
     public final static int opad = 10;
-    public final static int iconSize = 28;
+    public final static int iconSize = 24;
 
     private final LtvCustomPanel m_parentWrapper;
     private final LtvCommodityDetailDialogPlugin m_plugin;
@@ -873,7 +874,9 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             section,
             SECT3_WIDTH,
             SECT3_HEIGHT,
-            m_parentWrapper.m_market
+            m_parentWrapper.m_market,
+            20,
+            30
         );
 
         final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
@@ -962,15 +965,15 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
             Color textColor = market.getFaction().getBaseUIColor();
 
-            table.addCell(iconPanel, Alignment.LMID, null, null);
-            table.addCell(marketName, Alignment.LMID, null, textColor);
-            table.addCell(marketSize, Alignment.MID, null, textColor);
-            table.addCell(factionName, Alignment.MID, null, textColor);
-            table.addCell(quantityTxt, Alignment.MID, quantityValue, null);
-            table.addCell(infoBar, Alignment.MID, null, null);
-            table.addCell(access, Alignment.MID, accessibility, null);
-            table.addCell(marketSharePercent, Alignment.MID, marketShare, null);
-            table.addCell(incomeText, Alignment.MID, incomeValue, null);
+            table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
+            table.addCell(marketName, cellAlg.LEFTPAD, null, textColor);
+            table.addCell(marketSize, cellAlg.MID, null, textColor);
+            table.addCell(factionName, cellAlg.MID, null, textColor);
+            table.addCell(quantityTxt, cellAlg.MID, quantityValue, null);
+            table.addCell(infoBar, cellAlg.MID, null, null);
+            table.addCell(access, cellAlg.MID, accessibility, null);
+            table.addCell(marketSharePercent, cellAlg.MID, marketShare, null);
+            table.addCell(incomeText, cellAlg.MID, incomeValue, null);
 
             // Tooltip
             PendingTooltip tp = new PendingTooltip();

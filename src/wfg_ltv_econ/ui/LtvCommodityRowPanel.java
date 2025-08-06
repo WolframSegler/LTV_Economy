@@ -114,12 +114,12 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         // Source Icon
         CommodityMarketDataAPI commodityData = m_com.getCommodityMarketData();
         getPanel().addComponent(
-            getSourceIcon(baseColor, commodityData, iconSize, m_panel).getPanel())
+            getSourceIcon(baseColor, commodityData, iconSize - 4, m_panel).getPanel())
             .setSize(rowHeight, rowHeight).inBL(0, 0);
 
         if (commodityData.getExportIncome(m_com) > 0) {
             String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
-            LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, iconSize, iconSize,
+            LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, iconSize - 4, iconSize - 4,
                     new LtvSpritePanelPlugin(), iconPath, null, null, false);
             iconPanel.getPlugin().setHasGlow(Glow.NONE);
 

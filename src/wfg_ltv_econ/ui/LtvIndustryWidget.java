@@ -38,6 +38,7 @@ import com.fs.graphics.A.D;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.plugins.IndustryPanelPlugin;
+import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
@@ -52,7 +53,7 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
     public final static int pad = 3;
     public final static int opad = 10;
     public final static int PANEL_WIDTH = 190;
-    public final static int TITLE_HEIGHT = 15;
+    public final static int TITLE_HEIGHT = 15 + pad;
     public final static int IMAGE_HEIGHT = 95;
     public final static int ICON_SIZE = 32;
 
@@ -98,30 +99,61 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
 
     public void initializePlugin(boolean hasPlugin) {
         IndustryPanelPlugin plugin = ((IndustryPanelPlugin) getPlugin());
-        plugin.init(this, Glow.NONE, false, false, Outline.NONE);
+        plugin.init(this, Glow.NONE, false, true, Outline.NONE);
 
         getPlugin().setFader(new FaderUtil(0.2f, 0.2f, 0.2f, false, true));
+        setBgColor(darkColor);
+        getPlugin().setBackgroundTransparency(1.0f);
     }
 
     public void createPanel() {
 
+        // Button Listener
         TooltipMakerAPI tp = getPanel().createUIElement(
             PANEL_WIDTH, TITLE_HEIGHT + IMAGE_HEIGHT, false
         );
 
         tp.setActionListenerDelegate(this);
 
-        tp.setParaFont(Fonts.DEFAULT_SMALL);
-        buildingTitleHeader = tp.createLabel(
-            m_industry.getCurrentName(), baseColor
+        LtvBasePanel titlePanel = new LtvBasePanel(
+            getRoot(), getPanel(), m_market, PANEL_WIDTH, TITLE_HEIGHT, new LtvCustomPanelPlugin()
+        ) {
+            @Override
+            public void createPanel() {
+                buildingTitleHeader = Global.getSettings().createLabel(
+                    m_industry.getCurrentName(), Fonts.DEFAULT_SMALL
+                );
+                buildingTitleHeader.setColor(
+                    m_industry.isImproved() ? Misc.getStoryOptionColor() : baseColor
+                );
+                buildingTitleHeader.setAlignment(Alignment.LMID);
+                buildingTitleHeader.autoSizeToWidth(PANEL_WIDTH);
+
+                add(buildingTitleHeader).inTL(0, 0);
+            }
+        };
+
+        add(titlePanel.getPanel()).inTL(0, 0);
+
+
+        constructionActionButton = tp.addButton(
+            "",
+            null,
+            new Color(0, 0, 0, 0),
+            new Color(0, 0, 0, 0),
+            Alignment.MID,
+            CutStyle.NONE,
+            PANEL_WIDTH,
+            IMAGE_HEIGHT,
+            pad
         );
-        buildingTitleHeader.setAlignment(Alignment.LMID);
+        constructionActionButton.setQuickMode(true);
+        constructionActionButton.setOpacity(0.00001f);
 
-        if (m_industry.isImproved()) {
-            buildingTitleHeader.setColor(Misc.getStoryOptionColor());
-        }
+        tp.addComponent(constructionActionButton)
+        .setSize(PANEL_WIDTH, IMAGE_HEIGHT).inBL(0, 0);
 
-        buildingTitleHeader.autoSizeToWidth(PANEL_WIDTH);
+
         industryIcon = new LtvSpritePanel(
             getRoot(),
             m_panel,
@@ -134,19 +166,6 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
             null,
             false
         );
-        
-        constructionActionButton = tp.addButton(
-            "",
-            null,
-            new Color(0, 0, 0, 0),
-            new Color(0, 0, 0, 0),
-            Alignment.MID,
-            CutStyle.ALL,
-            PANEL_WIDTH,
-            IMAGE_HEIGHT,
-            pad
-        );
-        constructionActionButton.setQuickMode(true);
 
         if (!m_industry.isFunctional() || constructionQueueIndex >= 0) {
             industryIcon.setColor(darkColor);
@@ -156,6 +175,9 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
             industryIcon.setColor(Color.white);
             constructionActionButton.setEnabled(false);
         }
+
+        add(industryIcon.getPanel()).inBL(0, 0);
+
 
         LabelAPI workerCountLabel = tp.createLabel("", Misc.getHighlightColor());
         if (m_industry instanceof LtvBaseIndustry) {
@@ -168,6 +190,9 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
                 workerCountLabel.autoSizeToWidth(100f);
             }
         }
+
+        workerCountLabel.getPosition().inTL(pad*2, TITLE_HEIGHT + pad*2);
+
 
         tp.beginIconGroup();
         tp.setIconSpacingMedium();
@@ -183,6 +208,7 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
         }
         tp.addIconGroup(24, 1, pad);
         tp.getPrev().getPosition().inBL(pad + 2, pad);
+
 
         tp.beginIconGroup();
         tp.setIconSpacingWide();
@@ -203,20 +229,12 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
         tp.addIconGroup(ICON_SIZE, 1, pad);
         tp.getPrev().getPosition().inTR(pad + 2, TITLE_HEIGHT + pad*2);
 
-        tp.addComponent(constructionActionButton)
-        .setSize(PANEL_WIDTH, IMAGE_HEIGHT).inBL(0, 0);
-
-        buildingTitleHeader.getPosition().inTL(0, 0);
-
-        getPanel().addComponent(industryIcon.getPanel()).inBL(0, 0);
-
-        workerCountLabel.getPosition().inTL(pad + 4, pad + 20);
-
+        
         boolean isIndNotFunctional = m_industry.isBuilding() || m_industry.isDisrupted();
         if (isIndNotFunctional) {
             if (m_industry.isBuilding() && !m_industry.isUpgrading() && !m_industry.isDisrupted()) {
-                final String font = "graphics/fonts/insignia25LTaa.fnt";
-                tp.setParaFont(font);
+
+                tp.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
                 constructionStatusText = tp.createLabel("Building", baseColor);
 
                 constructionStatusText.autoSizeToWidth(PANEL_WIDTH);
@@ -224,7 +242,6 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
             }
 
             N slider = new N((String) null, 0, 100);
-            // Thanks to UTF-8, no need for reflection
             slider.getValue().getRenderer().o00000(D.Ò00000(Fonts.VICTOR_10));
             slider.getValue().getPosition().setYAlignOffset(1);
             slider.setBarColor(Misc.interpolateColor(baseColor, darkColor, 0.5F));
@@ -241,16 +258,6 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
         if (constructionQueueIndex >= 0) {
             setNormalMode();
         }
-    }
-
-    public PositionAPI add(LabelAPI a) {
-        getPanel().addComponent((UIComponentAPI) a);
-
-        return ((UIComponentAPI) a).getPosition();
-    }
-
-    public void remove(LabelAPI a) {
-        getPanel().removeComponent((UIComponentAPI) a);
     }
 
     public void clearLabels() {
@@ -536,7 +543,7 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
             }
         }
 
-        if (m_industry.isIndustry() && btnGlow > 00) {
+        if (m_industry.isIndustry() && btnGlow > 0) {
             RenderUtils.drawQuad(
                 x, y + h, w, TITLE_HEIGHT, quadColor, alphaMult * btnGlow * 0.33F, true
             );

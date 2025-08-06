@@ -7,8 +7,10 @@ import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.CampaignEngine;
 
@@ -113,6 +115,24 @@ public abstract class LtvCustomPanel{
 
     public void setGlowColor(Color color) {
         glowColor = color;
+    }
+
+    public PositionAPI add(LabelAPI a) {
+        return add((UIComponentAPI) a);
+    }
+
+    public PositionAPI add(UIComponentAPI a) {
+        getPanel().addComponent(a);
+
+        return (a).getPosition();
+    }
+
+    public void remove(LabelAPI a) {
+        remove((UIComponentAPI) a);
+    }
+
+    public void remove(UIComponentAPI a) {
+        getPanel().removeComponent(a);
     }
 
     /**

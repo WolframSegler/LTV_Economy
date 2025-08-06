@@ -86,9 +86,10 @@ public class LtvIndustryListPanel extends IndustryListPanel {
                LtvIndustryWidget panelo = new LtvIndustryWidget(
                   this, this, new IndustryPanelPlugin(), market, var15, this
                );
-               add((c)panelo.getPanel()).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
-               // widgets.add(var16);
-               // add(var16).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
+               add((c)panelo.getPanel()).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad) - 130);
+               widgets.add(var16);
+               add(var16).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
+
                StandardTooltipV2Expandable.addTooltipRight(var16,
                      BuildingWidgetPanel.createIndustryTooltip(IndustryTooltipMode.NORMAL, var15));
             } else {
