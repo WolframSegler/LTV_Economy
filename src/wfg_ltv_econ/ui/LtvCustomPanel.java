@@ -12,6 +12,7 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.CampaignEngine;
 
 import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
@@ -27,13 +28,14 @@ public abstract class LtvCustomPanel{
     private FactionAPI m_faction = null;
     public Color BgColor = new Color(0, 0, 0, 255);
     public Color glowColor = getFaction().getBaseUIColor();
+    public Color outlineColor = Misc.getDarkPlayerColor();
 
     protected boolean hasPlugin = false;
 
     /**
      * The child SHALL NOT add himself to the parent. The parent UIPanelAPI will add the child.
      * The parent SHALL NOT call createPanel(). Only the children may call it.
-     * The parent SHALL NOT call initializePanel(). It may use members only the child has.
+     * The parent SHALL NOT call initializePanel(). It may be using members only the child has.
      */
     public LtvCustomPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, CustomUIPanelPlugin plugin,
         MarketAPI market) {
@@ -47,11 +49,7 @@ public abstract class LtvCustomPanel{
 
         hasPlugin = plugin != null;
         
-        if (hasPlugin) {
-            m_panel = Global.getSettings().createCustom(width, height, plugin);
-        } else {
-            m_panel = Global.getSettings().createCustom(width, height, null);
-        }
+        m_panel = Global.getSettings().createCustom(width, height, hasPlugin ? plugin : null);
     }
 
     public CustomPanelAPI getPanel() {
@@ -115,6 +113,10 @@ public abstract class LtvCustomPanel{
 
     public void setGlowColor(Color color) {
         glowColor = color;
+    }
+
+    public void setOutlineColor(Color a) {
+        outlineColor = a;
     }
 
     public PositionAPI add(LabelAPI a) {

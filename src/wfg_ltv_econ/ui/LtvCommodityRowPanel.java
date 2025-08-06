@@ -34,7 +34,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
     public static final int pad = 3;
     public static final int opad = 10;
 
-    private static final int iconSize = 24;
+    private static final int iconSize = 28;
     private static final String notExpandedCodexF1 = "F1 show legend";
     private static final String ExpandedCodexF1 = "F1 go back";
     private static final String codexF2 = "F2 open Codex";
@@ -84,7 +84,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         final Color baseColor = getFaction().getBaseUIColor();
         final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(),
             getPanelPos().getHeight(), false);
-        final float rowHeight = getPanelPos().getHeight();  
+        final int rowHeight = (int) getPanelPos().getHeight(); 
 
         // Amount label
         tooltip.setParaSmallInsignia();
@@ -114,15 +114,16 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         // Source Icon
         CommodityMarketDataAPI commodityData = m_com.getCommodityMarketData();
         getPanel().addComponent(
-            getSourceIcon(baseColor, commodityData, iconSize - 4, m_panel).getPanel())
-            .setSize(rowHeight, rowHeight).inBL(0, 0);
+            getSourceIcon(baseColor, commodityData, rowHeight - 4, m_panel).getPanel())
+            .inBL(2, 2);
 
         if (commodityData.getExportIncome(m_com) > 0) {
             String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
-            LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, iconSize - 4, iconSize - 4,
+            LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, rowHeight - 4, rowHeight - 4,
                     new LtvSpritePanelPlugin(), iconPath, null, null, false);
+            iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
-            getPanel().addComponent(iconPanel.getPanel()).setSize(rowHeight, rowHeight).inBR(pad, 0.0F);
+            getPanel().addComponent(iconPanel.getPanel()).inRMid(pad);
         }
 
         getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
@@ -152,6 +153,10 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), parent, m_market, size, size,
                     new LtvSpritePanelPlugin(), iconPath, baseColor, null, isSourceIllegal);
+        if (isSourceIllegal) {
+            iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
+            iconPanel.setOutlineColor(Color.RED);
+        }
         return iconPanel;
     }
 
@@ -382,7 +387,10 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         LtvSpritePanel iconPanel = new LtvSpritePanel(root, panel, market, lgdIconSize, lgdIconSize,
             new LtvSpritePanelPlugin(), iconPath, null, drawFilledIcon, drawRedBorder);
-        iconPanel.getPlugin().setHasGlow(Glow.NONE);
+        if (drawRedBorder) {
+            iconPanel.setOutlineColor(Color.RED);
+            iconPanel.getPlugin().setOffsets(2, 2, -4, -4);
+        }
             
         tooltip.addComponent(iconPanel.getPanel()).setSize(lgdIconSize, lgdIconSize).inTL(pad + opad/2f, y);
 

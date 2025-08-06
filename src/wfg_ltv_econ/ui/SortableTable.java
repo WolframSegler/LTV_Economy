@@ -209,7 +209,8 @@ public class SortableTable extends LtvCustomPanel {
             getPlugin().init(this, Glow.OVERLAY, false, true, Outline.LINE);
             getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
 
-            glowColor = Misc.getTooltipTitleAndLightHighlightColor();
+            setGlowColor(Misc.getTooltipTitleAndLightHighlightColor());
+            setOutlineColor(getFaction().getGridUIColor());
         }
 
         @Override
@@ -240,7 +241,6 @@ public class SortableTable extends LtvCustomPanel {
                     getFaction().getBaseUIColor(),
                     null,
                     false);
-            sortIcon.getPlugin().setHasGlow(Glow.NONE);
 
             tooltip.addComponent(sortIcon.getPanel()).inBR(1, 0);
 
@@ -660,6 +660,7 @@ public class SortableTable extends LtvCustomPanel {
         // Selected Colony has an outline
         if (m_market == market) {
             pendingRow.getPlugin().setOutline(Outline.TEX_VERY_THIN);
+            pendingRow.setOutlineColor(getFaction().getBaseUIColor());
         }
 
         pendingRow.m_tooltip = tp;

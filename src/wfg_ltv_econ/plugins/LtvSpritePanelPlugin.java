@@ -21,24 +21,20 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
     private SpriteAPI m_sprite;
     private Color m_color;
     private Color m_fillColor;
-    private boolean drawBorder;
-    private final int padding = 1;
-    private final int borderThickness = 2;
-    private final float outlineBrightness = 0.6f;
+    private final float additiveBrightness = 0.6f;
 
     private boolean isDrawFilledQuad = false;
 
-    public void init(String spriteId, Color color, Color fillColor, boolean drawBorder) {
+    public void init(String spriteId, Color color, Color fillColor) {
 
-        this.init(Global.getSettings().getSprite(spriteId), color, fillColor, drawBorder);
+        this.init(Global.getSettings().getSprite(spriteId), color, fillColor);
     }
 
-    public void init(SpriteAPI sprite, Color color, Color fillColor, boolean drawBorder) {
+    public void init(SpriteAPI sprite, Color color, Color fillColor) {
         this.m_sprite = sprite;
 
         this.m_color = color;
         m_fillColor = fillColor;
-        this.drawBorder = drawBorder;
 
         if (fillColor != null) {
             isDrawFilledQuad = true;
@@ -78,20 +74,8 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
             RenderUtils.drawQuad(x, y, width, height, m_fillColor, alphaMult, false);
         }
 
-        if (drawBorder) {
-            RenderUtils.drawFramedBorder(
-                x - padding,
-                y - padding,
-                width + padding*2,
-                height + padding*2,
-                borderThickness,
-                Color.RED,
-                alphaMult
-            );
-        }
-
         if (glowType == Glow.ADDITIVE && m_fader.getBrightness() > 0) {
-            float glowAmount = outlineBrightness * m_fader.getBrightness() * alphaMult;
+            float glowAmount = additiveBrightness * m_fader.getBrightness() * alphaMult;
 
             RenderUtils.drawAdditiveGlow(m_sprite, x, y, m_panel.getFaction().getBaseUIColor(),
                     glowAmount);

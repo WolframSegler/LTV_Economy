@@ -30,8 +30,8 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
     public CommodityOnMarketAPI m_com;
 
     public LtvIconPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        CustomUIPanelPlugin plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-        super(root, parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+        CustomUIPanelPlugin plugin, String spriteID, Color color, Color fillColor) {
+        super(root, parent, market, width, height, plugin, spriteID, color, fillColor, false);
     }
 
     public void setCommodity(CommodityOnMarketAPI a) {
@@ -42,7 +42,7 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
     public void initializePlugin(boolean hasPlugin) {
         LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) m_panel.getPlugin());
         plugin.init(this, Glow.ADDITIVE, true, false, Outline.NONE);
-        plugin.init(m_spriteID, color, fillColor, drawBorder);
+        plugin.init(m_spriteID, color, fillColor);
         plugin.setIgnoreUIState(true);
     }
 

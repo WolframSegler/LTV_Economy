@@ -157,6 +157,9 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     }
 
+    /**
+     * Effects the background and outline position
+     */
     public void setOffsets(int x, int y, int width, int height) {
         offsetX = x;
         offsetY = y;
@@ -238,14 +241,15 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
                 default:
                     break;
             }
+
             if (borderThickness != 0) {
                 RenderUtils.drawFramedBorder(
-                    pos.getX(),
-                    pos.getY(),
-                    pos.getWidth(),
-                    pos.getHeight(),
+                    pos.getX() + offsetX,
+                    pos.getY() + offsetY,
+                    pos.getWidth() + offsetW,
+                    pos.getHeight() + offsetH,
                     borderThickness,
-                    m_panel.getFaction().getGridUIColor(),
+                    m_panel.outlineColor,
                     alphaMult
                 );
             }
@@ -258,23 +262,9 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
                     1,
                     textureID,
                     textureSize,
-                    m_panel.getFaction().getBaseUIColor()
+                    m_panel.outlineColor
                 );
             }
-        }
-
-       
-        if (outlineType == Outline.THIN) {
-            UiUtils.drawRoundedBorder(
-                pos.getX() - pad,
-                pos.getY() - pad,
-                pos.getWidth() + pad*2,
-                pos.getHeight() + pad*2,
-                1,
-                "ui_border3",
-                4,
-                m_panel.getFaction().getBaseUIColor()
-            );
         }
     }
 

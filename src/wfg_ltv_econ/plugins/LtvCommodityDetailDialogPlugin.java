@@ -23,11 +23,6 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
     protected boolean isProducerButtonChecked = true;
     protected boolean isConsumerButtonChecked = false;
 
-    protected int offsetX = 0;
-    protected int offsetY = 0;
-    protected int offsetW = 0;
-    protected int offsetH = 0;
-
     public LtvCommodityDetailDialogPlugin(LtvCustomPanel parent, LtvCommodityDetailDialog dialog) {
         m_parent = parent;
         m_dialog = dialog;
@@ -41,21 +36,14 @@ public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
 
     public void positionChanged(PositionAPI position) {}
 
-    public void setOffsets(int x, int y, int width, int height) {
-        offsetX = x;
-        offsetY = y;
-        offsetW = width;
-        offsetH = height;
-    }
-
     public void renderBelow(float alphaMult) {
         PositionAPI pos = m_panel.getPosition();
 
         if (hasBackground) {
-            int x = (int)pos.getX() + offsetX;
-            int y = (int)pos.getY() + offsetY;
-            int w = (int)pos.getWidth() + offsetW;
-            int h = (int)pos.getHeight() + offsetH;
+            int x = (int)pos.getX();
+            int y = (int)pos.getY();
+            int w = (int)pos.getWidth();
+            int h = (int)pos.getHeight();
             RenderUtils.drawQuad(x, y, w, h, m_parent.BgColor, alphaMult*0.65f, false);
             // Looks vanilla like with 0.65f
         }

@@ -55,6 +55,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
 
     public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this, Glow.NONE, false, true, Outline.LINE);
+        getPlugin().setOffsets(1, 1, -2, -2);
     }
 
     public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {
