@@ -208,11 +208,10 @@ public class SortableTable extends LtvCustomPanel {
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this, Glow.OVERLAY, false, true, Outline.LINE);
             getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+            getPlugin().setSoundEnabled(true);
 
             setGlowColor(Misc.getTooltipTitleAndLightHighlightColor());
             setOutlineColor(getFaction().getGridUIColor());
-
-            getPlugin().setSoundEnabled(true);
         }
 
         @Override
@@ -258,8 +257,9 @@ public class SortableTable extends LtvCustomPanel {
 
         @Override
         public void initializePlugin(boolean hasPlugin) {
-            getPlugin().init(this, Glow.OVERLAY, true, true, Outline.LINE);
-            getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+            super.initializePlugin(hasPlugin);
+
+            getPlugin().setTooltipActive(true);
         }
 
         public UIPanelAPI getTooltipAttachmentPoint() {
@@ -655,13 +655,14 @@ public class SortableTable extends LtvCustomPanel {
         pendingRow.setCodexId(codexID);
         pendingRow.setMarket(market);
         pendingRow.setTextColor(textColor);
+        pendingRow.getPlugin().setSoundEnabled(true);
         if (glowClr != null) {
             pendingRow.setGlowColor(glowClr);
         }
 
         // Selected Colony has an outline
         if (m_market == market) {
-            pendingRow.getPlugin().setOutline(Outline.TEX_VERY_THIN);
+            pendingRow.getPlugin().setOutline(Outline.TEX_THIN);
             pendingRow.setOutlineColor(getFaction().getBaseUIColor());
         }
 

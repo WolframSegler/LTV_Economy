@@ -14,6 +14,7 @@ import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 import wfg_ltv_econ.ui.LtvCustomPanel;
 import wfg_ltv_econ.ui.LtvCustomPanel.TooltipProvider;
 import wfg_ltv_econ.ui.LtvUIState;
+import wfg_ltv_econ.ui.SortableTable;
 import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
@@ -56,7 +57,7 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
     protected boolean hasBackground = false;
     protected boolean ignoreUIState = false;
     protected boolean soundEnabled = false;
-    protected boolean playedUIHoverSound = false;
+    protected boolean playedUIHoverSound = true;
 
     protected float hoverTime = 0f;
     protected int offsetX = 0;
@@ -66,13 +67,13 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     private final static int pad = 3;
 
-    public void init(LtvCustomPanel panel, Glow gT, boolean hasTooltip, boolean hasBackground,
+    public void init(LtvCustomPanel panel, Glow gT, boolean hasTooltip, boolean hasBg,
         Outline outline) {
         m_panel = panel;
         m_hasTooltip = hasTooltip;
         outlineType = outline;
-        this.glowType = gT;
-        this.hasBackground = hasBackground;
+        glowType = gT;
+        hasBackground = hasBg;
 
         if (glowType != Glow.NONE) {
             m_fader = new FaderUtil(0, 0, 0.2f, true, true);
@@ -113,6 +114,10 @@ public class LtvCustomPanelPlugin implements CustomUIPanelPlugin {
 
     public void setSoundEnabled(boolean a) {
         soundEnabled = a;
+    }
+
+    public boolean getSoundEnabled() {
+        return soundEnabled;
     }
 
     public boolean isValidUIContext() {

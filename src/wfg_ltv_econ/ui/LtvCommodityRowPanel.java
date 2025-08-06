@@ -358,7 +358,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         y.addAndGet(iconSize + pad);
 
         iconPath = "";
-        desc = "Production used for local demand or exports.";
+        desc = "Production used for local demand.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_LOCAL_PROD, root, panel, market);
         
         y.addAndGet(iconSize + pad);
