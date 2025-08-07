@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import java.awt.Color;
 
@@ -8,9 +8,9 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
 
 /**
  * Each instance implements createPanel, createTooltip etc. when creating the class.

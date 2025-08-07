@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import com.fs.graphics.A.D;
 import com.fs.graphics.util.B;

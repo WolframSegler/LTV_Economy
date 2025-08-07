@@ -13,7 +13,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.codex2.CodexDialog;
 
-import wfg_ltv_econ.plugins.CommodityinfobarPlugin;
+import wfg_ltv_econ.ui.ui_plugins.CommodityinfobarPlugin;
 
 public class UiUtils {
     public static final void resetFlowLeft(TooltipMakerAPI tooltip, float opad) {

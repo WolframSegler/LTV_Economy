@@ -1,4 +1,4 @@
-package wfg_ltv_econ.plugins;
+package wfg_ltv_econ.ui.ui_plugins;
 
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +75,7 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
     public void drawGlassLayer(float x, float y, float w, float h, float alphaMult) {
         Color topLight     = new Color(255, 255, 255, (int)(80 * alphaMult));
         Color centerHighlight = new Color(255, 255, 255, (int)(20 * alphaMult));
-        Color bottomShadow  = new Color(0, 0, 0, (int)(80 * alphaMult));
+        Color bottomShadow  = new Color(0, 0, 0, (int)(90 * alphaMult));
 
         final float topY = y + h * 0.97f;
         final float midTop = y + h * 0.82f;

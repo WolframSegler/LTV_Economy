@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import java.awt.Color;
 
@@ -14,9 +14,9 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.TooltipUtils;
 
 public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.TooltipProvider {
@@ -42,7 +42,7 @@ public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.Toolt
     public void initializePlugin(boolean hasPlugin) {
         LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) m_panel.getPlugin());
         plugin.init(this, Glow.ADDITIVE, true, false, Outline.NONE);
-        plugin.init(m_spriteID, color, fillColor);
+        plugin.init();
         plugin.setIgnoreUIState(true);
     }
 

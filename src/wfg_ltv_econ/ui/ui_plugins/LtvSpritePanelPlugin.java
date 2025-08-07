@@ -1,48 +1,35 @@
-package wfg_ltv_econ.plugins;
+package wfg_ltv_econ.ui.ui_plugins;
 
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
-import java.awt.Color;
-
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
-import wfg_ltv_econ.ui.LtvIconPanel;
+import wfg_ltv_econ.ui.panels.LtvIconPanel;
+import wfg_ltv_econ.ui.panels.LtvSpritePanel;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
 import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 
 public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
-    private SpriteAPI m_sprite;
-    private Color m_color;
-    private Color m_fillColor;
+
+    @Override
+    public LtvSpritePanel getPanel() {
+        return (LtvSpritePanel) m_panel;
+    }
+    
     private final float additiveBrightness = 0.6f;
 
     private boolean isDrawFilledQuad = false;
 
-    public void init(String spriteId, Color color, Color fillColor) {
-
-        this.init(Global.getSettings().getSprite(spriteId), color, fillColor);
-    }
-
-    public void init(SpriteAPI sprite, Color color, Color fillColor) {
-        this.m_sprite = sprite;
-
-        this.m_color = color;
-        m_fillColor = fillColor;
-
-        if (fillColor != null) {
+    public void init() {
+        if (getPanel().fillColor != null) {
             isDrawFilledQuad = true;
         }
-    }
-
-    public void setSprite(SpriteAPI sprite) {
-        m_sprite = sprite;
     }
 
     public void setDrawFilledQuad(boolean a) {
@@ -52,32 +39,32 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin {
     @Override
     public void render(float alphaMult) {
         super.render(alphaMult);
-        if (m_sprite == null) {
+        if (getPanel().m_sprite == null) {
             return;
         }
 
-        if (m_color != null) {
-            m_sprite.setColor(m_color);
+        if (getPanel().color != null) {
+            getPanel().setColor(getPanel().color);
         }
 
-        PositionAPI pos = m_panel.getPanelPos();
-        float x = pos.getX();
-        float y = pos.getY();
-        float width = pos.getWidth();
-        float height = pos.getHeight();
+        final PositionAPI pos = getPanel().getPos();
+        final float x = pos.getX();
+        final float y = pos.getY();
+        final float w = pos.getWidth();
+        final float h = pos.getHeight();
 
-        m_sprite.setSize(width, height);
-        m_sprite.render(x, y);
+        getPanel().m_sprite.setSize(w, h);
+        getPanel().m_sprite.render(x, y);
 
-        if (isDrawFilledQuad && m_fillColor != null) {
-            m_sprite.setColor(m_fillColor);
-            RenderUtils.drawQuad(x, y, width, height, m_fillColor, alphaMult, false);
+        if (isDrawFilledQuad && getPanel().fillColor != null) {
+            getPanel().m_sprite.setColor(getPanel().fillColor);
+            RenderUtils.drawQuad(x, y, w, h, getPanel().fillColor, alphaMult, false);
         }
 
         if (glowType == Glow.ADDITIVE && m_fader.getBrightness() > 0) {
             float glowAmount = additiveBrightness * m_fader.getBrightness() * alphaMult;
 
-            RenderUtils.drawAdditiveGlow(m_sprite, x, y, m_panel.getFaction().getBaseUIColor(),
+            RenderUtils.drawAdditiveGlow(getPanel().m_sprite, x, y, m_panel.getFaction().getBaseUIColor(),
                     glowAmount);
         }
     }

@@ -1,6 +1,6 @@
-package wfg_ltv_econ.plugins;
+package wfg_ltv_econ.ui.ui_plugins;
 
-import wfg_ltv_econ.ui.LtvIndustryWidget;
+import wfg_ltv_econ.ui.panels.LtvIndustryWidget;
 
 public class IndustryPanelPlugin extends LtvCustomPanelPlugin {
 //     @Override

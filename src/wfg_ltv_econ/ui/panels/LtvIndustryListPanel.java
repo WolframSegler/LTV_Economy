@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,7 +18,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.s;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 import com.fs.starfarer.ui.newui.L;
 
-import wfg_ltv_econ.plugins.IndustryPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.IndustryPanelPlugin;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;

@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +37,11 @@ import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.graphics.A.D;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
-import wfg_ltv_econ.plugins.IndustryPanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.ui_plugins.IndustryPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.LtvMarketReplacer;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
@@ -102,7 +102,7 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
         plugin.init(this, Glow.NONE, false, true, Outline.NONE);
 
         getPlugin().setFader(new FaderUtil(0.2f, 0.2f, 0.2f, false, true));
-        setBgColor(darkColor);
+        setBgColor(m_industry.isImproved() ? Misc.getStoryOptionColor() : darkColor);
         getPlugin().setBackgroundTransparency(1.0f);
     }
 
@@ -129,7 +129,7 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
                 buildingTitleHeader.setAlignment(Alignment.LMID);
                 buildingTitleHeader.autoSizeToWidth(PANEL_WIDTH);
 
-                add(buildingTitleHeader).inTL(0, 0);
+                add(buildingTitleHeader).inLMid(pad);
             }
         };
 
@@ -150,8 +150,7 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
         constructionActionButton.setQuickMode(true);
         constructionActionButton.setOpacity(0.00001f);
 
-        tp.addComponent(constructionActionButton)
-        .setSize(PANEL_WIDTH, IMAGE_HEIGHT).inBL(0, 0);
+        tp.addComponent(constructionActionButton).inBL(0, 0);
 
 
         industryIcon = new LtvSpritePanel(
@@ -162,7 +161,7 @@ public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerD
             IMAGE_HEIGHT,
             new LtvSpritePanelPlugin(),
             m_industry.getCurrentImage(),
-            baseColor,
+            Color.white,
             null,
             false
         );

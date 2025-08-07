@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,9 +13,9 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
-import wfg_ltv_econ.ui.LtvCommodityDetailDialog.CommoditySelectionListener;
+import wfg_ltv_econ.ui.dialogs.LtvCommodityDetailDialog.CommoditySelectionListener;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
 
 public class LtvCommodityPanel extends LtvCustomPanel{
 
@@ -86,14 +86,14 @@ public class LtvCommodityPanel extends LtvCustomPanel{
                 commodities.remove(com);
             }
         }
-        final TooltipMakerAPI FgTooltip = m_panel.createUIElement(getPanelPos().getWidth(), getPanelPos().getHeight(), false);
+        final TooltipMakerAPI FgTooltip = m_panel.createUIElement(getPos().getWidth(), getPos().getHeight(), false);
         FgTooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
         final int headerHeight = (int) FgTooltip.getPrev().getPosition().getHeight();
         getPlugin().setOffsets(0, 0, 0, -headerHeight);
 
         // Determine row height
-        float rowHeight = getPanelPos().getHeight() - headerHeight - opad - pad;
+        float rowHeight = getPos().getHeight() - headerHeight - opad - pad;
         rowHeight = rowHeight / (float)commodities.size();
         rowHeight = (float)((int)rowHeight);
         if (rowHeight % 2.0F == 0.0F) {
@@ -109,9 +109,9 @@ public class LtvCommodityPanel extends LtvCustomPanel{
 
         for (CommodityOnMarketAPI commodity : commodities) {
             LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(getRoot(), getPanel(), m_market, commodity,
-            this, (int)(getPanelPos().getWidth() - opad * 2), (int)rowHeight, childrenIgnoreUIState);
+            this, (int)(getPos().getWidth() - opad * 2), (int)rowHeight, childrenIgnoreUIState);
 
-            comRow.getPanelPos().setSize(getPanelPos().getWidth() - opad * 2.0F, rowHeight);
+            comRow.getPos().setSize(getPos().getWidth() - opad * 2.0F, rowHeight);
 
             if (previousRow == null) {
                 getPanel().addComponent(comRow.getPanel()).inTL(opad, headerHeight + opad);

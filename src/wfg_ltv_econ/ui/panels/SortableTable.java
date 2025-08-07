@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -17,13 +17,13 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
-import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
 
 public class SortableTable extends LtvCustomPanel {
     private final List<ColumnManager> m_columns = new ArrayList<>();
@@ -88,7 +88,7 @@ public class SortableTable extends LtvCustomPanel {
 
         // Create headers
         m_headerContainer = Global.getSettings().createCustom(
-            getPanelPos().getWidth(),
+            getPos().getWidth(),
             m_headerHeight,
             null
         );
@@ -156,14 +156,14 @@ public class SortableTable extends LtvCustomPanel {
 
         // Create rows
         m_rowContainer = Global.getSettings().createCustom(
-            getPanelPos().getWidth(),
-            getPanelPos().getHeight() - (m_headerHeight + pad),
+            getPos().getWidth(),
+            getPos().getHeight() - (m_headerHeight + pad),
             null
         );
 
         TooltipMakerAPI tp = m_rowContainer.createUIElement(
-            getPanelPos().getWidth() + pad,
-            getPanelPos().getHeight() - (m_headerHeight + pad),
+            getPos().getWidth() + pad,
+            getPos().getHeight() - (m_headerHeight + pad),
             true
         );
 
@@ -218,7 +218,7 @@ public class SortableTable extends LtvCustomPanel {
         public void createPanel() {
             CustomPanelAPI panel = SortableTable.HeaderPanel.this.getPanel();
             TooltipMakerAPI tooltip = panel.createUIElement(
-                    getPanelPos().getWidth(), getPanelPos().getHeight(), false);
+                    getPos().getWidth(), getPos().getHeight(), false);
 
             tooltip.setParaFontColor(m_market.getFaction().getBaseUIColor());
             tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -228,8 +228,8 @@ public class SortableTable extends LtvCustomPanel {
             final float lblHeight = lbl.computeTextHeight(lbl.getText());
 
             lbl.getPosition().inTL(
-                (getPanelPos().getWidth() / 2f) - (lblWidth / 2f),
-                (getPanelPos().getHeight() / 2f) - (lblHeight / 2f) 
+                (getPos().getWidth() / 2f) - (lblWidth / 2f),
+                (getPos().getHeight() / 2f) - (lblHeight / 2f) 
             );
 
             LtvSpritePanel sortIcon = new LtvSpritePanel(
@@ -442,8 +442,8 @@ public class SortableTable extends LtvCustomPanel {
 
                 } else if (cell instanceof LtvSpritePanel) {
                     comp = (UIComponentAPI) ((LtvSpritePanel)cell).getPanel();
-                    compWidth = ((LtvSpritePanel) cell).getPanelPos().getWidth();
-                    compHeight = ((LtvSpritePanel) cell).getPanelPos().getHeight();
+                    compWidth = ((LtvSpritePanel) cell).getPos().getWidth();
+                    compHeight = ((LtvSpritePanel) cell).getPos().getHeight();
 
                 } else if (cell instanceof UIPanelAPI) {
                     comp = (UIComponentAPI) cell;
@@ -619,7 +619,7 @@ public class SortableTable extends LtvCustomPanel {
             pendingRow = new RowManager(
                     getRoot(),
                     getParent(),
-                    (int) getPanelPos().getWidth() - 2,
+                    (int) getPos().getWidth() - 2,
                     m_rowHeight,
                     m_market,
                     new RowSelectionListener() {

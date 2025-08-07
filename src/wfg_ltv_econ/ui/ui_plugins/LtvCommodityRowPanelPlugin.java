@@ -1,4 +1,4 @@
-package wfg_ltv_econ.plugins;
+package wfg_ltv_econ.ui.ui_plugins;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.input.InputEventAPI;
 
-import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
-import wfg_ltv_econ.ui.LtvCommodityRowPanel;
+import wfg_ltv_econ.ui.dialogs.LtvCommodityDetailDialog;
+import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg_ltv_econ.util.UiUtils;
 
 public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin {

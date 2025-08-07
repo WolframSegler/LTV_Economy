@@ -1,4 +1,4 @@
-package wfg_ltv_econ.plugins;
+package wfg_ltv_econ.ui.ui_plugins;
 
 import java.util.List;
 
@@ -7,8 +7,8 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
-import wfg_ltv_econ.ui.LtvCommodityDetailDialog;
-import wfg_ltv_econ.ui.LtvCustomPanel;
+import wfg_ltv_econ.ui.dialogs.LtvCommodityDetailDialog;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.util.RenderUtils;
 
 public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {

@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import java.awt.Color;
 
@@ -12,23 +12,19 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.CampaignEngine;
 
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
 
-public abstract class LtvCustomPanel{
-    private final UIPanelAPI m_root;
+public abstract class LtvCustomPanel<PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<PluginType>>>{
     protected final UIPanelAPI m_parent;
     protected final CustomPanelAPI m_panel;
-    protected final CustomUIPanelPlugin m_plugin;
-    public MarketAPI m_market = null;
+    protected final PluginType m_plugin;
+    private final UIPanelAPI m_root;
     private FactionAPI m_faction = null;
-    public Color BgColor = new Color(0, 0, 0, 255);
-    public Color glowColor = getFaction().getBaseUIColor();
-    public Color outlineColor = Misc.getDarkPlayerColor();
+    private MarketAPI m_market = null;
 
     protected boolean hasPlugin = false;
 
@@ -37,7 +33,7 @@ public abstract class LtvCustomPanel{
      * The parent SHALL NOT call createPanel(). Only the children may call it.
      * The parent SHALL NOT call initializePanel(). It may be using members only the child has.
      */
-    public LtvCustomPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, CustomUIPanelPlugin plugin,
+    public LtvCustomPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, PluginType plugin,
         MarketAPI market) {
         m_root = root;
         m_parent = parent;
@@ -56,7 +52,7 @@ public abstract class LtvCustomPanel{
         return m_panel;
     }
 
-    public PositionAPI getPanelPos() {
+    public PositionAPI getPos() {
         return m_panel.getPosition();
     }
 
@@ -69,8 +65,8 @@ public abstract class LtvCustomPanel{
         return m_root == null ? defaultRoot : m_root;
     }
 
-    public LtvCustomPanelPlugin getPlugin() {
-        return (LtvCustomPanelPlugin)m_plugin;
+    public PluginType getPlugin() {
+        return m_plugin;
     }
 
     /**
@@ -100,23 +96,13 @@ public abstract class LtvCustomPanel{
         }
     }
 
+    public MarketAPI getMarket() {
+        return m_market;
+    }
+
     public void setMarket(MarketAPI market) {
         m_market = market;
         m_faction = market.getFaction();
-    }
-
-    public void setBgColor(Color color) {
-        BgColor = color;
-
-        getPlugin().setHasBackground(true);
-    }
-
-    public void setGlowColor(Color color) {
-        glowColor = color;
-    }
-
-    public void setOutlineColor(Color a) {
-        outlineColor = a;
     }
 
     public PositionAPI add(LabelAPI a) {
@@ -139,6 +125,7 @@ public abstract class LtvCustomPanel{
 
     /**
      * The child must initialize the Plugin.
+     * The plugin should not hold a copy the panel's members.
      * Leave it empty for no Plugin.
      */
     public abstract void initializePlugin(boolean hasPlugin);
@@ -147,6 +134,16 @@ public abstract class LtvCustomPanel{
      * The method for populating the main panel.
      */
     public abstract void createPanel();
+
+    public static interface ColoredPanel {
+        Color getBgColor();
+        Color getOutlineColor();
+        Color getGlowColor();
+
+        void setBgColor(Color color);
+        void setOutlineColor(Color color);
+        void setGlowColor(Color color);
+    }
 
     public static interface TooltipProvider {
 

@@ -34,9 +34,9 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
-import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.ui.LtvCustomPanel;
-import wfg_ltv_econ.ui.LtvSpritePanel;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel;
+import wfg_ltv_econ.ui.panels.LtvSpritePanel;
+import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
 
 public class TooltipUtils {
 
@@ -252,11 +252,10 @@ public class TooltipUtils {
                             // Arrow Sprite
                             SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
-                            LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
+                            LtvSpritePanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
                                     20, 20, new LtvSpritePanelPlugin(), "", null, null, false);
-                            LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) arrowPanel.getPlugin());
 
-                            plugin.setSprite(arrow);
+                            arrowPanel.setSprite(arrow);
 
                             Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                             Vector2f targetLoc = market.getStarSystem().getLocation();
@@ -361,11 +360,10 @@ public class TooltipUtils {
                         // Arrow Sprite
                         SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
-                        LtvCustomPanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
+                        LtvSpritePanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
                                 20, 20, new LtvSpritePanelPlugin(), "", null, null, false);
-                        LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) arrowPanel.getPlugin());
 
-                        plugin.setSprite(arrow);
+                        arrowPanel.setSprite(arrow);
 
                         Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                         Vector2f targetLoc = market.getStarSystem().getLocation();

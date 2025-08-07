@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityMarketDataAPI;
@@ -17,10 +17,11 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.loading.Description.Type;
 
-import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.plugins.LtvCommodityRowPanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.TooltipProvider;
+import wfg_ltv_econ.ui.ui_plugins.LtvCommodityRowPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.TooltipUtils;
@@ -82,9 +83,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
     public void createPanel() {
         final int textWidth = 60;
         final Color baseColor = getFaction().getBaseUIColor();
-        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth(),
-            getPanelPos().getHeight(), false);
-        final int rowHeight = (int) getPanelPos().getHeight(); 
+        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth(),
+            getPos().getHeight(), false);
+        final int rowHeight = (int) getPos().getHeight(); 
 
         // Amount label
         tooltip.setParaSmallInsignia();

@@ -1,18 +1,21 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.panels;
 
 import java.awt.Color;
 
+import com.fs.graphics.Sprite;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin.Outline;
-import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
 
 public class LtvSpritePanel extends LtvCustomPanel {
 
-    public final String m_spriteID;
+    public SpriteAPI m_sprite;
     public Color color;
     public Color fillColor;
     public boolean drawBorder = false;
@@ -21,7 +24,7 @@ public class LtvSpritePanel extends LtvCustomPanel {
         CustomUIPanelPlugin plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
         super(root, parent, width, height, plugin, market);
 
-        m_spriteID = spriteID;
+        m_sprite = Global.getSettings().getSprite(spriteID);
         this.color = color;
         this.fillColor = fillColor;
         this.drawBorder = drawBorder;
@@ -33,13 +36,19 @@ public class LtvSpritePanel extends LtvCustomPanel {
     public void initializePlugin(boolean hasPlugin) {
         LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) m_panel.getPlugin());
         plugin.init(this, Glow.NONE, false, false, Outline.NONE);
-        plugin.init(m_spriteID, color, fillColor);
         plugin.setIgnoreUIState(true);
         plugin.setOutline(drawBorder ? Outline.VERY_THIN : Outline.NONE);
     }
 
     public void setColor(Color a) {
         color = a;
+    }
+
+    public void setSprite(String spriteID) {
+        m_sprite = Global.getSettings().getSprite(spriteID);
+    }
+    public void setSprite(SpriteAPI sprite) {
+        m_sprite = sprite;
     }
 
     public void createPanel() {}

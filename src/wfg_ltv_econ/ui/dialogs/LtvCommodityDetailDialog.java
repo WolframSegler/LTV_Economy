@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui;
+package wfg_ltv_econ.ui.dialogs;
 
 import java.awt.Color;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,14 +27,24 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
-import wfg_ltv_econ.plugins.LtvCommodityDetailDialogPlugin;
-import wfg_ltv_econ.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.plugins.LtvCustomPanelPlugin;
+
+import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
-import wfg_ltv_econ.ui.SortableTable.ColumnManager;
-import wfg_ltv_econ.ui.SortableTable.HeaderPanelWithTooltip;
-import wfg_ltv_econ.ui.SortableTable.PendingTooltip;
-import wfg_ltv_econ.ui.SortableTable.cellAlg;
+import wfg_ltv_econ.ui.panels.LtvBasePanel;
+import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
+import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel;
+import wfg_ltv_econ.ui.panels.LtvIconPanel;
+import wfg_ltv_econ.ui.panels.LtvSpritePanel;
+import wfg_ltv_econ.ui.panels.LtvTextPanel;
+import wfg_ltv_econ.ui.panels.SortableTable;
+import wfg_ltv_econ.ui.panels.SortableTable.ColumnManager;
+import wfg_ltv_econ.ui.panels.SortableTable.HeaderPanelWithTooltip;
+import wfg_ltv_econ.ui.panels.SortableTable.PendingTooltip;
+import wfg_ltv_econ.ui.panels.SortableTable.cellAlg;
+import wfg_ltv_econ.ui.ui_plugins.LtvCommodityDetailDialogPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
@@ -175,13 +185,13 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
             @Override
             public TooltipMakerAPI createTooltip() {
-                TooltipMakerAPI tooltip = m_panel.createUIElement(getPanelPos().getWidth() * 0.7f, 0, false);
+                TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth() * 0.7f, 0, false);
 
                 tooltip.addPara(
                         "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
                         pad);
 
-                m_panel.addUIElement(tooltip).inBL(0, getPanelPos().getHeight());
+                m_panel.addUIElement(tooltip).inBL(0, getPos().getHeight());
                 m_panel.bringComponentToTop(tooltip);
 
                 return tooltip;
@@ -299,7 +309,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 iconSize, iconSize, new LtvSpritePanelPlugin(), comIconID, null, null);
         iconLeft.setCommodity(m_com);
 
-        iconLeft.getPanelPos().inTL(opad * 3,
+        iconLeft.getPos().inTL(opad * 3,
                 (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconLeft.getPanel());
 
@@ -307,7 +317,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 iconSize, iconSize, new LtvSpritePanelPlugin(), comIconID, null, null);
         iconRight.setCommodity(m_com);
 
-        iconRight.getPanelPos().inTL(SECT1_WIDTH - iconSize - opad * 3,
+        iconRight.getPos().inTL(SECT1_WIDTH - iconSize - opad * 3,
                 (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconRight.getPanel());
 
