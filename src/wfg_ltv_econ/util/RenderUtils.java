@@ -12,43 +12,48 @@ public class RenderUtils {
         drawRect(x, y, w, h, color, alphaMult, GL11.GL_QUADS, additive);
     }
 
-    public static void drawFramedBorder(float x, float y, float w, float h, float thickness, Color       
+    /**
+     * @param x = posX
+     * @param y = posY
+     * @param w = width
+     * @param h = height
+     * @param t = thickness
+     */
+    public static void drawFramedBorder(float x, float y, float w, float h, float t, Color       
         color, float alphaMult) {
-        // TOP
-        RenderUtils.drawRect(
-            x - thickness, 
-            y + h, 
-            w + thickness * 2, 
-            thickness, 
-            color, alphaMult, GL11.GL_QUADS, false
-        );
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        // BOTTOM
-        RenderUtils.drawRect(
-            x - thickness, 
-            y - thickness, 
-            w + thickness * 2, 
-            thickness, 
-            color, alphaMult, GL11.GL_QUADS, false
-        );
+        setGLColor(color, alphaMult);
+        GL11.glBegin(GL11.GL_QUADS);
 
-        // LEFT
-        RenderUtils.drawRect(
-            x - thickness, 
-            y, 
-            thickness, 
-            h, 
-            color, alphaMult, GL11.GL_QUADS, false
-        );
+        // Bottom
+        GL11.glVertex2f(x - t, y - t);
+        GL11.glVertex2f(x + w, y - t);
+        GL11.glVertex2f(x + w, y);
+        GL11.glVertex2f(x - t, y);
+        
+        // Right
+        GL11.glVertex2f(x + w, y - t);
+        GL11.glVertex2f(x + w + t, y - t);
+        GL11.glVertex2f(x + w + t, y + h);
+        GL11.glVertex2f(x + w, y + h);
 
-        // RIGHT
-        RenderUtils.drawRect(
-            x + w, 
-            y, 
-            thickness, 
-            h, 
-            color, alphaMult, GL11.GL_QUADS, false
-        );
+        // Top
+        GL11.glVertex2f(x, y + h);
+        GL11.glVertex2f(x + w + t, y + h);
+        GL11.glVertex2f(x + w + t, y + h + t);
+        GL11.glVertex2f(x, y + h + t);
+
+        // Left
+        GL11.glVertex2f(x - t, y);
+        GL11.glVertex2f(x, y);
+        GL11.glVertex2f(x, y + h + t);
+        GL11.glVertex2f(x - t, y + h + t);
+
+        GL11.glEnd();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
     public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult, int mode,
