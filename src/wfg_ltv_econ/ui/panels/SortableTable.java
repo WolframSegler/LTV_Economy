@@ -18,10 +18,10 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.LtvUIState.UIState;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 
@@ -249,7 +249,7 @@ public class SortableTable extends LtvCustomPanel {
         }
     }
 
-    public class HeaderPanelWithTooltip extends HeaderPanel implements LtvCustomPanel.TooltipProvider {
+    public class HeaderPanelWithTooltip extends HeaderPanel implements LtvCustomPanel.HasTooltip {
         public HeaderPanelWithTooltip(UIPanelAPI root, UIPanelAPI parent, int width, int height,
                 MarketAPI market, ColumnManager column, int listIndex) {
             super(root, parent, width, height, market, column, listIndex);
@@ -363,7 +363,7 @@ public class SortableTable extends LtvCustomPanel {
         }
     }
 
-    public class RowManager extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
+    public class RowManager extends LtvCustomPanel implements LtvCustomPanel.HasTooltip {
         protected final List<Object> m_cellData = new ArrayList<>();
         protected final List<cellAlg> m_cellAlignment = new ArrayList<>();
         protected final List<Object> m_sortValues = new ArrayList<>();

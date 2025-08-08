@@ -8,15 +8,15 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
 
 /**
  * Each instance implements createPanel, createTooltip etc. when creating the class.
  * The class just serves as a template for anonymous classes.
  */
-public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
+public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.HasTooltip {
 
     public Color m_textColor;
 

@@ -17,11 +17,11 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.loading.Description.Type;
 
-import wfg_ltv_econ.ui.panels.LtvCustomPanel.TooltipProvider;
-import wfg_ltv_econ.ui.ui_plugins.LtvCommodityRowPanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
+import wfg_ltv_econ.ui.plugins.LtvCommodityRowPanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.TooltipUtils;
@@ -30,7 +30,7 @@ import wfg_ltv_econ.util.UiUtils;
 import java.awt.Color;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPanel.TooltipProvider {
+public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPanel.HasTooltip {
 
     public static final int pad = 3;
     public static final int opad = 10;

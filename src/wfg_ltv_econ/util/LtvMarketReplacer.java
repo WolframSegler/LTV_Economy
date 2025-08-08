@@ -6,7 +6,7 @@ import com.fs.state.AppDriver;
 
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg_ltv_econ.ui.panels.LtvIndustryListPanel;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
 
 import com.fs.starfarer.campaign.CampaignEngine;

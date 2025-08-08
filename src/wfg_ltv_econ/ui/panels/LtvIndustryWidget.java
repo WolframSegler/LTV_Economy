@@ -37,11 +37,11 @@ import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.graphics.A.D;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
-import wfg_ltv_econ.ui.ui_plugins.IndustryPanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.LtvMarketReplacer;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;

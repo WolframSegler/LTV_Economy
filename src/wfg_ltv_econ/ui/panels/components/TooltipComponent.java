@@ -3,19 +3,45 @@ package wfg_ltv_econ.ui.panels.components;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
-import wfg_ltv_econ.ui.panels.LtvCustomPanel.TooltipProvider;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 
-public class TooltipComponent {
-    private final TooltipProvider provider;
+public final class TooltipComponent<
+    PluginType extends LtvCustomPanelPlugin<PanelType, ?>,
+    PanelType extends LtvCustomPanel<PluginType, ?> & HasTooltip
+> extends BaseComponent<PluginType, PanelType>{
+
+    private final HasTooltip provider;
     private TooltipMakerAPI tooltip;
-    private boolean tooltipActive = false;
-    private float tooltipDelay = 0.3f;
+    private TooltipMakerAPI codex;
 
-    public TooltipComponent(TooltipProvider a) {
-        provider = a;
+    private float hoverTime = 0f;
+
+    public TooltipComponent(PluginType a, HasTooltip b) {
+        super(a);
+        provider = b;
     }
 
-    public TooltipMakerAPI showTooltip() {
+    @Override
+    final public void advance(float amount, InputSnapshot input) {
+        if (tooltip == null) {
+            return;
+        }
+
+        if (provider.isTooltipEnabled() && input.hoveredLastFrame && !input.hasClickedBefore && getPlugin().isValidUIContext()) {
+            hoverTime += amount;
+            if (hoverTime > provider.getTooltipDelay()) {
+                showTooltip();
+            }
+        } else {
+            hoverTime = 0f;
+            hideTooltip();
+        }
+    }
+
+    final public void showTooltip() {
         if (tooltip == null) {
             tooltip = provider.createTooltip();
 
@@ -24,29 +50,23 @@ public class TooltipComponent {
                 standard.setShowBorder(true);
             }
         }
-        return tooltip;
-    }
-
-    public void hideTooltip() {
-        if (tooltip != null) {
-            provider.removeTooltip(tooltip);
-            tooltip = null;
+        if (codex == null) {
+            codex = provider.createCodex();
+            if (tooltip instanceof StandardTooltipV2Expandable standard) {
+                standard.setShowBackground(true);
+                standard.setShowBorder(true);
+            }
         }
     }
 
-    public void setTooltipActive(boolean active) {
-        this.tooltipActive = active;
-    }
-
-    public void setTooltipDelay(float delay) {
-        this.tooltipDelay = delay;
-    }
-
-    public boolean isTooltipActive() {
-        return tooltipActive;
-    }
-
-    public float getDelay() {
-        return tooltipDelay;
+    final public void hideTooltip() {
+        if (tooltip != null) {
+            provider.getTooltipAttachmentPoint().removeComponent(tooltip);
+            tooltip = null;
+        }
+        if (codex != null) {
+            provider.getCodexAttachmentPoint().removeComponent(codex);
+            codex = null;
+        }
     }
 }

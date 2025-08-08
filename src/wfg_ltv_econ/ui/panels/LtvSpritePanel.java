@@ -9,9 +9,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
 
 public class LtvSpritePanel extends LtvCustomPanel {
 

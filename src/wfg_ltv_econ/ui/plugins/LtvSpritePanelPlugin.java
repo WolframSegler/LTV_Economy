@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.ui_plugins;
+package wfg_ltv_econ.ui.plugins;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import com.fs.starfarer.api.ui.PositionAPI;
 
 import wfg_ltv_econ.ui.panels.LtvIconPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
 import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 

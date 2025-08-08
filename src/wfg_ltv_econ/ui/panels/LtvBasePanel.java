@@ -7,18 +7,18 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.ColoredPanel;
-import wfg_ltv_econ.ui.ui_plugins.LtvBasePanelPlugin;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.ui_plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
+import wfg_ltv_econ.ui.plugins.LtvBasePanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
 
 /**
  * An empty implementation of LtvCustomPanel
  */
-public class LtvBasePanel extends LtvCustomPanel<LtvBasePanelPlugin> implements ColoredPanel{
+public class LtvBasePanel extends LtvCustomPanel<LtvBasePanelPlugin, LtvBasePanel> implements ColoredPanel, HasBackground{
 
-    public Color BgColor = new Color(0, 0, 0, 255);
+    public Color BgColor = Color.BLACK;
+    public boolean isBgEnabled = true;
     public Color glowColor = getFaction().getBaseUIColor();
-    public Color outlineColor = Misc.getDarkPlayerColor();
 
     public LtvBasePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
         LtvBasePanelPlugin plugin) {
@@ -29,7 +29,7 @@ public class LtvBasePanel extends LtvCustomPanel<LtvBasePanelPlugin> implements 
     }
 
     public void initializePlugin(boolean hasPlugin) {
-        getPlugin().init(this, Glow.NONE, false, false, Outline.NONE);
+        getPlugin().init(this, Glow.NONE);
     }
 
     public void createPanel() {
@@ -39,23 +39,15 @@ public class LtvBasePanel extends LtvCustomPanel<LtvBasePanelPlugin> implements 
     public void setBgColor(Color color) {
         BgColor = color;
 
-        getPlugin().setHasBackground(true);
+        isBgEnabled = true;
+    }
+    public boolean isBgEnabled() {
+        return true;
     }
     public void setGlowColor(Color color) {
         glowColor = color;
 
         getPlugin().setHasGlow(Glow.OVERLAY);
-    }
-    public void setOutlineColor(Color a) {
-        outlineColor = a;
-
-        getPlugin().setOutline(Outline.LINE);
-    }
-    public Color getBgColor() {
-        return BgColor;
-    }
-    public Color getOutlineColor() {
-        return outlineColor;
     }
     public Color getGlowColor() {
         return glowColor;

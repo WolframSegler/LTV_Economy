@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.ui_plugins;
+package wfg_ltv_econ.ui.plugins;
 
 import wfg_ltv_econ.ui.panels.LtvIndustryWidget;
 

@@ -36,7 +36,7 @@ import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
-import wfg_ltv_econ.ui.ui_plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 
 public class TooltipUtils {
 
@@ -428,8 +428,8 @@ public class TooltipUtils {
 
         codexTooltip.setHeightSoFar(tooltipH);
 
-        if (panel instanceof LtvCustomPanel.TooltipProvider) {
-            ((LtvCustomPanel.TooltipProvider) panel).attachCodexTooltip(codexTooltip);
+        if (panel instanceof LtvCustomPanel.HasTooltip) {
+            ((LtvCustomPanel.HasTooltip) panel).attachCodexTooltip(codexTooltip);
         }
     }
 
