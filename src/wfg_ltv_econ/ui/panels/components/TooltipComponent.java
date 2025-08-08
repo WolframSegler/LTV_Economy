@@ -1,5 +1,8 @@
 package wfg_ltv_econ.ui.panels.components;
 
+import org.lwjgl.input.Keyboard;
+
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
@@ -7,10 +10,11 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
+import wfg_ltv_econ.util.UiUtils;
 
 public final class TooltipComponent<
-    PluginType extends LtvCustomPanelPlugin<PanelType, ?>,
-    PanelType extends LtvCustomPanel<PluginType, ?> & HasTooltip
+    PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
+    PanelType extends LtvCustomPanel<PluginType, PanelType> & HasTooltip
 > extends BaseComponent<PluginType, PanelType>{
 
     private final HasTooltip provider;
@@ -38,6 +42,35 @@ public final class TooltipComponent<
         } else {
             hoverTime = 0f;
             hideTooltip();
+        }
+
+        if (tooltip == null || input.hoveredLastFrame) {
+            getPanel().setExpanded(false);
+
+        } else {
+            for (InputEventAPI event : input.events) {
+                if (event.isMouseEvent()) {
+                    continue;
+                }
+    
+                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F1) {
+                    getPanel().setExpanded(!getPanel().isExpanded());
+                    hideTooltip();
+    
+                    event.consume();
+    
+                    break;
+                }
+    
+                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2) {
+                    UiUtils.openCodexPage(getPanel().getCodexID());
+                    hideTooltip();
+    
+                    event.consume();
+
+                    break;
+                }
+            }
         }
     }
 

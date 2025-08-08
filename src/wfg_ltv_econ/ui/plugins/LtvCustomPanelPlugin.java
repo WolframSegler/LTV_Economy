@@ -48,11 +48,13 @@ import wfg_ltv_econ.ui.panels.components.TooltipComponent;
  * </pre>
  */
 public abstract class LtvCustomPanelPlugin<
-    PanelType extends LtvCustomPanel<PluginType, ?>,
+    PanelType extends LtvCustomPanel<?, PanelType>,
     PluginType extends LtvCustomPanelPlugin<PanelType, ?>
 > implements CustomUIPanelPlugin {
 
     public static class InputSnapshot {
+        public List<InputEventAPI> events = null;
+
         public boolean LMBDownLastFrame = false;
         public boolean LMBUpLastFrame = false;
         public boolean hoveredLastFrame = false;
@@ -71,8 +73,8 @@ public abstract class LtvCustomPanelPlugin<
         return m_panel;
     }
 
-    private final List<BaseComponent<PluginType, PanelType>> components = new ArrayList<>();
-    private final InputSnapshot inputSnapshot = new InputSnapshot();
+    private final List<BaseComponent<?, PanelType>> components = new ArrayList<>();
+    protected final InputSnapshot inputSnapshot = new InputSnapshot();
     
     protected UIState targetUIState = UIState.NONE;
     protected boolean ignoreUIState = false;
@@ -87,31 +89,31 @@ public abstract class LtvCustomPanelPlugin<
         m_panel = panel;
 
         if (getPanel() instanceof HasTooltip provider) {
-            addComponent(new TooltipComponent((PluginType)this, provider));
+            addComponent(new TooltipComponent(this, provider));
         }
 
         if (getPanel() instanceof HasBackground) {
-            addComponent(new BackgroundComponent((PluginType)this));
+            addComponent(new BackgroundComponent(this));
         }
 
         if (getPanel() instanceof HasAudioFeedback) {
-            addComponent(new AudioFeedbackComponent((PluginType)this));
+            addComponent(new AudioFeedbackComponent(this));
         }
 
         if (getPanel() instanceof HasOutline) {
-            addComponent(new OutlineComponent((PluginType)this));
+            addComponent(new OutlineComponent(this));
         }
 
         if (getPanel() instanceof HasFader) {
-            addComponent(new FaderComponent((PluginType)this));
+            addComponent(new FaderComponent(this));
         }
     }
 
-    public void addComponent(BaseComponent<PluginType, PanelType> comp) {
+    protected final <C extends BaseComponent<?, PanelType>> void addComponent(C comp) {
         components.add(comp);
     }
 
-    public void removeComponent(BaseComponent<PluginType, PanelType> comp) {
+    public void removeComponent(BaseComponent<?, PanelType> comp) {
         components.remove(comp);
         comp.onRemove(inputSnapshot);
     }
@@ -128,10 +130,6 @@ public abstract class LtvCustomPanelPlugin<
         return LtvUIState.is(targetUIState) || ignoreUIState; 
     }
 
-    public void positionChanged(PositionAPI position) {
-
-    }
-
     /**
      * Effects the background and outline position
      */
@@ -143,25 +141,27 @@ public abstract class LtvCustomPanelPlugin<
     }
 
     public void renderBelow(float alphaMult) {
-        for (BaseComponent<PluginType, PanelType> comp : components) {
+        for (BaseComponent<?, PanelType> comp : components) {
             comp.renderBelow(alphaMult, inputSnapshot);
         }
     }
 
     public void render(float alphaMult) {
-        for (BaseComponent<PluginType, PanelType> comp : components) {
+        for (BaseComponent<?, PanelType> comp : components) {
             comp.render(alphaMult, inputSnapshot);
         }
     }
 
     public void advance(float amount) {
-        for (BaseComponent<PluginType, PanelType> comp : components) {
+        for (BaseComponent<?, PanelType> comp : components) {
             comp.advance(amount, inputSnapshot);
         }
     }
 
     public void processInput(List<InputEventAPI> events) {
         inputSnapshot.resetFrameFlags();
+
+        inputSnapshot.events = events;
 
         for (InputEventAPI event : events) {
 
@@ -195,7 +195,7 @@ public abstract class LtvCustomPanelPlugin<
         }
     }
 
-    public void buttonPressed(Object buttonId) {
+    public void buttonPressed(Object buttonId) {}
 
-    }
+    public void positionChanged(PositionAPI position) {}
 }

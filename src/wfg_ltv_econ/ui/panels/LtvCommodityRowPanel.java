@@ -13,15 +13,18 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
+import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.TooltipUtils;
@@ -30,8 +33,9 @@ import wfg_ltv_econ.util.UiUtils;
 import java.awt.Color;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPanel.HasTooltip {
-
+public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlugin<LtvCommodityRowPanel>, LtvCommodityRowPanel>
+    implements HasTooltip, HasFader, HasAudioFeedback
+{
     public static final int pad = 3;
     public static final int opad = 10;
 
@@ -39,22 +43,25 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
     private static final String notExpandedCodexF1 = "F1 show legend";
     private static final String ExpandedCodexF1 = "F1 go back";
     private static final String codexF2 = "F2 open Codex";
-    private TooltipMakerAPI codexTooltip;
 
     private final CommodityOnMarketAPI m_com;
-    private final LtvCommodityPanel m_parentWrapper;
+    private final LtvCommodityPanel m_parent;
+    private final FaderUtil m_fader;
     private final CommodityStats m_comStats;
+    public TooltipMakerAPI m_tooltip = null;
 
     public boolean isExpanded = false;
+    public boolean persistentGlow = false;
 
     public boolean m_canViewPrices;
 
     public LtvCommodityRowPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, CommodityOnMarketAPI com,
         LtvCommodityPanel parentWrapper, int width, int height, boolean childrenIgnoreUIState) {
-        super(root, parent, width, height, new LtvCommodityRowPanelPlugin(), market);
+        super(root, parent, width, height, new LtvCommodityRowPanelPlugin<>(), market);
         m_com = com;
-        m_parentWrapper = parentWrapper;
+        m_parent = parentWrapper;
         m_comStats = new CommodityStats(com, market);
+        m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
         m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
@@ -70,14 +77,37 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
     }
 
     public LtvCommodityPanel getParentWrapper() {
-        return m_parentWrapper;
+        return m_parent;
     }
 
     public void initializePlugin(boolean hasPlugin) {
-        LtvCommodityRowPanelPlugin plugin = ((LtvCommodityRowPanelPlugin) m_panel.getPlugin());
-        plugin.init(this, Glow.OVERLAY, true, false, Outline.NONE);
-        plugin.setDisplayPrices(m_canViewPrices);
-        plugin.setSoundEnabled(true);
+        getPlugin().init(this);
+        getPlugin().setDisplayPrices(m_canViewPrices);
+    }
+
+    @Override
+    public FaderUtil getFader() {
+        return m_fader;
+    }
+
+    @Override
+    public boolean isPersistentGlow() {
+        return persistentGlow;
+    }
+
+    @Override
+    public void setPersistentGlow(boolean a) {
+        persistentGlow = a;
+    }
+
+    @Override
+    public Color getGlowColor() {
+        return Misc.getBasePlayerColor();
+    }
+
+    @Override
+    public Glow getGlowType() {
+        return Glow.UNDERLAY;
     }
 
     public void createPanel() {
@@ -120,8 +150,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         if (commodityData.getExportIncome(m_com) > 0) {
             String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
-            LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, m_market, rowHeight - 4, rowHeight - 4,
-                    new LtvSpritePanelPlugin(), iconPath, null, null, false);
+            LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, getMarket(), rowHeight - 4, rowHeight - 4,
+                    new LtvSpritePanelPlugin<>(), iconPath, null, null, false);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
             getPanel().addComponent(iconPanel.getPanel()).inRMid(pad);
@@ -132,9 +162,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
     private LtvSpritePanel getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int size,
         UIPanelAPI parent) {
-        boolean isSourceIllegal = commodityData.getMarketShareData(m_market).isSourceIsIllegal();
+        boolean isSourceIllegal = commodityData.getMarketShareData(getMarket()).isSourceIsIllegal();
 
-        CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(m_market).getSource();
+        CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(getMarket()).getSource();
         String iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
         Color baseColor = color;
 
@@ -142,7 +172,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             case GLOBAL:
                 break;
             case IN_FACTION:
-                iconPath = m_market.getFaction().getCrest();
+                iconPath = getFaction().getCrest();
                 baseColor = null;
                 break;
             case LOCAL:
@@ -152,8 +182,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
             default:
         }
 
-        LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), parent, m_market, size, size,
-                    new LtvSpritePanelPlugin(), iconPath, baseColor, null, isSourceIllegal);
+        LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), parent, getMarket(), size, size,
+                    new LtvSpritePanelPlugin<>(), iconPath, baseColor, null, isSourceIllegal);
         if (isSourceIllegal) {
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
             iconPanel.setOutlineColor(Color.RED);
@@ -197,7 +227,6 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         tooltip.addSectionHeading("Production, imports and demand", Alignment.MID, opad);
 
         // // Production
-        // {
         TooltipUtils.createCommodityProductionBreakdown(
             tooltip, m_com, m_comStats, highlight, negative
         );
@@ -214,7 +243,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         // Export stats
         int exportIncome = m_com.getCommodityMarketData().getExportIncome(m_com);
-        boolean isIllegal = m_market.isIllegal(m_com);
+        boolean isIllegal = getMarket().isIllegal(m_com);
         String commodityName = m_com.getCommodity().getName();
 
         if (m_comStats.totalExports < 1) {
@@ -222,24 +251,24 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         } else
         if (isIllegal) {
             tooltip.addPara(
-            m_market.getName() + " controls %s of the export market share for " + commodityName + ".This trade brings in no income due to being underground.",
+            getMarket().getName() + " controls %s of the export market share for " + commodityName + ".This trade brings in no income due to being underground.",
             opad, highlight,
-            m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%"
+            m_com.getCommodityMarketData().getExportMarketSharePercent(getMarket()) + "%"
         );
         } else 
         if (exportIncome < 1) {
             tooltip.addPara(
-            m_market.getName() + " is exporting %s units of " + commodityName + " and controls %s of the global market share. Exports of " + commodityName + " bring in no income.",
+            getMarket().getName() + " is exporting %s units of " + commodityName + " and controls %s of the global market share. Exports of " + commodityName + " bring in no income.",
             opad, highlight,
             m_comStats.globalExport + "",
-            m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%"
+            m_com.getCommodityMarketData().getExportMarketSharePercent(getMarket()) + "%"
         );
         } else {
             tooltip.addPara(
-            m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. Exports bring in %s per month.",
+            getMarket().getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. Exports bring in %s per month.",
             opad, highlight,
             m_comStats.globalExport + "",
-            m_com.getCommodityMarketData().getExportMarketSharePercent(m_market) + "%",
+            m_com.getCommodityMarketData().getExportMarketSharePercent(getMarket()) + "%",
             exportIncome + Strings.C
             );
 
@@ -257,10 +286,6 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
         tooltip.addSpacer(opad*1.5f);
 
-        final int codexW = 240; 
-
-        TooltipUtils.createCustomCodex(tooltip, codexTooltip, this, notExpandedCodexF1, codexF2, codexW);
-
         } else {
             tooltip.setParaFont(Fonts.ORBITRON_12);
             tooltip.addSectionHeading("Legend", Alignment.MID, opad);
@@ -270,36 +295,58 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
 
             AtomicInteger y = new AtomicInteger((int)tooltip.getHeightSoFar() + opad + pad);
 
-            legendRowCreator(0, tooltip, y, legendIconSize, getRoot(), m_panel, m_market);
-
-            final int codexW = 200; 
-            
-            TooltipUtils.createCustomCodex(tooltip, codexTooltip, this, ExpandedCodexF1, codexF2, codexW);  
+            legendRowCreator(0, tooltip, y, legendIconSize, getRoot(), m_panel, getMarket()); 
         }
 
         ((CustomPanelAPI)getParent()).addUIElement(tooltip);
         ((CustomPanelAPI)getParent()).bringComponentToTop(tooltip);
         tooltip.getPosition().inTL(-tooltip.getPosition().getWidth() - opad, 0);
 
-        ((CustomPanelAPI)getParent()).addUIElement(codexTooltip);
-        ((CustomPanelAPI)getParent()).bringComponentToTop(codexTooltip);
-        codexTooltip.getPosition().belowLeft(tooltip, opad*1.5f - 1);
-        // Idk why I need to do opad*1.5f to begin with. I hate the tooltip
+        m_tooltip = tooltip;
 
         return tooltip;
     }
 
     @Override
-    public void removeTooltip(TooltipMakerAPI tooltip) {
-        if (codexTooltip != null) {
-            ((CustomPanelAPI)getParent()).removeComponent(codexTooltip);
-        }
-        ((CustomPanelAPI)getParent()).removeComponent(tooltip);
+    public UIPanelAPI getCodexAttachmentPoint() {
+        return m_tooltip;
     }
 
-    @Override 
-    public void attachCodexTooltip(TooltipMakerAPI codex) {
-        codexTooltip = codex;
+    @Override
+    public String getCodexID() {
+        CommodityOnMarketAPI com = getCommodity();
+        return CodexDataV2.getCommodityEntryId(com.getId());
+    }
+
+    @Override
+    public TooltipMakerAPI createCodex() {
+
+        TooltipMakerAPI codex = null;
+
+        if(!isExpanded) {
+            final int codexW = 240;
+            codex = TooltipUtils.createCustomCodex(this, notExpandedCodexF1, codexF2, codexW);
+
+        } else {
+            final int codexW = 200; 
+            codex = TooltipUtils.createCustomCodex(this, ExpandedCodexF1, codexF2, codexW); 
+        }
+
+        ((CustomPanelAPI)getParent()).addUIElement(codex);
+        ((CustomPanelAPI)getParent()).bringComponentToTop(codex);
+        codex.getPosition().belowLeft(getCodexAttachmentPoint(), opad*1.5f - 1);
+
+        return codex;
+    }
+
+    @Override
+    public boolean isExpanded() {
+        return isExpanded;
+    }
+
+    @Override
+    public void setExpanded(boolean a) {
+        isExpanded = a;
     }
 
     /**
@@ -387,7 +434,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel implements LtvCustomPan
         boolean drawRedBorder, Color drawFilledIcon, UIPanelAPI root, UIPanelAPI panel, MarketAPI market) {
 
         LtvSpritePanel iconPanel = new LtvSpritePanel(root, panel, market, lgdIconSize, lgdIconSize,
-            new LtvSpritePanelPlugin(), iconPath, null, drawFilledIcon, drawRedBorder);
+            new LtvSpritePanelPlugin<>(), iconPath, null, drawFilledIcon, drawRedBorder);
         if (drawRedBorder) {
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(2, 2, -4, -4);

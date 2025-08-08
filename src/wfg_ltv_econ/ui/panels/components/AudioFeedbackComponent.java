@@ -8,8 +8,8 @@ import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 
 public final class AudioFeedbackComponent<
-    PluginType extends LtvCustomPanelPlugin<PanelType, ?>,
-    PanelType extends LtvCustomPanel<PluginType, ?> & HasAudioFeedback
+    PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
+    PanelType extends LtvCustomPanel<PluginType, PanelType> & HasAudioFeedback
 > extends BaseComponent<PluginType, PanelType> {
 
     public AudioFeedbackComponent(PluginType plugin) {

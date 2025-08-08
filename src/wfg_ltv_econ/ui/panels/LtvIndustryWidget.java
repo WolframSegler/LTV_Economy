@@ -40,15 +40,13 @@ import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.LtvMarketReplacer;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 
-public class LtvIndustryWidget extends LtvCustomPanel implements ActionListenerDelegate, DismissDialogDelegate {
+public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget> implements ActionListenerDelegate, DismissDialogDelegate {
 
     public final static int pad = 3;
     public final static int opad = 10;

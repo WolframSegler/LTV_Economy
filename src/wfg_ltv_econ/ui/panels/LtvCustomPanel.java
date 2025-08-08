@@ -29,17 +29,17 @@ import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
  * <p><strong>Design principles:</strong></p>
  * <ul>
  *   <li>The panel is responsible for all <em>UI-specific</em> state — such as background color, position,
- *       dimensions, and any interface-specific properties (e.g. implementing {@link ColoredPanel}).</li>
+ *       dimensions, and any interface-specific properties (e.g. implementing {@link HasBackground}).</li>
  *   <li>The panel does not store or manage plugin-specific logic or toggles; those belong in the plugin.</li>
- *   <li>By implementing capability interfaces (like {@code ColoredPanel}), the panel exposes relevant data
+ *   <li>By implementing capability interfaces (like {@link HasBackground}), the panel exposes relevant data
  *       to both the plugin and components in a type-safe way.</li>
  *   <li>The panel type is bound to its plugin type via recursive generics to ensure compile-time type safety.</li>
  * </ul>
  *
  * <p>Example usage:</p>
  * <pre>
- * // Panel implementing ColoredPanel
- * public class MyPanel extends LtvCustomPanel<MyPlugin, MyPanel> implements ColoredPanel {
+ * // Panel implementing getBgColor
+ * public class MyPanel extends LtvCustomPanel<MyPlugin, MyPanel> implements HasBackground {
  *     private final Color bgColor;
  *
  *     public Color getBgColor() { return bgColor; }
@@ -47,7 +47,9 @@ import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
  * </pre>
  */
 public abstract class LtvCustomPanel<
-    PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<PluginType, PanelType>, ?>, PanelType> {
+    PluginType extends LtvCustomPanelPlugin<?, PluginType>, 
+    PanelType extends LtvCustomPanel<PluginType, ?>
+> {
     protected final UIPanelAPI m_parent;
     protected final CustomPanelAPI m_panel;
     protected final PluginType m_plugin;
@@ -179,12 +181,6 @@ public abstract class LtvCustomPanel<
      */
     public abstract void createPanel();
 
-    public static interface ColoredPanel {
-        Color getGlowColor();
-
-        void setGlowColor(Color color);
-    }
-
     public static interface HasFader {
 
         default FaderUtil getFader() {
@@ -199,17 +195,26 @@ public abstract class LtvCustomPanel<
             return false;
         }
 
-        void setPersistentGlow();
+        void setPersistentGlow(boolean a);
 
         default float getOverlayBrightness() {
             return 1.2f;
         }
 
         Color getGlowColor();
+
+        /**
+         * Used for additive Glow. Leave as null if not using it.
+         */
+        default String getSpriteID() {
+            return null;
+        }
     }
 
     public static interface HasOutline {
-        void setOutline(Outline a);
+        default void setOutline(Outline a) {
+
+        }
 
         default Outline getOutline() {
             return Outline.LINE;
@@ -218,7 +223,9 @@ public abstract class LtvCustomPanel<
         default Color getOutlineColor() {
             return Misc.getDarkPlayerColor();
         }
-        void setOutlineColor(Color color);
+        default void setOutlineColor(Color color) {
+
+        }
     }
 
     public static interface HasAudioFeedback {
@@ -226,7 +233,9 @@ public abstract class LtvCustomPanel<
             return true;
         }
 
-        void setSoundEnabled();
+        default void setSoundEnabled(boolean a) {
+
+        }
     }
 
     public static interface HasBackground {
@@ -234,7 +243,9 @@ public abstract class LtvCustomPanel<
             return new Color(0, 0, 0, 255);
         }
 
-        void setBgColor(Color color);
+        default void setBgColor(Color color) {
+
+        }
 
         default boolean isBgEnabled() {
             return true;
@@ -276,11 +287,25 @@ public abstract class LtvCustomPanel<
         */
         TooltipMakerAPI createCodex();
 
+        /**
+         * The component uses this ID to open the codex.
+         * Therefore it must be provided indepent of {@code createCodex()}.
+         */
+        String getCodexID();
+
         default boolean isTooltipEnabled() {
             return true;
         }
 
-        float getTooltipDelay();
+        default float getTooltipDelay() {
+            return 0.3f;
+        }
+
+        default boolean isExpanded() {
+            return false;
+        }
+
+        default void setExpanded(boolean a) {}
 
         /**
          * A tooltip interface that acts as a mutable shell.

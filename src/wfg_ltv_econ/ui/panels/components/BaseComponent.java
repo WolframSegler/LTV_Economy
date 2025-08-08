@@ -1,5 +1,9 @@
 package wfg_ltv_econ.ui.panels.components;
 
+import java.util.List;
+
+import com.fs.starfarer.api.input.InputEventAPI;
+
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
@@ -22,8 +26,8 @@ import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
  * allowing type-safe access to plugin members without unchecked casts.
  */
 public abstract class BaseComponent<
-    PluginType extends LtvCustomPanelPlugin<PanelType, ?>,
-    PanelType extends LtvCustomPanel<PluginType, ?>
+    PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
+    PanelType extends LtvCustomPanel<PluginType, PanelType>
 > {
 
     private PluginType plugin;
@@ -43,5 +47,6 @@ public abstract class BaseComponent<
     public void advance(float amount, InputSnapshot input) {}
     public void renderBelow(float alphaMult, InputSnapshot input) {}
     public void render(float alphaMult, InputSnapshot input) {}
+    public void processInput(List<InputEventAPI> events) {}
     public void onRemove(InputSnapshot input) {}
 }

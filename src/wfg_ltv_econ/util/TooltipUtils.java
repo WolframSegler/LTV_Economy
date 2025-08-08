@@ -403,14 +403,14 @@ public class TooltipUtils {
      * The Codex must be attached manually.
      * The F1 and F2 events must be handled using the Plugin.
      */
-    public static void createCustomCodex(TooltipMakerAPI tooltip, TooltipMakerAPI codexTooltip,
-            LtvCustomPanel panel, String codexF1, String codexF2, int codexW) {
+    public static TooltipMakerAPI createCustomCodex(
+            LtvCustomPanel<?, ?> panel, String codexF1, String codexF2, int codexW) {
 
         final Color gray = new Color(100, 100, 100);
         final Color highlight = Misc.getHighlightColor();
 
         // Create the custom Footer
-        codexTooltip = ((CustomPanelAPI) panel.getParent()).createUIElement(codexW, 0, false);
+        TooltipMakerAPI codexTooltip = ((CustomPanelAPI) panel.getParent()).createUIElement(codexW, 0, false);
 
         codexTooltip.setParaFont(Fonts.ORBITRON_12);
         ((StandardTooltipV2Expandable) codexTooltip).setShowBackground(true);
@@ -428,9 +428,7 @@ public class TooltipUtils {
 
         codexTooltip.setHeightSoFar(tooltipH);
 
-        if (panel instanceof LtvCustomPanel.HasTooltip) {
-            ((LtvCustomPanel.HasTooltip) panel).attachCodexTooltip(codexTooltip);
-        }
+        return codexTooltip;
     }
 
     private static Comparator<MarketAPI> createSellComparator(String comID, int econUnit) {

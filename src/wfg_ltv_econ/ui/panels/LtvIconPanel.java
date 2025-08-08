@@ -15,11 +15,10 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
 import wfg_ltv_econ.util.TooltipUtils;
 
-public class LtvIconPanel extends LtvSpritePanel implements LtvCustomPanel.HasTooltip {
+public class LtvIconPanel extends LtvSpritePanel<LtvSpritePanelPlugin<LtvIconPanel>, LtvIconPanel> implements HasTooltip {
+    public class LtvSpritePanel extends LtvCustomPanel<LtvSpritePanelPlugin<LtvSpritePanel>, LtvSpritePanel>
 
     private static final String notExpandedCodexF1 = "F1 more info";
     private static final String ExpandedCodexF1 = "F1 hide";

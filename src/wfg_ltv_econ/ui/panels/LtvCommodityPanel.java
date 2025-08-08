@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -14,10 +13,12 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.dialogs.LtvCommodityDetailDialog.CommoditySelectionListener;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
 
-public class LtvCommodityPanel extends LtvCustomPanel{
+public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel>
+    implements HasBackground, HasOutline{
 
     protected List<LtvCommodityRowPanel> commodityRows = new ArrayList<>();
 
@@ -28,22 +29,22 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     public boolean isRowSelectable = false;
 
     public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
-        CustomUIPanelPlugin plugin, String headerTxt) {
+        BasePanelPlugin<LtvCommodityPanel> plugin, String headerTxt) {
         this(root, parent, width, height, market, plugin, headerTxt, false);
     }
 
     public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
-        CustomUIPanelPlugin plugin) {
+        BasePanelPlugin<LtvCommodityPanel> plugin) {
         this(root, parent, width, height, market, plugin, "Commodities", false);
     }
 
     public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
-        CustomUIPanelPlugin plugin, boolean childrenIgnoreUIState) {
+        BasePanelPlugin<LtvCommodityPanel> plugin, boolean childrenIgnoreUIState) {
         this(root, parent, width, height, market, plugin, "Commodities", childrenIgnoreUIState);
     }
 
     public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
-        CustomUIPanelPlugin plugin, String headerTxt, boolean childrenIgnoreUIState) {
+        BasePanelPlugin<LtvCommodityPanel> plugin, String headerTxt, boolean childrenIgnoreUIState) {
         super(root, parent, width, height, plugin, market);
 
         m_headerTxt = headerTxt;
@@ -54,7 +55,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     }
 
     public void initializePlugin(boolean hasPlugin) {
-        getPlugin().init(this, Glow.NONE, false, true, Outline.LINE);
+        getPlugin().init(this);
         getPlugin().setOffsets(1, 1, -2, -2);
     }
 
@@ -75,7 +76,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         final int opad = 10;
 
         // Select relevant commodities
-        List<CommodityOnMarketAPI> commodities = m_market.getCommoditiesCopy();
+        List<CommodityOnMarketAPI> commodities = getMarket().getCommoditiesCopy();
         Collections.sort(commodities, getCommodityOrderComparator());
         for (CommodityOnMarketAPI com : new ArrayList<>(commodities)) {
             if (!com.isNonEcon() && com.getCommodity().isPrimary()) {
@@ -108,7 +109,7 @@ public class LtvCommodityPanel extends LtvCustomPanel{
         CustomPanelAPI previousRow = null;
 
         for (CommodityOnMarketAPI commodity : commodities) {
-            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(getRoot(), getPanel(), m_market, commodity,
+            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(getRoot(), getPanel(), getMarket(), commodity,
             this, (int)(getPos().getWidth() - opad * 2), (int)rowHeight, childrenIgnoreUIState);
 
             comRow.getPos().setSize(getPos().getWidth() - opad * 2.0F, rowHeight);
@@ -126,15 +127,15 @@ public class LtvCommodityPanel extends LtvCustomPanel{
     }
 
     public void selectRow(String comID) {
-        CommodityOnMarketAPI com = m_market.getCommodityData(comID);
+        CommodityOnMarketAPI com = getMarket().getCommodityData(comID);
         for (LtvCommodityRowPanel row : commodityRows) {
-            row.getPlugin().setPersistentGlow(row.getCommodity() == com);
+            row.setPersistentGlow(row.getCommodity() == com);
         }
     }
 
     public void selectRow(LtvCommodityRowPanel selectedRow) {
         for (LtvCommodityRowPanel row : commodityRows) {
-            row.getPlugin().setPersistentGlow(row == selectedRow);
+            row.setPersistentGlow(row == selectedRow);
         }
     }
 
