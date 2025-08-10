@@ -5,11 +5,9 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 
 import wfg_ltv_econ.ui.dialogs.LtvCommodityDetailDialog;
 import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
-import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 
-public class LtvCommodityRowPanelPlugin<
-    PanelType extends LtvCustomPanel<?, LtvCommodityRowPanel>> 
-    extends LtvCustomPanelPlugin<LtvCommodityRowPanel, LtvCommodityRowPanelPlugin<PanelType>
+public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin<
+    LtvCommodityRowPanel, LtvCommodityRowPanelPlugin
 > {
 
     private boolean displayPrices = false;

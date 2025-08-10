@@ -3,6 +3,7 @@ package wfg_ltv_econ.ui.panels.components;
 import java.util.List;
 
 import com.fs.starfarer.api.input.InputEventAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
@@ -27,7 +28,7 @@ import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
  */
 public abstract class BaseComponent<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType>
+    PanelType extends LtvCustomPanel<PluginType, PanelType, ? extends UIPanelAPI>
 > {
 
     private PluginType plugin;

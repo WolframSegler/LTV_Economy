@@ -1,7 +1,5 @@
 package wfg_ltv_econ.ui.panels.components;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.FaderUtil.State;
@@ -14,7 +12,7 @@ import wfg_ltv_econ.util.RenderUtils;
 
 public final class FaderComponent<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType> & HasFader
+    PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasFader
 > extends BaseComponent<PluginType, PanelType> {
 
     public static enum Glow {
@@ -84,9 +82,7 @@ public final class FaderComponent<
         if (getPanel().getGlowType() == Glow.ADDITIVE && fader.getBrightness() > 0) {
             float glowAmount = additiveBrightness * fader.getBrightness() * alphaMult;
 
-            if (getPanel().getSpriteID() != null) {
-                SpriteAPI sprite = Global.getSettings().getSprite(getPanel().getSpriteID());
-                
+            getPanel().getSprite().ifPresent(sprite -> {
                 RenderUtils.drawAdditiveGlow(
                     sprite,
                     getPanel().getPos().getX(),
@@ -94,7 +90,7 @@ public final class FaderComponent<
                     getPanel().getFaction().getBaseUIColor(),
                     glowAmount
                 );
-            }
+            });
         }
     }
 }

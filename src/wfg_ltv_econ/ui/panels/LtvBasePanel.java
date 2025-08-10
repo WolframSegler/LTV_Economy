@@ -3,6 +3,7 @@ package wfg_ltv_econ.ui.panels;
 import java.awt.Color;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
@@ -11,7 +12,11 @@ import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 /**
  * An empty implementation of LtvCustomPanel
  */
-public class LtvBasePanel extends LtvCustomPanel<BasePanelPlugin<LtvBasePanel>, LtvBasePanel> implements HasBackground{
+public class LtvBasePanel extends LtvCustomPanel<
+    BasePanelPlugin<LtvBasePanel>,
+    LtvBasePanel,
+    CustomPanelAPI
+> implements HasBackground{
 
     public Color BgColor = Color.BLACK;
     public boolean isBgEnabled = true;

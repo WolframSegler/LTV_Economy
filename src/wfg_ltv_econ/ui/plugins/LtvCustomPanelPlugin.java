@@ -6,6 +6,7 @@ import java.util.List;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
@@ -33,8 +34,8 @@ import wfg_ltv_econ.ui.panels.components.TooltipComponent;
  *       in the panel itself. The plugin may query this data via {@link #getPanel()}.</li>
  *   <li>Components never store their own global state; they query the plugin, which may in turn query the panel.
  *       This keeps components stateless or minimally stateful, focused only on behavior.</li>
- *   <li>Generic recursive typing ensures that each plugin and panel pair is tightly coupled in type,
- *       allowing components to interact with the exact plugin type without unsafe casting.</li>
+ *   <li>Recursive generics bind a plugin to a compatible panel type while permitting that plugin to be reused 
+ *       across panel subclasses, preserving compile-time type safety without casts.</li>
  * </ul>
  *
  * <p>Example data flow:</p>
@@ -48,8 +49,8 @@ import wfg_ltv_econ.ui.panels.components.TooltipComponent;
  * </pre>
  */
 public abstract class LtvCustomPanelPlugin<
-    PanelType extends LtvCustomPanel<?, PanelType>,
-    PluginType extends LtvCustomPanelPlugin<PanelType, ?>
+    PanelType extends LtvCustomPanel<? extends LtvCustomPanelPlugin<?, ? extends PluginType>, PanelType, ? extends UIPanelAPI>,
+    PluginType extends LtvCustomPanelPlugin<PanelType, ? extends LtvCustomPanelPlugin<?, ? extends PluginType>>
 > implements CustomUIPanelPlugin {
 
     public static class InputSnapshot {

@@ -18,6 +18,7 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.Constructi
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.IconRenderMode;
@@ -46,7 +47,7 @@ import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 
-public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget> implements ActionListenerDelegate, DismissDialogDelegate {
+public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget, CustomPanelAPI> implements ActionListenerDelegate, DismissDialogDelegate {
 
     public final static int pad = 3;
     public final static int opad = 10;

@@ -6,14 +6,11 @@ import com.fs.state.AppDriver;
 
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg_ltv_econ.ui.panels.LtvIndustryListPanel;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
+import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 
-import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
@@ -185,7 +182,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
             LtvCommodityPanel replacement = new LtvCommodityPanel(null ,managementPanel, width, height,
-                market, new LtvCustomPanelPlugin());
+                market, new BasePanelPlugin<>());
 
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later

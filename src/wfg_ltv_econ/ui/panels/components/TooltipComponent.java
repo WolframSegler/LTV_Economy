@@ -14,7 +14,7 @@ import wfg_ltv_econ.util.UiUtils;
 
 public final class TooltipComponent<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType> & HasTooltip
+    PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasTooltip
 > extends BaseComponent<PluginType, PanelType>{
 
     private final HasTooltip provider;
@@ -62,8 +62,10 @@ public final class TooltipComponent<
                     break;
                 }
     
-                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2) {
-                    UiUtils.openCodexPage(getPanel().getCodexID());
+                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2 ) {
+                    getPanel().getCodexID().ifPresent(codexID -> {
+                        UiUtils.openCodexPage(codexID);
+                    });
                     hideTooltip();
     
                     event.consume();
@@ -76,16 +78,16 @@ public final class TooltipComponent<
 
     final public void showTooltip() {
         if (tooltip == null) {
-            tooltip = provider.createTooltip();
-
+            tooltip = provider.createAndAttachTooltip();
             if (tooltip instanceof StandardTooltipV2Expandable standard) {
                 standard.setShowBackground(true);
                 standard.setShowBorder(true);
             }
         }
+
         if (codex == null) {
-            codex = provider.createCodex();
-            if (tooltip instanceof StandardTooltipV2Expandable standard) {
+            codex = provider.createAndAttachCodex().orElse(null);
+            if (codex instanceof StandardTooltipV2Expandable standard) {
                 standard.setShowBackground(true);
                 standard.setShowBorder(true);
             }
@@ -97,9 +99,10 @@ public final class TooltipComponent<
             provider.getTooltipAttachmentPoint().removeComponent(tooltip);
             tooltip = null;
         }
-        if (codex != null) {
-            provider.getCodexAttachmentPoint().removeComponent(codex);
+
+        provider.getCodexAttachmentPoint().ifPresent(attachment -> {
+            attachment.removeComponent(codex);
             codex = null;
-        }
+        });
     }
 }

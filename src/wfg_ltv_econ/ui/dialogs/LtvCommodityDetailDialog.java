@@ -30,20 +30,19 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
-import wfg_ltv_econ.ui.panels.LtvBasePanel;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
-import wfg_ltv_econ.ui.panels.LtvIconPanel;
+import wfg_ltv_econ.ui.panels.LtvComIconPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
 import wfg_ltv_econ.ui.panels.LtvTextPanel;
 import wfg_ltv_econ.ui.panels.SortableTable;
 import wfg_ltv_econ.ui.panels.SortableTable.ColumnManager;
 import wfg_ltv_econ.ui.panels.SortableTable.HeaderPanelWithTooltip;
-import wfg_ltv_econ.ui.panels.SortableTable.PendingTooltip;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.panels.SortableTable.cellAlg;
-import wfg_ltv_econ.ui.plugins.LtvCommodityDetailDialogPlugin;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg_ltv_econ.ui.plugins.ComDetailDialogPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
@@ -82,8 +81,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     public final static int opad = 10;
     public final static int iconSize = 24;
 
-    private final LtvCustomPanel m_parentWrapper;
-    private final LtvCommodityDetailDialogPlugin m_plugin;
+    private final LtvCustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
     private final Color highlight = Misc.getHighlightColor();
     private CustomPanelAPI m_dialogPanel;
 
@@ -94,12 +92,12 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     public ButtonAPI producerButton = null;
     public ButtonAPI consumerButton = null;
 
-    public LtvCommodityDetailDialog(LtvCustomPanel parent, CommodityOnMarketAPI com) {
+    public LtvCommodityDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com) {
         // Measured using very precise tools!! (my eyes)
         this(parent, com, 1166, 658 + 20);
     }
 
-    public LtvCommodityDetailDialog(LtvCustomPanel parent, CommodityOnMarketAPI com, int panelW, int panelH) {
+    public LtvCommodityDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com, int panelW, int panelH) {
         this.PANEL_W = panelW;
         this.PANEL_H = panelH;
 
@@ -115,7 +113,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         SECT4_WIDTH = (int) (PANEL_W * 0.24f - opad);
         SECT4_HEIGHT = (int) (PANEL_H * 0.72f - opad);
 
-        m_plugin = new LtvCommodityDetailDialogPlugin(parent, this);
         m_parentWrapper = parent;
         m_com = com;
     }
@@ -124,33 +121,30 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
         LtvUIState.setState(UIState.DETAIL_DIALOG);
 
-        // Panel for black BG
-        LtvBasePanel BgPanel = new LtvBasePanel(
+        ComDetailDialogPanel m_panel = new ComDetailDialogPanel(
             m_parentWrapper.getRoot(),
             panel,
-            m_parentWrapper.m_market,
+            m_parentWrapper.getMarket(),
             (int) panel.getPosition().getWidth(),
             (int) panel.getPosition().getHeight(),
-            new LtvCustomPanelPlugin()
+            new ComDetailDialogPlugin(this)
         );
-        BgPanel.setBgColor(new Color(0, 0, 0));
-        BgPanel.getPlugin().setBackgroundTransparency(1);
 
-        panel.addComponent(BgPanel.getPanel()).inBL(0, 0);
-        m_dialogPanel = BgPanel.getPanel();
+        panel.addComponent(m_panel.getPanel()).inBL(0, 0);
+        m_dialogPanel = m_panel.getPanel();
 
         createSections();
 
         // Footer
         final int footerH = 40;
 
-        LtvCustomPanelPlugin fPlugin = new LtvCustomPanelPlugin() {
+        BasePanelPlugin<LtvTextPanel> fPlugin = new BasePanelPlugin<>() {
             @Override
             public void advance(float amount) {
                 super.advance(amount);
 
-                if (hoveredLastFrame && LMBUpLastFrame) {
-                    ButtonAPI checkbox = ((LtvTextPanel) m_panel).m_checkbox;
+                if (inputSnapshot.hoveredLastFrame && inputSnapshot.LMBUpLastFrame) {
+                    ButtonAPI checkbox = getPanel().m_checkbox;
 
                     if (checkbox != null) {
                         checkbox.setChecked(!checkbox.isChecked());
@@ -159,9 +153,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
         };
 
-        footerPanel = new LtvTextPanel(
-                m_parentWrapper.getRoot(), BgPanel.getPanel(), m_parentWrapper.m_market, 400, footerH,
-                fPlugin, m_parentWrapper.getFaction().getBaseUIColor()) {
+        footerPanel = new LtvTextPanel(m_parentWrapper.getRoot(), m_panel.getPanel(),
+            m_parentWrapper.getMarket(), 400, footerH, fPlugin) {
 
             @Override
             public void createPanel() {
@@ -184,34 +177,28 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
 
             @Override
-            public TooltipMakerAPI createTooltip() {
+            public TooltipMakerAPI createAndAttachTooltip() {
                 TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth() * 0.7f, 0, false);
 
                 tooltip.addPara(
                         "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
                         pad);
 
-                m_panel.addUIElement(tooltip).inBL(0, getPos().getHeight());
+                add(tooltip).inBL(0, getPos().getHeight());
                 m_panel.bringComponentToTop(tooltip);
 
                 return tooltip;
             }
 
             @Override
-            public void removeTooltip(TooltipMakerAPI tooltip) {
-                m_panel.removeComponent(tooltip);
-            }
-
-            @Override
             public void initializePlugin(boolean hasPlugin) {
                 super.initializePlugin(hasPlugin);
 
-                ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
+                getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
             }
         };
 
-        BgPanel.getPanel().addComponent(footerPanel.getPanel()).inBL(pad, -opad * 3.5f);
-        m_plugin.init(false, false, BgPanel.getPanel());
+        m_panel.add(footerPanel.getPanel()).inBL(pad, -opad * 3.5f);
     }
 
     public void createSections() {
@@ -305,7 +292,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         String comIconID = m_com.getCommodity().getIconName();
 
-        LtvIconPanel iconLeft = new LtvIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.m_market,
+        LtvComIconPanel iconLeft = new LtvComIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(),
                 iconSize, iconSize, new LtvSpritePanelPlugin(), comIconID, null, null);
         iconLeft.setCommodity(m_com);
 
@@ -313,7 +300,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconLeft.getPanel());
 
-        LtvIconPanel iconRight = new LtvIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.m_market,
+        LtvComIconPanel iconRight = new LtvComIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(),
                 iconSize, iconSize, new LtvSpritePanelPlugin(), comIconID, null, null);
         iconRight.setCommodity(m_com);
 
@@ -326,8 +313,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         final Color baseColor = m_parentWrapper.getFaction().getBaseUIColor();
         { // Global market value
             LtvTextPanel textPanel = new LtvTextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.m_market, 170, 0,
-                    new LtvCustomPanelPlugin(), m_parentWrapper.getFaction().getBaseUIColor()) {
+                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 170, 0,
+                    new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
@@ -366,8 +353,13 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public TooltipMakerAPI createTooltip() {
-                    TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
+                public UIPanelAPI getTooltipAttachmentPoint() {
+                    return getParent();
+                }
+
+                @Override
+                public TooltipMakerAPI createAndAttachTooltip() {
+                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
                             "Total profit that can be made fulfilling the demand for " +
@@ -383,22 +375,17 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseY;
 
-                    ((CustomPanelAPI) getParent()).addUIElement(tooltip).inTL(tpX, tpY);
-                    ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
+                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
-                }
-
-                @Override
-                public void removeTooltip(TooltipMakerAPI tooltip) {
-                    ((CustomPanelAPI) getParent()).removeComponent(tooltip);
                 }
 
                 @Override
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -406,8 +393,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         }
         { // Total global exports
             LtvTextPanel textPanel = new LtvTextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.m_market, 170, 0,
-                    new LtvCustomPanelPlugin(), m_parentWrapper.getFaction().getBaseUIColor()) {
+                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 170, 0,
+                    new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
@@ -444,8 +431,13 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public TooltipMakerAPI createTooltip() {
-                    TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
+                public UIPanelAPI getTooltipAttachmentPoint() {
+                    return getParent();
+                }
+
+                @Override
+                public TooltipMakerAPI createAndAttachTooltip() {
+                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
                         "The total number of " + m_com.getCommodity().getName() + " being exported globally by all producing markets in the sector.\n\n" +
@@ -455,22 +447,17 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseY;
 
-                    ((CustomPanelAPI) getParent()).addUIElement(tooltip).inTL(tpX, tpY);
-                    ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
+                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
-                }
-
-                @Override
-                public void removeTooltip(TooltipMakerAPI tooltip) {
-                    ((CustomPanelAPI) getParent()).removeComponent(tooltip);
                 }
 
                 @Override
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -483,12 +470,12 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             if (m_selectedMarket != null) {
                 currMarket = m_selectedMarket;
             } else {
-                currMarket = m_parentWrapper.m_market;
+                currMarket = m_parentWrapper.getMarket();
             }
 
             LtvTextPanel textPanel = new LtvTextPanel(
                     m_parentWrapper.getRoot(), section, currMarket, 210, 0,
-                    new LtvCustomPanelPlugin(), m_parentWrapper.getFaction().getBaseUIColor()) {
+                    new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
@@ -537,8 +524,13 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public TooltipMakerAPI createTooltip() {
-                    TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
+                public UIPanelAPI getTooltipAttachmentPoint() {
+                    return getParent();
+                }
+
+                @Override
+                public TooltipMakerAPI createAndAttachTooltip() {
+                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
                         "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + getFaction().getPersonNamePrefix() + " control.\n\n" +
@@ -551,22 +543,17 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     final float tpX = textX1 - 460 - opad*2;
                     final float tpY = baseY;
 
-                    ((CustomPanelAPI) getParent()).addUIElement(tooltip).inTL(tpX, tpY);
-                    ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
+                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
-                }
-
-                @Override
-                public void removeTooltip(TooltipMakerAPI tooltip) {
-                    ((CustomPanelAPI) getParent()).removeComponent(tooltip);
                 }
 
                 @Override
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -577,8 +564,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
             LtvTextPanel textPanel = new LtvTextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.m_market, 210, 0,
-                    new LtvCustomPanelPlugin(), m_parentWrapper.getFaction().getBaseUIColor()) {
+                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 210, 0,
+                    new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
@@ -610,14 +597,19 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
                     lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
 
-                    m_panel.addUIElement(tooltip).inTL(0, 0);
+                    add(tooltip).inTL(0, 0);
 
                     m_panel.getPosition().setSize(tooltip.getWidthSoFar(), tooltip.getHeightSoFar());
                 }
 
                 @Override
-                public TooltipMakerAPI createTooltip() {
-                    TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
+                public UIPanelAPI getTooltipAttachmentPoint() {
+                    return getParent();
+                }
+
+                @Override
+                public TooltipMakerAPI createAndAttachTooltip() {
+                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     String marketOwner = m_parentWrapper.getFaction().isPlayerFaction() ?
                         "your" : m_parentWrapper.getFaction().getPersonNamePrefix(); 
@@ -629,22 +621,17 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseRow2Y;
 
-                    ((CustomPanelAPI) getParent()).addUIElement(tooltip).inTL(tpX, tpY);
-                    ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
+                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
-                }
-
-                @Override
-                public void removeTooltip(TooltipMakerAPI tooltip) {
-                    ((CustomPanelAPI) getParent()).removeComponent(tooltip);
                 }
 
                 @Override
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -653,8 +640,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
         else { // Faction market share
             LtvTextPanel textPanelLeft = new LtvTextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.m_market, 210, 0,
-                    new LtvCustomPanelPlugin(), m_parentWrapper.getFaction().getBaseUIColor()) {
+                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 210, 0,
+                    new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
@@ -686,14 +673,19 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
 
                     lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
 
-                    m_panel.addUIElement(tooltip).inTL(0, 0);
+                    add(tooltip).inTL(0, 0);
 
                     m_panel.getPosition().setSize(tooltip.getWidthSoFar(), tooltip.getHeightSoFar());
                 }
 
                 @Override
-                public TooltipMakerAPI createTooltip() {
-                    TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
+                public UIPanelAPI getTooltipAttachmentPoint() {
+                    return getParent();
+                }
+                
+                @Override
+                public TooltipMakerAPI createAndAttachTooltip() {
+                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
                         "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
@@ -702,29 +694,24 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseRow2Y;
 
-                    ((CustomPanelAPI) getParent()).addUIElement(tooltip).inTL(tpX, tpY);
-                    ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
+                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
-                }
-
-                @Override
-                public void removeTooltip(TooltipMakerAPI tooltip) {
-                    ((CustomPanelAPI) getParent()).removeComponent(tooltip);
                 }
 
                 @Override
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
 
             LtvTextPanel textPanelRight = new LtvTextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.m_market, 210, 0,
-                    new LtvCustomPanelPlugin(), m_parentWrapper.getFaction().getBaseUIColor()) {
+                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 210, 0,
+                    new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
@@ -762,8 +749,13 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public TooltipMakerAPI createTooltip() {
-                    TooltipMakerAPI tooltip = ((CustomPanelAPI) getParent()).createUIElement(460, 0, false);
+                public UIPanelAPI getTooltipAttachmentPoint() {
+                    return getParent();
+                }
+
+                @Override
+                public TooltipMakerAPI createAndAttachTooltip() {
+                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     String marketOwner = m_parentWrapper.getFaction().isPlayerFaction() ?
                         "your" : m_parentWrapper.getFaction().getPersonNamePrefix(); 
@@ -775,22 +767,17 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseRow2Y;
 
-                    ((CustomPanelAPI) getParent()).addUIElement(tooltip).inTL(tpX, tpY);
-                    ((CustomPanelAPI) getParent()).bringComponentToTop(tooltip);
+                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
-                }
-
-                @Override
-                public void removeTooltip(TooltipMakerAPI tooltip) {
-                    ((CustomPanelAPI) getParent()).removeComponent(tooltip);
                 }
 
                 @Override
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    ((LtvCustomPanelPlugin) m_panel.getPlugin()).setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
                 }
             };
 
@@ -802,8 +789,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     private void createSection2(CustomPanelAPI section, TooltipMakerAPI tooltip) {
         final int mapHeight = (int) section.getPosition().getHeight() - 2 * opad;
 
-        final StarSystemAPI starSystem = m_parentWrapper.m_market.getStarSystem();
-        String title = m_parentWrapper.m_market.getName();
+        final StarSystemAPI starSystem = m_parentWrapper.getMarket().getStarSystem();
+        String title = m_parentWrapper.getMarket().getName();
 
         MapParams params = new MapParams();
         params.showFilter = false;
@@ -813,7 +800,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         params.starSelectionRadiusMult = 0f;
 
         params.showSystem(starSystem);
-        params.showMarket(m_parentWrapper.m_market, 1);
+        params.showMarket(m_parentWrapper.getMarket(), 1);
 
         if (m_selectedMarket != null) {
             title += " and " + m_selectedMarket.getName();
@@ -883,7 +870,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             section,
             SECT3_WIDTH,
             SECT3_HEIGHT,
-            m_parentWrapper.m_market,
+            m_parentWrapper.getMarket(),
             20,
             30
         );
@@ -999,7 +986,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 tp
             );
 
-            if (m_parentWrapper.m_market == market) {
+            if (m_parentWrapper.getMarket() == market) {
                 table.selectLastRow();
             }
         }
@@ -1011,23 +998,23 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         table.createPanel();
 
         table.setRowSelectionListener(selectedRow -> {
-            m_selectedMarket = selectedRow.m_market;
+            m_selectedMarket = selectedRow.getMarket();
             updateSection1();
             updateSection2();
         });
     }
 
     private void createSection4(CustomPanelAPI section) {
-        CustomUIPanelPlugin comPanelPlugin = new LtvCustomPanelPlugin();
+        BasePanelPlugin<LtvCommodityPanel> comPanelPlugin = new BasePanelPlugin<>();
 
         LtvCommodityPanel comPanel = new LtvCommodityPanel(
                 m_parentWrapper.getRoot(),
-                (UIPanelAPI) section,
+                section,
                 (int) section.getPosition().getWidth(),
                 (int) section.getPosition().getHeight(),
-                m_parentWrapper.m_market,
+                m_parentWrapper.getMarket(),
                 comPanelPlugin,
-                m_parentWrapper.m_market.getName() + " - Commodities",
+                m_parentWrapper.getMarket().getName() + " - Commodities",
                 true);
         comPanel.setRowSelectable(true);
         comPanel.selectRow(m_com.getId());
@@ -1228,17 +1215,17 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             : "Shows demand for the commodity.";
 
         wrapper.factory = () -> {
-            UIPanelAPI attachmentPoint = null;
+            CustomPanelAPI attachmentPoint = null;
 
             for (ColumnManager column : table.getColumns()) {
                 if ("Quantity".equals(column.title)) {
-                    attachmentPoint = ((HeaderPanelWithTooltip) column.getHeaderPanel())
+                    attachmentPoint = (CustomPanelAPI) ((HeaderPanelWithTooltip) column.getHeaderPanel())
                     .getTooltipAttachmentPoint();
                     break;
                 }
             }
 
-            TooltipMakerAPI tp = ((CustomPanelAPI) attachmentPoint).createUIElement(
+            TooltipMakerAPI tp = attachmentPoint.createUIElement(
                 SortableTable.headerTooltipWidth*2, 0, false
             );
 
@@ -1253,7 +1240,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 26,
                 m_parentWrapper.getRoot(),
                 m_parentWrapper.getPanel(),
-                m_parentWrapper.m_market
+                m_parentWrapper.getMarket()
             );
 
             return tp;
@@ -1291,6 +1278,6 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     }
 
     public CustomUIPanelPlugin getCustomPanelPlugin() {
-        return m_plugin;
+        return null;
     }
 }

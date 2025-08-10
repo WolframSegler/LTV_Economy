@@ -11,7 +11,7 @@ import wfg_ltv_econ.util.UiUtils;
 
 public final class OutlineComponent<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType> & HasOutline
+    PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasOutline
 > extends BaseComponent<PluginType, PanelType> {
 
     public static enum Outline {

@@ -1,12 +1,14 @@
 package wfg_ltv_econ.ui.panels;
 
 import java.awt.Color;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -33,13 +35,13 @@ import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
  *   <li>The panel does not store or manage plugin-specific logic or toggles; those belong in the plugin.</li>
  *   <li>By implementing capability interfaces (like {@link HasBackground}), the panel exposes relevant data
  *       to both the plugin and components in a type-safe way.</li>
- *   <li>The panel type is bound to its plugin type via recursive generics to ensure compile-time type safety.</li>
+ *   <li>Recursive bounds (with selective wildcards) ensure methods like <code>getPlugin()</code> / <code>getPanel()</code> resolve to the concrete types at compile time, while still allowing a single plugin implementation to be reused by multiple panel subclasses.</li>
  * </ul>
  *
  * <p>Example usage:</p>
  * <pre>
- * // Panel implementing getBgColor
- * public class MyPanel extends LtvCustomPanel<MyPlugin, MyPanel> implements HasBackground {
+ * // Panel implementing {@link HasBackground}
+ * public class MyPanel extends LtvCustomPanel< MyPanelPlugin<MyPanel>, MyPanel, CustomPanelAPI> implements HasBackground {
  *     private final Color bgColor;
  *
  *     public Color getBgColor() { return bgColor; }
@@ -47,10 +49,11 @@ import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
  * </pre>
  */
 public abstract class LtvCustomPanel<
-    PluginType extends LtvCustomPanelPlugin<?, PluginType>, 
-    PanelType extends LtvCustomPanel<PluginType, ?>
+    PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<?, ? extends PanelType, ParentType>, PluginType>, 
+    PanelType extends LtvCustomPanel<PluginType, ? extends LtvCustomPanel<?, ? extends PanelType, ParentType>, ParentType>,
+    ParentType extends UIPanelAPI
 > {
-    protected final UIPanelAPI m_parent;
+    protected final ParentType m_parent;
     protected final CustomPanelAPI m_panel;
     protected final PluginType m_plugin;
     private final UIPanelAPI m_root;
@@ -72,10 +75,11 @@ public abstract class LtvCustomPanel<
      *      The child <b>must</b> call this in the Constructor.</li>
      * </ul>
      */
+    @SuppressWarnings("unchecked")
     public LtvCustomPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, PluginType plugin,
         MarketAPI market) {
         m_root = root;
-        m_parent = parent;
+        m_parent = (ParentType) parent;
         m_plugin = plugin;
         m_market = market;
         if (market != null) {
@@ -95,7 +99,17 @@ public abstract class LtvCustomPanel<
         return m_panel.getPosition();
     }
 
-    public UIPanelAPI getParent() {
+    /**
+     * Returns the parent panel cast to the expected type.
+     * <p>
+     * This cast is unchecked and does not guarantee type safety at compile time.
+     * It is provided for convenience based on the assumption that the parent
+     * is of the expected type (usually {@code CustomPanelAPI}).
+     * <p>
+     * Use with caution: if the actual parent type differs, a {@code ClassCastException}
+     * may occur at runtime.
+     */
+    public ParentType getParent() {
         return m_parent;
     }
 
@@ -148,8 +162,12 @@ public abstract class LtvCustomPanel<
         return add((UIComponentAPI) a);
     }
 
+    public PositionAPI add(TooltipMakerAPI a) {
+        return m_panel.addUIElement(a);
+    }
+
     public PositionAPI add(UIComponentAPI a) {
-        getPanel().addComponent(a);
+        m_panel.addComponent(a);
 
         return (a).getPosition();
     }
@@ -159,7 +177,7 @@ public abstract class LtvCustomPanel<
     }
 
     public void remove(UIComponentAPI a) {
-        getPanel().removeComponent(a);
+        m_panel.removeComponent(a);
     }
 
     /**
@@ -203,11 +221,13 @@ public abstract class LtvCustomPanel<
 
         Color getGlowColor();
 
+        default void setGlowColor(Color a) {}
+
         /**
          * Used for additive Glow. Leave as null if not using it.
          */
-        default String getSpriteID() {
-            return null;
+        default Optional<SpriteAPI> getSprite() {
+            return Optional.empty();
         }
     }
 
@@ -263,36 +283,45 @@ public abstract class LtvCustomPanel<
 
         /**
         * Return the panel the tooltip is attached to.
-        * Must return a non-null UIPanelAPI.
+        * Must return a non-null UIPanelAPI. Otherwise the tooltip will not be removed.
         */
         UIPanelAPI getTooltipAttachmentPoint();
 
         /**
         * Return the panel the codex is attached to, ideally the tooltip itself.
-        * Must return a non-null UIPanelAPI.
+        * Must return a non-null UIPanelAPI. Otherwise the codex will not be removed.
         */
-        UIPanelAPI getCodexAttachmentPoint();
+        default Optional<UIPanelAPI> getCodexAttachmentPoint() {
+            return Optional.empty();
+        }
 
         /**
         * The TooltipComponent will call this.
-        * Can be left empty for no tooltip.
         * Must create its own tooltip, attach it, position it and return it.
+        * A new tooltip will be created instead of an update.
+        * Therefore, conditional changes to the tooltip should happen during creation.
         */
-        TooltipMakerAPI createTooltip();
+        TooltipMakerAPI createAndAttachTooltip();
 
         /**
         * The TooltipComponent will call this.
-        * Can be left empty for no codex.
         * Must create its own codex, attach it, position it and return it.
         */
-        TooltipMakerAPI createCodex();
+        default Optional<TooltipMakerAPI> createAndAttachCodex() {
+            return Optional.empty();
+        }
 
         /**
          * The component uses this ID to open the codex.
-         * Therefore it must be provided indepent of {@code createCodex()}.
-         */
-        String getCodexID();
+         * Therefore it must be provided independent of {@code createCodex()} for codex behaviour.
+         */ 
+        default Optional<String> getCodexID() {
+            return Optional.empty();
+        }
 
+        /**
+         * Use this toggle to conditionally disable the tooltip.
+         */
         default boolean isTooltipEnabled() {
             return true;
         }

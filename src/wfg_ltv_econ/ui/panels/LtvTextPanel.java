@@ -1,29 +1,58 @@
 package wfg_ltv_econ.ui.panels;
 
-import java.awt.Color;
-
-import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Glow;
-import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.Outline;
+import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 
 /**
- * Each instance implements createPanel, createTooltip etc. when creating the class.
- * The class just serves as a template for anonymous classes.
+ * A base implementation of a text-based UI panel with tooltip support, 
+ * intended to be subclassed anonymously for ad-hoc UI creation.
+ * It acts as a configurable template, with public fields provided to expose 
+ * key UI state to external consumers. This allows external code to inspect 
+ * or interact with panel elements created by the anonymous subclass.
+ * <p>
+ * This class provides common state and lifecycle hooks for panels that 
+ * render text and optionally have tooltips or codex entries. 
+ * Anonymous subclasses are expected to override methods such as 
+ * {@code createPanel()} and {@code createAndAttachTooltip()} 
+ * to define their own UI behavior.
+ * <p>
+ * Typical usage:
+ * <pre>
+ * LtvTextPanel panel = new LtvTextPanel(root, parent, market, 300, 50, plugin) {
+ * </pre>
+ * <pre>
+ *      @Override 
+ *      public void createPanel() {
+ *          // Custom panel creation logic here
+ *      }
+ * </pre>
+ * <pre>
+ *      @Override 
+ *      public TooltipMakerAPI createAndAttachTooltip() {
+ *          // Custom tooltip logic here
+ *      }
+ * };
+ * </pre>
+ *
+ * <h4>Public API Fields</h4>
+ * <ul>
+ *   <li>{@code m_checkbox} – Reference to the checkbox UI element, if created.</li>
+ *   <li>{@code textX1}, {@code textX2}, {@code textY1}, {@code textY2} – Positional coordinates.</li>
+ *   <li>{@code textW1}, {@code textW2}, {@code textH1}, {@code textH2} – Dimension values.</li>
+ * </ul>
+ * These values are intentionally exposed as part of the public API to enable 
+ * direct querying and manipulation of panel state from outside the class.
  */
-public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.HasTooltip {
+public class LtvTextPanel extends LtvCustomPanel<BasePanelPlugin<LtvTextPanel>, LtvTextPanel, CustomPanelAPI>
+    implements HasTooltip {
 
-    public Color m_textColor;
-
-    /**
-     * Used by anonymous classes to transmit data.
-     * Do not crucify me for this.
-     */
+    // Shared state for anonymous subclasses to modify.
     public ButtonAPI m_checkbox;
     public float textX1 = 0;
     public float textX2 = 0;
@@ -35,23 +64,18 @@ public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.HasTo
     public float textH2 = 0;
 
     public LtvTextPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        CustomUIPanelPlugin plugin, Color textColor) {
+        BasePanelPlugin<LtvTextPanel> plugin) {
         super(root, parent, width, height, plugin, market);
-
-        this.m_textColor = textColor;
 
         initializePlugin(hasPlugin);
         createPanel();
     }
 
     public void initializePlugin(boolean hasPlugin) {
-        LtvCustomPanelPlugin plugin = ((LtvCustomPanelPlugin) m_panel.getPlugin());
-        plugin.init(this, Glow.NONE, true, false, Outline.NONE);
+        getPlugin().init(this);
     }
 
-    public void createPanel() {
-
-    }
+    public void createPanel() {}
 
     @Override
     public UIPanelAPI getTooltipAttachmentPoint() {
@@ -59,17 +83,7 @@ public class LtvTextPanel extends LtvCustomPanel implements LtvCustomPanel.HasTo
     }
 
     @Override
-    public TooltipMakerAPI createTooltip() {
+    public TooltipMakerAPI createAndAttachTooltip() {
         return null;
-    }
-
-    @Override
-    public void removeTooltip(TooltipMakerAPI tooltip) {
-
-    }
-
-    @Override
-    public void attachCodexTooltip(TooltipMakerAPI codexTooltip) {
-
     }
 }

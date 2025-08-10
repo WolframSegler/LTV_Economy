@@ -2,14 +2,10 @@ package wfg_ltv_econ.ui.plugins;
 
 import com.fs.starfarer.api.ui.PositionAPI;
 
-import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
 import wfg_ltv_econ.util.RenderUtils;
 
-public class LtvSpritePanelPlugin<
-    PanelType extends LtvCustomPanel<?, LtvSpritePanel>> 
-    extends LtvCustomPanelPlugin<LtvSpritePanel, LtvSpritePanelPlugin<PanelType>
-> {
+public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin<LtvSpritePanel, LtvSpritePanelPlugin> {
 
     private boolean isDrawFilledQuad = false;
 

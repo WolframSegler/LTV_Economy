@@ -2,62 +2,34 @@ package wfg_ltv_econ.ui.plugins;
 
 import java.util.List;
 
-import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
+import wfg_ltv_econ.ui.dialogs.ComDetailDialogPanel;
 import wfg_ltv_econ.ui.dialogs.LtvCommodityDetailDialog;
-import wfg_ltv_econ.ui.panels.LtvCustomPanel;
-import wfg_ltv_econ.util.RenderUtils;
 
-public class LtvCommodityDetailDialogPlugin implements CustomUIPanelPlugin {
-    protected CustomPanelAPI m_panel;
-    protected LtvCustomPanel m_parent;
+public class ComDetailDialogPlugin extends LtvCustomPanelPlugin<ComDetailDialogPanel, ComDetailDialogPlugin> {
     protected LtvCommodityDetailDialog m_dialog;
-
-    protected boolean hasBackground = false;
-    protected boolean hasOutline = false;
 
     protected boolean isFooterButtonChecked = false;
     protected boolean isProducerButtonChecked = true;
     protected boolean isConsumerButtonChecked = false;
 
-    public LtvCommodityDetailDialogPlugin(LtvCustomPanel parent, LtvCommodityDetailDialog dialog) {
-        m_parent = parent;
+    public ComDetailDialogPlugin(LtvCommodityDetailDialog dialog) {
         m_dialog = dialog;
     }
 
-    public void init(boolean hasBackground, boolean hasOutline, CustomPanelAPI panel) {
-        m_panel = panel;
-        this.hasBackground = hasBackground;
-        this.hasOutline = hasOutline;
+    public void init(ComDetailDialogPanel panel) {
+        super.init(m_panel);
     }
 
     public void positionChanged(PositionAPI position) {}
 
-    public void renderBelow(float alphaMult) {
-        PositionAPI pos = m_panel.getPosition();
-
-        if (hasBackground) {
-            int x = (int)pos.getX();
-            int y = (int)pos.getY();
-            int w = (int)pos.getWidth();
-            int h = (int)pos.getHeight();
-            RenderUtils.drawQuad(x, y, w, h, m_parent.BgColor, alphaMult*0.65f, false);
-            // Looks vanilla like with 0.65f
-        }
-        if (hasOutline) {
-            RenderUtils.drawFramedBorder(
-                pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
-                1, m_parent.getFaction().getGridUIColor(), alphaMult
-            );
-        }
-    }
-
     public void render(float alphaMult) {}
 
     public void advance(float amount) {
+        super.advance(amount);
+
         if (m_dialog.footerPanel.m_checkbox.isChecked() != isFooterButtonChecked) {
             isFooterButtonChecked = !isFooterButtonChecked;
 

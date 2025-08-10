@@ -404,13 +404,13 @@ public class TooltipUtils {
      * The F1 and F2 events must be handled using the Plugin.
      */
     public static TooltipMakerAPI createCustomCodex(
-            LtvCustomPanel<?, ?> panel, String codexF1, String codexF2, int codexW) {
+            LtvCustomPanel<?, ?, CustomPanelAPI> panel, String codexF1, String codexF2, int codexW) {
 
         final Color gray = new Color(100, 100, 100);
         final Color highlight = Misc.getHighlightColor();
 
         // Create the custom Footer
-        TooltipMakerAPI codexTooltip = ((CustomPanelAPI) panel.getParent()).createUIElement(codexW, 0, false);
+        TooltipMakerAPI codexTooltip = panel.getParent().createUIElement(codexW, 0, false);
 
         codexTooltip.setParaFont(Fonts.ORBITRON_12);
         ((StandardTooltipV2Expandable) codexTooltip).setShowBackground(true);

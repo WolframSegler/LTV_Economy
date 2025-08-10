@@ -8,7 +8,7 @@ import wfg_ltv_econ.util.RenderUtils;
 
 public final class BackgroundComponent<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType> & HasBackground
+    PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasBackground
 > extends BaseComponent<PluginType, PanelType> {
 
     public BackgroundComponent(PluginType a) {
