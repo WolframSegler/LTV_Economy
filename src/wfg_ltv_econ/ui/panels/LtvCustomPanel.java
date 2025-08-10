@@ -213,7 +213,7 @@ public abstract class LtvCustomPanel<
             return false;
         }
 
-        void setPersistentGlow(boolean a);
+        default void setPersistentGlow(boolean a) {}
 
         default float getOverlayBrightness() {
             return 1.2f;
