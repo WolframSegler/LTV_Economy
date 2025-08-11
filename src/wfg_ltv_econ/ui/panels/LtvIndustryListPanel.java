@@ -5,19 +5,18 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.ui.CutStyle;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.s;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 import com.fs.starfarer.ui.newui.L;
 
+import wfg_ltv_econ.ui.panels.BuildingWidgetPanel;
 import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.ReflectionUtils;
@@ -27,7 +26,6 @@ import com.fs.starfarer.ui.d;
 import com.fs.starfarer.ui.Q;
 import com.fs.starfarer.ui.c;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 
 import java.util.Collections;
 

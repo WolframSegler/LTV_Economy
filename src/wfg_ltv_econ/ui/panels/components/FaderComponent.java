@@ -29,7 +29,7 @@ public final class FaderComponent<
     private final float additiveBrightness = 0.6f;
 
     @Override
-    public void advance(float amount, InputSnapshot input) {
+    public final void advance(float amount, InputSnapshot input) {
         if (getPanel().getGlowType() == Glow.NONE) return;
 
         State target = input.hoveredLastFrame ? State.IN : State.OUT;
@@ -45,7 +45,7 @@ public final class FaderComponent<
         getPanel().getFader().advance(amount);
     }
 
-    private void drawGlowLayer(float alphaMult, InputSnapshot input) {
+    private final void drawGlowLayer(float alphaMult, InputSnapshot input) {
         final PanelType panel = getPanel();
         final PositionAPI pos = panel.getPos();
 
@@ -65,14 +65,14 @@ public final class FaderComponent<
     }
 
     @Override
-    public void renderBelow(float alphaMult, InputSnapshot input) {
+    public final void renderBelow(float alphaMult, InputSnapshot input) {
         if (getPanel().getGlowType() != Glow.UNDERLAY || getPanel().getFader().getBrightness() <= 0) return;
 
         drawGlowLayer(alphaMult, input);
     }
 
     @Override
-    public void render(float alphaMult, InputSnapshot input) {
+    public final void render(float alphaMult, InputSnapshot input) {
         final FaderUtil fader = getPanel().getFader();
 
         if (getPanel().getGlowType() == Glow.OVERLAY && fader.getBrightness() > 0) {

@@ -27,7 +27,7 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin<LtvSpritePanel, L
         }
 
         if (getPanel().color != null) {
-            getPanel().setColor(getPanel().color);
+            getPanel().m_sprite.setColor(getPanel().color);
         }
 
         final PositionAPI pos = getPanel().getPos();

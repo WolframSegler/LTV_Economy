@@ -62,14 +62,17 @@ public class LtvSpritePanel extends LtvCustomPanel<LtvSpritePanelPlugin, LtvSpri
         getPlugin().setIgnoreUIState(true);
     }
 
+    @Override
     public Outline getOutline() {
         return drawBorder ? Outline.VERY_THIN : Outline.NONE;
     }
 
+    @Override
     public Color getOutlineColor() {
         return outlineColor;
     }
 
+    @Override
     public void setOutlineColor(Color a) {
         outlineColor = a;
     }

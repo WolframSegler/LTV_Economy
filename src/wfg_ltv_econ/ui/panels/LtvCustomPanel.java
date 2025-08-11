@@ -49,7 +49,7 @@ import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
  * </pre>
  */
 public abstract class LtvCustomPanel<
-    PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<?, ? extends PanelType, ParentType>, PluginType>, 
+    PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<?, ?, ParentType>, PluginType>, 
     PanelType extends LtvCustomPanel<PluginType, ? extends LtvCustomPanel<?, ? extends PanelType, ParentType>, ParentType>,
     ParentType extends UIPanelAPI
 > {

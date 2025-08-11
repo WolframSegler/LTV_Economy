@@ -16,7 +16,7 @@ public final class BackgroundComponent<
     }
 
     @Override
-    public void renderBelow(float alphaMult, InputSnapshot input) {
+    public final void renderBelow(float alphaMult, InputSnapshot input) {
         if (!getPanel().isBgEnabled()) {
             return;
         }

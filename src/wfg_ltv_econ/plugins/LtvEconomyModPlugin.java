@@ -9,8 +9,6 @@ import wfg_ltv_econ.util.LtvMarketReplacer;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
-    // Global.getLogger(this.getClass()).info("message");
-
     @Override
     public void onApplicationLoad() throws Exception {
         

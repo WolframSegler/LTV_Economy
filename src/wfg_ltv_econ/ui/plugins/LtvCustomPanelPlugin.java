@@ -50,7 +50,7 @@ import wfg_ltv_econ.ui.panels.components.TooltipComponent;
  */
 public abstract class LtvCustomPanelPlugin<
     PanelType extends LtvCustomPanel<? extends LtvCustomPanelPlugin<?, ? extends PluginType>, PanelType, ? extends UIPanelAPI>,
-    PluginType extends LtvCustomPanelPlugin<PanelType, ? extends LtvCustomPanelPlugin<?, ? extends PluginType>>
+    PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<?, ?, ? extends UIPanelAPI>, ? extends LtvCustomPanelPlugin<?, ? extends PluginType>>
 > implements CustomUIPanelPlugin {
 
     public static class InputSnapshot {
@@ -89,23 +89,23 @@ public abstract class LtvCustomPanelPlugin<
     public void init(PanelType panel) {
         m_panel = panel;
 
-        if (getPanel() instanceof HasTooltip provider) {
+        if (panel instanceof HasTooltip provider) {
             addComponent(new TooltipComponent(this, provider));
         }
 
-        if (getPanel() instanceof HasBackground) {
+        if (panel instanceof HasBackground) {
             addComponent(new BackgroundComponent(this));
         }
 
-        if (getPanel() instanceof HasAudioFeedback) {
+        if (panel instanceof HasAudioFeedback) {
             addComponent(new AudioFeedbackComponent(this));
         }
 
-        if (getPanel() instanceof HasOutline) {
+        if (panel instanceof HasOutline) {
             addComponent(new OutlineComponent(this));
         }
 
-        if (getPanel() instanceof HasFader) {
+        if (panel instanceof HasFader) {
             addComponent(new FaderComponent(this));
         }
     }

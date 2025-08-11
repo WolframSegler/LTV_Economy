@@ -17,7 +17,7 @@ public final class AudioFeedbackComponent<
     }
 
     @Override
-    public void advance(float amount, InputSnapshot input) {
+    public final void advance(float amount, InputSnapshot input) {
         if (input.hoveredLastFrame && getPanel().isSoundEnabled() && getPlugin().isValidUIContext()) {
             if (!input.playedUIHoverSound) {
                 Global.getSoundPlayer().playUISound("ui_button_mouseover", 1, 1);

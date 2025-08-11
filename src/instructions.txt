@@ -2,18 +2,15 @@ DO NOT INCLUDE THIS FILE IN RELEASE
 Word Wrap shortcut: Alt + Z
 
 1. Compile the ReflectionUtils.kt:
-    kotlinc src/wfg_ltv_econ/util/ReflectionUtils.kt -d src/compiled/
+    kotlinc src/wfg_ltv_econ/util/ReflectionUtils.kt -d jars/libs/compiled/
 
 2. Package it as a jar:
-    jar cf jars/reflection.jar -C src/compiled .
+    jar cf jars/libs/reflection.jar -C jars/libs/compiled .
 
-3. Delete the directory src/compiled/
+3. Delete the directory jars/libs/compiled/
 
-4. Compile the project files to .class: navigate to LTV_Economy/ through the console and use the command:
-    javac -classpath "..\..\starsector-core\starfarer.api.jar;..\..\starsector-core\log4j-1.2.9.jar;..\..\starsector-core\lwjgl_util.jar;..\..\starsector-core\json.jar;..\..\starsector-core\starfarer_obf.jar;..\..\starsector-core\fs.common_obf.jar;.\jars\reflection.jar;..\..\starsector-core\lwjgl.jar" -encoding UTF-8 -d src/compiled/ src/wfg_ltv_econ/submarkets/*.java src/wfg_ltv_econ/industry/*.java src/wfg_ltv_econ/plugins/*.java src/wfg_ltv_econ/util/*.java src/wfg_ltv_econ/ui/*.java src/wfg_ltv_econ/conditions/*.java
-
-5. Create a jar file using the command:
-    jar cf jars/ltv_economy.jar -C src/compiled .
+4. Compile the main project. Navigate to Ltv_Economy and run:
+    mvn clean package
 
 6. Delete the logs from starsector_core/starsector.log
 

@@ -29,7 +29,7 @@ public final class TooltipComponent<
     }
 
     @Override
-    final public void advance(float amount, InputSnapshot input) {
+    public final void advance(float amount, InputSnapshot input) {
         if (tooltip == null) {
             return;
         }
@@ -76,7 +76,7 @@ public final class TooltipComponent<
         }
     }
 
-    final public void showTooltip() {
+    public final void showTooltip() {
         if (tooltip == null) {
             tooltip = provider.createAndAttachTooltip();
             if (tooltip instanceof StandardTooltipV2Expandable standard) {
@@ -94,7 +94,7 @@ public final class TooltipComponent<
         }
     }
 
-    final public void hideTooltip() {
+    public final void hideTooltip() {
         if (tooltip != null) {
             provider.getTooltipAttachmentPoint().removeComponent(tooltip);
             tooltip = null;

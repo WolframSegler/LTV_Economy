@@ -12,63 +12,49 @@
   <name>LTV Economy</name>
 
   <build>
+    <finalName>ltv_economy</finalName>
+    <directory>jars/main/</directory>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
-        <plugin>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-maven-plugin</artifactId>
-            <version>1.9.24</version>
-            <executions>
-                <execution>
-                    <id>compile-kotlin</id>
-                    <phase>compile</phase>
-                    <goals>
-                        <goal>compile</goal>
-                    </goals>
-                    <configuration>
-                        <sourceDirs>
-                            <sourceDir>${project.basedir}/src</sourceDir>
-                        </sourceDirs>
-                        <output>${project.build.directory}/compiled</output>
-                        <compilerArgs>
-                            <arg>-Xjsr305=strict</arg>
-                        </compilerArgs>
-                    </configuration>
-                </execution>
-                <execution>
-                    <id>test-compile-kotlin</id>
-                    <phase>test-compile</phase>
-                    <goals>
-                        <goal>test-compile</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <source>17</source>
+          <target>17</target>
+          <excludes>
+              <exclude>com/**</exclude>
+              <exclude>com_core/**</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
 
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.1</version>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>cleanup-target</id>
+            <phase>package</phase>
+            <goals><goal>run</goal></goals>
             <configuration>
-                <encoding>UTF-8</encoding>
-                <source>17</source>
-                <target>17</target>
-                <fork>true</fork>
-                <outputDirectory>src/compiled/</outputDirectory>
+              <target>
+                <delete dir="${project.build.directory}/classes"/>
+                <delete dir="${project.build.directory}/test-classes"/>
+                <delete dir="${project.build.directory}/maven-archiver"/>
+                <delete dir="${project.build.directory}/maven-status"/>
+                <delete dir="${project.build.directory}/antrun"/>
+                <delete dir="${project.build.directory}/generated-sources"/>
+              </target>
             </configuration>
-        </plugin>
-
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>3.2.0</version>
-            <configuration>
-                <finalName>ltv_economy</finalName>
-                <outputDirectory>${project.basedir}/jars</outputDirectory>
-            </configuration>
-        </plugin>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
-</build>
+  </build>
 
   <dependencies>
     <dependency>
@@ -119,6 +105,13 @@
       <version>1.0</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/../../starsector-core/starfarer_obf.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>local</groupId>
+      <artifactId>reflection</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jars/libs/reflection.jar</systemPath>
     </dependency>
   </dependencies>
 

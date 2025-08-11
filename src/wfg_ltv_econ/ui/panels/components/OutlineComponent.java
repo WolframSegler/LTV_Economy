@@ -34,7 +34,7 @@ public final class OutlineComponent<
     }
 
     @Override
-    public void render(float alphaMult, InputSnapshot input) {
+    public final void render(float alphaMult, InputSnapshot input) {
         if (getPanel().getOutline() == null || getPanel().getOutline() == Outline.NONE) return;
 
         PanelType panel = getPanel();
