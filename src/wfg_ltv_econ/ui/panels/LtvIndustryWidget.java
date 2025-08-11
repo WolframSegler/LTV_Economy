@@ -11,6 +11,7 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
+import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.input.InputEventAPI;
@@ -31,6 +32,8 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 
+import com.fs.starfarer.campaign.ui.marketinfo.intnew;
+import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.starfarer.campaign.ui.N;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
@@ -518,15 +521,18 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                     interactionMode = MarketInteractionMode.REMOTE;
                 }
 
-                // No way to get the constructor of b for now
-                // DialogCreatorUI dialog = new b(
-                //     m_industry,
-                //     (intnew) ((Object) this),
-                //     interactionMode,
-                //     getPanel(),
-                //     this
-                // );
-                // dialog.showDialog(0,0,null);
+                if (LtvIndustryListPanel.indOptConstr != null) {
+                    DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptConstr.newInstance(
+                        m_industry,
+                        // (intnew) ((Object) this), 
+                        (intnew) LtvIndustryListPanel.dummyWidget,
+                        interactionMode,
+                        (UIPanelAPI) getPanel(),
+                        // this
+                        null
+                    );
+                    dialog.showDialog(0,0,null);
+                }
                 tradeInfoPanel = true;
             } catch (Exception e) {
                 Global.getLogger(LtvMarketReplacer.class).error("Custom Widget failed", e);

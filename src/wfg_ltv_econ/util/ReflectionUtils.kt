@@ -1062,9 +1062,10 @@ internal object ReflectionUtils {
             numOfParams = numOfParams,
             parameterTypes = parameterTypes
         )
-
+        val accessibleConstructors: Set<Any> = this.declaredConstructors.toSet()
         return ReflectedConstructorsCache.getOrPut(cacheKey){
-            this.declaredConstructors.filter { constructor: Any ->
+            
+                accessibleConstructors.filter { constructor ->
                 // Get actual parameters
                 @Suppress("UNCHECKED_CAST")
                 val actualParamTypes = getConstructorParametersHandle.invoke(constructor) as Array<Class<*>>

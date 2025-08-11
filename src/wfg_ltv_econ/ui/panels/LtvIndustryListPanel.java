@@ -31,6 +31,7 @@ import java.util.Collections;
 
 public class LtvIndustryListPanel extends IndustryListPanel {
    static ReflectedConstructor indOptConstr = null;
+   static Object dummyWidget = null; 
 
    public LtvIndustryListPanel(MarketAPI var1, L var2, s var3) {
       super(var1, var2, var3);
@@ -51,8 +52,10 @@ public class LtvIndustryListPanel extends IndustryListPanel {
 
    public static void setindustryOptionsPanelConstructor(ReflectedConstructor a) {
       indOptConstr = a;
+   }
 
-      Global.getLogger(LtvIndustryListPanel.class).error(a.getClass());
+   public static void setDummyWidget(Object a) {
+      dummyWidget = a;
    }
 
    @Override

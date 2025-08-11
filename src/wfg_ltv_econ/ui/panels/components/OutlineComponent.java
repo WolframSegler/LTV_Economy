@@ -78,10 +78,10 @@ public final class OutlineComponent<
 
         if (textureID != null) {
             UiUtils.drawRoundedBorder(
-                pos.getX() - pad,
-                pos.getY() - pad,
-                pos.getWidth() + pad * 2,
-                pos.getHeight() + pad * 2,
+                pos.getX() - pad + getPlugin().offsetX,
+                pos.getY() - pad + getPlugin().offsetY,
+                pos.getWidth() + pad * 2 + getPlugin().offsetW,
+                pos.getHeight() + pad * 2 + getPlugin().offsetH,
                 1,
                 textureID,
                 textureSize,

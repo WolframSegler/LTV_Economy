@@ -56,7 +56,6 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
 
     public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
-        getPlugin().setOffsets(2, 2, -4, -4);
     }
 
     public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {
@@ -87,11 +86,11 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
                 commodities.remove(com);
             }
         }
-        final TooltipMakerAPI FgTooltip = m_panel.createUIElement(getPos().getWidth(), getPos().getHeight(), false);
-        FgTooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
+        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth(), getPos().getHeight(), false);
+        tooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
-        final int headerHeight = (int) FgTooltip.getPrev().getPosition().getHeight();
-        getPlugin().setOffsets(0, 0, 0, -headerHeight);
+        final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
+        getPlugin().setOffsets(1, 1, -2, -headerHeight - 2);
 
         // Determine row height
         float rowHeight = getPos().getHeight() - headerHeight - opad - pad;
@@ -123,7 +122,7 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
             previousRow = comRow.getPanel();
             commodityRows.add(comRow);
         }
-        getPanel().addUIElement(FgTooltip).inTL(0, 0);
+        getPanel().addUIElement(tooltip).inTL(0, 0);
     }
 
     public void selectRow(String comID) {

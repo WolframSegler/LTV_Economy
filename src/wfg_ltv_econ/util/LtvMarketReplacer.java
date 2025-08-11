@@ -7,16 +7,20 @@ import com.fs.state.AppDriver;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg_ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
 
+import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 import com.fs.starfarer.ui.newui.L;
 import com.fs.starfarer.campaign.ui.marketinfo.s;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class LtvMarketReplacer implements EveryFrameScript {
@@ -129,26 +133,31 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
             managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 25);
             
-            // // Acquire the popup class from one of the widgets
-            // Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
+            // Acquire the popup class from one of the widgets
+            Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
 
-            // // Now the popup class is a child of: 
-            // // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
-            // ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
+            // Attach the popup
+            ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
 
-            // List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
+            // Now the popup class is a child of: 
+            // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
 
-            // UIPanelAPI indOps = children.stream()
-            //     .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
-            //     .map(child -> (UIPanelAPI) child)
-            //     .findFirst().orElse(null);
+            List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
 
-            // ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
-            //     indOps.getClass(), 5).get(0);
+            UIPanelAPI indOps = children.stream()
+                .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
+                .map(child -> (UIPanelAPI) child)
+                .findFirst().orElse(null);
 
-            // LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
+            ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
+                indOps.getClass(), 5).get(0);
 
-            // // Delete the indOpsPanel after getting its constructor
+            LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
+            LtvIndustryListPanel.setDummyWidget(widget0);
+
+            // Dismiss the indOpsPanel after getting its constructor
+            ReflectionUtils.invoke(indOps, "dialogDismissed", null, 1);
+            industryPanel.removeComponent((UIPanelAPI)widget0);
             // children.remove(indOps);
             
             // No need for the old panel
@@ -182,7 +191,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
             LtvCommodityPanel replacement = new LtvCommodityPanel(null ,managementPanel, width, height,
-                market, new BasePanelPlugin<>());
+                market, new BasePanelPlugin<LtvCommodityPanel>());
 
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later

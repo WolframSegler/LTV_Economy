@@ -18,12 +18,20 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.TooltipUtils;
+import wfg_ltv_econ.util.UiUtils;
+import wfg_ltv_econ.util.UiUtils.AnchorType;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 
 public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements HasTooltip, HasFader {
 
+    private static final int pad = 3;
+    private static final int opad = 10;
+
+    private static final String notExpandedCodexF1 = "F1 more info";
+    private static final String ExpandedCodexF1 = "F1 hide";
+    private static final String codexF2 = "F2 open Codex";
     private TooltipMakerAPI m_tooltip;
     private FaderUtil m_fader = null;
 
@@ -76,6 +84,16 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
     }
 
     @Override
+    public void setExpanded(boolean a) {
+        isExpanded = a;
+    }
+
+    @Override
+    public boolean isExpanded() {
+        return isExpanded;
+    }
+
+    @Override
     public UIPanelAPI getTooltipParent() {
         return getParent();
     }
@@ -86,8 +104,6 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
             return null;
         }
 
-        final int pad = 3;
-        final int opad = 10;
         final Color gray = new Color(100, 100, 100);
 
         m_tooltip = getParent().createUIElement(720, 0, false);
@@ -117,12 +133,36 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
         getParent().bringComponentToTop(m_tooltip);
         TooltipUtils.mouseCornerPos(m_tooltip, opad);
 
-        m_tooltip.setCodexEntryId(CodexDataV2.getCommodityEntryId(m_com.getId()));
-
         return m_tooltip;
     }
 
     public Optional<UIPanelAPI> getCodexParent() {
         return Optional.ofNullable(getParent());
+    }
+
+    @Override
+    public Optional<TooltipMakerAPI> createAndAttachCodex() {
+        TooltipMakerAPI codex;
+
+        if (!isExpanded) {
+            final int codexW = 210;
+
+            codex = TooltipUtils.createCustomCodex(this, notExpandedCodexF1, codexF2, codexW);
+        } else {
+            final int codexW = 180;
+
+            codex = TooltipUtils.createCustomCodex(this, ExpandedCodexF1, codexF2, codexW);  
+        }
+
+        getParent().addUIElement(codex);
+        getParent().bringComponentToTop(codex);
+        UiUtils.anchorPanel(codex, m_tooltip, AnchorType.BelowLeft, opad + pad);
+
+        return Optional.ofNullable(codex);
+    }
+
+    @Override
+    public Optional<String> getCodexID() {
+        return Optional.ofNullable(CodexDataV2.getCommodityEntryId(m_com.getId()));
     }
 }
