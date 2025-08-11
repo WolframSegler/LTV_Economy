@@ -311,7 +311,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
     }
     @Override
     public Optional<UIPanelAPI> getCodexParent() {
-        return Optional.ofNullable(m_tooltip);
+        return Optional.ofNullable(getParent());
     }
 
     @Override
@@ -336,7 +336,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
 
         getParent().addUIElement(codex);
         getParent().bringComponentToTop(codex);
-        UiUtils.anchorPanel(codex, getCodexParent().get(), AnchorType.BelowLeft, opad);
+        UiUtils.anchorPanel(codex, m_tooltip, AnchorType.BelowLeft, opad);
 
         return Optional.ofNullable(codex);
     }

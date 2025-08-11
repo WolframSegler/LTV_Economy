@@ -367,7 +367,7 @@ public abstract class LtvCustomPanel<
          * }
          * </pre>
          */
-        public static abstract class PendingTooltip {
+        public static class PendingTooltip<ParentType extends UIPanelAPI> {
             /**
              * Factory method to create the tooltip.
              * Must be set by subclasses or instances.
@@ -375,12 +375,11 @@ public abstract class LtvCustomPanel<
             public Supplier<TooltipMakerAPI> factory;
 
             /**
-             * Return the parent panel of the tooltip created by the factory.
+             * Factory method to return the parent panel of the tooltip created by the factory.
              * Must return a non-null UIPanelAPI.
-             * This method must be overridden by subclasses.
-             * Classes that support PendingTooltip will use this getter.
+             * Classes that support PendingTooltip will use this factory.
              */
-            public abstract UIPanelAPI getTooltipParent();
+            public  Supplier<ParentType> getParent;
         }
     }
 }

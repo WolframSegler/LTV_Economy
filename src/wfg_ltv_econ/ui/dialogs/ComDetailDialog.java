@@ -879,7 +879,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
         final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
-        PendingTooltip quantityTooltip = new PendingTooltip();
+        PendingTooltip<UIPanelAPI> quantityTooltip = new PendingTooltip<>();
         createSection3QuantityHeaderTooltipFactory(mode, table, quantityTooltip);
 
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
@@ -974,7 +974,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
             table.addCell(incomeText, cellAlg.MID, incomeValue, null);
 
             // Tooltip
-            PendingTooltip tp = new PendingTooltip();
+            PendingTooltip<CustomPanelAPI> tp = new PendingTooltip<>();
             createSection3RowsTooltip(
                 table, market, marketName, textColor, tp
             );
@@ -1085,14 +1085,18 @@ public class ComDetailDialog implements CustomDialogDelegate {
     }
 
     private void createSection3RowsTooltip(SortableTable table, MarketAPI market,
-        String marketName, Color baseColor, PendingTooltip wrapper) {
+        String marketName, Color baseColor, PendingTooltip<CustomPanelAPI> wrapper) {
+
+        wrapper.getParent = () -> {
+            return table.getPanel();
+        };
 
         wrapper.factory = () -> {
 
             final int tpWidth = 450;
             final CommodityOnMarketAPI com = market.getCommodityData(m_com.getId());
     
-            TooltipMakerAPI tp = table.getPanel().createUIElement(
+            TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(
                 tpWidth, 0, false);
     
             final FactionAPI faction = market.getFaction();
@@ -1210,23 +1214,24 @@ public class ComDetailDialog implements CustomDialogDelegate {
         };
     }
 
-    private void createSection3QuantityHeaderTooltipFactory(int mode, SortableTable table, PendingTooltip wrapper) {
+    private void createSection3QuantityHeaderTooltipFactory(int mode, SortableTable table,
+        PendingTooltip<UIPanelAPI> wrapper) {
         final String quantityDesc = mode == 0
             ? "Shows units of the commodity that could be exported."
             : "Shows demand for the commodity.";
 
-        wrapper.factory = () -> {
-            CustomPanelAPI attachmentPoint = null;
-
+        wrapper.getParent = () -> {
             for (ColumnManager column : table.getColumns()) {
                 if ("Quantity".equals(column.title)) {
-                    attachmentPoint = (CustomPanelAPI) ((HeaderPanelWithTooltip) column.getHeaderPanel())
-                    .getTooltipParent();
-                    break;
+                    return ((HeaderPanelWithTooltip) column.getHeaderPanel()).getParent();
                 }
-            }
+            } 
 
-            TooltipMakerAPI tp = attachmentPoint.createUIElement(
+            return null;
+        };
+
+        wrapper.factory = () -> {
+            TooltipMakerAPI tp = ((CustomPanelAPI)wrapper.getParent.get()).createUIElement(
                 SortableTable.headerTooltipWidth*2, 0, false
             );
 

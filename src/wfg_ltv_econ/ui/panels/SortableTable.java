@@ -372,7 +372,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             if (column.getTooltipType() == String.class) {
                 return getParent();
             } else if (column.getTooltipType() == PendingTooltip.class) {
-                return ((PendingTooltip) column.tooltip).getTooltipParent();
+                return ((PendingTooltip<? extends UIPanelAPI>) column.tooltip).getParent.get();
             } else {
                 throw new IllegalArgumentException(
                     "Tooltip for header '" + column.title + "' has an illegal type."
@@ -391,7 +391,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                 tooltip.addPara((String) column.tooltip, pad);
 
             } else if (column.getTooltipType() == PendingTooltip.class) {
-                tooltip = ((PendingTooltip) column.tooltip).factory.get();
+                tooltip = ((PendingTooltip<? extends UIPanelAPI>) column.tooltip).factory.get();
 
             } else {
                 throw new IllegalArgumentException(
@@ -481,7 +481,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         protected String codexID = null;
         
         public Color textColor = Misc.getBasePlayerColor();
-        public PendingTooltip m_tooltip = null;
+        public PendingTooltip<? extends UIPanelAPI> m_tooltip = null;
         
         private FaderUtil m_fader = null;
         private boolean isPersistentGlow = false;
@@ -683,7 +683,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             if (m_tooltip == null) {
                 return getParent();
             } else {
-                return m_tooltip.getTooltipParent();
+                return m_tooltip.getParent.get();
             }
         }
         
@@ -808,7 +808,8 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
      * {@code codexID} is optional.
      * The {@code PendingTooltip} can be null.
      */
-    public void pushRow(String codexID, MarketAPI market, Color textColor, Color glowClr, PendingTooltip tp) {
+    public <TpType extends UIPanelAPI> void pushRow(String codexID, MarketAPI market, Color textColor,
+        Color glowClr, PendingTooltip<TpType> tp) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
                     + "Call addCell() before pushRow().");
