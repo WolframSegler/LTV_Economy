@@ -15,8 +15,8 @@ public final class AudioFeedbackComponent<
     /**
      * Newly created Components shouldn't make a sound for this many game ticks.
      */
-    private int initCompTicks = 2;
-    private int accumulatedGameTicks = 0;
+    final private int initCompTicks = 10;
+    private long accumulatedGameTicks = 0;
 
     public AudioFeedbackComponent(PluginType plugin) {
         super(plugin);
@@ -27,7 +27,7 @@ public final class AudioFeedbackComponent<
         if (input.hoveredLastFrame &&
             getPanel().isSoundEnabled() &&
             getPlugin().isValidUIContext() &&
-            accumulatedGameTicks < initCompTicks
+            accumulatedGameTicks > initCompTicks
         ) {
             if (!input.playedUIHoverSound) {
                 Global.getSoundPlayer().playUISound("ui_button_mouseover", 1, 1);

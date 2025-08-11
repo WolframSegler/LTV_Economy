@@ -53,7 +53,7 @@ public final class TooltipComponent<
 
         } else {
             final boolean isF1Down = Keyboard.isKeyDown(Keyboard.KEY_F1);
-            final boolean isF2Down = Keyboard.isKeyDown(Keyboard.KEY_2);
+            final boolean isF2Down = Keyboard.isKeyDown(Keyboard.KEY_F2);
 
             if (isF1Down && !wasF1Down) {
                 getPanel().setExpanded(!getPanel().isExpanded());

@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -23,9 +24,6 @@ import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 
 public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements HasTooltip, HasFader {
 
-    private static final String notExpandedCodexF1 = "F1 more info";
-    private static final String ExpandedCodexF1 = "F1 hide";
-    private static final String codexF2 = "F2 open Codex";
     private TooltipMakerAPI m_tooltip;
     private FaderUtil m_fader = null;
 
@@ -119,36 +117,12 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
         getParent().bringComponentToTop(m_tooltip);
         TooltipUtils.mouseCornerPos(m_tooltip, opad);
 
+        m_tooltip.setCodexEntryId(CodexDataV2.getCommodityEntryId(m_com.getId()));
+
         return m_tooltip;
     }
 
     public Optional<UIPanelAPI> getCodexParent() {
         return Optional.ofNullable(getParent());
-    }
-
-    @Override
-    public Optional<TooltipMakerAPI> createAndAttachCodex() {
-        TooltipMakerAPI codex;
-
-        if (!isExpanded) {
-            final int codexW = 210;
-
-            codex = TooltipUtils.createCustomCodex(this, notExpandedCodexF1, codexF2, codexW);
-        } else {
-            final int codexW = 180;
-
-            codex = TooltipUtils.createCustomCodex(this, ExpandedCodexF1, codexF2, codexW);  
-        }
-
-        getParent().addUIElement(codex);
-        getParent().bringComponentToTop(codex);
-        codex.getPosition().belowLeft(m_tooltip, 0);
-
-        return Optional.ofNullable(codex);
-    }
-
-    @Override
-    public Optional<String> getCodexID() {
-        return Optional.ofNullable(m_com.getId());
     }
 }
