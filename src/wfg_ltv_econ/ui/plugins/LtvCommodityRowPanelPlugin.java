@@ -3,7 +3,7 @@ package wfg_ltv_econ.ui.plugins;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 
-import wfg_ltv_econ.ui.dialogs.LtvCommodityDetailDialog;
+import wfg_ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
 
 public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin<
@@ -35,7 +35,7 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin<
                     .getCurrentInteractionDialog();
 
             if (dialog != null) {
-                LtvCommodityDetailDialog dialogPanel = new LtvCommodityDetailDialog(m_panel,
+                ComDetailDialog dialogPanel = new ComDetailDialog(m_panel,
                 panel.getCommodity());
 
                 dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);

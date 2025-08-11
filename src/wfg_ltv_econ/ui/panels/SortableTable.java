@@ -19,7 +19,9 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
+import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.components.OutlineComponent.Outline;
+import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.TooltipUtils;
@@ -307,12 +309,12 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                 (getPos().getHeight() / 2f) - (lblHeight / 2f) 
             );
 
-            LtvSpritePanel sortIcon = new LtvSpritePanel(
+            LtvSpritePanel.Base sortIcon = new Base(
                     getRoot(),
                     panel,
                     getMarket(),
                     m_headerHeight - 2, m_headerHeight,
-                    new LtvSpritePanelPlugin(),
+                    new LtvSpritePanelPlugin<>(),
                     sortIconPath,
                     getFaction().getBaseUIColor(),
                     null,
@@ -366,8 +368,16 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         }
 
         @Override
-        public UIPanelAPI getTooltipAttachmentPoint() {
-            return getParent();
+        public UIPanelAPI getTooltipParent() {
+            if (column.getTooltipType() == String.class) {
+                return getParent();
+            } else if (column.getTooltipType() == PendingTooltip.class) {
+                return ((PendingTooltip) column.tooltip).getTooltipParent();
+            } else {
+                throw new IllegalArgumentException(
+                    "Tooltip for header '" + column.title + "' has an illegal type."
+                );
+            }
         }
 
         @Override
@@ -462,7 +472,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
     }
 
     public class RowManager extends LtvCustomPanel<BasePanelPlugin<RowManager>, RowManager, CustomPanelAPI> 
-        implements HasTooltip, HasFader, HasOutline {
+        implements HasTooltip, HasFader, HasOutline, HasAudioFeedback {
 
         protected final List<Object> m_cellData = new ArrayList<>();
         protected final List<cellAlg> m_cellAlignment = new ArrayList<>();
@@ -624,6 +634,11 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         }
 
         @Override
+        public Glow getGlowType() {
+            return Glow.UNDERLAY;
+        }
+
+        @Override
         public boolean isPersistentGlow() {
             return isPersistentGlow;
         }
@@ -664,8 +679,12 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         }
 
         @Override
-        public UIPanelAPI getTooltipAttachmentPoint() {
-            return getParent();
+        public UIPanelAPI getTooltipParent() {
+            if (m_tooltip == null) {
+                return getParent();
+            } else {
+                return m_tooltip.getTooltipParent();
+            }
         }
         
         @Override

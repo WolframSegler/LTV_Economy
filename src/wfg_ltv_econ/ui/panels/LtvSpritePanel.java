@@ -22,20 +22,34 @@ import wfg_ltv_econ.ui.panels.components.OutlineComponent.Outline;
  * <ul>
  *   <li>Holds and displays a sprite loaded from a sprite ID or directly assigned {@link SpriteAPI}.</li>
  *   <li>Supports setting primary color, fill color, and toggle for drawing a very thin border outline.</li>
- *   <li>Provides {@link HasOutline} implementation for integration with outline-aware UI components.</li>
  *   <li>Allows dynamic sprite and color updates via setter methods.</li>
  * </ul>
  * 
- * <p><b>Usage example:</b>
+ * <p><b>Usage:</b>
+ * <ul>
+ *   <li>To subclass and customize, extend {@code LtvSpritePanel} with your own {@code PanelType}.</li>
+ *   <li>To directly instantiate a generic panel without subclassing, use the inner static {@link Base} class.</li>
+ * </ul>
+ * 
+ * <p><b>Example:</b>
  * <pre>
- * LtvSpritePanel sprite = new LtvSpritePanel(root, parent, market, 64, 64, plugin, "ui/icons/sprite", Color.WHITE, null, true);
+ * LtvSpritePanel.Base sprite = new LtvSpritePanel.Base(root, parent, market, 64, 64, plugin, "ui/icons/sprite", Color.WHITE, null, true);
  * sprite.setOutlineColor(Color.RED);
  * 
  * panel.addComponent(sprite.getPanel());
  * </pre>
  */
-public class LtvSpritePanel extends LtvCustomPanel<LtvSpritePanelPlugin, LtvSpritePanel, CustomPanelAPI> 
+public class LtvSpritePanel<
+    PanelType extends LtvSpritePanel<PanelType>
+> extends LtvCustomPanel<LtvSpritePanelPlugin<PanelType>, PanelType, CustomPanelAPI> 
     implements HasOutline{
+
+    public static class Base extends LtvSpritePanel<Base> {
+        public Base(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+            LtvSpritePanelPlugin<Base> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
+            super(root, parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+        }
+    }
 
     public SpriteAPI m_sprite;
     public Color color;
@@ -44,7 +58,7 @@ public class LtvSpritePanel extends LtvCustomPanel<LtvSpritePanelPlugin, LtvSpri
     public boolean drawBorder = false;
 
     public LtvSpritePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        LtvSpritePanelPlugin plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
+        LtvSpritePanelPlugin<PanelType> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
         super(root, parent, width, height, plugin, market);
 
         m_sprite = Global.getSettings().getSprite(spriteID);
@@ -56,8 +70,10 @@ public class LtvSpritePanel extends LtvCustomPanel<LtvSpritePanelPlugin, LtvSpri
         createPanel();
     }
 
+    @SuppressWarnings("unchecked")
     public void initializePlugin(boolean hasPlugin) {
-        getPlugin().init(this);
+        // PanelType is a subclass of LtvSpritePanel. This cast is safe.
+        getPlugin().init((PanelType)this); 
         getPlugin().init();
         getPlugin().setIgnoreUIState(true);
     }

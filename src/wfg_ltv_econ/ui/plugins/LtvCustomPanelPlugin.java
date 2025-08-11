@@ -74,7 +74,7 @@ public abstract class LtvCustomPanelPlugin<
         return m_panel;
     }
 
-    private final List<BaseComponent<?, PanelType>> components = new ArrayList<>();
+    public final List<BaseComponent<?, PanelType>> components = new ArrayList<>();
     protected final InputSnapshot inputSnapshot = new InputSnapshot();
     
     protected UIState targetUIState = UIState.NONE;

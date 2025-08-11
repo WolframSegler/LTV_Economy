@@ -95,14 +95,10 @@ public class RenderUtils {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
-    public static void drawAdditiveGlow(SpriteAPI sprite, float x, float y, Color glowColor,
-            float intensity) {
+    public static void drawAdditiveGlow(SpriteAPI sprite, float x, float y, Color glowColor, float intensity) {
         if (sprite == null || intensity <= 0f) {
             return;
         }
-
-        x += sprite.getTexX();
-        y += sprite.getTexY();
 
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glPushMatrix();

@@ -19,15 +19,11 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
-
 # Custom
 /src/com/
 /src/com_core/
 /src/org/
-/jars/main/classes/
+/jars/
 /ProjectFiles/Diagrams
 
-/.vscode/
+/.vscode/settings.json

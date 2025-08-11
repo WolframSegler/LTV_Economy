@@ -282,16 +282,17 @@ public abstract class LtvCustomPanel<
     public static interface HasTooltip {
 
         /**
-        * Return the panel the tooltip is attached to.
+        * Return the parent panel of the tooltip.
         * Must return a non-null UIPanelAPI. Otherwise the tooltip will not be removed.
+        * Never attach the tooltip to the codex. It WILL crash the game.
         */
-        UIPanelAPI getTooltipAttachmentPoint();
+        UIPanelAPI getTooltipParent();
 
         /**
-        * Return the panel the codex is attached to, ideally the tooltip itself.
+        * Return the parent panel of the codex is, ideally the same as the tooltip.
         * Must return a non-null UIPanelAPI. Otherwise the codex will not be removed.
         */
-        default Optional<UIPanelAPI> getCodexAttachmentPoint() {
+        default Optional<UIPanelAPI> getCodexParent() {
             return Optional.empty();
         }
 
@@ -366,8 +367,20 @@ public abstract class LtvCustomPanel<
          * }
          * </pre>
          */
-        public static class PendingTooltip {
-            public Supplier<TooltipMakerAPI> factory = null;
+        public static abstract class PendingTooltip {
+            /**
+             * Factory method to create the tooltip.
+             * Must be set by subclasses or instances.
+             */
+            public Supplier<TooltipMakerAPI> factory;
+
+            /**
+             * Return the parent panel of the tooltip created by the factory.
+             * Must return a non-null UIPanelAPI.
+             * This method must be overridden by subclasses.
+             * Classes that support PendingTooltip will use this getter.
+             */
+            public abstract UIPanelAPI getTooltipParent();
         }
     }
 }

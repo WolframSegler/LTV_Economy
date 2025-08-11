@@ -32,10 +32,11 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
-import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
+import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 
 public class TooltipUtils {
@@ -252,8 +253,8 @@ public class TooltipUtils {
                             // Arrow Sprite
                             SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
-                            LtvSpritePanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
-                                    20, 20, new LtvSpritePanelPlugin(), "", null, null, false);
+                            LtvSpritePanel.Base arrowPanel = new Base(null, tooltip, null,
+                                    20, 20, new LtvSpritePanelPlugin<>(), "", null, null, false);
 
                             arrowPanel.setSprite(arrow);
 
@@ -360,8 +361,8 @@ public class TooltipUtils {
                         // Arrow Sprite
                         SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
-                        LtvSpritePanel arrowPanel = new LtvSpritePanel(null, tooltip, null,
-                                20, 20, new LtvSpritePanelPlugin(), "", null, null, false);
+                        LtvSpritePanel.Base arrowPanel = new Base(null, tooltip, null,
+                                20, 20, new LtvSpritePanelPlugin<>(), "", null, null, false);
 
                         arrowPanel.setSprite(arrow);
 
@@ -403,18 +404,16 @@ public class TooltipUtils {
      * The Codex must be attached manually.
      * The F1 and F2 events must be handled using the Plugin.
      */
-    public static TooltipMakerAPI createCustomCodex(
-            LtvCustomPanel<?, ?, CustomPanelAPI> panel, String codexF1, String codexF2, int codexW) {
+    public static <PanelType extends LtvCustomPanel<?, ?, CustomPanelAPI> & HasTooltip> TooltipMakerAPI 
+        createCustomCodex(PanelType panel, String codexF1, String codexF2, int codexW) {
 
         final Color gray = new Color(100, 100, 100);
         final Color highlight = Misc.getHighlightColor();
 
         // Create the custom Footer
-        TooltipMakerAPI codexTooltip = panel.getParent().createUIElement(codexW, 0, false);
+        TooltipMakerAPI codexTooltip = ((CustomPanelAPI)panel.getCodexParent().get()).createUIElement(codexW, 0, false);
 
         codexTooltip.setParaFont(Fonts.ORBITRON_12);
-        ((StandardTooltipV2Expandable) codexTooltip).setShowBackground(true);
-        ((StandardTooltipV2Expandable) codexTooltip).setShowBorder(true);
 
         codexTooltip.setParaFontColor(gray);
         LabelAPI lbl1 = codexTooltip.addPara(codexF1, 0, highlight, "F1");

@@ -30,9 +30,6 @@ public final class TooltipComponent<
 
     @Override
     public final void advance(float amount, InputSnapshot input) {
-        if (tooltip == null) {
-            return;
-        }
 
         if (provider.isTooltipEnabled() && input.hoveredLastFrame && !input.hasClickedBefore && getPlugin().isValidUIContext()) {
             hoverTime += amount;
@@ -95,14 +92,15 @@ public final class TooltipComponent<
     }
 
     public final void hideTooltip() {
-        if (tooltip != null) {
-            provider.getTooltipAttachmentPoint().removeComponent(tooltip);
-            tooltip = null;
-        }
-
-        provider.getCodexAttachmentPoint().ifPresent(attachment -> {
+        // The codex needs to be deleted first in-case it is anchored to the tooltip
+        provider.getCodexParent().ifPresent(attachment -> {
             attachment.removeComponent(codex);
             codex = null;
         });
+
+        if (tooltip != null) {
+            provider.getTooltipParent().removeComponent(tooltip);
+            tooltip = null;
+        }
     }
 }

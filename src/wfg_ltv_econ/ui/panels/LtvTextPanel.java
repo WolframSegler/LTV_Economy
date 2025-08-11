@@ -7,6 +7,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 
 /**
@@ -50,7 +51,7 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
  * direct querying and manipulation of panel state from outside the class.
  */
 public class LtvTextPanel extends LtvCustomPanel<BasePanelPlugin<LtvTextPanel>, LtvTextPanel, CustomPanelAPI>
-    implements HasTooltip {
+    implements HasTooltip, HasAudioFeedback {
 
     // Shared state for anonymous subclasses to modify.
     public ButtonAPI m_checkbox;
@@ -63,12 +64,24 @@ public class LtvTextPanel extends LtvCustomPanel<BasePanelPlugin<LtvTextPanel>, 
     public float textH1 = 0;
     public float textH2 = 0;
 
+    private boolean isSoundEnabled = true;
+
     public LtvTextPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
         BasePanelPlugin<LtvTextPanel> plugin) {
         super(root, parent, width, height, plugin, market);
 
         initializePlugin(hasPlugin);
         createPanel();
+    }
+
+    @Override
+    public void setSoundEnabled(boolean a) {
+        isSoundEnabled = a;
+    }
+
+    @Override
+    public boolean isSoundEnabled() {
+        return isSoundEnabled;
     }
 
     public void initializePlugin(boolean hasPlugin) {
@@ -78,7 +91,7 @@ public class LtvTextPanel extends LtvCustomPanel<BasePanelPlugin<LtvTextPanel>, 
     public void createPanel() {}
 
     @Override
-    public UIPanelAPI getTooltipAttachmentPoint() {
+    public UIPanelAPI getTooltipParent() {
         return null;
     }
 

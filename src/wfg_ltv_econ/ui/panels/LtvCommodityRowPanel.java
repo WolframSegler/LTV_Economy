@@ -22,6 +22,7 @@ import com.fs.starfarer.api.loading.Description.Type;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
+import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
@@ -29,6 +30,7 @@ import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
+import wfg_ltv_econ.util.UiUtils.AnchorType;
 
 import java.awt.Color;
 import java.util.Optional;
@@ -151,8 +153,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
 
         if (commodityData.getExportIncome(m_com) > 0) {
             String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
-            LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), m_panel, getMarket(), rowHeight - 4, rowHeight - 4,
-                    new LtvSpritePanelPlugin(), iconPath, null, null, false);
+            LtvSpritePanel.Base iconPanel = new Base(getRoot(), m_panel, getMarket(), rowHeight - 4, rowHeight 
+            - 4, new LtvSpritePanelPlugin<>(), iconPath, null, null, false);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
             getPanel().addComponent(iconPanel.getPanel()).inRMid(pad);
@@ -161,7 +163,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
         getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
     }
 
-    private LtvSpritePanel getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int size,
+    private LtvSpritePanel.Base getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int size,
         UIPanelAPI parent) {
         boolean isSourceIllegal = commodityData.getMarketShareData(getMarket()).isSourceIsIllegal();
 
@@ -183,8 +185,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
             default:
         }
 
-        LtvSpritePanel iconPanel = new LtvSpritePanel(getRoot(), parent, getMarket(), size, size,
-                    new LtvSpritePanelPlugin(), iconPath, baseColor, null, isSourceIllegal);
+        LtvSpritePanel.Base iconPanel = new Base(getRoot(), parent, getMarket(), size, size,
+                    new LtvSpritePanelPlugin<>(), iconPath, baseColor, null, isSourceIllegal);
         if (isSourceIllegal) {
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
             iconPanel.setOutlineColor(Color.RED);
@@ -193,7 +195,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
     }
 
     @Override
-    public UIPanelAPI getTooltipAttachmentPoint() {
+    public UIPanelAPI getTooltipParent() {
         return getParent();
     }
 
@@ -307,9 +309,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
 
         return tooltip;
     }
-
     @Override
-    public Optional<UIPanelAPI> getCodexAttachmentPoint() {
+    public Optional<UIPanelAPI> getCodexParent() {
         return Optional.ofNullable(m_tooltip);
     }
 
@@ -335,7 +336,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
 
         getParent().addUIElement(codex);
         getParent().bringComponentToTop(codex);
-        codex.getPosition().belowLeft(getCodexAttachmentPoint().get(), opad*1.5f - 1);
+        UiUtils.anchorPanel(codex, getCodexParent().get(), AnchorType.BelowLeft, opad);
 
         return Optional.ofNullable(codex);
     }
@@ -434,8 +435,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
     private static void legendRowHelper(TooltipMakerAPI tooltip, int y, String iconPath, String desc, int lgdIconSize,
         boolean drawRedBorder, Color drawFilledIcon, UIPanelAPI root, UIPanelAPI panel, MarketAPI market) {
 
-        LtvSpritePanel iconPanel = new LtvSpritePanel(root, panel, market, lgdIconSize, lgdIconSize,
-            new LtvSpritePanelPlugin(), iconPath, null, drawFilledIcon, drawRedBorder);
+        LtvSpritePanel.Base iconPanel = new Base(root, panel, market, lgdIconSize, lgdIconSize,
+            new LtvSpritePanelPlugin<>(), iconPath, null, drawFilledIcon, drawRedBorder);
         if (drawRedBorder) {
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(2, 2, -4, -4);

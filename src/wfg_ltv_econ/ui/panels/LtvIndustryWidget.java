@@ -36,6 +36,7 @@ import com.fs.starfarer.campaign.ui.N;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
+import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
@@ -62,7 +63,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     public final Color brightColor;
 
     private Industry m_industry;
-    private LtvSpritePanel industryIcon;
+    private LtvSpritePanel.Base industryIcon;
     private ButtonAPI constructionActionButton;
     private boolean tradeInfoPanel;
     private LtvIndustryListPanel IndustryPanel;
@@ -153,13 +154,13 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         tp.addComponent(constructionActionButton).inBL(0, 0);
 
 
-        industryIcon = new LtvSpritePanel(
+        industryIcon = new Base(
             getRoot(),
             m_panel,
             getMarket(),
             PANEL_WIDTH,
             IMAGE_HEIGHT,
-            new LtvSpritePanelPlugin(),
+            new LtvSpritePanelPlugin<>(),
             m_industry.getCurrentImage(),
             Color.WHITE,
             null,

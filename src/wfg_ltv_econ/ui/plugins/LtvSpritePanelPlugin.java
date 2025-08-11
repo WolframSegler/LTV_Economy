@@ -5,7 +5,9 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
 import wfg_ltv_econ.util.RenderUtils;
 
-public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin<LtvSpritePanel, LtvSpritePanelPlugin> {
+public class LtvSpritePanelPlugin<
+    PanelType extends LtvSpritePanel<PanelType>
+> extends LtvCustomPanelPlugin<PanelType, LtvSpritePanelPlugin<PanelType>> {
 
     private boolean isDrawFilledQuad = false;
 
@@ -20,8 +22,8 @@ public class LtvSpritePanelPlugin extends LtvCustomPanelPlugin<LtvSpritePanel, L
     }
 
     @Override
-    public void render(float alphaMult) {
-        super.render(alphaMult);
+    public void renderBelow(float alphaMult) {
+        super.renderBelow(alphaMult);
         if (getPanel().m_sprite == null) {
             return;
         }

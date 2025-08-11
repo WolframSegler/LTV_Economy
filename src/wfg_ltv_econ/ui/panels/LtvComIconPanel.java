@@ -21,7 +21,7 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 
-public class LtvComIconPanel extends LtvSpritePanel implements HasTooltip, HasFader {
+public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements HasTooltip, HasFader {
 
     private static final String notExpandedCodexF1 = "F1 more info";
     private static final String ExpandedCodexF1 = "F1 hide";
@@ -33,8 +33,8 @@ public class LtvComIconPanel extends LtvSpritePanel implements HasTooltip, HasFa
     public CommodityOnMarketAPI m_com;
 
     public LtvComIconPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        LtvSpritePanelPlugin plugin, String spriteID, Color color, Color fillColor) {
-        super(root, parent, market, width, height, plugin, spriteID, color, fillColor, false);
+        LtvSpritePanelPlugin<LtvComIconPanel> plugin, String iconSpriteID, Color color, Color fillColor) {
+        super(root, parent, market, width, height, plugin, iconSpriteID, color, fillColor, false);
 
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
     }
@@ -45,10 +45,9 @@ public class LtvComIconPanel extends LtvSpritePanel implements HasTooltip, HasFa
 
     @Override
     public void initializePlugin(boolean hasPlugin) {
-        LtvSpritePanelPlugin plugin = ((LtvSpritePanelPlugin) m_panel.getPlugin());
-        plugin.init(this);
-        plugin.init();
-        plugin.setIgnoreUIState(true);
+        getPlugin().init(this);
+        getPlugin().init();
+        getPlugin().setIgnoreUIState(true);
     }
 
     @Override
@@ -58,6 +57,7 @@ public class LtvComIconPanel extends LtvSpritePanel implements HasTooltip, HasFa
         return m_fader;
     }
 
+    @Override
     public Glow getGlowType() {
         return Glow.ADDITIVE;
     }
@@ -78,7 +78,7 @@ public class LtvComIconPanel extends LtvSpritePanel implements HasTooltip, HasFa
     }
 
     @Override
-    public UIPanelAPI getTooltipAttachmentPoint() {
+    public UIPanelAPI getTooltipParent() {
         return getParent();
     }
 
@@ -122,7 +122,7 @@ public class LtvComIconPanel extends LtvSpritePanel implements HasTooltip, HasFa
         return m_tooltip;
     }
 
-    public Optional<UIPanelAPI> getCodexAttachmentPoint() {
+    public Optional<UIPanelAPI> getCodexParent() {
         return Optional.ofNullable(getParent());
     }
 

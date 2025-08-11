@@ -10,7 +10,9 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.codex2.CodexDialog;
 
 import wfg_ltv_econ.ui.plugins.CommodityinfobarPlugin;
@@ -35,7 +37,7 @@ public class UiUtils {
      * This function assumes that the sprite is pointing right.
      * In other words, it's directed towards the positive x-axis in Hyperspace.
      */
-    public static float rotateSprite(Vector2f origin, Vector2f target) {
+    public static final float rotateSprite(Vector2f origin, Vector2f target) {
         Vector2f delta = Vector2f.sub(target, origin, null);
 
         float angleDegrees = (float) Math.toDegrees(Math.atan2(delta.y, delta.x));
@@ -43,7 +45,7 @@ public class UiUtils {
         return angleDegrees;
     }
 
-    public static void openCodexPage(String codexID) {
+    public static final void openCodexPage(String codexID) {
         CodexDialog.show(codexID);
     }
 
@@ -58,7 +60,7 @@ public class UiUtils {
      * </pre>
      * @hidden
      */
-    public static void drawRoundedBorder(float x, float y, float w, float h, float alpha, String borderPrefix,
+    public static final void drawRoundedBorder(float x, float y, float w, float h, float alpha, String borderPrefix,
         int textureSize, Color color) {
 
         SpriteAPI nw = Global.getSettings().getSprite("ui", borderPrefix + "_top_left");
@@ -95,7 +97,7 @@ public class UiUtils {
         e.render(x + w - textureSize, y + textureSize);
     }
 
-    public static Color getInFactionColor() {
+    public static final Color getInFactionColor() {
         return new Color(35, 70, 130, 255);
     }
 
@@ -112,7 +114,7 @@ public class UiUtils {
         tooltip.addCustom(infoBar, 3);
     }
 
-    public static CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStats comStats) {
+    public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStats comStats) {
 
         float localProducedRatio = (float)comStats.demandMetWithLocal / (float)comStats.totalActivity;
         float inFactionImportRatio = (float)comStats.inFactionImports / (float)comStats.totalActivity;
@@ -145,7 +147,7 @@ public class UiUtils {
         return infoBar;
     }
 
-    public static Color adjustAlpha(Color color, float alphaMult) {
+    public static final Color adjustAlpha(Color color, float alphaMult) {
         int newAplha = (int) (color.getAlpha() * alphaMult);
         if (newAplha > 255) {
             newAplha = 255;
@@ -156,5 +158,110 @@ public class UiUtils {
         }
 
         return new Color(color.getRed(), color.getGreen(), color.getBlue(), newAplha);
+    }
+
+    /**
+     * Small utility to anchor the panel without actually using PositionAPI anchors.
+     * Makes UI lifecycle dependencies easier to manage.
+     * Does not handle screen bounds or overflow.
+     */
+    public static final void anchorPanel(UIPanelAPI panel, UIPanelAPI anchor, AnchorType type, int gap) {
+        if (panel == null || anchor == null) return;
+
+        final PositionAPI Ppos = panel.getPosition();
+        final PositionAPI Apos = anchor.getPosition();
+
+        Ppos.inBL(0, 0); // Reset the position. It's still relative
+        final float panelX = Ppos.getX();
+        final float panelY = Ppos.getY();
+        final float panelW = Ppos.getWidth();
+        final float panelH = Ppos.getHeight();
+
+        final float anchorX = Apos.getX();
+        final float anchorY = Apos.getY();
+        final float anchorW = Apos.getWidth();
+        final float anchorH = Apos.getHeight();
+
+        float offsetX = 0;
+        float offsetY = 0;
+        
+        switch (type) {
+            case LeftOfTop:
+                offsetX = anchorX - panelX - panelW - gap;
+                offsetY = anchorY + anchorH - panelY - panelH;
+                break;
+
+            case LeftOfMid:
+                offsetX = anchorX - panelX - panelW - gap;
+                offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
+                break;
+
+            case LeftOfBottom:
+                offsetX = anchorX - panelX - panelW  - gap;
+                offsetY = anchorY - panelY;
+                break;
+
+            case RightOfTop:
+                offsetX = anchorX + anchorW - panelX + gap;
+                offsetY = anchorY + anchorH - panelY - panelH;
+                break;
+
+            case RightOfMid:
+                offsetX = anchorX + anchorW - panelX + gap;
+                offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
+                break;
+
+            case RightOfBottom:
+                offsetX = anchorX + anchorW - panelX + gap;
+                offsetY = anchorY - panelY;
+                break;
+
+            case AboveLeft:
+                offsetX = anchorX - panelX;
+                offsetY = anchorY + anchorH - panelY + gap;
+                break;
+
+            case AboveMid:
+                offsetX = anchorX - panelX + (anchorW - panelW) / 2f;
+                offsetY = anchorY + anchorH - panelY + gap;
+                break;
+
+            case AboveRight:
+                offsetX = anchorX + anchorW - panelX - panelW;
+                offsetY = anchorY + anchorH - panelY + gap;
+                break;
+
+            case BelowLeft:
+                offsetX = anchorX - panelX;
+                offsetY = anchorY - panelY - panelH - gap;
+                break;
+
+            case BelowMid:
+                offsetX = anchorX - panelX + (anchorW - panelW) / 2f;
+                offsetY = anchorY - panelY - panelH - gap;
+                break;
+
+            case BelowRight:
+                offsetX = anchorX + anchorW - panelX - panelW;
+                offsetY = anchorY - panelY - panelH - gap;
+                break;
+            }
+        Ppos.setXAlignOffset(offsetX);
+        Ppos.setYAlignOffset(offsetY);
+    }
+
+    public enum AnchorType {
+        LeftOfTop,
+        LeftOfMid,
+        LeftOfBottom,
+        RightOfTop,
+        RightOfMid,
+        RightOfBottom,
+        AboveLeft,
+        AboveMid,
+        AboveRight,
+        BelowLeft,
+        BelowMid,
+        BelowRight
     }
 }

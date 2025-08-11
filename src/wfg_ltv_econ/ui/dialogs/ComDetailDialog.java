@@ -35,6 +35,7 @@ import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvComIconPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
+import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.panels.LtvTextPanel;
 import wfg_ltv_econ.ui.panels.SortableTable;
 import wfg_ltv_econ.ui.panels.SortableTable.ColumnManager;
@@ -50,7 +51,7 @@ import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 
-public class LtvCommodityDetailDialog implements CustomDialogDelegate {
+public class ComDetailDialog implements CustomDialogDelegate {
 
     public interface CommoditySelectionListener {
         void onCommoditySelected(CommodityOnMarketAPI selectedCommodity);
@@ -92,12 +93,12 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
     public ButtonAPI producerButton = null;
     public ButtonAPI consumerButton = null;
 
-    public LtvCommodityDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com) {
+    public ComDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com) {
         // Measured using very precise tools!! (my eyes)
         this(parent, com, 1166, 658 + 20);
     }
 
-    public LtvCommodityDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com, int panelW, int panelH) {
+    public ComDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com, int panelW, int panelH) {
         this.PANEL_W = panelW;
         this.PANEL_H = panelH;
 
@@ -293,7 +294,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         String comIconID = m_com.getCommodity().getIconName();
 
         LtvComIconPanel iconLeft = new LtvComIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(),
-                iconSize, iconSize, new LtvSpritePanelPlugin(), comIconID, null, null);
+                iconSize, iconSize, new LtvSpritePanelPlugin<>(), comIconID, null, null);
         iconLeft.setCommodity(m_com);
 
         iconLeft.getPos().inTL(opad * 3,
@@ -301,7 +302,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
         section.addComponent(iconLeft.getPanel());
 
         LtvComIconPanel iconRight = new LtvComIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(),
-                iconSize, iconSize, new LtvSpritePanelPlugin(), comIconID, null, null);
+                iconSize, iconSize, new LtvSpritePanelPlugin<>(), comIconID, null, null);
         iconRight.setCommodity(m_com);
 
         iconRight.getPos().inTL(SECT1_WIDTH - iconSize - opad * 3,
@@ -353,7 +354,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipAttachmentPoint() {
+                public UIPanelAPI getTooltipParent() {
                     return getParent();
                 }
 
@@ -431,7 +432,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipAttachmentPoint() {
+                public UIPanelAPI getTooltipParent() {
                     return getParent();
                 }
 
@@ -524,7 +525,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipAttachmentPoint() {
+                public UIPanelAPI getTooltipParent() {
                     return getParent();
                 }
 
@@ -603,7 +604,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipAttachmentPoint() {
+                public UIPanelAPI getTooltipParent() {
                     return getParent();
                 }
 
@@ -679,7 +680,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipAttachmentPoint() {
+                public UIPanelAPI getTooltipParent() {
                     return getParent();
                 }
                 
@@ -749,7 +750,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipAttachmentPoint() {
+                public UIPanelAPI getTooltipParent() {
                     return getParent();
                 }
 
@@ -917,8 +918,8 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             }
 
             String iconPath = market.getFaction().getCrest();
-            LtvSpritePanel iconPanel = new LtvSpritePanel(
-                m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new LtvSpritePanelPlugin(), 
+            LtvSpritePanel.Base iconPanel = new Base(
+                m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new LtvSpritePanelPlugin<>(), 
                 iconPath, null, null, comStats.localDeficit > 0
             );
             iconPanel.setOutlineColor(Color.RED);
@@ -1220,7 +1221,7 @@ public class LtvCommodityDetailDialog implements CustomDialogDelegate {
             for (ColumnManager column : table.getColumns()) {
                 if ("Quantity".equals(column.title)) {
                     attachmentPoint = (CustomPanelAPI) ((HeaderPanelWithTooltip) column.getHeaderPanel())
-                    .getTooltipAttachmentPoint();
+                    .getTooltipParent();
                     break;
                 }
             }
