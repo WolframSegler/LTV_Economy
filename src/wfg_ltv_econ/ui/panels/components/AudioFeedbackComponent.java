@@ -12,13 +12,23 @@ public final class AudioFeedbackComponent<
     PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasAudioFeedback
 > extends BaseComponent<PluginType, PanelType> {
 
+    /**
+     * Newly created Components shouldn't make a sound for this many game ticks.
+     */
+    private int initCompTicks = 2;
+    private int accumulatedGameTicks = 0;
+
     public AudioFeedbackComponent(PluginType plugin) {
         super(plugin);
     }
 
     @Override
     public final void advance(float amount, InputSnapshot input) {
-        if (input.hoveredLastFrame && getPanel().isSoundEnabled() && getPlugin().isValidUIContext()) {
+        if (input.hoveredLastFrame &&
+            getPanel().isSoundEnabled() &&
+            getPlugin().isValidUIContext() &&
+            accumulatedGameTicks < initCompTicks
+        ) {
             if (!input.playedUIHoverSound) {
                 Global.getSoundPlayer().playUISound("ui_button_mouseover", 1, 1);
                 input.playedUIHoverSound = true;
@@ -27,5 +37,7 @@ public final class AudioFeedbackComponent<
                 Global.getSoundPlayer().playUISound("ui_button_pressed", 1, 1);
             }
         }
+
+        accumulatedGameTicks++;
     }
 }

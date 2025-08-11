@@ -316,8 +316,11 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
 
     @Override
     public Optional<String> getCodexID() {
-        CommodityOnMarketAPI com = getCommodity();
-        return Optional.ofNullable(CodexDataV2.getCommodityEntryId(com.getId()));
+        Global.getLogger(getClass()).error(getCommodity().getId());
+        Global.getLogger(getClass()).error(m_com.getCommodity().getId());
+        Global.getLogger(getClass()).error(CodexDataV2.getCommodityEntryId(getCommodity().getId()));
+        Global.getLogger(getClass()).error(CodexDataV2.getCommodityEntryId(m_com.getCommodity().getId()));
+        return Optional.ofNullable(CodexDataV2.getCommodityEntryId(getCommodity().getId()));
     }
 
     @Override

@@ -54,8 +54,6 @@ public abstract class LtvCustomPanelPlugin<
 > implements CustomUIPanelPlugin {
 
     public static class InputSnapshot {
-        public List<InputEventAPI> events = null;
-
         public boolean LMBDownLastFrame = false;
         public boolean LMBUpLastFrame = false;
         public boolean hoveredLastFrame = false;
@@ -162,8 +160,7 @@ public abstract class LtvCustomPanelPlugin<
     public void processInput(List<InputEventAPI> events) {
         inputSnapshot.resetFrameFlags();
 
-        inputSnapshot.events = events;
-
+        // General events used by most components
         for (InputEventAPI event : events) {
 
             if (event.isMouseMoveEvent()) {
@@ -193,6 +190,11 @@ public abstract class LtvCustomPanelPlugin<
                 inputSnapshot.LMBDownLastFrame = true;
                 inputSnapshot.hasClickedBefore = true;
             }
+        }
+
+        // Component specific
+        for (BaseComponent<?, PanelType> comp : components) {
+            comp.processInput(events, inputSnapshot);
         }
     }
 

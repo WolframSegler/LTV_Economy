@@ -45,9 +45,12 @@ public abstract class BaseComponent<
         return plugin.getPanel();
     }
 
+    /**
+     * Runs before the game itself handles the inputs.
+     */
+    public void processInput(List<InputEventAPI> events, InputSnapshot input) {}
     public void advance(float amount, InputSnapshot input) {}
     public void renderBelow(float alphaMult, InputSnapshot input) {}
     public void render(float alphaMult, InputSnapshot input) {}
-    public void processInput(List<InputEventAPI> events) {}
     public void onRemove(InputSnapshot input) {}
 }

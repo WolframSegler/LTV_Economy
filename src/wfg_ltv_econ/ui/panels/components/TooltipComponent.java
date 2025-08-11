@@ -1,5 +1,7 @@
 package wfg_ltv_econ.ui.panels.components;
 
+import java.util.List;
+
 import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.input.InputEventAPI;
@@ -22,6 +24,8 @@ public final class TooltipComponent<
     private TooltipMakerAPI codex;
 
     private float hoverTime = 0f;
+    private boolean wasF1Down = false;
+    private boolean wasF2Down = false;
 
     public TooltipComponent(PluginType a, HasTooltip b) {
         super(a);
@@ -40,36 +44,31 @@ public final class TooltipComponent<
             hoverTime = 0f;
             hideTooltip();
         }
+    }
 
-        if (tooltip == null || input.hoveredLastFrame) {
+    @Override
+    public void processInput(List<InputEventAPI> events, InputSnapshot input) {
+        if (tooltip == null || !input.hoveredLastFrame) {
             getPanel().setExpanded(false);
 
         } else {
-            for (InputEventAPI event : input.events) {
-                if (event.isMouseEvent()) {
-                    continue;
-                }
-    
-                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F1) {
-                    getPanel().setExpanded(!getPanel().isExpanded());
-                    hideTooltip();
-    
-                    event.consume();
-    
-                    break;
-                }
-    
-                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2 ) {
-                    getPanel().getCodexID().ifPresent(codexID -> {
-                        UiUtils.openCodexPage(codexID);
-                    });
-                    hideTooltip();
-    
-                    event.consume();
+            final boolean isF1Down = Keyboard.isKeyDown(Keyboard.KEY_F1);
+            final boolean isF2Down = Keyboard.isKeyDown(Keyboard.KEY_2);
 
-                    break;
-                }
+            if (isF1Down && !wasF1Down) {
+                getPanel().setExpanded(!getPanel().isExpanded());
+                hideTooltip();
             }
+
+            if (isF2Down && !wasF2Down) {
+                getPanel().getCodexID().ifPresent(codexID -> {
+                    UiUtils.openCodexPage(codexID);
+                });
+                hideTooltip();
+            }
+
+            wasF1Down = isF1Down;
+            wasF2Down = isF2Down;
         }
     }
 
