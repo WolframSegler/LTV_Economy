@@ -15,7 +15,6 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.codex2.CodexDialog;
@@ -170,7 +169,7 @@ public class UiUtils {
      * Makes UI lifecycle dependencies easier to manage.
      * Does not handle screen bounds or overflow.
      */
-    public static final void anchorPanel(UIPanelAPI panel, UIComponentAPI anchor, AnchorType type, int gap) {
+    public static final void anchorPanel(UIComponentAPI panel, UIComponentAPI anchor, AnchorType type, int gap) {
         if (panel == null || anchor == null) return;
 
         final PositionAPI Ppos = panel.getPosition();
@@ -191,62 +190,62 @@ public class UiUtils {
         float offsetY = 0;
         
         switch (type) {
-            case LeftOfTop:
+            case LeftTop:
                 offsetX = anchorX - panelX - panelW - gap;
                 offsetY = anchorY + anchorH - panelY - panelH;
                 break;
 
-            case LeftOfMid:
+            case LeftMid:
                 offsetX = anchorX - panelX - panelW - gap;
                 offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
                 break;
 
-            case LeftOfBottom:
+            case LeftBottom:
                 offsetX = anchorX - panelX - panelW  - gap;
                 offsetY = anchorY - panelY;
                 break;
 
-            case RightOfTop:
+            case RightTop:
                 offsetX = anchorX + anchorW - panelX + gap;
                 offsetY = anchorY + anchorH - panelY - panelH;
                 break;
 
-            case RightOfMid:
+            case RightMid:
                 offsetX = anchorX + anchorW - panelX + gap;
                 offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
                 break;
 
-            case RightOfBottom:
+            case RightBottom:
                 offsetX = anchorX + anchorW - panelX + gap;
                 offsetY = anchorY - panelY;
                 break;
 
-            case AboveLeft:
+            case TopLeft:
                 offsetX = anchorX - panelX;
                 offsetY = anchorY + anchorH - panelY + gap;
                 break;
 
-            case AboveMid:
+            case TopMid:
                 offsetX = anchorX - panelX + (anchorW - panelW) / 2f;
                 offsetY = anchorY + anchorH - panelY + gap;
                 break;
 
-            case AboveRight:
+            case TopRight:
                 offsetX = anchorX + anchorW - panelX - panelW;
                 offsetY = anchorY + anchorH - panelY + gap;
                 break;
 
-            case BelowLeft:
+            case BottomLeft:
                 offsetX = anchorX - panelX;
                 offsetY = anchorY - panelY - panelH - gap;
                 break;
 
-            case BelowMid:
+            case BottomMid:
                 offsetX = anchorX - panelX + (anchorW - panelW) / 2f;
                 offsetY = anchorY - panelY - panelH - gap;
                 break;
 
-            case BelowRight:
+            case BottomRight:
                 offsetX = anchorX + anchorW - panelX - panelW;
                 offsetY = anchorY - panelY - panelH - gap;
                 break;
@@ -255,19 +254,53 @@ public class UiUtils {
         Ppos.setYAlignOffset(offsetY);
     }
 
+    /**
+     * Defines anchor positions for UI panel alignment relative to a reference component.
+     * <p>
+     * The enum names consist of two parts:
+     * </p>
+     * <ol>
+     *   <li><b>Direction</b> - The first word indicates the direction from the anchor component where the panel will be placed:
+     *     <ul>
+     *       <li><code>Left</code>: Panel is positioned to the left side of the anchor.</li>
+     *       <li><code>Right</code>: Panel is positioned to the right side of the anchor.</li>
+     *       <li><code>Top</code>: Panel is positioned above the anchor.</li>
+     *       <li><code>Bottom</code>: Panel is positioned below the anchor.</li>
+     *     </ul>
+     *   </li>
+     *   <li><b>Alignment</b> - The second word indicates the alignment along the axis perpendicular to the direction:
+     *     <ul>
+     *       <li>For <code>Left</code> and <code>Right</code> directions, alignment is vertical:
+     *         <ul>
+     *           <li><code>Top</code>: Align panel's top edge with anchor's top edge.</li>
+     *           <li><code>Mid</code>: Align panel's vertical center with anchor's vertical center.</li>
+     *           <li><code>Bottom</code>: Align panel's bottom edge with anchor's bottom edge.</li>
+     *         </ul>
+     *       </li>
+     *       <li>For <code>Top</code> and <code>Bottom</code> directions, alignment is horizontal:
+     *         <ul>
+     *           <li><code>Left</code>: Align panel's left edge with anchor's left edge.</li>
+     *           <li><code>Mid</code>: Align panel's horizontal center with anchor's horizontal center.</li>
+     *           <li><code>Right</code>: Align panel's right edge with anchor's right edge.</li>
+     *         </ul>
+     *       </li>
+     *     </ul>
+     *   </li>
+     * </ol>
+     */
     public enum AnchorType {
-        LeftOfTop,
-        LeftOfMid,
-        LeftOfBottom,
-        RightOfTop,
-        RightOfMid,
-        RightOfBottom,
-        AboveLeft,
-        AboveMid,
-        AboveRight,
-        BelowLeft,
-        BelowMid,
-        BelowRight
+        LeftTop,
+        LeftMid,
+        LeftBottom,
+        RightTop,
+        RightMid,
+        RightBottom,
+        TopLeft,
+        TopMid,
+        TopRight,
+        BottomLeft,
+        BottomMid,
+        BottomRight
     }
 
     /**
@@ -277,7 +310,7 @@ public class UiUtils {
     public static final LabelAPI createCreditsLabel(String font, int height) {
         MutableValue credits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
-        LabelAPI label = Global.getSettings().createLabel(font, "Credits: " + Misc.getWithDGS(credits.get()));
+        LabelAPI label = Global.getSettings().createLabel("Credits: " + Misc.getWithDGS(credits.get()), font);
         if (font == "small_insignia") {
             label.setAlignment(Alignment.LMID);
         }
@@ -302,7 +335,7 @@ public class UiUtils {
 
         String text = numInd + " / " + maxInd;
 
-        LabelAPI label = Global.getSettings().createLabel(font, "Industries: " + text);
+        LabelAPI label = Global.getSettings().createLabel("Industries: " + text, font);
         if (font == "small_insignia") {
             label.setAlignment(Alignment.LMID);
         }

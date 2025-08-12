@@ -16,6 +16,7 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.CutStyle;
+import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
@@ -72,6 +73,9 @@ public class LtvIndustryListPanel
 
 		m_coreUI = coreUI;
 		m_overview = overview;
+
+		initializePlugin(hasPlugin);
+		createPanel();
    	}
 
 	@Override
@@ -165,9 +169,9 @@ public class LtvIndustryListPanel
 		TooltipMakerAPI buttonWrapper = getPanel().createUIElement(
             getPos().getWidth(), getPos().getHeight(), true
         );
-
-		LabelAPI creditLbl = UiUtils.createCreditsLabel("graphics/fonts/insignia21LTaa.fnt", 25);
-		LabelAPI maxIndLbl = UiUtils.createMaxIndustriesLabel("graphics/fonts/insignia21LTaa.fnt", 25, getMarket());
+		
+		LabelAPI creditLbl = UiUtils.createCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
+		LabelAPI maxIndLbl = UiUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, getMarket());
 
 		buttonWrapper.setButtonFontOrbitron20Bold();
 		buttonWrapper.setActionListenerDelegate(this);
@@ -186,7 +190,8 @@ public class LtvIndustryListPanel
 		addTooltips(creditLbl, maxIndLbl, getMarket());
 		
 		buttonWrapper.addComponent(buildButton).inBL(0, 50);
-		add(creditLbl).rightOfMid(buildButton, 70);
+		add(creditLbl);
+		UiUtils.anchorPanel((UIComponentAPI) creditLbl, buildButton, AnchorType.RightMid, 70);
 		add(maxIndLbl).inBR(40, 50);
 
 		// try {
@@ -229,7 +234,7 @@ public class LtvIndustryListPanel
 	public final void addTooltips(LabelAPI label1, LabelAPI label2, MarketAPI var2) {
 		label1.setHighlightOnMouseover(true);
 		label2.setHighlightOnMouseover(true);
-		int tpWidth = 400;
+		final int tpWidth = 400;
 
 		TooltipMakerAPI tp1 = getPanel().createUIElement(tpWidth, 0, false);
 		TooltipMakerAPI tp2 = getPanel().createUIElement(tpWidth, 0, false);
@@ -293,29 +298,29 @@ public class LtvIndustryListPanel
 			tp2.addPara(indent + "None", paragraphSpacing);
 		}
 
-		UiUtils.anchorPanel(tp1, (UIComponentAPI) label1, AnchorType.LeftOfTop, 0);
-		UiUtils.anchorPanel(tp2, (UIComponentAPI) label2, AnchorType.LeftOfTop, 0);
+		UiUtils.anchorPanel(tp1, (UIComponentAPI) label1, AnchorType.LeftTop, 0);
+		UiUtils.anchorPanel(tp2, (UIComponentAPI) label2, AnchorType.LeftTop, 0);
    	}
 
 	protected void advanceImpl(float amount) {
-		int queueSize = getMarket().getConstructionQueue().getItems().size();
-		boolean builfSlotsNotFull = CommodityStats.getVisibleIndustries(getMarket()).size() + queueSize < 12;
-		builfSlotsNotFull &= DebugFlags.COLONY_DEBUG || getMarket().isPlayerOwned();
-		if (builfSlotsNotFull != buildButton.isEnabled()) {
-			buildButton.setEnabled(builfSlotsNotFull);
-			if (builfSlotsNotFull) {
-				remove(buildButtonTp);
-			} else {
+		boolean shouldEnableButton = DebugFlags.COLONY_DEBUG || getMarket().isPlayerOwned();
+		
+		if (shouldEnableButton != buildButton.isEnabled()) {
+			buildButton.setEnabled(shouldEnableButton);
+			if (!shouldEnableButton) {
 				buildButtonTp = getPanel().createUIElement(300, 0, false);
 
 				buildButtonTp.addPara("Maximum number of industries reached.", 0);
 
 				add(buildButtonTp);
-				UiUtils.anchorPanel(buildButtonTp, buildButton, AnchorType.LeftOfBottom, 0);
+				UiUtils.anchorPanel(buildButtonTp, buildButton, AnchorType.LeftBottom, 0);
+
+			} else {
+				remove(buildButtonTp);
+
+				buildButtonTp = null;
 			}
 		}
-
-		// super.advanceImpl(amount);
 	}
 
 	protected void processInputImpl(List<InputEventAPI> events) {

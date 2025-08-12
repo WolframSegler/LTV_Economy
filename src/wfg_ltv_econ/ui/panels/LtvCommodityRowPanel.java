@@ -335,7 +335,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
 
         getParent().addUIElement(codex);
         getParent().bringComponentToTop(codex);
-        UiUtils.anchorPanel(codex, m_tooltip, AnchorType.BelowLeft, opad + pad);
+        UiUtils.anchorPanel(codex, m_tooltip, AnchorType.BottomLeft, opad + pad);
 
         return Optional.ofNullable(codex);
     }

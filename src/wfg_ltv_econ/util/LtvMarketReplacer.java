@@ -10,6 +10,7 @@ import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg_ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
+import wfg_ltv_econ.util.UiUtils.AnchorType;
 
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
@@ -99,86 +100,107 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         List<?> managementChildren = (List<?>) ReflectionUtils.invoke(managementPanel, "getChildrenCopy");
 
+        final Class<?> knownClass1 = IndustryListPanel.class;
+        final Class<?> knownClass2 = LtvIndustryListPanel.class;
+        final Class<?> knownClass3 = CommodityPanel.class;
+        final Class<?> knownClass4 = LtvCommodityPanel.class;
+
+        UIPanelAPI anchorChild = null;
+
+        for (Object child : managementChildren) {
+            Class<?> childClass = child.getClass();
+            if (!childClass.equals(knownClass1) &&
+                !childClass.equals(knownClass2) &&
+                !childClass.equals(knownClass3) &&
+                !childClass.equals(knownClass4)
+            ) {
+                anchorChild = (UIPanelAPI) child;
+                break;
+            }
+        }
+        if (anchorChild == null) {
+            return;
+        }
+
         // Replace the Panel which holds the widgets
-        replaceIndustryListPanel(managementPanel, managementChildren);
+        replaceIndustryListPanel(managementPanel, managementChildren, anchorChild);
 
         // Replace the Commodity Panel which shows the total imports and exports
-        replaceCommodityPanel(managementPanel, managementChildren);
+        replaceCommodityPanel(managementPanel, managementChildren, anchorChild);
     }
 
-    private static final void replaceIndustryListPanel(UIPanelAPI managementPanel, List<?> managementChildren) {
+    private static final void replaceIndustryListPanel(
+        UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI anchor
+    ) {
+
         UIPanelAPI industryPanel = managementChildren.stream()
                 .filter(child -> child instanceof IndustryListPanel)
                 .map(child -> (IndustryListPanel) child)
                 .findFirst().orElse(null);
-        if (industryPanel instanceof LtvIndustryListPanel) {
+        if (industryPanel == null || industryPanel instanceof LtvIndustryListPanel) {
             return;
         }
 
-        try {
-            // Steal the members for the constructor
-            MarketAPI market = (MarketAPI)ReflectionUtils.get(industryPanel, null, MarketAPI.class);
-            UIPanelAPI coreUI = (UIPanelAPI) ReflectionUtils.get(industryPanel, null, CoreUIAPI.class);
-            UIPanelAPI overview = (UIPanelAPI) ((IndustryListPanel)industryPanel).getOverview();
+        // Steal the members for the constructor
+        MarketAPI market = (MarketAPI)ReflectionUtils.get(industryPanel, null, MarketAPI.class);
+        UIPanelAPI coreUI = (UIPanelAPI) ReflectionUtils.get(industryPanel, null, CoreUIAPI.class);
+        UIPanelAPI overview = (UIPanelAPI) ((IndustryListPanel)industryPanel).getOverview();
 
-            int width = (int) industryPanel.getPosition().getWidth();
-            int height = (int) industryPanel.getPosition().getHeight();
+        int width = (int) industryPanel.getPosition().getWidth();
+        int height = (int) industryPanel.getPosition().getHeight();
 
-            LtvIndustryListPanel replacement = new LtvIndustryListPanel(
-                managementPanel,
-                managementPanel,
-                width,
-                height,
-                market,
-                industryPanel,
-                coreUI,
-                overview
-            );
-            // The Panel with the player portrait
-            UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
+        LtvIndustryListPanel replacement = new LtvIndustryListPanel(
+            managementPanel,
+            managementPanel,
+            width,
+            height,
+            market,
+            industryPanel,
+            coreUI,
+            overview
+        );
 
-            managementPanel.addComponent(replacement.getPanel()).setSize(width, height)
-            .belowLeft(managementPanelChild1, 25);
-            
-            if (LtvIndustryListPanel.indOptConstr == null) {
-                // Acquire the popup class from one of the widgets
-                Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
-    
-                // Attach the popup
-                ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
-    
-                // Now the popup class is a child of: 
-                // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
-    
-                List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
-    
-                UIPanelAPI indOps = children.stream()
-                    .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
-                    .map(child -> (UIPanelAPI) child)
-                    .findFirst().orElse(null);
-    
-                ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
-                    indOps.getClass(), 5).get(0);
-    
-                LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
-    
-                // Dismiss the indOpsPanel after getting its constructor
-                ReflectionUtils.invoke(indOps, "dismiss", 0);
-            }
-            
-            // No need for the old panel
-            managementPanel.removeComponent(industryPanel);
+        managementPanel.addComponent(replacement.getPanel());
+        UiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomLeft, 25);
 
-        } catch (Exception e) {
-            Global.getLogger(LtvMarketReplacer.class).error("Failed to replace IndustryListPanel", e);
+        if (LtvIndustryListPanel.indOptConstr == null) {
+            // Acquire the popup class from one of the widgets
+            Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
+
+            // Attach the popup
+            ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
+
+            // Now the popup class is a child of: 
+            // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
+
+            List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
+
+            UIPanelAPI indOps = children.stream()
+                .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
+                .map(child -> (UIPanelAPI) child)
+                .findFirst().orElse(null);
+
+            ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
+                indOps.getClass(), 5).get(0);
+
+            LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
+
+            // Dismiss the indOpsPanel after getting its constructor
+            ReflectionUtils.invoke(indOps, "dismiss", 0);
         }
+        
+        // No need for the old panel
+        managementPanel.removeComponent(industryPanel);
+
 
         if (Global.getSettings().isDevMode()) {
             Global.getLogger(LtvMarketReplacer.class).info("Replaced IndustryListPanel");
         }
     }
 
-    private static final void replaceCommodityPanel(UIPanelAPI managementPanel, List<?> managementChildren) {
+    private static final void replaceCommodityPanel(
+        UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI anchor
+    ) {
         UIPanelAPI commodityPanel = managementChildren.stream()
                 .filter(child -> child instanceof CommodityPanel)
                 .map(child -> (CommodityPanel) child)
@@ -193,15 +215,20 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
             int width = (int) commodityPanel.getPosition().getWidth();
             int height = (int) commodityPanel.getPosition().getHeight();
-            // The Panel with the player portrait
-            UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
-            LtvCommodityPanel replacement = new LtvCommodityPanel(null ,managementPanel, width, height,
-                market, new BasePanelPlugin<LtvCommodityPanel>());
+            LtvCommodityPanel replacement = new LtvCommodityPanel(
+                managementPanel,
+                managementPanel,
+                width,
+                height,
+                market,
+                new BasePanelPlugin<LtvCommodityPanel>()
+            );
 
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later
-            managementPanel.addComponent(replacement.getPanel()).setSize(width, height).belowRight(managementPanelChild1, -43);
+            managementPanel.addComponent(replacement.getPanel());
+            UiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomRight, -43);
             
             managementPanel.removeComponent(commodityPanel);
 
