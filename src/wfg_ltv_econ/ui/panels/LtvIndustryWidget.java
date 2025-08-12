@@ -30,7 +30,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
-import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
+import com.fs.starfarer.campaign.CampaignEngine;
 
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.campaign.ui.marketinfo.b;
@@ -58,12 +58,15 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     public final static int PANEL_WIDTH = 190;
     public final static int TITLE_HEIGHT = 15 + pad;
     public final static int IMAGE_HEIGHT = 95;
+    public final static int TOTAL_HEIGHT = TITLE_HEIGHT + IMAGE_HEIGHT;
     public final static int ICON_SIZE = 32;
 
     public final Color baseColor;
     public final Color darkColor;
     public final Color gridColor;
     public final Color brightColor;
+
+    private final Object originalWidget;
 
     private Industry m_industry;
     private LtvSpritePanel.Base industryIcon;
@@ -80,13 +83,13 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     private Color BgColor = null;
 
     public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryPanelPlugin plugin,
-            MarketAPI market, Industry ind, LtvIndustryListPanel indPanel) {
+        MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, Object orgWidget) {
 
-        this(root, parent, plugin, market, ind, indPanel, -1);
+        this(root, parent, plugin, market, ind, indPanel, orgWidget, -1);
     }
 
     public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryPanelPlugin plugin,
-            MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, int queue) {
+            MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, Object orgWidget, int queue) {
         super(root, parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin, market);
 
         constructionMode = ConstructionMode.NORMAL;
@@ -98,6 +101,10 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         darkColor = getFaction().getDarkUIColor();
         gridColor = getFaction().getGridUIColor();
         brightColor = getFaction().getBrightUIColor();
+
+        originalWidget = orgWidget;
+        ((UIComponentAPI) originalWidget).setOpacity(0f);
+        ((UIComponentAPI) originalWidget).getPosition().setLocation(getPos().getX(), getPos().getY());
 
         m_fader = new FaderUtil(0.2f, 0.2f, 0.2f, false, true);
         BgColor = m_industry.isImproved() ? Misc.getStoryOptionColor() : darkColor;
@@ -152,7 +159,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             pad
         );
         constructionActionButton.setQuickMode(true);
-        constructionActionButton.setOpacity(0.00001f);
+        constructionActionButton.setOpacity(0.0000001f);
 
         tp.addComponent(constructionActionButton).inBL(0, 0);
 
@@ -431,8 +438,8 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         if (constructionQueueIndex >= 0) {
 
             if (event.isRMBEvent()) {
-                for (LtvIndustryWidget widget : IndustryPanel.getWidgetsNew()) {
-                    if (widget.getQueueIndex() >= 0) {
+                for (Object widgetObj : IndustryPanel.getWidgets()) {
+                    if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
                         widget.setNormalMode();
                     }
                 }
@@ -441,8 +448,8 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             }
 
             if (constructionMode == ConstructionMode.NORMAL) {
-                for (LtvIndustryWidget widget : IndustryPanel.getWidgetsNew()) {
-                if (widget.getQueueIndex() >= 0) {
+                for (Object widgetObj : IndustryPanel.getWidgets()) {
+                if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
                     if (widget == this) {
                         widget.setRemoveMode();
                     } else {
@@ -453,9 +460,11 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             } else if (constructionMode == ConstructionMode.SWAP) {
                 targetInd = null;
 
-                for (LtvIndustryWidget widget : IndustryPanel.getWidgetsNew()) {
-                    if (widget.getQueueIndex() >= 0
-                            && widget.constructionMode == ConstructionMode.REMOVE) {
+                for (Object widgetObj : IndustryPanel.getWidgets()) {
+                    if (widgetObj instanceof LtvIndustryWidget widget &&
+                        widget.getQueueIndex() >= 0 &&
+                        widget.constructionMode == ConstructionMode.REMOVE
+                    ) {
                         targetInd = widget;
                         break;
                     }
@@ -505,14 +514,15 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                 }
             }
         } else {
-            for (LtvIndustryWidget widget : IndustryPanel.getWidgetsNew()) {
-                if (widget.getQueueIndex() >= 0) {
+            for (Object widgetObj : IndustryPanel.getWidgets()) {
+                if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
                     widget.setNormalMode();
                 }
             }
 
             try {
-                UIPanelAPI infoPanel = IndustryPanel.getOverview().getInfoPanel();
+                UIPanelAPI overview = IndustryPanel.getOverview();
+                UIPanelAPI infoPanel = (UIPanelAPI) ReflectionUtils.invoke(overview, "getInfoPanel");
                 Object a = ReflectionUtils.invoke(infoPanel, "getTradePanel");
                 Object outpostPanelParams = ReflectionUtils.invoke(a, "getOutpostPanelParams");
 
@@ -522,16 +532,16 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                 }
 
                 if (LtvIndustryListPanel.indOptConstr != null) {
+                    // b var17 = new b(this.øôöO00, this, var14, CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
+
                     DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptConstr.newInstance(
                         m_industry,
-                        // (intnew) ((Object) this), 
-                        (intnew) LtvIndustryListPanel.dummyWidget,
+                        originalWidget,
                         interactionMode,
-                        (UIPanelAPI) getPanel(),
-                        // this
-                        null
+                        CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
+                        originalWidget
                     );
-                    dialog.showDialog(0,0,null);
+                    ReflectionUtils.invoke(dialog, "show", 0f, 0f);
                 }
                 tradeInfoPanel = true;
             } catch (Exception e) {
@@ -610,13 +620,13 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         return m_industry;
     }
 
-    public IndustryListPanel getIndustryPanel() {
+    public LtvIndustryListPanel getIndustryPanel() {
         return IndustryPanel;
     }
 
     public enum ConstructionMode {
-        NORMAL,
-        SWAP,
-        REMOVE
+        NORMAL, // Ó00000
+        SWAP,   // Ò00000
+        REMOVE, // String
     }
 }

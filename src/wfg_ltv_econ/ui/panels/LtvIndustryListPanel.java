@@ -2,139 +2,421 @@ package wfg_ltv_econ.ui.panels;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignUIAPI.DismissDialogDelegate;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
+import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
+import com.fs.starfarer.api.input.InputEventAPI;
+import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.CutStyle;
+import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate;
+import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.MutableValue;
+import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
-import com.fs.starfarer.campaign.ui.marketinfo.s;
-import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
-import com.fs.starfarer.ui.newui.L;
+import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
-import wfg_ltv_econ.ui.panels.BuildingWidgetPanel;
+import wfg_ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
+import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
 import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.ReflectionUtils;
+import wfg_ltv_econ.util.TooltipUtils;
+import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
+import wfg_ltv_econ.util.UiUtils.AnchorType;
 
-import com.fs.starfarer.ui.d;
-import com.fs.starfarer.ui.Q;
-import com.fs.starfarer.ui.c;
-import com.fs.starfarer.api.ui.Alignment;
+public class LtvIndustryListPanel
+	extends LtvCustomPanel<BasePanelPlugin<LtvIndustryListPanel>, LtvIndustryListPanel, UIPanelAPI>
+	implements ActionListenerDelegate, DismissDialogDelegate {
 
-import java.util.Collections;
+	public static final int BUTTON_SECTION_HEIGHT = 50;
 
-public class LtvIndustryListPanel extends IndustryListPanel {
-   static ReflectedConstructor indOptConstr = null;
-   static Object dummyWidget = null; 
+	public static ReflectedConstructor indOptConstr = null;
+	private final IndustryListPanel originalIndustryPanel;
 
-   public LtvIndustryListPanel(MarketAPI var1, L var2, s var3) {
-      super(var1, var2, var3);
-   }
+	private List<Object> widgets = new ArrayList<>();
+	public List<Object> getWidgets() {
+		return widgets;
+	}
 
-   public static Comparator<Industry> getIndustryOrderComparator() {
-      return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
-   }
+	public static Comparator<Industry> getIndustryOrderComparator() {
+		return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
+	}
 
-   @Override
-   public void recreate() {
-      this.sizeChanged(this.getWidth(), this.getHeight());
-   }
+	private final UIPanelAPI m_coreUI;
+	private final UIPanelAPI m_overview;
 
-   public List<LtvIndustryWidget> getWidgetsNew() {
-      return new ArrayList<LtvIndustryWidget>();
-   }
+	private ButtonAPI buildButton;
+	private TooltipMakerAPI buildButtonTp;
+	private boolean buildDialogOpen = false;
 
-   public static void setindustryOptionsPanelConstructor(ReflectedConstructor a) {
-      indOptConstr = a;
-   }
+	public LtvIndustryListPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market, 
+		UIPanelAPI industryPanel, UIPanelAPI coreUI, UIPanelAPI overview) {
+		super(root, parent, width, height, new BasePanelPlugin<>(), market);
 
-   public static void setDummyWidget(Object a) {
-      dummyWidget = a;
-   }
+		originalIndustryPanel = (IndustryListPanel) industryPanel;
 
-   @Override
-   public void sizeChanged(float var1, float var2) {
-      clearChildren();
-      // super.sizeChanged(var1, var2);
-      if (!this.created) {
-         this.afterSizeFirstChanged(var1, var2);
-         this.created = true;
-      }
-      /* Grandparent Code Block */
-      widgets.clear();
-      List<Industry> industries = CommodityStats.getVisibleIndustries(market);
-      Collections.sort(industries, getIndustryOrderComparator());
-      List<ConstructionQueueItem> queuedIndustries = market.getConstructionQueue().getItems();
-      float opad = 20.0F;
-      byte rowAmount = 3;
-      byte colunmAmount = 4;
+		m_coreUI = coreUI;
+		m_overview = overview;
+   	}
 
-      for (int i = 0; i < colunmAmount; i++) {
-         for (int j = 0; j < rowAmount; j++) {
-            int var14 = j * colunmAmount + i;
-            if (var14 >= (industries.size() + queuedIndustries.size())) {
-               continue;
-            }
-            if (var14 < industries.size()) {
-               Industry var15 = (Industry) industries.get(var14);
-               BuildingWidgetPanel var16 = new BuildingWidgetPanel(market, var15, this);
-               LtvIndustryWidget panelo = new LtvIndustryWidget(
-                  this, this, new IndustryPanelPlugin(), market, var15, this
-               );
-               add((c)panelo.getPanel()).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad) - 130);
-               widgets.add(var16);
-               add(var16).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
+	@Override
+	public void initializePlugin(boolean hasPlugin) {
+		getPlugin().init(this);
+	}
 
-               StandardTooltipV2Expandable.addTooltipRight(var16,
-                     BuildingWidgetPanel.createIndustryTooltip(IndustryTooltipMode.NORMAL, var15));
-            } else {
-               var14 -= industries.size();
-               ConstructionQueueItem var21 = (ConstructionQueueItem) queuedIndustries.get(var14);
-               Industry var23 = market.instantiateIndustry(var21.id);
-               BuildingWidgetPanel var17 = new BuildingWidgetPanel(market, var23, this, var14);
-               widgets.add(var17);
-               add(var17).setSize(BuildingWidgetPanel.WIDTH, BuildingWidgetPanel.HEIGHT).inTL((float) i * (BuildingWidgetPanel.WIDTH + opad), (float) j * (BuildingWidgetPanel.HEIGHT + opad));
-               StandardTooltipV2Expandable.addTooltipRight(var17, BuildingWidgetPanel.createIndustryTooltip(IndustryTooltipMode.QUEUED, var23));
-            }
-         }
-      }
+	public UIPanelAPI getOverview() {
+		return m_overview;
+	}
 
-      d var18 = d.createCreditsLabel("graphics/fonts/insignia21LTaa.fnt", 25.0F);
-      d var19 = d.createMaxIndustriesLabel("graphics/fonts/insignia21LTaa.fnt", 25.0F, market);
-      addTooltips(var18, var19, market);
-      build = Q.o00000("   Add industry or structure...", "graphics/fonts/orbitron20aabold.fnt", dark, color,
-      Alignment.LMID, CutStyle.TL_BR, this);
+	public static void setindustryOptionsPanelConstructor(ReflectedConstructor a) {
+		indOptConstr = a;
+	}
 
-      try {
-         // build.setShortcut(oo.øô0000, true);
-         Class<?> clazz = Class.forName("com.fs.starfarer.title.OoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO.OoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO$oo");
-         Object enumValue = ReflectionUtils.getFieldsMatching(clazz, "øô0000", null, null)
-               .get(0)
-               .get(null); // null because it's a static field
-         ReflectionUtils.invoke(build, "setShortcut", enumValue, true);
-      } catch (Exception e) {
-         Global.getLogger(getClass()).error("Failed to replace IndustryListPanel", e);
-      }
+	@Override
+	public void createPanel() {
+		clearChildren();
+		widgets.clear();
 
-      float var20 = 350.0F;
-      float var22 = 25.0F;
-      add(build).setSize(var20, var22).inBL(0.0F, 50.0F);
-      add(var18).rightOfMid(build, 70.0F);
-      add(var19).inBR(40.0F, 50.0F);
-      if (!DebugFlags.COLONY_DEBUG && !market.isPlayerOwned()) {
-         build.setEnabled(false);
-         if (DebugFlags.HIDE_COLONY_CONTROLS) {
-            build.setOpacity(0.0F);
-            var18.setOpacity(0.0F);
-         }
-      }
+		List<Industry> industries = CommodityStats.getVisibleIndustries(getMarket());
+		Collections.sort(industries, getIndustryOrderComparator());
+		List<ConstructionQueueItem> queuedIndustries = getMarket().getConstructionQueue().getItems();
+		
+		final int pad = 3;
+		final int opad = 20;
+		final byte columnAmount = 4;
 
-      CommodityStats.recalculateMaxDemandAndSupplyForAll(market);
-   }
+		TooltipMakerAPI widgetWrapper = getPanel().createUIElement(
+            getPos().getWidth(), getPos().getHeight() - BUTTON_SECTION_HEIGHT, true
+        );
+
+		// Normal industries
+		for (int index = 0; index < industries.size(); index++) {
+			int i = index % columnAmount;
+			int j = index / columnAmount;
+			Industry ind = industries.get(index);
+
+			Object originalWidget = originalIndustryPanel.getWidgets().get(index);
+			LtvIndustryWidget widget = new LtvIndustryWidget(
+				getRoot(),
+				widgetWrapper,
+				new IndustryPanelPlugin(),
+				getMarket(),
+				ind,
+				this,
+				originalWidget
+			);
+
+			widgetWrapper.addComponent(widget.getPanel()).inTL(
+				i * (LtvIndustryWidget.PANEL_WIDTH + opad),
+				j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
+			);
+
+			TooltipMakerAPI tp = getPanel().createUIElement(ind.getTooltipWidth(), 0, false);
+			ind.createTooltip(IndustryTooltipMode.NORMAL, tp, false);
+			
+			TooltipUtils.dynamicPos(tp, widget.getPanel(), 0);
+		}
+
+		// Queued industries
+		for (int index = 0; index < queuedIndustries.size(); index++) {
+			int i = (index + industries.size()) % columnAmount;
+			int j = (index + industries.size()) / columnAmount;
+			Industry ind = getMarket().instantiateIndustry(queuedIndustries.get(index).id);
+
+			Object originalWidget = originalIndustryPanel.getWidgets().get(index);
+			LtvIndustryWidget widget = new LtvIndustryWidget(
+				getRoot(),
+				widgetWrapper,
+				new IndustryPanelPlugin(),
+				getMarket(),
+				ind,
+				this,
+				originalWidget
+			);
+
+			widgetWrapper.addComponent(widget.getPanel()).inTL(
+				i * (LtvIndustryWidget.PANEL_WIDTH + opad),
+				j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
+			);
+
+			TooltipMakerAPI tp = getPanel().createUIElement(ind.getTooltipWidth(), 0, false);
+			ind.createTooltip(IndustryTooltipMode.QUEUED, tp, false);
+			
+			TooltipUtils.dynamicPos(tp, widget.getPanel(), 0);
+		}
+
+		add(widgetWrapper).inTL(0, 0);
+
+		TooltipMakerAPI buttonWrapper = getPanel().createUIElement(
+            getPos().getWidth(), getPos().getHeight(), true
+        );
+
+		LabelAPI creditLbl = UiUtils.createCreditsLabel("graphics/fonts/insignia21LTaa.fnt", 25);
+		LabelAPI maxIndLbl = UiUtils.createMaxIndustriesLabel("graphics/fonts/insignia21LTaa.fnt", 25, getMarket());
+
+		buttonWrapper.setButtonFontOrbitron20Bold();
+		buttonWrapper.setActionListenerDelegate(this);
+		buildButton = buttonWrapper.addButton(
+            "   Add industry or structure...",
+            null,
+            Misc.getDarkPlayerColor(),
+            Misc.getBasePlayerColor(),
+            Alignment.LMID,
+            CutStyle.TL_BR,
+            350,
+            25,
+            pad
+        );
+
+		addTooltips(creditLbl, maxIndLbl, getMarket());
+		
+		buttonWrapper.addComponent(buildButton).inBL(0, 50);
+		add(creditLbl).rightOfMid(buildButton, 70);
+		add(maxIndLbl).inBR(40, 50);
+
+		// try {
+		// 	// build.setShortcut(oo.øô0000, true);
+		// 	Class<?> clazz = Class.forName(
+		// 			"com.fs.starfarer.title.OoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO.OoOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO$oo");
+		// 	Object enumValue = ReflectionUtils.getFieldsMatching(clazz, "øô0000", null, null)
+		// 			.get(0)
+		// 			.get(null); // null because it's a static field
+		// 	ReflectionUtils.invoke(build, "setShortcut", enumValue, true);
+		// } catch (Exception e) {
+		// 	Global.getLogger(getClass()).error("Failed to replace IndustryListPanel", e);
+		// }
+
+		if (!DebugFlags.COLONY_DEBUG && !getMarket().isPlayerOwned()) {
+			buildButton.setEnabled(false);
+			if (DebugFlags.HIDE_COLONY_CONTROLS) {
+				buildButton.setOpacity(0);
+				creditLbl.setOpacity(0);
+			}
+		}
+
+		CommodityStats.recalculateMaxDemandAndSupplyForAll(getMarket());
+
+		add(buttonWrapper).inBL(0, 0);
+	}
+
+	public void recreateOverview() {
+		Global.getSector().getEconomy().tripleStep();
+		recreateOverviewNoEconStep();
+
+		createPanel();
+		ReflectionUtils.invoke(getPanel(), "fakeAdvance", 10f);
+	}
+
+	public void recreateOverviewNoEconStep() {
+		ReflectionUtils.invoke(m_overview, "recreate");
+	}
+
+	public final void addTooltips(LabelAPI label1, LabelAPI label2, MarketAPI var2) {
+		label1.setHighlightOnMouseover(true);
+		label2.setHighlightOnMouseover(true);
+		int tpWidth = 400;
+
+		TooltipMakerAPI tp1 = getPanel().createUIElement(tpWidth, 0, false);
+		TooltipMakerAPI tp2 = getPanel().createUIElement(tpWidth, 0, false);
+
+		// Tooltip 1
+		tp1.addPara("Credits available.", 0);
+
+		// Tooltip 2
+		tp2.addPara("Maximum number of industries, based on the size of a colony and other factors.", 0);
+		tp2.beginTable(getFaction(), 20, new Object[]{"Colony size", 120, "Base industries", 120});
+
+		for(int i = 3; i <= Misc.getMaxMarketSize(getMarket()); i++) {
+			tp2.addRow(new Object[]{Misc.getHighlightColor(), "" + i, Misc.getHighlightColor(), "" + PopulationAndInfrastructure.getMaxIndustries(i)});
+		}
+
+		tp2.addTable("", 0, 10);
+		tp2.addPara("Structures such as spaceports or orbital stations do not count against this limit." + 
+			"Colonies that exceed this limit for any reason have their stability reduced by %s.", 20,
+			Misc.getHighlightColor(), new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
+		);
+		tp2.addPara("Industries on %s:", 10, getFaction().getBaseUIColor(),
+			new String[]{getMarket().getName()}
+		);
+
+		List<Industry> industries = CommodityStats.getVisibleIndustries(getMarket());
+		Collections.sort(industries, getIndustryOrderComparator());
+
+		final String indent = "    ";
+		boolean anyIndustryAdded = false;
+		int paragraphSpacing = 5;
+
+		for (Industry industry : industries) {
+			if (industry.isIndustry()) {
+				tp2.addPara(indent + industry.getCurrentName(), paragraphSpacing);
+				paragraphSpacing = 3;
+				anyIndustryAdded = true;
+			} else if (industry.isUpgrading()) {
+				String upgradeId = industry.getSpec().getUpgrade();
+				if (upgradeId != null) {
+					Industry upgradedIndustry = getMarket().instantiateIndustry(upgradeId);
+					if (upgradedIndustry.isIndustry()) {
+						tp2.addPara(indent + industry.getCurrentName() + " (upgrading to " + upgradedIndustry.getCurrentName() + ")", paragraphSpacing);
+						paragraphSpacing = 3;
+						anyIndustryAdded = true;
+					}
+				}
+			}
+		}
+
+		for (ConstructionQueueItem item : getMarket().getConstructionQueue().getItems()) {
+			final IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
+			if (spec.hasTag("industry")) {
+				Industry ind = getMarket().instantiateIndustry(item.id);
+				tp2.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
+				paragraphSpacing = 3;
+				anyIndustryAdded = true;
+			}
+		}
+
+		if (!anyIndustryAdded) {
+			tp2.addPara(indent + "None", paragraphSpacing);
+		}
+
+		UiUtils.anchorPanel(tp1, (UIComponentAPI) label1, AnchorType.LeftOfTop, 0);
+		UiUtils.anchorPanel(tp2, (UIComponentAPI) label2, AnchorType.LeftOfTop, 0);
+   	}
+
+	protected void advanceImpl(float amount) {
+		int queueSize = getMarket().getConstructionQueue().getItems().size();
+		boolean builfSlotsNotFull = CommodityStats.getVisibleIndustries(getMarket()).size() + queueSize < 12;
+		builfSlotsNotFull &= DebugFlags.COLONY_DEBUG || getMarket().isPlayerOwned();
+		if (builfSlotsNotFull != buildButton.isEnabled()) {
+			buildButton.setEnabled(builfSlotsNotFull);
+			if (builfSlotsNotFull) {
+				remove(buildButtonTp);
+			} else {
+				buildButtonTp = getPanel().createUIElement(300, 0, false);
+
+				buildButtonTp.addPara("Maximum number of industries reached.", 0);
+
+				add(buildButtonTp);
+				UiUtils.anchorPanel(buildButtonTp, buildButton, AnchorType.LeftOfBottom, 0);
+			}
+		}
+
+		// super.advanceImpl(amount);
+	}
+
+	protected void processInputImpl(List<InputEventAPI> events) {
+		boolean anyWidgetNotNormal = false;
+
+		for (Object widgetObj : widgets) {
+			if (widgetObj instanceof LtvIndustryWidget widget) {
+				if (widget.getMode() != ConstructionMode.NORMAL) {
+					anyWidgetNotNormal = true;
+					break;
+				}
+			}
+
+		}
+
+		if (anyWidgetNotNormal) {
+			boolean mouseOverWidget = events.stream()
+					.filter(InputEventAPI::isMouseMoveEvent)
+					.anyMatch(event -> widgets.stream()
+							.anyMatch(widget -> ((LtvIndustryWidget) widget).getButton().getPosition()
+									.containsEvent(event)));
+
+			if (mouseOverWidget) {
+				anyWidgetNotNormal = false;
+			}
+		}
+
+		if (anyWidgetNotNormal) {
+			InputEventAPI targetEvent = null;
+
+			eventLoop: for (InputEventAPI event : events) {
+				if (event.isConsumed()) {
+					continue;
+				}
+				if (event.isLMBDownEvent() || event.isRMBDownEvent()) {
+					targetEvent = event;
+					break eventLoop;
+				}
+			}
+
+			if (targetEvent != null) {
+				for (Object widgetObj : widgets) {
+					if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
+						widget.setNormalMode();
+					}
+				}
+				targetEvent.consume();
+			}
+		}
+	}
+
+	public void actionPerformed(Object data, Object source) {
+		if (source == buildButton) {
+			ReflectedConstructor ctor = ReflectionUtils.getConstructorsMatching(IndustryPickerDialog.class, 3).get(0);
+
+			IndustryPickerDialog dialog = (IndustryPickerDialog) ctor.newInstance(
+				getMarket(),
+				m_coreUI, // (UIPanelAPI)
+				// this
+				originalIndustryPanel
+			);
+			dialog.show(0.3F, 0.2F);
+			buildDialogOpen = true;
+		}
+	}
+
+	public void dialogDismissed() {
+		if (buildDialogOpen) {
+			List<?> chldr = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
+    
+			IndustryPickerDialog buildDialog = chldr.stream()
+				.filter(child -> child instanceof IndustryPickerDialog && child instanceof UIPanelAPI)
+				.map(child -> (IndustryPickerDialog) child)
+				.findFirst().orElse(null);
+
+			if (buildDialog.getSelected() != null) {
+				Industry selectedIndustry = buildDialog.getSelected().getIndustry();
+				final int buildCost = (int) selectedIndustry.getBuildCost();
+
+				Misc.getCurrentlyBeingConstructed(getMarket());
+				getMarket().getConstructionQueue().addToEnd(selectedIndustry.getId(), buildCost);
+
+				MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
+				playerCredits.subtract(buildCost);
+				if (playerCredits.get() <= 0) {
+					playerCredits.set(0);
+				}
+
+				CampaignEngine.getInstance().getCampaignUI().getMessageDisplay().addMessage(
+					String.format(
+						"Spent %s",
+						Misc.getDGSCredits(buildCost)
+					),
+					Misc.getTooltipTitleAndLightHighlightColor(),
+					Misc.getDGSCredits(buildCost),
+					Misc.getHighlightColor()
+				);
+				recreateOverview();
+			}
+		} else {
+			buildDialogOpen = false;
+		}
+	}
 }

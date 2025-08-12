@@ -1,5 +1,7 @@
 package wfg_ltv_econ.util;
 
+import java.util.List;
+
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.state.AppDriver;
@@ -12,16 +14,11 @@ import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
+import com.fs.starfarer.api.campaign.CoreUIAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
-
-import com.fs.starfarer.ui.newui.L;
-import com.fs.starfarer.campaign.ui.marketinfo.s;
-
-import java.lang.reflect.Method;
-import java.util.List;
 
 public class LtvMarketReplacer implements EveryFrameScript {
 
@@ -121,44 +118,53 @@ public class LtvMarketReplacer implements EveryFrameScript {
         try {
             // Steal the members for the constructor
             MarketAPI market = (MarketAPI)ReflectionUtils.get(industryPanel, null, MarketAPI.class);
-            L lInstance = (L)ReflectionUtils.get(industryPanel, null, L.class);
-            s sInstance = (s)ReflectionUtils.get(industryPanel, null, s.class);
+            UIPanelAPI coreUI = (UIPanelAPI) ReflectionUtils.get(industryPanel, null, CoreUIAPI.class);
+            UIPanelAPI overview = (UIPanelAPI) ((IndustryListPanel)industryPanel).getOverview();
 
-            LtvIndustryListPanel replacement = new LtvIndustryListPanel(market, lInstance, sInstance);
+            int width = (int) industryPanel.getPosition().getWidth();
+            int height = (int) industryPanel.getPosition().getHeight();
 
-            float width = industryPanel.getPosition().getWidth();
-            float height = industryPanel.getPosition().getHeight();
+            LtvIndustryListPanel replacement = new LtvIndustryListPanel(
+                managementPanel,
+                managementPanel,
+                width,
+                height,
+                market,
+                industryPanel,
+                coreUI,
+                overview
+            );
             // The Panel with the player portrait
             UIPanelAPI managementPanelChild1 = (UIPanelAPI)managementChildren.get(0);
 
-            managementPanel.addComponent(replacement).setSize(width, height).belowLeft(managementPanelChild1, 25);
+            managementPanel.addComponent(replacement.getPanel()).setSize(width, height)
+            .belowLeft(managementPanelChild1, 25);
             
-            // Acquire the popup class from one of the widgets
-            Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
-
-            // Attach the popup
-            ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
-
-            // Now the popup class is a child of: 
-            // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
-
-            List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
-
-            UIPanelAPI indOps = children.stream()
-                .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
-                .map(child -> (UIPanelAPI) child)
-                .findFirst().orElse(null);
-
-            ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
-                indOps.getClass(), 5).get(0);
-
-            LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
-            LtvIndustryListPanel.setDummyWidget(widget0);
-
-            // Dismiss the indOpsPanel after getting its constructor
-            ReflectionUtils.invoke(indOps, "dialogDismissed", null, 1);
-            industryPanel.removeComponent((UIPanelAPI)widget0);
-            // children.remove(indOps);
+            if (LtvIndustryListPanel.indOptConstr == null) {
+                // Acquire the popup class from one of the widgets
+                Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
+    
+                // Attach the popup
+                ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
+    
+                // Now the popup class is a child of: 
+                // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
+    
+                List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
+    
+                UIPanelAPI indOps = children.stream()
+                    .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
+                    .map(child -> (UIPanelAPI) child)
+                    .findFirst().orElse(null);
+    
+                ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
+                    indOps.getClass(), 5).get(0);
+    
+                LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
+    
+                // Dismiss the indOpsPanel after getting its constructor
+                ReflectionUtils.invoke(indOps, "dismiss", 0);
+            }
             
             // No need for the old panel
             managementPanel.removeComponent(industryPanel);

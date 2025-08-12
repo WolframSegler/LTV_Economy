@@ -29,6 +29,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
@@ -50,7 +51,7 @@ public class TooltipUtils {
         cargoTooltipArrow_PATH = Global.getSettings().getSpriteName("ui", "cargoTooltipArrow");
     }
 
-    public static void dynamicPos(TooltipMakerAPI tooltip, CustomPanelAPI anchor, int opad) {
+    public static void dynamicPos(TooltipMakerAPI tooltip, UIPanelAPI anchor, int opad) {
         PositionAPI pos = tooltip.getPosition();
 
         final float tooltipWidth = pos.getWidth();

@@ -7,12 +7,17 @@ import java.util.Map;
 import org.lwjgl.util.vector.Vector2f;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.codex2.CodexDialog;
 
 import wfg_ltv_econ.ui.plugins.CommodityinfobarPlugin;
@@ -165,7 +170,7 @@ public class UiUtils {
      * Makes UI lifecycle dependencies easier to manage.
      * Does not handle screen bounds or overflow.
      */
-    public static final void anchorPanel(UIPanelAPI panel, UIPanelAPI anchor, AnchorType type, int gap) {
+    public static final void anchorPanel(UIPanelAPI panel, UIComponentAPI anchor, AnchorType type, int gap) {
         if (panel == null || anchor == null) return;
 
         final PositionAPI Ppos = panel.getPosition();
@@ -263,5 +268,57 @@ public class UiUtils {
         BelowLeft,
         BelowMid,
         BelowRight
+    }
+
+    /**
+     * I copied and cleaned this from the obfuscated code.
+     * Because this is not available through the API for some reason.
+     */
+    public static final LabelAPI createCreditsLabel(String font, int height) {
+        MutableValue credits = Global.getSector().getPlayerFleet().getCargo().getCredits();
+
+        LabelAPI label = Global.getSettings().createLabel(font, "Credits: " + Misc.getWithDGS(credits.get()));
+        if (font == "small_insignia") {
+            label.setAlignment(Alignment.LMID);
+        }
+        label.setColor(Global.getSettings().getColor("textGrayColor"));
+        label.autoSizeToWidth(label.computeTextWidth(label.getText()));
+        if (height > 0) {
+            label.getPosition().setSize(label.getPosition().getWidth(), height);
+        }
+
+        label.setHighlightColor(Misc.getHighlightColor());
+        label.highlightLast(Misc.getWithDGS(credits.get()));
+        return label;
+    }
+
+    /**
+     * I copied and cleaned this from the obfuscated code.
+     * Because this is not available through the API for some reason.
+     */
+    public static LabelAPI createMaxIndustriesLabel(String font, int height, MarketAPI market) {
+        final int numInd = Misc.getNumIndustries(market);
+        final int maxInd = Misc.getMaxIndustries(market);
+
+        String text = numInd + " / " + maxInd;
+
+        LabelAPI label = Global.getSettings().createLabel(font, "Industries: " + text);
+        if (font == "small_insignia") {
+            label.setAlignment(Alignment.LMID);
+        }
+
+        label.setColor(Global.getSettings().getColor("textGrayColor"));
+        label.autoSizeToWidth(label.computeTextWidth(label.getText()));
+        if (height > 0) {
+            label.getPosition().setSize(label.getPosition().getWidth(), height);
+        }
+        if (numInd > maxInd) {
+            label.setHighlightColor(Misc.getNegativeHighlightColor());
+        } else {
+            label.setHighlightColor(Misc.getHighlightColor());
+        }
+
+        label.highlightLast(text);
+        return label;
     }
 }

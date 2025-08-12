@@ -91,11 +91,11 @@ public abstract class LtvCustomPanel<
         m_panel = Global.getSettings().createCustom(width, height, hasPlugin ? plugin : null);
     }
 
-    public CustomPanelAPI getPanel() {
+    public final CustomPanelAPI getPanel() {
         return m_panel;
     }
 
-    public PositionAPI getPos() {
+    public final PositionAPI getPos() {
         return m_panel.getPosition();
     }
 
@@ -109,16 +109,16 @@ public abstract class LtvCustomPanel<
      * Use with caution: if the actual parent type differs, a {@code ClassCastException}
      * may occur at runtime.
      */
-    public ParentType getParent() {
+    public final ParentType getParent() {
         return m_parent;
     }
 
-    public UIPanelAPI getRoot() {
+    public final UIPanelAPI getRoot() {
         final UIPanelAPI defaultRoot = CampaignEngine.getInstance().getCampaignUI().getDialogParent();
         return m_root == null ? defaultRoot : m_root;
     }
 
-    public PluginType getPlugin() {
+    public final PluginType getPlugin() {
         return m_plugin;
     }
 
@@ -134,7 +134,7 @@ public abstract class LtvCustomPanel<
     /**
      * Has a default value for no faction.
      */
-    public FactionAPI getFaction() {
+    public final FactionAPI getFaction() {
         if (m_faction == null) {
             final String factionID = "player";
 
@@ -149,35 +149,39 @@ public abstract class LtvCustomPanel<
         }
     }
 
-    public MarketAPI getMarket() {
+    public final MarketAPI getMarket() {
         return m_market;
     }
 
-    public void setMarket(MarketAPI market) {
+    public final void setMarket(MarketAPI market) {
         m_market = market;
         m_faction = market.getFaction();
     }
 
-    public PositionAPI add(LabelAPI a) {
+    public final PositionAPI add(LabelAPI a) {
         return add((UIComponentAPI) a);
     }
 
-    public PositionAPI add(TooltipMakerAPI a) {
+    public final PositionAPI add(TooltipMakerAPI a) {
         return m_panel.addUIElement(a);
     }
 
-    public PositionAPI add(UIComponentAPI a) {
+    public final PositionAPI add(UIComponentAPI a) {
         m_panel.addComponent(a);
 
         return (a).getPosition();
     }
 
-    public void remove(LabelAPI a) {
+    public final void remove(LabelAPI a) {
         remove((UIComponentAPI) a);
     }
 
-    public void remove(UIComponentAPI a) {
+    public final void remove(UIComponentAPI a) {
         m_panel.removeComponent(a);
+    }
+
+    public void clearChildren() {
+        ReflectionUtils.invoke(m_panel, "clearChildren");
     }
 
     /**
