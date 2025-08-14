@@ -30,7 +30,9 @@ public final class FaderComponent<
 
     @Override
     public final void advance(float amount, InputSnapshot input) {
-        if (getPanel().getGlowType() == Glow.NONE) return;
+        if (getPanel().getGlowType() == Glow.NONE || !getPanel().isFaderOwner()) {
+            return;
+        }
 
         State target = input.hoveredLastFrame ? State.IN : State.OUT;
 
@@ -87,7 +89,7 @@ public final class FaderComponent<
                     sprite,
                     getPanel().getPos().getX(),
                     getPanel().getPos().getY(), 
-                    getPanel().getFaction().getBaseUIColor(),
+                    getPanel().getGlowColor(),
                     glowAmount
                 );
             });

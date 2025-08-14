@@ -1,6 +1,9 @@
 package wfg_ltv_econ.ui.panels.components;
 
+import java.util.List;
+
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.input.InputEventAPI;
 
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
@@ -18,6 +21,8 @@ public final class AudioFeedbackComponent<
     final private int initCompTicks = 10;
     private long accumulatedGameTicks = 0;
 
+    public boolean playedUIHoverSound = false;
+
     public AudioFeedbackComponent(PluginType plugin) {
         super(plugin);
     }
@@ -29,9 +34,9 @@ public final class AudioFeedbackComponent<
             getPlugin().isValidUIContext() &&
             accumulatedGameTicks > initCompTicks
         ) {
-            if (!input.playedUIHoverSound) {
+            if (!playedUIHoverSound) {
                 Global.getSoundPlayer().playUISound("ui_button_mouseover", 1, 1);
-                input.playedUIHoverSound = true;
+                playedUIHoverSound = true;
             }
             if (input.LMBUpLastFrame) {
                 Global.getSoundPlayer().playUISound("ui_button_pressed", 1, 1);
@@ -39,5 +44,12 @@ public final class AudioFeedbackComponent<
         }
 
         accumulatedGameTicks++;
+    }
+
+    @Override
+    public final void processInput(List<InputEventAPI> events, InputSnapshot input) {
+        if (!input.hoveredLastFrame) {
+            playedUIHoverSound = false;
+        }
     }
 }

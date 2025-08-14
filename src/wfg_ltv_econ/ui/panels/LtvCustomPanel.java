@@ -13,6 +13,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
@@ -203,7 +204,93 @@ public abstract class LtvCustomPanel<
      */
     public abstract void createPanel();
 
+    /**
+     * Marks a panel as being able to accept and store a {@link HasActionListener}.
+     * <p>
+     * This interface is primarily intended for panels that work with the explicit
+     * interaction methods defined in {@link HasActionListener}, allowing {@code ActionListenerComponent} 
+     * to automatically invoke those callbacks.
+     * </p>
+     * 
+     * <p>
+     * Panels implementing this interface may also accept {@link TooltipMakerAPI.ActionListenerDelegate}.
+     * <strong>This built-in delegate is <em>not</em> automatically invoked</strong> by this system —
+     * if you wish to use it, you must manually call its {@code actionPerformed()} method
+     * from your panel's plugin logic under the desired conditions.
+     * </p>
+     *
+     * <p>
+     * This design keeps {@code AcceptsActionListener} compatible with both approaches while
+     * encouraging use of the more explicit, strongly-typed {@link HasActionListener} methods
+     * for clarity and composability.
+     * </p>
+     */
+    public interface AcceptsActionListener {
+        // Custom Listener
+        void setActionListener(HasActionListener listener);
+        Optional<HasActionListener> getActionListener();
+
+        // API listener
+        void setVanillaActionListener(ActionListenerDelegate listener);
+        Optional<ActionListenerDelegate> getVanillaActionListener();
+        }
+
+    /**
+     * A strongly-typed, explicit alternative to {@link com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate}.
+     * <p>
+     * While the built-in {@code ActionListenerDelegate} reports a single, catch-all {@code actionPerformed} event,
+     * this listener clearly differentiates between interaction types — clicks, hovering, hover start/end transitions,
+     * and keyboard shortcuts — allowing implementers to respond with precision.
+     * </p>
+     * 
+     * <p>
+     * Implement this interface in any {@code LtvCustomPanel} (or compatible type) to handle specific user interactions.
+     * The {@code source} parameter passed to each method is always the panel where the event originated.
+     * </p>
+     */
+    public static interface HasActionListener {
+
+        /**
+         * Called once per frame while the cursor is over the panel.
+         */
+        default void onHover(LtvCustomPanel<?, ?, ?> source) {}
+
+        /**
+         * Called once when the cursor first enters the panel.
+         */
+        default void onHoverStarted(LtvCustomPanel<?, ?, ?> source) {}
+
+        /**
+         * Called once when the cursor leaves the panel.
+         */
+        default void onHoverEnded(LtvCustomPanel<?, ?, ?> source) {}
+
+        default void onClicked(LtvCustomPanel<?, ?, ?> source) {}
+
+        default void onShortcutPressed(LtvCustomPanel<?, ?, ?> source) {}
+
+        /**
+         * Use org.lwjgl.input.Keyboard
+         */
+        default Optional<Integer> getShortcut() {
+            return Optional.empty();
+        } 
+    }
+
     public static interface HasFader {
+
+        /**
+         * Indicates whether this panel controls its own {@code faderUtil} instance.
+         * <p>
+         * Some panels may instead synchronize their fading behavior with another panel's fader.
+         * In such cases, this should return {@code false}.
+         *
+         * @return {@code true} if this panel manages its own fader instance,
+         *         {@code false} if it follows another panel's fader.
+         */
+        default boolean isFaderOwner() {
+            return true;
+        }
 
         default FaderUtil getFader() {
             return new FaderUtil(0, 0, 0.2f, true, true);

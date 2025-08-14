@@ -11,11 +11,13 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
+import wfg_ltv_econ.ui.panels.components.ActionListenerComponent;
 import wfg_ltv_econ.ui.panels.components.AudioFeedbackComponent;
 import wfg_ltv_econ.ui.panels.components.BackgroundComponent;
 import wfg_ltv_econ.ui.panels.components.BaseComponent;
@@ -56,9 +58,11 @@ public abstract class LtvCustomPanelPlugin<
     public static class InputSnapshot {
         public boolean LMBDownLastFrame = false;
         public boolean LMBUpLastFrame = false;
-        public boolean hoveredLastFrame = false;
-        public boolean playedUIHoverSound = false;
         public boolean hasClickedBefore = false;
+
+        public boolean hoveredLastFrame = false;
+        public boolean hoverStarted = false;
+        public boolean hoverEnded = false;
 
         public void resetFrameFlags() {
             LMBDownLastFrame = false;
@@ -105,6 +109,10 @@ public abstract class LtvCustomPanelPlugin<
 
         if (panel instanceof HasFader) {
             addComponent(new FaderComponent(this));
+        }
+
+        if (panel instanceof AcceptsActionListener) {
+            addComponent(new ActionListenerComponent(this));
         }
     }
 
@@ -174,11 +182,14 @@ public abstract class LtvCustomPanelPlugin<
                 final float h = pos.getHeight();
 
                 // Check for mouse over panel
+                boolean hoveredBefore = inputSnapshot.hoveredLastFrame;
                 inputSnapshot.hoveredLastFrame = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
+
+                inputSnapshot.hoverStarted = inputSnapshot.hoveredLastFrame && !hoveredBefore;
+                inputSnapshot.hoverEnded   = !inputSnapshot.hoveredLastFrame && hoveredBefore;
             }
 
             if (!inputSnapshot.hoveredLastFrame) {
-                inputSnapshot.playedUIHoverSound = false;
                 inputSnapshot.hasClickedBefore = false;
             }
 

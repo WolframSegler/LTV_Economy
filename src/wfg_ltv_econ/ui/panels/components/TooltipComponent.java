@@ -42,13 +42,29 @@ public final class TooltipComponent<
         if (tooltip == null) {
             return;
         }
-        final PositionAPI pos = tooltip.getPosition();
+        final PositionAPI posTp = tooltip.getPosition();
 
         RenderUtils.drawQuad(
-            pos.getX(),
-            pos.getY(),
-            pos.getWidth(),
-            pos.getHeight(),
+            posTp.getX(),
+            posTp.getY(),
+            posTp.getWidth(),
+            posTp.getHeight(),
+            BgColor,
+            alphaMult,
+            false
+        );
+
+        if (codex == null) {
+            return;
+        }
+
+        final PositionAPI posCd = codex.getPosition();
+
+        RenderUtils.drawQuad(
+            posCd.getX(),
+            posCd.getY(),
+            posCd.getWidth(),
+            posCd.getHeight(),
             BgColor,
             alphaMult,
             false

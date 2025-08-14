@@ -144,8 +144,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
         // Steal the members for the constructor
         MarketAPI market = (MarketAPI)ReflectionUtils.get(industryPanel, null, MarketAPI.class);
         UIPanelAPI coreUI = (UIPanelAPI) ReflectionUtils.get(industryPanel, null, CoreUIAPI.class);
-        UIPanelAPI overview = (UIPanelAPI) ((IndustryListPanel)industryPanel).getOverview();
-
         int width = (int) industryPanel.getPosition().getWidth();
         int height = (int) industryPanel.getPosition().getHeight();
 
@@ -156,14 +154,13 @@ public class LtvMarketReplacer implements EveryFrameScript {
             height,
             market,
             industryPanel,
-            coreUI,
-            overview
+            coreUI
         );
 
         managementPanel.addComponent(replacement.getPanel());
         UiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomLeft, 25);
 
-        if (LtvIndustryListPanel.indOptConstr == null) {
+        if (LtvIndustryListPanel.indOptCtor == null) {
             // Acquire the popup class from one of the widgets
             Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
 

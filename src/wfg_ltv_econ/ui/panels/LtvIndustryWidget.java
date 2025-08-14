@@ -2,8 +2,10 @@ package wfg_ltv_econ.ui.panels;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.awt.Color;
 
+import com.fs.graphics.A.D;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI.DismissDialogDelegate;
 import com.fs.starfarer.api.campaign.SpecialItemData;
@@ -12,6 +14,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.input.InputEventAPI;
@@ -33,7 +36,6 @@ import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
 
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
-import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.starfarer.campaign.ui.N;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
@@ -69,7 +71,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     private final Object originalWidget;
 
     private Industry m_industry;
-    private LtvSpritePanel.Base industryIcon;
+    private IndustryImagePanel industryIcon;
     private ButtonAPI constructionActionButton;
     private boolean tradeInfoPanel;
     private LtvIndustryListPanel IndustryPanel;
@@ -79,6 +81,9 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     private ConstructionMode constructionMode;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
+    /*
+     * Shared both by the Widget and IndustryImagePanel
+     */
     private FaderUtil m_fader = null;
     private Color BgColor = null;
 
@@ -107,7 +112,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         ((UIComponentAPI) originalWidget).getPosition().setLocation(getPos().getX(), getPos().getY());
 
         m_fader = new FaderUtil(0.2f, 0.2f, 0.2f, false, true);
-        BgColor = m_industry.isImproved() ? Misc.getStoryOptionColor() : darkColor;
+        BgColor = m_industry.isImproved() ? Misc.getStoryOptionColor() : gridColor;
 
         initializePlugin(hasPlugin);
         createPanel();
@@ -115,6 +120,48 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
     public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
+        getPlugin().setOffsets(-1, -1, 2, 2);
+    }
+
+    @Override
+    public Color getBgColor() {
+        return BgColor;
+    }
+
+    @Override
+    public void setBgColor(Color color) {
+        BgColor = color;
+    }
+
+    @Override
+    public boolean isBgEnabled() {
+        return true;
+    }
+
+    @Override
+    public float getBgTransparency() {
+        return 1;
+    }
+
+    @Override
+    public FaderUtil getFader() {
+        return m_fader;
+    }
+
+    @Override
+    public boolean isFaderOwner() {
+        return false;
+    }
+
+    @Override
+    public Glow getGlowType() {
+        return Glow.UNDERLAY;
+    }
+
+    @Override
+    public Color getGlowColor() {
+        // return UiUtils.adjustAlpha(Color.WHITE, 0.33f);
+        return getFaction().getBaseUIColor();
     }
 
     public void createPanel() {
@@ -164,7 +211,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         tp.addComponent(constructionActionButton).inBL(0, 0);
 
 
-        industryIcon = new Base(
+        industryIcon = new IndustryImagePanel(
             getRoot(),
             m_panel,
             getMarket(),
@@ -253,11 +300,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
             N slider = new N((String) null, 0, 100);
 
-            final String text = ((LabelAPI) slider.getValue()).getText();
-            final LabelAPI label = Global.getSettings().createLabel(text, Fonts.VICTOR_10);
-            ReflectionUtils.set(slider.getValue(), label);
-
-            // slider.getValue().getRenderer().o00000(D.Ò00000(Fonts.VICTOR_10));
+            slider.getValue().getRenderer().o00000(D.Ò00000(Fonts.VICTOR_10));
             slider.getValue().getPosition().setYAlignOffset(1);
             slider.setBarColor(Misc.interpolateColor(baseColor, darkColor, 0.5f));
             slider.setTextColor(baseColor);
@@ -273,41 +316,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         if (constructionQueueIndex >= 0) {
             setNormalMode();
         }
-    }
-
-    @Override
-    public Color getBgColor() {
-        return BgColor;
-    }
-
-    @Override
-    public void setBgColor(Color color) {
-        BgColor = color;
-    }
-
-    @Override
-    public boolean isBgEnabled() {
-        return true;
-    }
-
-    @Override
-    public float getBgTransparency() {
-        return 1;
-    }
-
-    @Override
-    public FaderUtil getFader() {
-        return m_fader;
-    }
-
-    @Override
-    public Glow getGlowType() {
-        return Glow.OVERLAY;
-    }
-
-    @Override
-    public Color getGlowColor() {
-        return UiUtils.adjustAlpha(Color.WHITE, 0.33f);
     }
 
     public void clearLabels() {
@@ -329,7 +337,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         constructionStatusText.setColor(baseColor);
         constructionStatusText.autoSizeToWidth(PANEL_WIDTH);
 
-        add(constructionStatusText).inMid().setYAlignOffset(-TITLE_HEIGHT / 2);
+        add(constructionStatusText).inMid().setYAlignOffset(-TITLE_HEIGHT / 2f);
         constructionActionButton.unhighlight();
 
         constructionMode = ConstructionMode.NORMAL;
@@ -488,7 +496,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                     targetItem.cost = tempCost;
 
                     if (queueItems.indexOf(sourceItem) != 0 && queueItems.indexOf(targetItem) != 0) {
-                        IndustryPanel.recreateOverviewNoEconStep();
+                        IndustryPanel.createPanel();
                     } else {
                         IndustryPanel.recreateOverview();
                     }
@@ -509,7 +517,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                     if (constructionQueueIndex == 0) {
                         IndustryPanel.recreateOverview();
                     } else {
-                        IndustryPanel.recreateOverviewNoEconStep();
+                        IndustryPanel.createPanel();
                     }
                 }
             }
@@ -531,10 +539,10 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                     interactionMode = MarketInteractionMode.REMOTE;
                 }
 
-                if (LtvIndustryListPanel.indOptConstr != null) {
+                if (LtvIndustryListPanel.indOptCtor != null) {
                     // b var17 = new b(this.øôöO00, this, var14, CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
 
-                    DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptConstr.newInstance(
+                    DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptCtor.newInstance(
                         m_industry,
                         originalWidget,
                         interactionMode,
@@ -562,14 +570,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         y -= gap;
         w += gap * 2;
         h += gap * 2;
-
-        Color quadColor = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
-
-        if (m_industry.isIndustry()) {
-            RenderUtils.drawQuad(x, y + h, w, TITLE_HEIGHT, quadColor, 1.0f, false);
-        }
-
-        RenderUtils.drawQuad(x, y, w, h, quadColor, alphaMult, false);
 
         float btnGlow = constructionActionButton.getGlowBrightness();
 
@@ -628,5 +628,35 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         NORMAL, // Ó00000
         SWAP,   // Ò00000
         REMOVE, // String
+    }
+
+    private class IndustryImagePanel extends LtvSpritePanel<IndustryImagePanel> 
+        implements HasFader {
+
+        public IndustryImagePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+            LtvSpritePanelPlugin<IndustryImagePanel> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
+            super(root, parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+        }
+
+        @Override
+        public FaderUtil getFader() {
+            return m_fader;
+        }
+
+        @Override
+        public Glow getGlowType() {
+            return Glow.ADDITIVE;
+        }
+
+        @Override
+        public Optional<SpriteAPI> getSprite() {
+            return Optional.ofNullable(m_sprite);
+        }
+
+        @Override
+        public Color getGlowColor() {
+            return UiUtils.adjustAlpha(Color.WHITE, 0.33f);
+            // getFaction().getBaseUIColor()
+        }
     }
 }
