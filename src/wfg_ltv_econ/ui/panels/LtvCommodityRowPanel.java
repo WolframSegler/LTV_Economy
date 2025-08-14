@@ -19,11 +19,11 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 
+import wfg_ltv_econ.ui.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
-import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.CommodityStats;

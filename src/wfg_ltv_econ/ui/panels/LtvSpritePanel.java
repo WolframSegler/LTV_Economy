@@ -9,8 +9,8 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.components.OutlineComponent.Outline;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
-import wfg_ltv_econ.ui.panels.components.OutlineComponent.Outline;
 
 
 /**

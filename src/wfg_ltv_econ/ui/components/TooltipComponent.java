@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.panels.components;
+package wfg_ltv_econ.ui.components;
 
 import java.awt.Color;
 import java.util.List;
@@ -74,7 +74,7 @@ public final class TooltipComponent<
     @Override
     public final void advance(float amount, InputSnapshot input) {
 
-        if (provider.isTooltipEnabled() && input.hoveredLastFrame && !input.hasClickedBefore && getPlugin().isValidUIContext()) {
+        if (provider.isTooltipEnabled() && input.hoveredLastFrame && !input.hasLMBClickedBefore && getPlugin().isValidUIContext()) {
             hoverTime += amount;
             if (hoverTime > provider.getTooltipDelay()) {
                 showTooltip();

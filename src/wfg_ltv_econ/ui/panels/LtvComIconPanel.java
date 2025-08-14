@@ -20,9 +20,9 @@ import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.util.UiUtils.AnchorType;
+import wfg_ltv_econ.ui.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
-import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 
 public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements HasTooltip, HasFader {
 

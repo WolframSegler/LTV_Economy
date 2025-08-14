@@ -18,9 +18,9 @@ import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.LtvUIState.UIState;
+import wfg_ltv_econ.ui.components.FaderComponent.Glow;
+import wfg_ltv_econ.ui.components.OutlineComponent.Outline;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
-import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
-import wfg_ltv_econ.ui.panels.components.OutlineComponent.Outline;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
@@ -272,7 +272,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                 public void advance(float amount) {
                     super.advance(amount);
 
-                    if (inputSnapshot.LMBUpLastFrame && inputSnapshot.hasClickedBefore) {
+                    if (inputSnapshot.LMBUpLastFrame && inputSnapshot.hasLMBClickedBefore) {
                         SortableTable.this.sortRows(getPanel().listIndex);
                     }
                 }
@@ -497,7 +497,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                 public void advance(float amount) {
                     super.advance(amount);
 
-                    if (inputSnapshot.LMBUpLastFrame && inputSnapshot.hasClickedBefore) {
+                    if (inputSnapshot.LMBUpLastFrame && inputSnapshot.hasLMBClickedBefore) {
                         SortableTable table = SortableTable.this;
                         table.selectRow(m_panel);
 
@@ -505,7 +505,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                             table.selectionListener.onRowSelected(m_panel);
                         }
 
-                        inputSnapshot.hasClickedBefore = false;
+                        inputSnapshot.hasLMBClickedBefore = false;
                     }
                 }
             }, market);

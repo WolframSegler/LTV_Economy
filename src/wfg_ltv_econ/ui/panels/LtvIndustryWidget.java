@@ -39,10 +39,11 @@ import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.campaign.ui.N;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.ui.components.FaderComponent.Glow;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
-import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
@@ -53,7 +54,7 @@ import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 
 public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget, CustomPanelAPI>
-    implements ActionListenerDelegate, DismissDialogDelegate, HasBackground, HasFader {
+    implements ActionListenerDelegate, DismissDialogDelegate, HasBackground, HasFader, HasActionListener {
 
     public final static int pad = 3;
     public final static int opad = 10;
@@ -72,7 +73,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
     private Industry m_industry;
     private IndustryImagePanel industryIcon;
-    private ButtonAPI constructionActionButton;
+    private boolean isListenerEnabled = true;
     private boolean tradeInfoPanel;
     private LtvIndustryListPanel IndustryPanel;
     private int constructionQueueIndex;
@@ -164,6 +165,13 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         return getFaction().getBaseUIColor();
     }
 
+    @Override
+    public boolean isListenerEnabled() {
+        return isListenerEnabled;
+    }
+
+    
+
     public void createPanel() {
 
         // Button Listener
@@ -194,23 +202,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         add(titlePanel.getPanel()).inTL(0, 0);
 
 
-        constructionActionButton = tp.addButton(
-            "",
-            null,
-            new Color(0, 0, 0, 0),
-            new Color(0, 0, 0, 0),
-            Alignment.MID,
-            CutStyle.NONE,
-            PANEL_WIDTH,
-            IMAGE_HEIGHT,
-            pad
-        );
-        constructionActionButton.setQuickMode(true);
-        constructionActionButton.setOpacity(0.0000001f);
-
-        tp.addComponent(constructionActionButton).inBL(0, 0);
-
-
         industryIcon = new IndustryImagePanel(
             getRoot(),
             m_panel,
@@ -230,7 +221,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
         if (!DebugFlags.COLONY_DEBUG && !getMarket().isPlayerOwned()) {
             industryIcon.setColor(Color.white);
-            constructionActionButton.setEnabled(false);
+            isListenerEnabled = false;
         }
 
         add(industryIcon.getPanel()).inBL(0, 0);
@@ -338,7 +329,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         constructionStatusText.autoSizeToWidth(PANEL_WIDTH);
 
         add(constructionStatusText).inMid().setYAlignOffset(-TITLE_HEIGHT / 2f);
-        constructionActionButton.unhighlight();
 
         constructionMode = ConstructionMode.NORMAL;
         addCostTimeLabels();
@@ -369,7 +359,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
             add(removeLabel).aboveMid((UIComponentAPI)constructionStatusText, 0);
             add(refundLabel).belowMid((UIComponentAPI)constructionStatusText, 0);
-            constructionActionButton.highlight();
             constructionMode = ConstructionMode.REMOVE;
             addCostTimeLabels();
         }
@@ -382,7 +371,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         
         labels.add(swapLabel);
         add(swapLabel).aboveMid((UIComponentAPI)constructionStatusText, 0);
-        constructionActionButton.highlight();
         constructionMode = ConstructionMode.SWAP;
         addCostTimeLabels();
     }
@@ -433,6 +421,130 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     public ConstructionMode getMode() {
       return constructionMode;
    }
+
+    @Override
+    public void onClicked(LtvCustomPanel<?, ?, ?> source) {
+        if (tradeInfoPanel || !(data instanceof InputEventAPI)) {
+            return;
+        }
+
+        final InputEventAPI event = (InputEventAPI) data;
+        LtvIndustryWidget targetInd;
+
+        if (constructionQueueIndex >= 0) {
+
+            if (event.isRMBEvent()) {
+                for (Object widgetObj : IndustryPanel.getWidgets()) {
+                    if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
+                        widget.setNormalMode();
+                    }
+                }
+
+                return;
+            }
+
+            if (constructionMode == ConstructionMode.NORMAL) {
+                for (Object widgetObj : IndustryPanel.getWidgets()) {
+                if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
+                    if (widget == this) {
+                        widget.setRemoveMode();
+                    } else {
+                        widget.setSwapMode();
+                    }
+                }
+                }
+            } else if (constructionMode == ConstructionMode.SWAP) {
+                targetInd = null;
+
+                for (Object widgetObj : IndustryPanel.getWidgets()) {
+                    if (widgetObj instanceof LtvIndustryWidget widget &&
+                        widget.getQueueIndex() >= 0 &&
+                        widget.constructionMode == ConstructionMode.REMOVE
+                    ) {
+                        targetInd = widget;
+                        break;
+                    }
+                }
+
+                // Swap industries
+
+                List<ConstructionQueueItem> queueItems = getMarket().getConstructionQueue().getItems();
+                if (targetInd != null && targetInd.constructionQueueIndex >= 0 && targetInd.constructionQueueIndex < queueItems.size()
+                    && constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
+
+                    ConstructionQueueItem sourceItem = queueItems.get(constructionQueueIndex);
+                    ConstructionQueueItem targetItem = queueItems.get(targetInd.constructionQueueIndex);
+
+                    String tempID = sourceItem.id;
+                    int tempCost  = sourceItem.cost;
+
+                    sourceItem.id = targetItem.id;
+                    sourceItem.cost = targetItem.cost;
+                    targetItem.id = tempID;
+                    targetItem.cost = tempCost;
+
+                    if (queueItems.indexOf(sourceItem) != 0 && queueItems.indexOf(targetItem) != 0) {
+                        IndustryPanel.createPanel();
+                    } else {
+                        IndustryPanel.recreateOverview();
+                    }
+                }
+            } else if (constructionMode == ConstructionMode.REMOVE) {
+                List<ConstructionQueueItem> queueItems = getMarket().getConstructionQueue().getItems();
+                if (constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
+
+                    final ConstructionQueueItem item = queueItems.get(constructionQueueIndex);
+                    getMarket().getConstructionQueue().removeItem(item.id);
+
+                    int itemCost = item.cost;
+                    if (itemCost > 0) {
+                        Global.getSector().getPlayerFleet().getCargo().getCredits().add(itemCost);
+                        Misc.addCreditsMessage("Received %s", itemCost);
+                    }
+
+                    if (constructionQueueIndex == 0) {
+                        IndustryPanel.recreateOverview();
+                    } else {
+                        IndustryPanel.createPanel();
+                    }
+                }
+            }
+        } else {
+            for (Object widgetObj : IndustryPanel.getWidgets()) {
+                if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
+                    widget.setNormalMode();
+                }
+            }
+
+            try {
+                UIPanelAPI overview = IndustryPanel.getOverview();
+                UIPanelAPI infoPanel = (UIPanelAPI) ReflectionUtils.invoke(overview, "getInfoPanel");
+                Object a = ReflectionUtils.invoke(infoPanel, "getTradePanel");
+                Object outpostPanelParams = ReflectionUtils.invoke(a, "getOutpostPanelParams");
+
+                MarketInteractionMode interactionMode = MarketInteractionMode.LOCAL;
+                if (outpostPanelParams != null) {
+                    interactionMode = MarketInteractionMode.REMOTE;
+                }
+
+                if (LtvIndustryListPanel.indOptCtor != null) {
+                    // b var17 = new b(this.øôöO00, this, var14, CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
+
+                    DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptCtor.newInstance(
+                        m_industry,
+                        originalWidget,
+                        interactionMode,
+                        CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
+                        originalWidget
+                    );
+                    ReflectionUtils.invoke(dialog, "show", 0f, 0f);
+                }
+                tradeInfoPanel = true;
+            } catch (Exception e) {
+                Global.getLogger(LtvMarketReplacer.class).error("Custom Widget failed", e);
+            }
+        }
+    }
 
     @Override
     public void actionPerformed(Object data, Object source) {
@@ -571,8 +683,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         w += gap * 2;
         h += gap * 2;
 
-        float btnGlow = constructionActionButton.getGlowBrightness();
-
         if (btnGlow > 0) {
             Color glowColor = UiUtils.adjustAlpha(Color.white, btnGlow * 0.33f);
 
@@ -612,10 +722,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         tradeInfoPanel = false;
     }
 
-    public ButtonAPI getButton() {
-        return constructionActionButton;
-    }
-
     public Industry getIndustry() {
         return m_industry;
     }
@@ -631,7 +737,9 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     }
 
     private class IndustryImagePanel extends LtvSpritePanel<IndustryImagePanel> 
-        implements HasFader {
+        implements HasFader, AcceptsActionListener {
+
+        HasActionListener m_listener = null;
 
         public IndustryImagePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
             LtvSpritePanelPlugin<IndustryImagePanel> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
@@ -657,6 +765,16 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         public Color getGlowColor() {
             return UiUtils.adjustAlpha(Color.WHITE, 0.33f);
             // getFaction().getBaseUIColor()
+        }
+
+        @Override
+        public Optional<HasActionListener> getActionListener() {
+            return Optional.ofNullable(m_listener);
+        }
+
+        @Override
+        public void setActionListener(HasActionListener a) {
+            m_listener = a;
         }
     }
 }

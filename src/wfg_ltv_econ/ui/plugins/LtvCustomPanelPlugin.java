@@ -10,6 +10,13 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
+import wfg_ltv_econ.ui.components.ActionListenerComponent;
+import wfg_ltv_econ.ui.components.AudioFeedbackComponent;
+import wfg_ltv_econ.ui.components.BackgroundComponent;
+import wfg_ltv_econ.ui.components.BaseComponent;
+import wfg_ltv_econ.ui.components.FaderComponent;
+import wfg_ltv_econ.ui.components.OutlineComponent;
+import wfg_ltv_econ.ui.components.TooltipComponent;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
@@ -17,13 +24,6 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
-import wfg_ltv_econ.ui.panels.components.ActionListenerComponent;
-import wfg_ltv_econ.ui.panels.components.AudioFeedbackComponent;
-import wfg_ltv_econ.ui.panels.components.BackgroundComponent;
-import wfg_ltv_econ.ui.panels.components.BaseComponent;
-import wfg_ltv_econ.ui.panels.components.FaderComponent;
-import wfg_ltv_econ.ui.panels.components.OutlineComponent;
-import wfg_ltv_econ.ui.panels.components.TooltipComponent;
 
 /**
  * The plugin serves as the central coordinator for its associated {@link LtvCustomPanel} and components.
@@ -58,7 +58,11 @@ public abstract class LtvCustomPanelPlugin<
     public static class InputSnapshot {
         public boolean LMBDownLastFrame = false;
         public boolean LMBUpLastFrame = false;
-        public boolean hasClickedBefore = false;
+        public boolean hasLMBClickedBefore = false;
+
+        public boolean RMBDownLastFrame = false;
+        public boolean RMBUpLastFrame = false;
+        public boolean hasRMBClickedBefore = false;
 
         public boolean hoveredLastFrame = false;
         public boolean hoverStarted = false;
@@ -67,6 +71,9 @@ public abstract class LtvCustomPanelPlugin<
         public void resetFrameFlags() {
             LMBDownLastFrame = false;
             LMBUpLastFrame = false;
+
+            RMBDownLastFrame = false;
+            RMBUpLastFrame = false;
         }
     }
 
@@ -187,19 +194,34 @@ public abstract class LtvCustomPanelPlugin<
 
                 inputSnapshot.hoverStarted = inputSnapshot.hoveredLastFrame && !hoveredBefore;
                 inputSnapshot.hoverEnded   = !inputSnapshot.hoveredLastFrame && hoveredBefore;
-            }
 
-            if (!inputSnapshot.hoveredLastFrame) {
-                inputSnapshot.hasClickedBefore = false;
-            }
+                if (!inputSnapshot.hoveredLastFrame) {
+                    inputSnapshot.hasLMBClickedBefore = false;
+                    inputSnapshot.hasRMBClickedBefore = false;
+                }
 
-            if (inputSnapshot.hoveredLastFrame && inputSnapshot.hasClickedBefore && event.isLMBUpEvent()) {
-                inputSnapshot.LMBUpLastFrame = true;
-            }
+                if (inputSnapshot.hoveredLastFrame) {
+                    if (inputSnapshot.hasLMBClickedBefore && event.isLMBUpEvent()) {
+                        inputSnapshot.LMBUpLastFrame = true;
+                    }
 
-            if (inputSnapshot.hoveredLastFrame && event.isLMBDownEvent()) {
-                inputSnapshot.LMBDownLastFrame = true;
-                inputSnapshot.hasClickedBefore = true;
+                    if (inputSnapshot.hasRMBClickedBefore && event.isRMBUpEvent()) {
+                        inputSnapshot.RMBUpLastFrame = true;
+                    }
+                }
+
+                if (inputSnapshot.hoveredLastFrame) {
+
+                    if (event.isLMBDownEvent()) {
+                        inputSnapshot.LMBDownLastFrame = true;
+                        inputSnapshot.hasLMBClickedBefore = true;
+                    }
+
+                    if (event.isRMBDownEvent()) {
+                        inputSnapshot.RMBDownLastFrame = true;
+                        inputSnapshot.hasRMBClickedBefore = true;
+                    }
+                }
             }
         }
 

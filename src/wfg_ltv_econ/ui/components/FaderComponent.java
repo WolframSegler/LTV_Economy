@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.panels.components;
+package wfg_ltv_econ.ui.components;
 
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.FaderUtil;
@@ -58,7 +58,7 @@ public final class FaderComponent<
             panel.getGlowColor(), glowAmount
         );
 
-        if (input.hasClickedBefore) {
+        if (input.hasLMBClickedBefore) {
             RenderUtils.drawGlowOverlay(
                 pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
                 panel.getGlowColor(), glowAmount / 2

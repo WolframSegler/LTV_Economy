@@ -20,8 +20,8 @@ import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.CampaignEngine;
 
-import wfg_ltv_econ.ui.panels.components.FaderComponent.Glow;
-import wfg_ltv_econ.ui.panels.components.OutlineComponent.Outline;
+import wfg_ltv_econ.ui.components.FaderComponent.Glow;
+import wfg_ltv_econ.ui.components.OutlineComponent.Outline;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
@@ -211,29 +211,29 @@ public abstract class LtvCustomPanel<
      * interaction methods defined in {@link HasActionListener}, allowing {@code ActionListenerComponent} 
      * to automatically invoke those callbacks.
      * </p>
-     * 
-     * <p>
-     * Panels implementing this interface may also accept {@link TooltipMakerAPI.ActionListenerDelegate}.
-     * <strong>This built-in delegate is <em>not</em> automatically invoked</strong> by this system —
-     * if you wish to use it, you must manually call its {@code actionPerformed()} method
-     * from your panel's plugin logic under the desired conditions.
-     * </p>
      *
      * <p>
-     * This design keeps {@code AcceptsActionListener} compatible with both approaches while
-     * encouraging use of the more explicit, strongly-typed {@link HasActionListener} methods
-     * for clarity and composability.
+     * This design keeps {@code AcceptsActionListener} compatible with both {@link HasActionListener}
+     * and {@link TooltipMakerAPI.ActionListenerDelegate} while encouraging use of the more explicit,
+     * strongly-typed {@link HasActionListener} methods for clarity and composability.
      * </p>
      */
     public interface AcceptsActionListener {
-        // Custom Listener
-        void setActionListener(HasActionListener listener);
-        Optional<HasActionListener> getActionListener();
-
-        // API listener
-        void setVanillaActionListener(ActionListenerDelegate listener);
-        Optional<ActionListenerDelegate> getVanillaActionListener();
+        default Optional<HasActionListener> getActionListener() {
+            return Optional.empty();
         }
+        default void setActionListener(HasActionListener listener) {}
+
+        /**
+         * Optional support for the vanilla Starsector ActionListenerDelegate.
+         * This listener is not invoked automatically by the custom ActionListenerComponent.
+         * If you want to use it, you must call actionPerformed() manually from your plugin.
+         */
+        default Optional<ActionListenerDelegate> getVanillaActionListener() {
+            return Optional.empty();
+        }
+        default void setVanillaActionListener(ActionListenerDelegate listener) {}
+    }
 
     /**
      * A strongly-typed, explicit alternative to {@link com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate}.
@@ -250,6 +250,10 @@ public abstract class LtvCustomPanel<
      */
     public static interface HasActionListener {
 
+        default boolean isListenerEnabled() {
+            return true;
+        }
+
         /**
          * Called once per frame while the cursor is over the panel.
          */
@@ -265,7 +269,7 @@ public abstract class LtvCustomPanel<
          */
         default void onHoverEnded(LtvCustomPanel<?, ?, ?> source) {}
 
-        default void onClicked(LtvCustomPanel<?, ?, ?> source) {}
+        default void onClicked(LtvCustomPanel<?, ?, ?> source, boolean isLeftClick) {}
 
         default void onShortcutPressed(LtvCustomPanel<?, ?, ?> source) {}
 

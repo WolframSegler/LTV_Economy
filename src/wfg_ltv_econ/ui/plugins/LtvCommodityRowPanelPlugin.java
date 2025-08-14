@@ -41,7 +41,7 @@ public class LtvCommodityRowPanelPlugin extends LtvCustomPanelPlugin<
                 dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
             }
 
-            inputSnapshot.hasClickedBefore = false;
+            inputSnapshot.hasLMBClickedBefore = false;
         }
     }
 }

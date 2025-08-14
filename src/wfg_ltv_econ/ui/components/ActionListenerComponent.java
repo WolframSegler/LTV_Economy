@@ -1,10 +1,6 @@
-package wfg_ltv_econ.ui.panels.components;
-
-import java.util.List;
+package wfg_ltv_econ.ui.components;
 
 import org.lwjgl.input.Keyboard;
-
-import com.fs.starfarer.api.input.InputEventAPI;
 
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
@@ -23,10 +19,18 @@ public final class ActionListenerComponent<
     }
 
     @Override
-    public final void processInput(List<InputEventAPI> events, InputSnapshot input) {
+    public final void advance(float amount, InputSnapshot input) {
         getPanel().getActionListener().ifPresent(listener -> {
+            if (!listener.isListenerEnabled()) {
+                return;
+            }
+            
             if (input.LMBUpLastFrame) {
-                listener.onClicked(getPanel());
+                listener.onClicked(getPanel(), true);
+            }
+
+            if (input.RMBUpLastFrame) {
+                listener.onClicked(getPanel(), false);
             }
 
             listener.getShortcut().ifPresent(shortcut -> {
@@ -50,10 +54,6 @@ public final class ActionListenerComponent<
 
             if (input.hoverEnded) {
                 listener.onHoverEnded(getPanel());
-            }
-
-            for (InputEventAPI event : events) {
-                listener.actionPerformed(event, getPanel());
             }
         });
     }
