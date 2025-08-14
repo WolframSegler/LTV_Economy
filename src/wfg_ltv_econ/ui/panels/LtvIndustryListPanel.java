@@ -128,11 +128,6 @@ public class LtvIndustryListPanel
 				i * (LtvIndustryWidget.PANEL_WIDTH + opad),
 				j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
 			);
-
-			TooltipMakerAPI tp = getPanel().createUIElement(ind.getTooltipWidth(), 0, false);
-			ind.createTooltip(IndustryTooltipMode.NORMAL, tp, false);
-			
-			TooltipUtils.dynamicPos(tp, widget.getPanel(), 0);
 		}
 
 		// Queued industries
@@ -157,11 +152,6 @@ public class LtvIndustryListPanel
 				i * (LtvIndustryWidget.PANEL_WIDTH + opad),
 				j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
 			);
-
-			TooltipMakerAPI tp = getPanel().createUIElement(ind.getTooltipWidth(), 0, false);
-			ind.createTooltip(IndustryTooltipMode.QUEUED, tp, false);
-			
-			TooltipUtils.dynamicPos(tp, widget.getPanel(), 0);
 		}
 
 		add(widgetWrapper).inTL(0, 0);
@@ -335,7 +325,7 @@ public class LtvIndustryListPanel
 			boolean mouseOverWidget = events.stream()
 					.filter(InputEventAPI::isMouseMoveEvent)
 					.anyMatch(event -> widgets.stream()
-							.anyMatch(widget -> ((LtvIndustryWidget) widget).getButton().getPosition()
+							.anyMatch(widget -> ((LtvIndustryWidget) widget).getIndustryIcon().getPos()
 									.containsEvent(event)));
 
 			if (mouseOverWidget) {
@@ -346,13 +336,13 @@ public class LtvIndustryListPanel
 		if (anyWidgetNotNormal) {
 			InputEventAPI targetEvent = null;
 
-			eventLoop: for (InputEventAPI event : events) {
+			for (InputEventAPI event : events) {
 				if (event.isConsumed()) {
 					continue;
 				}
 				if (event.isLMBDownEvent() || event.isRMBDownEvent()) {
 					targetEvent = event;
-					break eventLoop;
+					break;
 				}
 			}
 

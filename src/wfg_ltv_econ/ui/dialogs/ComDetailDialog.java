@@ -186,7 +186,6 @@ public class ComDetailDialog implements CustomDialogDelegate {
                         pad);
 
                 add(tooltip).inBL(0, getPos().getHeight());
-                m_panel.bringComponentToTop(tooltip);
 
                 return tooltip;
             }
@@ -377,7 +376,6 @@ public class ComDetailDialog implements CustomDialogDelegate {
                     final float tpY = baseY;
 
                     getParent().addUIElement(tooltip).inTL(tpX, tpY);
-                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
                 }
@@ -449,7 +447,6 @@ public class ComDetailDialog implements CustomDialogDelegate {
                     final float tpY = baseY;
 
                     getParent().addUIElement(tooltip).inTL(tpX, tpY);
-                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
                 }
@@ -545,7 +542,6 @@ public class ComDetailDialog implements CustomDialogDelegate {
                     final float tpY = baseY;
 
                     getParent().addUIElement(tooltip).inTL(tpX, tpY);
-                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
                 }
@@ -623,7 +619,6 @@ public class ComDetailDialog implements CustomDialogDelegate {
                     final float tpY = baseRow2Y;
 
                     getParent().addUIElement(tooltip).inTL(tpX, tpY);
-                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
                 }
@@ -696,7 +691,6 @@ public class ComDetailDialog implements CustomDialogDelegate {
                     final float tpY = baseRow2Y;
 
                     getParent().addUIElement(tooltip).inTL(tpX, tpY);
-                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
                 }
@@ -769,7 +763,6 @@ public class ComDetailDialog implements CustomDialogDelegate {
                     final float tpY = baseRow2Y;
 
                     getParent().addUIElement(tooltip).inTL(tpX, tpY);
-                    getParent().bringComponentToTop(tooltip);
 
                     return tooltip;
                 }

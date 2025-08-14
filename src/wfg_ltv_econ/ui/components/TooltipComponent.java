@@ -1,12 +1,10 @@
 package wfg_ltv_econ.ui.components;
 
-import java.awt.Color;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
@@ -14,15 +12,12 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
-import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 
 public final class TooltipComponent<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
     PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasTooltip
 > extends BaseComponent<PluginType, PanelType>{
-
-    private static final Color BgColor = Color.BLACK;
 
     private final HasTooltip provider;
     private TooltipMakerAPI tooltip;
@@ -35,40 +30,6 @@ public final class TooltipComponent<
     public TooltipComponent(PluginType a, HasTooltip b) {
         super(a);
         provider = b;
-    }
-
-    @Override
-    public final void renderBelow(float alphaMult, InputSnapshot input) {
-        if (tooltip == null) {
-            return;
-        }
-        final PositionAPI posTp = tooltip.getPosition();
-
-        RenderUtils.drawQuad(
-            posTp.getX(),
-            posTp.getY(),
-            posTp.getWidth(),
-            posTp.getHeight(),
-            BgColor,
-            alphaMult,
-            false
-        );
-
-        if (codex == null) {
-            return;
-        }
-
-        final PositionAPI posCd = codex.getPosition();
-
-        RenderUtils.drawQuad(
-            posCd.getX(),
-            posCd.getY(),
-            posCd.getWidth(),
-            posCd.getHeight(),
-            BgColor,
-            alphaMult,
-            false
-        );
     }
 
     @Override
@@ -116,14 +77,22 @@ public final class TooltipComponent<
             tooltip = provider.createAndAttachTooltip();
             if (tooltip instanceof StandardTooltipV2Expandable standard) {
                 standard.setShowBorder(true);
+                standard.setShowBackground(true);
+                standard.setBgAlpha(1f);
             }
+            provider.getTooltipParent().bringComponentToTop(tooltip);
         }
 
         if (codex == null) {
             codex = provider.createAndAttachCodex().orElse(null);
             if (codex instanceof StandardTooltipV2Expandable standard) {
                 standard.setShowBorder(true);
+                standard.setShowBackground(true);
+                standard.setBgAlpha(1f);
             }
+            provider.getCodexParent().ifPresent(attachment -> {
+                attachment.bringComponentToTop(codex);
+            });
         }
     }
 

@@ -130,7 +130,6 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
         }
         
         getParent().addUIElement(m_tooltip);
-        getParent().bringComponentToTop(m_tooltip);
         TooltipUtils.mouseCornerPos(m_tooltip, opad);
 
         return m_tooltip;
@@ -155,7 +154,6 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
         }
 
         getParent().addUIElement(codex);
-        getParent().bringComponentToTop(codex);
         UiUtils.anchorPanel(codex, m_tooltip, AnchorType.BottomLeft, opad + pad);
 
         return Optional.ofNullable(codex);

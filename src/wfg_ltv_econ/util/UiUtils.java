@@ -165,6 +165,17 @@ public class UiUtils {
     }
 
     /**
+     * values below 1 lower brightness. Values above 1 increase it.
+     */
+    public static final Color adjustBrightness(Color base, float factor) {
+        int r = Math.min(255, (int) (base.getRed()   * factor));
+        int g = Math.min(255, (int) (base.getGreen() * factor));
+        int b = Math.min(255, (int) (base.getBlue()  * factor));
+        
+        return new Color(r, g, b, base.getAlpha());
+    }
+
+    /**
      * Small utility to anchor the panel without actually using PositionAPI anchors.
      * Makes UI lifecycle dependencies easier to manage.
      * Does not handle screen bounds or overflow.

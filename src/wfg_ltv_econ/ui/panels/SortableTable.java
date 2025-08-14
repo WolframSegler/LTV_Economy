@@ -400,7 +400,6 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             }
 
             getParent().addUIElement(tooltip);
-            getParent().bringComponentToTop(tooltip);
             TooltipUtils.dynamicPos(tooltip, getPanel(), opad);
 
             return tooltip;
@@ -697,7 +696,6 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             TooltipMakerAPI tooltip = m_tooltip.factory.get();
 
             (SortableTable.this.getPanel()).addUIElement(tooltip);
-            (SortableTable.this.getPanel()).bringComponentToTop(tooltip);
             TooltipUtils.mouseCornerPos(tooltip, opad);
 
             if (codexID != null) {

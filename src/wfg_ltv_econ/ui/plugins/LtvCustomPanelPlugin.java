@@ -178,22 +178,25 @@ public abstract class LtvCustomPanelPlugin<
         // General events used by most components
         for (InputEventAPI event : events) {
 
-            if (event.isMouseMoveEvent()) {
-                final float mouseX = event.getX();
-                final float mouseY = event.getY();
+            if (event.isMouseEvent()) {
 
-                final PositionAPI pos = m_panel.getPos();
-                final float x = pos.getX();
-                final float y = pos.getY();
-                final float w = pos.getWidth();
-                final float h = pos.getHeight();
-
-                // Check for mouse over panel
-                boolean hoveredBefore = inputSnapshot.hoveredLastFrame;
-                inputSnapshot.hoveredLastFrame = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
-
-                inputSnapshot.hoverStarted = inputSnapshot.hoveredLastFrame && !hoveredBefore;
-                inputSnapshot.hoverEnded   = !inputSnapshot.hoveredLastFrame && hoveredBefore;
+                if (event.isMouseMoveEvent()) {
+                    final float mouseX = event.getX();
+                    final float mouseY = event.getY();
+    
+                    final PositionAPI pos = m_panel.getPos();
+                    final float x = pos.getX();
+                    final float y = pos.getY();
+                    final float w = pos.getWidth();
+                    final float h = pos.getHeight();
+    
+                    // Check for mouse over panel
+                    boolean hoveredBefore = inputSnapshot.hoveredLastFrame;
+                    inputSnapshot.hoveredLastFrame = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
+    
+                    inputSnapshot.hoverStarted = inputSnapshot.hoveredLastFrame && !hoveredBefore;
+                    inputSnapshot.hoverEnded   = !inputSnapshot.hoveredLastFrame && hoveredBefore;
+                }
 
                 if (!inputSnapshot.hoveredLastFrame) {
                     inputSnapshot.hasLMBClickedBefore = false;
@@ -208,9 +211,6 @@ public abstract class LtvCustomPanelPlugin<
                     if (inputSnapshot.hasRMBClickedBefore && event.isRMBUpEvent()) {
                         inputSnapshot.RMBUpLastFrame = true;
                     }
-                }
-
-                if (inputSnapshot.hoveredLastFrame) {
 
                     if (event.isLMBDownEvent()) {
                         inputSnapshot.LMBDownLastFrame = true;
