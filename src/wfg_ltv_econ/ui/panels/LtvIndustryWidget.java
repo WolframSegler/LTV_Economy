@@ -677,7 +677,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
             getParent().addComponent(tp);
 			
-            UiUtils.anchorPanel(tp, getParent(), AnchorType.LeftTop, 1);
+            UiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 1);
 
             return tp;
         }

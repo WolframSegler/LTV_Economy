@@ -26,6 +26,7 @@ import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
+import wfg_ltv_econ.util.UiUtils.AnchorType;
 
 /**
  * SortableTable is a customizable, sortable UI table component designed to display
@@ -202,7 +203,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                     );
                 }
 
-                m_headerContainer.addComponent(panel.getPanel()).inTL(cumulativeXOffset, 0);
+                m_headerContainer.addComponent(panel.getPanel()).inBL(cumulativeXOffset, 0);
 
                 cumulativeXOffset += mergedWidth;
 
@@ -220,7 +221,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                     );
                 }
 
-                m_headerContainer.addComponent(panel.getPanel()).inTL(cumulativeXOffset, 0);
+                m_headerContainer.addComponent(panel.getPanel()).inBL(cumulativeXOffset, 0);
 
                 cumulativeXOffset += column.width;
             }
@@ -385,8 +386,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             final TooltipMakerAPI tooltip;
 
             if (column.getTooltipType() == String.class) {
-                tooltip = getParent().createUIElement(
-                        headerTooltipWidth, 0, false);
+                tooltip = getParent().createUIElement(headerTooltipWidth, 0, false);
     
                 tooltip.addPara((String) column.tooltip, pad);
 
@@ -400,7 +400,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             }
 
             getParent().addUIElement(tooltip);
-            TooltipUtils.dynamicPos(tooltip, getPanel(), opad);
+            UiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
 
             return tooltip;
         }

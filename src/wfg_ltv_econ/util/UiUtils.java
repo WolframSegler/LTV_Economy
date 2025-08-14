@@ -181,86 +181,97 @@ public class UiUtils {
      * Does not handle screen bounds or overflow.
      */
     public static final void anchorPanel(UIComponentAPI panel, UIComponentAPI anchor, AnchorType type, int gap) {
+
         if (panel == null || anchor == null) return;
 
         final PositionAPI Ppos = panel.getPosition();
         final PositionAPI Apos = anchor.getPosition();
 
         Ppos.inBL(0, 0); // Reset the position. It's still relative
-        final float panelX = Ppos.getX();
-        final float panelY = Ppos.getY();
-        final float panelW = Ppos.getWidth();
-        final float panelH = Ppos.getHeight();
+        final int panelX = (int) Ppos.getX();
+        final int panelY = (int) Ppos.getY();
+        final int panelW = (int) Ppos.getWidth();
+        final int panelH = (int) Ppos.getHeight();
 
-        final float anchorX = Apos.getX();
-        final float anchorY = Apos.getY();
-        final float anchorW = Apos.getWidth();
-        final float anchorH = Apos.getHeight();
+        final int anchorX = (int) Apos.getX();
+        final int anchorY = (int) Apos.getY();
+        final int anchorW = (int) Apos.getWidth();
+        final int anchorH = (int)Apos.getHeight();
+
+        int widthCompensation = 0;
+
+        if (panel instanceof TooltipMakerAPI ^ anchor instanceof TooltipMakerAPI) {
+            boolean panelIsTooltip = panel instanceof TooltipMakerAPI;
+            TooltipMakerAPI tooltip = panelIsTooltip ? 
+                (TooltipMakerAPI) panel : (TooltipMakerAPI) anchor;
+            int comp = (int) ((tooltip.getPosition().getWidth() - tooltip.getWidthSoFar()) / 2f);
+            widthCompensation = panelIsTooltip ? comp : -comp;
+        }
 
         float offsetX = 0;
         float offsetY = 0;
         
         switch (type) {
-            case LeftTop:
-                offsetX = anchorX - panelX - panelW - gap;
-                offsetY = anchorY + anchorH - panelY - panelH;
-                break;
+        case LeftTop:
+            offsetX = anchorX - panelX - panelW - gap + widthCompensation;
+            offsetY = anchorY + anchorH - panelY - panelH;
+            break;
 
-            case LeftMid:
-                offsetX = anchorX - panelX - panelW - gap;
-                offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
-                break;
+        case LeftMid:
+            offsetX = anchorX - panelX - panelW - gap + widthCompensation;
+            offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
+            break;
 
-            case LeftBottom:
-                offsetX = anchorX - panelX - panelW  - gap;
-                offsetY = anchorY - panelY;
-                break;
+        case LeftBottom:
+            offsetX = anchorX - panelX - panelW - gap + widthCompensation;
+            offsetY = anchorY - panelY;
+            break;
 
-            case RightTop:
-                offsetX = anchorX + anchorW - panelX + gap;
-                offsetY = anchorY + anchorH - panelY - panelH;
-                break;
+        case RightTop:
+            offsetX = anchorX + anchorW - panelX + gap - widthCompensation;
+            offsetY = anchorY + anchorH - panelY - panelH;
+            break;
 
-            case RightMid:
-                offsetX = anchorX + anchorW - panelX + gap;
-                offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
-                break;
+        case RightMid:
+            offsetX = anchorX + anchorW - panelX + gap - widthCompensation;
+            offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
+            break;
 
-            case RightBottom:
-                offsetX = anchorX + anchorW - panelX + gap;
-                offsetY = anchorY - panelY;
-                break;
+        case RightBottom:
+            offsetX = anchorX + anchorW - panelX + gap - widthCompensation;
+            offsetY = anchorY - panelY;
+            break;
 
-            case TopLeft:
-                offsetX = anchorX - panelX;
-                offsetY = anchorY + anchorH - panelY + gap;
-                break;
+        case TopLeft:
+            offsetX = anchorX - panelX - widthCompensation;
+            offsetY = anchorY + anchorH - panelY + gap;
+            break;
 
-            case TopMid:
-                offsetX = anchorX - panelX + (anchorW - panelW) / 2f;
-                offsetY = anchorY + anchorH - panelY + gap;
-                break;
+        case TopMid:
+            offsetX = anchorX - panelX + (anchorW - panelW - widthCompensation*2) / 2f;
+            offsetY = anchorY + anchorH - panelY + gap;
+            break;
 
-            case TopRight:
-                offsetX = anchorX + anchorW - panelX - panelW;
-                offsetY = anchorY + anchorH - panelY + gap;
-                break;
+        case TopRight:
+            offsetX = anchorX + anchorW - panelX - panelW + widthCompensation;
+            offsetY = anchorY + anchorH - panelY + gap;
+            break;
 
-            case BottomLeft:
-                offsetX = anchorX - panelX;
-                offsetY = anchorY - panelY - panelH - gap;
-                break;
+        case BottomLeft:
+            offsetX = anchorX - panelX - widthCompensation;
+            offsetY = anchorY - panelY - panelH - gap;
+            break;
 
-            case BottomMid:
-                offsetX = anchorX - panelX + (anchorW - panelW) / 2f;
-                offsetY = anchorY - panelY - panelH - gap;
-                break;
+        case BottomMid:
+            offsetX = anchorX - panelX + (anchorW - panelW - widthCompensation*2) / 2f;
+            offsetY = anchorY - panelY - panelH - gap;
+            break;
 
-            case BottomRight:
-                offsetX = anchorX + anchorW - panelX - panelW;
-                offsetY = anchorY - panelY - panelH - gap;
-                break;
-            }
+        case BottomRight:
+            offsetX = anchorX + anchorW - panelX - panelW + widthCompensation;
+            offsetY = anchorY - panelY - panelH - gap;
+            break;
+        }
         Ppos.setXAlignOffset(offsetX);
         Ppos.setYAlignOffset(offsetY);
     }
