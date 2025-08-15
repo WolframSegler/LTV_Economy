@@ -29,7 +29,6 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
@@ -49,37 +48,6 @@ public class TooltipUtils {
 
     static {
         cargoTooltipArrow_PATH = Global.getSettings().getSpriteName("ui", "cargoTooltipArrow");
-    }
-
-    public static void dynamicPos(TooltipMakerAPI tooltip, UIPanelAPI anchor, int opad) {
-        PositionAPI pos = tooltip.getPosition();
-
-        final float tooltipWidth = pos.getWidth();
-        final float tooltipHeight = pos.getHeight();
-
-        final float screenW = Global.getSettings().getScreenWidth();
-        final float screenH = Global.getSettings().getScreenHeight();
-
-        pos.rightOfTop(anchor, opad);
-
-        // If it overflows the screen to the right, move it to the left
-        if (pos.getX() + tooltipWidth > screenW) {
-            pos.leftOfTop(anchor, opad);
-        }
-
-        float y = pos.getY();
-        float yOverflowTop = y + tooltipHeight - screenH;
-        float yUnderflowBottom = y < 0 ? -y : 0;
-
-        // If it overflows the top, clamp it to top
-        if (yUnderflowBottom > 0) {
-            pos.setYAlignOffset(-yOverflowTop - opad);
-        }
-
-        // If it overflows the bottom, clamp it to bottom
-        if (yUnderflowBottom > 0) {
-            pos.setYAlignOffset(yUnderflowBottom + opad);
-        }
     }
 
     public static void mouseCornerPos(TooltipMakerAPI tooltip, int opad) {

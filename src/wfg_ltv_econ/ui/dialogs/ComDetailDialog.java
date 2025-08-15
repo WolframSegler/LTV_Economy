@@ -178,6 +178,11 @@ public class ComDetailDialog implements CustomDialogDelegate {
             }
 
             @Override
+            public UIPanelAPI getTooltipParent() {
+                return m_panel;
+            }
+
+            @Override
             public TooltipMakerAPI createAndAttachTooltip() {
                 TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth() * 0.7f, 0, false);
 
