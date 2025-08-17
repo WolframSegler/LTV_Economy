@@ -1,4 +1,4 @@
-package wfg_ltv_econ.util;
+package wfg_ltv_econ.commodities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +34,7 @@ public class CommodityStats {
     public long demandMetWithLocal = 0;
     public long demandMetNotWithLocal = 0;
 
-    public CommodityStats(CommodityOnMarketAPI com, MarketAPI market) {
-        final String comID = com.getId();
+    public CommodityStats(String comID, MarketAPI market) {
 
         this.m_com = market.getCommodityData(comID);
         this.market = market;

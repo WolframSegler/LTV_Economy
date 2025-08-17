@@ -30,13 +30,13 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
+import wfg_ltv_econ.commodities.CommodityStats;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
-import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;

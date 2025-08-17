@@ -93,7 +93,6 @@ public class RfReflectionUtils {
     private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
     private static final Class<?> fieldClass;
-    private static final Class<?> fieldArrayClass;
     private static final Class<?> methodClass;
     private static final Class<?> typeClass;
     private static final Class<?> typeArrayClass;
@@ -121,14 +120,11 @@ public class RfReflectionUtils {
     private static final MethodHandle setConstructorAccessibleHandle;
     private static final MethodHandle getConstructorParameterTypesHandle;
     private static final MethodHandle constructorNewInstanceHandle;
-    private static final MethodHandle getConstructorDeclaringClassHandle;
     private static final MethodHandle getConstructorGenericParameterTypesHandle;
-    private static final MethodHandle getConstructorNameHandle;
 
     static {
         try {
             fieldClass = Class.forName("java.lang.reflect.Field", false, Class.class.getClassLoader());
-            fieldArrayClass = Class.forName("[Ljava.lang.reflect.Field;", false, Class.class.getClassLoader());
             methodClass = Class.forName("java.lang.reflect.Method", false, Class.class.getClassLoader());
             typeClass = Class.forName("java.lang.reflect.Type", false, Class.class.getClassLoader());
             typeArrayClass = Class.forName("[Ljava.lang.reflect.Type;", false, Class.class.getClassLoader());
@@ -156,9 +152,7 @@ public class RfReflectionUtils {
             setConstructorAccessibleHandle = lookup.findVirtual(constructorClass, "setAccessible", MethodType.methodType(void.class, boolean.class));
             getConstructorParameterTypesHandle = lookup.findVirtual(constructorClass, "getParameterTypes", MethodType.methodType(Class[].class));
             constructorNewInstanceHandle = lookup.findVirtual(constructorClass, "newInstance", MethodType.methodType(Object.class, Object[].class));
-            getConstructorDeclaringClassHandle = lookup.findVirtual(constructorClass, "getDeclaringClass", MethodType.methodType(Class.class));
             getConstructorGenericParameterTypesHandle = lookup.findVirtual(constructorClass, "getGenericParameterTypes", MethodType.methodType(typeArrayClass));
-            getConstructorNameHandle = lookup.findVirtual(constructorClass, "getName", MethodType.methodType(String.class));
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -914,20 +908,6 @@ public class RfReflectionUtils {
             throw new RuntimeException(e);
         }
         return null;
-    }
-
-    private static boolean areParameterTypesMatching(Class<?>[] methodParamTypes, Class<?>[] targetParamTypes) {
-        if (methodParamTypes.length != targetParamTypes.length) {
-            return false;
-        }
-
-        for (int i = 0; i < methodParamTypes.length; i++) {
-            if (!methodParamTypes[i].isAssignableFrom(targetParamTypes[i])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public static void logField(String fieldName, Class<?> fieldType, Object field, int i) throws Throwable {

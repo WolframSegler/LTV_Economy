@@ -26,8 +26,6 @@ public final class FaderComponent<
         super(plugin);
     }
 
-    private final float additiveBrightness = 0.6f;
-
     @Override
     public final void advance(float amount, InputSnapshot input) {
         if (getPanel().getGlowType() == Glow.NONE || !getPanel().isFaderOwner()) {
@@ -88,7 +86,7 @@ public final class FaderComponent<
         }
 
         if (getPanel().getGlowType() == Glow.ADDITIVE && fader.getBrightness() > 0) {
-            float glowAmount = additiveBrightness * fader.getBrightness() * alphaMult;
+            float glowAmount = getPanel().getAdditiveBrightness() * fader.getBrightness() * alphaMult;
 
             getPanel().getSprite().ifPresent(sprite -> {
                 RenderUtils.drawAdditiveGlow(

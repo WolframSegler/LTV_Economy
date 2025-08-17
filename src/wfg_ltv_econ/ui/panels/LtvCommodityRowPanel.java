@@ -19,6 +19,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 
+import wfg_ltv_econ.commodities.CommodityStats;
 import wfg_ltv_econ.ui.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
@@ -26,7 +27,6 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.plugins.LtvCommodityRowPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
@@ -63,7 +63,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
         super(root, parent, width, height, new LtvCommodityRowPanelPlugin(), market);
         m_com = com;
         m_parent = parentWrapper;
-        m_comStats = new CommodityStats(com, market);
+        m_comStats = new CommodityStats(com.getId(), market);
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");

@@ -28,6 +28,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg_ltv_econ.commodities.CommodityStats;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
@@ -45,7 +46,6 @@ import wfg_ltv_econ.ui.panels.SortableTable.cellAlg;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.ComDetailDialogPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg_ltv_econ.util.CommodityStats;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.TooltipUtils;
@@ -905,7 +905,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
             if (market.isHidden()) {
                 continue;
             }
-            final CommodityStats comStats = new CommodityStats(m_com, market);
+            final CommodityStats comStats = new CommodityStats(m_com.getId(), market);
             if (comStats.globalExport < 1 && mode == 0 || comStats.localDemand < 1 && mode == 1) {
                 continue;
             }
@@ -1039,9 +1039,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
         int total = 0;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            CommodityOnMarketAPI comOnMarket = market.getCommodityData(comID);
-
-            CommodityStats stats = new CommodityStats(comOnMarket, market);
+            CommodityStats stats = new CommodityStats(comID, market);
 
             total += stats.globalExport;
         }
@@ -1056,9 +1054,8 @@ public class ComDetailDialog implements CustomDialogDelegate {
             if (!market.getFaction().getId().equals(faction.getId())) {
                 continue;
             }
-            CommodityOnMarketAPI comOnMarket = market.getCommodityData(comID);
 
-            CommodityStats stats = new CommodityStats(comOnMarket, market);
+            CommodityStats stats = new CommodityStats(comID, market);
             total += stats.inFactionExport;
         }
 
@@ -1072,9 +1069,8 @@ public class ComDetailDialog implements CustomDialogDelegate {
             if (market.getFaction() != faction) {
                 continue;
             }
-            CommodityOnMarketAPI comOnMarket = market.getCommodityData(comID);
 
-            CommodityStats stats = new CommodityStats(comOnMarket, market);
+            CommodityStats stats = new CommodityStats(comID, market);
 
             total += stats.globalExport;
         }
@@ -1098,7 +1094,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
                 tpWidth, 0, false);
     
             final FactionAPI faction = market.getFaction();
-            final CommodityStats comStats = new CommodityStats(com, market);
+            final CommodityStats comStats = new CommodityStats(m_com.getId(), market);
     
             final Color highlight = Misc.getHighlightColor();
             final Color negative = Misc.getNegativeHighlightColor();

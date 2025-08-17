@@ -19,6 +19,7 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.Constructi
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
+import com.fs.starfarer.api.ui.IconGroupAPI;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -31,8 +32,12 @@ import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
+import com.fs.starfarer.campaign.ui.marketinfo.ooO0;
+import com.fs.starfarer.ui.OOOo;
 import com.fs.starfarer.campaign.ui.N;
 
+import wfg_ltv_econ.commodities.CommodityStats;
+import wfg_ltv_econ.commodities.SpecialItemCommodityWrapper;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
@@ -48,6 +53,7 @@ import wfg_ltv_econ.util.ListenerFactory;
 import wfg_ltv_econ.util.LtvMarketReplacer;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
+import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
 import wfg_ltv_econ.util.UiUtils;
 
 public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget, TooltipMakerAPI>
@@ -120,7 +126,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
         BgColor = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
 
-        m_fader = new FaderUtil(0.2f, 0.1f, 0.1f, true, false);
+        m_fader = new FaderUtil(0.3f, 0.1f, 0.4f, true, false);
         m_tooltip = new PendingTooltip<>();
 
         initializePlugin(hasPlugin);
@@ -175,7 +181,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     @Override
     public boolean isListenerEnabled() {
         return isListenerEnabled;
-    }    
+    }
 
     public void createPanel() {
 
@@ -257,13 +263,20 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         tp.setIconSpacingMedium();
 
         for (Pair<String, Integer> deficitEntry : m_industry.getAllDeficit()) {
+            CommodityStats stats = new CommodityStats(deficitEntry.one, getMarket());
+
             CommodityOnMarketAPI commodity = getMarket().getCommodityData(deficitEntry.one);
 
-            if (deficitEntry.two < 1) {
+            if (stats.localDeficit < 1) {
                 continue;
             }
 
-            tp.addIcons(commodity, 2, IconRenderMode.RED);
+            int iconCount = 1;
+
+            if (stats.localDeficit / (double) stats.localDemand > 0.33f) iconCount = 2;
+            if (stats.localDeficit / (double) stats.localDemand > 0.66f) iconCount = 3;
+
+            tp.addIcons(commodity, iconCount, IconRenderMode.RED);
         }
         tp.addIconGroup(24, 1, pad);
         tp.getPrev().getPosition().inBL(pad + 2, pad);
@@ -273,16 +286,21 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         tp.setIconSpacingWide();
         List<SpecialItemData> visibleItems = m_industry.getVisibleInstalledItems();
         for (SpecialItemData item : visibleItems) {
-            CommodityOnMarketAPI com = getMarket().getCommodityData(item.getId());
-            
-            tp.addIcons(com, 1, IconRenderMode.BLACK);
 
-            // Global.getSettings().getSpecialItemSpec(item.getId())
+            SpecialItemCommodityWrapper com = new SpecialItemCommodityWrapper(item);
+
+            ReflectedField iconField = ReflectionUtils.getFieldsMatching(
+                tp, null, IconGroupAPI.class, null, IconGroupAPI.class, true
+            ).get(0);
+
+            ReflectionUtils.invoke(iconField, "addGroup", com, 1, 1, IconRenderMode.OUTLINE_CUSTOM, null);
+
+            tp.addIcons(com, 1, IconRenderMode.OUTLINE_CUSTOM);
         }
 
         if (m_industry.getAICoreId() != null) {
             CommodityOnMarketAPI AICore = getMarket().getCommodityData(m_industry.getAICoreId());
-            tp.addIcons(AICore, 1, IconRenderMode.BLACK);
+            tp.addIcons(AICore, 1, IconRenderMode.OUTLINE_CUSTOM);
         }
 
         tp.addIconGroup(ICON_SIZE, 1, pad);
@@ -316,7 +334,8 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             tp.addComponent(slider).setSize(PANEL_WIDTH, sliderHeight).inBL(0, -sliderHeight - 2);
         }
 
-        getPanel().addUIElement(tp).inBL(0, 0);
+        tp.setHeightSoFar(IMAGE_HEIGHT);
+        add(tp).inBL(0, 0);
 
         if (constructionQueueIndex >= 0) {
             setNormalMode();
@@ -669,6 +688,11 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         @Override
         public Glow getGlowType() {
             return Glow.ADDITIVE;
+        }
+
+        @Override
+        public float getAdditiveBrightness() {
+            return 1;
         }
 
         @Override

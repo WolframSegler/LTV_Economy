@@ -317,6 +317,10 @@ public abstract class LtvCustomPanel<
             return 1.2f;
         }
 
+        default float getAdditiveBrightness() {
+            return 0.6f;
+        }
+
         Color getGlowColor();
 
         default void setGlowColor(Color a) {}

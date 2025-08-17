@@ -19,6 +19,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.codex2.CodexDialog;
 
+import wfg_ltv_econ.commodities.CommodityStats;
 import wfg_ltv_econ.ui.plugins.CommodityinfobarPlugin;
 
 public class UiUtils {

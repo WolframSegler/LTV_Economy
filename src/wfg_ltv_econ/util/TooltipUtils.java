@@ -33,6 +33,7 @@ import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 
+import wfg_ltv_econ.commodities.CommodityStats;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
@@ -165,7 +166,7 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
                         CommodityOnMarketAPI com = market.getCommodityData(comID);
-                        CommodityStats comStat = new CommodityStats(com, market);
+                        CommodityStats comStat = new CommodityStats(comID, market);
                         long marketDemand = com.getMaxDemand() - com.getPlayerTradeNetQuantity();
                         if (marketDemand < 0) {
                             marketDemand = 0;

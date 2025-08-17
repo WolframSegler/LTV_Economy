@@ -5,12 +5,12 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
+
+import wfg_ltv_econ.util.RfReflectionUtils.ObfuscatedClasses;
 
 /**
  * Listener factory by rolfosian.
@@ -184,43 +184,6 @@ public class ListenerFactory {
                 return actionListenerCallSite.getTarget().invoke(new ActionListenerProxy(proxyTriggerInstance));
             default:
                 throw new IllegalArgumentException("Unsupported method: " + targetMethodName);
-        }
-    }
-
-    public static class ObfuscatedClasses {
-        private static final Class<?>[] obfClazzes;
-        private static final Class<?>[] obfInterfaces;
-        private static final Class<?>[] obfEnums;
-
-        static {
-            List<Class<?>> obfClasses = RfReflectionUtils.getAllObfClasses();
-    
-            List<Class<?>> enumz = new ArrayList<>();
-            List<Class<?>> interfeces = new ArrayList<>();
-            List<Class<?>> clses = new ArrayList<>();
-    
-            for (Class<?> cls : obfClasses) {
-                if (cls.isEnum()) enumz.add(cls);
-                else if (cls.isInterface()) interfeces.add(cls);
-                else clses.add(cls);
-            }
-    
-            Class<?>[] clsArr = new Class<?>[0];
-            obfClazzes = clses.toArray(clsArr);
-            obfInterfaces = interfeces.toArray(clsArr);
-            obfEnums = enumz.toArray(clsArr);
-        }
-
-        public static Class<?>[] getClasses() {
-            return obfClazzes;
-        }
-
-        public static Class<?>[] getInterfaces() {
-            return obfInterfaces;
-        }
-
-        public static Class<?>[] getEnums() {
-            return obfEnums;
         }
     }
 }
