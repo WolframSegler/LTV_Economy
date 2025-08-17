@@ -91,12 +91,12 @@ public class LtvTextPanel extends LtvCustomPanel<BasePanelPlugin<LtvTextPanel>, 
     public void createPanel() {}
 
     @Override
-    public UIPanelAPI getTooltipParent() {
+    public CustomPanelAPI getTpParent() {
         return null;
     }
 
     @Override
-    public TooltipMakerAPI createAndAttachTooltip() {
+    public TooltipMakerAPI createAndAttachTp() {
         return null;
     }
 }

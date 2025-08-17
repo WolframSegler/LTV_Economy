@@ -369,11 +369,11 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         }
 
         @Override
-        public UIPanelAPI getTooltipParent() {
+        public CustomPanelAPI getTpParent() {
             if (column.getTooltipType() == String.class) {
                 return getParent();
             } else if (column.getTooltipType() == PendingTooltip.class) {
-                return ((PendingTooltip<? extends UIPanelAPI>) column.tooltip).getParent.get();
+                return ((PendingTooltip<? extends CustomPanelAPI>) column.tooltip).getParent.get();
             } else {
                 throw new IllegalArgumentException(
                     "Tooltip for header '" + column.title + "' has an illegal type."
@@ -382,7 +382,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         }
 
         @Override
-        public TooltipMakerAPI createAndAttachTooltip() {
+        public TooltipMakerAPI createAndAttachTp() {
             final TooltipMakerAPI tooltip;
 
             if (column.getTooltipType() == String.class) {
@@ -678,7 +678,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         }
 
         @Override
-        public UIPanelAPI getTooltipParent() {
+        public CustomPanelAPI getTpParent() {
             if (m_tooltip == null) {
                 return getParent();
             } else {
@@ -687,10 +687,10 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         }
         
         @Override
-        public TooltipMakerAPI createAndAttachTooltip() {
+        public TooltipMakerAPI createAndAttachTp() {
             if (m_tooltip == null) {
                 // Invisible header
-                return getParent().createUIElement(headerTooltipWidth, 0, false);
+                return getParent().createUIElement(0, 0, false);
             }
 
             TooltipMakerAPI tooltip = m_tooltip.factory.get();
@@ -806,7 +806,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
      * {@code codexID} is optional.
      * The {@code PendingTooltip} can be null.
      */
-    public <TpType extends UIPanelAPI> void pushRow(String codexID, MarketAPI market, Color textColor,
+    public <TpType extends CustomPanelAPI> void pushRow(String codexID, MarketAPI market, Color textColor,
         Color glowClr, PendingTooltip<TpType> tp) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "

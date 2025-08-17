@@ -115,8 +115,11 @@ public abstract class LtvCustomPanel<
     }
 
     public final UIPanelAPI getRoot() {
-        final UIPanelAPI defaultRoot = CampaignEngine.getInstance().getCampaignUI().getDialogParent();
-        return m_root == null ? defaultRoot : m_root;
+        return m_root == null ? getDialogParent() : m_root;
+    }
+
+    public final UIPanelAPI getDialogParent() {
+        return CampaignEngine.getInstance().getCampaignUI().getDialogParent();
     }
 
     public final PluginType getPlugin() {
@@ -378,16 +381,16 @@ public abstract class LtvCustomPanel<
 
         /**
         * Return the parent panel of the tooltip.
-        * Must return a non-null UIPanelAPI. Otherwise the tooltip will not be removed.
+        * Must return a non-null CustomPanelAPI. Otherwise the tooltip will not be removed.
         * Never attach the tooltip to the codex. It WILL crash the game.
         */
-        UIPanelAPI getTooltipParent();
+        CustomPanelAPI getTpParent();
 
         /**
         * Return the parent panel of the codex is, ideally the same as the tooltip.
-        * Must return a non-null UIPanelAPI. Otherwise the codex will not be removed.
+        * Must return a non-null CustomPanelAPI. Otherwise the codex will not be removed.
         */
-        default Optional<UIPanelAPI> getCodexParent() {
+        default Optional<CustomPanelAPI> getCodexParent() {
             return Optional.empty();
         }
 
@@ -397,7 +400,7 @@ public abstract class LtvCustomPanel<
         * A new tooltip will be created instead of an update.
         * Therefore, conditional changes to the tooltip should happen during creation.
         */
-        TooltipMakerAPI createAndAttachTooltip();
+        TooltipMakerAPI createAndAttachTp();
 
         /**
         * The TooltipComponent will call this.
@@ -462,7 +465,7 @@ public abstract class LtvCustomPanel<
          * }
          * </pre>
          */
-        public static class PendingTooltip<ParentType extends UIPanelAPI> {
+        public static class PendingTooltip<ParentType extends CustomPanelAPI> {
             /**
              * Factory method to create the tooltip.
              * Must be set by subclasses or instances.

@@ -54,13 +54,19 @@ public final class FaderComponent<
         final float glowAmount = panel.getOverlayBrightness() * getPanel().getFader().getBrightness() * alphaMult;
 
         RenderUtils.drawGlowOverlay(
-            pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
+            pos.getX() + getPlugin().offsetX,
+            pos.getY() + getPlugin().offsetY,
+            pos.getWidth() + getPlugin().offsetW,
+            pos.getHeight() + getPlugin().offsetH,
             panel.getGlowColor(), glowAmount
         );
 
         if (input.hasLMBClickedBefore) {
             RenderUtils.drawGlowOverlay(
-                pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
+                pos.getX() + getPlugin().offsetX,
+                pos.getY() + getPlugin().offsetY,
+                pos.getWidth() + getPlugin().offsetW,
+                pos.getHeight() + getPlugin().offsetH,
                 panel.getGlowColor(), glowAmount / 2
             );
         }

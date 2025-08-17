@@ -27,9 +27,12 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
+import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
 import wfg_ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
@@ -44,7 +47,9 @@ public class LtvIndustryListPanel
 	extends LtvCustomPanel<IndustryListPanelPlugin, LtvIndustryListPanel, UIPanelAPI>
 	implements ActionListenerDelegate, DismissDialogDelegate {
 
-	public static final int BUTTON_SECTION_HEIGHT = 50;
+	public static final int BUTTON_SECTION_HEIGHT = 45;
+	public static final int pad = 3;
+	public static final int opad = 20;
 
 	public static final ReflectedConstructor indPickCtor = ReflectionUtils.getConstructorsMatching(IndustryPickerDialog.class, 3).get(0);
 	public static ReflectedConstructor indOptCtor = null;
@@ -98,14 +103,22 @@ public class LtvIndustryListPanel
 		List<Industry> industries = CommodityStats.getVisibleIndustries(getMarket());
 		Collections.sort(industries, getIndustryOrderComparator());
 		List<ConstructionQueueItem> queuedIndustries = getMarket().getConstructionQueue().getItems();
-		
-		final int pad = 3;
-		final int opad = 20;
+	
 		final byte columnAmount = 4;
 
-		TooltipMakerAPI widgetWrapper = getPanel().createUIElement(
-            getPos().getWidth(), getPos().getHeight() - BUTTON_SECTION_HEIGHT, true
+		CustomPanelAPI widgetWrapper = Global.getSettings().createCustom(
+            getPos().getWidth(),
+            getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
+            null
         );
+
+		TooltipMakerAPI wrappertp = widgetWrapper.createUIElement(
+            getPos().getWidth(),
+			getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
+			true
+        );
+
+		int wrapperTpHeight = 0;
 
 		// Normal industries
 		for (int index = 0; index < industries.size(); index++) {
@@ -116,7 +129,7 @@ public class LtvIndustryListPanel
 			Object originalWidget = originalIndustryPanel.getWidgets().get(index);
 			LtvIndustryWidget widget = new LtvIndustryWidget(
 				getRoot(),
-				widgetWrapper,
+				wrappertp,
 				new IndustryPanelPlugin(),
 				getMarket(),
 				ind,
@@ -124,10 +137,14 @@ public class LtvIndustryListPanel
 				originalWidget
 			);
 
-			widgetWrapper.addComponent(widget.getPanel()).inTL(
-				i * (LtvIndustryWidget.PANEL_WIDTH + opad),
-				j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
+			wrappertp.addComponent(widget.getPanel()).inTL(
+				i * (LtvIndustryWidget.PANEL_WIDTH + opad) + pad,
+				wrapperTpHeight = j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
 			);
+
+			addWidgetTooltip(IndustryTooltipMode.NORMAL, ind, widget);
+
+			widgets.add(widget);
 		}
 
 		// Queued industries
@@ -139,7 +156,7 @@ public class LtvIndustryListPanel
 			Object originalWidget = originalIndustryPanel.getWidgets().get(index);
 			LtvIndustryWidget widget = new LtvIndustryWidget(
 				getRoot(),
-				widgetWrapper,
+				wrappertp,
 				new IndustryPanelPlugin(),
 				getMarket(),
 				ind,
@@ -148,12 +165,18 @@ public class LtvIndustryListPanel
 				index
 			);
 
-			widgetWrapper.addComponent(widget.getPanel()).inTL(
-				i * (LtvIndustryWidget.PANEL_WIDTH + opad),
-				j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
+			wrappertp.addComponent(widget.getPanel()).inTL(
+				i * (LtvIndustryWidget.PANEL_WIDTH + opad) + pad,
+				wrapperTpHeight = j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
 			);
-		}
 
+			addWidgetTooltip(IndustryTooltipMode.QUEUED, ind, widget);
+
+			widgets.add(widget);
+		}
+		wrappertp.setHeightSoFar(wrapperTpHeight + LtvIndustryWidget.TOTAL_HEIGHT + opad);
+
+		widgetWrapper.addUIElement(wrappertp).inTL(-pad, 0);
 		add(widgetWrapper).inTL(0, 0);
 
 		TooltipMakerAPI buttonWrapper = getPanel().createUIElement(
@@ -180,10 +203,10 @@ public class LtvIndustryListPanel
 
 		addTooltips(creditLbl, maxIndLbl, getMarket());
 		
-		buttonWrapper.addComponent(buildButton).inBL(0, 50);
+		buttonWrapper.addComponent(buildButton).inBL(0, BUTTON_SECTION_HEIGHT);
 		add(creditLbl);
 		UiUtils.anchorPanel((UIComponentAPI) creditLbl, buildButton, AnchorType.RightMid, 70);
-		add(maxIndLbl).inBR(40, 50);
+		add(maxIndLbl).inBR(40, BUTTON_SECTION_HEIGHT);
 
 		if (!DebugFlags.COLONY_DEBUG && !getMarket().isPlayerOwned()) {
 			buildButton.setEnabled(false);
@@ -203,6 +226,27 @@ public class LtvIndustryListPanel
 
 		createPanel();
 		ReflectionUtils.invoke(getPanel(), "fakeAdvance", 10f);
+	}
+
+	public final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, LtvIndustryWidget widget) {
+
+		PendingTooltip<CustomPanelAPI> wrapper = widget.m_tooltip;
+
+		wrapper.getParent = () -> {
+			return LtvIndustryListPanel.this.getPanel();
+		};
+
+		wrapper.factory = () -> {
+			TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(ind.getTooltipWidth(), 0, false);
+
+			ind.createTooltip(mode, tp, false);
+
+			wrapper.getParent.get().addUIElement(tp);
+			
+			UiUtils.anchorPanelWithBounds(tp, widget.getPanel(), AnchorType.RightTop, pad*2);
+
+			return tp;
+		};
 	}
 
 	public final void addTooltips(LabelAPI label1, LabelAPI label2, MarketAPI var2) {

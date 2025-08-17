@@ -74,13 +74,13 @@ public final class TooltipComponent<
 
     public final void showTooltip() {
         if (tooltip == null) {
-            tooltip = provider.createAndAttachTooltip();
+            tooltip = provider.createAndAttachTp();
             if (tooltip instanceof StandardTooltipV2Expandable standard) {
                 standard.setShowBorder(true);
                 standard.setShowBackground(true);
                 standard.setBgAlpha(1f);
             }
-            provider.getTooltipParent().bringComponentToTop(tooltip);
+            provider.getTpParent().bringComponentToTop(tooltip);
         }
 
         if (codex == null) {
@@ -104,7 +104,7 @@ public final class TooltipComponent<
         });
 
         if (tooltip != null) {
-            provider.getTooltipParent().removeComponent(tooltip);
+            provider.getTpParent().removeComponent(tooltip);
             tooltip = null;
         }
     }

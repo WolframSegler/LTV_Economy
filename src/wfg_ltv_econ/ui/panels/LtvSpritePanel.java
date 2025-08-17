@@ -75,7 +75,6 @@ public class LtvSpritePanel<
         // PanelType is a subclass of LtvSpritePanel. This cast is safe.
         getPlugin().init((PanelType)this); 
         getPlugin().init();
-        getPlugin().setIgnoreUIState(true);
     }
 
     @Override

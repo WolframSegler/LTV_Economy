@@ -178,12 +178,12 @@ public class ComDetailDialog implements CustomDialogDelegate {
             }
 
             @Override
-            public UIPanelAPI getTooltipParent() {
+            public CustomPanelAPI getTpParent() {
                 return m_panel;
             }
 
             @Override
-            public TooltipMakerAPI createAndAttachTooltip() {
+            public TooltipMakerAPI createAndAttachTp() {
                 TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth() * 0.7f, 0, false);
 
                 tooltip.addPara(
@@ -358,12 +358,12 @@ public class ComDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipParent() {
+                public CustomPanelAPI getTpParent() {
                     return getParent();
                 }
 
                 @Override
-                public TooltipMakerAPI createAndAttachTooltip() {
+                public TooltipMakerAPI createAndAttachTp() {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
@@ -435,12 +435,12 @@ public class ComDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipParent() {
+                public CustomPanelAPI getTpParent() {
                     return getParent();
                 }
 
                 @Override
-                public TooltipMakerAPI createAndAttachTooltip() {
+                public TooltipMakerAPI createAndAttachTp() {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
@@ -527,12 +527,12 @@ public class ComDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipParent() {
+                public CustomPanelAPI getTpParent() {
                     return getParent();
                 }
 
                 @Override
-                public TooltipMakerAPI createAndAttachTooltip() {
+                public TooltipMakerAPI createAndAttachTp() {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
@@ -605,12 +605,12 @@ public class ComDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipParent() {
+                public CustomPanelAPI getTpParent() {
                     return getParent();
                 }
 
                 @Override
-                public TooltipMakerAPI createAndAttachTooltip() {
+                public TooltipMakerAPI createAndAttachTp() {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     String marketOwner = m_parentWrapper.getFaction().isPlayerFaction() ?
@@ -680,12 +680,12 @@ public class ComDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipParent() {
+                public CustomPanelAPI getTpParent() {
                     return getParent();
                 }
                 
                 @Override
-                public TooltipMakerAPI createAndAttachTooltip() {
+                public TooltipMakerAPI createAndAttachTp() {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
@@ -749,12 +749,12 @@ public class ComDetailDialog implements CustomDialogDelegate {
                 }
 
                 @Override
-                public UIPanelAPI getTooltipParent() {
+                public CustomPanelAPI getTpParent() {
                     return getParent();
                 }
 
                 @Override
-                public TooltipMakerAPI createAndAttachTooltip() {
+                public TooltipMakerAPI createAndAttachTp() {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     String marketOwner = m_parentWrapper.getFaction().isPlayerFaction() ?
@@ -877,7 +877,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
         final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
-        PendingTooltip<UIPanelAPI> quantityTooltip = new PendingTooltip<>();
+        PendingTooltip<CustomPanelAPI> quantityTooltip = new PendingTooltip<>();
         createSection3QuantityHeaderTooltipFactory(mode, table, quantityTooltip);
 
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
@@ -1213,7 +1213,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
     }
 
     private void createSection3QuantityHeaderTooltipFactory(int mode, SortableTable table,
-        PendingTooltip<UIPanelAPI> wrapper) {
+        PendingTooltip<CustomPanelAPI> wrapper) {
         final String quantityDesc = mode == 0
             ? "Shows units of the commodity that could be exported."
             : "Shows demand for the commodity.";
@@ -1229,7 +1229,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
         };
 
         wrapper.factory = () -> {
-            TooltipMakerAPI tp = ((CustomPanelAPI)wrapper.getParent.get()).createUIElement(
+            TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(
                 SortableTable.headerTooltipWidth*2, 0, false
             );
 

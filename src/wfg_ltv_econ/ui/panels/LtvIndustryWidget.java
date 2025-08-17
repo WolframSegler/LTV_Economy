@@ -10,7 +10,6 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
-import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
@@ -35,10 +34,13 @@ import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.campaign.ui.N;
 
 import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.ui.LtvUIState;
+import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
@@ -47,9 +49,8 @@ import wfg_ltv_econ.util.LtvMarketReplacer;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.UiUtils;
-import wfg_ltv_econ.util.UiUtils.AnchorType;
 
-public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget, CustomPanelAPI>
+public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget, TooltipMakerAPI>
     implements HasBackground, HasFader, HasActionListener {
 
     public final static int pad = 3;
@@ -76,13 +77,14 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     private LabelAPI buildingTitleHeader;
     private LabelAPI constructionStatusText;
     private ConstructionMode constructionMode;
+    private Color BgColor = null;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
     /*
      * Shared both by the Widget and IndustryImagePanel
      */
     private FaderUtil m_fader = null;
-    private Color BgColor = null;
+    public PendingTooltip<CustomPanelAPI> m_tooltip = null;
 
     public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryPanelPlugin plugin,
         MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, Object orgWidget) {
@@ -116,8 +118,10 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
         oldPos.inBL(offsetX, offsetY);
 
-        m_fader = new FaderUtil(0.2f, 0.1f, 0.1f, true, true);
         BgColor = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
+
+        m_fader = new FaderUtil(0.2f, 0.1f, 0.1f, true, false);
+        m_tooltip = new PendingTooltip<>();
 
         initializePlugin(hasPlugin);
         createPanel();
@@ -190,7 +194,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                     UiUtils.adjustBrightness(buildingTitleHeader.getColor(), 1.33f)
                 );
                 buildingTitleHeader.setAlignment(Alignment.LMID);
-                buildingTitleHeader.autoSizeToWidth(PANEL_WIDTH);
+                buildingTitleHeader.autoSizeToWidth(PANEL_WIDTH + 50);
 
                 add(buildingTitleHeader).inLMid(pad);
             }
@@ -229,7 +233,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         add(industryIcon.getPanel()).inBL(0, 0);
 
 
-        LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.ORBITRON_12);
+        LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(Misc.getHighlightColor());
         workerCountLabel.setHighlightColor(
             UiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
@@ -245,7 +249,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             }
         }
 
-        workerCountLabel.getPosition().inTL(pad*2, TITLE_HEIGHT + pad*2);
+        add(workerCountLabel).inTL(pad*2, TITLE_HEIGHT + pad*2);
 
         TooltipMakerAPI tp = getPanel().createUIElement(PANEL_WIDTH, IMAGE_HEIGHT, false);
 
@@ -366,7 +370,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             LabelAPI refundLabel = Global.getSettings().createLabel(
                 Misc.getDGSCredits(queueItem.cost), Fonts.DEFAULT_SMALL
             );
-            refundLabel.setColor(baseColor);
+            refundLabel.setColor(Misc.getHighlightColor());
             refundLabel.setHighlightColor(
                 UiUtils.adjustBrightness(refundLabel.getColor(), 1.33f)
             );
@@ -383,9 +387,12 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             labels.add(refundLabel);
             labels.add(refundLabelAppendix);
 
+            final float offset = refundLabelAppendix.computeTextWidth(refundLabelAppendix.getText()) / 2f;
+
             add(removeLabel).aboveMid((UIComponentAPI)constructionStatusText, 0);
             add(refundLabel).belowMid((UIComponentAPI)constructionStatusText, 0);
-            add(refundLabelAppendix).belowLeft((UIComponentAPI)refundLabel, 0);
+            add(refundLabel).setXAlignOffset(-offset); // centers it nicely
+            add(refundLabelAppendix).rightOfBottom((UIComponentAPI)refundLabel, 0);
             constructionMode = ConstructionMode.REMOVE;
             addCostTimeLabels();
         }
@@ -491,6 +498,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                     }
                 }
                 }
+
             } else if (constructionMode == ConstructionMode.SWAP) {
                 targetInd = null;
 
@@ -586,6 +594,8 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
                 }
                 tradeInfoPanel = true;
+
+                LtvUIState.setState(UIState.DETAIL_DIALOG);
             } catch (Exception e) {
                 Global.getLogger(LtvMarketReplacer.class).error("Custom Widget failed", e);
             }
@@ -617,6 +627,10 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
     public void dialogDismissed() {
         tradeInfoPanel = false;
+        ReflectionUtils.getMethodsMatching(originalWidget, "dialogDismissed", void.class, 2)
+        .get(0).invoke(originalWidget, null, 0);
+
+        LtvUIState.setState(UIState.NONE);
     }
 
     public Industry getIndustry() {
@@ -679,25 +693,13 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
         }
 
         @Override
-        public UIPanelAPI getTooltipParent() {
-            return getParent();
+        public CustomPanelAPI getTpParent() {
+            return m_tooltip.getParent.get();
         }
 
         @Override
-        public TooltipMakerAPI createAndAttachTooltip() {
-            TooltipMakerAPI tp = getParent().createUIElement(m_industry.getTooltipWidth(), 0, false);
-            if (constructionQueueIndex >= 0) {
-                m_industry.createTooltip(IndustryTooltipMode.QUEUED, tp, false);
-            }
-            if (constructionQueueIndex < 0) {
-                m_industry.createTooltip(IndustryTooltipMode.NORMAL, tp, false);
-            }
-
-            getParent().addComponent(tp);
-			
-            UiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 1);
-
-            return tp;
+        public TooltipMakerAPI createAndAttachTp() {
+            return m_tooltip.factory.get();
         }
     }
 }

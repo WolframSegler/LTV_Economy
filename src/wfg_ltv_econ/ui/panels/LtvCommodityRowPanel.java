@@ -195,12 +195,12 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
     }
 
     @Override
-    public UIPanelAPI getTooltipParent() {
+    public CustomPanelAPI getTpParent() {
         return getParent();
     }
 
     @Override
-    public TooltipMakerAPI createAndAttachTooltip() {
+    public TooltipMakerAPI createAndAttachTp() {
 
         final Color highlight = Misc.getHighlightColor();
         final Color gray = new Color(100, 100, 100);
@@ -309,7 +309,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
         return tooltip;
     }
     @Override
-    public Optional<UIPanelAPI> getCodexParent() {
+    public Optional<CustomPanelAPI> getCodexParent() {
         return Optional.ofNullable(getParent());
     }
 

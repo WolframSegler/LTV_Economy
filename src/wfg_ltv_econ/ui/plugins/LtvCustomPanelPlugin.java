@@ -145,7 +145,7 @@ public abstract class LtvCustomPanelPlugin<
     }
 
     /**
-     * Effects the background and outline position
+     * Effects the background, the fader and the outline position
      */
     public void setOffsets(int x, int y, int width, int height) {
         offsetX = x;

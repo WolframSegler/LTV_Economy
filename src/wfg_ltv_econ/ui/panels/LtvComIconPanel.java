@@ -10,6 +10,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -94,12 +95,12 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
     }
 
     @Override
-    public UIPanelAPI getTooltipParent() {
+    public CustomPanelAPI getTpParent() {
         return getParent();
     }
 
     @Override
-    public TooltipMakerAPI createAndAttachTooltip() {
+    public TooltipMakerAPI createAndAttachTp() {
         if (m_com == null) {
             return null;
         }
@@ -135,7 +136,7 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
         return m_tooltip;
     }
 
-    public Optional<UIPanelAPI> getCodexParent() {
+    public Optional<CustomPanelAPI> getCodexParent() {
         return Optional.ofNullable(getParent());
     }
 

@@ -11,7 +11,9 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onApplicationLoad() throws Exception {
-        
+        // Force early load large classes.
+        Class.forName("wfg_ltv_econ.util.ListenerFactory");
+        Class.forName("wfg_ltv_econ.util.RfReflectionUtils");
     }
 
     @Override

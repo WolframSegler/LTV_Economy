@@ -30,7 +30,6 @@ public class UiUtils {
     }
 
     public static final void positionCodexLabel(TooltipMakerAPI tooltip, int opad, int pad) {
-        // LabelAPI F2Label = ((StandardTooltipV2Expandable) tooltip).expandLabel;
         LabelAPI F2Label = (LabelAPI) ReflectionUtils.get(tooltip, "expandLabel", LabelAPI.class, true);
         if (F2Label != null) {
             F2Label.getPosition().inBL(opad + pad, -pad * 6);
@@ -67,15 +66,15 @@ public class UiUtils {
     public static final void drawRoundedBorder(float x, float y, float w, float h, float alpha, String borderPrefix,
         int textureSize, Color color) {
 
-        SpriteAPI nw = Global.getSettings().getSprite("ui", borderPrefix + "_top_left");
-        SpriteAPI ne = Global.getSettings().getSprite("ui", borderPrefix + "_top_right");
-        SpriteAPI sw = Global.getSettings().getSprite("ui", borderPrefix + "_bot_left");
-        SpriteAPI se = Global.getSettings().getSprite("ui", borderPrefix + "_bot_right");
+        final SpriteAPI nw = Global.getSettings().getSprite("ui", borderPrefix + "_top_left");
+        final SpriteAPI ne = Global.getSettings().getSprite("ui", borderPrefix + "_top_right");
+        final SpriteAPI sw = Global.getSettings().getSprite("ui", borderPrefix + "_bot_left");
+        final SpriteAPI se = Global.getSettings().getSprite("ui", borderPrefix + "_bot_right");
 
-        SpriteAPI n = Global.getSettings().getSprite("ui", borderPrefix + "_top");
-        SpriteAPI s = Global.getSettings().getSprite("ui", borderPrefix + "_bot");
-        SpriteAPI wSprite = Global.getSettings().getSprite("ui", borderPrefix + "_left");
-        SpriteAPI e = Global.getSettings().getSprite("ui", borderPrefix + "_right");
+        final SpriteAPI n = Global.getSettings().getSprite("ui", borderPrefix + "_top");
+        final SpriteAPI s = Global.getSettings().getSprite("ui", borderPrefix + "_bot");
+        final SpriteAPI wSprite = Global.getSettings().getSprite("ui", borderPrefix + "_left");
+        final SpriteAPI e = Global.getSettings().getSprite("ui", borderPrefix + "_right");
 
         for (SpriteAPI sprite : new SpriteAPI[] { nw, ne, sw, se, n, s, wSprite, e }) {
             sprite.setAlphaMult(alpha);
@@ -176,6 +175,54 @@ public class UiUtils {
     }
 
     /**
+     * Anchors a panel relative to another panel (via {@link #anchorPanel}) and then clamps
+     * the result to stay within screen bounds.
+     * <p>
+     * Panels anchored to the top/bottom are checked for horizontal overflow (left/right edges of screen).
+     * Panels anchored to the left/right are checked for vertical overflow (top/bottom edges of screen).
+     * <p>
+     */
+    public static final void anchorPanelWithBounds(
+        UIComponentAPI panel, UIComponentAPI anchor, AnchorType type, int gap
+    ) {
+        if (panel == null || anchor == null) return;
+
+        anchorPanel(panel, anchor, type, gap);
+
+        final PositionAPI Ppos = panel.getPosition();
+        final int panelX = (int) Ppos.getX();
+        final int panelY = (int) Ppos.getY();
+        final int panelW = (int) Ppos.getWidth();
+        final int panelH = (int) Ppos.getHeight();
+
+        final int screenW = (int) Global.getSettings().getScreenWidth();
+        final int screenH = (int) Global.getSettings().getScreenHeight();
+
+
+        switch (type) {
+            case TopLeft: case TopMid: case TopRight:
+            case BottomLeft: case BottomMid: case BottomRight:
+                if (panelX < 0) {
+                    Ppos.setXAlignOffset(-panelX);
+                }
+                else if (panelX + panelW > screenW) {
+                    Ppos.setXAlignOffset(screenW - (panelX + panelW));
+                }
+                break;
+
+            case LeftTop: case LeftMid: case LeftBottom:
+            case RightTop: case RightMid: case RightBottom:
+                if (panelY < 0) {
+                    Ppos.setYAlignOffset(-panelY);
+                }
+                else if (panelY + panelH > screenH) {
+                    Ppos.setYAlignOffset(screenH - (panelY + panelH));
+                }
+                break;
+        }
+    }
+
+    /**
      * Small utility to anchor the panel without actually using PositionAPI anchors.
      * Makes UI lifecycle dependencies easier to manage.
      * Does not handle screen bounds or overflow.
@@ -196,7 +243,7 @@ public class UiUtils {
         final int anchorX = (int) Apos.getX();
         final int anchorY = (int) Apos.getY();
         final int anchorW = (int) Apos.getWidth();
-        final int anchorH = (int)Apos.getHeight();
+        final int anchorH = (int) Apos.getHeight();
 
         int widthCompensation = 0;
 
@@ -208,38 +255,46 @@ public class UiUtils {
             widthCompensation = panelIsTooltip ? comp : -comp;
         }
 
+        int heightCompensation = 0;
+
+        if (panel instanceof TooltipMakerAPI tp) {
+            if (tp.getCodexEntryId() != null) {
+                heightCompensation += 14; // API codex label height / 2f
+            }
+        } 
+
         float offsetX = 0;
         float offsetY = 0;
         
         switch (type) {
         case LeftTop:
             offsetX = anchorX - panelX - panelW - gap + widthCompensation;
-            offsetY = anchorY + anchorH - panelY - panelH;
+            offsetY = anchorY + anchorH - panelY - panelH - heightCompensation;
             break;
 
         case LeftMid:
             offsetX = anchorX - panelX - panelW - gap + widthCompensation;
-            offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
+            offsetY = anchorY - panelY + (anchorH - panelH) / 2f - heightCompensation;
             break;
 
         case LeftBottom:
             offsetX = anchorX - panelX - panelW - gap + widthCompensation;
-            offsetY = anchorY - panelY;
+            offsetY = anchorY - panelY - heightCompensation;
             break;
 
         case RightTop:
             offsetX = anchorX + anchorW - panelX + gap - widthCompensation;
-            offsetY = anchorY + anchorH - panelY - panelH;
+            offsetY = anchorY + anchorH - panelY - panelH - heightCompensation;
             break;
 
         case RightMid:
             offsetX = anchorX + anchorW - panelX + gap - widthCompensation;
-            offsetY = anchorY - panelY + (anchorH - panelH) / 2f;
+            offsetY = anchorY - panelY + (anchorH - panelH) / 2f - heightCompensation;
             break;
 
         case RightBottom:
             offsetX = anchorX + anchorW - panelX + gap - widthCompensation;
-            offsetY = anchorY - panelY;
+            offsetY = anchorY - panelY - heightCompensation;
             break;
 
         case TopLeft:
@@ -272,8 +327,8 @@ public class UiUtils {
             offsetY = anchorY - panelY - panelH - gap;
             break;
         }
-        Ppos.setXAlignOffset(offsetX);
-        Ppos.setYAlignOffset(offsetY);
+
+        Ppos.inBL(offsetX, offsetY);
     }
 
     /**
