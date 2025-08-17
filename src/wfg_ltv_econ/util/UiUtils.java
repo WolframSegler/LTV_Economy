@@ -22,6 +22,10 @@ import com.fs.starfarer.codex2.CodexDialog;
 import wfg_ltv_econ.ui.plugins.CommodityinfobarPlugin;
 
 public class UiUtils {
+
+    public static final int APICodexHeight = 28;
+    public static final int opad = 10;
+
     public static final void resetFlowLeft(TooltipMakerAPI tooltip, float opad) {
         float prevHeight = tooltip.getHeightSoFar();
         LabelAPI alignReset = tooltip.addPara("", 0);
@@ -175,19 +179,15 @@ public class UiUtils {
     }
 
     /**
-     * Anchors a panel relative to another panel (via {@link #anchorPanel}) and then clamps
+     * Anchors a panel relative to another panel via {@link #anchorPanel} and then clamps
      * the result to stay within screen bounds.
-     * <p>
-     * Panels anchored to the top/bottom are checked for horizontal overflow (left/right edges of screen).
-     * Panels anchored to the left/right are checked for vertical overflow (top/bottom edges of screen).
-     * <p>
      */
     public static final void anchorPanelWithBounds(
         UIComponentAPI panel, UIComponentAPI anchor, AnchorType type, int gap
     ) {
         if (panel == null || anchor == null) return;
 
-        anchorPanel(panel, anchor, type, gap);
+        AnchorPanelOffset offsets = anchorPanel(panel, anchor, type, gap);
 
         final PositionAPI Ppos = panel.getPosition();
         final int panelX = (int) Ppos.getX();
@@ -198,27 +198,34 @@ public class UiUtils {
         final int screenW = (int) Global.getSettings().getScreenWidth();
         final int screenH = (int) Global.getSettings().getScreenHeight();
 
+        float offsetX = 0;
+        if (panelX < 0) {
+            offsetX = opad + (-panelX);
+        }
+        else if (panelX + panelW > screenW) {
+            offsetX = screenW - (panelX + panelW + opad);
+        }
 
-        switch (type) {
-            case TopLeft: case TopMid: case TopRight:
-            case BottomLeft: case BottomMid: case BottomRight:
-                if (panelX < 0) {
-                    Ppos.setXAlignOffset(-panelX);
+        float offsetY = 0;
+        if (panelY < 0) {
+            offsetY = opad + (-panelY);
+            if (panel instanceof TooltipMakerAPI tp) {
+                if (tp.getCodexEntryId() != null) {
+                    offsetY += APICodexHeight;
                 }
-                else if (panelX + panelW > screenW) {
-                    Ppos.setXAlignOffset(screenW - (panelX + panelW));
-                }
-                break;
+            }
+        } else if (panelY + panelH > screenH) {
+            offsetY = screenH - (panelY + panelH + opad);
+        }
 
-            case LeftTop: case LeftMid: case LeftBottom:
-            case RightTop: case RightMid: case RightBottom:
-                if (panelY < 0) {
-                    Ppos.setYAlignOffset(-panelY);
-                }
-                else if (panelY + panelH > screenH) {
-                    Ppos.setYAlignOffset(screenH - (panelY + panelH));
-                }
-                break;
+        Ppos.inBL(offsets.x + offsetX, offsets.y + offsetY);
+    }
+
+    protected static class AnchorPanelOffset {
+        public final float x;
+        public final float y;
+        public AnchorPanelOffset(float x, float y) {
+            this.x = x; this.y = y;
         }
     }
 
@@ -227,9 +234,9 @@ public class UiUtils {
      * Makes UI lifecycle dependencies easier to manage.
      * Does not handle screen bounds or overflow.
      */
-    public static final void anchorPanel(UIComponentAPI panel, UIComponentAPI anchor, AnchorType type, int gap) {
+    public static final AnchorPanelOffset anchorPanel(UIComponentAPI panel, UIComponentAPI anchor, AnchorType type, int gap) {
 
-        if (panel == null || anchor == null) return;
+        if (panel == null || anchor == null) return null;
 
         final PositionAPI Ppos = panel.getPosition();
         final PositionAPI Apos = anchor.getPosition();
@@ -259,7 +266,7 @@ public class UiUtils {
 
         if (panel instanceof TooltipMakerAPI tp) {
             if (tp.getCodexEntryId() != null) {
-                heightCompensation += 14; // API codex label height / 2f
+                heightCompensation += APICodexHeight / 2f;
             }
         } 
 
@@ -329,6 +336,8 @@ public class UiUtils {
         }
 
         Ppos.inBL(offsetX, offsetY);
+
+        return new AnchorPanelOffset(offsetX, offsetY);
     }
 
     /**
