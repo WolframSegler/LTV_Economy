@@ -87,7 +87,7 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
         GL11.glBegin(GL11.GL_QUADS);
 
         // TOP
-        RenderUtils.setGLColor(topLight, alphaMult);
+        RenderUtils.setGlColor(topLight, alphaMult);
 
         GL11.glVertex2f(x, midTop);
         GL11.glVertex2f(x + w, midTop);
@@ -95,7 +95,7 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
         GL11.glVertex2f(x, topY);
 
         // MIDDLE
-        RenderUtils.setGLColor(centerHighlight, alphaMult);
+        RenderUtils.setGlColor(centerHighlight, alphaMult);
 
         GL11.glVertex2f(x, midBottom);
         GL11.glVertex2f(x + w, midBottom);
@@ -103,7 +103,7 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
         GL11.glVertex2f(x, midTop);
 
         // BOTTOM
-        RenderUtils.setGLColor(bottomShadow, alphaMult);
+        RenderUtils.setGlColor(bottomShadow, alphaMult);
 
         GL11.glVertex2f(x, botY);
         GL11.glVertex2f(x + w, botY);

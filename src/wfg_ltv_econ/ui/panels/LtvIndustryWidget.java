@@ -8,6 +8,7 @@ import java.awt.Color;
 import com.fs.graphics.A.D;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.campaign.SpecialItemSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -19,7 +20,6 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.Constructi
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.IconGroupAPI;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -32,12 +32,11 @@ import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
-import com.fs.starfarer.campaign.ui.marketinfo.ooO0;
+import com.fs.starfarer.campaign.ui.marketinfo.f;
 import com.fs.starfarer.ui.OOOo;
 import com.fs.starfarer.campaign.ui.N;
 
 import wfg_ltv_econ.commodities.CommodityStats;
-import wfg_ltv_econ.commodities.SpecialItemCommodityWrapper;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
@@ -53,7 +52,6 @@ import wfg_ltv_econ.util.ListenerFactory;
 import wfg_ltv_econ.util.LtvMarketReplacer;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
-import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
 import wfg_ltv_econ.util.UiUtils;
 
 public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget, TooltipMakerAPI>
@@ -284,27 +282,36 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
 
         tp.beginIconGroup();
         tp.setIconSpacingWide();
+
+        int totalW = 0;
         List<SpecialItemData> visibleItems = m_industry.getVisibleInstalledItems();
         for (SpecialItemData item : visibleItems) {
 
-            SpecialItemCommodityWrapper com = new SpecialItemCommodityWrapper(item);
+            SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(item.getId());
 
-            ReflectedField iconField = ReflectionUtils.getFieldsMatching(
-                tp, null, IconGroupAPI.class, null, IconGroupAPI.class, true
-            ).get(0);
+            LtvSpritePanel.Base itemPanel = new LtvSpritePanel.Base(
+                getRoot(),
+                m_panel,
+                getMarket(),
+                28, 28,
+                new LtvSpritePanelPlugin<>(),
+                spec.getIconName(),
+                Color.WHITE, null, false
+            );
+            itemPanel.setDrawTexOutline(true);
+            itemPanel.setTexOutlineColor(baseColor);
+            totalW += itemPanel.getPos().getWidth();
 
-            ReflectionUtils.invoke(iconField, "addGroup", com, 1, 1, IconRenderMode.OUTLINE_CUSTOM, null);
-
-            tp.addIcons(com, 1, IconRenderMode.OUTLINE_CUSTOM);
+            add(itemPanel.getPanel()).inTR(pad + 2, TITLE_HEIGHT + pad*2);
         }
 
         if (m_industry.getAICoreId() != null) {
             CommodityOnMarketAPI AICore = getMarket().getCommodityData(m_industry.getAICoreId());
-            tp.addIcons(AICore, 1, IconRenderMode.OUTLINE_CUSTOM);
+            tp.addIcons(AICore, 1, IconRenderMode.GREEN);
         }
 
         tp.addIconGroup(ICON_SIZE, 1, pad);
-        tp.getPrev().getPosition().inTR(pad + 2, TITLE_HEIGHT + pad*2);
+        tp.getPrev().getPosition().inTR(pad + 2 + totalW, TITLE_HEIGHT + pad*2);
 
         
         boolean isIndNotFunctional = m_industry.isBuilding() || m_industry.isDisrupted();

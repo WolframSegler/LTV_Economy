@@ -38,12 +38,18 @@ public class LtvSpritePanelPlugin<
         final float w = pos.getWidth();
         final float h = pos.getHeight();
 
-        getPanel().m_sprite.setSize(w, h);
-        getPanel().m_sprite.render(x, y);
-
         if (isDrawFilledQuad && getPanel().fillColor != null) {
             getPanel().m_sprite.setColor(getPanel().fillColor);
             RenderUtils.drawQuad(x, y, w, h, getPanel().fillColor, alphaMult, false);
         }
+
+        if (getPanel().drawTexOutline && getPanel().texOutlineColor != null) {
+            RenderUtils.drawSpriteOutline(
+                getPanel().m_sprite, x, y, w, h, getPanel().texOutlineColor, alphaMult,1
+            );
+        }
+
+        getPanel().m_sprite.setSize(w, h);
+        getPanel().m_sprite.render(x, y);
     }
 }

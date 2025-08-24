@@ -55,7 +55,9 @@ public class LtvSpritePanel<
     public Color color;
     public Color outlineColor;
     public Color fillColor;
+    public Color texOutlineColor = Color.GREEN;
     public boolean drawBorder = false;
+    public boolean drawTexOutline = false;
 
     public LtvSpritePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
         LtvSpritePanelPlugin<PanelType> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
@@ -67,7 +69,6 @@ public class LtvSpritePanel<
         this.drawBorder = drawBorder;
 
         initializePlugin(hasPlugin);
-        createPanel();
     }
 
     @SuppressWarnings("unchecked")
@@ -104,4 +105,12 @@ public class LtvSpritePanel<
     }
 
     public void createPanel() {}
+
+    public void setDrawTexOutline(boolean a) {
+        drawTexOutline = a;
+    }
+
+    public void setTexOutlineColor(Color a) {
+        texOutlineColor = a;
+    }
 }

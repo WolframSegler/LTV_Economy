@@ -28,4 +28,4 @@ Extra Instructions:
 - Search for implementation for API's using the following commands
   -> implements\s+[^{]*\bInteractionDialogAPI\b
 
-for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Yig")) { p.getSpec().setTexture("graphics/planets/US_planet_textureAtoll.jpg"); p.applySpecChanges(); break; }
+for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Sophita")) { p.getSpec().setTexture("graphics/kaleidoscope/planets/terran_boreal01.jpg"); p.applySpecChanges(); break; }
