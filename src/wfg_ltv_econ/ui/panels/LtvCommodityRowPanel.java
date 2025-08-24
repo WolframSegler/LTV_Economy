@@ -21,11 +21,12 @@ import com.fs.starfarer.api.loading.Description.Type;
 
 import wfg_ltv_econ.commodities.CommodityStats;
 import wfg_ltv_econ.ui.components.FaderComponent.Glow;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
-import wfg_ltv_econ.ui.plugins.LtvCommodityRowPanelPlugin;
+import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.TooltipUtils;
@@ -36,8 +37,8 @@ import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlugin, LtvCommodityRowPanel, CustomPanelAPI>
-    implements HasTooltip, HasFader, HasAudioFeedback
+public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodityRowPanel>, LtvCommodityRowPanel, CustomPanelAPI>
+    implements HasTooltip, HasFader, HasAudioFeedback, AcceptsActionListener
 {
     public static final int pad = 3;
     public static final int opad = 10;
@@ -55,19 +56,18 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
 
     public boolean isExpanded = false;
     public boolean persistentGlow = false;
-
-    public boolean m_canViewPrices;
+    public boolean m_canViewPrices = false;
 
     public LtvCommodityRowPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, CommodityOnMarketAPI com,
-        LtvCommodityPanel parentWrapper, int width, int height, boolean childrenIgnoreUIState) {
-        super(root, parent, width, height, new LtvCommodityRowPanelPlugin(), market);
+        LtvCommodityPanel parentWrapper, int width, int height, boolean childrenIgnoreUIState, boolean canViewPrices) {
+
+        super(root, parent, width, height, new BasePanelPlugin<>(), market);
         m_com = com;
         m_parent = parentWrapper;
         m_comStats = new CommodityStats(com.getId(), market);
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
-        boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
-        m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
+        m_canViewPrices = canViewPrices;
 
         initializePlugin(hasPlugin);
         createPanel();
@@ -85,7 +85,6 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
 
     public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
-        getPlugin().setDisplayPrices(m_canViewPrices);
     }
 
     @Override
@@ -111,6 +110,15 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<LtvCommodityRowPanelPlu
     @Override
     public Glow getGlowType() {
         return Glow.UNDERLAY;
+    }
+
+    public HasActionListener selectionListener;
+
+    public Optional<HasActionListener> getActionListener() {
+        return Optional.ofNullable(selectionListener);
+    }
+    public void setActionListener(HasActionListener listener) {
+        selectionListener = listener;
     }
 
     public void createPanel() {

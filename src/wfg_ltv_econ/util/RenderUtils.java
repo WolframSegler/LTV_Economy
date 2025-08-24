@@ -135,7 +135,7 @@ public class RenderUtils {
 
         if (sprite == null || color == null) return;
 
-        final int steps = 24;
+        final int steps = 12;
         final int angleStep = 360 / steps;
 
         sprite.setSize(w, h);
@@ -152,7 +152,7 @@ public class RenderUtils {
         GL11.glColorMask(false, false, false, false);
 
         // Only write stencil where texture alpha > threshold
-        final float threshold = 0.001f;
+        final float threshold = 0.1f;
         GL11.glEnable(GL11.GL_ALPHA_TEST);
         GL11.glAlphaFunc(GL11.GL_GREATER, threshold);
 

@@ -6,7 +6,11 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.state.AppDriver;
 
+import wfg_ltv_econ.ui.dialogs.ComDetailDialog;
+import wfg_ltv_econ.ui.panels.ActionListenerPanel;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
+import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
@@ -16,6 +20,7 @@ import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.api.campaign.CoreUIAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -223,6 +228,36 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 market,
                 new BasePanelPlugin<LtvCommodityPanel>()
             );
+
+            ActionListenerPanel listener = new ActionListenerPanel(
+                managementPanel,
+                managementPanel,
+                0, 0, market
+            ) {
+                @Override
+                public void onClicked(LtvCustomPanel<?, ?, ?> source, boolean isLeftClick) {
+                    if (!isLeftClick) {
+                        return;
+                    }
+                    
+                    LtvCommodityRowPanel panel = ((LtvCommodityRowPanel)source);
+
+                    replacement.selectRow(panel);
+
+                    if (replacement.m_canViewPrices) {
+                        InteractionDialogAPI dialog = Global.getSector().getCampaignUI().getCurrentInteractionDialog();
+
+                        if (dialog != null) {
+                            ComDetailDialog dialogPanel = new ComDetailDialog(panel, panel.getCommodity());
+
+                            dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
+                        }
+                    } 
+                }
+            };
+
+            replacement.setActionListener(listener);
+            replacement.createPanel();
 
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later

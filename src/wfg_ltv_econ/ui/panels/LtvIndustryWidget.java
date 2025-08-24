@@ -10,6 +10,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.SpecialItemSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
@@ -300,18 +301,30 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             );
             itemPanel.setDrawTexOutline(true);
             itemPanel.setTexOutlineColor(baseColor);
-            totalW += itemPanel.getPos().getWidth();
 
-            add(itemPanel.getPanel()).inTR(pad + 2, TITLE_HEIGHT + pad*2);
+            add(itemPanel.getPanel()).inTR(pad + 2 + totalW, TITLE_HEIGHT + pad*2);
+            
+            totalW += itemPanel.getPos().getWidth() + pad;
         }
 
         if (m_industry.getAICoreId() != null) {
-            CommodityOnMarketAPI AICore = getMarket().getCommodityData(m_industry.getAICoreId());
-            tp.addIcons(AICore, 1, IconRenderMode.GREEN);
-        }
 
-        tp.addIconGroup(ICON_SIZE, 1, pad);
-        tp.getPrev().getPosition().inTR(pad + 2 + totalW, TITLE_HEIGHT + pad*2);
+            CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(m_industry.getAICoreId());
+
+            LtvSpritePanel.Base aiCorePanel = new LtvSpritePanel.Base(
+                getRoot(),
+                m_panel,
+                getMarket(),
+                28, 28,
+                new LtvSpritePanelPlugin<>(),
+                spec.getIconName(),
+                Color.WHITE, null, false
+            );
+            aiCorePanel.setDrawTexOutline(true);
+            aiCorePanel.setTexOutlineColor(baseColor);
+
+            add(aiCorePanel.getPanel()).inTR(pad + 2 + totalW, TITLE_HEIGHT + pad*2);
+        }
 
         
         boolean isIndNotFunctional = m_industry.isBuilding() || m_industry.isDisrupted();

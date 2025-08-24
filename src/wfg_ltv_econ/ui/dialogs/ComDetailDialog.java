@@ -9,6 +9,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -41,6 +42,7 @@ import wfg_ltv_econ.ui.panels.LtvTextPanel;
 import wfg_ltv_econ.ui.panels.SortableTable;
 import wfg_ltv_econ.ui.panels.SortableTable.ColumnManager;
 import wfg_ltv_econ.ui.panels.SortableTable.HeaderPanelWithTooltip;
+import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.panels.SortableTable.cellAlg;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
@@ -51,11 +53,7 @@ import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 
-public class ComDetailDialog implements CustomDialogDelegate {
-
-    public interface CommoditySelectionListener {
-        void onCommoditySelected(CommodityOnMarketAPI selectedCommodity);
-    }
+public class ComDetailDialog implements CustomDialogDelegate, HasActionListener {
 
     // this.PANEL_W = 1206; // Exact width using VisualVM. Includes pad.
     // this.PANEL_H = 728; // Exact height using VisualVM. Includes pad.
@@ -92,6 +90,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
     public LtvTextPanel footerPanel = null;
     public ButtonAPI producerButton = null;
     public ButtonAPI consumerButton = null;
+    public LtvCommodityPanel section4ComPanel = null;
 
     public ComDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com) {
         // Measured using very precise tools!! (my eyes)
@@ -1006,7 +1005,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
     private void createSection4(CustomPanelAPI section) {
         BasePanelPlugin<LtvCommodityPanel> comPanelPlugin = new BasePanelPlugin<>();
 
-        LtvCommodityPanel comPanel = new LtvCommodityPanel(
+        section4ComPanel = new LtvCommodityPanel(
                 m_parentWrapper.getRoot(),
                 section,
                 (int) section.getPosition().getWidth(),
@@ -1015,13 +1014,33 @@ public class ComDetailDialog implements CustomDialogDelegate {
                 comPanelPlugin,
                 m_parentWrapper.getMarket().getName() + " - Commodities",
                 true);
-        comPanel.setRowSelectable(true);
-        comPanel.selectRow(m_com.getId());
+        section4ComPanel.setRowSelectable(true);
+        section4ComPanel.selectRow(m_com.getId());
 
-        comPanel.setCommoditySelectionListener(new CommoditySelectionListener() {
-            @Override
-            public void onCommoditySelected(CommodityOnMarketAPI selectedCommodity) {
-                m_com = selectedCommodity;
+        section4ComPanel.setActionListener(this);
+        section4ComPanel.createPanel();
+
+        section.addComponent(section4ComPanel.getPanel());
+    }
+
+    @Override
+    public void onClicked(LtvCustomPanel<?, ?, ?> source, boolean isLeftClick) {
+        if (!isLeftClick) {
+            return;
+        }
+
+        LtvCommodityRowPanel panel = ((LtvCommodityRowPanel)source);
+        m_com = panel.getCommodity();
+
+        section4ComPanel.selectRow(panel);
+
+        if (section4ComPanel.m_canViewPrices) {
+            InteractionDialogAPI dialog = Global.getSector().getCampaignUI().getCurrentInteractionDialog();
+
+            if (dialog != null) {
+                ComDetailDialog dialogPanel = new ComDetailDialog(panel, panel.getCommodity());
+
+                dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
 
                 // Update UI
                 updateSection1();
@@ -1030,9 +1049,7 @@ public class ComDetailDialog implements CustomDialogDelegate {
 
                 updateSection3(mode);
             }
-        });
-
-        section.addComponent(comPanel.getPanel());
+        } 
     }
 
     private int getTotalGlobalExports(String comID) {
