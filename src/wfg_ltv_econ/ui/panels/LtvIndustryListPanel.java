@@ -9,9 +9,11 @@ import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI.DismissDialogDelegate;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
@@ -27,6 +29,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.campaign.command.OutpostItemRow;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
@@ -343,6 +346,8 @@ public class LtvIndustryListPanel
 
 		buttonWrapper.setButtonFontOrbitron20Bold();
 		buttonWrapper.setActionListenerDelegate(this);
+
+		final int buildBtnWidth = 350;
 		buildButton = buttonWrapper.addButton(
             "   Add industry or structure...",
             null,
@@ -350,15 +355,14 @@ public class LtvIndustryListPanel
             Misc.getDarkPlayerColor(),
             Alignment.LMID,
             CutStyle.TL_BR,
-            350,
+            buildBtnWidth,
             25,
             pad
         );
 		buildButton.setShortcut(Keyboard.KEY_Q, false);
 		
 		buttonWrapper.addComponent(buildButton).inBL(0, BUTTON_SECTION_HEIGHT);
-		add(creditLblPanel.getPanel());
-		UiUtils.anchorPanel(creditLblPanel.getPanel(), buildButton, AnchorType.RightMid, 70);
+		add(creditLblPanel.getPanel()).inBL(buildBtnWidth + 70, BUTTON_SECTION_HEIGHT);
 		add(maxIndLblPanel.getPanel()).inBR(40, BUTTON_SECTION_HEIGHT);
 
 		if (!DebugFlags.COLONY_DEBUG && !getMarket().isPlayerOwned()) {
@@ -552,4 +556,18 @@ public class LtvIndustryListPanel
 			buildDialogOpen = false;
 		}
 	}
+
+	public MarketInteractionMode getMarketInteractionModeForRow(OutpostItemRow row) {
+		SectorEntityToken interactingEntity = Global.getSector().getCampaignUI()
+			.getCurrentInteractionDialog().getInteractionTarget();
+
+		MarketInteractionMode mode = MarketInteractionMode.REMOTE;
+
+		if (interactingEntity != null && interactingEntity.getMarket() == getMarket()) {
+			mode = MarketInteractionMode.LOCAL;
+		}
+
+		return mode;
+	}
+
 }

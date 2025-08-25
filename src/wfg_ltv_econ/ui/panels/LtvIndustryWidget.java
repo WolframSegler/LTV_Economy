@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.awt.Color;
 
-import com.fs.graphics.A.D;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.SpecialItemSpecAPI;
@@ -31,10 +30,12 @@ import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
+
 import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.ui.OOOo;
 import com.fs.starfarer.campaign.ui.N;
+import com.fs.graphics.A.D;
 
 import wfg_ltv_econ.commodities.CommodityStats;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
