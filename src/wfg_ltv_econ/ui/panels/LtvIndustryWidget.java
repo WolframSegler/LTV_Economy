@@ -302,9 +302,9 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             itemPanel.setDrawTexOutline(true);
             itemPanel.setTexOutlineColor(baseColor);
 
-            add(itemPanel.getPanel()).inTR(pad + 2 + totalW, TITLE_HEIGHT + pad*2);
+            add(itemPanel.getPanel()).inTR(pad*2 + totalW, TITLE_HEIGHT + pad*2);
             
-            totalW += itemPanel.getPos().getWidth() + pad;
+            totalW += itemPanel.getPos().getWidth() + pad*2;
         }
 
         if (m_industry.getAICoreId() != null) {
