@@ -45,7 +45,7 @@ public class LtvSpritePanelPlugin<
 
         if (getPanel().drawTexOutline && getPanel().texOutlineColor != null) {
             RenderUtils.drawSpriteOutline(
-                getPanel().m_sprite, getPanel().texOutlineColor, x, y, w, h, alphaMult, 5
+                getPanel().m_sprite, getPanel().texOutlineColor, x, y, w, h, alphaMult, 2
             );
         }
 

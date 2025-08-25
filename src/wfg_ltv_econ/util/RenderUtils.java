@@ -131,75 +131,6 @@ public class RenderUtils {
         );
     }
 
-    public static void drawSpriteOutlinea(SpriteAPI sprite, float x, float y, float w, float h,
-        Color color, float alpha, float radius) {
-
-        if (sprite == null || color == null) return;
-
-        final int steps = 12;
-        final int angleStep = 360 / steps;
-
-        sprite.setSize(w, h);
-
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-        GL11.glPushMatrix();
-
-        // --- Pass 1: stencil/alpha mask ---
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
-        GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
-        GL11.glColorMask(false, false, false, false);
-
-        // Only write stencil where texture alpha > threshold
-        final float threshold = 0.1f;
-        GL11.glEnable(GL11.GL_ALPHA_TEST);
-        GL11.glAlphaFunc(GL11.GL_GREATER, threshold);
-
-        // Write "1" to stencil wherever sprite is drawn
-        GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
-        GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-        sprite.setAlphaMult(alpha);
-        sprite.setColor(Color.white);
-        for (int i = 0; i < steps; i++) {
-            double rad = Math.toRadians(i * angleStep);
-            float dx = (float)Math.cos(rad) * radius;
-            float dy = (float)Math.sin(rad) * radius;
-            sprite.render(x + dx, y + dy);
-        }
-
-        // sprite.setSize(w + radius, h + radius);
-        // sprite.render(x - radius / 2f, y - radius / 2f);
-
-        GL11.glDisable(GL11.GL_ALPHA_TEST);
-
-        // --- Pass 2: draw colored outline only where stencil == 1 ---
-        GL11.glColorMask(true, true, true, true);
-        GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
-        GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glColor4ub(
-            (byte)color.getRed(),
-            (byte)color.getGreen(),
-            (byte)color.getBlue(),
-            (byte)(color.getAlpha() * alpha)
-        );
-
-        GL11.glVertex2f(x - radius, y - radius);
-        GL11.glVertex2f(x - radius, y + h + radius);
-        GL11.glVertex2f(x + w + radius, y + h + radius);
-        GL11.glVertex2f(x + w + radius, y - radius);
-        GL11.glEnd();
-
-        GL11.glPopMatrix();
-        GL11.glPopAttrib();
-    }
-
     public static void drawSpriteOutline(SpriteAPI sprite, Color color, float x, float y, float w, float h,
         float alphaMult, float radius) {
 
@@ -218,38 +149,28 @@ public class RenderUtils {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         GL11.glColorMask(false, false, false, true);
-        quadWithBlend(x - w, y - h, w * 2.0F, h * 2.0F, new Color(0, 0, 0, 0), 0.0F);
+        quadWithBlend(x - w / 2f, y - h / 2f, w * 2.0F, h * 2.0F, new Color(0, 0, 0, 0), 0.0F);
 
         sprite.setBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         sprite.setAlphaMult(alphaMult * 0.75f);
         sprite.setColor(Color.white);
 
-        float var8 = 30.0F;
-        float var9 = 0.0F;
-        // if (this.ÕoöO00 == com.fs.starfarer.campaign.ui.marketinfo.f.Oo.Ó00000) {
-        //     sprite.setAlphaMult(alphaMult);
-        //     var8 = 90.0F;
-        // } else if (this.ÕoöO00 == com.fs.starfarer.campaign.ui.marketinfo.f.Oo.new) {
-        //     sprite.setAlphaMult(var5);
-        //     var8 = 180.0F;
-        //     var9 = 90.0F;
-        // }
 
-        for(float var10 = var9; var10 < 360 + var9; var10 += var8) {
-            float var11 = (float)Math.sin(Math.toRadians((double)var10));
-            float var12 = (float)Math.cos(Math.toRadians((double)var10));
-            sprite.renderAtCenter(x + radius * var12, y + radius * var11);
+        for(float angle = 0; angle < 360; angle += 30) {
+            float dx = (float) Math.cos(Math.toRadians(angle));
+            float dy = (float) Math.sin(Math.toRadians(angle));
+            sprite.render(x + radius * dx, y + radius * dy);
         }
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_SRC_ALPHA);
 
-        quadNoBlend(x - w + 1, y - h + 1, w * 2 - 2, h * 2 - 2, Color.white, alphaMult);
-        quadNoBlend(x - w + 1, y - h + 1, w * 2 - 2, h * 2 - 2, Color.white, alphaMult);
+        quadNoBlend(x - w / 2f + 1, y - h / 2f + 1, w * 2 - 2, h * 2 - 2, Color.white, alphaMult);
+        quadNoBlend(x - w / 2f + 1, y - h / 2f + 1, w * 2 - 2, h * 2 - 2, Color.white, alphaMult);
         GL11.glColorMask(true, true, true, true);
         GL11.glBlendFunc(GL11.GL_DST_ALPHA, GL11.GL_ONE_MINUS_DST_ALPHA);
-        quadNoBlend(x - w + 1, y - h + 1, w * 2 - 2, h * 2 - 2, color, alphaMult);
+        quadNoBlend(x - w / 2f + 1, y - h / 2f + 1, w * 2 - 2, h * 2 - 2, color, alphaMult);
 
         GL11.glPopMatrix();
         GL11.glPopAttrib();
