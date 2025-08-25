@@ -33,7 +33,6 @@ import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
-import com.fs.starfarer.campaign.ui.marketinfo.f;
 import com.fs.starfarer.ui.OOOo;
 import com.fs.starfarer.campaign.ui.N;
 

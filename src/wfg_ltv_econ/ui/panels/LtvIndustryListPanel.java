@@ -173,7 +173,7 @@ public class LtvIndustryListPanel
 
 			widgets.add(widget);
 		}
-		wrappertp.setHeightSoFar(wrapperTpHeight + LtvIndustryWidget.TOTAL_HEIGHT + opad);
+		wrappertp.setHeightSoFar(wrapperTpHeight + LtvIndustryWidget.TOTAL_HEIGHT + opad*2);
 
 		widgetWrapper.addUIElement(wrappertp).inTL(-pad, 0);
 		add(widgetWrapper).inTL(0, 0);
@@ -449,10 +449,10 @@ public class LtvIndustryListPanel
 
 		if (anyWidgetNotNormal) {
 			boolean mouseOverWidget = events.stream()
-					.filter(InputEventAPI::isMouseMoveEvent)
-					.anyMatch(event -> widgets.stream()
-							.anyMatch(widget -> ((LtvIndustryWidget) widget).getIndustryIcon().getPos()
-									.containsEvent(event)));
+				.filter(InputEventAPI::isMouseMoveEvent)
+				.anyMatch(event -> widgets.stream()
+				.anyMatch(widget -> ((LtvIndustryWidget) widget).getIndustryIcon().getPos()
+				.containsEvent(event)));
 
 			if (mouseOverWidget) {
 				anyWidgetNotNormal = false;
