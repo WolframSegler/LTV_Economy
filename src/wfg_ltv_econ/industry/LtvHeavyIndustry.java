@@ -120,17 +120,19 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public void apply() {
 		super.apply(true);
 
-		demand(Commodities.METALS, Math.round(ltv_precalculatecost(
-				DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned() * METALS_WEIGHT_FOR_HEAVY_MACHINERY,
-				DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned() * METALS_WEIGHT_FOR_SUPPLIES,
-				DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned() * METALS_WEIGHT_FOR_HAND_WEAPONS,
-				DAILY_BASE_PROD_SHIPS*getWorkerAssigned() * METALS_WEIGHT_FOR_SHIPS)));
+		demand(Commodities.METALS, Math.round(
+				DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned() * METALS_WEIGHT_FOR_HEAVY_MACHINERY+
+				DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned() * METALS_WEIGHT_FOR_SUPPLIES+
+				DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned() * METALS_WEIGHT_FOR_HAND_WEAPONS+
+				DAILY_BASE_PROD_SHIPS*getWorkerAssigned() * METALS_WEIGHT_FOR_SHIPS)
+		);
 
-		demand(Commodities.RARE_METALS, Math.round(ltv_precalculatecost(
-				DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY,
-				DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_SUPPLIES,
-				DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_HAND_WEAPONS,
-				DAILY_BASE_PROD_SHIPS*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_SHIPS)));
+		demand(Commodities.RARE_METALS, Math.round(
+				DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY+
+				DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_SUPPLIES+
+				DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_HAND_WEAPONS+
+				DAILY_BASE_PROD_SHIPS*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_SHIPS)
+		);
 
 		supply(Commodities.HEAVY_MACHINERY, (int)(DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned()));
 		supply(Commodities.SUPPLIES, (int)(DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned()));
@@ -171,13 +173,9 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		int day = Global.getSector().getClock().getDay();
 		super.advance(day);
 
-		if (dayTracker != day) { //Production
+		if (dayTracker != day) {
 
 			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
-
-			//All the consumption is done by Population and Infrastructure
-
-			ltv_produce(COMMODITY_LIST);
 
 			if (special != null && !isPermaPollution()) {
 				daysWithNanoforge++;

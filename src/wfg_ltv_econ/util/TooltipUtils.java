@@ -33,7 +33,7 @@ import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 
-import wfg_ltv_econ.economy.CommodityStatsa;
+import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
@@ -166,14 +166,14 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
                         CommodityOnMarketAPI com = market.getCommodityData(comID);
-                        CommodityStatsa comStat = new CommodityStatsa(comID, market);
+                        CommodityStats comStat = new CommodityStats(comID, market);
                         long marketDemand = com.getMaxDemand() - com.getPlayerTradeNetQuantity();
                         if (marketDemand < 0) {
                             marketDemand = 0;
                         }
 
                         int unitPrice = (int) market.getDemandPrice(comID, 1, true);
-                        long deficit = comStat.localDeficit;
+                        long deficit = comStat.getDeficit();
                         Color labelColor = highlight;
                         Color deficitColor = gray;
                         String quantityLabel = "---";
@@ -461,13 +461,13 @@ public class TooltipUtils {
     public static void createCommodityProductionBreakdown(
         TooltipMakerAPI tooltip,
         CommodityOnMarketAPI com,
-        CommodityStatsa comStats,
+        CommodityStats comStats,
         Color highlight,
         Color negative
     ) {
         tooltip.setParaFontDefault();
         LabelAPI title = tooltip.addPara("Available: %s", pad, highlight,
-            NumFormat.engNotation(comStats.available));
+            NumFormat.engNotation(comStats.getAvailable()));
 
         final int valueTxtWidth = 50;
         boolean firstPara = true;
@@ -586,17 +586,17 @@ public class TooltipUtils {
     public static void createCommodityDemandBreakdown(
         TooltipMakerAPI tooltip,
         CommodityOnMarketAPI com,
-        CommodityStatsa comStats,
+        CommodityStats comStats,
         Color highlight,
         Color negative
     ) {
         Color valueColor = highlight;
-        if (comStats.available < comStats.localDemand) {
+        if (comStats.getDeficit() > 0) {
             valueColor = negative;
         }
         
         LabelAPI title = tooltip.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation(comStats.localDemand));
+            NumFormat.engNotation(comStats.demandPreTrade));
 
         final int valueTxtWidth = 50;
         boolean firstPara = true;

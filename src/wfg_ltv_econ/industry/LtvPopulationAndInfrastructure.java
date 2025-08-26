@@ -127,27 +127,30 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 	}
 
 	public void StabilityModifierDemand(int luxuryThreshold) {
-		Pair<String, Float> deficit = ltv_getMaxDeficit(Commodities.DOMESTIC_GOODS);
-		if (deficit.two <= 0.1) { // If 90% or more is satisfied
+		Pair<String, Float> availableRatio = ltv_getMaxDeficit(Commodities.DOMESTIC_GOODS);
+		if (availableRatio.two > 0.9) { // If 90% or more is satisfied
 			market.getStability().modifyFlat(getModId(0), 1, "Domestic goods demand met");
 		} else {
 			market.getStability().unmodifyFlat(getModId(0));
 		}
 
-		deficit = ltv_getMaxDeficit(Commodities.LUXURY_GOODS);
-		if (deficit.two <= 0.1 && market.getSize() > luxuryThreshold) { // If 90% or more is satisfied
+		availableRatio = ltv_getMaxDeficit(Commodities.LUXURY_GOODS);
+		if (availableRatio.two > 0.9 && market.getSize() > luxuryThreshold) { // If 90% or more is satisfied
 			market.getStability().modifyFlat(getModId(1), 1, "Luxury goods demand met");
 		} else {
 			market.getStability().unmodifyFlat(getModId(1));
 		}
 
-		deficit = ltv_getMaxDeficit(Commodities.FOOD);
+		availableRatio = ltv_getMaxDeficit(Commodities.FOOD);
 		if (!market.hasCondition(Conditions.HABITABLE)) {
-			deficit = ltv_getMaxDeficit(Commodities.FOOD, Commodities.ORGANICS);
+			availableRatio = ltv_getMaxDeficit(Commodities.FOOD, Commodities.ORGANICS);
 		}
-		if (deficit.two > 0.1) { // If less than 90% is satisfied
-			int stabilityPenalty = deficit.two > 0.7f ? -3 : (deficit.two > 0.4f ? -2 : (deficit.two > 0.1f ? -1 : 0));
-			market.getStability().modifyFlat(getModId(2), stabilityPenalty, getDeficitText(deficit.one));
+		if (availableRatio.two < 0.9) { // If less than 90% is satisfied
+			int stabilityPenalty = 
+				availableRatio.two < 0.1 ? -3 :
+                availableRatio.two < 0.4 ? -2 :
+                availableRatio.two < 0.7 ? -1 : 0;
+			market.getStability().modifyFlat(getModId(2), stabilityPenalty, getDeficitText(availableRatio.one));
 		} else {
 			market.getStability().unmodifyFlat(getModId(2));
 		}
@@ -311,24 +314,9 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		int day = Global.getSector().getClock().getDay();
 		super.advance(day);
 
-		if (dayTracker != day) { // Consumption&Production
-			// All the industries set their own demand.
-			// But only Population and Infrastructure consume the demanded items.
-			// This way the industries don't have to keep track of their demands.
-			// This works, because WieghtedDeficitModifiers only looks at the total demand
-			// and not the individual demands of industries.
+		if (dayTracker != day) {
 
 			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
-
-			// Consume all commodities with demand
-			for (CommodityOnMarketAPI com : market.getAllCommodities()) {
-				int demand = com.getMaxDemand();
-				if (demand > 0) {
-					ltv_consume(com.getId());
-				}
-			}
-
-			ltv_produce(COMMODITY_LIST);
 
 			dayTracker = day; // Do this at the end of the advance() method
 		}

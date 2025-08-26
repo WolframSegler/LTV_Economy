@@ -34,6 +34,12 @@ public class GlobalTradeEngine {
             m_commoditySpecs.put(spec.getId(), spec);
             m_commoditInfo.put(spec.getId(), new CommodityInfo(spec));
         }
+
+        Update();
+    }
+
+    private void Update() {
+        
     }
 
     protected int dayTracker = -1;
@@ -57,6 +63,10 @@ public class GlobalTradeEngine {
 
     public List<MarketAPI> getMarkets() {
         return m_markets;
+    }
+
+    public CommodityInfo getCommodityInfo(String comId) {
+        return m_commoditInfo.get(comId);
     }
 
     public final List<MarketAPI> getMarketsImportingCom(

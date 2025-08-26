@@ -64,13 +64,9 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 		int day = Global.getSector().getClock().getDay();
 		super.advance(day);
 
-		if (dayTracker != day) { //Production
+		if (dayTracker != day) {
 
 			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
-
-			//All the consumption is done by Population and Infrastructure
-
-			ltv_produce(COMMODITY_LIST);
 
 			dayTracker = day; // Do this at the end of the advance() method
 		}

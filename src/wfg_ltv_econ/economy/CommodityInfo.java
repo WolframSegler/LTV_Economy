@@ -18,6 +18,8 @@ public class CommodityInfo {
         m_spec = spec;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            if (market.isHidden()) continue;
+            
             m_comStats.put(market, new CommodityStats(m_spec.getId(), market));
         }
     }

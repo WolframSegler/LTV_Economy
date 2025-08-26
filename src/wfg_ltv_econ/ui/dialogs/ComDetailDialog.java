@@ -28,7 +28,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg_ltv_econ.economy.CommodityStatsa;
+import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
@@ -905,20 +905,20 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             if (market.isHidden()) {
                 continue;
             }
-            final CommodityStatsa comStats = new CommodityStatsa(m_com.getId(), market);
-            if (comStats.globalExport < 1 && mode == 0 || comStats.localDemand < 1 && mode == 1) {
+            final CommodityStats comStats = new CommodityStats(m_com.getId(), market);
+            if (comStats.globalExport < 1 && mode == 0 || comStats.demandPreTrade < 1 && mode == 1) {
                 continue;
             }
 
             if (footerPanel != null && footerPanel.m_checkbox.isChecked() &&
-                !(comStats.canNotExport > 0 || comStats.localDeficit > 0)) {
+                !(comStats.getCanNotExport() > 0 || comStats.getDeficit() > 0)) {
                 continue;
             }
 
             String iconPath = market.getFaction().getCrest();
             LtvSpritePanel.Base iconPanel = new Base(
                 m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new LtvSpritePanelPlugin<>(), 
-                iconPath, null, null, comStats.localDeficit > 0
+                iconPath, null, null, comStats.getDeficit() > 0
             );
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
@@ -1048,7 +1048,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         int total = 0;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            CommodityStatsa stats = new CommodityStatsa(comID, market);
+            CommodityStats stats = new CommodityStats(comID, market);
 
             total += stats.globalExport;
         }
@@ -1064,7 +1064,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 continue;
             }
 
-            CommodityStatsa stats = new CommodityStatsa(comID, market);
+            CommodityStats stats = new CommodityStats(comID, market);
             total += stats.inFactionExport;
         }
 
@@ -1079,7 +1079,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 continue;
             }
 
-            CommodityStatsa stats = new CommodityStatsa(comID, market);
+            CommodityStats stats = new CommodityStats(comID, market);
 
             total += stats.globalExport;
         }
@@ -1103,7 +1103,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 tpWidth, 0, false);
     
             final FactionAPI faction = market.getFaction();
-            final CommodityStatsa comStats = new CommodityStatsa(m_com.getId(), market);
+            final CommodityStats comStats = new CommodityStats(m_com.getId(), market);
     
             final Color highlight = Misc.getHighlightColor();
             final Color negative = Misc.getNegativeHighlightColor();
@@ -1152,12 +1152,12 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 com.getId(), (double)econUnit, true) / econUnit;
     
             if (!com.isMeta()) {
-                if (comStats.totalExports > 0) {
+                if (comStats.getCanNotExport() > 0) {
                     tp.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), 
-                    highlight, NumFormat.engNotation(comStats.totalExports));
-                } else if (comStats.localDeficit > 0) {
+                    highlight, NumFormat.engNotation(comStats.getCanNotExport()));
+                } else if (comStats.getDeficit() > 0) {
                     tp.addPara("Local deficit: %s units.", opad, negative, 
-                    highlight, NumFormat.engNotation(comStats.localDeficit));
+                    highlight, NumFormat.engNotation(comStats.getDeficit()));
                 }
     
                 tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{

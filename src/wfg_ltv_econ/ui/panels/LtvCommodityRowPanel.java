@@ -19,7 +19,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 
-import wfg_ltv_econ.economy.CommodityStatsa;
+import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.ui.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
@@ -51,7 +51,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
     private final CommodityOnMarketAPI m_com;
     private final LtvCommodityPanel m_parent;
     private final FaderUtil m_fader;
-    private final CommodityStatsa m_comStats;
+    private final CommodityStats m_comStats;
     public TooltipMakerAPI m_tooltip = null;
 
     public boolean isExpanded = false;
@@ -64,7 +64,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         super(root, parent, width, height, new BasePanelPlugin<>(), market);
         m_com = com;
         m_parent = parentWrapper;
-        m_comStats = new CommodityStatsa(com.getId(), market);
+        m_comStats = new CommodityStats(com.getId(), market);
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
         m_canViewPrices = canViewPrices;
@@ -257,7 +257,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         boolean isIllegal = getMarket().isIllegal(m_com);
         String commodityName = m_com.getCommodity().getName();
 
-        if (m_comStats.totalExports < 1) {
+        if (m_comStats.getTotalExports() < 1) {
             tooltip.addPara("No local production to export.", opad);
         } else
         if (isIllegal) {
@@ -283,10 +283,10 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
             exportIncome + Strings.C
             );
 
-            if (m_comStats.canNotExport > 0) {
+            if (m_comStats.getCanNotExport() > 0) {
                 tooltip.addPara(
                 "Exports are reduced by %s due to insufficient accessibility.",
-                pad, negative, NumFormat.engNotation(m_comStats.canNotExport)
+                pad, negative, NumFormat.engNotation(m_comStats.getCanNotExport())
             );
             }
         }

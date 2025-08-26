@@ -13,7 +13,6 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 
@@ -229,32 +228,14 @@ public class LtvMining extends LtvBaseIndustry {
 		int day = Global.getSector().getClock().getDay();
 		super.advance(day);
 
-		if (dayTracker != day) { //Production
+		if (dayTracker != day) {
 
 			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
-
-			//All the consumption is done by Population and Infrastructure
-
-			ltv_produce(COMMODITY_LIST);
 
 			dayTracker = day; // Do this at the end of the advance() method
 		}
 	}
-
-	protected boolean hasPostDemandSection(boolean hasDemand, IndustryTooltipMode mode) {
-		Pair<String, Integer> deficit = getMaxDeficit(Commodities.DRUGS);
-		if (deficit.two <= 0) return false;
-		return mode != IndustryTooltipMode.NORMAL || isFunctional();
-	}
 	
-	@Override
-	protected void addPostDemandSection(TooltipMakerAPI tooltip, boolean hasDemand, IndustryTooltipMode mode) {
-		if (mode != IndustryTooltipMode.NORMAL || isFunctional()) {			
-			// Reduce worker productivity instead of reducing immigration
-		}
-	}
-	
-
 	@Override
 	public boolean isAvailableToBuild() {
 		if (!super.isAvailableToBuild()) return false;

@@ -34,7 +34,7 @@ import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.ui.N;
 import com.fs.graphics.A.D;
 
-import wfg_ltv_econ.economy.CommodityStatsa;
+import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
@@ -245,18 +245,18 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
         tp.setIconSpacingMedium();
 
         for (Pair<String, Integer> deficitEntry : m_industry.getAllDeficit()) {
-            CommodityStatsa stats = new CommodityStatsa(deficitEntry.one, getMarket());
+            CommodityStats stats = new CommodityStats(deficitEntry.one, getMarket());
 
             CommodityOnMarketAPI commodity = getMarket().getCommodityData(deficitEntry.one);
 
-            if (stats.localDeficit < 1) {
+            if (stats.getDeficit() < 1) {
                 continue;
             }
 
             int iconCount = 1;
 
-            if (stats.localDeficit / (double) stats.localDemand > 0.33f) iconCount = 2;
-            if (stats.localDeficit / (double) stats.localDemand > 0.66f) iconCount = 3;
+            if (stats.availabilityRatio < 0.67f) iconCount = 2;
+            if (stats.availabilityRatio < 0.33f) iconCount = 3;
 
             tp.addIcons(commodity, iconCount, IconRenderMode.RED);
         }

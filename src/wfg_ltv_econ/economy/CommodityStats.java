@@ -35,20 +35,22 @@ public class CommodityStats {
     public long inFactionExport = 0;
     public long globalExport = 0;
 
-    public final long getTotalActivity() {
-        return localProduction + getDeficitPreTrade();
-    }
-
     public final long getDemandMet() { return demandMetWithLocal + demandMetViaTrade; }
     public final long getDeficitPreTrade() { return demandPreTrade - demandMetWithLocal; }
     public final long getDeficit() { return demandPreTrade - getDemandMet(); }
 
     public long getTotalImports() { return inFactionImports + externalImports; }
     public long getTotalExports() { return inFactionExport + globalExport; }
+    public final long getAvailable() { return localProduction + getTotalImports(); }
     public final long getCanNotExport() {
         final long totalExportable = Math.max(0, localProduction - getDeficitPreTrade());
         return Math.max(0, totalExportable - getTotalExports());
     }
+
+    public final long getTotalActivity() {
+        return getAvailable() + getDeficit() + getTotalExports() + getCanNotExport();
+    }
+
 
     public final void addInFactionImport(int a) {
         inFactionImports += a;
@@ -72,6 +74,10 @@ public class CommodityStats {
         globalExport += a;
 
         Update();
+    }
+
+    public final long getStoredAmount() {
+        return stored;
     }
 
     public final void addStoredAmount(long a) {
@@ -102,7 +108,8 @@ public class CommodityStats {
      * Gets called each day to update the values and the stored amount.
      */
     public final void advance() {
-        availabilityRatio = (float) getDemandMet() / demandPreTrade;
+        
+        availabilityRatio = demandPreTrade == 0 ? 1f : (float) getDemandMet() / demandPreTrade;
         
         addStoredAmount(getCanNotExport() - getDeficit());
 
@@ -112,7 +119,7 @@ public class CommodityStats {
         if (amount > 0) {
             cargo.addItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), amount);
         } else {
-            cargo.removeItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), amount);
+            cargo.removeItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), Math.abs(amount));
         }
     }
 
@@ -138,6 +145,15 @@ public class CommodityStats {
         }
 
         return result;
+    }
+
+    /**
+     * Returns the fraction of demand that could be satisfied by the current stored amount.
+     */
+    public float getStoredCoverageRatio() {
+        if (demandPreTrade <= 0) return 1f;
+
+        return Math.min((float) stored / demandPreTrade, 1f);
     }
 
     public static List<Industry> getVisibleIndustries(MarketAPI market) {
