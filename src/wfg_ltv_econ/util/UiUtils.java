@@ -23,7 +23,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.codex2.CodexDialog;
 
-import wfg_ltv_econ.commodities.CommodityStats;
+import wfg_ltv_econ.economy.CommodityStatsa;
 import wfg_ltv_econ.ui.dialogs.LtvCustomDialogDelegate;
 import wfg_ltv_econ.ui.plugins.CommodityinfobarPlugin;
 
@@ -121,13 +121,13 @@ public class UiUtils {
     public static final Color COLOR_EXPORT = new Color(63,  175, 63);
     public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
 
-    public static void CommodityInfoBar(TooltipMakerAPI tooltip, int barHeight, int barWidth, CommodityStats comStats) {
+    public static void CommodityInfoBar(TooltipMakerAPI tooltip, int barHeight, int barWidth, CommodityStatsa comStats) {
         final CustomPanelAPI infoBar = CommodityInfoBar(barHeight, barWidth, comStats);
 
         tooltip.addCustom(infoBar, 3);
     }
 
-    public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStats comStats) {
+    public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStatsa comStats) {
 
         float localProducedRatio = (float)comStats.demandMetWithLocal / (float)comStats.totalActivity;
         float inFactionImportRatio = (float)comStats.inFactionImports / (float)comStats.totalActivity;

@@ -29,14 +29,12 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
 
-import com.fs.starfarer.campaign.ui.marketinfo.b;
-import com.fs.starfarer.campaign.ui.marketinfo.intnew;
-import com.fs.starfarer.ui.OOOo;
-import com.fs.starfarer.ui.newui.o0Oo;
+// import com.fs.starfarer.campaign.ui.marketinfo.b;
+// import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.campaign.ui.N;
 import com.fs.graphics.A.D;
 
-import wfg_ltv_econ.commodities.CommodityStats;
+import wfg_ltv_econ.economy.CommodityStatsa;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
@@ -247,7 +245,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
         tp.setIconSpacingMedium();
 
         for (Pair<String, Integer> deficitEntry : m_industry.getAllDeficit()) {
-            CommodityStats stats = new CommodityStats(deficitEntry.one, getMarket());
+            CommodityStatsa stats = new CommodityStatsa(deficitEntry.one, getMarket());
 
             CommodityOnMarketAPI commodity = getMarket().getCommodityData(deficitEntry.one);
 

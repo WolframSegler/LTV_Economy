@@ -19,7 +19,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 
-import wfg_ltv_econ.commodities.CommodityStats;
+import wfg_ltv_econ.economy.CommodityStatsa;
 import wfg_ltv_econ.ui.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
@@ -51,7 +51,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
     private final CommodityOnMarketAPI m_com;
     private final LtvCommodityPanel m_parent;
     private final FaderUtil m_fader;
-    private final CommodityStats m_comStats;
+    private final CommodityStatsa m_comStats;
     public TooltipMakerAPI m_tooltip = null;
 
     public boolean isExpanded = false;
@@ -64,7 +64,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         super(root, parent, width, height, new BasePanelPlugin<>(), market);
         m_com = com;
         m_parent = parentWrapper;
-        m_comStats = new CommodityStats(com.getId(), market);
+        m_comStats = new CommodityStatsa(com.getId(), market);
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
         m_canViewPrices = canViewPrices;

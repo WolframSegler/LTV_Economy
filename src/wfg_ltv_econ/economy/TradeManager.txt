@@ -1,0 +1,9 @@
+Indicators for trade priority:
+1. In-Faction
+2. Political modifiers / Faction relationship / embargoes
+4. Existing trade agreements
+5. Accessibility
+6. Local commodity price
+7. Distance
+8. Local deficit ratio
+

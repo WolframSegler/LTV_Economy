@@ -1,0 +1,32 @@
+package wfg_ltv_econ.economy;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+
+public class CommodityInfo {
+    private final CommoditySpecAPI m_spec;
+    private final Map<MarketAPI, CommodityStatsa> m_comStats = new HashMap<>();
+
+    public CommodityInfo(
+        CommoditySpecAPI spec
+    ) {
+        m_spec = spec;
+
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            m_comStats.put(market, new CommodityStatsa(m_spec.getId(), market));
+        }
+    }
+
+    public CommodityStatsa getStats(MarketAPI market) {
+    return m_comStats.get(market);
+}
+
+    public Collection<CommodityStatsa> getAllStats() {
+        return m_comStats.values();
+    }
+}

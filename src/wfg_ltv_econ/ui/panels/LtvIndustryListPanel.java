@@ -34,7 +34,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
-import wfg_ltv_econ.commodities.CommodityStats;
+import wfg_ltv_econ.economy.CommodityStatsa;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
@@ -107,7 +107,7 @@ public class LtvIndustryListPanel
 		clearChildren();
 		widgets.clear();
 
-		List<Industry> industries = CommodityStats.getVisibleIndustries(getMarket());
+		List<Industry> industries = CommodityStatsa.getVisibleIndustries(getMarket());
 		Collections.sort(industries, getIndustryOrderComparator());
 		List<ConstructionQueueItem> queuedIndustries = getMarket().getConstructionQueue().getItems();
 	
@@ -287,7 +287,7 @@ public class LtvIndustryListPanel
 						new String[]{getMarket().getName()}
 					);
 
-					List<Industry> industries = CommodityStats.getVisibleIndustries(getMarket());
+					List<Industry> industries = CommodityStatsa.getVisibleIndustries(getMarket());
 					Collections.sort(industries, getIndustryOrderComparator());
 
 					final String indent = "    ";
@@ -374,7 +374,7 @@ public class LtvIndustryListPanel
 			}
 		}
 
-		CommodityStats.recalculateMaxDemandAndSupplyForAll(getMarket());
+		CommodityStatsa.recalculateMaxDemandAndSupplyForAll(getMarket());
 
 		add(buttonWrapper).inBL(0, 0);
 	}

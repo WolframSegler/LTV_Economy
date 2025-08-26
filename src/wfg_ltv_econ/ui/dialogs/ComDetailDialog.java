@@ -28,7 +28,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg_ltv_econ.commodities.CommodityStats;
+import wfg_ltv_econ.economy.CommodityStatsa;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
@@ -905,7 +905,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             if (market.isHidden()) {
                 continue;
             }
-            final CommodityStats comStats = new CommodityStats(m_com.getId(), market);
+            final CommodityStatsa comStats = new CommodityStatsa(m_com.getId(), market);
             if (comStats.globalExport < 1 && mode == 0 || comStats.localDemand < 1 && mode == 1) {
                 continue;
             }
@@ -1048,7 +1048,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         int total = 0;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            CommodityStats stats = new CommodityStats(comID, market);
+            CommodityStatsa stats = new CommodityStatsa(comID, market);
 
             total += stats.globalExport;
         }
@@ -1064,7 +1064,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 continue;
             }
 
-            CommodityStats stats = new CommodityStats(comID, market);
+            CommodityStatsa stats = new CommodityStatsa(comID, market);
             total += stats.inFactionExport;
         }
 
@@ -1079,7 +1079,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 continue;
             }
 
-            CommodityStats stats = new CommodityStats(comID, market);
+            CommodityStatsa stats = new CommodityStatsa(comID, market);
 
             total += stats.globalExport;
         }
@@ -1103,7 +1103,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 tpWidth, 0, false);
     
             final FactionAPI faction = market.getFaction();
-            final CommodityStats comStats = new CommodityStats(m_com.getId(), market);
+            final CommodityStatsa comStats = new CommodityStatsa(m_com.getId(), market);
     
             final Color highlight = Misc.getHighlightColor();
             final Color negative = Misc.getNegativeHighlightColor();

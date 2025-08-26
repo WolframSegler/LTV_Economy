@@ -1,4 +1,4 @@
-package wfg_ltv_econ.commodities;
+package wfg_ltv_econ.economy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +9,15 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 
-public class CommodityStats {
+public class CommodityStatsa {
 
     public final CommodityOnMarketAPI m_com;
     public final MarketAPI market;
+
+    /*
+     * Actual value that stores the amount.
+     */
+    public long stored = 0;
 
     public long totalActivity = 0;
     public long available = 0;
@@ -34,10 +39,10 @@ public class CommodityStats {
     public long demandMetWithLocal = 0;
     public long demandMetNotWithLocal = 0;
 
-    public CommodityStats(String comID, MarketAPI market) {
+    public CommodityStatsa(String comID, MarketAPI market) {
 
-        this.m_com = market.getCommodityData(comID);
         this.market = market;
+        this.m_com = market.getCommodityData(comID);
 
         recalculateTotalDemandSupplyForCommodity(market, comID);
 
