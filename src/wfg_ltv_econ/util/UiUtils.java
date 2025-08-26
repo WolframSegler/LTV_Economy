@@ -248,15 +248,15 @@ public class UiUtils {
         final PositionAPI Apos = anchor.getPosition();
 
         Ppos.inBL(0, 0); // Reset the position. It's still relative
-        final int panelX = (int) Ppos.getX();
-        final int panelY = (int) Ppos.getY();
-        final int panelW = (int) Ppos.getWidth();
-        final int panelH = (int) Ppos.getHeight();
+        final float panelX = Ppos.getX();
+        final float panelY = Ppos.getY();
+        final float panelW = Ppos.getWidth();
+        final float panelH = Ppos.getHeight();
 
-        final int anchorX = (int) Apos.getX();
-        final int anchorY = (int) Apos.getY();
-        final int anchorW = (int) Apos.getWidth();
-        final int anchorH = (int) Apos.getHeight();
+        final float anchorX = Apos.getX();
+        final float anchorY = Apos.getY();
+        final float anchorW = Apos.getWidth();
+        final float anchorH = Apos.getHeight();
 
         int widthCompensation = 0;
 
@@ -339,6 +339,26 @@ public class UiUtils {
             offsetX = anchorX + anchorW - panelX - panelW + widthCompensation;
             offsetY = anchorY - panelY - panelH - gap;
             break;
+
+        case MidTopLeft:
+            offsetX = anchorX + (anchorW / 2f) - panelX + gap - widthCompensation;
+            offsetY = anchorY + (anchorH / 2f) - panelY - panelH;
+            break;
+
+        case MidTopRight:
+            offsetX = anchorX + (anchorW / 2f) - panelX - panelW + gap - widthCompensation;
+            offsetY = anchorY + (anchorH / 2f) - panelY - panelH;
+            break;
+
+        case MidBottomLeft:
+            offsetX = anchorX + (anchorW / 2f) - panelX + gap - widthCompensation;
+            offsetY = anchorY + (anchorH / 2f) - panelY;
+            break;
+
+        case MidBottomRight:
+            offsetX = anchorX + (anchorW / 2f) - panelX - panelW + gap - widthCompensation;
+            offsetY = anchorY + (anchorH / 2f) - panelY;
+            break;
         }
 
         Ppos.inBL(offsetX, offsetY);
@@ -358,6 +378,7 @@ public class UiUtils {
      *       <li><code>Right</code>: Panel is positioned to the right side of the anchor.</li>
      *       <li><code>Top</code>: Panel is positioned above the anchor.</li>
      *       <li><code>Bottom</code>: Panel is positioned below the anchor.</li>
+     *       <li><code>Mid</code>: Panel is positioned to the vertical center line of the anchor.</li>
      *     </ul>
      *   </li>
      *   <li><b>Alignment</b> - The second word indicates the alignment along the axis perpendicular to the direction:
@@ -376,6 +397,14 @@ public class UiUtils {
      *           <li><code>Right</code>: Align panel's right edge with anchor's right edge.</li>
      *         </ul>
      *       </li>
+     *       <li>For <code>Mid</code> direction, alignment is Omnidirectional:
+     *         <ul>
+     *           <li><code>TopLeft</code>: Align panel's top left corner with anchor's center.</li>
+     *           <li><code>TopRight</code>: Align panel's top right corner with anchor's center.</li>
+     *           <li><code>BottomLeft</code>: Align panel's bottom left corner with anchor's center.</li>
+     *           <li><code>BottomRight</code>: Align panel's bottom right corner with anchor's center.</li>
+     *         </ul>
+     *       </li>
      *     </ul>
      *   </li>
      * </ol>
@@ -392,7 +421,11 @@ public class UiUtils {
         TopRight,
         BottomLeft,
         BottomMid,
-        BottomRight
+        BottomRight,
+        MidTopLeft,
+        MidTopRight,
+        MidBottomLeft,
+        MidBottomRight
     }
 
     /**

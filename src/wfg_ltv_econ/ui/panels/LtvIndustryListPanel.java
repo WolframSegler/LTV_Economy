@@ -24,6 +24,7 @@ import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -55,6 +56,7 @@ public class LtvIndustryListPanel
 
 	public static final ReflectedConstructor indPickCtor = ReflectionUtils.getConstructorsMatching(IndustryPickerDialog.class, 3).get(0);
 	public static ReflectedConstructor indOptCtor = null;
+	public final UIComponentAPI dummyWidget;
 	private final IndustryListPanel originalIndustryPanel;
 
 	private List<Object> widgets = new ArrayList<>();
@@ -77,6 +79,9 @@ public class LtvIndustryListPanel
 		super(root, parent, width, height, new IndustryListPanelPlugin(), market);
 
 		originalIndustryPanel = (IndustryListPanel) industryPanel;
+
+		dummyWidget = originalIndustryPanel.getWidgets().get(0);
+		dummyWidget.setOpacity(0);
 
 		m_coreUI = coreUI;
 
@@ -128,15 +133,13 @@ public class LtvIndustryListPanel
 			int j = index / columnAmount;
 			Industry ind = industries.get(index);
 
-			Object originalWidget = originalIndustryPanel.getWidgets().get(index);
 			LtvIndustryWidget widget = new LtvIndustryWidget(
 				getRoot(),
 				wrappertp,
 				new IndustryWidgetPlugin(),
 				getMarket(),
 				ind,
-				this,
-				originalWidget
+				this
 			);
 
 			wrappertp.addComponent(widget.getPanel()).inTL(
@@ -155,7 +158,6 @@ public class LtvIndustryListPanel
 			int j = (index + industries.size()) / columnAmount;
 			Industry ind = getMarket().instantiateIndustry(queuedIndustries.get(index).id);
 
-			Object originalWidget = originalIndustryPanel.getWidgets().get(index);
 			LtvIndustryWidget widget = new LtvIndustryWidget(
 				getRoot(),
 				wrappertp,
@@ -163,7 +165,6 @@ public class LtvIndustryListPanel
 				getMarket(),
 				ind,
 				this,
-				originalWidget,
 				index
 			);
 
@@ -176,7 +177,7 @@ public class LtvIndustryListPanel
 
 			widgets.add(widget);
 		}
-		wrappertp.setHeightSoFar(wrapperTpHeight + LtvIndustryWidget.TOTAL_HEIGHT + opad*2);
+		wrappertp.setHeightSoFar(wrapperTpHeight + LtvIndustryWidget.TOTAL_HEIGHT + opad*1.5f);
 
 		widgetWrapper.addUIElement(wrappertp).inTL(-pad, 0);
 		add(widgetWrapper).inTL(0, 0);
