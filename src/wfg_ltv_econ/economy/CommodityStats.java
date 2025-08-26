@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
+import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
+import com.fs.starfarer.api.util.Pair;
 
 public class CommodityStats {
 
@@ -15,13 +18,14 @@ public class CommodityStats {
     public final MarketAPI market;
 
     // Storage
-    public long stored = 0;
+    private long stored = 0;
+    public float availabilityRatio = 1f;
     public long localProduction = 0;
 
     // Demand
     public long demandPreTrade = 0;
     public long demandMetWithLocal = 0;
-    public long demandMetWithGlobal = 0;
+    public long demandMetViaTrade = 0;
 
     // Import
     public long inFactionImports = 0;
@@ -30,13 +34,12 @@ public class CommodityStats {
     // Export
     public long inFactionExport = 0;
     public long globalExport = 0;
-    public long canNotExport = 0;
 
     public final long getTotalActivity() {
         return localProduction + getDeficitPreTrade();
     }
 
-    public final long getDemandMet() { return demandMetWithLocal + demandMetWithGlobal; }
+    public final long getDemandMet() { return demandMetWithLocal + demandMetViaTrade; }
     public final long getDeficitPreTrade() { return demandPreTrade - demandMetWithLocal; }
     public final long getDeficit() { return demandPreTrade - getDemandMet(); }
 
@@ -49,18 +52,30 @@ public class CommodityStats {
 
     public final void addInFactionImport(int a) {
         inFactionImports += a;
+
+        Update();
     }
 
     public final void addExternalImport(int a) {
         externalImports += a;
+
+        Update();
     }
 
     public final void addInFactionExport(int a) {
         inFactionExport += a;
+
+        Update();
     }
 
     public final void addGlobalExport(int a) {
         globalExport += a;
+
+        Update();
+    }
+
+    public final void addStoredAmount(long a) {
+        stored = Math.max(0, stored + a);
     }
 
     public CommodityStats(String comID, MarketAPI market) {
@@ -76,15 +91,42 @@ public class CommodityStats {
         Update();
     }
 
-    /**
-     * Call after all trade between the colonies are complete.
-     */
-    public final void Update() {
-        final int shippingGlobal = Global.getSettings().getShippingCapacity(market, false);
-        final int shippingInFaction = Global.getSettings().getShippingCapacity(market, true);
+    private final void Update() {
+        // final int shippingGlobal = Global.getSettings().getShippingCapacity(market, false);
+        // final int shippingInFaction = Global.getSettings().getShippingCapacity(market, true);
 
-
+        demandMetViaTrade = getTotalImports();
     }
+
+    /**
+     * Gets called each day to update the values and the stored amount.
+     */
+    public final void advance() {
+        availabilityRatio = (float) getDemandMet() / demandPreTrade;
+        
+        addStoredAmount(getCanNotExport() - getDeficit());
+
+        final long amount = getCanNotExport() - getDeficit();
+        CargoAPI cargo = market.getSubmarket(ltv_getAvaliableInCargo().one).getCargo();
+
+        if (amount > 0) {
+            cargo.addItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), amount);
+        } else {
+            cargo.removeItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), amount);
+        }
+    }
+
+    public Pair<String, Integer> ltv_getAvaliableInCargo() {
+		String submarket = Submarkets.SUBMARKET_OPEN;
+		if (market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
+			submarket = Submarkets.LOCAL_RESOURCES;
+		} else if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) == null) {
+			return new Pair<String, Integer>(submarket, 0);
+		}
+
+		return new Pair<String, Integer>(submarket,
+			(int) market.getSubmarket(submarket).getCargo().getCommodityQuantity(m_com.getId()));
+	}
 
     public static List<MarketAPI> getFactionMarkets(String factionId) {
         List<MarketAPI> result = new ArrayList<>();
@@ -143,7 +185,7 @@ public class CommodityStats {
 
     public void printAllInfo() {
         Global.getLogger(getClass()).error("Commodity: " + m_com.getCommodity().getName());
-        Global.getLogger(getClass()).error("totalActivity: " + totalActivity);
+        Global.getLogger(getClass()).error("totalActivity: " + getTotalActivity());
         Global.getLogger(getClass()).error("localProduction: " + localProduction);
         Global.getLogger(getClass()).error("demandPreTrade: " + demandPreTrade);
         Global.getLogger(getClass()).error("deficitPreTrade: " + getDeficitPreTrade());
@@ -153,19 +195,19 @@ public class CommodityStats {
         Global.getLogger(getClass()).error("totalExports: " + getTotalExports());
         Global.getLogger(getClass()).error("inFactionExport: " + inFactionExport);
         Global.getLogger(getClass()).error("globalExport: " + globalExport);
-        Global.getLogger(getClass()).error("canNotExport: " + canNotExport);
+        Global.getLogger(getClass()).error("canNotExport: " + getCanNotExport());
         Global.getLogger(getClass()).error("demandMet: " + getDemandMet());
         Global.getLogger(getClass()).error("demandMetWithLocal: " + demandMetWithLocal);
-        Global.getLogger(getClass()).error("demandMetNotWithLocal: " + demandMetWithGlobal);
+        Global.getLogger(getClass()).error("demandMetNotWithLocal: " + demandMetViaTrade);
 
-        float total1 = demandMetWithLocal + inFactionExport + globalExport + canNotExport;
+        float total1 = demandMetWithLocal + inFactionExport + globalExport + getCanNotExport();
         total1 += inFactionImports + externalImports + getDeficitPreTrade();
 
-        float total1Ratio = total1 / totalActivity;
+        float total1Ratio = total1 / getTotalActivity();
 
-        float total2 = demandMetWithLocal + getTotalExports() + canNotExport + getTotalImports() + getDeficitPreTrade();
+        float total2 = demandMetWithLocal + getTotalExports() + getCanNotExport() + getTotalImports() + getDeficitPreTrade();
 
-        float total2Ratio = total2 / totalActivity;
+        float total2Ratio = total2 / getTotalActivity();
 
         Global.getLogger(getClass()).error("Ratio1: " + total1Ratio);
         Global.getLogger(getClass()).error("Ratio2: " + total2Ratio);

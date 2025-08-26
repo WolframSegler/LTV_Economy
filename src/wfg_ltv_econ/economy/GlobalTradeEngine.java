@@ -1,11 +1,9 @@
 package wfg_ltv_econ.economy;
 
-import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
@@ -38,11 +36,26 @@ public class GlobalTradeEngine {
         }
     }
 
+    protected int dayTracker = -1;
+
+    public void advance(float delta) {
+        final int day = Global.getSector().getClock().getDay();
+
+		if (dayTracker != day) {
+
+            for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
+                com.getValue().advance();
+            }
+
+			dayTracker = day;
+		}
+    }
+
     public void registerMarket(MarketAPI market) {
         m_markets.add(market);
     }
 
-    public List<MarketAPI> getM_markets() {
+    public List<MarketAPI> getMarkets() {
         return m_markets;
     }
 
@@ -51,15 +64,14 @@ public class GlobalTradeEngine {
     ) {
         List <MarketAPI> importers = new ArrayList<>();
 
-        for (CommodityStatsa stats : m_commoditInfo.get(spec.getId()).getAllStats()) {
+        for (CommodityStats stats : m_commoditInfo.get(spec.getId()).getAllStats()) {
             if (onlyInFaction && !stats.market.getFaction().equals(exporter.getFaction())) {
                 continue;
             }
 
             final CommodityOnMarketAPI com = stats.m_com;
 
-            if (com != null && stats.localDeficit > 0) {
-                // Market has unmet demand
+            if (com != null && stats.getDeficitPreTrade() > 0) {
                 importers.add(stats.market);
             }
         }
