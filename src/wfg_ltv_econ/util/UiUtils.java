@@ -7,7 +7,11 @@ import java.util.Map;
 import org.lwjgl.util.vector.Vector2f;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -20,6 +24,7 @@ import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.codex2.CodexDialog;
 
 import wfg_ltv_econ.commodities.CommodityStats;
+import wfg_ltv_econ.ui.dialogs.LtvCustomDialogDelegate;
 import wfg_ltv_econ.ui.plugins.CommodityinfobarPlugin;
 
 public class UiUtils {
@@ -388,6 +393,45 @@ public class UiUtils {
         BottomLeft,
         BottomMid,
         BottomRight
+    }
+
+    /**
+    <div>
+        <p>
+            Opens a CustomDialogDelegate inside a temporary 
+            InteractionDialog. This is useful when no 
+            InteractionDialogAPI is currently active (e.g. opening 
+            dialogs from command UI).
+        </p>
+        <h4>Usage Example</h4>
+        <pre>
+            ComDetailDialog panel = new ComDetailDialog(rowPanel, commodity);
+            UiUtils.showCustomDialogAsInteraction(panel, market.getPrimaryEntity());
+        </pre>
+    </div>
+     */
+    public static boolean showStandaloneCustomDialog(
+        final LtvCustomDialogDelegate dialogPanel, float width, float height
+    ) {
+        return Global.getSector().getCampaignUI().showInteractionDialogFromCargo(
+            new InteractionDialogPlugin() {
+                @Override
+                public void init(InteractionDialogAPI dialog) {
+                    dialogPanel.setInteractionDialog(dialog);
+                    dialog.showCustomDialog(width, height, dialogPanel);
+
+                    dialog.setPromptText("");
+                }
+
+                public void optionSelected(String optionText, Object optionData) {}
+                public void optionMousedOver(String optionText, Object optionData) {}
+                public void advance(float amount) {}
+                public void backFromEngagement(EngagementResultAPI result) {}
+                public Object getContext() { return null;}
+                public Map<String, MemoryAPI> getMemoryMap() { return new HashMap<>();}
+            },
+            null, null
+        );
     }
 
     /**

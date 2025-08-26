@@ -59,10 +59,10 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (dialog != null) {
             master = (UIPanelAPI) ReflectionUtils.invoke(dialog, "getCoreUI");
         }
-        // if (master == null) {
-        //     master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
-        //     // Access the Market from the Command menu (remote access)
-        // }
+        if (master == null) {
+            master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
+            // Access the Market from the Command menu (remote access)
+        }
         if (master == null) {
             return;
         }
@@ -96,7 +96,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
         }
 
         List<?> overviewChildren = (List<?>) ReflectionUtils.invoke(overviewPanel, "getChildrenCopy");
-        // managementPanel = com.fs.starfarer.campaign.ui.marketinfo.s
         UIPanelAPI managementPanel = overviewChildren.stream()
                 .filter(child -> !ReflectionUtils.getMethodsMatching(child, "recreateWithEconUpdate").isEmpty())
                 .map(child -> (UIPanelAPI) child)
@@ -245,12 +244,15 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     replacement.selectRow(panel);
 
                     if (replacement.m_canViewPrices) {
-                        InteractionDialogAPI dialog = Global.getSector().getCampaignUI().getCurrentInteractionDialog();
+                        final InteractionDialogAPI dialog = Global.getSector().getCampaignUI()
+                            .getCurrentInteractionDialog();
+                        final ComDetailDialog dialogPanel = new ComDetailDialog(panel, panel.getCommodity());
 
-                        if (dialog != null) {
-                            ComDetailDialog dialogPanel = new ComDetailDialog(panel, panel.getCommodity());
-
+                        if (dialog != null) { // Local
                             dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
+
+                        } else { // Remote
+                            UiUtils.showStandaloneCustomDialog(dialogPanel, dialogPanel.PANEL_W, dialogPanel.PANEL_H);
                         }
                     } 
                 }

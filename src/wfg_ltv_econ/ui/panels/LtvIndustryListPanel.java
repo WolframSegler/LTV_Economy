@@ -9,6 +9,7 @@ import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI.DismissDialogDelegate;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
@@ -29,7 +30,6 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.campaign.command.OutpostItemRow;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
@@ -39,7 +39,7 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.IndustryListPanelPlugin;
-import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
+import wfg_ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
@@ -132,7 +132,7 @@ public class LtvIndustryListPanel
 			LtvIndustryWidget widget = new LtvIndustryWidget(
 				getRoot(),
 				wrappertp,
-				new IndustryPanelPlugin(),
+				new IndustryWidgetPlugin(),
 				getMarket(),
 				ind,
 				this,
@@ -159,7 +159,7 @@ public class LtvIndustryListPanel
 			LtvIndustryWidget widget = new LtvIndustryWidget(
 				getRoot(),
 				wrappertp,
-				new IndustryPanelPlugin(),
+				new IndustryWidgetPlugin(),
 				getMarket(),
 				ind,
 				this,
@@ -557,17 +557,17 @@ public class LtvIndustryListPanel
 		}
 	}
 
-	public MarketInteractionMode getMarketInteractionModeForRow(OutpostItemRow row) {
-		SectorEntityToken interactingEntity = Global.getSector().getCampaignUI()
-			.getCurrentInteractionDialog().getInteractionTarget();
-
-		MarketInteractionMode mode = MarketInteractionMode.REMOTE;
-
-		if (interactingEntity != null && interactingEntity.getMarket() == getMarket()) {
-			mode = MarketInteractionMode.LOCAL;
+	public MarketInteractionMode getMarketInteractionMode() {
+		final InteractionDialogAPI dialog = Global.getSector().getCampaignUI().getCurrentInteractionDialog();
+		if (dialog == null) {
+			return MarketInteractionMode.REMOTE;
 		}
 
-		return mode;
+		final SectorEntityToken interactingTarget = dialog.getInteractionTarget();
+		if (interactingTarget != null && interactingTarget.getMarket() == getMarket()) {
+			return MarketInteractionMode.LOCAL;
+		} else {
+			return MarketInteractionMode.REMOTE;
+		}
 	}
-
 }

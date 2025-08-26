@@ -12,7 +12,6 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
@@ -34,6 +33,7 @@ import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.ui.marketinfo.b;
 import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 import com.fs.starfarer.ui.OOOo;
+import com.fs.starfarer.ui.newui.o0Oo;
 import com.fs.starfarer.campaign.ui.N;
 import com.fs.graphics.A.D;
 
@@ -47,7 +47,7 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
-import wfg_ltv_econ.ui.plugins.IndustryPanelPlugin;
+import wfg_ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
 import wfg_ltv_econ.util.ListenerFactory;
 import wfg_ltv_econ.util.LtvMarketReplacer;
@@ -55,7 +55,7 @@ import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.UiUtils;
 
-public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIndustryWidget, TooltipMakerAPI>
+public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvIndustryWidget, TooltipMakerAPI>
     implements HasBackground, HasFader, HasActionListener {
 
     public final static int pad = 3;
@@ -91,13 +91,13 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
     private FaderUtil m_fader = null;
     public PendingTooltip<CustomPanelAPI> m_tooltip = null;
 
-    public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryPanelPlugin plugin,
+    public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryWidgetPlugin plugin,
         MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, Object orgWidget) {
 
         this(root, parent, plugin, market, ind, indPanel, orgWidget, -1);
     }
 
-    public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryPanelPlugin plugin,
+    public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryWidgetPlugin plugin,
             MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, Object orgWidget, int queue) {
         super(root, parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin, market);
 
@@ -602,16 +602,6 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
             }
 
             try {
-                UIPanelAPI overview = IndustryPanel.getOverview();
-                UIPanelAPI infoPanel = (UIPanelAPI) ReflectionUtils.invoke(overview, "getInfoPanel");
-                Object tradePanel = ReflectionUtils.invoke(infoPanel, "getTradePanel");
-                Object outpostPanelParams = ReflectionUtils.invoke(tradePanel, "getOutpostPanelParams");
-
-                MarketInteractionMode interactionMode = MarketInteractionMode.LOCAL;
-                if (outpostPanelParams != null) {
-                    interactionMode = MarketInteractionMode.REMOTE;
-                }
-
                 if (LtvIndustryListPanel.indOptCtor != null) {
                     // b var17 = new b(this.øôöO00, this, var14, CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
 
@@ -625,7 +615,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryPanelPlugin, LtvIn
                     DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptCtor.newInstance(
                         m_industry,
                         originalWidget,
-                        interactionMode,
+                        getIndustryPanel().getMarketInteractionMode(),
                         CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
                         listener
                     );

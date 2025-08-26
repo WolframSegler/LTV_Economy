@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
@@ -53,7 +52,7 @@ import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 
-public class ComDetailDialog implements CustomDialogDelegate, HasActionListener {
+public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListener {
 
     // this.PANEL_W = 1206; // Exact width using VisualVM. Includes pad.
     // this.PANEL_H = 728; // Exact height using VisualVM. Includes pad.
@@ -81,8 +80,10 @@ public class ComDetailDialog implements CustomDialogDelegate, HasActionListener 
     public final static int iconSize = 24;
 
     private final LtvCustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
-    private final Color highlight = Misc.getHighlightColor();
+    private InteractionDialogAPI interactionDialog;
     private CustomPanelAPI m_dialogPanel;
+    
+    private final Color highlight = Misc.getHighlightColor();
 
     public CommodityOnMarketAPI m_com;
     public MarketAPI m_selectedMarket = null;
@@ -1035,20 +1036,11 @@ public class ComDetailDialog implements CustomDialogDelegate, HasActionListener 
         section4ComPanel.selectRow(panel);
 
         if (section4ComPanel.m_canViewPrices) {
-            InteractionDialogAPI dialog = Global.getSector().getCampaignUI().getCurrentInteractionDialog();
+            updateSection1();
+            
+            final int mode = producerButton.isChecked() ? 0 : 1;
 
-            if (dialog != null) {
-                ComDetailDialog dialogPanel = new ComDetailDialog(panel, panel.getCommodity());
-
-                dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
-
-                // Update UI
-                updateSection1();
-                
-                final int mode = producerButton.isChecked() ? 0 : 1;
-
-                updateSection3(mode);
-            }
+            updateSection3(mode);
         } 
     }
 
@@ -1265,13 +1257,22 @@ public class ComDetailDialog implements CustomDialogDelegate, HasActionListener 
     }
     
     @Override
+    public void setInteractionDialog(InteractionDialogAPI a) {
+        interactionDialog = a;
+    }
+
+    @Override
     public void customDialogConfirm() {
-        LtvUIState.setState(UIState.NONE);
+        customDialogCancel();
     }
 
     @Override
     public void customDialogCancel() {
         LtvUIState.setState(UIState.NONE);
+
+        if (interactionDialog != null) {
+            interactionDialog.dismiss();
+        }
     }
 
     public float getCustomDialogWidth() {

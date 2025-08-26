@@ -118,7 +118,7 @@ public abstract class LtvCustomPanel<
         return m_root == null ? getDialogParent() : m_root;
     }
 
-    public final UIPanelAPI getDialogParent() {
+    public static final UIPanelAPI getDialogParent() {
         return CampaignEngine.getInstance().getCampaignUI().getDialogParent();
     }
 
