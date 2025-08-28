@@ -68,7 +68,21 @@ public class EconomyEngine {
         dayTracker = day;
 
         for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
-            com.getValue().advance();
+            com.getValue().reset();
+        }
+
+        for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
+            com.getValue().advance(false);
+        }
+    }
+
+    public final void fakeAdvance() {
+        for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
+            com.getValue().reset();
+        }
+
+        for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
+            com.getValue().advance(true);
         }
     }
 
@@ -157,7 +171,6 @@ public class EconomyEngine {
     ) {
         Map<MarketAPI, Integer> tradeScores = new HashMap<>();
         for (MarketAPI importer : importers) {
-            CommodityStats stats = getComStats(spec.getId(), importer); 
             int score = 0;
     
             if (importer.getFaction().equals(exporter.getFaction())) {
@@ -175,8 +188,6 @@ public class EconomyEngine {
             score += priceFactor(spec, importer) * TradeWeights.LOCAL_PRICE;
     
             score += distanceFactor(importer, exporter) * TradeWeights.DISTANCE;
-    
-            score += deficitFactor(stats) * TradeWeights.LOCAL_DEFICIT_RATIO;
     
             score += sizeFactor(importer) * TradeWeights.MARKET_SIZE;
     
@@ -234,13 +245,6 @@ public class EconomyEngine {
 
         final float penalty = (float) Math.pow(Math.sqrt(normalized), alpha); // [-1, 0]
         return -penalty;
-    }
-
-    private static final float deficitFactor(CommodityStats stats) {
-        long deficit = stats.getDeficitPreTrade();
-        if (stats.demandBase <= 0) return 0;
-
-        return Math.min(1, (deficit / (float) stats.demandBase));
     }
 
     private static final float sizeFactor(MarketAPI exporter) {

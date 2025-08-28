@@ -10,6 +10,5 @@ public class TradeWeights {
     public static final int ACCESSIBILITY = 75;
     public static final int LOCAL_PRICE = 50;
     public static final int DISTANCE = 40;
-    public static final int LOCAL_DEFICIT_RATIO = 30;
     public static final int MARKET_SIZE = 20;
 }

@@ -119,10 +119,17 @@ public class CommodityStats {
         demandBase = demandBase < 1 ? 0 : demandBase;
     }
 
+    public final void resetTradeValues() {
+        inFactionImports = 0;
+        globalImports = 0;
+        inFactionExports = 0;
+        globalExports = 0;
+    }
+
     /**
      * Gets called each day to update the values and the stored amount.
      */
-    public final void advance() {
+    public final void advance(boolean fakeAdvance) {
 
         update();
 
@@ -130,15 +137,17 @@ public class CommodityStats {
             trade();
         }
         
-        addStoredAmount(getCanNotExport() - getDeficit());
-
-        final long amount = getCanNotExport() - getDeficit();
-        CargoAPI cargo = market.getSubmarket(ltv_getAvaliableInCargo().one).getCargo();
-
-        if (amount > 0) {
-            cargo.addItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), amount);
-        } else {
-            cargo.removeItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), Math.abs(amount));
+        if (!fakeAdvance) {
+            addStoredAmount(getCanNotExport() - getDeficit());
+    
+            final long amount = getCanNotExport() - getDeficit();
+            CargoAPI cargo = market.getSubmarket(ltv_getAvaliableInCargo().one).getCargo();
+    
+            if (amount > 0) {
+                cargo.addItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), amount);
+            } else {
+                cargo.removeItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), Math.abs(amount));
+            }
         }
     }
 

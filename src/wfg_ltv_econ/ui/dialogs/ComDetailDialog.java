@@ -216,6 +216,8 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             return;
         }
 
+        EconomyEngine.getInstance().fakeAdvance();
+
         updateSection1();
         updateSection2();
         updateSection3(0);

@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.plugins.ComDetailDialogPlugin;
@@ -33,6 +34,8 @@ public class ComDetailDialogPanel extends LtvCustomPanel<
     public ComDetailDialogPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
         ComDetailDialogPlugin plugin) {
         super(root, parent, width, height, plugin, market);
+
+        EconomyEngine.getInstance().fakeAdvance();
 
         initializePlugin(hasPlugin);
         createPanel();
