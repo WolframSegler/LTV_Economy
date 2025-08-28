@@ -8,7 +8,11 @@ import java.util.Map;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
+import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+
+import wfg_ltv_econ.conditions.WorkerPoolCondition;
+import wfg_ltv_econ.industry.LtvBaseIndustry;
 
 /**
  * Handles the trade, consumption, production and all related logic
@@ -43,6 +47,8 @@ public class EconomyEngine {
             m_commoditySpecs.put(spec.getId(), spec);
             m_commoditInfo.put(spec.getId(), new CommodityInfo(spec));
         }
+
+        fakeAdvance();
     }
 
     public final void update() {
@@ -74,7 +80,10 @@ public class EconomyEngine {
     }
 
     private final void mainLoop(boolean fakeAdvance) {
+        assignWorkers();
+
         for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
+
             com.getValue().reset();
 
             com.getValue().trade();
@@ -107,6 +116,34 @@ public class EconomyEngine {
             stats.update();
         }
         return stats;
+    }
+
+    private final void assignWorkers() {
+        for (MarketAPI market : getMarketsCopy()) {
+            if (market.isPlayerOwned() || market.isHidden()) continue;
+
+            final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
+            if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) continue;
+
+            WorkerPoolCondition cond =(WorkerPoolCondition)market.getCondition(WorkerPoolCondition.ConditionID);
+
+            int workerAssignableIndustries = 0;
+
+            for (Industry ind : workingIndustries) {
+                if (ind instanceof LtvBaseIndustry && ind.isFunctional()) {
+                    workerAssignableIndustries++;
+                }
+            }
+
+            if (workerAssignableIndustries == 0) continue;
+
+            long workersPerIndustry = (long) (cond.getWorkerPool() / (float) workerAssignableIndustries);
+            for (Industry ind : workingIndustries) {
+                if (ind instanceof LtvBaseIndustry industry && ind.isFunctional()) {
+                    industry.setWorkersAssigned(workersPerIndustry);
+                }
+            }
+        }
     }
 
     public final long getTotalGlobalExports(String comID) {

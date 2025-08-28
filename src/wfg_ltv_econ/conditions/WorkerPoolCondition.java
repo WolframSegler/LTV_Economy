@@ -12,6 +12,8 @@ import wfg_ltv_econ.industry.LtvBaseIndustry;
 
 public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
+    public static final String ConditionID = "worker_pool";
+
     private long workerPool = 0;
     private float freeWorkerRatio = 1f;
 
@@ -90,10 +92,10 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
     public final static void initialize() {
         // All existing markets
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (market.hasCondition("worker_pool") || market.getFactionId().equals(Factions.NEUTRAL)) {
+            if (market.hasCondition(ConditionID) || market.getFactionId().equals(Factions.NEUTRAL)) {
                 continue;
             }
-            market.addCondition("worker_pool");
+            market.addCondition(ConditionID);
         }
     }
 }
