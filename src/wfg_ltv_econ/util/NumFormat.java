@@ -22,7 +22,8 @@ public class NumFormat {
         long value = Math.abs(input);
 
         if (value < 1000) {
-            return Long.toString(value);
+            final String prefix = input < 0 ? "\u2212" : "";
+            return prefix + Long.toString(value);
         }
 
         int suffix = (int)(Math.log10(value) / 3);

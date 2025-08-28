@@ -3,7 +3,6 @@ package wfg_ltv_econ.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -18,7 +17,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
-import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
@@ -34,7 +32,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 
 import wfg_ltv_econ.economy.CommodityStats;
-import wfg_ltv_econ.economy.GlobalTradeEngine;
+import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
@@ -167,7 +165,7 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
                         CommodityOnMarketAPI com = market.getCommodityData(comID);
-                        CommodityStats comStat = GlobalTradeEngine.getInstance().getComStats(comID, market);
+                        CommodityStats comStat = EconomyEngine.getInstance().getComStats(comID, market);
                         long marketDemand = com.getMaxDemand() - com.getPlayerTradeNetQuantity();
                         if (marketDemand < 0) {
                             marketDemand = 0;
@@ -474,7 +472,7 @@ public class TooltipUtils {
         boolean firstPara = true;
 		float y = tooltip.getHeightSoFar() + pad;
 
-        for(Industry industry : com.getMarket().getIndustries()) {
+        for(Industry industry : comStats.getVisibleIndustries()) {
             if(industry.getSupply(com.getId()).getQuantity().getModifiedInt() < 1) {
                 continue;
             }
@@ -537,41 +535,27 @@ public class TooltipUtils {
                 firstPara = false;
             }
         }
+
         // Import mods
-        HashMap<String, StatMod> imports = com.getAvailableStat().getFlatMods();
-
-        for (Map.Entry<String, MutableStat.StatMod> entry : imports.entrySet()) {
-            MutableStat.StatMod mod = entry.getValue();
-
-            float value = mod.getValue();
-            String desc = mod.getDesc();
-
-            if (desc == null ||!desc.contains("faction")) {
-                continue;
-            }
-
-            String symbol = "+";
-            Color valueColor = highlight;
-            if (value < 0) {
-                symbol = "";
-                valueColor = negative;
-            }
-
-            y = TooltipUtils.createStatModGridRow(
-                tooltip, y, valueTxtWidth, firstPara, valueColor, value, true, desc, null, symbol
+        if (comStats.getTotalImports() > 0) {
+            y = addRow(tooltip, y, valueTxtWidth, firstPara, 
+                comStats.getTotalImports(), "Desired import volume", highlight, negative
             );
-
             firstPara = false;
         }
 
-        if (comStats.globalImports > 0) {
-            final String desc = "Desired import volume";
-
-            y = TooltipUtils.createStatModGridRow(
-                tooltip, y, valueTxtWidth, firstPara, highlight, comStats.globalImports, true,
-                desc, null, "+"
+        if (comStats.getDeficitPreTrade() > 0) {
+            y = addRow(tooltip, y, valueTxtWidth, firstPara, 
+                comStats.getDeficitPreTrade(), "Desired in-faction imports", highlight, negative
             );
+            firstPara = false;
+        } 
 
+        if (comStats.getDeficitPreTrade() - comStats.inFactionExports > 0) {
+            y = addRow(tooltip, y, valueTxtWidth, firstPara, 
+                -(comStats.getDeficitPreTrade() - comStats.inFactionImports),
+                "In-faction shortage", highlight, negative
+            );
             firstPara = false;
         }
 
@@ -582,6 +566,18 @@ public class TooltipUtils {
 
         tooltip.setHeightSoFar(y);
         UiUtils.resetFlowLeft(tooltip, opad);
+    }
+
+    private static final float addRow(TooltipMakerAPI tooltip, float y, float valueTxtWidth, boolean firstPara,
+        float value, String desc, Color highlight, Color negative) {
+
+        String symbol = value >= 0 ? "+" : "";
+        Color valueColor = value >= 0 ? highlight : negative;
+
+        return TooltipUtils.createStatModGridRow(
+            tooltip, y, valueTxtWidth, firstPara,
+            valueColor, value, true, desc, null, symbol
+        );
     }
 
     public static void createCommodityDemandBreakdown(

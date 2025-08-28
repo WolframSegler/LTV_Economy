@@ -14,67 +14,93 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 /**
  * Handles the trade, consumption, production and all related logic
  */
-public class GlobalTradeEngine {
-    private static GlobalTradeEngine instance;
+public class EconomyEngine {
+    private static EconomyEngine instance;
 
-    private Map<String, CommoditySpecAPI> m_commoditySpecs;
-    private Map<String, CommodityInfo> m_commoditInfo;
-    private List<MarketAPI> m_markets;
+    private final Map<String, CommoditySpecAPI> m_commoditySpecs;
+    private final Map<String, CommodityInfo> m_commoditInfo;
 
-    public static GlobalTradeEngine getInstance() {
-        if (instance == null) instance = new GlobalTradeEngine();
+    public static void createInstance() {
+        if (instance == null) {
+            instance = new EconomyEngine();
+        }
+    }
+
+    public static EconomyEngine getInstance() {
         return instance;
     }
 
-    private GlobalTradeEngine() {
-        this.m_markets = new ArrayList<>();
+    public static boolean isInitialized() {
+        return instance != null;
+    }
+
+    private EconomyEngine() {
         this.m_commoditInfo = new HashMap<>();
         this.m_commoditySpecs = new HashMap<>();
 
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
+            if (spec.isNonEcon()) continue;
+
             m_commoditySpecs.put(spec.getId(), spec);
             m_commoditInfo.put(spec.getId(), new CommodityInfo(spec));
         }
-
-        Update();
     }
 
-    private void Update() {
-        
+    public final void update() {
+        for (Map.Entry<String, CommodityInfo> comInfo : m_commoditInfo.entrySet()) {
+            for (CommodityStats stats : comInfo.getValue().getAllStats()) {
+                stats.update();
+            }
+        }
     }
 
     protected int dayTracker = -1;
 
-    public void advance(float delta) {
+    public final void advance(float delta) {
         final int day = Global.getSector().getClock().getDay();
 
+        if (dayTracker == -1) {
+            dayTracker = day;
+        }
+
 		if (dayTracker != day) {
+            dayTracker = day;
 
             for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
                 com.getValue().advance();
             }
 
-			dayTracker = day;
+			Global.getLogger(getClass()).error("DayPassedEconEngine: " + day);
 		}
     }
 
-    public void registerMarket(MarketAPI market) {
-        m_markets.add(market);
+    public final void registerMarket(MarketAPI market) {
+        for (Map.Entry<String, CommodityInfo> comInfo : m_commoditInfo.entrySet()) {
+            comInfo.getValue().addMarket(market);
+        }
     }
 
-    public List<MarketAPI> getMarkets() {
-        return m_markets;
+    public final List<MarketAPI> getMarketsCopy() {
+        return Global.getSector().getEconomy().getMarketsCopy();
     }
 
-    public CommodityInfo getCommodityInfo(String comID) {
+    public final List<CommoditySpecAPI> getCommoditiesCopy() {
+        return new ArrayList<>(m_commoditySpecs.values());
+    }
+
+    public final CommodityInfo getCommodityInfo(String comID) {
         return m_commoditInfo.get(comID);
     }
 
-    public CommodityStats getComStats(String comID, MarketAPI market) {
-        return m_commoditInfo.get(comID).getStats(market);
+    public final CommodityStats getComStats(String comID, MarketAPI market) {
+        final CommodityStats stats = m_commoditInfo.get(comID).getStats(market);
+        if (stats != null) {
+            stats.update();
+        }
+        return stats;
     }
 
-    public long getTotalGlobalExports(String comID) {
+    public final long getTotalGlobalExports(String comID) {
         long totalGlobalExports = 0;
         for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
             totalGlobalExports += stats.globalExports;
@@ -83,7 +109,7 @@ public class GlobalTradeEngine {
         return totalGlobalExports;
     }
 
-    public long getTotalInFactionExports(String comID, FactionAPI faction) {
+    public final long getTotalInFactionExports(String comID, FactionAPI faction) {
         long TotalFactionExports = 0;
 
         for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
@@ -96,7 +122,7 @@ public class GlobalTradeEngine {
         return TotalFactionExports;
     }
 
-    public long getFactionTotalGlobalExports(String comID, FactionAPI faction) {
+    public final long getFactionTotalGlobalExports(String comID, FactionAPI faction) {
         long totalGlobalExports = 0;
 
         for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {

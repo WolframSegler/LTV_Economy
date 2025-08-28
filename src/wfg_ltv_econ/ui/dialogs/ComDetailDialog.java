@@ -29,7 +29,7 @@ import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.economy.CommodityStats;
-import wfg_ltv_econ.economy.GlobalTradeEngine;
+import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
@@ -87,13 +87,10 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
     private final Color highlight = Misc.getHighlightColor();
 
     private CommodityOnMarketAPI m_com;
-    private CommodityStats comStats;
     public MarketAPI m_selectedMarket = null;
 
     public void setCommodity(String comID) {
         m_com = m_selectedMarket.getCommodityData(comID);
-
-        comStats = GlobalTradeEngine.getInstance().getComStats(comID, m_selectedMarket);
     }
 
     public LtvTextPanel footerPanel = null;
@@ -415,7 +412,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                     String txt = "Total global exports";
 
                     String valueTxt = NumFormat.engNotation(
-                        GlobalTradeEngine.getInstance().getTotalGlobalExports(m_com.getId())
+                        EconomyEngine.getInstance().getTotalGlobalExports(m_com.getId())
                     );
 
                     tooltip.setParaFontColor(baseColor);
@@ -500,11 +497,11 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                     String txt = "Total " + factionName + " exports";
 
                     final String globalValue = NumFormat.engNotation(
-                        GlobalTradeEngine.getInstance().getFactionTotalGlobalExports(
+                        EconomyEngine.getInstance().getFactionTotalGlobalExports(
                             m_com.getId(), getFaction())
                     );
                     final String inFactionValue = NumFormat.engNotation(
-                        GlobalTradeEngine.getInstance().getTotalInFactionExports(
+                        EconomyEngine.getInstance().getTotalInFactionExports(
                             m_com.getId(), getFaction())
                     );
 
@@ -919,6 +916,9 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             if (market.isHidden()) {
                 continue;
             }
+
+            CommodityStats comStats = EconomyEngine.getInstance().getComStats(m_com.getId(), market);
+
             if (comStats.globalExports < 1 && mode == 0 || comStats.demandBase < 1 && mode == 1) {
                 continue;
             }
@@ -1105,6 +1105,8 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
     
             tp.addSectionHeading(com.getCommodity().getName() + " production & availability",
             baseColor, darkColor, Alignment.MID, opad);
+
+            CommodityStats comStats = EconomyEngine.getInstance().getComStats(com.getId(), market);
                 
             TooltipUtils.createCommodityProductionBreakdown(
                 tp, com, comStats, highlight, negative
@@ -1144,7 +1146,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
     
             tp.addPara("Accessibility: %s", opad, valueColor, stability + "%");
     
-            tp.addStatModGrid(tpWidth, 50.0F, opad, pad, market.getAccessibilityMod(),
+            tp.addStatModGrid(tpWidth, 50, opad, pad, market.getAccessibilityMod(),
                 new StatModValueGetter() {
                 public String getPercentValue(StatMod value) {
                     return null;

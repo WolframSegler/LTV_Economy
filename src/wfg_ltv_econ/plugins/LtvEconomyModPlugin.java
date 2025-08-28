@@ -5,8 +5,6 @@ import com.fs.starfarer.api.Global;
 
 import wfg_ltv_econ.conditions.NoRestockCondition;
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
-import wfg_ltv_econ.economy.GlobalTradeEngine;
-import wfg_ltv_econ.util.LtvMarketReplacer;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
@@ -16,7 +14,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         Class.forName("wfg_ltv_econ.util.ListenerFactory");
         Class.forName("wfg_ltv_econ.util.RfReflectionUtils");
         Class.forName("wfg_ltv_econ.util.ReflectionUtils");
-        Class.forName("wfg_ltv_econ.economy.GlobalTradeEngine");
     }
 
     @Override
@@ -29,9 +26,9 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     public void onGameLoad(boolean newGame) {
         NoRestockCondition.initialize();
         WorkerPoolCondition.initialize();
-        GlobalTradeEngine.getInstance();
 
         Global.getSector().getListenerManager().addListener(new AddWorkerIndustryOption(), true);
         Global.getSector().addTransientScript(new LtvMarketReplacer());
+        Global.getSector().addTransientScript(new EconomyEngineScript());
     }
 }

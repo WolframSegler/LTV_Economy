@@ -71,25 +71,25 @@ public class CommodityStats {
     public final void addInFactionImport(int a) {
         inFactionImports += a;
 
-        Update();
+        update();
     }
 
     public final void addExternalImport(int a) {
         globalImports += a;
 
-        Update();
+        update();
     }
 
     public final void addInFactionExport(int a) {
         inFactionExports += a;
 
-        Update();
+        update();
     }
 
     public final void addGlobalExport(int a) {
         globalExports += a;
 
-        Update();
+        update();
     }
 
     public final long getStoredAmount() {
@@ -104,13 +104,25 @@ public class CommodityStats {
         this.market = market;
         this.m_com = market.getCommodityData(comID);
 
-        Update();
+        update();
     }
 
-    private final void Update() {
-        recalculateTotalDemandSupplyForCommodity(market, m_com.getId());
-        localProduction = m_com.getMaxSupply(); // TotalSupply in reality
-        demandBase = m_com.getMaxDemand(); // TotalDemand in reality
+    public final void update() {
+        localProduction = 0;
+        demandBase = 0;
+
+        for (Industry industry : getVisibleIndustries(market)) {
+
+            // Ensure that the demand uses the ID of the commodity
+            int demand = industry.getDemand(m_com.getId()).getQuantity().getModifiedInt();
+            demandBase += demand;
+
+            int supply = industry.getSupply(m_com.getId()).getQuantity().getModifiedInt();
+            localProduction += supply;
+        }
+
+        localProduction = localProduction < 1 ? 0 : localProduction;
+        demandBase = demandBase < 1 ? 0 : demandBase;
     }
 
     /**
@@ -118,7 +130,7 @@ public class CommodityStats {
      */
     public final void advance() {
 
-        Update();
+        update();
         
         addStoredAmount(getCanNotExport() - getDeficit());
 
@@ -165,27 +177,16 @@ public class CommodityStats {
         return Math.min((float) stored / demandBase, 1f);
     }
 
-    public static List<Industry> getVisibleIndustries(MarketAPI market) {
+    public List<Industry> getVisibleIndustries() {
         List<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);
         return industries;
     }
 
-    public static void recalculateTotalDemandSupplyForCommodity(MarketAPI market, String comID) {
-        CommodityOnMarketAPI com = market.getCommodityData(comID);
-
-        com.setMaxDemand(0);
-        com.setMaxSupply(0);
-
-        for (Industry industry : getVisibleIndustries(market)) {
-
-            // Ensure that the demand uses the ID of the commodity
-            int demand = industry.getDemand(comID).getQuantity().getModifiedInt();
-            com.setMaxDemand(com.getMaxDemand() + demand);
-
-            int supply = industry.getSupply(comID).getQuantity().getModifiedInt();
-            com.setMaxSupply(com.getMaxSupply() + supply);
-        }
+    public static List<Industry> getVisibleIndustries(MarketAPI market) {
+        List<Industry> industries = new ArrayList<>(market.getIndustries());
+        industries.removeIf(Industry::isHidden);
+        return industries;
     }
 
     public static void recalculateMaxDemandAndSupplyForAll(MarketAPI market) {
@@ -206,9 +207,15 @@ public class CommodityStats {
                 com.setMaxSupply(com.getMaxSupply() + supply.getQuantity().getModifiedInt());
             }
         }
+
+        // Guard against below zero
+        for (CommodityOnMarketAPI com : market.getAllCommodities()) {
+            com.setMaxDemand(com.getMaxSupply() < 1 ? 0 : com.getMaxDemand());
+            com.setMaxSupply(com.getMaxDemand() < 1 ? 0 : com.getMaxSupply());
+        }
     }
 
-    public void printAllInfo() {
+    public void logAllInfo() {
         Global.getLogger(getClass()).error("Commodity: " + m_com.getCommodity().getName());
         Global.getLogger(getClass()).error("economicFootprint: " + getEconomicFootprint());
         Global.getLogger(getClass()).error("localProduction: " + localProduction);
@@ -223,7 +230,7 @@ public class CommodityStats {
         Global.getLogger(getClass()).error("canNotExport: " + getCanNotExport());
         Global.getLogger(getClass()).error("demandMet: " + getDemandMet());
         Global.getLogger(getClass()).error("demandMetWithLocal: " + getDemandMetLocally());
-        Global.getLogger(getClass()).error("demandMetNotWithLocal: " + getDemandMetViaTrade());
+        Global.getLogger(getClass()).error("demandMetViaTrade: " + getDemandMetViaTrade());
 
         float trade = getDemandMetLocally() + getTotalExports() + getCanNotExport() + getDemandMetViaTrade() + getDeficit();
 

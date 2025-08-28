@@ -1,4 +1,4 @@
-package wfg_ltv_econ.util;
+package wfg_ltv_econ.plugins;
 
 import java.util.List;
 
@@ -13,6 +13,8 @@ import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg_ltv_econ.util.ReflectionUtils;
+import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedConstructor;
 import wfg_ltv_econ.util.UiUtils.AnchorType;
 
@@ -59,10 +61,10 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (dialog != null) {
             master = (UIPanelAPI) ReflectionUtils.invoke(dialog, "getCoreUI");
         }
-        if (master == null) {
-            master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
-            // Access the Market from the Command menu (remote access)
-        }
+        // if (master == null) {
+        //     master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
+        //     // Access the Market from the Command menu (remote access)
+        // }
         if (master == null) {
             return;
         }

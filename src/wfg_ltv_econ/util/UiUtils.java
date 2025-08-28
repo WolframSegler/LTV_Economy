@@ -129,7 +129,7 @@ public class UiUtils {
 
     public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStats comStats) {
         if (comStats.getEconomicFootprint() <= 0) {
-            throw new IllegalArgumentException(
+            throw new IllegalStateException(
                 "CommodityInfoBar cannot display info: economic footprint is zero for " 
                 + comStats.m_com.getCommodity().getName()
             );

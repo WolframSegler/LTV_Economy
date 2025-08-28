@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -14,6 +15,8 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg_ltv_econ.economy.CommodityStats;
+import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
 
@@ -61,8 +64,8 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
         getPlugin().init(this);
     }
 
-    public static Comparator<CommodityOnMarketAPI> getCommodityOrderComparator() {
-        return Comparator.comparingDouble(com -> com.getCommodity().getOrder());
+    public static Comparator<CommoditySpecAPI> getCommodityOrderComparator() {
+        return Comparator.comparingDouble(com -> com.getOrder());
     }
 
     public void setRowSelectable(boolean a) {
@@ -82,18 +85,16 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
         final int pad = 3;
         final int opad = 10;
 
+        EconomyEngine.getInstance().update();
+
         // Select relevant commodities
-        List<CommodityOnMarketAPI> commodities = getMarket().getCommoditiesCopy();
+        List<CommoditySpecAPI> commodities = EconomyEngine.getInstance().getCommoditiesCopy();
         Collections.sort(commodities, getCommodityOrderComparator());
-        for (CommodityOnMarketAPI com : new ArrayList<>(commodities)) {
-            if (!com.isNonEcon() && com.getCommodity().isPrimary()) {
-                if (com.getAvailableStat().getBaseValue() <= 0.0F && com.getMaxDemand() <= 0 && com.getMaxSupply() <= 0) {
-                    commodities.remove(com);
-                }
-            } else {
-                commodities.remove(com);
-            }
-        }
+        commodities.removeIf(com -> {
+            CommodityStats stats = EconomyEngine.getInstance().getComStats(com.getId(), getMarket());
+            return stats.getEconomicFootprint() <= 0;
+        });
+
         final TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth(), getPos().getHeight(), false);
         tooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
@@ -115,8 +116,8 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
         // Add Rows to the panel
         CustomPanelAPI previousRow = null;
 
-        for (CommodityOnMarketAPI commodity : commodities) {
-            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(getRoot(), getPanel(), getMarket(), commodity,
+        for (CommoditySpecAPI com : commodities) {
+            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(getRoot(), getPanel(), getMarket(), com.getId(),
             this, (int)(getPos().getWidth() - opad * 2), (int)rowHeight, childrenIgnoreUIState, m_canViewPrices);
 
             comRow.getPos().setSize(getPos().getWidth() - opad * 2.0F, rowHeight);

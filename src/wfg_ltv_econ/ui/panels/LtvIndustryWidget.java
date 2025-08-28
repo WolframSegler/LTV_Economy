@@ -8,7 +8,6 @@ import java.awt.Color;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.SpecialItemSpecAPI;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -36,7 +35,7 @@ import com.fs.starfarer.campaign.ui.N;
 import com.fs.graphics.A.D;
 
 import wfg_ltv_econ.economy.CommodityStats;
-import wfg_ltv_econ.economy.GlobalTradeEngine;
+import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
@@ -247,9 +246,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
         tp.setIconSpacingMedium();
 
         for (Pair<String, Integer> deficitEntry : m_industry.getAllDeficit()) {
-            CommodityStats stats = GlobalTradeEngine.getInstance().getComStats(deficitEntry.one, getMarket());
-
-            CommodityOnMarketAPI commodity = getMarket().getCommodityData(deficitEntry.one);
+            CommodityStats stats = EconomyEngine.getInstance().getComStats(deficitEntry.one, getMarket());
 
             if (stats.getDeficit() < 1) {
                 continue;
@@ -260,7 +257,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
             if (stats.getAvailabilityRatio() < 0.67f) iconCount = 2;
             if (stats.getAvailabilityRatio() < 0.33f) iconCount = 3;
 
-            tp.addIcons(commodity, iconCount, IconRenderMode.RED);
+            tp.addIcons(stats.m_com, iconCount, IconRenderMode.RED);
         }
         tp.addIconGroup(24, 1, pad);
         tp.getPrev().getPosition().inBL(pad + 2, pad);

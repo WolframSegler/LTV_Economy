@@ -59,7 +59,7 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.economy.CommodityStats;
-import wfg_ltv_econ.economy.GlobalTradeEngine;
+import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
 
@@ -288,6 +288,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		// The List<Float> contains the weight of resources (between 0 and 1) needed for
 		// each commodity inside the Map
 
+		if (!EconomyEngine.isInitialized()) return;
+
 		for (Map.Entry<String, List<Pair<String, Float>>> commodity : CommodityList.entrySet()) {
 			MutableStat commodity_supply = getSupply(commodity.getKey()).getQuantity();
 			commodity_supply.unmodifyMult("ltv_weighted_deficit"); // clear previous deficit modifier
@@ -295,8 +297,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			float supplyMultiplier = 1f;
 
 			for (Pair<String, Float> element : commodity.getValue()) {
-				final CommodityStats stats = GlobalTradeEngine.getInstance().getCommodityInfo(element.one)
-					.getStats(market);
+				final CommodityStats stats = EconomyEngine.getInstance().getComStats(element.one, market);
 
 				if (stats == null) return;
 
@@ -838,11 +839,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		// 1 is no deficit and 0 is 100% deficit
 		Pair<String, Float> result = new Pair<String, Float>();
 		result.two = 1f;
-		if (Global.CODEX_TOOLTIP_MODE) return result;
+		if (Global.CODEX_TOOLTIP_MODE || !EconomyEngine.isInitialized()) return result;
 
 		for (String id : commodityIds) {
-			final CommodityStats stats = GlobalTradeEngine.getInstance().getCommodityInfo(id)
-				.getStats(market);
+			final CommodityStats stats = EconomyEngine.getInstance().getComStats(id, market);
 			if (stats == null) {
 				return result;
 			}
