@@ -1,12 +1,17 @@
 package wfg_ltv_econ.economy;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.Pair;
 
 public class CommodityInfo {
     private final CommoditySpecAPI m_spec;
@@ -51,140 +56,188 @@ public class CommodityInfo {
         return m_comStats.values();
     }
 
-    // inside CommodityInfo
-    // private static final int TOP_K_PER_EXPORTER = 12; // tune: 8..20 is reasonable
+    public static Pair<MarketAPI, MarketAPI> getPairFromIndex(int index, List<MarketAPI> exporters,     
+        List<MarketAPI> importers) {
 
-    // private static class PairOffer {
-    //     final CommodityStats exporterStats;
-    //     final CommodityStats importerStats;
-    //     final float score;
+        final int numImporters = importers.size();
+        final int exporterIndex = index / numImporters;
+        final int importerIndex = index % numImporters;
 
-    //     PairOffer(CommodityStats exporterStats, CommodityStats importerStats, float score) {
-    //         this.exporterStats = exporterStats;
-    //         this.importerStats = importerStats;
-    //         this.score = score;
-    //     }
-    // }
+        final MarketAPI exporter = exporters.get(exporterIndex);
+        final MarketAPI importer = importers.get(importerIndex);
 
-    // public void performGlobalTradeForCommodity() {
-    //     // 1) Gather exporters and importers (tick-pre-trade numbers)
-    //     List<CommodityStats> exporters = new ArrayList<>();
-    //     List<CommodityStats> importers = new ArrayList<>();
+        return new Pair<>(exporter, importer);
+    }
 
-    //     for (CommodityStats s : m_comStats.values()) {
-    //         long exportable = s.getTotalExportable();
-    //         long deficitPre = s.getDeficitPreTrade();
-    //         if (exportable > 0) exporters.add(s);
-    //         if (deficitPre > 0) importers.add(s);
-    //     }
+    public final void trade() {
+        List<MarketAPI> importers = getImporters();
+        List<MarketAPI> exporters = getExporters();
 
-    //     if (exporters.isEmpty() || importers.isEmpty()) return;
+        int[] pairScores = new int[importers.size() * exporters.size()];
+        Integer[] indices = new Integer[importers.size() * exporters.size()];
 
-    //     // Build quick lookup maps for remaining amounts
-    //     Map<CommodityStats, Long> exporterRemaining = new HashMap<>();
-    //     Map<CommodityStats, Long> importerRemaining = new HashMap<>();
-    //     for (CommodityStats e : exporters) exporterRemaining.put(e, e.getTotalExportable());
-    //     for (CommodityStats r : importers) importerRemaining.put(r, r.getDeficitPreTrade());
+        int expInd = 0;
+        for (MarketAPI exporter : exporters) {
 
-    //     // Priority queue of pair offers sorted by highest score first
-    //     PriorityQueue<PairOffer> pq = new PriorityQueue<>(
-    //         (a, b) -> Float.compare(b.score, a.score)
-    //     );
+            int impInd = 0;
+            for (MarketAPI importer : importers) {
+                if (exporter.getId().contains(importer.getId())) {
+                    continue;
+                }
 
-    //     // 2) For each exporter, generate candidate importer pairs (prune & keep top-K)
-    //     for (CommodityStats exporterStats : exporters) {
-    //         MarketAPI exporterMarket = exporterStats.market;
+                pairScores[expInd*importers.size() + impInd] = computePairScore(importer, exporter);
 
-    //         // get candidate importer markets logically (your existing method)
-    //         List<MarketAPI> candidateMarkets = EconomyEngine.getInstance()
-    //             .getMarketsImportingCom(m_com.getCommodity(), exporterMarket, false);
+                impInd++;
+            }
+            expInd++;
+        }
 
-    //         // Filter to only importers that are actually in our importer list (have deficit)
-    //         // and map to their CommodityStats
-    //         List<CommodityStats> candidateStats = new ArrayList<>();
-    //         for (MarketAPI cm : candidateMarkets) {
-    //             CommodityStats s = EconomyEngine.getInstance().getComStats(m_com.getId(), cm);
-    //             if (s != null && importerRemaining.containsKey(s)) candidateStats.add(s);
-    //         }
+        for (int i = 0; i < indices.length; i++) {
+            indices[i] = i;
+        }
 
-    //         if (candidateStats.isEmpty()) continue;
+        Arrays.sort(indices, (a, b) -> Integer.compare(pairScores[b], pairScores[a]));
 
-    //         // Compute scores for these candidate pairs
-    //         // We create a small list and select top-K by score
-    //         List<PairOffer> localOffers = new ArrayList<>(candidateStats.size());
-    //         for (CommodityStats impStats : candidateStats) {
-    //             float score = computePairScore(exporterStats, impStats, m_com.getCommodity());
-    //             // Ignore extremely low/negative scores if desired:
-    //             if (score <= Float.NEGATIVE_INFINITY) continue; // placeholder; or use a threshold
-    //             localOffers.add(new PairOffer(exporterStats, impStats, score));
-    //         }
+        for (int i = 0; i < indices.length; i++) {
+            Pair<MarketAPI, MarketAPI> expImp = getPairFromIndex(
+                indices[i], exporters, importers
+            );
 
-    //         // sort localOffers descending by score and push top-K into global pq
-    //         localOffers.sort((a,b) -> Float.compare(b.score, a.score));
-    //         int limit = Math.min(TOP_K_PER_EXPORTER, localOffers.size());
-    //         for (int i=0; i<limit; i++) {
-    //             pq.add(localOffers.get(i));
-    //         }
-    //     }
+            CommodityStats expStats = getStats(expImp.one);
+            CommodityStats impStats = getStats(expImp.two);
 
-    //     // 3) Process PQ: allocate best matches first
-    //     while (!pq.isEmpty()) {
-    //         PairOffer offer = pq.poll();
-    //         CommodityStats exp = offer.exporterStats;
-    //         CommodityStats imp = offer.importerStats;
+            long exportableRemaining = expStats.getRemainingExportable();
+            long deficitRemaining = impStats.getDeficit();
 
-    //         Long expRemL = exporterRemaining.get(exp);
-    //         Long impRemL = importerRemaining.get(imp);
-    //         long expRem = expRemL == null ? 0L : expRemL;
-    //         long impRem = impRemL == null ? 0L : impRemL;
+            if (exportableRemaining < 1 || deficitRemaining < 1) continue;
 
-    //         if (expRem <= 0 || impRem <= 0) {
-    //             continue; // one side exhausted, skip
-    //         }
+            boolean sameFaction = expStats.market.getFaction().equals(impStats.market.getFaction());
 
-    //         long amount = Math.min(expRem, impRem);
-    //         if (amount <= 0) continue;
+            long amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
-    //         // apply allocation
-    //         if (exp.market.getFaction().equals(imp.market.getFaction())) {
-    //             exp.addInFactionExport((int) amount);   // or addInFactionExport(long) if you have it
-    //             imp.addInFactionImport((int) amount);
-    //         } else {
-    //             exp.addGlobalExport((int) amount);
-    //             imp.addGlobalImport((int) amount);
-    //         }
+            exportableRemaining -= amountToSend;
+            if(sameFaction) {
+                expStats.addInFactionExport(amountToSend);
+                impStats.addInFactionImport(amountToSend);
+            } else {
+                expStats.addGlobalExport(amountToSend);
+                impStats.addGlobalImport(amountToSend);
+            }
+        }
+    }
 
-    //         expRem -= amount;
-    //         impRem -= amount;
-    //         exporterRemaining.put(exp, expRem);
-    //         importerRemaining.put(imp, impRem);
+    public final List<MarketAPI> getImporters() {
+        List <MarketAPI> importers = new ArrayList<>(50);
 
-    //         // Note: we do NOT push new offers here because we precomputed top-K per exporter.
-    //         // If you want re-queuing behavior (e.g. if importer still needs and another exporter could serve),
-    //         // those would already be present in the PQ from other exporter passes.
-    //     }
-    // }
+        for (Map.Entry<String, CommodityStats> map : m_comStats.entrySet()) {
+            CommodityStats stats = map.getValue();
 
-    // private float computePairScore(CommodityStats exporterStats, CommodityStats importerStats, 
-    //     CommoditySpecAPI spec) {
-    //     MarketAPI exporter = exporterStats.market;
-    //     MarketAPI importer = importerStats.market;
+            if (stats.getDeficitPreTrade() > 0) {
+                importers.add(stats.market);
+            }
+        }
 
-    //     float score = 0f;
-    //     // in-faction
-    //     if (importer.getFaction().equals(exporter.getFaction())) {
-    //         score += TradeWeights.IN_FACTION;
-    //     }
+        return importers;
+    }
 
-    //     score += relationFactor(exporter, importer) * TradeWeights.POLITICAL;
-    //     if (hasTradeAgreement(exporter, importer)) score += TradeWeights.TRADE_AGREEMENTS;
+    public final List<MarketAPI> getExporters() {
+        List <MarketAPI> exporters = new ArrayList<>(50);
 
-    //     score += accessibilityFactor(importer) * TradeWeights.ACCESSIBILITY;
-    //     score += priceFactor(spec, importer) * TradeWeights.LOCAL_PRICE;
-    //     score += distanceFactor(importer, exporter) * TradeWeights.DISTANCE;
-    //     score += deficitFactor(importerStats) * TradeWeights.LOCAL_DEFICIT_RATIO;
-    //     score += sizeFactor(importer) * TradeWeights.MARKET_SIZE;
+        for (Map.Entry<String, CommodityStats> map : m_comStats.entrySet()) {
+            CommodityStats stats = map.getValue();
 
-    //     return score;
-    // }
+            if (stats.getBaseExportable() > 0) {
+                exporters.add(stats.market);
+            }
+        }
+
+        return exporters;
+    }
+
+    public final Integer computePairScore(MarketAPI importer, MarketAPI exporter) {
+
+        int score = 0;
+
+        if (importer.getFaction().equals(exporter.getFaction())) {
+            score += TradeWeights.IN_FACTION;
+        }
+
+        score += relationFactor(exporter, importer) * TradeWeights.POLITICAL;
+
+        // if (hasTradeAgreement(exporter, importers)) {
+        //     score += TradeWeights.TRADE_AGREEMENTS;
+        // }
+
+        score += accessibilityFactor(exporter, importer) * TradeWeights.ACCESSIBILITY;
+
+        score += priceFactor(m_spec, importer) * TradeWeights.LOCAL_PRICE;
+
+        score += distanceFactor(exporter, importer) * TradeWeights.DISTANCE;
+
+        score += sizeFactor(importer) * TradeWeights.MARKET_SIZE;
+
+        return score;
+    }
+
+    private static final float relationFactor(MarketAPI exporter, MarketAPI importer) {
+        final float rel = exporter.getFaction().getRelationship(importer.getFaction().getId());
+        Global.getLogger(EconomyEngine.class).error(rel);
+
+        final float weight = (float) Math.pow(Math.abs(rel), 1.7f);
+        return rel < 0 ? -weight : weight;
+    }
+
+    private static final float accessibilityFactor(MarketAPI exporter, MarketAPI importer) {
+        float expValue = smoothAroundOne(exporter.getAccessibilityMod().computeEffective(0)) * 0.3f;
+        float impValue = smoothAroundOne(importer.getAccessibilityMod().computeEffective(0)) * 0.7f;
+        return expValue + impValue;
+    }
+
+    private static final float smoothAroundOne(float value) {
+        if (value == 1f) return 1f;
+        if (value > 1f) {
+            return 1f + (float)Math.pow(value - 1f, 0.8f);  // diminishing growth
+        } else { // value < 1
+            return 1f - (float)Math.pow(1f - value, 1.4f);  // harsher penalty
+        }
+    }
+
+    private static final float priceFactor(CommoditySpecAPI spec, MarketAPI importer) {
+        final float price = importer.getDemandPrice(spec.getId(), spec.getEconUnit(), false);
+        final float base = spec.getBasePrice();
+
+        float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
+
+        float scaled;
+        if (diff >= 0) {
+            scaled = (float) Math.sqrt(diff);
+        } else {
+            scaled = -(float) Math.sqrt(-diff);
+        }
+
+        // Scale to desired range [-1,1] and clamp
+        if (scaled > 1f) scaled = 1f;
+        if (scaled < -1f) scaled = -1f;
+
+        return scaled;
+    }
+
+    private static final float distanceFactor(MarketAPI exporter, MarketAPI importer) {
+        final float dist = Misc.getDistanceLY(importer.getLocationInHyperspace(), exporter.getLocationInHyperspace());
+
+        // Map size in vanilla is 82*52 LY
+        final int maxDistance = 100; // max map diagonal
+
+        final float normalized = Math.min(dist / maxDistance, 1f);
+        final float alpha = 0.6f; // less harsh in mid-range
+
+        final float penalty = (float) Math.pow(Math.sqrt(normalized), alpha); // [-1, 0]
+        return -penalty;
+    }
+
+    private static final float sizeFactor(MarketAPI exporter) {
+        int size = exporter.getSize();
+        int maxSize = 10;
+        return (float) Math.sqrt(size / (float) maxSize);
+    }
 }

@@ -56,11 +56,14 @@ public class CommodityStats {
     public final long getAvailable() {
         return localProduction + getTotalImports();
     }
-    public final long getTotalExportable() {
+    public final long getBaseExportable() {
         return Math.max(0, localProduction - demandBase);
     }
+    public final long getRemainingExportable() {
+        return getBaseExportable() - getTotalExports();
+    }
     public final long getCanNotExport() {
-        return Math.max(0, getTotalExportable() - getTotalExports());
+        return Math.max(0, getBaseExportable() - getTotalExports());
     }
     public final long getEconomicFootprint() {
         return getDemandMet() + getDeficit() + getTotalExports() + getCanNotExport();
@@ -132,10 +135,6 @@ public class CommodityStats {
     public final void advance(boolean fakeAdvance) {
 
         update();
-
-        if (getTotalExportable() > 0) {
-            trade();
-        }
         
         if (!fakeAdvance) {
             addStoredAmount(getCanNotExport() - getDeficit());
@@ -173,37 +172,6 @@ public class CommodityStats {
         }
 
         return result;
-    }
-
-    private final void trade() {
-        List<MarketAPI> importers = EconomyEngine.getInstance().getMarketsImportingCom(
-            m_com.getCommodity(), market, false
-        );
-
-        importers = EconomyEngine.getInstance().computeTradeScore(importers, market, m_com.getCommodity());
-
-        long exportableRemaining = getTotalExportable();
-
-        for(MarketAPI importer : importers) {
-            if (exportableRemaining <= 0) break;
-
-            CommodityStats importerStats = EconomyEngine.getInstance().getComStats(m_com.getId(), importer);
-            boolean sameFaction = importerStats.market.getFaction().equals(market.getFaction());
-
-            long importerDeficit = importerStats.getDeficit();
-            if (importerDeficit <= 0) continue;
-
-            long amountToSend = Math.min(exportableRemaining, importerDeficit);
-
-            exportableRemaining -= amountToSend;
-            if(sameFaction) {
-                inFactionExports += amountToSend;
-                importerStats.addInFactionImport(amountToSend);
-            } else {
-                globalExports += amountToSend;
-                importerStats.addGlobalImport(amountToSend);
-            }
-        }
     }
 
     /**
