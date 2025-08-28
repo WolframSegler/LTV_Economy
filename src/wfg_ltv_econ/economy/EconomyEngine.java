@@ -7,9 +7,9 @@ import java.util.Map;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.util.Misc;
 
 /**
  * Handles the trade, consumption, production and all related logic
@@ -63,15 +63,13 @@ public class EconomyEngine {
             dayTracker = day;
         }
 
-		if (dayTracker != day) {
-            dayTracker = day;
+		if (dayTracker == day) return;
 
-            for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
-                com.getValue().advance();
-            }
+        dayTracker = day;
 
-			Global.getLogger(getClass()).error("DayPassedEconEngine: " + day);
-		}
+        for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
+            com.getValue().advance();
+        }
     }
 
     public final void registerMarket(MarketAPI market) {
@@ -146,13 +144,108 @@ public class EconomyEngine {
                 continue;
             }
 
-            final CommodityOnMarketAPI com = stats.m_com;
-
-            if (com != null && stats.getDeficitPreTrade() > 0) {
+            if (stats.m_com != null && stats.getDeficitPreTrade() > 0) {
                 importers.add(stats.market);
             }
         }
 
         return importers;
+    }
+
+    public final List<MarketAPI> computeTradeScore(
+        List<MarketAPI> importers, MarketAPI exporter, CommoditySpecAPI spec
+    ) {
+        Map<MarketAPI, Integer> tradeScores = new HashMap<>();
+        for (MarketAPI importer : importers) {
+            CommodityStats stats = getComStats(spec.getId(), importer); 
+            int score = 0;
+    
+            if (importer.getFaction().equals(exporter.getFaction())) {
+                score += TradeWeights.IN_FACTION;
+            }
+    
+            score += relationFactor(exporter, importer) * TradeWeights.POLITICAL;
+    
+            // if (hasTradeAgreement(exporter, importers)) {
+            //     score += TradeWeights.TRADE_AGREEMENTS;
+            // }
+    
+            score += accessibilityFactor(importer) * TradeWeights.ACCESSIBILITY;
+    
+            score += priceFactor(spec, importer) * TradeWeights.LOCAL_PRICE;
+    
+            score += distanceFactor(importer, exporter) * TradeWeights.DISTANCE;
+    
+            score += deficitFactor(stats) * TradeWeights.LOCAL_DEFICIT_RATIO;
+    
+            score += sizeFactor(importer) * TradeWeights.MARKET_SIZE;
+    
+            tradeScores.put(importer, score);
+        }
+
+        final List<MarketAPI> sortedCandidates = tradeScores.entrySet().stream()
+            .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+            .map(Map.Entry::getKey)
+            .toList();
+
+        return sortedCandidates;
+    }
+
+    private static final float relationFactor(MarketAPI exporter, MarketAPI importer) {
+        final float rel = exporter.getFaction().getRelationship(importer.getFaction().getId());
+        Global.getLogger(EconomyEngine.class).error(rel);
+
+        final float weight = (float) Math.pow(Math.abs(rel), 1.7f);
+        return rel < 0 ? -weight : weight;
+    }
+
+    private static final float accessibilityFactor(MarketAPI importer) {
+        return importer.getAccessibilityMod().computeEffective(0);
+    }
+
+    private static final float priceFactor(CommoditySpecAPI spec, MarketAPI importer) {
+        final float price = importer.getDemandPrice(spec.getId(), spec.getEconUnit(), false);
+        final float base = spec.getBasePrice();
+
+        float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
+
+        float scaled;
+        if (diff >= 0) {
+            scaled = (float) Math.sqrt(diff);
+        } else {
+            scaled = -(float) Math.sqrt(-diff);
+        }
+
+        // Scale to desired range [-1,1] and clamp
+        if (scaled > 1f) scaled = 1f;
+        if (scaled < -1f) scaled = -1f;
+
+        return scaled;
+    }
+
+    private static final float distanceFactor(MarketAPI importer, MarketAPI exporter) {
+        final float dist = Misc.getDistanceLY(importer.getLocationInHyperspace(), exporter.getLocationInHyperspace());
+
+        // Map size in vanilla is 82*52 LY
+        final int maxDistance = 100; // max map diagonal
+
+        final float normalized = Math.min(dist / maxDistance, 1f);
+        final float alpha = 0.6f; // less harsh in mid-range
+
+        final float penalty = (float) Math.pow(Math.sqrt(normalized), alpha); // [-1, 0]
+        return -penalty;
+    }
+
+    private static final float deficitFactor(CommodityStats stats) {
+        long deficit = stats.getDeficitPreTrade();
+        if (stats.demandBase <= 0) return 0;
+
+        return Math.min(1, (deficit / (float) stats.demandBase));
+    }
+
+    private static final float sizeFactor(MarketAPI exporter) {
+        int size = exporter.getSize();
+        int maxSize = 10;
+        return (float) Math.sqrt(size / (float) maxSize);
     }
 }

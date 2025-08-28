@@ -61,10 +61,10 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (dialog != null) {
             master = (UIPanelAPI) ReflectionUtils.invoke(dialog, "getCoreUI");
         }
-        // if (master == null) {
-        //     master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
-        //     // Access the Market from the Command menu (remote access)
-        // }
+        if (master == null) {
+            master = (UIPanelAPI)ReflectionUtils.invoke(state, "getCore");
+            // Access the Market from the Command menu (remote access)
+        }
         if (master == null) {
             return;
         }

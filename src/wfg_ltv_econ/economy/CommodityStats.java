@@ -56,9 +56,11 @@ public class CommodityStats {
     public final long getAvailable() {
         return localProduction + getTotalImports();
     }
+    public final long getTotalExportable() {
+        return Math.max(0, localProduction - demandBase);
+    }
     public final long getCanNotExport() {
-        final long totalExportable = Math.max(0, localProduction - getDeficitPreTrade());
-        return Math.max(0, totalExportable - getTotalExports());
+        return Math.max(0, getTotalExportable() - getTotalExports());
     }
     public final long getEconomicFootprint() {
         return getDemandMet() + getDeficit() + getTotalExports() + getCanNotExport();
@@ -68,28 +70,20 @@ public class CommodityStats {
     }
 
 
-    public final void addInFactionImport(int a) {
+    public final void addInFactionImport(long a) {
         inFactionImports += a;
-
-        update();
     }
 
-    public final void addExternalImport(int a) {
+    public final void addGlobalImport(long a) {
         globalImports += a;
-
-        update();
     }
 
-    public final void addInFactionExport(int a) {
+    public final void addInFactionExport(long a) {
         inFactionExports += a;
-
-        update();
     }
 
-    public final void addGlobalExport(int a) {
+    public final void addGlobalExport(long a) {
         globalExports += a;
-
-        update();
     }
 
     public final long getStoredAmount() {
@@ -131,6 +125,10 @@ public class CommodityStats {
     public final void advance() {
 
         update();
+
+        if (getTotalExportable() > 0) {
+            trade();
+        }
         
         addStoredAmount(getCanNotExport() - getDeficit());
 
@@ -166,6 +164,37 @@ public class CommodityStats {
         }
 
         return result;
+    }
+
+    private final void trade() {
+        List<MarketAPI> importers = EconomyEngine.getInstance().getMarketsImportingCom(
+            m_com.getCommodity(), market, false
+        );
+
+        importers = EconomyEngine.getInstance().computeTradeScore(importers, market, m_com.getCommodity());
+
+        long exportableRemaining = getTotalExportable();
+
+        for(MarketAPI importer : importers) {
+            if (exportableRemaining <= 0) break;
+
+            CommodityStats importerStats = EconomyEngine.getInstance().getComStats(m_com.getId(), importer);
+            boolean sameFaction = importerStats.market.getFaction().equals(market.getFaction());
+
+            long importerDeficit = importerStats.getDeficit();
+            if (importerDeficit <= 0) continue;
+
+            long amountToSend = Math.min(exportableRemaining, importerDeficit);
+
+            exportableRemaining -= amountToSend;
+            if(sameFaction) {
+                inFactionExports += amountToSend;
+                importerStats.addInFactionImport(amountToSend);
+            } else {
+                globalExports += amountToSend;
+                importerStats.addGlobalImport(amountToSend);
+            }
+        }
     }
 
     /**
@@ -223,7 +252,7 @@ public class CommodityStats {
         Global.getLogger(getClass()).error("deficitPreTrade: " + getDeficitPreTrade());
         Global.getLogger(getClass()).error("totalImports: " + getTotalImports());
         Global.getLogger(getClass()).error("inFactionImports: " + inFactionImports);
-        Global.getLogger(getClass()).error("externalImports: " + globalImports);
+        Global.getLogger(getClass()).error("globalImports: " + globalImports);
         Global.getLogger(getClass()).error("totalExports: " + getTotalExports());
         Global.getLogger(getClass()).error("inFactionExport: " + inFactionExports);
         Global.getLogger(getClass()).error("globalExport: " + globalExports);
