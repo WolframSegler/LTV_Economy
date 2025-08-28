@@ -300,7 +300,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 				if (stats == null) return;
 
-				final float ratio = stats.availabilityRatio;
+				final float ratio = (float) stats.getAvailabilityRatio();
 
 				float deficitImpact = element.two * (1f - ratio); // weight × deficitRatio
 

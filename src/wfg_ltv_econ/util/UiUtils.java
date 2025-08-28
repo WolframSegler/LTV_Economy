@@ -128,21 +128,27 @@ public class UiUtils {
     }
 
     public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStats comStats) {
+        if (comStats.getEconomicFootprint() <= 0) {
+            throw new IllegalArgumentException(
+                "CommodityInfoBar cannot display info: economic footprint is zero for " 
+                + comStats.m_com.getCommodity().getName()
+            );
+        }
 
-        float localProducedRatio = (float)comStats.localProduction / (float)comStats.getTotalActivity();
-        float inFactionImportRatio = (float)comStats.inFactionImports / (float)comStats.getTotalActivity();
-        float externalImportRatio = (float)comStats.externalImports / (float)comStats.getTotalActivity();
-        float exportedRatio = (float)comStats.getTotalExports() / (float)comStats.getTotalActivity();
-        float notExportedRatio = (float)comStats.getCanNotExport() / (float)comStats.getTotalActivity();
-        float deficitRatio = (float)comStats.getDeficit() / (float)comStats.getTotalActivity();
+        float demandMetLocalRatio = (float)comStats.getDemandMetLocally() / comStats.getEconomicFootprint();
+        float inFactionImportRatio = (float)comStats.inFactionImports / comStats.getEconomicFootprint();
+        float globalImportRatio = (float)comStats.globalImports / comStats.getEconomicFootprint();
+        float exportedRatio = (float)comStats.getTotalExports() / comStats.getEconomicFootprint();
+        float notExportedRatio = (float)comStats.getCanNotExport() / comStats.getEconomicFootprint();
+        float deficitRatio = (float)comStats.getDeficit() / comStats.getEconomicFootprint();
 
         final HashMap<Color, Float> barMap = new HashMap<Color, Float>();
-        barMap.put(COLOR_DEFICIT, deficitRatio);
-        barMap.put(COLOR_IMPORT, externalImportRatio);
-        barMap.put(COLOR_FACTION_IMPORT, inFactionImportRatio);
-        barMap.put(COLOR_LOCAL_PROD, localProducedRatio);
+        barMap.put(COLOR_LOCAL_PROD, demandMetLocalRatio);
         barMap.put(COLOR_EXPORT, exportedRatio);
         barMap.put(COLOR_NOT_EXPORTED, notExportedRatio);
+        barMap.put(COLOR_FACTION_IMPORT, inFactionImportRatio);
+        barMap.put(COLOR_IMPORT, globalImportRatio);
+        barMap.put(COLOR_DEFICIT, deficitRatio);
 
         for (Map.Entry<Color, Float> barPiece : barMap.entrySet()) {
             if (barPiece.getValue() < 0) {

@@ -34,6 +34,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 
 import wfg_ltv_econ.economy.CommodityStats;
+import wfg_ltv_econ.economy.GlobalTradeEngine;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
@@ -166,7 +167,7 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
                         CommodityOnMarketAPI com = market.getCommodityData(comID);
-                        CommodityStats comStat = new CommodityStats(comID, market);
+                        CommodityStats comStat = GlobalTradeEngine.getInstance().getComStats(comID, market);
                         long marketDemand = com.getMaxDemand() - com.getPlayerTradeNetQuantity();
                         if (marketDemand < 0) {
                             marketDemand = 0;
@@ -563,11 +564,11 @@ public class TooltipUtils {
             firstPara = false;
         }
 
-        if (comStats.externalImports > 0) {
+        if (comStats.globalImports > 0) {
             final String desc = "Desired import volume";
 
             y = TooltipUtils.createStatModGridRow(
-                tooltip, y, valueTxtWidth, firstPara, highlight, comStats.externalImports, true,
+                tooltip, y, valueTxtWidth, firstPara, highlight, comStats.globalImports, true,
                 desc, null, "+"
             );
 
@@ -596,7 +597,7 @@ public class TooltipUtils {
         }
         
         LabelAPI title = tooltip.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation(comStats.demandPreTrade));
+            NumFormat.engNotation(comStats.demandBase));
 
         final int valueTxtWidth = 50;
         boolean firstPara = true;

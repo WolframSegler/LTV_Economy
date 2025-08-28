@@ -29,6 +29,7 @@ import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.economy.CommodityStats;
+import wfg_ltv_econ.economy.GlobalTradeEngine;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
@@ -85,8 +86,15 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
     
     private final Color highlight = Misc.getHighlightColor();
 
-    public CommodityOnMarketAPI m_com;
+    private CommodityOnMarketAPI m_com;
+    private CommodityStats comStats;
     public MarketAPI m_selectedMarket = null;
+
+    public void setCommodity(String comID) {
+        m_com = m_selectedMarket.getCommodityData(comID);
+
+        comStats = GlobalTradeEngine.getInstance().getComStats(comID, m_selectedMarket);
+    }
 
     public LtvTextPanel footerPanel = null;
     public ButtonAPI producerButton = null;
@@ -406,7 +414,9 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
 
                     String txt = "Total global exports";
 
-                    String valueTxt = NumFormat.engNotation(getTotalGlobalExports(m_com.getId()));
+                    String valueTxt = NumFormat.engNotation(
+                        GlobalTradeEngine.getInstance().getTotalGlobalExports(m_com.getId())
+                    );
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -490,9 +500,13 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                     String txt = "Total " + factionName + " exports";
 
                     final String globalValue = NumFormat.engNotation(
-                        getFactionGlobalExports(m_com.getId(), getFaction()));
+                        GlobalTradeEngine.getInstance().getFactionTotalGlobalExports(
+                            m_com.getId(), getFaction())
+                    );
                     final String inFactionValue = NumFormat.engNotation(
-                        getTotalFactionExports(m_com.getId(), getFaction()));
+                        GlobalTradeEngine.getInstance().getTotalInFactionExports(
+                            m_com.getId(), getFaction())
+                    );
 
                     String valueTxt = globalValue + "  |  " + inFactionValue;
 
@@ -905,8 +919,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             if (market.isHidden()) {
                 continue;
             }
-            final CommodityStats comStats = new CommodityStats(m_com.getId(), market);
-            if (comStats.globalExport < 1 && mode == 0 || comStats.demandPreTrade < 1 && mode == 1) {
+            if (comStats.globalExports < 1 && mode == 0 || comStats.demandBase < 1 && mode == 1) {
                 continue;
             }
 
@@ -930,9 +943,9 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             String factionName = market.getFaction().getDisplayName();
 
             String quantityTxt = NumFormat.engNotation(
-                mode == 0 ? comStats.globalExport : comStats.externalImports
+                mode == 0 ? comStats.globalExports : comStats.globalImports
             );
-            long quantityValue = mode == 0 ? comStats.globalExport : comStats.externalImports;
+            long quantityValue = mode == 0 ? comStats.globalExports : comStats.globalImports;
 
             CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, comStats);
 
@@ -1044,49 +1057,6 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         } 
     }
 
-    private int getTotalGlobalExports(String comID) {
-        int total = 0;
-
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            CommodityStats stats = new CommodityStats(comID, market);
-
-            total += stats.globalExport;
-        }
-
-        return total;
-    }
-
-    private int getTotalFactionExports(String comID, FactionAPI faction) {
-        int total = 0;
-
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (!market.getFaction().getId().equals(faction.getId())) {
-                continue;
-            }
-
-            CommodityStats stats = new CommodityStats(comID, market);
-            total += stats.inFactionExport;
-        }
-
-        return total;
-    }
-
-    private int getFactionGlobalExports(String comID, FactionAPI faction) {
-        int total = 0;
-
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (market.getFaction() != faction) {
-                continue;
-            }
-
-            CommodityStats stats = new CommodityStats(comID, market);
-
-            total += stats.globalExport;
-        }
-
-        return total;
-    }
-
     private void createSection3RowsTooltip(SortableTable table, MarketAPI market,
         String marketName, Color baseColor, PendingTooltip<CustomPanelAPI> wrapper) {
 
@@ -1103,7 +1073,6 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 tpWidth, 0, false);
     
             final FactionAPI faction = market.getFaction();
-            final CommodityStats comStats = new CommodityStats(m_com.getId(), market);
     
             final Color highlight = Misc.getHighlightColor();
             final Color negative = Misc.getNegativeHighlightColor();

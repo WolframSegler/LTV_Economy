@@ -16,6 +16,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         Class.forName("wfg_ltv_econ.util.ListenerFactory");
         Class.forName("wfg_ltv_econ.util.RfReflectionUtils");
         Class.forName("wfg_ltv_econ.util.ReflectionUtils");
+        Class.forName("wfg_ltv_econ.economy.GlobalTradeEngine");
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -65,8 +66,48 @@ public class GlobalTradeEngine {
         return m_markets;
     }
 
-    public CommodityInfo getCommodityInfo(String comId) {
-        return m_commoditInfo.get(comId);
+    public CommodityInfo getCommodityInfo(String comID) {
+        return m_commoditInfo.get(comID);
+    }
+
+    public CommodityStats getComStats(String comID, MarketAPI market) {
+        return m_commoditInfo.get(comID).getStats(market);
+    }
+
+    public long getTotalGlobalExports(String comID) {
+        long totalGlobalExports = 0;
+        for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
+            totalGlobalExports += stats.globalExports;
+        }
+
+        return totalGlobalExports;
+    }
+
+    public long getTotalInFactionExports(String comID, FactionAPI faction) {
+        long TotalFactionExports = 0;
+
+        for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
+            if (!stats.market.getFaction().getId().equals(faction.getId())) {
+                continue;
+            }
+            TotalFactionExports += stats.inFactionExports;
+        }
+
+        return TotalFactionExports;
+    }
+
+    public long getFactionTotalGlobalExports(String comID, FactionAPI faction) {
+        long totalGlobalExports = 0;
+
+        for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
+            if (stats.market.getFaction().getId().equals(faction.getId())) {
+                continue;
+            }
+
+            totalGlobalExports += stats.globalExports;
+        }
+
+        return totalGlobalExports;
     }
 
     public final List<MarketAPI> getMarketsImportingCom(
