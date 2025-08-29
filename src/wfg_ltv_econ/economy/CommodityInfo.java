@@ -15,7 +15,7 @@ import com.fs.starfarer.api.util.Pair;
 
 public class CommodityInfo {
     private final CommoditySpecAPI m_spec;
-    private final Map<String, CommodityStats> m_comStats = new HashMap<>();
+    private final Map<MarketAPI, CommodityStats> m_comStats = new HashMap<>();
 
     public CommodityInfo(
         CommoditySpecAPI spec
@@ -25,31 +25,50 @@ public class CommodityInfo {
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
             if (market.isHidden()) continue;
             
-            m_comStats.put(market.getId(), new CommodityStats(m_spec.getId(), market));
+            m_comStats.put(market, new CommodityStats(m_spec.getId(), market));
         }
     }
 
     public final void advance(boolean fakeAdvance) {
-        for (Map.Entry<String, CommodityStats> stats : m_comStats.entrySet()) {
-            stats.getValue().advance(fakeAdvance);
+        for (CommodityStats stats : m_comStats.values()) {
+            stats.advance(fakeAdvance);
         }
     }
 
     public final void reset() {
-        for (Map.Entry<String, CommodityStats> stats : m_comStats.entrySet()) {
-            stats.getValue().resetTradeValues();
+        for (CommodityStats stats : m_comStats.values()) {
+            stats.resetTradeValues();
+        }
+    }
+
+    public final void update() {
+        for (CommodityStats stats : m_comStats.values()) {
+            stats.update();
         }
     }
 
     public final void addMarket(MarketAPI market) {
-        if (m_comStats.containsKey(market.getId())) return;
+        if (m_comStats.containsKey(market)) return;
         
-        m_comStats.put(market.getId(), new CommodityStats(m_spec.getId(), market));
+        m_comStats.put(market, new CommodityStats(m_spec.getId(), market));
+    }
+
+    public final void refreshMarkets() {
+        final EconomyEngine engine = EconomyEngine.getInstance();
+
+        List<MarketAPI> newMarkets = engine.symmetricDifference(
+            engine.getMarketsCopy(),
+            new ArrayList<>(m_comStats.keySet())
+        );
+
+        for (MarketAPI market : newMarkets) {
+            addMarket(market);
+        }
     }
 
     public final CommodityStats getStats(MarketAPI market) {
 
-        return m_comStats.get(market.getId());
+        return m_comStats.get(market);
     }
 
     public final Collection<CommodityStats> getAllStats() {
@@ -85,7 +104,7 @@ public class CommodityInfo {
                     continue;
                 }
 
-                pairScores[expInd*importers.size() + impInd] = computePairScore(importer, exporter);
+                pairScores[expInd*importers.size() + impInd] = computeStaticPairScore(exporter, importer);
 
                 impInd++;
             }
@@ -129,8 +148,7 @@ public class CommodityInfo {
     public final List<MarketAPI> getImporters() {
         List <MarketAPI> importers = new ArrayList<>(50);
 
-        for (Map.Entry<String, CommodityStats> map : m_comStats.entrySet()) {
-            CommodityStats stats = map.getValue();
+        for (CommodityStats stats : m_comStats.values()) {
 
             if (stats.getDeficitPreTrade() > 0) {
                 importers.add(stats.market);
@@ -143,8 +161,7 @@ public class CommodityInfo {
     public final List<MarketAPI> getExporters() {
         List <MarketAPI> exporters = new ArrayList<>(50);
 
-        for (Map.Entry<String, CommodityStats> map : m_comStats.entrySet()) {
-            CommodityStats stats = map.getValue();
+        for (CommodityStats stats : m_comStats.values()) {
 
             if (stats.getBaseExportable() > 0) {
                 exporters.add(stats.market);
@@ -154,7 +171,7 @@ public class CommodityInfo {
         return exporters;
     }
 
-    public final Integer computePairScore(MarketAPI importer, MarketAPI exporter) {
+    public final int computeStaticPairScore(MarketAPI exporter, MarketAPI importer) {
 
         int score = 0;
 
@@ -170,8 +187,6 @@ public class CommodityInfo {
 
         score += accessibilityFactor(exporter, importer) * TradeWeights.ACCESSIBILITY;
 
-        score += priceFactor(m_spec, importer) * TradeWeights.LOCAL_PRICE;
-
         score += distanceFactor(exporter, importer) * TradeWeights.DISTANCE;
 
         score += sizeFactor(importer) * TradeWeights.MARKET_SIZE;
@@ -179,9 +194,12 @@ public class CommodityInfo {
         return score;
     }
 
+    public final int computeDynamicPairScore(MarketAPI importer) {
+        return (int) priceFactor(m_spec, importer) * TradeWeights.LOCAL_PRICE;
+    }
+
     private static final float relationFactor(MarketAPI exporter, MarketAPI importer) {
         final float rel = exporter.getFaction().getRelationship(importer.getFaction().getId());
-        Global.getLogger(EconomyEngine.class).error(rel);
 
         final float weight = (float) Math.pow(Math.abs(rel), 1.7f);
         return rel < 0 ? -weight : weight;

@@ -1,6 +1,5 @@
 package wfg_ltv_econ.ui.plugins;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +24,10 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
     public static final Color sideBarColor = Misc.getDarkPlayerColor();
 
     private CustomPanelAPI m_panel;
-    private HashMap<Color, Float> m_barMap;
+    private Map<Color, Float> m_barMap;
     private boolean hasOutline = false;
 
-    public void init(CustomPanelAPI panel, boolean hasOutline, HashMap<Color, Float> barMap) {
+    public void init(CustomPanelAPI panel, boolean hasOutline, Map<Color, Float> barMap) {
         m_panel = panel;
         m_barMap = barMap;
         this.hasOutline = hasOutline;

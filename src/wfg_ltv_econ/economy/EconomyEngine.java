@@ -2,8 +2,10 @@ package wfg_ltv_econ.economy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -20,8 +22,9 @@ import wfg_ltv_econ.industry.LtvBaseIndustry;
 public class EconomyEngine {
     private static EconomyEngine instance;
 
-    private final Map<String, CommoditySpecAPI> m_commoditySpecs;
     private final Map<String, CommodityInfo> m_commoditInfo;
+
+    private int marketAmount = 0; 
 
     public static void createInstance() {
         if (instance == null) {
@@ -39,23 +42,21 @@ public class EconomyEngine {
 
     private EconomyEngine() {
         this.m_commoditInfo = new HashMap<>();
-        this.m_commoditySpecs = new HashMap<>();
 
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
             if (spec.isNonEcon()) continue;
 
-            m_commoditySpecs.put(spec.getId(), spec);
             m_commoditInfo.put(spec.getId(), new CommodityInfo(spec));
         }
+
+        marketAmount = getMarketsCopy().size();
 
         fakeAdvance();
     }
 
     public final void update() {
-        for (Map.Entry<String, CommodityInfo> comInfo : m_commoditInfo.entrySet()) {
-            for (CommodityStats stats : comInfo.getValue().getAllStats()) {
-                stats.update();
-            }
+        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+            comInfo.update();
         }
     }
 
@@ -72,6 +73,13 @@ public class EconomyEngine {
 
         dayTracker = day;
 
+        if (getMarketsCopy().size() != marketAmount) {
+
+            for (CommodityInfo comInfo : m_commoditInfo.values()) {
+                comInfo.refreshMarkets();
+            }
+        }
+
         mainLoop(false);
     }
 
@@ -79,22 +87,24 @@ public class EconomyEngine {
         mainLoop(true);
     }
 
-    private final void mainLoop(boolean fakeAdvance) {
+    private final void mainLoop(boolean fakeAdvance) {        
         assignWorkers();
 
-        for (Map.Entry<String, CommodityInfo> com : m_commoditInfo.entrySet()) {
+        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+            // Order matters here
+            comInfo.reset();
 
-            com.getValue().reset();
+            comInfo.update();
 
-            com.getValue().trade();
+            comInfo.trade();
 
-            com.getValue().advance(fakeAdvance);
+            comInfo.advance(fakeAdvance);
         }
     }
 
     public final void registerMarket(MarketAPI market) {
-        for (Map.Entry<String, CommodityInfo> comInfo : m_commoditInfo.entrySet()) {
-            comInfo.getValue().addMarket(market);
+        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+            comInfo.addMarket(market);
         }
     }
 
@@ -102,8 +112,8 @@ public class EconomyEngine {
         return Global.getSector().getEconomy().getMarketsCopy();
     }
 
-    public final List<CommoditySpecAPI> getCommoditiesCopy() {
-        return new ArrayList<>(m_commoditySpecs.values());
+    public final List<CommoditySpecAPI> getAllCom() {
+        return Global.getSettings().getAllCommoditySpecs();
     }
 
     public final CommodityInfo getCommodityInfo(String comID) {
@@ -119,13 +129,14 @@ public class EconomyEngine {
     }
 
     private final void assignWorkers() {
+
         for (MarketAPI market : getMarketsCopy()) {
             if (market.isPlayerOwned() || market.isHidden()) continue;
 
+            Global.getLogger(getClass()).error(market.getName());
+
             final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
             if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) continue;
-
-            WorkerPoolCondition cond =(WorkerPoolCondition)market.getCondition(WorkerPoolCondition.ConditionID);
 
             int workerAssignableIndustries = 0;
 
@@ -137,10 +148,9 @@ public class EconomyEngine {
 
             if (workerAssignableIndustries == 0) continue;
 
-            long workersPerIndustry = (long) (cond.getWorkerPool() / (float) workerAssignableIndustries);
             for (Industry ind : workingIndustries) {
                 if (ind instanceof LtvBaseIndustry industry && ind.isFunctional()) {
-                    industry.setWorkersAssigned(workersPerIndustry);
+                    industry.setWorkersAssigned(1 / (float) workerAssignableIndustries);
                 }
             }
         }
@@ -180,5 +190,18 @@ public class EconomyEngine {
         }
 
         return totalGlobalExports;
+    }
+
+    public <T> List<T> symmetricDifference(List<T> list1, List<T> list2) {
+        Set<T> set1 = new HashSet<>(list1);
+        Set<T> set2 = new HashSet<>(list2);
+
+        Set<T> result = new HashSet<>(set1);
+        result.addAll(set2);           // union
+        Set<T> tmp = new HashSet<>(set1);
+        tmp.retainAll(set2);           // intersection
+        result.removeAll(tmp);         // remove intersection
+
+        return new ArrayList<>(result);
     }
 }

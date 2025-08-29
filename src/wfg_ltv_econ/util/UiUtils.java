@@ -2,6 +2,7 @@ package wfg_ltv_econ.util;
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -142,13 +143,14 @@ public class UiUtils {
         float notExportedRatio = (float)comStats.getCanNotExport() / comStats.getEconomicFootprint();
         float deficitRatio = (float)comStats.getDeficit() / comStats.getEconomicFootprint();
 
-        final HashMap<Color, Float> barMap = new HashMap<Color, Float>();
-        barMap.put(COLOR_LOCAL_PROD, demandMetLocalRatio);
-        barMap.put(COLOR_EXPORT, exportedRatio);
-        barMap.put(COLOR_NOT_EXPORTED, notExportedRatio);
-        barMap.put(COLOR_FACTION_IMPORT, inFactionImportRatio);
-        barMap.put(COLOR_IMPORT, globalImportRatio);
-        barMap.put(COLOR_DEFICIT, deficitRatio);
+        final Map<Color, Float> barMap = new LinkedHashMap<>() {{
+            put(COLOR_LOCAL_PROD, demandMetLocalRatio);
+            put(COLOR_EXPORT, exportedRatio);
+            put(COLOR_NOT_EXPORTED, notExportedRatio);
+            put(COLOR_FACTION_IMPORT, inFactionImportRatio);
+            put(COLOR_IMPORT, globalImportRatio);
+            put(COLOR_DEFICIT, deficitRatio);
+        }};
 
         for (Map.Entry<Color, Float> barPiece : barMap.entrySet()) {
             if (barPiece.getValue() < 0) {

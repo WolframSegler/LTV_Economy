@@ -62,9 +62,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         String txt = "Assign workers to " + industry.getCurrentName();
         LabelAPI lbl = tooltip.addPara(txt, 0f);
 
-        UIComponentAPI lblComp = tooltip.getPrev();
         float textX = (panelWidth - lbl.computeTextWidth(txt)) / 2;
-        lblComp.getPosition().inTL(textX, opad);
+        lbl.getPosition().inTL(textX, opad);
         tooltip.setParaFontDefault();
 
         // Draw Production
@@ -81,10 +80,9 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         txt = "Workers:";
         lbl = tooltip.addPara(txt, 0f);
 
-        lblComp = tooltip.getPrev();
         float textH = lbl.computeTextHeight(txt);
         float textY = sliderY + (sliderHeight - textH) * 0.5f;
-        lblComp.getPosition().inTL(pad, textY);
+        lbl.getPosition().inTL(pad, textY);
         tooltip.setParaFontDefault();
 
         // Create the slider

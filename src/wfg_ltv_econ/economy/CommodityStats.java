@@ -133,8 +133,6 @@ public class CommodityStats {
      * Gets called each day to update the values and the stored amount.
      */
     public final void advance(boolean fakeAdvance) {
-
-        update();
         
         if (!fakeAdvance) {
             addStoredAmount(getCanNotExport() - getDeficit());
