@@ -69,18 +69,18 @@ public class LtvMining extends LtvBaseIndustry {
 	public void apply() {
 		super.apply(true);
 
-		applyConditionModifiers();
+		// applyConditionModifiers();
 
-		// Supply before demand, because demand depends on supply in this case
-		demand(Commodities.HEAVY_MACHINERY, Math.round(demandCostHeavyMachinery));
-        demand(Commodities.DRUGS, Math.round(demandCostDrugs));
+		// // Supply before demand, because demand depends on supply in this case
+		// demand(Commodities.HEAVY_MACHINERY, Math.round(demandCostHeavyMachinery));
+        // demand(Commodities.DRUGS, Math.round(demandCostDrugs));
 		
 		if (!isFunctional()) {
 			supply.clear();
 		}
 	}
 
-	protected void applyConditionModifiers() {
+	private void applyConditionModifiers() {
 		for(MarketConditionAPI condition : market.getConditions()) {
 			String id = condition.getId();
 

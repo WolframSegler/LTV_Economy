@@ -1,9 +1,12 @@
 package wfg_ltv_econ.economy;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -62,13 +65,21 @@ public class IndustryConfigLoader {
                         }
                     }
 
+                    List<String> marketConditions = new ArrayList<>();
+                    JSONArray condArray = commodityJson.optJSONArray("onMarketConditions");
+                    if (condArray != null) {
+                        for (int i = 0; i < condArray.length(); i++) {
+                            marketConditions.add(condArray.getString(i));
+                        }
+                    }
+
                     boolean scaleWSize = commodityJson.optBoolean("scaleWithMarketSize");
                     boolean useWorkers = commodityJson.optBoolean("usesWorkers");
                     boolean isAbstract = commodityJson.optBoolean("isAbstract");
                     boolean checkLegality = commodityJson.optBoolean("checkLegality");
 
                     commodityMap.put(commodityId, new OutputCom(
-                        baseProd, demandMap, scaleWSize, useWorkers, isAbstract, checkLegality
+                        baseProd, demandMap, scaleWSize, useWorkers, isAbstract, checkLegality, marketConditions
                     ));
                 }
             }
@@ -88,6 +99,7 @@ public class IndustryConfigLoader {
     public static class OutputCom {
         public final float baseProd;
         public final Map<String, Float> demand;
+        public final List<String> marketConditions;
 
         public final boolean scaleWithMarketSize; // Base size where no scaling happens is 3.
         public final boolean usesWorkers;
@@ -96,10 +108,11 @@ public class IndustryConfigLoader {
 
         public OutputCom(
             float baseProd, Map<String, Float> demand, boolean scaleWithMarketSize, boolean useWorkers,
-            boolean isAbstract, boolean checkLegality
+            boolean isAbstract, boolean checkLegality, List<String> marketConditions
         ) {
             this.baseProd = baseProd;
             this.demand = demand;
+            this.marketConditions = marketConditions;
             this.scaleWithMarketSize = scaleWithMarketSize;
             this.usesWorkers = useWorkers;
             this.isAbstract = isAbstract;

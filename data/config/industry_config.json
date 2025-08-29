@@ -7,10 +7,7 @@
 				"metals": 0.8,
 				"rare_metals": 0.2
 			},
-			"scaleWithMarketSize": false,
-			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"usesWorkers": true
 		},
 		"supplies": {
 			"base_prod": 2,
@@ -18,10 +15,7 @@
 				"metals": 0.9,
 				"rare_metals": 0.1
 			},
-			"scaleWithMarketSize": false,
-			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"usesWorkers": true
 		},
 		"hand_weapons": {
 			"base_prod": 0.4,
@@ -29,10 +23,7 @@
 				"metals": 0.4,
 				"rare_metals": 0.6
 			},
-			"scaleWithMarketSize": false,
-			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"usesWorkers": true
 		},
 		"ships": {
 			"base_prod": 0.6,
@@ -40,10 +31,7 @@
 				"metals": 0.6,
 				"rare_metals": 0.4
 			},
-			"scaleWithMarketSize": false,
-			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"usesWorkers": true
 		}
 	},
 	"lightindustry": {
@@ -53,19 +41,14 @@
 			"demand": {
 				"organics": 1
 			},
-			"scaleWithMarketSize": false,
-			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"usesWorkers": true
 		},
 		"luxury_goods": {
 			"base_prod": 0.2,
 			"demand": {
 				"organics": 1
 			},
-			"scaleWithMarketSize": false,
 			"usesWorkers": true,
-			"isAbstract": false,
 			"checkLegality": true
 		},
 		"drugs": {
@@ -73,9 +56,7 @@
 			"demand": {
 				"organics": 1
 			},
-			"scaleWithMarketSize": false,
 			"usesWorkers": true,
-			"isAbstract": false,
 			"checkLegality": true
 		}
 	},
@@ -92,9 +73,16 @@
 				"organs": 0.0128755
 			},
 			"scaleWithMarketSize": true,
-			"usesWorkers": false,
+			"isAbstract": true
+		},
+		"peopleNonHabitable": {
+			"base_prod": 0,
+			"demand": {
+				"organics": 0.1667
+			},
+			"scaleWithMarketSize": true,
 			"isAbstract": true,
-			"checkLegality": false
+			"onMarketConditions": ["habitable"]
 		},
 		"crew": {
 			"base_prod": 0.0016438,
@@ -104,30 +92,21 @@
 				"luxury_goods": 0.1,
 				"supplies": 0.1
 			},
-			"scaleWithMarketSize": true,
-			"usesWorkers": false,
-			"isAbstract": false,
-			"checkLegality": false
+			"scaleWithMarketSize": true
 		},
 		"organs": {
 			"base_prod": 0.025,
 			"demand": {
 				"food": 0.7
 			},
-			"scaleWithMarketSize": true,
-			"usesWorkers": false,
-			"isAbstract": false,
-			"checkLegality": false
+			"scaleWithMarketSize": true
 		},
 		"drugs": {
 			"base_prod": 0.00256849,
 			"demand": {
 				"domestic_goods": 0.5
 			},
-			"scaleWithMarketSize": true,
-			"usesWorkers": false,
-			"isAbstract": false,
-			"checkLegality": false
+			"scaleWithMarketSize": true
 		}
 	},
 	"mining": {
@@ -138,10 +117,7 @@
 				"heavy_machinery": 0.4,
 				"drugs": 0.4
 			},
-			"scaleWithMarketSize": false,
-			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"usesWorkers": true
 		},
 		"rare_ore": {
 			"base_prod": 0.4,
@@ -149,10 +125,8 @@
 				"heavy_machinery": 0.4,
 				"drugs": 0.4
 			},
-			"scaleWithMarketSize": false,
 			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"isAbstract": false
 		},
 		"organics": {
 			"base_prod": 0.9,
@@ -160,10 +134,7 @@
 				"heavy_machinery": 0.4,
 				"drugs": 0.4
 			},
-			"scaleWithMarketSize": false,
-			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"usesWorkers": true
 		},
 		"volatiles": {
 			"base_prod": 0.1,
@@ -171,10 +142,7 @@
 				"heavy_machinery": 0.4,
 				"drugs": 0.4
 			},
-			"scaleWithMarketSize": false,
-			"usesWorkers": true,
-			"isAbstract": false,
-			"checkLegality": false
+			"usesWorkers": true
 		}
 	}
 }

@@ -95,12 +95,8 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		market.getStats().getDynamic().getMod(Stats.MAX_INDUSTRIES).modifyFlat(getModId(), getMaxIndustries(), null);
 		market.addTransientImmigrationModifier(this);
 
-		int size = market.getSize();
-		int luxuryThreshold = 3;
-		
-		if (!market.hasCondition(Conditions.HABITABLE)) {
-			demand(Commodities.ORGANICS, (int) ((1.0/6.0)*Math.pow(10, size - 3)));
-		}
+		final int size = market.getSize();
+		final int luxuryThreshold = 3;
 
 		AccessModifierSpaceport(size);
 

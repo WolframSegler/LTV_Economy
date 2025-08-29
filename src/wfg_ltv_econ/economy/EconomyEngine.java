@@ -265,6 +265,14 @@ public class EconomyEngine {
 				if (com.usesWorkers) scale *= ltvInd.getWorkerAssigned();
 			}
 			if (com.checkLegality) scale *=market.isIllegal(entry.getKey()) ? 0 : 1;
+            if (!com.marketConditions.isEmpty()) {
+                for (String conditionID : com.marketConditions) {
+                    if (!market.hasCondition(conditionID)){
+                        scale *= 0;
+                        break;
+                    }
+                }
+            }
 
 			for (Map.Entry<String, Float> demandEntry : com.demand.entrySet()) {
 				String input = demandEntry.getKey();
@@ -291,6 +299,14 @@ public class EconomyEngine {
 			}
 			if (com.isAbstract) scale *= 0;
 			if (com.checkLegality) scale *=market.isIllegal(entry.getKey()) ? 0 : 1;
+            if (!com.marketConditions.isEmpty()) {
+                for (String conditionID : com.marketConditions) {
+                    if (!market.hasCondition(conditionID)){
+                        scale *= 0;
+                        break;
+                    }
+                }
+            }
 
 			int finalSupply = Math.max(0, Math.round(com.baseProd * scale));
 			if (ind instanceof BaseIndustry BaseInd) {
