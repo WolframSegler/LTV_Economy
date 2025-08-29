@@ -31,8 +31,8 @@ public class IndustryConfigLoader {
 
     @SuppressWarnings("unchecked")
     public static Map<String, Map<String, OutputCom>> loadAsMap() {
-        JSONObject root = IndustryConfigLoader.getConfig();
-        Map<String, Map<String, OutputCom>> result = new HashMap<>();
+        final JSONObject root = IndustryConfigLoader.getConfig();
+        final Map<String, Map<String, OutputCom>> result = new HashMap<>();
 
         try {
         for (Iterator<String> itIndustry = root.keys(); itIndustry.hasNext();) {
@@ -43,21 +43,34 @@ public class IndustryConfigLoader {
 
             for (Iterator<String> itCommodity = industryJson.keys(); itCommodity.hasNext();) {
                 String commodityId = itCommodity.next();
-                JSONObject commodityJson = industryJson.getJSONObject(commodityId);
+                Object value = industryJson.getJSONObject(commodityId);
 
-                float baseProd = (float) commodityJson.optDouble("base_prod", 0);
+                // if (value instanceof Boolean booleanJson) {
+                //     // TODO: use workerAssignable field later
+                // }
 
-                Map<String, Float> demandMap = new HashMap<>();
-                JSONObject demandJson = commodityJson.optJSONObject("demand");
-                if (demandJson != null) {
-                    for (Iterator<String> itDemand = demandJson.keys(); itDemand.hasNext();) {
-                        String inputId = itDemand.next();
-                        float weight = (float) demandJson.getDouble(inputId);
-                        demandMap.put(inputId, weight);
+                if (value instanceof JSONObject commodityJson) {
+                    float baseProd = (float) commodityJson.optDouble("base_prod", 0);
+
+                    Map<String, Float> demandMap = new HashMap<>();
+                    JSONObject demandJson = commodityJson.optJSONObject("demand");
+                    if (demandJson != null) {
+                        for (Iterator<String> itDemand = demandJson.keys(); itDemand.hasNext();) {
+                            String inputId = itDemand.next();
+                            float weight = (float) demandJson.getDouble(inputId);
+                            demandMap.put(inputId, weight);
+                        }
                     }
-                }
 
-                commodityMap.put(commodityId, new OutputCom(baseProd, demandMap));
+                    boolean scaleWSize = commodityJson.optBoolean("scaleWithMarketSize");
+                    boolean useWorkers = commodityJson.optBoolean("usesWorkers");
+                    boolean isAbstract = commodityJson.optBoolean("isAbstract");
+                    boolean checkLegality = commodityJson.optBoolean("checkLegality");
+
+                    commodityMap.put(commodityId, new OutputCom(
+                        baseProd, demandMap, scaleWSize, useWorkers, isAbstract, checkLegality
+                    ));
+                }
             }
 
             result.put(industryId, commodityMap);
@@ -76,9 +89,21 @@ public class IndustryConfigLoader {
         public final float baseProd;
         public final Map<String, Float> demand;
 
-        public OutputCom(float baseProd, Map<String, Float> demand) {
+        public final boolean scaleWithMarketSize; // Base size where no scaling happens is 3.
+        public final boolean usesWorkers;
+        public final boolean isAbstract;
+        public final boolean checkLegality;
+
+        public OutputCom(
+            float baseProd, Map<String, Float> demand, boolean scaleWithMarketSize, boolean useWorkers,
+            boolean isAbstract, boolean checkLegality
+        ) {
             this.baseProd = baseProd;
             this.demand = demand;
+            this.scaleWithMarketSize = scaleWithMarketSize;
+            this.usesWorkers = useWorkers;
+            this.isAbstract = isAbstract;
+            this.checkLegality = checkLegality;
         }
     }
 }

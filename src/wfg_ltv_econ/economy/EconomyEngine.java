@@ -13,6 +13,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.economy.IndustryConfigLoader.OutputCom;
@@ -240,6 +241,63 @@ public class EconomyEngine {
             }
         }
     }
+
+    /**
+	 * Adds Production Inputs and Outputs using data/config/industry_config.json.
+	 * Only supports conditions inside {@link OutputCom}.
+	 * Other conditional inputs or outputs must be added by the subclass manually.
+	 */
+	public static final void applySubclassPIOs(MarketAPI market, Industry ind) {
+		final Map<String, OutputCom> indMap = EconomyEngine.getInstance().configs.get(ind.getId());
+		final Map<String, Float> totalDemandMap = new HashMap<>();
+
+		if (indMap == null || indMap.isEmpty()) return;
+
+		final int size = market.getSize();
+
+		// Compute total input demand
+		for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
+			OutputCom com = entry.getValue();
+
+			float scale = 1f;
+			if (com.scaleWithMarketSize) scale *= Math.pow(10, size - 3);
+			if (ind instanceof LtvBaseIndustry ltvInd) {
+				if (com.usesWorkers) scale *= ltvInd.getWorkerAssigned();
+			}
+			if (com.checkLegality) scale *=market.isIllegal(entry.getKey()) ? 0 : 1;
+
+			for (Map.Entry<String, Float> demandEntry : com.demand.entrySet()) {
+				String input = demandEntry.getKey();
+				float demandAmount = demandEntry.getValue() * com.baseProd * scale;
+
+				totalDemandMap.merge(input, demandAmount, Float::sum);
+			}
+		}
+
+		for (Map.Entry<String, Float> entry : totalDemandMap.entrySet()) {
+			int finalDemand = Math.max(0, Math.round(entry.getValue()));
+			if (ind instanceof BaseIndustry BaseInd) {
+				BaseInd.demand(entry.getKey(), finalDemand);
+			}
+		}
+
+		for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
+			OutputCom com = entry.getValue();
+
+			float scale = 1f;
+			if (com.scaleWithMarketSize) scale *= Math.pow(10, size - 3);
+			if (ind instanceof LtvBaseIndustry ltvInd) {
+				if (com.usesWorkers) scale *= ltvInd.getWorkerAssigned();
+			}
+			if (com.isAbstract) scale *= 0;
+			if (com.checkLegality) scale *=market.isIllegal(entry.getKey()) ? 0 : 1;
+
+			int finalSupply = Math.max(0, Math.round(com.baseProd * scale));
+			if (ind instanceof BaseIndustry BaseInd) {
+				BaseInd.supply(entry.getKey(), finalSupply);
+			}
+		}
+	}
 
     public final long getTotalGlobalExports(String comID) {
         long totalGlobalExports = 0;

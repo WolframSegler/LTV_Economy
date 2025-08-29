@@ -1,7 +1,6 @@
 package wfg_ltv_econ.industry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -61,7 +60,6 @@ import com.fs.starfarer.api.util.Pair;
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
-import wfg_ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
 
@@ -240,31 +238,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			}
 		}
 
-		applySubclassPIOs();
-	}
-
-	public void applySubclassPIOs() {
-		final Map<String, OutputCom> indMap = EconomyEngine.getInstance().configs.get(getId());
-		final Map<String, Integer> totalDemandMap = new HashMap<>();
-
-		if (indMap == null || indMap.isEmpty()) throw new RuntimeException("indMap cannot be empty");
-
-		for (OutputCom com : indMap.values()) {
-			for (Map.Entry<String, Float> demandEntry : com.demand.entrySet()) {
-				String input = demandEntry.getKey();
-				int demandAmount = Math.round(demandEntry.getValue()*com.baseProd);
-
-				totalDemandMap.merge(input, demandAmount, Integer::sum);
-			}
-		}
-
-		for (Map.Entry<String, Integer> entry : totalDemandMap.entrySet()) {
-			demand(entry.getKey(), entry.getValue() * getWorkerAssigned());
-		}
-
-		for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
-			supply(entry.getKey(), (int) entry.getValue().baseProd*getWorkerAssigned());
-		}
+		EconomyEngine.applySubclassPIOs(market, this);
 	}
 
 	public void unapply() {
