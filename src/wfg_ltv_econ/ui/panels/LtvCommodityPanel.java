@@ -88,7 +88,7 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
         EconomyEngine.getInstance().update();
 
         // Select relevant commodities
-        List<CommoditySpecAPI> commodities = EconomyEngine.getInstance().getAllCom();
+        List<CommoditySpecAPI> commodities = EconomyEngine.getEconCommodities();
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
             CommodityStats stats = EconomyEngine.getInstance().getComStats(com.getId(), getMarket());

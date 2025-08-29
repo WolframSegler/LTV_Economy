@@ -544,7 +544,7 @@ public class TooltipUtils {
             firstPara = false;
         } 
 
-        if ((comStats.getDeficitPreTrade() - comStats.inFactionExports) > 0) {
+        if ((comStats.getDeficitPreTrade() - comStats.inFactionImports) > 0) {
             y = addRow(tooltip, y, valueTxtWidth, firstPara, 
                 -(comStats.getDeficitPreTrade() - comStats.inFactionImports),
                 "In-faction shortage", highlight, negative

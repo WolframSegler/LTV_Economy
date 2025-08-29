@@ -1,17 +1,25 @@
 package wfg_ltv_econ.economy;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.util.Pair;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
@@ -112,15 +120,22 @@ public class EconomyEngine {
         return Global.getSector().getEconomy().getMarketsCopy();
     }
 
-    public final List<CommoditySpecAPI> getAllCom() {
-        return Global.getSettings().getAllCommoditySpecs();
+    public static final List<CommoditySpecAPI> getEconCommodities() {
+        return Global.getSettings().getAllCommoditySpecs().stream()
+            .filter(spec -> !spec.isNonEcon())
+            .collect(Collectors.toList()); 
     }
 
     public final CommodityInfo getCommodityInfo(String comID) {
         return m_commoditInfo.get(comID);
     }
 
+    public boolean hasCommodity(String comID) {
+        return m_commoditInfo.containsKey(comID);
+    }
+
     public final CommodityStats getComStats(String comID, MarketAPI market) {
+        Global.getLogger(getClass()).error(comID);
         final CommodityStats stats = m_commoditInfo.get(comID).getStats(market);
         if (stats != null) {
             stats.update();
@@ -132,8 +147,6 @@ public class EconomyEngine {
 
         for (MarketAPI market : getMarketsCopy()) {
             if (market.isPlayerOwned() || market.isHidden()) continue;
-
-            Global.getLogger(getClass()).error(market.getName());
 
             final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
             if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) continue;
@@ -204,4 +217,9 @@ public class EconomyEngine {
 
         return new ArrayList<>(result);
     }
+
+    private Map<String, Map<String, List<Pair<String, Float>>>> industryWeights;
+
+    public void loadIndustryInfo() {
+
 }

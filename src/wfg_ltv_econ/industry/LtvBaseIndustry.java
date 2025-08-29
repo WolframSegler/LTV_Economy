@@ -297,11 +297,11 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 			float supplyMultiplier = 1f;
 
 			for (Pair<String, Float> element : commodity.getValue()) {
-				final CommodityStats stats = EconomyEngine.getInstance().getComStats(element.one, market);
+				CommodityStats stats = EconomyEngine.getInstance().getComStats(element.one, market);
 
-				if (stats == null) return;
+				if (stats == null) continue;
 
-				final float ratio = (float) stats.getAvailabilityRatio();
+				final float ratio = (float) stats.getStoredCoverageRatio();
 
 				float deficitImpact = element.two * (1f - ratio); // weight × deficitRatio
 
