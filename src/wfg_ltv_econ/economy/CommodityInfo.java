@@ -37,7 +37,7 @@ public class CommodityInfo {
 
     public final void reset() {
         for (CommodityStats stats : m_comStats.values()) {
-            stats.resetTradeValues();
+            stats.reset();
         }
     }
 
@@ -56,7 +56,7 @@ public class CommodityInfo {
     public final void refreshMarkets() {
         final EconomyEngine engine = EconomyEngine.getInstance();
 
-        List<MarketAPI> newMarkets = engine.symmetricDifference(
+        List<MarketAPI> newMarkets = EconomyEngine.symmetricDifference(
             engine.getMarketsCopy(),
             new ArrayList<>(m_comStats.keySet())
         );
@@ -73,6 +73,10 @@ public class CommodityInfo {
 
     public final Collection<CommodityStats> getAllStats() {
         return m_comStats.values();
+    }
+
+    public final Map<MarketAPI, CommodityStats> getStatsMap() {
+        return m_comStats;
     }
 
     public static Pair<MarketAPI, MarketAPI> getPairFromIndex(int index, List<MarketAPI> exporters,     
@@ -191,12 +195,14 @@ public class CommodityInfo {
 
         score += sizeFactor(importer) * TradeWeights.MARKET_SIZE;
 
+        score += priceFactor(m_spec, importer) * TradeWeights.LOCAL_PRICE;
+
         return score;
     }
 
-    public final int computeDynamicPairScore(MarketAPI importer) {
-        return (int) priceFactor(m_spec, importer) * TradeWeights.LOCAL_PRICE;
-    }
+    // public final int computeDynamicPairScore(MarketAPI importer) {
+    //     return (int) priceFactor(m_spec, importer) * TradeWeights.LOCAL_PRICE;
+    // }
 
     private static final float relationFactor(MarketAPI exporter, MarketAPI importer) {
         final float rel = exporter.getFaction().getRelationship(importer.getFaction().getId());

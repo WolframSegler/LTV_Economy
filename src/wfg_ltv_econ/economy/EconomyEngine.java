@@ -1,7 +1,5 @@
 package wfg_ltv_econ.economy;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,18 +8,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.util.Pair;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
+import wfg_ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 
 /**
@@ -31,6 +25,7 @@ public class EconomyEngine {
     private static EconomyEngine instance;
 
     private final Map<String, CommodityInfo> m_commoditInfo;
+    public final Map<String, Map<String, IndustryConfigLoader.OutputCom>> configs;
 
     private int marketAmount = 0; 
 
@@ -58,6 +53,8 @@ public class EconomyEngine {
         }
 
         marketAmount = getMarketsCopy().size();
+
+        configs = IndustryConfigLoader.loadAsMap();
 
         fakeAdvance();
     }
@@ -95,15 +92,21 @@ public class EconomyEngine {
         mainLoop(true);
     }
 
+    // Order matters here
     private final void mainLoop(boolean fakeAdvance) {        
         assignWorkers();
 
         for (CommodityInfo comInfo : m_commoditInfo.values()) {
-            // Order matters here
             comInfo.reset();
 
             comInfo.update();
+        }
 
+        weightedOutputDeficitMods();
+
+        weightedInputDeficitMods();
+
+        for (CommodityInfo comInfo : m_commoditInfo.values()) {
             comInfo.trade();
 
             comInfo.advance(fakeAdvance);
@@ -141,6 +144,76 @@ public class EconomyEngine {
             stats.update();
         }
         return stats;
+    }
+
+    public final void weightedOutputDeficitMods() {
+
+        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+        for (Map.Entry<MarketAPI, CommodityStats> marketEntry : comInfo.getStatsMap().entrySet()) {
+            CommodityStats stats = marketEntry.getValue();
+            double outputMultiplier = 1f;
+
+            for (Industry ind : stats.getVisibleIndustries()) {
+                Map<String, OutputCom> indObj = configs.get(ind.getId());
+                if (indObj == null) continue;
+
+                OutputCom outputCom = indObj.get(stats.m_com.getId());
+                if (outputCom == null) continue;
+
+                Map<String, Float> weights = outputCom.demand;
+                for (Map.Entry<String, Float> inputWeight : weights.entrySet()) {
+                    CommodityStats inputStats = getComStats(inputWeight.getKey(), marketEntry.getKey());
+                    if (inputStats == null) continue;
+
+                    float coverage = inputStats.getStoredCoverageRatio();
+                    outputMultiplier -= inputWeight.getValue() * (1f - coverage);
+                }
+            }
+
+            stats.localProductionMult = Math.max(outputMultiplier, 0.01f);
+        }
+        }
+    }
+
+    public final void weightedInputDeficitMods() {
+
+        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+        for (Map.Entry<MarketAPI, CommodityStats> marketEntry : comInfo.getStatsMap().entrySet()) {
+            CommodityStats stats = marketEntry.getValue();
+
+            double maxInputMultiplier = 1f;
+
+            // Loop through industries in this market that are relevant to this commodity
+            for (Industry ind : stats.getVisibleIndustries()) {
+                Map<String, OutputCom> indObj = configs.get(ind.getId());
+                if (indObj == null) continue;
+
+                // Check all outputs this industry produces
+                for (Map.Entry<String, OutputCom> outputEntry : indObj.entrySet()) {
+                    String outputCommodityId = outputEntry.getKey();  // key is the commodity produced
+                    OutputCom outputCom = outputEntry.getValue();
+
+                    Map<String, Float> inputWeights = outputCom.demand;
+
+                    // Only proceed if this output consumes the current commodity
+                    if (inputWeights.containsKey(stats.m_com.getId())) {
+                        double contribution = inputWeights.get(stats.m_com.getId()); // weight of this input
+
+                        // Get the production stats of the output commodity
+                        CommodityStats outputStats = getComStats(outputCommodityId, marketEntry.getKey());
+                        if (outputStats == null) continue;
+
+                        double throttledRatio = outputStats.localProductionMult;
+
+                        // Scale the allowed input proportionally to output production
+                        maxInputMultiplier = Math.min(maxInputMultiplier, throttledRatio / contribution);
+                    }
+                }
+            }
+
+            stats.demandBaseMult = Math.max(maxInputMultiplier, 0f);
+        }
+        }
     }
 
     private final void assignWorkers() {
@@ -205,7 +278,7 @@ public class EconomyEngine {
         return totalGlobalExports;
     }
 
-    public <T> List<T> symmetricDifference(List<T> list1, List<T> list2) {
+    public static final <T> List<T> symmetricDifference(List<T> list1, List<T> list2) {
         Set<T> set1 = new HashSet<>(list1);
         Set<T> set2 = new HashSet<>(list2);
 
@@ -217,9 +290,5 @@ public class EconomyEngine {
 
         return new ArrayList<>(result);
     }
-
-    private Map<String, Map<String, List<Pair<String, Float>>>> industryWeights;
-
-    public void loadIndustryInfo() {
 
 }

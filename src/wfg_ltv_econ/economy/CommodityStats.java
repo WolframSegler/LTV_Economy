@@ -21,8 +21,11 @@ public class CommodityStats {
     private long stored = 0;
     
     // Local
-    public long localProduction = 0;
-    public long demandBase = 0;
+    private long localProduction = 0;
+    private long demandBase = 0;
+
+    public double localProductionMult = 1f;
+    public double demandBaseMult = 1f;
 
     // Import
     public long inFactionImports = 0;
@@ -32,20 +35,27 @@ public class CommodityStats {
     public long inFactionExports = 0;
     public long globalExports = 0;
 
+
+    public final long getLocalProduction(boolean modified) {
+        return modified ? (long) (localProduction*localProductionMult) : localProduction;
+    }
+    public final long getBaseDemand(boolean modified) {
+        return modified ? (long) (demandBase*demandBaseMult) : demandBase;
+    }
     public final long getDemandMet() {
         return getDemandMetLocally() + getDemandMetViaTrade();
     }
     public final long getDemandMetLocally() {
-        return Math.min(localProduction, demandBase); 
+        return Math.min((long) getLocalProduction(true), getBaseDemand(false)); 
     }
     public final long getDeficitPreTrade() {
-        return demandBase - getDemandMetLocally();
+        return getBaseDemand(false) - getDemandMetLocally();
     }
     public final long getDemandMetViaTrade() {
-        return Math.min(getTotalImports(), demandBase - getDemandMetLocally());
+        return Math.min(getTotalImports(), getBaseDemand(false) - getDemandMetLocally());
     }
     public final long getDeficit() {
-        return demandBase - getDemandMet();
+        return getBaseDemand(false) - getDemandMet();
     }
     public long getTotalImports() {
         return inFactionImports + globalImports;
@@ -54,10 +64,10 @@ public class CommodityStats {
         return inFactionExports + globalExports;
     }
     public final long getAvailable() {
-        return localProduction + getTotalImports();
+        return getLocalProduction(true) + getTotalImports();
     }
     public final long getBaseExportable() {
-        return Math.max(0, localProduction - demandBase);
+        return Math.max(0, getLocalProduction(true) - getBaseDemand(false));
     }
     public final long getRemainingExportable() {
         return getBaseExportable() - getTotalExports();
@@ -69,7 +79,7 @@ public class CommodityStats {
         return getDemandMet() + getDeficit() + getTotalExports() + getCanNotExport();
     }
     public final double getAvailabilityRatio() {
-        return demandBase == 0 ? 1f : (double) getDemandMet() / demandBase;
+        return getBaseDemand(false) == 0 ? 1f : (double) getDemandMet() / getBaseDemand(false);
     }
 
 
@@ -94,7 +104,7 @@ public class CommodityStats {
     }
 
     public final void addStoredAmount(long a) {
-        stored = Math.max(0, stored + a);
+        stored += Math.max(0, a);
     }
 
     public CommodityStats(String comID, MarketAPI market) {
@@ -122,11 +132,14 @@ public class CommodityStats {
         demandBase = demandBase < 1 ? 0 : demandBase;
     }
 
-    public final void resetTradeValues() {
+    public final void reset() {
         inFactionImports = 0;
         globalImports = 0;
         inFactionExports = 0;
         globalExports = 0;
+
+        localProductionMult = 1f;
+        demandBaseMult = 1f;
     }
 
     /**
@@ -135,7 +148,7 @@ public class CommodityStats {
     public final void advance(boolean fakeAdvance) {
         
         if (!fakeAdvance) {
-            addStoredAmount(getCanNotExport() - getDeficit());
+            addStoredAmount(getAvailable() - getBaseDemand(true));
     
             final long amount = getCanNotExport() - getDeficit();
             CargoAPI cargo = market.getSubmarket(ltv_getAvaliableInCargo().one).getCargo();
@@ -176,9 +189,9 @@ public class CommodityStats {
      * Returns the fraction of demand that could be satisfied by the current stored amount.
      */
     public float getStoredCoverageRatio() {
-        if (demandBase <= 0) return 1f;
+        if (getBaseDemand(false) <= 0) return 1f;
 
-        return Math.min((float) stored / demandBase, 1f);
+        return Math.min((float) stored / getBaseDemand(false), 1f);
     }
 
     public List<Industry> getVisibleIndustries() {
@@ -222,8 +235,8 @@ public class CommodityStats {
     public void logAllInfo() {
         Global.getLogger(getClass()).error("Commodity: " + m_com.getCommodity().getName());
         Global.getLogger(getClass()).error("economicFootprint: " + getEconomicFootprint());
-        Global.getLogger(getClass()).error("localProduction: " + localProduction);
-        Global.getLogger(getClass()).error("baseDemand: " + demandBase);
+        Global.getLogger(getClass()).error("localProduction: " + getLocalProduction(true));
+        Global.getLogger(getClass()).error("baseDemand: " + getBaseDemand(false));
         Global.getLogger(getClass()).error("deficitPreTrade: " + getDeficitPreTrade());
         Global.getLogger(getClass()).error("totalImports: " + getTotalImports());
         Global.getLogger(getClass()).error("inFactionImports: " + inFactionImports);

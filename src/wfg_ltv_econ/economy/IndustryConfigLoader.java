@@ -30,16 +30,16 @@ public class IndustryConfigLoader {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, Map<String, IndustryConfig>> loadAsMap() {
+    public static Map<String, Map<String, OutputCom>> loadAsMap() {
         JSONObject root = IndustryConfigLoader.getConfig();
-        Map<String, Map<String, IndustryConfig>> result = new HashMap<>();
+        Map<String, Map<String, OutputCom>> result = new HashMap<>();
 
         try {
         for (Iterator<String> itIndustry = root.keys(); itIndustry.hasNext();) {
             String industryId = itIndustry.next();
             JSONObject industryJson = root.getJSONObject(industryId);
 
-            Map<String, IndustryConfig> commodityMap = new HashMap<>();
+            Map<String, OutputCom> commodityMap = new HashMap<>();
 
             for (Iterator<String> itCommodity = industryJson.keys(); itCommodity.hasNext();) {
                 String commodityId = itCommodity.next();
@@ -57,7 +57,7 @@ public class IndustryConfigLoader {
                     }
                 }
 
-                commodityMap.put(commodityId, new IndustryConfig(baseProd, demandMap));
+                commodityMap.put(commodityId, new OutputCom(baseProd, demandMap));
             }
 
             result.put(industryId, commodityMap);
@@ -72,11 +72,11 @@ public class IndustryConfigLoader {
         return result;
     }
 
-    public static class IndustryConfig {
+    public static class OutputCom {
         public final float baseProd;
         public final Map<String, Float> demand;
 
-        public IndustryConfig(float baseProd, Map<String, Float> demand) {
+        public OutputCom(float baseProd, Map<String, Float> demand) {
             this.baseProd = baseProd;
             this.demand = demand;
         }
