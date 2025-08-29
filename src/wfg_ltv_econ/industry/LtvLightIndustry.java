@@ -66,8 +66,6 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 
 		if (dayTracker != day) {
 
-			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
-
 			dayTracker = day; // Do this at the end of the advance() method
 		}
 	}

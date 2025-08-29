@@ -593,7 +593,7 @@ public class TooltipUtils {
         }
         
         LabelAPI title = tooltip.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation(comStats.demandBase));
+            NumFormat.engNotation(comStats.getBaseDemand(false)));
 
         final int valueTxtWidth = 50;
         boolean firstPara = true;

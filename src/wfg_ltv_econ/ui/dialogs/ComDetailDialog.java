@@ -921,7 +921,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
 
             CommodityStats comStats = EconomyEngine.getInstance().getComStats(m_com.getId(), market);
 
-            if (comStats.globalExports < 1 && mode == 0 || comStats.demandBase < 1 && mode == 1) {
+            if (comStats.globalExports < 1 && mode == 0 || comStats.getBaseDemand(false) < 1 && mode == 1) {
                 continue;
             }
 

@@ -4,17 +4,12 @@ import java.awt.Color;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.api.util.Pair;
-
-import java.util.Map;
-import java.util.List;
 
 public class LtvHeavyIndustry extends LtvBaseIndustry {
 
@@ -22,43 +17,6 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 
 	public final static float DAYS_BEFORE_POLLUTION = 0f;
 	public final static float DAYS_BEFORE_POLLUTION_PERMANENT = 180f;
-
-	public final static float DAILY_BASE_PROD_HEAVY_MACHINERY = 1.3f; // 150$
-	public final static float DAILY_BASE_PROD_SUPPLIES = 2.0f; // 100$
-	public final static float DAILY_BASE_PROD_HAND_WEAPONS = 0.4f; // 500$
-	public final static float DAILY_BASE_PROD_SHIPS = 0.6f; // 300$
-
-	public final static float METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.8f;
-	public final static float RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY = 0.2f;
-	public final static float METALS_WEIGHT_FOR_SUPPLIES = 0.9f;
-	public final static float RARE_METALS_WEIGHT_FOR_SUPPLIES = 0.1f;
-	public final static float METALS_WEIGHT_FOR_HAND_WEAPONS = 0.4f;
-	public final static float RARE_METALS_WEIGHT_FOR_HAND_WEAPONS = 0.6f;
-	public final static float METALS_WEIGHT_FOR_SHIPS = 0.6f;
-	public final static float RARE_METALS_WEIGHT_FOR_SHIPS = 0.4f;
-
-	protected static Map<String, List<Pair<String, Float>>> COMMODITY_LIST;
-
-	static {
-		COMMODITY_LIST = Map.of(
-    		Commodities.HEAVY_MACHINERY, List.of(
-    	    	new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_HEAVY_MACHINERY),
-    	    	new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY)
-    		),
-			Commodities.SUPPLIES, List.of(
-				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_SUPPLIES),
-				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SUPPLIES)
-			),
-			Commodities.HAND_WEAPONS, List.of(
-				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_HAND_WEAPONS),
-				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_HAND_WEAPONS)
-			),
-			Commodities.SHIPS, List.of(
-				new Pair<>(Commodities.METALS, METALS_WEIGHT_FOR_SHIPS),
-				new Pair<>(Commodities.RARE_METALS, RARE_METALS_WEIGHT_FOR_SHIPS)
-			)
-		);
-	}
 
 	public void HeavyIndustryModifiers() {
 		if (Industries.ORBITALWORKS.equals(getId())) {
@@ -120,25 +78,6 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 	public void apply() {
 		super.apply(true);
 
-		demand(Commodities.METALS, Math.round(
-				DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned() * METALS_WEIGHT_FOR_HEAVY_MACHINERY+
-				DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned() * METALS_WEIGHT_FOR_SUPPLIES+
-				DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned() * METALS_WEIGHT_FOR_HAND_WEAPONS+
-				DAILY_BASE_PROD_SHIPS*getWorkerAssigned() * METALS_WEIGHT_FOR_SHIPS)
-		);
-
-		demand(Commodities.RARE_METALS, Math.round(
-				DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_HEAVY_MACHINERY+
-				DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_SUPPLIES+
-				DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_HAND_WEAPONS+
-				DAILY_BASE_PROD_SHIPS*getWorkerAssigned() * RARE_METALS_WEIGHT_FOR_SHIPS)
-		);
-
-		supply(Commodities.HEAVY_MACHINERY, (int)(DAILY_BASE_PROD_HEAVY_MACHINERY*getWorkerAssigned()));
-		supply(Commodities.SUPPLIES, (int)(DAILY_BASE_PROD_SUPPLIES*getWorkerAssigned()));
-		supply(Commodities.HAND_WEAPONS, (int)(DAILY_BASE_PROD_HAND_WEAPONS*getWorkerAssigned()));
-		supply(Commodities.SHIPS, (int)(DAILY_BASE_PROD_SHIPS*getWorkerAssigned()));
-
 		HeavyIndustryModifiers();
 
 		if (!isFunctional()) {
@@ -174,8 +113,6 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		super.advance(day);
 
 		if (dayTracker != day) {
-
-			ltv_WeightedDeficitModifiers(COMMODITY_LIST);
 
 			if (special != null && !isPermaPollution()) {
 				daysWithNanoforge++;

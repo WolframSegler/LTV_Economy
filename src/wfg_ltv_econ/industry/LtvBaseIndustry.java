@@ -1,6 +1,7 @@
 package wfg_ltv_econ.industry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -60,6 +61,7 @@ import com.fs.starfarer.api.util.Pair;
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
+import wfg_ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
 
@@ -237,6 +239,32 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				}
 			}
 		}
+
+		applySubclassPIOs();
+	}
+
+	public void applySubclassPIOs() {
+		final Map<String, OutputCom> indMap = EconomyEngine.getInstance().configs.get(getId());
+		final Map<String, Integer> totalDemandMap = new HashMap<>();
+
+		if (indMap == null || indMap.isEmpty()) throw new RuntimeException("indMap cannot be empty");
+
+		for (OutputCom com : indMap.values()) {
+			for (Map.Entry<String, Float> demandEntry : com.demand.entrySet()) {
+				String input = demandEntry.getKey();
+				int demandAmount = Math.round(demandEntry.getValue()*com.baseProd);
+
+				totalDemandMap.merge(input, demandAmount, Integer::sum);
+			}
+		}
+
+		for (Map.Entry<String, Integer> entry : totalDemandMap.entrySet()) {
+			demand(entry.getKey(), entry.getValue() * getWorkerAssigned());
+		}
+
+		for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
+			supply(entry.getKey(), (int) entry.getValue().baseProd*getWorkerAssigned());
+		}
 	}
 
 	public void unapply() {
@@ -282,35 +310,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 
 		FactionAPI playerFaction = Global.getSector().getPlayerFaction();
 		return market.getFaction().equals(playerFaction);
-	}
-
-	protected void ltv_WeightedDeficitModifiers(Map<String, List<Pair<String, Float>>> CommodityList) {
-		// The List<Float> contains the weight of resources (between 0 and 1) needed for
-		// each commodity inside the Map
-
-		if (!EconomyEngine.isInitialized()) return;
-
-		for (Map.Entry<String, List<Pair<String, Float>>> commodity : CommodityList.entrySet()) {
-			MutableStat commodity_supply = getSupply(commodity.getKey()).getQuantity();
-			commodity_supply.unmodifyMult("ltv_weighted_deficit"); // clear previous deficit modifier
-
-			float supplyMultiplier = 1f;
-
-			for (Pair<String, Float> element : commodity.getValue()) {
-				CommodityStats stats = EconomyEngine.getInstance().getComStats(element.one, market);
-
-				if (stats == null) continue;
-
-				final float ratio = (float) stats.getStoredCoverageRatio();
-
-				float deficitImpact = element.two * (1f - ratio); // weight × deficitRatio
-
-				supplyMultiplier -= deficitImpact;
-			}
-
-			supplyMultiplier = Math.max(supplyMultiplier, 0.01f); // Minimum 1% production
-			commodity_supply.modifyMult("ltv_weighted_deficit", supplyMultiplier);
-		}
 	}
 
 	public void demand(String commodityId, int quantity) {

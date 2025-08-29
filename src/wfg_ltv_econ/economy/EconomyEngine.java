@@ -138,7 +138,6 @@ public class EconomyEngine {
     }
 
     public final CommodityStats getComStats(String comID, MarketAPI market) {
-        Global.getLogger(getClass()).error(comID);
         final CommodityStats stats = m_commoditInfo.get(comID).getStats(market);
         if (stats != null) {
             stats.update();
