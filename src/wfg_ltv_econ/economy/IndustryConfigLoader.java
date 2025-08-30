@@ -46,7 +46,7 @@ public class IndustryConfigLoader {
 
             for (Iterator<String> itCommodity = industryJson.keys(); itCommodity.hasNext();) {
                 String commodityId = itCommodity.next();
-                Object value = industryJson.getJSONObject(commodityId);
+                Object value = industryJson.get(commodityId);
 
                 // if (value instanceof Boolean booleanJson) {
                 //     // TODO: use workerAssignable field later

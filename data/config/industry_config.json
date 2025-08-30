@@ -95,14 +95,14 @@
 			"scaleWithMarketSize": true
 		},
 		"organs": {
-			"base_prod": 0.025,
+			"base_prod": 0.0000256849,
 			"demand": {
 				"food": 0.7
 			},
 			"scaleWithMarketSize": true
 		},
 		"drugs": {
-			"base_prod": 0.00256849,
+			"base_prod": 0.00025,
 			"demand": {
 				"domestic_goods": 0.5
 			},

@@ -139,7 +139,14 @@ public class EconomyEngine {
     }
 
     public final CommodityStats getComStats(String comID, MarketAPI market) {
-        final CommodityStats stats = m_commoditInfo.get(comID).getStats(market);
+        final CommodityInfo comInfo = m_commoditInfo.get(comID);
+
+        if (comInfo == null) {
+            throw new RuntimeException("Referencing a non-econ or missing commodity: " + comID);
+        }
+
+        final CommodityStats stats = comInfo.getStats(market);
+
         if (stats != null) {
             stats.update();
         }
@@ -158,7 +165,7 @@ public class EconomyEngine {
                 if (indObj == null) continue;
 
                 OutputCom outputCom = indObj.get(stats.m_com.getId());
-                if (outputCom == null) continue;
+                if (outputCom == null || outputCom.isAbstract) continue;
 
                 Map<String, Float> weights = outputCom.demand;
                 for (Map.Entry<String, Float> inputWeight : weights.entrySet()) {
@@ -192,6 +199,8 @@ public class EconomyEngine {
                 for (Map.Entry<String, OutputCom> outputEntry : indObj.entrySet()) {
                     String outputCommodityId = outputEntry.getKey();  // key is the commodity produced
                     OutputCom outputCom = outputEntry.getValue();
+
+                    if (outputCom.isAbstract) continue;
 
                     Map<String, Float> inputWeights = outputCom.demand;
 
@@ -248,6 +257,8 @@ public class EconomyEngine {
 	 * Other conditional inputs or outputs must be added by the subclass manually.
 	 */
 	public static final void applySubclassPIOs(MarketAPI market, Industry ind) {
+        if (EconomyEngine.getInstance() == null) return;
+
 		final Map<String, OutputCom> indMap = EconomyEngine.getInstance().configs.get(ind.getId());
 		final Map<String, Float> totalDemandMap = new HashMap<>();
 

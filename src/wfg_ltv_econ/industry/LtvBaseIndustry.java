@@ -1,51 +1,31 @@
 package wfg_ltv_econ.industry;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import java.awt.Color;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.SpecialItemData;
-import com.fs.starfarer.api.campaign.SpecialItemSpecAPI;
-import com.fs.starfarer.api.campaign.comm.CommMessageAPI.MessageClickAction;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
-import com.fs.starfarer.api.campaign.econ.InstallableIndustryItemPlugin;
-import com.fs.starfarer.api.campaign.econ.InstallableIndustryItemPlugin.InstallableItemDescriptionMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
-import com.fs.starfarer.api.campaign.impl.items.GenericSpecialItemPlugin;
 import com.fs.starfarer.api.campaign.listeners.ListenerUtil;
-import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.SharedUnlockData;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
+import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.econ.impl.InstallableItemEffect;
-import com.fs.starfarer.api.impl.campaign.econ.impl.ItemEffectsRepo;
-import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
-import com.fs.starfarer.api.impl.campaign.ids.Items;
-import com.fs.starfarer.api.impl.campaign.ids.Sounds;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
-import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
-import com.fs.starfarer.api.impl.campaign.intel.MessageIntel;
-import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidDangerLevel;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -63,12 +43,7 @@ import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
 
-public abstract class LtvBaseIndustry implements Industry, Cloneable {
-
-	public static final int SIZE_FOR_SMALL_IMAGE = 3;
-	public static final int SIZE_FOR_LARGE_IMAGE = 6;
-
-	public static final String BASE_VALUE_TEXT = "Base value for colony size";
+public abstract class LtvBaseIndustry extends BaseIndustry {
 
 	public static final float DEFAULT_IMPROVE_PRODUCTION_BONUS = 1.3f; // +30% output
 	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 0.75f; // -20% input
@@ -85,52 +60,16 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 	@Override
 	protected LtvBaseIndustry clone() {
 		LtvBaseIndustry copy = null;
-		try {
-			copy = (LtvBaseIndustry) super.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
+
+		copy = (LtvBaseIndustry) super.clone();
+
 		return copy;
 	}
 
-	public static String getDeficitText(String commodityId) {
-		if (commodityId == null) {
-			return "Various shortages";
-		}
-		CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(commodityId);
-		return Misc.ucFirst(spec.getName().toLowerCase() + " shortage");
-	}
-
-	protected Map<String, MutableCommodityQuantity> supply = new LinkedHashMap<String, MutableCommodityQuantity>();
-	protected Map<String, MutableCommodityQuantity> demand = new LinkedHashMap<String, MutableCommodityQuantity>();
-
-	protected MutableStat income = new MutableStat(0f);
-	protected MutableStat upkeep = new MutableStat(0f);
-	protected MarketAPI market;
-
-	protected String id;
-
-	protected float buildProgress = 0f;
-	protected float buildTime = 1f;
-	protected boolean building = false;
-	protected Boolean improved = null;
-	protected String upgradeId = null;
-
-	protected transient IndustrySpecAPI spec = null;
-
-	protected String aiCoreId = null;
-
-	protected MutableStat demandReduction = new MutableStat(0);
-	protected MutableStat supplyBonus = new MutableStat(0);
-
-	protected transient MutableStat demandReductionFromOther = new MutableStat(0);
-	protected transient MutableStat supplyBonusFromOther = new MutableStat(0);
-
 	public float workersAssigned = 0;
 
-	public LtvBaseIndustry() {
+	public LtvBaseIndustry() {}
 
-	}
 	public Map<String, MutableCommodityQuantity> getSupply() {
 		return supply;
 	}
@@ -138,41 +77,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return demand;
 	}
 
-	public MutableStat getDemandReduction() {
-		return demandReduction;
-	}
+	protected transient String modId;
+	protected transient String[] modIds;
 
-	public MutableStat getSupplyBonus() {
-		return supplyBonus;
-	}
-
-	public MutableStat getDemandReductionFromOther() {
-		if (demandReductionFromOther == null) {
-			demandReductionFromOther = new MutableStat(0);
-		}
-		return demandReductionFromOther;
-	}
-
-	public MutableStat getSupplyBonusFromOther() {
-		if (supplyBonusFromOther == null) {
-			supplyBonusFromOther = new MutableStat(0);
-		}
-		return supplyBonusFromOther;
-	}
-
-	public void setMarket(MarketAPI market) {
-		this.market = market;
-	}
-
-	public void init(String id, MarketAPI market) {
-		this.id = id;
-		this.market = market;
-		readResolve();
-	}
-
-	private transient String modId;
-	private transient String[] modIds;
-
+	@Override
 	protected Object readResolve() {
 		spec = Global.getSettings().getIndustrySpec(id);
 
@@ -206,20 +114,16 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return this;
 	}
 
-	protected Object writeReplace() {
-		clearUnmodified();
-		return this;
-	}
-
-	public void apply(Boolean updateIncomeAndUpkeep) {
+	@Override
+	public void apply(boolean updateIncomeAndUpkeep) {
 		// Increased Production also increases the Demand
 		updateSupplyAndDemandModifiers();
 
 		if (updateIncomeAndUpkeep) {
 			updateIncomeAndUpkeep();
 		}
-		applyModifiers();
-
+		
+		applyAICoreModifiers();
 		applyImproveModifiers();
 
 		if (this instanceof MarketImmigrationModifier) {
@@ -241,63 +145,17 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		EconomyEngine.applySubclassPIOs(market, this);
 	}
 
-	public void unapply() {
-		applyNoAICoreModifiers();
-
-		demand.clear();
-		supply.clear();
-
-		Boolean wasImproved = improved;
-		improved = null;
-		applyImproveModifiers(); // to unapply them
-		improved = wasImproved;
-
-		if (this instanceof MarketImmigrationModifier && market != null) {
-			market.removeTransientImmigrationModifier((MarketImmigrationModifier) this);
-		}
-
-		if (special != null) {
-			InstallableItemEffect effect = ItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
-			if (effect != null) {
-				effect.unapply(this);
-			}
-		}
-	}
-
-	protected void applyModifiers() {
-	}
-
-	protected void applyNoAICoreModifiers() {
-	}
-
+	@Override
 	protected String getModId() {
 		return modId;
 	}
 
+	@Override
 	protected String getModId(int index) {
 		return modIds[index];
 	}
 
-	public boolean isPlayerOwned(MarketAPI market) {
-		if (market == null)
-			return false;
-
-		FactionAPI playerFaction = Global.getSector().getPlayerFaction();
-		return market.getFaction().equals(playerFaction);
-	}
-
-	public void demand(String commodityId, int quantity) {
-		demand(0, commodityId, quantity, BASE_VALUE_TEXT);
-	}
-
-	public void demand(String commodityId, int quantity, String desc) {
-		demand(0, commodityId, quantity, desc);
-	}
-
-	public void demand(int index, String commodityId, int quantity, String desc) {
-		demand(getModId(index), commodityId, quantity, desc);
-	}
-
+	@Override
 	public void demand(String modId, String commodityId, int quantity, String desc) {
 		if (quantity == 0) {
 			getDemand(commodityId).getQuantity().unmodifyFlat(modId);
@@ -316,18 +174,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 	}
 
-	public void supply(String commodityId, int quantity) {
-		supply(0, commodityId, quantity, BASE_VALUE_TEXT);
-	}
-
-	public void supply(String commodityId, int quantity, String desc) {
-		supply(0, commodityId, quantity, desc);
-	}
-
-	public void supply(int index, String commodityId, int quantity, String desc) {
-		supply(getModId(index), commodityId, quantity, desc);
-	}
-
+	@Override
 	public void supply(String modId, String commodityId, int quantity, String desc) {
 		if (quantity == 0) {
 			getSupply(commodityId).getQuantity().unmodifyFlat(modId);
@@ -346,14 +193,13 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 	}
 
+	@Override
+	@Deprecated
 	protected void applyDeficitToProduction(int index, Pair<String, Integer> deficit, String... commodities) {
-		for (String commodity : commodities) {
-			if (getSupply(commodity).getQuantity().isUnmodified())
-				continue;
-			supply(index, commodity, -deficit.two, getDeficitText(deficit.one));
-		}
+		super.applyDeficitToProduction(index, deficit, commodities);
 	}
 
+	@Override
 	public void updateIncomeAndUpkeep() {
 		int sizeMult = market.getSize() - 2;
 		float stabilityMult = market.getIncomeMult().getModifiedValue();
@@ -385,38 +231,17 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 	}
 
-	public float getBuildTime() {
-		return getSpec().getBuildTime();
-	}
-
-	protected Float buildCostOverride = null;
-
-	public Float getBuildCostOverride() {
-		return buildCostOverride;
-	}
-
-	public void setBuildCostOverride(float buildCostOverride) {
-		this.buildCostOverride = buildCostOverride;
-	}
-
-	public float getBuildCost() {
-		if (buildCostOverride != null)
-			return buildCostOverride;
-		return getSpec().getCost();
-	}
-
+	@Override
 	public float getBaseUpkeep() {
 		float sizeMult = market.getSize();
 		sizeMult = Math.max(1, sizeMult - 2);
 		return getSpec().getUpkeep() * sizeMult;
 	}
 
-	protected boolean wasDisrupted = false;
+	protected float dayTracker = -1;
 
-	protected int dayTracker = -1;
-
-	public void advance(int day) {
-
+	@Override
+	public void advance(float day) {
 		if (dayTracker == -1) {
 			dayTracker = day;
 		}
@@ -435,145 +260,6 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				}
 			}
 		}
-	}
-
-	protected void notifyDisrupted() {
-
-	}
-
-	protected void disruptionFinished() {
-
-	}
-
-	public boolean isBuilding() {
-		return building;
-	}
-
-	public boolean isFunctional() {
-		if (isDisrupted())
-			return false;
-		return !(isBuilding() && !isUpgrading());
-	}
-
-	public boolean isUpgrading() {
-		return building && upgradeId != null;
-	}
-
-	public float getBuildOrUpgradeProgress() {
-		if (isDisrupted()) {
-			return 0f;
-		}
-		if (!isBuilding())
-			return 0f;
-
-		return Math.min(1f, buildProgress / buildTime);
-	}
-
-	public String getBuildOrUpgradeDaysText() {
-		if (isDisrupted()) {
-			int left = (int) getDisruptedDays();
-			if (left < 1)
-				left = 1;
-			String days = "days";
-			if (left == 1)
-				days = "day";
-
-			return "" + left + " " + days + "";
-		}
-
-		int left = (int) (buildTime - buildProgress);
-		if (left < 1)
-			left = 1;
-		String days = "days";
-		if (left == 1)
-			days = "day";
-
-		return left + " " + days;
-	}
-
-	public String getBuildOrUpgradeProgressText() {
-		if (isDisrupted()) {
-			int left = (int) getDisruptedDays();
-			if (left < 1)
-				left = 1;
-			String days = "days";
-			if (left == 1)
-				days = "day";
-
-			return "Disrupted: " + left + " " + days + " left";
-		}
-
-		int left = (int) (buildTime - buildProgress);
-		if (left < 1)
-			left = 1;
-		String days = "days";
-		if (left == 1)
-			days = "day";
-
-		if (isUpgrading()) {
-			return "Upgrading: " + left + " " + days + " left";
-		} else {
-			return "Building: " + left + " " + days + " left";
-		}
-	}
-
-	public void startBuilding() {
-		building = true;
-		buildProgress = 0;
-		upgradeId = null;
-
-		buildTime = spec.getBuildTime();
-		unapply();
-	}
-
-	public void finishBuildingOrUpgrading() {
-		building = false;
-		buildProgress = 0;
-		buildTime = 1f;
-		if (upgradeId != null) {
-			market.removeIndustry(getId(), null, true);
-			market.addIndustry(upgradeId);
-			LtvBaseIndustry industry = (LtvBaseIndustry) market.getIndustry(upgradeId);
-			industry.setAICoreId(getAICoreId());
-			industry.setImproved(isImproved());
-			industry.upgradeFinished(this);
-			industry.reapply();
-		} else {
-			buildingFinished();
-			reapply();
-		}
-	}
-
-	public void startUpgrading() {
-		building = true;
-		buildProgress = 0;
-		upgradeId = getSpec().getUpgrade();
-
-		IndustrySpecAPI upgrade = Global.getSettings().getIndustrySpec(upgradeId);
-		buildTime = upgrade.getBuildTime();
-	}
-
-	public void cancelUpgrade() {
-		building = false;
-		buildProgress = 0;
-		upgradeId = null;
-	}
-
-	public void downgrade() {
-		building = true;
-		buildProgress = 0;
-		upgradeId = getSpec().getDowngrade();
-		finishBuildingOrUpgrading();
-	}
-
-	public void reapply() {
-		unapply();
-		apply();
-	}
-
-	protected void buildingFinished() {
-		sendBuildOrUpgradeMessage();
-		buildNextInQueue(market);
 	}
 
 	public float getWorkerAssignedRatio() {
@@ -632,178 +318,17 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return (int)(pool.getWorkerPool()*0.2);
 	}
 
-	public static void buildNextInQueue(MarketAPI market) {
-		ConstructionQueueItem next = null;
-		Iterator<ConstructionQueueItem> iter = market.getConstructionQueue().getItems().iterator();
-		while (iter.hasNext()) {
-			next = iter.next();
-			iter.remove();
-
-			Industry ind = market.instantiateIndustry(next.id);
-			int num = Misc.getNumIndustries(market);
-			int max = Misc.getMaxIndustries(market);
-			if (ind.isAvailableToBuild() && (num <= max || !ind.isIndustry())) { // <= because num includes what's
-																					// queued
-				break;
-			} else {
-				if (market.isPlayerOwned()) {
-					MessageIntel intel = new MessageIntel(ind.getCurrentName() + " at " + market.getName(),
-							Misc.getBasePlayerColor());
-					intel.addLine(BaseIntelPlugin.BULLET + "Construction aborted");
-
-					int refund = next.cost;
-					Global.getSector().getPlayerFleet().getCargo().getCredits().add(refund);
-					intel.addLine(BaseIntelPlugin.BULLET + "%s refunded",
-							Misc.getTextColor(),
-							new String[] { Misc.getDGSCredits(refund) }, Misc.getHighlightColor());
-					intel.setIcon(Global.getSector().getPlayerFaction().getCrest());
-					intel.setSound(BaseIntelPlugin.getSoundStandardUpdate());
-					Global.getSector().getCampaignUI().addMessage(intel, MessageClickAction.COLONY_INFO, market);
-				}
-				next = null;
-			}
-		}
-
-		if (next != null) {
-			market.addIndustry(next.id);
-			Industry ind = market.getIndustry(next.id);
-			ind.startBuilding();
-			if (ind instanceof LtvBaseIndustry) {
-				((LtvBaseIndustry) ind).setBuildCostOverride(next.cost);
-			}
-
-			if (market.isPlayerOwned()) {
-				MessageIntel intel = new MessageIntel(ind.getCurrentName() + " at " + market.getName(),
-						Misc.getBasePlayerColor());
-				intel.addLine(BaseIntelPlugin.BULLET + "Construction started");
-				intel.setIcon(Global.getSector().getPlayerFaction().getCrest());
-				intel.setSound(BaseIntelPlugin.getSoundStandardUpdate());
-				Global.getSector().getCampaignUI().addMessage(intel, MessageClickAction.COLONY_INFO, market);
-			}
-		}
-	}
-
-	protected void upgradeFinished(Industry previous) {
-		sendBuildOrUpgradeMessage();
-
-		setSpecialItem(previous.getSpecialItem());
-	}
-
-	protected void sendBuildOrUpgradeMessage() {
-		if (market.isPlayerOwned()) {
-			MessageIntel intel = new MessageIntel(getCurrentName() + " at " + market.getName(),
-					Misc.getBasePlayerColor());
-			intel.addLine(BaseIntelPlugin.BULLET + "Construction completed");
-			intel.setIcon(Global.getSector().getPlayerFaction().getCrest());
-			intel.setSound(BaseIntelPlugin.getSoundStandardUpdate());
-			Global.getSector().getCampaignUI().addMessage(intel, MessageClickAction.COLONY_INFO, market);
-		}
-	}
-
-	public void notifyBeingRemoved(MarketInteractionMode mode, boolean forUpgrade) {
-		if (aiCoreId != null && !forUpgrade) {
-			CargoAPI cargo = getCargoForInteractionMode(mode);
-			if (cargo != null) {
-				cargo.addCommodity(aiCoreId, 1);
-			}
-		}
-
-		if (special != null && !forUpgrade) {
-			CargoAPI cargo = getCargoForInteractionMode(mode);
-			if (cargo != null) {
-				cargo.addSpecial(special, 1);
-			}
-		}
-	}
-
-	protected CargoAPI getCargoForInteractionMode(MarketInteractionMode mode) {
-		CargoAPI cargo = null;
-		if (mode == null)
-			return null;
-
-		if (mode == MarketInteractionMode.REMOTE) {
-			cargo = Misc.getStorageCargo(market);
-		} else {
-			cargo = Global.getSector().getPlayerFleet().getCargo();
-		}
-		return cargo;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public IndustrySpecAPI getSpec() {
-		if (spec == null)
-			spec = Global.getSettings().getIndustrySpec(id);
-		return spec;
-	}
-
-	public void clearUnmodified() {
-		if (supply != null) {
-			for (String id : new ArrayList<String>(supply.keySet())) {
-				MutableCommodityQuantity stat = supply.get(id);
-				if (stat != null && (stat.getQuantity().isUnmodified() || stat.getQuantity().getModifiedValue() <= 0)) {
-					supply.remove(id);
-				}
-			}
-		}
-		if (demand != null) {
-			for (String id : new ArrayList<String>(demand.keySet())) {
-				MutableCommodityQuantity stat = demand.get(id);
-				if (stat != null && (stat.getQuantity().isUnmodified() || stat.getQuantity().getModifiedValue() <= 0)) {
-					demand.remove(id);
-				}
-			}
-		}
-	}
-
-	public List<MutableCommodityQuantity> getAllDemand() {
-		List<MutableCommodityQuantity> result = new ArrayList<MutableCommodityQuantity>();
-		for (MutableCommodityQuantity q : demand.values()) {
-			if (q.getQuantity().getModifiedValue() > 0) {
-				result.add(q);
-			}
-		}
-		return result;
-	}
-
-	public List<MutableCommodityQuantity> getAllSupply() {
-		List<MutableCommodityQuantity> result = new ArrayList<MutableCommodityQuantity>();
-		for (MutableCommodityQuantity q : supply.values()) {
-			if (q.getQuantity().getModifiedValue() > 0) {
-				result.add(q);
-			}
-		}
-		return result;
-	}
-
-	public MutableCommodityQuantity getSupply(String id) {
-		MutableCommodityQuantity stat = supply.get(id);
-		if (stat == null) {
-			stat = new MutableCommodityQuantity(id);
-			supply.put(id, stat);
-		}
-		return stat;
-	}
-
-	public MutableCommodityQuantity getDemand(String id) {
-		MutableCommodityQuantity stat = demand.get(id);
-		if (stat == null) {
-			stat = new MutableCommodityQuantity(id);
-			demand.put(id, stat);
-		}
-		return stat;
-	}
-
+	@Override
 	public MutableStat getIncome() {
 		return income;
 	}
 
+	@Override
 	public MutableStat getUpkeep() {
 		return upkeep;
 	}
 
+	@Override
 	public MarketAPI getMarket() {
 		return market;
 	}
@@ -830,109 +355,25 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		return result;
 	}
 
+	@Override
 	@Deprecated
 	public Pair<String, Integer> getMaxDeficit(String... commodityIds) {
-		Pair<String, Integer> result = new Pair<String, Integer>();
-		result.two = 0;
-		if (Global.CODEX_TOOLTIP_MODE)
-			return result;
-		for (String id : commodityIds) {
-			int demand = (int) getDemand(id).getQuantity().getModifiedValue();
-			CommodityOnMarketAPI com = market.getCommodityData(id);
-			int available = com.getAvailable();
-
-			int deficit = Math.max(demand - available, 0);
-			if (deficit > result.two) {
-				result.one = id;
-				result.two = deficit;
-			}
-		}
-		return result;
+		return super.getMaxDeficit(commodityIds);
 	}
 
+	@Override
 	@Deprecated
 	public List<Pair<String, Integer>> getAllDeficit() {
-		List<String> commodities = new ArrayList<String>();
-		for (MutableCommodityQuantity curr : demand.values()) {
-			commodities.add(curr.getCommodityId());
-		}
-		return getAllDeficit(commodities.toArray(new String[0]));
+		return super.getAllDeficit();
 	}
 
+	@Override
 	@Deprecated
 	public List<Pair<String, Integer>> getAllDeficit(String... commodityIds) {
-		List<Pair<String, Integer>> result = new ArrayList<Pair<String, Integer>>();
-		for (String id : commodityIds) {
-			int demand = (int) getDemand(id).getQuantity().getModifiedValue();
-			CommodityOnMarketAPI com = market.getCommodityData(id);
-			int available = com.getAvailable();
-
-			int deficit = Math.max(demand - available, 0);
-			if (deficit > 0) {
-				Pair<String, Integer> curr = new Pair<String, Integer>();
-				curr.one = id;
-				curr.two = deficit;
-				result.add(curr);
-			}
-		}
-		return result;
+		return super.getAllDeficit(commodityIds);
 	}
 
-	public static float getCommodityEconUnitMult(float size) {
-		if (size <= 0)
-			return 0f;
-		return 1f;
-	}
-
-	public void doPreSaveCleanup() {
-		supply = null;
-		demand = null;
-		income = null;
-		upkeep = null;
-	}
-
-	public void doPostSaveRestore() {
-		supply = new LinkedHashMap<String, MutableCommodityQuantity>();
-		demand = new LinkedHashMap<String, MutableCommodityQuantity>();
-
-		income = new MutableStat(0f);
-		upkeep = new MutableStat(0f);
-	}
-
-	public String getCurrentImage() {
-		return getSpec().getImageName();
-	}
-
-	public String getCurrentName() {
-		return getSpec().getName();
-	}
-
-	public boolean isAvailableToBuild() {
-		if (market.hasTag(Tags.MARKET_NO_INDUSTRIES_ALLOWED))
-			return false;
-		return market.hasIndustry(Industries.POPULATION) && !getId().equals(Industries.POPULATION);
-	}
-
-	public boolean showWhenUnavailable() {
-		if (market.hasTag(Tags.MARKET_NO_INDUSTRIES_ALLOWED))
-			return false;
-		return true;
-	}
-
-	public String getUnavailableReason() {
-		return "Can not be built";
-	}
-
-	public boolean isTooltipExpandable() {
-		return false;
-	}
-
-	public float getTooltipWidth() {
-		return 400f;
-	}
-
-	protected transient IndustryTooltipMode currTooltipMode = null;
-
+	@Override
 	public void createTooltip(IndustryTooltipMode mode, TooltipMakerAPI tooltip, boolean expanded) {
 
 		if (getSpec() != null && getSpec().hasTag(Tags.CODEX_UNLOCKABLE)) {
@@ -1348,94 +789,11 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		market.reapplyConditions();
 	}
 
-	public void addInstalledItemsSection(IndustryTooltipMode mode, TooltipMakerAPI tooltip, boolean expanded) {
-		float opad = 10f;
 
-		FactionAPI faction = market.getFaction();
-		Color color = faction.getBaseUIColor();
-		Color dark = faction.getDarkUIColor();
-
-		LabelAPI heading = tooltip.addSectionHeading("Items", color, dark, Alignment.MID, opad);
-
-		boolean addedSomething = false;
-		if (aiCoreId != null) {
-			AICoreDescriptionMode aiCoreDescMode = AICoreDescriptionMode.INDUSTRY_TOOLTIP;
-			addAICoreSection(tooltip, aiCoreId, aiCoreDescMode);
-			addedSomething = true;
-		}
-		addedSomething |= addNonAICoreInstalledItems(mode, tooltip, expanded);
-
-		if (!addedSomething) {
-			heading.setText("No items installed");
-		}
-	}
-
-	protected boolean addNonAICoreInstalledItems(IndustryTooltipMode mode, TooltipMakerAPI tooltip, boolean expanded) {
-		if (special == null)
-			return false;
-
-		float opad = 10f;
-		SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(special.getId());
-
-		TooltipMakerAPI text = tooltip.beginImageWithText(spec.getIconName(), 48);
-		InstallableItemEffect effect = LtvItemEffectsRepo.ITEM_EFFECTS.get(special.getId());
-		effect.addItemDescription(this, text, special, InstallableItemDescriptionMode.INDUSTRY_TOOLTIP);
-		tooltip.addImageWithText(opad);
-
-		return true;
-	}
-
-	public List<SpecialItemData> getVisibleInstalledItems() {
-		List<SpecialItemData> result = new ArrayList<SpecialItemData>();
-		if (special != null) {
-			result.add(special);
-		}
-		return result;
-	}
-
-	public boolean wantsToUseSpecialItem(SpecialItemData data) {
-		if (special != null)
-			return false;
-		SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(data.getId());
-		String[] industries = spec.getParams().split(",");
-		Set<String> all = new HashSet<String>();
-		for (String ind : industries)
-			all.add(ind.trim());
-		return all.contains(getId());
-	}
-
-	public void addAICoreSection(TooltipMakerAPI tooltip, AICoreDescriptionMode mode) {
-		addAICoreSection(tooltip, aiCoreId, mode);
-	}
-
-	public void addAICoreSection(TooltipMakerAPI tooltip, String coreId, AICoreDescriptionMode mode) {
-		float opad = 10f;
-
-		if (mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
-			if (coreId == null) {
-				tooltip.addPara("No AI core currently assigned. Click to assign an AI core from your cargo.", opad);
-				return;
-			}
-		}
-
-		boolean alpha = coreId.equals(Commodities.ALPHA_CORE);
-		boolean beta = coreId.equals(Commodities.BETA_CORE);
-		boolean gamma = coreId.equals(Commodities.GAMMA_CORE);
-
-		if (alpha) {
-			addAlphaCoreDescription(tooltip, mode);
-		} else if (beta) {
-			addBetaCoreDescription(tooltip, mode);
-		} else if (gamma) {
-			addGammaCoreDescription(tooltip, mode);
-		} else {
-			addUnknownCoreDescription(coreId, tooltip, mode);
-		}
-	}
-
+	@Override
 	protected void addAlphaCoreDescription(TooltipMakerAPI tooltip, AICoreDescriptionMode mode) {
-		float opad = 10f;
-		Color highlight = Misc.getHighlightColor();
+		final float opad = 10f;
+		final Color highlight = Misc.getHighlightColor();
 
 		String pre = "Alpha-level AI core currently assigned. ";
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
@@ -1460,9 +818,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				String.valueOf(Math.round((ALPHA_CORE_PRODUCTION_BOOST - 1f) * 100f)) + "%");
 	}
 
+	@Override
 	protected void addBetaCoreDescription(TooltipMakerAPI tooltip, AICoreDescriptionMode mode) {
-		float opad = 10f;
-		Color highlight = Misc.getHighlightColor();
+		final float opad = 10f;
+		final Color highlight = Misc.getHighlightColor();
 
 		String pre = "Beta-level AI core currently assigned. ";
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
@@ -1485,9 +844,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%");
 	}
 
+	@Override
 	protected void addGammaCoreDescription(TooltipMakerAPI tooltip, AICoreDescriptionMode mode) {
-		float opad = 10f;
-		Color highlight = Misc.getHighlightColor();
+		final float opad = 10f;
+		final Color highlight = Misc.getHighlightColor();
 
 		String pre = "Gamma-level AI core currently assigned. ";
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
@@ -1507,57 +867,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 				String.valueOf(Math.round((1f - GAMMA_CORE_INPUT_REDUCTION) * 100f)) + "%");
 	}
 
-	protected void addUnknownCoreDescription(String coreId, TooltipMakerAPI tooltip, AICoreDescriptionMode mode) {
-
-		CommoditySpecAPI core = Global.getSettings().getCommoditySpec(coreId);
-		if (core == null)
-			return;
-
-		float opad = 10f;
-
-		String pre = core.getName() + " currently assigned. ";
-		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
-			pre = core.getName() + ". ";
-		}
-
-		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
-			TooltipMakerAPI text = tooltip.beginImageWithText(core.getIconName(), 48);
-			text.addPara(pre + "No effect.", opad);
-			tooltip.addImageWithText(opad);
-			return;
-		}
-
-		tooltip.addPara(pre + "No effect.", opad);
-	}
-
-	protected void addPostSupplySection(TooltipMakerAPI tooltip, boolean hasSupply, IndustryTooltipMode mode) {
-
-	}
-
-	protected void addPostDemandSection(TooltipMakerAPI tooltip, boolean hasDemand, IndustryTooltipMode mode) {
-
-	}
-
-	protected void addRightAfterDescriptionSection(TooltipMakerAPI tooltip, IndustryTooltipMode mode) {
-
-	}
-
-	protected void addPostDescriptionSection(TooltipMakerAPI tooltip, IndustryTooltipMode mode) {
-
-	}
-
-	protected void addPostUpkeepSection(TooltipMakerAPI tooltip, IndustryTooltipMode mode) {
-
-	}
-
-	public String getAICoreId() {
-		return aiCoreId;
-	}
-
-	public void setAICoreId(String aiCoreId) {
-		this.aiCoreId = aiCoreId;
-	}
-
+	@Override
 	protected void applyAICoreToIncomeAndUpkeep() {
 		if (aiCoreId == null || Commodities.GAMMA_CORE.equals(aiCoreId)) {
 			getUpkeep().unmodifyMult("ind_core");
@@ -1573,6 +883,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 	}
 
+	@Override
 	protected void updateAICoreToSupplyAndDemandModifiers() {
 		if (aiCoreId == null) {
 			return;
@@ -1591,6 +902,7 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 	}
 
+	@Override
 	protected void updateSupplyAndDemandModifiers() {
 
 		supplyBonus.unmodify();
@@ -1604,8 +916,8 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (admin != null && admin.getStats() != null) {
 
 			if (admin.getStats().getDynamic().getValue(Stats.SUPPLY_BONUS_MOD, 0) != 0) {
-				supplyBonus.modifyMult(getModId(1), getImproveProductionBonus(), "Administrator");
-				demandReduction.modifyMult(getModId(9), getImproveProductionBonus(), "Administrator");
+				supplyBonus.modifyMult(getModId(1), getImproveProductionBonusMult(), "Administrator");
+				demandReduction.modifyMult(getModId(9), getImproveProductionBonusMult(), "Administrator");
 			}
 
 			if (admin.getStats().getDynamic().getValue(Stats.DEMAND_REDUCTION_MOD, 0) != 0) {
@@ -1622,402 +934,25 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 	}
 
-	public boolean showShutDown() {
-		return true;
-	}
-
-	public boolean canShutDown() {
-		return true;
-	}
-
-	public String getCanNotShutDownReason() {
-		return null;
-	}
-
-	public boolean canUpgrade() {
-		return true;
-	}
-
-	public boolean canDowngrade() {
-		return true;
-	}
-
-	protected String getDescriptionOverride() {
-		return null;
-	}
-
-	public String getNameForModifier() {
-		return Misc.ucFirst(getCurrentName().toLowerCase());
-	}
-
-	public boolean isDemandLegal(CommodityOnMarketAPI com) {
-		return !com.isIllegal();
-	}
-
-	public boolean isSupplyLegal(CommodityOnMarketAPI com) {
-		return !com.isIllegal();
-	}
-
-	protected boolean isAICoreId(String str) {
-		Set<String> cores = new HashSet<String>();
-		cores.add(Commodities.ALPHA_CORE);
-		cores.add(Commodities.BETA_CORE);
-		cores.add(Commodities.GAMMA_CORE);
-		return cores.contains(str);
-	}
-
-	public void initWithParams(List<String> params) {
-		for (String str : params) {
-			if (isAICoreId(str)) {
-				setAICoreId(str);
-				break;
-			}
-		}
-
-		for (String str : params) {
-			SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(str);
-			if (spec == null)
-				continue;
-
-			String[] industries = spec.getParams().split(",");
-			Set<String> all = new HashSet<String>();
-			for (String ind : industries)
-				all.add(ind.trim());
-			if (all.contains(getId())) {
-				setSpecialItem(new SpecialItemData(str, null));
-			}
-		}
-	}
-
-	protected boolean hasPostDemandSection(boolean hasDemand, IndustryTooltipMode mode) {
-		return false;
-	}
-
-	protected int getBaseStabilityMod() {
-		return 0;
-	}
-
-	protected void modifyStabilityWithBaseMod() {
-		int stabilityMod = getBaseStabilityMod();
-		int stabilityPenalty = getStabilityPenalty();
-		if (stabilityPenalty > stabilityMod) {
-			stabilityPenalty = stabilityMod;
-		}
-		stabilityMod -= stabilityPenalty;
-		if (stabilityMod > 0) {
-			market.getStability().modifyFlat(getModId(), stabilityMod, getNameForModifier());
-		}
-	}
-
-	protected void unmodifyStabilityWithBaseMod() {
-		market.getStability().unmodifyFlat(getModId());
-	}
-
-	protected Pair<String, Integer> getStabilityAffectingDeficit() {
-		return new Pair<String, Integer>(Commodities.SUPPLIES, 0);
-	}
-
+	@Override
+	@Deprecated
 	protected int getStabilityPenalty() {
-		float deficit = getStabilityAffectingDeficit().two;
-		if (deficit < 0)
-			deficit = 0;
-		return (int) Math.round(deficit);
+		return super.getStabilityPenalty();
 	}
 
-	protected void addStabilityPostDemandSection(TooltipMakerAPI tooltip, boolean hasDemand, IndustryTooltipMode mode) {
-		Color h = Misc.getHighlightColor();
-		float opad = 10f;
-
-		MutableStat fake = new MutableStat(0);
-		int stabilityMod = getBaseStabilityMod();
-		int stabilityPenalty = getStabilityPenalty();
-
-		if (stabilityPenalty > stabilityMod) {
-			stabilityPenalty = stabilityMod;
-		}
-
-		String str = getDeficitText(getStabilityAffectingDeficit().one);
-		fake.modifyFlat("1", stabilityMod, getNameForModifier());
-		if (stabilityPenalty != 0) {
-			fake.modifyFlat("2", -stabilityPenalty, str);
-		}
-
-		int total = stabilityMod - stabilityPenalty;
-		String totalStr = "+" + total;
-		if (total < 0) {
-			totalStr = "" + total;
-			h = Misc.getNegativeHighlightColor();
-		}
-		float pad = 3f;
-		if (total >= 0) {
-			tooltip.addPara("Stability bonus: %s", opad, h, totalStr);
-		} else {
-			tooltip.addPara("Stability penalty: %s", opad, h, totalStr);
-		}
-		tooltip.addStatModGrid(400, 35, opad, pad, fake, new StatModValueGetter() {
-			public String getPercentValue(StatMod mod) {
-				return null;
-			}
-
-			public String getMultValue(StatMod mod) {
-				return null;
-			}
-
-			public Color getModColor(StatMod mod) {
-				if (mod.value < 0)
-					return Misc.getNegativeHighlightColor();
-				return null;
-			}
-
-			public String getFlatValue(StatMod mod) {
-				return null;
-			}
-		});
-	}
-
-	public void setHidden(boolean hidden) {
-		if (hidden)
-			hiddenOverride = true;
-		else
-			hiddenOverride = null;
-	}
-
-	protected Boolean hiddenOverride = null;
-
-	public boolean isHidden() {
-		if (hiddenOverride != null)
-			return hiddenOverride;
-		return false;
-	}
-
-	protected transient String dKey = null;
-
-	public String getDisruptedKey() {
-		if (dKey != null)
-			return dKey;
-		dKey = "$core_disrupted_" + getClass().getSimpleName();
-		return dKey;
-	}
-
-	public void setDisrupted(float days) {
-		setDisrupted(days, false);
-	}
-
-	public void setDisrupted(float days, boolean useMax) {
-		if (!canBeDisrupted())
-			return;
-
-		boolean was = isDisrupted();
-		String key = getDisruptedKey();
-
-		MemoryAPI memory = market.getMemoryWithoutUpdate();
-		float dur = days;
-		if (useMax) {
-			dur = Math.max(memory.getExpire(key), dur);
-		}
-
-		if (dur <= 0) {
-			memory.unset(key);
-		} else {
-			memory.set(key, true, dur);
-		}
-
-		if (!was) {
-			notifyDisrupted();
-		}
-	}
-
-	public float getDisruptedDays() {
-		String key = getDisruptedKey();
-		float dur = market.getMemoryWithoutUpdate().getExpire(key);
-		if (dur < 0)
-			dur = 0;
-		return dur;
-	}
-
-	public boolean canBeDisrupted() {
-		return true;
-	}
-
-	public boolean isDisrupted() {
-		String key = getDisruptedKey();
-		return market.getMemoryWithoutUpdate().is(key, true);
-	}
-
-	public float getPatherInterest() {
-		float interest = 0;
-		if (Commodities.ALPHA_CORE.equals(aiCoreId)) {
-			interest += 4f;
-		} else if (Commodities.BETA_CORE.equals(aiCoreId)) {
-			interest += 2f;
-		} else if (Commodities.GAMMA_CORE.equals(aiCoreId)) {
-			interest += 1f;
-		}
-
-		if (special != null) {
-			SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(special.getId());
-			if (spec != null) {
-				if (spec.hasTag(Items.TAG_PATHER1))
-					interest += 1;
-				else if (spec.hasTag(Items.TAG_PATHER2))
-					interest += 2;
-				else if (spec.hasTag(Items.TAG_PATHER4))
-					interest += 4;
-				else if (spec.hasTag(Items.TAG_PATHER6))
-					interest += 6;
-				else if (spec.hasTag(Items.TAG_PATHER8))
-					interest += 8;
-				else if (spec.hasTag(Items.TAG_PATHER10))
-					interest += 10;
-			}
-		}
-
-		return interest;
-	}
-
-	public CargoAPI generateCargoForGatheringPoint(Random random) {
-		return null;
-	}
-
-	public String getCargoTitleForGatheringPoint() {
-		return getCurrentName();
-	}
-
-	protected SpecialItemData special = null;
-
-	public SpecialItemData getSpecialItem() {
-		return special;
-	}
-
-	public void setSpecialItem(SpecialItemData special) {
-		if (this.special != null) {
-			InstallableItemEffect effect = LtvItemEffectsRepo.ITEM_EFFECTS.get(this.special.getId());
-			if (effect != null) {
-				effect.unapply(this);
-			}
-		}
-		this.special = special;
-	}
-
+	@Override
 	@Deprecated
 	protected float getDeficitMult(String... commodities) {
-		float deficit = getMaxDeficit(commodities).two;
-		float demand = 0f;
-
-		for (String id : commodities) {
-			demand = Math.max(demand, getDemand(id).getQuantity().getModifiedInt());
-		}
-
-		if (deficit < 0)
-			deficit = 0f;
-		if (demand < 1) {
-			demand = 1;
-			deficit = 0f;
-		}
-
-		float mult = (demand - deficit) / demand;
-		if (mult < 0)
-			mult = 0;
-		if (mult > 1)
-			mult = 1;
-		return mult;
+		return super.getDeficitMult(commodities);
 	}
 
-	protected void addGroundDefensesImpactSection(TooltipMakerAPI tooltip, float bonus, String... commodities) {
-		Color h = Misc.getHighlightColor();
-		float opad = 10f;
-
-		MutableStat fake = new MutableStat(1);
-
-		fake.modifyFlat("1", bonus, getNameForModifier());
-
-		if (commodities != null) {
-			float mult = ltv_getMaxDeficit(commodities).two;
-			if (mult != 0) {
-				String com = getMaxDeficit(commodities).one;
-				fake.modifyFlat("2", -mult * bonus, getDeficitText(com));
-			}
-		}
-
-		float total = Misc.getRoundedValueFloat(fake.getModifiedValue());
-		String totalStr = Strings.X + total;
-		if (total < 1f) {
-			h = Misc.getNegativeHighlightColor();
-		}
-		float pad = 3f;
-		tooltip.addPara("Ground defense strength: %s", opad, h, totalStr);
-		tooltip.addStatModGrid(400, 35, opad, pad, fake, new StatModValueGetter() {
-			public String getPercentValue(StatMod mod) {
-				return null;
-			}
-
-			public String getMultValue(StatMod mod) {
-				return null;
-			}
-
-			public Color getModColor(StatMod mod) {
-				if (mod.value < 0)
-					return Misc.getNegativeHighlightColor();
-				return null;
-			}
-
-			public String getFlatValue(StatMod mod) {
-				String r = Misc.getRoundedValue(mod.value);
-				if (mod.value >= 0)
-					return "+" + r;
-				return r;
-			}
-		});
-	}
-
-	public boolean isIndustry() {
-		return getSpec().hasTag(Industries.TAG_INDUSTRY);
-	}
-
-	public boolean isStructure() {
-		return getSpec().hasTag(Industries.TAG_STRUCTURE);
-	}
-
-	public boolean isOther() {
-		return !isIndustry() && !isStructure();
-	}
-
-	public void notifyColonyRenamed() {
-
-	}
-
-	public boolean canImprove() {
-		return canImproveToIncreaseProduction();
-	}
-
-	public float getImproveBonusXP() {
-		return 0;
-	}
-
-	public String getImproveMenuText() {
-		return "Make improvements...";
-	}
-
+	@Override
 	public int getImproveStoryPoints() {
 		int base = Global.getSettings().getInt("industryImproveBase");
 		return base * (int) Math.round(Math.pow(2, Misc.getNumImprovedIndustries(market)));
 	}
 
-	public boolean isImproved() {
-		return improved != null && improved;
-	}
-
-	public void setImproved(boolean improved) {
-		if (!improved) {
-			this.improved = null;
-		} else {
-			this.improved = improved;
-		}
-	}
-
-	protected void applyImproveModifiers() {
-	}
-
+	@Override
 	public void addImproveDesc(TooltipMakerAPI info, ImprovementDescriptionMode mode) {
 		float initPad = 0f;
 		float opad = 10f;
@@ -2025,10 +960,10 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		if (canImproveToIncreaseProduction()) {
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
 				info.addPara("Production increased by %s.", initPad, Misc.getHighlightColor(),
-						Strings.X + getImproveProductionBonus());
+						Strings.X + getImproveProductionBonusMult());
 			} else {
 				info.addPara("Increases production by %s.", initPad, Misc.getHighlightColor(),
-						Strings.X + getImproveProductionBonus());
+						Strings.X + getImproveProductionBonusMult());
 			}
 			initPad = opad;
 			addedSomething = true;
@@ -2046,103 +981,31 @@ public abstract class LtvBaseIndustry implements Industry, Cloneable {
 		}
 	}
 
-	public String getImproveDialogTitle() {
-		return "Improving " + getSpec().getName();
+	@Override
+	@Deprecated
+	protected int getImproveProductionBonus() {
+		return (int) DEFAULT_IMPROVE_PRODUCTION_BONUS;
 	}
 
-	public String getImproveSoundId() {
-		return Sounds.STORY_POINT_SPEND_INDUSTRY;
-	}
-
-	protected boolean canImproveToIncreaseProduction() {
-		return false;
-	}
-
-	protected float getImproveProductionBonus() {
+	protected float getImproveProductionBonusMult() {
 		return DEFAULT_IMPROVE_PRODUCTION_BONUS;
 	}
 
-	protected String getImprovementsDescForModifiers() {
-		return "Improvements";
-	}
-
+	@Override
 	protected void updateImprovementSupplyAndDemandModifiers() {
-		if (!canImproveToIncreaseProduction())
+		if (!canImproveToIncreaseProduction() || !isImproved() || getImproveProductionBonusMult() <= 1f) {
 			return;
-		if (!isImproved())
-			return;
-
-		if (getImproveProductionBonus() <= 1f)
-			return;
-
-		supplyBonus.modifyMult(getModId(3), getImproveProductionBonus(), getImprovementsDescForModifiers());
-		demandReduction.modifyMult(getModId(8) + "increased_production", getImproveProductionBonus(),  getImprovementsDescForModifiers());
-	}
-
-	public void addImprovedSection(IndustryTooltipMode mode, TooltipMakerAPI tooltip, boolean expanded) {
-
-		if (!isImproved())
-			return;
-
-		final int opad = 10;
-
-		tooltip.addSectionHeading("Improvements made", Misc.getStoryOptionColor(),
-				Misc.getStoryDarkColor(), Alignment.MID, opad);
-
-		tooltip.addSpacer(opad);
-		addImproveDesc(tooltip, ImprovementDescriptionMode.INDUSTRY_TOOLTIP);
-	}
-
-	public RaidDangerLevel adjustCommodityDangerLevel(String commodityId, RaidDangerLevel level) {
-		return level;
-	}
-
-	public RaidDangerLevel adjustItemDangerLevel(String itemId, String data, RaidDangerLevel level) {
-		return level;
-	}
-
-	public int adjustMarineTokensToRaidItem(String itemId, String data, int marineTokens) {
-		return marineTokens;
-	}
-
-	public boolean canInstallAICores() {
-		return true;
-	}
-
-	protected transient Boolean hasInstallableItems = null;
-
-	public List<InstallableIndustryItemPlugin> getInstallableItems() {
-		boolean found = false;
-		if (hasInstallableItems != null) {
-			found = hasInstallableItems;
-		} else {
-			OUTER: for (SpecialItemSpecAPI spec : Global.getSettings().getAllSpecialItemSpecs()) {
-				if (spec.getParams() == null || spec.getParams().isEmpty())
-					continue;
-				if (spec.getNewPluginInstance(null) instanceof GenericSpecialItemPlugin) {
-					for (String id : spec.getParams().split(",")) {
-						id = id.trim();
-						if (id.equals(getId())) {
-							found = true;
-							break OUTER;
-						}
-					}
-				}
-			}
-			hasInstallableItems = found;
 		}
-		ArrayList<InstallableIndustryItemPlugin> list = new ArrayList<InstallableIndustryItemPlugin>();
-		if (found) {
-			list.add(new LtvGenericInstallableItemPlugin(this));
-		}
-		return list;
-	}
 
-	public float getBuildProgress() {
-		return buildProgress;
-	}
-
-	public void setBuildProgress(float buildProgress) {
-		this.buildProgress = buildProgress;
+		supplyBonus.modifyMult(
+			getModId(3),
+			getImproveProductionBonusMult(),
+			getImprovementsDescForModifiers()
+		);
+		demandReduction.modifyMult(
+			getModId(8) + "increased_production",
+			getImproveProductionBonusMult(),
+			getImprovementsDescForModifiers()
+		);
 	}
 }

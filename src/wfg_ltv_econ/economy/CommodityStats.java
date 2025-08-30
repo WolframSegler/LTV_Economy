@@ -104,7 +104,7 @@ public class CommodityStats {
     }
 
     public final void addStoredAmount(long a) {
-        stored += Math.max(0, a);
+        stored = Math.max(0, stored + a);
     }
 
     public CommodityStats(String comID, MarketAPI market) {
