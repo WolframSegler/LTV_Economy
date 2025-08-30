@@ -38,6 +38,13 @@ public class IndustryConfigLoader {
         final Map<String, Map<String, OutputCom>> result = new HashMap<>();
 
         try {
+            
+            Global.getLogger(IndustryConfigLoader.class).error(root.toString(4));
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+        try {
         for (Iterator<String> itIndustry = root.keys(); itIndustry.hasNext();) {
             String industryId = itIndustry.next();
             JSONObject industryJson = root.getJSONObject(industryId);

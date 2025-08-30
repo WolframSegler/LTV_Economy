@@ -131,7 +131,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
 
         // Amount label
         tooltip.setParaSmallInsignia();
-        LabelAPI amountTxt = tooltip.addPara(NumFormat.engNotation(m_com.getAvailable()) + Strings.X, pad);
+        LabelAPI amountTxt = tooltip.addPara(NumFormat.engNotation(m_comStats.getAvailable()) + Strings.X, pad);
         final int textHeight = (int) amountTxt.computeTextHeight(amountTxt.getText());
         amountTxt.setColor(baseColor);
         amountTxt.getPosition().setSize(textWidth, textHeight);

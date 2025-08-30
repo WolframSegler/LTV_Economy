@@ -85,7 +85,7 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
         final int pad = 3;
         final int opad = 10;
 
-        EconomyEngine.getInstance().update();
+        EconomyEngine.getInstance().fakeAdvance();
 
         // Select relevant commodities
         List<CommoditySpecAPI> commodities = EconomyEngine.getEconCommodities();

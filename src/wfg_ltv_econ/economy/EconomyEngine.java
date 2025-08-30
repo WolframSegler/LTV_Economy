@@ -256,7 +256,7 @@ public class EconomyEngine {
 	 * Only supports conditions inside {@link OutputCom}.
 	 * Other conditional inputs or outputs must be added by the subclass manually.
 	 */
-	public static final void applySubclassPIOs(MarketAPI market, Industry ind) {
+	public static final void applySubclassPIOs(MarketAPI market, BaseIndustry ind) {
         if (EconomyEngine.getInstance() == null) return;
 
 		final Map<String, OutputCom> indMap = EconomyEngine.getInstance().configs.get(ind.getId());
@@ -295,9 +295,7 @@ public class EconomyEngine {
 
 		for (Map.Entry<String, Float> entry : totalDemandMap.entrySet()) {
 			int finalDemand = Math.max(0, Math.round(entry.getValue()));
-			if (ind instanceof BaseIndustry BaseInd) {
-				BaseInd.demand(entry.getKey(), finalDemand);
-			}
+			ind.demand(entry.getKey(), finalDemand);
 		}
 
 		for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
@@ -320,9 +318,7 @@ public class EconomyEngine {
             }
 
 			int finalSupply = Math.max(0, Math.round(com.baseProd * scale));
-			if (ind instanceof BaseIndustry BaseInd) {
-				BaseInd.supply(entry.getKey(), finalSupply);
-			}
+			ind.supply(entry.getKey(), finalSupply);
 		}
 	}
 

@@ -534,6 +534,19 @@ public class TooltipUtils {
 
                 firstPara = false;
             }
+
+            if (comStats.localProductionMult != 1f) {
+
+                final float value =  Math.round(comStats.localProductionMult * 100f) / 100f;
+                final String desc = "Input shortages";
+                final String industryName = industry.getNameForModifier();
+
+                y = TooltipUtils.createStatModGridRow(
+                    tooltip, y, valueTxtWidth, firstPara, negative, value, false, desc, industryName, Strings.X
+                );
+
+                firstPara = false;
+            }
         }
 
         // Import mods
