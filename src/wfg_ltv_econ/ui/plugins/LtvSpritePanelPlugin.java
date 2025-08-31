@@ -40,7 +40,7 @@ public class LtvSpritePanelPlugin<
 
         if (isDrawFilledQuad && getPanel().fillColor != null) {
             getPanel().m_sprite.setColor(getPanel().fillColor);
-            RenderUtils.drawQuad(x, y, w, h, getPanel().fillColor, alphaMult, false);
+            RenderUtils.drawRect(x, y, w, h, getPanel().fillColor, alphaMult, false);
         }
 
         if (getPanel().drawTexOutline && getPanel().texOutlineColor != null) {

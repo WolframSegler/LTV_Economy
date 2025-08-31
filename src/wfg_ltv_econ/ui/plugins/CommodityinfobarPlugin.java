@@ -51,13 +51,13 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
             );
         }
 
-        RenderUtils.drawQuad(x, y, 2, h, sideBarColor, alphaMult, false);
+        RenderUtils.drawRect(x, y, 2, h, sideBarColor, alphaMult, false);
         final int sideBarGap = 4;
 
         float offsetX = x + sideBarGap;
 
         for (Map.Entry<Color, Float> mapEntry : m_barMap.entrySet()) {
-            RenderUtils.drawQuad(offsetX, y, (w - sideBarGap)*mapEntry.getValue(), h, mapEntry.getKey(), alphaMult, false);
+            RenderUtils.drawRect(offsetX, y, (w - sideBarGap)*mapEntry.getValue(), h, mapEntry.getKey(), alphaMult, false);
             offsetX += (w - sideBarGap)*mapEntry.getValue();
         }
 

@@ -61,7 +61,7 @@ public class CustomDetailDialogPanel<
 
     @Override
     public float getBgTransparency() {
-        return 1;
+        return 1f;
     }
 
     @Override

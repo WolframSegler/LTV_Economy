@@ -27,6 +27,6 @@ public final class BackgroundComponent<
         final int w = (int) pos.getWidth() + getPlugin().offsetW;
         final int h = (int) pos.getHeight() + getPlugin().offsetH;
 
-        RenderUtils.drawQuad(x, y, w, h, getPanel().getBgColor(), alphaMult * getPanel().getBgTransparency(), false);
+        RenderUtils.drawRect(x, y, w, h, getPanel().getBgColor(), getPanel().getBgTransparency(), false);
     }
 }
