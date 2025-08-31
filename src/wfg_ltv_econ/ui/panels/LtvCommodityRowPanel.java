@@ -21,7 +21,6 @@ import com.fs.starfarer.api.loading.Description.Type;
 
 import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
-import wfg_ltv_econ.ui.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
@@ -29,6 +28,7 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.systems.FaderSystem.Glow;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;

@@ -20,9 +20,9 @@ import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.CampaignEngine;
 
-import wfg_ltv_econ.ui.components.FaderComponent.Glow;
-import wfg_ltv_econ.ui.components.OutlineComponent.Outline;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
+import wfg_ltv_econ.ui.systems.FaderSystem.Glow;
+import wfg_ltv_econ.ui.systems.OutlineSystem.Outline;
 import wfg_ltv_econ.util.ReflectionUtils;
 import wfg_ltv_econ.util.ReflectionUtils.ReflectedField;
 

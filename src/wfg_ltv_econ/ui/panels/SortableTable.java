@@ -18,12 +18,12 @@ import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.LtvUIState.UIState;
-import wfg_ltv_econ.ui.components.FaderComponent.Glow;
-import wfg_ltv_econ.ui.components.OutlineComponent.Outline;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.panels.LtvSpritePanel.Base;
 import wfg_ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.systems.FaderSystem.Glow;
+import wfg_ltv_econ.ui.systems.OutlineSystem.Outline;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.util.UiUtils.AnchorType;

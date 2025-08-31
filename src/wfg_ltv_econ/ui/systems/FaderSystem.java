@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.components;
+package wfg_ltv_econ.ui.systems;
 
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.FaderUtil;
@@ -10,10 +10,10 @@ import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 import wfg_ltv_econ.util.RenderUtils;
 
-public final class FaderComponent<
+public final class FaderSystem<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
     PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasFader
-> extends BaseComponent<PluginType, PanelType> {
+> extends BaseSystem<PluginType, PanelType> {
 
     public static enum Glow {
         NONE,
@@ -22,7 +22,7 @@ public final class FaderComponent<
         UNDERLAY
     }
 
-    public FaderComponent(PluginType plugin) {
+    public FaderSystem(PluginType plugin) {
         super(plugin);
     }
 

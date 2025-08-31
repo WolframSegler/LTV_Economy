@@ -10,13 +10,6 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
-import wfg_ltv_econ.ui.components.ActionListenerComponent;
-import wfg_ltv_econ.ui.components.AudioFeedbackComponent;
-import wfg_ltv_econ.ui.components.BackgroundComponent;
-import wfg_ltv_econ.ui.components.BaseComponent;
-import wfg_ltv_econ.ui.components.FaderComponent;
-import wfg_ltv_econ.ui.components.OutlineComponent;
-import wfg_ltv_econ.ui.components.TooltipComponent;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
@@ -24,6 +17,13 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
+import wfg_ltv_econ.ui.systems.ActionListenerSystem;
+import wfg_ltv_econ.ui.systems.AudioFeedbackSystem;
+import wfg_ltv_econ.ui.systems.BackgroundSystem;
+import wfg_ltv_econ.ui.systems.BaseSystem;
+import wfg_ltv_econ.ui.systems.FaderSystem;
+import wfg_ltv_econ.ui.systems.OutlineSystem;
+import wfg_ltv_econ.ui.systems.TooltipSystem;
 
 /**
  * The plugin serves as the central coordinator for its associated {@link LtvCustomPanel} and components.
@@ -83,7 +83,7 @@ public abstract class LtvCustomPanelPlugin<
         return m_panel;
     }
 
-    public final List<BaseComponent<?, PanelType>> components = new ArrayList<>();
+    public final List<BaseSystem<?, PanelType>> components = new ArrayList<>();
     protected final InputSnapshot inputSnapshot = new InputSnapshot();
     
     protected UIState targetUIState = UIState.NONE;
@@ -99,35 +99,35 @@ public abstract class LtvCustomPanelPlugin<
         m_panel = panel;
 
         if (panel instanceof HasTooltip provider) {
-            addComponent(new TooltipComponent(this, provider));
+            addComponent(new TooltipSystem(this, provider));
         }
 
         if (panel instanceof HasBackground) {
-            addComponent(new BackgroundComponent(this));
+            addComponent(new BackgroundSystem(this));
         }
 
         if (panel instanceof HasAudioFeedback) {
-            addComponent(new AudioFeedbackComponent(this));
+            addComponent(new AudioFeedbackSystem(this));
         }
 
         if (panel instanceof HasOutline) {
-            addComponent(new OutlineComponent(this));
+            addComponent(new OutlineSystem(this));
         }
 
         if (panel instanceof HasFader) {
-            addComponent(new FaderComponent(this));
+            addComponent(new FaderSystem(this));
         }
 
         if (panel instanceof AcceptsActionListener) {
-            addComponent(new ActionListenerComponent(this));
+            addComponent(new ActionListenerSystem(this));
         }
     }
 
-    protected final <C extends BaseComponent<?, PanelType>> void addComponent(C comp) {
+    protected final <C extends BaseSystem<?, PanelType>> void addComponent(C comp) {
         components.add(comp);
     }
 
-    public void removeComponent(BaseComponent<?, PanelType> comp) {
+    public void removeComponent(BaseSystem<?, PanelType> comp) {
         components.remove(comp);
         comp.onRemove(inputSnapshot);
     }
@@ -155,19 +155,19 @@ public abstract class LtvCustomPanelPlugin<
     }
 
     public void renderBelow(float alphaMult) {
-        for (BaseComponent<?, PanelType> comp : components) {
+        for (BaseSystem<?, PanelType> comp : components) {
             comp.renderBelow(alphaMult, inputSnapshot);
         }
     }
 
     public void render(float alphaMult) {
-        for (BaseComponent<?, PanelType> comp : components) {
+        for (BaseSystem<?, PanelType> comp : components) {
             comp.render(alphaMult, inputSnapshot);
         }
     }
 
     public void advance(float amount) {
-        for (BaseComponent<?, PanelType> comp : components) {
+        for (BaseSystem<?, PanelType> comp : components) {
             comp.advance(amount, inputSnapshot);
         }
     }
@@ -226,7 +226,7 @@ public abstract class LtvCustomPanelPlugin<
         }
 
         // Component specific
-        for (BaseComponent<?, PanelType> comp : components) {
+        for (BaseSystem<?, PanelType> comp : components) {
             comp.processInput(events, inputSnapshot);
         }
     }

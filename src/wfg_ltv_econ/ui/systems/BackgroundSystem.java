@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.components;
+package wfg_ltv_econ.ui.systems;
 
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
@@ -6,12 +6,12 @@ import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 import wfg_ltv_econ.util.RenderUtils;
 
-public final class BackgroundComponent<
+public final class BackgroundSystem<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
     PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasBackground
-> extends BaseComponent<PluginType, PanelType> {
+> extends BaseSystem<PluginType, PanelType> {
 
-    public BackgroundComponent(PluginType a) {
+    public BackgroundSystem(PluginType a) {
         super(a);
     }
 

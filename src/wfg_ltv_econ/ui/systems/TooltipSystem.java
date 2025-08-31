@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.components;
+package wfg_ltv_econ.ui.systems;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 import wfg_ltv_econ.util.UiUtils;
 
-public final class TooltipComponent<
+public final class TooltipSystem<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
     PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasTooltip
-> extends BaseComponent<PluginType, PanelType>{
+> extends BaseSystem<PluginType, PanelType>{
 
     private final HasTooltip provider;
     private TooltipMakerAPI tooltip;
@@ -27,7 +27,7 @@ public final class TooltipComponent<
     private boolean wasF1Down = false;
     private boolean wasF2Down = false;
 
-    public TooltipComponent(PluginType a, HasTooltip b) {
+    public TooltipSystem(PluginType a, HasTooltip b) {
         super(a);
         provider = b;
     }

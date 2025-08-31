@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.components;
+package wfg_ltv_econ.ui.systems;
 
 import java.util.List;
 
@@ -10,30 +10,30 @@ import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 
 /**
- * Try to make the components final so that JIT can inline them.
+ * Try to make the systems final so that JIT can inline them.
  * Implement the plugin methods as needed.
  * 
  * <br></br>Design note:
  * All mutable state or configuration variables (e.g. toggles, transparency, 
- * flags) should be stored inside the plugin, not inside components.
- * Components should access plugin state via getPlugin() to remain stateless
+ * flags) should be stored inside the plugin, not inside the systems.
+ * Systems should access plugin state via getPlugin() to remain stateless
  * or minimally stateful, focusing on behavior and logic only.
- * Variables that the plugin is not going access should be stored in the component.
+ * Variables that the plugin is not going access should be stored in the system.
  * 
  * <br></br>Technical note:
  * Recursive generics e.g.
  * {@code PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<PluginType, ?>, ?>}
- * enable components to know the exact concrete plugin type at compile time,
+ * enable systems to know the exact concrete plugin type at compile time,
  * allowing type-safe access to plugin members without unchecked casts.
  */
-public abstract class BaseComponent<
+public abstract class BaseSystem<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
     PanelType extends LtvCustomPanel<PluginType, PanelType, ? extends UIPanelAPI>
 > {
 
     private PluginType plugin;
 
-    public BaseComponent(PluginType a) {
+    public BaseSystem(PluginType a) {
         plugin = a;
     }
 

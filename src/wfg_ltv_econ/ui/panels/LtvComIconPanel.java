@@ -18,10 +18,10 @@ import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg_ltv_econ.ui.systems.FaderSystem.Glow;
 import wfg_ltv_econ.util.TooltipUtils;
 import wfg_ltv_econ.util.UiUtils;
 import wfg_ltv_econ.util.UiUtils.AnchorType;
-import wfg_ltv_econ.ui.components.FaderComponent.Glow;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasFader;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
 

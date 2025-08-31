@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.components;
+package wfg_ltv_econ.ui.systems;
 
 import org.lwjgl.input.Keyboard;
 
@@ -7,14 +7,14 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 
-public final class ActionListenerComponent<
+public final class ActionListenerSystem<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
     PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & AcceptsActionListener
-> extends BaseComponent<PluginType, PanelType>{
+> extends BaseSystem<PluginType, PanelType>{
 
     boolean shortcutKeyDown = false;
 
-    public ActionListenerComponent(PluginType plugin) {
+    public ActionListenerSystem(PluginType plugin) {
         super(plugin);
     }
 

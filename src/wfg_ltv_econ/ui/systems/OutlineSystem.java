@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.components;
+package wfg_ltv_econ.ui.systems;
 
 import com.fs.starfarer.api.ui.PositionAPI;
 
@@ -9,10 +9,10 @@ import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 import wfg_ltv_econ.util.RenderUtils;
 import wfg_ltv_econ.util.UiUtils;
 
-public final class OutlineComponent<
+public final class OutlineSystem<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
     PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasOutline
-> extends BaseComponent<PluginType, PanelType> {
+> extends BaseSystem<PluginType, PanelType> {
 
     public static enum Outline {
         NONE,
@@ -29,7 +29,7 @@ public final class OutlineComponent<
 
     public static final int pad = 3;
 
-    public OutlineComponent(PluginType plugin) {
+    public OutlineSystem(PluginType plugin) {
         super(plugin);
     }
 

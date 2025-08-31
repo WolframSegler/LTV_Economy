@@ -1,4 +1,4 @@
-package wfg_ltv_econ.ui.components;
+package wfg_ltv_econ.ui.systems;
 
 import java.util.List;
 
@@ -10,10 +10,10 @@ import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
 
-public final class AudioFeedbackComponent<
+public final class AudioFeedbackSystem<
     PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
     PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasAudioFeedback
-> extends BaseComponent<PluginType, PanelType> {
+> extends BaseSystem<PluginType, PanelType> {
 
     /**
      * Newly created Components shouldn't make a sound for this many game ticks.
@@ -23,7 +23,7 @@ public final class AudioFeedbackComponent<
 
     public boolean playedUIHoverSound = false;
 
-    public AudioFeedbackComponent(PluginType plugin) {
+    public AudioFeedbackSystem(PluginType plugin) {
         super(plugin);
     }
 
