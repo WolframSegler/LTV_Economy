@@ -8,6 +8,8 @@ import com.fs.state.AppDriver;
 
 import wfg_ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg_ltv_econ.ui.panels.ActionListenerPanel;
+import wfg_ltv_econ.ui.panels.ColonyInventoryButton;
+import wfg_ltv_econ.ui.panels.ColonyInventoryButton.ColonyInvButtonPlugin;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
@@ -21,10 +23,12 @@ import wfg_ltv_econ.util.UiUtils.AnchorType;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
+import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
 import com.fs.starfarer.api.campaign.CoreUIAPI;
-import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
+import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
@@ -130,6 +134,9 @@ public class LtvMarketReplacer implements EveryFrameScript {
             return;
         }
 
+        // Replace the "Use stockpiles during shortages" button
+        replaceUseStockpilesButton(managementPanel, managementChildren, anchorChild);
+
         // Replace the Panel which holds the widgets
         replaceIndustryListPanel(managementPanel, managementChildren, anchorChild);
 
@@ -137,17 +144,51 @@ public class LtvMarketReplacer implements EveryFrameScript {
         replaceCommodityPanel(managementPanel, managementChildren, anchorChild);
     }
 
+    private static final void replaceUseStockpilesButton(
+        UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
+    ) {
+        for (Object child : managementChildren) {
+            if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof ColonyInvButtonPlugin) {
+                return;
+            }
+        }
+
+        ShippingPanel shipPanel = (ShippingPanel) ReflectionUtils.invoke(colonyInfoPanel, "getShipping");
+
+        ButtonAPI useStockpilesBtn = (ButtonAPI) ReflectionUtils.invoke(shipPanel, "getUseStockpiles");
+
+        MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
+
+        ColonyInventoryButton inventoryBtn = new ColonyInventoryButton(
+            managementPanel, managementPanel, market
+        );
+
+        managementPanel.addComponent(inventoryBtn.getPanel()).inBL(0, 0);
+
+        final int xOffset = (int) (useStockpilesBtn.getPosition().getX() - inventoryBtn.getPos().getX());
+        final int yOffset = (int) (useStockpilesBtn.getPosition().getY() - inventoryBtn.getPos().getY());
+
+        inventoryBtn.getPos().inBL(xOffset, yOffset);
+
+        useStockpilesBtn.setOpacity(0);
+        useStockpilesBtn.setEnabled(false);
+
+        if (Global.getSettings().isDevMode()) {
+            Global.getLogger(LtvMarketReplacer.class).info("Replaced UseStockpilesButton");
+        }
+    }
+
     private static final void replaceIndustryListPanel(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI anchor
     ) {
-
-        UIPanelAPI industryPanel = managementChildren.stream()
-                .filter(child -> child instanceof IndustryListPanel)
-                .map(child -> (IndustryListPanel) child)
-                .findFirst().orElse(null);
-        if (industryPanel == null || industryPanel instanceof LtvIndustryListPanel) {
-            return;
+        UIPanelAPI industryPanel = null;
+        for (Object child : managementChildren) {
+            if (child instanceof IndustryListPanel) {
+                industryPanel = (UIPanelAPI) child;
+                break;
+            }
         }
+        if (industryPanel == null) return;
 
         // Steal the members for the constructor
         MarketAPI market = (MarketAPI)ReflectionUtils.get(industryPanel, null, MarketAPI.class);
@@ -206,13 +247,14 @@ public class LtvMarketReplacer implements EveryFrameScript {
     private static final void replaceCommodityPanel(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI anchor
     ) {
-        UIPanelAPI commodityPanel = managementChildren.stream()
-                .filter(child -> child instanceof CommodityPanel)
-                .map(child -> (CommodityPanel) child)
-                .findFirst().orElse(null);
-        if (commodityPanel == null || commodityPanel instanceof LtvCommodityPanel) {
-            return;
+        UIPanelAPI commodityPanel = null;
+        for (Object child : managementChildren) {
+            if (child instanceof CommodityPanel) {
+                commodityPanel = (UIPanelAPI) child;
+                break;
+            }
         }
+        if (commodityPanel == null) return;
 
         try {
             // Steal the members for the constructor
@@ -246,16 +288,11 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     replacement.selectRow(panel);
 
                     if (replacement.m_canViewPrices) {
-                        final InteractionDialogAPI dialog = Global.getSector().getCampaignUI()
-                            .getCurrentInteractionDialog();
                         final ComDetailDialog dialogPanel = new ComDetailDialog(panel, panel.getCommodity());
 
-                        if (dialog != null) { // Local
-                            dialog.showCustomDialog(dialogPanel.PANEL_W, dialogPanel.PANEL_H, dialogPanel);
-
-                        } else { // Remote
-                            UiUtils.showStandaloneCustomDialog(dialogPanel, dialogPanel.PANEL_W, dialogPanel.PANEL_H);
-                        }
+                        UiUtils.CustomDialogViewer(
+                            dialogPanel, dialogPanel.PANEL_W, dialogPanel.PANEL_H
+                        );
                     } 
                 }
             };

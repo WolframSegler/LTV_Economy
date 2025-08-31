@@ -451,7 +451,7 @@ public class UiUtils {
         </pre>
     </div>
      */
-    public static boolean showStandaloneCustomDialog(
+    public static final boolean showStandaloneCustomDialog(
         final LtvCustomDialogDelegate dialogPanel, float width, float height
     ) {
         return Global.getSector().getCampaignUI().showInteractionDialogFromCargo(
@@ -473,6 +473,21 @@ public class UiUtils {
             },
             null, null
         );
+    }
+
+    public static final void CustomDialogViewer(
+        final LtvCustomDialogDelegate dialogPanel, float width, float height
+    ) {
+        final InteractionDialogAPI dialog = Global.getSector().getCampaignUI()
+            .getCurrentInteractionDialog();
+
+        if (dialog != null) { // Local
+            dialog.showCustomDialog(width, height, dialogPanel);
+        } else { // Remote
+            UiUtils.showStandaloneCustomDialog(
+                dialogPanel, width, height
+            );
+        }
     }
 
     /**

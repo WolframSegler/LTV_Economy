@@ -148,7 +148,7 @@ public class CommodityStats {
     public final void advance(boolean fakeAdvance) {
         
         if (!fakeAdvance) {
-            addStoredAmount(getAvailable() - getBaseDemand(true));
+            addStoredAmount(getAvailable() - getBaseDemand(true) - getTotalExports());
     
             final long amount = getCanNotExport() - getDeficit();
             CargoAPI cargo = market.getSubmarket(ltv_getAvaliableInCargo().one).getCargo();

@@ -32,6 +32,7 @@ import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
+import wfg_ltv_econ.ui.components.OutlineComponent.Outline;
 import wfg_ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg_ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
@@ -127,7 +128,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
         LtvUIState.setState(UIState.DETAIL_DIALOG);
 
-        ComDetailDialogPanel m_panel = new ComDetailDialogPanel(
+        CustomDetailDialogPanel<ComDetailDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
             m_parentWrapper.getRoot(),
             panel,
             m_parentWrapper.getMarket(),
@@ -552,7 +553,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                         "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + getFaction().getPersonNamePrefix() + " control.\n\n" +
                         "Global exports are limited by the colony's accessibility and cannot exceed the maximum global export capacity.\n\n" +
                         "In-faction exports benefit from higher shipping limits.",
-                        pad, new Color[] {Misc.getBasePlayerColor(), UiUtils.getInFactionColor()},
+                        pad, new Color[] {getFaction().getBaseUIColor(), UiUtils.getInFactionColor()},
                         new String[] {"all consumers globally", "within the faction"}
                     );
 
@@ -913,13 +914,15 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
         );
 
+        final EconomyEngine engine = EconomyEngine.getInstance();
+
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
 
             if (market.isHidden()) {
                 continue;
             }
 
-            CommodityStats comStats = EconomyEngine.getInstance().getComStats(m_com.getId(), market);
+            CommodityStats comStats = engine.getComStats(m_com.getId(), market);
 
             if (comStats.globalExports < 1 && mode == 0 || comStats.getBaseDemand(false) < 1 && mode == 1) {
                 continue;
@@ -952,12 +955,11 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, comStats);
 
             int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
-            int maxExportCapacity = Global.getSettings().getShippingCapacity(market, false);
 
-            String access = (accessibility) + "% (" + maxExportCapacity + ")";
+            String access = (accessibility) + "%";
 
-            int marketShare = market.getCommodityData(m_com.getId())
-                    .getCommodityMarketData().getExportMarketSharePercent(market);
+            int marketShare = mode == 0 ? engine.getExportMarketShare(m_com.getId(), market) :
+                engine.getImportMarketShare(m_com.getId(), market);
             String marketSharePercent = marketShare + "%";
 
             String incomeText = "---";
@@ -991,6 +993,11 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             createSection3RowsTooltip(
                 table, market, marketName, textColor, tp
             );
+
+            if (m_parentWrapper.getMarket() == market) {
+                table.getPendingRow().setOutline(Outline.TEX_THIN);
+                table.getPendingRow().setOutlineColor(Misc.getBasePlayerColor());
+            }
 
             table.pushRow(
                 CodexDataV2.getCommodityEntryId(m_com.getId()),
@@ -1193,8 +1200,8 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
     private void createSection3QuantityHeaderTooltipFactory(int mode, SortableTable table,
         PendingTooltip<CustomPanelAPI> wrapper) {
         final String quantityDesc = mode == 0
-            ? "Shows units of the commodity that could be exported."
-            : "Shows demand for the commodity.";
+            ? "Units of this commodity exported globally."
+            : "Units of this commodity imported globally to meet demand.";
 
         wrapper.getParent = () -> {
             for (ColumnManager column : table.getColumns()) {

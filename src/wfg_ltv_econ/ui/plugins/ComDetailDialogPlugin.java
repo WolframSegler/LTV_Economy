@@ -5,10 +5,12 @@ import java.util.List;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
-import wfg_ltv_econ.ui.dialogs.ComDetailDialogPanel;
+import wfg_ltv_econ.ui.dialogs.CustomDetailDialogPanel;
 import wfg_ltv_econ.ui.dialogs.ComDetailDialog;
 
-public class ComDetailDialogPlugin extends LtvCustomPanelPlugin<ComDetailDialogPanel, ComDetailDialogPlugin> {
+public class ComDetailDialogPlugin extends LtvCustomPanelPlugin<
+    CustomDetailDialogPanel<ComDetailDialogPlugin>, ComDetailDialogPlugin
+> {
     protected ComDetailDialog m_dialog;
 
     protected boolean isFooterButtonChecked = false;
@@ -19,7 +21,7 @@ public class ComDetailDialogPlugin extends LtvCustomPanelPlugin<ComDetailDialogP
         m_dialog = dialog;
     }
 
-    public void init(ComDetailDialogPanel panel) {
+    public void init(CustomDetailDialogPanel<ComDetailDialogPlugin> panel) {
         super.init(m_panel);
     }
 

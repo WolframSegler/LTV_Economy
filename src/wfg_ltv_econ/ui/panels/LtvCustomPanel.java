@@ -242,8 +242,7 @@ public abstract class LtvCustomPanel<
      * A strongly-typed, explicit alternative to {@link com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate}.
      * <p>
      * While the built-in {@code ActionListenerDelegate} reports a single, catch-all {@code actionPerformed} event,
-     * this listener clearly differentiates between interaction types — clicks, hovering, hover start/end transitions,
-     * and keyboard shortcuts — allowing implementers to respond with precision.
+     * this listener clearly differentiates between interaction types.
      * </p>
      * 
      * <p>

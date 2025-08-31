@@ -352,6 +352,29 @@ public class EconomyEngine {
         return totalGlobalExports;
     }
 
+    public final int getExportMarketShare(String comID, MarketAPI market) {
+        final long total = getTotalGlobalExports(comID);
+        if (total == 0) return 0;
+
+        return (int) (((float) getComStats(comID, market).globalExports / (float) total) * 100);
+    }
+
+    public final long getTotalGlobalImports(String comID) {
+        long totalGlobalImports = 0;
+        for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
+            totalGlobalImports += stats.globalImports;
+        }
+
+        return totalGlobalImports;
+    }
+
+    public final int getImportMarketShare(String comID, MarketAPI market) {
+        final long total = getTotalGlobalImports(comID);
+        if (total == 0) return 0;
+
+        return (int) (((float) getComStats(comID, market).globalImports / (float) total) * 100);
+    }
+
     public final long getTotalInFactionExports(String comID, FactionAPI faction) {
         long TotalFactionExports = 0;
 

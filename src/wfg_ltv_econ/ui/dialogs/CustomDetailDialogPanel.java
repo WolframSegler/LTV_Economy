@@ -6,10 +6,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
-import wfg_ltv_econ.ui.plugins.ComDetailDialogPlugin;
+import wfg_ltv_econ.ui.plugins.LtvCustomPanelPlugin;
 
 /**
  * A wrapper panel that bridges the game-provided detail dialog panel with
@@ -22,26 +21,27 @@ import wfg_ltv_econ.ui.plugins.ComDetailDialogPlugin;
  * component system, enabling consistent behavior, background handling,
  * and rendering within the larger UI framework.</p>
  */
-public class ComDetailDialogPanel extends LtvCustomPanel<
-    ComDetailDialogPlugin,
-    ComDetailDialogPanel,
-    CustomPanelAPI
-> implements HasBackground{
+public class CustomDetailDialogPanel<
+    PluginType extends LtvCustomPanelPlugin<
+        CustomDetailDialogPanel<PluginType>,
+        PluginType
+    >
+> extends LtvCustomPanel<PluginType, CustomDetailDialogPanel<PluginType>, CustomPanelAPI> implements HasBackground{
 
     public Color BgColor = Color.BLACK;
     public boolean isBgEnabled = true;
 
-    public ComDetailDialogPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        ComDetailDialogPlugin plugin) {
+    public CustomDetailDialogPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+        PluginType plugin) {
         super(root, parent, width, height, plugin, market);
-
-        EconomyEngine.getInstance().fakeAdvance();
 
         initializePlugin(hasPlugin);
         createPanel();
     }
 
     public void initializePlugin(boolean hasPlugin) {
+        if (!hasPlugin) return;
+        
         getPlugin().init(this);
     }
 
@@ -62,5 +62,10 @@ public class ComDetailDialogPanel extends LtvCustomPanel<
     @Override
     public float getBgTransparency() {
         return 1;
+    }
+
+    @Override
+    public Color getBgColor() {
+        return new Color(0, 0, 0, 255);
     }
 }

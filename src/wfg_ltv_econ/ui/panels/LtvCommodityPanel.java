@@ -25,7 +25,7 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
 
     protected List<LtvCommodityRowPanel> commodityRows = new ArrayList<>();
 
-    public static int STANDARD_WIDTH = 264;
+    public static final int STANDARD_WIDTH = 264;
     public String m_headerTxt;
 
     public boolean childrenIgnoreUIState = false;

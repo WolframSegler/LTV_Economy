@@ -49,7 +49,6 @@ import wfg_ltv_econ.util.UiUtils.AnchorType;
  *   <li>{@link UIPanelAPI} — displayed directly as a UI panel component.</li>
  *   <li>{@link LabelAPI} — displayed as a label UI component with optional color.</li>
  * </ul>
- * Passing any other cell type will result in an {@link IllegalArgumentException}.
  * </p>
  * <b>Typical usage example:</b>
  * <pre>{@code
@@ -822,12 +821,6 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         pendingRow.setTextColor(textColor);
         if (glowClr != null) {
             pendingRow.setGlowColor(glowClr);
-        }
-
-        // Selected Colony has an outline
-        if (getMarket() == market) {
-            pendingRow.setOutline(Outline.TEX_THIN);
-            pendingRow.setOutlineColor(getFaction().getBaseUIColor());
         }
 
         pendingRow.m_tooltip = tp;
