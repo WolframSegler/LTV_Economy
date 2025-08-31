@@ -550,17 +550,9 @@ public class TooltipUtils {
         }
 
         // Import mods
-        if (comStats.getDeficitPreTrade() > 0) {
+        if (comStats.inFactionImports > 0) {
             y = addRow(tooltip, y, valueTxtWidth, firstPara, 
-                comStats.getDeficitPreTrade(), "Desired in-faction imports", highlight, negative
-            );
-            firstPara = false;
-        } 
-
-        if ((comStats.getDeficitPreTrade() - comStats.inFactionImports) > 0) {
-            y = addRow(tooltip, y, valueTxtWidth, firstPara, 
-                -(comStats.getDeficitPreTrade() - comStats.inFactionImports),
-                "In-faction shortage", highlight, negative
+                comStats.inFactionImports, "In-faction imports", highlight, negative
             );
             firstPara = false;
         }
@@ -568,6 +560,13 @@ public class TooltipUtils {
         if (comStats.globalImports > 0) {
             y = addRow(tooltip, y, valueTxtWidth, firstPara, 
                 comStats.globalImports, "Global imports", highlight, negative
+            );
+            firstPara = false;
+        }
+
+        if (comStats.getDeficit() > 0) {
+            y = addRow(tooltip, y, valueTxtWidth, firstPara, -comStats.getDeficit(),
+                "Post-trade shortage", highlight, negative
             );
             firstPara = false;
         }

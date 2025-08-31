@@ -294,6 +294,7 @@ public class EconomyEngine {
                 }
             }
             if (skip) continue;
+            if (com.isAbstract) scale *= 1 / ind.getDemandReduction().getMult();
 
 			for (Map.Entry<String, Float> demandEntry : com.demand.entrySet()) {
 				String input = demandEntry.getKey();
@@ -304,7 +305,7 @@ public class EconomyEngine {
 		}
 
 		for (Map.Entry<String, Float> entry : totalDemandMap.entrySet()) {
-			int finalDemand = Math.max(0, Math.round(entry.getValue()));
+			int finalDemand = entry.getValue().intValue();
 			ind.demand(entry.getKey(), finalDemand);
 		}
 
@@ -323,7 +324,7 @@ public class EconomyEngine {
                 for (String conditionID : com.ifMarketCondsFalse) {
                     if (market.hasCondition(conditionID)) {
                         skip = true;
-                        break; // break inner loop
+                        break;
                     }
                 }
             }
@@ -337,7 +338,7 @@ public class EconomyEngine {
             }
             if (skip) continue;
 
-			int finalSupply = Math.max(0, Math.round(com.baseProd * scale));
+			int finalSupply = (int) (com.baseProd * scale);
 			ind.supply(entry.getKey(), finalSupply);
 		}
 	}
