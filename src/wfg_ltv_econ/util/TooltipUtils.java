@@ -565,9 +565,9 @@ public class TooltipUtils {
             firstPara = false;
         }
 
-        if (comStats.getTotalImports() > 0) {
+        if (comStats.globalImports > 0) {
             y = addRow(tooltip, y, valueTxtWidth, firstPara, 
-                comStats.getTotalImports(), "Global imports", highlight, negative
+                comStats.globalImports, "Global imports", highlight, negative
             );
             firstPara = false;
         }

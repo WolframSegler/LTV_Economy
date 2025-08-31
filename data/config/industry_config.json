@@ -63,7 +63,7 @@
 	"population": {
 		"workerAssignable": true,
 		"people": {
-			"base_prod": 0,
+			"base_prod": 1,
 			"demand": {
 				"food": 1.667,
 				"domestic_goods": 0.333,
@@ -76,13 +76,13 @@
 			"isAbstract": true
 		},
 		"peopleNonHabitable": {
-			"base_prod": 0,
+			"base_prod": 1,
 			"demand": {
 				"organics": 0.1667
 			},
 			"scaleWithMarketSize": true,
 			"isAbstract": true,
-			"onMarketConditions": ["habitable"]
+			"ifMarketConditionsFalse": ["habitable"]
 		},
 		"crew": {
 			"base_prod": 0.0016438,
@@ -125,8 +125,7 @@
 				"heavy_machinery": 0.4,
 				"drugs": 0.4
 			},
-			"usesWorkers": true,
-			"isAbstract": false
+			"usesWorkers": true
 		},
 		"organics": {
 			"base_prod": 0.9,

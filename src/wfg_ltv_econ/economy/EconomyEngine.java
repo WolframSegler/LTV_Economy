@@ -271,19 +271,29 @@ public class EconomyEngine {
 			OutputCom com = entry.getValue();
 
 			float scale = 1f;
+            boolean skip = false;
 			if (com.scaleWithMarketSize) scale *= Math.pow(10, size - 3);
 			if (ind instanceof LtvBaseIndustry ltvInd) {
 				if (com.usesWorkers) scale *= ltvInd.getWorkerAssigned();
 			}
 			if (com.checkLegality) scale *=market.isIllegal(entry.getKey()) ? 0 : 1;
-            if (!com.marketConditions.isEmpty()) {
-                for (String conditionID : com.marketConditions) {
-                    if (!market.hasCondition(conditionID)){
-                        scale *= 0;
+            if (!com.ifMarketCondsFalse.isEmpty()) {
+                for (String conditionID : com.ifMarketCondsFalse) {
+                    if (market.hasCondition(conditionID)){
+                        skip = true;
                         break;
                     }
                 }
             }
+            if (!com.ifMarketCondsTrue.isEmpty()) {
+                for (String conditionID : com.ifMarketCondsTrue) {
+                    if (!market.hasCondition(conditionID)){
+                        skip = true;
+                        break;
+                    }
+                }
+            }
+            if (skip) continue;
 
 			for (Map.Entry<String, Float> demandEntry : com.demand.entrySet()) {
 				String input = demandEntry.getKey();
@@ -302,20 +312,30 @@ public class EconomyEngine {
 			OutputCom com = entry.getValue();
 
 			float scale = 1f;
+            boolean skip = false;
 			if (com.scaleWithMarketSize) scale *= Math.pow(10, size - 3);
 			if (ind instanceof LtvBaseIndustry ltvInd) {
 				if (com.usesWorkers) scale *= ltvInd.getWorkerAssigned();
 			}
-			if (com.isAbstract) scale *= 0;
+			if (com.isAbstract) continue;
 			if (com.checkLegality) scale *=market.isIllegal(entry.getKey()) ? 0 : 1;
-            if (!com.marketConditions.isEmpty()) {
-                for (String conditionID : com.marketConditions) {
+            if (!com.ifMarketCondsFalse.isEmpty()) {
+                for (String conditionID : com.ifMarketCondsFalse) {
+                    if (market.hasCondition(conditionID)) {
+                        skip = true;
+                        break; // break inner loop
+                    }
+                }
+            }
+            if (!com.ifMarketCondsTrue.isEmpty()) {
+                for (String conditionID : com.ifMarketCondsTrue) {
                     if (!market.hasCondition(conditionID)){
-                        scale *= 0;
+                        skip = true;
                         break;
                     }
                 }
             }
+            if (skip) continue;
 
 			int finalSupply = Math.max(0, Math.round(com.baseProd * scale));
 			ind.supply(entry.getKey(), finalSupply);
