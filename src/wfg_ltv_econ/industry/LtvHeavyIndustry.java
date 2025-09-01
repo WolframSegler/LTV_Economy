@@ -159,11 +159,6 @@ public class LtvHeavyIndustry extends LtvBaseIndustry {
 		return addedPollution;
 	}
 
-	@Override
-	public boolean isWorkerAssignable() {
-		return true;
-	}
-
 	public void setAddedPollution(boolean addedPollution) {
 		this.addedPollution = addedPollution;
 	}

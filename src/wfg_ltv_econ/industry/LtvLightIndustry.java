@@ -59,9 +59,4 @@ public class LtvLightIndustry extends LtvBaseIndustry {
 	protected boolean canImproveToIncreaseProduction() {
 		return true;
 	}
-
-	@Override
-	public boolean isWorkerAssignable() {
-		return true;
-	}
 }

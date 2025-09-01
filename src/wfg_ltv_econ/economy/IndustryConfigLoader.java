@@ -35,27 +35,29 @@ public class IndustryConfigLoader {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, Map<String, OutputCom>> loadAsMap() {
+    public static Map<String, IndustryConfig> loadAsMap() {
         final JSONObject root = IndustryConfigLoader.getConfig();
-        final Map<String, Map<String, OutputCom>> result = new HashMap<>();
+        final Map<String, IndustryConfig> result = new HashMap<>();
 
         try {
         for (Iterator<String> itIndustry = root.keys(); itIndustry.hasNext();) {
             String industryId = itIndustry.next();
             JSONObject industryJson = root.getJSONObject(industryId);
 
+            boolean workerAssignable = false;
+            OCCTag occTag = OCCTag.AVERAGE;
+
             Map<String, OutputCom> commodityMap = new HashMap<>();
 
             for (Iterator<String> itCommodity = industryJson.keys(); itCommodity.hasNext();) {
-                String commodityId = itCommodity.next();
-                Object value = industryJson.get(commodityId);
+                String iter = itCommodity.next();
+                Object value = industryJson.get(iter);
 
-                // if (value instanceof Boolean booleanJson) {
-                //     // TODO: use workerAssignable field later
-                // }
+                if (value instanceof Boolean bool && iter.equals("workerAssignable")) {
+                    workerAssignable = bool.booleanValue();
+                }
 
-                OCCTag occTag = OCCTag.AVERAGE;
-                if (value instanceof String occTagStr && occTagStr.equals("occTag")) {
+                if (value instanceof String occTagStr && iter.equals("occTag")) {
                     switch (occTagStr) {
                     case "average":
                         break;
@@ -122,7 +124,7 @@ public class IndustryConfigLoader {
                     boolean checkLegality = commodityJson.optBoolean("checkLegality");
 
                     OutputCom otp = new OutputCom(
-                        commodityId,
+                        iter,
                         baseProd,
                         CCMoneyDist,
                         scaleWSize,
@@ -131,15 +133,16 @@ public class IndustryConfigLoader {
                         checkLegality,
                         marketCondsFalse,
                         marketCondsTrue,
-                        occTag,
                         ConsumptionMap
                     );
 
-                    commodityMap.put(commodityId, otp);
+                    commodityMap.put(iter, otp);
                 }
+                
             }
-
-            result.put(industryId, commodityMap);
+            
+            IndustryConfig indConfig = new IndustryConfig(workerAssignable, commodityMap, occTag);
+            result.put(industryId, indConfig);
         }
         } catch (Exception e) {
             throw new RuntimeException(
@@ -151,10 +154,21 @@ public class IndustryConfigLoader {
         return result;
     }
 
+    public static class IndustryConfig {
+        public final boolean workerAssignable;
+        public final OCCTag occTag; // Used to determine the RoVC of the industry
+        public final Map<String, OutputCom> outputs;
+
+        public IndustryConfig(boolean workerAssignable, Map<String, OutputCom> outputs, OCCTag occTag) {
+            this.workerAssignable = workerAssignable;
+            this.outputs = outputs;
+            this.occTag = occTag;
+        }
+    }
+
     public static class OutputCom {
         public final String comID;
         public final float baseProd; // Used when the output does not depend on workers
-        public final OCCTag occTag; // Used to determine the RoVC of the industry
 
         public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
         public final Map<String, Float> ConsumptionMap; // Flat input amounts that are independent of workers
@@ -171,7 +185,7 @@ public class IndustryConfigLoader {
         public OutputCom(
             String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
             boolean useWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketConditionsFalse,
-            List<String> ifMarketConditionsTrue, OCCTag occTag, Map<String, Float> ConsumptionMap
+            List<String> ifMarketConditionsTrue, Map<String, Float> ConsumptionMap
         ) {
             this.comID = comID;
             this.baseProd = baseProd;
@@ -183,7 +197,6 @@ public class IndustryConfigLoader {
             this.usesWorkers = useWorkers;
             this.isAbstract = isAbstract;
             this.checkLegality = checkLegality;
-            this.occTag = occTag;
         }
 
         @Override
@@ -198,7 +211,6 @@ public class IndustryConfigLoader {
                 ", usesWorkers=" + usesWorkers +
                 ", isAbstract=" + isAbstract +
                 ", checkLegality=" + checkLegality +
-                ", occTag=" + occTag +
                 '}';
         }
     }

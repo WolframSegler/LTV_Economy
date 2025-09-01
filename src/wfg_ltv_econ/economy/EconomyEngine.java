@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
+import wfg_ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg_ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg_ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
@@ -28,7 +29,7 @@ public class EconomyEngine {
 
     private final Map<String, CommodityInfo> m_commoditInfo;
 
-    public transient Map<String, Map<String, OutputCom>> ind_config;
+    public transient Map<String, IndustryConfig> ind_config;
     private final transient Map<String, List<OutputComReference>> commodityToOutputMap = new HashMap<>();
     public transient LaborConfig labor_config;
 
@@ -267,7 +268,8 @@ public class EconomyEngine {
         final EconomyEngine engine = EconomyEngine.getInstance();
         final WorkerRegistry workerReg = WorkerRegistry.getInstance();
 
-        final Map<String, OutputCom> indMap = engine.ind_config.get(ind.getId());
+        final IndustryConfig indConfig = engine.ind_config.get(ind.getId());
+        final Map<String, OutputCom> indMap = indConfig.outputs;
         final Map<String, Float> totalDemandMap = new HashMap<>();
         if (indMap == null || indMap.isEmpty()) return;
 
@@ -312,7 +314,7 @@ public class EconomyEngine {
                     ind.supply(entry.getKey(), finalSupply);
                 }
             } else {
-                float Vcc = spec.getBasePrice() * engine.labor_config.getRoCC(output.occTag);
+                float Vcc = spec.getBasePrice() * engine.labor_config.getRoCC(indConfig.occTag);
 
                 // Allocate constant capital to inputs
                 float totalWeight = output.CCMoneyDist.values().stream().reduce(0f, Float::sum);
@@ -338,7 +340,7 @@ public class EconomyEngine {
                     float Pout = Global.getSettings().getCommoditySpec(entry.getKey()).getBasePrice();
 
                     float LPV_day = EconomyEngine.getInstance().labor_config.LPV_day;
-                    float RoVC = engine.labor_config.getRoVC(output.occTag);
+                    float RoVC = engine.labor_config.getRoVC(indConfig.occTag);
 
                     float workersPerUnit = (Pout * RoVC) / LPV_day;
 
@@ -431,9 +433,9 @@ public class EconomyEngine {
     public void buildCommodityOutputMap() {
         commodityToOutputMap.clear();
 
-        for (Map<String, OutputCom> indEntry : ind_config.values()) {
+        for (IndustryConfig indEntry : ind_config.values()) {
 
-            for (Map.Entry<String, OutputCom> outputEntry : indEntry.entrySet()) {
+            for (Map.Entry<String, OutputCom> outputEntry : indEntry.outputs.entrySet()) {
                 String outputId = outputEntry.getKey();
                 OutputCom output = outputEntry.getValue();
 

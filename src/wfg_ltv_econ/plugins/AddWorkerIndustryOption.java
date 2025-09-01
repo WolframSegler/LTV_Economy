@@ -1,6 +1,7 @@
 package wfg_ltv_econ.plugins;
 
-import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.economy.EconomyEngine;
+import wfg_ltv_econ.economy.WorkerRegistry;
 import wfg_ltv_econ.ui.dialogs.AssignWorkersDialog;
 import wfg_ltv_econ.util.NumFormat;
 
@@ -20,11 +21,14 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
     public Industry industry = null;
 
     public boolean isSuitable(Industry ind, boolean allowUnderConstruction){
-        if (ind == null || ind.getMarket() == null || (!allowUnderConstruction && (ind.isBuilding() || ind.isUpgrading()))) return false;
-        if (!(ind instanceof LtvBaseIndustry)) {
+        if (ind == null ||
+            ind.getMarket() == null ||
+            (!allowUnderConstruction && (ind.isBuilding() || ind.isUpgrading()))
+        ) {
             return false;
         }
-        if (!((LtvBaseIndustry)ind).isWorkerAssignable()) {
+
+        if (!EconomyEngine.getInstance().ind_config.get(ind.getId()).workerAssignable) {
             return false;
         }
         return true;
@@ -63,7 +67,8 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
             Misc.getHighlightColor(),
             Misc.getBasePlayerColor()
         },
-        NumFormat.engNotation(((LtvBaseIndustry)industry).getWorkersAssigned()),
+        NumFormat.engNotation(WorkerRegistry.getInstance().get(
+            industry.getMarket().getId(), industry.getId()).getWorkersAssigned()),
         industry.getCurrentName()
         );
     }

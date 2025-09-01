@@ -10,22 +10,21 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
-import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.economy.CommodityStats;
+import wfg_ltv_econ.economy.EconomyEngine;
+import wfg_ltv_econ.economy.WorkerRegistry;
+import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg_ltv_econ.util.NumFormat;
 
 import java.awt.Color;
-import java.util.Map;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
-import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.campaign.ui.N; //Current slider class (v.0.98 R8).
 // Here is a unique method it has: public float getShowNotchOnIfBelowProgress()
@@ -37,14 +36,17 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
     private final int panelWidth;
     private final int panelHeight;
 
+    private final WorkerIndustryData data;
+
     // public N(String LabelText, float MinValue, float MaxValue)
     private N slider = new N(null, 0, 100);
 
-    public AssignWorkersDialog(Industry industry, int panelWidth, int panelHeight) {
-        this.industry = industry;
-        this.market = ((LtvBaseIndustry) industry).getMarket();
+    public AssignWorkersDialog(Industry ind, int panelWidth, int panelHeight) {
+        this.industry = ind;
+        this.market = ind.getMarket();
         this.panelWidth = panelWidth;
         this.panelHeight = panelHeight;
+        this.data = WorkerRegistry.getInstance().get(ind.getMarket().getId(), ind.getId());
     }
 
     @Override
@@ -97,19 +99,18 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         slider.setBarColor(new Color(20, 125, 200));
         slider.setHeight(sliderHeight);
         slider.setWidth(sliderWidth);
-        slider.setProgress(((LtvBaseIndustry) industry).getWorkerAssignedRatio() * 100);
-        slider.setMax((getFreeWorkerRatio() * 100f) + ((LtvBaseIndustry) industry).getWorkerAssignedRatio() * 100);
+        slider.setProgress(data.getWorkerAssignedRatio() * 100);
+        slider.setMax((getFreeWorkerRatio() * 100f) + data.getWorkerAssignedRatio() * 100);
         // Do not let assignation above capacity minus the current industry
 
         panel.addComponent((UIPanelAPI) slider).inTL((panelWidth - sliderWidth - opad), sliderY);
 
-        // Add the tooltip to the main Panel at the end
         panel.addUIElement(tooltip);
     }
 
     @Override
     public void customDialogConfirm() {
-        ((LtvBaseIndustry) industry).setWorkersAssigned(slider.getProgress() / 100);
+        data.setWorkersAssigned(slider.getProgress() / 100f);
     }
 
     public float getFreeWorkerRatio() {
@@ -126,8 +127,11 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final int itemsPerRow = 2;
         final float sectionWidth = ((panelWidth / 2) / itemsPerRow) - opad;
         final Color highlight = Misc.getHighlightColor();
-        Map<String, MutableCommodityQuantity> supply = ((LtvBaseIndustry) industry).getSupply();
-        Map<String, MutableCommodityQuantity> demand = ((LtvBaseIndustry) industry).getDemand();
+
+        final EconomyEngine engine = EconomyEngine.getInstance();
+
+        // Map<String, MutableCommodityQuantity> supply = ((LtvBaseIndustry) industry).getSupply();
+        // Map<String, MutableCommodityQuantity> demand = ((LtvBaseIndustry) industry).getDemand();
         final FactionAPI faction = market.getFaction();
         final Color color = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
@@ -141,10 +145,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         float y = startY;
         int count = -1;
 
-        for (MutableCommodityQuantity curr : supply.values()) {
-            CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
-            CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
-            int pAmount = curr.getQuantity().getModifiedInt();
+        for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
+            long pAmount = engine.getComStats(com.getId(), market.getId()).getLocalProduction(false);
 
             if (pAmount < 1) {
                 continue;
@@ -160,23 +162,22 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             // draw icon
             tooltip.beginIconGroup();
             tooltip.setIconSpacingMedium();
-            tooltip.addIcons(commodity, 1, IconRenderMode.NORMAL);
+            tooltip.addIcons(com, 1, IconRenderMode.NORMAL);
             tooltip.addIconGroup(0f);
             UIComponentAPI iconComp = tooltip.getPrev();
 
             // Add extra padding for thinner icons
-            float actualIconWidth = iconSize * commoditySpec.getIconWidthMult();
+            float actualIconWidth = iconSize * com.getIconWidthMult();
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
             String txt = Strings.X + NumFormat.engNotation(pAmount);
             LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
-            UIComponentAPI lblComp = tooltip.getPrev();
             float textH = lbl.computeTextHeight(txt);
             float textX = x + iconSize + pad;
             float textY = y + (iconSize - textH) * 0.5f;
-            lblComp.getPosition().inTL(textX, textY);
+            lbl.getPosition().inTL(textX, textY);
 
             // advance X
             x += sectionWidth + 5f;
@@ -192,11 +193,10 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         y = startY;
         count = -1;
 
-        for (MutableCommodityQuantity curr : demand.values()) {
-            CommodityOnMarketAPI commodity = market.getCommodityData(curr.getCommodityId());
-            CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
-            int dAmount = curr.getQuantity().getModifiedInt();
-            int allDeficit = commodity.getDeficitQuantity();
+        for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
+            CommodityStats stats = engine.getComStats(com.getId(), market.getId());
+            long dAmount = stats.getLocalProduction(false);
+            long allDeficit = stats.getDeficit();
 
             if (dAmount < 1) {
                 continue;
@@ -213,26 +213,25 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             tooltip.beginIconGroup();
             tooltip.setIconSpacingMedium();
             if (allDeficit > 0) {
-                tooltip.addIcons(commodity, 1, IconRenderMode.DIM_RED);
+                tooltip.addIcons(com, 1, IconRenderMode.DIM_RED);
             } else {
-                tooltip.addIcons(commodity, 1, IconRenderMode.NORMAL);
+                tooltip.addIcons(com, 1, IconRenderMode.NORMAL);
             }
             tooltip.addIconGroup(0f);
             UIComponentAPI iconComp = tooltip.getPrev();
 
             // Add extra padding for thinner icons
-            float actualIconWidth = iconSize * commoditySpec.getIconWidthMult();
+            float actualIconWidth = iconSize * com.getIconWidthMult();
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
             String txt = Strings.X + NumFormat.engNotation(dAmount);
             LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
-            UIComponentAPI lblComp = tooltip.getPrev();
             float textH = lbl.computeTextHeight(txt);
             float textX = x + iconSize + pad;
             float textY = y + (iconSize - textH) * 0.5f;
-            lblComp.getPosition().inTL(textX, textY);
+            lbl.getPosition().inTL(textX, textY);
 
             // advance X
             x += sectionWidth + 5f;
@@ -243,9 +242,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
     }
 
     @Override
-    public void customDialogCancel() {
-        // Called when dialog is cancelled (e.g. ESC or close)
-    }
+    public void customDialogCancel() {}
 
     public float getCustomDialogWidth() {
         return panelWidth;

@@ -35,7 +35,8 @@ import com.fs.graphics.A.D;
 
 import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
-import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.economy.WorkerRegistry;
+import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasActionListener;
@@ -221,20 +222,22 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
         add(industryIcon.getPanel()).inBL(0, 0);
 
 
+        
+        final WorkerIndustryData data = WorkerRegistry.getInstance().get(
+            getMarket().getId(), m_industry.getId()
+        );
         LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(Misc.getHighlightColor());
         workerCountLabel.setHighlightColor(
             UiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
         );
-        if (m_industry instanceof LtvBaseIndustry baseIndustry) {
-            int assigned = baseIndustry.getWorkersAssigned();
-            if (baseIndustry.isWorkerAssignable()) {
-                String assignedStr = NumFormat.engNotation(assigned);
+        if (EconomyEngine.getInstance().ind_config.get(m_industry.getId()).workerAssignable) {
 
-                workerCountLabel.setText(assignedStr);
-                workerCountLabel.setOpacity(0.9f);
-                workerCountLabel.autoSizeToWidth(100f);
-            }
+            final String assignedStr = NumFormat.engNotation(data.getWorkersAssigned());
+
+            workerCountLabel.setText(assignedStr);
+            workerCountLabel.setOpacity(0.9f);
+            workerCountLabel.autoSizeToWidth(100f);
         }
 
         add(workerCountLabel).inTL(pad*2, TITLE_HEIGHT + pad*2);
