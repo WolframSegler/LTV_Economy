@@ -158,6 +158,7 @@ public class IndustryConfigLoader {
 
         public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
         public final Map<String, Float> ConsumptionMap; // Flat input amounts that are independent of workers
+        public final Map<String, Float> DynamicInputWeights = new HashMap<>(); // Populated dynamically
 
         public final List<String> ifMarketCondsFalse;
         public final List<String> ifMarketCondsTrue;

@@ -63,7 +63,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
             Misc.getHighlightColor(),
             Misc.getBasePlayerColor()
         },
-        NumFormat.engNotation(((LtvBaseIndustry)industry).getWorkerAssigned()),
+        NumFormat.engNotation(((LtvBaseIndustry)industry).getWorkersAssigned()),
         industry.getCurrentName()
         );
     }

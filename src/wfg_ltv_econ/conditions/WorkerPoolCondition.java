@@ -7,8 +7,10 @@ import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+
 import wfg_ltv_econ.util.NumFormat;
-import wfg_ltv_econ.industry.LtvBaseIndustry;
+import wfg_ltv_econ.economy.WorkerRegistry;
+import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
@@ -29,14 +31,14 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         setWorkerPool((long)(0.64 * Math.pow(10, market.getSize())));
 
         float totalAssigned = 0;
+        final WorkerRegistry registry = WorkerRegistry.getInstance();
         for (Industry ind : market.getIndustries()) {
-            if (ind instanceof LtvBaseIndustry) {
-                totalAssigned += ((LtvBaseIndustry) ind).workersAssigned;
+            WorkerIndustryData data = registry.getData(market, ind);
+            if (data != null) {
+                totalAssigned += data.getWorkerAssignedRatio();
             }
         }
-        if (setFreeWorkerRatio(1 - totalAssigned)) {
-
-        }
+        setFreeWorkerRatio(Math.max(0f, 1f - totalAssigned));
     }
 
     public long getWorkerPool() {
@@ -72,6 +74,13 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
         freeWorkerRatio -= assignedWorkers;
         return true;
+    }
+
+    public void releaseWorkers(float releasedWorkers) {
+        freeWorkerRatio += releasedWorkers;
+        if (freeWorkerRatio > 1f) {
+            freeWorkerRatio = 1f;
+        }
     }
 
     @Override

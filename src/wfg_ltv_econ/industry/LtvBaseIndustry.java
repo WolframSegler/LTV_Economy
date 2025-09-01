@@ -10,7 +10,6 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.campaign.listeners.ListenerUtil;
@@ -37,7 +36,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
-import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.util.NumFormat;
@@ -65,8 +63,6 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 
 		return copy;
 	}
-
-	public float workersAssigned = 0;
 
 	public LtvBaseIndustry() {}
 
@@ -260,62 +256,6 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 				}
 			}
 		}
-	}
-
-	public float getWorkerAssignedRatio() {
-		return workersAssigned;
-	}
-
-	public int getWorkerAssigned() {
-		MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-		if (workerPoolCondition == null) {
-			return 0;
-		}
-		WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
-		return (int) (workersAssigned * pool.getWorkerPool());
-	}
-
-	public void setWorkersAssigned(float newAmount) {
-		if (0 > newAmount || newAmount > 1 || market == null) {
-			return;
-		}
-		MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-		if (workerPoolCondition == null) {
-			return;
-		}
-		WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
-
-		float delta = newAmount - workersAssigned;
-
-		if (delta > 0f) {
-			// Attempting to assign more workers
-			if (pool.isWorkerRatioAssignable(delta)) {
-				pool.assignFreeWorkers(delta);
-				workersAssigned = newAmount;
-			}
-			// else not enough workers available; do nothing or handle failure
-		} else if (delta < 0f) {
-			// Releasing workers
-			pool.assignFreeWorkers(pool.getFreeWorkerRatio() - delta); // delta is negative
-			workersAssigned = newAmount;
-		}
-	}
-
-	/**
-	 * needs to be overridden by the child.
-	 */
-	public boolean isWorkerAssignable() {
-		return false;
-	}
-
-	public int getWorkerCap() {
-		MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-		if (workerPoolCondition == null) {
-			return 0;
-		}
-		WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
-
-		return (int)(pool.getWorkerPool()*0.2);
 	}
 
 	@Override

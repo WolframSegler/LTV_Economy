@@ -227,7 +227,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
             UiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
         );
         if (m_industry instanceof LtvBaseIndustry baseIndustry) {
-            int assigned = baseIndustry.getWorkerAssigned();
+            int assigned = baseIndustry.getWorkersAssigned();
             if (baseIndustry.isWorkerAssignable()) {
                 String assignedStr = NumFormat.engNotation(assigned);
 

@@ -33,7 +33,7 @@ public class LaborConfigLoader {
             result.avg_wage = (float) root.getDouble("avg_wage_month");
             result.RoSV = root.getInt("RoSV");
             result.LPV_month = root.getInt("LPV_month");
-            result.LTV_day = (float) root.getDouble("LPV_day");
+            result.LPV_day = (float) root.getDouble("LPV_day");
             result.RoVC_average = (float) root.getDouble("RoVC_average");
             result.RoCC_average = (float) root.getDouble("RoCC_average");
             result.RoVC_industry = (float) root.getDouble("RoVC_industry");
@@ -67,7 +67,7 @@ public class LaborConfigLoader {
         public float avg_wage;
         public int RoSV;
         public int LPV_month;
-        public float LTV_day;
+        public float LPV_day;
         public float RoVC_average;
         public float RoCC_average;
         public float RoVC_industry;
@@ -85,6 +85,42 @@ public class LaborConfigLoader {
         public float RoVC_space;
         public float RoCC_space;
         public float space_ratio;
+
+        public final float getRoVC(OCCTag tag) {
+            switch (tag) {
+            case INDUSTRY:
+                return RoVC_industry;
+            case SERVICE:
+                return RoVC_service;
+            case AGRICULTURE:
+                return RoVC_agriculture;
+            case MANUAL:
+                return RoVC_manual;
+            case SPACE:
+                return RoVC_space;
+            case AVERAGE:
+            default:
+                return RoVC_average;
+            }
+        }
+
+        public final float getRoCC(OCCTag tag) {
+            switch (tag) {
+            case INDUSTRY:
+                return RoCC_industry;
+            case SERVICE:
+                return RoCC_service;
+            case AGRICULTURE:
+                return RoCC_agriculture;
+            case MANUAL:
+                return RoCC_manual;
+            case SPACE:
+                return RoCC_space;
+            case AVERAGE:
+            default:
+                return RoCC_average;
+            }
+        }
     }
 
     public static enum OCCTag {

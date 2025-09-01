@@ -8,10 +8,12 @@ import com.fs.starfarer.api.Global;
 import wfg_ltv_econ.conditions.NoRestockCondition;
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.economy.EconomyEngine;
+import wfg_ltv_econ.economy.WorkerRegistry;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
     public static final String EconEngine = "ltv_econ_econ_engine";
+    public static final String WorkerRegistery = "ltv_econ_worker_registery";
 
     @Override
     public void onApplicationLoad() throws Exception {
@@ -33,10 +35,15 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         WorkerPoolCondition.initialize();
 
         final Map<String, Object> persistentData = Global.getSector().getPersistentData();
+
         final EconomyEngine engine = (EconomyEngine) persistentData.get(EconEngine);
+        final WorkerRegistry workerRegistry = (WorkerRegistry) persistentData.get(WorkerRegistery);
+
         if (engine != null) {
             EconomyEngine.setInstance(engine);
-            engine.readResolve();
+        }
+        if (workerRegistry != null) {
+            WorkerRegistry.setInstance(workerRegistry);
         }
 
         Global.getSector().getListenerManager().addListener(new AddWorkerIndustryOption(), true);
@@ -47,6 +54,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void beforeGameSave() {
         Map<String, Object> persistentData = Global.getSector().getPersistentData();
+
         persistentData.put(EconEngine, EconomyEngine.getInstance());
+        persistentData.put(WorkerRegistery, WorkerRegistry.getInstance());
     }
 }
