@@ -15,6 +15,20 @@ public class WorkerRegistry {
 
     private static WorkerRegistry instance;
 
+    private WorkerRegistry() {
+        for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
+        for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
+            if (EconomyEngine.getInstance().isWorkerAssignable(ind)) {
+                register(market.getId(), ind.getId());
+            }
+        }
+        }
+    }
+
+    public static final void createInstance() {
+        instance = new WorkerRegistry();
+    }
+
     public static final void setInstance(WorkerRegistry a) {
         instance = a;
     }
@@ -23,17 +37,13 @@ public class WorkerRegistry {
         return instance;
     }
 
-    public final void register(MarketAPI market, Industry ind) {
-        String key = makeKey(market.getId(), ind.getId());
-        registry.putIfAbsent(key, new WorkerIndustryData(market.getId(), ind.getId()));
+    public final void register(String marketID, String indID) {
+        String key = makeKey(marketID, indID);
+        registry.putIfAbsent(key, new WorkerIndustryData(marketID, indID));
     }
 
-    public final WorkerIndustryData get(String marketID, String industryID) {
+    public final WorkerIndustryData getData(String marketID, String industryID) {
         return registry.get(makeKey(marketID, industryID));
-    }
-
-    public final WorkerIndustryData getData(MarketAPI market, Industry ind) {
-        return get(market.getId(), ind.getId());
     }
 
     private static final String makeKey(String marketId, String industryId) {

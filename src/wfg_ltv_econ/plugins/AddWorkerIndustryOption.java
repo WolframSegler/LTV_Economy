@@ -67,7 +67,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
             Misc.getHighlightColor(),
             Misc.getBasePlayerColor()
         },
-        NumFormat.engNotation(WorkerRegistry.getInstance().get(
+        NumFormat.engNotation(WorkerRegistry.getInstance().getData(
             industry.getMarket().getId(), industry.getId()).getWorkersAssigned()),
         industry.getCurrentName()
         );

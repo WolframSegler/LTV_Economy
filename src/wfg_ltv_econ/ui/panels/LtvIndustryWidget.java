@@ -223,7 +223,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
 
 
         
-        final WorkerIndustryData data = WorkerRegistry.getInstance().get(
+        final WorkerIndustryData data = WorkerRegistry.getInstance().getData(
             getMarket().getId(), m_industry.getId()
         );
         LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);

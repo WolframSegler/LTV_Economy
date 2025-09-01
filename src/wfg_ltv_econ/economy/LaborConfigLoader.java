@@ -24,7 +24,7 @@ public class LaborConfigLoader {
     }
 
     public static LaborConfig loadAsClass() {
-        final JSONObject root = IndustryConfigLoader.getConfig();
+        final JSONObject root = LaborConfigLoader.getConfig();
 
         final LaborConfig result = new LaborConfig();
 

@@ -46,7 +46,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         this.market = ind.getMarket();
         this.panelWidth = panelWidth;
         this.panelHeight = panelHeight;
-        this.data = WorkerRegistry.getInstance().get(ind.getMarket().getId(), ind.getId());
+        this.data = WorkerRegistry.getInstance().getData(ind.getMarket().getId(), ind.getId());
     }
 
     @Override
