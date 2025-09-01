@@ -600,8 +600,12 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                     return baseX + colWidth - compWidth;
                 case LEFTPAD:
                     return baseX + pad;
+                case LEFTOPAD:
+                    return baseX + opad;
                 case RIGHTPAD:
                     return baseX + colWidth - compWidth - pad;
+                case RIGHTOPAD:
+                    return baseX + colWidth - compWidth - opad;
                 case MID:
                 default:
                     return baseX + (colWidth / 2f) - (compWidth / 2f);
@@ -908,6 +912,8 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         MID,
         RIGHT,
         LEFTPAD,
+        LEFTOPAD,
         RIGHTPAD,
+        RIGHTOPAD
     }
 }

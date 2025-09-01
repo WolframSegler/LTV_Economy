@@ -26,7 +26,7 @@ public class EconomyEngine {
     private static EconomyEngine instance;
 
     private final Map<String, CommodityInfo> m_commoditInfo;
-    public final Map<String, Map<String, IndustryConfigLoader.OutputCom>> configs;
+    public transient Map<String, Map<String, IndustryConfigLoader.OutputCom>> configs;
 
     private int marketAmount = 0; 
 
@@ -34,6 +34,10 @@ public class EconomyEngine {
         if (instance == null) {
             instance = new EconomyEngine();
         }
+    }
+
+    public static void setInstance(EconomyEngine a) {
+        instance = a;
     }
 
     public static EconomyEngine getInstance() {
@@ -55,9 +59,15 @@ public class EconomyEngine {
 
         marketAmount = getMarketsCopy().size();
 
+        readResolve();
+    }
+
+    public final Object readResolve() {
         configs = IndustryConfigLoader.loadAsMap();
 
         fakeAdvance();
+
+        return this;
     }
 
     public final void update() {
@@ -414,5 +424,4 @@ public class EconomyEngine {
 
         return new ArrayList<>(result);
     }
-
 }

@@ -108,6 +108,13 @@
     </dependency>
     <dependency>
       <groupId>local</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/../../starsector-core/xstream-1.4.10.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>local</groupId>
       <artifactId>reflection</artifactId>
       <version>1.0</version>
       <scope>system</scope>

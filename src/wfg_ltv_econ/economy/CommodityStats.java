@@ -6,6 +6,7 @@ import java.util.List;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
@@ -14,7 +15,7 @@ import com.fs.starfarer.api.util.Pair;
 
 public class CommodityStats {
 
-    public final CommodityOnMarketAPI m_com;
+    public final CommoditySpecAPI m_com;
     public final MarketAPI market;
 
     // Storage
@@ -81,6 +82,9 @@ public class CommodityStats {
     public final double getAvailabilityRatio() {
         return getBaseDemand(false) == 0 ? 1f : (double) getDemandMet() / getBaseDemand(false);
     }
+    public final long getRealBalance() {
+        return getAvailable() - getBaseDemand(true) - getTotalExports();
+    }
 
 
     public final void addInFactionImport(long a) {
@@ -109,7 +113,7 @@ public class CommodityStats {
 
     public CommodityStats(String comID, MarketAPI market) {
         this.market = market;
-        this.m_com = market.getCommodityData(comID);
+        this.m_com = Global.getSettings().getCommoditySpec(comID);
 
         update();
     }
@@ -148,7 +152,7 @@ public class CommodityStats {
     public final void advance(boolean fakeAdvance) {
         
         if (!fakeAdvance) {
-            addStoredAmount(getAvailable() - getBaseDemand(true) - getTotalExports());
+            addStoredAmount(getRealBalance());
     
             final long amount = getCanNotExport() - getDeficit();
             CargoAPI cargo = market.getSubmarket(ltv_getAvaliableInCargo().one).getCargo();
@@ -233,7 +237,7 @@ public class CommodityStats {
     }
 
     public void logAllInfo() {
-        Global.getLogger(getClass()).error("Commodity: " + m_com.getCommodity().getName());
+        Global.getLogger(getClass()).error("Commodity: " + m_com.getName());
         Global.getLogger(getClass()).error("economicFootprint: " + getEconomicFootprint());
         Global.getLogger(getClass()).error("localProduction: " + getLocalProduction(true));
         Global.getLogger(getClass()).error("baseDemand: " + getBaseDemand(false));

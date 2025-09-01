@@ -1,12 +1,17 @@
 package wfg_ltv_econ.plugins;
 
+import java.util.Map;
+
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 
 import wfg_ltv_econ.conditions.NoRestockCondition;
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
+import wfg_ltv_econ.economy.EconomyEngine;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
+
+    public static final String EconEngine = "ltv_econ_econ_engine";
 
     @Override
     public void onApplicationLoad() throws Exception {
@@ -27,8 +32,23 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         NoRestockCondition.initialize();
         WorkerPoolCondition.initialize();
 
+        Global.getSettings().getCurrentState();
+
+        final Map<String, Object> persistentData = Global.getSector().getPersistentData();
+        final EconomyEngine engine = (EconomyEngine) persistentData.get(EconEngine);
+        if (engine != null) {
+            EconomyEngine.setInstance(engine);
+            engine.readResolve();
+        }
+
         Global.getSector().getListenerManager().addListener(new AddWorkerIndustryOption(), true);
         Global.getSector().addTransientScript(new LtvMarketReplacer());
         Global.getSector().addTransientScript(new EconomyEngineScript());
+    }
+
+    @Override
+    public void beforeGameSave() {
+        Map<String, Object> persistentData = Global.getSector().getPersistentData();
+        persistentData.put(EconEngine, EconomyEngine.getInstance());
     }
 }

@@ -11,6 +11,7 @@
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\json.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\fs.common_obf.jar",
         "e:\\Games\\Starsector Mod Testing\\starsector-core\\starfarer_obf.jar",
+        "e:\\Games\\Starsector Mod Testing\\starsector-core\\xstream-1.4.10.jar",
         "e:\\Games\\Starsector Mod Testing\\mods\\LTV_Economy\\jars\\libs\\reflection.jar"
     ],
     "java.configuration.updateBuildConfiguration": "automatic",

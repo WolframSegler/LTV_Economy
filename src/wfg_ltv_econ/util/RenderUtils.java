@@ -7,12 +7,6 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import java.awt.Color;
 
 public class RenderUtils {
-    public static void drawRect(float x, float y, float w, float h, Color color, float alphaMult,
-        boolean additive) {
-            
-        drawQuad(x, y, w, h, color, alphaMult, GL11.GL_QUADS, additive);
-    }
-
     /**
      * @param x = posX
      * @param y = posY
@@ -57,7 +51,7 @@ public class RenderUtils {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
-    public static void drawQuad(float x, float y, float w, float h, Color color, float alphaMult, int mode,
+    public static void drawQuad(float x, float y, float w, float h, Color color, float alphaMult,
         boolean additive) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
@@ -68,7 +62,7 @@ public class RenderUtils {
 
         setGlColor(color, alphaMult);
 
-        GL11.glBegin(mode);
+        GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex2f(x, y);
         GL11.glVertex2f(x + w, y);
         GL11.glVertex2f(x + w, y + h);
@@ -179,16 +173,12 @@ public class RenderUtils {
         sprite.setNormalBlend();
     }
 
-    public static void quadWithBlend(float x, float y, float w, float h, Color color, float alphaMult) {
+    private static final void quadWithBlend(float x, float y, float w, float h, Color color, float alphaMult) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ZERO);
-        GL11.glColor4ub(
-            (byte)  color.getRed(),
-            (byte)  color.getGreen(),
-            (byte)  color.getBlue(),
-            (byte) (color.getAlpha() * alphaMult)
-        );
+        setGlColor(color, alphaMult);
+
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex2f(x, y);
         GL11.glVertex2f(x, y + h);
@@ -197,9 +187,8 @@ public class RenderUtils {
         GL11.glEnd();
     }
 
-    public static void quadNoBlend(float x, float y, float w, float h, Color color, float alphaMult) {
+    private static final void quadNoBlend(float x, float y, float w, float h, Color color, float alphaMult) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_BLEND);
         setGlColor(color, alphaMult);
         
         GL11.glBegin(GL11.GL_QUADS);

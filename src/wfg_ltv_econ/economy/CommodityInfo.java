@@ -14,18 +14,18 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
 public class CommodityInfo {
-    private final CommoditySpecAPI m_spec;
+    private final String comID;
     private final Map<MarketAPI, CommodityStats> m_comStats = new HashMap<>();
 
     public CommodityInfo(
         CommoditySpecAPI spec
     ) {
-        m_spec = spec;
+        comID = spec.getId();
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
             if (market.isHidden()) continue;
             
-            m_comStats.put(market, new CommodityStats(m_spec.getId(), market));
+            m_comStats.put(market, new CommodityStats(comID, market));
         }
     }
 
@@ -50,7 +50,7 @@ public class CommodityInfo {
     public final void addMarket(MarketAPI market) {
         if (m_comStats.containsKey(market)) return;
         
-        m_comStats.put(market, new CommodityStats(m_spec.getId(), market));
+        m_comStats.put(market, new CommodityStats(comID, market));
     }
 
     public final void refreshMarkets() {
@@ -195,7 +195,7 @@ public class CommodityInfo {
 
         score += sizeFactor(importer) * TradeWeights.MARKET_SIZE;
 
-        score += priceFactor(m_spec, importer) * TradeWeights.LOCAL_PRICE;
+        score += priceFactor(comID, importer) * TradeWeights.LOCAL_PRICE;
 
         return score;
     }
@@ -226,7 +226,8 @@ public class CommodityInfo {
         }
     }
 
-    private static final float priceFactor(CommoditySpecAPI spec, MarketAPI importer) {
+    private static final float priceFactor(String comID, MarketAPI importer) {
+        final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID); 
         final float price = importer.getDemandPrice(spec.getId(), spec.getEconUnit(), false);
         final float base = spec.getBasePrice();
 

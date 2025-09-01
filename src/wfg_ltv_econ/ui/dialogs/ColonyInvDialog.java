@@ -23,7 +23,7 @@ import wfg_ltv_econ.util.NumFormat;
 
 public class ColonyInvDialog implements LtvCustomDialogDelegate, HasActionListener {
 
-    public static final int PANEL_W = 840;
+    public static final int PANEL_W = 950;
     public static final int PANEL_H = 600;
 
     private final LtvCustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
@@ -56,16 +56,18 @@ public class ColonyInvDialog implements LtvCustomDialogDelegate, HasActionListen
 
         final String BaseProdTpTxt = "Theoretical local daily production, assuming no deficits or shortages.";
         final String RealProdTpTxt = "Actual daily production after accounting for stored deficits.";
-        final String BalanceTpTxt = "Net daily change in stockpile, ignoring imports or exports.";
+        final String BaseBalanceTpTxt = "Net daily change in stockpile, ignoring imports or exports.";
+        final String RealBalanceTpTxt = "Net daily change in stockpile, including imports or exports.";
 
         table.addHeaders(
             "", 40, null, true, false, 1,
             "Commodity", 160, "Commodity.", true, true, 1,
             "Stored", 100, "Amount in Colony stockpile.", false, false, -1,
             "Demand", 100, "Total demand by colony.", false, false, -1,
-            "Base Production", 160, BaseProdTpTxt, false, false, -1,
-            "Real Production", 160, RealProdTpTxt, false, false, -1,
-            "Balance", 100, BalanceTpTxt, false, false, -1
+            "Base Prod", 140, BaseProdTpTxt, false, false, -1,
+            "Real Prod", 140, RealProdTpTxt, false, false, -1,
+            "Base Balance", 130, BaseBalanceTpTxt, false, false, -1,
+            "Real Balance", 120, RealBalanceTpTxt, false, false, -1
         );
 
         final EconomyEngine engine = EconomyEngine.getInstance();
@@ -83,18 +85,25 @@ public class ColonyInvDialog implements LtvCustomDialogDelegate, HasActionListen
             long demand = comStats.getBaseDemand(false);
             long baseProd = comStats.getLocalProduction(false);
             long modifiedProd = comStats.getLocalProduction(true);
-            long balance = comStats.getLocalProduction(true) - comStats.getBaseDemand(true);
+            long baseBalance = comStats.getLocalProduction(true) - comStats.getBaseDemand(true);
+            long realBalance = comStats.getRealBalance();
 
-            Color balanceColor = balance < 0 ? 
-                Misc.getNegativeHighlightColor() : Misc.getPositiveHighlightColor();
+            Color baseBlcColor = baseBalance < 0 ? 
+                Misc.getNegativeHighlightColor() : baseBalance > 0 ?
+                Misc.getPositiveHighlightColor() : Misc.getTextColor();
+
+            Color realBlcColor = realBalance < 0 ? 
+                Misc.getNegativeHighlightColor() : realBalance > 0 ?
+                Misc.getPositiveHighlightColor() : Misc.getTextColor();
 
             table.addCell(comIcon, cellAlg.MID, null, null);
             table.addCell(com.getName(), cellAlg.LEFT, com.getName(), Misc.getBasePlayerColor());
-            table.addCell(NumFormat.engNotation(stored), cellAlg.MID, stored, null);
-            table.addCell(NumFormat.engNotation(demand), cellAlg.MID, demand, Misc.getNegativeHighlightColor());
-            table.addCell(NumFormat.engNotation(baseProd), cellAlg.MID, baseProd, Misc.getHighlightColor());
-            table.addCell(NumFormat.engNotation(modifiedProd), cellAlg.MID, modifiedProd, Misc.getHighlightColor());
-            table.addCell(NumFormat.engNotation(balance), cellAlg.MID, balance, balanceColor);
+            table.addCell(NumFormat.engNotation(stored), cellAlg.LEFTOPAD, stored, null);
+            table.addCell(NumFormat.engNotation(demand), cellAlg.LEFTOPAD, demand, Misc.getNegativeHighlightColor());
+            table.addCell(NumFormat.engNotation(baseProd), cellAlg.LEFTOPAD, baseProd, Misc.getHighlightColor());
+            table.addCell(NumFormat.engNotation(modifiedProd), cellAlg.LEFTOPAD, modifiedProd, Misc.getHighlightColor());
+            table.addCell(NumFormat.engNotation(baseBalance), cellAlg.LEFTOPAD, baseBalance, baseBlcColor);
+            table.addCell(NumFormat.engNotation(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             table.pushRow(
                 CodexDataV2.getCommodityEntryId(com.getId()), m_panel.getMarket(), null, null, null
