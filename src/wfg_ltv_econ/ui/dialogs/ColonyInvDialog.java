@@ -74,7 +74,7 @@ public class ColonyInvDialog implements LtvCustomDialogDelegate, HasActionListen
 
         for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
 
-            CommodityStats comStats = engine.getComStats(com.getId(), m_panel.getMarket());
+            CommodityStats comStats = engine.getComStats(com.getId(), m_panel.getMarket().getId());
 
             Base comIcon = new Base(
                 m_panel.getRoot(), m_panel.getPanel(), m_panel.getMarket(),26, 26,

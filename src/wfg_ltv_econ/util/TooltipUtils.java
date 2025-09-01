@@ -165,7 +165,7 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
                         CommodityOnMarketAPI com = market.getCommodityData(comID);
-                        CommodityStats comStat = EconomyEngine.getInstance().getComStats(comID, market);
+                        CommodityStats comStat = EconomyEngine.getInstance().getComStats(comID, market.getId());
                         long marketDemand = com.getMaxDemand() - com.getPlayerTradeNetQuantity();
                         if (marketDemand < 0) {
                             marketDemand = 0;

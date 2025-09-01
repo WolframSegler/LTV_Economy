@@ -340,7 +340,7 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 		if (Global.CODEX_TOOLTIP_MODE || !EconomyEngine.isInitialized()) return result;
 
 		for (String id : commodityIds) {
-			final CommodityStats stats = EconomyEngine.getInstance().getComStats(id, market);
+			final CommodityStats stats = EconomyEngine.getInstance().getComStats(id, market.getId());
 			if (stats == null) {
 				return result;
 			}

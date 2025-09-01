@@ -15,7 +15,7 @@ import com.fs.starfarer.api.util.Pair;
 
 public class CommodityInfo {
     private final String comID;
-    private final Map<MarketAPI, CommodityStats> m_comStats = new HashMap<>();
+    private final Map<String, CommodityStats> m_comStats = new HashMap<>();
 
     public CommodityInfo(
         CommoditySpecAPI spec
@@ -25,7 +25,7 @@ public class CommodityInfo {
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
             if (market.isHidden()) continue;
             
-            m_comStats.put(market, new CommodityStats(comID, market));
+            m_comStats.put(market.getId(), new CommodityStats(comID, market.getId()));
         }
     }
 
@@ -47,47 +47,52 @@ public class CommodityInfo {
         }
     }
 
-    public final void addMarket(MarketAPI market) {
-        if (m_comStats.containsKey(market)) return;
+    public final void addMarket(String marketID) {
+        if (m_comStats.containsKey(marketID)) return;
         
-        m_comStats.put(market, new CommodityStats(comID, market));
+        m_comStats.put(marketID, new CommodityStats(comID, marketID));
     }
 
     public final void refreshMarkets() {
         final EconomyEngine engine = EconomyEngine.getInstance();
 
+        final List<MarketAPI> oldList = new ArrayList<>();
+        for (String marketID : m_comStats.keySet()) {
+            oldList.add(Global.getSector().getEconomy().getMarket(marketID));
+        }
+
         List<MarketAPI> newMarkets = EconomyEngine.symmetricDifference(
             engine.getMarketsCopy(),
-            new ArrayList<>(m_comStats.keySet())
+            oldList
         );
 
         for (MarketAPI market : newMarkets) {
-            addMarket(market);
+            addMarket(market.getId());
         }
     }
 
-    public final CommodityStats getStats(MarketAPI market) {
+    public final CommodityStats getStats(String marketID) {
 
-        return m_comStats.get(market);
+        return m_comStats.get(marketID);
     }
 
     public final Collection<CommodityStats> getAllStats() {
         return m_comStats.values();
     }
 
-    public final Map<MarketAPI, CommodityStats> getStatsMap() {
+    public final Map<String, CommodityStats> getStatsMap() {
         return m_comStats;
     }
 
-    public static Pair<MarketAPI, MarketAPI> getPairFromIndex(int index, List<MarketAPI> exporters,     
+    public static Pair<String, String> getPairFromIndex(int index, List<MarketAPI> exporters,     
         List<MarketAPI> importers) {
 
         final int numImporters = importers.size();
         final int exporterIndex = index / numImporters;
         final int importerIndex = index % numImporters;
 
-        final MarketAPI exporter = exporters.get(exporterIndex);
-        final MarketAPI importer = importers.get(importerIndex);
+        final String exporter = exporters.get(exporterIndex).getId();
+        final String importer = importers.get(importerIndex).getId();
 
         return new Pair<>(exporter, importer);
     }
@@ -122,7 +127,7 @@ public class CommodityInfo {
         Arrays.sort(indices, (a, b) -> Integer.compare(pairScores[b], pairScores[a]));
 
         for (int i = 0; i < indices.length; i++) {
-            Pair<MarketAPI, MarketAPI> expImp = getPairFromIndex(
+            Pair<String, String> expImp = getPairFromIndex(
                 indices[i], exporters, importers
             );
 

@@ -4,19 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
-import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
-import com.fs.starfarer.api.util.Pair;
 
 public class CommodityStats {
 
-    public final CommoditySpecAPI m_com;
-    public final MarketAPI market;
+    public final String comID;
+    public final String marketID;
+
+    public transient MarketAPI market;
 
     // Storage
     private long stored = 0;
@@ -111,11 +109,18 @@ public class CommodityStats {
         stored = Math.max(0, stored + a);
     }
 
-    public CommodityStats(String comID, MarketAPI market) {
-        this.market = market;
-        this.m_com = Global.getSettings().getCommoditySpec(comID);
+    public CommodityStats(String comID, String marketID) {
+        this.marketID = marketID;
+        this.comID = comID;
 
+        readResolve();
         update();
+    }
+
+    public Object readResolve() {
+        market = Global.getSector().getEconomy().getMarket(marketID);
+
+        return this;
     }
 
     public final void update() {
@@ -125,10 +130,10 @@ public class CommodityStats {
         for (Industry industry : getVisibleIndustries(market)) {
 
             // Ensure that the demand uses the ID of the commodity
-            int demand = industry.getDemand(m_com.getId()).getQuantity().getModifiedInt();
+            int demand = industry.getDemand(comID).getQuantity().getModifiedInt();
             demandBase += demand;
 
-            int supply = industry.getSupply(m_com.getId()).getQuantity().getModifiedInt();
+            int supply = industry.getSupply(comID).getQuantity().getModifiedInt();
             localProduction += supply;
         }
 
@@ -153,29 +158,8 @@ public class CommodityStats {
         
         if (!fakeAdvance) {
             addStoredAmount(getRealBalance());
-    
-            final long amount = getCanNotExport() - getDeficit();
-            CargoAPI cargo = market.getSubmarket(ltv_getAvaliableInCargo().one).getCargo();
-    
-            if (amount > 0) {
-                cargo.addItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), amount);
-            } else {
-                cargo.removeItems(CargoAPI.CargoItemType.RESOURCES, m_com.getId(), Math.abs(amount));
-            }
         }
     }
-
-    public Pair<String, Integer> ltv_getAvaliableInCargo() {
-		String submarket = Submarkets.SUBMARKET_OPEN;
-		if (market.getSubmarket(Submarkets.LOCAL_RESOURCES) != null) {
-			submarket = Submarkets.LOCAL_RESOURCES;
-		} else if (market.getSubmarket(Submarkets.SUBMARKET_OPEN) == null) {
-			return new Pair<String, Integer>(submarket, 0);
-		}
-
-		return new Pair<String, Integer>(submarket,
-			(int) market.getSubmarket(submarket).getCargo().getCommodityQuantity(m_com.getId()));
-	}
 
     public static List<MarketAPI> getFactionMarkets(String factionId) {
         List<MarketAPI> result = new ArrayList<>();
@@ -237,7 +221,8 @@ public class CommodityStats {
     }
 
     public void logAllInfo() {
-        Global.getLogger(getClass()).error("Commodity: " + m_com.getName());
+        final String comName = Global.getSettings().getCommoditySpec(comID).getName();
+        Global.getLogger(getClass()).error("Commodity: " + comName);
         Global.getLogger(getClass()).error("economicFootprint: " + getEconomicFootprint());
         Global.getLogger(getClass()).error("localProduction: " + getLocalProduction(true));
         Global.getLogger(getClass()).error("baseDemand: " + getBaseDemand(false));

@@ -922,7 +922,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 continue;
             }
 
-            CommodityStats comStats = engine.getComStats(m_com.getId(), market);
+            CommodityStats comStats = engine.getComStats(m_com.getId(), market.getId());
 
             if (comStats.globalExports < 1 && mode == 0 || comStats.getBaseDemand(false) < 1 && mode == 1) {
                 continue;
@@ -958,8 +958,8 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
 
             String access = (accessibility) + "%";
 
-            int marketShare = mode == 0 ? engine.getExportMarketShare(m_com.getId(), market) :
-                engine.getImportMarketShare(m_com.getId(), market);
+            int marketShare = mode == 0 ? engine.getExportMarketShare(m_com.getId(), market.getId()) :
+                engine.getImportMarketShare(m_com.getId(), market.getId());
             String marketSharePercent = marketShare + "%";
 
             String incomeText = "---";
@@ -1115,7 +1115,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             tp.addSectionHeading(com.getCommodity().getName() + " production & availability",
             baseColor, darkColor, Alignment.MID, opad);
 
-            CommodityStats comStats = EconomyEngine.getInstance().getComStats(com.getId(), market);
+            CommodityStats comStats = EconomyEngine.getInstance().getComStats(com.getId(), market.getId());
                 
             TooltipUtils.createCommodityProductionBreakdown(
                 tp, com, comStats, highlight, negative

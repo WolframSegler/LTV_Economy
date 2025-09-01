@@ -63,8 +63,8 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         LtvCommodityPanel parentWrapper, int width, int height, boolean childrenIgnoreUIState, boolean canViewPrices) {
 
         super(root, parent, width, height, new BasePanelPlugin<>(), market);
-        m_comStats = EconomyEngine.getInstance().getComStats(comID, market);
-        m_com = m_comStats.m_com;
+        m_comStats = EconomyEngine.getInstance().getComStats(comID, market.getId());
+        m_com = market.getCommodityData(comID);
         m_parent = parentWrapper;
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 

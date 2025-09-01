@@ -65,8 +65,6 @@ public class EconomyEngine {
     public final Object readResolve() {
         configs = IndustryConfigLoader.loadAsMap();
 
-        fakeAdvance();
-
         return this;
     }
 
@@ -104,8 +102,10 @@ public class EconomyEngine {
     }
 
     // Order matters here
-    private final void mainLoop(boolean fakeAdvance) {        
-        assignWorkers();
+    private final void mainLoop(boolean fakeAdvance) { 
+        if (!fakeAdvance) {
+            assignWorkers();
+        }       
 
         for (CommodityInfo comInfo : m_commoditInfo.values()) {
             comInfo.reset();
@@ -124,9 +124,9 @@ public class EconomyEngine {
         }
     }
 
-    public final void registerMarket(MarketAPI market) {
+    public final void registerMarket(String marketID) {
         for (CommodityInfo comInfo : m_commoditInfo.values()) {
-            comInfo.addMarket(market);
+            comInfo.addMarket(marketID);
         }
     }
 
@@ -148,14 +148,14 @@ public class EconomyEngine {
         return m_commoditInfo.containsKey(comID);
     }
 
-    public final CommodityStats getComStats(String comID, MarketAPI market) {
+    public final CommodityStats getComStats(String comID, String marketID) {
         final CommodityInfo comInfo = m_commoditInfo.get(comID);
 
         if (comInfo == null) {
             throw new RuntimeException("Referencing a non-econ or missing commodity: " + comID);
         }
 
-        final CommodityStats stats = comInfo.getStats(market);
+        final CommodityStats stats = comInfo.getStats(marketID);
 
         if (stats != null) {
             stats.update();
@@ -166,7 +166,7 @@ public class EconomyEngine {
     public final void weightedOutputDeficitMods() {
 
         for (CommodityInfo comInfo : m_commoditInfo.values()) {
-        for (Map.Entry<MarketAPI, CommodityStats> marketEntry : comInfo.getStatsMap().entrySet()) {
+        for (Map.Entry<String, CommodityStats> marketEntry : comInfo.getStatsMap().entrySet()) {
             CommodityStats stats = marketEntry.getValue();
             double outputMultiplier = 1f;
 
@@ -174,7 +174,7 @@ public class EconomyEngine {
                 Map<String, OutputCom> indObj = configs.get(ind.getId());
                 if (indObj == null) continue;
 
-                OutputCom outputCom = indObj.get(stats.m_com.getId());
+                OutputCom outputCom = indObj.get(stats.comID);
                 if (outputCom == null || outputCom.isAbstract) continue;
 
                 Map<String, Float> weights = outputCom.demand;
@@ -195,7 +195,7 @@ public class EconomyEngine {
     public final void weightedInputDeficitMods() {
 
         for (CommodityInfo comInfo : m_commoditInfo.values()) {
-        for (Map.Entry<MarketAPI, CommodityStats> marketEntry : comInfo.getStatsMap().entrySet()) {
+        for (Map.Entry<String, CommodityStats> marketEntry : comInfo.getStatsMap().entrySet()) {
             CommodityStats stats = marketEntry.getValue();
 
             double maxInputMultiplier = 1f;
@@ -215,8 +215,8 @@ public class EconomyEngine {
                     Map<String, Float> inputWeights = outputCom.demand;
 
                     // Only proceed if this output consumes the current commodity
-                    if (inputWeights.containsKey(stats.m_com.getId())) {
-                        double contribution = inputWeights.get(stats.m_com.getId()); // weight of this input
+                    if (inputWeights.containsKey(stats.comID)) {
+                        double contribution = inputWeights.get(stats.comID); // weight of this input
 
                         // Get the production stats of the output commodity
                         CommodityStats outputStats = getComStats(outputCommodityId, marketEntry.getKey());
@@ -362,11 +362,11 @@ public class EconomyEngine {
         return totalGlobalExports;
     }
 
-    public final int getExportMarketShare(String comID, MarketAPI market) {
+    public final int getExportMarketShare(String comID, String marketID) {
         final long total = getTotalGlobalExports(comID);
         if (total == 0) return 0;
 
-        return (int) (((float) getComStats(comID, market).globalExports / (float) total) * 100);
+        return (int) (((float) getComStats(comID, marketID).globalExports / (float) total) * 100);
     }
 
     public final long getTotalGlobalImports(String comID) {
@@ -378,11 +378,11 @@ public class EconomyEngine {
         return totalGlobalImports;
     }
 
-    public final int getImportMarketShare(String comID, MarketAPI market) {
+    public final int getImportMarketShare(String comID, String marketID) {
         final long total = getTotalGlobalImports(comID);
         if (total == 0) return 0;
 
-        return (int) (((float) getComStats(comID, market).globalImports / (float) total) * 100);
+        return (int) (((float) getComStats(comID, marketID).globalImports / (float) total) * 100);
     }
 
     public final long getTotalInFactionExports(String comID, FactionAPI faction) {
@@ -402,7 +402,7 @@ public class EconomyEngine {
         long totalGlobalExports = 0;
 
         for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
-            if (stats.market.getFaction().getId().equals(faction.getId())) {
+            if (!stats.market.getFaction().getId().equals(faction.getId())) {
                 continue;
             }
 

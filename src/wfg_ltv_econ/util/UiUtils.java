@@ -132,7 +132,7 @@ public class UiUtils {
         if (comStats.getEconomicFootprint() <= 0) {
             throw new IllegalStateException(
                 "CommodityInfoBar cannot display info: economic footprint is zero for " 
-                + comStats.m_com.getCommodity().getName()
+                + comStats.comID
             );
         }
 

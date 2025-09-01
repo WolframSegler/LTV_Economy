@@ -25,7 +25,6 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
 
 // import com.fs.starfarer.campaign.ui.marketinfo.b;
@@ -245,10 +244,10 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
         tp.beginIconGroup();
         tp.setIconSpacingMedium();
 
-        for (Pair<String, Integer> deficitEntry : m_industry.getAllDeficit()) {
-            CommodityStats stats = EconomyEngine.getInstance().getComStats(deficitEntry.one, getMarket());
+        for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
+            CommodityStats stats = EconomyEngine.getInstance().getComStats(spec.getId(), getMarket().getId());
 
-            if (stats.getDeficit() < 1) {
+            if (stats.getDeficit() < 1 || m_industry.getDemand(spec.getId()).getQuantity().getModifiedInt() < 1) {
                 continue;
             }
 
@@ -257,7 +256,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
             if (stats.getAvailabilityRatio() < 0.67f) iconCount = 2;
             if (stats.getAvailabilityRatio() < 0.33f) iconCount = 3;
 
-            tp.addIcons(stats.m_com, iconCount, IconRenderMode.RED);
+            tp.addIcons(spec, iconCount, IconRenderMode.RED);
         }
         tp.addIconGroup(24, 1, pad);
         tp.getPrev().getPosition().inBL(pad + 2, pad);

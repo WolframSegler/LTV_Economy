@@ -32,8 +32,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         NoRestockCondition.initialize();
         WorkerPoolCondition.initialize();
 
-        Global.getSettings().getCurrentState();
-
         final Map<String, Object> persistentData = Global.getSector().getPersistentData();
         final EconomyEngine engine = (EconomyEngine) persistentData.get(EconEngine);
         if (engine != null) {
