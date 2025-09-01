@@ -5,6 +5,8 @@ import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
 
+import wfg_ltv_econ.economy.LaborConfigLoader.OCCTag;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,16 +54,49 @@ public class IndustryConfigLoader {
                 //     // TODO: use workerAssignable field later
                 // }
 
-                if (value instanceof JSONObject commodityJson) {
-                    float baseProd = (float) commodityJson.optDouble("base_prod", 0);
+                OCCTag occTag = OCCTag.AVERAGE;
+                if (value instanceof String occTagStr && occTagStr.equals("occTag")) {
+                    switch (occTagStr) {
+                    case "average":
+                        break;
+                    case "industry":
+                        occTag = OCCTag.INDUSTRY;
+                        break;
+                    case "service":
+                        occTag = OCCTag.SERVICE;
+                        break;
+                    case "agriculture":
+                        occTag = OCCTag.AGRICULTURE;
+                        break;
+                    case "manual":
+                        occTag = OCCTag.MANUAL;
+                        break;
+                    case "space":
+                        occTag = OCCTag.SPACE;
+                        break;
+                    }
+                }
 
-                    Map<String, Float> demandMap = new HashMap<>();
-                    JSONObject demandJson = commodityJson.optJSONObject("demand");
-                    if (demandJson != null) {
-                        for (Iterator<String> itDemand = demandJson.keys(); itDemand.hasNext();) {
+                if (value instanceof JSONObject commodityJson) {
+                    float baseProd = (float) commodityJson.optDouble("base_prod", 1);
+
+                    Map<String, Float> CCMoneyDist = new HashMap<>();
+                    JSONObject mapJson = commodityJson.optJSONObject("constantCapitalMoneySplit");
+                    if (mapJson != null) {
+                        for (Iterator<String> itDemand = mapJson.keys(); itDemand.hasNext();) {
                             String inputId = itDemand.next();
-                            float weight = (float) demandJson.getDouble(inputId);
-                            demandMap.put(inputId, weight);
+                            float weight = (float) mapJson.getDouble(inputId);
+                            CCMoneyDist.put(inputId, weight);
+                        }
+                    }
+
+                    Map<String, Float> ConsumptionMap = new HashMap<>();
+                    mapJson = commodityJson.optJSONObject("consumptionRequirements");
+                    if (mapJson != null) {
+                        for (Iterator<String> itDemand = mapJson.keys(); itDemand.hasNext();) {
+                            String inputId = itDemand.next();
+                            float weight = (float) mapJson.getDouble(inputId);
+                            ConsumptionMap.put(inputId, weight);
                         }
                     }
 
@@ -89,13 +124,15 @@ public class IndustryConfigLoader {
                     OutputCom otp = new OutputCom(
                         commodityId,
                         baseProd,
-                        demandMap,
+                        CCMoneyDist,
                         scaleWSize,
                         useWorkers,
                         isAbstract,
                         checkLegality,
                         marketCondsFalse,
-                        marketCondsTrue
+                        marketCondsTrue,
+                        occTag,
+                        ConsumptionMap
                     );
 
                     commodityMap.put(commodityId, otp);
@@ -116,43 +153,51 @@ public class IndustryConfigLoader {
 
     public static class OutputCom {
         public final String comID;
-        public final float baseProd;
-        public final Map<String, Float> demand;
+        public final float baseProd; // Used when the output does not depend on workers
+        public final OCCTag occTag; // Used to determine the RoVC of the industry
+
+        public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
+        public final Map<String, Float> ConsumptionMap; // Flat input amounts that are independent of workers
+
         public final List<String> ifMarketCondsFalse;
         public final List<String> ifMarketCondsTrue;
 
         public final boolean scaleWithMarketSize; // Base size where no scaling happens is 3.
         public final boolean usesWorkers;
-        public final boolean isAbstract;
+        public final boolean isAbstract; // Abstract outputs have no output, only inputs
         public final boolean checkLegality;
 
         public OutputCom(
-            String comID, float baseProd, Map<String, Float> demand, boolean scaleWithMarketSize,
+            String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
             boolean useWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketConditionsFalse,
-            List<String> ifMarketConditionsTrue
+            List<String> ifMarketConditionsTrue, OCCTag occTag, Map<String, Float> ConsumptionMap
         ) {
             this.comID = comID;
             this.baseProd = baseProd;
-            this.demand = demand;
+            this.CCMoneyDist = CCMoneyDist;
+            this.ConsumptionMap = ConsumptionMap;
             this.ifMarketCondsFalse = ifMarketConditionsFalse;
             this.ifMarketCondsTrue = ifMarketConditionsTrue;
             this.scaleWithMarketSize = scaleWithMarketSize;
             this.usesWorkers = useWorkers;
             this.isAbstract = isAbstract;
             this.checkLegality = checkLegality;
+            this.occTag = occTag;
         }
 
         @Override
         public final String toString() {
             return comID + " {" +
                 "baseProd=" + baseProd +
-                ", demand=" + demand +
+                ", CCMoneyDist=" + CCMoneyDist +
+                ", ConsumptionMap=" + ConsumptionMap +
                 ", ifMarketConditionsFalse=" + ifMarketCondsFalse +
                 ", ifMarketConditionsTrue=" + ifMarketCondsTrue +
                 ", scaleWithMarketSize=" + scaleWithMarketSize +
                 ", usesWorkers=" + usesWorkers +
                 ", isAbstract=" + isAbstract +
                 ", checkLegality=" + checkLegality +
+                ", occTag=" + occTag +
                 '}';
         }
     }

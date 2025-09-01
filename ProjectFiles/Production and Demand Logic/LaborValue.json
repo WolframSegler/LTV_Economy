@@ -1,0 +1,30 @@
+{
+  "EconomyEngineConcepts": {
+    "description": "This document explains how production, labor, and exploitation are modeled in the economic system.",
+    "key_concepts": {
+      "labor_value": "The economic value a worker produces per day. Measured in monetary units, compared to the base_price of the output commodity.",
+      "value_added_by_labor": "The portion of a commodity's output value that comes from labor, i.e., base_price minus total input costs.",
+      "exploitation_factor": "Ratio of value produced by labor to the actual wage received. A factor > 0 indicates worker is underpaid relative to output value.",
+      "workers_needed": "Calculated as Value Added by Labor ÷ Worker Daily Labor Value. Adjusted for the exploitation factor."
+    },
+    "example": {
+      "industry": "heavyindustry",
+      "commodity": "heavy_machinery",
+      "base_prod": 1.3,
+      "input_cost": 50,
+      "base_price": 150,
+      "value_added_by_labor": 100,
+      "worker_daily_wage": 2,
+      "worker_labor_value": 6,
+      "exploitation_factor": 3,
+      "calculation": "Workers Needed = Value Added ÷ Worker Labor Value = 100 ÷ 6 = 16.667 workers for 1 day",
+      "notes": "The example shows that to produce 1 unit of heavy machinery, 16.667 workers working 1 day are required when the exploitation factor is 3 (workers receive 1/3 of the value they create as wages)."
+    },
+    "assumptions": [
+      "Average person spends 50% of income on food (used as a baseline for wage calculations).",
+      "Wages for different classes are derived from the BASE assumption and Society.json class distribution.",
+      "Production scales linearly with the number of workers and their labor value."
+    ]
+  },
+  "rate_of_surplus_value": "In real life, the value of the labor power of a worker is more than 3 times higher compared to his wage. https://thetricontinental.org/wp-content/uploads/2019/09/190928_Notebook-2_EN_Final_Web.pdf. Therefore, to reflect the dystopian nature of the persean sector, the RoSV will be set at 4."
+}

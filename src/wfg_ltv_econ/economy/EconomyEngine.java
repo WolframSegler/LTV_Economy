@@ -17,6 +17,7 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.economy.IndustryConfigLoader.OutputCom;
+import wfg_ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg_ltv_econ.industry.LtvBaseIndustry;
 
 /**
@@ -26,7 +27,9 @@ public class EconomyEngine {
     private static EconomyEngine instance;
 
     private final Map<String, CommodityInfo> m_commoditInfo;
-    public transient Map<String, Map<String, IndustryConfigLoader.OutputCom>> configs;
+
+    public transient Map<String, Map<String, IndustryConfigLoader.OutputCom>> ind_config;
+    public transient LaborConfig labor_config;
 
     private int marketAmount = 0; 
 
@@ -63,7 +66,8 @@ public class EconomyEngine {
     }
 
     public final Object readResolve() {
-        configs = IndustryConfigLoader.loadAsMap();
+        ind_config = IndustryConfigLoader.loadAsMap();
+        labor_config = LaborConfigLoader.loadAsClass();
 
         return this;
     }
@@ -171,13 +175,13 @@ public class EconomyEngine {
             double outputMultiplier = 1f;
 
             for (Industry ind : stats.getVisibleIndustries()) {
-                Map<String, OutputCom> indObj = configs.get(ind.getId());
+                Map<String, OutputCom> indObj = ind_config.get(ind.getId());
                 if (indObj == null) continue;
 
                 OutputCom outputCom = indObj.get(stats.comID);
                 if (outputCom == null || outputCom.isAbstract) continue;
 
-                Map<String, Float> weights = outputCom.demand;
+                Map<String, Float> weights = outputCom.inputMap;
                 for (Map.Entry<String, Float> inputWeight : weights.entrySet()) {
                     CommodityStats inputStats = getComStats(inputWeight.getKey(), marketEntry.getKey());
                     if (inputStats == null) continue;
@@ -202,7 +206,7 @@ public class EconomyEngine {
 
             // Loop through industries in this market that are relevant to this commodity
             for (Industry ind : stats.getVisibleIndustries()) {
-                Map<String, OutputCom> indObj = configs.get(ind.getId());
+                Map<String, OutputCom> indObj = ind_config.get(ind.getId());
                 if (indObj == null) continue;
 
                 // Check all outputs this industry produces
@@ -212,7 +216,7 @@ public class EconomyEngine {
 
                     if (outputCom.isAbstract) continue;
 
-                    Map<String, Float> inputWeights = outputCom.demand;
+                    Map<String, Float> inputWeights = outputCom.inputMap;
 
                     // Only proceed if this output consumes the current commodity
                     if (inputWeights.containsKey(stats.comID)) {
@@ -269,7 +273,7 @@ public class EconomyEngine {
 	public static final void applySubclassPIOs(MarketAPI market, BaseIndustry ind) {
         if (EconomyEngine.getInstance() == null) return;
 
-		final Map<String, OutputCom> indMap = EconomyEngine.getInstance().configs.get(ind.getId());
+		final Map<String, OutputCom> indMap = EconomyEngine.getInstance().ind_config.get(ind.getId());
 		final Map<String, Float> totalDemandMap = new HashMap<>();
 
 		if (indMap == null || indMap.isEmpty()) return;
@@ -306,7 +310,7 @@ public class EconomyEngine {
             if (skip) continue;
             if (com.isAbstract) scale *= 1 / ind.getDemandReduction().getMult();
 
-			for (Map.Entry<String, Float> demandEntry : com.demand.entrySet()) {
+			for (Map.Entry<String, Float> demandEntry : com.inputMap.entrySet()) {
 				String input = demandEntry.getKey();
 				float demandAmount = demandEntry.getValue() * com.baseProd * scale;
 
