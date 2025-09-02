@@ -48,27 +48,11 @@ public class CommodityInfo {
     }
 
     public final void addMarket(String marketID) {
-        if (m_comStats.containsKey(marketID)) return;
-        
-        m_comStats.put(marketID, new CommodityStats(comID, marketID));
+        m_comStats.putIfAbsent(marketID, new CommodityStats(comID, marketID));
     }
 
-    public final void refreshMarkets() {
-        final EconomyEngine engine = EconomyEngine.getInstance();
-
-        final List<MarketAPI> oldList = new ArrayList<>();
-        for (String marketID : m_comStats.keySet()) {
-            oldList.add(Global.getSector().getEconomy().getMarket(marketID));
-        }
-
-        List<MarketAPI> newMarkets = EconomyEngine.symmetricDifference(
-            engine.getMarketsCopy(),
-            oldList
-        );
-
-        for (MarketAPI market : newMarkets) {
-            addMarket(market.getId());
-        }
+    public final void removeMarket(String marketID) {
+        m_comStats.remove(marketID);
     }
 
     public final CommodityStats getStats(String marketID) {

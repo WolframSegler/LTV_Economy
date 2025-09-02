@@ -1,6 +1,7 @@
 package wfg_ltv_econ.economy;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,11 +11,14 @@ import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
+import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
+import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 
 import wfg_ltv_econ.conditions.WorkerPoolCondition;
 import wfg_ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
@@ -25,16 +29,15 @@ import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 /**
  * Handles the trade, consumption, production and all related logic
  */
-public class EconomyEngine {
+public class EconomyEngine implements PlayerColonizationListener, ColonyDecivListener {
     private static EconomyEngine instance;
 
+    private final Set<String> m_registeredMarkets = new HashSet<>();
     private final Map<String, CommodityInfo> m_commoditInfo;
 
+    private transient Map<String, List<OutputComReference>> commodityToOutputMap;
     public transient Map<String, IndustryConfig> ind_config;
-    private final transient Map<String, List<OutputComReference>> commodityToOutputMap = new HashMap<>();
     public transient LaborConfig labor_config;
-
-    private int marketAmount = 0;
 
     public static void createInstance() {
         if (instance == null) {
@@ -64,8 +67,6 @@ public class EconomyEngine {
             m_commoditInfo.put(spec.getId(), new CommodityInfo(spec));
         }
 
-        marketAmount = getMarketsCopy().size();
-
         readResolve();
     }
 
@@ -73,6 +74,8 @@ public class EconomyEngine {
         ind_config = IndustryConfigLoader.loadAsMap();
         labor_config = LaborConfigLoader.loadAsClass();
         buildCommodityOutputMap();
+
+        Global.getSector().getListenerManager().addListener(this, true);
 
         return this;
     }
@@ -97,13 +100,6 @@ public class EconomyEngine {
 
         dayTracker = day;
 
-        if (getMarketsCopy().size() != marketAmount) {
-
-            for (CommodityInfo comInfo : m_commoditInfo.values()) {
-                comInfo.refreshMarkets();
-            }
-        }
-
         mainLoop(false);
     }
 
@@ -113,6 +109,8 @@ public class EconomyEngine {
 
     // Order matters here
     private final void mainLoop(boolean fakeAdvance) {
+        refreshMarkets();
+
         if (!fakeAdvance) {
             assignWorkers();
         }
@@ -135,14 +133,53 @@ public class EconomyEngine {
     }
 
     public final void registerMarket(String marketID) {
-        for (CommodityInfo comInfo : m_commoditInfo.values()) {
-            comInfo.addMarket(marketID);
+        if (m_registeredMarkets.add(marketID)) {
+            for (CommodityInfo comInfo : m_commoditInfo.values()) {
+                comInfo.addMarket(marketID);
+            }
+
+            WorkerRegistry.getInstance().register(marketID);
         }
+    }
+
+    public final void removeMarket(String marketID) {
+        if (m_registeredMarkets.remove(marketID)) {
+            for (CommodityInfo comInfo : m_commoditInfo.values()) {
+                comInfo.removeMarket(marketID);
+            }
+
+            WorkerRegistry.getInstance().remove(marketID);
+        }
+    }
+
+    public final void refreshMarkets() {
+        for (MarketAPI market : getMarketsCopy()) {
+            registerMarket(market.getId());
+        }
+    }
+
+    public Set<String> getRegisteredMarkets() {
+        return Collections.unmodifiableSet(m_registeredMarkets);
     }
 
     public static final List<MarketAPI> getMarketsCopy() {
         return Global.getSector().getEconomy().getMarketsCopy();
     }
+
+    public void reportPlayerColonizedPlanet(PlanetAPI planet) {
+        final String marketID = planet.getMarket().getId();
+        registerMarket(marketID);
+    }
+
+    public void reportPlayerAbandonedColony(MarketAPI market) {
+        removeMarket(market.getId());
+    }
+
+    public void reportColonyDecivilized(MarketAPI market, boolean fullyDestroyed) {
+        removeMarket(market.getId());
+    }
+
+    public void reportColonyAboutToBeDecivilized(MarketAPI a, boolean b) {}
 
     public static final List<CommoditySpecAPI> getEconCommodities() {
         return Global.getSettings().getAllCommoditySpecs().stream()
@@ -190,6 +227,7 @@ public class EconomyEngine {
                 double outputMultiplier = 1f;
 
                 List<OutputComReference> relevantOutputs = commodityToOutputMap.get(stats.comID);
+                if (relevantOutputs == null) continue; // Non-existing entries are null
 
                 for (OutputComReference ref : relevantOutputs) {
                     OutputCom output = ref.output;
@@ -217,8 +255,11 @@ public class EconomyEngine {
                 double maxInputMultiplier = 1f;
 
                 List<OutputComReference> relevantOutputs = commodityToOutputMap.get(stats.comID);
+                if (relevantOutputs == null) continue; // Non-existing entries are null
 
                 for (OutputComReference ref : relevantOutputs) {
+                    if (ref.output.isAbstract) continue;
+
                     Map<String, Float> weights = ref.output.usesWorkers ? 
                         ref.output.DynamicInputWeights : ref.output.ConsumptionMap;
 
@@ -440,21 +481,8 @@ public class EconomyEngine {
         return totalGlobalExports;
     }
 
-    public static final <T> List<T> symmetricDifference(List<T> list1, List<T> list2) {
-        Set<T> set1 = new HashSet<>(list1);
-        Set<T> set2 = new HashSet<>(list2);
-
-        Set<T> result = new HashSet<>(set1);
-        result.addAll(set2); // union
-        Set<T> tmp = new HashSet<>(set1);
-        tmp.retainAll(set2); // intersection
-        result.removeAll(tmp); // remove intersection
-
-        return new ArrayList<>(result);
-    }
-
     public final void buildCommodityOutputMap() {
-        commodityToOutputMap.clear();
+        commodityToOutputMap = new HashMap<>();
 
         for (IndustryConfig indEntry : ind_config.values()) {
 

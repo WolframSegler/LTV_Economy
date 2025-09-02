@@ -38,8 +38,36 @@ public class WorkerRegistry {
     }
 
     public final void register(String marketID, String indID) {
-        String key = makeKey(marketID, indID);
+        final String key = makeKey(marketID, indID);
         registry.putIfAbsent(key, new WorkerIndustryData(marketID, indID));
+    }
+
+    public final void register(String marketID) {
+        final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
+        for (Industry ind : market.getIndustries()) {
+            final String key = makeKey(marketID, ind.getId());
+            registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind.getId()));
+        }
+    }
+
+    public final void remove(String marketID, String indID) {
+        registry.remove(makeKey(marketID, indID));
+    }
+
+    public final void remove(String marketID) {
+        final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
+        for (Industry ind : market.getIndustries()) {
+            registry.remove(makeKey(marketID, ind.getId()));
+        }
+    }
+
+    public final boolean isMarketDataPresent(String marketID) {
+        for (String dataID : registry.keySet()) {
+            if (dataID.startsWith(marketID + "::")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public final WorkerIndustryData getData(String marketID, String industryID) {

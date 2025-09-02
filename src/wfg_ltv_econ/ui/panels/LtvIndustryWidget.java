@@ -36,6 +36,7 @@ import com.fs.graphics.A.D;
 import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
 import wfg_ltv_econ.economy.WorkerRegistry;
+import wfg_ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg_ltv_econ.ui.LtvUIState;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
@@ -222,7 +223,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
         add(industryIcon.getPanel()).inBL(0, 0);
 
 
-        
+        final IndustryConfig config = EconomyEngine.getInstance().ind_config.get(m_industry.getId());
         final WorkerIndustryData data = WorkerRegistry.getInstance().getData(
             getMarket().getId(), m_industry.getId()
         );
@@ -231,7 +232,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
         workerCountLabel.setHighlightColor(
             UiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
         );
-        if (EconomyEngine.getInstance().ind_config.get(m_industry.getId()).workerAssignable) {
+        if (config != null && config.workerAssignable) {
 
             final String assignedStr = NumFormat.engNotation(data.getWorkersAssigned());
 
@@ -249,6 +250,8 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
 
         for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
             CommodityStats stats = EconomyEngine.getInstance().getComStats(spec.getId(), getMarket().getId());
+
+            if (stats == null) continue;
 
             if (stats.getDeficit() < 1 || m_industry.getDemand(spec.getId()).getQuantity().getModifiedInt() < 1) {
                 continue;
