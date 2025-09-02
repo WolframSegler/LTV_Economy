@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -29,11 +30,13 @@ import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 /**
  * Handles the trade, consumption, production and all related logic
  */
-public class EconomyEngine implements PlayerColonizationListener, ColonyDecivListener {
+public class EconomyEngine extends BaseCampaignEventListener
+    implements PlayerColonizationListener, ColonyDecivListener {
+
     private static EconomyEngine instance;
 
-    private final Set<String> m_registeredMarkets = new HashSet<>();
-    private final Map<String, CommodityInfo> m_commoditInfo;
+    private final Set<String> m_registeredMarkets;
+    private final Map<String, CommodityInfo> m_comInfo;
 
     private transient Map<String, List<OutputComReference>> commodityToOutputMap;
     public transient Map<String, IndustryConfig> ind_config;
@@ -58,13 +61,19 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
     }
 
     private EconomyEngine() {
-        this.m_commoditInfo = new HashMap<>();
+        super(true);
+        m_registeredMarkets = new HashSet<>();
+        m_comInfo = new HashMap<>();
+
+        for (MarketAPI market : getMarketsCopy()) {
+            m_registeredMarkets.add(market.getId());
+        }
 
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
             if (spec.isNonEcon())
                 continue;
 
-            m_commoditInfo.put(spec.getId(), new CommodityInfo(spec));
+            m_comInfo.put(spec.getId(), new CommodityInfo(spec));
         }
 
         readResolve();
@@ -76,14 +85,9 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
         buildCommodityOutputMap();
 
         Global.getSector().getListenerManager().addListener(this, true);
+        Global.getSector().addListener(this);
 
         return this;
-    }
-
-    public final void update() {
-        for (CommodityInfo comInfo : m_commoditInfo.values()) {
-            comInfo.update();
-        }
     }
 
     protected int dayTracker = -1;
@@ -115,7 +119,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
             assignWorkers();
         }
 
-        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+        for (CommodityInfo comInfo : m_comInfo.values()) {
             comInfo.reset();
 
             comInfo.update();
@@ -125,7 +129,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
 
         weightedInputDeficitMods();
 
-        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+        for (CommodityInfo comInfo : m_comInfo.values()) {
             comInfo.trade();
 
             comInfo.advance(fakeAdvance);
@@ -134,7 +138,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
 
     public final void registerMarket(String marketID) {
         if (m_registeredMarkets.add(marketID)) {
-            for (CommodityInfo comInfo : m_commoditInfo.values()) {
+            for (CommodityInfo comInfo : m_comInfo.values()) {
                 comInfo.addMarket(marketID);
             }
 
@@ -144,7 +148,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
 
     public final void removeMarket(String marketID) {
         if (m_registeredMarkets.remove(marketID)) {
-            for (CommodityInfo comInfo : m_commoditInfo.values()) {
+            for (CommodityInfo comInfo : m_comInfo.values()) {
                 comInfo.removeMarket(marketID);
             }
 
@@ -166,17 +170,25 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
         return Global.getSector().getEconomy().getMarketsCopy();
     }
 
+    public void reportPlayerOpenedMarket() {
+        fakeAdvance();
+        Global.getLogger(getClass()).error("MarketOpened");
+    }
+
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
         final String marketID = planet.getMarket().getId();
         registerMarket(marketID);
+        Global.getLogger(getClass()).error("MarketColonized");
     }
 
     public void reportPlayerAbandonedColony(MarketAPI market) {
         removeMarket(market.getId());
+        Global.getLogger(getClass()).error("MarketAbandoned");
     }
 
     public void reportColonyDecivilized(MarketAPI market, boolean fullyDestroyed) {
         removeMarket(market.getId());
+        Global.getLogger(getClass()).error("MarketDecivilized");
     }
 
     public void reportColonyAboutToBeDecivilized(MarketAPI a, boolean b) {}
@@ -188,15 +200,15 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
     }
 
     public final CommodityInfo getCommodityInfo(String comID) {
-        return m_commoditInfo.get(comID);
+        return m_comInfo.get(comID);
     }
 
     public final boolean hasCommodity(String comID) {
-        return m_commoditInfo.containsKey(comID);
+        return m_comInfo.containsKey(comID);
     }
 
     public final CommodityStats getComStats(String comID, String marketID) {
-        final CommodityInfo comInfo = m_commoditInfo.get(comID);
+        final CommodityInfo comInfo = m_comInfo.get(comID);
 
         if (comInfo == null) {
             throw new RuntimeException("Referencing a non-econ or missing commodity: " + comID);
@@ -219,8 +231,21 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
         }
     }
 
+    public static final String getBaseIndustryID(Industry ind) {
+        IndustrySpecAPI currentInd = ind.getSpec();
+
+        while (true) {
+            final String downgradeId = currentInd.getDowngrade();
+            if (downgradeId.isEmpty()) break;
+
+            currentInd = Global.getSettings().getIndustrySpec(downgradeId);
+        }
+
+        return currentInd.getId();
+    }
+
     public final void weightedOutputDeficitMods() {
-        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+        for (CommodityInfo comInfo : m_comInfo.values()) {
             for (Map.Entry<String, CommodityStats> marketEntry : comInfo.getStatsMap().entrySet()) {
                 CommodityStats stats = marketEntry.getValue();
 
@@ -249,7 +274,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
     }
 
     public final void weightedInputDeficitMods() {
-        for (CommodityInfo comInfo : m_commoditInfo.values()) {
+        for (CommodityInfo comInfo : m_comInfo.values()) {
             for (Map.Entry<String, CommodityStats> marketEntry : comInfo.getStatsMap().entrySet()) {
                 CommodityStats stats = marketEntry.getValue();
                 double maxInputMultiplier = 1f;
@@ -276,6 +301,8 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
 
     private final void assignWorkers() {
 
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
+
         for (MarketAPI market : getMarketsCopy()) {
             if (market.isPlayerOwned() || market.isHidden())
                 continue;
@@ -284,21 +311,19 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
             if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID))
                 continue;
 
-            int workerAssignableIndustries = 0;
+            List<WorkerIndustryData> workerAssignable = new ArrayList<>(8);
 
             for (Industry ind : workingIndustries) {
-                if (ind.isFunctional()) {
-                    workerAssignableIndustries++;
+                WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
+                if (ind.isFunctional() && data != null) {
+                    workerAssignable.add(data);
                 }
             }
 
-            if (workerAssignableIndustries == 0) continue;
+            if (workerAssignable.isEmpty()) continue;
 
-            for (Industry ind : workingIndustries) {
-                if (ind.isFunctional()) {
-                    WorkerIndustryData reg = WorkerRegistry.getInstance().getData(market.getId(), ind.getId());
-                    reg.setWorkersAssigned(1 / (float) workerAssignableIndustries);
-                }
+            for (WorkerIndustryData data : workerAssignable) {
+                data.setWorkersAssigned(1 / (float) workerAssignable.size());
             }
         }
     }
@@ -315,16 +340,10 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
 
         if (engine == null || workerReg == null) return;
 
-        IndustryConfig indConfig = engine.ind_config.get(ind.getId());
-        IndustrySpecAPI currentInd = ind.getSpec();
+        final String baseIndustryID = getBaseIndustryID(ind);
 
-        while (indConfig == null) {
-            String downgradeId = currentInd.getDowngrade();
-            if (downgradeId == null || downgradeId.isEmpty()) break;
+        IndustryConfig indConfig = engine.ind_config.get(baseIndustryID);
 
-            indConfig = engine.ind_config.get(downgradeId);
-            currentInd = Global.getSettings().getIndustrySpec(downgradeId);
-        }
         if (indConfig == null) return; // NO-OP if no config file exists. Implement default PIOs later.
 
         final Map<String, OutputCom> indMap = indConfig.outputs;
@@ -344,8 +363,6 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
             float scale = 1f;
             boolean skip = false;
 
-            if (output.scaleWithMarketSize) scale *= Math.pow(10, size - 3);
-
             if (output.checkLegality && market.isIllegal(entry.getKey())) {
                 skip = true;
             }
@@ -362,6 +379,11 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
                 }
             }
             if (skip) continue;
+
+            if (output.scaleWithMarketSize) scale *= Math.pow(10, size - 3);
+            if (output.isAbstract) {
+                scale *= 1 / ind.getDemandReduction().getMult();
+            }
 
             if (!output.usesWorkers) {
                 for (Map.Entry<String, Float> demandEntry : output.ConsumptionMap.entrySet()) {
@@ -397,7 +419,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
                     totalDemandMap.merge(inputID, qty, Float::sum);
                 }
 
-                // Handle supply
+                // Handle outputs
                 if (!output.isAbstract && EconomyEngine.getInstance().isWorkerAssignable(ind)) {
                     long workersAssigned = workerReg.getData(market.getId(), ind.getId()).getWorkersAssigned();
 
@@ -422,7 +444,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
 
     public final long getTotalGlobalExports(String comID) {
         long totalGlobalExports = 0;
-        for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             totalGlobalExports += stats.globalExports;
         }
 
@@ -439,7 +461,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
 
     public final long getTotalGlobalImports(String comID) {
         long totalGlobalImports = 0;
-        for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             totalGlobalImports += stats.globalImports;
         }
 
@@ -457,7 +479,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
     public final long getTotalInFactionExports(String comID, FactionAPI faction) {
         long TotalFactionExports = 0;
 
-        for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             if (!stats.market.getFaction().getId().equals(faction.getId())) {
                 continue;
             }
@@ -470,7 +492,7 @@ public class EconomyEngine implements PlayerColonizationListener, ColonyDecivLis
     public final long getFactionTotalGlobalExports(String comID, FactionAPI faction) {
         long totalGlobalExports = 0;
 
-        for (CommodityStats stats : m_commoditInfo.get(comID).getAllStats()) {
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             if (!stats.market.getFaction().getId().equals(faction.getId())) {
                 continue;
             }

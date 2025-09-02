@@ -13,7 +13,7 @@ import wfg_ltv_econ.economy.WorkerRegistry;
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
     public static final String EconEngine = "ltv_econ_econ_engine";
-    public static final String WorkerRegistery = "ltv_econ_worker_registery";
+    public static final String WorkerReg = "ltv_econ_worker_registry";
 
     @Override
     public void onApplicationLoad() throws Exception {
@@ -37,13 +37,23 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         final Map<String, Object> persistentData = Global.getSector().getPersistentData();
 
         final EconomyEngine engine = (EconomyEngine) persistentData.get(EconEngine);
-        final WorkerRegistry workerRegistry = (WorkerRegistry) persistentData.get(WorkerRegistery);
+        final WorkerRegistry workerRegistry = (WorkerRegistry) persistentData.get(WorkerReg);
 
         if (engine != null) {
             EconomyEngine.setInstance(engine);
+        } else {
+            EconomyEngine.createInstance();
+            if (Global.getSettings().isDevMode()) {
+                Global.getLogger(getClass()).info("Economy Engine constructed");
+            }
         }
         if (workerRegistry != null) {
             WorkerRegistry.setInstance(workerRegistry);
+        } else {
+            WorkerRegistry.createInstance();
+            if (Global.getSettings().isDevMode()) {
+                Global.getLogger(getClass()).info("Worker Registery constructed");
+            }
         }
 
         Global.getSector().getListenerManager().addListener(new AddWorkerIndustryOption(), true);
@@ -56,6 +66,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         Map<String, Object> persistentData = Global.getSector().getPersistentData();
 
         persistentData.put(EconEngine, EconomyEngine.getInstance());
-        persistentData.put(WorkerRegistery, WorkerRegistry.getInstance());
+        persistentData.put(WorkerReg, WorkerRegistry.getInstance());
     }
 }

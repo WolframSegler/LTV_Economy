@@ -21,17 +21,13 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
     public Industry industry = null;
 
     public boolean isSuitable(Industry ind, boolean allowUnderConstruction){
-        if (ind == null ||
-            ind.getMarket() == null ||
+        if (ind == null || ind.getMarket() == null ||
             (!allowUnderConstruction && (ind.isBuilding() || ind.isUpgrading()))
         ) {
             return false;
         }
 
-        if (!EconomyEngine.getInstance().ind_config.get(ind.getId()).workerAssignable) {
-            return false;
-        }
-        return true;
+        return EconomyEngine.getInstance().isWorkerAssignable(ind);
     }
 
     @Override
