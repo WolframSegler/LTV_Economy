@@ -374,8 +374,6 @@ public class LtvIndustryListPanel
 			}
 		}
 
-		CommodityStats.recalculateMaxDemandAndSupplyForAll(getMarket());
-
 		add(buttonWrapper).inBL(0, 0);
 	}
 

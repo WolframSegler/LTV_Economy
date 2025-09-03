@@ -1,8 +1,6 @@
 package wfg_ltv_econ.industry;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.awt.Color;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -13,16 +11,13 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.campaign.listeners.ListenerUtil;
-import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.SharedUnlockData;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.econ.impl.InstallableItemEffect;
-import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
-import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -66,53 +61,8 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 
 	public LtvBaseIndustry() {}
 
-	public Map<String, MutableCommodityQuantity> getSupply() {
-		return supply;
-	}
-	public Map<String, MutableCommodityQuantity> getDemand() {
-		return demand;
-	}
-
-	protected transient String modId;
-	protected transient String[] modIds;
-
-	@Override
-	protected Object readResolve() {
-		spec = Global.getSettings().getIndustrySpec(id);
-
-		if (buildTime < 1f)
-			buildTime = 1f;
-
-		modId = "ind_" + id;
-		modIds = new String[10];
-		for (int i = 0; i < modIds.length; i++) {
-			modIds[i] = modId + "_" + i;
-		}
-
-		if (demandReduction == null)
-			demandReduction = new MutableStat(0);
-		if (supplyBonus == null)
-			supplyBonus = new MutableStat(0);
-
-		if (supply != null) {
-			for (String id : new ArrayList<String>(supply.keySet())) {
-				MutableCommodityQuantity stat = supply.get(id);
-				stat.getQuantity().unmodifyFlat("ind_sb");
-			}
-		}
-		if (demand != null) {
-			for (String id : new ArrayList<String>(demand.keySet())) {
-				MutableCommodityQuantity stat = demand.get(id);
-				stat.getQuantity().unmodifyFlat("ind_dr");
-			}
-		}
-
-		return this;
-	}
-
 	@Override
 	public void apply(boolean updateIncomeAndUpkeep) {
-		// Increased Production also increases the Demand
 		updateSupplyAndDemandModifiers();
 
 		if (updateIncomeAndUpkeep) {
@@ -137,62 +87,6 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 				}
 			}
 		}
-
-		EconomyEngine.applySubclassPIOs(market, this);
-	}
-
-	@Override
-	protected String getModId() {
-		return modId;
-	}
-
-	@Override
-	protected String getModId(int index) {
-		return modIds[index];
-	}
-
-	@Override
-	public void demand(String modId, String commodityId, int quantity, String desc) {
-		if (quantity == 0) {
-			getDemand(commodityId).getQuantity().unmodifyFlat(modId);
-		} else {
-			getDemand(commodityId).getQuantity().modifyFlat(modId, quantity, desc);
-		}
-
-		if (quantity > 0) {
-			if (!demandReduction.isUnmodified()) {
-				getDemand(commodityId).getQuantity().modifyMult("ind_dr", demandReduction.getMult());
-				getDemand(commodityId).getQuantity().modifyFlat("ind_dr", demandReduction.getFlatMod());
-			} else {
-				getDemand(commodityId).getQuantity().unmodifyMult("ind_dr");
-				getDemand(commodityId).getQuantity().unmodifyFlat("ind_dr");
-			}
-		}
-	}
-
-	@Override
-	public void supply(String modId, String commodityId, int quantity, String desc) {
-		if (quantity == 0) {
-			getSupply(commodityId).getQuantity().unmodifyFlat(modId);
-		} else {
-			getSupply(commodityId).getQuantity().modifyFlat(modId, quantity, desc);
-		}
-
-		if (quantity > 0) {
-			if (!supplyBonus.isUnmodified()) {
-				getSupply(commodityId).getQuantity().modifyMult("ind_sb", supplyBonus.getMult());
-				getSupply(commodityId).getQuantity().modifyFlat("ind_sb", supplyBonus.getFlatMod());
-			} else {
-				getSupply(commodityId).getQuantity().unmodifyMult("ind_sb");
-				getSupply(commodityId).getQuantity().unmodifyFlat("ind_sb");
-			}
-		}
-	}
-
-	@Override
-	@Deprecated
-	protected void applyDeficitToProduction(int index, Pair<String, Integer> deficit, String... commodities) {
-		super.applyDeficitToProduction(index, deficit, commodities);
 	}
 
 	@Override
@@ -268,11 +162,6 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 		return upkeep;
 	}
 
-	@Override
-	public MarketAPI getMarket() {
-		return market;
-	}
-
 	public Pair<String, Float> ltv_getMaxDeficit(String... commodityIds) {
 		// 1 is no deficit and 0 is 100% deficit
 		Pair<String, Float> result = new Pair<String, Float>();
@@ -293,24 +182,6 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 			}
 		}
 		return result;
-	}
-
-	@Override
-	@Deprecated
-	public Pair<String, Integer> getMaxDeficit(String... commodityIds) {
-		return super.getMaxDeficit(commodityIds);
-	}
-
-	@Override
-	@Deprecated
-	public List<Pair<String, Integer>> getAllDeficit() {
-		return super.getAllDeficit();
-	}
-
-	@Override
-	@Deprecated
-	public List<Pair<String, Integer>> getAllDeficit(String... commodityIds) {
-		return super.getAllDeficit(commodityIds);
 	}
 
 	@Override
@@ -808,82 +679,9 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 	}
 
 	@Override
-	protected void applyAICoreToIncomeAndUpkeep() {
-		if (aiCoreId == null || Commodities.GAMMA_CORE.equals(aiCoreId)) {
-			getUpkeep().unmodifyMult("ind_core");
-			return;
-		}
-
-		if (aiCoreId.equals(Commodities.ALPHA_CORE)) {
-			getUpkeep().modifyMult("ind_core", ALPHA_CORE_UPKEEP_REDUCTION_MULT, "Alpha Core assigned");
-
-		} else if (aiCoreId.equals(Commodities.BETA_CORE)) {
-			getUpkeep().modifyMult("ind_core", BETA_CORE_UPKEEP_REDUCTION_MULT, "Beta Core assigned");
-
-		}
-	}
-
-	@Override
-	protected void updateAICoreToSupplyAndDemandModifiers() {
-		if (aiCoreId == null) {
-			return;
-		}
-
-		if (aiCoreId.equals(Commodities.ALPHA_CORE)) {
-			supplyBonus.modifyMult(getModId(0), ALPHA_CORE_PRODUCTION_BOOST, "Alpha core");
-			demandReduction.modifyMult(getModId(0), ALPHA_CORE_INPUT_REDUCTION, "Alpha core");
-			demandReduction.modifyMult(getModId(7), ALPHA_CORE_PRODUCTION_BOOST, "Alpha core");
-
-		} else if (aiCoreId.equals(Commodities.BETA_CORE)) {
-			demandReduction.modifyMult(getModId(0), BETA_CORE_INPUT_REDUCTION, "Beta core");
-
-		} else if (aiCoreId.equals(Commodities.GAMMA_CORE)) {
-			demandReduction.modifyMult(getModId(0), GAMMA_CORE_INPUT_REDUCTION, "Gamma core");
-		}
-	}
-
-	@Override
-	protected void updateSupplyAndDemandModifiers() {
-
-		supplyBonus.unmodify();
-		demandReduction.unmodify();
-
-		updateAICoreToSupplyAndDemandModifiers();
-
-		updateImprovementSupplyAndDemandModifiers();
-
-		PersonAPI admin = market.getAdmin();
-		if (admin != null && admin.getStats() != null) {
-
-			if (admin.getStats().getDynamic().getValue(Stats.SUPPLY_BONUS_MOD, 0) != 0) {
-				supplyBonus.modifyMult(getModId(1), getImproveProductionBonusMult(), "Administrator");
-				demandReduction.modifyMult(getModId(9), getImproveProductionBonusMult(), "Administrator");
-			}
-
-			if (admin.getStats().getDynamic().getValue(Stats.DEMAND_REDUCTION_MOD, 0) != 0) {
-				demandReduction.modifyMult(getModId(1), DEFAULT_INPUT_REDUCTION_BONUS, "Administrator");
-			}
-		}
-
-		if (supplyBonusFromOther != null) {
-			supplyBonus.applyMods(supplyBonusFromOther);
-			demandReduction.applyMods(supplyBonusFromOther);
-		}
-		if (demandReductionFromOther != null) {
-			demandReduction.applyMods(demandReductionFromOther);
-		}
-	}
-
-	@Override
 	@Deprecated
 	protected int getStabilityPenalty() {
 		return super.getStabilityPenalty();
-	}
-
-	@Override
-	@Deprecated
-	protected float getDeficitMult(String... commodities) {
-		return super.getDeficitMult(commodities);
 	}
 
 	@Override
@@ -900,10 +698,10 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 		if (canImproveToIncreaseProduction()) {
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
 				info.addPara("Production increased by %s.", initPad, Misc.getHighlightColor(),
-						Strings.X + getImproveProductionBonusMult());
+						Strings.X + DEFAULT_IMPROVE_PRODUCTION_BONUS);
 			} else {
 				info.addPara("Increases production by %s.", initPad, Misc.getHighlightColor(),
-						Strings.X + getImproveProductionBonusMult());
+						Strings.X + DEFAULT_IMPROVE_PRODUCTION_BONUS);
 			}
 			initPad = opad;
 			addedSomething = true;
@@ -919,33 +717,5 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 		if (!addedSomething) {
 			info.addSpacer(-opad);
 		}
-	}
-
-	@Override
-	@Deprecated
-	protected int getImproveProductionBonus() {
-		return (int) DEFAULT_IMPROVE_PRODUCTION_BONUS;
-	}
-
-	protected float getImproveProductionBonusMult() {
-		return DEFAULT_IMPROVE_PRODUCTION_BONUS;
-	}
-
-	@Override
-	protected void updateImprovementSupplyAndDemandModifiers() {
-		if (!canImproveToIncreaseProduction() || !isImproved() || getImproveProductionBonusMult() <= 1f) {
-			return;
-		}
-
-		supplyBonus.modifyMult(
-			getModId(3),
-			getImproveProductionBonusMult(),
-			getImprovementsDescForModifiers()
-		);
-		demandReduction.modifyMult(
-			getModId(8) + "increased_production",
-			getImproveProductionBonusMult(),
-			getImprovementsDescForModifiers()
-		);
 	}
 }

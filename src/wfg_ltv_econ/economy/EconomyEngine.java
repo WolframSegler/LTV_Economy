@@ -222,12 +222,12 @@ public class EconomyEngine extends BaseCampaignEventListener
         return stats;
     }
 
-    public final boolean isWorkerAssignable(Industry ind) {
-        final IndustryConfig config = EconomyEngine.getInstance().ind_config.get(ind.getId());
+    public static final boolean isWorkerAssignable(Industry ind) {
+        final IndustryConfig config = EconomyEngine.getInstance().ind_config.get(getBaseIndustryID(ind));
         if (config != null) {
             return config.workerAssignable;
         } else {
-            return false;
+            return ind.isIndustry();
         }
     }
 
@@ -236,7 +236,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         while (true) {
             final String downgradeId = currentInd.getDowngrade();
-            if (downgradeId.isEmpty()) break;
+            if (downgradeId == null) break;
 
             currentInd = Global.getSettings().getIndustrySpec(downgradeId);
         }
@@ -268,7 +268,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                     outputMultiplier -= contribution * (1f - outputStats.getStoredCoverageRatio());
                 }
 
-                stats.localProductionMult = Math.max(outputMultiplier, 0.01f);
+                stats.localProductionMult = (float) Math.max(outputMultiplier, 0.01f);
             }
         }
     }
@@ -294,7 +294,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                     maxInputMultiplier = Math.min(maxInputMultiplier, outputStats.localProductionMult / contribution);
                 }
 
-                stats.demandBaseMult = Math.max(maxInputMultiplier, 0f);
+                stats.demandBaseMult = (float) Math.max(maxInputMultiplier, 0f);
             }
         }
     }
@@ -333,7 +333,7 @@ public class EconomyEngine extends BaseCampaignEventListener
      * Only supports conditions inside {@link OutputCom}.
      * Other conditional inputs or outputs must be added by the subclass manually.
      */
-    public static final void applySubclassPIOs(MarketAPI market, BaseIndustry ind) {
+    public static final void applyIndustryPIOs(MarketAPI market, BaseIndustry ind) {
         final int size = market.getSize();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final WorkerRegistry workerReg = WorkerRegistry.getInstance();
@@ -342,17 +342,13 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         final String baseIndustryID = getBaseIndustryID(ind);
 
-        IndustryConfig indConfig = engine.ind_config.get(baseIndustryID);
+        final IndustryConfig indConfig = engine.ind_config.get(baseIndustryID);
 
-        if (indConfig == null) return; // NO-OP if no config file exists. Implement default PIOs later.
+        if (indConfig == null) return; // NO-OP if no config file exists.
 
         final Map<String, OutputCom> indMap = indConfig.outputs;
         final Map<String, Float> totalDemandMap = new HashMap<>();
         if (indMap == null || indMap.isEmpty()) return;
-
-        final int workerDrivenCount = (int) indMap.values().stream()
-            .filter(o -> o.usesWorkers && !o.isAbstract)
-            .count();
 
         final String abstractCom = "abstract";
 
@@ -381,9 +377,6 @@ public class EconomyEngine extends BaseCampaignEventListener
             if (skip) continue;
 
             if (output.scaleWithMarketSize) scale *= Math.pow(10, size - 3);
-            if (output.isAbstract) {
-                scale *= 1 / ind.getDemandReduction().getMult();
-            }
 
             if (!output.usesWorkers) {
                 for (Map.Entry<String, Float> demandEntry : output.ConsumptionMap.entrySet()) {
@@ -420,8 +413,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 }
 
                 // Handle outputs
-                if (!output.isAbstract && EconomyEngine.getInstance().isWorkerAssignable(ind)) {
-                    long workersAssigned = workerReg.getData(market.getId(), ind.getId()).getWorkersAssigned();
+                if (!output.isAbstract && EconomyEngine.isWorkerAssignable(ind)) {
 
                     float Pout = Global.getSettings().getCommoditySpec(entry.getKey()).getBasePrice();
 
@@ -430,7 +422,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                     float workersPerUnit = (Pout * RoVC) / LPV_day;
 
-                    int supplyQty = (int) ((workersAssigned * scale) / (workersPerUnit * workerDrivenCount));
+                    int supplyQty = (int) (scale / workersPerUnit);
 
                     ind.supply(entry.getKey(), supplyQty);
                 }

@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
+import com.fs.starfarer.api.combat.MutableStat;
+
+import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 public class CommodityStats {
 
@@ -18,13 +19,12 @@ public class CommodityStats {
 
     // Storage
     private long stored = 0;
-    
-    // Local
-    private long localProduction = 0;
-    private long demandBase = 0;
 
-    public double localProductionMult = 1f;
-    public double demandBaseMult = 1f;
+    private MutableStat localProduction = new MutableStat(0);
+    private MutableStat demandBase = new MutableStat(0);
+
+    public float localProductionMult = 1f;
+    public float demandBaseMult = 1f;
 
     // Import
     public long inFactionImports = 0;
@@ -35,11 +35,13 @@ public class CommodityStats {
     public long globalExports = 0;
 
 
-    public final long getLocalProduction(boolean modified) {
-        return modified ? (long) (localProduction*localProductionMult) : localProduction;
+    public final int getLocalProduction(boolean modified) {
+        return modified ? (int) (localProduction.getModifiedInt()*localProductionMult)
+            : (int) localProduction.getModifiedValue();
     }
-    public final long getBaseDemand(boolean modified) {
-        return modified ? (long) (demandBase*demandBaseMult) : demandBase;
+    public final int getBaseDemand(boolean modified) {
+        return modified ? (int) (demandBase.getModifiedValue()*demandBaseMult)
+            : (int) demandBase.getModifiedValue();
     }
     public final long getDemandMet() {
         return getDemandMetLocally() + getDemandMetViaTrade();
@@ -124,21 +126,31 @@ public class CommodityStats {
     }
 
     public final void update() {
-        localProduction = 0;
-        demandBase = 0;
+        localProduction = new MutableStat(0);
+        demandBase = new MutableStat(0);
+
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
 
         for (Industry industry : getVisibleIndustries(market)) {
 
-            // Ensure that the demand uses the ID of the commodity
-            int demand = industry.getDemand(comID).getQuantity().getModifiedInt();
-            demandBase += demand;
+            MutableStat supplyStat = LtvCompatibilityLayer.convertIndSupplyStat(industry, comID);
+            MutableStat demandStat = LtvCompatibilityLayer.convertIndDemandStat(industry, comID);
 
-            int supply = industry.getSupply(comID).getQuantity().getModifiedInt();
-            localProduction += supply;
+            WorkerIndustryData data = reg.getData(market.getId(), industry.getId());
+            if (data != null) {
+                float workers = data.getWorkersAssigned() / (float) reg.getIndustriesUsingWorkers(marketID);
+                supplyStat.modifyMult("worker_assigned", workers, "Assigned workers");
+            }
+
+            localProduction.base += supplyStat.base;
+            demandBase.base += demandStat.base;
+
+            localProduction.applyMods(supplyStat);
+            demandBase.applyMods(demandStat);
         }
 
-        localProduction = localProduction < 1 ? 0 : localProduction;
-        demandBase = demandBase < 1 ? 0 : demandBase;
+        localProduction = localProduction.getModifiedInt() < 1 ? new MutableStat(0) : localProduction;
+        demandBase = demandBase.getModifiedInt() < 1 ? new MutableStat(0) : demandBase;
     }
 
     public final void reset() {
@@ -192,32 +204,6 @@ public class CommodityStats {
         List<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);
         return industries;
-    }
-
-    public static void recalculateMaxDemandAndSupplyForAll(MarketAPI market) {
-        // Resets Max Demand & Supply
-        for (CommodityOnMarketAPI com : market.getAllCommodities()) {
-            com.setMaxDemand(0);
-            com.setMaxSupply(0);
-        }
-
-        for (Industry industry : getVisibleIndustries(market)) {
-            for (MutableCommodityQuantity demand : industry.getAllDemand()) {
-                CommodityOnMarketAPI com = market.getCommodityData(demand.getCommodityId());
-                com.setMaxDemand(com.getMaxDemand() + demand.getQuantity().getModifiedInt());
-            }
-
-            for (MutableCommodityQuantity supply : industry.getAllSupply()) {
-                CommodityOnMarketAPI com = market.getCommodityData(supply.getCommodityId());
-                com.setMaxSupply(com.getMaxSupply() + supply.getQuantity().getModifiedInt());
-            }
-        }
-
-        // Guard against below zero
-        for (CommodityOnMarketAPI com : market.getAllCommodities()) {
-            com.setMaxDemand(com.getMaxSupply() < 1 ? 0 : com.getMaxDemand());
-            com.setMaxSupply(com.getMaxDemand() < 1 ? 0 : com.getMaxSupply());
-        }
     }
 
     public void logAllInfo() {

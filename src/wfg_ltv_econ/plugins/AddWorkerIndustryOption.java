@@ -27,7 +27,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
             return false;
         }
 
-        return EconomyEngine.getInstance().isWorkerAssignable(ind);
+        return EconomyEngine.isWorkerAssignable(ind);
     }
 
     @Override

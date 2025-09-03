@@ -18,7 +18,7 @@ public class WorkerRegistry {
     private WorkerRegistry() {
         for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
         for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
-            if (EconomyEngine.getInstance().isWorkerAssignable(ind)) {
+            if (EconomyEngine.isWorkerAssignable(ind)) {
                 register(market.getId(), ind.getId());
             }
         }
@@ -39,14 +39,19 @@ public class WorkerRegistry {
 
     public final void register(String marketID, String indID) {
         final String key = makeKey(marketID, indID);
-        registry.putIfAbsent(key, new WorkerIndustryData(marketID, indID));
+        final Industry ind = Global.getSector().getEconomy().getMarket(marketID).getIndustry(indID);
+        if (EconomyEngine.isWorkerAssignable(ind)) {
+            registry.putIfAbsent(key, new WorkerIndustryData(marketID, indID));
+        }
     }
 
     public final void register(String marketID) {
         final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
         for (Industry ind : market.getIndustries()) {
             final String key = makeKey(marketID, ind.getId());
-            registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind.getId()));
+            if (EconomyEngine.isWorkerAssignable(ind)) {
+                registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind.getId()));
+            }
         }
     }
 
@@ -68,6 +73,17 @@ public class WorkerRegistry {
             }
         }
         return false;
+    }
+
+    public final int getIndustriesUsingWorkers(String marketID) {
+        int count = 0;
+        for (String dataID : registry.keySet()) {
+            if (dataID.startsWith(marketID + "::")) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     public final WorkerIndustryData getData(String marketID, String industryID) {

@@ -44,101 +44,103 @@ public class IndustryConfigLoader {
             String industryId = itIndustry.next();
             JSONObject industryJson = root.getJSONObject(industryId);
 
-            boolean workerAssignable = false;
+            boolean workerAssignable = industryJson.getBoolean("workerAssignable");
+
+            String occTagStr = industryJson.getString("occTag");
             OCCTag occTag = OCCTag.AVERAGE;
 
+            if (occTagStr != null) {
+                switch (occTagStr) {
+                case "average":
+                    break;
+                case "industry":
+                    occTag = OCCTag.INDUSTRY;
+                    break;
+                case "service":
+                    occTag = OCCTag.SERVICE;
+                    break;
+                case "agriculture":
+                    occTag = OCCTag.AGRICULTURE;
+                    break;
+                case "manual":
+                    occTag = OCCTag.MANUAL;
+                    break;
+                case "space":
+                    occTag = OCCTag.SPACE;
+                    break;
+                }
+            }
+
+            JSONObject outputInfo = industryJson.getJSONObject("outputList");
             Map<String, OutputCom> commodityMap = new HashMap<>();
 
-            for (Iterator<String> itCommodity = industryJson.keys(); itCommodity.hasNext();) {
-                String iter = itCommodity.next();
-                Object value = industryJson.get(iter);
+            Iterator<String> outputIds = outputInfo.keys();
+            while (outputIds.hasNext()) {
+                String outputId = outputIds.next();
+                JSONObject outputData = outputInfo.getJSONObject(outputId);
 
-                if (value instanceof Boolean bool && iter.equals("workerAssignable")) {
-                    workerAssignable = bool.booleanValue();
+                float baseProd = 1;
+                if (outputData.has("base_prod")) {
+                    baseProd = (float) outputData.optDouble("base_prod", 1);
                 }
 
-                if (value instanceof String occTagStr && iter.equals("occTag")) {
-                    switch (occTagStr) {
-                    case "average":
-                        break;
-                    case "industry":
-                        occTag = OCCTag.INDUSTRY;
-                        break;
-                    case "service":
-                        occTag = OCCTag.SERVICE;
-                        break;
-                    case "agriculture":
-                        occTag = OCCTag.AGRICULTURE;
-                        break;
-                    case "manual":
-                        occTag = OCCTag.MANUAL;
-                        break;
-                    case "space":
-                        occTag = OCCTag.SPACE;
-                        break;
+                boolean scaleWSize = outputData.optBoolean("scaleWithMarketSize", false);
+                boolean isAbstract = outputData.optBoolean("isAbstract", false);
+                boolean useWorkers = outputData.optBoolean("usesWorkers", false);
+                boolean checkLegality = outputData.optBoolean("checkLegality", false);
+
+                List<String> marketCondsFalse = new ArrayList<>();
+                if (outputData.has("ifMarketConditionsFalse")) {
+                    JSONArray conds = outputData.getJSONArray("ifMarketConditionsFalse");
+                    for (int i = 0; i < conds.length(); i++) {
+                        marketCondsFalse.add(conds.getString(i));
                     }
                 }
 
-                if (value instanceof JSONObject commodityJson) {
-                    float baseProd = (float) commodityJson.optDouble("base_prod", 1);
-
-                    Map<String, Float> CCMoneyDist = new HashMap<>();
-                    JSONObject mapJson = commodityJson.optJSONObject("constantCapitalMoneySplit");
-                    if (mapJson != null) {
-                        for (Iterator<String> itDemand = mapJson.keys(); itDemand.hasNext();) {
-                            String inputId = itDemand.next();
-                            float weight = (float) mapJson.getDouble(inputId);
-                            CCMoneyDist.put(inputId, weight);
-                        }
+                List<String> marketCondsTrue = new ArrayList<>();
+                if (outputData.has("ifMarketConditionsTrue")) {
+                    JSONArray conds = outputData.getJSONArray("ifMarketConditionsFalse");
+                    for (int i = 0; i < conds.length(); i++) {
+                        marketCondsTrue.add(conds.getString(i));
                     }
-
-                    Map<String, Float> ConsumptionMap = new HashMap<>();
-                    mapJson = commodityJson.optJSONObject("consumptionRequirements");
-                    if (mapJson != null) {
-                        for (Iterator<String> itDemand = mapJson.keys(); itDemand.hasNext();) {
-                            String inputId = itDemand.next();
-                            float weight = (float) mapJson.getDouble(inputId);
-                            ConsumptionMap.put(inputId, weight);
-                        }
-                    }
-
-                    List<String> marketCondsFalse = new ArrayList<>();
-                    JSONArray condArray = commodityJson.optJSONArray("ifMarketConditionsFalse");
-                    if (condArray != null) {
-                        for (int i = 0; i < condArray.length(); i++) {
-                            marketCondsFalse.add(condArray.getString(i));
-                        }
-                    }
-
-                    List<String> marketCondsTrue = new ArrayList<>();
-                    condArray = commodityJson.optJSONArray("ifMarketConditionsTrue");
-                    if (condArray != null) {
-                        for (int i = 0; i < condArray.length(); i++) {
-                            marketCondsTrue.add(condArray.getString(i));
-                        }
-                    }
-
-                    boolean scaleWSize = commodityJson.optBoolean("scaleWithMarketSize");
-                    boolean useWorkers = commodityJson.optBoolean("usesWorkers");
-                    boolean isAbstract = commodityJson.optBoolean("isAbstract");
-                    boolean checkLegality = commodityJson.optBoolean("checkLegality");
-
-                    OutputCom otp = new OutputCom(
-                        iter,
-                        baseProd,
-                        CCMoneyDist,
-                        scaleWSize,
-                        useWorkers,
-                        isAbstract,
-                        checkLegality,
-                        marketCondsFalse,
-                        marketCondsTrue,
-                        ConsumptionMap
-                    );
-
-                    commodityMap.put(iter, otp);
                 }
-                
+
+                Map<String, Float> ConsumptionMap = new HashMap<>();
+                if (outputData.has("consumptionRequirements")) {
+                    JSONObject consumption = outputData.getJSONObject("consumptionRequirements");
+                    Iterator<String> inputIds = consumption.keys();
+                    while (inputIds.hasNext()) {
+                        String inputId = inputIds.next();
+                        float weight = (float) consumption.getDouble(inputId);
+                        ConsumptionMap.put(inputId, weight);
+                    }
+                }
+
+                Map<String, Float> CCMoneyDist = new HashMap<>();
+                if (outputData.has("constantCapitalMoneySplit")) {
+                    JSONObject consumption = outputData.getJSONObject("constantCapitalMoneySplit");
+                    Iterator<String> inputIds = consumption.keys();
+                    while (inputIds.hasNext()) {
+                        String inputId = inputIds.next();
+                        float alloc = (float) consumption.getDouble(inputId);
+                        CCMoneyDist.put(inputId, alloc);
+                    }
+                }
+
+                OutputCom otp = new OutputCom(
+                    outputId,
+                    baseProd,
+                    CCMoneyDist,
+                    scaleWSize,
+                    useWorkers,
+                    isAbstract,
+                    checkLegality,
+                    marketCondsFalse,
+                    marketCondsTrue,
+                    ConsumptionMap
+                );
+
+                commodityMap.put(outputId, otp);
             }
             
             IndustryConfig indConfig = new IndustryConfig(workerAssignable, commodityMap, occTag);
@@ -163,6 +165,15 @@ public class IndustryConfigLoader {
             this.workerAssignable = workerAssignable;
             this.outputs = outputs;
             this.occTag = occTag;
+        }
+
+        @Override
+        public final String toString() {
+            return '{' + " ,\n"
+                + "workerAssignable: " + workerAssignable + " ,\n"
+                + "occTag: " + occTag.toString() + " ,\n"
+                + outputs.toString()
+                + '}';
         }
     }
 
@@ -201,16 +212,16 @@ public class IndustryConfigLoader {
 
         @Override
         public final String toString() {
-            return comID + " {" +
-                "baseProd=" + baseProd +
-                ", CCMoneyDist=" + CCMoneyDist +
-                ", ConsumptionMap=" + ConsumptionMap +
-                ", ifMarketConditionsFalse=" + ifMarketCondsFalse +
-                ", ifMarketConditionsTrue=" + ifMarketCondsTrue +
-                ", scaleWithMarketSize=" + scaleWithMarketSize +
-                ", usesWorkers=" + usesWorkers +
-                ", isAbstract=" + isAbstract +
-                ", checkLegality=" + checkLegality +
+            return '{' +  " ,\n" +
+                "baseProd=" + baseProd + " ,\n" +
+                ", CCMoneyDist=" + CCMoneyDist + " ,\n" +
+                ", ConsumptionMap=" + ConsumptionMap + " ,\n" +
+                ", ifMarketConditionsFalse=" + ifMarketCondsFalse + " ,\n" +
+                ", ifMarketConditionsTrue=" + ifMarketCondsTrue + " ,\n" +
+                ", scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +
+                ", usesWorkers=" + usesWorkers + " ,\n" +
+                ", isAbstract=" + isAbstract + " ,\n" +
+                ", checkLegality=" + checkLegality + " ,\n" +
                 '}';
         }
     }
