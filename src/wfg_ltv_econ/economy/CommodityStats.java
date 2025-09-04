@@ -34,9 +34,14 @@ public class CommodityStats {
     public long inFactionExports = 0;
     public long globalExports = 0;
 
-
+    public final MutableStat getLocalProductionStat() {
+        return localProduction;
+    }
+    public final MutableStat getBaseDemandStat() {
+        return demandBase;
+    }
     public final int getLocalProduction(boolean modified) {
-        return modified ? (int) (localProduction.getModifiedInt()*localProductionMult)
+        return modified ? (int) (localProduction.getModifiedValue()*localProductionMult)
             : (int) localProduction.getModifiedValue();
     }
     public final int getBaseDemand(boolean modified) {
@@ -116,7 +121,6 @@ public class CommodityStats {
         this.comID = comID;
 
         readResolve();
-        update();
     }
 
     public Object readResolve() {
@@ -138,12 +142,11 @@ public class CommodityStats {
 
             WorkerIndustryData data = reg.getData(market.getId(), industry.getId());
             if (data != null) {
-                float workers = data.getWorkersAssigned() / (float) reg.getIndustriesUsingWorkers(marketID);
-                supplyStat.modifyMult("worker_assigned", workers, "Assigned workers");
+                float workers = data.getWorkersAssigned() / (float) industry.getAllSupply().size();
+                supplyStat.modifyMult(
+                    "worker_assigned::" + industry.getCurrentName(), workers, "Assigned workers"
+                );
             }
-
-            localProduction.base += supplyStat.base;
-            demandBase.base += demandStat.base;
 
             localProduction.applyMods(supplyStat);
             demandBase.applyMods(demandStat);

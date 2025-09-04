@@ -3,7 +3,6 @@ package wfg_ltv_econ.ui.panels;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityMarketDataAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.campaign.econ.CommoditySourceType;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -176,26 +175,21 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         UIPanelAPI parent) {
         boolean isSourceIllegal = commodityData.getMarketShareData(getMarket()).isSourceIsIllegal();
 
-        CommoditySourceType source = m_com.getCommodityMarketData().getMarketShareData(getMarket()).getSource();
         String iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
         Color baseColor = color;
 
-        switch (source) {
-            case GLOBAL:
-                break;
-            case IN_FACTION:
+        if (m_comStats.globalImports < 0) {
+            if (m_comStats.inFactionImports > 0) {
                 iconPath = getFaction().getCrest();
                 baseColor = null;
-                break;
-            case LOCAL:
-            case NONE:
+            } else {
                 iconPath = Global.getSettings().getSpriteName("commodity_markers", "production");
-                break;
-            default:
+            }
         }
 
         LtvSpritePanel.Base iconPanel = new Base(getRoot(), parent, getMarket(), size, size,
-                    new LtvSpritePanelPlugin<>(), iconPath, baseColor, null, isSourceIllegal);
+            new LtvSpritePanelPlugin<>(), iconPath, baseColor, null, isSourceIllegal
+        );
         if (isSourceIllegal) {
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
             iconPanel.setOutlineColor(Color.RED);

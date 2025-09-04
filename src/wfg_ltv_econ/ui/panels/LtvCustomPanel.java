@@ -290,9 +290,6 @@ public abstract class LtvCustomPanel<
          * <p>
          * Some panels may instead synchronize their fading behavior with another panel's fader.
          * In such cases, this should return {@code false}.
-         *
-         * @return {@code true} if this panel manages its own fader instance,
-         *         {@code false} if it follows another panel's fader.
          */
         default boolean isFaderOwner() {
             return true;

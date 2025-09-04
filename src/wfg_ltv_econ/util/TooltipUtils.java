@@ -3,7 +3,6 @@ package wfg_ltv_econ.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
 
 import org.lwjgl.util.vector.Vector2f;
 
@@ -14,9 +13,9 @@ import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
@@ -472,81 +471,49 @@ public class TooltipUtils {
         boolean firstPara = true;
 		float y = tooltip.getHeightSoFar() + pad;
 
-        for(Industry industry : comStats.getVisibleIndustries()) {
-            if(industry.getSupply(com.getId()).getQuantity().getModifiedInt() < 1) {
+        final MutableStat stat = comStats.getLocalProductionStat();
+
+        // Flat mods
+        for (StatMod mod : stat.getFlatMods().values()) {
+            String industryName = mod.source.split("::", 2)[1];
+
+            if (mod.getDesc() == null || mod.getValue() < 1) {
                 continue;
             }
-            
-            MutableStat baseProd = industry.getSupply(com.getId()).getQuantity();
-            MutableStat prodBonus = industry.getSupplyBonus();
 
-            // Flat mods
-            for (Map.Entry<String, MutableStat.StatMod> entry : baseProd.getFlatMods().entrySet()) {
-                final MutableStat.StatMod mod = entry.getValue();
+            y = TooltipUtils.createStatModGridRow(
+                tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true,
+                mod.getDesc(), industryName, "+"
+            );
 
-                final float value = mod.getValue();
-                final String desc = mod.getDesc();
-                final String industryName = industry.getNameForModifier();
+            firstPara = false;
+        }
 
-                if (desc == null || value < 1) {
-                    continue;
-                }
+        // Mult mods
+        for (StatMod mod : stat.getMultMods().values()) {
+            String industryName = mod.source.split("::", 2)[1];
 
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, value, true, desc, industryName, "+"
-                );
-
-                firstPara = false;
-            }
-            // Flat bonuses
-            for (Map.Entry<String, MutableStat.StatMod> entry : prodBonus.getFlatMods().entrySet()) {
-                final MutableStat.StatMod mod = entry.getValue();
-
-                final float value = mod.getValue();
-                final String desc = mod.getDesc();
-                final String industryName = industry.getNameForModifier();
-
-                if (desc == null || value < 1) {
-                    continue;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, value, true, desc, industryName, "+"
-                );
-
-                firstPara = false;
-            }
-            // Mult bonuses
-            for (Map.Entry<String, MutableStat.StatMod> entry : prodBonus.getMultMods().entrySet()) {
-                final MutableStat.StatMod mod = entry.getValue();
-
-                final float value = mod.getValue();
-                final String desc = mod.getDesc();
-                final String industryName = industry.getNameForModifier();
-
-                if (desc == null || value < 0) {
-                    continue;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, value, false, desc, industryName, Strings.X
-                );
-
-                firstPara = false;
+            if (mod.getDesc() == null || mod.getValue() < 0) {
+                continue;
             }
 
-            if (comStats.localProductionMult != 1f) {
+            y = TooltipUtils.createStatModGridRow(
+                tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), false,
+                mod.getDesc(), industryName, Strings.X
+            );
 
-                final float value =  Math.round(comStats.localProductionMult * 100f) / 100f;
-                final String desc = "Input shortages";
-                final String industryName = industry.getNameForModifier();
+            firstPara = false;
+        }
 
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, negative, value, false, desc, industryName, Strings.X
-                );
+        if (comStats.localProductionMult != 1f) {
+            final float value =  Math.round(comStats.localProductionMult * 100f) / 100f;
 
-                firstPara = false;
-            }
+            y = TooltipUtils.createStatModGridRow(
+                tooltip, y, valueTxtWidth, firstPara, negative, value, false, "Input shortages",
+                null, Strings.X
+            );
+
+            firstPara = false;
         }
 
         // Import mods
@@ -611,73 +578,39 @@ public class TooltipUtils {
         boolean firstPara = true;
 		float y = tooltip.getHeightSoFar() + pad;
 
-        for(Industry industry : com.getMarket().getIndustries()) {
-            if(industry.getDemand(com.getId()).getQuantity().getModifiedInt() < 1) {
+        final MutableStat stat = comStats.getBaseDemandStat();
+
+        // Flat mods
+        for (StatMod mod : stat.getFlatMods().values()) {
+            String industryName = mod.source.split("::", 2)[1];
+            String text =  "Needed by " + industryName;
+
+            if (mod.getValue() < 1) {
                 continue;
             }
-            
-            MutableStat baseDemand = industry.getDemand(com.getId()).getQuantity();
-            MutableStat demandBonus = industry.getDemandReduction();
 
-            // Flat mods
-            for (Map.Entry<String, MutableStat.StatMod> entry : baseDemand.getFlatMods().entrySet()) {
-                final MutableStat.StatMod mod = entry.getValue();
+            y = TooltipUtils.createStatModGridRow(
+                tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true,
+                text, industryName, "+"
+            );
 
-                final float value = mod.getValue();
-                final String industryName = industry.getNameForModifier();
+            firstPara = false;
+        }
 
-                if (value < 1) {
-                    continue;
-                }
-                String text =  "Needed by " + industryName;
-                if (firstPara) {
-                    firstPara = false;
-                    y -= pad;
-                }
+        // Mult mods
+        for (StatMod mod : stat.getMultMods().values()) {
+            String industryName = mod.source.split("::", 2)[1];
 
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, value, true, text,
-                    null, "+"
-                );
+            if (mod.getDesc() == null || mod.getValue() < 0) {
+                continue;
             }
 
-            // Flat bonuses
-            for (Map.Entry<String, MutableStat.StatMod> entry : demandBonus.getFlatMods().entrySet()) {
-                final MutableStat.StatMod mod = entry.getValue();
+            y = TooltipUtils.createStatModGridRow(
+                tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), false,
+                mod.getDesc(), industryName, Strings.X
+            );
 
-                final float value = mod.getValue();
-                final String desc = mod.getDesc();
-                final String industryName = industry.getNameForModifier();
-
-                if (desc == null || value < 1) {
-                    continue;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, value, true, desc, industryName, "+"
-                );
-
-                firstPara = false;
-            }
-
-            // Mult bonuses
-            for (Map.Entry<String, MutableStat.StatMod> entry : demandBonus.getMultMods().entrySet()) {
-                final MutableStat.StatMod mod = entry.getValue();
-
-                final float value = mod.getValue();
-                final String desc = mod.getDesc();
-                final String industryName = industry.getNameForModifier();
-
-                if (desc == null || value < 0) {
-                    continue;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, value, false, desc, industryName, Strings.X
-                );
-
-                firstPara = false;
-            }
+            firstPara = false;
         }
 
         if (firstPara) {

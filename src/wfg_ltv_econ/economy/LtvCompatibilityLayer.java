@@ -5,6 +5,7 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 
 import wfg_ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
+import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 /**
  * <p>
@@ -42,7 +43,8 @@ public final class LtvCompatibilityLayer {
 
         MutableStat modifier;
         if (
-            (config != null && !config.outputs.get(comID).isAbstract) || (config == null && ind.isIndustry())
+            (config != null && config.outputs.get(comID) != null && !config.outputs.get(comID).isAbstract) ||
+            (config == null && ind.isIndustry())
         ) {
             modifier = ind.getDemandReduction().createCopy();
             modifier.applyMods(ind.getSupplyBonus());
@@ -67,41 +69,34 @@ public final class LtvCompatibilityLayer {
 
         final String baseID = "ind_" + ind.getId() + "_0";
         final StatMod baseMod = base.getFlatMods().get(baseID);
+        float baseValue = 0;
         if (baseMod != null) {
-            dest.base = baseMod.value;
+            baseValue = baseMod.value;
         } else {
             float cumulativeBase = 0f;
             for (MutableStat.StatMod f : base.getFlatMods().values()) {
                 if (f.source.equals(modID)) continue;
                 cumulativeBase += f.value;
             }
-            if (cumulativeBase != 0f) {
-                dest.base = cumulativeBase;
-
-            } else {
-                throw new IllegalStateException("Base flat mod for commodity "
-                    + comID + " inside industry "
-                    + ind.getCurrentName()
-                    + " is missing. Cannot convert vanilla modifiers to LTV modifiers."
-                );
-            }
+            baseValue = cumulativeBase;
         }
 
-        dest.base = industryBaseConverter(dest.base, ind, comID);
+        baseValue = industryBaseConverter(baseValue, ind, comID);
+        dest.modifyFlat("base::" + ind.getCurrentName(), baseValue, "Base value for industry");
 
         if (mods == null) return;
 
         for (MutableStat.StatMod mod : mods.getPercentMods().values()) {
-            dest.modifyPercent(mod.source, mod.value, mod.desc);
+            dest.modifyFlat(mod.source + "::" + ind.getCurrentName(), baseValue * mod.value / 100f, mod.desc);
         }
 
         for (MutableStat.StatMod mod : mods.getMultMods().values()) {
-            dest.modifyMult(mod.source, mod.value, mod.desc);
+            dest.modifyMult(mod.source + "::" + ind.getCurrentName(), mod.value, mod.desc);
         }
 
         for (MutableStat.StatMod mod : mods.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
-            dest.modifyMult(mod.source, converted, mod.desc);
+            dest.modifyMult(mod.source + "::" + ind.getCurrentName(), converted, mod.desc);
         }
     }
 
@@ -120,6 +115,10 @@ public final class LtvCompatibilityLayer {
 
         if (size3Base < 0f) size3Base = 0f;
 
+        final WorkerIndustryData data = WorkerRegistry.getInstance().getData(ind.getMarket().getId(), ind.getId());
+        if (data != null) {
+            return size3Base;
+        }
         return (float) Math.pow(10, size - 3) * size3Base;
     }
 

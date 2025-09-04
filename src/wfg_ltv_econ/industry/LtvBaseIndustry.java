@@ -1,5 +1,6 @@
 package wfg_ltv_econ.industry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.awt.Color;
 import com.fs.starfarer.api.Global;
@@ -33,13 +34,13 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
+import wfg_ltv_econ.economy.LtvCompatibilityLayer;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
 
 public abstract class LtvBaseIndustry extends BaseIndustry {
 
 	public static final float DEFAULT_IMPROVE_PRODUCTION_BONUS = 1.3f; // +30% output
-	public static final float DEFAULT_INPUT_REDUCTION_BONUS = 0.75f; // -20% input
 
 	public static final float ALPHA_CORE_PRODUCTION_BOOST = 1.3f; // +30% output
 
@@ -433,21 +434,26 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 
 			addPostUpkeepSection(tooltip, mode);
 
+			List<MutableStat> outputs = new ArrayList<>(7);
+			List<MutableStat> inputs = new ArrayList<>(7);
+
 			boolean hasSupply = false;
 			for (MutableCommodityQuantity curr : supply.values()) {
-				int quantity = curr.getQuantity().getModifiedInt();
-				if (quantity < 1)
+				MutableStat stat = LtvCompatibilityLayer.convertIndSupplyStat(this, curr.getCommodityId());
+				if (stat.getModifiedValue() <= 0)
 					continue;
+
+				outputs.add(stat);
 				hasSupply = true;
-				break;
 			}
 			boolean hasDemand = false;
 			for (MutableCommodityQuantity curr : demand.values()) {
-				int quantity = curr.getQuantity().getModifiedInt();
-				if (quantity < 1)
+				MutableStat stat = LtvCompatibilityLayer.convertIndDemandStat(this, curr.getCommodityId());
+				if (stat.getModifiedValue() <= 0)
 					continue;
+				
+				inputs.add(stat);
 				hasDemand = true;
-				break;
 			}
 
 			final float iconSize = 32f;
@@ -465,7 +471,6 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 
 				for (MutableCommodityQuantity curr : supply.values()) {
 					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
-					CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
 					int pAmount = curr.getQuantity().getModifiedInt();
 
 					if (pAmount < 1) {
@@ -487,7 +492,7 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 					UIComponentAPI iconComp = tooltip.getPrev();
 
 					// Add extra padding for thinner icons
-					float actualIconWidth = iconSize * commoditySpec.getIconWidthMult();
+					float actualIconWidth = iconSize * commodity.getIconWidthMult();
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text

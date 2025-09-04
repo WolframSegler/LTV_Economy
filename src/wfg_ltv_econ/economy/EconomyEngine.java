@@ -87,6 +87,18 @@ public class EconomyEngine extends BaseCampaignEventListener
         Global.getSector().getListenerManager().addListener(this, true);
         Global.getSector().addListener(this);
 
+        for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
+            for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
+                if (ind instanceof BaseIndustry baseInd) {
+                    applyIndustryPIOs(market, baseInd);
+                } else {
+                    Global.getLogger(getClass()).warn(
+                        "Industry type " + ind.getClass() + " is unsupported by LTV Economy."
+                    );
+                }
+            }
+        }
+
         return this;
     }
 
@@ -117,6 +129,18 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         if (!fakeAdvance) {
             assignWorkers();
+        }
+
+        for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
+            for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
+                if (ind instanceof BaseIndustry baseInd) {
+                    applyIndustryPIOs(market, baseInd);
+                } else {
+                    Global.getLogger(getClass()).warn(
+                        "Industry type " + ind.getClass() + " is unsupported by LTV Economy."
+                    );
+                }
+            }
         }
 
         for (CommodityInfo comInfo : m_comInfo.values()) {
@@ -215,10 +239,6 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
 
         final CommodityStats stats = comInfo.getStats(marketID);
-
-        if (stats != null) {
-            stats.update();
-        }
         return stats;
     }
 
@@ -317,6 +337,8 @@ public class EconomyEngine extends BaseCampaignEventListener
                 WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
                 if (ind.isFunctional() && data != null) {
                     workerAssignable.add(data);
+
+                    data.setWorkersAssigned(0);
                 }
             }
 
@@ -422,9 +444,12 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                     float workersPerUnit = (Pout * RoVC) / LPV_day;
 
-                    int supplyQty = (int) (scale / workersPerUnit);
+                    float supplyQty = scale / workersPerUnit;
+                    String modID = "ind_" + ind.getId() + "_0";
 
-                    ind.supply(entry.getKey(), supplyQty);
+                    ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
+                        modID, supplyQty, BaseIndustry.BASE_VALUE_TEXT
+                    );
                 }
             }
         }

@@ -24,7 +24,6 @@ import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
-import com.fs.starfarer.api.campaign.CoreUIAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.ui.ButtonAPI;
@@ -192,7 +191,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         // Steal the members for the constructor
         MarketAPI market = (MarketAPI)ReflectionUtils.get(industryPanel, null, MarketAPI.class);
-        UIPanelAPI coreUI = (UIPanelAPI) ReflectionUtils.get(industryPanel, null, CoreUIAPI.class);
         int width = (int) industryPanel.getPosition().getWidth();
         int height = (int) industryPanel.getPosition().getHeight();
 
@@ -202,8 +200,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             width,
             height,
             market,
-            industryPanel,
-            coreUI
+            industryPanel
         );
 
         managementPanel.addComponent(replacement.getPanel());

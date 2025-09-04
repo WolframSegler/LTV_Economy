@@ -118,7 +118,9 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
 
     public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
-        getPlugin().setOffsets(-1, -1, 2, 2);
+
+        final int hOffset = m_industry.isStructure() ? TITLE_HEIGHT : 0;
+        getPlugin().setOffsets(-1, -1, 2, 2 - hOffset);
     }
 
     @Override

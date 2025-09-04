@@ -61,7 +61,7 @@
 	},
 	"population": {
 		"occTag": "service",
-		"workerAssignable": true,
+		"workerAssignable": false,
 		"outputList" : {
 			"people": {
 				"consumptionRequirements": {

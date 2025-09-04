@@ -68,22 +68,18 @@ public class LtvIndustryListPanel
 		return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
 	}
 
-	private final UIPanelAPI m_coreUI;
-
 	private ButtonAPI buildButton;
 	private TooltipMakerAPI buildButtonTp;
 	private boolean buildDialogOpen = false;
 
 	public LtvIndustryListPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market, 
-		UIPanelAPI industryPanel, UIPanelAPI coreUI) {
+		UIPanelAPI industryPanel) {
 		super(root, parent, width, height, new IndustryListPanelPlugin(), market);
 
 		originalIndustryPanel = (IndustryListPanel) industryPanel;
 
 		dummyWidget = originalIndustryPanel.getWidgets().get(0);
 		dummyWidget.setOpacity(0);
-
-		m_coreUI = coreUI;
 
 		initializePlugin(hasPlugin);
 		createPanel();

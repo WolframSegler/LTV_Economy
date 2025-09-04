@@ -118,16 +118,12 @@ public class WorkerRegistry {
             return this;
         }
 
-        public final void setAssignedWorkers(float workers) {
-            workersAssigned = workers;
-        }
-
         public final float getWorkerAssignedRatio() {
             return workersAssigned;
         }
 
         public final long getWorkersAssigned() {
-            MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
+            final MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
             if (workerPoolCondition == null) {
                 return 0;
             }
@@ -139,7 +135,7 @@ public class WorkerRegistry {
             if (0 > newAmount || newAmount > 1 || market == null) {
                 return;
             }
-            MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
+            final MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
             if (workerPoolCondition == null) {
                 return;
             }
