@@ -434,48 +434,48 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 
 			addPostUpkeepSection(tooltip, mode);
 
-			List<MutableStat> outputs = new ArrayList<>(7);
-			List<MutableStat> inputs = new ArrayList<>(7);
+			List<MutableCommodityQuantity> outputs = new ArrayList<>(7);
+			List<MutableCommodityQuantity> inputs = new ArrayList<>(7);
 
 			boolean hasSupply = false;
 			for (MutableCommodityQuantity curr : supply.values()) {
 				MutableStat stat = LtvCompatibilityLayer.convertIndSupplyStat(this, curr.getCommodityId());
-				if (stat.getModifiedValue() <= 0)
+				if (stat.getModifiedInt() < 1)
 					continue;
 
-				outputs.add(stat);
+				MutableCommodityQuantity mut = new MutableCommodityQuantity(curr.getCommodityId());
+				mut.getQuantity().applyMods(stat);
+				outputs.add(mut);
 				hasSupply = true;
 			}
 			boolean hasDemand = false;
 			for (MutableCommodityQuantity curr : demand.values()) {
 				MutableStat stat = LtvCompatibilityLayer.convertIndDemandStat(this, curr.getCommodityId());
-				if (stat.getModifiedValue() <= 0)
+				if (stat.getModifiedInt() < 1)
 					continue;
 				
-				inputs.add(stat);
+				MutableCommodityQuantity mut = new MutableCommodityQuantity(curr.getCommodityId());
+				mut.getQuantity().applyMods(stat);
+				inputs.add(mut);
 				hasDemand = true;
 			}
 
-			final float iconSize = 32f;
+			final int iconSize = 32;
 			final int itemsPerRow = 3;
 
 			if (hasSupply) {
 				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
 
-				float startY = tooltip.getHeightSoFar() + opad;
+				final float startY = tooltip.getHeightSoFar() + opad;
 
 				float x = opad;
 				float y = startY;
 				float sectionWidth = (getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (MutableCommodityQuantity curr : supply.values()) {
+				for (MutableCommodityQuantity curr : outputs) {
 					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
 					int pAmount = curr.getQuantity().getModifiedInt();
-
-					if (pAmount < 1) {
-						continue;
-					}
 
 					// wrap to next line if needed
 					count++;
@@ -530,15 +530,9 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 				float sectionWidth = (getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (MutableCommodityQuantity curr : demand.values()) {
-					CommodityOnMarketAPI commodity = market.getCommodityData(curr.getCommodityId());
-					CommoditySpecAPI commoditySpec = Global.getSettings().getCommoditySpec(curr.getCommodityId());
+				for (MutableCommodityQuantity curr : inputs) {
+					CommoditySpecAPI commodity = Global.getSettings().getCommoditySpec(curr.getCommodityId());
 					int dAmount = curr.getQuantity().getModifiedInt();
-					int allDeficit = commodity.getDeficitQuantity();
-
-					if (dAmount < 1) {
-						continue;
-					}
 
 					// wrap to next line if needed
 					count++;
@@ -550,7 +544,7 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 					// draw icon
 					tooltip.beginIconGroup();
 					tooltip.setIconSpacingMedium();
-					if (allDeficit > 0) {
+					if (dAmount > 0) {
 						tooltip.addIcons(commodity, 1, IconRenderMode.DIM_RED);
 					} else {
 						tooltip.addIcons(commodity, 1, IconRenderMode.NORMAL);
@@ -559,7 +553,7 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 					UIComponentAPI iconComp = tooltip.getPrev();
 
 					// Add extra padding for thinner icons
-					float actualIconWidth = iconSize * commoditySpec.getIconWidthMult();
+					float actualIconWidth = iconSize * commodity.getIconWidthMult();
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
@@ -571,7 +565,6 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 					float textY = y + (iconSize - textH) * 0.5f;
 					lbl.getPosition().inTL(textX, textY);
 
-					// advance X
 					x += sectionWidth + 5f;
 				}
 				tooltip.setHeightSoFar(y + opad*1.5f);

@@ -69,34 +69,32 @@ public final class LtvCompatibilityLayer {
 
         final String baseID = "ind_" + ind.getId() + "_0";
         final StatMod baseMod = base.getFlatMods().get(baseID);
-        float baseValue = 0;
         if (baseMod != null) {
-            baseValue = baseMod.value;
+            dest.base = baseMod.value;
         } else {
             float cumulativeBase = 0f;
             for (MutableStat.StatMod f : base.getFlatMods().values()) {
                 if (f.source.equals(modID)) continue;
                 cumulativeBase += f.value;
             }
-            baseValue = cumulativeBase;
+            dest.base = cumulativeBase;
         }
 
-        baseValue = industryBaseConverter(baseValue, ind, comID);
-        dest.modifyFlat("base::" + ind.getCurrentName(), baseValue, "Base value for industry");
+        dest.base = industryBaseConverter(dest.base, ind, comID);
 
         if (mods == null) return;
 
         for (MutableStat.StatMod mod : mods.getPercentMods().values()) {
-            dest.modifyFlat(mod.source + "::" + ind.getCurrentName(), baseValue * mod.value / 100f, mod.desc);
+            dest.modifyPercent(mod.source + "::" + ind.getId(), mod.value, mod.desc);
         }
 
         for (MutableStat.StatMod mod : mods.getMultMods().values()) {
-            dest.modifyMult(mod.source + "::" + ind.getCurrentName(), mod.value, mod.desc);
+            dest.modifyMult(mod.source + "::" + ind.getId(), mod.value, mod.desc);
         }
 
         for (MutableStat.StatMod mod : mods.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
-            dest.modifyMult(mod.source + "::" + ind.getCurrentName(), converted, mod.desc);
+            dest.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
         }
     }
 
@@ -107,6 +105,21 @@ public final class LtvCompatibilityLayer {
         final String baseID = EconomyEngine.getBaseIndustryID(ind);
         final IndustryConfig config =  EconomyEngine.getInstance().ind_config.get(baseID);
 
+        final WorkerRegistry reg = WorkerRegistry.getInstance(); 
+        final WorkerIndustryData data = reg.getData(ind.getMarket().getId(), ind.getId());
+
+        if (
+            config != null && config.outputs.get(comID) != null && !config.outputs.get(comID).isAbstract
+        ) {
+            final int workerDrivenCount = (int) config.outputs.values().stream()
+                .filter(o -> o.usesWorkers && !o.isAbstract)
+                .count();
+            if (data != null) baseValue *= (data.getWorkersAssigned() / (float) workerDrivenCount);
+        } else if (EconomyEngine.isWorkerAssignable(ind)) {
+            final int workerDrivenCount = ind.getAllSupply().size();
+            if (data != null) baseValue *= (data.getWorkersAssigned() / (float) workerDrivenCount);
+        }
+
         if (config != null) return baseValue;
 
         final int size = ind.getMarket().getSize();
@@ -115,7 +128,6 @@ public final class LtvCompatibilityLayer {
 
         if (size3Base < 0f) size3Base = 0f;
 
-        final WorkerIndustryData data = WorkerRegistry.getInstance().getData(ind.getMarket().getId(), ind.getId());
         if (data != null) {
             return size3Base;
         }

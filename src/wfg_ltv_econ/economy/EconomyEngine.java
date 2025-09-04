@@ -247,7 +247,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         if (config != null) {
             return config.workerAssignable;
         } else {
-            return ind.isIndustry();
+            return ind.isIndustry() && !ind.isStructure();
         }
     }
 
@@ -288,7 +288,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                     outputMultiplier -= contribution * (1f - outputStats.getStoredCoverageRatio());
                 }
 
-                stats.localProductionMult = (float) Math.max(outputMultiplier, 0.01f);
+                stats.localProdMult = (float) Math.max(outputMultiplier, 0.01f);
             }
         }
     }
@@ -311,7 +311,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                     double contribution = weights.get(stats.comID);
                     CommodityStats outputStats = getComStats(ref.outputId, marketEntry.getKey());
 
-                    maxInputMultiplier = Math.min(maxInputMultiplier, outputStats.localProductionMult / contribution);
+                    maxInputMultiplier = Math.min(maxInputMultiplier, outputStats.localProdMult / contribution);
                 }
 
                 stats.demandBaseMult = (float) Math.max(maxInputMultiplier, 0f);

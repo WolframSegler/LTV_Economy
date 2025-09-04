@@ -1,16 +1,18 @@
 package wfg_ltv_econ.economy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 
-import wfg_ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
-
 public class CommodityStats {
+
+    public static final String WORKER_MOD_ID = "worker_assigned";
 
     public final String comID;
     public final String marketID;
@@ -20,10 +22,13 @@ public class CommodityStats {
     // Storage
     private long stored = 0;
 
-    private MutableStat localProduction = new MutableStat(0);
-    private MutableStat demandBase = new MutableStat(0);
+    private int localProd = 0;
+    private int demandBase = 0;
 
-    public float localProductionMult = 1f;
+    private Map<String, MutableStat> localProdMutables = new HashMap<>();
+    private Map<String, MutableStat> demandBaseMutables = new HashMap<>();
+
+    public float localProdMult = 1f;
     public float demandBaseMult = 1f;
 
     // Import
@@ -34,19 +39,23 @@ public class CommodityStats {
     public long inFactionExports = 0;
     public long globalExports = 0;
 
-    public final MutableStat getLocalProductionStat() {
-        return localProduction;
+    public final Map<String, MutableStat> getLocalProductionStat() {
+        return localProdMutables;
     }
-    public final MutableStat getBaseDemandStat() {
-        return demandBase;
+    public final Map<String, MutableStat> getBaseDemandStat() {
+        return demandBaseMutables;
+    }
+    public final MutableStat getLocalProductionStat(String industryID) {
+        return localProdMutables.get(industryID);
+    }
+    public final MutableStat getBaseDemandStat(String industryID) {
+        return demandBaseMutables.get(industryID);
     }
     public final int getLocalProduction(boolean modified) {
-        return modified ? (int) (localProduction.getModifiedValue()*localProductionMult)
-            : (int) localProduction.getModifiedValue();
+        return modified ? (int) (localProd*localProdMult) : localProd;
     }
     public final int getBaseDemand(boolean modified) {
-        return modified ? (int) (demandBase.getModifiedValue()*demandBaseMult)
-            : (int) demandBase.getModifiedValue();
+        return modified ? (int) (demandBase*demandBaseMult) : demandBase;
     }
     public final long getDemandMet() {
         return getDemandMetLocally() + getDemandMetViaTrade();
@@ -130,30 +139,32 @@ public class CommodityStats {
     }
 
     public final void update() {
-        localProduction = new MutableStat(0);
-        demandBase = new MutableStat(0);
-
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        localProdMutables = new HashMap<>();
+        demandBaseMutables = new HashMap<>();
 
         for (Industry industry : getVisibleIndustries(market)) {
+
+            if (industry.getSupply(comID).getQuantity().getModifiedValue() <= 0 &&
+                industry.getDemand(comID).getQuantity().getModifiedValue() <= 0
+            ) continue; 
 
             MutableStat supplyStat = LtvCompatibilityLayer.convertIndSupplyStat(industry, comID);
             MutableStat demandStat = LtvCompatibilityLayer.convertIndDemandStat(industry, comID);
 
-            WorkerIndustryData data = reg.getData(market.getId(), industry.getId());
-            if (data != null) {
-                float workers = data.getWorkersAssigned() / (float) industry.getAllSupply().size();
-                supplyStat.modifyMult(
-                    "worker_assigned::" + industry.getCurrentName(), workers, "Assigned workers"
-                );
-            }
-
-            localProduction.applyMods(supplyStat);
-            demandBase.applyMods(demandStat);
+            localProdMutables.put(industry.getId(), supplyStat);
+            demandBaseMutables.put(industry.getId(), demandStat);
         }
 
-        localProduction = localProduction.getModifiedInt() < 1 ? new MutableStat(0) : localProduction;
-        demandBase = demandBase.getModifiedInt() < 1 ? new MutableStat(0) : demandBase;
+        for (MutableStat stat : localProdMutables.values()) {
+            localProd += stat.getModifiedInt();
+        }
+
+        for (MutableStat stat : demandBaseMutables.values()) {
+            demandBase += stat.getModifiedInt();
+        }
+
+        localProd = localProd < 1 ? 0 : localProd;
+        demandBase = demandBase < 1 ? 0 : demandBase;
     }
 
     public final void reset() {
@@ -162,8 +173,11 @@ public class CommodityStats {
         inFactionExports = 0;
         globalExports = 0;
 
-        localProductionMult = 1f;
+        localProdMult = 1f;
         demandBaseMult = 1f;
+
+        localProd = 0;
+        demandBase = 0;
     }
 
     /**
