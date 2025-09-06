@@ -503,6 +503,7 @@ public class TooltipUtils {
 
             // Mult mods
             for (StatMod mod : stat.getMultMods().values()) {
+                if (!(stat.base > 0)) break;
 
                 if (mod.getDesc() == null || mod.getValue() < 0) {
                     continue;
@@ -518,7 +519,7 @@ public class TooltipUtils {
         }
 
         
-        if (comStats.localProdMult != 1f) {
+        if (comStats.localProdMult != 1f && comStats.getLocalProduction(false) > 0) {
             final float value =  Math.round(comStats.localProdMult * 100f) / 100f;
 
             y = TooltipUtils.createStatModGridRow(
@@ -625,6 +626,8 @@ public class TooltipUtils {
 
             // Mult mods
             for (StatMod mod : stat.getMultMods().values()) {
+                if (!(stat.base > 0)) break;
+
                 if (mod.getDesc() == null || mod.getValue() < 0) {
                     continue;
                 }

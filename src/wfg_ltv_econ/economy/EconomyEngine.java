@@ -123,10 +123,6 @@ public class EconomyEngine extends BaseCampaignEventListener
             for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
                 if (ind instanceof BaseIndustry baseInd) {
                     applyIndustryPIOs(market, baseInd);
-                } else {
-                    Global.getLogger(getClass()).warn(
-                        "Industry type " + ind.getClass() + " is unsupported by LTV Economy."
-                    );
                 }
             }
         }
@@ -243,7 +239,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         IndustrySpecAPI currentInd = ind.getSpec();
 
         while (true) {
-            final String downgradeId = currentInd.getDowngrade();
+            String downgradeId = currentInd.getDowngrade();
             if (downgradeId == null) break;
 
             currentInd = Global.getSettings().getIndustrySpec(downgradeId);
@@ -312,12 +308,12 @@ public class EconomyEngine extends BaseCampaignEventListener
         final WorkerRegistry reg = WorkerRegistry.getInstance();
 
         for (MarketAPI market : getMarketsCopy()) {
-            if (market.isPlayerOwned() || market.isHidden())
-                continue;
+            if (market.isPlayerOwned() || market.isHidden()) continue;
 
             final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
-            if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID))
+            if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) {
                 continue;
+            }
 
             List<WorkerIndustryData> workerAssignable = new ArrayList<>(8);
 
@@ -434,7 +430,10 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                     float supplyQty = scale / workersPerUnit;
 
-                    ind.supply(entry.getKey(), (int) supplyQty);
+                    final String baseID = "ind_" + ind.getId() + "_0";
+                    ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
+                        baseID, supplyQty, BaseIndustry.BASE_VALUE_TEXT
+                    );
                 }
             }
         }

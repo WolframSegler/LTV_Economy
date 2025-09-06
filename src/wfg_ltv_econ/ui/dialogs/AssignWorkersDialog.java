@@ -130,8 +130,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
         final EconomyEngine engine = EconomyEngine.getInstance();
 
-        // Map<String, MutableCommodityQuantity> supply = ((LtvBaseIndustry) industry).getSupply();
-        // Map<String, MutableCommodityQuantity> demand = ((LtvBaseIndustry) industry).getDemand();
         final FactionAPI faction = market.getFaction();
         final Color color = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
@@ -146,7 +144,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         int count = -1;
 
         for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
-            long pAmount = engine.getComStats(com.getId(), market.getId()).getLocalProduction(false);
+            CommodityStats stats = engine.getComStats(com.getId(), market.getId());
+            long pAmount = stats.getLocalProductionStat(industry.getId()).getModifiedInt();
 
             if (pAmount < 1) {
                 continue;
@@ -195,8 +194,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
         for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
             CommodityStats stats = engine.getComStats(com.getId(), market.getId());
-            long dAmount = stats.getLocalProduction(false);
-            long allDeficit = stats.getDeficit();
+            long dAmount = stats.getBaseDemandStat(industry.getId()).getModifiedInt();
+            long allDeficit = stats.getDeficit();            
 
             if (dAmount < 1) {
                 continue;

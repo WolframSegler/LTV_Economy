@@ -28,4 +28,7 @@ Extra Instructions:
 - Search for implementation for API's using the following commands
   -> implements\s+[^{]*\bInteractionDialogAPI\b
 
+- Standard porter message for AI agent:
+  -> Create me a porter message with all the relevant info about what we were working on and the overall project. This chat is getting slow
+
 for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Sophita")) { p.getSpec().setTexture("graphics/kaleidoscope/planets/terran_boreal01.jpg"); p.applySpecChanges(); break; }

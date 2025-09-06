@@ -35,6 +35,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import wfg_ltv_econ.economy.CommodityStats;
+import wfg_ltv_econ.industry.IndustryTooltips;
 import wfg_ltv_econ.ui.LtvUIState.UIState;
 import wfg_ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg_ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
@@ -391,7 +392,8 @@ public class LtvIndustryListPanel
 		wrapper.factory = () -> {
 			TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(ind.getTooltipWidth(), 0, false);
 
-			ind.createTooltip(mode, tp, false);
+			// ind.createTooltip(mode, tp, false);
+			IndustryTooltips.createIndustryTooltip(mode, tp, false, ind);
 
 			wrapper.getParent.get().addUIElement(tp);
 			

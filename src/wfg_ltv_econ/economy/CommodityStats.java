@@ -47,10 +47,12 @@ public class CommodityStats {
         return demandBaseMutables;
     }
     public final MutableStat getLocalProductionStat(String industryID) {
-        return localProdMutables.get(industryID);
+        final MutableStat mutable = localProdMutables.get(industryID);
+        return mutable == null ? new MutableStat(0) : mutable;
     }
     public final MutableStat getBaseDemandStat(String industryID) {
-        return demandBaseMutables.get(industryID);
+        final MutableStat mutable = demandBaseMutables.get(industryID);
+        return mutable == null ? new MutableStat(0) : mutable;
     }
     public final int getLocalProduction(boolean modified) {
         return modified ? (int) (localProd*localProdMult) : localProd;
@@ -152,6 +154,7 @@ public class CommodityStats {
                 localProdMutables.put(industry.getId(), supplyStat);
 
                 Global.getLogger(getClass()).error(industry.getId() + " supply:");
+               
                 Global.getLogger(getClass()).error("base: " + supplyStat.base);
                 Global.getLogger(getClass()).error("Flat");
                 for(StatMod a : supplyStat.getFlatMods().values()) {
@@ -187,7 +190,6 @@ public class CommodityStats {
                     Global.getLogger(getClass()).error(a.source +" "+ a.value +" "+a.desc);
                 }
                 Global.getLogger(getClass()).error("final: " + demandStat.getModifiedInt());
-
             }
         }
 

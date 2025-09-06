@@ -38,7 +38,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
         industry = ind;
 
         IndustryOptionData opt = new IndustryOptionData("Assign Workers...", PluginID, ind, this);
-        opt.color = ind.getMarket().getFaction().getBaseUIColor();
+        opt.color = ind.getMarket().getFaction().getBrightUIColor();
         result.add(opt);
 
         return result;

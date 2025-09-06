@@ -69,30 +69,32 @@ public final class LtvCompatibilityLayer {
 
         final String baseID = "ind_" + ind.getId() + "_0";
         final StatMod baseMod = base.getFlatMods().get(baseID);
-        if (baseMod != null) {
-            dest.base = baseMod.value;
+
+        float baseValue = 0;
+        if (baseMod != null && baseMod.value > 0) {
+            baseValue = baseMod.value;
         } else {
             float cumulativeBase = 0f;
-            for (MutableStat.StatMod f : base.getFlatMods().values()) {
-                if (f.source.equals(modID)) continue;
+            for (StatMod f : base.getFlatMods().values()) {
+                if (f.source.equals(modID) || f.value < 0) continue;
                 cumulativeBase += f.value;
             }
-            dest.base = cumulativeBase;
+            baseValue = cumulativeBase;
         }
 
-        dest.base = industryBaseConverter(dest.base, ind, comID);
+        dest.setBaseValue(industryBaseConverter(baseValue, ind, comID));
 
         if (mods == null) return;
 
-        for (MutableStat.StatMod mod : mods.getPercentMods().values()) {
+        for (StatMod mod : mods.getPercentMods().values()) {
             dest.modifyPercent(mod.source + "::" + ind.getId(), mod.value, mod.desc);
         }
 
-        for (MutableStat.StatMod mod : mods.getMultMods().values()) {
+        for (StatMod mod : mods.getMultMods().values()) {
             dest.modifyMult(mod.source + "::" + ind.getId(), mod.value, mod.desc);
         }
 
-        for (MutableStat.StatMod mod : mods.getFlatMods().values()) {
+        for (StatMod mod : mods.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
             dest.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
         }

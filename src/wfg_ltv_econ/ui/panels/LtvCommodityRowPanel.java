@@ -159,9 +159,9 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
             getSourceIcon(baseColor, commodityData, rowHeight - 4, m_panel).getPanel())
             .inBL(2, 2);
 
-        if (commodityData.getExportIncome(m_com) > 0) {
-            String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
-            LtvSpritePanel.Base iconPanel = new Base(getRoot(), m_panel, getMarket(), rowHeight - 4, rowHeight 
+        if (m_comStats.globalExports > 0) {
+            final String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
+            Base iconPanel = new Base(getRoot(), m_panel, getMarket(), rowHeight - 4, rowHeight 
             - 4, new LtvSpritePanelPlugin<>(), iconPath, null, null, false);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
@@ -171,7 +171,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
     }
 
-    private LtvSpritePanel.Base getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int size,
+    private Base getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int size,
         UIPanelAPI parent) {
         boolean isSourceIllegal = commodityData.getMarketShareData(getMarket()).isSourceIsIllegal();
 
@@ -187,7 +187,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
             }
         }
 
-        LtvSpritePanel.Base iconPanel = new Base(getRoot(), parent, getMarket(), size, size,
+        Base iconPanel = new Base(getRoot(), parent, getMarket(), size, size,
             new LtvSpritePanelPlugin<>(), iconPath, baseColor, null, isSourceIllegal
         );
         if (isSourceIllegal) {
@@ -435,7 +435,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
     private static void legendRowHelper(TooltipMakerAPI tooltip, int y, String iconPath, String desc, int lgdIconSize,
         boolean drawRedBorder, Color drawFilledIcon, UIPanelAPI root, UIPanelAPI panel, MarketAPI market) {
 
-        LtvSpritePanel.Base iconPanel = new Base(root, panel, market, lgdIconSize, lgdIconSize,
+        Base iconPanel = new Base(root, panel, market, lgdIconSize, lgdIconSize,
             new LtvSpritePanelPlugin<>(), iconPath, null, drawFilledIcon, drawRedBorder);
         if (drawRedBorder) {
             iconPanel.setOutlineColor(Color.RED);
