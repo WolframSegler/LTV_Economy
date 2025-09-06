@@ -39,7 +39,7 @@ import wfg_ltv_econ.util.UiUtils;
 
 public class IndustryTooltips {
     public static final int pad = 3;
-	public static final int opad = 20;
+	public static final int opad = 10;
 
     public static final float ALPHA_CORE_PRODUCTION_BOOST = 1.3f;
 
@@ -103,7 +103,9 @@ public class IndustryTooltips {
 		tp.addTitle(ind.getCurrentName() + type, color);
 
 		String desc = ind.getSpec().getDesc();
-		String override = (String) ReflectionUtils.invoke(ind, "getDescriptionOverride");
+        String override = (String) ReflectionUtils.getMethodsMatching(
+            BaseIndustry.class, "getDescriptionOverride", String.class, 0).get(0
+        ).invoke(ind);
 		if (override != null) {
 			desc = override;
 		}
@@ -153,7 +155,9 @@ public class IndustryTooltips {
 			}
 		}
 
-		ReflectionUtils.invoke(ind, "addRightAfterDescriptionSection", tp, mode);
+        ReflectionUtils.getMethodsMatching(
+            BaseIndustry.class, "addRightAfterDescriptionSection", void.class, 2).get(0
+        ).invoke(ind, tp, mode);
 
 		if (ind.isDisrupted()) {
 			int left = (int) ind.getDisruptedDays();
@@ -193,7 +197,7 @@ public class IndustryTooltips {
 				opad
 			);
 
-			float buildTime = (float) ReflectionUtils.get(ind, "buildTime", Float.class);
+			float buildTime = (float) ReflectionUtils.get(ind, "buildTime", float.class);
 			int left = Math.round((buildTime - ((BaseIndustry)ind).getBuildProgress()));
 			String days = "days";
 			if (left < 2)
@@ -251,7 +255,9 @@ public class IndustryTooltips {
 				}
 			}
 
-			ReflectionUtils.invoke(ind, "addPostDescriptionSection", tp, mode);
+            ReflectionUtils.getMethodsMatching(
+                BaseIndustry.class, "addPostDescriptionSection", void.class, 2).get(0
+            ).invoke(ind, tp, mode);
 
 			if (!ind.getIncome().isUnmodified()) {
 				int income = ind.getIncome().getModifiedInt();
@@ -298,7 +304,10 @@ public class IndustryTooltips {
 				});
 			}
 
-			ReflectionUtils.invoke(ind, "addPostUpkeepSection", tp, mode);
+            ReflectionUtils.getMethodsMatching(
+                BaseIndustry.class, "addPostUpkeepSection", void.class, 2).get(0
+            ).invoke(ind, tp, mode);
+            
 
 			boolean hasSupply = ind.getAllSupply().size() > 0 ? true : false;
 			boolean hasDemand = ind.getAllDemand().size() > 0 ? true : false;
@@ -361,12 +370,14 @@ public class IndustryTooltips {
 				UiUtils.resetFlowLeft(tp, opad);
 			}
 
-			ReflectionUtils.invoke(ind, "addPostSupplySection", tp, hasSupply, mode);
+            ReflectionUtils.getMethodsMatching(
+                BaseIndustry.class, "addPostSupplySection", void.class, 3).get(0
+            ).invoke(ind, tp, hasSupply, mode);
 
 			float headerHeight = 0;
-			boolean hasPostDemandSection = (boolean) ReflectionUtils.invoke(
-				ind, "hasPostDemandSection", hasDemand, mode
-			);
+            boolean hasPostDemandSection = (boolean) ReflectionUtils.getMethodsMatching(
+                BaseIndustry.class, "hasPostDemandSection", boolean.class, 2).get(0
+            ).invoke(ind, hasDemand, mode);
 			if (hasDemand || hasPostDemandSection) {
 				tp.addSectionHeading("Demand & effects", color, dark, Alignment.MID, opad);
 				headerHeight = tp.getPrev().getPosition().getHeight();
@@ -429,7 +440,9 @@ public class IndustryTooltips {
 				UiUtils.resetFlowLeft(tp, opad);
 			}
 
-			ReflectionUtils.invoke(ind, "addPostDemandSection", tp, hasDemand, mode);
+            ReflectionUtils.getMethodsMatching(
+                BaseIndustry.class, "addPostDemandSection", void.class, 3).get(0
+            ).invoke(ind, tp, hasDemand, mode);
 
 			if (!needToAddIndustry) {
 				addInstalledItemsSection(mode, tp, expanded, ind);
@@ -470,7 +483,9 @@ public class IndustryTooltips {
 			addAICoreSection(tooltip, ind.getAICoreId(), aiCoreDescMode, ind);
 			addedSomething = true;
 		}
-        boolean r =(boolean) ReflectionUtils.invoke(ind, "addNonAICoreInstalledItems", mode, tooltip, expanded);
+        boolean r = (boolean) ReflectionUtils.getMethodsMatching(
+            BaseIndustry.class, "addNonAICoreInstalledItems", boolean.class, 3).get(0
+        ).invoke(ind, mode, tooltip, expanded);
 		addedSomething |= r;
 		
 		if (!addedSomething) {
@@ -500,7 +515,9 @@ public class IndustryTooltips {
 		} else if (gamma) {
 			addGammaCoreDescription(tooltip, mode, ind);
 		} else {
-            ReflectionUtils.invoke(ind, "addUnknownCoreDescription", coreId, tooltip, mode);
+            ReflectionUtils.getMethodsMatching(
+                BaseIndustry.class, "addUnknownCoreDescription", void.class, 3).get(0
+            ).invoke(ind, coreId, tooltip, mode);
 		}
 	}
 
