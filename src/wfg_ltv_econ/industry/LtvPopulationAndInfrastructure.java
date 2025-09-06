@@ -25,6 +25,7 @@ import com.fs.starfarer.api.characters.MarketConditionSpecAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.CommRelayCondition;
+import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
@@ -45,7 +46,9 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
-public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements MarketImmigrationModifier {
+import wfg_ltv_econ.economy.EconomyEngine;
+
+public class LtvPopulationAndInfrastructure extends BaseIndustry implements MarketImmigrationModifier {
 
 	public final static float OFFICER_BASE_PROB = Global.getSettings().getFloat("officerBaseProb");
 	public final static float OFFICER_PROB_PER_SIZE = Global.getSettings().getFloat("officerProbPerColonySize");
@@ -112,23 +115,23 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 	}
 
 	public void StabilityModifierDemand(int luxuryThreshold) {
-		Pair<String, Float> availableRatio = ltv_getMaxDeficit(Commodities.DOMESTIC_GOODS);
+		Pair<String, Float> availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.DOMESTIC_GOODS);
 		if (availableRatio.two > 0.9) { // If 90% or more is satisfied
 			market.getStability().modifyFlat(getModId(0), 1, "Domestic goods demand met");
 		} else {
 			market.getStability().unmodifyFlat(getModId(0));
 		}
 
-		availableRatio = ltv_getMaxDeficit(Commodities.LUXURY_GOODS);
+		availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.LUXURY_GOODS);
 		if (availableRatio.two > 0.9 && market.getSize() > luxuryThreshold) { // If 90% or more is satisfied
 			market.getStability().modifyFlat(getModId(1), 1, "Luxury goods demand met");
 		} else {
 			market.getStability().unmodifyFlat(getModId(1));
 		}
 
-		availableRatio = ltv_getMaxDeficit(Commodities.FOOD);
+		availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.FOOD);
 		if (!market.hasCondition(Conditions.HABITABLE)) {
-			availableRatio = ltv_getMaxDeficit(Commodities.FOOD, Commodities.ORGANICS);
+			availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.FOOD, Commodities.ORGANICS);
 		}
 		if (availableRatio.two < 0.9) { // If less than 90% is satisfied
 			int stabilityPenalty = 
@@ -290,19 +293,6 @@ public class LtvPopulationAndInfrastructure extends LtvBaseIndustry implements M
 		unmodifyStability(market, getModId(3));
 
 		market.removeTransientImmigrationModifier(this);
-	}
-
-	protected int dayTracker = -1;
-
-	@Override
-	public void advance(float amount) {
-		int day = Global.getSector().getClock().getDay();
-		super.advance(day);
-
-		if (dayTracker != day) {
-
-			dayTracker = day; // Do this at the end of the advance() method
-		}
 	}
 
 	protected boolean hasPostDemandSection(boolean hasDemand, IndustryTooltipMode mode) {

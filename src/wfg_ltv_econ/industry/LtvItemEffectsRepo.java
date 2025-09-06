@@ -30,6 +30,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.combat.MutableStat.StatModType;
 
 import com.fs.starfarer.api.impl.campaign.econ.impl.InstallableItemEffect;
+import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseInstallableItemEffect;
 
 public class LtvItemEffectsRepo {
@@ -116,9 +117,10 @@ public class LtvItemEffectsRepo {
 							farming.getSupplyBonusFromOther().unmodifyMult(spec.getId());
 						}
 					}
-					if (industry instanceof LtvBaseIndustry) {
-						LtvBaseIndustry b = (LtvBaseIndustry) industry;
-						b.demand(9, Commodities.VOLATILES, FUSION_LAMP_VOLATILES, Misc.ucFirst(spec.getName().toLowerCase()));
+					if (industry instanceof BaseIndustry ind) {
+						ind.demand(9, Commodities.VOLATILES, FUSION_LAMP_VOLATILES, Misc.ucFirst(
+							spec.getName().toLowerCase())
+						);
 
 						MemoryAPI memory = getLampMemory(industry);
 						float h = getShortageHazard(industry);
@@ -142,9 +144,8 @@ public class LtvItemEffectsRepo {
 					if (farming != null && FUSION_LAMP_FARMING_BONUS_MULT > 0) {
 						farming.getSupplyBonusFromOther().unmodifyMult(spec.getId());
 					}
-					if (industry instanceof LtvBaseIndustry) {
-						LtvBaseIndustry b = (LtvBaseIndustry) industry;
-						b.demand(9, Commodities.VOLATILES, 0, null);
+					if (industry instanceof BaseIndustry ind) {
+						ind.demand(9, Commodities.VOLATILES, 0, null);
 						industry.getMarket().getHazard().unmodifyFlat(spec.getId());
 						MemoryAPI memory = getLampMemory(industry);
 						if (memory != null) {
@@ -315,23 +316,21 @@ public class LtvItemEffectsRepo {
 
 				public void apply(Industry industry) {
 					Set<String> list = getAffectedCommodities(industry);
-					if (industry instanceof LtvBaseIndustry && !list.isEmpty()) {
-						LtvBaseIndustry b = (LtvBaseIndustry) industry;
+					if (industry instanceof BaseIndustry ind && !list.isEmpty()) {
 
 						for (String curr : list) {
 							int new_amount = (int)industry.getSupply(curr).getQuantity().getBaseValue();
 							new_amount += (int)industry.getSupply(curr).getQuantity().getBaseValue() * (MANTLE_BORE_MINING_BONUS/100);
-							b.supply(spec.getId(), curr, new_amount, Misc.ucFirst(spec.getName().toLowerCase()));
+							ind.supply(spec.getId(), curr, new_amount, Misc.ucFirst(spec.getName().toLowerCase()));
 						}
 					}
 				}
 
 				public void unapply(Industry industry) {
-					if (industry instanceof LtvBaseIndustry) {
-						LtvBaseIndustry b = (LtvBaseIndustry) industry;
+					if (industry instanceof BaseIndustry ind) {
 
 						for (String curr : MANTLE_BORE_COMMODITIES) {
-							b.supply(spec.getId(), curr, 0, null);
+							ind.supply(spec.getId(), curr, 0, null);
 						}
 					}
 				}
@@ -372,23 +371,19 @@ public class LtvItemEffectsRepo {
 
 				public void apply(Industry industry) {
 					Set<String> list = getAffectedCommodities(industry);
-					if (industry instanceof LtvBaseIndustry && !list.isEmpty()) {
-						LtvBaseIndustry b = (LtvBaseIndustry) industry;
-
+					if (industry instanceof BaseIndustry ind && !list.isEmpty()) {
 						for (String curr : list) {
 							int new_amount = (int)industry.getSupply(curr).getQuantity().getBaseValue();
 							new_amount += (int)industry.getSupply(curr).getQuantity().getBaseValue() * (PLASMA_DYNAMO_MINING_BONUS/100);
-							b.supply(spec.getId(), curr, new_amount, Misc.ucFirst(spec.getName().toLowerCase()));
+							ind.supply(spec.getId(), curr, new_amount, Misc.ucFirst(spec.getName().toLowerCase()));
 						}
 					}
 				}
 
 				public void unapply(Industry industry) {
-					if (industry instanceof LtvBaseIndustry) {
-						LtvBaseIndustry b = (LtvBaseIndustry) industry;
-
+					if (industry instanceof BaseIndustry ind) {
 						for (String curr : PLASMA_DYNAMO_COMMODITIES) {
-							b.supply(spec.getId(), curr, 0, null);
+							ind.supply(spec.getId(), curr, 0, null);
 						}
 					}
 				}
@@ -543,9 +538,8 @@ public class LtvItemEffectsRepo {
 			});
 			put(Items.CORONAL_PORTAL, new BaseInstallableItemEffect(Items.CORONAL_PORTAL) {
 				public void apply(Industry industry) {
-					if (industry instanceof LtvBaseIndustry) {
-						LtvBaseIndustry b = (LtvBaseIndustry) industry;
-						b.demand(8, Commodities.RARE_METALS, CORONAL_TAP_TRANSPLUTONICS,
+					if (industry instanceof BaseIndustry ind) {
+						ind.demand(8, Commodities.RARE_METALS, CORONAL_TAP_TRANSPLUTONICS,
 								Misc.ucFirst(spec.getName().toLowerCase()));
 
 						if (!hasShortage(industry)) {
@@ -559,9 +553,8 @@ public class LtvItemEffectsRepo {
 				}
 
 				public void unapply(Industry industry) {
-					if (industry instanceof LtvBaseIndustry) {
-						LtvBaseIndustry b = (LtvBaseIndustry) industry;
-						b.demand(8, Commodities.RARE_METALS, 0, null);
+					if (industry instanceof BaseIndustry ind) {
+						ind.demand(8, Commodities.RARE_METALS, 0, null);
 						industry.getMarket().getStats().getDynamic().getMod(Stats.MAX_INDUSTRIES)
 								.unmodifyFlat(spec.getId());
 					}

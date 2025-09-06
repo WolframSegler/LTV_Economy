@@ -18,6 +18,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
+import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 
@@ -503,6 +504,28 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         return totalGlobalExports;
     }
+
+    public static final Pair<String, Float> getMaxDeficit(MarketAPI market, String... commodityIds) {
+		// 1 is no deficit and 0 is 100% deficit
+		Pair<String, Float> result = new Pair<String, Float>();
+		result.two = 1f;
+		if (Global.CODEX_TOOLTIP_MODE || !EconomyEngine.isInitialized()) return result;
+
+		for (String id : commodityIds) {
+			final CommodityStats stats = EconomyEngine.getInstance().getComStats(id, market.getId());
+			if (stats == null) {
+				return result;
+			}
+
+			float available = stats.getStoredCoverageRatio();
+
+			if (available < result.two) {
+				result.one = id;
+				result.two = available;
+			}
+		}
+		return result;
+	}
 
     public final void buildCommodityOutputMap() {
         commodityToOutputMap = new HashMap<>();

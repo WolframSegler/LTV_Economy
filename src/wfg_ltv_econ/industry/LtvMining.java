@@ -7,10 +7,11 @@ import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
+import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 
 
-public class LtvMining extends LtvBaseIndustry {
+public class LtvMining extends BaseIndustry {
 
 	public final static float MINING_NONE = 0;
 	public final static float MINING_SPARSE = 0.5f;
@@ -28,23 +29,6 @@ public class LtvMining extends LtvBaseIndustry {
 		
 		if (!isFunctional()) {
 			supply.clear();
-		}
-	}
-
-	@Override
-	public void unapply() {
-		super.unapply();
-	}
-
-    protected int dayTracker = -1;
-    @Override
-	public void advance(float amount) {
-		int day = Global.getSector().getClock().getDay();
-		super.advance(day);
-
-		if (dayTracker != day) {
-
-			dayTracker = day; // Do this at the end of the advance() method
 		}
 	}
 	
