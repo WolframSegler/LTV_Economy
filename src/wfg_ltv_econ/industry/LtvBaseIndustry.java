@@ -1,6 +1,5 @@
 package wfg_ltv_econ.industry;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.awt.Color;
 import com.fs.starfarer.api.Global;
@@ -34,7 +33,6 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg_ltv_econ.economy.CommodityStats;
 import wfg_ltv_econ.economy.EconomyEngine;
-import wfg_ltv_econ.economy.LtvCompatibilityLayer;
 import wfg_ltv_econ.util.NumFormat;
 import wfg_ltv_econ.util.UiUtils;
 
@@ -434,30 +432,19 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 
 			addPostUpkeepSection(tooltip, mode);
 
-			List<MutableCommodityQuantity> outputs = new ArrayList<>(7);
-			List<MutableCommodityQuantity> inputs = new ArrayList<>(7);
-
 			boolean hasSupply = false;
 			for (MutableCommodityQuantity curr : supply.values()) {
-				MutableStat stat = LtvCompatibilityLayer.convertIndSupplyStat(this, curr.getCommodityId());
-				if (stat.getModifiedInt() < 1)
-					continue;
-
-				MutableCommodityQuantity mut = new MutableCommodityQuantity(curr.getCommodityId());
-				mut.getQuantity().applyMods(stat);
-				outputs.add(mut);
+				int qty = curr.getQuantity().getModifiedInt();
+				if (qty <= 0) continue;
 				hasSupply = true;
+				break;
 			}
 			boolean hasDemand = false;
 			for (MutableCommodityQuantity curr : demand.values()) {
-				MutableStat stat = LtvCompatibilityLayer.convertIndDemandStat(this, curr.getCommodityId());
-				if (stat.getModifiedInt() < 1)
-					continue;
-				
-				MutableCommodityQuantity mut = new MutableCommodityQuantity(curr.getCommodityId());
-				mut.getQuantity().applyMods(stat);
-				inputs.add(mut);
+				int qty = curr.getQuantity().getModifiedInt();
+				if (qty <= 0) continue;
 				hasDemand = true;
+				break;
 			}
 
 			final int iconSize = 32;
@@ -475,7 +462,7 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 				float sectionWidth = (getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (MutableCommodityQuantity curr : outputs) {
+				for (MutableCommodityQuantity curr : supply.values()) {
 					CommodityStats stats = engine.getComStats(curr.getCommodityId(), market.getId());
 					int pAmount = stats.getLocalProductionStat(id).getModifiedInt();
 					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
@@ -533,7 +520,7 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 				float sectionWidth = (getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (MutableCommodityQuantity curr : inputs) {
+				for (MutableCommodityQuantity curr : demand.values()) {
 					CommodityStats stats = engine.getComStats(curr.getCommodityId(), market.getId());
 					int dAmount = stats.getBaseDemandStat(id).getModifiedInt();
 					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
