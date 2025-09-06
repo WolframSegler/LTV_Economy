@@ -38,13 +38,13 @@ public final class LtvCompatibilityLayer {
         final String baseID = EconomyEngine.getBaseIndustryID(ind);
         final IndustryConfig config =  EconomyEngine.getInstance().ind_config.get(baseID);
 
-        MutableStat src = ind.getDemand(comID).getQuantity();
-        MutableStat dest = new MutableStat(0f);
+        final MutableStat src = ind.getDemand(comID).getQuantity();
+        final MutableStat dest = new MutableStat(0f);
 
         MutableStat modifier;
         if (
             (config != null && config.outputs.get(comID) != null && !config.outputs.get(comID).isAbstract) ||
-            (config == null && ind.isIndustry())
+            (config == null && ind.isIndustry() && !ind.isStructure())
         ) {
             modifier = ind.getDemandReduction().createCopy();
             modifier.applyMods(ind.getSupplyBonus());
@@ -57,8 +57,8 @@ public final class LtvCompatibilityLayer {
     }
 
     public static final MutableStat convertIndSupplyStat(Industry ind, String comID) {
-        MutableStat src = ind.getSupply(comID).getQuantity();
-        MutableStat dest = new MutableStat(0f);
+        final MutableStat src = ind.getSupply(comID).getQuantity();
+        final MutableStat dest = new MutableStat(0f);
 
         copyMods(ind, src, dest, "ind_sb", ind.getSupplyBonus(), comID);
         return dest;

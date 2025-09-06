@@ -32,7 +32,6 @@ import com.fs.starfarer.api.combat.MutableStat.StatModType;
 import com.fs.starfarer.api.impl.campaign.econ.impl.InstallableItemEffect;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseInstallableItemEffect;
 
-@SuppressWarnings("serial")
 public class LtvItemEffectsRepo {
 	// I modified the items so that an increase in Production also increases the Demand
 
@@ -69,8 +68,8 @@ public class LtvItemEffectsRepo {
 	public final static float CORRUPTED_NANOFORGE_QUALITY_BONUS = 0.2f;
 	public final static float PRISTINE_NANOFORGE_QUALITY_BONUS = 0.5f;
 
-	public final static float CORRUPTED_NANOFORGE_PROD = 1.20f; // +20% output mult
-	public final static float PRISTINE_NANOFORGE_PROD = 1.60f; // +60% output mult
+	public final static float CORRUPTED_NANOFORGE_PROD = 1.20f;
+	public final static float PRISTINE_NANOFORGE_PROD = 1.60f;
 
 	public final static int SYNCHROTRON_FUEL_BONUS = 100; // +100% output perct
 

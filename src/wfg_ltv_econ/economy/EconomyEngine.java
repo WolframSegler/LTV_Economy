@@ -87,18 +87,6 @@ public class EconomyEngine extends BaseCampaignEventListener
         Global.getSector().getListenerManager().addListener(this, true);
         Global.getSector().addListener(this);
 
-        for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
-            for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
-                if (ind instanceof BaseIndustry baseInd) {
-                    applyIndustryPIOs(market, baseInd);
-                } else {
-                    Global.getLogger(getClass()).warn(
-                        "Industry type " + ind.getClass() + " is unsupported by LTV Economy."
-                    );
-                }
-            }
-        }
-
         return this;
     }
 
@@ -358,9 +346,9 @@ public class EconomyEngine extends BaseCampaignEventListener
     public static final void applyIndustryPIOs(MarketAPI market, BaseIndustry ind) {
         final int size = market.getSize();
         final EconomyEngine engine = EconomyEngine.getInstance();
-        final WorkerRegistry workerReg = WorkerRegistry.getInstance();
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
 
-        if (engine == null || workerReg == null) return;
+        if (engine == null || reg == null) return;
 
         final String baseIndustryID = getBaseIndustryID(ind);
 
@@ -372,7 +360,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         final Map<String, Float> totalDemandMap = new HashMap<>();
         if (indMap == null || indMap.isEmpty()) return;
 
-        final String abstractCom = "abstract";
+        final String ABSTRACT_COM = "abstract";
 
         for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
             OutputCom output = entry.getValue();
@@ -403,7 +391,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             if (!output.usesWorkers) {
                 for (Map.Entry<String, Float> demandEntry : output.ConsumptionMap.entrySet()) {
                     String input = demandEntry.getKey();
-                    if (input.equals(abstractCom)) continue;
+                    if (input.equals(ABSTRACT_COM)) continue;
 
                     float demandAmount = demandEntry.getValue() * output.baseProd * scale;
                     totalDemandMap.merge(input, demandAmount, Float::sum);
@@ -419,7 +407,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 float totalWeight = output.CCMoneyDist.values().stream().reduce(0f, Float::sum);
                 for (Map.Entry<String, Float> ccEntry : output.CCMoneyDist.entrySet()) {
                     String inputID = ccEntry.getKey();
-                    if (inputID.equals(abstractCom)) continue;
+                    if (inputID.equals(ABSTRACT_COM)) continue;
 
                     float weight = ccEntry.getValue() / totalWeight;
                     float inputValue = Vcc * weight;
@@ -445,11 +433,8 @@ public class EconomyEngine extends BaseCampaignEventListener
                     float workersPerUnit = (Pout * RoVC) / LPV_day;
 
                     float supplyQty = scale / workersPerUnit;
-                    String modID = "ind_" + ind.getId() + "_0";
 
-                    ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
-                        modID, supplyQty, BaseIndustry.BASE_VALUE_TEXT
-                    );
+                    ind.supply(entry.getKey(), (int) supplyQty);
                 }
             }
         }

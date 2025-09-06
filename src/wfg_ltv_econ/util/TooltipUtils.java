@@ -19,6 +19,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
@@ -477,6 +478,15 @@ public class TooltipUtils {
             MutableStat stat = entry.getValue();
             Industry ind = comStats.market.getIndustry(entry.getKey());
 
+            if (stat.base > 0) {
+                y = TooltipUtils.createStatModGridRow(
+                    tooltip, y, valueTxtWidth, firstPara, highlight, stat.base, true,
+                    BaseIndustry.BASE_VALUE_TEXT, ind.getCurrentName(), "+"
+                );
+
+                firstPara = false;
+            }
+
             // Flat mods
             for (StatMod mod : stat.getFlatMods().values()) {
                 if (mod.getDesc() == null || mod.getValue() < 1) {
@@ -585,19 +595,28 @@ public class TooltipUtils {
             MutableStat stat = entry.getValue();
             Industry ind = comStats.market.getIndustry(entry.getKey());
 
-            // Flat mods
-            for (StatMod mod : stat.getFlatMods().values()) {
-                if (mod.getValue() < 1) {
-                    continue;
-                }
-
+            if (stat.base > 0) {
                 if (firstPara) {
                     firstPara = false;
                     y -= pad;
                 }
 
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true,
+                    tooltip, y, valueTxtWidth, firstPara, valueColor, stat.base, true,
+                    BaseIndustry.BASE_VALUE_TEXT, ind.getCurrentName(), "+"
+                );
+
+                firstPara = false;
+            }
+
+            // Flat mods
+            for (StatMod mod : stat.getFlatMods().values()) {
+                if (mod.getValue() < 1) {
+                    continue;
+                }
+
+                y = TooltipUtils.createStatModGridRow(
+                    tooltip, y, valueTxtWidth, firstPara, valueColor, mod.getValue(), true,
                     "Needed by " + ind.getCurrentName(), null, "+"
                 );
 
@@ -611,7 +630,7 @@ public class TooltipUtils {
                 }
 
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), false,
+                    tooltip, y, valueTxtWidth, firstPara, valueColor, mod.getValue(), false,
                     mod.getDesc(), ind.getCurrentName(), Strings.X
                 );
 

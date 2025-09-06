@@ -463,6 +463,8 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 			final int iconSize = 32;
 			final int itemsPerRow = 3;
 
+			final EconomyEngine engine = EconomyEngine.getInstance();
+
 			if (hasSupply) {
 				tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
 
@@ -474,8 +476,9 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 				int count = -1;
 
 				for (MutableCommodityQuantity curr : outputs) {
+					CommodityStats stats = engine.getComStats(curr.getCommodityId(), market.getId());
+					int pAmount = stats.getLocalProductionStat(id).getModifiedInt();
 					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
-					int pAmount = curr.getQuantity().getModifiedInt();
 
 					// wrap to next line if needed
 					count++;
@@ -531,8 +534,9 @@ public abstract class LtvBaseIndustry extends BaseIndustry {
 				int count = -1;
 
 				for (MutableCommodityQuantity curr : inputs) {
-					CommoditySpecAPI commodity = Global.getSettings().getCommoditySpec(curr.getCommodityId());
-					int dAmount = curr.getQuantity().getModifiedInt();
+					CommodityStats stats = engine.getComStats(curr.getCommodityId(), market.getId());
+					int dAmount = stats.getBaseDemandStat(id).getModifiedInt();
+					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
 
 					// wrap to next line if needed
 					count++;

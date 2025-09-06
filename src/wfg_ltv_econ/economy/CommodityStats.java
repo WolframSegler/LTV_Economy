@@ -9,6 +9,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
 
 public class CommodityStats {
 
@@ -142,18 +143,55 @@ public class CommodityStats {
         localProdMutables = new HashMap<>();
         demandBaseMutables = new HashMap<>();
 
+        Global.getLogger(getClass()).error(market.getName() + " " + market.getSize());
+        Global.getLogger(getClass()).error(comID);
+
         for (Industry industry : getVisibleIndustries(market)) {
+            if(industry.getSupply(comID).getQuantity().getModifiedValue() > 0) {
+                MutableStat supplyStat = LtvCompatibilityLayer.convertIndSupplyStat(industry, comID);
+                localProdMutables.put(industry.getId(), supplyStat);
 
-            if (industry.getSupply(comID).getQuantity().getModifiedValue() <= 0 &&
-                industry.getDemand(comID).getQuantity().getModifiedValue() <= 0
-            ) continue; 
+                Global.getLogger(getClass()).error(industry.getId() + " supply:");
+                Global.getLogger(getClass()).error("base: " + supplyStat.base);
+                Global.getLogger(getClass()).error("Flat");
+                for(StatMod a : supplyStat.getFlatMods().values()) {
+                    Global.getLogger(getClass()).error(a.source +" "+ a.value +" "+a.desc);
+                }
+                Global.getLogger(getClass()).error("Mult");
+                for(StatMod a : supplyStat.getMultMods().values()) {
+                    Global.getLogger(getClass()).error(a.source +" "+ a.value +" "+a.desc);
+                }
+                Global.getLogger(getClass()).error("Percent");
+                for(StatMod a : supplyStat.getPercentMods().values()) {
+                    Global.getLogger(getClass()).error(a.source +" "+ a.value +" "+a.desc);
+                }
+                Global.getLogger(getClass()).error("final: " + supplyStat.getModifiedInt());
 
-            MutableStat supplyStat = LtvCompatibilityLayer.convertIndSupplyStat(industry, comID);
-            MutableStat demandStat = LtvCompatibilityLayer.convertIndDemandStat(industry, comID);
+            }
+            if(industry.getDemand(comID).getQuantity().getModifiedValue() > 0) {
+                MutableStat demandStat = LtvCompatibilityLayer.convertIndDemandStat(industry, comID);
+                demandBaseMutables.put(industry.getId(), demandStat);
 
-            localProdMutables.put(industry.getId(), supplyStat);
-            demandBaseMutables.put(industry.getId(), demandStat);
+                Global.getLogger(getClass()).error(industry.getId() + " demand:");
+                Global.getLogger(getClass()).error("base: " + demandStat.base);
+                Global.getLogger(getClass()).error("Flat");
+                for(StatMod a : demandStat.getFlatMods().values()) {
+                    Global.getLogger(getClass()).error(a.source +" "+ a.value +" "+a.desc);
+                }
+                Global.getLogger(getClass()).error("Mult");
+                for(StatMod a : demandStat.getMultMods().values()) {
+                    Global.getLogger(getClass()).error(a.source +" "+ a.value +" "+a.desc);
+                }
+                Global.getLogger(getClass()).error("Percent");
+                for(StatMod a : demandStat.getPercentMods().values()) {
+                    Global.getLogger(getClass()).error(a.source +" "+ a.value +" "+a.desc);
+                }
+                Global.getLogger(getClass()).error("final: " + demandStat.getModifiedInt());
+
+            }
         }
+
+        Global.getLogger(getClass()).error("----------------------------------------");
 
         for (MutableStat stat : localProdMutables.values()) {
             localProd += stat.getModifiedInt();
