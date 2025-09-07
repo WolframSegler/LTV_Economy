@@ -95,45 +95,39 @@ public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodi
             return stats.getEconomicFootprint() <= 0;
         });
 
-        final TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth(), getPos().getHeight(), false);
+        final TooltipMakerAPI tooltip = m_panel.createUIElement(
+            getPos().getWidth(), 0, false
+        );
         tooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
+        tooltip.setHeightSoFar(headerHeight);
+        getPanel().addUIElement(tooltip).inTL(0, 0);
         getPlugin().setOffsets(1, 1, -2, -headerHeight - 2);
 
-        // Determine row height
-        float rowHeight = getPos().getHeight() - headerHeight - opad - pad;
-        rowHeight = rowHeight / (float)commodities.size();
-        rowHeight = (float)((int)rowHeight);
-        if (rowHeight % 2.0F == 0.0F) {
-           rowHeight--;
-        }
-        rowHeight -= pad;
-        if (rowHeight > 28.0f) {
-            rowHeight = 28.0f;
-        }
-
-        // Add Rows to the panel
-        CustomPanelAPI previousRow = null;
+        final TooltipMakerAPI rowTp = m_panel.createUIElement(
+            getPos().getWidth(), getPos().getHeight() - headerHeight, true
+        );
+        
+        final int rowHeight = 28;
+        int cumulativeYOffset = opad;
 
         for (CommoditySpecAPI com : commodities) {
-            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(getRoot(), getPanel(), getMarket(), com.getId(),
-            this, (int)(getPos().getWidth() - opad * 2), (int)rowHeight, childrenIgnoreUIState, m_canViewPrices);
+            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(
+                getRoot(), getPanel(), getMarket(), com.getId(), this, (int)(getPos().getWidth() - opad * 2), 
+                rowHeight, childrenIgnoreUIState, m_canViewPrices
+            );
 
-            comRow.getPos().setSize(getPos().getWidth() - opad * 2.0F, rowHeight);
+            rowTp.addComponent(comRow.getPanel()).inTL(opad, cumulativeYOffset);
 
-            if (previousRow == null) {
-                getPanel().addComponent(comRow.getPanel()).inTL(opad, headerHeight + opad);
-            } else {
-                getPanel().addComponent(comRow.getPanel()).belowLeft(previousRow, pad);
-            }
+            cumulativeYOffset += pad + rowHeight;
 
             comRow.setActionListener(selectionListener);
 
-            previousRow = comRow.getPanel();
             commodityRows.add(comRow);
         }
-        getPanel().addUIElement(tooltip).inTL(0, 0);
+        rowTp.setHeightSoFar(cumulativeYOffset);
+        getPanel().addUIElement(rowTp).inTL(0, headerHeight);
     }
 
     public void selectRow(String comID) {

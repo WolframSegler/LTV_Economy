@@ -30,7 +30,7 @@ import wfg.ltv_econ.util.UiUtils.AnchorType;
 
 /**
  * SortableTable is a customizable, sortable UI table component designed to display
- * complex tabular data within a custom panel environment. It extends {@link LtvCustomPanel}
+ * tabular data within a custom panel environment. It extends {@link LtvCustomPanel}
  * to integrate smoothly with the overall UI framework.
  * <p>
  * <b>This table supports:</b>
@@ -56,7 +56,7 @@ import wfg.ltv_econ.util.UiUtils.AnchorType;
  *
  * // Setup headers with labels, widths, tooltips, merge flags and merge group
  * table.addHeaders(
- *     "", 40, null, true, false, 1,
+ *     "", 40, null, true, false, 1, // Icon header
  *     "Colony", 200, "Colony name", true, true, 1,
  *     "Size", 100, "Colony size", false, false, -1,
  *     "Faction", 150, "Controlling faction", false, false, -1,
@@ -64,9 +64,9 @@ import wfg.ltv_econ.util.UiUtils.AnchorType;
  * );
  *
  * // Add rows with multiple typed cells and associated tooltips
- * table.addCell(iconPanel, Alignment.LEFT, null, null);
- * table.addCell("Colony Name", Alignment.LEFT, null, textColor);
- * table.addCell(5, Alignment.CENTER, null, textColor);
+ * table.addCell(iconPanel, cellAlg.LEFT, null, null);
+ * table.addCell("Colony Name", cellAlg.LEFT, null, textColor);
+ * table.addCell(5, cellAlg.MID, null, textColor);
  * // ...
  * table.pushRow(codexID, market, null, highlightColor, tooltip);
  *
@@ -83,11 +83,8 @@ import wfg.ltv_econ.util.UiUtils.AnchorType;
  * });
  * }</pre>
  * <p>
- * This component is designed to be flexible for various data types and dynamic updates.
- * It supports tooltips both for headers and rows via {@link PendingTooltip}.
+ * This component supports tooltips both for headers and rows via {@link PendingTooltip}.
  * <p>
- * The class is tightly integrated with the {@code LtvCustomPanel} and the broader UI framework,
- * allowing custom rendering, plugin integration, and seamless UI event handling.
  */
 public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>, SortableTable, CustomPanelAPI> {
     private final List<ColumnManager> m_columns = new ArrayList<>();
@@ -243,10 +240,9 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             true
         );
 
-        int cumulativeYOffset = pad; // The first row should still have a gap
+        int cumulativeYOffset = pad;
         for (RowManager row : m_rows) {
-            tp.addComponent(row.getPanel()).inTL(
-                    pad, cumulativeYOffset);
+            tp.addComponent(row.getPanel()).inTL(pad, cumulativeYOffset);
 
             cumulativeYOffset += pad + m_rowHeight;
         }
