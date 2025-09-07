@@ -63,7 +63,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void beforeGameSave() {
-        Map<String, Object> persistentData = Global.getSector().getPersistentData();
+        final Map<String, Object> persistentData = Global.getSector().getPersistentData();
 
         persistentData.put(EconEngine, EconomyEngine.getInstance());
         persistentData.put(WorkerReg, WorkerRegistry.getInstance());
