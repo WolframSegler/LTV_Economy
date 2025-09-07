@@ -26,6 +26,7 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.CommRelayCondition;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
+import com.fs.starfarer.api.impl.campaign.econ.impl.ItemEffectsRepo;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
@@ -740,7 +741,7 @@ public class LtvPopulationAndInfrastructure extends BaseIndustry implements Mark
 			return false;
 
 		if (Items.ORBITAL_FUSION_LAMP.equals(data.getId())) {
-			for (String mc : LtvItemEffectsRepo.FUSION_LAMP_CONDITIONS) {
+			for (String mc : ItemEffectsRepo.FUSION_LAMP_CONDITIONS) {
 				if (market.hasCondition(mc))
 					return true;
 			}
@@ -766,9 +767,9 @@ public class LtvPopulationAndInfrastructure extends BaseIndustry implements Mark
 			SectorEntityToken entity = hypershunt.getEntity();
 			if (!usable || entity.getMemoryWithoutUpdate().contains("$usable")) {
 				float dist = Misc.getDistanceLY(locInHyper, entity.getLocationInHyperspace());
-				if (dist > LtvItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS &&
-						Math.round(dist * 10f) <= LtvItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS * 10f) {
-					dist = LtvItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS;
+				if (dist > ItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS &&
+						Math.round(dist * 10f) <= ItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS * 10f) {
+					dist = ItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS;
 				}
 				if (dist < minDist) {
 					minDist = dist;
@@ -802,14 +803,14 @@ public class LtvPopulationAndInfrastructure extends BaseIndustry implements Mark
 				lights = "light-year";
 			}
 
-			if (p.two > LtvItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS) {
+			if (p.two > ItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS) {
 				text.addPara(
 						"The nearest coronal tap is located in the "
 								+ p.one.getContainingLocation().getNameWithLowercaseType() + ", %s " + lights
 								+ " away. The maximum range at a portal can connect to a tap is %s light-years.",
 						opad, h,
 						Misc.getRoundedValueMaxOneAfterDecimal(p.two),
-						Integer.toString(LtvItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS));
+						Integer.toString(ItemEffectsRepo.CORONAL_TAP_LIGHT_YEARS));
 			} else {
 				text.addPara(
 						"The nearest coronal tap is located in the "

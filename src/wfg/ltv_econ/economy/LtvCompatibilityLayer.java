@@ -1,6 +1,13 @@
 package wfg.ltv_econ.economy;
 
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.Industry;
+import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 
@@ -67,22 +74,55 @@ public final class LtvCompatibilityLayer {
     private static final void copyMods(Industry ind, MutableStat base, MutableStat dest, String modID,
         MutableStat mods, String comID) {
 
-        final String baseID = "ind_" + ind.getId() + "_0";
-        final StatMod baseMod = base.getFlatMods().get(baseID);
+        final String baseID = "_0";
+        final String marketCondID = "_1";
 
-        float baseValue = 0;
-        if (baseMod != null && baseMod.value > 0) {
-            baseValue = baseMod.value;
-        } else {
-            float cumulativeBase = 0f;
-            for (StatMod f : base.getFlatMods().values()) {
-                if (f.source.equals(modID) || f.value < 0) continue;
-                cumulativeBase += f.value;
+        StatMod baseMod = null;
+        List<StatMod> marketCondMods = new ArrayList<>(4);
+        float cumulativeBase = 0f;
+
+        for (Map.Entry<String, StatMod> entry : base.getFlatMods().entrySet()) {
+            if (entry.getKey().endsWith(baseID) && entry.getValue().value > 0) {
+                baseMod = entry.getValue();
+                break;
+            } else if (entry.getKey().endsWith(marketCondID)) {
+                marketCondMods.add(entry.getValue());
+            } else {
+                if (!entry.getValue().source.equals(modID) && entry.getValue().value >= 0) {
+                    cumulativeBase += entry.getValue().value;
+                }
             }
-            baseValue = cumulativeBase;
+        }
+        
+        float baseValue = (baseMod != null ? baseMod.value : cumulativeBase);
+        dest.setBaseValue(industryBaseConverter(baseValue, ind, comID));
+
+        // ResourceDepositsCondition Mods
+        for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
+        for (StatMod mod : marketCondMods) {
+            if (mod.source.contains(cond.getId())) {
+                Global.getLogger(LtvCompatibilityLayer.class).error(mod.source +" "+ mod.value);
+                dest.modifyMult(
+                    mod.source + "::" + ind.getId(), marketConditionModConverter((int) mod.value), mod.desc
+                );
+            }
+        }
         }
 
-        dest.setBaseValue(industryBaseConverter(baseValue, ind, comID));
+        // Special Items
+        if (ind.getSpecialItem() != null) {
+            final SpecialItemData itemData = ind.getSpecialItem();
+            final String specialId = itemData.getId();
+            
+            for (StatMod mod : base.getFlatMods().values()) {
+                if (mod.source != null && mod.source.equals(specialId)) {
+                    Global.getLogger(LtvCompatibilityLayer.class).error(
+                        "Special item " + specialId + " adds " + mod.value + " to " + comID
+                    );
+                }
+            }
+        }
+
 
         if (mods == null) return;
 
@@ -175,6 +215,39 @@ public final class LtvCompatibilityLayer {
             } else {
                 return 1;
             }
+        }
+    }
+
+    private static final float marketConditionModConverter(int flatValue) {
+        switch (flatValue) {
+        case 0:
+            return 1f;
+        case 1:
+            return 1.5f;
+        case 2:
+            return 2f;
+        case 3: 
+            return 3f;
+        case 4:
+            return 5f;
+        case 5:
+            return 8f;
+        case 6:
+            return 12f;
+        case -1:
+            return 0.5f;
+        case -2:
+            return 0.25f;
+        case -3:
+            return 0.1f;
+        case -4:
+            return 0.05f;
+        case -5:
+            return 0.01f;
+        case -6:
+            return 0.001f;
+        default:
+            return flatValue;
         }
     }
 }

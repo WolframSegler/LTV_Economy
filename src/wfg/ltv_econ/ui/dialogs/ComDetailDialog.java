@@ -580,12 +580,12 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
 
         if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
             LtvTextPanel textPanel = new LtvTextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 210, 0,
+                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
                     new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
+                    TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
 
                     String factionName = m_parentWrapper.getFaction().getDisplayName();
                     String txt = factionName + " market share";
@@ -655,12 +655,12 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
 
         else { // Faction market share
             LtvTextPanel textPanelLeft = new LtvTextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 210, 0,
+                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
                     new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
+                    TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
 
                     String factionName = m_selectedMarket.getFaction().getDisplayName();
                     String txt = factionName + " market share";
@@ -724,12 +724,12 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
 
 
             LtvTextPanel textPanelRight = new LtvTextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 210, 0,
+                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
                     new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
+                    TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
 
                     String factionName = m_parentWrapper.getFaction().getDisplayName();
                     String txt = factionName + " market share";
