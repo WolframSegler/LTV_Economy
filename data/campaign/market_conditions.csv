@@ -1,3 +1,3 @@
 name,id,tags,planetary,decivRemove,script,desc,icon,order
-No Automatic Stockpiling,no_restock_condition,,TRUE,,"wfg_ltv_econ.conditions.NoRestockCondition","Prevents automatic commodity restocking on this market.",graphics/icons/markets/wfg_labor_small.png,200
-Worker Pool,worker_pool,,TRUE,TRUE,"wfg_ltv_econ.conditions.WorkerPoolCondition","The pool of workers assignable to industries. This determines the production of said industires.",graphics/icons/markets/wfg_labor_small.png,200
+No Automatic Stockpiling,no_restock_condition,,TRUE,,"wfg.ltv_econ.conditions.NoRestockCondition","Prevents automatic commodity restocking on this market.",graphics/icons/markets/wfg_labor_small.png,200
+Worker Pool,worker_pool,,TRUE,TRUE,"wfg.ltv_econ.conditions.WorkerPoolCondition","The pool of workers assignable to industries. This determines the production of said industires.",graphics/icons/markets/wfg_labor_small.png,200

@@ -10,5 +10,5 @@
         "jars/main/ltv_economy.jar",
 		"jars/libs/reflection.jar"
     ],
-	"modPlugin": "wfg_ltv_econ.plugins.LtvEconomyModPlugin"
+	"modPlugin": "wfg.ltv_econ.plugins.LtvEconomyModPlugin"
 }
