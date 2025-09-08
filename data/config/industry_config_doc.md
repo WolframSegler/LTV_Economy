@@ -6,6 +6,7 @@ Documentation of OutputCom Fields and JSON Configuration
 
 * `occTag`: Determines the OCC category for the industry, used to look up the labor share (RoVC).
 * `workerAssignable`: Boolean indicating if the industry can assign workers to outputs.
+* `workerAssignableLimit`: Limits the ratio of globally available workers that can be assigned.
 
 ### Output-level fields (per commodity)
 

@@ -45,6 +45,7 @@ public class IndustryConfigLoader {
             JSONObject industryJson = root.getJSONObject(industryId);
 
             boolean workerAssignable = industryJson.getBoolean("workerAssignable");
+            float limit = (float) industryJson.optDouble("workerAssignableLimit", 1);
 
             String occTagStr = industryJson.getString("occTag");
             OCCTag occTag = OCCTag.AVERAGE;
@@ -143,7 +144,7 @@ public class IndustryConfigLoader {
                 commodityMap.put(outputId, otp);
             }
             
-            IndustryConfig indConfig = new IndustryConfig(workerAssignable, commodityMap, occTag);
+            IndustryConfig indConfig = new IndustryConfig(workerAssignable, commodityMap, occTag, limit);
             result.put(industryId, indConfig);
         }
         } catch (Exception e) {
@@ -158,19 +159,24 @@ public class IndustryConfigLoader {
 
     public static class IndustryConfig {
         public final boolean workerAssignable;
+        public final float workerAssignableLimit;
         public final OCCTag occTag; // Used to determine the RoVC of the industry
         public final Map<String, OutputCom> outputs;
 
-        public IndustryConfig(boolean workerAssignable, Map<String, OutputCom> outputs, OCCTag occTag) {
+        public IndustryConfig(boolean workerAssignable, Map<String, OutputCom> outputs, OCCTag occTag,
+            float limit) {
+
             this.workerAssignable = workerAssignable;
             this.outputs = outputs;
             this.occTag = occTag;
+            this.workerAssignableLimit = limit;
         }
 
         @Override
         public final String toString() {
             return '{' + " ,\n"
                 + "workerAssignable: " + workerAssignable + " ,\n"
+                + "workerAssignableLimit: " + workerAssignableLimit + " ,\n"
                 + "occTag: " + occTag.toString() + " ,\n"
                 + outputs.toString()
                 + '}';

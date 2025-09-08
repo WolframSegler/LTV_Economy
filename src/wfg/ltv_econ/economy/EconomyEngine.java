@@ -349,9 +349,12 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         if (engine == null || reg == null) return;
 
-        final String baseIndustryID = getBaseIndustryID(ind);
+        IndustryConfig indConfig = engine.ind_config.get(ind.getId());
 
-        final IndustryConfig indConfig = engine.ind_config.get(baseIndustryID);
+        if (indConfig == null) {
+            final String baseIndustryID = getBaseIndustryID(ind);
+            indConfig = engine.ind_config.get(baseIndustryID);
+        }
 
         if (indConfig == null) return; // NO-OP if no config file exists.
 

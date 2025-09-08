@@ -118,22 +118,7 @@ public final class CompatLayer {
             return;
         }
 
-        for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
-            String commodityId = ResourceDepositsCondition.COMMODITY.get(cond.getId());
-            if (commodityId == null) continue; // condition doesn't affect a commodity
-
-            Integer mod = ResourceDepositsCondition.MODIFIER.get(cond.getId());
-            if (mod == null) continue;
-
-            Integer baseCondMod = ResourceDepositsCondition.BASE_MODIFIER.get(commodityId);
-            if (baseCondMod == null) continue;
-
-            String industryId = ResourceDepositsCondition.INDUSTRY.get(commodityId);
-            if (industryId == null || !industryId.equals(ind.getId())) continue;
-
-            float converted = marketConditionModConverter(mod);
-            dest.modifyMult(cond.getId() + "::" + ind.getId(), converted, cond.getName());
-        }
+        applyResourceDepositMods(ind, dest);
 
         if (bonus == null) return;
 
@@ -182,12 +167,11 @@ public final class CompatLayer {
 
         float size3Base = baseValue - (size - 3);
 
-        if (size3Base < 0f) size3Base = 0f;
-
         if (data != null) {
             return size3Base;
         }
-        return (float) Math.pow(9, size - 3) * size3Base;
+        if (size3Base < 1f) return 1f; // For industries that do not scale well with market size
+        return (float) Math.pow(8.5, size - 3) * size3Base;
     }
 
     /*
@@ -200,27 +184,27 @@ public final class CompatLayer {
         case 1:
             return 1.3f;
         case 2:
-            return 1.69f;
+            return 1.8f;
         case 3: 
-            return 2.197f;
+            return 2.4f;
         case 4:
-            return 2.856f;
+            return 3f;
         case 5:
-            return 3.713f;
+            return 4f;
         case 6:
-            return 4.827f;
+            return 5f;
         case -1:
             return 0.75f;
         case -2:
-            return 0.563f;
+            return 0.5f;
         case -3:
-            return 0.422f;
+            return 0.3f;
         case -4:
-            return 0.316f;
+            return 0.2f;
         case -5:
-            return 0.237f;
+            return 0.1f;
         case -6:
-            return 0.178f;
+            return 0.05f;
         default:
             if (flatValue < 0) {
                 return (float) Math.pow(0.75, flatValue);
@@ -262,6 +246,25 @@ public final class CompatLayer {
             return 0.001f;
         default:
             return flatValue;
+        }
+    }
+
+    public static final void applyResourceDepositMods(Industry ind, MutableStat dest) {
+        for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
+            String commodityId = ResourceDepositsCondition.COMMODITY.get(cond.getId());
+            if (commodityId == null) continue; // condition doesn't affect a commodity
+
+            Integer mod = ResourceDepositsCondition.MODIFIER.get(cond.getId());
+            if (mod == null) continue;
+
+            Integer baseCondMod = ResourceDepositsCondition.BASE_MODIFIER.get(commodityId);
+            if (baseCondMod == null) continue;
+
+            String industryId = ResourceDepositsCondition.INDUSTRY.get(commodityId);
+            if (industryId == null || !industryId.equals(ind.getId())) continue;
+
+            float converted = marketConditionModConverter(mod);
+            dest.modifyMult(cond.getId() + "::" + ind.getId(), converted, cond.getName());
         }
     }
 }

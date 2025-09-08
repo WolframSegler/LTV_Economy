@@ -149,5 +149,390 @@
 				"usesWorkers": true
 			}
 		}
+	},
+	"farming": {
+		"occTag": "agriculture",
+		"workerAssignable": true,
+		"outputList" : {
+			"food": {
+				"constantCapitalMoneySplit": {
+					"heavy_machinery": 1
+				},
+				"usesWorkers": true
+			}
+		}
+	},
+	"aquaculture": {
+		"occTag": "agriculture",
+		"workerAssignable": true,
+		"outputList" : {
+			"food": {
+				"constantCapitalMoneySplit": {
+					"heavy_machinery": 1
+				},
+				"usesWorkers": true
+			}
+		}
+	},
+	"techmining": {
+		"occTag": "manual",
+		"workerAssignable": true,
+		"workerAssignableLimit": 0.05,
+		"outputList" : {
+			"rare_metals": {
+				"constantCapitalMoneySplit": {
+					"abstract": 0.99,
+					"crew": 0.01
+				},
+				"usesWorkers": true
+			},
+			"metals": {
+				"constantCapitalMoneySplit": {
+					"abstract": 1
+				},
+				"usesWorkers": true
+			}
+		}
+	},
+	"refining": {
+		"occTag": "industry",
+		"workerAssignable": true,
+		"workerAssignableLimit": 0.5,
+		"outputList" : {
+			"metals": {
+				"constantCapitalMoneySplit": {
+					"ore": 0.95,
+					"heavy_machinery": 0.05
+				},
+				"usesWorkers": true
+			},
+			"rare_metals": {
+				"constantCapitalMoneySplit": {
+					"rare_ore": 0.9,
+					"heavy_machinery": 0.1
+				},
+				"usesWorkers": true
+			}
+		}
+	},
+	"spaceport": {
+		"occTag": "space",
+		"workerAssignable": false,
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"ships": 0.1,
+					"fuel": 0.2,
+					"supplies": 0.5
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			},
+			"crew": {
+				"base_prod": 0.01,
+				"consumptionRequirements": {
+					"abstract": 0.7,
+					"supplies": 0.1,
+					"fuel": 0.2
+				},
+				"scaleWithMarketSize": true
+			}
+		}
+	},
+	"fuelprod": {
+		"occTag": "manual",
+		"workerAssignable": true,
+		"workerAssignableLimit": 0.6,
+		"outputList" : {
+			"fuel": {
+				"constantCapitalMoneySplit": {
+					"heavy_machinery": 0.2,
+					"volatiles": 0.8
+				},
+				"usesWorkers": true
+			}
+		}
+	},
+	"#advfuelprod": {
+		"occTag": "industry",
+		"workerAssignable": true,
+		"workerAssignableLimit": 0.6,
+		"outputList" : {
+			"fuel": {
+				"constantCapitalMoneySplit": {
+					"heavy_machinery": 0.3,
+					"volatiles": 0.7
+				},
+				"usesWorkers": true
+			}
+		}
+	},
+	"commerce": {
+		"occTag": "service",
+		"outputList" : {
+			"maintenance": {
+				"consumptionRequirements": {
+					"supplies": 0.05
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			}
+		}
+	},
+	"station_base": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 2,
+					"crew": 10
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			}
+		}
+	},
+	"orbitalstation": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 2,
+					"crew": 10
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			}
+		}
+	},
+	"battlestation": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 10,
+					"crew": 50
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			}
+		}
+	},
+	"starfortress": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 30,
+					"crew": 150
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			}
+		}
+	},
+	"grounddefenses": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 4,
+					"marines": 12,
+					"hand_weapons": 3
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			}
+		}
+	},
+	"heavybatteries": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 4,
+					"marines": 14,
+					"hand_weapons": 8
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			}
+		}
+	},
+	"patrolhq": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 3,
+					"fuel": 10,
+					"ships": 6
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			},
+			"crew": {
+				"constantCapitalMoneySplit": {
+					"supplies": 0.3,
+					"fuel": 0.6,
+					"ships": 0.1
+				},
+				"scaleWithMarketSize": true
+			}
+		}
+	},
+	"militarybase": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 9,
+					"fuel": 30,
+					"ships": 18
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			},
+			"crew": {
+				"constantCapitalMoneySplit": {
+					"supplies": 0.3,
+					"fuel": 0.6,
+					"ships": 0.1
+				},
+				"scaleWithMarketSize": true
+			},
+			"marines": {
+				"constantCapitalMoneySplit": {
+					"supplies": 0.1,
+					"fuel": 0.2,
+					"ships": 0.4,
+					"hand_weapons": 0.3
+				},
+				"scaleWithMarketSize": true
+			}
+		}
+	},
+	"highcommand": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 16,
+					"fuel": 70,
+					"ships": 55
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			},
+			"crew": {
+				"constantCapitalMoneySplit": {
+					"supplies": 0.3,
+					"fuel": 0.6,
+					"ships": 0.1
+				},
+				"scaleWithMarketSize": true
+			},
+			"marines": {
+				"constantCapitalMoneySplit": {
+					"supplies": 0.1,
+					"fuel": 0.2,
+					"ships": 0.4,
+					"hand_weapons": 0.3
+				},
+				"scaleWithMarketSize": true
+			}
+		}
+	},
+	"lionsguard": {
+		"occTag": "space",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 20,
+					"fuel": 90,
+					"ships": 64
+				},
+				"scaleWithMarketSize": true,
+				"isAbstract": true
+			},
+			"crew": {
+				"constantCapitalMoneySplit": {
+					"supplies": 0.3,
+					"fuel": 0.6,
+					"ships": 0.1
+				},
+				"scaleWithMarketSize": true
+			},
+			"marines": {
+				"constantCapitalMoneySplit": {
+					"supplies": 0.1,
+					"fuel": 0.2,
+					"ships": 0.3,
+					"hand_weapons": 0.4
+				},
+				"scaleWithMarketSize": true
+			}
+		}
+	},
+	"planetaryshield": {
+		"occTag": "industry",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 50,
+					"fuel": 140
+				},
+				"scaleWithMarketSize": false,
+				"isAbstract": true
+			}
+		}
+	},
+	"waystation": {
+		"occTag": "service",
+		"usesWorkers": true,
+		"outputList" : {
+			"imports": {
+				"constantCapitalMoneySplit": {
+					"supplies": 0.2,
+					"fuel": 0.4,
+					"crew": 0.1,
+					"volatiles": 0.2,
+					"rare_metals": 0.2
+				},
+				"usesWorkers": true,
+				"isAbstract": true
+			}
+		}
+	},
+	"cryosanctum": {
+		"occTag": "service",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"supplies": 85,
+					"organics": 300
+				},
+				"isAbstract": true
+			},
+			"organs": {
+				"base_prod": 0.3,
+				"consumptionRequirements": {
+					"abstract": 1
+				},
+				"scaleWithMarketSize": true
+			}
+		}
+	},
+	"cryorevival": {
+		"occTag": "service",
+		"outputList" : {
+			"operation": {
+				"consumptionRequirements": {
+					"organics": 20
+				},
+				"isAbstract": true,
+				"scaleWithMarketSize": true
+			}
+		}
 	}
 }
