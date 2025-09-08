@@ -234,7 +234,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
         workerCountLabel.setHighlightColor(
             UiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
         );
-        if (EconomyEngine.isWorkerAssignable(m_industry)) {
+        if (data != null) {
 
             final String assignedStr = NumFormat.engNotation(data.getWorkersAssigned());
 
@@ -556,11 +556,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
                     targetItem.id = tempID;
                     targetItem.cost = tempCost;
 
-                    if (queueItems.indexOf(sourceItem) != 0 && queueItems.indexOf(targetItem) != 0) {
-                        IndustryPanel.createPanel();
-                    } else {
-                        IndustryPanel.recreateOverview();
-                    }
+                    IndustryPanel.createPanel();
                 }
             } else if (constructionMode == ConstructionMode.REMOVE) {
                 List<ConstructionQueueItem> queueItems = getMarket().getConstructionQueue().getItems();
@@ -575,11 +571,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
                         Misc.addCreditsMessage("Received %s", itemCost);
                     }
 
-                    if (constructionQueueIndex == 0) {
-                        IndustryPanel.recreateOverview();
-                    } else {
-                        IndustryPanel.createPanel();
-                    }
+                    IndustryPanel.createPanel();
                 }
             }
         } else {
@@ -602,7 +594,7 @@ public class LtvIndustryWidget extends LtvCustomPanel<IndustryWidgetPlugin, LtvI
                 DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptCtor.newInstance(
                     m_industry,
                     getIndustryPanel().dummyWidget,
-                    getIndustryPanel().getMarketInteractionMode(),
+                    LtvIndustryListPanel.getMarketInteractionMode(getMarket()),
                     CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
                     listener
                 );

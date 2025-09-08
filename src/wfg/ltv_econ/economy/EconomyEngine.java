@@ -152,8 +152,9 @@ public class EconomyEngine extends BaseCampaignEventListener
                 comInfo.addMarket(marketID);
             }
 
-            WorkerRegistry.getInstance().register(marketID);
         }
+        
+        WorkerRegistry.getInstance().register(marketID);
     }
 
     public final void removeMarket(String marketID) {

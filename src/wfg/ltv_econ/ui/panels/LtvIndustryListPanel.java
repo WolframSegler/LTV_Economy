@@ -36,7 +36,6 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.industry.IndustryTooltips;
-import wfg.ltv_econ.ui.LtvUIState.UIState;
 import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg.ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
 import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
@@ -112,7 +111,7 @@ public class LtvIndustryListPanel
 
 		CustomPanelAPI widgetWrapper = Global.getSettings().createCustom(
             getPos().getWidth(),
-            getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
+            getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.5f,
             null
         );
 
@@ -227,8 +226,6 @@ public class LtvIndustryListPanel
                 @Override
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
-
-                    getPlugin().setTargetUIState(UIState.NONE);
                 }
             };
         }
@@ -336,8 +333,6 @@ public class LtvIndustryListPanel
                 @Override
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
-
-                    getPlugin().setTargetUIState(UIState.NONE);
                 }
             };
         }
@@ -372,13 +367,6 @@ public class LtvIndustryListPanel
 		}
 
 		add(buttonWrapper).inBL(0, 0);
-	}
-
-	public void recreateOverview() {
-		Global.getSector().getEconomy().tripleStep();
-
-		createPanel();
-		ReflectionUtils.invoke(getPanel(), "fakeAdvance", 10f);
 	}
 
 	public final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, LtvIndustryWidget widget) {
@@ -547,21 +535,19 @@ public class LtvIndustryListPanel
 			// 		Misc.getHighlightColor()
 			// 	);
 			// }
-
-			recreateOverview();
 		} else {
 			buildDialogOpen = false;
 		}
 	}
 
-	public MarketInteractionMode getMarketInteractionMode() {
+	public static MarketInteractionMode getMarketInteractionMode(MarketAPI market) {
 		final InteractionDialogAPI dialog = Global.getSector().getCampaignUI().getCurrentInteractionDialog();
 		if (dialog == null) {
 			return MarketInteractionMode.REMOTE;
 		}
 
 		final SectorEntityToken interactingTarget = dialog.getInteractionTarget();
-		if (interactingTarget != null && interactingTarget.getMarket() == getMarket()) {
+		if (interactingTarget != null && interactingTarget.getMarket() == market) {
 			return MarketInteractionMode.LOCAL;
 		} else {
 			return MarketInteractionMode.REMOTE;

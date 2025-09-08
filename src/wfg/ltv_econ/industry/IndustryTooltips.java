@@ -197,7 +197,7 @@ public class IndustryTooltips {
 				opad
 			);
 
-			float buildTime = (float) ReflectionUtils.get(ind, "buildTime", float.class);
+			float buildTime = (float) ReflectionUtils.get(ind, "buildTime", float.class, true);
 			int left = Math.round((buildTime - ((BaseIndustry)ind).getBuildProgress()));
 			String days = "days";
 			if (left < 2)

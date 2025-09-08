@@ -48,10 +48,7 @@ public class WorkerRegistry {
     public final void register(String marketID) {
         final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
         for (Industry ind : market.getIndustries()) {
-            final String key = makeKey(marketID, ind.getId());
-            if (EconomyEngine.isWorkerAssignable(ind)) {
-                registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind.getId()));
-            }
+            register(marketID, ind.getId());
         }
     }
 
