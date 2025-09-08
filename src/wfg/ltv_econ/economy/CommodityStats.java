@@ -146,12 +146,12 @@ public class CommodityStats {
 
         for (Industry industry : getVisibleIndustries(market)) {
             if(industry.getSupply(comID).getQuantity().getModifiedValue() > 0) {
-                MutableStat supplyStat = LtvCompatibilityLayer.convertIndSupplyStat(industry, comID);
+                MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);
                 localProdMutables.put(industry.getId(), supplyStat);
 
             }
             if(industry.getDemand(comID).getQuantity().getModifiedValue() > 0) {
-                MutableStat demandStat = LtvCompatibilityLayer.convertIndDemandStat(industry, comID);
+                MutableStat demandStat = CompatLayer.convertIndDemandStat(industry, comID);
                 demandBaseMutables.put(industry.getId(), demandStat);
 
             }

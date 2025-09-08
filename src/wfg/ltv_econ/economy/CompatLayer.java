@@ -1,22 +1,17 @@
 package wfg.ltv_econ.economy;
 
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
+import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
 import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 /**
  * <p>
- * <strong>LtvCompatibilityLayer</strong> exists to provide a compatibility layer between vanilla/modded
+ * <strong>CompatibilityLayer</strong> exists to provide a compatibility layer between vanilla/modded
  * industries and the <em>LTV</em> economy system. In the LTV system, all production and consumption
  * modifiers are treated multiplicatively, whereas vanilla Starsector and many mods use additive
  * (flat) or percentage-based bonuses.
@@ -39,7 +34,11 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
  * consumption, or any other LTV-scaled metric.
  * </p>
  */
-public final class LtvCompatibilityLayer {
+public final class CompatLayer {
+
+    public static final String CONFIG_MOD_SUFFIX = "_config";
+    public static final String BASE_MOD_SUFFIX = "_0";
+    public static final String MARKET_COND_MOD_SUFFIX = "_1";
 
     public static final MutableStat convertIndDemandStat(Industry ind, String comID) {
         final String baseID = EconomyEngine.getBaseIndustryID(ind);
@@ -59,82 +58,94 @@ public final class LtvCompatibilityLayer {
             modifier = ind.getDemandReduction();
         }
 
-        copyMods(ind, src, dest, "ind_dr", modifier, comID);
+        copyMods(ind, src, modifier, dest, "ind_dr", comID);
         return dest;
     }
 
     public static final MutableStat convertIndSupplyStat(Industry ind, String comID) {
         final MutableStat src = ind.getSupply(comID).getQuantity();
+        final MutableStat supplyBonus = ind.getSupplyBonus();
         final MutableStat dest = new MutableStat(0f);
 
-        copyMods(ind, src, dest, "ind_sb", ind.getSupplyBonus(), comID);
+        copyMods(ind, src, supplyBonus, dest, "ind_sb",  comID);
         return dest;
     }
 
-    private static final void copyMods(Industry ind, MutableStat base, MutableStat dest, String modID,
-        MutableStat mods, String comID) {
+    private static final void copyMods(Industry ind, MutableStat base, MutableStat bonus, MutableStat dest,
+        String modID, String comID) {
 
-        final String baseID = "_0";
-        final String marketCondID = "_1";
+        boolean useConfig = true;
 
         StatMod baseMod = null;
-        List<StatMod> marketCondMods = new ArrayList<>(4);
         float cumulativeBase = 0f;
 
-        for (Map.Entry<String, StatMod> entry : base.getFlatMods().entrySet()) {
-            if (entry.getKey().endsWith(baseID) && entry.getValue().value > 0) {
-                baseMod = entry.getValue();
-                break;
-            } else if (entry.getKey().endsWith(marketCondID)) {
-                marketCondMods.add(entry.getValue());
+        for (StatMod mod : base.getFlatMods().values()) {
+            if (mod.source.endsWith(CONFIG_MOD_SUFFIX) && mod.value > 0) {
+                baseMod = mod;
+
+            } else if (mod.source.endsWith(BASE_MOD_SUFFIX) && mod.value > 0) {
+                baseMod = baseMod == null ? mod : baseMod;
+
             } else {
-                if (!entry.getValue().source.equals(modID) && entry.getValue().value >= 0) {
-                    cumulativeBase += entry.getValue().value;
+                if (!mod.source.equals(modID) && 
+                    !mod.source.endsWith(MARKET_COND_MOD_SUFFIX) &&
+                    mod.value >= 0
+                ) {
+                    cumulativeBase += mod.value;
+                    useConfig = false;
                 }
             }
         }
-        
+
+        boolean hasRelevantCondition = true;
+
+        if (useConfig && ResourceDepositsCondition.COMMODITY.containsValue(comID)) {
+            hasRelevantCondition = false;
+            for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
+                String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
+                if (comID.equals(condComID)) {
+                    hasRelevantCondition = true;
+                    break;
+                }
+            }
+        }
+
         float baseValue = (baseMod != null ? baseMod.value : cumulativeBase);
-        dest.setBaseValue(industryBaseConverter(baseValue, ind, comID));
+        if (hasRelevantCondition) {
+            dest.setBaseValue(industryBaseConverter(baseValue, ind, comID, useConfig));
+        } else {
+            dest.setBaseValue(0);
+            return;
+        }
 
-        // ResourceDepositsCondition Mods
         for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
-        for (StatMod mod : marketCondMods) {
-            if (mod.source.contains(cond.getId())) {
-                Global.getLogger(LtvCompatibilityLayer.class).error(mod.source +" "+ mod.value);
-                dest.modifyMult(
-                    mod.source + "::" + ind.getId(), marketConditionModConverter((int) mod.value), mod.desc
-                );
-            }
-        }
-        }
+            String commodityId = ResourceDepositsCondition.COMMODITY.get(cond.getId());
+            if (commodityId == null) continue; // condition doesn't affect a commodity
 
-        // Special Items
-        if (ind.getSpecialItem() != null) {
-            final SpecialItemData itemData = ind.getSpecialItem();
-            final String specialId = itemData.getId();
-            
-            for (StatMod mod : base.getFlatMods().values()) {
-                if (mod.source != null && mod.source.equals(specialId)) {
-                    Global.getLogger(LtvCompatibilityLayer.class).error(
-                        "Special item " + specialId + " adds " + mod.value + " to " + comID
-                    );
-                }
-            }
+            Integer mod = ResourceDepositsCondition.MODIFIER.get(cond.getId());
+            if (mod == null) continue;
+
+            Integer baseCondMod = ResourceDepositsCondition.BASE_MODIFIER.get(commodityId);
+            if (baseCondMod == null) continue;
+
+            String industryId = ResourceDepositsCondition.INDUSTRY.get(commodityId);
+            if (industryId == null || !industryId.equals(ind.getId())) continue;
+
+            float converted = marketConditionModConverter(mod);
+            dest.modifyMult(cond.getId() + "::" + ind.getId(), converted, cond.getName());
         }
 
+        if (bonus == null) return;
 
-        if (mods == null) return;
-
-        for (StatMod mod : mods.getPercentMods().values()) {
+        for (StatMod mod : bonus.getPercentMods().values()) {
             dest.modifyPercent(mod.source + "::" + ind.getId(), mod.value, mod.desc);
         }
 
-        for (StatMod mod : mods.getMultMods().values()) {
+        for (StatMod mod : bonus.getMultMods().values()) {
             dest.modifyMult(mod.source + "::" + ind.getId(), mod.value, mod.desc);
         }
 
-        for (StatMod mod : mods.getFlatMods().values()) {
+        for (StatMod mod : bonus.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
             dest.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
         }
@@ -143,7 +154,9 @@ public final class LtvCompatibilityLayer {
     /*
      * Converts vanilla base value to LTV base value with correct scaling.
      */
-    private static final float industryBaseConverter(float baseValue, Industry ind, String comID) {
+    private static final float industryBaseConverter(
+        float baseValue, Industry ind, String comID, boolean useConfig
+    ) {
         final String baseID = EconomyEngine.getBaseIndustryID(ind);
         final IndustryConfig config =  EconomyEngine.getInstance().ind_config.get(baseID);
 
@@ -157,12 +170,13 @@ public final class LtvCompatibilityLayer {
                 .filter(o -> o.usesWorkers && !o.isAbstract)
                 .count();
             if (data != null) baseValue *= (data.getWorkersAssigned() / (float) workerDrivenCount);
+
         } else if (EconomyEngine.isWorkerAssignable(ind)) {
             final int workerDrivenCount = ind.getAllSupply().size();
             if (data != null) baseValue *= (data.getWorkersAssigned() / (float) workerDrivenCount);
         }
 
-        if (config != null) return baseValue;
+        if (config != null && useConfig) return baseValue;
 
         final int size = ind.getMarket().getSize();
 
@@ -173,7 +187,7 @@ public final class LtvCompatibilityLayer {
         if (data != null) {
             return size3Base;
         }
-        return (float) Math.pow(10, size - 3) * size3Base;
+        return (float) Math.pow(9, size - 3) * size3Base;
     }
 
     /*

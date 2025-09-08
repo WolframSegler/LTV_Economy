@@ -359,6 +359,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         if (indMap == null || indMap.isEmpty()) return;
 
         final String ABSTRACT_COM = "abstract";
+        final String CONFIG_MOD_ID = "ind_" + ind.getId() + CompatLayer.CONFIG_MOD_SUFFIX;
 
         for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
             OutputCom output = entry.getValue();
@@ -396,7 +397,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 }
                 if (!output.isAbstract) {
                     int finalSupply = (int) (output.baseProd * scale);
-                    ind.supply(entry.getKey(), finalSupply);
+                    ind.supply(CONFIG_MOD_ID, entry.getKey(), finalSupply, BaseIndustry.BASE_VALUE_TEXT);
                 }
             } else {
                 float Vcc = spec.getBasePrice() * engine.labor_config.getRoCC(indConfig.occTag);
@@ -432,16 +433,17 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                     float supplyQty = scale / workersPerUnit;
 
-                    final String baseID = "ind_" + ind.getId() + "_0";
                     ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
-                        baseID, supplyQty, BaseIndustry.BASE_VALUE_TEXT
+                        CONFIG_MOD_ID, supplyQty, BaseIndustry.BASE_VALUE_TEXT
                     );
                 }
             }
         }
 
         for (Map.Entry<String, Float> entry : totalDemandMap.entrySet()) {
-            ind.demand(entry.getKey(), entry.getValue().intValue());
+            ind.demand(
+                CONFIG_MOD_ID, entry.getKey(), entry.getValue().intValue(), BaseIndustry.BASE_VALUE_TEXT
+            );
         }
     }
 
