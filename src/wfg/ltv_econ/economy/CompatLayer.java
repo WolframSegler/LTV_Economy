@@ -62,7 +62,7 @@ public final class CompatLayer {
             for (OutputCom output : config.outputs.values()) {
                 if (output.isAbstract) continue;
 
-                float amount = output.DynamicInputPerWorker.get(comID);
+                float amount = output.DynamicInputsPerUnit.get(comID);
                 float weight = amount / totalDemand;
                 if (weight > 0f) {
                     totalContribution += weight;
@@ -176,17 +176,18 @@ public final class CompatLayer {
         final WorkerRegistry reg = WorkerRegistry.getInstance(); 
         final WorkerIndustryData data = reg.getData(ind.getMarket().getId(), ind.getId());
 
+        float workersPerUnit = EconomyEngine.getWorkersPerUnit(comID, config.occTag);
         if (
             config != null && config.outputs.get(comID) != null && !config.outputs.get(comID).isAbstract
         ) {
             final int workerDrivenCount = (int) config.outputs.values().stream()
                 .filter(o -> o.usesWorkers && !o.isAbstract)
                 .count();
-            if (data != null) baseValue *= (data.getWorkersAssigned() / (float) workerDrivenCount);
+            if (data != null) baseValue *= (data.getWorkersAssigned() / (workerDrivenCount*workersPerUnit));
 
         } else if (EconomyEngine.isWorkerAssignable(ind)) {
             final int workerDrivenCount = ind.getAllSupply().size();
-            if (data != null) baseValue *= (data.getWorkersAssigned() / (float) workerDrivenCount);
+            if (data != null) baseValue *= (data.getWorkersAssigned() / (workerDrivenCount*workersPerUnit));
         }
 
         if (config != null && useConfig) return baseValue;

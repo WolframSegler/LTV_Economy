@@ -10,9 +10,9 @@ Documentation of OutputCom Fields and JSON Configuration
 
 ### Output-level fields (per commodity)
 
-* `base_prod`: Float. Used when `usesWorkers = false`. Represents fixed production per tick/unit.
-* `CCMoneyDist` (`constantCapitalMoneySplit` in JSON): Map\<String, Float>. Determines the **relative monetary allocation** for constant capital inputs (physical or abstract). Weights are normalized internally. Only used if `usesWorkers = true`.
-* `ConsumptionMap` (`consumptionRequirements` in JSON): Map\<String, Float>. Flat input amounts required per unit/output. Scales with market/population if `scaleWithMarketSize = true`. Can include abstract inputs.
+* `base_prod`: Float. Acts as a scaler when `usesWorkers = true`. Represents daily production in units when used alongside StaticInputsPerUnit. The units inside StaticInputsPerUnit are multiplied with it. Default is always 1.
+* `CCMoneyDist` (`constantCapitalMoneySplit` in JSON): Map\<String, Float>. Defines **relative monetary allocation** for constant capital inputs (physical or abstract). Weights are normalized internally. Can be used with or without workers. Mutually exclusive with `StaticInputsPerUnit`. Can include abstract inputs.
+* `StaticInputsPerUnit` (`consumptionRequirements` in JSON): Map\<String, Float>. Flat input amounts required per output unit. Scales with market/population if `scaleWithMarketSize = true`. Can include abstract inputs.
 * `ifMarketCondsFalse` / `ifMarketCondsTrue`: Lists of conditions affecting output; used to enable/disable production under specific market states.
 * `scaleWithMarketSize`: Boolean. If true, output and/or consumption scales proportionally to market size or population.
 * `usesWorkers`: Boolean. Determines if labor calculations (RoVC, LPV\_day) are applied.
@@ -27,11 +27,14 @@ Documentation of OutputCom Fields and JSON Configuration
    * Total constant capital value `V_cc = P_out * RoCC`.
    * `CCMoneyDist` weights allocate V\_cc to each input.
    * Abstract inputs in `CCMoneyDist` contribute to accounting but have no quantities.
+   * Real inputs per unit of output are stored inside `DynamicInputsPerUnit` during initialization.
 
 2. **Non-labor production** (`usesWorkers = false`):
 
    * Output quantity = `base_prod` × 10^(market_size - 3) (if `scaleWithMarketSize = true`).
-   * Consumption requirements from `ConsumptionMap` are scaled accordingly.
+   * Consumption requirements from `StaticInputsPerUnit` are scaled accordingly.
+   * Inputs are scaled with modifiers from outputs if the output is not abstract.
+   * If using `CCMoneyDist` to model inputs instead, the allocations will build a `DynamicInputsPerUnit` map. "If both CCMoneyDist and StaticInputsPerUnit are present, which is undefined, only CCMoneyDist is used. Static inputs are ignored in this case."
 
 3. **Abstract outputs** (`isAbstract = true`):
 
@@ -46,8 +49,8 @@ Documentation of OutputCom Fields and JSON Configuration
 
 5. **CCMoneyDist weights**:
 
-   * Do not need to sum to 1; internal normalization ensures that the **proportion of total constant capital** is maintained.
-   * Determines monetary allocation per input, which is then converted to quantities based on unit prices.
+   * Do not need to sum to 1; internal normalization ensures that the **proportion of total constant capital** is maintained. It is **strongly advised**, however.
+   * Determines monetary allocation per input based on organic composition of capital (OCC) and output value, which is then converted to quantities.
 
 6. **Integration**:
 

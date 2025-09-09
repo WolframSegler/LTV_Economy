@@ -188,8 +188,8 @@ public class IndustryConfigLoader {
         public final float baseProd; // Used when the output does not depend on workers
 
         public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
-        public final Map<String, Float> ConsumptionMap; // Flat input amounts that are independent of workers
-        public final Map<String, Float> DynamicInputPerWorker = new HashMap<>(); // Populated dynamically
+        public final Map<String, Float> StaticInputsPerUnit; // Flat input amounts independent of workers
+        public final Map<String, Float> DynamicInputsPerUnit = new HashMap<>(); // Populated dynamically
 
         public final List<String> ifMarketCondsFalse;
         public final List<String> ifMarketCondsTrue;
@@ -207,7 +207,7 @@ public class IndustryConfigLoader {
             this.comID = comID;
             this.baseProd = baseProd;
             this.CCMoneyDist = CCMoneyDist;
-            this.ConsumptionMap = ConsumptionMap;
+            this.StaticInputsPerUnit = ConsumptionMap;
             this.ifMarketCondsFalse = ifMarketConditionsFalse;
             this.ifMarketCondsTrue = ifMarketConditionsTrue;
             this.scaleWithMarketSize = scaleWithMarketSize;
@@ -221,7 +221,7 @@ public class IndustryConfigLoader {
             return '{' +  " ,\n" +
                 "baseProd=" + baseProd + " ,\n" +
                 ", CCMoneyDist=" + CCMoneyDist + " ,\n" +
-                ", ConsumptionMap=" + ConsumptionMap + " ,\n" +
+                ", ConsumptionMap=" + StaticInputsPerUnit + " ,\n" +
                 ", ifMarketConditionsFalse=" + ifMarketCondsFalse + " ,\n" +
                 ", ifMarketConditionsTrue=" + ifMarketCondsTrue + " ,\n" +
                 ", scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +

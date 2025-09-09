@@ -24,6 +24,7 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
@@ -262,6 +263,16 @@ public class EconomyEngine extends BaseCampaignEventListener
         return indConfig;
     }
 
+    public static final float getWorkersPerUnit(String comID, OCCTag tag) {
+        final EconomyEngine engine = EconomyEngine.getInstance();
+
+        final float Pout = Global.getSettings().getCommoditySpec(comID).getBasePrice();
+        final float LPV_day = EconomyEngine.getInstance().labor_config.LPV_day;
+        final float RoVC = engine.labor_config.getRoVC(tag);
+
+        return (Pout * RoVC) / LPV_day;
+    } 
+
     public final void weightedOutputDeficitMods() {
         for (CommodityInfo comInfo : m_comInfo.values()) {
         for (CommodityStats stats : comInfo.getStatsMap().values()) {
@@ -289,13 +300,13 @@ public class EconomyEngine extends BaseCampaignEventListener
     
                     float sum = 0;
                     if (output.usesWorkers ||
-                        output.DynamicInputPerWorker != null && !output.DynamicInputPerWorker.isEmpty()
+                        output.DynamicInputsPerUnit != null && !output.DynamicInputsPerUnit.isEmpty()
                     ) {
-                        sum = output.DynamicInputPerWorker.values().stream().reduce(0f, Float::sum);
-                        inputWeights = output.DynamicInputPerWorker;
+                        sum = output.DynamicInputsPerUnit.values().stream().reduce(0f, Float::sum);
+                        inputWeights = output.DynamicInputsPerUnit;
                     } else {
-                        sum = output.ConsumptionMap.values().stream().reduce(0f, Float::sum);
-                        inputWeights = output.ConsumptionMap;
+                        sum = output.StaticInputsPerUnit.values().stream().reduce(0f, Float::sum);
+                        inputWeights = output.StaticInputsPerUnit;
                     }
                     final float finalSum = sum;
                     inputWeights.entrySet().stream()
@@ -428,11 +439,11 @@ public class EconomyEngine extends BaseCampaignEventListener
                         float unitPrice = Global.getSettings().getCommoditySpec(inputID).getBasePrice();
                         float qty = inputValue * scale / unitPrice;
 
-                        output.DynamicInputPerWorker.put(inputID, qty);
+                        output.DynamicInputsPerUnit.put(inputID, qty);
                         totalDemandMap.merge(inputID, qty, Float::sum);
                     }
                 } else {
-                    for (Map.Entry<String, Float> demandEntry : output.ConsumptionMap.entrySet()) {
+                    for (Map.Entry<String, Float> demandEntry : output.StaticInputsPerUnit.entrySet()) {
                         String input = demandEntry.getKey();
                         if (input.equals(ABSTRACT_COM)) continue;
 
@@ -447,11 +458,6 @@ public class EconomyEngine extends BaseCampaignEventListener
                 }
 
             } else {
-                float Pout = Global.getSettings().getCommoditySpec(entry.getKey()).getBasePrice();
-                float LPV_day = EconomyEngine.getInstance().labor_config.LPV_day;
-                float RoVC = engine.labor_config.getRoVC(indConfig.occTag);
-
-                float workersPerUnit = (Pout * RoVC) / LPV_day;
                 float totalWeight = output.CCMoneyDist.values().stream().reduce(0f, Float::sum);
                 
                 // Allocate constant capital to inputs
@@ -464,20 +470,16 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                     float unitPrice = Global.getSettings().getCommoditySpec(inputID).getBasePrice();
                     float qty = inputValue * scale / unitPrice;
-
-                    qty *=  1 / workersPerUnit;
                     
-                    output.DynamicInputPerWorker.put(inputID, qty);
+                    output.DynamicInputsPerUnit.put(inputID, qty);
 
                     totalDemandMap.merge(inputID, qty, Float::sum);
                 }
 
                 // Handle outputs
                 if (!output.isAbstract && EconomyEngine.isWorkerAssignable(ind)) {
-                    float qty = scale / workersPerUnit;
-
                     ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
-                        CONFIG_MOD_ID, qty, BaseIndustry.BASE_VALUE_TEXT
+                        CONFIG_MOD_ID, scale, BaseIndustry.BASE_VALUE_TEXT
                     );
                 }
             }
@@ -583,7 +585,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 OutputCom output = outputEntry.getValue();
 
                 Map<String, Float> relevantInputs = output.usesWorkers ? 
-                    output.CCMoneyDist : output.ConsumptionMap;
+                    output.CCMoneyDist : output.StaticInputsPerUnit;
 
                 for (String inputID : relevantInputs.keySet()) {
                     inputToDependentOutputs
