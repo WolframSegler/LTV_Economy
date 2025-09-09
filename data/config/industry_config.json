@@ -483,7 +483,7 @@
 	},
 	"waystation": {
 		"occTag": "service",
-		"usesWorkers": true,
+		"workerAssignable": true,
 		"outputList" : {
 			"imports": {
 				"constantCapitalMoneySplit": {

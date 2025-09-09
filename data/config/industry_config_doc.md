@@ -23,6 +23,7 @@ Documentation of OutputCom Fields and JSON Configuration
 
 1. **Production with labor** (`usesWorkers = true`):
 
+   * Every labor-driven output must define `CCMoneyDist` (constantCapitalMoneySplit in JSON). This is required to calculate the variable capital contribution for each input according to the Labor Theory of Value.
    * Workers needed are calculated using OCC and LPV\_day.
    * Total constant capital value `V_cc = P_out * RoCC`.
    * `CCMoneyDist` weights allocate V\_cc to each input.

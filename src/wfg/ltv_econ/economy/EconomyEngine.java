@@ -401,6 +401,11 @@ public class EconomyEngine extends BaseCampaignEventListener
             OutputCom output = entry.getValue();
             CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(output.comID);
 
+            if (output.usesWorkers && (output.CCMoneyDist == null || output.CCMoneyDist.isEmpty())) {
+                throw new RuntimeException("Labor-driven output " + output.comID + " in " + ind.getId() +
+                    " must define CCMoneyDist to calculate variable capital contribution.");
+            }
+
             float scale = 1f * output.baseProd;
             boolean skip = false;
 
@@ -425,63 +430,35 @@ public class EconomyEngine extends BaseCampaignEventListener
 
             float Vcc = spec.getBasePrice() * engine.labor_config.getRoCC(indConfig.occTag);
 
-            if (!output.usesWorkers) {
-                if (output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty()) {
-                    float totalWeight = output.CCMoneyDist.values().stream().reduce(0f, Float::sum);
-
-                    for (Map.Entry<String, Float> ccEntry : output.CCMoneyDist.entrySet()) {
-                        String inputID = ccEntry.getKey();
-                        if (inputID.equals(ABSTRACT_COM)) continue;
-
-                        float weight = ccEntry.getValue() / totalWeight;
-                        float inputValue = Vcc * weight; 
-
-                        float unitPrice = Global.getSettings().getCommoditySpec(inputID).getBasePrice();
-                        float qty = inputValue * scale / unitPrice;
-
-                        output.DynamicInputsPerUnit.put(inputID, qty);
-                        totalDemandMap.merge(inputID, qty, Float::sum);
-                    }
-                } else {
-                    for (Map.Entry<String, Float> demandEntry : output.StaticInputsPerUnit.entrySet()) {
-                        String input = demandEntry.getKey();
-                        if (input.equals(ABSTRACT_COM)) continue;
-
-                        float demandAmount = demandEntry.getValue() * scale;
-                        totalDemandMap.merge(input, demandAmount, Float::sum);
-                    }
-                }
-                if (!output.isAbstract) {
-                    ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
-                        CONFIG_MOD_ID, scale, BaseIndustry.BASE_VALUE_TEXT
-                    );
-                }
-
-            } else {
+            if ((output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty())) {
                 float totalWeight = output.CCMoneyDist.values().stream().reduce(0f, Float::sum);
-                
-                // Allocate constant capital to inputs
-                for (Map.Entry<String, Float> ccEntry : output.CCMoneyDist.entrySet()) {
-                    String inputID = ccEntry.getKey();
+
+                for (Map.Entry<String, Float> inputEntry : output.CCMoneyDist.entrySet()) {
+                    String inputID = inputEntry.getKey();
                     if (inputID.equals(ABSTRACT_COM)) continue;
 
-                    float weight = ccEntry.getValue() / totalWeight;
+                    float weight = inputEntry.getValue() / totalWeight;
                     float inputValue = Vcc * weight;
-
                     float unitPrice = Global.getSettings().getCommoditySpec(inputID).getBasePrice();
                     float qty = inputValue * scale / unitPrice;
-                    
-                    output.DynamicInputsPerUnit.put(inputID, qty);
 
+                    output.DynamicInputsPerUnit.put(inputID, qty);
                     totalDemandMap.merge(inputID, qty, Float::sum);
                 }
+            } else if (output.StaticInputsPerUnit != null && !output.StaticInputsPerUnit.isEmpty()) {
+                for (Map.Entry<String, Float> demandEntry : output.StaticInputsPerUnit.entrySet()) {
+                    String inputID = demandEntry.getKey();
+                    if (inputID.equals(ABSTRACT_COM)) continue;
 
-                // Handle outputs
-                if (!output.isAbstract && EconomyEngine.isWorkerAssignable(ind)) {
-                    ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
-                        CONFIG_MOD_ID, scale, BaseIndustry.BASE_VALUE_TEXT
-                    );
+                    float qty = demandEntry.getValue() * scale;
+                    totalDemandMap.merge(inputID, qty, Float::sum);
                 }
+            }
+
+            if (!output.isAbstract) {
+                ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
+                    CONFIG_MOD_ID, scale, BaseIndustry.BASE_VALUE_TEXT
+                );
             }
         }
 
