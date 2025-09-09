@@ -29,7 +29,6 @@ public class CommodityStats {
     private Map<String, MutableStat> demandBaseMutables = new HashMap<>();
 
     public float localProdMult = 1f;
-    public float demandBaseMult = 1f;
 
     // Import
     public long inFactionImports = 0;
@@ -57,7 +56,7 @@ public class CommodityStats {
         return modified ? (int) (localProd*localProdMult) : localProd;
     }
     public final int getBaseDemand(boolean modified) {
-        return modified ? (int) (demandBase*demandBaseMult) : demandBase;
+        return modified ? (int) (demandBase*getStoredCoverageRatio()) : demandBase;
     }
     public final long getDemandMet() {
         return getDemandMetLocally() + getDemandMetViaTrade();
@@ -101,7 +100,11 @@ public class CommodityStats {
     public final long getRealBalance() {
         return getAvailable() - getBaseDemand(true) - getTotalExports();
     }
+    public final float getStoredCoverageRatio() {
+        if (getBaseDemand(false) <= 0) return 1f;
 
+        return Math.min(stored / (float) getBaseDemand(false), 1f);
+    }
 
     public final void addInFactionImport(long a) {
         inFactionImports += a;
@@ -176,7 +179,6 @@ public class CommodityStats {
         globalExports = 0;
 
         localProdMult = 1f;
-        demandBaseMult = 1f;
 
         localProd = 0;
         demandBase = 0;
@@ -202,15 +204,6 @@ public class CommodityStats {
         }
 
         return result;
-    }
-
-    /**
-     * Returns the fraction of demand that could be satisfied by the current stored amount.
-     */
-    public float getStoredCoverageRatio() {
-        if (getBaseDemand(false) <= 0) return 1f;
-
-        return Math.min((float) stored / getBaseDemand(false), 1f);
     }
 
     public List<Industry> getVisibleIndustries() {

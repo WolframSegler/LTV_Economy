@@ -44,10 +44,10 @@ public class IndustryConfigLoader {
             String industryId = itIndustry.next();
             JSONObject industryJson = root.getJSONObject(industryId);
 
-            boolean workerAssignable = industryJson.getBoolean("workerAssignable");
+            boolean workerAssignable = industryJson.optBoolean("workerAssignable", false);
             float limit = (float) industryJson.optDouble("workerAssignableLimit", 1);
 
-            String occTagStr = industryJson.getString("occTag");
+            String occTagStr = industryJson.optString("occTag", null);
             OCCTag occTag = OCCTag.AVERAGE;
 
             if (occTagStr != null) {
@@ -189,7 +189,7 @@ public class IndustryConfigLoader {
 
         public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
         public final Map<String, Float> ConsumptionMap; // Flat input amounts that are independent of workers
-        public final Map<String, Float> DynamicInputWeights = new HashMap<>(); // Populated dynamically
+        public final Map<String, Float> DynamicInputPerWorker = new HashMap<>(); // Populated dynamically
 
         public final List<String> ifMarketCondsFalse;
         public final List<String> ifMarketCondsTrue;

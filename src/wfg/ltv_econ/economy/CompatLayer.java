@@ -7,6 +7,7 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
 import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
+import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 /**
@@ -41,24 +42,50 @@ public final class CompatLayer {
     public static final String MARKET_COND_MOD_SUFFIX = "_1";
 
     public static final MutableStat convertIndDemandStat(Industry ind, String comID) {
-        final String baseID = EconomyEngine.getBaseIndustryID(ind);
-        final IndustryConfig config =  EconomyEngine.getInstance().ind_config.get(baseID);
+        final IndustryConfig config =  EconomyEngine.getIndConfig(ind);
 
         final MutableStat src = ind.getDemand(comID).getQuantity();
         final MutableStat dest = new MutableStat(0f);
 
-        MutableStat modifier;
+        final MutableStat modifier = ind.getDemandReduction();
         if (
-            (config != null && config.outputs.get(comID) != null && !config.outputs.get(comID).isAbstract) ||
-            (config == null && ind.isIndustry() && !ind.isStructure())
+            (config != null || config == null && ind.isIndustry() && !ind.isStructure())
         ) {
-            modifier = ind.getDemandReduction().createCopy();
-            modifier.applyMods(ind.getSupplyBonus());
-        } else {
-            modifier = ind.getDemandReduction();
+            float totalDemand = 0;
+            for (StatMod mod : src.getFlatMods().values()) {
+                if (mod.source.endsWith(CONFIG_MOD_SUFFIX) && mod.value > 0) {
+                    totalDemand = mod.value;
+                    break;
+                }
+            }
+            float totalContribution = 0f;
+            for (OutputCom output : config.outputs.values()) {
+                if (output.isAbstract) continue;
+
+                float amount = output.DynamicInputPerWorker.get(comID);
+                float weight = amount / totalDemand;
+                if (weight > 0f) {
+                    totalContribution += weight;
+                }
+            }
+            
+            if (ind.getSupplyBonus() != null && totalContribution > 0f) {
+                final MutableStat scaledBonus = ind.getSupplyBonus().createCopy();
+                for (StatMod mod : scaledBonus.getFlatMods().values()) {
+                    mod.value *= totalContribution;
+                }
+                for (StatMod mod : scaledBonus.getPercentMods().values()) {
+                    mod.value *= totalContribution;
+                }
+                for (StatMod mod : scaledBonus.getMultMods().values()) {
+                    mod.value = 1 + (mod.value - 1) * totalContribution;
+                }
+
+                modifier.applyMods(scaledBonus);
+            }
         }
 
-        copyMods(ind, src, modifier, dest, "ind_dr", comID);
+        copyMods(ind, src, modifier, dest, "ind_dr", comID, true);
         return dest;
     }
 
@@ -67,12 +94,12 @@ public final class CompatLayer {
         final MutableStat supplyBonus = ind.getSupplyBonus();
         final MutableStat dest = new MutableStat(0f);
 
-        copyMods(ind, src, supplyBonus, dest, "ind_sb",  comID);
+        copyMods(ind, src, supplyBonus, dest, "ind_sb", comID, false);
         return dest;
     }
 
     private static final void copyMods(Industry ind, MutableStat base, MutableStat bonus, MutableStat dest,
-        String modID, String comID) {
+        String modID, String comID, boolean isDemand) {
 
         boolean useConfig = true;
 
@@ -82,6 +109,8 @@ public final class CompatLayer {
         for (StatMod mod : base.getFlatMods().values()) {
             if (mod.source.endsWith(CONFIG_MOD_SUFFIX) && mod.value > 0) {
                 baseMod = mod;
+                useConfig = true;
+                break;
 
             } else if (mod.source.endsWith(BASE_MOD_SUFFIX) && mod.value > 0) {
                 baseMod = baseMod == null ? mod : baseMod;
@@ -99,7 +128,7 @@ public final class CompatLayer {
 
         boolean hasRelevantCondition = true;
 
-        if (useConfig && ResourceDepositsCondition.COMMODITY.containsValue(comID)) {
+        if (useConfig && ResourceDepositsCondition.COMMODITY.containsValue(comID) && !isDemand) {
             hasRelevantCondition = false;
             for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
                 String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
@@ -142,8 +171,7 @@ public final class CompatLayer {
     private static final float industryBaseConverter(
         float baseValue, Industry ind, String comID, boolean useConfig
     ) {
-        final String baseID = EconomyEngine.getBaseIndustryID(ind);
-        final IndustryConfig config =  EconomyEngine.getInstance().ind_config.get(baseID);
+        final IndustryConfig config =  EconomyEngine.getIndConfig(ind);
 
         final WorkerRegistry reg = WorkerRegistry.getInstance(); 
         final WorkerIndustryData data = reg.getData(ind.getMarket().getId(), ind.getId());
@@ -170,7 +198,7 @@ public final class CompatLayer {
         if (data != null) {
             return size3Base;
         }
-        if (size3Base < 1f) return 1f; // For industries that do not scale well with market size
+        if (size3Base <= 0f) return 1f; // For industries that do not scale well with market size
         return (float) Math.pow(8.5, size - 3) * size3Base;
     }
 

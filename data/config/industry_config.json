@@ -156,7 +156,8 @@
 		"outputList" : {
 			"food": {
 				"constantCapitalMoneySplit": {
-					"heavy_machinery": 1
+					"heavy_machinery": 0.7,
+					"abstract": 0.2
 				},
 				"usesWorkers": true
 			}
@@ -168,7 +169,8 @@
 		"outputList" : {
 			"food": {
 				"constantCapitalMoneySplit": {
-					"heavy_machinery": 1
+					"heavy_machinery": 0.7,
+					"abstract": 0.3
 				},
 				"usesWorkers": true
 			}
@@ -246,22 +248,8 @@
 		"outputList" : {
 			"fuel": {
 				"constantCapitalMoneySplit": {
-					"heavy_machinery": 0.2,
-					"volatiles": 0.8
-				},
-				"usesWorkers": true
-			}
-		}
-	},
-	"#advfuelprod": {
-		"occTag": "industry",
-		"workerAssignable": true,
-		"workerAssignableLimit": 0.6,
-		"outputList" : {
-			"fuel": {
-				"constantCapitalMoneySplit": {
-					"heavy_machinery": 0.3,
-					"volatiles": 0.7
+					"heavy_machinery": 0.05,
+					"volatiles": 0.95
 				},
 				"usesWorkers": true
 			}
@@ -284,8 +272,8 @@
 		"outputList" : {
 			"operation": {
 				"consumptionRequirements": {
-					"supplies": 2,
-					"crew": 10
+					"supplies": 0.3,
+					"crew": 2
 				},
 				"scaleWithMarketSize": true,
 				"isAbstract": true
@@ -297,8 +285,8 @@
 		"outputList" : {
 			"operation": {
 				"consumptionRequirements": {
-					"supplies": 2,
-					"crew": 10
+					"supplies": 0.3,
+					"crew": 2
 				},
 				"scaleWithMarketSize": true,
 				"isAbstract": true
@@ -310,8 +298,8 @@
 		"outputList" : {
 			"operation": {
 				"consumptionRequirements": {
-					"supplies": 10,
-					"crew": 50
+					"supplies": 0.6,
+					"crew": 4
 				},
 				"scaleWithMarketSize": true,
 				"isAbstract": true
@@ -323,8 +311,8 @@
 		"outputList" : {
 			"operation": {
 				"consumptionRequirements": {
-					"supplies": 30,
-					"crew": 150
+					"supplies": 1.2,
+					"crew": 7
 				},
 				"scaleWithMarketSize": true,
 				"isAbstract": true
