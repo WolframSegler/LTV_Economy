@@ -37,6 +37,8 @@ import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 public class EconomyEngine extends BaseCampaignEventListener
     implements PlayerColonizationListener, ColonyDecivListener {
 
+    public static final String ABSTRACT_COM = "abstract";
+
     private static EconomyEngine instance;
 
     private final Set<String> m_registeredMarkets;
@@ -329,6 +331,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 for (Map.Entry<String, Float> inputEntry : inputWeights.entrySet()) {
                     float weight = inputEntry.getValue();
                     String inputID = inputEntry.getKey();
+                    if (inputID.equals(ABSTRACT_COM)) continue;
 
                     CommodityStats inputStats = getComStats(inputID, stats.market.getId());
 
@@ -394,7 +397,6 @@ public class EconomyEngine extends BaseCampaignEventListener
         final Map<String, Float> totalDemandMap = new HashMap<>();
         if (indMap == null || indMap.isEmpty()) return;
 
-        final String ABSTRACT_COM = "abstract";
         final String CONFIG_MOD_ID = "ind_" + ind.getId() + CompatLayer.CONFIG_MOD_SUFFIX;
 
         for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
@@ -426,12 +428,11 @@ public class EconomyEngine extends BaseCampaignEventListener
             }
             if (skip) continue;
 
-            if (output.scaleWithMarketSize) scale *= Math.pow(10, size - 3);
-
-            float Vcc = spec.getBasePrice() * engine.labor_config.getRoCC(indConfig.occTag);
+            if (output.scaleWithMarketSize) scale *= Math.pow(10, size - 3);            
 
             if ((output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty())) {
                 float totalWeight = output.CCMoneyDist.values().stream().reduce(0f, Float::sum);
+                float Vcc = spec.getBasePrice() * engine.labor_config.getRoCC(indConfig.occTag);
 
                 for (Map.Entry<String, Float> inputEntry : output.CCMoneyDist.entrySet()) {
                     String inputID = inputEntry.getKey();

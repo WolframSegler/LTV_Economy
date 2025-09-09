@@ -8,6 +8,7 @@ import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
 import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
+import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 /**
@@ -62,10 +63,15 @@ public final class CompatLayer {
             for (OutputCom output : config.outputs.values()) {
                 if (output.isAbstract) continue;
 
-                float amount = output.DynamicInputsPerUnit.get(comID);
-                float weight = amount / totalDemand;
-                if (weight > 0f) {
-                    totalContribution += weight;
+                float amount = 0f;
+                if (output.DynamicInputsPerUnit.containsKey(comID)) {
+                    amount = output.DynamicInputsPerUnit.get(comID);
+                } else {
+                    continue;
+                }
+
+                if (amount > 0f) {
+                    totalContribution += amount / totalDemand;
                 }
             }
             
@@ -176,16 +182,19 @@ public final class CompatLayer {
         final WorkerRegistry reg = WorkerRegistry.getInstance(); 
         final WorkerIndustryData data = reg.getData(ind.getMarket().getId(), ind.getId());
 
-        float workersPerUnit = EconomyEngine.getWorkersPerUnit(comID, config.occTag);
         if (
             config != null && config.outputs.get(comID) != null && !config.outputs.get(comID).isAbstract
         ) {
+            final float workersPerUnit = EconomyEngine.getWorkersPerUnit(comID, config.occTag);
+
             final int workerDrivenCount = (int) config.outputs.values().stream()
                 .filter(o -> o.usesWorkers && !o.isAbstract)
                 .count();
             if (data != null) baseValue *= (data.getWorkersAssigned() / (workerDrivenCount*workersPerUnit));
 
         } else if (EconomyEngine.isWorkerAssignable(ind)) {
+            final float workersPerUnit = EconomyEngine.getWorkersPerUnit(comID, OCCTag.AVERAGE);
+
             final int workerDrivenCount = ind.getAllSupply().size();
             if (data != null) baseValue *= (data.getWorkersAssigned() / (workerDrivenCount*workersPerUnit));
         }
