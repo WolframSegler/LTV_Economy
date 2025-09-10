@@ -311,8 +311,8 @@
 		"outputList" : {
 			"operation": {
 				"consumptionRequirements": {
-					"supplies": 1.2,
-					"crew": 7
+					"supplies": 0.9,
+					"crew": 6
 				},
 				"scaleWithMarketSize": true,
 				"isAbstract": true
@@ -408,9 +408,9 @@
 		"outputList" : {
 			"operation": {
 				"consumptionRequirements": {
-					"supplies": 2.1,
-					"fuel": 11,
-					"ships": 7
+					"supplies": 1.3,
+					"fuel": 8,
+					"ships": 5
 				},
 				"scaleWithMarketSize": true,
 				"isAbstract": true
@@ -441,9 +441,9 @@
 		"outputList" : {
 			"operation": {
 				"consumptionRequirements": {
-					"supplies": 3.2,
-					"fuel": 23,
-					"ships": 13
+					"supplies": 1.6,
+					"fuel": 10.2,
+					"ships": 7
 				},
 				"scaleWithMarketSize": true,
 				"isAbstract": true

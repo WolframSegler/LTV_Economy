@@ -19,7 +19,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         // Force early load large classes.
         Class.forName("wfg.ltv_econ.util.ListenerFactory");
         Class.forName("wfg.ltv_econ.util.RfReflectionUtils");
-        Class.forName("wfg.ltv_econ.util.ReflectionUtils");
+        Class.forName("wfg.reflection.ReflectionUtils");
     }
 
     @Override

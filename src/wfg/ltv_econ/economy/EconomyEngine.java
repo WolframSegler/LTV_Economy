@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.util.Pair;
@@ -280,14 +281,13 @@ public class EconomyEngine extends BaseCampaignEventListener
         for (CommodityStats stats : comInfo.getStatsMap().values()) {
 
             float totalDeficit = 0f;
+            float totalMarketOutput = stats.getLocalProduction(false);
 
             for (Map.Entry<String, MutableStat> industryEntry : stats.getLocalProductionStat().entrySet()) {
                 String industryID = industryEntry.getKey();
                 MutableStat industryStat = industryEntry.getValue();
 
                 float industryOutput = industryStat.getModifiedValue();
-                float totalMarketOutput = stats.getLocalProduction(false);
-
                 if (industryOutput <= 0 || totalMarketOutput <= 0) continue;
 
                 float industryShare = industryOutput / totalMarketOutput;
@@ -300,42 +300,40 @@ public class EconomyEngine extends BaseCampaignEventListener
                     OutputCom output = config.outputs.get(stats.comID);
                     if (output == null || output.isAbstract) continue;
     
-                    float sum = 0;
                     if (output.usesWorkers ||
                         output.DynamicInputsPerUnit != null && !output.DynamicInputsPerUnit.isEmpty()
                     ) {
-                        sum = output.DynamicInputsPerUnit.values().stream().reduce(0f, Float::sum);
                         inputWeights = output.DynamicInputsPerUnit;
                     } else {
-                        sum = output.StaticInputsPerUnit.values().stream().reduce(0f, Float::sum);
                         inputWeights = output.StaticInputsPerUnit;
                     }
-                    final float finalSum = sum;
-                    inputWeights.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                e -> e.getValue() / finalSum
-                        ));
                 } else {
                     int size = ind.getAllDemand().size();
                     if (size < 1) continue;
 
-                    inputWeights = ind.getAllDemand().stream()
-                        .collect(Collectors.toMap(
-                            k -> k.getCommodityId(),
-                            e -> 1f / size
-                        ));
+                    Map<String, Float> equal = new HashMap<>(size);
+                    for (MutableCommodityQuantity d : ind.getAllDemand()) {
+                        equal.put(d.getCommodityId(), 1f / size);
+                    }
+                    inputWeights = equal;
                 }
+
+                float sum = 0f;
+                for (float value : inputWeights.values()) {
+                    sum += value;
+                }
+                if (sum <= 0f) continue;
 
                 float industryDeficit = 0f;
                 for (Map.Entry<String, Float> inputEntry : inputWeights.entrySet()) {
-                    float weight = inputEntry.getValue();
                     String inputID = inputEntry.getKey();
                     if (inputID.equals(ABSTRACT_COM)) continue;
-
+                    
                     CommodityStats inputStats = getComStats(inputID, stats.market.getId());
 
-                    industryDeficit += weight * (1 - inputStats.getStoredCoverageRatio());
+                    float weightNorm = inputEntry.getValue() / sum;
+
+                    industryDeficit += weightNorm * (1 - inputStats.getStoredCoverageRatio());
                 }
 
                 totalDeficit += industryDeficit * industryShare;

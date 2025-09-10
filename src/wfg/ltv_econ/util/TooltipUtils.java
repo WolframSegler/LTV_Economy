@@ -438,7 +438,7 @@ public class TooltipUtils {
             MutableStat stat = entry.getValue();
             Industry ind = comStats.market.getIndustry(entry.getKey());
 
-            if (comStats.getAvailable() > 0) {
+            if (stat.getModifiedInt() > 0) {
                 y = TooltipUtils.createStatModGridRow(
                     tooltip, y, valueTxtWidth, firstPara, highlight, stat.base, true,
                     BaseIndustry.BASE_VALUE_TEXT, ind.getCurrentName(), "+"
@@ -556,7 +556,7 @@ public class TooltipUtils {
             MutableStat stat = entry.getValue();
             Industry ind = comStats.market.getIndustry(entry.getKey());
 
-            if (comStats.getBaseDemand(false) > 0) {
+            if (stat.getModifiedInt() > 0) {
                 if (firstPara) {
                     firstPara = false;
                     y -= pad;
