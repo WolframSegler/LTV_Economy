@@ -38,19 +38,16 @@ public class LaborConfigLoader {
             result.RoCC_average = (float) root.getDouble("RoCC_average");
             result.RoVC_industry = (float) root.getDouble("RoVC_industry");
             result.RoCC_industry = (float) root.getDouble("RoCC_industry");
-            result.industry_ratio = (float) root.getDouble("industry_ratio");
             result.RoVC_service = (float) root.getDouble("RoVC_service");
             result.RoCC_service = (float) root.getDouble("RoCC_service");
-            result.service_ratio = (float) root.getDouble("service_ratio");
             result.RoVC_agriculture = (float) root.getDouble("RoVC_agriculture");
             result.RoCC_agriculture = (float) root.getDouble("RoCC_agriculture");
-            result.agriculture_ratio = (float) root.getDouble("agriculture_ratio");
+            result.RoVC_mechanized = (float) root.getDouble("RoVC_mechanized");
+            result.RoCC_mechanized = (float) root.getDouble("RoCC_mechanized");
             result.RoVC_manual = (float) root.getDouble("RoVC_manual");
             result.RoCC_manual = (float) root.getDouble("RoCC_manual");
-            result.manual_ratio = (float) root.getDouble("manual_ratio");
             result.RoVC_space = (float) root.getDouble("RoVC_space");
             result.RoCC_space = (float) root.getDouble("RoCC_space");
-            result.space_ratio = (float) root.getDouble("space_ratio");
 
         } catch (Exception e) {
             throw new RuntimeException(
@@ -72,19 +69,16 @@ public class LaborConfigLoader {
         public float RoCC_average;
         public float RoVC_industry;
         public float RoCC_industry;
-        public float industry_ratio;
         public float RoVC_service;
         public float RoCC_service;
-        public float service_ratio;
         public float RoVC_agriculture;
         public float RoCC_agriculture;
-        public float agriculture_ratio;
+        public float RoVC_mechanized;
+        public float RoCC_mechanized;
         public float RoVC_manual;
         public float RoCC_manual;
-        public float manual_ratio;
         public float RoVC_space;
         public float RoCC_space;
-        public float space_ratio;
 
         public final float getRoVC(OCCTag tag) {
             switch (tag) {
@@ -96,6 +90,8 @@ public class LaborConfigLoader {
                 return RoVC_agriculture;
             case MANUAL:
                 return RoVC_manual;
+            case MECHANIZED:
+                return RoVC_mechanized;
             case SPACE:
                 return RoVC_space;
             case AVERAGE:
@@ -112,6 +108,8 @@ public class LaborConfigLoader {
                 return RoCC_service;
             case AGRICULTURE:
                 return RoCC_agriculture;
+            case MECHANIZED:
+                return RoCC_mechanized;
             case MANUAL:
                 return RoCC_manual;
             case SPACE:
@@ -128,6 +126,7 @@ public class LaborConfigLoader {
         INDUSTRY,
         SERVICE,
         AGRICULTURE,
+        MECHANIZED,
         MANUAL,
         SPACE
     }

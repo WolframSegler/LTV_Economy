@@ -4,23 +4,20 @@
     "LPV_month": 8,
     "LPV_day": 0.26667,
 
-    "RoVC_average": 0.13447,
-    "RoCC_average": 0.86553,
+    "RoVC_average": 0.13,
+    "RoCC_average": 0.87,
     "RoVC_industry": 0.03,
     "RoCC_industry": 0.97,
-    "industry_ratio": 0.614,
     "RoVC_service": 0.35,
     "RoCC_service": 0.65,
-    "service_ratio": 0.157,
     "RoVC_agriculture": 0.15,
     "RoCC_agriculture": 0.85,
-    "agriculture_ratio": 0.071,
+    "RoVC_mechanized": 0.1,
+    "RoCC_mechanized": 0.9,
     "RoVC_manual": 0.4,
     "RoCC_manual": 0.6,
-    "manual_ratio": 0.073,
     "RoVC_space": 0.25,
     "RoCC_space": 0.75,
-    "space_ratio": 0.085,
 
     "inspiration": "https://mpra.ub.uni-muenchen.de/55894/1/"
 }

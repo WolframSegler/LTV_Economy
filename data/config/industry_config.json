@@ -2,6 +2,7 @@
 	"heavyindustry": {
 		"workerAssignable": true,
 		"occTag": "industry",
+		"workerAssignableLimit": 0.4,
 		"outputList" : {
 			"heavy_machinery": {
 				"constantCapitalMoneySplit": {
@@ -36,6 +37,7 @@
 	"lightindustry": {
 		"occTag": "industry",
 		"workerAssignable": true,
+		"workerAssignableLimit": 0.4,
 		"outputList" : {
 			"domestic_goods": {
 				"constantCapitalMoneySplit": {
@@ -115,36 +117,37 @@
 	"mining": {
 		"occTag": "manual",
 		"workerAssignable": true,
+		"workerAssignableLimit": 0.05,
 		"outputList" : {
 			"ore": {
 				"constantCapitalMoneySplit": {
 					"heavy_machinery": 0.3,
-					"drugs": 0.6,
-					"abstract": 0.1
+					"drugs": 0.2,
+					"abstract": 0.5
 				},
 				"usesWorkers": true
 			},
 			"rare_ore": {
 				"constantCapitalMoneySplit": {
 					"heavy_machinery": 0.3,
-					"drugs": 0.6,
-					"abstract": 0.1
+					"drugs": 0.2,
+					"abstract": 0.5
 				},
 				"usesWorkers": true
 			},
 			"organics": {
 				"constantCapitalMoneySplit": {
 					"heavy_machinery": 0.3,
-					"drugs": 0.6,
-					"abstract": 0.1
+					"drugs": 0.2,
+					"abstract": 0.5
 				},
 				"usesWorkers": true
 			},
 			"volatiles": {
 				"constantCapitalMoneySplit": {
 					"heavy_machinery": 0.3,
-					"drugs": 0.6,
-					"abstract": 0.1
+					"drugs": 0.2,
+					"abstract": 0.5
 				},
 				"usesWorkers": true
 			}
@@ -153,11 +156,12 @@
 	"farming": {
 		"occTag": "agriculture",
 		"workerAssignable": true,
+		"workerAssignableLimit": 0.05,
 		"outputList" : {
 			"food": {
 				"constantCapitalMoneySplit": {
-					"heavy_machinery": 0.7,
-					"abstract": 0.2
+					"heavy_machinery": 0.9,
+					"abstract": 0.1
 				},
 				"usesWorkers": true
 			}
@@ -166,11 +170,12 @@
 	"aquaculture": {
 		"occTag": "agriculture",
 		"workerAssignable": true,
+		"workerAssignableLimit": 0.05,
 		"outputList" : {
 			"food": {
 				"constantCapitalMoneySplit": {
-					"heavy_machinery": 0.7,
-					"abstract": 0.3
+					"heavy_machinery": 0.9,
+					"abstract": 0.1
 				},
 				"usesWorkers": true
 			}
@@ -199,7 +204,7 @@
 	"refining": {
 		"occTag": "industry",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.5,
+		"workerAssignableLimit": 0.4,
 		"outputList" : {
 			"metals": {
 				"constantCapitalMoneySplit": {
@@ -242,9 +247,9 @@
 		}
 	},
 	"fuelprod": {
-		"occTag": "manual",
+		"occTag": "mechanized",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.6,
+		"workerAssignableLimit": 0.3,
 		"outputList" : {
 			"fuel": {
 				"constantCapitalMoneySplit": {
@@ -484,6 +489,7 @@
 	"waystation": {
 		"occTag": "service",
 		"workerAssignable": true,
+		"workerAssignableLimit": 0.1,
 		"outputList" : {
 			"imports": {
 				"constantCapitalMoneySplit": {
