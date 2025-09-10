@@ -356,21 +356,32 @@ public class EconomyEngine extends BaseCampaignEventListener
                 continue;
             }
 
-            List<WorkerIndustryData> workerAssignable = new ArrayList<>(8);
+            List<WorkerIndustryData> workerAssignable = new ArrayList<>();
 
+            float totalWorkerAbsorbtionCapacity = 0;
             for (Industry ind : workingIndustries) {
                 WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
                 if (ind.isFunctional() && data != null) {
                     workerAssignable.add(data);
 
                     data.setWorkersAssigned(0);
+
+                    IndustryConfig config = ind_config.get(ind.getId());
+
+                    totalWorkerAbsorbtionCapacity += config == null ?
+                        WorkerRegistry.DEFAULT_WORKER_CAP : config.workerAssignableLimit;
                 }
             }
-
             if (workerAssignable.isEmpty()) continue;
 
+            float workerPerIndustry = 1f / totalWorkerAbsorbtionCapacity;
+            if (workerPerIndustry > 1f) workerPerIndustry = 1f;
+
             for (WorkerIndustryData data : workerAssignable) {
-                data.setWorkersAssigned(1 / (float) workerAssignable.size());
+                IndustryConfig config = ind_config.get(data.indID);
+                float limit = config == null ? WorkerRegistry.DEFAULT_WORKER_CAP : config.workerAssignableLimit;
+
+                data.setWorkersAssigned(limit*workerPerIndustry);
             }
         }
     }
@@ -429,12 +440,19 @@ public class EconomyEngine extends BaseCampaignEventListener
             if (output.scaleWithMarketSize) scale *= Math.pow(10, size - 3);            
 
             if ((output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty())) {
-                float totalWeight = output.CCMoneyDist.values().stream().reduce(0f, Float::sum);
                 float Vcc = spec.getBasePrice() * engine.labor_config.getRoCC(indConfig.occTag);
+                float totalWeight = 0;
+                for (float weight : output.CCMoneyDist.values()) {
+                    totalWeight += weight;
+                }
 
+                boolean hasAbstractInput = false;
                 for (Map.Entry<String, Float> inputEntry : output.CCMoneyDist.entrySet()) {
                     String inputID = inputEntry.getKey();
-                    if (inputID.equals(ABSTRACT_COM)) continue;
+                    if (inputID.equals(ABSTRACT_COM)) {
+                        hasAbstractInput = true;
+                        continue;
+                    };
 
                     float weight = inputEntry.getValue() / totalWeight;
                     float inputValue = Vcc * weight;
@@ -443,6 +461,14 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                     output.DynamicInputsPerUnit.put(inputID, qty);
                     totalDemandMap.merge(inputID, qty, Float::sum);
+                }
+                if (hasAbstractInput) {
+                    float totalUnits = 0;
+                    for (float weight : output.DynamicInputsPerUnit.values()) {
+                        totalUnits += weight;
+                    }
+                    float value = output.CCMoneyDist.get(ABSTRACT_COM) * totalUnits / totalWeight;
+                    output.DynamicInputsPerUnit.put(ABSTRACT_COM, value);
                 }
             } else if (output.StaticInputsPerUnit != null && !output.StaticInputsPerUnit.isEmpty()) {
                 for (Map.Entry<String, Float> demandEntry : output.StaticInputsPerUnit.entrySet()) {

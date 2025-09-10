@@ -25,6 +25,7 @@ import com.fs.starfarer.campaign.ui.N; //Current slider class (v.0.98 R8).
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.wrap_ui.util.NumFormat;
@@ -51,7 +52,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
-        TooltipMakerAPI tooltip = panel.createUIElement(panelWidth, panelHeight, true);
+        final TooltipMakerAPI tooltip = panel.createUIElement(panelWidth, panelHeight, true);
+        final EconomyEngine engine = EconomyEngine.getInstance();
 
         final int pad = 3;
         final int opad = 10;
@@ -64,7 +66,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         String txt = "Assign workers to " + industry.getCurrentName();
         LabelAPI lbl = tooltip.addPara(txt, 0f);
 
-        float textX = (panelWidth - lbl.computeTextWidth(txt)) / 2;
+        final float textX = (panelWidth - lbl.computeTextWidth(txt)) / 2;
         lbl.getPosition().inTL(textX, opad);
         tooltip.setParaFontDefault();
 
@@ -82,8 +84,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         txt = "Workers:";
         lbl = tooltip.addPara(txt, 0f);
 
-        float textH = lbl.computeTextHeight(txt);
-        float textY = sliderY + (sliderHeight - textH) * 0.5f;
+        final float textH = lbl.computeTextHeight(txt);
+        final float textY = sliderY + (sliderHeight - textH) * 0.5f;
         lbl.getPosition().inTL(pad, textY);
         tooltip.setParaFontDefault();
 
@@ -95,16 +97,20 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         slider.setRoundBarValue(true);
         slider.setClampCurrToMax(true);
 
-        slider.setRoundingIncrement(5);
+        slider.setRoundingIncrement(2);
         slider.setBarColor(new Color(20, 125, 200));
         slider.setHeight(sliderHeight);
         slider.setWidth(sliderWidth);
         slider.setProgress(data.getWorkerAssignedRatio() * 100);
-        slider.setMax((getFreeWorkerRatio() * 100f) + data.getWorkerAssignedRatio() * 100);
-        // Do not let assignation above capacity minus the current industry
+
+        final IndustryConfig config = engine.ind_config.get(industry.getId());
+        final float limit = config == null ? WorkerRegistry.DEFAULT_WORKER_CAP
+            : config.workerAssignableLimit;
+        final float max = Math.min(limit, getFreeWorkerRatio() + data.getWorkerAssignedRatio());
+        
+        slider.setMax(max * 100);
 
         panel.addComponent((UIPanelAPI) slider).inTL((panelWidth - sliderWidth - opad), sliderY);
-
         panel.addUIElement(tooltip);
     }
 

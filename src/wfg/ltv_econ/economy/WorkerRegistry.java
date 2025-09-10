@@ -11,6 +11,8 @@ import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 
 public class WorkerRegistry {
+    public static final float DEFAULT_WORKER_CAP = 0.6f;
+
     private final Map<String, WorkerIndustryData> registry = new HashMap<>();
 
     private static WorkerRegistry instance;
@@ -83,6 +85,16 @@ public class WorkerRegistry {
         return count;
     }
 
+    public static final long getWorkerCap(MarketAPI market) {
+        MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
+        if (workerPoolCondition == null) {
+            return 0;
+        }
+        WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+
+        return pool.getWorkerPool();
+    }
+
     public final WorkerIndustryData getData(String marketID, String industryID) {
         return registry.get(makeKey(marketID, industryID));
     }
@@ -149,16 +161,6 @@ public class WorkerRegistry {
                 pool.releaseWorkers(-delta);
                 workersAssigned = newAmount;
             }
-        }
-
-        public final long getWorkerCap() {
-            MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-            if (workerPoolCondition == null) {
-                return 0;
-            }
-            WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
-
-            return pool.getWorkerPool();
         }
     }
 }

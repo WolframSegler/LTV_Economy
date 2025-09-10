@@ -153,7 +153,7 @@ public final class CompatLayer {
             return;
         }
 
-        applyResourceDepositMods(ind, dest);
+        applyResourceDepositMods(ind, dest, comID);
 
         if (bonus == null) return;
 
@@ -287,19 +287,16 @@ public final class CompatLayer {
         }
     }
 
-    public static final void applyResourceDepositMods(Industry ind, MutableStat dest) {
+    public static final void applyResourceDepositMods(Industry ind, MutableStat dest, String comID) {
         for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
             String commodityId = ResourceDepositsCondition.COMMODITY.get(cond.getId());
-            if (commodityId == null) continue; // condition doesn't affect a commodity
-
-            Integer mod = ResourceDepositsCondition.MODIFIER.get(cond.getId());
-            if (mod == null) continue;
-
-            Integer baseCondMod = ResourceDepositsCondition.BASE_MODIFIER.get(commodityId);
-            if (baseCondMod == null) continue;
+            if (commodityId == null || !commodityId.equals(comID)) continue;
 
             String industryId = ResourceDepositsCondition.INDUSTRY.get(commodityId);
             if (industryId == null || !industryId.equals(ind.getId())) continue;
+
+            Integer mod = ResourceDepositsCondition.MODIFIER.get(cond.getId());
+            if (mod == null) continue;
 
             float converted = marketConditionModConverter(mod);
             dest.modifyMult(cond.getId() + "::" + ind.getId(), converted, cond.getName());
