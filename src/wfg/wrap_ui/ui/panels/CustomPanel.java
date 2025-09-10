@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.panels;
+package wfg.wrap_ui.ui.panels;
 
 import java.awt.Color;
 import java.util.Optional;
@@ -20,14 +20,16 @@ import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.CampaignEngine;
 
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin;
-import wfg.ltv_econ.ui.systems.FaderSystem.Glow;
-import wfg.ltv_econ.ui.systems.OutlineSystem.Outline;
-import wfg.ltv_econ.util.ReflectionUtils;
-import wfg.ltv_econ.util.ReflectionUtils.ReflectedField;
+import wfg.reflection.ReflectionUtils;
+import wfg.reflection.ReflectionUtils.ReflectedField;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
+import wfg.wrap_ui.ui.systems.ActionListenerSystem;
+import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
+import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
+import wfg.wrap_ui.ui.systems.TooltipSystem;
 
 /**
- * Represents the visual and layout container for a set of components managed by a matching {@link LtvCustomPanelPlugin}.
+ * Represents the visual and layout container for a set of components managed by a matching {@link CustomPanelPlugin}.
  *
  * <p><strong>Design principles:</strong></p>
  * <ul>
@@ -35,23 +37,23 @@ import wfg.ltv_econ.util.ReflectionUtils.ReflectedField;
  *       dimensions, and any interface-specific properties (e.g. implementing {@link HasBackground}).</li>
  *   <li>The panel does not store or manage plugin-specific logic or toggles; those belong in the plugin.</li>
  *   <li>By implementing capability interfaces (like {@link HasBackground}), the panel exposes relevant data
- *       to both the plugin and components in a type-safe way.</li>
- *   <li>Recursive bounds (with selective wildcards) ensure methods like <code>getPlugin()</code> / <code>getPanel()</code> resolve to the concrete types at compile time, while still allowing a single plugin implementation to be reused by multiple panel subclasses.</li>
+ *       to both the plugin and systems in a type-safe way.</li>
+ *   <li>Recursive bounds (with selective wildcards) ensure methods like <code>{@link #getPlugin()}</code> / <code>{@link #getPanel()}</code> resolve to the concrete types at compile time, while still allowing a single plugin implementation to be reused by multiple panel subclasses.</li>
  * </ul>
  *
  * <p>Example usage:</p>
  * <pre>
  * // Panel implementing {@link HasBackground}
- * public class MyPanel extends LtvCustomPanel< MyPanelPlugin<MyPanel>, MyPanel, CustomPanelAPI> implements HasBackground {
+ * public class MyPanel extends CustomPanel< MyPanelPlugin<MyPanel>, MyPanel, CustomPanelAPI> implements HasBackground {
  *     private final Color bgColor;
  *
  *     public Color getBgColor() { return bgColor; }
  * }
  * </pre>
  */
-public abstract class LtvCustomPanel<
-    PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<?, ?, ParentType>, PluginType>, 
-    PanelType extends LtvCustomPanel<PluginType, ? extends LtvCustomPanel<?, ? extends PanelType, ParentType>, ParentType>,
+public abstract class CustomPanel<
+    PluginType extends CustomPanelPlugin<? extends CustomPanel<?, ?, ParentType>, PluginType>, 
+    PanelType extends CustomPanel<PluginType, ? extends CustomPanel<?, ? extends PanelType, ParentType>, ParentType>,
     ParentType extends UIPanelAPI
 > {
     protected final ParentType m_parent;
@@ -67,17 +69,17 @@ public abstract class LtvCustomPanel<
      * Ownership and lifecycle rules for child panels:
      * <ul>
      *   <li>The child <b>MUST NOT</b> add itself to the parent.
-     *      This prevents the child from being responsible for its own positioning,
+     *       This prevents the child from being responsible for its own positioning,
      *       since each panel handles positioning its children separately.</li>
-     *   <li>The parent <b>MUST NOT</b> call <code>createPanel()</code>.
+     *   <li>The parent <b>MUST NOT</b> call <code>{@link #createPanel()}</code>.
      *      This ensures that the child’s members are fully initialized before panel creation.</li>
-     *   <li>The parent <b>MUST NOT</b> call <code>initializePanel()</code>.
+     *   <li>The parent <b>MUST NOT</b> call <code>{@link #initializePlugin()}</code>.
      *      Initialization may depend on child-specific members. 
      *      The child <b>must</b> call this in the Constructor.</li>
      * </ul>
      */
     @SuppressWarnings("unchecked")
-    public LtvCustomPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, PluginType plugin,
+    public CustomPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, PluginType plugin,
         MarketAPI market) {
         m_root = root;
         m_parent = (ParentType) parent;
@@ -126,9 +128,6 @@ public abstract class LtvCustomPanel<
         return m_plugin;
     }
 
-    /**
-     * This is the realest way to do this. Do not judge.
-     */
     public void setPlugin(CustomUIPanelPlugin newPlugin) {
         ReflectedField plugin = ReflectionUtils.getFieldsMatching(m_panel, null, CustomUIPanelPlugin.class).get(0);
 
@@ -194,10 +193,10 @@ public abstract class LtvCustomPanel<
      * If no Plugin is needed, this method should be left empty.
      *
      * <ul>
-     *  <li>Custom components should be added to the plugin by the child within this method. Since component management belongs to the plugin, doing this in the constructor is discouraged. The constructor calls this method, keeping related logic together.</li>
-     *  <li>Components provided by the UI library are added automatically by the base plugin.</li>
-     *  <li>The panel must implement any required interfaces defined in LtvCustomPanel to support the relevant components.</li>
-     *  <li>All state management for components should be handled within the plugin.</li>
+     *  <li>Custom systems should be added to the plugin by the child within this method. Since system management belongs to the plugin, doing this in the constructor is discouraged. The constructor calls this method, keeping related logic together.</li>
+     *  <li>Systems provided by the UI library are added automatically by the base plugin.</li>
+     *  <li>The panel must implement any required interfaces defined in {@link CustomPanel} to support the relevant systems.</li>
+     *  <li>All state management for systems should be handled within the plugin.</li>
      * </ul>
      */
     public abstract void initializePlugin(boolean hasPlugin);
@@ -229,7 +228,7 @@ public abstract class LtvCustomPanel<
 
         /**
          * Optional support for the vanilla Starsector ActionListenerDelegate.
-         * This listener is not invoked automatically by the custom ActionListenerComponent.
+         * This listener is not invoked automatically by the custom {@link ActionListenerSystem}.
          * If you want to use it, you must call actionPerformed() manually from your plugin.
          */
         default Optional<ActionListenerDelegate> getVanillaActionListener() {
@@ -246,7 +245,7 @@ public abstract class LtvCustomPanel<
      * </p>
      * 
      * <p>
-     * Implement this interface in any {@code LtvCustomPanel} (or compatible type) to handle specific user interactions.
+     * Implement this interface in any {@link CustomPanel} (or compatible type) to handle specific user interactions.
      * The {@code source} parameter passed to each method is always the panel where the event originated.
      * </p>
      */
@@ -259,21 +258,21 @@ public abstract class LtvCustomPanel<
         /**
          * Called once per frame while the cursor is over the panel.
          */
-        default void onHover(LtvCustomPanel<?, ?, ?> source) {}
+        default void onHover(CustomPanel<?, ?, ?> source) {}
 
         /**
          * Called once when the cursor first enters the panel.
          */
-        default void onHoverStarted(LtvCustomPanel<?, ?, ?> source) {}
+        default void onHoverStarted(CustomPanel<?, ?, ?> source) {}
 
         /**
          * Called once when the cursor leaves the panel.
          */
-        default void onHoverEnded(LtvCustomPanel<?, ?, ?> source) {}
+        default void onHoverEnded(CustomPanel<?, ?, ?> source) {}
 
-        default void onClicked(LtvCustomPanel<?, ?, ?> source, boolean isLeftClick) {}
+        default void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {}
 
-        default void onShortcutPressed(LtvCustomPanel<?, ?, ?> source) {}
+        default void onShortcutPressed(CustomPanel<?, ?, ?> source) {}
 
         /**
          * Use org.lwjgl.input.Keyboard
@@ -371,6 +370,7 @@ public abstract class LtvCustomPanel<
 
         /**
          * default is 0.65f which looks vanilla-like.
+         * Vanilla uses 0.85 in reality.
          */
         default float getBgTransparency() {
             return 0.65f;
@@ -382,7 +382,7 @@ public abstract class LtvCustomPanel<
         /**
         * Return the parent panel of the tooltip.
         * Must return a non-null CustomPanelAPI. Otherwise the tooltip will not be removed.
-        * Never attach the tooltip to the codex. It WILL crash the game.
+        * Never attach the tooltip to the codex. It WILL crash.
         */
         CustomPanelAPI getTpParent();
 
@@ -395,7 +395,7 @@ public abstract class LtvCustomPanel<
         }
 
         /**
-        * The TooltipComponent will call this.
+        * The {@link TooltipSystem} will call this.
         * Must create its own tooltip, attach it, position it and return it.
         * A new tooltip will be created instead of an update.
         * Therefore, conditional changes to the tooltip should happen during creation.
@@ -403,7 +403,7 @@ public abstract class LtvCustomPanel<
         TooltipMakerAPI createAndAttachTp();
 
         /**
-        * The TooltipComponent will call this.
+        * The {@link TooltipSystem} will call this.
         * Must create its own codex, attach it, position it and return it.
         */
         default Optional<TooltipMakerAPI> createAndAttachCodex() {
@@ -411,7 +411,7 @@ public abstract class LtvCustomPanel<
         }
 
         /**
-         * The component uses this ID to open the codex.
+         * The system uses this ID to open the codex.
          * Therefore it must be provided independent of {@code createCodex()} for codex behaviour.
          */ 
         default Optional<String> getCodexID() {
@@ -440,7 +440,7 @@ public abstract class LtvCustomPanel<
          * Used primarily to pass null checks during UI construction and allow
          * tooltip creation to be deferred until the actual content is ready.
          *
-         * This class should be returned from {@code createTooltip()} when the real tooltip
+         * This class should be returned from {@link #createAndAttachTp()} when the real tooltip
          * is not yet available. The {@code factory} Supplier is used to supply the actual
          * TooltipMakerAPI instance later, enabling lazy or dynamic creation.
          *
@@ -453,11 +453,11 @@ public abstract class LtvCustomPanel<
          *
          * <p><b>Example usage:</b>
          * <pre>
-         * public TooltipMakerAPI createTooltip() {
+         * public TooltipMakerAPI createAndAttachTp() {
          *     PendingTooltip pending = new PendingTooltip();
          *     pending.factory = () -> {
          *         // Create and return the real tooltip here
-         *         TooltipMakerAPI tooltip = somePanel.createTooltipInstance();
+         *         TooltipMakerAPI tooltip = somePanel.createUIElement(...);
          *         // Configure tooltip as needed
          *         return tooltip;
          *     };

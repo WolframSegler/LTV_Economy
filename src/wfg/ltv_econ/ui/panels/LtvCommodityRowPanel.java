@@ -17,18 +17,20 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasFader;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
-import wfg.ltv_econ.ui.panels.LtvSpritePanel.Base;
-import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
-import wfg.ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg.ltv_econ.ui.systems.FaderSystem.Glow;
-import wfg.ltv_econ.util.NumFormat;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.ltv_econ.util.UiUtils.AnchorType;
+import wfg.wrap_ui.util.NumFormat;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.AcceptsActionListener;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
+import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -38,7 +40,7 @@ import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodityRowPanel>, LtvCommodityRowPanel, CustomPanelAPI>
+public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodityRowPanel>, LtvCommodityRowPanel, CustomPanelAPI>
     implements HasTooltip, HasFader, HasAudioFeedback, AcceptsActionListener
 {
     public static final int pad = 3;
@@ -163,7 +165,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         if (m_comStats.globalExports > 0) {
             final String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
             Base iconPanel = new Base(getRoot(), m_panel, getMarket(), rowHeight - 4, rowHeight 
-            - 4, new LtvSpritePanelPlugin<>(), iconPath, null, null, false);
+            - 4, new SpritePanelPlugin<>(), iconPath, null, null, false);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
             getPanel().addComponent(iconPanel.getPanel()).inRMid(pad);
@@ -189,7 +191,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         }
 
         Base iconPanel = new Base(getRoot(), parent, getMarket(), size, size,
-            new LtvSpritePanelPlugin<>(), iconPath, baseColor, null, isSourceIllegal
+            new SpritePanelPlugin<>(), iconPath, baseColor, null, isSourceIllegal
         );
         if (isSourceIllegal) {
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
@@ -337,7 +339,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         }
 
         getParent().addUIElement(codex);
-        UiUtils.anchorPanel(codex, m_tooltip, AnchorType.BottomLeft, opad + pad);
+        WrapUiUtils.anchorPanel(codex, m_tooltip, AnchorType.BottomLeft, opad + pad);
 
         return Optional.ofNullable(codex);
     }
@@ -437,7 +439,7 @@ public class LtvCommodityRowPanel extends LtvCustomPanel<BasePanelPlugin<LtvComm
         boolean drawRedBorder, Color drawFilledIcon, UIPanelAPI root, UIPanelAPI panel, MarketAPI market) {
 
         Base iconPanel = new Base(root, panel, market, lgdIconSize, lgdIconSize,
-            new LtvSpritePanelPlugin<>(), iconPath, null, drawFilledIcon, drawRedBorder);
+            new SpritePanelPlugin<>(), iconPath, null, drawFilledIcon, drawRedBorder);
         if (drawRedBorder) {
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(2, 2, -4, -4);

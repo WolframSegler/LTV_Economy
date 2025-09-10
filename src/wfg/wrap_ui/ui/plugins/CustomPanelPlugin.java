@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.plugins;
+package wfg.wrap_ui.ui.plugins;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,34 +8,34 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.ui.LtvUIState;
-import wfg.ltv_econ.ui.LtvUIState.UIState;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.AcceptsActionListener;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasFader;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
-import wfg.ltv_econ.ui.systems.ActionListenerSystem;
-import wfg.ltv_econ.ui.systems.AudioFeedbackSystem;
-import wfg.ltv_econ.ui.systems.BackgroundSystem;
-import wfg.ltv_econ.ui.systems.BaseSystem;
-import wfg.ltv_econ.ui.systems.FaderSystem;
-import wfg.ltv_econ.ui.systems.OutlineSystem;
-import wfg.ltv_econ.ui.systems.TooltipSystem;
+import wfg.wrap_ui.ui.UIState;
+import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.AcceptsActionListener;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
+import wfg.wrap_ui.ui.systems.ActionListenerSystem;
+import wfg.wrap_ui.ui.systems.AudioFeedbackSystem;
+import wfg.wrap_ui.ui.systems.BackgroundSystem;
+import wfg.wrap_ui.ui.systems.BaseSystem;
+import wfg.wrap_ui.ui.systems.FaderSystem;
+import wfg.wrap_ui.ui.systems.OutlineSystem;
+import wfg.wrap_ui.ui.systems.TooltipSystem;
 
 /**
- * The plugin serves as the central coordinator for its associated {@link LtvCustomPanel} and components.
+ * The plugin serves as the central coordinator for its associated {@link CustomPanel} and components.
  *
  * <p><strong>Design principles:</strong></p>
  * <ul>
  *   <li>The plugin manages and owns <em>plugin-specific</em> state — flags, toggles, configuration values —
- *       that control component behavior but are not part of the panel's intrinsic UI data.</li>
+ *       that control system behavior but are not part of the panel's intrinsic UI data.</li>
  *   <li>All <em>panel-specific</em> state (such as background color, dimensions, position) is stored exclusively
  *       in the panel itself. The plugin may query this data via {@link #getPanel()}.</li>
- *   <li>Components never store their own global state; they query the plugin, which may in turn query the panel.
- *       This keeps components stateless or minimally stateful, focused only on behavior.</li>
+ *   <li>Systems never store their own global state; they query the plugin, which may in turn query the panel.
+ *       This keeps systems stateless or minimally stateful, focused only on behavior.</li>
  *   <li>Recursive generics bind a plugin to a compatible panel type while permitting that plugin to be reused 
  *       across panel subclasses, preserving compile-time type safety without casts.</li>
  * </ul>
@@ -50,9 +50,9 @@ import wfg.ltv_econ.ui.systems.TooltipSystem;
  * Color bg = panel.getBgColor();
  * </pre>
  */
-public abstract class LtvCustomPanelPlugin<
-    PanelType extends LtvCustomPanel<? extends LtvCustomPanelPlugin<?, ? extends PluginType>, PanelType, ? extends UIPanelAPI>,
-    PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<?, ?, ? extends UIPanelAPI>, ? extends LtvCustomPanelPlugin<?, ? extends PluginType>>
+public abstract class CustomPanelPlugin<
+    PanelType extends CustomPanel<? extends CustomPanelPlugin<?, ? extends PluginType>, PanelType, ? extends UIPanelAPI>,
+    PluginType extends CustomPanelPlugin<? extends CustomPanel<?, ?, ? extends UIPanelAPI>, ? extends CustomPanelPlugin<?, ? extends PluginType>>
 > implements CustomUIPanelPlugin {
 
     public static class InputSnapshot {
@@ -86,7 +86,7 @@ public abstract class LtvCustomPanelPlugin<
     public final List<BaseSystem<?, PanelType>> components = new ArrayList<>();
     protected final InputSnapshot inputSnapshot = new InputSnapshot();
     
-    protected UIState targetUIState = UIState.NONE;
+    protected State targetUIState = State.NONE;
     protected boolean ignoreUIState = false;
 
     public int offsetX = 0;
@@ -132,7 +132,7 @@ public abstract class LtvCustomPanelPlugin<
         comp.onRemove(inputSnapshot);
     }
 
-    public void setTargetUIState(UIState a) {
+    public void setTargetUIState(State a) {
         targetUIState = a;
     }
 
@@ -141,7 +141,7 @@ public abstract class LtvCustomPanelPlugin<
     }
 
     public boolean isValidUIContext() {
-        return LtvUIState.is(targetUIState) || ignoreUIState; 
+        return UIState.is(targetUIState) || ignoreUIState; 
     }
 
     /**

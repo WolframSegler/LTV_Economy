@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.dialogs;
+package wfg.wrap_ui.ui.dialogs;
 
 import java.awt.Color;
 
@@ -6,9 +6,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
 
 /**
  * A wrapper panel that bridges the game-provided detail dialog panel with
@@ -22,11 +22,11 @@ import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin;
  * and rendering within the larger UI framework.</p>
  */
 public class CustomDetailDialogPanel<
-    PluginType extends LtvCustomPanelPlugin<
+    PluginType extends CustomPanelPlugin<
         CustomDetailDialogPanel<PluginType>,
         PluginType
     >
-> extends LtvCustomPanel<PluginType, CustomDetailDialogPanel<PluginType>, CustomPanelAPI> implements HasBackground{
+> extends CustomPanel<PluginType, CustomDetailDialogPanel<PluginType>, CustomPanelAPI> implements HasBackground{
 
     public Color BgColor = Color.BLACK;
     public boolean isBgEnabled = true;

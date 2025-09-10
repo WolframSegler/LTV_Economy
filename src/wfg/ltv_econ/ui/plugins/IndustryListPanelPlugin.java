@@ -5,8 +5,9 @@ import java.util.List;
 import com.fs.starfarer.api.input.InputEventAPI;
 
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
 
-public class IndustryListPanelPlugin extends LtvCustomPanelPlugin<LtvIndustryListPanel, IndustryListPanelPlugin>  {
+public class IndustryListPanelPlugin extends CustomPanelPlugin<LtvIndustryListPanel, IndustryListPanelPlugin>  {
     
     @Override
     public void advance(float amount) {

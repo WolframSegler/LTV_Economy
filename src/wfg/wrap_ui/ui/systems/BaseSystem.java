@@ -1,13 +1,13 @@
-package wfg.ltv_econ.ui.systems;
+package wfg.wrap_ui.ui.systems;
 
 import java.util.List;
 
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin.InputSnapshot;
 
 /**
  * Try to make the systems final so that JIT can inline them.
@@ -22,13 +22,13 @@ import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
  * 
  * <br></br>Technical note:
  * Recursive generics e.g.
- * {@code PluginType extends LtvCustomPanelPlugin<? extends LtvCustomPanel<PluginType, ?>, ?>}
+ * {@code PluginType extends CustomPanelPlugin<? extends CustomPanel<PluginType, ?>, ?>}
  * enable systems to know the exact concrete plugin type at compile time,
  * allowing type-safe access to plugin members without unchecked casts.
  */
 public abstract class BaseSystem<
-    PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType, ? extends UIPanelAPI>
+    PluginType extends CustomPanelPlugin<PanelType, PluginType>,
+    PanelType extends CustomPanel<PluginType, PanelType, ? extends UIPanelAPI>
 > {
 
     private PluginType plugin;

@@ -15,7 +15,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.util.RenderUtils;
+import wfg.wrap_ui.util.RenderUtils;
 
 
 public class CommodityinfobarPlugin implements CustomUIPanelPlugin {

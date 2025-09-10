@@ -27,7 +27,7 @@ import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
-import wfg.ltv_econ.util.NumFormat;
+import wfg.wrap_ui.util.NumFormat;
 
 public class AssignWorkersDialog implements CustomDialogDelegate {
 

@@ -1,13 +1,13 @@
-package wfg.ltv_econ.ui.plugins;
+package wfg.wrap_ui.ui.plugins;
 
 import com.fs.starfarer.api.ui.PositionAPI;
 
-import wfg.ltv_econ.ui.panels.LtvSpritePanel;
-import wfg.ltv_econ.util.RenderUtils;
+import wfg.wrap_ui.ui.panels.SpritePanel;
+import wfg.wrap_ui.util.RenderUtils;
 
-public class LtvSpritePanelPlugin<
-    PanelType extends LtvSpritePanel<PanelType>
-> extends LtvCustomPanelPlugin<PanelType, LtvSpritePanelPlugin<PanelType>> {
+public class SpritePanelPlugin<
+    PanelType extends SpritePanel<PanelType>
+> extends CustomPanelPlugin<PanelType, SpritePanelPlugin<PanelType>> {
 
     private boolean isDrawFilledQuad = false;
 

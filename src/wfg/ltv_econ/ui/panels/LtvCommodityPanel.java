@@ -16,11 +16,12 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
-import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
+import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 
-public class LtvCommodityPanel extends LtvCustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel, CustomPanelAPI>
+public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel, CustomPanelAPI>
     implements HasBackground, HasOutline {
 
     protected List<LtvCommodityRowPanel> commodityRows = new ArrayList<>();

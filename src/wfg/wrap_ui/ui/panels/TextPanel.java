@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.panels;
+package wfg.wrap_ui.ui.panels;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
@@ -6,9 +6,9 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
-import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
+import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 
 /**
  * A base implementation of a text-based UI panel with tooltip support, 
@@ -25,7 +25,7 @@ import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
  * <p>
  * Typical usage:
  * <pre>
- * LtvTextPanel panel = new LtvTextPanel(root, parent, market, 300, 50, plugin) {
+ * TextPanel panel = new TextPanel(root, parent, market, 300, 50, plugin) {
  * </pre>
  * <pre>
  *      @Override 
@@ -50,7 +50,7 @@ import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
  * These values are intentionally exposed as part of the public API to enable 
  * direct querying and manipulation of panel state from outside the class.
  */
-public class LtvTextPanel extends LtvCustomPanel<BasePanelPlugin<LtvTextPanel>, LtvTextPanel, CustomPanelAPI>
+public class TextPanel extends CustomPanel<BasePanelPlugin<TextPanel>, TextPanel, CustomPanelAPI>
     implements HasTooltip, HasAudioFeedback {
 
     // Shared state for anonymous subclasses to modify.
@@ -66,8 +66,8 @@ public class LtvTextPanel extends LtvCustomPanel<BasePanelPlugin<LtvTextPanel>, 
 
     private boolean isSoundEnabled = true;
 
-    public LtvTextPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        BasePanelPlugin<LtvTextPanel> plugin) {
+    public TextPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+        BasePanelPlugin<TextPanel> plugin) {
         super(root, parent, width, height, plugin, market);
 
         initializePlugin(hasPlugin);

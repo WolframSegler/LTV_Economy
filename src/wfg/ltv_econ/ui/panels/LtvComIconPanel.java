@@ -17,15 +17,16 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasFader;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
-import wfg.ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg.ltv_econ.ui.systems.FaderSystem.Glow;
 import wfg.ltv_econ.util.TooltipUtils;
-import wfg.ltv_econ.util.UiUtils;
-import wfg.ltv_econ.util.UiUtils.AnchorType;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.wrap_ui.ui.panels.SpritePanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
+import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 
-public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements HasTooltip, HasFader {
+public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements HasTooltip, HasFader {
 
     private static final int pad = 3;
     private static final int opad = 10;
@@ -40,7 +41,7 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
     public CommodityOnMarketAPI m_com;
 
     public LtvComIconPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
-        LtvSpritePanelPlugin<LtvComIconPanel> plugin, String iconSpriteID, Color color, Color fillColor) {
+        SpritePanelPlugin<LtvComIconPanel> plugin, String iconSpriteID, Color color, Color fillColor) {
         super(root, parent, market, width, height, plugin, iconSpriteID, color, fillColor, false);
 
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
@@ -131,7 +132,7 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
         }
         
         getParent().addUIElement(m_tooltip);
-        TooltipUtils.mouseCornerPos(m_tooltip, opad);
+        WrapUiUtils.mouseCornerPos(m_tooltip, opad);
 
         return m_tooltip;
     }
@@ -155,7 +156,7 @@ public class LtvComIconPanel extends LtvSpritePanel<LtvComIconPanel> implements 
         }
 
         getParent().addUIElement(codex);
-        UiUtils.anchorPanel(codex, m_tooltip, AnchorType.BottomLeft, opad + pad);
+        WrapUiUtils.anchorPanel(codex, m_tooltip, AnchorType.BottomLeft, opad + pad);
 
         return Optional.ofNullable(codex);
     }

@@ -11,30 +11,32 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.ui.LtvUIState;
-import wfg.ltv_econ.ui.LtvUIState.UIState;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.panels.SortableTable;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasActionListener;
-import wfg.ltv_econ.ui.panels.LtvSpritePanel.Base;
-import wfg.ltv_econ.ui.panels.SortableTable.cellAlg;
-import wfg.ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg.ltv_econ.util.NumFormat;
+import wfg.wrap_ui.ui.UIState;
+import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
+import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.SortableTable;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
+import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
+import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.util.NumFormat;
 
-public class ColonyInvDialog implements LtvCustomDialogDelegate, HasActionListener {
+public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
 
     public static final int PANEL_W = 950;
     public static final int PANEL_H = 600;
 
-    private final LtvCustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
+    private final CustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
     private InteractionDialogAPI interactionDialog;
 
-    public ColonyInvDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent) {
+    public ColonyInvDialog(CustomPanel<?, ?, CustomPanelAPI> parent) {
         m_parentWrapper = parent;
     }
 
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
-        LtvUIState.setState(UIState.DETAIL_DIALOG);
+        UIState.setState(State.DETAIL_DIALOG);
 
         CustomDetailDialogPanel<?> m_panel = new CustomDetailDialogPanel<>(
             m_parentWrapper.getRoot(),
@@ -78,7 +80,7 @@ public class ColonyInvDialog implements LtvCustomDialogDelegate, HasActionListen
 
             Base comIcon = new Base(
                 m_panel.getRoot(), m_panel.getPanel(), m_panel.getMarket(),26, 26,
-                new LtvSpritePanelPlugin<>(), com.getIconName(), null, null, false
+                new SpritePanelPlugin<>(), com.getIconName(), null, null, false
             );
             
             long stored = comStats.getStoredAmount();
@@ -129,7 +131,7 @@ public class ColonyInvDialog implements LtvCustomDialogDelegate, HasActionListen
 
     @Override
     public void customDialogCancel() {
-        LtvUIState.setState(UIState.NONE);
+        UIState.setState(State.NONE);
 
         if (interactionDialog != null) {
             interactionDialog.dismiss();

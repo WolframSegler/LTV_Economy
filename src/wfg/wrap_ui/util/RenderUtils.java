@@ -1,4 +1,4 @@
-package wfg.ltv_econ.util;
+package wfg.wrap_ui.util;
 
 import org.lwjgl.opengl.GL11;
 

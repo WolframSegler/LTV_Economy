@@ -1,17 +1,17 @@
-package wfg.ltv_econ.ui.systems;
+package wfg.wrap_ui.ui.systems;
 
 import com.fs.starfarer.api.ui.PositionAPI;
 
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
-import wfg.ltv_econ.util.RenderUtils;
-import wfg.ltv_econ.util.UiUtils;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin.InputSnapshot;
+import wfg.wrap_ui.util.RenderUtils;
+import wfg.wrap_ui.util.WrapUiUtils;
 
 public final class OutlineSystem<
-    PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasOutline
+    PluginType extends CustomPanelPlugin<PanelType, PluginType>,
+    PanelType extends CustomPanel<PluginType, PanelType, ?> & HasOutline
 > extends BaseSystem<PluginType, PanelType> {
 
     public static enum Outline {
@@ -77,7 +77,7 @@ public final class OutlineSystem<
         }
 
         if (textureID != null) {
-            UiUtils.drawRoundedBorder(
+            WrapUiUtils.drawRoundedBorder(
                 pos.getX() - pad + getPlugin().offsetX,
                 pos.getY() - pad + getPlugin().offsetY,
                 pos.getWidth() + pad * 2 + getPlugin().offsetW,

@@ -30,31 +30,33 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.ui.LtvUIState;
-import wfg.ltv_econ.ui.LtvUIState.UIState;
 import wfg.ltv_econ.ui.panels.LtvComIconPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.panels.LtvSpritePanel;
-import wfg.ltv_econ.ui.panels.LtvTextPanel;
-import wfg.ltv_econ.ui.panels.SortableTable;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasActionListener;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
-import wfg.ltv_econ.ui.panels.LtvSpritePanel.Base;
-import wfg.ltv_econ.ui.panels.SortableTable.ColumnManager;
-import wfg.ltv_econ.ui.panels.SortableTable.HeaderPanelWithTooltip;
-import wfg.ltv_econ.ui.panels.SortableTable.cellAlg;
-import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg.ltv_econ.ui.plugins.ComDetailDialogPlugin;
-import wfg.ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg.ltv_econ.ui.systems.OutlineSystem.Outline;
-import wfg.ltv_econ.util.NumFormat;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.ltv_econ.util.ReflectionUtils;
+import wfg.wrap_ui.ui.UIState;
+import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
+import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.SortableTable;
+import wfg.wrap_ui.ui.panels.SpritePanel;
+import wfg.wrap_ui.ui.panels.TextPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
+import wfg.wrap_ui.ui.panels.SortableTable.ColumnManager;
+import wfg.wrap_ui.ui.panels.SortableTable.HeaderPanelWithTooltip;
+import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
+import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
+import wfg.wrap_ui.util.NumFormat;
+import wfg.reflection.ReflectionUtils;
 
-public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListener {
+public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
     // this.PANEL_W = 1206; // Exact width using VisualVM. Includes pad.
     // this.PANEL_H = 728; // Exact height using VisualVM. Includes pad.
@@ -81,7 +83,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
     public final static int opad = 10;
     public final static int iconSize = 24;
 
-    private final LtvCustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
+    private final CustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
     private InteractionDialogAPI interactionDialog;
     private CustomPanelAPI m_dialogPanel;
     
@@ -94,17 +96,17 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         m_com = m_selectedMarket.getCommodityData(comID);
     }
 
-    public LtvTextPanel footerPanel = null;
+    public TextPanel footerPanel = null;
     public ButtonAPI producerButton = null;
     public ButtonAPI consumerButton = null;
     public LtvCommodityPanel section4ComPanel = null;
 
-    public ComDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com) {
+    public ComDetailDialog(CustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com) {
         // Measured using very precise tools!! (my eyes)
         this(parent, com, 1166, 658 + 20);
     }
 
-    public ComDetailDialog(LtvCustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com, int panelW, int panelH) {
+    public ComDetailDialog(CustomPanel<?, ?, CustomPanelAPI> parent, CommodityOnMarketAPI com, int panelW, int panelH) {
         this.PANEL_W = panelW;
         this.PANEL_H = panelH;
 
@@ -126,7 +128,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
 
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
-        LtvUIState.setState(UIState.DETAIL_DIALOG);
+        UIState.setState(State.DETAIL_DIALOG);
 
         CustomDetailDialogPanel<ComDetailDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
             m_parentWrapper.getRoot(),
@@ -145,7 +147,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         // Footer
         final int footerH = 40;
 
-        BasePanelPlugin<LtvTextPanel> fPlugin = new BasePanelPlugin<>() {
+        BasePanelPlugin<TextPanel> fPlugin = new BasePanelPlugin<>() {
             @Override
             public void advance(float amount) {
                 super.advance(amount);
@@ -160,7 +162,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             }
         };
 
-        footerPanel = new LtvTextPanel(m_parentWrapper.getRoot(), m_panel.getPanel(),
+        footerPanel = new TextPanel(m_parentWrapper.getRoot(), m_panel.getPanel(),
             m_parentWrapper.getMarket(), 400, footerH, fPlugin) {
 
             @Override
@@ -205,7 +207,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             public void initializePlugin(boolean hasPlugin) {
                 super.initializePlugin(hasPlugin);
 
-                getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+                getPlugin().setTargetUIState(State.DETAIL_DIALOG);
             }
         };
 
@@ -306,7 +308,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         String comIconID = m_com.getCommodity().getIconName();
 
         LtvComIconPanel iconLeft = new LtvComIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(),
-                iconSize, iconSize, new LtvSpritePanelPlugin<>(), comIconID, null, null);
+                iconSize, iconSize, new SpritePanelPlugin<>(), comIconID, null, null);
         iconLeft.setCommodity(m_com);
 
         iconLeft.getPos().inTL(opad * 3,
@@ -314,7 +316,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         section.addComponent(iconLeft.getPanel());
 
         LtvComIconPanel iconRight = new LtvComIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(),
-                iconSize, iconSize, new LtvSpritePanelPlugin<>(), comIconID, null, null);
+                iconSize, iconSize, new SpritePanelPlugin<>(), comIconID, null, null);
         iconRight.setCommodity(m_com);
 
         iconRight.getPos().inTL(SECT1_WIDTH - iconSize - opad * 3,
@@ -325,7 +327,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         final int baseY = (int) (headerHeight + opad * 1.5f);
         final Color baseColor = m_parentWrapper.getFaction().getBaseUIColor();
         { // Global market value
-            LtvTextPanel textPanel = new LtvTextPanel(
+            TextPanel textPanel = new TextPanel(
                     m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 170, 0,
                     new BasePanelPlugin<>()) {
 
@@ -397,14 +399,14 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
                 }
             };
 
             tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseY);
         }
         { // Total global exports
-            LtvTextPanel textPanel = new LtvTextPanel(
+            TextPanel textPanel = new TextPanel(
                     m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 170, 0,
                     new BasePanelPlugin<>()) {
 
@@ -470,7 +472,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
                 }
             };
 
@@ -486,7 +488,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 currMarket = m_parentWrapper.getMarket();
             }
 
-            LtvTextPanel textPanel = new LtvTextPanel(
+            TextPanel textPanel = new TextPanel(
                     m_parentWrapper.getRoot(), section, currMarket, 210, 0,
                     new BasePanelPlugin<>()) {
 
@@ -569,7 +571,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
                 }
             };
 
@@ -579,7 +581,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         final int baseRow2Y = baseY * 3 + pad;
 
         if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
-            LtvTextPanel textPanel = new LtvTextPanel(
+            TextPanel textPanel = new TextPanel(
                     m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
                     new BasePanelPlugin<>()) {
 
@@ -646,7 +648,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
                 }
             };
 
@@ -654,7 +656,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
         }
 
         else { // Faction market share
-            LtvTextPanel textPanelLeft = new LtvTextPanel(
+            TextPanel textPanelLeft = new TextPanel(
                     m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
                     new BasePanelPlugin<>()) {
 
@@ -718,12 +720,12 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
                 }
             };
 
 
-            LtvTextPanel textPanelRight = new LtvTextPanel(
+            TextPanel textPanelRight = new TextPanel(
                     m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
                     new BasePanelPlugin<>()) {
 
@@ -790,7 +792,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
                 }
             };
 
@@ -934,8 +936,8 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
             }
 
             String iconPath = market.getFaction().getCrest();
-            LtvSpritePanel.Base iconPanel = new Base(
-                m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new LtvSpritePanelPlugin<>(), 
+            SpritePanel.Base iconPanel = new Base(
+                m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new SpritePanelPlugin<>(), 
                 iconPath, null, null, comStats.getDeficit() > 0
             );
             iconPanel.setOutlineColor(Color.RED);
@@ -1047,7 +1049,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
     }
 
     @Override
-    public void onClicked(LtvCustomPanel<?, ?, ?> source, boolean isLeftClick) {
+    public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
         if (!isLeftClick) {
             return;
         }
@@ -1248,7 +1250,7 @@ public class ComDetailDialog implements LtvCustomDialogDelegate, HasActionListen
 
     @Override
     public void customDialogCancel() {
-        LtvUIState.setState(UIState.NONE);
+        UIState.setState(State.NONE);
 
         if (interactionDialog != null) {
             interactionDialog.dismiss();

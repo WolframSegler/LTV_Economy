@@ -27,7 +27,6 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
@@ -35,11 +34,14 @@ import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.panels.LtvSpritePanel;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
-import wfg.ltv_econ.ui.panels.LtvSpritePanel.Base;
-import wfg.ltv_econ.ui.plugins.LtvSpritePanelPlugin;
+import wfg.reflection.ReflectionUtils;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.SpritePanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
+import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.util.NumFormat;
+import wfg.wrap_ui.util.WrapUiUtils;
 
 public class TooltipUtils {
 
@@ -50,48 +52,6 @@ public class TooltipUtils {
 
     static {
         cargoTooltipArrow_PATH = Global.getSettings().getSpriteName("ui", "cargoTooltipArrow");
-    }
-
-    public static void mouseCornerPos(TooltipMakerAPI tooltip, int opad) {
-        final int mouseSize = 40;
-        final float correction = 8f;
-
-        PositionAPI pos = tooltip.getPosition();
-
-        float tooltipW = pos.getWidth();
-        float tooltipH = pos.getHeight();
-        float mouseX = Global.getSettings().getMouseX();
-        float mouseY = Global.getSettings().getMouseY();
-        float screenW = Global.getSettings().getScreenWidth();
-
-        pos.inBL(0, 0);
-
-        float tooltipX = pos.getX();
-        float tooltipY = pos.getY();
-
-        // Bottom-left of mouse
-        float offsetX = (mouseX - tooltipX) + mouseSize / 2f;
-        float offsetY = (mouseY - tooltipY) - tooltipH - mouseSize;
-
-        // If right-side overflow
-        if (tooltipX + offsetX + tooltipW > screenW - opad) {
-            offsetX -= tooltipW + mouseSize - correction;
-        }
-
-        // If bottom overflow
-        if (tooltipY + offsetY < opad) {
-            offsetY += tooltipH + mouseSize + correction;
-        }
-
-        // If top overflow
-        final int screenH = (int) Global.getSettings().getScreenHeight();
-
-        if (tooltipY + offsetY + tooltipH > screenH - opad) {
-            offsetY = screenH - tooltipY - tooltipH - opad*2;
-        }
-
-        pos.setXAlignOffset(offsetX);
-        pos.setYAlignOffset(offsetY);
     }
 
     /**
@@ -224,15 +184,15 @@ public class TooltipUtils {
                             // Arrow Sprite
                             SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
-                            LtvSpritePanel.Base arrowPanel = new Base(null, tooltip, null,
-                                    20, 20, new LtvSpritePanelPlugin<>(), "", null, null, false);
+                            SpritePanel.Base arrowPanel = new Base(null, tooltip, null,
+                                    20, 20, new SpritePanelPlugin<>(), "", null, null, false);
 
                             arrowPanel.setSprite(arrow);
 
                             Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                             Vector2f targetLoc = market.getStarSystem().getLocation();
 
-                            arrow.setAngle(UiUtils.rotateSprite(playerLoc, targetLoc));
+                            arrow.setAngle(WrapUiUtils.rotateSprite(playerLoc, targetLoc));
 
                             int arrowY = relativeY + rowH * (2 + rowCount);
                             tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
@@ -332,15 +292,15 @@ public class TooltipUtils {
                         // Arrow Sprite
                         SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
-                        LtvSpritePanel.Base arrowPanel = new Base(null, tooltip, null,
-                                20, 20, new LtvSpritePanelPlugin<>(), "", null, null, false);
+                        SpritePanel.Base arrowPanel = new Base(null, tooltip, null,
+                                20, 20, new SpritePanelPlugin<>(), "", null, null, false);
 
                         arrowPanel.setSprite(arrow);
 
                         Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                         Vector2f targetLoc = market.getStarSystem().getLocation();
 
-                        arrow.setAngle(UiUtils.rotateSprite(playerLoc, targetLoc));
+                        arrow.setAngle(WrapUiUtils.rotateSprite(playerLoc, targetLoc));
 
                         int arrowY = relativeY + rowH * (2 + rowCount);
                         tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
@@ -375,7 +335,7 @@ public class TooltipUtils {
      * The Codex must be attached manually.
      * The F1 and F2 events must be handled using the Plugin.
      */
-    public static <PanelType extends LtvCustomPanel<?, ?, CustomPanelAPI> & HasTooltip> TooltipMakerAPI 
+    public static <PanelType extends CustomPanel<?, ?, CustomPanelAPI> & HasTooltip> TooltipMakerAPI 
         createCustomCodex(PanelType panel, String codexF1, String codexF2, int codexW) {
 
         final Color gray = new Color(100, 100, 100);
@@ -558,7 +518,7 @@ public class TooltipUtils {
         }
 
         tooltip.setHeightSoFar(y);
-        UiUtils.resetFlowLeft(tooltip, opad);
+        WrapUiUtils.resetFlowLeft(tooltip, opad);
     }
 
     private static final float addRow(TooltipMakerAPI tooltip, float y, float valueTxtWidth, boolean firstPara,
@@ -647,6 +607,6 @@ public class TooltipUtils {
         }
 
         tooltip.setHeightSoFar(y);
-        UiUtils.resetFlowLeft(tooltip, opad);
+        WrapUiUtils.resetFlowLeft(tooltip, opad);
     }
 }

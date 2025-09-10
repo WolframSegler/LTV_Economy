@@ -1,22 +1,22 @@
-package wfg.ltv_econ.ui.systems;
+package wfg.wrap_ui.ui.systems;
 
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.input.InputEventAPI;
 
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasAudioFeedback;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin.InputSnapshot;
 
 public final class AudioFeedbackSystem<
-    PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasAudioFeedback
+    PluginType extends CustomPanelPlugin<PanelType, PluginType>,
+    PanelType extends CustomPanel<PluginType, PanelType, ?> & HasAudioFeedback
 > extends BaseSystem<PluginType, PanelType> {
 
     /**
-     * Newly created Components shouldn't make a sound for this many game ticks.
+     * Newly created Systems shouldn't make a sound for this many game ticks.
      */
     final private int initCompTicks = 10;
     private long accumulatedGameTicks = 0;

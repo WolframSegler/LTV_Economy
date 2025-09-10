@@ -1,4 +1,4 @@
-package wfg.ltv_econ.util;
+package wfg.wrap_ui.util;
 
 import java.text.DecimalFormat;
 
@@ -15,7 +15,7 @@ public class NumFormat {
      *   924 -> "924"
      *   9,245 -> "9.25K"
      *   79,245 -> "79.2K"
-     *   1,000,000,000 -> "1.00B"
+     *   1,024,000,000 -> "1.02B"
      */
     public static final String engNotation(long input) {
 
@@ -53,30 +53,4 @@ public class NumFormat {
 		}
 		return x;
 	}
-
-    public static int min(int... values) {
-        if (values == null || values.length == 0) {
-            throw new IllegalArgumentException("At least one value must be provided");
-        }
-        int min = values[0];
-        for (int i = 1; i < values.length; i++) {
-            if (values[i] < min) {
-                min = values[i];
-            }
-        }
-        return min;
-    }
-
-    public static float min(float... values) {
-        if (values == null || values.length == 0) {
-            throw new IllegalArgumentException("At least one value must be provided");
-        }
-        float min = values[0];
-        for (int i = 1; i < values.length; i++) {
-            if (values[i] < min) {
-                min = values[i];
-            }
-        }
-        return min;
-    }
 }

@@ -33,9 +33,9 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.util.NumFormat;
-import wfg.ltv_econ.util.UiUtils;
-import wfg.ltv_econ.util.ReflectionUtils;
+import wfg.wrap_ui.util.NumFormat;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.reflection.ReflectionUtils;
 
 public class IndustryTooltips {
     public static final int pad = 3;
@@ -367,7 +367,7 @@ public class IndustryTooltips {
 					x += sectionWidth + 5f;
 				}
 				tp.setHeightSoFar(y + opad*1.5f);
-				UiUtils.resetFlowLeft(tp, opad);
+				WrapUiUtils.resetFlowLeft(tp, opad);
 			}
 
             ReflectionUtils.getMethodsMatching(
@@ -437,7 +437,7 @@ public class IndustryTooltips {
 					x += sectionWidth + 5f;
 				}
 				tp.setHeightSoFar(y + opad*1.5f);
-				UiUtils.resetFlowLeft(tp, opad);
+				WrapUiUtils.resetFlowLeft(tp, opad);
 			}
 
             ReflectionUtils.getMethodsMatching(

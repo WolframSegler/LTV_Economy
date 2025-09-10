@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.systems;
+package wfg.wrap_ui.ui.systems;
 
 import java.util.List;
 
@@ -8,15 +8,15 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin.InputSnapshot;
-import wfg.ltv_econ.util.UiUtils;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin.InputSnapshot;
+import wfg.wrap_ui.util.WrapUiUtils;
 
 public final class TooltipSystem<
-    PluginType extends LtvCustomPanelPlugin<PanelType, PluginType>,
-    PanelType extends LtvCustomPanel<PluginType, PanelType, ?> & HasTooltip
+    PluginType extends CustomPanelPlugin<PanelType, PluginType>,
+    PanelType extends CustomPanel<PluginType, PanelType, ?> & HasTooltip
 > extends BaseSystem<PluginType, PanelType>{
 
     private final HasTooltip provider;
@@ -62,7 +62,7 @@ public final class TooltipSystem<
 
             if (isF2Down && !wasF2Down) {
                 getPanel().getCodexID().ifPresent(codexID -> {
-                    UiUtils.openCodexPage(codexID);
+                    WrapUiUtils.openCodexPage(codexID);
                 });
                 hideTooltip();
             }

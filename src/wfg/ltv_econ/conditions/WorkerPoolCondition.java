@@ -10,7 +10,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
-import wfg.ltv_econ.util.NumFormat;
+import wfg.wrap_ui.util.NumFormat;
 
 public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 

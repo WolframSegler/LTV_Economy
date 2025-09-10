@@ -1,4 +1,4 @@
-package wfg.ltv_econ.util
+package wfg.reflection
 
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles

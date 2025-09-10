@@ -1,9 +1,9 @@
-package wfg.ltv_econ.ui.dialogs;
+package wfg.wrap_ui.ui.dialogs;
 
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 
-public interface LtvCustomDialogDelegate extends CustomDialogDelegate {
+public interface WrapDialogDelegate extends CustomDialogDelegate {
     /**
      * Allows the CustomDialogDelegate to access its InteractionDialog 
      */

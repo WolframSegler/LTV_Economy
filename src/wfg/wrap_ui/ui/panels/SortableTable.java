@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.panels;
+package wfg.wrap_ui.ui.panels;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -17,21 +17,20 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.ui.LtvUIState.UIState;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
-import wfg.ltv_econ.ui.panels.LtvSpritePanel.Base;
-import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
-import wfg.ltv_econ.ui.plugins.LtvSpritePanelPlugin;
-import wfg.ltv_econ.ui.systems.FaderSystem.Glow;
-import wfg.ltv_econ.ui.systems.OutlineSystem.Outline;
-import wfg.ltv_econ.util.TooltipUtils;
-import wfg.ltv_econ.util.UiUtils;
-import wfg.ltv_econ.util.UiUtils.AnchorType;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
+import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
+import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 
 /**
  * SortableTable is a customizable, sortable UI table component designed to display
- * tabular data within a custom panel environment. It extends {@link LtvCustomPanel}
- * to integrate smoothly with the overall UI framework.
+ * tabular data within a custom panel environment. It extends {@link CustomPanel}
+ * to integrate smoothly with the Wrao UI framework.
  * <p>
  * <b>This table supports:</b>
  * <ul>
@@ -45,7 +44,7 @@ import wfg.ltv_econ.util.UiUtils.AnchorType;
  * <ul>
  *   <li>{@link Integer} — displayed as a small-font label with optional color.</li>
  *   <li>{@link String} — displayed as a small-font label with optional color.</li>
- *   <li>{@link LtvSpritePanel} — displayed as a sprite panel UI component.</li>
+ *   <li>{@link SpritePanel} — displayed as a sprite panel UI component.</li>
  *   <li>{@link UIPanelAPI} — displayed directly as a UI panel component.</li>
  *   <li>{@link LabelAPI} — displayed as a label UI component with optional color.</li>
  * </ul>
@@ -86,7 +85,7 @@ import wfg.ltv_econ.util.UiUtils.AnchorType;
  * This component supports tooltips both for headers and rows via {@link PendingTooltip}.
  * <p>
  */
-public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>, SortableTable, CustomPanelAPI> {
+public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, SortableTable, CustomPanelAPI> {
     private final List<ColumnManager> m_columns = new ArrayList<>();
     private final List<RowManager> m_rows = new ArrayList<>();
 
@@ -253,7 +252,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         getPanel().addComponent(m_rowContainer).inTL(0, m_headerHeight + pad);
     }
 
-    private class HeaderPanel extends LtvCustomPanel<BasePanelPlugin<HeaderPanel>, HeaderPanel, CustomPanelAPI> 
+    private class HeaderPanel extends CustomPanel<BasePanelPlugin<HeaderPanel>, HeaderPanel, CustomPanelAPI> 
         implements HasOutline, HasBackground, HasFader, HasAudioFeedback {
         protected final ColumnManager column;
         public int listIndex = -1;
@@ -284,7 +283,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         @Override
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this);
-            getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+            getPlugin().setTargetUIState(State.DETAIL_DIALOG);
         }
 
         @Override
@@ -305,12 +304,12 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                 (getPos().getHeight() / 2f) - (lblHeight / 2f) 
             );
 
-            LtvSpritePanel.Base sortIcon = new Base(
+            SpritePanel.Base sortIcon = new Base(
                     getRoot(),
                     panel,
                     getMarket(),
                     m_headerHeight - 2, m_headerHeight,
-                    new LtvSpritePanelPlugin<>(),
+                    new SpritePanelPlugin<>(),
                     sortIconPath,
                     getFaction().getBaseUIColor(),
                     null,
@@ -395,7 +394,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             }
 
             getParent().addUIElement(tooltip);
-            UiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
+            WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
 
             return tooltip;
         }
@@ -465,7 +464,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
         }
     }
 
-    public class RowManager extends LtvCustomPanel<BasePanelPlugin<RowManager>, RowManager, CustomPanelAPI> 
+    public class RowManager extends CustomPanel<BasePanelPlugin<RowManager>, RowManager, CustomPanelAPI> 
         implements HasTooltip, HasFader, HasOutline, HasAudioFeedback {
 
         protected final List<Object> m_cellData = new ArrayList<>();
@@ -511,7 +510,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
 
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this);
-            getPlugin().setTargetUIState(UIState.DETAIL_DIALOG);
+            getPlugin().setTargetUIState(State.DETAIL_DIALOG);
         }
 
         public void createPanel() {
@@ -553,7 +552,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
                         label.setColor(textColor);
                     }
 
-                } else if (cell instanceof LtvSpritePanel sprite) {
+                } else if (cell instanceof SpritePanel sprite) {
                     comp = (UIComponentAPI) sprite.getPanel();
                     compWidth = sprite.getPos().getWidth();
                     compHeight = sprite.getPos().getHeight();
@@ -695,11 +694,11 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
             TooltipMakerAPI tooltip = m_tooltip.factory.get();
 
             (SortableTable.this.getPanel()).addUIElement(tooltip);
-            TooltipUtils.mouseCornerPos(tooltip, opad);
+            WrapUiUtils.mouseCornerPos(tooltip, opad);
 
             if (codexID != null) {
                 tooltip.setCodexEntryId(codexID);
-                UiUtils.positionCodexLabel(tooltip, opad, pad);
+                WrapUiUtils.positionCodexLabel(tooltip, opad, pad);
             }
 
             return tooltip;
@@ -719,10 +718,10 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
 
     /**
      * Each set must contain the title of the header, its width, the text of the
-     * tooltip or a PendingTooltip, whether if it is merged, if it is the parent and the ID of the mergeSet.
+     * tooltip or a {@link PendingTooltip}, whether if it is merged, if it is the parent and the ID of the mergeSet.
      * A merged non-parent header will not display a tooltip.
      * <br></br> The expected input is {String, int, String, bool, bool, int}.
-     * Or alternatively {String, int, PendingTooltip, bool, bool, int}.
+     * Or alternatively {String, int, {@link PendingTooltip}, bool, bool, int}.
      * The tooltip and mergeSetID can be left empty:
      * {String, int, null, bool, bool, null}.
      */
@@ -803,7 +802,7 @@ public class SortableTable extends LtvCustomPanel<BasePanelPlugin<SortableTable>
      * The {@code market} is used for certain colors and location info.
      * {@code glowClr} can be null.
      * {@code codexID} is optional.
-     * The {@code PendingTooltip} can be null.
+     * The {@link PendingTooltip} can be null.
      */
     public <TpType extends CustomPanelAPI> void pushRow(String codexID, MarketAPI market, Color textColor,
         Color glowClr, PendingTooltip<TpType> tp) {

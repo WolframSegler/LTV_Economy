@@ -13,12 +13,13 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasBackground;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasOutline;
-import wfg.ltv_econ.ui.plugins.LtvCustomPanelPlugin;
-import wfg.ltv_econ.util.UiUtils;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
 
-public class ColonyInventoryButton extends LtvCustomPanel<
+public class ColonyInventoryButton extends CustomPanel<
     ColonyInventoryButton.ColonyInvButtonPlugin, ColonyInventoryButton, CustomPanelAPI
 > implements HasOutline, ActionListenerDelegate, HasBackground{
 
@@ -67,7 +68,7 @@ public class ColonyInventoryButton extends LtvCustomPanel<
     public void actionPerformed(Object data, Object source) {
         final ColonyInvDialog dialogPanel = new ColonyInvDialog(this);
 
-        UiUtils.CustomDialogViewer(
+        WrapUiUtils.CustomDialogViewer(
             dialogPanel, ColonyInvDialog.PANEL_W, ColonyInvDialog.PANEL_H
         );
     }
@@ -76,7 +77,7 @@ public class ColonyInventoryButton extends LtvCustomPanel<
         return 0.85f;
     }
 
-    public static class ColonyInvButtonPlugin extends LtvCustomPanelPlugin<
+    public static class ColonyInvButtonPlugin extends CustomPanelPlugin<
         ColonyInventoryButton, ColonyInvButtonPlugin
     > {}
 }

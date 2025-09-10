@@ -7,18 +7,18 @@ import com.fs.starfarer.api.Global;
 import com.fs.state.AppDriver;
 
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
-import wfg.ltv_econ.ui.panels.ActionListenerPanel;
 import wfg.ltv_econ.ui.panels.ColonyInventoryButton;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.ltv_econ.ui.panels.ColonyInventoryButton.ColonyInvButtonPlugin;
-import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
-import wfg.ltv_econ.util.UiUtils;
-import wfg.ltv_econ.util.UiUtils.AnchorType;
-import wfg.ltv_econ.util.ReflectionUtils;
-import wfg.ltv_econ.util.ReflectionUtils.ReflectedConstructor;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.wrap_ui.ui.panels.ActionListenerPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.reflection.ReflectionUtils;
+import wfg.reflection.ReflectionUtils.ReflectedConstructor;
 
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.CampaignState;
@@ -204,7 +204,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         );
 
         managementPanel.addComponent(replacement.getPanel());
-        UiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomLeft, 25);
+        WrapUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomLeft, 25);
 
         if (LtvIndustryListPanel.indOptCtor == null) {
             // Acquire the popup class from one of the widgets
@@ -275,7 +275,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 0, 0, market
             ) {
                 @Override
-                public void onClicked(LtvCustomPanel<?, ?, ?> source, boolean isLeftClick) {
+                public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
                     if (!isLeftClick) {
                         return;
                     }
@@ -287,7 +287,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     if (replacement.m_canViewPrices) {
                         final ComDetailDialog dialogPanel = new ComDetailDialog(panel, panel.getCommodity());
 
-                        UiUtils.CustomDialogViewer(
+                        WrapUiUtils.CustomDialogViewer(
                             dialogPanel, dialogPanel.PANEL_W, dialogPanel.PANEL_H
                         );
                     } 
@@ -300,7 +300,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             // Got the Y offset by looking at the getY() difference of replacement and commodityPanel
             // Might automate the getY() difference later
             managementPanel.addComponent(replacement.getPanel());
-            UiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomRight, -43);
+            WrapUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomRight, -43);
             
             managementPanel.removeComponent(commodityPanel);
 

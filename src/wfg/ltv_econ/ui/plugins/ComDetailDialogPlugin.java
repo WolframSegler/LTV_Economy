@@ -6,9 +6,10 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
-import wfg.ltv_econ.ui.dialogs.CustomDetailDialogPanel;
+import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
 
-public class ComDetailDialogPlugin extends LtvCustomPanelPlugin<
+public class ComDetailDialogPlugin extends CustomPanelPlugin<
     CustomDetailDialogPanel<ComDetailDialogPlugin>, ComDetailDialogPlugin
 > {
     protected ComDetailDialog m_dialog;

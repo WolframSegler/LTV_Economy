@@ -36,18 +36,21 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.industry.IndustryTooltips;
-import wfg.ltv_econ.ui.panels.LtvCustomPanel.HasTooltip.PendingTooltip;
 import wfg.ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
-import wfg.ltv_econ.ui.plugins.BasePanelPlugin;
 import wfg.ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.ltv_econ.util.UiUtils.AnchorType;
-import wfg.ltv_econ.util.ReflectionUtils;
-import wfg.ltv_econ.util.ReflectionUtils.ReflectedConstructor;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.TextPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
+import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.reflection.ReflectionUtils;
+import wfg.reflection.ReflectionUtils.ReflectedConstructor;
 
 public class LtvIndustryListPanel
-	extends LtvCustomPanel<IndustryListPanelPlugin, LtvIndustryListPanel, UIPanelAPI>
+	extends CustomPanel<IndustryListPanelPlugin, LtvIndustryListPanel, UIPanelAPI>
 	implements ActionListenerDelegate, DismissDialogDelegate {
 
 	public static final int BUTTON_SECTION_HEIGHT = 45;
@@ -182,11 +185,11 @@ public class LtvIndustryListPanel
             getPos().getWidth(), getPos().getHeight(), false
         );
 		
-		LtvTextPanel creditLblPanel = null;
-		LtvTextPanel maxIndLblPanel = null;
+		TextPanel creditLblPanel = null;
+		TextPanel maxIndLblPanel = null;
 
 		{ // creditLbl
-			creditLblPanel = new LtvTextPanel(
+			creditLblPanel = new TextPanel(
                 getRoot(), getPanel(), getMarket(), 200, 25,
                 new BasePanelPlugin<>()) {
 
@@ -218,7 +221,7 @@ public class LtvIndustryListPanel
 
 					getParent().addUIElement(tooltip);
 
-					UiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
+					WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
 
                     return tooltip;
                 }
@@ -231,7 +234,7 @@ public class LtvIndustryListPanel
         }
 
 		{ // maxIndLbl
-			maxIndLblPanel = new LtvTextPanel(
+			maxIndLblPanel = new TextPanel(
                 getRoot(), getPanel(), getMarket(), 200, 25,
                 new BasePanelPlugin<>()) {
 
@@ -325,7 +328,7 @@ public class LtvIndustryListPanel
 
 					getParent().addUIElement(tooltip);
 
-					UiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
+					WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
 
                     return tooltip;
                 }
@@ -385,7 +388,7 @@ public class LtvIndustryListPanel
 
 			wrapper.getParent.get().addUIElement(tp);
 			
-			UiUtils.anchorPanelWithBounds(tp, widget.getPanel(), AnchorType.RightTop, pad*2);
+			WrapUiUtils.anchorPanelWithBounds(tp, widget.getPanel(), AnchorType.RightTop, pad*2);
 
 			return tp;
 		};
@@ -402,7 +405,7 @@ public class LtvIndustryListPanel
 				buildButtonTp.addPara("Maximum number of industries reached.", 0);
 
 				add(buildButtonTp);
-				UiUtils.anchorPanel(buildButtonTp, buildButton, AnchorType.LeftBottom, 0);
+				WrapUiUtils.anchorPanel(buildButtonTp, buildButton, AnchorType.LeftBottom, 0);
 
 			} else {
 				remove(buildButtonTp);
