@@ -27,6 +27,7 @@ import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.wrap_ui.util.NumFormat;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.combat.MutableStat;
@@ -147,6 +148,8 @@ public class EconomyEngine extends BaseCampaignEventListener
 
             comInfo.advance(fakeAdvance);
         }
+
+        logEconomySnapshot();
     }
 
     public final void registerMarket(String marketID) {
@@ -606,5 +609,58 @@ public class EconomyEngine extends BaseCampaignEventListener
             this.outputId = outputId;
             this.output = output;
         }
+    }
+
+    public final void logEconomySnapshot() {
+        Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT START ----");
+        
+        for (Map.Entry<String, CommodityInfo> info : m_comInfo.entrySet()) {
+            Global.getLogger(getClass()).info("Commodity: " + info.getKey());
+            long potencialProd = 0;
+            long realProd = 0;
+            long potencialDemand = 0;
+            long realDemand = 0;
+            long available = 0;
+            double availabilityRatio = 0f;
+            long deficit = 0;
+            long globalStockpile = 0;
+            long totalExports = 0;
+            long inFactionExports = 0;
+            long globalExports = 0;
+
+            for (CommodityStats stats : info.getValue().getAllStats()) {
+                potencialProd += stats.getLocalProduction(false);
+                realProd += stats.getLocalProduction(true);
+                potencialDemand += stats.getBaseDemand(false);
+                realDemand += stats.getBaseDemand(true);
+                available += stats.getAvailable();
+                availabilityRatio += stats.getAvailabilityRatio();
+                deficit += stats.getDeficit();
+                globalStockpile += stats.getStoredAmount();
+                totalExports += stats.getTotalExports();
+                inFactionExports += stats.inFactionExports;
+                globalExports += stats.globalExports;
+            }
+
+            availabilityRatio /= (float) info.getValue().getAllStats().size();
+
+            Global.getLogger(getClass()).info(
+                "potencialProd: " + NumFormat.engNotation(potencialProd) + "\n" +
+                "realProd: " + NumFormat.engNotation(realProd) + "\n"+
+                "potencialDemand: " + NumFormat.engNotation(potencialDemand) + "\n"+
+                "realDemand: " + NumFormat.engNotation(realDemand) + "\n"+
+                "available: " + NumFormat.engNotation(available) + "\n"+
+                "availabilityRatio: " + availabilityRatio + "\n"+
+                "deficit: " + NumFormat.engNotation(deficit) + "\n"+
+                "globalStockpile: " + NumFormat.engNotation(globalStockpile) + "\n"+
+                "totalExports: " + NumFormat.engNotation(totalExports) + "\n"+
+                "inFactionExports: " + NumFormat.engNotation(inFactionExports) + "\n"+
+                "globalExports: " + NumFormat.engNotation(globalExports) + "\n"+
+
+                "---------------------------------------"
+            );
+        }
+        
+        Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT END ----");
     }
 }

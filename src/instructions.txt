@@ -31,4 +31,4 @@ Extra Instructions:
 - Standard porter message for AI agent:
   -> Create me a porter message with all the relevant info about what we were working on and the overall project. This chat is getting slow
 
-for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Sophita")) { p.getSpec().setTexture("graphics/kaleidoscope/planets/terran_boreal01.jpg"); p.applySpecChanges(); break; }
+for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Wonde")) { p.getSpec().setTexture("graphics/planets/US_planet_textureAuric.jpg"); p.applySpecChanges(); break; }

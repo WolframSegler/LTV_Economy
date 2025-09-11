@@ -107,19 +107,24 @@ public final class CompatLayer {
     private static final void copyMods(Industry ind, MutableStat base, MutableStat bonus, MutableStat dest,
         String modID, String comID, boolean isDemand) {
 
-        boolean useConfig = true;
+        boolean useConfig = false;
 
         StatMod baseMod = null;
         float cumulativeBase = 0f;
+
+        String installedItemID = ind.getSpecialItem() != null ? ind.getSpecialItem().getId() : null;
 
         for (StatMod mod : base.getFlatMods().values()) {
             if (mod.source.endsWith(CONFIG_MOD_SUFFIX) && mod.value > 0) {
                 baseMod = mod;
                 useConfig = true;
-                break;
 
             } else if (mod.source.endsWith(BASE_MOD_SUFFIX) && mod.value > 0) {
                 baseMod = baseMod == null ? mod : baseMod;
+
+            } else if (installedItemID != null && mod.source.contains(installedItemID)) {
+                float converted = industryModConverter((int) mod.value);
+                dest.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
 
             } else {
                 if (!mod.source.equals(modID) && 
@@ -127,7 +132,6 @@ public final class CompatLayer {
                     mod.value >= 0
                 ) {
                     cumulativeBase += mod.value;
-                    useConfig = false;
                 }
             }
         }
