@@ -391,7 +391,11 @@ public class TooltipUtils {
     ) {
         final String valueTxt;
         if (engNotate) {
-            valueTxt = valuePrefix + NumFormat.engNotation((long) value);
+            if (value < 10) {
+                valueTxt = valuePrefix + NumFormat.reverseEngNotation(value);
+            } else {
+                valueTxt = valuePrefix + NumFormat.engNotation((long) value);
+            } 
         } else {
             valueTxt = valuePrefix + value;
         }
@@ -470,8 +474,8 @@ public class TooltipUtils {
                 }
 
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), false,
-                    mod.getDesc(), ind.getCurrentName(), Strings.X
+                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true,
+                    mod.getDesc(), ind.getCurrentName(), ""
                 );
 
                 firstPara = false;
@@ -480,7 +484,7 @@ public class TooltipUtils {
 
         
         if (comStats.localProdMult != 1f && comStats.getLocalProduction(false) > 0) {
-            final float value =  Math.round(comStats.localProdMult * 100f) / 100f;
+            final float value =  ((int) (comStats.localProdMult * 100f)) / 100f;
 
             y = TooltipUtils.createStatModGridRow(
                 tooltip, y, valueTxtWidth, firstPara, negative, value, false, "Input shortages",

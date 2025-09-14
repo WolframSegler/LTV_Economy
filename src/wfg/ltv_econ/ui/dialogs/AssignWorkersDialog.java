@@ -28,6 +28,7 @@ import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.wrap_ui.util.NumFormat;
 
 public class AssignWorkersDialog implements CustomDialogDelegate {
@@ -53,7 +54,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
         final TooltipMakerAPI tooltip = panel.createUIElement(panelWidth, panelHeight, true);
-        final EconomyEngine engine = EconomyEngine.getInstance();
 
         final int pad = 3;
         final int opad = 10;
@@ -103,7 +103,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         slider.setWidth(sliderWidth);
         slider.setProgress(data.getWorkerAssignedRatio() * 100);
 
-        final IndustryConfig config = engine.ind_config.get(industry.getId());
+        final IndustryConfig config = IndustryIOs.ind_config.get(industry.getId());
         final float limit = config == null ? WorkerRegistry.DEFAULT_WORKER_CAP
             : config.workerAssignableLimit;
         final float max = Math.min(limit, getFreeWorkerRatio() + data.getWorkerAssignedRatio());

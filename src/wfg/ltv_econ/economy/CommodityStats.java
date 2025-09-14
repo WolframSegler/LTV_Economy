@@ -10,6 +10,8 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 
+import wfg.ltv_econ.industry.IndustryIOs;
+
 public class CommodityStats {
 
     public static final String WORKER_MOD_ID = "worker_assigned";
@@ -148,12 +150,16 @@ public class CommodityStats {
         demandBaseMutables = new HashMap<>();
 
         for (Industry industry : getVisibleIndustries(market)) {
-            if(industry.getSupply(comID).getQuantity().getModifiedValue() > 0) {
+            if (IndustryIOs.hasSupply(industry, comID) || 
+                industry.getSupply(comID).getQuantity().getModifiedValue() > 0
+            ) {
                 MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);
                 localProdMutables.put(industry.getId(), supplyStat);
 
             }
-            if(industry.getDemand(comID).getQuantity().getModifiedValue() > 0) {
+            if (IndustryIOs.hasDemand(industry, comID) || 
+                industry.getDemand(comID).getQuantity().getModifiedValue() > 0 
+            ) {
                 MutableStat demandStat = CompatLayer.convertIndDemandStat(industry, comID);
                 demandBaseMutables.put(industry.getId(), demandStat);
 
@@ -220,26 +226,29 @@ public class CommodityStats {
 
     public void logAllInfo() {
         final String comName = Global.getSettings().getCommoditySpec(comID).getName();
-        Global.getLogger(getClass()).error("Commodity: " + comName);
-        Global.getLogger(getClass()).error("economicFootprint: " + getEconomicFootprint());
-        Global.getLogger(getClass()).error("localProduction: " + getLocalProduction(true));
-        Global.getLogger(getClass()).error("baseDemand: " + getBaseDemand(false));
-        Global.getLogger(getClass()).error("deficitPreTrade: " + getDeficitPreTrade());
-        Global.getLogger(getClass()).error("totalImports: " + getTotalImports());
-        Global.getLogger(getClass()).error("inFactionImports: " + inFactionImports);
-        Global.getLogger(getClass()).error("globalImports: " + globalImports);
-        Global.getLogger(getClass()).error("totalExports: " + getTotalExports());
-        Global.getLogger(getClass()).error("inFactionExport: " + inFactionExports);
-        Global.getLogger(getClass()).error("globalExport: " + globalExports);
-        Global.getLogger(getClass()).error("canNotExport: " + getCanNotExport());
-        Global.getLogger(getClass()).error("demandMet: " + getDemandMet());
-        Global.getLogger(getClass()).error("demandMetWithLocal: " + getDemandMetLocally());
-        Global.getLogger(getClass()).error("demandMetViaTrade: " + getDemandMetViaTrade());
-
-        float trade = getDemandMetLocally() + getTotalExports() + getCanNotExport() + getDemandMetViaTrade() + getDeficit();
+        float trade = getDemandMetLocally() + getTotalExports() + getCanNotExport() +
+            getDemandMetViaTrade() + getDeficit();
 
         float ratio = trade / getEconomicFootprint();
 
-        Global.getLogger(getClass()).error("ratio: " + ratio);
+        Global.getLogger(getClass()).info("\n" +
+            "---- COMMODITY STATS LOG ----" + "\n" +
+            "Commodity: " + comName + "\n" +
+            "economicFootprint: " + getEconomicFootprint() + "\n" +
+            "localProduction: " + getLocalProduction(true) + "\n" +
+            "baseDemand: " + getBaseDemand(false) + "\n" +
+            "deficitPreTrade: " + getDeficitPreTrade() + "\n" +
+            "totalImports: " + getTotalImports() + "\n" +
+            "inFactionImports: " + inFactionImports + "\n" +
+            "globalImports: " + globalImports + "\n" +
+            "totalExports: " + getTotalExports() + "\n" +
+            "inFactionExport: " + inFactionExports + "\n" +
+            "globalExport: " + globalExports + "\n" +
+            "canNotExport: " + getCanNotExport() + "\n" +
+            "demandMet: " + getDemandMet() + "\n" +
+            "demandMetWithLocal: " + getDemandMetLocally() + "\n" +
+            "demandMetViaTrade: " + getDemandMetViaTrade() + "\n" +
+            "ratio: " + ratio
+        );
     }
 }

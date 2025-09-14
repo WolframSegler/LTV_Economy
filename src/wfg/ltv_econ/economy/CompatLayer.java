@@ -1,15 +1,18 @@
 package wfg.ltv_econ.economy;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
-import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
  * <p>
@@ -38,106 +41,124 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
  */
 public final class CompatLayer {
 
-    public static final String CONFIG_MOD_SUFFIX = "_config";
     public static final String BASE_MOD_SUFFIX = "_0";
     public static final String MARKET_COND_MOD_SUFFIX = "_1";
 
-    public static final MutableStat convertIndDemandStat(Industry ind, String comID) {
-        final IndustryConfig config =  EconomyEngine.getIndConfig(ind);
-
-        final MutableStat src = ind.getDemand(comID).getQuantity();
+    public static final MutableStat convertIndDemandStat(Industry ind, String inputID) {
+        final MutableStat src = ind.getDemand(inputID).getQuantity();
         final MutableStat dest = new MutableStat(0f);
 
-        final MutableStat modifier = ind.getDemandReduction();
-        if (
-            (config != null || config == null && ind.isIndustry() && !ind.isStructure())
-        ) {
-            float totalDemand = 0;
-            for (StatMod mod : src.getFlatMods().values()) {
-                if (mod.source.endsWith(CONFIG_MOD_SUFFIX) && mod.value > 0) {
-                    totalDemand = mod.value;
-                    break;
+        final MutableStat modifier = ind.getDemandReduction().createCopy();
+
+        float totalInput = IndustryIOs.getSumInput(ind, inputID);
+        float nonAbstractInput = 0f;
+        float ratio = 0f;
+
+        if (IndustryIOs.hasConfig(ind)) {
+            final Map<String, OutputCom> outputs = IndustryIOs.getIndConfig(ind).outputs;
+
+            for (String outputID : IndustryIOs.getOutputs(ind, true).keySet()) {
+                OutputCom output = outputs.get(outputID);
+    
+                Map<String, Float> inputs = IndustryIOs.getInputs(ind, outputID);
+    
+                if (inputs.containsKey(inputID) && !output.isAbstract) {
+                    nonAbstractInput += inputs.get(inputID);
                 }
             }
-            float totalContribution = 0f;
-            for (OutputCom output : config.outputs.values()) {
-                if (output.isAbstract) continue;
+            ratio = totalInput > 0 ? nonAbstractInput / totalInput : 0f;
 
-                float amount = 0f;
-                if (output.DynamicInputsPerUnit.containsKey(comID)) {
-                    amount = output.DynamicInputsPerUnit.get(comID);
-                } else {
-                    continue;
-                }
-
-                if (amount > 0f) {
-                    totalContribution += amount / totalDemand;
-                }
-            }
-            
-            if (ind.getSupplyBonus() != null && totalContribution > 0f) {
-                final MutableStat scaledBonus = ind.getSupplyBonus().createCopy();
-                for (StatMod mod : scaledBonus.getFlatMods().values()) {
-                    mod.value *= totalContribution;
-                }
-                for (StatMod mod : scaledBonus.getPercentMods().values()) {
-                    mod.value *= totalContribution;
-                }
-                for (StatMod mod : scaledBonus.getMultMods().values()) {
-                    mod.value = 1 + (mod.value - 1) * totalContribution;
-                }
-
-                modifier.applyMods(scaledBonus);
-            }
+        } else {
+            ratio = EconomyEngine.isWorkerAssignable(ind) ? 1 : 0;
         }
 
-        copyMods(ind, src, modifier, dest, "ind_dr", comID, true);
+        if (ind.getSupplyBonus() != null && ratio > 0) {
+            final MutableStat scaledBonus = ind.getSupplyBonus().createCopy();
+
+            for (Iterator<StatMod> it = scaledBonus.getFlatMods().values().iterator(); it.hasNext();) {
+                StatMod mod = it.next();
+                scaledBonus.modifyMult(
+                    mod.source, industryModConverter((int) mod.value), mod.desc
+                );
+                it.remove();
+            }
+
+            for (StatMod mod : scaledBonus.getMultMods().values()) {
+                if (ratio < 1) {
+                    mod.value = 1f + (mod.value - 1f) * ratio;
+                }
+            }
+
+            for (StatMod mod : scaledBonus.getPercentMods().values()) {
+                if (ratio < 1) {
+                    mod.value *= ratio;
+                }
+            }
+
+            modifier.applyMods(scaledBonus);
+        }
+
+        copyMods(ind, src, modifier, dest, "ind_dr", inputID, true);
         return dest;
     }
 
-    public static final MutableStat convertIndSupplyStat(Industry ind, String comID) {
-        final MutableStat src = ind.getSupply(comID).getQuantity();
+    public static final MutableStat convertIndSupplyStat(Industry ind, String outputID) {
+        final MutableStat src = ind.getSupply(outputID).getQuantity();
         final MutableStat supplyBonus = ind.getSupplyBonus();
         final MutableStat dest = new MutableStat(0f);
 
-        copyMods(ind, src, supplyBonus, dest, "ind_sb", comID, false);
+        copyMods(ind, src, supplyBonus, dest, "ind_sb", outputID, false);
         return dest;
     }
 
     private static final void copyMods(Industry ind, MutableStat base, MutableStat bonus, MutableStat dest,
         String modID, String comID, boolean isDemand) {
 
-        boolean useConfig = false;
+        boolean useConfig = IndustryIOs.hasConfig(ind);
 
-        StatMod baseMod = null;
-        float cumulativeBase = 0f;
+        float value = 0;
+        if (useConfig) {
+            if (isDemand) {
+                value = IndustryIOs.getSumInput(ind, comID);
+            } else {
+                value = IndustryIOs.getOutput(ind, comID);
+            }
+
+            if (value == 0) return;
+
+        } else {
+            StatMod baseMod = null;
+            float cumulativeBase = 0f;
+    
+            for (StatMod mod : base.getFlatMods().values()) {
+                if (mod.source.endsWith(BASE_MOD_SUFFIX) && mod.value > 0) {
+                    baseMod = baseMod == null ? mod : baseMod;
+    
+                } else {
+                    if (!mod.source.equals(modID) && 
+                        !mod.source.endsWith(MARKET_COND_MOD_SUFFIX) &&
+                        mod.value >= 0
+                    ) {
+                        cumulativeBase += mod.value;
+                    }
+                }
+            }
+
+            value = (baseMod != null ? baseMod.value : cumulativeBase);
+        }
 
         String installedItemID = ind.getSpecialItem() != null ? ind.getSpecialItem().getId() : null;
 
-        for (StatMod mod : base.getFlatMods().values()) {
-            if (mod.source.endsWith(CONFIG_MOD_SUFFIX) && mod.value > 0) {
-                baseMod = mod;
-                useConfig = true;
-
-            } else if (mod.source.endsWith(BASE_MOD_SUFFIX) && mod.value > 0) {
-                baseMod = baseMod == null ? mod : baseMod;
-
-            } else if (installedItemID != null && mod.source.contains(installedItemID)) {
-                float converted = industryModConverter((int) mod.value);
-                dest.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
-
-            } else {
-                if (!mod.source.equals(modID) && 
-                    !mod.source.endsWith(MARKET_COND_MOD_SUFFIX) &&
-                    mod.value >= 0
-                ) {
-                    cumulativeBase += mod.value;
+        if (installedItemID != null) {
+            for (StatMod mod : base.getFlatMods().values()) {
+                if (mod.source.contains(installedItemID)) {
+                    float converted = industryModConverter((int) mod.value);
+                    dest.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
                 }
             }
         }
 
         boolean hasRelevantCondition = true;
-
         if (useConfig && ResourceDepositsCondition.COMMODITY.containsValue(comID) && !isDemand) {
             hasRelevantCondition = false;
             for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
@@ -149,9 +170,8 @@ public final class CompatLayer {
             }
         }
 
-        float baseValue = (baseMod != null ? baseMod.value : cumulativeBase);
         if (hasRelevantCondition) {
-            dest.setBaseValue(industryBaseConverter(baseValue, ind, comID, useConfig));
+            dest.setBaseValue(industryBaseConverter(value, ind, comID, useConfig));
         } else {
             dest.setBaseValue(0);
             return;
@@ -181,31 +201,21 @@ public final class CompatLayer {
     private static final float industryBaseConverter(
         float baseValue, Industry ind, String comID, boolean useConfig
     ) {
-        final IndustryConfig config =  EconomyEngine.getIndConfig(ind);
+
+        if (useConfig) return baseValue;
 
         final WorkerRegistry reg = WorkerRegistry.getInstance(); 
         final WorkerIndustryData data = reg.getData(ind.getMarket().getId(), ind.getId());
+        final int size = ind.getMarket().getSize();
 
-        if (
-            config != null && config.outputs.get(comID) != null && !config.outputs.get(comID).isAbstract
-        ) {
-            final float workersPerUnit = EconomyEngine.getWorkersPerUnit(comID, config.occTag);
-
-            final int workerDrivenCount = (int) config.outputs.values().stream()
-                .filter(o -> o.usesWorkers && !o.isAbstract)
-                .count();
-            if (data != null) baseValue *= (data.getWorkersAssigned() / (workerDrivenCount*workersPerUnit));
-
-        } else if (EconomyEngine.isWorkerAssignable(ind)) {
+        if (EconomyEngine.isWorkerAssignable(ind)) {
             final float workersPerUnit = EconomyEngine.getWorkersPerUnit(comID, OCCTag.AVERAGE);
 
             final int workerDrivenCount = ind.getAllSupply().size();
             if (data != null) baseValue *= (data.getWorkersAssigned() / (workerDrivenCount*workersPerUnit));
+
+            return baseValue;
         }
-
-        if (config != null && useConfig) return baseValue;
-
-        final int size = ind.getMarket().getSize();
 
         float size3Base = baseValue - (size - 3);
 
@@ -213,6 +223,11 @@ public final class CompatLayer {
             return size3Base;
         }
         if (size3Base <= 0f) return 1f; // For industries that do not scale well with market size
+
+        // Throttle market size scaling to 8.5 instead of 10 to prevent modded buildings
+        // with unusually high base production from breaking the economy.
+        // Vanilla Starsector uses 10^x to represent production units (e.g., x → ~10^(x-1) ),
+        // but using 10 for all modded buildings causes exponential blow-ups in LTV values.
         return (float) Math.pow(8.5, size - 3) * size3Base;
     }
 

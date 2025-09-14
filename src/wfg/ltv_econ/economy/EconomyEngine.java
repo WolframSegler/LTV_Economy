@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,16 +18,13 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
-import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
-import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
-import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
-import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.wrap_ui.util.NumFormat;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
@@ -39,16 +37,10 @@ import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 public class EconomyEngine extends BaseCampaignEventListener
     implements PlayerColonizationListener, ColonyDecivListener {
 
-    public static final String ABSTRACT_COM = "abstract";
-
     private static EconomyEngine instance;
 
     private final Set<String> m_registeredMarkets;
     private final Map<String, CommodityInfo> m_comInfo;
-
-    private transient Map<String, List<OutputComReference>> inputToDependentOutputs;
-    public transient Map<String, IndustryConfig> ind_config;
-    public transient LaborConfig labor_config;
 
     public static void createInstance() {
         if (instance == null) {
@@ -88,10 +80,6 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     public final Object readResolve() {
-        ind_config = IndustryConfigLoader.loadAsMap();
-        labor_config = LaborConfigLoader.loadAsClass();
-        buildInputToOutputsMap();
-
         Global.getSector().getListenerManager().addListener(this, true);
         Global.getSector().addListener(this);
 
@@ -119,20 +107,58 @@ public class EconomyEngine extends BaseCampaignEventListener
         mainLoop(true);
     }
 
-    // Order matters here
+    /**
+     * Advances the economy by one production&trade cycle.
+     * <p>
+     * This method is the central loop for processing all markets, industries, and commodities
+     * within the EconomyEngine. It handles production, labor assignment, input deficit adjustments,
+     * trade, and stockpile updates. Each step occurs in a specific order to preserve the integrity
+     * of the simulation and avoid unfair advantages between markets.
+     * </p>
+     * <p><b>Cycle steps:</b></p>
+     * <ol>
+     *   <li>
+     *     <b>refreshMarkets()</b> - Synchronizes the EconomyEngine's market list with the game's
+     *     official Economy. Adds new markets and removes non-existent ones.
+     *   </li>
+     *   <li>
+     *     <b>assignWorkers()</b> - Assigns workers to industries per market according to their
+     *     <code>workerAssignableLimit</code>. Only runs if <code>fakeAdvance == false</code> (i.e.,
+     *     this is a real day advance). Worker allocation scales potential production.
+     *   </li>
+     *   <li>
+     *     <b>comInfo.reset()</b> - Resets per-commodity values such as imports, exports, and
+     *     stockpile usage from the previous cycle. Ensures a clean slate for updates.
+     *   </li>
+     *   <li>
+     *     <b>comInfo.update()</b> - Converts industry production into LTV-based stats for
+     *     each commodity, calculates base demand, and base local production.
+     *   </li>
+     *   <li>
+     *     <b>weightedOutputDeficitMods()</b> - Adjusts local production based on input deficits.
+     *     Only considers stockpiles available at the start of this cycle. This throttling
+     *     ensures industries cannot consume unavailable inputs.
+     *   </li>
+     *   <li>
+     *     <b>comInfo.trade()</b> - Handles exports of surplus commodities and imports to
+     *     fill storage for the next cycle. <b>Important:</b> trade happens <i>after</i> production
+     *     so that industries always consume existing stockpiles. Imports feed storage for
+     *     future production; they do not pre-fill inputs.
+     *   </li>
+     *   <li>
+     *     <b>comInfo.advance(fakeAdvance)</b> - Updates stockpiles after production and trade.
+     *     If <code>fakeAdvance</code> is true, this step does nothing. Stockpiles now include
+     *     newly imported goods ready for the next cycle.
+     *   </li>
+     * </ol>
+     * @param fakeAdvance If true, simulates a tick without modifying worker assignments or
+     *                    stockpiles (useful for interfaces or previews).
+     */
     private final void mainLoop(boolean fakeAdvance) {
         refreshMarkets();
 
         if (!fakeAdvance) {
             assignWorkers();
-        }
-
-        for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
-            for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
-                if (ind instanceof BaseIndustry baseInd) {
-                    applyIndustryPIOs(market, baseInd);
-                }
-            }
         }
 
         for (CommodityInfo comInfo : m_comInfo.values()) {
@@ -149,7 +175,8 @@ public class EconomyEngine extends BaseCampaignEventListener
             comInfo.advance(fakeAdvance);
         }
 
-        logEconomySnapshot();
+        // IndustryIOs.logMaps();
+        // logEconomySnapshot();
     }
 
     public final void registerMarket(String marketID) {
@@ -174,8 +201,23 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     public final void refreshMarkets() {
+        Set<String> currentMarketIDs = new HashSet<>();
+
         for (MarketAPI market : getMarketsCopy()) {
-            registerMarket(market.getId());
+            String marketID = market.getId();
+            currentMarketIDs.add(marketID);
+            registerMarket(marketID);
+        }
+
+        for (Iterator<String> it = m_registeredMarkets.iterator(); it.hasNext();) {
+            String registeredID = it.next();
+            if (!currentMarketIDs.contains(registeredID)) {
+                it.remove(); 
+                for (CommodityInfo comInfo : m_comInfo.values()) {
+                    comInfo.removeMarket(registeredID);
+                }
+                WorkerRegistry.getInstance().remove(registeredID);
+            }
         }
     }
 
@@ -236,7 +278,7 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     public static final boolean isWorkerAssignable(Industry ind) {
-        final IndustryConfig config = EconomyEngine.getInstance().ind_config.get(getBaseIndustryID(ind));
+        final IndustryConfig config = IndustryIOs.getIndConfig(ind);
         if (config != null) {
             return config.workerAssignable;
         } else {
@@ -244,37 +286,10 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
     }
 
-    public static final String getBaseIndustryID(Industry ind) {
-        IndustrySpecAPI currentInd = ind.getSpec();
-
-        while (true) {
-            String downgradeId = currentInd.getDowngrade();
-            if (downgradeId == null) break;
-
-            currentInd = Global.getSettings().getIndustrySpec(downgradeId);
-        }
-
-        return currentInd.getId();
-    }
-
-    public static final IndustryConfig getIndConfig(Industry ind) {
-        final EconomyEngine engine = EconomyEngine.getInstance();
-        IndustryConfig indConfig = engine.ind_config.get(ind.getId());
-
-        if (indConfig == null) {
-            final String baseIndustryID = getBaseIndustryID(ind);
-            indConfig = engine.ind_config.get(baseIndustryID);
-        }
-
-        return indConfig;
-    }
-
     public static final float getWorkersPerUnit(String comID, OCCTag tag) {
-        final EconomyEngine engine = EconomyEngine.getInstance();
-
         final float Pout = Global.getSettings().getCommoditySpec(comID).getBasePrice();
-        final float LPV_day = EconomyEngine.getInstance().labor_config.LPV_day;
-        final float RoVC = engine.labor_config.getRoVC(tag);
+        final float LPV_day = IndustryIOs.labor_config.LPV_day;
+        final float RoVC = IndustryIOs.labor_config.getRoVC(tag);
 
         return (Pout * RoVC) / LPV_day;
     } 
@@ -285,6 +300,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
             float totalDeficit = 0f;
             float totalMarketOutput = stats.getLocalProduction(false);
+            float invMarketOutput = 1f / totalMarketOutput;
 
             for (Map.Entry<String, MutableStat> industryEntry : stats.getLocalProductionStat().entrySet()) {
                 String industryID = industryEntry.getKey();
@@ -293,44 +309,36 @@ public class EconomyEngine extends BaseCampaignEventListener
                 float industryOutput = industryStat.getModifiedValue();
                 if (industryOutput <= 0 || totalMarketOutput <= 0) continue;
 
-                float industryShare = industryOutput / totalMarketOutput;
+                float industryShare = industryOutput * invMarketOutput;
 
                 Industry ind = stats.market.getIndustry(industryID);
-                IndustryConfig config = EconomyEngine.getIndConfig(ind);
-                Map<String, Float> inputWeights;
 
-                if (config != null) {
-                    OutputCom output = config.outputs.get(stats.comID);
-                    if (output == null || output.isAbstract) continue;
-    
-                    if (output.usesWorkers ||
-                        output.DynamicInputsPerUnit != null && !output.DynamicInputsPerUnit.isEmpty()
-                    ) {
-                        inputWeights = output.DynamicInputsPerUnit;
-                    } else {
-                        inputWeights = output.StaticInputsPerUnit;
+                Map<String, Float> inputWeights;
+                float sum = 0f;
+
+                if (IndustryIOs.hasConfig(ind)) {
+                    inputWeights = IndustryIOs.getInputs(ind, stats.comID);
+                    if (inputWeights.isEmpty()) continue;
+                    for (float value : inputWeights.values()) {
+                        sum += value;
                     }
                 } else {
                     int size = ind.getAllDemand().size();
                     if (size < 1) continue;
 
-                    Map<String, Float> equal = new HashMap<>(size);
+                    float equalWeight = 1f / size;
+
+                    inputWeights = new HashMap<>(size);
                     for (MutableCommodityQuantity d : ind.getAllDemand()) {
-                        equal.put(d.getCommodityId(), 1f / size);
+                        inputWeights.put(d.getCommodityId(), equalWeight);
                     }
-                    inputWeights = equal;
                 }
 
-                float sum = 0f;
-                for (float value : inputWeights.values()) {
-                    sum += value;
-                }
                 if (sum <= 0f) continue;
 
                 float industryDeficit = 0f;
                 for (Map.Entry<String, Float> inputEntry : inputWeights.entrySet()) {
                     String inputID = inputEntry.getKey();
-                    if (inputID.equals(ABSTRACT_COM)) continue;
                     
                     CommodityStats inputStats = getComStats(inputID, stats.market.getId());
 
@@ -369,7 +377,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                     data.setWorkersAssigned(0);
 
-                    IndustryConfig config = ind_config.get(ind.getId());
+                    IndustryConfig config = IndustryIOs.ind_config.get(ind.getId());
 
                     totalWorkerAbsorbtionCapacity += config == null ?
                         WorkerRegistry.DEFAULT_WORKER_CAP : config.workerAssignableLimit;
@@ -381,119 +389,11 @@ public class EconomyEngine extends BaseCampaignEventListener
             if (workerPerIndustry > 1f) workerPerIndustry = 1f;
 
             for (WorkerIndustryData data : workerAssignable) {
-                IndustryConfig config = ind_config.get(data.indID);
+                IndustryConfig config = IndustryIOs.ind_config.get(data.indID);
                 float limit = config == null ? WorkerRegistry.DEFAULT_WORKER_CAP : config.workerAssignableLimit;
 
                 data.setWorkersAssigned(limit*workerPerIndustry);
             }
-        }
-    }
-
-    /**
-     * Adds Production Inputs and Outputs using data/config/industry_config.json.
-     * Only supports conditions inside {@link OutputCom}.
-     * Other conditional inputs or outputs must be added by the subclass manually.
-     */
-    public static final void applyIndustryPIOs(MarketAPI market, BaseIndustry ind) {
-        final int size = market.getSize();
-        final EconomyEngine engine = EconomyEngine.getInstance();
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
-
-        if (engine == null || reg == null) return;
-
-        IndustryConfig indConfig = getIndConfig(ind);
-
-        if (indConfig == null) return; // NO-OP if no config file exists.
-
-        final Map<String, OutputCom> indMap = indConfig.outputs;
-        final Map<String, Float> totalDemandMap = new HashMap<>();
-        if (indMap == null || indMap.isEmpty()) return;
-
-        final String CONFIG_MOD_ID = "ind_" + ind.getId() + CompatLayer.CONFIG_MOD_SUFFIX;
-
-        for (Map.Entry<String, OutputCom> entry : indMap.entrySet()) {
-            OutputCom output = entry.getValue();
-            CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(output.comID);
-
-            if (output.usesWorkers && (output.CCMoneyDist == null || output.CCMoneyDist.isEmpty())) {
-                throw new RuntimeException("Labor-driven output " + output.comID + " in " + ind.getId() +
-                    " must define CCMoneyDist to calculate variable capital contribution.");
-            }
-
-            float scale = 1f * output.baseProd;
-            boolean skip = false;
-
-            if (output.checkLegality && market.isIllegal(entry.getKey())) {
-                skip = true;
-            }
-            for (String conditionID : output.ifMarketCondsFalse) {
-                if (market.hasCondition(conditionID)) {
-                    skip = true;
-                    break;
-                }
-            }
-            for (String conditionID : output.ifMarketCondsTrue) {
-                if (!market.hasCondition(conditionID)) {
-                    skip = true;
-                    break;
-                }
-            }
-            if (skip) continue;
-
-            if (output.scaleWithMarketSize) scale *= Math.pow(10, size - 3);            
-
-            if ((output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty())) {
-                float Vcc = spec.getBasePrice() * engine.labor_config.getRoCC(indConfig.occTag);
-                float totalWeight = 0;
-                for (float weight : output.CCMoneyDist.values()) {
-                    totalWeight += weight;
-                }
-
-                boolean hasAbstractInput = false;
-                for (Map.Entry<String, Float> inputEntry : output.CCMoneyDist.entrySet()) {
-                    String inputID = inputEntry.getKey();
-                    if (inputID.equals(ABSTRACT_COM)) {
-                        hasAbstractInput = true;
-                        continue;
-                    };
-
-                    float weight = inputEntry.getValue() / totalWeight;
-                    float inputValue = Vcc * weight;
-                    float unitPrice = Global.getSettings().getCommoditySpec(inputID).getBasePrice();
-                    float qty = inputValue * scale / unitPrice;
-
-                    output.DynamicInputsPerUnit.put(inputID, qty);
-                    totalDemandMap.merge(inputID, qty, Float::sum);
-                }
-                if (hasAbstractInput) {
-                    float totalUnits = 0;
-                    for (float weight : output.DynamicInputsPerUnit.values()) {
-                        totalUnits += weight;
-                    }
-                    float value = output.CCMoneyDist.get(ABSTRACT_COM) * totalUnits / totalWeight;
-                    output.DynamicInputsPerUnit.put(ABSTRACT_COM, value);
-                }
-            } else if (output.StaticInputsPerUnit != null && !output.StaticInputsPerUnit.isEmpty()) {
-                for (Map.Entry<String, Float> demandEntry : output.StaticInputsPerUnit.entrySet()) {
-                    String inputID = demandEntry.getKey();
-                    if (inputID.equals(ABSTRACT_COM)) continue;
-
-                    float qty = demandEntry.getValue() * scale;
-                    totalDemandMap.merge(inputID, qty, Float::sum);
-                }
-            }
-
-            if (!output.isAbstract) {
-                ind.getSupply(entry.getKey()).getQuantity().modifyFlat(
-                    CONFIG_MOD_ID, scale, BaseIndustry.BASE_VALUE_TEXT
-                );
-            }
-        }
-
-        for (Map.Entry<String, Float> entry : totalDemandMap.entrySet()) {
-            ind.getDemand(entry.getKey()).getQuantity().modifyFlat(
-                CONFIG_MOD_ID, entry.getValue().floatValue(), BaseIndustry.BASE_VALUE_TEXT
-            );
         }
     }
 
@@ -580,42 +480,10 @@ public class EconomyEngine extends BaseCampaignEventListener
 		return result;
 	}
 
-    public final void buildInputToOutputsMap() {
-        inputToDependentOutputs = new HashMap<>();
-
-        for (IndustryConfig indEntry : ind_config.values()) {
-
-            for (Map.Entry<String, OutputCom> outputEntry : indEntry.outputs.entrySet()) {
-                String outputId = outputEntry.getKey();
-                OutputCom output = outputEntry.getValue();
-
-                Map<String, Float> relevantInputs = output.usesWorkers ? 
-                    output.CCMoneyDist : output.StaticInputsPerUnit;
-
-                for (String inputID : relevantInputs.keySet()) {
-                    inputToDependentOutputs
-                    .computeIfAbsent(inputID, k -> new ArrayList<>())
-                    .add(new OutputComReference(outputId, output));
-                }
-            }
-        }
-    }
-
-    public static class OutputComReference {
-        public final String outputId;
-        public final OutputCom output;
-
-        public OutputComReference(String outputId, OutputCom output) {
-            this.outputId = outputId;
-            this.output = output;
-        }
-    }
-
     public final void logEconomySnapshot() {
         Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT START ----");
-        
+
         for (Map.Entry<String, CommodityInfo> info : m_comInfo.entrySet()) {
-            Global.getLogger(getClass()).info("Commodity: " + info.getKey());
             long potencialProd = 0;
             long realProd = 0;
             long potencialDemand = 0;
@@ -644,8 +512,9 @@ public class EconomyEngine extends BaseCampaignEventListener
 
             availabilityRatio /= (float) info.getValue().getAllStats().size();
 
-            Global.getLogger(getClass()).info(
-                "potencialProd: " + NumFormat.engNotation(potencialProd) + "\n" +
+            Global.getLogger(getClass()).info("\n"+
+                "Commodity: " + info.getKey() + "\n"+
+                "potencialProd: " + NumFormat.engNotation(potencialProd) + "\n"+
                 "realProd: " + NumFormat.engNotation(realProd) + "\n"+
                 "potencialDemand: " + NumFormat.engNotation(potencialDemand) + "\n"+
                 "realDemand: " + NumFormat.engNotation(realDemand) + "\n"+

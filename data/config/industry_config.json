@@ -492,14 +492,14 @@
 		"workerAssignableLimit": 0.1,
 		"outputList" : {
 			"imports": {
-				"constantCapitalMoneySplit": {
+				"consumptionRequirements": {
 					"supplies": 0.2,
 					"fuel": 0.4,
 					"crew": 0.1,
 					"volatiles": 0.2,
 					"rare_metals": 0.2
 				},
-				"usesWorkers": true,
+				"usesWorkers": false,
 				"isAbstract": true
 			}
 		}

@@ -189,7 +189,6 @@ public class IndustryConfigLoader {
 
         public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
         public final Map<String, Float> StaticInputsPerUnit; // List of per-output-unit inputs
-        public final Map<String, Float> DynamicInputsPerUnit = new HashMap<>(); // Populated dynamically
 
         public final List<String> ifMarketCondsFalse;
         public final List<String> ifMarketCondsTrue;
@@ -232,4 +231,3 @@ public class IndustryConfigLoader {
         }
     }
 }
-
