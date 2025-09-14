@@ -225,7 +225,6 @@ public class CommodityStats {
     }
 
     public void logAllInfo() {
-        final String comName = Global.getSettings().getCommoditySpec(comID).getName();
         float trade = getDemandMetLocally() + getTotalExports() + getCanNotExport() +
             getDemandMetViaTrade() + getDeficit();
 
@@ -233,7 +232,7 @@ public class CommodityStats {
 
         Global.getLogger(getClass()).info("\n" +
             "---- COMMODITY STATS LOG ----" + "\n" +
-            "Commodity: " + comName + "\n" +
+            "Commodity: " + comID + "\n" +
             "economicFootprint: " + getEconomicFootprint() + "\n" +
             "localProduction: " + getLocalProduction(true) + "\n" +
             "baseDemand: " + getBaseDemand(false) + "\n" +

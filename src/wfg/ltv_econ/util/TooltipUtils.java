@@ -385,14 +385,15 @@ public class TooltipUtils {
             Color valueColor,
             float value,
             boolean engNotate,
+            boolean flatNum,
             String desc,
             String modSource,
             String valuePrefix // "+", "x", or ""
     ) {
         final String valueTxt;
         if (engNotate) {
-            if (value < 10) {
-                valueTxt = valuePrefix + NumFormat.reverseEngNotation(value);
+            if (Math.abs(value) < 1000 && !flatNum) {
+                valueTxt = valuePrefix + NumFormat.formatSmart(value);
             } else {
                 valueTxt = valuePrefix + NumFormat.engNotation((long) value);
             } 
@@ -444,7 +445,7 @@ public class TooltipUtils {
 
             if (stat.getModifiedInt() > 0) {
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, stat.base, true,
+                    tooltip, y, valueTxtWidth, firstPara, highlight, stat.base, true, true,
                     BaseIndustry.BASE_VALUE_TEXT, ind.getCurrentName(), "+"
                 );
 
@@ -458,7 +459,7 @@ public class TooltipUtils {
                 }
 
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true,
+                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, true,
                     mod.getDesc(), ind.getCurrentName(), "+"
                 );
 
@@ -474,8 +475,8 @@ public class TooltipUtils {
                 }
 
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true,
-                    mod.getDesc(), ind.getCurrentName(), ""
+                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, false,
+                    mod.getDesc(), ind.getCurrentName(), Strings.X
                 );
 
                 firstPara = false;
@@ -487,8 +488,8 @@ public class TooltipUtils {
             final float value =  ((int) (comStats.localProdMult * 100f)) / 100f;
 
             y = TooltipUtils.createStatModGridRow(
-                tooltip, y, valueTxtWidth, firstPara, negative, value, false, "Input shortages",
-                null, Strings.X
+                tooltip, y, valueTxtWidth, firstPara, negative, value, false, true,
+                "Input shortages", null, Strings.X
             );
 
             firstPara = false;
@@ -533,7 +534,7 @@ public class TooltipUtils {
 
         return TooltipUtils.createStatModGridRow(
             tooltip, y, valueTxtWidth, firstPara,
-            valueColor, value, true, desc, null, symbol
+            valueColor, value, true, true, desc, null, symbol
         );
     }
 
@@ -567,7 +568,7 @@ public class TooltipUtils {
                 }
 
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, stat.base, true,
+                    tooltip, y, valueTxtWidth, firstPara, valueColor, stat.base, true, true,
                     BaseIndustry.BASE_VALUE_TEXT, ind.getCurrentName(), "+"
                 );
 
@@ -581,7 +582,7 @@ public class TooltipUtils {
                 }
 
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, mod.getValue(), true,
+                    tooltip, y, valueTxtWidth, firstPara, valueColor, mod.getValue(), true, true,
                     "Needed by " + ind.getCurrentName(), null, "+"
                 );
 
@@ -597,7 +598,7 @@ public class TooltipUtils {
                 }
 
                 y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, mod.getValue(), false,
+                    tooltip, y, valueTxtWidth, firstPara, valueColor, mod.getValue(), true, false,
                     mod.getDesc(), ind.getCurrentName(), Strings.X
                 );
 

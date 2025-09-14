@@ -1,6 +1,8 @@
 package wfg.ltv_econ.industry;
 
 import java.awt.Color;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -11,7 +13,6 @@ import com.fs.starfarer.api.campaign.econ.Industry.AICoreDescriptionMode;
 import com.fs.starfarer.api.campaign.econ.Industry.ImprovementDescriptionMode;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.campaign.listeners.ListenerUtil;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.SharedUnlockData;
@@ -307,17 +308,27 @@ public class IndustryTooltips {
             ReflectionUtils.getMethodsMatching(
                 BaseIndustry.class, "addPostUpkeepSection", void.class, 2).get(0
             ).invoke(ind, tp, mode);
-            
 
-			boolean hasSupply = ind.getAllSupply().size() > 0 ? true : false;
-			boolean hasDemand = ind.getAllDemand().size() > 0 ? true : false;
+			List<CommodityStats> supplyList = new ArrayList<>();
+			List<CommodityStats> demandList = new ArrayList<>();
+
+			final EconomyEngine engine = EconomyEngine.getInstance();
+
+			for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
+				CommodityStats stats = engine.getComStats(spec.getId(), ind.getMarket().getId());
+
+				if (stats.getLocalProductionStat(ind.getId()).getModifiedInt() > 0) {
+					supplyList.add(stats);
+				}
+				if (stats.getBaseDemandStat(ind.getId()).getModifiedInt() > 0) {
+					demandList.add(stats);
+				}
+			}
 
 			final int iconSize = 32;
 			final int itemsPerRow = 3;
 
-			final EconomyEngine engine = EconomyEngine.getInstance();
-
-			if (hasSupply) {
+			if (!supplyList.isEmpty()) {
 				tp.addSectionHeading("Production", color, dark, Alignment.MID, opad);
 
 				final float startY = tp.getHeightSoFar() + opad;
@@ -327,11 +338,9 @@ public class IndustryTooltips {
 				float sectionWidth = (ind.getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (MutableCommodityQuantity curr : ind.getAllSupply()) {
-					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
-					if (commodity.isNonEcon()) continue;
+				for (CommodityStats stats : supplyList) {
+					CommoditySpecAPI commodity = market.getCommodityData(stats.comID).getCommodity();
 
-					CommodityStats stats = engine.getComStats(curr.getCommodityId(), market.getId());
 					int pAmount = stats.getLocalProductionStat(ind.getId()).getModifiedInt();
 
 					if (pAmount < 1) continue;
@@ -372,20 +381,20 @@ public class IndustryTooltips {
 
             ReflectionUtils.getMethodsMatching(
                 BaseIndustry.class, "addPostSupplySection", void.class, 3).get(0
-            ).invoke(ind, tp, hasSupply, mode);
+            ).invoke(ind, tp, !supplyList.isEmpty(), mode);
 
 			float headerHeight = 0;
             boolean hasPostDemandSection = (boolean) ReflectionUtils.getMethodsMatching(
                 BaseIndustry.class, "hasPostDemandSection", boolean.class, 2).get(0
-            ).invoke(ind, hasDemand, mode);
-			if (hasDemand || hasPostDemandSection) {
+            ).invoke(ind, !demandList.isEmpty(), mode);
+			if (!demandList.isEmpty() || hasPostDemandSection) {
 				tp.addSectionHeading("Demand & effects", color, dark, Alignment.MID, opad);
 				headerHeight = tp.getPrev().getPosition().getHeight();
 			}
 
-			if (hasDemand) {
+			if (!demandList.isEmpty()) {
 				float startY = tp.getHeightSoFar() + opad;
-				if (hasSupply) {
+				if (!supplyList.isEmpty()) {
 					startY += headerHeight;
 				}
 
@@ -394,11 +403,9 @@ public class IndustryTooltips {
 				float sectionWidth = (ind.getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (MutableCommodityQuantity curr : ind.getAllDemand()) {
-					CommoditySpecAPI commodity = market.getCommodityData(curr.getCommodityId()).getCommodity();
-					if (commodity.isNonEcon()) continue;
+				for (CommodityStats stats : demandList) {
+					CommoditySpecAPI commodity = market.getCommodityData(stats.comID).getCommodity();
 
-					CommodityStats stats = engine.getComStats(curr.getCommodityId(), market.getId());
 					int dAmount = stats.getBaseDemandStat(ind.getId()).getModifiedInt();
 
 					if (dAmount < 1) continue;
@@ -442,7 +449,7 @@ public class IndustryTooltips {
 
             ReflectionUtils.getMethodsMatching(
                 BaseIndustry.class, "addPostDemandSection", void.class, 3).get(0
-            ).invoke(ind, tp, hasDemand, mode);
+            ).invoke(ind, tp, !demandList.isEmpty(), mode);
 
 			if (!needToAddIndustry) {
 				addInstalledItemsSection(mode, tp, expanded, ind);

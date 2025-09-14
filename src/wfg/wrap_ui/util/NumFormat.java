@@ -2,8 +2,6 @@ package wfg.wrap_ui.util;
 
 import java.text.DecimalFormat;
 
-import com.fs.starfarer.api.impl.campaign.ids.Strings;
-
 public class NumFormat {
 
     private static final String[] LARGE_SUFFIXES = {"", "K", "M", "B", "T", "P", "E"};
@@ -68,14 +66,10 @@ public class NumFormat {
      *
      * @return a <code>String</code> containing the formatted multiplier.
      */
-    public static String reverseEngNotation(double multiplier) {
-        if (multiplier <= 0) return Double.toString(multiplier);
+    public static final String reverseEngNotation(float multiplier) {
+        if (multiplier <= 0 || multiplier >= 1.01) return "" + multiplier;
 
-        if (multiplier >= 1.01) {
-            return String.format(Strings.X + "%.3f", multiplier);
-        }
-
-        double delta = multiplier - 1.0;
+        float delta = multiplier - 1f;
 
         int exp = 0;
         while (Math.abs(delta) < 0.001 && exp < SMALL_SUFFIXES.length - 1) {
@@ -84,6 +78,24 @@ public class NumFormat {
         }
 
         return String.format("1.%.0f%s", Math.round(delta * 10) / 10.0, SMALL_SUFFIXES[exp]);
+    }
+
+    public static final String formatSmart(double value) {
+        double rounded = Math.round(value * 100.0) / 100.0;
+        String formatted;
+
+        // Check if it's basically 1.00 but not exactly
+        if (Math.abs(value - 1.0) < 0.01 && Math.abs(value - 1.0) > 1e-6) {
+            formatted = "1.00...";
+        }
+        // Normal formatting: drop second decimal if it's 0
+        else if (Math.abs(rounded * 10 - Math.round(rounded * 10)) < 1e-9) {
+            formatted = String.format("%.1f", rounded);
+        } else {
+            formatted = String.format("%.2f", rounded);
+        }
+
+        return formatted;
     }
 
     public static final int firstDigit(int x) {
