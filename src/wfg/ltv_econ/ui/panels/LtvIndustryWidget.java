@@ -255,11 +255,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
             CommodityStats stats = EconomyEngine.getInstance().getComStats(spec.getId(), getMarket().getId());
 
-            if (stats == null) continue;
-
-            if (stats.getDeficit() < 1 || m_industry.getDemand(spec.getId()).getQuantity().getModifiedInt() < 1) {
-                continue;
-            }
+            if (stats == null || stats.getDeficit() < 1) continue;
 
             int iconCount = 1;
 
