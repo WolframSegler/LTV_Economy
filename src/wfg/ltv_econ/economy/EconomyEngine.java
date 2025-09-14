@@ -174,8 +174,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
             comInfo.advance(fakeAdvance);
         }
-
-        // IndustryIOs.logMaps();
+        
         // logEconomySnapshot();
     }
 
@@ -334,13 +333,6 @@ public class EconomyEngine extends BaseCampaignEventListener
                     }
 
                     sum = 1;
-                }
-
-                if (stats.market.getId().contains("cruor") && industryID.contains("mining")) {
-                    Global.getLogger(getClass()).error(
-                        "\n"+"sum: "+sum+"\n"+
-                        inputWeights.entrySet().toString()
-                    );
                 }
 
                 if (sum <= 0f) continue;

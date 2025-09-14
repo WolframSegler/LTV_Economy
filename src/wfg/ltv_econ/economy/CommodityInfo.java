@@ -1,7 +1,6 @@
 package wfg.ltv_econ.economy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -85,30 +84,24 @@ public class CommodityInfo {
         List<MarketAPI> importers = getImporters();
         List<MarketAPI> exporters = getExporters();
 
-        int[] pairScores = new int[importers.size() * exporters.size()];
-        Integer[] indices = new Integer[importers.size() * exporters.size()];
+        final int pairCount = importers.size() * exporters.size();
 
-        int expInd = 0;
-        for (MarketAPI exporter : exporters) {
+        int[] pairScores = new int[pairCount];
+        int[] indices = new int[pairCount];
 
-            int impInd = 0;
-            for (MarketAPI importer : importers) {
-                if (exporter.getId().contains(importer.getId())) {
-                    continue;
-                }
-
-                pairScores[expInd*importers.size() + impInd] = computeStaticPairScore(exporter, importer);
-
-                impInd++;
+        for (int expInd = 0; expInd < exporters.size(); expInd++) {
+            for (int impInd = 0; impInd < importers.size(); impInd++) {
+                pairScores[expInd * importers.size() + impInd] = computePairScore(
+                    exporters.get(expInd), importers.get(impInd)
+                );
             }
-            expInd++;
         }
 
         for (int i = 0; i < indices.length; i++) {
             indices[i] = i;
         }
 
-        Arrays.sort(indices, (a, b) -> Integer.compare(pairScores[b], pairScores[a]));
+        radixSortIndices(indices, pairScores);
 
         for (int i = 0; i < indices.length; i++) {
             Pair<String, String> expImp = getPairFromIndex(
@@ -164,7 +157,48 @@ public class CommodityInfo {
         return exporters;
     }
 
-    public final int computeStaticPairScore(MarketAPI exporter, MarketAPI importer) {
+    /**
+     * Sorts the indices array in-place based on pairScores using radix sort with radix = 256.
+     * Descending order: highest score first.
+     */
+    public static void radixSortIndices(int[] indices, int[] pairScores) {
+        int n = indices.length;
+        int[] output = new int[n];
+
+        int maxScore = 0;
+        for (int i = 0; i < n; i++) {
+            if (pairScores[indices[i]] > maxScore) maxScore = pairScores[indices[i]];
+        }
+
+        int[] count = new int[256];
+        int shift = 0; // start with least significant byte
+
+        while ((maxScore >> shift) != 0) {
+            for (int i = 0; i < 256; i++) count[i] = 0;
+
+            for (int i = 0; i < n; i++) {
+                int byteVal = (pairScores[indices[i]] >> shift) & 0xFF;
+                count[byteVal]++;
+            }
+
+            for (int i = 254; i >= 0; i--) {
+                count[i] += count[i + 1];
+            }
+
+            for (int i = 0; i < n; i++) {
+                int byteVal = (pairScores[indices[i]] >> shift) & 0xFF;
+                int pos = count[byteVal] - 1;
+                output[pos] = indices[i];
+                count[byteVal]--;
+            }
+
+            System.arraycopy(output, 0, indices, 0, n);
+
+            shift += 8; // next byte
+        }
+    }
+
+    public final int computePairScore(MarketAPI exporter, MarketAPI importer) {
 
         int score = 0;
 
@@ -189,15 +223,11 @@ public class CommodityInfo {
         return score;
     }
 
-    // public final int computeDynamicPairScore(MarketAPI importer) {
-    //     return (int) priceFactor(m_spec, importer) * TradeWeights.LOCAL_PRICE;
-    // }
-
     private static final float relationFactor(MarketAPI exporter, MarketAPI importer) {
-        final float rel = exporter.getFaction().getRelationship(importer.getFaction().getId());
-
-        final float weight = (float) Math.pow(Math.abs(rel), 1.7f);
-        return rel < 0 ? -weight : weight;
+        final float rel = exporter.getFaction().getRelationship(importer.getFaction().getId()); // [-1,1]
+        final float relNorm = (rel + 1f) / 2f;
+        final float weight = (float) Math.pow(relNorm, 1.7f);
+        return weight; // [0,1]
     }
 
     private static final float accessibilityFactor(MarketAPI exporter, MarketAPI importer) {
@@ -233,7 +263,7 @@ public class CommodityInfo {
         if (scaled > 1f) scaled = 1f;
         if (scaled < -1f) scaled = -1f;
 
-        return scaled;
+        return (scaled + 1f) / 2f; // [0,1]
     }
 
     private static final float distanceFactor(MarketAPI exporter, MarketAPI importer) {
@@ -245,8 +275,8 @@ public class CommodityInfo {
         final float normalized = Math.min(dist / maxDistance, 1f);
         final float alpha = 0.6f; // less harsh in mid-range
 
-        final float penalty = (float) Math.pow(Math.sqrt(normalized), alpha); // [-1, 0]
-        return -penalty;
+        final float score = 1f - (float) Math.pow(Math.sqrt(normalized), alpha); // [0, 1]
+        return score;
     }
 
     private static final float sizeFactor(MarketAPI exporter) {
