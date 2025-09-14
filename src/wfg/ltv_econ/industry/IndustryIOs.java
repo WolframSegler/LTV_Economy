@@ -354,6 +354,28 @@ public class IndustryIOs {
         return scaledInputs;
     }
 
+    /**
+     * Returns a list of all the inputs for a given industry.
+     */
+    public static final Set<String> getInputs(Industry ind, boolean includeAbstract) {
+        if (ind == null || ind.getId() == null) return Collections.emptySet();
+
+        final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
+
+        final Map<String, Map<String, Float>> outputs = baseInputs.get(indID);
+        if (outputs == null) return Collections.emptySet();
+
+        final Set<String> inputSet = new HashSet<>();
+        for (Map<String, Float> inputMap : outputs.values()) {
+            for (String input : inputMap.keySet()) {
+                if (ABSTRACT_COM.contains(input) && !includeAbstract) continue;
+                inputSet.add(input);
+            }
+        }
+
+        return inputSet;
+    }
+
     public static final Map<String, List<String>> getInputToOutput() {
         Map<String, List<String>> immutableMap = new HashMap<>();
         for (Map.Entry<String, List<String>> entry : inputToOutput.entrySet()) {

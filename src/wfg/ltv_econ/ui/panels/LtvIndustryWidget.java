@@ -25,12 +25,14 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg.ltv_econ.util.ListenerFactory;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
@@ -252,17 +254,35 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         tp.beginIconGroup();
         tp.setIconSpacingMedium();
 
-        for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
-            CommodityStats stats = EconomyEngine.getInstance().getComStats(spec.getId(), getMarket().getId());
+        boolean hasConfig = IndustryIOs.hasConfig(m_industry);
 
-            if (stats == null || stats.getDeficit() < 1) continue;
+        if (hasConfig) {
+            for (String comID : IndustryIOs.getInputs(m_industry, false)) {
+                CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID);
+                CommodityStats stats = EconomyEngine.getInstance().getComStats(comID, getMarket().getId());
 
-            int iconCount = 1;
+                if (stats == null || stats.getDeficit() < 1) continue;
 
-            if (stats.getAvailabilityRatio() < 0.67f) iconCount = 2;
-            if (stats.getAvailabilityRatio() < 0.33f) iconCount = 3;
+                int iconCount = 1;
+                if (stats.getAvailabilityRatio() < 0.67f) iconCount = 2;
+                if (stats.getAvailabilityRatio() < 0.33f) iconCount = 3;
 
-            tp.addIcons(spec, iconCount, IconRenderMode.RED);
+                tp.addIcons(spec, iconCount, IconRenderMode.RED);
+            }
+        } else {
+            for (Pair<String, Integer> pair : m_industry.getAllDeficit()) {
+                CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(pair.one);
+                CommodityStats stats = EconomyEngine.getInstance().getComStats(pair.one, getMarket().getId());
+
+                if (stats == null || stats.getDeficit() < 1) continue;
+
+                int iconCount = 1;
+
+                if (stats.getAvailabilityRatio() < 0.67f) iconCount = 2;
+                if (stats.getAvailabilityRatio() < 0.33f) iconCount = 3;
+
+                tp.addIcons(spec, iconCount, IconRenderMode.RED);
+            }
         }
         tp.addIconGroup(24, 1, pad);
         tp.getPrev().getPosition().inBL(pad + 2, pad);
