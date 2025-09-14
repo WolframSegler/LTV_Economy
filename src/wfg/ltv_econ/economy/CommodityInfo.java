@@ -67,7 +67,7 @@ public class CommodityInfo {
         return m_comStats;
     }
 
-    public static Pair<String, String> getPairFromIndex(int index, List<MarketAPI> exporters,     
+    public static final Pair<String, String> getPairFromIndex(int index, List<MarketAPI> exporters,     
         List<MarketAPI> importers) {
 
         final int numImporters = importers.size();
@@ -111,8 +111,8 @@ public class CommodityInfo {
             CommodityStats expStats = getStats(expImp.one);
             CommodityStats impStats = getStats(expImp.two);
 
-            long exportableRemaining = expStats.getRemainingExportable();
-            long deficitRemaining = impStats.getDeficit();
+            long exportableRemaining = computeExportableRemaining(expStats);
+            long deficitRemaining = computeProjectedImportAmount(impStats);
 
             if (exportableRemaining < 1 || deficitRemaining < 1) continue;
 
@@ -120,7 +120,6 @@ public class CommodityInfo {
 
             long amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
-            exportableRemaining -= amountToSend;
             if(sameFaction) {
                 expStats.addInFactionExport(amountToSend);
                 impStats.addInFactionImport(amountToSend);
@@ -149,7 +148,7 @@ public class CommodityInfo {
 
         for (CommodityStats stats : m_comStats.values()) {
 
-            if (stats.getBaseExportable() > 0) {
+            if (stats.getBaseExportable() > 0 && stats.getDeficitPreTrade() <= 0) {
                 exporters.add(stats.market);
             }
         }
@@ -283,5 +282,21 @@ public class CommodityInfo {
         int size = exporter.getSize();
         int maxSize = 10;
         return (float) Math.sqrt(size / (float) maxSize);
+    }
+
+    private static final long computeProjectedImportAmount(CommodityStats stats) {
+        final int daysToCover = 3;
+        final long targetStockpiles = daysToCover*stats.getDeficitPreTrade();
+
+        final long delta = targetStockpiles - stats.getStoredAmount() - stats.getTotalImports();
+        return Math.max(delta, 0);
+    }
+
+    private static final long computeExportableRemaining(CommodityStats stats) {
+        // If there is a deficit before trade, do not export.
+        if (stats.getDeficitPreTrade() > 0) {
+            return 0;
+        }
+        return stats.getRemainingExportable();
     }
 }
