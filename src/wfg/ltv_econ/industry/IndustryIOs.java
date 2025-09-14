@@ -145,11 +145,12 @@ public class IndustryIOs {
                         inputMap.put(inputID, qty);
                     }
                     if (hasAbstractInput) {
-                        float totalUnits = 0;
+                        float realUnits = 0;
                         for (float weight : inputMap.values()) {
-                            totalUnits += weight;
+                            realUnits += weight;
                         }
-                        float value = output.CCMoneyDist.get(ABSTRACT_COM) * totalUnits / totalWeight;
+                        float abs_weight = output.CCMoneyDist.get(ABSTRACT_COM);
+                        float value = abs_weight * realUnits / (totalWeight - abs_weight);
                         inputMap.put(ABSTRACT_COM, value);
                     }
                 } else if (output.StaticInputsPerUnit != null && !output.StaticInputsPerUnit.isEmpty()) {
@@ -270,8 +271,6 @@ public class IndustryIOs {
      * or if legality prevents the output from being produced.
      */
     public static final float getInput(Industry ind, String outputID, String inputID) {
-        if (ABSTRACT_COM.equals(inputID)) return 0;
-
         final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
 
         IndustryConfig cfg = ind_config.get(indID);
@@ -335,7 +334,7 @@ public class IndustryIOs {
     /** 
      * Returns the modified inputs map for a given industry and output.
      */
-    public static final Map<String, Float> getInputs(Industry ind, String outputID) {
+    public static final Map<String, Float> getInputs(Industry ind, String outputID, boolean includeAbstract) {
         if (ind == null || ind.getId() == null) return Collections.emptyMap();
 
         final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
@@ -349,7 +348,7 @@ public class IndustryIOs {
         Map<String, Float> scaledInputs = new HashMap<>();
         for (Map.Entry<String, Float> entry : baseInputMap.entrySet()) {
             float value = getInput(ind, outputID, entry.getKey());
-            if (value > 0) scaledInputs.put(entry.getKey(), value);
+            if (includeAbstract || value > 0) scaledInputs.put(entry.getKey(), value);
         }
 
         return scaledInputs;

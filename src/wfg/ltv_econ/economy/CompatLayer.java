@@ -60,7 +60,7 @@ public final class CompatLayer {
             for (String outputID : IndustryIOs.getOutputs(ind, true).keySet()) {
                 OutputCom output = outputs.get(outputID);
     
-                Map<String, Float> inputs = IndustryIOs.getInputs(ind, outputID);
+                Map<String, Float> inputs = IndustryIOs.getInputs(ind, outputID, false);
     
                 if (inputs.containsKey(inputID) && !output.isAbstract) {
                     nonAbstractInput += inputs.get(inputID);

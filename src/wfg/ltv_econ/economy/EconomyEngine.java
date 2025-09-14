@@ -317,7 +317,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 float sum = 0f;
 
                 if (IndustryIOs.hasConfig(ind)) {
-                    inputWeights = IndustryIOs.getInputs(ind, stats.comID);
+                    inputWeights = IndustryIOs.getInputs(ind, stats.comID, true);
                     if (inputWeights.isEmpty()) continue;
                     for (float value : inputWeights.values()) {
                         sum += value;
@@ -332,6 +332,15 @@ public class EconomyEngine extends BaseCampaignEventListener
                     for (MutableCommodityQuantity d : ind.getAllDemand()) {
                         inputWeights.put(d.getCommodityId(), equalWeight);
                     }
+
+                    sum = 1;
+                }
+
+                if (stats.market.getId().contains("cruor") && industryID.contains("mining")) {
+                    Global.getLogger(getClass()).error(
+                        "\n"+"sum: "+sum+"\n"+
+                        inputWeights.entrySet().toString()
+                    );
                 }
 
                 if (sum <= 0f) continue;
@@ -339,6 +348,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 float industryDeficit = 0f;
                 for (Map.Entry<String, Float> inputEntry : inputWeights.entrySet()) {
                     String inputID = inputEntry.getKey();
+                    if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
                     
                     CommodityStats inputStats = getComStats(inputID, stats.market.getId());
 
