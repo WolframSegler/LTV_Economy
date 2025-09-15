@@ -50,6 +50,14 @@ public final class CompatLayer {
 
         final MutableStat modifier = ind.getDemandReduction().createCopy();
 
+        /*
+        * Bonuses inside demandReduction are positive, even though they reduce demand.
+        * Their sign must be flipped for compatibility
+        */ 
+        for (StatMod mod : modifier.getFlatMods().values()) {
+            if (mod.value > 0f) mod.value = -mod.value;
+        }
+
         float totalInput = IndustryIOs.getSumInput(ind, inputID);
         float nonAbstractInput = 0f;
         float ratio = 0f;

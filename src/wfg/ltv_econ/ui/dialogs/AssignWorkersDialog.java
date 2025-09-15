@@ -103,7 +103,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         slider.setWidth(sliderWidth);
         slider.setProgress(data.getWorkerAssignedRatio() * 100);
 
-        final IndustryConfig config = IndustryIOs.ind_config.get(industry.getId());
+        final IndustryConfig config = IndustryIOs.getIndConfig(industry);
         final float limit = config == null ? WorkerRegistry.DEFAULT_WORKER_CAP
             : config.workerAssignableLimit;
         final float max = Math.min(limit, getFreeWorkerRatio() + data.getWorkerAssignedRatio());
