@@ -894,7 +894,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
         PendingTooltip<CustomPanelAPI> quantityTooltip = new PendingTooltip<>();
-        createSection3QuantityHeaderTooltipFactory(mode, table, quantityTooltip);
+        createSection3QuantityHeaderTooltip(mode, table, quantityTooltip);
 
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
         :
@@ -1199,7 +1199,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         };
     }
 
-    private void createSection3QuantityHeaderTooltipFactory(int mode, SortableTable table,
+    private void createSection3QuantityHeaderTooltip(int mode, SortableTable table,
         PendingTooltip<CustomPanelAPI> wrapper) {
         final String quantityDesc = mode == 0
             ? "Units of this commodity exported globally."

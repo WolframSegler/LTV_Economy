@@ -25,6 +25,7 @@ public class UiUtils {
     }
 
     public static final Color COLOR_DEFICIT = new Color(140, 15, 15);
+    public static final Color COLOR_OVER_IMPORT = new Color(180, 90, 180);
     public static final Color COLOR_IMPORT = new Color(200, 140, 60);
     public static final Color COLOR_FACTION_IMPORT = new Color(240, 240, 100);
     public static final Color COLOR_LOCAL_PROD = new Color(122, 200, 122);
@@ -45,12 +46,15 @@ public class UiUtils {
             );
         }
 
-        float demandMetLocalRatio = (float)comStats.getDemandMetLocally() / comStats.getEconomicFootprint();
-        float inFactionImportRatio = (float)comStats.inFactionImports / comStats.getEconomicFootprint();
-        float globalImportRatio = (float)comStats.globalImports / comStats.getEconomicFootprint();
-        float exportedRatio = (float)comStats.getTotalExports() / comStats.getEconomicFootprint();
-        float notExportedRatio = (float)comStats.getCanNotExport() / comStats.getEconomicFootprint();
-        float deficitRatio = (float)comStats.getDeficit() / comStats.getEconomicFootprint();
+        final long footprint = comStats.getEconomicFootprint();
+
+        float demandMetLocalRatio = (float)comStats.getDemandMetLocally() / footprint;
+        float inFactionImportRatio = (float)comStats.getDemandMetViaFactionTrade() / footprint;
+        float globalImportRatio = (float)comStats.getDemandMetViaGlobalTrade() / footprint;
+        float overImportRatio = (float)comStats.getOverImports() / footprint;
+        float exportedRatio = (float)comStats.getTotalExports() / footprint;
+        float notExportedRatio = (float)comStats.getCanNotExport() / footprint;
+        float deficitRatio = (float)comStats.getDeficit() / footprint;
 
         final Map<Color, Float> barMap = new LinkedHashMap<>() {{
             put(COLOR_LOCAL_PROD, demandMetLocalRatio);
@@ -58,6 +62,7 @@ public class UiUtils {
             put(COLOR_NOT_EXPORTED, notExportedRatio);
             put(COLOR_FACTION_IMPORT, inFactionImportRatio);
             put(COLOR_IMPORT, globalImportRatio);
+            put(COLOR_OVER_IMPORT, overImportRatio);
             put(COLOR_DEFICIT, deficitRatio);
         }};
 

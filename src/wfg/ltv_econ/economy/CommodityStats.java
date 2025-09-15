@@ -70,7 +70,16 @@ public class CommodityStats {
         return getBaseDemand(false) - getDemandMetLocally();
     }
     public final long getDemandMetViaTrade() {
-        return Math.min(getTotalImports(), getBaseDemand(false) - getDemandMetLocally());
+        return getDemandMetViaFactionTrade() + getDemandMetViaGlobalTrade();
+    }
+    public final long getDemandMetViaFactionTrade() {
+        return Math.min(inFactionImports, getDeficitPreTrade());
+    }
+    public final long getDemandMetViaGlobalTrade() {
+        return Math.min(globalImports, getDeficitPreTrade() - getDemandMetViaFactionTrade());
+    }
+    public final long getOverImports() {
+        return Math.max(0, getTotalImports() - getDemandMetViaTrade());
     }
     public final long getDeficit() {
         return getBaseDemand(false) - getDemandMet();
@@ -94,7 +103,7 @@ public class CommodityStats {
         return Math.max(0, getBaseExportable() - getTotalExports());
     }
     public final long getEconomicFootprint() {
-        return getDemandMet() + getDeficit() + getTotalExports() + getCanNotExport();
+        return getDemandMet() + getDeficit() + getOverImports() + getTotalExports() + getCanNotExport();
     }
     public final double getAvailabilityRatio() {
         return getBaseDemand(false) == 0 ? 1f : (double) getDemandMet() / getBaseDemand(false);
