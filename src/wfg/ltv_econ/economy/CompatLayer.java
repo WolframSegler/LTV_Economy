@@ -55,7 +55,7 @@ public final class CompatLayer {
         * Their sign must be flipped for compatibility
         */ 
         for (StatMod mod : modifier.getFlatMods().values()) {
-            if (mod.value > 0f) mod.value = -mod.value;
+            if (mod.value > 0) mod.value = -mod.value;
         }
 
         float totalInput = IndustryIOs.getSumInput(ind, inputID);
@@ -188,18 +188,20 @@ public final class CompatLayer {
         applyResourceDepositMods(ind, dest, comID);
 
         if (bonus == null) return;
+        int bonusID = 0;
 
         for (StatMod mod : bonus.getPercentMods().values()) {
-            dest.modifyPercent(mod.source + "::" + ind.getId(), mod.value, mod.desc);
+            dest.modifyPercent(bonusID++ + "::" + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getMultMods().values()) {
-            dest.modifyMult(mod.source + "::" + ind.getId(), mod.value, mod.desc);
+            dest.modifyMult(bonusID++ + "::" + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
-            dest.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
+
+            dest.modifyMult(bonusID++ + "::" + ind.getId(), converted, mod.desc);
         }
     }
 
