@@ -379,7 +379,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                     data.setWorkersAssigned(0);
 
-                    IndustryConfig config = IndustryIOs.ind_config.get(ind.getId());
+                    IndustryConfig config = IndustryIOs.getIndConfig(ind);
 
                     totalWorkerAbsorbtionCapacity += config == null ?
                         WorkerRegistry.DEFAULT_WORKER_CAP : config.workerAssignableLimit;
@@ -391,7 +391,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             if (workerPerIndustry > 1f) workerPerIndustry = 1f;
 
             for (WorkerIndustryData data : workerAssignable) {
-                IndustryConfig config = IndustryIOs.ind_config.get(data.indID);
+                IndustryConfig config = IndustryIOs.getIndConfig(data.ind);
                 float limit = config == null ? WorkerRegistry.DEFAULT_WORKER_CAP : config.workerAssignableLimit;
 
                 data.setWorkersAssigned(limit*workerPerIndustry);

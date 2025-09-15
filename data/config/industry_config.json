@@ -117,7 +117,7 @@
 	"mining": {
 		"occTag": "mechanized",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.15,
+		"workerAssignableLimit": 0.25,
 		"outputList" : {
 			"ore": {
 				"constantCapitalMoneySplit": {

@@ -430,7 +430,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
 
         iconPath = "";
         desc = "Excess imports beyond current demand stockpiled for future use.";
-        legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_NOT_EXPORTED, root, panel, market);
+        legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_OVER_IMPORT, root, panel, market);
         
         y.addAndGet(iconSize + pad);
 

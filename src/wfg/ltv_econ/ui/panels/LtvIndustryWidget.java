@@ -256,7 +256,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
         boolean hasConfig = IndustryIOs.hasConfig(m_industry);
 
-        if (hasConfig) {
+        if (hasConfig && m_industry.isFunctional() && !m_industry.isBuilding()) {
             for (String comID : IndustryIOs.getInputs(m_industry, false)) {
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID);
                 CommodityStats stats = EconomyEngine.getInstance().getComStats(comID, getMarket().getId());
@@ -269,7 +269,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
                 tp.addIcons(spec, iconCount, IconRenderMode.RED);
             }
-        } else {
+        } else if (m_industry.isFunctional() && !m_industry.isBuilding()) {
             for (Pair<String, Integer> pair : m_industry.getAllDeficit()) {
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(pair.one);
                 CommodityStats stats = EconomyEngine.getInstance().getComStats(pair.one, getMarket().getId());
