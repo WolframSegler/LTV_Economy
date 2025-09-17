@@ -66,9 +66,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void onNewGameAfterEconomyLoad() {
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (market.hasIndustry("manufacturing")) continue;
-
-            if(!market.isPlanetConditionMarketOnly()) continue;
+            if (market.isHidden() || market.hasIndustry("manufacturing")) continue;
 
             if (market.getSize() < 4 || market.isPlayerOwned()) continue;
 

@@ -1,0 +1,6 @@
+id,type,text1,text2,text3,text4,text5,notes
+light_machinery,RESOURCE,"Precision-engineered machines and tools used in light manufacturing and assembly. Essential for producing consumer goods and smaller-scale industrial components.",,,,,
+components_structural,RESOURCE,"Bulk structural parts and frames used in heavy assemblies and substructures.",,,,,
+components_precision,RESOURCE,"High-precision machined parts made from rare metals, essential for advanced systems and precision-heavy assemblies. Used in the manufacture of components for machinery, electronics, and specialized equipment requiring exact tolerances and durability.",,,,,
+components_subassembly,RESOURCE,"Pre-assembled modules combining light and precision components. Ready for final assembly.",,,,,
+components_light,RESOURCE,"Light, labor-intensive components used in consumer goods and light industrial products. Forms the backbone of everyday manufacturing and assembly.",,,,,

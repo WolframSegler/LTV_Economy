@@ -163,13 +163,13 @@
 	"manufacturing": {
 		"occTag": "manufacture",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.5,
+		"workerAssignableLimit": 0.7,
 		"outputList": {
 			"components_structural": {
 				"constantCapitalMoneySplit": {
-					"metals": 0.8,
+					"metals": 0.85,
 					"rare_metals": 0.1,
-					"heavy_machinery": 0.1
+					"heavy_machinery": 0.05
 				},
 				"usesWorkers": true
 			},
@@ -184,18 +184,18 @@
 			},
 			"components_subassembly": {
 				"constantCapitalMoneySplit": {
-					"metals": 0.4,
+					"metals": 0.45,
 					"rare_metals": 0.3,
 					"heavy_machinery": 0.1,
-					"light_machinery": 0.1
+					"light_machinery": 0.05
 				},
 				"usesWorkers": true
 			},
 			"components_light": {
 				"constantCapitalMoneySplit": {
 					"metals": 0.1,
-					"organics": 0.8,
-					"light_machinery": 0.1
+					"organics": 0.85,
+					"light_machinery": 0.05
 				},
 				"usesWorkers": true
 			}

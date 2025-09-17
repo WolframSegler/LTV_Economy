@@ -59,10 +59,7 @@ public class WorkerRegistry {
     }
 
     public final void remove(String marketID) {
-        final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
-        for (Industry ind : market.getIndustries()) {
-            registry.remove(makeKey(marketID, ind.getId()));
-        }
+        registry.keySet().removeIf(key -> key.startsWith(marketID + "::"));
     }
 
     public final boolean isMarketDataPresent(String marketID) {
