@@ -346,7 +346,7 @@
 	"refining": {
 		"occTag": "industry",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.2,
+		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"metals": {
 				"constantCapitalMoneySplit": {

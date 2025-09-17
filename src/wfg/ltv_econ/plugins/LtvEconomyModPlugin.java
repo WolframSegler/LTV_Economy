@@ -70,7 +70,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
             if (market.getSize() < 4 || market.isPlayerOwned()) continue;
 
-            if (market.getPlanetEntity().isGasGiant()) continue;
+            if (market.getPlanetEntity() == null || market.getPlanetEntity().isGasGiant()) continue;
 
             boolean hasRequiredIndustry = false;
             for (Industry ind : market.getIndustries()) {
