@@ -57,6 +57,9 @@ public class IndustryConfigLoader {
                 case "industry":
                     occTag = OCCTag.INDUSTRY;
                     break;
+                case "manufacture":
+                    occTag = OCCTag.MANUFACTURE;
+                    break;
                 case "service":
                     occTag = OCCTag.SERVICE;
                     break;

@@ -35,19 +35,13 @@ public class LaborConfigLoader {
             result.LPV_month = root.getInt("LPV_month");
             result.LPV_day = (float) root.getDouble("LPV_day");
             result.RoVC_average = (float) root.getDouble("RoVC_average");
-            result.RoCC_average = (float) root.getDouble("RoCC_average");
             result.RoVC_industry = (float) root.getDouble("RoVC_industry");
-            result.RoCC_industry = (float) root.getDouble("RoCC_industry");
+            result.RoVC_manufacture = (float) root.getDouble("RoVC_manufacture");
             result.RoVC_service = (float) root.getDouble("RoVC_service");
-            result.RoCC_service = (float) root.getDouble("RoCC_service");
             result.RoVC_agriculture = (float) root.getDouble("RoVC_agriculture");
-            result.RoCC_agriculture = (float) root.getDouble("RoCC_agriculture");
             result.RoVC_mechanized = (float) root.getDouble("RoVC_mechanized");
-            result.RoCC_mechanized = (float) root.getDouble("RoCC_mechanized");
             result.RoVC_manual = (float) root.getDouble("RoVC_manual");
-            result.RoCC_manual = (float) root.getDouble("RoCC_manual");
             result.RoVC_space = (float) root.getDouble("RoVC_space");
-            result.RoCC_space = (float) root.getDouble("RoCC_space");
 
         } catch (Exception e) {
             throw new RuntimeException(
@@ -66,24 +60,20 @@ public class LaborConfigLoader {
         public int LPV_month;
         public float LPV_day;
         public float RoVC_average;
-        public float RoCC_average;
         public float RoVC_industry;
-        public float RoCC_industry;
+        public float RoVC_manufacture;
         public float RoVC_service;
-        public float RoCC_service;
         public float RoVC_agriculture;
-        public float RoCC_agriculture;
         public float RoVC_mechanized;
-        public float RoCC_mechanized;
         public float RoVC_manual;
-        public float RoCC_manual;
         public float RoVC_space;
-        public float RoCC_space;
 
         public final float getRoVC(OCCTag tag) {
             switch (tag) {
             case INDUSTRY:
                 return RoVC_industry;
+            case MANUFACTURE:
+                return RoVC_manufacture;
             case SERVICE:
                 return RoVC_service;
             case AGRICULTURE:
@@ -103,20 +93,22 @@ public class LaborConfigLoader {
         public final float getRoCC(OCCTag tag) {
             switch (tag) {
             case INDUSTRY:
-                return RoCC_industry;
+                return 1f - RoVC_industry;
+            case MANUFACTURE:
+                return 1f - RoVC_manufacture;
             case SERVICE:
-                return RoCC_service;
+                return 1f - RoVC_service;
             case AGRICULTURE:
-                return RoCC_agriculture;
+                return 1f - RoVC_agriculture;
             case MECHANIZED:
-                return RoCC_mechanized;
+                return 1f - RoVC_mechanized;
             case MANUAL:
-                return RoCC_manual;
+                return 1f - RoVC_manual;
             case SPACE:
-                return RoCC_space;
+                return 1f - RoVC_space;
             case AVERAGE:
             default:
-                return RoCC_average;
+                return 1f - RoVC_average;
             }
         }
     }
@@ -124,6 +116,7 @@ public class LaborConfigLoader {
     public static enum OCCTag {
         AVERAGE,
         INDUSTRY,
+        MANUFACTURE,
         SERVICE,
         AGRICULTURE,
         MECHANIZED,

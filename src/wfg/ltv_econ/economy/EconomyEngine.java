@@ -175,7 +175,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             comInfo.advance(fakeAdvance);
         }
         
-        // logEconomySnapshot();
+        logEconomySnapshot();
     }
 
     public final void registerMarket(String marketID) {

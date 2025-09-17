@@ -5,19 +5,13 @@
     "LPV_day": 0.26667,
 
     "RoVC_average": 0.13,
-    "RoCC_average": 0.87,
-    "RoVC_industry": 0.03,
-    "RoCC_industry": 0.97,
+    "RoVC_industry": 0.04,
+    "RoVC_manufacture": 0.30,
     "RoVC_service": 0.35,
-    "RoCC_service": 0.65,
     "RoVC_agriculture": 0.15,
-    "RoCC_agriculture": 0.85,
     "RoVC_mechanized": 0.1,
-    "RoCC_mechanized": 0.9,
     "RoVC_manual": 0.4,
-    "RoCC_manual": 0.6,
-    "RoVC_space": 0.25,
-    "RoCC_space": 0.75,
+    "RoVC_space": 0.3,
 
     "inspiration": "https://mpra.ub.uni-muenchen.de/55894/1/"
 }
