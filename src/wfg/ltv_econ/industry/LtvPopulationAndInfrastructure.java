@@ -222,17 +222,19 @@ public class LtvPopulationAndInfrastructure extends PopulationAndInfrastructure 
 
 		market.getStability().modifyFlat("_" + modId + "_ms", BASE_STABILITY, "Base value");
 
-		final float inFactionRatio = 1f - EconomyEngine.getInstance().getGlobalTradeRatio(market);
-
-		if (inFactionRatio > 0f) {
-			float mult = Math.round(100f - (inFactionRatio * IN_FACTION_IMPORT_BONUS * 100f)) / 100f;
-			String desc = inFactionRatio == 1f
-					? "All supply sourced in-faction"
-					: "Supply sourced in-faction (" + Math.round(inFactionRatio * 100f) + "%)";
-			market.getUpkeepMult().modifyMultAlways(modId + "ifi", mult, desc);
-		} else {
-			market.getUpkeepMult().modifyMultAlways(modId + "ifi", 1f,
-					"All supply sourced globally; no upkeep reduction");
+		if (EconomyEngine.isInitialized()) {
+			final float inFactionRatio = 1f - EconomyEngine.getInstance().getGlobalTradeRatio(market);
+	
+			if (inFactionRatio > 0f) {
+				float mult = Math.round(100f - (inFactionRatio * IN_FACTION_IMPORT_BONUS * 100f)) / 100f;
+				String desc = inFactionRatio == 1f
+						? "All supply sourced in-faction"
+						: "Supply sourced in-faction (" + Math.round(inFactionRatio * 100f) + "%)";
+				market.getUpkeepMult().modifyMultAlways(modId + "ifi", mult, desc);
+			} else {
+				market.getUpkeepMult().modifyMultAlways(modId + "ifi", 1f,
+						"All supply sourced globally; no upkeep reduction");
+			}
 		}
 
 		if (market.isPlayerOwned() && market.getAdmin().isPlayer()) {

@@ -420,7 +420,7 @@ public class IndustryTooltips {
 					// draw icon
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
-					if (dAmount > 0) {
+					if (stats.getAvailabilityRatio() < 0.99f) {
 						tp.addIcons(commodity, 1, IconRenderMode.DIM_RED);
 					} else {
 						tp.addIcons(commodity, 1, IconRenderMode.NORMAL);

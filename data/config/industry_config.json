@@ -71,13 +71,12 @@
 	"heavyindustry": {
 		"workerAssignable": true,
 		"occTag": "industry",
-		"workerAssignableLimit": 0.2,
+		"workerAssignableLimit": 0.15,
 		"outputList": {
 			"heavy_machinery": {
 				"constantCapitalMoneySplit": {
-					"metals": 0.05,
-					"rare_metals": 0.1,
-					"components_subassembly": 0.2,
+					"metals": 0.1,
+					"components_subassembly": 0.25,
 					"components_structural": 0.3,
 					"components_precision": 0.35
 				},
@@ -85,8 +84,7 @@
 			},
 			"light_machinery": {
 				"constantCapitalMoneySplit": {
-					"metals": 0.05,
-					"rare_metals": 0.05,
+					"metals": 0.1,
 					"components_light": 0.4,
 					"components_subassembly": 0.2,
 					"components_precision": 0.3
@@ -106,9 +104,8 @@
 			"hand_weapons": {
 				"constantCapitalMoneySplit": {
 					"metals": 0.05,
-					"rare_metals": 0.1,
 					"components_subassembly": 0.3,
-					"components_structural": 0.15,
+					"components_structural": 0.25,
 					"components_precision": 0.4
 				},
 				"usesWorkers": true
@@ -127,22 +124,22 @@
 	"lightindustry": {
 		"occTag": "industry",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.3,
+		"workerAssignableLimit": 0.2,
 		"outputList": {
 			"domestic_goods": {
 				"constantCapitalMoneySplit": {
-					"organics": 0.1,
+					"organics": 0.05,
 					"components_subassembly": 0.25,
-					"components_light": 0.6,
+					"components_light": 0.65,
 					"light_machinery": 0.05
 				},
 				"usesWorkers": true
 			},
 			"luxury_goods": {
 				"constantCapitalMoneySplit": {
-					"organics": 0.1,
+					"organics": 0.05,
 					"components_subassembly": 0.3,
-					"components_light": 0.4,
+					"components_light": 0.45,
 					"light_machinery": 0.2
 				},
 				"usesWorkers": true,
@@ -150,8 +147,8 @@
 			},
 			"drugs": {
 				"constantCapitalMoneySplit": {
-					"organics": 0.4,
-					"components_light": 0.1,
+					"organics": 0.1,
+					"components_light": 0.4,
 					"light_machinery": 0.4,
 					"abstract": 0.1
 				},
@@ -163,7 +160,7 @@
 	"manufacturing": {
 		"occTag": "manufacture",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.7,
+		"workerAssignableLimit": 0.8,
 		"outputList": {
 			"components_structural": {
 				"constantCapitalMoneySplit": {

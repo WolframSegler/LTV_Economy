@@ -200,8 +200,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
         for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
             CommodityStats stats = engine.getComStats(com.getId(), market.getId());
-            long dAmount = stats.getBaseDemandStat(industry.getId()).getModifiedInt();
-            long allDeficit = stats.getDeficit();            
+            long dAmount = stats.getBaseDemandStat(industry.getId()).getModifiedInt();   
 
             if (dAmount < 1) {
                 continue;
@@ -217,7 +216,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             // draw icon
             tooltip.beginIconGroup();
             tooltip.setIconSpacingMedium();
-            if (allDeficit > 0) {
+            if (stats.getAvailabilityRatio() < 0.99f) {
                 tooltip.addIcons(com, 1, IconRenderMode.DIM_RED);
             } else {
                 tooltip.addIcons(com, 1, IconRenderMode.NORMAL);
