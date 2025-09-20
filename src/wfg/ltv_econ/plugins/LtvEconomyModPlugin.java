@@ -16,6 +16,7 @@ import wfg.ltv_econ.economy.IndustryConfigLoader;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryTooltips;
+import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg.ltv_econ.ui.panels.ColonyInventoryButton;
 import wfg.ltv_econ.ui.panels.LtvComIconPanel;
@@ -72,6 +73,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
             if (market.getPlanetEntity() == null || market.getPlanetEntity().isGasGiant()) continue;
 
+            
+
             boolean hasRequiredIndustry = false;
             for (Industry ind : market.getIndustries()) {
                 if (ind.getId().equals(Industries.HEAVYINDUSTRY) ||
@@ -85,6 +88,10 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             }
 
             if (!hasRequiredIndustry) continue;
+
+            if (LtvPopulationAndInfrastructure.getMaxIndustries(market.getSize()) >
+                market.getIndustries().size()
+            ) continue;
 
             market.addIndustry("manufacturing");
             market.reapplyIndustries();

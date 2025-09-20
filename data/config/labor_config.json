@@ -6,11 +6,11 @@
 
     "RoVC_average": 0.13,
     "RoVC_industry": 0.04,
-    "RoVC_manufacture": 0.30,
-    "RoVC_service": 0.35,
+    "RoVC_manufacture": 0.35,
+    "RoVC_service": 0.4,
     "RoVC_agriculture": 0.15,
     "RoVC_mechanized": 0.1,
-    "RoVC_manual": 0.4,
+    "RoVC_manual": 0.5,
     "RoVC_space": 0.3,
 
     "inspiration": "https://mpra.ub.uni-muenchen.de/55894/1/"

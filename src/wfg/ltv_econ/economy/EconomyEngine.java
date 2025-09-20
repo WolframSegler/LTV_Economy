@@ -460,8 +460,41 @@ public class EconomyEngine extends BaseCampaignEventListener
         return totalGlobalExports;
     }
 
+    /**
+     * Returns the sum of all the available commodity counts of a market
+     */
+    public final long getMarketActivity(MarketAPI market) {
+        long totalActivity = 0;
+        for (CommodityInfo info : m_comInfo.values()) {
+            CommodityStats stats = info.getStats(market.getId());
+
+            totalActivity += stats.getAvailable();
+        }
+
+        return totalActivity;
+    }
+
+    /**
+     * Includes over-imports.
+     */
+    public final float getGlobalTradeRatio(MarketAPI market) {
+        final double activity = getMarketActivity(market);
+
+        float ratio = 0f;
+
+        for (CommodityInfo info : m_comInfo.values()) {
+            CommodityStats stats = info.getStats(market.getId());
+
+            ratio += Math.abs(stats.globalImports - stats.getAvailable()) / activity;
+        }
+
+        return ratio;
+    }
+
+    /**
+     * 1 is no deficit and 0 is max deficit
+     */
     public static final Pair<String, Float> getMaxDeficit(MarketAPI market, String... commodityIds) {
-		// 1 is no deficit and 0 is 100% deficit
 		Pair<String, Float> result = new Pair<String, Float>();
 		result.two = 1f;
 		if (Global.CODEX_TOOLTIP_MODE || !EconomyEngine.isInitialized()) return result;

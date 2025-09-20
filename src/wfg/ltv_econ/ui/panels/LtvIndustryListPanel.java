@@ -17,7 +17,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
-import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.CutStyle;
@@ -36,6 +35,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.industry.IndustryTooltips;
+import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
 import wfg.ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
 import wfg.ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
@@ -271,7 +271,7 @@ public class LtvIndustryListPanel
 
 					for(int i = 3; i <= Misc.getMaxMarketSize(getMarket()); i++) {
 						tooltip.addRow(new Object[]{Misc.getHighlightColor(), "" + i, Misc.getHighlightColor(),
-						"" + PopulationAndInfrastructure.getMaxIndustries(i)});
+						"" + LtvPopulationAndInfrastructure.getMaxIndustries(i)});
 					}
 
 					tooltip.addTable("", 0, 10);
