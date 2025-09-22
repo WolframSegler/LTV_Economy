@@ -29,6 +29,6 @@ Extra Instructions:
   -> implements\s+[^{]*\bInteractionDialogAPI\b
 
 - Standard porter message for AI agent:
-  -> Create me a porter message with all the relevant info about what we were working on and the overall project. This chat is getting slow
+  -> Create me a porter message with all the relevant info about what we were working on and the overall project. This chat is getting slow. Paragraph format.
 
 for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Wonde")) { p.getSpec().setTexture("graphics/planets/US_planet_textureAuric.jpg"); p.applySpecChanges(); break; }

@@ -103,15 +103,17 @@ public class WorkerRegistry {
     public class WorkerIndustryData {
         public final String marketID;
         public final String indID;
-
+        
         public transient MarketAPI market;
         public transient Industry ind;
-
+        
+        private final Map<String, Float> outputRatios;
         private float workersAssigned;
 
         public WorkerIndustryData(String marketID, String industryID) {
             this.marketID = marketID;
             this.indID = industryID;
+            this.outputRatios = new HashMap<>();
             this.workersAssigned = 0;
 
             readResolve();
@@ -130,11 +132,47 @@ public class WorkerRegistry {
 
         public final long getWorkersAssigned() {
             final MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-            if (workerPoolCondition == null) {
-                return 0;
-            }
-            WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+            if (workerPoolCondition == null) return 0;
+            
+            final WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
             return (long) (workersAssigned * pool.getWorkerPool());
+        }
+
+        public final long getAssignedForOutput(String comID) {
+            final MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
+            if (workerPoolCondition == null) return 0;
+            
+            final WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+            if (!outputRatios.containsKey(comID)) return 0;
+
+            return (long) (workersAssigned * pool.getWorkerPool() * outputRatios.get(comID));
+        }
+
+        public final void setRatioForOutput(String comID, float ratio) {
+            ratio = Math.max(0f, Math.min(1f, ratio));
+            final float current = outputRatios.getOrDefault(comID, 0f);
+
+            final float diff = ratio - current;
+            final float result = outputRatioSum() + diff;
+
+            if (result > 1f) {
+                final float remaining = 1f - ratio;
+                final float otherSum = outputRatioSum() - current;
+                for (Map.Entry<String, Float> entry : outputRatios.entrySet()) {
+                    if (!entry.getKey().equals(comID)) {
+                        
+                        entry.setValue(otherSum > 0f ? entry.getValue() / otherSum * remaining : remaining);
+                    }
+                }
+            }
+            outputRatios.put(comID, ratio);
+        }
+
+        public final float outputRatioSum() {
+            float sum = 0f;
+            for (float value : outputRatios.values()) sum += value;
+
+            return sum;
         }
 
         public final void setWorkersAssigned(float newAmount) {

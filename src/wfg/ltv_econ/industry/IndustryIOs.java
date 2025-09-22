@@ -1,19 +1,28 @@
 package wfg.ltv_econ.industry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
+import com.fs.starfarer.api.characters.MarketConditionSpecAPI;
+import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
+import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.IndustryConfigLoader;
 import wfg.ltv_econ.economy.LaborConfigLoader;
@@ -21,6 +30,7 @@ import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
 import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 /**
@@ -83,14 +93,216 @@ public class IndustryIOs {
         ind_config = IndustryConfigLoader.loadAsMap();
         labor_config = LaborConfigLoader.loadAsClass();
 
-        buildInputOutputMaps();
+        DynamicIndConfigs();
+        
+        ConfigInputOutputMaps();
 
         buildInputToOutput();
 
         buildInputOutputToIndustries();
     }
 
-    private static final void buildInputOutputMaps() {
+    /**
+     * Creates dynamic configs for industries without a json config.
+     */
+    private static final void DynamicIndConfigs() {
+        final String marketID = "ltv_dynamic_ind_test_market";
+        final MarketAPI testMarket = Global.getFactory().createMarket(marketID, marketID, 6);
+
+        Map<String, IndustryConfig> dynamicInds = new HashMap<>();
+
+        BiConsumer<Industry, Map<String, Float>> populateInputs = (ind, inputs) -> {
+            ind.getAllDemand().forEach(mutable -> {
+                MutableStat base = mutable.getQuantity();
+                StatMod baseMod = null;
+                float cumulativeBase = 0f;
+
+                for (StatMod mod : base.getFlatMods().values()) {
+                    if (mod.source.endsWith(CompatLayer.BASE_MOD_SUFFIX) && mod.value > 0) {
+                        baseMod = baseMod == null ? mod : baseMod;
+        
+                    } else {
+                        if (!mod.source.equals(CompatLayer.DEMAND_RED_MOD) && 
+                            !mod.source.endsWith(CompatLayer.MARKET_COND_MOD_SUFFIX) &&
+                            mod.value >= 0
+                        ) {
+                            cumulativeBase += mod.value;
+                        }
+                    }
+                }
+
+                float value = (baseMod != null ? baseMod.value : cumulativeBase);
+                value = (float) Math.pow(0.1, 1f - (base.getModifiedValue() - (ind.getMarket().getSize() - 3)));
+                inputs.put(mutable.getCommodityId(), value);
+            });
+        };
+
+        for (IndustrySpecAPI indSpec : Global.getSettings().getAllIndustrySpecs()) { 
+            if (getIndConfig(indSpec) != null) continue;
+
+            String indID = indSpec.getId();
+            Map<String, OutputCom> configOutputs = new HashMap<>();
+            
+            testMarket.addIndustry(indID);
+
+            Industry ind = testMarket.getIndustry(indID);
+            // In vanilla, each output uses each input
+            Map<String, Float> inputs = new HashMap<>(6);
+            List<String> outputs = new ArrayList<>(6);
+            Set<String> illegalOutputs = new HashSet<>(6);
+
+            populateInputs.accept(ind, inputs);
+            for (MutableCommodityQuantity mutable : ind.getAllSupply()) {
+                outputs.add(mutable.getCommodityId());
+            }
+
+            testMarket.setFreePort(true);
+            ind.apply();
+
+            for (MutableCommodityQuantity mutable : ind.getAllSupply()) {
+                illegalOutputs.add(mutable.getCommodityId());
+            }
+            illegalOutputs.removeAll(outputs);
+
+            boolean usesWorkers = EconomyEngine.isWorkerAssignable(ind);
+            Map<String, Float> CCMoneyDist = usesWorkers ?
+                inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, i -> 1f)) : null;
+
+            Map<String, Float> ConsumptionMap = !usesWorkers ?
+                inputs.entrySet().stream().collect(
+                    Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)
+                ) : null;
+
+            Consumer<String> addOutput = (outputID) -> {
+                boolean illegal = illegalOutputs.contains(outputID);
+                OutputCom optCom = new OutputCom(
+                        outputID,
+                        1,
+                        CCMoneyDist,
+                        !usesWorkers,
+                        usesWorkers,
+                        false,
+                        illegal,
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        ConsumptionMap
+                );
+                configOutputs.put(outputID, optCom);
+            };
+
+            outputs.forEach(addOutput);
+            illegalOutputs.forEach(addOutput);
+
+            IndustryConfig config = new IndustryConfig(
+                true, configOutputs, OCCTag.AVERAGE, 1f
+            );
+            config.dynamic = true;
+
+            ind_config.put(indID, config);
+            dynamicInds.put(indID, config);
+        }
+
+        final List<String> conds = Global.getSettings().getAllMarketConditionSpecs()
+            .stream().map(MarketConditionSpecAPI::getId).collect(Collectors.toList());
+
+
+        Consumer<List<String>> applyAndTestCombo = condCombo -> {
+            for (String condID : condCombo) {
+                testMarket.addCondition(condID);
+            }
+            testMarket.reapplyConditions();
+            testMarket.reapplyIndustries();
+
+            for (Map.Entry<String, IndustryConfig> entry : dynamicInds.entrySet()) {
+                String indID = entry.getKey();
+                IndustryConfig config = entry.getValue();
+                Industry ind = testMarket.getIndustry(indID);
+
+                Set<String> currentOutputs = ind.getAllSupply().stream()
+                    .map(MutableCommodityQuantity::getCommodityId)
+                    .collect(Collectors.toSet());
+
+                Set<String> baselineOutputs = config.outputs.keySet();
+
+                Map<String, Float> inputs = new HashMap<>(6);
+                populateInputs.accept(ind, inputs);
+
+                Map<String, Float> CCMoneyDist = config.workerAssignable ?
+                    inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, i -> 1f)) : null;
+
+                Map<String, Float> ConsumptionMap = !config.workerAssignable ?
+                    inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)) : null;
+
+                // Outputs that appeared
+                Set<String> appearingOutputs = new HashSet<>(currentOutputs);
+                appearingOutputs.removeAll(baselineOutputs);
+
+                for (String newOutput : appearingOutputs) {
+                    OutputCom optCom = new OutputCom(
+                        newOutput,
+                        1,
+                        CCMoneyDist,
+                        !config.workerAssignable,
+                        config.workerAssignable,
+                        false,
+                        false,
+                        new ArrayList<>(),
+                        new ArrayList<>(condCombo),
+                        ConsumptionMap
+                    );
+                    config.outputs.put(newOutput, optCom);
+                }
+
+                // --- Outputs that disappeared ---
+                Set<String> disappearingOutputs = new HashSet<>(baselineOutputs);
+                disappearingOutputs.removeAll(currentOutputs);
+
+                for (String missingOutput : disappearingOutputs) {
+                    OutputCom optCom = new OutputCom(
+                        missingOutput,
+                        1,
+                        CCMoneyDist,
+                        !config.workerAssignable,
+                        config.workerAssignable,
+                        false,
+                        false,
+                        new ArrayList<>(condCombo),
+                        new ArrayList<>(),
+                        ConsumptionMap
+                    );
+                    config.outputs.put(missingOutput, optCom);
+                }
+            }
+
+            for (String condID : condCombo) {
+                testMarket.removeCondition(condID);
+            }
+            testMarket.reapplyConditions();
+        };
+
+        // Test single conditions
+        for (int i = 0; i < conds.size(); i++) {
+            applyAndTestCombo.accept(Collections.singletonList(conds.get(i)));
+        }
+
+        // Test pairs
+        for (int i = 0; i < conds.size(); i++) {
+            for (int j = i + 1; j < conds.size(); j++) {
+                applyAndTestCombo.accept(Arrays.asList(conds.get(i), conds.get(j)));
+            }
+        }
+
+        // Test triplets
+        for (int i = 0; i < conds.size(); i++) {
+            for (int j = i + 1; j < conds.size(); j++) {
+                for (int k = j + 1; k < conds.size(); k++) {
+                    applyAndTestCombo.accept(Arrays.asList(conds.get(i), conds.get(j), conds.get(k)));
+                }
+            }
+        }
+    }
+
+    private static final void ConfigInputOutputMaps() {
         for (Map.Entry<String, IndustryConfig> entry : ind_config.entrySet()) {
             Map<String, Float> outputMap = baseOutputs.computeIfAbsent(
                 entry.getKey(), k -> new HashMap<>()
@@ -206,11 +418,11 @@ public class IndustryIOs {
     private static final boolean isOutputValidForMarket(OutputCom output, MarketAPI market, String outputID) {
         if (output.checkLegality && market.isIllegal(outputID)) return false;
 
-        for (String cond : output.ifMarketCondsFalse) {
+        for (String cond : output.ifMarketCondsAllFalse) {
             if (market.hasCondition(cond)) return false;
         }
 
-        for (String cond : output.ifMarketCondsTrue) {
+        for (String cond : output.ifMarketCondsAllTrue) {
             if (!market.hasCondition(cond)) return false;
         }
 
@@ -223,17 +435,16 @@ public class IndustryIOs {
         float scale = 1f;
 
         if (output.usesWorkers && !output.isAbstract) {
-            WorkerRegistry reg = WorkerRegistry.getInstance();
-            WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
+            final WorkerRegistry reg = WorkerRegistry.getInstance();
+            final WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
             if (data != null) {
-                final long workerDrivenCount = cfg.outputs.values().stream()
-                    .filter(o -> o.usesWorkers && !o.isAbstract)
-                    .count();
-                scale *= data.getWorkersAssigned() / workerDrivenCount;
+                scale *= data.getAssignedForOutput(outputID);
             }
         }
 
-        if (output.scaleWithMarketSize) scale *= Math.pow(10, market.getSize() - 3);
+        final double base = cfg.dynamic ? 8.5 : 10;
+
+        if (output.scaleWithMarketSize) scale *= Math.pow(base, market.getSize() - 3);
 
         return scale;
     }
@@ -410,6 +621,10 @@ public class IndustryIOs {
     }
 
     public static final IndustryConfig getIndConfig(Industry ind) {
+        return getIndConfig(ind.getSpec());
+    }
+
+    public static final IndustryConfig getIndConfig(IndustrySpecAPI ind) {
         IndustryConfig indConfig = ind_config.get(ind.getId());
 
         if (indConfig == null) {
@@ -420,7 +635,11 @@ public class IndustryIOs {
     }
 
     public static final String getBaseIndustryID(Industry ind) {
-        IndustrySpecAPI currentInd = ind.getSpec();
+        return getBaseIndustryID(ind.getSpec());
+    }
+
+    public static final String getBaseIndustryID(IndustrySpecAPI ind) {
+        IndustrySpecAPI currentInd = ind;
 
         while (true) {
             String downgradeId = currentInd.getDowngrade();

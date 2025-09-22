@@ -166,6 +166,8 @@ public class IndustryConfigLoader {
         public final OCCTag occTag; // Used to determine the RoVC of the industry
         public final Map<String, OutputCom> outputs;
 
+        public boolean dynamic = false;
+
         public IndustryConfig(boolean workerAssignable, Map<String, OutputCom> outputs, OCCTag occTag,
             float limit) {
 
@@ -193,8 +195,8 @@ public class IndustryConfigLoader {
         public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
         public final Map<String, Float> StaticInputsPerUnit; // List of per-output-unit inputs
 
-        public final List<String> ifMarketCondsFalse;
-        public final List<String> ifMarketCondsTrue;
+        public final List<String> ifMarketCondsAllFalse;
+        public final List<String> ifMarketCondsAllTrue;
 
         public final boolean scaleWithMarketSize; // Base size where no scaling happens is 3.
         public final boolean usesWorkers;
@@ -203,15 +205,15 @@ public class IndustryConfigLoader {
 
         public OutputCom(
             String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
-            boolean useWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketConditionsFalse,
-            List<String> ifMarketConditionsTrue, Map<String, Float> ConsumptionMap
+            boolean useWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketConditionsAllFalse,
+            List<String> ifMarketConditionsAllTrue, Map<String, Float> ConsumptionMap
         ) {
             this.comID = comID;
             this.baseProd = baseProd;
             this.CCMoneyDist = CCMoneyDist;
             this.StaticInputsPerUnit = ConsumptionMap;
-            this.ifMarketCondsFalse = ifMarketConditionsFalse;
-            this.ifMarketCondsTrue = ifMarketConditionsTrue;
+            this.ifMarketCondsAllFalse = ifMarketConditionsAllFalse;
+            this.ifMarketCondsAllTrue = ifMarketConditionsAllTrue;
             this.scaleWithMarketSize = scaleWithMarketSize;
             this.usesWorkers = useWorkers;
             this.isAbstract = isAbstract;
@@ -224,8 +226,8 @@ public class IndustryConfigLoader {
                 "baseProd=" + baseProd + " ,\n" +
                 ", CCMoneyDist=" + CCMoneyDist + " ,\n" +
                 ", ConsumptionMap=" + StaticInputsPerUnit + " ,\n" +
-                ", ifMarketConditionsFalse=" + ifMarketCondsFalse + " ,\n" +
-                ", ifMarketConditionsTrue=" + ifMarketCondsTrue + " ,\n" +
+                ", ifMarketConditionsFalse=" + ifMarketCondsAllFalse + " ,\n" +
+                ", ifMarketConditionsTrue=" + ifMarketCondsAllTrue + " ,\n" +
                 ", scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +
                 ", usesWorkers=" + usesWorkers + " ,\n" +
                 ", isAbstract=" + isAbstract + " ,\n" +

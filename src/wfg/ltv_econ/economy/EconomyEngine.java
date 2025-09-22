@@ -1,6 +1,7 @@
 package wfg.ltv_econ.economy;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,11 +18,11 @@ import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
+import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -175,7 +176,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             comInfo.advance(fakeAdvance);
         }
         
-        logEconomySnapshot();
+        // logEconomySnapshotAsCSV();
     }
 
     public final void registerMarket(String marketID) {
@@ -315,24 +316,10 @@ public class EconomyEngine extends BaseCampaignEventListener
                 Map<String, Float> inputWeights;
                 float sum = 0f;
 
-                if (IndustryIOs.hasConfig(ind)) {
-                    inputWeights = IndustryIOs.getInputs(ind, stats.comID, true);
-                    if (inputWeights.isEmpty()) continue;
-                    for (float value : inputWeights.values()) {
-                        sum += value;
-                    }
-                } else {
-                    int size = ind.getAllDemand().size();
-                    if (size < 1) continue;
-
-                    float equalWeight = 1f / size;
-
-                    inputWeights = new HashMap<>(size);
-                    for (MutableCommodityQuantity d : ind.getAllDemand()) {
-                        inputWeights.put(d.getCommodityId(), equalWeight);
-                    }
-
-                    sum = 1;
+                inputWeights = IndustryIOs.getInputs(ind, stats.comID, true);
+                if (inputWeights.isEmpty()) continue;
+                for (float value : inputWeights.values()) {
+                    sum += value;
                 }
 
                 if (sum <= 0f) continue;
@@ -396,6 +383,106 @@ public class EconomyEngine extends BaseCampaignEventListener
 
                 data.setWorkersAssigned(limit*workerPerIndustry);
             }
+        }
+    }
+
+    public final void assignWorkersSmart() {
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
+
+        for (MarketAPI market : getMarketsCopy()) {
+            if (market.isPlayerOwned() || market.isHidden()) continue;
+
+            final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
+            if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) {
+                continue;
+            }
+
+            for (Industry ind : workingIndustries) {
+                WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
+                if (data != null) {
+                    data.setWorkersAssigned(0);
+                }
+            }
+        }
+
+        for (CommodityInfo comInfo : m_comInfo.values()) {
+            comInfo.reset();
+
+            comInfo.update();
+        }
+
+        Map<String, Long> globalDemandMap = new HashMap<>();
+
+        for (Map.Entry<String, CommodityInfo> info : m_comInfo.entrySet()) {
+            long value = 0;
+            for (CommodityStats stats : info.getValue().getAllStats()) {
+                value += stats.getBaseDemand(false);
+            }
+            globalDemandMap.put(info.getKey(), value);
+        }
+
+        Map<String, List<Industry>> commodityToIndustries = new HashMap<>();
+
+
+
+
+
+        for (MarketAPI market : getMarketsCopy()) {
+            final List<Industry> allIndustries = market.getIndustries();
+            
+            // Separate industries into 3 groups
+            List<Industry> workerIndependentIndustries = new ArrayList<>();
+            List<Industry> partiallyWorkerIndustries = new ArrayList<>();
+            List<Industry> fullyWorkerIndustries = new ArrayList<>();
+            
+            indLoop:
+            for (Industry ind : allIndustries) {
+                if (!EconomyEngine.isWorkerAssignable(ind)) {
+                    workerIndependentIndustries.add(ind);
+                    continue;
+                }
+
+                IndustryConfig config = IndustryIOs.getIndConfig(ind);
+                if (config == null) {
+                    fullyWorkerIndustries.add(ind);
+                    continue;
+                }
+                for (OutputCom output : config.outputs.values()) {
+                    if (!output.usesWorkers) {
+                        partiallyWorkerIndustries.add(ind);
+                        continue indLoop;
+                    }
+                }
+                fullyWorkerIndustries.add(ind);
+            }
+    
+            // // 2. Build current stockpiles map
+            // Map<String, Float> stockpiles = new HashMap<>();
+            // for (CommoditySpecAPI com : getEconCommodities()) {
+            //     stockpiles.put(com.getId(), (float) com.getAvailable());
+            // }
+    
+            // // 3. PASS 1: Fulfill demand from worker-independent industries
+            // Map<String, Float> unmetDemand = computeUnmetDemand(workerIndependentIndustries, stockpiles);
+            // assignWorkersToMeetDemand(unmetDemand, partiallyWorkerIndustries, fullyWorkerIndustries);
+    
+            // // 4. PASS 2: Fulfill induced demand from worker-dependent outputs
+            // Map<String, Float> newDemand = computeInducedDemand(partiallyWorkerIndustries, fullyWorkerIndustries);
+            // assignWorkersToMeetDemand(newDemand, partiallyWorkerIndustries, fullyWorkerIndustries);
+    
+            // // 5. PASS 3: Apply buffer
+            // float bufferFactor = 1.3f; // 30% buffer
+            // for (Industry ind : partiallyWorkerIndustries) {
+            //     int workers = ind.getWorkerCount();
+            //     ind.setWorkerCount(Math.round(workers * bufferFactor));
+            // }
+            // for (Industry ind : fullyWorkerIndustries) {
+            //     int workers = ind.getWorkerCount();
+            //     ind.setWorkerCount(Math.round(workers * bufferFactor));
+            // }
+    
+            // // 6. Update any dependent maps / UI
+            // market.reapplyWorkers(); // placeholder for whatever method updates the market state
         }
     }
 
@@ -566,5 +653,61 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
         
         Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT END ----");
+    }
+
+    public final void logEconomySnapshotAsCSV() {
+        StringBuilder csv = new StringBuilder(2048);
+
+        csv.append("Commodity,PotencialProd,RealProd,PotencialDemand,RealDemand,Available,AvailabilityRatio,Deficit,GlobalStockpile,TotalExports,InFactionExports,GlobalExports\n");
+
+        for (Map.Entry<String, CommodityInfo> entry : m_comInfo.entrySet()) {
+            String commodity = entry.getKey();
+            CommodityInfo info = entry.getValue();
+
+            long potencialProd = 0;
+            long realProd = 0;
+            long potencialDemand = 0;
+            long realDemand = 0;
+            long available = 0;
+            double availabilityRatio = 0f;
+            long deficit = 0;
+            long globalStockpile = 0;
+            long totalExports = 0;
+            long inFactionExports = 0;
+            long globalExports = 0;
+
+            Collection<CommodityStats> allStats = info.getAllStats();
+            for (CommodityStats stats : allStats) {
+                potencialProd += stats.getLocalProduction(false);
+                realProd += stats.getLocalProduction(true);
+                potencialDemand += stats.getBaseDemand(false);
+                realDemand += stats.getBaseDemand(true);
+                available += stats.getAvailable();
+                availabilityRatio += stats.getAvailabilityRatio();
+                deficit += stats.getDeficit();
+                globalStockpile += stats.getStoredAmount();
+                totalExports += stats.getTotalExports();
+                inFactionExports += stats.inFactionExports;
+                globalExports += stats.globalExports;
+            }
+
+            availabilityRatio /= (double) allStats.size();
+
+            csv.append(String.format("%s,%d,%d,%d,%d,%d,%.4f,%d,%d,%d,%d,%d\n",
+                commodity,
+                potencialProd,
+                realProd,
+                potencialDemand,
+                realDemand,
+                available,
+                availabilityRatio,
+                deficit,
+                globalStockpile,
+                totalExports,
+                inFactionExports,
+                globalExports
+            ));
+        }
+        Global.getLogger(getClass()).info(csv.toString());
     }
 }

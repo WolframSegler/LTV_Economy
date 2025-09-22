@@ -10,8 +10,6 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
 import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
-import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
@@ -44,6 +42,9 @@ public final class CompatLayer {
     public static final String BASE_MOD_SUFFIX = "_0";
     public static final String MARKET_COND_MOD_SUFFIX = "_1";
 
+    public static final String DEMAND_RED_MOD = "ind_dr";
+    public static final String SUPPLY_BONUS_MOD = "ind_sb";
+
     public static final MutableStat convertIndDemandStat(Industry ind, String inputID) {
         final MutableStat src = ind.getDemand(inputID).getQuantity();
         final MutableStat dest = new MutableStat(0f);
@@ -62,23 +63,20 @@ public final class CompatLayer {
         float nonAbstractInput = 0f;
         float ratio = 0f;
 
-        if (IndustryIOs.hasConfig(ind)) {
-            final Map<String, OutputCom> outputs = IndustryIOs.getIndConfig(ind).outputs;
+        final Map<String, OutputCom> outputs = IndustryIOs.getIndConfig(ind).outputs;
 
-            for (String outputID : IndustryIOs.getOutputs(ind, true).keySet()) {
-                OutputCom output = outputs.get(outputID);
-    
-                Map<String, Float> inputs = IndustryIOs.getInputs(ind, outputID, false);
-    
-                if (inputs.containsKey(inputID) && !output.isAbstract) {
-                    nonAbstractInput += inputs.get(inputID);
-                }
+        for (String outputID : IndustryIOs.getOutputs(ind, true).keySet()) {
+            OutputCom output = outputs.get(outputID);
+
+            Map<String, Float> inputs = IndustryIOs.getInputs(ind, outputID, false);
+
+            if (inputs.containsKey(inputID) && !output.isAbstract) {
+                nonAbstractInput += inputs.get(inputID);
             }
-            ratio = totalInput > 0 ? nonAbstractInput / totalInput : 0f;
-
-        } else {
-            ratio = EconomyEngine.isWorkerAssignable(ind) ? 1 : 0;
         }
+        ratio = totalInput > 0 ? nonAbstractInput / totalInput : 0f;
+
+
 
         if (ind.getSupplyBonus() != null && ratio > 0) {
             final MutableStat scaledBonus = ind.getSupplyBonus().createCopy();
@@ -106,7 +104,7 @@ public final class CompatLayer {
             modifier.applyMods(scaledBonus);
         }
 
-        copyMods(ind, src, modifier, dest, "ind_dr", inputID, true);
+        copyMods(ind, src, modifier, dest, DEMAND_RED_MOD, inputID, true);
         return dest;
     }
 
@@ -115,45 +113,15 @@ public final class CompatLayer {
         final MutableStat supplyBonus = ind.getSupplyBonus();
         final MutableStat dest = new MutableStat(0f);
 
-        copyMods(ind, src, supplyBonus, dest, "ind_sb", outputID, false);
+        copyMods(ind, src, supplyBonus, dest, SUPPLY_BONUS_MOD, outputID, false);
         return dest;
     }
 
     private static final void copyMods(Industry ind, MutableStat base, MutableStat bonus, MutableStat dest,
         String modID, String comID, boolean isDemand) {
 
-        boolean useConfig = IndustryIOs.hasConfig(ind);
-
-        float value = 0;
-        if (useConfig) {
-            if (isDemand) {
-                value = IndustryIOs.getSumInput(ind, comID);
-            } else {
-                value = IndustryIOs.getOutput(ind, comID);
-            }
-
-            if (value == 0) return;
-
-        } else {
-            StatMod baseMod = null;
-            float cumulativeBase = 0f;
-    
-            for (StatMod mod : base.getFlatMods().values()) {
-                if (mod.source.endsWith(BASE_MOD_SUFFIX) && mod.value > 0) {
-                    baseMod = baseMod == null ? mod : baseMod;
-    
-                } else {
-                    if (!mod.source.equals(modID) && 
-                        !mod.source.endsWith(MARKET_COND_MOD_SUFFIX) &&
-                        mod.value >= 0
-                    ) {
-                        cumulativeBase += mod.value;
-                    }
-                }
-            }
-
-            value = (baseMod != null ? baseMod.value : cumulativeBase);
-        }
+        float value = isDemand ? IndustryIOs.getSumInput(ind, comID) : IndustryIOs.getOutput(ind, comID);
+        if (value == 0) return;
 
         String installedItemID = ind.getSpecialItem() != null ? ind.getSpecialItem().getId() : null;
 
@@ -167,7 +135,7 @@ public final class CompatLayer {
         }
 
         boolean hasRelevantCondition = true;
-        if (useConfig && ResourceDepositsCondition.COMMODITY.containsValue(comID) && !isDemand) {
+        if (ResourceDepositsCondition.COMMODITY.containsValue(comID) && !isDemand) {
             hasRelevantCondition = false;
             for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
                 String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
@@ -179,7 +147,7 @@ public final class CompatLayer {
         }
 
         if (hasRelevantCondition) {
-            dest.setBaseValue(industryBaseConverter(value, ind, comID, useConfig));
+            dest.setBaseValue(value);
         } else {
             dest.setBaseValue(0);
             return;
@@ -203,42 +171,6 @@ public final class CompatLayer {
 
             dest.modifyMult(bonusID++ + "::" + ind.getId(), converted, mod.desc);
         }
-    }
-
-    /*
-     * Converts vanilla base value to LTV base value with correct scaling.
-     */
-    private static final float industryBaseConverter(
-        float baseValue, Industry ind, String comID, boolean useConfig
-    ) {
-
-        if (useConfig) return baseValue;
-
-        final WorkerRegistry reg = WorkerRegistry.getInstance(); 
-        final WorkerIndustryData data = reg.getData(ind.getMarket().getId(), ind.getId());
-        final int size = ind.getMarket().getSize();
-
-        if (EconomyEngine.isWorkerAssignable(ind)) {
-            final float workersPerUnit = EconomyEngine.getWorkersPerUnit(comID, OCCTag.AVERAGE);
-
-            final int workerDrivenCount = ind.getAllSupply().size();
-            if (data != null) baseValue *= (data.getWorkersAssigned() / (workerDrivenCount*workersPerUnit));
-
-            return baseValue;
-        }
-
-        float size3Base = baseValue - (size - 3);
-
-        if (data != null) {
-            return size3Base;
-        }
-        if (size3Base <= 0f) return 1f; // For industries that do not scale well with market size
-
-        // Throttle market size scaling to 8.5 instead of 10 to prevent modded buildings
-        // with unusually high base production from breaking the economy.
-        // Vanilla Starsector uses 10^x to represent production units (e.g., x → ~10^(x-1) ),
-        // but using 10 for all modded buildings causes exponential blow-ups in LTV values.
-        return (float) Math.pow(8.5, size - 3) * size3Base;
     }
 
     /*
