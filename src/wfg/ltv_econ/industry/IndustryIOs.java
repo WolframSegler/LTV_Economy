@@ -107,6 +107,7 @@ public class IndustryIOs {
      */
     private static final void DynamicIndConfigs() {
         final String marketID = "ltv_dynamic_ind_test_market";
+        final String abstractOutput = "atLeastOneOutputForAbstractInputs";
         final MarketAPI testMarket = Global.getFactory().createMarket(marketID, marketID, 6);
 
         Map<String, IndustryConfig> dynamicInds = new HashMap<>();
@@ -155,6 +156,8 @@ public class IndustryIOs {
             for (MutableCommodityQuantity mutable : ind.getAllSupply()) {
                 outputs.add(mutable.getCommodityId());
             }
+
+            if (outputs.isEmpty()) outputs.add(abstractOutput);
 
             testMarket.setFreePort(true);
             ind.apply();

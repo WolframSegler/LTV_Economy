@@ -178,6 +178,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
         
         // logEconomySnapshotAsCSV();
+        IndustryIOs.logMaps();
     }
 
     public final void registerMarket(String marketID) {
