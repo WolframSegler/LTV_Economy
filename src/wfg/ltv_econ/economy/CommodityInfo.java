@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -17,14 +18,12 @@ public class CommodityInfo {
     private final Map<String, CommodityStats> m_comStats = new HashMap<>();
 
     public CommodityInfo(
-        CommoditySpecAPI spec
+        CommoditySpecAPI spec, Set<String> registeredMarkets
     ) {
         comID = spec.getId();
 
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (market.isHidden()) continue;
-            
-            m_comStats.put(market.getId(), new CommodityStats(comID, market.getId()));
+        for (String marketID : registeredMarkets) {
+            m_comStats.put(marketID, new CommodityStats(comID, marketID));
         }
     }
 
@@ -55,7 +54,6 @@ public class CommodityInfo {
     }
 
     public final CommodityStats getStats(String marketID) {
-
         return m_comStats.get(marketID);
     }
 

@@ -67,14 +67,15 @@ public class EconomyEngine extends BaseCampaignEventListener
         m_comInfo = new HashMap<>();
 
         for (MarketAPI market : getMarketsCopy()) {
+            if (!market.isInEconomy()) continue;
+
             m_registeredMarkets.add(market.getId());
         }
 
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
-            if (spec.isNonEcon())
-                continue;
+            if (spec.isNonEcon()) continue;
 
-            m_comInfo.put(spec.getId(), new CommodityInfo(spec));
+            m_comInfo.put(spec.getId(), new CommodityInfo(spec, m_registeredMarkets));
         }
 
         readResolve();
@@ -349,7 +350,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         final WorkerRegistry reg = WorkerRegistry.getInstance();
 
         for (MarketAPI market : getMarketsCopy()) {
-            if (market.isPlayerOwned() || market.isHidden()) continue;
+            if (market.isPlayerOwned() || !market.isInEconomy()) continue;
 
             final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
             if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) {
@@ -390,7 +391,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         final WorkerRegistry reg = WorkerRegistry.getInstance();
 
         for (MarketAPI market : getMarketsCopy()) {
-            if (market.isPlayerOwned() || market.isHidden()) continue;
+            if (market.isPlayerOwned() || !market.isInEconomy()) continue;
 
             final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
             if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) {
@@ -553,6 +554,9 @@ public class EconomyEngine extends BaseCampaignEventListener
     public final long getMarketActivity(MarketAPI market) {
         long totalActivity = 0;
         for (CommodityInfo info : m_comInfo.values()) {
+            if (!getRegisteredMarkets().contains(market.getId())) {
+                registerMarket(market.getId());
+            }
             CommodityStats stats = info.getStats(market.getId());
 
             totalActivity += stats.getAvailable();
@@ -565,6 +569,8 @@ public class EconomyEngine extends BaseCampaignEventListener
      * Includes over-imports.
      */
     public final float getGlobalTradeRatio(MarketAPI market) {
+        if (!market.isInEconomy()) return 0f;
+
         final double activity = getMarketActivity(market);
 
         float ratio = 0f;

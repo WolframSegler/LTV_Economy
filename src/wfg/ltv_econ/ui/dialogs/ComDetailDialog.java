@@ -920,7 +920,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
 
-            if (market.isHidden()) {
+            if (market.isHidden() || !market.isInEconomy()) {
                 continue;
             }
 

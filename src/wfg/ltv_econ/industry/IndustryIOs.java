@@ -207,9 +207,24 @@ public class IndustryIOs {
 
 
         Consumer<List<String>> applyAndTestCombo = condCombo -> {
-            for (String condID : condCombo) {
-                testMarket.addCondition(condID);
+            try {
+                for (String condID : condCombo) {
+                    MarketConditionSpecAPI spec = Global.getSettings().getMarketConditionSpec(condID);
+                    if (spec.getScriptClass().contains("FoodShortage") ||
+                        spec.getScriptClass().contains("LuddicPathCells") ||
+                        spec.getScriptClass().contains("PirateActivity")
+                    ) continue;
+                    
+                    testMarket.addCondition(condID);
+                }
+            } catch (Exception e) {
+                Global.getLogger(IndustryIOs.class).warn("Condition combo failed: " + condCombo, e);
+                for (String condID : condCombo) {
+                    testMarket.removeCondition(condID);
+                }
+                return;
             }
+            
             testMarket.reapplyConditions();
             testMarket.reapplyIndustries();
 
