@@ -12,7 +12,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.json.JSONObject;
+
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -24,14 +28,15 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.economy.IndustryConfigLoader;
+import wfg.ltv_econ.economy.IndustryConfigManager;
 import wfg.ltv_econ.economy.LaborConfigLoader;
 import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
-import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
+import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.economy.IndustryConfigManager.OutputCom;
 import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.reflection.ReflectionUtils;
 
 /**
  * <h3>IndustryIOs</h3>
@@ -80,6 +85,7 @@ public class IndustryIOs {
     private static final Map<String, Set<String>> supplyToInd = new HashMap<>();
 
     public static Map<String, IndustryConfig> ind_config;
+    public static Map<String, IndustryConfig> dynamic_ind_config;
     public static LaborConfig labor_config;
 
     public static final String ABSTRACT_COM = "abstract";
@@ -90,7 +96,8 @@ public class IndustryIOs {
     }
 
     private static final void init() {
-        ind_config = IndustryConfigLoader.loadAsMap();
+        ind_config = IndustryConfigManager.loadAsMap(false);
+        dynamic_ind_config = IndustryConfigManager.loadAsMap(true);
         labor_config = LaborConfigLoader.loadAsClass();
 
         DynamicIndConfigs();
@@ -106,12 +113,30 @@ public class IndustryIOs {
      * Creates dynamic configs for industries without a json config.
      */
     private static final void DynamicIndConfigs() {
+        final SettingsAPI settings = Global.getSettings();
+
+        boolean allIndustriesHaveConfig = true;
+        for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
+            if (!hasConfig(spec) && !hasDynamicConfig(spec)) {
+                allIndustriesHaveConfig = false;
+                break;
+            }
+        }
+
+        if (allIndustriesHaveConfig) {
+            ind_config.putAll(dynamic_ind_config);
+            return;
+        }
+
+        dynamic_ind_config.clear();
+
+        final String factionID = "ltv_test";
         final String marketID = "ltv_dynamic_ind_test_market";
         final String abstractOutput = "atLeastOneOutputForAbstractInputs";
         final MarketAPI testMarket = Global.getFactory().createMarket(marketID, marketID, 6);
-
-        Map<String, IndustryConfig> dynamicInds = new HashMap<>();
-
+        testMarket.setFactionId(factionID);
+        final FactionAPI testFaction = testMarket.getFaction();
+        
         BiConsumer<Industry, Map<String, Float>> populateInputs = (ind, inputs) -> {
             ind.getAllDemand().forEach(mutable -> {
                 MutableStat base = mutable.getQuantity();
@@ -138,7 +163,15 @@ public class IndustryIOs {
             });
         };
 
-        for (IndustrySpecAPI indSpec : Global.getSettings().getAllIndustrySpecs()) { 
+        // Make every commodity illegal to observe industry behaviour
+        
+        for (CommoditySpecAPI spec : settings.getAllCommoditySpecs()) {
+            if (spec.isNonEcon()) continue;
+
+            testFaction.makeCommodityIllegal(spec.getId());
+        }
+
+        for (IndustrySpecAPI indSpec : settings.getAllIndustrySpecs()) { 
             if (getIndConfig(indSpec) != null) continue;
 
             String indID = indSpec.getId();
@@ -171,24 +204,26 @@ public class IndustryIOs {
             Map<String, Float> CCMoneyDist = usesWorkers ?
                 inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, i -> 1f)) : null;
 
-            Map<String, Float> ConsumptionMap = !usesWorkers ?
+            Map<String, Float> InputsPerUnitOutput = !usesWorkers ?
                 inputs.entrySet().stream().collect(
                     Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)
                 ) : null;
 
             Consumer<String> addOutput = (outputID) -> {
-                boolean illegal = illegalOutputs.contains(outputID);
+                boolean isIllegal = illegalOutputs.contains(outputID);
+                boolean isAbstract = settings.getCommoditySpec(outputID) == null;
+
                 OutputCom optCom = new OutputCom(
                         outputID,
                         1,
                         CCMoneyDist,
-                        !usesWorkers,
+                        !usesWorkers || isAbstract,
                         usesWorkers,
-                        false,
-                        illegal,
+                        isAbstract,
+                        isIllegal,
                         new ArrayList<>(),
                         new ArrayList<>(),
-                        ConsumptionMap
+                        InputsPerUnitOutput
                 );
                 configOutputs.put(outputID, optCom);
             };
@@ -197,41 +232,50 @@ public class IndustryIOs {
             illegalOutputs.forEach(addOutput);
 
             IndustryConfig config = new IndustryConfig(
-                true, configOutputs, OCCTag.AVERAGE, 1f
+                usesWorkers, configOutputs, OCCTag.AVERAGE, 1f
             );
             config.dynamic = true;
 
             ind_config.put(indID, config);
-            dynamicInds.put(indID, config);
+            dynamic_ind_config.put(indID, config);
         }
 
-        final List<String> conds = Global.getSettings().getAllMarketConditionSpecs()
+        final List<String> conds = settings.getAllMarketConditionSpecs()
             .stream().map(MarketConditionSpecAPI::getId).collect(Collectors.toList());
 
+        final Map<String, IndustryConfig> new_dynamic_ind_config = new HashMap<>();
+        for (Map.Entry<String, IndustryConfig> e : dynamic_ind_config.entrySet()) {
+            new_dynamic_ind_config.put(e.getKey(), new IndustryConfig(e.getValue()));
+        }
 
         Consumer<List<String>> applyAndTestCombo = condCombo -> {
+            List<String> addedConds = new ArrayList<>();
+
+            testMarket.getConditions().clear();
+
             try {
                 for (String condID : condCombo) {
-                    MarketConditionSpecAPI spec = Global.getSettings().getMarketConditionSpec(condID);
+                    MarketConditionSpecAPI spec = settings.getMarketConditionSpec(condID);
                     if (spec.getScriptClass().contains("FoodShortage") ||
                         spec.getScriptClass().contains("LuddicPathCells") ||
                         spec.getScriptClass().contains("PirateActivity")
                     ) continue;
                     
                     testMarket.addCondition(condID);
+                    addedConds.add(condID);
                 }
             } catch (Exception e) {
-                Global.getLogger(IndustryIOs.class).warn("Condition combo failed: " + condCombo, e);
                 for (String condID : condCombo) {
                     testMarket.removeCondition(condID);
                 }
                 return;
             }
             
+            ReflectionUtils.invoke(testMarket, "resetCache");
             testMarket.reapplyConditions();
             testMarket.reapplyIndustries();
 
-            for (Map.Entry<String, IndustryConfig> entry : dynamicInds.entrySet()) {
+            for (Map.Entry<String, IndustryConfig> entry : dynamic_ind_config.entrySet()) {
                 String indID = entry.getKey();
                 IndustryConfig config = entry.getValue();
                 Industry ind = testMarket.getIndustry(indID);
@@ -241,6 +285,7 @@ public class IndustryIOs {
                     .collect(Collectors.toSet());
 
                 Set<String> baselineOutputs = config.outputs.keySet();
+                Map<String, OutputCom> new_outputs = new_dynamic_ind_config.get(indID).outputs;
 
                 Map<String, Float> inputs = new HashMap<>(6);
                 populateInputs.accept(ind, inputs);
@@ -248,7 +293,7 @@ public class IndustryIOs {
                 Map<String, Float> CCMoneyDist = config.workerAssignable ?
                     inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, i -> 1f)) : null;
 
-                Map<String, Float> ConsumptionMap = !config.workerAssignable ?
+                Map<String, Float> InputsPerUnitOutput = !config.workerAssignable ?
                     inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)) : null;
 
                 // Outputs that appeared
@@ -256,46 +301,30 @@ public class IndustryIOs {
                 appearingOutputs.removeAll(baselineOutputs);
 
                 for (String newOutput : appearingOutputs) {
+                    boolean isAbstract = settings.getCommoditySpec(newOutput) == null;
                     OutputCom optCom = new OutputCom(
                         newOutput,
                         1,
                         CCMoneyDist,
                         !config.workerAssignable,
                         config.workerAssignable,
-                        false,
+                        isAbstract,
                         false,
                         new ArrayList<>(),
                         new ArrayList<>(condCombo),
-                        ConsumptionMap
+                        InputsPerUnitOutput
                     );
-                    config.outputs.put(newOutput, optCom);
+                    new_outputs.put(newOutput, optCom);
                 }
 
                 // --- Outputs that disappeared ---
-                Set<String> disappearingOutputs = new HashSet<>(baselineOutputs);
-                disappearingOutputs.removeAll(currentOutputs);
+                Set<String> disappearingOutputs = new HashSet<>(currentOutputs);
+                disappearingOutputs.removeAll(baselineOutputs);
 
                 for (String missingOutput : disappearingOutputs) {
-                    OutputCom optCom = new OutputCom(
-                        missingOutput,
-                        1,
-                        CCMoneyDist,
-                        !config.workerAssignable,
-                        config.workerAssignable,
-                        false,
-                        false,
-                        new ArrayList<>(condCombo),
-                        new ArrayList<>(),
-                        ConsumptionMap
-                    );
-                    config.outputs.put(missingOutput, optCom);
+                    new_outputs.get(missingOutput).ifMarketCondsAllFalse = new ArrayList<>(condCombo);
                 }
             }
-
-            for (String condID : condCombo) {
-                testMarket.removeCondition(condID);
-            }
-            testMarket.reapplyConditions();
         };
 
         // Test single conditions
@@ -311,12 +340,29 @@ public class IndustryIOs {
         }
 
         // Test triplets
-        for (int i = 0; i < conds.size(); i++) {
-            for (int j = i + 1; j < conds.size(); j++) {
-                for (int k = j + 1; k < conds.size(); k++) {
-                    applyAndTestCombo.accept(Arrays.asList(conds.get(i), conds.get(j), conds.get(k)));
-                }
-            }
+        // for (int i = 0; i < conds.size(); i++) {
+        //     for (int j = i + 1; j < conds.size(); j++) {
+        //         for (int k = j + 1; k < conds.size(); k++) {
+        //             applyAndTestCombo.accept(Arrays.asList(conds.get(i), conds.get(j), conds.get(k)));
+        //         }
+        //     }
+        // }
+    
+        dynamic_ind_config = new_dynamic_ind_config;
+
+        JSONObject json = IndustryConfigManager.serializeIndustryConfigs(dynamic_ind_config);
+
+        try {
+            settings.writeJSONToCommon(
+                IndustryConfigManager.DYNAMIC_CONFIG_NAME,
+                json,
+                false
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(
+                "Failed to write dynamic industry configuration to common JSON file '"
+                + IndustryConfigManager.DYNAMIC_CONFIG_NAME, e
+            );
         }
     }
 
@@ -383,8 +429,8 @@ public class IndustryIOs {
                         float value = abs_weight * realUnits / (totalWeight - abs_weight);
                         inputMap.put(ABSTRACT_COM, value);
                     }
-                } else if (output.StaticInputsPerUnit != null && !output.StaticInputsPerUnit.isEmpty()) {
-                    for (Map.Entry<String, Float> demandEntry : output.StaticInputsPerUnit.entrySet()) {
+                } else if (output.InputsPerUnitOutput != null && !output.InputsPerUnitOutput.isEmpty()) {
+                    for (Map.Entry<String, Float> demandEntry : output.InputsPerUnitOutput.entrySet()) {
                         String inputID = demandEntry.getKey();
                         if (inputID.equals(ABSTRACT_COM)) continue;
 
@@ -504,11 +550,13 @@ public class IndustryIOs {
 
         IndustryConfig cfg = ind_config.get(indID);
         if (cfg == null) return 0;
+
         OutputCom output = cfg.outputs.get(outputID);
         if (output == null) return 0;
 
         Map<String, Map<String, Float>> indMap = baseInputs.get(indID);
         if (indMap == null) return 0;
+
         Map<String, Float> inputMap = indMap.get(outputID);
         if (inputMap == null) return 0;
 
@@ -614,10 +662,19 @@ public class IndustryIOs {
         return Collections.unmodifiableMap(immutableMap);
     }
 
+    public static final boolean hasDynamicConfig(IndustrySpecAPI ind) {
+        return dynamic_ind_config.containsKey(ind.getId()) 
+            || dynamic_ind_config.containsKey(getBaseIndustryID(ind));
+    }
+
     /**
      * Checks whether a precomputed configuration exists for the given industry.
      */
     public static final boolean hasConfig(Industry ind) {
+        return hasConfig(ind.getSpec());
+    }
+
+    public static final boolean hasConfig(IndustrySpecAPI ind) {
         return ind_config.containsKey(ind.getId()) 
             || ind_config.containsKey(getBaseIndustryID(ind));
     }

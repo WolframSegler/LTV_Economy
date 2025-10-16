@@ -21,8 +21,8 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
-import wfg.ltv_econ.economy.IndustryConfigLoader.OutputCom;
+import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.economy.IndustryConfigManager.OutputCom;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -178,7 +178,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
         
         // logEconomySnapshotAsCSV();
-        IndustryIOs.logMaps();
+        // IndustryIOs.logMaps();
     }
 
     public final void registerMarket(String marketID) {
@@ -423,7 +423,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             globalDemandMap.put(info.getKey(), value);
         }
 
-        Map<String, List<Industry>> commodityToIndustries = new HashMap<>();
+        // Map<String, List<Industry>> commodityToIndustries = new HashMap<>();
 
 
 

@@ -25,7 +25,7 @@ import com.fs.starfarer.campaign.ui.N; //Current slider class (v.0.98 R8).
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.economy.IndustryConfigLoader.IndustryConfig;
+import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;

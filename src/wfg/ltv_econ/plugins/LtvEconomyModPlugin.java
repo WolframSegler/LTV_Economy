@@ -12,7 +12,7 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.economy.IndustryConfigLoader;
+import wfg.ltv_econ.economy.IndustryConfigManager;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryTooltips;
@@ -42,7 +42,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         clazz = ReflectionUtils.class;
         clazz = CommodityStats.class;
         clazz = CompatLayer.class;
-        clazz = IndustryConfigLoader.class;
+        clazz = IndustryConfigManager.class;
         clazz = IndustryIOs.class;
         clazz = EconomyEngine.class;
         clazz = WorkerRegistry.class;

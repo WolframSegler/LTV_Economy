@@ -1,80 +1,11 @@
 {
-	"heavyindustry_old": {
-		"workerAssignable": true,
-		"occTag": "industry",
-		"workerAssignableLimit": 0.2,
-		"outputList": {
-			"heavy_machinery": {
-				"constantCapitalMoneySplit": {
-					"metals": 0.5,
-					"rare_metals": 0.5
-				},
-				"usesWorkers": true
-			},
-			"light_machinery": {
-				"constantCapitalMoneySplit": {
-					"metals": 0.75,
-					"rare_metals": 0.25
-				},
-				"usesWorkers": true
-			},
-			"supplies": {
-				"constantCapitalMoneySplit": {
-					"metals": 0.7,
-					"rare_metals": 0.3
-				},
-				"usesWorkers": true
-			},
-			"hand_weapons": {
-				"constantCapitalMoneySplit": {
-					"metals": 0.2,
-					"rare_metals": 0.8
-				},
-				"usesWorkers": true
-			},
-			"ships": {
-				"constantCapitalMoneySplit": {
-					"metals": 0.4,
-					"rare_metals": 0.6
-				},
-				"usesWorkers": true
-			}
-		}
-	},
-	"lightindustry_old": {
-		"occTag": "industry",
-		"workerAssignable": true,
-		"workerAssignableLimit": 0.2,
-		"outputList": {
-			"domestic_goods": {
-				"constantCapitalMoneySplit": {
-					"organics": 1
-				},
-				"usesWorkers": true
-			},
-			"luxury_goods": {
-				"constantCapitalMoneySplit": {
-					"organics": 1
-				},
-				"usesWorkers": true,
-				"checkLegality": true
-			},
-			"drugs": {
-				"constantCapitalMoneySplit": {
-					"organics": 1
-				},
-				"usesWorkers": true,
-				"checkLegality": true
-			}
-		}
-	},
 	"heavyindustry": {
 		"workerAssignable": true,
 		"occTag": "industry",
 		"workerAssignableLimit": 0.15,
 		"outputList": {
 			"heavy_machinery": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"metals": 0.1,
 					"components_subassembly": 0.25,
 					"components_structural": 0.3,
@@ -83,7 +14,7 @@
 				"usesWorkers": true
 			},
 			"light_machinery": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"metals": 0.1,
 					"components_light": 0.4,
 					"components_subassembly": 0.2,
@@ -92,7 +23,7 @@
 				"usesWorkers": true
 			},
 			"supplies": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"metals": 0.05,
 					"components_subassembly": 0.25,
 					"components_structural": 0.1,
@@ -102,7 +33,7 @@
 				"usesWorkers": true
 			},
 			"hand_weapons": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"metals": 0.05,
 					"components_subassembly": 0.3,
 					"components_structural": 0.25,
@@ -111,7 +42,7 @@
 				"usesWorkers": true
 			},
 			"ships": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"components_subassembly": 0.3,
 					"components_structural": 0.5,
 					"components_light": 0.05,
@@ -127,7 +58,7 @@
 		"workerAssignableLimit": 0.2,
 		"outputList": {
 			"domestic_goods": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"organics": 0.05,
 					"components_subassembly": 0.25,
 					"components_light": 0.65,
@@ -136,7 +67,7 @@
 				"usesWorkers": true
 			},
 			"luxury_goods": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"organics": 0.05,
 					"components_subassembly": 0.3,
 					"components_light": 0.45,
@@ -146,7 +77,7 @@
 				"checkLegality": true
 			},
 			"drugs": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"organics": 0.1,
 					"components_light": 0.4,
 					"light_machinery": 0.4,
@@ -163,7 +94,7 @@
 		"workerAssignableLimit": 0.8,
 		"outputList": {
 			"components_structural": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"metals": 0.85,
 					"rare_metals": 0.1,
 					"heavy_machinery": 0.05
@@ -171,7 +102,7 @@
 				"usesWorkers": true
 			},
 			"components_precision": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"metals": 0.1,
 					"rare_metals": 0.75,
 					"heavy_machinery": 0.05,
@@ -180,7 +111,7 @@
 				"usesWorkers": true
 			},
 			"components_subassembly": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"metals": 0.45,
 					"rare_metals": 0.3,
 					"heavy_machinery": 0.1,
@@ -189,7 +120,7 @@
 				"usesWorkers": true
 			},
 			"components_light": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"metals": 0.1,
 					"organics": 0.85,
 					"light_machinery": 0.05
@@ -203,7 +134,7 @@
 		"workerAssignable": false,
 		"outputList": {
 			"people": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"food": 1.667,
 					"domestic_goods": 0.333,
 					"luxury_goods": 0.0333,
@@ -215,18 +146,18 @@
 				"isAbstract": true
 			},
 			"peopleNonHabitable": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"organics": 0.1667
 				},
 				"scaleWithMarketSize": true,
 				"isAbstract": true,
-				"ifMarketConditionsFalse": [
+				"ifMarketCondsAllFalse": [
 					"habitable"
 				]
 			},
 			"crew": {
-				"base_prod": 0.0016438,
-				"consumptionRequirements": {
+				"baseProd": 0.0016438,
+				"InputsPerUnitOutput": {
 					"food": 0.4,
 					"domestic_goods": 0.2,
 					"luxury_goods": 0.1,
@@ -236,16 +167,16 @@
 				"scaleWithMarketSize": true
 			},
 			"organs": {
-				"base_prod": 0.0000256849,
-				"consumptionRequirements": {
+				"baseProd": 0.0000256849,
+				"InputsPerUnitOutput": {
 					"food": 0.7,
 					"abstract": 0.3
 				},
 				"scaleWithMarketSize": true
 			},
 			"drugs": {
-				"base_prod": 0.00025,
-				"consumptionRequirements": {
+				"baseProd": 0.00025,
+				"InputsPerUnitOutput": {
 					"domestic_goods": 0.5,
 					"abstract": 0.5
 				},
@@ -259,7 +190,7 @@
 		"workerAssignableLimit": 0.5,
 		"outputList": {
 			"ore": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"heavy_machinery": 0.3,
 					"drugs": 0.2,
 					"abstract": 0.5
@@ -267,7 +198,7 @@
 				"usesWorkers": true
 			},
 			"rare_ore": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"heavy_machinery": 0.3,
 					"drugs": 0.2,
 					"abstract": 0.5
@@ -275,7 +206,7 @@
 				"usesWorkers": true
 			},
 			"organics": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"heavy_machinery": 0.3,
 					"drugs": 0.2,
 					"abstract": 0.5
@@ -283,7 +214,7 @@
 				"usesWorkers": true
 			},
 			"volatiles": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"heavy_machinery": 0.3,
 					"drugs": 0.2,
 					"abstract": 0.5
@@ -298,7 +229,7 @@
 		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"food": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"heavy_machinery": 0.9,
 					"abstract": 0.1
 				},
@@ -312,7 +243,7 @@
 		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"food": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"heavy_machinery": 0.9,
 					"abstract": 0.1
 				},
@@ -326,14 +257,14 @@
 		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"rare_metals": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"abstract": 0.99,
 					"crew": 0.01
 				},
 				"usesWorkers": true
 			},
 			"metals": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"abstract": 1
 				},
 				"usesWorkers": true
@@ -346,14 +277,14 @@
 		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"metals": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"ore": 0.95,
 					"heavy_machinery": 0.05
 				},
 				"usesWorkers": true
 			},
 			"rare_metals": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"rare_ore": 0.9,
 					"heavy_machinery": 0.1
 				},
@@ -366,7 +297,7 @@
 		"workerAssignable": false,
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"ships": 0.1,
 					"fuel": 0.2,
 					"supplies": 0.5
@@ -375,8 +306,8 @@
 				"isAbstract": true
 			},
 			"crew": {
-				"base_prod": 0.01,
-				"consumptionRequirements": {
+				"baseProd": 0.01,
+				"InputsPerUnitOutput": {
 					"abstract": 0.7,
 					"supplies": 0.1,
 					"fuel": 0.2
@@ -391,7 +322,7 @@
 		"workerAssignableLimit": 0.4,
 		"outputList": {
 			"fuel": {
-				"constantCapitalMoneySplit": {
+				"CCMoneyDist": {
 					"heavy_machinery": 0.05,
 					"volatiles": 0.95
 				},
@@ -403,7 +334,7 @@
 		"occTag": "service",
 		"outputList": {
 			"maintenance": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 0.05
 				},
 				"scaleWithMarketSize": true,
@@ -415,7 +346,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 7,
 					"crew": 4
 				},
@@ -427,7 +358,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 7,
 					"crew": 4
 				},
@@ -439,7 +370,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 11,
 					"crew": 7
 				},
@@ -451,7 +382,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 16,
 					"crew": 10
 				},
@@ -463,7 +394,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 0.2,
 					"marines": 0.4,
 					"hand_weapons": 0.06
@@ -477,7 +408,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 0.3,
 					"marines": 0.7,
 					"hand_weapons": 0.1
@@ -491,7 +422,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 0.3,
 					"fuel": 0.7,
 					"ships": 0.4
@@ -500,8 +431,8 @@
 				"isAbstract": true
 			},
 			"crew": {
-				"base_prod": 0.7,
-				"constantCapitalMoneySplit": {
+				"baseProd": 0.7,
+				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
 					"ships": 0.1
@@ -514,7 +445,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 0.6,
 					"fuel": 1.6,
 					"ships": 0.8
@@ -523,8 +454,8 @@
 				"isAbstract": true
 			},
 			"crew": {
-				"base_prod": 1.4,
-				"constantCapitalMoneySplit": {
+				"baseProd": 1.4,
+				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
 					"ships": 0.1
@@ -532,8 +463,8 @@
 				"scaleWithMarketSize": true
 			},
 			"marines": {
-				"base_prod": 0.9,
-				"constantCapitalMoneySplit": {
+				"baseProd": 0.9,
+				"CCMoneyDist": {
 					"supplies": 0.1,
 					"fuel": 0.2,
 					"ships": 0.4,
@@ -547,7 +478,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 0.9,
 					"fuel": 2.9,
 					"ships": 1.2
@@ -556,8 +487,8 @@
 				"isAbstract": true
 			},
 			"crew": {
-				"base_prod": 1.8,
-				"constantCapitalMoneySplit": {
+				"baseProd": 1.8,
+				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
 					"ships": 0.1
@@ -565,8 +496,8 @@
 				"scaleWithMarketSize": true
 			},
 			"marines": {
-				"base_prod": 1.3,
-				"constantCapitalMoneySplit": {
+				"baseProd": 1.3,
+				"CCMoneyDist": {
 					"supplies": 0.1,
 					"fuel": 0.2,
 					"ships": 0.4,
@@ -580,7 +511,7 @@
 		"occTag": "space",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 0.7,
 					"fuel": 2.4,
 					"ships": 0.68
@@ -589,8 +520,8 @@
 				"isAbstract": true
 			},
 			"crew": {
-				"base_prod": 2.6,
-				"constantCapitalMoneySplit": {
+				"baseProd": 2.6,
+				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
 					"ships": 0.1
@@ -598,8 +529,8 @@
 				"scaleWithMarketSize": true
 			},
 			"marines": {
-				"base_prod": 2,
-				"constantCapitalMoneySplit": {
+				"baseProd": 2,
+				"CCMoneyDist": {
 					"supplies": 0.1,
 					"fuel": 0.2,
 					"ships": 0.3,
@@ -613,7 +544,7 @@
 		"occTag": "industry",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 7,
 					"fuel": 20
 				},
@@ -627,7 +558,7 @@
 		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"imports": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 0.2,
 					"fuel": 0.4,
 					"crew": 0.1,
@@ -643,15 +574,15 @@
 		"occTag": "service",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"supplies": 34,
 					"organics": 80
 				},
 				"isAbstract": true
 			},
 			"organs": {
-				"base_prod": 0.3,
-				"constantCapitalMoneySplit": {
+				"baseProd": 0.3,
+				"CCMoneyDist": {
 					"abstract": 0.95,
 					"supplies": 0.05
 				},
@@ -663,7 +594,7 @@
 		"occTag": "service",
 		"outputList": {
 			"operation": {
-				"consumptionRequirements": {
+				"InputsPerUnitOutput": {
 					"organics": 90
 				},
 				"isAbstract": true

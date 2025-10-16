@@ -171,7 +171,7 @@ public class CommodityStats {
             ) {
                 MutableStat demandStat = CompatLayer.convertIndDemandStat(industry, comID);
                 demandBaseMutables.put(industry.getId(), demandStat);
-
+                
             }
         }
 
