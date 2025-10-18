@@ -141,7 +141,7 @@ public class IndustryIOs {
         testMarket2.setFactionId(factionID);
         final FactionAPI testFaction = testMarket1.getFaction();
 
-        final Map<String, Boolean> scaleWithMarketSize = new HashMap<>();
+        final List<String> scaleWithMarketSize = new ArrayList<>();
         final Map<String, Map<String, Float>> inputCache = new HashMap<>();
         final List<String> emptyList = new ArrayList<>();
         
@@ -219,7 +219,7 @@ public class IndustryIOs {
                     ind2.getSupply(comID).getQuantity().getModifiedValue()
                 ) > 0.01f;
 
-                scaleWithMarketSize.put(comID, scaleWithSize);
+                if (scaleWithSize) scaleWithMarketSize.add(comID);
             }
 
             if (outputs.isEmpty() && illegalOutputs.isEmpty()) {
@@ -232,9 +232,7 @@ public class IndustryIOs {
                         ind1.getDemand(comID).getQuantity().getModifiedValue() -
                         ind2.getDemand(comID).getQuantity().getModifiedValue()
                     ) > 0.01f;
-                    scaleWithMarketSize.put(abstractOutput, scaleWithSize);
-                } else {
-                    scaleWithMarketSize.put(abstractOutput, false);
+                    if (scaleWithSize) scaleWithMarketSize.add(abstractOutput);
                 }
             }
 
@@ -260,7 +258,7 @@ public class IndustryIOs {
                         outputID,
                         1,
                         CCMoneyDist,
-                        scaleWithMarketSize.get(outputID),
+                        scaleWithMarketSize.contains(outputID),
                         usesWorkers,
                         isAbstract,
                         isIllegal,
@@ -343,7 +341,7 @@ public class IndustryIOs {
                         ind2.getSupply(comID).getQuantity().getModifiedValue()
                     ) > 0.01f;
 
-                    scaleWithMarketSize.put(comID, scaleWithSize);
+                    if (scaleWithSize) scaleWithMarketSize.add(comID);
                 }
 
                 final Map<String, Float> inputs;
@@ -386,7 +384,7 @@ public class IndustryIOs {
                         newOutput,
                         1,
                         CCMoneyDist,
-                        scaleWithMarketSize.get(newOutput),
+                        scaleWithMarketSize.contains(newOutput),
                         config.workerAssignable,
                         isAbstract,
                         false,
