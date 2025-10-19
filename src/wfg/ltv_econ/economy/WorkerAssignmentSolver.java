@@ -18,8 +18,35 @@ import com.fs.starfarer.api.Global;
 
 public class WorkerAssignmentSolver {
 
-    public static final double WORKER_COST = 1;
-    public static final double SLACK_COST = 150;
+    /*
+    * NOTE ON SLACK / DEFICIT HANDLING
+    *
+    * PROBLEM:
+    * Currently, the Solver treats all deficits (slack variables) equally, regardless of the commodity's price.
+    * That is, a deficit of 1 unit of food is considered just as bad as a deficit of 1 unit of hand_weapons,
+    * even though the economic value of a hand_weapon is much higher than a unit of food.
+    *
+    * CONSEQUENCE:
+    * This can lead the solver to "give up" on high-value commodities that are produced in small quantities,
+    * because minimizing slack in cheaper, larger-quantity commodities reduces the objective function more efficiently.
+    * For example, expensive goods like hand_weapons or drugs may end up with zero assigned workers
+    * while the solver prioritizes large-volume low-cost items like food or fuel.
+    *
+    * POTENTIAL SOLUTION:
+    * Convert the demand vector from unit counts to monetary values before solving the LP:
+    *   monetaryDemand[i] = unitDemand[i] * pricePerUnit[i]
+    * This way, the slack penalty naturally scales with the economic value of the commodity,
+    * so the solver prioritizes fulfilling deficits equally over all commodities.
+    *
+    * RESOLUTION:
+    * Currently I am happy with the way the LP Solver treats unit deficits equally regardless of their value.
+    * I might change this in the future, hence the note.
+    */
+
+    public static final double WORKER_COST = 1;     // penatly for a unit of worker used.
+    public static final double SLACK_COST = 1300;   // penalty for a unit of deficit regardless of value.
+
+    // Any lower than 1300 causes the solver to not produce hand_weapons
 
     /**
      * Solve A*x >= d using linear programming with slack variables.
@@ -91,7 +118,7 @@ public class WorkerAssignmentSolver {
             csv.append(commodity).append(",");
 
             for (int j = 0; j < industryOutputs.size(); j++) {
-                csv.append(String.format("%.6f", A[i][j]));
+                csv.append(String.format("%.2f", A[i][j]));
                 if (j < industryOutputs.size() - 1) csv.append(",");
             }
             csv.append("\n");

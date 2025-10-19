@@ -9,6 +9,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.wrap_ui.util.NumFormat;
 
@@ -28,7 +29,9 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
     }
 
     public void recalculateWorkerPool() {
-        setWorkerPool((long)(0.64 * Math.pow(10, market.getSize())));
+        setWorkerPool((long)(
+            LaborConfig.populationRatioThatAreWorkers * Math.pow(10, market.getSize())
+        ));
 
         float totalAssigned = 0;
         final WorkerRegistry registry = WorkerRegistry.getInstance();
@@ -37,7 +40,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         for (Industry ind : market.getIndustries()) {
             WorkerIndustryData data = registry.getData(market.getId(), ind.getId());
             if (data != null) {
-                totalAssigned += data.getWorkerAssignedRatio();
+                totalAssigned += data.getWorkerAssignedRatio(false);
             }
         }
         setFreeWorkerRatio(Math.max(0f, 1f - totalAssigned));

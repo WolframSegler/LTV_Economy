@@ -24,6 +24,7 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -190,7 +191,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         if (!fakeAdvance) {
             // assignWorkers();
-            assignWorkersSmart();
+            assignWorkers();
         }
 
         for (CommodityInfo comInfo : m_comInfo.values()) {
@@ -315,8 +316,8 @@ public class EconomyEngine extends BaseCampaignEventListener
 
     public static final float getWorkersPerUnit(String comID, OCCTag tag) {
         final float Pout = Global.getSettings().getCommoditySpec(comID).getBasePrice();
-        final float LPV_day = IndustryIOs.labor_config.LPV_day;
-        final float RoVC = IndustryIOs.labor_config.getRoVC(tag);
+        final float LPV_day = LaborConfig.LPV_day;
+        final float RoVC = LaborConfig.getRoVC(tag);
 
         return (Pout * RoVC) / LPV_day;
     } 
@@ -375,53 +376,11 @@ public class EconomyEngine extends BaseCampaignEventListener
         final WorkerRegistry reg = WorkerRegistry.getInstance();
 
         for (WorkerIndustryData data : reg.getRegister()) {
-            data.setWorkersAssigned(0);
+            data.resetWorkersAssigned();
         }
     }
 
-    private final void assignWorkers() {
-
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
-
-        for (MarketAPI market : getMarketsCopy()) {
-            if (market.isPlayerOwned() || !market.isInEconomy()) continue;
-
-            final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
-            if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) {
-                continue;
-            }
-
-            List<WorkerIndustryData> workerAssignable = new ArrayList<>();
-
-            float totalWorkerAbsorbtionCapacity = 0;
-            for (Industry ind : workingIndustries) {
-                WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
-                if (ind.isFunctional() && data != null) {
-                    workerAssignable.add(data);
-
-                    data.setWorkersAssigned(0);
-
-                    IndustryConfig config = IndustryIOs.getIndConfig(ind);
-
-                    totalWorkerAbsorbtionCapacity += config == null ?
-                        WorkerRegistry.DEFAULT_WORKER_CAP : config.workerAssignableLimit;
-                }
-            }
-            if (workerAssignable.isEmpty()) continue;
-
-            float workerPerIndustry = 1f / totalWorkerAbsorbtionCapacity;
-            if (workerPerIndustry > 1f) workerPerIndustry = 1f;
-
-            for (WorkerIndustryData data : workerAssignable) {
-                IndustryConfig config = IndustryIOs.getIndConfig(data.ind);
-                float limit = config == null ? WorkerRegistry.DEFAULT_WORKER_CAP : config.workerAssignableLimit;
-
-                data.setWorkersAssigned(limit*workerPerIndustry);
-            }
-        }
-    }
-
-    public final void assignWorkersSmart() {
+    public final void assignWorkers() {
         // final WorkerRegistry reg = WorkerRegistry.getInstance();
 
         final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputs();
@@ -472,36 +431,40 @@ public class EconomyEngine extends BaseCampaignEventListener
             }
         }
 
-        double[][] A = new double[commodities.size()][industries.size()];
+        final double[][] A = new double[commodities.size()][industryOutputPairs.size()];
 
-        for (int j = 0; j < industryOutputPairs.size(); j++) {
-            final String pair = industryOutputPairs.get(j);
-            final String[] parts = pair.split(key, 2);
-            final String indID = parts[0];
-            final String outputID = parts[1];
+        int colIndex = 0;
 
-            // Inputs for this output
-            Map<String, Map<String, Float>> indInputs = baseInputs.get(indID);
-            if (indInputs != null) {
-                for (Map<String, Float> inputs : indInputs.values()) {
+        for (String indID : industries) {
+            final Map<String, Float> indOutputs = baseOutputs.get(indID);
+            final Map<String, Map<String, Float>> indInputs = baseInputs.get(indID);
+
+            if (indOutputs == null) continue;
+
+            for (Map.Entry<String, Float> outputEntry : indOutputs.entrySet()) {
+                final String outputCommodity = outputEntry.getKey();
+                final float outputValue = outputEntry.getValue();
+
+                // Inputs for Output
+                if (indInputs != null && indInputs.containsKey(outputCommodity)) {
+                    Map<String, Float> inputs = indInputs.get(outputCommodity);
                     for (Map.Entry<String, Float> inputEntry : inputs.entrySet()) {
-                        final String inputCommodity = inputEntry.getKey();
-                        final float value = inputEntry.getValue();
-
-                        final int row = commodities.indexOf(inputCommodity);
+                        String inputCommodity = inputEntry.getKey();
+                        float value = inputEntry.getValue();
+                        int row = commodities.indexOf(inputCommodity);
                         if (row >= 0) {
-                            A[row][j] -= value; // negative for consumption
+                            A[row][colIndex] -= value; // subtract input
                         }
                     }
                 }
-            }
 
-            Map<String, Float> indOutputs = baseOutputs.get(indID);
-            if (indOutputs != null && indOutputs.containsKey(outputID)) {
-                final int row = commodities.indexOf(outputID);
+                // Output
+                int row = commodities.indexOf(outputCommodity);
                 if (row >= 0) {
-                    A[row][j] += indOutputs.get(outputID); // positive for production
+                    A[row][colIndex] += outputValue; // add output
                 }
+
+                colIndex++;
             }
         }
 
@@ -510,7 +473,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             commodityToRow.put(commodities.get(i), i);
         }
 
-        double[] d = new double[commodities.size()];
+        final double[] d = new double[commodities.size()];
         for (String commodityID : commodities) {
             Integer row = commodityToRow.get(commodityID);
             if (row != null) {
@@ -518,14 +481,9 @@ public class EconomyEngine extends BaseCampaignEventListener
             }
         }
 
-        double[] workerVector = WorkerAssignmentSolver.solveLPWithSlack(A, d);
+        final long globalWorkerCount = getGlobalWorkerCount();
 
-        WorkerAssignmentSolver.logInputMatrix(A, industryOutputPairs, commodities);
-
-        WorkerAssignmentSolver.logDemandVector(d, commodities);
-
-        WorkerAssignmentSolver.logCommodityResults(A, workerVector, commodities);
-
+        final double[] workerVector = WorkerAssignmentSolver.solveLPWithSlack(A, d);
     }
 
     public final long getTotalGlobalExports(String comID) {
@@ -604,6 +562,17 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
 
         return totalActivity;
+    }
+
+    public static final long getGlobalWorkerCount() {
+        long total = 0;
+        for (MarketAPI market : getMarketsCopy()) {
+            final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(market);
+            if (cond == null) continue;
+
+            total += cond.getWorkerPool();
+        }
+        return total;
     }
 
     /**

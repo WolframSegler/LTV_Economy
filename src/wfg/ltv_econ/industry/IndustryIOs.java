@@ -30,7 +30,6 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.IndustryConfigManager;
-import wfg.ltv_econ.economy.LaborConfigLoader;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.economy.IndustryConfigManager.OutputCom;
@@ -86,7 +85,6 @@ public class IndustryIOs {
 
     public static Map<String, IndustryConfig> ind_config;
     public static Map<String, IndustryConfig> dynamic_ind_config;
-    public static LaborConfig labor_config;
 
     public static final String ABSTRACT_COM = "abstract";
 
@@ -98,7 +96,6 @@ public class IndustryIOs {
     private static final void init() {
         ind_config = IndustryConfigManager.loadAsMap(false);
         dynamic_ind_config = IndustryConfigManager.loadAsMap(true);
-        labor_config = LaborConfigLoader.loadAsClass();
 
         DynamicIndConfigs();
         
@@ -476,7 +473,7 @@ public class IndustryIOs {
 
                 if ((output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty())) {
                     CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(output.comID);
-                    float Vcc = spec.getBasePrice() * labor_config.getRoCC(entry.getValue().occTag);
+                    float Vcc = spec.getBasePrice() * LaborConfig.getRoCC(entry.getValue().occTag);
                     float totalWeight = 0;
                     for (float weight : output.CCMoneyDist.values()) {
                         totalWeight += weight;

@@ -1,8 +1,7 @@
 {
-    "avg_wage_month": 2,
     "RoSV": 4,
     "LPV_month": 8,
-    "LPV_day": 0.26667,
+    "populationRatioThatAreWorkers": 0.64,
 
     "RoVC_average": 0.13,
     "RoVC_industry": 0.04,

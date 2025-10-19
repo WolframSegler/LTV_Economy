@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -86,11 +87,8 @@ public class WorkerRegistry {
     }
 
     public static final long getWorkerCap(MarketAPI market) {
-        MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-        if (workerPoolCondition == null) {
-            return 0;
-        }
-        WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+        WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(market);
+        if (pool == null) return 0;
 
         return pool.getWorkerPool();
     }
@@ -115,13 +113,12 @@ public class WorkerRegistry {
         public transient Industry ind;
         
         private final Map<String, Float> outputRatios;
-        private float workersAssigned;
+        private float outputRatioSum = 0;
 
         public WorkerIndustryData(String marketID, String industryID) {
             this.marketID = marketID;
             this.indID = industryID;
             this.outputRatios = new HashMap<>();
-            this.workersAssigned = 0;
 
             readResolve();
         }
@@ -133,76 +130,84 @@ public class WorkerRegistry {
             return this;
         }
 
-        public final float getWorkerAssignedRatio() {
-            return workersAssigned;
+        public final float getWorkerAssignedRatio(boolean resetCache) {
+            if (resetCache) recalculateOutputRatioSum();
+            return outputRatioSum;
+        }
+
+        public final float getRelativeWorkerAssignedRatio() {
+            return getWorkerAssignedRatio(false) / outputRatioSum;
         }
 
         public final long getWorkersAssigned() {
-            final MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-            if (workerPoolCondition == null) return 0;
-            
-            final WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
-            return (long) (workersAssigned * pool.getWorkerPool());
+            final WorkerPoolCondition pool = getPoolCondition(market);
+            if (pool == null) return 0;
+
+            return (long) (outputRatioSum * pool.getWorkerPool());
         }
 
         public final long getAssignedForOutput(String comID) {
-            final MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-            if (workerPoolCondition == null) return 0;
-            
-            final WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
             if (!outputRatios.containsKey(comID)) return 0;
 
-            return (long) (workersAssigned * pool.getWorkerPool() * outputRatios.get(comID));
+            final WorkerPoolCondition pool = getPoolCondition(market);
+            if (pool == null) return 0;
+
+            return (long) (pool.getWorkerPool() * outputRatios.get(comID));
         }
 
-        public final void setRatioForOutput(String comID, float ratio) {
-            ratio = Math.max(0f, Math.min(1f, ratio));
-            final float current = outputRatios.getOrDefault(comID, 0f);
+        public final float getAssignedRatioForOutput(String comID) {
+            return outputRatios.containsKey(comID) ? outputRatios.get(comID) : 0;
+        }
 
-            final float diff = ratio - current;
-            final float result = outputRatioSum() + diff;
+        public final float getRelativeAssignedRatioForOutput(String comID) {
+            if (!outputRatios.containsKey(comID)) return 0;
+            return getAssignedRatioForOutput(comID) / outputRatioSum;
+        }
 
-            if (result > 1f) {
-                final float remaining = 1f - ratio;
-                final float otherSum = outputRatioSum() - current;
-                for (Map.Entry<String, Float> entry : outputRatios.entrySet()) {
-                    if (!entry.getKey().equals(comID)) {
-                        
-                        entry.setValue(otherSum > 0f ? entry.getValue() / otherSum * remaining : remaining);
-                    }
-                }
-            }
+        /**
+         * @return A boolean indicating the success of the operation.
+         */
+        public final boolean setRatioForOutput(String comID, float ratio) {
+            if (ratio < 0) ratio = 0;
+            if (ratio > 1) ratio = 1;
+
+            if (!outputRatios.containsKey(comID)) outputRatios.put(comID, 0f);
+
+            final float diff = ratio - outputRatios.get(comID);
+            final float result = outputRatioSum + diff;
+
+            if (result > 1f) return false;
+            if (getPoolCondition(market).getFreeWorkerRatio() - diff < 0f) return false;
+
             outputRatios.put(comID, ratio);
+            outputRatioSum = result;
+
+            return true;
         }
 
-        public final float outputRatioSum() {
+        public final void recalculateOutputRatioSum() {
             float sum = 0f;
             for (float value : outputRatios.values()) sum += value;
 
-            return sum;
+            outputRatioSum = sum;
         }
 
-        public final void setWorkersAssigned(float newAmount) {
-            if (0 > newAmount || newAmount > 1 || market == null) {
-                return;
-            }
-            final MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-            if (workerPoolCondition == null) {
-                return;
-            }
-            final WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+        public final void resetWorkersAssigned() {
+            outputRatios.replaceAll((k, v) -> 0f);
 
-            final float delta = newAmount - workersAssigned;
+            outputRatioSum = 0;
+        }
 
-            if (delta > 0f) {
-                if (pool.isWorkerRatioAssignable(delta)) {
-                    pool.assignFreeWorkers(delta);
-                    workersAssigned = newAmount;
-                }
-            } else if (delta < 0f) {
-                pool.releaseWorkers(-delta);
-                workersAssigned = newAmount;
-            }
+        public final Set<String> getRegisteredOutputs() {
+            return outputRatios.keySet();
+        }
+
+        public static final WorkerPoolCondition getPoolCondition(MarketAPI market) {
+
+            final MarketConditionAPI workerPoolCondition = market.getCondition(WorkerPoolCondition.ConditionID);
+            if (workerPoolCondition == null) return null;
+
+            return (WorkerPoolCondition) workerPoolCondition.getPlugin();
         }
     }
 }

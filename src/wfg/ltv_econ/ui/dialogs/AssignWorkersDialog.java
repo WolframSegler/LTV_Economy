@@ -10,14 +10,17 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.campaign.ui.N; //Current slider class (v.0.98 R8).
 // Here is a unique method it has: public float getShowNotchOnIfBelowProgress()
@@ -39,9 +42,10 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
     private final int panelHeight;
 
     private final WorkerIndustryData data;
+    private final Map<String, N> outputSliders;
 
     // public N(String LabelText, float MinValue, float MaxValue)
-    private N slider = new N(null, 0, 100);
+    private N indSlider = new N(null, 0, 100);
 
     public AssignWorkersDialog(Industry ind, int panelWidth, int panelHeight) {
         this.industry = ind;
@@ -49,6 +53,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         this.panelWidth = panelWidth;
         this.panelHeight = panelHeight;
         this.data = WorkerRegistry.getInstance().getData(ind.getMarket().getId(), ind.getId());
+        this.outputSliders = new HashMap<>();
     }
 
     @Override
@@ -60,6 +65,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final int sliderHeight = 32;
         final int sliderWidth = 380;
         final int sliderY = 250;
+        final int iconSize = 28;
 
         // Draw Titel
         tooltip.setParaOrbitronLarge();
@@ -73,12 +79,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         // Draw Production
         drawProductionAndConsumption(panel, pad, opad, (int) (tooltip.getHeightSoFar() + lbl.computeTextHeight(txt)));
 
-        // Draw separator line
-        final Color gray = new Color(100, 100, 100);
-        LabelAPI separator = tooltip.addSectionHeading(null, gray, gray, Alignment.MID, 0);
-        separator.getPosition().inTL(0, sliderY - sliderHeight);
-        separator.getPosition().setSize(panelWidth, 1);
-
         // Draw text left of the slider
         tooltip.setParaInsigniaLarge();
         txt = "Workers:";
@@ -90,41 +90,100 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         tooltip.setParaFontDefault();
 
         // Create the slider
-        slider.setHighlightOnMouseover(true);
-        slider.setUserAdjustable(true);
-        slider.setShowAdjustableIndicator(true);
-        slider.setShowValueOnly(true);
-        slider.setRoundBarValue(true);
-        slider.setClampCurrToMax(true);
+        indSlider.setHighlightOnMouseover(true);
+        indSlider.setUserAdjustable(true);
+        indSlider.setShowAdjustableIndicator(true);
+        indSlider.setShowValueOnly(true);
+        indSlider.setRoundBarValue(true);
+        indSlider.setClampCurrToMax(true);
 
-        slider.setRoundingIncrement(2);
-        slider.setBarColor(new Color(20, 125, 200));
-        slider.setHeight(sliderHeight);
-        slider.setWidth(sliderWidth);
-        slider.setProgress(data.getWorkerAssignedRatio() * 100);
+        indSlider.setRoundingIncrement(2);
+        indSlider.setBarColor(new Color(20, 125, 200));
+        indSlider.setHeight(sliderHeight);
+        indSlider.setWidth(sliderWidth);
+        indSlider.setProgress(data.getWorkerAssignedRatio(true) * 100);
 
         final IndustryConfig config = IndustryIOs.getIndConfig(industry);
         final float limit = config == null ? WorkerRegistry.DEFAULT_WORKER_CAP
             : config.workerAssignableLimit;
-        final float max = Math.min(limit, getFreeWorkerRatio() + data.getWorkerAssignedRatio());
+        float max = Math.min(limit, getFreeWorkerRatio() + data.getWorkerAssignedRatio(false));
         
-        slider.setMax(max * 100);
+        indSlider.setMax(max * 100);
 
-        panel.addComponent((UIPanelAPI) slider).inTL((panelWidth - sliderWidth - opad), sliderY);
+        panel.addComponent((UIPanelAPI) indSlider).inTL((panelWidth - sliderWidth - opad), sliderY);
+
+        // Draw separator line
+        final Color gray = new Color(100, 100, 100);
+        final LabelAPI separator = tooltip.addSectionHeading(null, gray, gray, Alignment.MID, 0);
+        separator.getPosition().inTL(0, sliderY - sliderHeight);
+        separator.getPosition().setSize(panelWidth, 1);
+
         panel.addUIElement(tooltip);
+
+        final CustomPanelAPI outputsPanel = Global.getSettings().createCustom(
+            panelWidth,
+            300,
+            null
+        );
+        final TooltipMakerAPI outputsTp = outputsPanel.createUIElement(panelWidth, 300, true);
+
+        final SettingsAPI settings = Global.getSettings();
+
+        int cumulativeYOffset = pad;
+        for (String comID : data.getRegisteredOutputs()) {
+            final CommoditySpecAPI spec = settings.getCommoditySpec(comID);
+            outputsTp.addImage(spec.getIconName(), iconSize, iconSize, pad);
+            outputsTp.getPrev().getPosition().inTL(pad, cumulativeYOffset);
+
+            N outputSlider = new N(null, 0, 100);
+            outputSliders.put(comID, outputSlider);
+
+            // Create the slider
+            outputSlider.setHighlightOnMouseover(true);
+            outputSlider.setUserAdjustable(true);
+            outputSlider.setShowAdjustableIndicator(true);
+            outputSlider.setShowValueOnly(true);
+            outputSlider.setRoundBarValue(true);
+            outputSlider.setClampCurrToMax(true);
+
+            outputSlider.setRoundingIncrement(2);
+            outputSlider.setBarColor(new Color(20, 125, 200));
+            outputSlider.setHeight(sliderHeight);
+            outputSlider.setWidth(sliderWidth);
+            outputSlider.setProgress(data.getWorkerAssignedRatio(true) * 100);
+
+            max = Math.max(
+                0, data.getRelativeWorkerAssignedRatio() - data.getRelativeAssignedRatioForOutput(comID)
+            );
+            
+            indSlider.setMax(max * 100);
+
+            outputsTp.addComponent(outputSlider).inTL(iconSize + pad*2, cumulativeYOffset);
+            cumulativeYOffset += pad + sliderHeight;
+        }
+
+        outputsTp.setHeightSoFar(cumulativeYOffset);
+
+        outputsPanel.addUIElement(outputsTp).inTL(-pad, 0);
+        panel.addComponent(outputsPanel).inTL(0, sliderY + opad);
     }
 
     @Override
     public void customDialogConfirm() {
-        data.setWorkersAssigned(slider.getProgress() / 100f);
+        for (Map.Entry<String, N> entry : outputSliders.entrySet()) {
+            final String comID = entry.getKey();
+            final N slider = entry.getValue();
+
+            final float value = (slider.getProgress() / 100f) * indSlider.getProgress();
+
+            data.setRatioForOutput(comID, value);
+        }
     }
 
     public float getFreeWorkerRatio() {
-        MarketConditionAPI workerPoolCondition = market.getCondition("worker_pool");
-        if (workerPoolCondition == null) {
-            return 0;
-        }
-        WorkerPoolCondition pool = (WorkerPoolCondition) workerPoolCondition.getPlugin();
+        final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(market);
+        if (pool == null) return 0;
+
         return pool.getFreeWorkerRatio();
     }
 

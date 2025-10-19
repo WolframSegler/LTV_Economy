@@ -23,25 +23,23 @@ public class LaborConfigLoader {
         return config;
     }
 
-    public static LaborConfig loadAsClass() {
+    public static void loadConfig() {
         final JSONObject root = LaborConfigLoader.getConfig();
 
-        final LaborConfig result = new LaborConfig();
-
         try {
-
-            result.avg_wage = (float) root.getDouble("avg_wage_month");
-            result.RoSV = root.getInt("RoSV");
-            result.LPV_month = root.getInt("LPV_month");
-            result.LPV_day = (float) root.getDouble("LPV_day");
-            result.RoVC_average = (float) root.getDouble("RoVC_average");
-            result.RoVC_industry = (float) root.getDouble("RoVC_industry");
-            result.RoVC_manufacture = (float) root.getDouble("RoVC_manufacture");
-            result.RoVC_service = (float) root.getDouble("RoVC_service");
-            result.RoVC_agriculture = (float) root.getDouble("RoVC_agriculture");
-            result.RoVC_mechanized = (float) root.getDouble("RoVC_mechanized");
-            result.RoVC_manual = (float) root.getDouble("RoVC_manual");
-            result.RoVC_space = (float) root.getDouble("RoVC_space");
+            LaborConfig.RoSV = root.getInt("RoSV");
+            LaborConfig.LPV_month = root.getInt("LPV_month");
+            LaborConfig.LPV_day = LaborConfig.LPV_month / 30f;
+            LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
+            LaborConfig.populationRatioThatAreWorkers = (float) root.getDouble("populationRatioThatAreWorkers");
+            LaborConfig.RoVC_average = (float) root.getDouble("RoVC_average");
+            LaborConfig.RoVC_industry = (float) root.getDouble("RoVC_industry");
+            LaborConfig.RoVC_manufacture = (float) root.getDouble("RoVC_manufacture");
+            LaborConfig.RoVC_service = (float) root.getDouble("RoVC_service");
+            LaborConfig.RoVC_agriculture = (float) root.getDouble("RoVC_agriculture");
+            LaborConfig.RoVC_mechanized = (float) root.getDouble("RoVC_mechanized");
+            LaborConfig.RoVC_manual = (float) root.getDouble("RoVC_manual");
+            LaborConfig.RoVC_space = (float) root.getDouble("RoVC_space");
 
         } catch (Exception e) {
             throw new RuntimeException(
@@ -49,26 +47,31 @@ public class LaborConfigLoader {
                 + e.getMessage(), e
             );
         }
-
-        return result;
     }
 
     public static class LaborConfig {
 
-        public float avg_wage;
-        public int RoSV;
-        public int LPV_month;
-        public float LPV_day;
-        public float RoVC_average;
-        public float RoVC_industry;
-        public float RoVC_manufacture;
-        public float RoVC_service;
-        public float RoVC_agriculture;
-        public float RoVC_mechanized;
-        public float RoVC_manual;
-        public float RoVC_space;
+        public static float avg_wage;
+        public static int RoSV;
+        public static int LPV_month;
+        public static float LPV_day;
 
-        public final float getRoVC(OCCTag tag) {
+        public static float populationRatioThatAreWorkers;
+
+        public static float RoVC_average;
+        public static float RoVC_industry;
+        public static float RoVC_manufacture;
+        public static float RoVC_service;
+        public static float RoVC_agriculture;
+        public static float RoVC_mechanized;
+        public static float RoVC_manual;
+        public static float RoVC_space;
+
+        static {
+            LaborConfigLoader.loadConfig();
+        }
+
+        public static final float getRoVC(OCCTag tag) {
             switch (tag) {
             case INDUSTRY:
                 return RoVC_industry;
@@ -90,7 +93,7 @@ public class LaborConfigLoader {
             }
         }
 
-        public final float getRoCC(OCCTag tag) {
+        public static final float getRoCC(OCCTag tag) {
             switch (tag) {
             case INDUSTRY:
                 return 1f - RoVC_industry;
