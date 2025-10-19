@@ -81,8 +81,8 @@ public class IndustryIOs {
     private static Map<String, List<String>> inputToOutput = new HashMap<>();
 
     // Map<commodityID, Set<industryID>>
-    private static final Map<String, Set<String>> demandToInd = new HashMap<>();
-    private static final Map<String, Set<String>> supplyToInd = new HashMap<>();
+    private static final Map<String, Set<String>> inputToInd = new HashMap<>();
+    private static final Map<String, Set<String>> outputToInd = new HashMap<>();
 
     public static Map<String, IndustryConfig> ind_config;
     public static Map<String, IndustryConfig> dynamic_ind_config;
@@ -141,7 +141,7 @@ public class IndustryIOs {
         testMarket2.setFactionId(factionID);
         final FactionAPI testFaction = testMarket1.getFaction();
 
-        final List<String> scaleWithMarketSize = new ArrayList<>();
+        final Set<String> scaleWithMarketSize = new HashSet<>(8);
         final Map<String, Map<String, Float>> inputCache = new HashMap<>();
         final List<String> emptyList = new ArrayList<>();
         
@@ -544,12 +544,12 @@ public class IndustryIOs {
             IndustryConfig cfg = e.getValue();
 
             for (String outputID : cfg.outputs.keySet()) {
-                supplyToInd.computeIfAbsent(outputID, k -> new HashSet<>()).add(indID);
+                outputToInd.computeIfAbsent(outputID, k -> new HashSet<>()).add(indID);
 
                 Map<String, Float> inputs = baseInputs.get(indID).get(outputID);
                 if (inputs != null) {
                     for (String inputID : inputs.keySet()) {
-                        demandToInd.computeIfAbsent(inputID, k -> new HashSet<>()).add(indID);
+                        inputToInd.computeIfAbsent(inputID, k -> new HashSet<>()).add(indID);
                     }
                 }
             }
@@ -758,29 +758,39 @@ public class IndustryIOs {
 
     public static final boolean hasSupply(Industry ind, String comID) {
         String id = ind.getId();
-        if (!supplyToInd.getOrDefault(comID, Collections.emptySet()).contains(id)) {
+        if (!outputToInd.getOrDefault(comID, Collections.emptySet()).contains(id)) {
             id = getBaseIndustryID(ind);
         }
-        return supplyToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
+        return outputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }
 
     public static final boolean hasDemand(Industry ind, String comID) {
         String id = ind.getId();
-        if (!demandToInd.getOrDefault(comID, Collections.emptySet()).contains(id)) {
+        if (!inputToInd.getOrDefault(comID, Collections.emptySet()).contains(id)) {
             id = getBaseIndustryID(ind);
         }
-        return demandToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
+        return inputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }
 
     public static final IndustryConfig getIndConfig(Industry ind) {
         return getIndConfig(ind.getSpec());
     }
 
+    /**
+     * Works for both dynamic and static configs.
+     */
     public static final IndustryConfig getIndConfig(IndustrySpecAPI ind) {
         IndustryConfig indConfig = ind_config.get(ind.getId());
 
         if (indConfig == null) {
             indConfig = ind_config.get(getBaseIndustryID(ind));
+        }
+        if (indConfig == null && hasDynamicConfig(ind)) {
+            indConfig = dynamic_ind_config.get(ind.getId());
+
+            if (indConfig == null) {
+                indConfig = dynamic_ind_config.get(getBaseIndustryID(ind));
+            }
         }
 
         return indConfig;
@@ -803,6 +813,34 @@ public class IndustryIOs {
         return currentInd.getId();
     }
 
+    /**
+     * Do not modify the content of this map
+     */
+    public static final Map<String, Map<String, Float>> getBaseOutputs() {
+        return Collections.unmodifiableMap(baseOutputs);
+    }
+
+    /**
+     * Do not modify the content of this map
+     */
+    public static final Map<String, Map<String, Map<String, Float>>> getBaseInputs() {
+        return Collections.unmodifiableMap(baseInputs);
+    }
+
+    public static final Map<String, IndustryConfig> getCombinedConfigs() {
+        Map<String, IndustryConfig> combined = new HashMap<>();
+
+        if (dynamic_ind_config != null) {
+            combined.putAll(dynamic_ind_config);
+        }
+
+        if (ind_config != null) {
+            combined.putAll(ind_config);
+        }
+
+        return Collections.unmodifiableMap(combined);
+    }
+
     public static final void logMaps() {
         Global.getLogger(IndustryIOs.class).info(
             "==== IndustryIOs Map Log ====" + "\n" +
@@ -813,10 +851,10 @@ public class IndustryIOs {
             baseInputs.toString() + "\n" +
             "--------------------------" + "\n" +
             "demandsToInd" + "\n" +
-            demandToInd.toString() + "\n" +
+            inputToInd.toString() + "\n" +
             "--------------------------" + "\n" +
             "supplyToInd" + "\n" +
-            supplyToInd.toString()
+            outputToInd.toString()
         );
     }
 }

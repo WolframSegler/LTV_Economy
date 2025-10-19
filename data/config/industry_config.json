@@ -554,7 +554,7 @@
 	},
 	"waystation": {
 		"occTag": "service",
-		"workerAssignable": true,
+		"workerAssignable": false,
 		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"imports": {

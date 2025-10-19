@@ -155,6 +155,9 @@ public class CommodityStats {
     }
 
     public final void update() {
+        localProd = 0;
+        demandBase = 0;
+        
         localProdMutables = new HashMap<>();
         demandBaseMutables = new HashMap<>();
 

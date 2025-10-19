@@ -120,6 +120,41 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/jars/libs/reflection.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>local</groupId>
+      <artifactId>apache-math-core</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jars/libs/commons-math4-core-4.0-beta1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>local</groupId>
+      <artifactId>apache-math-legacy</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jars/libs/commons-math4-legacy-4.0-beta1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>local</groupId>
+      <artifactId>apache-exception</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jars/libs/commons-math4-legacy-exception-4.0-beta1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>local</groupId>
+      <artifactId>apache-legacy-core</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jars/libs/commons-math4-legacy-core-4.0-beta1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>local</groupId>
+      <artifactId>apache-numbers-core</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jars/libs/commons-numbers-core-1.2.jar</systemPath>
+    </dependency>
   </dependencies>
 
 </project>

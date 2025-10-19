@@ -1,6 +1,9 @@
 package wfg.ltv_econ.economy;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
@@ -98,6 +101,10 @@ public class WorkerRegistry {
 
     private static final String makeKey(String marketId, String industryId) {
         return marketId + "::" + industryId;
+    }
+
+    public final List<WorkerIndustryData> getRegister() {
+        return Collections.unmodifiableList(new ArrayList<>(registry.values()));
     }
 
     public class WorkerIndustryData {

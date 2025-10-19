@@ -6,12 +6,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
@@ -22,7 +24,6 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
-import wfg.ltv_econ.economy.IndustryConfigManager.OutputCom;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -30,6 +31,7 @@ import wfg.wrap_ui.util.NumFormat;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 
 /**
@@ -110,12 +112,13 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     /**
-     * Advances the economy by one production&trade cycle.
+     * Advances the economy by one production & trade cycle.
      * <p>
      * This method is the central loop for processing all markets, industries, and commodities
      * within the EconomyEngine. It handles production, labor assignment, input deficit adjustments,
      * trade, and stockpile updates. Each step occurs in a specific order to preserve the integrity
-     * of the simulation and avoid unfair advantages between markets.
+     * of the simulation and ensure worker assignment is based on actual unmet demand from
+     * worker-independent industries.
      * </p>
      * <p><b>Cycle steps:</b></p>
      * <ol>
@@ -124,17 +127,23 @@ public class EconomyEngine extends BaseCampaignEventListener
      *     official Economy. Adds new markets and removes non-existent ones.
      *   </li>
      *   <li>
-     *     <b>assignWorkers()</b> - Assigns workers to industries per market according to their
-     *     <code>workerAssignableLimit</code>. Only runs if <code>fakeAdvance == false</code> (i.e.,
-     *     this is a real day advance). Worker allocation scales potential production.
-     *   </li>
-     *   <li>
      *     <b>comInfo.reset()</b> - Resets per-commodity values such as imports, exports, and
      *     stockpile usage from the previous cycle. Ensures a clean slate for updates.
      *   </li>
      *   <li>
-     *     <b>comInfo.update()</b> - Converts industry production into LTV-based stats for
-     *     each commodity, calculates base demand, and base local production.
+     *     <b>Worker-independent industry update</b> - Updates commodities produced by industries that
+     *     do not depend on workers. Worker-dependent industries are temporarily ignored, so their
+     *     demand does not affect the calculation.
+     *   </li>
+     *   <li>
+     *     <b>assignWorkers()</b> - Assigns workers to worker-dependent industries using the
+     *     matrix-based solver. This step uses only the demand from worker-independent industries,
+     *     ensuring optimal allocation without iterative guesswork. Runs only if
+     *     <code>fakeAdvance == false</code>.
+     *   </li>
+     *   <li>
+     *     <b>comInfo.update()</b> - Updates all commodities to account for the newly assigned workers,
+     *     converting production into LTV-based stats, calculating base demand, and updating local production.
      *   </li>
      *   <li>
      *     <b>weightedOutputDeficitMods()</b> - Adjusts local production based on input deficits.
@@ -143,9 +152,8 @@ public class EconomyEngine extends BaseCampaignEventListener
      *   </li>
      *   <li>
      *     <b>comInfo.trade()</b> - Handles exports of surplus commodities and imports to
-     *     fill storage for the next cycle. <b>Important:</b> trade happens <i>after</i> production
-     *     so that industries always consume existing stockpiles. Imports feed storage for
-     *     future production; they do not pre-fill inputs.
+     *     fill storage for the next cycle. Trade occurs after production so industries
+     *     always consume existing stockpiles. Imports feed storage for future production.
      *   </li>
      *   <li>
      *     <b>comInfo.advance(fakeAdvance)</b> - Updates stockpiles after production and trade.
@@ -153,19 +161,39 @@ public class EconomyEngine extends BaseCampaignEventListener
      *     newly imported goods ready for the next cycle.
      *   </li>
      * </ol>
+     *
+     * <p><b>Important notes:</b></p>
+     * <ul>
+     *   <li>Worker assignment must occur after worker-independent production is updated but before
+     *       worker-dependent industries are updated, to ensure demand reflects actual unmet needs.</li>
+     *   <li>If <code>fakeAdvance</code> is true, worker assignments and stockpile updates are skipped,
+     *       allowing simulation previews without altering the economy state.</li>
+     * </ul>
+     *
      * @param fakeAdvance If true, simulates a tick without modifying worker assignments or
      *                    stockpiles (useful for interfaces or previews).
      */
     private final void mainLoop(boolean fakeAdvance) {
         refreshMarkets();
 
+        for (CommodityInfo comInfo : m_comInfo.values()) {
+            comInfo.reset();
+        }
+
         if (!fakeAdvance) {
-            assignWorkers();
+            resetWorkersAssigned();
+    
+            for (CommodityInfo comInfo : m_comInfo.values()) {
+                comInfo.update();
+            }
+        }
+
+        if (!fakeAdvance) {
+            // assignWorkers();
+            assignWorkersSmart();
         }
 
         for (CommodityInfo comInfo : m_comInfo.values()) {
-            comInfo.reset();
-
             comInfo.update();
         }
         
@@ -176,9 +204,6 @@ public class EconomyEngine extends BaseCampaignEventListener
 
             comInfo.advance(fakeAdvance);
         }
-        
-        // logEconomySnapshotAsCSV();
-        // IndustryIOs.logMaps();
     }
 
     public final void registerMarket(String marketID) {
@@ -346,6 +371,14 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
     }
 
+    private final void resetWorkersAssigned() {
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
+
+        for (WorkerIndustryData data : reg.getRegister()) {
+            data.setWorkersAssigned(0);
+        }
+    }
+
     private final void assignWorkers() {
 
         final WorkerRegistry reg = WorkerRegistry.getInstance();
@@ -389,103 +422,110 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     public final void assignWorkersSmart() {
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        // final WorkerRegistry reg = WorkerRegistry.getInstance();
 
-        for (MarketAPI market : getMarketsCopy()) {
-            if (market.isPlayerOwned() || !market.isInEconomy()) continue;
+        final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputs();
+        final Map<String, Map<String, Map<String, Float>>> baseInputs = IndustryIOs.getBaseInputs();
+        final String key = "::";
 
-            final List<Industry> workingIndustries = CommodityStats.getVisibleIndustries(market);
-            if (workingIndustries.isEmpty() || !market.hasCondition(WorkerPoolCondition.ConditionID)) {
-                continue;
-            }
+        List<String> commodities = getEconCommodities().stream()
+                .map(CommoditySpecAPI::getId)
+                .collect(Collectors.toList());
 
-            for (Industry ind : workingIndustries) {
-                WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
-                if (data != null) {
-                    data.setWorkersAssigned(0);
+        final SettingsAPI settings = Global.getSettings();
+
+        Iterator<String> it = commodities.iterator();
+        while (it.hasNext()) {
+            String com = it.next();
+            boolean remove = true;
+            for (Map.Entry<String, Map<String, Float>> entry : IndustryIOs.getBaseOutputs().entrySet()) {
+                IndustrySpecAPI spec = settings.getIndustrySpec(entry.getKey());
+                if (IndustryIOs.getIndConfig(spec).workerAssignable && entry.getValue().containsKey(com)) {
+                    remove = false;
+                    break;
                 }
             }
+            if (remove) it.remove();
         }
 
-        for (CommodityInfo comInfo : m_comInfo.values()) {
-            comInfo.reset();
-
-            comInfo.update();
-        }
-
-        Map<String, Long> globalDemandMap = new HashMap<>();
-
-        for (Map.Entry<String, CommodityInfo> info : m_comInfo.entrySet()) {
-            long value = 0;
-            for (CommodityStats stats : info.getValue().getAllStats()) {
-                value += stats.getBaseDemand(false);
-            }
-            globalDemandMap.put(info.getKey(), value);
-        }
-
-        // Map<String, List<Industry>> commodityToIndustries = new HashMap<>();
-
-
-
-
-
-        for (MarketAPI market : getMarketsCopy()) {
-            final List<Industry> allIndustries = market.getIndustries();
-            
-            // Separate industries into 3 groups
-            List<Industry> workerIndependentIndustries = new ArrayList<>();
-            List<Industry> partiallyWorkerIndustries = new ArrayList<>();
-            List<Industry> fullyWorkerIndustries = new ArrayList<>();
-            
-            indLoop:
-            for (Industry ind : allIndustries) {
-                if (!EconomyEngine.isWorkerAssignable(ind)) {
-                    workerIndependentIndustries.add(ind);
-                    continue;
-                }
-
-                IndustryConfig config = IndustryIOs.getIndConfig(ind);
-                if (config == null) {
-                    fullyWorkerIndustries.add(ind);
-                    continue;
-                }
-                for (OutputCom output : config.outputs.values()) {
-                    if (!output.usesWorkers) {
-                        partiallyWorkerIndustries.add(ind);
-                        continue indLoop;
+        List<String> industries = null;
+        { // Memory management
+            Set<String> industrySet = new LinkedHashSet<>();
+            for (IndustrySpecAPI spec : Global.getSettings().getAllIndustrySpecs()) {
+                if (IndustryIOs.hasConfig(spec) || IndustryIOs.hasDynamicConfig(spec)) {
+                    if (IndustryIOs.getIndConfig(spec).workerAssignable) {
+                        industrySet.add(IndustryIOs.getBaseIndustryID(spec));
                     }
                 }
-                fullyWorkerIndustries.add(ind);
             }
-    
-            // // 2. Build current stockpiles map
-            // Map<String, Float> stockpiles = new HashMap<>();
-            // for (CommoditySpecAPI com : getEconCommodities()) {
-            //     stockpiles.put(com.getId(), (float) com.getAvailable());
-            // }
-    
-            // // 3. PASS 1: Fulfill demand from worker-independent industries
-            // Map<String, Float> unmetDemand = computeUnmetDemand(workerIndependentIndustries, stockpiles);
-            // assignWorkersToMeetDemand(unmetDemand, partiallyWorkerIndustries, fullyWorkerIndustries);
-    
-            // // 4. PASS 2: Fulfill induced demand from worker-dependent outputs
-            // Map<String, Float> newDemand = computeInducedDemand(partiallyWorkerIndustries, fullyWorkerIndustries);
-            // assignWorkersToMeetDemand(newDemand, partiallyWorkerIndustries, fullyWorkerIndustries);
-    
-            // // 5. PASS 3: Apply buffer
-            // float bufferFactor = 1.3f; // 30% buffer
-            // for (Industry ind : partiallyWorkerIndustries) {
-            //     int workers = ind.getWorkerCount();
-            //     ind.setWorkerCount(Math.round(workers * bufferFactor));
-            // }
-            // for (Industry ind : fullyWorkerIndustries) {
-            //     int workers = ind.getWorkerCount();
-            //     ind.setWorkerCount(Math.round(workers * bufferFactor));
-            // }
-    
-            // // 6. Update any dependent maps / UI
-            // market.reapplyWorkers(); // placeholder for whatever method updates the market state
+            industries = new ArrayList<>(industrySet);
         }
+
+        // Flatten industries into industry-output pairs
+        List<String> industryOutputPairs = new ArrayList<>();
+        for (String indID : industries) {
+            Map<String, Float> outputs = baseOutputs.get(indID);
+            if (outputs != null) {
+                for (String outputID : outputs.keySet()) {
+                    industryOutputPairs.add(indID + key + outputID);
+                }
+            }
+        }
+
+        double[][] A = new double[commodities.size()][industries.size()];
+
+        for (int j = 0; j < industryOutputPairs.size(); j++) {
+            final String pair = industryOutputPairs.get(j);
+            final String[] parts = pair.split(key, 2);
+            final String indID = parts[0];
+            final String outputID = parts[1];
+
+            // Inputs for this output
+            Map<String, Map<String, Float>> indInputs = baseInputs.get(indID);
+            if (indInputs != null) {
+                for (Map<String, Float> inputs : indInputs.values()) {
+                    for (Map.Entry<String, Float> inputEntry : inputs.entrySet()) {
+                        final String inputCommodity = inputEntry.getKey();
+                        final float value = inputEntry.getValue();
+
+                        final int row = commodities.indexOf(inputCommodity);
+                        if (row >= 0) {
+                            A[row][j] -= value; // negative for consumption
+                        }
+                    }
+                }
+            }
+
+            Map<String, Float> indOutputs = baseOutputs.get(indID);
+            if (indOutputs != null && indOutputs.containsKey(outputID)) {
+                final int row = commodities.indexOf(outputID);
+                if (row >= 0) {
+                    A[row][j] += indOutputs.get(outputID); // positive for production
+                }
+            }
+        }
+
+        Map<String, Integer> commodityToRow = new HashMap<>();
+        for (int i = 0; i < commodities.size(); i++) {
+            commodityToRow.put(commodities.get(i), i);
+        }
+
+        double[] d = new double[commodities.size()];
+        for (String commodityID : commodities) {
+            Integer row = commodityToRow.get(commodityID);
+            if (row != null) {
+                d[row] = getGlobalDemand(commodityID);
+            }
+        }
+
+        double[] workerVector = WorkerAssignmentSolver.solveLPWithSlack(A, d);
+
+        WorkerAssignmentSolver.logInputMatrix(A, industryOutputPairs, commodities);
+
+        WorkerAssignmentSolver.logDemandVector(d, commodities);
+
+        WorkerAssignmentSolver.logCommodityResults(A, workerVector, commodities);
+
     }
 
     public final long getTotalGlobalExports(String comID) {
@@ -583,6 +623,15 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
 
         return ratio;
+    }
+
+    public final long getGlobalDemand(String comID) {
+        long total = 0;
+
+        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
+        total += stats.getBaseDemand(false);
+
+        return total;
     }
 
     /**
