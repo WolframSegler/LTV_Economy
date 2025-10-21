@@ -13,6 +13,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.industry.IndustryIOs;
 
 public class WorkerRegistry {
     public static final float DEFAULT_WORKER_CAP = 0.6f;
@@ -25,7 +26,7 @@ public class WorkerRegistry {
         for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
         for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
             if (EconomyEngine.isWorkerAssignable(ind)) {
-                register(market.getId(), ind.getId());
+                register(market, ind);
             }
         }
         }
@@ -43,18 +44,17 @@ public class WorkerRegistry {
         return instance;
     }
 
-    public final void register(String marketID, String indID) {
-        final String key = makeKey(marketID, indID);
-        final Industry ind = Global.getSector().getEconomy().getMarket(marketID).getIndustry(indID);
+    public final void register(MarketAPI market, Industry ind) {
+        final String key = makeKey(market.getId(), ind.getId());
         if (EconomyEngine.isWorkerAssignable(ind)) {
-            registry.putIfAbsent(key, new WorkerIndustryData(marketID, indID));
+            registry.putIfAbsent(key, new WorkerIndustryData(market, ind));
         }
     }
 
     public final void register(String marketID) {
         final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
         for (Industry ind : market.getIndustries()) {
-            register(marketID, ind.getId());
+            register(market, ind);
         }
     }
 
@@ -97,6 +97,10 @@ public class WorkerRegistry {
         return registry.get(makeKey(marketID, industryID));
     }
 
+    public final void setData(WorkerIndustryData data) {
+        registry.put(makeKey(data.marketID, data.indID), data);
+    }
+
     private static final String makeKey(String marketId, String industryId) {
         return marketId + "::" + industryId;
     }
@@ -105,7 +109,7 @@ public class WorkerRegistry {
         return Collections.unmodifiableList(new ArrayList<>(registry.values()));
     }
 
-    public class WorkerIndustryData {
+    public static class WorkerIndustryData {
         public final String marketID;
         public final String indID;
         
@@ -115,10 +119,14 @@ public class WorkerRegistry {
         private final Map<String, Float> outputRatios;
         private float outputRatioSum = 0;
 
-        public WorkerIndustryData(String marketID, String industryID) {
-            this.marketID = marketID;
-            this.indID = industryID;
+        public WorkerIndustryData(MarketAPI market, Industry industry) {
+            this.marketID = market.getId();
+            this.indID = industry.getId();
             this.outputRatios = new HashMap<>();
+
+            for (String outputID : IndustryIOs.getIndConfig(industry).outputs.keySet()) {
+                outputRatios.put(outputID, 0f);
+            }
 
             readResolve();
         }
@@ -128,6 +136,21 @@ public class WorkerRegistry {
             ind = market.getIndustry(indID);
 
             return this;
+        }
+
+        /**
+         * Copy Constructor
+         */
+        public WorkerIndustryData(WorkerIndustryData other) {
+            this.marketID = other.marketID;
+            this.indID = other.indID;
+
+            this.outputRatios = new HashMap<>(other.outputRatios);
+
+            this.outputRatioSum = other.outputRatioSum;
+
+            this.market = other.market;
+            this.ind = other.ind;
         }
 
         public final float getWorkerAssignedRatio(boolean resetCache) {

@@ -93,9 +93,13 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         final float pad = 10f;
 
         tooltip.addPara("Total Workers: %s", pad, Misc.getHighlightColor(),
-                NumFormat.engNotation(getWorkerPool()));
-        tooltip.addPara("Free Workers: %s", pad, Misc.getHighlightColor(),
-                NumFormat.engNotation((long)(freeWorkerRatio*getWorkerPool())));
+            NumFormat.engNotation(getWorkerPool())
+        );
+        tooltip.addPara(
+            "Free Workers: %s (%s%%)", pad, Misc.getHighlightColor(),
+            NumFormat.engNotation((long)(freeWorkerRatio * getWorkerPool())),
+            String.format("%.1f", freeWorkerRatio * 100)
+        );
     }
 
     @Override

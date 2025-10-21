@@ -34,8 +34,15 @@ import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
  *      }
  * </pre>
  * <pre>
+ * 
+ *      @Override
+ *      public CustomPanelAPI getTpParent() {
+ *          return null; // return tooltip parent
+ *      }
+ * </pre>
+ * <pre>
  *      @Override 
- *      public TooltipMakerAPI createAndAttachTooltip() {
+ *      public TooltipMakerAPI createAndAttachTp() {
  *          // Custom tooltip logic here
  *      }
  * };

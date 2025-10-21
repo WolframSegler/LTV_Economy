@@ -175,6 +175,12 @@ public abstract class CustomPanel<
         return (a).getPosition();
     }
 
+    public final PositionAPI add(CustomPanel<?, ?, ?> a) {
+        m_panel.addComponent(a.getPanel());
+
+        return a.getPos();
+    }
+
     public final void remove(LabelAPI a) {
         remove((UIComponentAPI) a);
     }

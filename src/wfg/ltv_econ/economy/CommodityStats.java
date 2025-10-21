@@ -112,9 +112,9 @@ public class CommodityStats {
         return getAvailable() - getBaseDemand(true) - getTotalExports();
     }
     public final float getStoredCoverageRatio() {
-        if (getBaseDemand(false) <= 0) return 1f;
+        if (demandBase <= 0) return 1f;
 
-        return Math.min(stored / (float) getBaseDemand(false), 1f);
+        return Math.min(stored / (float) demandBase, 1f);
     }
 
     public final void addInFactionImport(long a) {
@@ -162,16 +162,12 @@ public class CommodityStats {
         demandBaseMutables = new HashMap<>();
 
         for (Industry industry : getVisibleIndustries(market)) {
-            if (IndustryIOs.hasSupply(industry, comID) || 
-                industry.getSupply(comID).getQuantity().getModifiedValue() > 0
-            ) {
+            if (IndustryIOs.hasSupply(industry, comID)) {
                 MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);
                 localProdMutables.put(industry.getId(), supplyStat);
 
             }
-            if (IndustryIOs.hasDemand(industry, comID) || 
-                industry.getDemand(comID).getQuantity().getModifiedValue() > 0 
-            ) {
+            if (IndustryIOs.hasDemand(industry, comID)) {
                 MutableStat demandStat = CompatLayer.convertIndDemandStat(industry, comID);
                 demandBaseMutables.put(industry.getId(), demandStat);
                 
