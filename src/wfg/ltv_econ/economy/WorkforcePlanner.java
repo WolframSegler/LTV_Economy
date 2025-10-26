@@ -265,46 +265,6 @@ public class WorkforcePlanner {
             constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetVector[j]));
         }
 
-        final double TOLERANCE = 0.99;
-
-        // // 4) Even spread as much as possible
-        // for (int j = 0; j < numOutputs; j++) {
-        //     // First, compute total available workers across markets that can produce this output
-        //     double totalMarketCapacityForOutput = 0.0;
-        //     for (int m = 0; m < numMarkets; m++) {
-        //         if (!outputsPerMarket.get(m).contains(j)) continue;
-        //         final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
-        //         totalMarketCapacityForOutput += (pool != null) ? pool.getWorkerPool() : 0.0;
-        //     }
-
-        //     // Now, for each market, compute preferred share proportional to its capacity
-        //     for (int m = 0; m < numMarkets; m++) {
-        //         if (!outputsPerMarket.get(m).contains(j)) continue;
-
-        //         final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
-        //         final double marketCapacity = (pool != null) ? pool.getWorkerPool() : 0.0;
-
-        //         // preferredWorkers = proportion of total targetVector[j] based on market capacity
-        //         final double preferredWorkers = (totalMarketCapacityForOutput > 0) 
-        //             ? marketCapacity / totalMarketCapacityForOutput * targetVector[j]
-        //             : 0.0;
-
-        //         // Add a soft constraint: minimize deviation from preferredWorkers
-        //         // This can be done using a slack variable "slack_m_j" per market/output
-        //         double[] coeffs = new double[nVars];
-        //         coeffs[m * numOutputs + j] = 1.0;            // worker variable x_{m,j}
-        //         coeffs[slackStart + j] = 1.0;     // slack variable for deviation
-
-        //         // Lower bound: at least preferredWorkers - tolerance
-        //         constraints.add(new LinearConstraint(
-        //             coeffs, Relationship.GEQ, preferredWorkers * (1 - TOLERANCE)));
-
-        //         // Upper bound: at most preferredWorkers + tolerance
-        //         constraints.add(new LinearConstraint(
-        //             coeffs, Relationship.LEQ, preferredWorkers * (1 + TOLERANCE)));
-        //     }
-        // }
-
         SimplexSolver solver = new SimplexSolver();
         PointValuePair solution = solver.optimize(
             new MaxIter(5000),
