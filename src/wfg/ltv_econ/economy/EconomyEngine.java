@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
@@ -190,7 +191,6 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
 
         if (!fakeAdvance) {
-            // assignWorkers();
             assignWorkers();
         }
 
@@ -254,7 +254,9 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     public static final List<MarketAPI> getMarketsCopy() {
-        return Global.getSector().getEconomy().getMarketsCopy();
+        List<MarketAPI> markets = Global.getSector().getEconomy().getMarketsCopy();
+        markets.removeIf(m -> !m.isInEconomy());
+        return markets;
     }
 
     public void reportPlayerOpenedMarket() {
@@ -381,7 +383,7 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     public final void assignWorkers() {
-        // final WorkerRegistry reg = WorkerRegistry.getInstance();
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
 
         final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputs();
         final Map<String, Map<String, Map<String, Float>>> baseInputs = IndustryIOs.getBaseInputs();
@@ -413,7 +415,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             for (IndustrySpecAPI spec : Global.getSettings().getAllIndustrySpecs()) {
                 if (IndustryIOs.hasConfig(spec) || IndustryIOs.hasDynamicConfig(spec)) {
                     if (IndustryIOs.getIndConfig(spec).workerAssignable) {
-                        industrySet.add(IndustryIOs.getBaseIndustryID(spec));
+                        industrySet.add(IndustryIOs.getBaseIndIDifNoConfig(spec));
                     }
                 }
             }
@@ -481,9 +483,56 @@ public class EconomyEngine extends BaseCampaignEventListener
             }
         }
 
-        final long globalWorkerCount = getGlobalWorkerCount();
+        final List<List<Integer>> outputsPerMarket = new ArrayList<>();
+        final List<MarketAPI> markets = getMarketsCopy();
 
-        final double[] workerVector = WorkerAssignmentSolver.solveLPWithSlack(A, d);
+        for (int i = 0; i < markets.size(); i++) {
+            final List<Integer> outputIndexes = new ArrayList<>();
+
+            for (Industry ind : CommodityStats.getVisibleIndustries(markets.get(i))) {
+                if (!IndustryIOs.getIndConfig(ind).workerAssignable) continue;
+
+                final String indID = IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec());
+
+                for (String outputID : IndustryIOs.getIndConfig(ind).outputs.keySet()) {
+                    for (int j = 0; j < industryOutputPairs.size(); j++) {
+                        String pair = industryOutputPairs.get(j);
+
+                        if (pair.equals(indID + key + outputID)) {
+                            outputIndexes.add(j);
+                        }
+                    }
+                }
+            }
+            outputsPerMarket.add(outputIndexes);
+        }
+
+        final double[] workerVector = WorkforcePlanner.calculateGlobalWorkerTargets(A, d);
+
+        final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.allocateWorkersToMarkets(
+            workerVector, markets, industryOutputPairs, outputsPerMarket
+        );
+
+        for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
+            final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(entry.getKey());
+            if (cond == null) continue;
+
+            final String marketID = entry.getKey().getId();
+            final float[] assignments = entry.getValue();
+            final long totalWorkers = cond.getWorkerPool();
+
+            for (int i = 0; i < industryOutputPairs.size(); i++) {
+                if (assignments[i] == 0) continue;
+
+                final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(key), 2);
+                final String indID = indAndOutputID[0];
+                final String outputID = indAndOutputID[1];
+
+                final float ratio = (assignments[i] / totalWorkers);
+
+                reg.getData(marketID, indID).setRatioForOutput(outputID, ratio);
+            }
+        }
     }
 
     public final long getTotalGlobalExports(String comID) {

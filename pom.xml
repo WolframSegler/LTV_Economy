@@ -11,6 +11,11 @@
   <packaging>jar</packaging>
   <name>LTV Economy</name>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
   <build>
     <finalName>ltv_economy</finalName>
     <directory>jars/main/</directory>

@@ -1,0 +1,415 @@
+package wfg.ltv_econ.economy;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.math4.legacy.optim.MaxIter;
+import org.apache.commons.math4.legacy.optim.PointValuePair;
+import org.apache.commons.math4.legacy.optim.linear.LinearConstraint;
+import org.apache.commons.math4.legacy.optim.linear.LinearConstraintSet;
+import org.apache.commons.math4.legacy.optim.linear.LinearObjectiveFunction;
+import org.apache.commons.math4.legacy.optim.linear.NonNegativeConstraint;
+import org.apache.commons.math4.legacy.optim.linear.Relationship;
+import org.apache.commons.math4.legacy.optim.linear.SimplexSolver;
+import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
+
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+
+import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+
+public class WorkforcePlanner {
+
+    /*
+    * NOTE ON SLACK / DEFICIT HANDLING
+    *
+    * PROBLEM:
+    * Currently, the Solver treats all deficits (slack variables) equally, regardless of the commodity's price.
+    * That is, a deficit of 1 unit of food is considered just as bad as a deficit of 1 unit of hand_weapons,
+    * even though the economic value of a hand_weapon is much higher than a unit of food.
+    *
+    * CONSEQUENCE:
+    * This can lead the solver to "give up" on high-value commodities that are produced in small quantities,
+    * because minimizing slack in cheaper, larger-quantity commodities reduces the objective function more efficiently.
+    * For example, expensive goods like hand_weapons or drugs may end up with zero assigned workers
+    * while the solver prioritizes large-volume low-cost items like food or fuel.
+    *
+    * POTENTIAL SOLUTION:
+    * Convert the demand vector from unit counts to monetary values before solving the LP:
+    *   monetaryDemand[i] = unitDemand[i] * pricePerUnit[i]
+    * This way, the slack penalty naturally scales with the economic value of the commodity,
+    * so the solver prioritizes fulfilling deficits equally over all commodities.
+    *
+    * RESOLUTION:
+    * Currently I am happy with the way the LP Solver treats unit deficits equally regardless of their value.
+    * I might change this in the future, hence the note.
+    */
+
+    public static final double WORKER_COST = 1;     // penatly for a unit of worker used.
+    public static final double SLACK_COST = 1300;   // penalty for a unit of deficit regardless of value.
+
+    // Any lower than 1300 causes the solver to not produce hand_weapons
+
+    /**
+     * Calculate global worker requirements per output using linear programming with slack variables.
+     * Ensures each output's demand is met if possible, or distributes shortfall via slack.
+     *
+     * @param A Matrix of size (commodities x outputs)
+     * @param d Demand vector of size (commodities)
+     * @return Non-negative worker assignments to outputs
+     */
+    public static double[] calculateGlobalWorkerTargets(double[][] A, double[] d) {
+        int m = A.length;       // number of commodities
+        int n = A[0].length;    // number of outputs
+
+        double[] objectiveCoeffs = new double[n + m];
+
+        for (int j = 0; j < n; j++) {
+            objectiveCoeffs[j] = WORKER_COST;
+        }
+        for (int i = 0; i < m; i++) {
+            objectiveCoeffs[n + i] = SLACK_COST;
+        }
+
+        LinearObjectiveFunction f = new LinearObjectiveFunction(objectiveCoeffs, 0.0);
+        List<LinearConstraint> constraints = new ArrayList<>();
+
+        // Constraints: A*x + s >= d * buffer  ->  -A*x - s <= -d * buffer
+        for (int i = 0; i < m; i++) {
+            double[] coeffs = new double[n + m];
+            for (int j = 0; j < n; j++) coeffs[j] = -A[i][j]; // industry coefficients
+            coeffs[n + i] = -1.0; // slack variable coefficient
+            constraints.add(new LinearConstraint(
+                coeffs, Relationship.LEQ, -d[i] * LaborConfig.productionBuffer
+            ));
+        }
+
+        // total assigned workers ≤ total available workers
+        double[] totalWorkerCoeffs = new double[n + m];
+        for (int j = 0; j < n; j++) {
+            totalWorkerCoeffs[j] = 1.0;
+        }
+        constraints.add(new LinearConstraint(
+            totalWorkerCoeffs, Relationship.LEQ, EconomyEngine.getGlobalWorkerCount()
+        ));
+
+        // Non-negativity for workers
+        for (int i = 0; i < n + m; i++) {
+            double[] coeffs = new double[n + m];
+            coeffs[i] = 1.0;
+            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, 0.0));
+        }
+
+        // Non-negative net production for all commodities
+        for (int i = 0; i < m; i++) {
+            double[] coeffs = new double[n + m];
+            for (int j = 0; j < n; j++) {
+                coeffs[j] = A[i][j];
+            }
+            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, 0.0));
+        }
+
+        // Solve
+        SimplexSolver solver = new SimplexSolver();
+        PointValuePair solution = solver.optimize(
+            new MaxIter(1000),
+            f,
+            new LinearConstraintSet(constraints),
+            GoalType.MINIMIZE,
+            new NonNegativeConstraint(true)
+        );
+
+        double[] vars = solution.getPoint();
+        // First n variables are the worker assignments
+        double[] workers = new double[n];
+        System.arraycopy(vars, 0, workers, 0, n);
+        return workers;
+    }
+
+    public static final void logInputMatrix(double[][] A, List<String> industryOutputs, List<String> coms) {
+        StringBuilder csv = new StringBuilder(4096);
+        csv.append("Commodity/IndustryOutput,");
+
+        // Header: industry_output pairs
+        for (String indOut : industryOutputs) {
+            csv.append(indOut).append(",");
+        }
+        csv.append("\n");
+
+        // Matrix rows
+        for (int i = 0; i < coms.size(); i++) {
+            String commodity = coms.get(i);
+            csv.append(commodity).append(",");
+
+            for (int j = 0; j < industryOutputs.size(); j++) {
+                csv.append(String.format("%.2f", A[i][j]));
+                if (j < industryOutputs.size() - 1) csv.append(",");
+            }
+            csv.append("\n");
+        }
+
+        Global.getLogger(WorkforcePlanner.class)
+            .info("=== Input Matrix A (Industry_Output Columns) ===\n" + csv);
+    }
+
+    public static final void logDemandVector(double[] d, List<String> commodities) {
+        StringBuilder demandLog = new StringBuilder("=== Demand Vector d ===\n");
+        for (int i = 0; i < commodities.size(); i++) {
+            demandLog.append(String.format("%s: %.3f\n", commodities.get(i), d[i]));
+        }
+
+        Global.getLogger(WorkforcePlanner.class).info(demandLog);
+    }
+
+    public static final void logWorkerTargets(double[] workerVector, List<String> industryOutputPairs) {
+        List<String> lines = new ArrayList<>();
+        for (int i = 0; i < industryOutputPairs.size(); i++) {
+            String line = industryOutputPairs.get(i) + ": " + Math.round(workerVector[i]);
+            lines.add(line);
+        }
+        String logString = lines.stream()
+                .map(s -> "    " + s)
+                .collect(Collectors.joining("\n"));
+        Global.getLogger(WorkforcePlanner.class).info(logString);
+    }
+
+    public static final void logCommodityResults(double[][] A, double[] workerVector, List<String> commodities) {
+        int rows = A.length;
+        int cols = A[0].length;
+        double[] result = new double[rows];
+
+        for (int i = 0; i < rows; i++) {
+            double sum = 0;
+            for (int j = 0; j < cols; j++) {
+                sum += A[i][j] * workerVector[j];
+            }
+            result[i] = sum;
+        }
+
+        List<String> lines = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            String line = commodities.get(i) + ": " + Math.round(result[i]);
+            lines.add(line);
+        }
+
+        String logString = lines.stream()
+                .map(s -> "    " + s)
+                .collect(Collectors.joining("\n"));
+        Global.getLogger(WorkforcePlanner.class).info(logString);
+    }
+
+    /**
+     * Allocate global worker targets to individual markets fairly, respecting market capacities.
+     *
+     * @param targetVector Global worker assignments per output (from calculateGlobalWorkerTargets)
+     * @param markets List of markets to distribute to
+     * @param industryOutputPairs industryID::outputID
+     * @param outputsPerMarket List of markets containing list of indexes for industryOutputPairs
+     * @return Map from market to worker assignments array (length = industryOutputPairs.size())
+     */
+    public static Map<MarketAPI, float[]> allocateWorkersToMarkets(
+        double[] targetVector,
+        List<MarketAPI> markets,
+        List<String> industryOutputPairs,
+        List<List<Integer>> outputsPerMarket
+    ) {
+
+        final int numMarkets = markets.size();
+        final int numOutputs = industryOutputPairs.size();
+        final int nVars = numMarkets * numOutputs + numOutputs; // extra variables for slack per output
+        final int slackStart = numMarkets * numOutputs;
+
+        final double[] objectiveCoeffs = new double[nVars];
+        for (int j = 0; j < numOutputs; j++) {
+            objectiveCoeffs[slackStart + j] = 1.0;
+        }
+
+        LinearObjectiveFunction f = new LinearObjectiveFunction(objectiveCoeffs, 0.0);
+        List<LinearConstraint> constraints = new ArrayList<>();
+
+        // 1) Market capacity constraint: sum over outputs <= workerPool
+        for (int m = 0; m < numMarkets; m++) {
+            final double[] coeffs = new double[nVars];
+            for (int j = 0; j < numOutputs; j++) {
+                if (outputsPerMarket.get(m).contains(j)) {
+                    coeffs[m * numOutputs + j] = 1.0;
+                }
+            }
+            final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(markets.get(m));
+            final double Wm = (cond != null) ? cond.getWorkerPool() : 0.0;
+            constraints.add(new LinearConstraint(coeffs, Relationship.LEQ, Wm));
+        }
+
+        // 2) Non-negativity constraint
+        for (int i = 0; i < nVars; i++) {
+            double[] coeffs = new double[nVars];
+            coeffs[i] = 1.0;
+            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, 0.0));
+        }
+
+        // 3) Output constraints
+        for (int j = 0; j < numOutputs; j++) {
+            double[] coeffs = new double[nVars];
+            for (int m = 0; m < numMarkets; m++) {
+                if (outputsPerMarket.get(m).contains(j)) {
+                    coeffs[m * numOutputs + j] = 1.0;
+                }
+            }
+            coeffs[slackStart + j] = 1.0;
+            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetVector[j]));
+        }
+
+        final double TOLERANCE = 0.99;
+
+        // // 4) Even spread as much as possible
+        // for (int j = 0; j < numOutputs; j++) {
+        //     // First, compute total available workers across markets that can produce this output
+        //     double totalMarketCapacityForOutput = 0.0;
+        //     for (int m = 0; m < numMarkets; m++) {
+        //         if (!outputsPerMarket.get(m).contains(j)) continue;
+        //         final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
+        //         totalMarketCapacityForOutput += (pool != null) ? pool.getWorkerPool() : 0.0;
+        //     }
+
+        //     // Now, for each market, compute preferred share proportional to its capacity
+        //     for (int m = 0; m < numMarkets; m++) {
+        //         if (!outputsPerMarket.get(m).contains(j)) continue;
+
+        //         final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
+        //         final double marketCapacity = (pool != null) ? pool.getWorkerPool() : 0.0;
+
+        //         // preferredWorkers = proportion of total targetVector[j] based on market capacity
+        //         final double preferredWorkers = (totalMarketCapacityForOutput > 0) 
+        //             ? marketCapacity / totalMarketCapacityForOutput * targetVector[j]
+        //             : 0.0;
+
+        //         // Add a soft constraint: minimize deviation from preferredWorkers
+        //         // This can be done using a slack variable "slack_m_j" per market/output
+        //         double[] coeffs = new double[nVars];
+        //         coeffs[m * numOutputs + j] = 1.0;            // worker variable x_{m,j}
+        //         coeffs[slackStart + j] = 1.0;     // slack variable for deviation
+
+        //         // Lower bound: at least preferredWorkers - tolerance
+        //         constraints.add(new LinearConstraint(
+        //             coeffs, Relationship.GEQ, preferredWorkers * (1 - TOLERANCE)));
+
+        //         // Upper bound: at most preferredWorkers + tolerance
+        //         constraints.add(new LinearConstraint(
+        //             coeffs, Relationship.LEQ, preferredWorkers * (1 + TOLERANCE)));
+        //     }
+        // }
+
+        SimplexSolver solver = new SimplexSolver();
+        PointValuePair solution = solver.optimize(
+            new MaxIter(5000),
+            f,
+            new LinearConstraintSet(constraints),
+            GoalType.MINIMIZE,
+            new NonNegativeConstraint(true)
+        );
+
+        double[] vars = solution.getPoint();
+        Map<MarketAPI, float[]> marketAssignments = new HashMap<>();
+
+        for (int m = 0; m < numMarkets; m++) {
+            float[] assignment = new float[numOutputs];
+            for (int j = 0; j < numOutputs; j++) {
+                assignment[j] = (float) vars[m * numOutputs + j];
+            }
+            marketAssignments.put(markets.get(m), assignment);
+        }
+
+        return marketAssignments;
+    }
+
+    public static final void logWorkerAssignments(
+        Map<MarketAPI, float[]> assignedWorkersPerMarket,
+        List<String> industryOutputPairs,
+        double[] workerVector
+    ) {
+        float totalAssigned = 0f;
+        float totalRequired = 0f;
+        StringBuilder sb = new StringBuilder("\n=== Worker Distribution Report ===\n");
+
+        // 1. Global overview
+        for (double w : workerVector) totalRequired += w;
+        for (float[] arr : assignedWorkersPerMarket.values()) {
+            for (float v : arr) totalAssigned += v;
+        }
+
+        sb.append(String.format(Locale.ROOT, "Total workers required: %.0f\n", totalRequired));
+        sb.append(String.format(Locale.ROOT, "Total workers assigned: %.0f\n", totalAssigned));
+        sb.append(String.format(Locale.ROOT, "Discrepancy: %.2f%%\n\n",
+                100f * (totalAssigned - totalRequired) / Math.max(1f, totalRequired)));
+
+        // 2. Market-level details
+        for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
+            MarketAPI market = entry.getKey();
+            WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(market);
+            float pool = (cond != null) ? cond.getWorkerPool() : 0f;
+            float used = 0f;
+
+            for (float v : entry.getValue()) used += v;
+
+            float utilization = (pool > 0) ? used / pool : 0f;
+            sb.append(String.format(Locale.ROOT,
+                    "[%s] used %.0f / %.0f (%.1f%%)\n",
+                    market.getName(), used, pool, utilization * 100f));
+
+            for (int i = 0; i < industryOutputPairs.size(); i++) {
+                float assigned = entry.getValue()[i];
+                if (assigned > 0.01f * pool) {
+                    sb.append(String.format("   - %-25s : %.0f (%.2f%%)\n",
+                            industryOutputPairs.get(i),
+                            assigned,
+                            100f * assigned / Math.max(1f, pool)));
+                }
+            }
+
+            if (used > pool + 1e-3f)
+                sb.append("   ⚠ Overcapacity!\n");
+            else if (used < 0)
+                sb.append("   ⚠ Negative assignment!\n");
+
+            sb.append("\n");
+        }
+
+        sb.append("=== End of Report ===\n");
+        Global.getLogger(WorkforcePlanner.class).info(sb.toString());
+    }
+
+    public static final void logOutputsPerMarketCSV(
+        List<List<Integer>> outputsPerMarket,
+        List<MarketAPI> markets,
+        List<String> industryOutputPairs
+    ) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Output/Market");
+        for (MarketAPI market : markets) {
+            sb.append(",").append(market.getName());
+        }
+        sb.append("\n");
+
+        for (int j = 0; j < industryOutputPairs.size(); j++) {
+            sb.append(industryOutputPairs.get(j));
+
+            for (int m = 0; m < markets.size(); m++) {
+                List<Integer> available = outputsPerMarket.get(m);
+                boolean exists = available.contains(j);
+
+                sb.append(",");
+                sb.append(exists ? "O" : "X");
+            }
+            sb.append("\n");
+        }
+
+        Global.getLogger(WorkforcePlanner.class).info(sb.toString());
+    }
+}

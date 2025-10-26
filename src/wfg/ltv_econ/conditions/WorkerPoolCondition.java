@@ -107,13 +107,19 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         return true;
     }
 
-    public final static void initialize() {
+    public static final void initialize() {
         // All existing markets
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (market.hasCondition(ConditionID) || market.getFactionId().equals(Factions.NEUTRAL)) {
-                continue;
-            }
-            market.addCondition(ConditionID);
+            addConditionToMarket(market);
         }
+    }
+
+    public static final void addConditionToMarket(MarketAPI market) {
+        if (market.hasCondition(ConditionID) ||
+            market.getFactionId().equals(Factions.NEUTRAL) ||
+            !market.isInEconomy()
+        ) return;
+
+        market.addCondition(ConditionID);
     }
 }

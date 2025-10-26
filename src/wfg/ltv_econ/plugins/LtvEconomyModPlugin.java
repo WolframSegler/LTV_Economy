@@ -9,24 +9,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.economy.CommodityStats;
-import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.economy.IndustryConfigManager;
 import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
-import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
-import wfg.ltv_econ.ui.panels.ColonyInventoryButton;
-import wfg.ltv_econ.ui.panels.LtvComIconPanel;
-import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
-import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
-import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
-import wfg.ltv_econ.ui.panels.LtvIndustryWidget;
-import wfg.ltv_econ.util.ListenerFactory;
-import wfg.ltv_econ.util.RfReflectionUtils;
-import wfg.reflection.ReflectionUtils;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
@@ -34,30 +19,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     public static final String WorkerReg = "ltv_econ_worker_registry";
 
     @Override
-    public void onApplicationLoad() throws Exception {
-        // Force early load classes to prevent lag.
-        Class<?> clazz = null;
-        clazz = ListenerFactory.class;
-        clazz = RfReflectionUtils.class;
-        clazz = ReflectionUtils.class;
-        clazz = CommodityStats.class;
-        clazz = CompatLayer.class;
-        clazz = IndustryConfigManager.class;
-        clazz = IndustryIOs.class;
-        clazz = EconomyEngine.class;
-        clazz = WorkerRegistry.class;
-        clazz = IndustryTooltips.class;
-        clazz = LtvMarketReplacer.class;
-        clazz = ComDetailDialog.class;
-        clazz = ColonyInventoryButton.class;
-        clazz = LtvComIconPanel.class;
-        clazz = LtvCommodityPanel.class;
-        clazz = LtvCommodityRowPanel.class;
-        clazz = LtvIndustryListPanel.class;
-        clazz = LtvIndustryWidget.class;
-
-        if (clazz != null) return;
-    }
+    public void onApplicationLoad() throws Exception {}
 
     @Override
     public void onNewGame() {

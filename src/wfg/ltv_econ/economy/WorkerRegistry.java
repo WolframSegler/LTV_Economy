@@ -11,6 +11,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
+import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -45,7 +46,7 @@ public class WorkerRegistry {
     }
 
     public final void register(MarketAPI market, Industry ind) {
-        final String key = makeKey(market.getId(), ind.getId());
+        final String key = makeKey(market.getId(), IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec()));
         if (EconomyEngine.isWorkerAssignable(ind)) {
             registry.putIfAbsent(key, new WorkerIndustryData(market, ind));
         }
@@ -58,8 +59,8 @@ public class WorkerRegistry {
         }
     }
 
-    public final void remove(String marketID, String indID) {
-        registry.remove(makeKey(marketID, indID));
+    public final void remove(String marketID, IndustrySpecAPI ind) {
+        registry.remove(makeKey(marketID, IndustryIOs.getBaseIndIDifNoConfig(ind)));
     }
 
     public final void remove(String marketID) {
@@ -97,12 +98,16 @@ public class WorkerRegistry {
         return registry.get(makeKey(marketID, industryID));
     }
 
+    public final WorkerIndustryData getData(String marketID, IndustrySpecAPI ind) {
+        return getData(marketID, IndustryIOs.getBaseIndIDifNoConfig(ind));
+    }
+
     public final void setData(WorkerIndustryData data) {
         registry.put(makeKey(data.marketID, data.indID), data);
     }
 
-    private static final String makeKey(String marketId, String industryId) {
-        return marketId + "::" + industryId;
+    private static final String makeKey(String marketID, String industryID) {
+        return marketID + "::" + industryID;
     }
 
     public final List<WorkerIndustryData> getRegister() {
@@ -191,22 +196,27 @@ public class WorkerRegistry {
          * @return A boolean indicating the success of the operation.
          */
         public final boolean setRatioForOutput(String comID, float ratio) {
-            if (ratio < 0) ratio = 0;
-            if (ratio > 1) ratio = 1;
-
             if (!outputRatios.containsKey(comID)) outputRatios.put(comID, 0f);
 
-            final float diff = ratio - outputRatios.get(comID);
-            final float result = outputRatioSum + diff;
+            final float oldRatio = outputRatios.get(comID);
+            float diff = ratio - oldRatio;
 
-            if (result > 1f) return false;
-            if (getPoolCondition(market).getFreeWorkerRatio() - diff < 0f) return false;
+            // compute allowed adjustment based on total sum
+            final float maxAllowedDiff = 1f - outputRatioSum;
+            final float minAllowedDiff = -getPoolCondition(market).getFreeWorkerRatio();
 
-            outputRatios.put(comID, ratio);
-            outputRatioSum = result;
+            // clamp the diff to the allowed range
+            if (diff > maxAllowedDiff) diff = maxAllowedDiff;
+            if (diff < minAllowedDiff) diff = minAllowedDiff;
+
+            // apply adjusted ratio
+            float newRatio = oldRatio + diff;
+            outputRatios.put(comID, newRatio);
+            outputRatioSum += diff;
 
             return true;
         }
+
 
         public final void recalculateOutputRatioSum() {
             float sum = 0f;
@@ -227,10 +237,12 @@ public class WorkerRegistry {
 
         public static final WorkerPoolCondition getPoolCondition(MarketAPI market) {
 
-            final MarketConditionAPI workerPoolCondition = market.getCondition(WorkerPoolCondition.ConditionID);
-            if (workerPoolCondition == null) return null;
-
-            return (WorkerPoolCondition) workerPoolCondition.getPlugin();
+            MarketConditionAPI cond = market.getCondition(WorkerPoolCondition.ConditionID);
+            if (cond == null) {
+                WorkerPoolCondition.addConditionToMarket(market);
+                cond = market.getCondition(WorkerPoolCondition.ConditionID);
+            }
+            return (cond != null) ? (WorkerPoolCondition) cond.getPlugin() : null;
         }
     }
 }

@@ -32,6 +32,7 @@ public class LaborConfigLoader {
             LaborConfig.LPV_day = LaborConfig.LPV_month / 30f;
             LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
             LaborConfig.populationRatioThatAreWorkers = (float) root.getDouble("populationRatioThatAreWorkers");
+            LaborConfig.productionBuffer = 1f + (float) root.getDouble("productionBuffer");
             LaborConfig.RoVC_average = (float) root.getDouble("RoVC_average");
             LaborConfig.RoVC_industry = (float) root.getDouble("RoVC_industry");
             LaborConfig.RoVC_manufacture = (float) root.getDouble("RoVC_manufacture");
@@ -57,6 +58,8 @@ public class LaborConfigLoader {
         public static float LPV_day;
 
         public static float populationRatioThatAreWorkers;
+
+        public static float productionBuffer;
 
         public static float RoVC_average;
         public static float RoVC_industry;

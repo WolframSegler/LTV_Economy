@@ -574,7 +574,7 @@ public class IndustryIOs {
 
         if (output.usesWorkers && !output.isAbstract) {
             final WorkerRegistry reg = WorkerRegistry.getInstance();
-            final WorkerIndustryData data = reg.getData(market.getId(), ind.getId());
+            final WorkerIndustryData data = reg.getData(market.getId(), ind.getSpec());
             if (data != null) {
                 scale *= data.getAssignedForOutput(outputID);
             }
@@ -781,13 +781,14 @@ public class IndustryIOs {
 
         if (indConfig == null) {
             indConfig = ind_config.get(getBaseIndustryID(ind));
-        }
+
         if (indConfig == null && hasDynamicConfig(ind)) {
             indConfig = dynamic_ind_config.get(ind.getId());
 
-            if (indConfig == null) {
-                indConfig = dynamic_ind_config.get(getBaseIndustryID(ind));
-            }
+        if (indConfig == null) {
+            indConfig = dynamic_ind_config.get(getBaseIndustryID(ind));
+        }
+        }
         }
 
         return indConfig;
@@ -808,6 +809,13 @@ public class IndustryIOs {
         }
 
         return currentInd.getId();
+    }
+
+    public static final String getBaseIndIDifNoConfig(IndustrySpecAPI ind) {
+        if (ind_config.containsKey(ind.getId()) || dynamic_ind_config.containsKey(ind.getId())) {
+            return ind.getId();
+        }
+        return getBaseIndustryID(ind);
     }
 
     /**

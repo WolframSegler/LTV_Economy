@@ -70,7 +70,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         this.market = ind.getMarket();
         this.panelWidth = panelWidth;
         this.panelHeight = panelHeight;
-        this.data = reg.getData(ind.getMarket().getId(), ind.getId());
+        this.data = reg.getData(ind.getMarket().getId(), ind.getSpec());
         this.previewData = new WorkerIndustryData(data);
         reg.setData(previewData);
 
@@ -198,7 +198,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             outputSlider.setRoundBarValue(true);
             outputSlider.setClampCurrToMax(true);
 
-            outputSlider.setRoundingIncrement(2);
+            outputSlider.setRoundingIncrement(1);
             outputSlider.setBarColor(new Color(20, 125, 200));
             outputSlider.setHeight(sliderHeight);
             outputSlider.setWidth(sliderWidth);
