@@ -49,63 +49,9 @@ public final class CompatLayer {
     public static final MutableStat convertIndDemandStat(Industry ind, String inputID) {
         final MutableStat src = ind.getDemand(inputID).getQuantity();
         final MutableStat dest = new MutableStat(0f);
+        final MutableStat modifier = getDemandReductionMutable(ind, inputID);
 
-        final MutableStat modifier = ind.getDemandReduction().createCopy();
-
-        /*
-        * Bonuses inside demandReduction are positive, even though they reduce demand.
-        * Their sign must be flipped for compatibility
-        */ 
-        for (StatMod mod : modifier.getFlatMods().values()) {
-            if (mod.value > 0) mod.value = -mod.value;
-        }
-
-        float totalInput = IndustryIOs.getRealSumInput(ind, inputID);
-        float nonAbstractInput = 0f;
-        float ratio = 0f;
-
-        final Map<String, OutputCom> outputs = IndustryIOs.getIndConfig(ind).outputs;
-
-        for (String outputID : IndustryIOs.getRealOutputs(ind, true).keySet()) {
-            OutputCom output = outputs.get(outputID);
-
-            Map<String, Float> inputs = IndustryIOs.getRealInputs(ind, outputID, false);
-
-            if (inputs.containsKey(inputID) && !output.isAbstract) {
-                nonAbstractInput += inputs.get(inputID);
-            }
-        }
-        ratio = totalInput > 0 ? nonAbstractInput / totalInput : 0f;
-
-
-
-        if (ind.getSupplyBonus() != null && ratio > 0) {
-            final MutableStat scaledBonus = ind.getSupplyBonus().createCopy();
-
-            for (Iterator<StatMod> it = scaledBonus.getFlatMods().values().iterator(); it.hasNext();) {
-                StatMod mod = it.next();
-                scaledBonus.modifyMult(
-                    mod.source, industryModConverter((int) mod.value), mod.desc
-                );
-                it.remove();
-            }
-
-            for (StatMod mod : scaledBonus.getMultMods().values()) {
-                if (ratio < 1) {
-                    mod.value = 1f + (mod.value - 1f) * ratio;
-                }
-            }
-
-            for (StatMod mod : scaledBonus.getPercentMods().values()) {
-                if (ratio < 1) {
-                    mod.value *= ratio;
-                }
-            }
-
-            modifier.applyMods(scaledBonus);
-        }
-
-        copyMods(ind, src, modifier, dest, DEMAND_RED_MOD, inputID, true);
+        copyMods(ind, src, modifier, dest, inputID, true);
         return dest;
     }
 
@@ -114,15 +60,34 @@ public final class CompatLayer {
         final MutableStat supplyBonus = ind.getSupplyBonus();
         final MutableStat dest = new MutableStat(0f);
 
-        copyMods(ind, src, supplyBonus, dest, SUPPLY_BONUS_MOD, outputID, false);
+        copyMods(ind, src, supplyBonus, dest, outputID, false);
         return dest;
     }
 
     private static final void copyMods(Industry ind, MutableStat base, MutableStat bonus, MutableStat dest,
-        String modID, String comID, boolean isDemand) {
+        String comID, boolean isDemand) {
 
-        float value = isDemand ? IndustryIOs.getRealSumInput(ind, comID) : IndustryIOs.getRealOutput(ind, comID);
+        float value = getBaseValue(ind, comID, isDemand);
+        dest.setBaseValue(value);
         if (value == 0) return;
+
+        dest.applyMods(getModifiers(ind, comID, base, bonus));
+    }
+
+    /**
+     * Retrieve the base value (worker-dependent) of an industry for a given commodity.
+     */
+    public static final float getBaseValue(Industry ind, String comID, boolean isDemand) {
+        float value = isDemand ? IndustryIOs.getRealSumInput(ind, comID) : IndustryIOs.getRealOutput(ind, comID);
+        boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
+        return hasRelevantCondition ? value : 0f;
+    }
+
+    
+    public static final MutableStat getModifiers(
+        Industry ind, String comID, MutableStat base, MutableStat bonus
+    ) {
+        MutableStat modifierStat = new MutableStat(1f);
 
         String installedItemID = ind.getSpecialItem() != null ? ind.getSpecialItem().getId() : null;
 
@@ -130,38 +95,42 @@ public final class CompatLayer {
             for (StatMod mod : base.getFlatMods().values()) {
                 if (mod.source.contains(installedItemID)) {
                     float converted = industryModConverter((int) mod.value);
-                    dest.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
+                    modifierStat.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
                 }
             }
         }
 
-        boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
+        applyResourceDepositMods(ind, modifierStat, comID);
 
-        if (hasRelevantCondition) {
-            dest.setBaseValue(value);
-        } else {
-            dest.setBaseValue(0);
-            return;
-        }
-
-        applyResourceDepositMods(ind, dest, comID);
-
-        if (bonus == null) return;
+        if (bonus == null) return modifierStat;
         int bonusID = 0;
 
         for (StatMod mod : bonus.getPercentMods().values()) {
-            dest.modifyPercent(bonusID++ + "::" + ind.getId(), mod.value, mod.desc);
+            modifierStat.modifyPercent(bonusID++ + "::" + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getMultMods().values()) {
-            dest.modifyMult(bonusID++ + "::" + ind.getId(), mod.value, mod.desc);
+            modifierStat.modifyMult(bonusID++ + "::" + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
 
-            dest.modifyMult(bonusID++ + "::" + ind.getId(), converted, mod.desc);
+            modifierStat.modifyMult(bonusID++ + "::" + ind.getId(), converted, mod.desc);
         }
+
+        return modifierStat;
+    }
+
+    public static final float getModifiersMult(
+        Industry ind, String comID, boolean isDemand
+    ) {
+        final MutableStat bonus = isDemand ?
+            getDemandReductionMutable(ind, comID) : ind.getSupplyBonus();
+        final MutableStat base = isDemand ?
+            ind.getDemand(comID).getQuantity() : ind.getSupply(comID).getQuantity();
+
+        return getModifiers(ind, comID, base, bonus).getModifiedValue();
     }
 
     /*
@@ -267,5 +236,63 @@ public final class CompatLayer {
             }
         }
         return hasRelevantCondition;
+    }
+
+    private static final MutableStat getDemandReductionMutable(Industry ind, String inputID) {
+        final MutableStat modifier = ind.getDemandReduction().createCopy();
+
+        /*
+        * Bonuses inside demandReduction are positive, even though they reduce demand.
+        * Their sign must be flipped for compatibility
+        */ 
+        for (StatMod mod : modifier.getFlatMods().values()) {
+            if (mod.value > 0) mod.value = -mod.value;
+        }
+
+        float totalInput = IndustryIOs.getRealSumInput(ind, inputID);
+        float nonAbstractInput = 0f;
+        float ratio = 0f;
+
+        final Map<String, OutputCom> outputs = IndustryIOs.getIndConfig(ind).outputs;
+
+        for (String outputID : IndustryIOs.getRealOutputs(ind, true).keySet()) {
+            OutputCom output = outputs.get(outputID);
+
+            Map<String, Float> inputs = IndustryIOs.getRealInputs(ind, outputID, false);
+
+            if (inputs.containsKey(inputID) && !output.isAbstract) {
+                nonAbstractInput += inputs.get(inputID);
+            }
+        }
+        ratio = totalInput > 0 ? nonAbstractInput / totalInput : 0f;
+
+
+        if (ind.getSupplyBonus() != null && ratio > 0) {
+            final MutableStat scaledBonus = ind.getSupplyBonus().createCopy();
+
+            for (Iterator<StatMod> it = scaledBonus.getFlatMods().values().iterator(); it.hasNext();) {
+                StatMod mod = it.next();
+                scaledBonus.modifyMult(
+                    mod.source, industryModConverter((int) mod.value), mod.desc
+                );
+                it.remove();
+            }
+
+            for (StatMod mod : scaledBonus.getMultMods().values()) {
+                if (ratio < 1) {
+                    mod.value = 1f + (mod.value - 1f) * ratio;
+                }
+            }
+
+            for (StatMod mod : scaledBonus.getPercentMods().values()) {
+                if (ratio < 1) {
+                    mod.value *= ratio;
+                }
+            }
+
+            modifier.applyMods(scaledBonus);
+        }
+
+        return modifier;
     }
 }

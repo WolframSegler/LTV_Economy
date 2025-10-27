@@ -18,6 +18,7 @@ import org.apache.commons.math4.legacy.optim.linear.SimplexSolver;
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
@@ -25,6 +26,7 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
+import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 
 public class WorkforcePlanner {
@@ -56,8 +58,9 @@ public class WorkforcePlanner {
 
     public static final double WORKER_COST = 1;     // penatly for a unit of worker used.
     public static final double SLACK_COST = 1300;   // penalty for a unit of deficit regardless of value.
-    public static final double CONCENTRATION_COST = 6;
-    public static final double TOLERANCE = 0.55;
+    public static final double CONCENTRATION_COST = 5.5;
+    public static final double TOLERANCE = 0.4;
+    public static final double MODIFIER_SCALER = 0.025;
 
     // Any lower than 1300 causes the solver to not produce hand_weapons
 
@@ -313,17 +316,39 @@ public class WorkforcePlanner {
         // 4) Spreading assignments across markets
         for (int j = 0; j < numOutputs; j++) {
             double totalCapacity = 0.0;
+            Map<MarketAPI, Double> effectiveCapacities = new HashMap<>();
+            final String outputID = industryOutputPairs.get(j).split("::")[1];
+
             for (int m = 0; m < numMarkets; m++) {
                 if (!outputsPerMarket.get(m).contains(j)) continue;
+
+                final MarketAPI market = markets.get(m);
                 final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
-                totalCapacity += (pool != null) ? pool.getWorkerPool() : 0.0;
+                final long baseCapacity = (pool != null) ? pool.getWorkerPool() : 0;
+
+                float outputMultiplier = 0f;
+                int contributing = 0;
+
+                for (Industry ind : IndustryIOs.getIndustriesForOutput(outputID, market)) {
+                    outputMultiplier += CompatLayer.getModifiersMult(ind, outputID, false);
+                    contributing++;
+                }
+
+                if (contributing > 1) {
+                    outputMultiplier /= contributing;
+                }
+
+                double effectiveCapacity = baseCapacity + baseCapacity * outputMultiplier * MODIFIER_SCALER;
+                effectiveCapacities.put(market, effectiveCapacity);
+                totalCapacity += effectiveCapacity;
             }
 
             for (int m = 0; m < numMarkets; m++) {
                 if (!outputsPerMarket.get(m).contains(j)) continue;
 
-                final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
-                final double marketCapacity = (pool != null) ? pool.getWorkerPool() : 0.0;
+                final double marketCapacity = effectiveCapacities.getOrDefault(
+                    markets.get(m), 0.0
+                );
 
                 final double preferredWorkers = (totalCapacity > 0) ?
                     marketCapacity / totalCapacity * targetVector[j] : 0.0;
@@ -333,7 +358,7 @@ public class WorkforcePlanner {
                 coeffsGE[m * numOutputs + j] = 1.0;          // worker assignment
                 coeffsGE[slackStart + j] = 1.0;              // slack per output
                 constraints.add(new LinearConstraint(
-                        coeffsGE, Relationship.GEQ, preferredWorkers * (1 - TOLERANCE)
+                    coeffsGE, Relationship.GEQ, preferredWorkers * (1 - TOLERANCE)
                 ));
 
                 // x_{m,j} <= preferred + s_j
@@ -341,7 +366,7 @@ public class WorkforcePlanner {
                 coeffsLE[m * numOutputs + j] = 1.0;          // worker assignment
                 coeffsLE[slackStart + j] = -1.0;             // slack per output
                 constraints.add(new LinearConstraint(
-                        coeffsLE, Relationship.LEQ, preferredWorkers * (1 + TOLERANCE)
+                    coeffsLE, Relationship.LEQ, preferredWorkers * (1 + TOLERANCE)
                 ));
             }
         }
