@@ -19,10 +19,13 @@ import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.industry.IndustryGrouper;
+import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 
 public class WorkforcePlanner {
 
@@ -53,6 +56,8 @@ public class WorkforcePlanner {
 
     public static final double WORKER_COST = 1;     // penatly for a unit of worker used.
     public static final double SLACK_COST = 1300;   // penalty for a unit of deficit regardless of value.
+    public static final double CONCENTRATION_COST = 5;
+    public static final double TOLERANCE = 0.4;
 
     // Any lower than 1300 causes the solver to not produce hand_weapons
 
@@ -132,6 +137,16 @@ public class WorkforcePlanner {
         return workers;
     }
 
+    /**
+     * For reduced / grouped matrixes
+     */
+    public static final void logInputMatrix(GroupedMatrix grouped, List<String> coms) {
+        logInputMatrix(grouped.reducedMatrix, grouped.groupNames, coms);
+    }
+
+    /**
+     * For non-reduced / non-grouped Matrixes
+     */
     public static final void logInputMatrix(double[][] A, List<String> industryOutputs, List<String> coms) {
         StringBuilder csv = new StringBuilder(4096);
         csv.append("Commodity/IndustryOutput,");
@@ -147,9 +162,9 @@ public class WorkforcePlanner {
             String commodity = coms.get(i);
             csv.append(commodity).append(",");
 
-            for (int j = 0; j < industryOutputs.size(); j++) {
+            for (int j = 0; j < A[i].length; j++) {
                 csv.append(String.format("%.2f", A[i][j]));
-                if (j < industryOutputs.size() - 1) csv.append(",");
+                if (j < A[i].length - 1) csv.append(",");
             }
             csv.append("\n");
         }
@@ -167,15 +182,25 @@ public class WorkforcePlanner {
         Global.getLogger(WorkforcePlanner.class).info(demandLog);
     }
 
+    /**
+     * For reduced / grouped matrixes
+     */
+    public static final void logWorkerTargets(double[] workerVector, GroupedMatrix groupedMatrix) {
+        logWorkerTargets(workerVector, groupedMatrix.groupNames);
+    }
+
+    /**
+     * For non-reduced / non-grouped Matrixes
+     */
     public static final void logWorkerTargets(double[] workerVector, List<String> industryOutputPairs) {
         List<String> lines = new ArrayList<>();
-        for (int i = 0; i < industryOutputPairs.size(); i++) {
+        for (int i = 0; i < workerVector.length; i++) {
             String line = industryOutputPairs.get(i) + ": " + Math.round(workerVector[i]);
             lines.add(line);
         }
         String logString = lines.stream()
-                .map(s -> "    " + s)
-                .collect(Collectors.joining("\n"));
+            .map(s -> "    " + s)
+            .collect(Collectors.joining("\n"));
         Global.getLogger(WorkforcePlanner.class).info(logString);
     }
 
@@ -211,23 +236,39 @@ public class WorkforcePlanner {
      * @param markets List of markets to distribute to
      * @param industryOutputPairs industryID::outputID
      * @param outputsPerMarket List of markets containing list of indexes for industryOutputPairs
+     * @param reducedMatrix containts the group data of the reduced matrix.
      * @return Map from market to worker assignments array (length = industryOutputPairs.size())
      */
     public static Map<MarketAPI, float[]> allocateWorkersToMarkets(
         double[] targetVector,
         List<MarketAPI> markets,
         List<String> industryOutputPairs,
-        List<List<Integer>> outputsPerMarket
+        List<List<Integer>> outputsPerMarket,
+        GroupedMatrix groupingData
     ) {
+        Pair<List<String>, List<List<Integer>>> groupedData =
+        IndustryGrouper.applyGroupingToMarketData(
+            markets,
+            industryOutputPairs,
+            outputsPerMarket,
+            groupingData.memberToGroup
+        );
+        outputsPerMarket = groupedData.two;
 
         final int numMarkets = markets.size();
-        final int numOutputs = industryOutputPairs.size();
-        final int nVars = numMarkets * numOutputs + numOutputs; // extra variables for slack per output
+        final int numOutputs = groupedData.one.size();
+        final int nVars = numMarkets * numOutputs * 2; // original + slack per market/output
         final int slackStart = numMarkets * numOutputs;
 
         final double[] objectiveCoeffs = new double[nVars];
         for (int j = 0; j < numOutputs; j++) {
             objectiveCoeffs[slackStart + j] = 1.0;
+        }
+        for (int m = 0; m < numMarkets; m++) {
+            for (int j = 0; j < numOutputs; j++) {
+                objectiveCoeffs[m * numOutputs + j] = WORKER_COST;  // regular worker cost
+                objectiveCoeffs[slackStart + m * numOutputs + j] = CONCENTRATION_COST; // penalize deviation
+            }
         }
 
         LinearObjectiveFunction f = new LinearObjectiveFunction(objectiveCoeffs, 0.0);
@@ -265,6 +306,46 @@ public class WorkforcePlanner {
             constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetVector[j]));
         }
 
+
+        // 4) Spreading assignments across markets
+        for (int j = 0; j < numOutputs; j++) {
+            // compute total market capacity that can produce output j
+            double totalCapacity = 0.0;
+            for (int m = 0; m < numMarkets; m++) {
+                if (!outputsPerMarket.get(m).contains(j)) continue;
+                WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
+                totalCapacity += (pool != null) ? pool.getWorkerPool() : 0.0;
+            }
+
+            for (int m = 0; m < numMarkets; m++) {
+                if (!outputsPerMarket.get(m).contains(j)) continue;
+
+                WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
+                double marketCapacity = (pool != null) ? pool.getWorkerPool() : 0.0;
+
+                // preferred share proportional to capacity
+                double preferredWorkers = (totalCapacity > 0) ? 
+                    marketCapacity / totalCapacity * targetVector[j] : 0.0;
+
+                double[] coeffs = new double[nVars];
+                coeffs[m * numOutputs + j] = 1.0;
+                coeffs[slackStart + m * numOutputs + j] = 1.0;
+
+                // x_{m,j} + s >= preferred + TOLERANCE
+                constraints.add(new LinearConstraint(
+                    coeffs, Relationship.GEQ, preferredWorkers * (1 - TOLERANCE)
+                ));
+
+                // x_{m,j} - s <= preferred - TOLERANCE
+                double[] coeffsUpper = new double[nVars];
+                coeffsUpper[m * numOutputs + j] = 1.0;
+                coeffsUpper[slackStart + m * numOutputs + j] = -1.0;
+                constraints.add(new LinearConstraint(
+                    coeffsUpper, Relationship.LEQ, preferredWorkers * (1 + TOLERANCE)
+                ));
+            }
+        }
+
         SimplexSolver solver = new SimplexSolver();
         PointValuePair solution = solver.optimize(
             new MaxIter(5000),
@@ -274,8 +355,8 @@ public class WorkforcePlanner {
             new NonNegativeConstraint(true)
         );
 
-        double[] vars = solution.getPoint();
-        Map<MarketAPI, float[]> marketAssignments = new HashMap<>();
+        final double[] vars = solution.getPoint();
+        final Map<MarketAPI, float[]> marketAssignments = new HashMap<>();
 
         for (int m = 0; m < numMarkets; m++) {
             float[] assignment = new float[numOutputs];
@@ -285,7 +366,15 @@ public class WorkforcePlanner {
             marketAssignments.put(markets.get(m), assignment);
         }
 
-        return marketAssignments;
+        final Map<MarketAPI, float[]> expandedAssignments =
+        IndustryGrouper.expandGroupedAssignments(
+            marketAssignments,
+            groupingData,
+            markets,
+            industryOutputPairs
+        );
+
+        return expandedAssignments;
     }
 
     public static final void logWorkerAssignments(

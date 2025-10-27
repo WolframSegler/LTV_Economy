@@ -251,11 +251,11 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final Map<String, MutableStat> supplyList = new HashMap<>();
         final Map<String, MutableStat> demandList = new HashMap<>();
 
-        for (String comID : IndustryIOs.getOutputs(industry, false).keySet()) {
+        for (String comID : IndustryIOs.getRealOutputs(industry, false).keySet()) {
             supplyList.put(comID, CompatLayer.convertIndSupplyStat(industry, comID));
         }
 
-        for (String comID : IndustryIOs.getInputs(industry, false)) {
+        for (String comID : IndustryIOs.getRealInputs(industry, false)) {
             demandList.put(comID, CompatLayer.convertIndDemandStat(industry, comID));
         }
 

@@ -28,7 +28,9 @@ import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 import wfg.wrap_ui.util.NumFormat;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
@@ -346,7 +348,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 Map<String, Float> inputWeights;
                 float sum = 0f;
 
-                inputWeights = IndustryIOs.getInputs(ind, stats.comID, true);
+                inputWeights = IndustryIOs.getRealInputs(ind, stats.comID, true);
                 if (inputWeights.isEmpty()) continue;
                 for (float value : inputWeights.values()) {
                     sum += value;
@@ -385,13 +387,13 @@ public class EconomyEngine extends BaseCampaignEventListener
     public final void assignWorkers() {
         final WorkerRegistry reg = WorkerRegistry.getInstance();
 
-        final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputs();
-        final Map<String, Map<String, Map<String, Float>>> baseInputs = IndustryIOs.getBaseInputs();
+        final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
+        final Map<String, Map<String, Map<String, Float>>> baseInputs = IndustryIOs.getBaseInputsMap();
         final String key = "::";
 
         List<String> commodities = getEconCommodities().stream()
-                .map(CommoditySpecAPI::getId)
-                .collect(Collectors.toList());
+            .map(CommoditySpecAPI::getId)
+            .collect(Collectors.toList());
 
         final SettingsAPI settings = Global.getSettings();
 
@@ -399,7 +401,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         while (it.hasNext()) {
             String com = it.next();
             boolean remove = true;
-            for (Map.Entry<String, Map<String, Float>> entry : IndustryIOs.getBaseOutputs().entrySet()) {
+            for (Map.Entry<String, Map<String, Float>> entry : baseOutputs.entrySet()) {
                 IndustrySpecAPI spec = settings.getIndustrySpec(entry.getKey());
                 if (IndustryIOs.getIndConfig(spec).workerAssignable && entry.getValue().containsKey(com)) {
                     remove = false;
@@ -507,10 +509,14 @@ public class EconomyEngine extends BaseCampaignEventListener
             outputsPerMarket.add(outputIndexes);
         }
 
-        final double[] workerVector = WorkforcePlanner.calculateGlobalWorkerTargets(A, d);
+        final GroupedMatrix A_r = IndustryGrouper.groupSimilarIndustries(
+            A, industryOutputPairs, 0.01
+        );
+
+        final double[] workerVector = WorkforcePlanner.calculateGlobalWorkerTargets(A_r.reducedMatrix, d);
 
         final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.allocateWorkersToMarkets(
-            workerVector, markets, industryOutputPairs, outputsPerMarket
+            workerVector, markets, industryOutputPairs, outputsPerMarket, A_r
         );
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {

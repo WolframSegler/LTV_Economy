@@ -59,16 +59,16 @@ public final class CompatLayer {
             if (mod.value > 0) mod.value = -mod.value;
         }
 
-        float totalInput = IndustryIOs.getSumInput(ind, inputID);
+        float totalInput = IndustryIOs.getRealSumInput(ind, inputID);
         float nonAbstractInput = 0f;
         float ratio = 0f;
 
         final Map<String, OutputCom> outputs = IndustryIOs.getIndConfig(ind).outputs;
 
-        for (String outputID : IndustryIOs.getOutputs(ind, true).keySet()) {
+        for (String outputID : IndustryIOs.getRealOutputs(ind, true).keySet()) {
             OutputCom output = outputs.get(outputID);
 
-            Map<String, Float> inputs = IndustryIOs.getInputs(ind, outputID, false);
+            Map<String, Float> inputs = IndustryIOs.getRealInputs(ind, outputID, false);
 
             if (inputs.containsKey(inputID) && !output.isAbstract) {
                 nonAbstractInput += inputs.get(inputID);
@@ -120,7 +120,7 @@ public final class CompatLayer {
     private static final void copyMods(Industry ind, MutableStat base, MutableStat bonus, MutableStat dest,
         String modID, String comID, boolean isDemand) {
 
-        float value = isDemand ? IndustryIOs.getSumInput(ind, comID) : IndustryIOs.getOutput(ind, comID);
+        float value = isDemand ? IndustryIOs.getRealSumInput(ind, comID) : IndustryIOs.getRealOutput(ind, comID);
         if (value == 0) return;
 
         String installedItemID = ind.getSpecialItem() != null ? ind.getSpecialItem().getId() : null;

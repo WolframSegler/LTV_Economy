@@ -592,24 +592,19 @@ public class IndustryIOs {
      * Returns 0 if the output does not exist, if the market conditions are not met,
      * or if legality prevents the output from being produced.
      */
-    public static final float getOutput(Industry ind, String outputID) {
-        final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
-
-        IndustryConfig cfg = ind_config.get(indID);
-        if (cfg == null) return 0;
-        OutputCom output = cfg.outputs.get(outputID);
+    public static final float getRealOutput(Industry ind, String outputID) {
+        final IndustryConfig cfg = getIndConfig(ind);
+        final OutputCom output = cfg.outputs.get(outputID);
         if (output == null || output.isAbstract) return 0;
 
-        Map<String, Float> indMap = baseOutputs.get(indID);
-        if (indMap == null) return 0;
-        Float value = indMap.get(outputID);
-        if (value == null) return 0;
+        final float value = getBaseOutput(ind.getSpec(), outputID);
+        if (value == 0) return 0;
 
         final MarketAPI market = ind.getMarket();
 
         if (!isOutputValidForMarket(output, market, outputID)) return 0;
 
-        float scale = calculateScale(ind, market, output, outputID, cfg);
+        final float scale = calculateScale(ind, market, output, outputID, cfg);
 
         return value * scale;
     }
@@ -619,29 +614,18 @@ public class IndustryIOs {
      * Returns 0 if the output or input does not exist, if the market conditions are not met,
      * or if legality prevents the output from being produced.
      */
-    public static final float getInput(Industry ind, String outputID, String inputID) {
-        final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
+    public static final float getRealInput(Industry ind, String outputID, String inputID) {
+        final IndustryConfig cfg = getIndConfig(ind);
+        final OutputCom output = cfg.outputs.get(outputID);
 
-        IndustryConfig cfg = ind_config.get(indID);
-        if (cfg == null) return 0;
-
-        OutputCom output = cfg.outputs.get(outputID);
-        if (output == null) return 0;
-
-        Map<String, Map<String, Float>> indMap = baseInputs.get(indID);
-        if (indMap == null) return 0;
-
-        Map<String, Float> inputMap = indMap.get(outputID);
-        if (inputMap == null) return 0;
-
-        Float value = inputMap.get(inputID);
-        if (value == null) return 0;
+        final float value = getBaseInput(ind.getSpec(), outputID, inputID);
+        if (value == 0) return 0;
 
         final MarketAPI market = ind.getMarket();
 
         if (!isOutputValidForMarket(output, market, outputID)) return 0;
 
-        float scale = calculateScale(ind, market, output, outputID, cfg);
+        final float scale = calculateScale(ind, market, output, outputID, cfg);
 
         return value * scale;
     }
@@ -649,15 +633,24 @@ public class IndustryIOs {
     /**
      * Get the total demand of an industry for a given commodity across all outputs.
      */
-    public static final float getSumInput(Industry ind, String inputID) {
-        final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
-
-        Map<String, Map<String, Float>> indMap = baseInputs.get(indID);
-        if (indMap == null) return 0;
+    public static final float getRealSumInput(Industry ind, String inputID) {
+        final Map<String, Map<String, Float>> indMap = getBaseInputs(ind.getSpec());
+        final IndustryConfig cfg = getIndConfig(ind);
+        final MarketAPI market = ind.getMarket();
 
         float total = 0f;
-        for (String outputID : indMap.keySet()) {
-            total += getInput(ind, outputID, inputID);
+        for (Map.Entry<String,Map<String,Float>> inputMap : indMap.entrySet()) {
+            final OutputCom output = cfg.outputs.get(inputMap.getKey());
+
+            for (Map.Entry<String, Float> entry : inputMap.getValue().entrySet()) {
+                if (entry.getKey().equals(inputID)) {
+                    if (!isOutputValidForMarket(output, market, inputMap.getKey())) continue;
+
+                    final float scale = calculateScale(ind, market, output, inputMap.getKey(), cfg);
+
+                    total += entry.getValue() * scale;
+                }
+            }
         }
         return total;
     }
@@ -665,17 +658,12 @@ public class IndustryIOs {
     /** 
      * Returns the modified output map for a given industry.
      */
-    public static final Map<String, Float> getOutputs(Industry ind, boolean includeAbstract) {
-        if (ind == null || ind.getId() == null) return Collections.emptyMap();
-
-        final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
-
-        final Map<String, Float> outputs = baseOutputs.get(indID);
-        if (outputs == null) return Collections.emptyMap();
+    public static final Map<String, Float> getRealOutputs(Industry ind, boolean includeAbstract) {
+        final Map<String, Float> outputs = getBaseOutputs(ind.getSpec());
 
         Map<String, Float> scaledOutputs = new HashMap<>();
         for (String output : outputs.keySet()) {
-            float value = getOutput(ind, output);
+            float value = getRealOutput(ind, output);
             if (includeAbstract || value > 0) scaledOutputs.put(output, value);
         }
 
@@ -685,21 +673,13 @@ public class IndustryIOs {
     /** 
      * Returns the modified inputs map for a given industry and output.
      */
-    public static final Map<String, Float> getInputs(Industry ind, String outputID, boolean includeAbstract) {
-        if (ind == null || ind.getId() == null) return Collections.emptyMap();
-
-        final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
-
-        final Map<String, Map<String, Float>> outputs = baseInputs.get(indID);
-        if (outputs == null) return Collections.emptyMap();
-
-        final Map<String, Float> baseInputMap = outputs.get(outputID);
-        if (baseInputMap == null) return Collections.emptyMap();
+    public static final Map<String, Float> getRealInputs(Industry ind, String outputID, boolean includeAbstract) {
+        final Map<String, Map<String, Float>> outputs = getBaseInputs(ind.getSpec());
 
         Map<String, Float> scaledInputs = new HashMap<>();
-        for (Map.Entry<String, Float> entry : baseInputMap.entrySet()) {
-            float value = getInput(ind, outputID, entry.getKey());
-            if (includeAbstract || value > 0) scaledInputs.put(entry.getKey(), value);
+        for (String output : outputs.get(outputID).keySet()) {
+            float value = getRealInput(ind, outputID, output);
+            if (includeAbstract || value > 0) scaledInputs.put(output, value);
         }
 
         return scaledInputs;
@@ -708,7 +688,7 @@ public class IndustryIOs {
     /**
      * Returns a list of all the inputs for a given industry.
      */
-    public static final Set<String> getInputs(Industry ind, boolean includeAbstract) {
+    public static final Set<String> getRealInputs(Industry ind, boolean includeAbstract) {
         if (ind == null || ind.getId() == null) return Collections.emptySet();
 
         final String indID = ind_config.get(ind.getId()) != null ? ind.getId() : getBaseIndustryID(ind);
@@ -725,6 +705,58 @@ public class IndustryIOs {
         }
 
         return inputSet;
+    }
+
+    /**
+     * Get the pre-calculated base output of an industry for a given commodity.
+     * Ignores market conditions, scaling, and legality.
+     */
+    public static final float getBaseOutput(IndustrySpecAPI ind, String outputID) {
+        final Map<String, Float> indMap = baseOutputs.get(getBaseIndIDifNoConfig(ind));
+        if (indMap == null) return 0f;
+        return indMap.getOrDefault(outputID, 0f);
+    }
+
+    /**
+     * Get the pre-calculated base input required by an industry for a specific output.
+     * Ignores market context.
+     */
+    public static final float getBaseInput(IndustrySpecAPI ind, String outputID, String inputID) {
+        final Map<String, Map<String, Float>> indMap = baseInputs.get(getBaseIndIDifNoConfig(ind));
+        if (indMap == null) return 0f;
+        final Map<String, Float> inputMap = indMap.get(outputID);
+        if (inputMap == null) return 0f;
+        return inputMap.getOrDefault(inputID, 0f);
+    }
+
+    /**
+     * Get total pre-calculated demand for a specific input across all outputs.
+     */
+    public static final float getBaseSumInput(IndustrySpecAPI ind, String inputID) {
+        final Map<String, Map<String, Float>> indMap = baseInputs.get(getBaseIndIDifNoConfig(ind));
+        if (indMap == null) return 0f;
+
+        float total = 0f;
+        for (Map<String, Float> inputMap : indMap.values()) {
+            total += inputMap.getOrDefault(inputID, 0f);
+        }
+        return total;
+    }
+
+    /**
+     * Get the map of pre-calculated outputs for an industry.
+     */
+    public static final Map<String, Float> getBaseOutputs(IndustrySpecAPI ind) {
+        final Map<String, Float> map = baseOutputs.get(getBaseIndIDifNoConfig(ind));
+        return (map != null) ? Collections.unmodifiableMap(map) : Collections.emptyMap();
+    }
+
+    /**
+     * Get the map of pre-calculated inputs for an industry.
+     */
+    public static final Map<String, Map<String, Float>> getBaseInputs(IndustrySpecAPI ind) {
+        final Map<String, Map<String, Float>> map = baseInputs.get(getBaseIndIDifNoConfig(ind));
+        return (map != null) ? Collections.unmodifiableMap(map) : Collections.emptyMap();
     }
 
     public static final Map<String, List<String>> getInputToOutput() {
@@ -769,6 +801,9 @@ public class IndustryIOs {
         return inputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }
 
+    /**
+     * Works for both dynamic and static configs.
+     */
     public static final IndustryConfig getIndConfig(Industry ind) {
         return getIndConfig(ind.getSpec());
     }
@@ -821,14 +856,14 @@ public class IndustryIOs {
     /**
      * Do not modify the content of this map
      */
-    public static final Map<String, Map<String, Float>> getBaseOutputs() {
+    public static final Map<String, Map<String, Float>> getBaseOutputsMap() {
         return Collections.unmodifiableMap(baseOutputs);
     }
 
     /**
      * Do not modify the content of this map
      */
-    public static final Map<String, Map<String, Map<String, Float>>> getBaseInputs() {
+    public static final Map<String, Map<String, Map<String, Float>>> getBaseInputsMap() {
         return Collections.unmodifiableMap(baseInputs);
     }
 

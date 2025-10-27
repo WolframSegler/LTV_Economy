@@ -257,7 +257,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         boolean hasConfig = IndustryIOs.hasConfig(m_industry);
 
         if (hasConfig && m_industry.isFunctional() && !m_industry.isBuilding()) {
-            for (String comID : IndustryIOs.getInputs(m_industry, false)) {
+            for (String comID : IndustryIOs.getRealInputs(m_industry, false)) {
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID);
                 CommodityStats stats = EconomyEngine.getInstance().getComStats(comID, getMarket().getId());
 
