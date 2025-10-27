@@ -490,13 +490,20 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         for (int i = 0; i < markets.size(); i++) {
             final List<Integer> outputIndexes = new ArrayList<>();
+            final MarketAPI market = markets.get(i);
 
-            for (Industry ind : CommodityStats.getVisibleIndustries(markets.get(i))) {
-                if (!IndustryIOs.getIndConfig(ind).workerAssignable) continue;
+            for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
+                final IndustryConfig config = IndustryIOs.getIndConfig(ind);
+                if (!config.workerAssignable) continue;
 
                 final String indID = IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec());
 
                 for (String outputID : IndustryIOs.getIndConfig(ind).outputs.keySet()) {
+                    if (!CompatLayer.hasRelevantCondition(outputID, market)) continue;
+                    if (!IndustryIOs.isOutputValidForMarket(
+                        config.outputs.get(outputID), market, outputID
+                    )) continue;
+
                     for (int j = 0; j < industryOutputPairs.size(); j++) {
                         String pair = industryOutputPairs.get(j);
 
@@ -518,6 +525,10 @@ public class EconomyEngine extends BaseCampaignEventListener
         final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.allocateWorkersToMarkets(
             workerVector, markets, industryOutputPairs, outputsPerMarket, A_r
         );
+
+        WorkforcePlanner.logDemandVector(d, commodities);
+        WorkforcePlanner.logCommodityResults(A_r, workerVector);
+        WorkforcePlanner.logWorkerAssignments(assignedWorkersPerMarket, industryOutputPairs, workerVector);
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
             final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(entry.getKey());

@@ -553,7 +553,7 @@ public class IndustryIOs {
         }
     }
 
-    private static final boolean isOutputValidForMarket(OutputCom output, MarketAPI market, String outputID) {
+    public static final boolean isOutputValidForMarket(OutputCom output, MarketAPI market, String outputID) {
         if (output.checkLegality && market.isIllegal(outputID)) return false;
 
         for (String cond : output.ifMarketCondsAllFalse) {
@@ -567,7 +567,7 @@ public class IndustryIOs {
         return true;
     }
 
-    private static final float calculateScale(
+    public static final float calculateScale(
         Industry ind, MarketAPI market, OutputCom output, String outputID, IndustryConfig cfg
     ) {
         float scale = 1f;

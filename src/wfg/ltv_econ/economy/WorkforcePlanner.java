@@ -57,7 +57,7 @@ public class WorkforcePlanner {
     public static final double WORKER_COST = 1;     // penatly for a unit of worker used.
     public static final double SLACK_COST = 1300;   // penalty for a unit of deficit regardless of value.
     public static final double CONCENTRATION_COST = 5;
-    public static final double TOLERANCE = 0.4;
+    public static final double TOLERANCE = 0.5;
 
     // Any lower than 1300 causes the solver to not produce hand_weapons
 
@@ -204,6 +204,10 @@ public class WorkforcePlanner {
         Global.getLogger(WorkforcePlanner.class).info(logString);
     }
 
+    public static final void logCommodityResults(GroupedMatrix group, double[] workerVector) {
+        logCommodityResults(group.reducedMatrix, workerVector, group.groupNames);
+    }
+
     public static final void logCommodityResults(double[][] A, double[] workerVector, List<String> commodities) {
         int rows = A.length;
         int cols = A[0].length;
@@ -257,18 +261,18 @@ public class WorkforcePlanner {
 
         final int numMarkets = markets.size();
         final int numOutputs = groupedData.one.size();
-        final int nVars = numMarkets * numOutputs * 2; // original + slack per market/output
+        final int nVars = numMarkets * numOutputs + numOutputs; // original + slack per output
         final int slackStart = numMarkets * numOutputs;
 
         final double[] objectiveCoeffs = new double[nVars];
-        for (int j = 0; j < numOutputs; j++) {
-            objectiveCoeffs[slackStart + j] = 1.0;
-        }
+
         for (int m = 0; m < numMarkets; m++) {
             for (int j = 0; j < numOutputs; j++) {
-                objectiveCoeffs[m * numOutputs + j] = WORKER_COST;  // regular worker cost
-                objectiveCoeffs[slackStart + m * numOutputs + j] = CONCENTRATION_COST; // penalize deviation
+                objectiveCoeffs[m * numOutputs + j] = WORKER_COST;
             }
+        }
+        for (int j = 0; j < numOutputs; j++) {
+            objectiveCoeffs[slackStart + j] = CONCENTRATION_COST;
         }
 
         LinearObjectiveFunction f = new LinearObjectiveFunction(objectiveCoeffs, 0.0);
@@ -278,7 +282,7 @@ public class WorkforcePlanner {
         for (int m = 0; m < numMarkets; m++) {
             final double[] coeffs = new double[nVars];
             for (int j = 0; j < numOutputs; j++) {
-                if (canProduceInMarket(industryOutputPairs, markets, outputsPerMarket, m, j)) {
+                if (outputsPerMarket.get(m).contains(j)) {
                     coeffs[m * numOutputs + j] = 1.0;
                 }
             }
@@ -298,7 +302,7 @@ public class WorkforcePlanner {
         for (int j = 0; j < numOutputs; j++) {
             double[] coeffs = new double[nVars];
             for (int m = 0; m < numMarkets; m++) {
-                if (canProduceInMarket(industryOutputPairs, markets, outputsPerMarket, m, j)) {
+                if (outputsPerMarket.get(m).contains(j)) {
                     coeffs[m * numOutputs + j] = 1.0;
                 }
             }
@@ -306,42 +310,38 @@ public class WorkforcePlanner {
             constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetVector[j]));
         }
 
-
         // 4) Spreading assignments across markets
         for (int j = 0; j < numOutputs; j++) {
-            // compute total market capacity that can produce output j
             double totalCapacity = 0.0;
             for (int m = 0; m < numMarkets; m++) {
-                if (!canProduceInMarket(industryOutputPairs, markets, outputsPerMarket, m, j)) continue;
-                WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
+                if (!outputsPerMarket.get(m).contains(j)) continue;
+                final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
                 totalCapacity += (pool != null) ? pool.getWorkerPool() : 0.0;
             }
 
             for (int m = 0; m < numMarkets; m++) {
-                if (!canProduceInMarket(industryOutputPairs, markets, outputsPerMarket, m, j)) continue;
+                if (!outputsPerMarket.get(m).contains(j)) continue;
 
-                WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
-                double marketCapacity = (pool != null) ? pool.getWorkerPool() : 0.0;
+                final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
+                final double marketCapacity = (pool != null) ? pool.getWorkerPool() : 0.0;
 
-                // preferred share proportional to capacity
-                double preferredWorkers = (totalCapacity > 0) ? 
+                final double preferredWorkers = (totalCapacity > 0) ?
                     marketCapacity / totalCapacity * targetVector[j] : 0.0;
 
-                double[] coeffs = new double[nVars];
-                coeffs[m * numOutputs + j] = 1.0;
-                coeffs[slackStart + m * numOutputs + j] = 1.0;
-
-                // x_{m,j} + s >= preferred + TOLERANCE
+                // x_{m,j} >= preferred - s_j
+                final double[] coeffsGE = new double[nVars];
+                coeffsGE[m * numOutputs + j] = 1.0;          // worker assignment
+                coeffsGE[slackStart + j] = 1.0;              // slack per output
                 constraints.add(new LinearConstraint(
-                    coeffs, Relationship.GEQ, preferredWorkers * (1 - TOLERANCE)
+                        coeffsGE, Relationship.GEQ, preferredWorkers * (1 - TOLERANCE)
                 ));
 
-                // x_{m,j} - s <= preferred - TOLERANCE
-                double[] coeffsUpper = new double[nVars];
-                coeffsUpper[m * numOutputs + j] = 1.0;
-                coeffsUpper[slackStart + m * numOutputs + j] = -1.0;
+                // x_{m,j} <= preferred + s_j
+                final double[] coeffsLE = new double[nVars];
+                coeffsLE[m * numOutputs + j] = 1.0;          // worker assignment
+                coeffsLE[slackStart + j] = -1.0;             // slack per output
                 constraints.add(new LinearConstraint(
-                    coeffsUpper, Relationship.LEQ, preferredWorkers * (1 + TOLERANCE)
+                        coeffsLE, Relationship.LEQ, preferredWorkers * (1 + TOLERANCE)
                 ));
             }
         }
@@ -375,19 +375,6 @@ public class WorkforcePlanner {
         );
 
         return expandedAssignments;
-    }
-
-    /**
-     * Check if a given industry::output pair can produce in the specified market.
-     * Takes into account both market availability and relevant conditions.
-     */
-    public static final boolean canProduceInMarket(
-        List<String> industryOutputPairs, List<MarketAPI> markets, List<List<Integer>> outputsPerMarket,
-        int marketIndex, int comIndex
-    ) {
-        final String outputID = industryOutputPairs.get(comIndex).split("::")[1];
-        return outputsPerMarket.get(marketIndex).contains(comIndex) &&
-            CompatLayer.hasRelevantCondition(outputID, markets.get(marketIndex));
     }
 
     public static final void logWorkerAssignments(
