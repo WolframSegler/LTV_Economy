@@ -278,7 +278,7 @@ public class WorkforcePlanner {
         for (int m = 0; m < numMarkets; m++) {
             final double[] coeffs = new double[nVars];
             for (int j = 0; j < numOutputs; j++) {
-                if (outputsPerMarket.get(m).contains(j)) {
+                if (canProduceInMarket(industryOutputPairs, markets, outputsPerMarket, m, j)) {
                     coeffs[m * numOutputs + j] = 1.0;
                 }
             }
@@ -298,7 +298,7 @@ public class WorkforcePlanner {
         for (int j = 0; j < numOutputs; j++) {
             double[] coeffs = new double[nVars];
             for (int m = 0; m < numMarkets; m++) {
-                if (outputsPerMarket.get(m).contains(j)) {
+                if (canProduceInMarket(industryOutputPairs, markets, outputsPerMarket, m, j)) {
                     coeffs[m * numOutputs + j] = 1.0;
                 }
             }
@@ -312,13 +312,13 @@ public class WorkforcePlanner {
             // compute total market capacity that can produce output j
             double totalCapacity = 0.0;
             for (int m = 0; m < numMarkets; m++) {
-                if (!outputsPerMarket.get(m).contains(j)) continue;
+                if (!canProduceInMarket(industryOutputPairs, markets, outputsPerMarket, m, j)) continue;
                 WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
                 totalCapacity += (pool != null) ? pool.getWorkerPool() : 0.0;
             }
 
             for (int m = 0; m < numMarkets; m++) {
-                if (!outputsPerMarket.get(m).contains(j)) continue;
+                if (!canProduceInMarket(industryOutputPairs, markets, outputsPerMarket, m, j)) continue;
 
                 WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
                 double marketCapacity = (pool != null) ? pool.getWorkerPool() : 0.0;
@@ -375,6 +375,19 @@ public class WorkforcePlanner {
         );
 
         return expandedAssignments;
+    }
+
+    /**
+     * Check if a given industry::output pair can produce in the specified market.
+     * Takes into account both market availability and relevant conditions.
+     */
+    public static final boolean canProduceInMarket(
+        List<String> industryOutputPairs, List<MarketAPI> markets, List<List<Integer>> outputsPerMarket,
+        int marketIndex, int comIndex
+    ) {
+        final String outputID = industryOutputPairs.get(comIndex).split("::")[1];
+        return outputsPerMarket.get(marketIndex).contains(comIndex) &&
+            CompatLayer.hasRelevantCondition(outputID, markets.get(marketIndex));
     }
 
     public static final void logWorkerAssignments(

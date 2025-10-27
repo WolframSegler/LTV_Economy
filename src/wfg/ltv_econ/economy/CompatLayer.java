@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
@@ -134,17 +135,7 @@ public final class CompatLayer {
             }
         }
 
-        boolean hasRelevantCondition = true;
-        if (ResourceDepositsCondition.COMMODITY.containsValue(comID) && !isDemand) {
-            hasRelevantCondition = false;
-            for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
-                String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
-                if (comID.equals(condComID)) {
-                    hasRelevantCondition = true;
-                    break;
-                }
-            }
-        }
+        boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
 
         if (hasRelevantCondition) {
             dest.setBaseValue(value);
@@ -262,5 +253,19 @@ public final class CompatLayer {
             float converted = marketConditionModConverter(mod);
             dest.modifyMult(cond.getId() + "::" + ind.getId(), converted, cond.getName());
         }
+    }
+
+    public static final boolean hasRelevantCondition(String comID, MarketAPI market) {
+        boolean hasRelevantCondition = true;
+        if (ResourceDepositsCondition.COMMODITY.containsValue(comID)) {
+            hasRelevantCondition = false;
+            for (MarketConditionAPI cond : market.getConditions()) {
+                String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
+                if (comID.equals(condComID)) {
+                    return true;
+                }
+            }
+        }
+        return hasRelevantCondition;
     }
 }
