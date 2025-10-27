@@ -10,6 +10,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,8 @@ public class EconomyEngine extends BaseCampaignEventListener
 
     private final Set<String> m_registeredMarkets;
     private final Map<String, CommodityInfo> m_comInfo;
+
+    private transient ExecutorService mainLoopExecutor;
 
     public static void createInstance() {
         if (instance == null) {
@@ -91,6 +95,12 @@ public class EconomyEngine extends BaseCampaignEventListener
         Global.getSector().getListenerManager().addListener(this, true);
         Global.getSector().addListener(this);
 
+        mainLoopExecutor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "LTV-MainLoop");
+            t.setDaemon(true);
+            return t;
+        });
+
         return this;
     }
 
@@ -108,7 +118,13 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         dayTracker = day;
 
-        mainLoop(false);
+        mainLoopExecutor.submit(() -> {
+            try {
+                mainLoop(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public final void fakeAdvance() {
@@ -180,33 +196,24 @@ public class EconomyEngine extends BaseCampaignEventListener
     private final void mainLoop(boolean fakeAdvance) {
         refreshMarkets();
 
-        for (CommodityInfo comInfo : m_comInfo.values()) {
-            comInfo.reset();
-        }
+        m_comInfo.values().parallelStream().forEach(CommodityInfo::reset);
 
         if (!fakeAdvance) {
             resetWorkersAssigned();
-    
-            for (CommodityInfo comInfo : m_comInfo.values()) {
-                comInfo.update();
-            }
+
+            m_comInfo.values().parallelStream().forEach(CommodityInfo::update);
         }
 
         if (!fakeAdvance) {
             assignWorkers();
         }
 
-        for (CommodityInfo comInfo : m_comInfo.values()) {
-            comInfo.update();
-        }
+        m_comInfo.values().parallelStream().forEach(CommodityInfo::update);
         
         weightedOutputDeficitMods();
 
-        for (CommodityInfo comInfo : m_comInfo.values()) {
-            comInfo.trade();
-
-            comInfo.advance(fakeAdvance);
-        }
+        m_comInfo.values().parallelStream().forEach(CommodityInfo::trade);
+        m_comInfo.values().parallelStream().forEach(c -> c.advance(fakeAdvance));
     }
 
     public final void registerMarket(String marketID) {
@@ -327,53 +334,55 @@ public class EconomyEngine extends BaseCampaignEventListener
     } 
 
     public final void weightedOutputDeficitMods() {
-        for (CommodityInfo comInfo : m_comInfo.values()) {
-        for (CommodityStats stats : comInfo.getStatsMap().values()) {
+        m_comInfo.values().stream()
+            .flatMap(comInfo -> comInfo.getStatsMap().values().stream())
+            .parallel()
+            .forEach(this::computeStatsDeficits);
+    }
 
-            float totalDeficit = 0f;
-            float totalMarketOutput = stats.getLocalProduction(false);
-            float invMarketOutput = 1f / totalMarketOutput;
+    private final void computeStatsDeficits(CommodityStats stats) {
+        float totalDeficit = 0f;
+        final float totalMarketOutput = stats.getLocalProduction(false);
+        final float invMarketOutput = 1f / totalMarketOutput;
 
-            for (Map.Entry<String, MutableStat> industryEntry : stats.getLocalProductionStat().entrySet()) {
-                String industryID = industryEntry.getKey();
-                MutableStat industryStat = industryEntry.getValue();
+        for (Map.Entry<String, MutableStat> industryEntry : stats.getLocalProductionStat().entrySet()) {
+            final String industryID = industryEntry.getKey();
+            final MutableStat industryStat = industryEntry.getValue();
 
-                float industryOutput = industryStat.getModifiedValue();
-                if (industryOutput <= 0 || totalMarketOutput <= 0) continue;
+            final float industryOutput = industryStat.getModifiedValue();
+            if (industryOutput <= 0 || totalMarketOutput <= 0) continue;
 
-                float industryShare = industryOutput * invMarketOutput;
+            final float industryShare = industryOutput * invMarketOutput;
 
-                Industry ind = stats.market.getIndustry(industryID);
+            final Industry ind = stats.market.getIndustry(industryID);
 
-                Map<String, Float> inputWeights;
-                float sum = 0f;
+            Map<String, Float> inputWeights;
+            float sum = 0f;
 
-                inputWeights = IndustryIOs.getRealInputs(ind, stats.comID, true);
-                if (inputWeights.isEmpty()) continue;
-                for (float value : inputWeights.values()) {
-                    sum += value;
-                }
-
-                if (sum <= 0f) continue;
-
-                float industryDeficit = 0f;
-                for (Map.Entry<String, Float> inputEntry : inputWeights.entrySet()) {
-                    String inputID = inputEntry.getKey();
-                    if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
-                    
-                    CommodityStats inputStats = getComStats(inputID, stats.market.getId());
-
-                    float weightNorm = inputEntry.getValue() / sum;
-
-                    industryDeficit += weightNorm * (1 - inputStats.getStoredCoverageRatio());
-                }
-
-                totalDeficit += industryDeficit * industryShare;
+            inputWeights = IndustryIOs.getRealInputs(ind, stats.comID, true);
+            if (inputWeights.isEmpty()) continue;
+            for (float value : inputWeights.values()) {
+                sum += value;
             }
 
-            stats.localProdMult = Math.max(1f - totalDeficit, 0.01f);
+            if (sum <= 0f) continue;
+
+            float industryDeficit = 0f;
+            for (Map.Entry<String, Float> inputEntry : inputWeights.entrySet()) {
+                String inputID = inputEntry.getKey();
+                if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
+                
+                final CommodityStats inputStats = getComStats(inputID, stats.market.getId());
+
+                final float weightNorm = inputEntry.getValue() / sum;
+
+                industryDeficit += weightNorm * (1 - inputStats.getStoredCoverageRatio());
+            }
+
+            totalDeficit += industryDeficit * industryShare;
         }
-        }
+
+        stats.localProdMult = Math.max(1f - totalDeficit, 0.01f);
     }
 
     private final void resetWorkersAssigned() {
@@ -525,10 +534,6 @@ public class EconomyEngine extends BaseCampaignEventListener
         final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.allocateWorkersToMarkets(
             workerVector, markets, industryOutputPairs, outputsPerMarket, A_r
         );
-
-        WorkforcePlanner.logDemandVector(d, commodities);
-        WorkforcePlanner.logCommodityResults(A_r, workerVector);
-        WorkforcePlanner.logWorkerAssignments(assignedWorkersPerMarket, industryOutputPairs, workerVector);
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
             final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(entry.getKey());

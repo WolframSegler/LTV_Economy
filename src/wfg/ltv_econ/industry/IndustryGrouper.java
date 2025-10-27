@@ -34,9 +34,9 @@ public final class IndustryGrouper {
         for (int j = 0; j < n; j++) {
             if (grouped[j]) continue;
 
-            final String groupName = industryOutputPairs.get(j);
+            final String groupName = "group_" + industryOutputPairs.get(j);
             final List<String> members = new ArrayList<>();
-            members.add(groupName);
+            members.add(industryOutputPairs.get(j));
             grouped[j] = true;
 
             final double[] baseCol = new double[m];
