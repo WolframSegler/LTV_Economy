@@ -56,8 +56,8 @@ public class WorkforcePlanner {
 
     public static final double WORKER_COST = 1;     // penatly for a unit of worker used.
     public static final double SLACK_COST = 1300;   // penalty for a unit of deficit regardless of value.
-    public static final double CONCENTRATION_COST = 5;
-    public static final double TOLERANCE = 0.5;
+    public static final double CONCENTRATION_COST = 6;
+    public static final double TOLERANCE = 0.55;
 
     // Any lower than 1300 causes the solver to not produce hand_weapons
 

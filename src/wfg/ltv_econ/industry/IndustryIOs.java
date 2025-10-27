@@ -867,6 +867,10 @@ public class IndustryIOs {
         return Collections.unmodifiableMap(baseInputs);
     }
 
+    public static final List<Industry> getIndustriesForOutput(String outputID, MarketAPI market) {
+        return outputToInd.get(outputID).stream().map(market::getIndustry).collect(Collectors.toList());
+    }
+
     public static final Map<String, IndustryConfig> getCombinedConfigs() {
         Map<String, IndustryConfig> combined = new HashMap<>();
 

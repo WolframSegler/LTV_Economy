@@ -28,21 +28,15 @@ public class CommodityInfo {
     }
 
     public final void advance(boolean fakeAdvance) {
-        for (CommodityStats stats : m_comStats.values()) {
-            stats.advance(fakeAdvance);
-        }
+        m_comStats.values().parallelStream().forEach(stats -> stats.advance(fakeAdvance));
     }
 
     public final void reset() {
-        for (CommodityStats stats : m_comStats.values()) {
-            stats.reset();
-        }
+        m_comStats.values().parallelStream().forEach(CommodityStats::reset);
     }
 
     public final void update() {
-        for (CommodityStats stats : m_comStats.values()) {
-            stats.update();
-        }
+        m_comStats.values().parallelStream().forEach(CommodityStats::update);
     }
 
     public final void addMarket(String marketID) {

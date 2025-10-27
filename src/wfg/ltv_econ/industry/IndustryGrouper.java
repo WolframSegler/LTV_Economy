@@ -109,16 +109,16 @@ public final class IndustryGrouper {
 
     public static final Pair<List<String>, List<List<Integer>>> applyGroupingToMarketData(
         List<MarketAPI> markets,
-        List<String> originalPairs,
+        List<String> pairs,
         List<List<Integer>> outputsPerMarket,
-        Map<String, String> originalToGroup
+        Map<String, String> memberToGroup
     ) {
         final List<String> groupedPairs = new ArrayList<>();
         final Map<String, Integer> groupIndex = new HashMap<>();
 
         // Step 1: create new grouped list
-        for (String pair : originalPairs) {
-            String group = originalToGroup.getOrDefault(pair, pair);
+        for (String pair : pairs) {
+            String group = memberToGroup.getOrDefault(pair, pair);
             if (!groupIndex.containsKey(group)) {
                 groupIndex.put(group, groupedPairs.size());
                 groupedPairs.add(group);
@@ -130,8 +130,8 @@ public final class IndustryGrouper {
         for (List<Integer> oldList : outputsPerMarket) {
             Set<Integer> newSet = new HashSet<>();
             for (int idx : oldList) {
-                String oldPair = originalPairs.get(idx);
-                String group = originalToGroup.getOrDefault(oldPair, oldPair);
+                String oldPair = pairs.get(idx);
+                String group = memberToGroup.getOrDefault(oldPair, oldPair);
                 Integer newIdx = groupIndex.get(group);
                 if (newIdx != null) newSet.add(newIdx);
             }
