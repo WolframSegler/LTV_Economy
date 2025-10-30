@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.economy.CommodityStats.PriceType;
+
 public class CommodityInfo {
+
     private final String comID;
     private final Map<String, CommodityStats> m_comStats = new HashMap<>();
 
@@ -73,6 +76,8 @@ public class CommodityInfo {
     }
 
     public final void trade() {
+        final EconomyEngine engine = EconomyEngine.getInstance();
+
         List<MarketAPI> importers = getImporters();
         List<MarketAPI> exporters = getExporters();
 
@@ -103,21 +108,36 @@ public class CommodityInfo {
             CommodityStats expStats = getStats(expImp.one);
             CommodityStats impStats = getStats(expImp.two);
 
-            long exportableRemaining = computeExportableRemaining(expStats);
-            long deficitRemaining = computeProjectedImportAmount(impStats);
+            int exportableRemaining = (int) computeExportableRemaining(expStats);
+            int deficitRemaining = (int) computeProjectedImportAmount(impStats);
 
             if (exportableRemaining < 1 || deficitRemaining < 1) continue;
 
             boolean sameFaction = expStats.market.getFaction().equals(impStats.market.getFaction());
 
-            long amountToSend = Math.min(exportableRemaining, deficitRemaining);
+            int amountToSend = Math.min(exportableRemaining, deficitRemaining);
+
+            // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
+            // models supply-demand influence on transaction.
+            final float exporterPrice = expStats.getUnitPrice(PriceType.SELLING, (int)amountToSend);
+            final float importerPrice = impStats.getUnitPrice(PriceType.BUYING, (int)amountToSend);
+            final float weight = Math.min(1f, (float)impStats.getDeficitPreTrade() / amountToSend);
+            final float pricePerUnit = exporterPrice * (1f - weight) + importerPrice * weight;
+            final float price = pricePerUnit * amountToSend;
 
             if(sameFaction) {
                 expStats.addInFactionExport(amountToSend);
                 impStats.addInFactionImport(amountToSend);
+
+                engine.addCredits(expStats.marketID, (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT));
+                engine.addCredits(impStats.marketID, (int) (-price * EconomyConfig.FACTION_EXCHANGE_MULT));
+
             } else {
                 expStats.addGlobalExport(amountToSend);
                 impStats.addGlobalImport(amountToSend);
+
+                engine.addCredits(expStats.marketID, (int) price);
+                engine.addCredits(impStats.marketID, (int) -price);
             }
         }
     }
@@ -236,12 +256,43 @@ public class CommodityInfo {
         }
     }
 
+    /*
+    * ALTERNATIVE PRICE FACTOR APPROACH:
+    *
+    * Current implementation is importer-centric: priceFactor is calculated based on
+    * the importer’s BUYING price, reflecting how much the importing market wants
+    * a commodity. This works well for general balance and keeps calculations simple.
+    *
+    * Alternative, more "capitalist" or exporter-centric approach:
+    * - If the importer has a deficit (even projected with DAYS_TO_COVER), use the
+    *   exporter’s SELLING price to calculate priceFactor. This reflects real-world
+    *   producer leverage: owners of production can dictate terms, push surplus, or
+    *   exploit market scarcity.
+    * - If the importer has no deficit, fall back to the importer’s BUYING price, as
+    *   they are not under pressure to acquire the good.
+    * 
+    * Pros of exporter-centric or hybrid method:
+    * - Models market leverage and capitalist-style dynamics.
+    * - Allows overproducing exporters to influence trade decisions and prices.
+    * - Can introduce strategic behaviors like monopolies, stockpile-driven pricing, 
+    *   or political dominance of certain markets.
+    * 
+    * Cons:
+    * - More complex logic and slightly higher computation.
+    *
+    * Possible hybrid: mostly importer-centric for simplicity, but incorporate
+    * exporter SELLING influence when projected deficits exist.
+    *
+    * This can be revisited later if the goal is to simulate more "realistic" trade
+    * dynamics beyond simple supply/demand ratio.
+    */
     private static final float priceFactor(String comID, MarketAPI importer) {
-        final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID); 
-        final float price = importer.getDemandPrice(spec.getId(), spec.getEconUnit(), false);
-        final float base = spec.getBasePrice();
+        final CommodityStats stats = EconomyEngine.getInstance().getComStats(comID, importer.getId());
 
-        float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
+        final float price = stats.getUnitPrice(PriceType.BUYING, 1);
+        final float base = stats.spec.getBasePrice();
+
+        final float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
 
         float scaled;
         if (diff >= 0) {
@@ -277,15 +328,14 @@ public class CommodityInfo {
     }
 
     private static final long computeProjectedImportAmount(CommodityStats stats) {
-        final int daysToCover = 3;
-        final long targetStockpiles = daysToCover*stats.getDeficitPreTrade();
+        final long targetStockpiles = EconomyConfig.DAYS_TO_COVER*stats.getDeficitPreTrade();
 
-        final long delta = targetStockpiles - stats.getStoredAmount() - stats.getTotalImports();
+        long delta = targetStockpiles - stats.getStoredAmount() - stats.getTotalImports();
+        delta = Math.min(delta, EconomyConfig.DAYS_TO_COVER_PER_IMPORT*stats.getDeficitPreTrade());
         return Math.max(delta, 0);
     }
 
     private static final long computeExportableRemaining(CommodityStats stats) {
-        // If there is a deficit before trade, do not export.
         if (stats.getDeficitPreTrade() > 0) {
             return 0;
         }

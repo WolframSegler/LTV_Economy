@@ -8,8 +8,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.wrap_ui.util.NumFormat;
 

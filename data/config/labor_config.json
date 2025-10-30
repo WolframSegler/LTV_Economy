@@ -2,7 +2,6 @@
     "RoSV": 4,
     "LPV_month": 8,
     "populationRatioThatAreWorkers": 0.64,
-    "productionBuffer": 0.1,
 
     "RoVC_average": 0.13,
     "RoVC_industry": 0.04,

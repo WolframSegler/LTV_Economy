@@ -23,7 +23,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -58,9 +58,6 @@ public class WorkforcePlanner {
 
     public static final double WORKER_COST = 1;     // penatly for a unit of worker used.
     public static final double SLACK_COST = 1300;   // penalty for a unit of deficit regardless of value.
-    public static final double CONCENTRATION_COST = 5.5;
-    public static final double TOLERANCE = 0.4;
-    public static final double MODIFIER_SCALER = 0.025;
 
     // Any lower than 1300 causes the solver to not produce hand_weapons
 
@@ -94,7 +91,7 @@ public class WorkforcePlanner {
             for (int j = 0; j < n; j++) coeffs[j] = -A[i][j]; // industry coefficients
             coeffs[n + i] = -1.0; // slack variable coefficient
             constraints.add(new LinearConstraint(
-                coeffs, Relationship.LEQ, -d[i] * LaborConfig.productionBuffer
+                coeffs, Relationship.LEQ, -d[i] * EconomyConfig.PRODUCTION_BUFFER
             ));
         }
 
@@ -275,7 +272,7 @@ public class WorkforcePlanner {
             }
         }
         for (int j = 0; j < numOutputs; j++) {
-            objectiveCoeffs[slackStart + j] = CONCENTRATION_COST;
+            objectiveCoeffs[slackStart + j] = EconomyConfig.CONCENTRATION_COST;
         }
 
         LinearObjectiveFunction f = new LinearObjectiveFunction(objectiveCoeffs, 0.0);
@@ -338,7 +335,9 @@ public class WorkforcePlanner {
                     outputMultiplier /= contributing;
                 }
 
-                double effectiveCapacity = baseCapacity + baseCapacity * outputMultiplier * MODIFIER_SCALER;
+                double effectiveCapacity = baseCapacity + baseCapacity * outputMultiplier *
+                    EconomyConfig.MARKET_MODIFIER_SCALER;
+
                 effectiveCapacities.put(market, effectiveCapacity);
                 totalCapacity += effectiveCapacity;
             }
@@ -358,7 +357,7 @@ public class WorkforcePlanner {
                 coeffsGE[m * numOutputs + j] = 1.0;          // worker assignment
                 coeffsGE[slackStart + j] = 1.0;              // slack per output
                 constraints.add(new LinearConstraint(
-                    coeffsGE, Relationship.GEQ, preferredWorkers * (1 - TOLERANCE)
+                    coeffsGE, Relationship.GEQ, preferredWorkers * (1 - EconomyConfig.IDEAL_SPREAD_TOLERANCE)
                 ));
 
                 // x_{m,j} <= preferred + s_j
@@ -366,14 +365,14 @@ public class WorkforcePlanner {
                 coeffsLE[m * numOutputs + j] = 1.0;          // worker assignment
                 coeffsLE[slackStart + j] = -1.0;             // slack per output
                 constraints.add(new LinearConstraint(
-                    coeffsLE, Relationship.LEQ, preferredWorkers * (1 + TOLERANCE)
+                    coeffsLE, Relationship.LEQ, preferredWorkers * (1 + EconomyConfig.IDEAL_SPREAD_TOLERANCE)
                 ));
             }
         }
 
         SimplexSolver solver = new SimplexSolver();
         PointValuePair solution = solver.optimize(
-            new MaxIter(5000),
+            new MaxIter(4000),
             f,
             new LinearConstraintSet(constraints),
             GoalType.MINIMIZE,

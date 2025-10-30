@@ -28,14 +28,14 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
+import wfg.ltv_econ.configs.IndustryConfigManager;
+import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.configs.IndustryConfigManager.OutputCom;
+import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.economy.IndustryConfigManager;
 import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
-import wfg.ltv_econ.economy.IndustryConfigManager.OutputCom;
-import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 
 /**

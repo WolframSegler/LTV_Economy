@@ -26,9 +26,10 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.economy.IndustryConfigManager.IndustryConfig;
-import wfg.ltv_econ.economy.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -49,6 +50,7 @@ public class EconomyEngine extends BaseCampaignEventListener
     private static EconomyEngine instance;
 
     private final Set<String> m_registeredMarkets;
+    private final Map<String, Long> m_marketCredits = new HashMap<>();
     private final Map<String, CommodityInfo> m_comInfo;
 
     private transient ExecutorService mainLoopExecutor;
@@ -80,6 +82,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             if (!market.isInEconomy()) continue;
 
             m_registeredMarkets.add(market.getId());
+            m_marketCredits.put(market.getId(), (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
         }
 
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
@@ -118,13 +121,17 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         dayTracker = day;
 
-        mainLoopExecutor.submit(() -> {
-            try {
-                mainLoop(false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        if (EconomyConfig.MULTI_THREADING) {
+            mainLoopExecutor.submit(() -> {
+                try {
+                    mainLoop(false);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            mainLoop(false);
+        }
     }
 
     public final void fakeAdvance() {
@@ -214,6 +221,8 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         m_comInfo.values().parallelStream().forEach(CommodityInfo::trade);
         m_comInfo.values().parallelStream().forEach(c -> c.advance(fakeAdvance));
+
+        logCreditsSnapshot();
     }
 
     public final void registerMarket(String marketID) {
@@ -222,9 +231,9 @@ public class EconomyEngine extends BaseCampaignEventListener
                 comInfo.addMarket(marketID);
             }
 
+            m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
+            WorkerRegistry.getInstance().register(marketID);
         }
-        
-        WorkerRegistry.getInstance().register(marketID);
     }
 
     public final void removeMarket(String marketID) {
@@ -233,6 +242,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 comInfo.removeMarket(marketID);
             }
 
+            m_marketCredits.remove(marketID);
             WorkerRegistry.getInstance().remove(marketID);
         }
     }
@@ -674,6 +684,29 @@ public class EconomyEngine extends BaseCampaignEventListener
         return total;
     }
 
+    public void addCredits(String marketID, int amount) {
+        long current = m_marketCredits.getOrDefault(marketID, 0l);
+
+        if (amount > 0 && current > Long.MAX_VALUE - amount) {
+            current = Long.MAX_VALUE;
+
+        } else if (amount < 0 && current < Long.MIN_VALUE - amount) {
+            current = Long.MIN_VALUE;
+
+        } else {
+            current += amount;
+        }
+
+        m_marketCredits.put(marketID, current);
+    }
+
+    /**
+     * Returns 0 if no market is registered
+     */
+    public long getCredits(String marketID) {
+        return m_marketCredits.getOrDefault(marketID, 0l);
+    }
+
     /**
      * 1 is no deficit and 0 is max deficit
      */
@@ -805,5 +838,20 @@ public class EconomyEngine extends BaseCampaignEventListener
             ));
         }
         Global.getLogger(getClass()).info(csv.toString());
+    }
+
+    public final void logCreditsSnapshot() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("\n=== Market Credits Snapshot ===\n");
+
+        m_marketCredits.entrySet().stream()
+        .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+        .forEach(entry -> sb.append(entry.getKey())
+            .append(": ")
+            .append(entry.getValue())
+            .append(" credits\n"));
+
+        sb.append("=== End Snapshot ===");
+        Global.getLogger(EconomyEngine.class).info(sb.toString());
     }
 }

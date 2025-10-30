@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy;
+package wfg.ltv_econ.configs;
 import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
@@ -24,7 +24,7 @@ public class LaborConfigLoader {
     }
 
     public static void loadConfig() {
-        final JSONObject root = LaborConfigLoader.getConfig();
+        final JSONObject root = getConfig();
 
         try {
             LaborConfig.RoSV = root.getInt("RoSV");
@@ -32,7 +32,6 @@ public class LaborConfigLoader {
             LaborConfig.LPV_day = LaborConfig.LPV_month / 30f;
             LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
             LaborConfig.populationRatioThatAreWorkers = (float) root.getDouble("populationRatioThatAreWorkers");
-            LaborConfig.productionBuffer = 1f + (float) root.getDouble("productionBuffer");
             LaborConfig.RoVC_average = (float) root.getDouble("RoVC_average");
             LaborConfig.RoVC_industry = (float) root.getDouble("RoVC_industry");
             LaborConfig.RoVC_manufacture = (float) root.getDouble("RoVC_manufacture");
@@ -58,8 +57,6 @@ public class LaborConfigLoader {
         public static float LPV_day;
 
         public static float populationRatioThatAreWorkers;
-
-        public static float productionBuffer;
 
         public static float RoVC_average;
         public static float RoVC_industry;

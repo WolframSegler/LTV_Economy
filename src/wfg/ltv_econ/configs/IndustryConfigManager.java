@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy;
+package wfg.ltv_econ.configs;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 
-import wfg.ltv_econ.economy.LaborConfigLoader.OCCTag;
+import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class IndustryConfigManager {
 
     @SuppressWarnings("unchecked")
     public static Map<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
-        final JSONObject root = IndustryConfigManager.getConfig(dynamicConfig);
+        final JSONObject root = getConfig(dynamicConfig);
         final Map<String, IndustryConfig> result = new HashMap<>();
 
         try {

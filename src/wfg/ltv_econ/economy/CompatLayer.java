@@ -10,7 +10,7 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
-import wfg.ltv_econ.economy.IndustryConfigManager.OutputCom;
+import wfg.ltv_econ.configs.IndustryConfigManager.OutputCom;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 /**

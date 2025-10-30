@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
@@ -20,6 +21,7 @@ public class CommodityStats {
     public final String marketID;
 
     public transient MarketAPI market;
+    public transient CommoditySpecAPI spec;
 
     // Storage
     private long stored = 0;
@@ -150,6 +152,7 @@ public class CommodityStats {
 
     public Object readResolve() {
         market = Global.getSector().getEconomy().getMarket(marketID);
+        spec = Global.getSettings().getCommoditySpec(comID);
 
         return this;
     }
@@ -208,6 +211,35 @@ public class CommodityStats {
         }
     }
 
+    public float getUnitPrice(PriceType type, int amount) {
+        final float basePrice = spec.getBasePrice();
+
+        final long stock = Math.max(getStoredAmount() - amount, 1);
+        final float demand = CommodityInfo.DAYS_TO_COVER * Math.max(demandBase, 1);
+        final float ratio = stock / demand;
+
+        final float ELASTICITY = 0.65f;
+        float scarcityMult = (float) Math.pow(1f / ratio, ELASTICITY);
+        scarcityMult = Math.max(0.25f, Math.min(4f, scarcityMult));
+
+        float directionBias;
+        switch (type) {
+        case BUYING:
+            directionBias = 0.9f;
+            break;
+        case SELLING:
+            directionBias = 1.1f;
+            break;
+        case NEUTRAL: default:
+            directionBias = 1f;
+            break;
+        }
+
+        float price = basePrice * scarcityMult * directionBias;
+
+        return Math.max(price, 1f);
+    }
+
     public static List<MarketAPI> getFactionMarkets(String factionId) {
         List<MarketAPI> result = new ArrayList<>();
 
@@ -257,5 +289,11 @@ public class CommodityStats {
             "demandMetViaTrade: " + getDemandMetViaTrade() + "\n" +
             "ratio: " + ratio
         );
+    }
+
+    public static enum PriceType {
+        BUYING,   // what the market will pay when buying from others
+        SELLING,  // what the market charges when selling to others
+        NEUTRAL  // internal baseline
     }
 }
