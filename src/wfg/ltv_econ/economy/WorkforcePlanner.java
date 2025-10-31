@@ -70,8 +70,8 @@ public class WorkforcePlanner {
      * @return Non-negative worker assignments to outputs
      */
     public static double[] calculateGlobalWorkerTargets(double[][] A, double[] d) {
-        int m = A.length;       // number of commodities
-        int n = A[0].length;    // number of outputs
+        final int m = A.length;       // number of commodities
+        final int n = A[0].length;    // number of outputs
 
         double[] objectiveCoeffs = new double[n + m];
 
@@ -257,12 +257,20 @@ public class WorkforcePlanner {
             outputsPerMarket,
             groupingData.memberToGroup
         );
+        final List<String> groupedOutputPairs = groupedData.one;
         outputsPerMarket = groupedData.two;
 
         final int numMarkets = markets.size();
-        final int numOutputs = groupedData.one.size();
+        final int numOutputs = groupedOutputPairs.size();
         final int nVars = numMarkets * numOutputs + numOutputs; // original + slack per output
         final int slackStart = numMarkets * numOutputs;
+
+        final long[] baseCapacities = new long[numMarkets];
+        for (int m = 0; m < numMarkets; m++) {
+            final MarketAPI market = markets.get(m);
+            final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(market);
+            baseCapacities[m] = (pool != null) ? pool.getWorkerPool() : 0;
+        }
 
         final double[] objectiveCoeffs = new double[nVars];
 
@@ -310,22 +318,69 @@ public class WorkforcePlanner {
             constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetVector[j]));
         }
 
-        // 4) Spreading assignments across markets
+        // 4) Output capacity constraint: workersAssigned <= workerLimit
         for (int j = 0; j < numOutputs; j++) {
-            double totalCapacity = 0.0;
-            Map<MarketAPI, Double> effectiveCapacities = new HashMap<>();
-            final String[] pair = industryOutputPairs.get(j).split("::");
-            final String indID = pair[0];
-            final String outputID = pair[1];
+            final String pair = groupedOutputPairs.get(j);
+            final String indGroupID = pair.split(EconomyEngine.KEY)[0];
+            final String outputID = pair.split(EconomyEngine.KEY)[1];
 
             for (int m = 0; m < numMarkets; m++) {
                 if (!outputsPerMarket.get(m).contains(j)) continue;
 
                 final MarketAPI market = markets.get(m);
-                final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
-                final long baseCapacity = (pool != null) ? pool.getWorkerPool() : 0;
 
-                final Industry ind = IndustryIOs.getRealIndustryFromBaseID(market, indID);
+                final Industry ind;
+                if (groupingData.groupToMembers.get(pair) == null) {
+                    ind = IndustryIOs.getRealIndustryFromBaseID(
+                        market, indGroupID
+                    );
+                } else {
+                    final List<String> baseIDs = groupingData.groupToMembers.get(pair).stream()
+                        .map(p -> p.split(EconomyEngine.KEY)[0])
+                        .toList();
+
+                    ind = IndustryIOs.getRealIndustryFromBaseID(market, baseIDs);
+                }
+
+                final float limit = IndustryIOs.getIndConfig(ind).outputs.get(outputID).workerAssignableLimit;
+
+                // create constraint: x_{m,j} <= limit * baseCapacity
+                final double[] coeffsLimit = new double[nVars];
+                coeffsLimit[m * numOutputs + j] = 1.0;
+                constraints.add(new LinearConstraint(
+                    coeffsLimit,
+                    Relationship.LEQ,
+                    limit * baseCapacities[m]
+                ));
+            }
+        }
+
+        // 5) Spreading assignments across markets
+        for (int j = 0; j < numOutputs; j++) {
+            double totalCapacity = 0.0;
+            Map<MarketAPI, Double> effectiveCapacities = new HashMap<>();
+            final String pair = groupedOutputPairs.get(j);
+            final String indGroupID = pair.split(EconomyEngine.KEY)[0];
+            final String outputID = pair.split(EconomyEngine.KEY)[1];
+
+            for (int m = 0; m < numMarkets; m++) {
+                if (!outputsPerMarket.get(m).contains(j)) continue;
+
+                final MarketAPI market = markets.get(m);
+                final long baseCapacity = baseCapacities[m];
+
+                final Industry ind;
+                if (groupingData.groupToMembers.get(pair) == null) {
+                    ind = IndustryIOs.getRealIndustryFromBaseID(
+                        market, indGroupID
+                    );
+                } else {
+                    final List<String> baseIDs = groupingData.groupToMembers.get(pair).stream()
+                        .map(p -> p.split(EconomyEngine.KEY)[0])
+                        .toList();
+
+                    ind = IndustryIOs.getRealIndustryFromBaseID(market, baseIDs);
+                }
 
                 float outputMultiplier = CompatLayer.getModifiersMult(
                     ind, outputID, false
@@ -333,10 +388,6 @@ public class WorkforcePlanner {
 
                 double effectiveCapacity = baseCapacity + baseCapacity * outputMultiplier *
                     EconomyConfig.MARKET_MODIFIER_SCALER;
-
-                final float limit = IndustryIOs.getIndConfig(ind).outputs.get(outputID).workerAssignableLimit;
-
-                effectiveCapacity = Math.min(effectiveCapacity, limit * baseCapacity);
 
                 effectiveCapacities.put(market, effectiveCapacity);
                 totalCapacity += effectiveCapacity;

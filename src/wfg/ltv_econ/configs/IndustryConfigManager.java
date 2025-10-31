@@ -108,7 +108,7 @@ public class IndustryConfigManager {
                 JSONObject outputData = outputList.getJSONObject(outputId);
 
                 float baseProd = (float) outputData.optDouble("baseProd", 1);
-                float workerAssignableLimit = (float) industryJson.optDouble(
+                float workerAssignableLimit = (float) outputData.optDouble(
                     "workerAssignableLimit", LaborConfig.defaultWorkerCapPerOutput
                 );
 

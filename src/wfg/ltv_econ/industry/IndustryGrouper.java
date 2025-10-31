@@ -13,25 +13,47 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.IndustryMatrix;
 
 public final class IndustryGrouper {
 
+    private static GroupedMatrix STATIC_GROUPING;
+
+    public static synchronized GroupedMatrix getStaticGrouping() {
+        if (STATIC_GROUPING == null) {
+            double[][] A = IndustryMatrix.getMatrix();
+            List<String> pairs = IndustryMatrix.getIndustryOutputPairs();
+            STATIC_GROUPING = groupSimilarIndustries(A, pairs, 0.01);
+        }
+        return STATIC_GROUPING;
+    }
+
+    public static void invalidate() {
+        STATIC_GROUPING = null;
+    }
+
+    /**
+     * Groups similar industry::output pairs, but only if they have identical input/output patterns.
+     * Industries with differing outputs or inputs are never grouped,
+     * even if their matrix columns are close.
+     */
     public static GroupedMatrix groupSimilarIndustries(
         double[][] A,
         List<String> industryOutputPairs,
         double similarityTolerance
     ) {
-        final int m = A.length;       // commodities
-        final int n = A[0].length;    // industry::output pairs
+        final int rows = A.length;       // commodities
+        final int columns = A[0].length;    // industry::output pairs
 
-        final boolean[] grouped = new boolean[n];
+        final boolean[] grouped = new boolean[columns];
         final Map<String, List<String>> groupToMembers = new LinkedHashMap<>();
         final Map<String, String> memberToGroup = new HashMap<>();
 
         final List<String> groupNames = new ArrayList<>();
         final List<double[]> groupedColumns = new ArrayList<>();
 
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < columns; j++) {
             if (grouped[j]) continue;
 
             final String groupName = "group_" + industryOutputPairs.get(j);
@@ -39,21 +61,11 @@ public final class IndustryGrouper {
             members.add(industryOutputPairs.get(j));
             grouped[j] = true;
 
-            final double[] baseCol = new double[m];
-            for (int i = 0; i < m; i++) baseCol[i] = A[i][j];
+            final double[] baseCol = new double[rows];
+            for (int i = 0; i < rows; i++) baseCol[i] = A[i][j];
 
-            // merge similar columns
-            for (int k = j + 1; k < n; k++) {
-                if (grouped[k]) continue;
-
-                double dist = columnDistance(A, baseCol, k);
-                if (dist < similarityTolerance) {
-                    members.add(industryOutputPairs.get(k));
-                    grouped[k] = true;
-                }
-            }
-
-            for (int k = j + 1; k < n; k++) {
+            // merge similar columns only if same input/output pattern
+            for (int k = j + 1; k < columns; k++) {
                 if (grouped[k] || !haveSameCommodityPattern(A, j, k)) continue;
 
                 final double dist = columnDistance(A, baseCol, k);
@@ -63,14 +75,14 @@ public final class IndustryGrouper {
                 }
             }
 
-            final double[] avgCol = new double[m];
+            final double[] avgCol = new double[rows];
             for (String member : members) {
                 int idx = industryOutputPairs.indexOf(member);
-                for (int i = 0; i < m; i++) {
+                for (int i = 0; i < rows; i++) {
                     avgCol[i] += A[i][idx];
                 }
             }
-            for (int i = 0; i < m; i++) avgCol[i] /= members.size();
+            for (int i = 0; i < rows; i++) avgCol[i] /= members.size();
 
             groupNames.add(groupName);
             groupedColumns.add(avgCol);
@@ -78,9 +90,9 @@ public final class IndustryGrouper {
             for (String member : members) memberToGroup.put(member, groupName);
         }
 
-        final double[][] reduced = new double[m][groupedColumns.size()];
+        final double[][] reduced = new double[rows][groupedColumns.size()];
         for (int g = 0; g < groupedColumns.size(); g++) {
-            for (int i = 0; i < m; i++) {
+            for (int i = 0; i < rows; i++) {
                 reduced[i][g] = groupedColumns.get(g)[i];
             }
         }
@@ -163,7 +175,7 @@ public final class IndustryGrouper {
                 for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
                     for (String pair : originals) {
                         if (IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec()).equals(
-                            pair.split("::")[0]
+                            pair.split(EconomyEngine.KEY)[0]
                         )) valid.add(pair);
                     }
                 }

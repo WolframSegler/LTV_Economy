@@ -856,16 +856,36 @@ public class IndustryIOs {
         return getBaseIndustryID(ind);
     }
 
+    /**
+     * Retrieves the real Industry instance from a market that matches the given base ID.
+     *
+     * @param market the market to search for industries
+     * @param baseID the base industry ID to match against
+     * @return the Industry in the market whose base ID matches baseID
+     * @throws IllegalStateException if no matching industry is found in the market
+     */
     public static Industry getRealIndustryFromBaseID(MarketAPI market, String baseID) {
+        return getRealIndustryFromBaseID(market, List.of(baseID));
+    }
+
+    /**
+     * Retrieves the real Industry instance from a market that matches any of the given base IDs.
+     *
+     * @param market the market to search for industries
+     * @param baseIDList a list of base industry IDs to match against
+     * @return the first Industry in the market whose base ID is in baseIDList
+     * @throws IllegalStateException if no matching industry is found in the market
+     */
+    public static Industry getRealIndustryFromBaseID(MarketAPI market, List<String> baseIDList) {
         for (Industry ind : market.getIndustries()) {
             final String realBaseID = IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec());
-            if (realBaseID.equals(baseID)) {
-                return ind;
+            for (String baseID : baseIDList) {
+                if (realBaseID.equals(baseID)) return ind;
             }
         }
         throw new IllegalStateException(
             "Expected market '" + market.getId() + "' to contain an industry with baseID '"
-            + baseID + "', but none was found."
+            + baseIDList.toString() + "', but none was found."
         );
     }
 

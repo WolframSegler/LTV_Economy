@@ -17,7 +17,7 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class WorkerRegistry {
-    public static final float DEFAULT_WORKER_CAP = 0.6f;
+    public static final String KEY = "::";
 
     private final Map<String, WorkerIndustryData> registry = new HashMap<>();
 
@@ -64,12 +64,12 @@ public class WorkerRegistry {
     }
 
     public final void remove(String marketID) {
-        registry.keySet().removeIf(key -> key.startsWith(marketID + "::"));
+        registry.keySet().removeIf(key -> key.startsWith(marketID + KEY));
     }
 
     public final boolean isMarketDataPresent(String marketID) {
         for (String dataID : registry.keySet()) {
-            if (dataID.startsWith(marketID + "::")) {
+            if (dataID.startsWith(marketID + KEY)) {
                 return true;
             }
         }
@@ -79,7 +79,7 @@ public class WorkerRegistry {
     public final int getIndustriesUsingWorkers(String marketID) {
         int count = 0;
         for (String dataID : registry.keySet()) {
-            if (dataID.startsWith(marketID + "::")) {
+            if (dataID.startsWith(marketID + KEY)) {
                 count++;
             }
         }
@@ -107,7 +107,7 @@ public class WorkerRegistry {
     }
 
     private static final String makeKey(String marketID, String industryID) {
-        return marketID + "::" + industryID;
+        return marketID + KEY + industryID;
     }
 
     public final List<WorkerIndustryData> getRegister() {

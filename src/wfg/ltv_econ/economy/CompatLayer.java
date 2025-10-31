@@ -30,12 +30,6 @@ import wfg.ltv_econ.industry.IndustryIOs;
  *   <li>Community or modded industries automatically integrate with the LTV scaling system.</li>
  *   <li>All calculations in the economy engine remain consistent and scale correctly.</li>
  * </ul>
- *
- * <p>
- * <strong>Usage:</strong> When the economy engine encounters a vanilla or third-party industry
- * modifier (flat or percent), it passes it through this translator to obtain an equivalent
- * multiplicative value in LTV space. This value can then be safely applied to production,
- * consumption, or any other LTV-scaled metric.
  * </p>
  */
 public final class CompatLayer {
@@ -95,7 +89,7 @@ public final class CompatLayer {
             for (StatMod mod : base.getFlatMods().values()) {
                 if (mod.source.contains(installedItemID)) {
                     float converted = industryModConverter((int) mod.value);
-                    modifierStat.modifyMult(mod.source + "::" + ind.getId(), converted, mod.desc);
+                    modifierStat.modifyMult(mod.source + EconomyEngine.KEY + ind.getId(), converted, mod.desc);
                 }
             }
         }
@@ -106,17 +100,17 @@ public final class CompatLayer {
         int bonusID = 0;
 
         for (StatMod mod : bonus.getPercentMods().values()) {
-            modifierStat.modifyPercent(bonusID++ + "::" + ind.getId(), mod.value, mod.desc);
+            modifierStat.modifyPercent(bonusID++ + EconomyEngine.KEY + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getMultMods().values()) {
-            modifierStat.modifyMult(bonusID++ + "::" + ind.getId(), mod.value, mod.desc);
+            modifierStat.modifyMult(bonusID++ + EconomyEngine.KEY + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
 
-            modifierStat.modifyMult(bonusID++ + "::" + ind.getId(), converted, mod.desc);
+            modifierStat.modifyMult(bonusID++ + EconomyEngine.KEY + ind.getId(), converted, mod.desc);
         }
 
         return modifierStat;
@@ -220,7 +214,7 @@ public final class CompatLayer {
             if (mod == null) continue;
 
             float converted = marketConditionModConverter(mod);
-            dest.modifyMult(cond.getId() + "::" + ind.getId(), converted, cond.getName());
+            dest.modifyMult(cond.getId() + EconomyEngine.KEY + ind.getId(), converted, cond.getName());
         }
     }
 

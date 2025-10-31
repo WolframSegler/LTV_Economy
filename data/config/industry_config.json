@@ -97,7 +97,6 @@
 	"manufacturing": {
 		"occTag": "manufacture",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.8,
 		"outputList": {
 			"components_structural": {
 				"CCMoneyDist": {
@@ -197,12 +196,11 @@
 	"mining": {
 		"occTag": "mechanized",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.5,
 		"outputList": {
 			"ore": {
 				"CCMoneyDist": {
-					"heavy_machinery": 0.3,
-					"drugs": 0.2,
+					"heavy_machinery": 0.4,
+					"drugs": 0.1,
 					"abstract": 0.5
 				},
 				"usesWorkers": true,
@@ -210,8 +208,8 @@
 			},
 			"rare_ore": {
 				"CCMoneyDist": {
-					"heavy_machinery": 0.3,
-					"drugs": 0.2,
+					"heavy_machinery": 0.4,
+					"drugs": 0.1,
 					"abstract": 0.5
 				},
 				"usesWorkers": true,
@@ -219,8 +217,8 @@
 			},
 			"organics": {
 				"CCMoneyDist": {
-					"heavy_machinery": 0.3,
-					"drugs": 0.2,
+					"heavy_machinery": 0.4,
+					"drugs": 0.1,
 					"abstract": 0.5
 				},
 				"usesWorkers": true,
@@ -228,8 +226,8 @@
 			},
 			"volatiles": {
 				"CCMoneyDist": {
-					"heavy_machinery": 0.3,
-					"drugs": 0.2,
+					"heavy_machinery": 0.4,
+					"drugs": 0.1,
 					"abstract": 0.5
 				},
 				"usesWorkers": true,
@@ -240,7 +238,6 @@
 	"farming": {
 		"occTag": "agriculture",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"food": {
 				"CCMoneyDist": {
@@ -255,7 +252,6 @@
 	"aquaculture": {
 		"occTag": "agriculture",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"food": {
 				"CCMoneyDist": {
@@ -270,7 +266,6 @@
 	"techmining": {
 		"occTag": "manual",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"rare_metals": {
 				"CCMoneyDist": {
@@ -292,7 +287,6 @@
 	"refining": {
 		"occTag": "industry",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.1,
 		"outputList": {
 			"metals": {
 				"CCMoneyDist": {
@@ -339,7 +333,6 @@
 	"fuelprod": {
 		"occTag": "mechanized",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.4,
 		"outputList": {
 			"fuel": {
 				"CCMoneyDist": {

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +15,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
@@ -38,7 +36,6 @@ import wfg.wrap_ui.util.NumFormat;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.combat.MutableStat;
-import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 
 /**
@@ -46,6 +43,8 @@ import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
  */
 public class EconomyEngine extends BaseCampaignEventListener
     implements PlayerColonizationListener, ColonyDecivListener {
+
+    public static final String KEY = "::";
 
     private static EconomyEngine instance;
 
@@ -222,7 +221,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         m_comInfo.values().parallelStream().forEach(CommodityInfo::trade);
         m_comInfo.values().parallelStream().forEach(c -> c.advance(fakeAdvance));
 
-        logCreditsSnapshot();
+        // logCreditsSnapshot();
     }
 
     public final void registerMarket(String marketID) {
@@ -303,8 +302,15 @@ public class EconomyEngine extends BaseCampaignEventListener
 
     public static final List<CommoditySpecAPI> getEconCommodities() {
         return Global.getSettings().getAllCommoditySpecs().stream()
-                .filter(spec -> !spec.isNonEcon())
-                .collect(Collectors.toList());
+            .filter(spec -> !spec.isNonEcon())
+            .collect(Collectors.toList());
+    }
+
+    public static final List<String> getEconCommodityIDs() {
+        return Global.getSettings().getAllCommoditySpecs().stream()
+            .filter(spec -> !spec.isNonEcon())
+            .map(CommoditySpecAPI::getId)
+            .collect(Collectors.toList());
     }
 
     public final CommodityInfo getCommodityInfo(String comID) {
@@ -406,90 +412,9 @@ public class EconomyEngine extends BaseCampaignEventListener
     public final void assignWorkers() {
         final WorkerRegistry reg = WorkerRegistry.getInstance();
 
-        final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
-        final Map<String, Map<String, Map<String, Float>>> baseInputs = IndustryIOs.getBaseInputsMap();
-        final String key = "::";
-
-        List<String> commodities = getEconCommodities().stream()
-            .map(CommoditySpecAPI::getId)
-            .collect(Collectors.toList());
-
-        final SettingsAPI settings = Global.getSettings();
-
-        Iterator<String> it = commodities.iterator();
-        while (it.hasNext()) {
-            String com = it.next();
-            boolean remove = true;
-            for (Map.Entry<String, Map<String, Float>> entry : baseOutputs.entrySet()) {
-                IndustrySpecAPI spec = settings.getIndustrySpec(entry.getKey());
-                if (IndustryIOs.getIndConfig(spec).workerAssignable && entry.getValue().containsKey(com)) {
-                    remove = false;
-                    break;
-                }
-            }
-            if (remove) it.remove();
-        }
-
-        List<String> industries = null;
-        { // Memory management
-            Set<String> industrySet = new LinkedHashSet<>();
-            for (IndustrySpecAPI spec : Global.getSettings().getAllIndustrySpecs()) {
-                if (IndustryIOs.hasConfig(spec) || IndustryIOs.hasDynamicConfig(spec)) {
-                    if (IndustryIOs.getIndConfig(spec).workerAssignable) {
-                        industrySet.add(IndustryIOs.getBaseIndIDifNoConfig(spec));
-                    }
-                }
-            }
-            industries = new ArrayList<>(industrySet);
-        }
-
-        // Flatten industries into industry-output pairs
-        List<String> industryOutputPairs = new ArrayList<>();
-        for (String indID : industries) {
-            Map<String, Float> outputs = baseOutputs.get(indID);
-            if (outputs != null) {
-                for (String outputID : outputs.keySet()) {
-                    industryOutputPairs.add(indID + key + outputID);
-                }
-            }
-        }
-
-        final double[][] A = new double[commodities.size()][industryOutputPairs.size()];
-
-        int colIndex = 0;
-
-        for (String indID : industries) {
-            final Map<String, Float> indOutputs = baseOutputs.get(indID);
-            final Map<String, Map<String, Float>> indInputs = baseInputs.get(indID);
-
-            if (indOutputs == null) continue;
-
-            for (Map.Entry<String, Float> outputEntry : indOutputs.entrySet()) {
-                final String outputCommodity = outputEntry.getKey();
-                final float outputValue = outputEntry.getValue();
-
-                // Inputs for Output
-                if (indInputs != null && indInputs.containsKey(outputCommodity)) {
-                    Map<String, Float> inputs = indInputs.get(outputCommodity);
-                    for (Map.Entry<String, Float> inputEntry : inputs.entrySet()) {
-                        String inputCommodity = inputEntry.getKey();
-                        float value = inputEntry.getValue();
-                        int row = commodities.indexOf(inputCommodity);
-                        if (row >= 0) {
-                            A[row][colIndex] -= value; // subtract input
-                        }
-                    }
-                }
-
-                // Output
-                int row = commodities.indexOf(outputCommodity);
-                if (row >= 0) {
-                    A[row][colIndex] += outputValue; // add output
-                }
-
-                colIndex++;
-            }
-        }
+        final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
+        final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
+        final GroupedMatrix A = IndustryGrouper.getStaticGrouping();
 
         Map<String, Integer> commodityToRow = new HashMap<>();
         for (int i = 0; i < commodities.size(); i++) {
@@ -532,7 +457,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                     for (int j = 0; j < industryOutputPairs.size(); j++) {
                         String pair = industryOutputPairs.get(j);
 
-                        if (pair.equals(indID + key + outputID)) {
+                        if (pair.equals(indID + KEY + outputID)) {
                             outputIndexes.add(j);
                         }
                     }
@@ -541,14 +466,10 @@ public class EconomyEngine extends BaseCampaignEventListener
             outputsPerMarket.add(outputIndexes);
         }
 
-        final GroupedMatrix A_r = IndustryGrouper.groupSimilarIndustries(
-            A, industryOutputPairs, 0.01
-        );
-
-        final double[] workerVector = WorkforcePlanner.calculateGlobalWorkerTargets(A_r.reducedMatrix, d);
+        final double[] workerVector = WorkforcePlanner.calculateGlobalWorkerTargets(A.reducedMatrix, d);
 
         final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.allocateWorkersToMarkets(
-            workerVector, markets, industryOutputPairs, outputsPerMarket, A_r
+            workerVector, markets, industryOutputPairs, outputsPerMarket, A
         );
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
@@ -562,7 +483,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             for (int i = 0; i < industryOutputPairs.size(); i++) {
                 if (assignments[i] == 0) continue;
 
-                final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(key), 2);
+                final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(KEY), 2);
                 final String indID = indAndOutputID[0];
                 final String outputID = indAndOutputID[1];
 
