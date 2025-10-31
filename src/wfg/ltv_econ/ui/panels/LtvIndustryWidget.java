@@ -255,11 +255,12 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         tp.setIconSpacingMedium();
 
         boolean hasConfig = IndustryIOs.hasConfig(m_industry);
+        final EconomyEngine engine = EconomyEngine.getInstance();
 
         if (hasConfig && m_industry.isFunctional() && !m_industry.isBuilding()) {
             for (String comID : IndustryIOs.getRealInputs(m_industry, false)) {
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID);
-                CommodityStats stats = EconomyEngine.getInstance().getComStats(comID, getMarket().getId());
+                CommodityStats stats = engine.getComStats(comID, getMarket().getId());
 
                 if (stats == null || stats.getDeficit() < 1) continue;
 
@@ -272,7 +273,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         } else if (m_industry.isFunctional() && !m_industry.isBuilding()) {
             for (Pair<String, Integer> pair : m_industry.getAllDeficit()) {
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(pair.one);
-                CommodityStats stats = EconomyEngine.getInstance().getComStats(pair.one, getMarket().getId());
+                CommodityStats stats = engine.getComStats(pair.one, getMarket().getId());
 
                 if (stats == null || stats.getDeficit() < 1) continue;
 

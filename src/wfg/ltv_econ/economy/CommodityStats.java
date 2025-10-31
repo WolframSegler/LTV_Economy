@@ -11,6 +11,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class CommodityStats {
@@ -215,7 +216,7 @@ public class CommodityStats {
         final float basePrice = spec.getBasePrice();
 
         final long stock = Math.max(getStoredAmount() - amount, 1);
-        final float demand = CommodityInfo.DAYS_TO_COVER * Math.max(demandBase, 1);
+        final float demand = EconomyConfig.DAYS_TO_COVER * Math.max(demandBase, 1);
         final float ratio = stock / demand;
 
         final float ELASTICITY = 0.65f;

@@ -2,7 +2,6 @@
 	"heavyindustry": {
 		"workerAssignable": true,
 		"occTag": "industry",
-		"workerAssignableLimit": 0.15,
 		"outputList": {
 			"heavy_machinery": {
 				"CCMoneyDist": {
@@ -11,7 +10,8 @@
 					"components_structural": 0.3,
 					"components_precision": 0.35
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.3
 			},
 			"light_machinery": {
 				"CCMoneyDist": {
@@ -20,7 +20,8 @@
 					"components_subassembly": 0.2,
 					"components_precision": 0.3
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.4
 			},
 			"supplies": {
 				"CCMoneyDist": {
@@ -30,7 +31,8 @@
 					"components_light": 0.4,
 					"components_precision": 0.2
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.4
 			},
 			"hand_weapons": {
 				"CCMoneyDist": {
@@ -39,7 +41,8 @@
 					"components_structural": 0.25,
 					"components_precision": 0.4
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.3
 			},
 			"ships": {
 				"CCMoneyDist": {
@@ -48,14 +51,14 @@
 					"components_light": 0.05,
 					"components_precision": 0.15
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.5
 			}
 		}
 	},
 	"lightindustry": {
 		"occTag": "industry",
 		"workerAssignable": true,
-		"workerAssignableLimit": 0.2,
 		"outputList": {
 			"domestic_goods": {
 				"CCMoneyDist": {
@@ -64,7 +67,8 @@
 					"components_light": 0.65,
 					"light_machinery": 0.05
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.6
 			},
 			"luxury_goods": {
 				"CCMoneyDist": {
@@ -74,6 +78,7 @@
 					"light_machinery": 0.2
 				},
 				"usesWorkers": true,
+				"workerAssignableLimit": 0.5,
 				"checkLegality": true
 			},
 			"drugs": {
@@ -84,6 +89,7 @@
 					"abstract": 0.1
 				},
 				"usesWorkers": true,
+				"workerAssignableLimit": 0.4,
 				"checkLegality": true
 			}
 		}
@@ -99,7 +105,8 @@
 					"rare_metals": 0.1,
 					"heavy_machinery": 0.05
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.7
 			},
 			"components_precision": {
 				"CCMoneyDist": {
@@ -108,7 +115,8 @@
 					"heavy_machinery": 0.05,
 					"light_machinery": 0.1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.5
 			},
 			"components_subassembly": {
 				"CCMoneyDist": {
@@ -117,7 +125,8 @@
 					"heavy_machinery": 0.1,
 					"light_machinery": 0.05
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.8
 			},
 			"components_light": {
 				"CCMoneyDist": {
@@ -125,7 +134,8 @@
 					"organics": 0.85,
 					"light_machinery": 0.05
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.55
 			}
 		}
 	},
@@ -195,7 +205,8 @@
 					"drugs": 0.2,
 					"abstract": 0.5
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.4
 			},
 			"rare_ore": {
 				"CCMoneyDist": {
@@ -203,7 +214,8 @@
 					"drugs": 0.2,
 					"abstract": 0.5
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.4
 			},
 			"organics": {
 				"CCMoneyDist": {
@@ -211,7 +223,8 @@
 					"drugs": 0.2,
 					"abstract": 0.5
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.7
 			},
 			"volatiles": {
 				"CCMoneyDist": {
@@ -219,7 +232,8 @@
 					"drugs": 0.2,
 					"abstract": 0.5
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.3
 			}
 		}
 	},
@@ -233,7 +247,8 @@
 					"heavy_machinery": 0.9,
 					"abstract": 0.1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.2
 			}
 		}
 	},
@@ -247,7 +262,8 @@
 					"heavy_machinery": 0.9,
 					"abstract": 0.1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.3
 			}
 		}
 	},
@@ -261,13 +277,15 @@
 					"abstract": 0.99,
 					"crew": 0.01
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.1
 			},
 			"metals": {
 				"CCMoneyDist": {
 					"abstract": 1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.1
 			}
 		}
 	},
@@ -281,14 +299,16 @@
 					"ore": 0.95,
 					"heavy_machinery": 0.05
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.6
 			},
 			"rare_metals": {
 				"CCMoneyDist": {
 					"rare_ore": 0.9,
 					"heavy_machinery": 0.1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.5
 			}
 		}
 	},
@@ -326,7 +346,8 @@
 					"heavy_machinery": 0.05,
 					"volatiles": 0.95
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.7
 			}
 		}
 	},

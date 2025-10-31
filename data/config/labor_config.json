@@ -3,6 +3,9 @@
     "LPV_month": 8,
     "populationRatioThatAreWorkers": 0.64,
 
+    "defaultWorkerCapPerOutput": 0.6,
+    "dynamicWorkerCapPerOutput": 0.8,
+
     "RoVC_average": 0.13,
     "RoVC_industry": 0.04,
     "RoVC_manufacture": 0.35,

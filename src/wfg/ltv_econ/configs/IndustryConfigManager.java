@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 
+import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 
 import java.util.List;
@@ -69,7 +70,6 @@ public class IndustryConfigManager {
             JSONObject industryJson = root.getJSONObject(industryId);
 
             boolean workerAssignable = industryJson.optBoolean("workerAssignable", false);
-            float limit = (float) industryJson.optDouble("workerAssignableLimit", 1);
 
             String occTagStr = industryJson.optString("occTag", null);
             OCCTag occTag = OCCTag.AVERAGE;
@@ -107,10 +107,10 @@ public class IndustryConfigManager {
                 String outputId = outputIds.next();
                 JSONObject outputData = outputList.getJSONObject(outputId);
 
-                float baseProd = 1;
-                if (outputData.has("baseProd")) {
-                    baseProd = (float) outputData.optDouble("baseProd", 1);
-                }
+                float baseProd = (float) outputData.optDouble("baseProd", 1);
+                float workerAssignableLimit = (float) industryJson.optDouble(
+                    "workerAssignableLimit", LaborConfig.defaultWorkerCapPerOutput
+                );
 
                 boolean scaleWSize = outputData.optBoolean("scaleWithMarketSize", false);
                 boolean isAbstract = outputData.optBoolean("isAbstract", false);
@@ -165,13 +165,14 @@ public class IndustryConfigManager {
                     checkLegality,
                     marketCondsAllFalse,
                     marketCondsAllTrue,
-                    ConsumptionMap
+                    ConsumptionMap,
+                    workerAssignableLimit
                 );
 
                 commodityMap.put(outputId, otp);
             }
             
-            IndustryConfig indConfig = new IndustryConfig(workerAssignable, commodityMap, occTag, limit);
+            IndustryConfig indConfig = new IndustryConfig(workerAssignable, commodityMap, occTag);
             result.put(industryId, indConfig);
         }
         } catch (Exception e) {
@@ -194,7 +195,6 @@ public class IndustryConfigManager {
 
                 JSONObject indJson = new JSONObject();
                 indJson.put("workerAssignable", ind.workerAssignable);
-                indJson.put("workerAssignableLimit", ind.workerAssignableLimit);
 
                 if (ind.occTag != null) {
                     indJson.put("occTag", ind.occTag.name().toLowerCase());
@@ -207,8 +207,8 @@ public class IndustryConfigManager {
 
                     JSONObject optJson = new JSONObject();
                     optJson.put("baseProd", opt.baseProd);
+                    optJson.put("workerAssignableLimit", opt.workerAssignableLimit);
 
-                    // Optional maps
                     if (opt.CCMoneyDist != null && !opt.CCMoneyDist.isEmpty()) {
                         JSONObject ccJson = new JSONObject();
                         for (Map.Entry<String, Float> e : opt.CCMoneyDist.entrySet()) {
@@ -254,19 +254,15 @@ public class IndustryConfigManager {
 
     public static class IndustryConfig {
         public final boolean workerAssignable;
-        public final float workerAssignableLimit;
         public final OCCTag occTag;
         public final Map<String, OutputCom> outputs;
 
         public boolean dynamic = false;
 
-        public IndustryConfig(boolean workerAssignable, Map<String, OutputCom> outputs, OCCTag occTag,
-            float limit) {
-
+        public IndustryConfig(boolean workerAssignable, Map<String, OutputCom> outputs, OCCTag occTag) {
             this.workerAssignable = workerAssignable;
             this.outputs = outputs;
             this.occTag = occTag;
-            this.workerAssignableLimit = limit;
         }
 
         /**
@@ -274,7 +270,6 @@ public class IndustryConfigManager {
          */
         public IndustryConfig(IndustryConfig config) {
             this.workerAssignable = config.workerAssignable;
-            this.workerAssignableLimit = config.workerAssignableLimit;
             this.occTag = config.occTag;
             this.dynamic = config.dynamic;
 
@@ -294,7 +289,6 @@ public class IndustryConfigManager {
         public final String toString() {
             return '{' + " ,\n"
                 + "workerAssignable: " + workerAssignable + " ,\n"
-                + "workerAssignableLimit: " + workerAssignableLimit + " ,\n"
                 + "occTag: " + occTag.toString() + " ,\n"
                 + outputs.toString()
                 + '}';
@@ -304,6 +298,7 @@ public class IndustryConfigManager {
     public static class OutputCom {
         public final String comID;
         public final float baseProd;
+        public final float workerAssignableLimit;
 
         public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
         public final Map<String, Float> InputsPerUnitOutput;
@@ -319,7 +314,7 @@ public class IndustryConfigManager {
         public OutputCom(
             String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
             boolean usesWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketCondsAllFalse,
-            List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput
+            List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput, float workerAssignableLimit
         ) {
             this.comID = comID;
             this.baseProd = baseProd;
@@ -329,6 +324,7 @@ public class IndustryConfigManager {
             this.ifMarketCondsAllTrue = ifMarketCondsAllTrue;
             this.scaleWithMarketSize = scaleWithMarketSize;
             this.usesWorkers = usesWorkers;
+            this.workerAssignableLimit = workerAssignableLimit;
             this.isAbstract = isAbstract;
             this.checkLegality = checkLegality;
         }
@@ -350,6 +346,7 @@ public class IndustryConfigManager {
 
             this.scaleWithMarketSize = other.scaleWithMarketSize;
             this.usesWorkers = other.usesWorkers;
+            this.workerAssignableLimit = other.workerAssignableLimit;
             this.isAbstract = other.isAbstract;
             this.checkLegality = other.checkLegality;
         }
@@ -364,6 +361,7 @@ public class IndustryConfigManager {
                 ", ifMarketCondsAllTrue=" + ifMarketCondsAllTrue + " ,\n" +
                 ", scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +
                 ", usesWorkers=" + usesWorkers + " ,\n" +
+                "workerAssignableLimit: " + workerAssignableLimit + " ,\n" +
                 ", isAbstract=" + isAbstract + " ,\n" +
                 ", checkLegality=" + checkLegality + " ,\n" +
                 '}';

@@ -6,7 +6,6 @@ Documentation of `industry_config.json` Fields
 
 * `occTag`: Determines the OCC category for the industry, used to look up the labor share (RoVC).
 * `workerAssignable`: Boolean indicating if the industry can assign workers to outputs.
-* `workerAssignableLimit`: Limits the ratio of globally available workers that can be assigned.
 
 ### Output-level fields (per commodity)
 
@@ -16,6 +15,7 @@ Documentation of `industry_config.json` Fields
 * `ifMarketCondsAllFalse` / `ifMarketCondsAllTrue`: Lists of conditions affecting output; used to enable/disable production under specific market conditions.
 * `scaleWithMarketSize`: Boolean. If true, output and consumption scales proportionally to market size.
 * `usesWorkers`: Boolean. Determines if labor calculations (RoVC, LPV\_day) are applied.
+* `workerAssignableLimit`: Limits the ratio of globally available workers that can be assigned.
 * `isAbstract`: Boolean. Indicates the output is **not physically produced**; used for accounting and value input only.
 * `checkLegality`: Boolean. Used to flag outputs that require legality checks.
 

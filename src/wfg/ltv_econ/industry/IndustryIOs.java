@@ -262,7 +262,8 @@ public class IndustryIOs {
                         isIllegal,
                         emptyList,
                         emptyList,
-                        InputsPerUnitOutput
+                        InputsPerUnitOutput,
+                        LaborConfig.dynamicWorkerCapPerOutput
                 );
                 configOutputs.put(outputID, optCom);
             };
@@ -271,7 +272,7 @@ public class IndustryIOs {
             illegalOutputs.forEach(addOutput);
 
             IndustryConfig config = new IndustryConfig(
-                usesWorkers, configOutputs, OCCTag.AVERAGE, 1f
+                usesWorkers, configOutputs, OCCTag.AVERAGE
             );
             config.dynamic = true;
 
@@ -388,7 +389,8 @@ public class IndustryIOs {
                         false,
                         emptyList,
                         condCombo,
-                        InputsPerUnitOutput
+                        InputsPerUnitOutput,
+                        LaborConfig.dynamicWorkerCapPerOutput
                     );
                     new_outputs.put(newOutput, optCom);
                 }
@@ -852,6 +854,19 @@ public class IndustryIOs {
             return ind.getId();
         }
         return getBaseIndustryID(ind);
+    }
+
+    public static Industry getRealIndustryFromBaseID(MarketAPI market, String baseID) {
+        for (Industry ind : market.getIndustries()) {
+            final String realBaseID = IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec());
+            if (realBaseID.equals(baseID)) {
+                return ind;
+            }
+        }
+        throw new IllegalStateException(
+            "Expected market '" + market.getId() + "' to contain an industry with baseID '"
+            + baseID + "', but none was found."
+        );
     }
 
     /**

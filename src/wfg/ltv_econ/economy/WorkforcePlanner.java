@@ -314,7 +314,9 @@ public class WorkforcePlanner {
         for (int j = 0; j < numOutputs; j++) {
             double totalCapacity = 0.0;
             Map<MarketAPI, Double> effectiveCapacities = new HashMap<>();
-            final String outputID = industryOutputPairs.get(j).split("::")[1];
+            final String[] pair = industryOutputPairs.get(j).split("::");
+            final String indID = pair[0];
+            final String outputID = pair[1];
 
             for (int m = 0; m < numMarkets; m++) {
                 if (!outputsPerMarket.get(m).contains(j)) continue;
@@ -323,20 +325,18 @@ public class WorkforcePlanner {
                 final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(markets.get(m));
                 final long baseCapacity = (pool != null) ? pool.getWorkerPool() : 0;
 
-                float outputMultiplier = 0f;
-                int contributing = 0;
+                final Industry ind = IndustryIOs.getRealIndustryFromBaseID(market, indID);
 
-                for (Industry ind : IndustryIOs.getIndustriesForOutput(outputID, market)) {
-                    outputMultiplier += CompatLayer.getModifiersMult(ind, outputID, false);
-                    contributing++;
-                }
-
-                if (contributing > 1) {
-                    outputMultiplier /= contributing;
-                }
+                float outputMultiplier = CompatLayer.getModifiersMult(
+                    ind, outputID, false
+                );
 
                 double effectiveCapacity = baseCapacity + baseCapacity * outputMultiplier *
                     EconomyConfig.MARKET_MODIFIER_SCALER;
+
+                final float limit = IndustryIOs.getIndConfig(ind).outputs.get(outputID).workerAssignableLimit;
+
+                effectiveCapacity = Math.min(effectiveCapacity, limit * baseCapacity);
 
                 effectiveCapacities.put(market, effectiveCapacity);
                 totalCapacity += effectiveCapacity;

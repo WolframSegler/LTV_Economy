@@ -33,7 +33,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 public class LtvMarketReplacer implements EveryFrameScript {
 
-    public final static int pad = 3;
+    public static final int pad = 3;
 
     private int frames = 0;
 
