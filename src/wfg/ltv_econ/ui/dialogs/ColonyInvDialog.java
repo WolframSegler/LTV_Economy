@@ -83,7 +83,7 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
                 new SpritePanelPlugin<>(), com.getIconName(), null, null, false
             );
             
-            long stored = comStats.getStoredAmount();
+            long stored = comStats.getStored();
             long demand = comStats.getBaseDemand(false);
             long baseProd = comStats.getLocalProduction(false);
             long modifiedProd = comStats.getLocalProduction(true);

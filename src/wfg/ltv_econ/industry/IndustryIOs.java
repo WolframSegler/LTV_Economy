@@ -30,9 +30,10 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.configs.IndustryConfigManager;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
-import wfg.ltv_econ.configs.IndustryConfigManager.OutputCom;
+import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
+import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
@@ -185,7 +186,7 @@ public class IndustryIOs {
             if (getIndConfig(indSpec) != null) continue;
 
             String indID = indSpec.getId();
-            Map<String, OutputCom> configOutputs = new HashMap<>();
+            Map<String, OutputConfig> configOutputs = new HashMap<>();
             
             testMarket1.addIndustry(indID);
             testMarket2.addIndustry(indID);
@@ -252,7 +253,7 @@ public class IndustryIOs {
                 boolean isIllegal = illegalOutputs.contains(outputID);
                 boolean isAbstract = settings.getCommoditySpec(outputID) == null;
 
-                OutputCom optCom = new OutputCom(
+                OutputConfig optCom = new OutputConfig(
                         outputID,
                         1,
                         CCMoneyDist,
@@ -264,7 +265,8 @@ public class IndustryIOs {
                         emptyList,
                         InputsPerUnitOutput,
                         LaborConfig.dynamicWorkerCapPerOutput,
-                        8.5f
+                        8.5f,
+                        -1
                 );
                 configOutputs.put(outputID, optCom);
             };
@@ -329,7 +331,7 @@ public class IndustryIOs {
 
                 final Set<String> currentOutputs = new HashSet<>();
                 final Set<String> baselineOutputs = config.outputs.keySet();
-                final Map<String, OutputCom> new_outputs = new_dynamic_ind_config.get(indID).outputs;
+                final Map<String, OutputConfig> new_outputs = new_dynamic_ind_config.get(indID).outputs;
 
                 for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
                     currentOutputs.add(mutable.getCommodityId());
@@ -380,7 +382,7 @@ public class IndustryIOs {
 
                 for (String newOutput : appearingOutputs) {
                     boolean isAbstract = settings.getCommoditySpec(newOutput) == null;
-                    OutputCom optCom = new OutputCom(
+                    OutputConfig optCom = new OutputConfig(
                         newOutput,
                         1,
                         CCMoneyDist,
@@ -392,13 +394,14 @@ public class IndustryIOs {
                         condCombo,
                         InputsPerUnitOutput,
                         LaborConfig.dynamicWorkerCapPerOutput,
-                        8.5f
+                        8.5f,
+                        -1
                     );
                     new_outputs.put(newOutput, optCom);
                 }
 
                 for (String missingOutput : disappearingOutputs) {
-                    final OutputCom outputCom = new_outputs.get(missingOutput);
+                    final OutputConfig outputCom = new_outputs.get(missingOutput);
                     if (outputCom.ifMarketCondsAllFalse == null || outputCom.ifMarketCondsAllFalse.isEmpty()) {
                         outputCom.ifMarketCondsAllFalse = condCombo;
                     }
@@ -454,14 +457,14 @@ public class IndustryIOs {
                 entry.getKey(), k -> new HashMap<>()
             );
 
-            final Map<String, OutputCom> outputs = entry.getValue().outputs;
+            final Map<String, OutputConfig> outputs = entry.getValue().outputs;
 
-            for (Map.Entry<String, OutputCom> outputEntry : outputs.entrySet()) {
+            for (Map.Entry<String, OutputConfig> outputEntry : outputs.entrySet()) {
                 Map<String, Float> inputMap = inputOuterMap.computeIfAbsent(
                     outputEntry.getKey(), k -> new HashMap<>()
                 );
                 
-                OutputCom output = outputEntry.getValue();
+                OutputConfig output = outputEntry.getValue();
 
                 if (output.usesWorkers && (output.CCMoneyDist == null || output.CCMoneyDist.isEmpty())) {
                     throw new RuntimeException(
@@ -558,7 +561,7 @@ public class IndustryIOs {
         }
     }
 
-    public static final boolean isOutputValidForMarket(OutputCom output, MarketAPI market, String outputID) {
+    public static final boolean isOutputValidForMarket(OutputConfig output, MarketAPI market, String outputID) {
         if (output.checkLegality && market.isIllegal(outputID)) return false;
 
         for (String cond : output.ifMarketCondsAllFalse) {
@@ -573,9 +576,12 @@ public class IndustryIOs {
     }
 
     public static final float calculateScale(
-        Industry ind, MarketAPI market, OutputCom output, String outputID, IndustryConfig cfg
+        Industry ind, MarketAPI market, OutputConfig output, String outputID, IndustryConfig cfg
     ) {
         float scale = 1f;
+
+        final CommodityStats stats = EconomyEngine.getInstance().getComStats(output.comID, market.getId()); 
+        if (stats != null && output.target > 0 && output.target < stats.getStored()) return 0f;
 
         if (output.usesWorkers && !output.isAbstract) {
             final WorkerRegistry reg = WorkerRegistry.getInstance();
@@ -597,7 +603,7 @@ public class IndustryIOs {
      */
     public static final float getRealOutput(Industry ind, String outputID) {
         final IndustryConfig cfg = getIndConfig(ind);
-        final OutputCom output = cfg.outputs.get(outputID);
+        final OutputConfig output = cfg.outputs.get(outputID);
         if (output == null || output.isAbstract) return 0;
 
         final float value = getBaseOutput(ind.getSpec(), outputID);
@@ -619,7 +625,7 @@ public class IndustryIOs {
      */
     public static final float getRealInput(Industry ind, String outputID, String inputID) {
         final IndustryConfig cfg = getIndConfig(ind);
-        final OutputCom output = cfg.outputs.get(outputID);
+        final OutputConfig output = cfg.outputs.get(outputID);
 
         final float value = getBaseInput(ind.getSpec(), outputID, inputID);
         if (value == 0) return 0;
@@ -643,7 +649,7 @@ public class IndustryIOs {
 
         float total = 0f;
         for (Map.Entry<String,Map<String,Float>> inputMap : indMap.entrySet()) {
-            final OutputCom output = cfg.outputs.get(inputMap.getKey());
+            final OutputConfig output = cfg.outputs.get(inputMap.getKey());
 
             for (Map.Entry<String, Float> entry : inputMap.getValue().entrySet()) {
                 if (entry.getKey().equals(inputID)) {

@@ -14,7 +14,7 @@ import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.configs.IndustryConfigManager.OutputCom;
+import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class WorkerRegistry {
@@ -130,7 +130,7 @@ public class WorkerRegistry {
             this.indID = industry.getId();
             this.outputRatios = new HashMap<>();
 
-            for (OutputCom output : IndustryIOs.getIndConfig(industry).outputs.values()) {
+            for (OutputConfig output : IndustryIOs.getIndConfig(industry).outputs.values()) {
                 if (!output.usesWorkers) continue;
                 outputRatios.put(output.comID, 0f);
             }

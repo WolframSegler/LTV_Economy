@@ -330,7 +330,7 @@ public class CommodityInfo {
     private static final long computeProjectedImportAmount(CommodityStats stats) {
         final long targetStockpiles = EconomyConfig.DAYS_TO_COVER*stats.getDeficitPreTrade();
 
-        long delta = targetStockpiles - stats.getStoredAmount() - stats.getTotalImports();
+        long delta = targetStockpiles - stats.getStored() - stats.getTotalImports();
         delta = Math.min(delta, EconomyConfig.DAYS_TO_COVER_PER_IMPORT*stats.getDeficitPreTrade());
         return Math.max(delta, 0);
     }

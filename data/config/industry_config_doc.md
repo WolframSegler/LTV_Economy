@@ -10,6 +10,7 @@ Documentation of `industry_config.json` Fields
 ### Output-level fields (per commodity)
 
 * `baseProd`: Float. Acts as a scaler when `usesWorkers = true`. Represents daily production in units when used alongside InputsPerUnitOutput. The units inside InputsPerUnitOutput are multiplied with it. Default is always 1.
+* `target`: Float. Defines an upper limit for the stored amount of this commodity. When target > 0, production (or import) will scale to 0 once the stored quantity exceeds the target, effectively throttling output. A value ≤ 0 disables this limit.
 * `CCMoneyDist`: Map\<String, Float>. ConstantCapitalMoneyDistribution Defines **relative monetary allocation** for constant capital inputs (physical or abstract). Weights are normalized internally. Can be used with or without workers. Mutually exclusive with `InputsPerUnitOutput`. Can include abstract inputs.
 * `InputsPerUnitOutput`: Map\<String, Float>. Flat input amounts required per output unit. Scales with market/population if `scaleWithMarketSize = true`. Can include abstract inputs.
 * `ifMarketCondsAllFalse` / `ifMarketCondsAllTrue`: Lists of conditions affecting output; used to enable/disable production under specific market conditions.

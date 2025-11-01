@@ -3,23 +3,24 @@ package wfg.ltv_econ.submarkets;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CoreUIAPI;
 import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
-import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.submarkets.BaseSubmarketPlugin;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.wrap_ui.util.NumFormat;
 
 public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
@@ -43,20 +44,13 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		return true;
 	}
 
-	private float daysSinceLastUpdate = -1;
-
 	@Override
 	public void advance(float amount) {
 		super.advance(amount);
-		final int day = Global.getSector().getClock().getDay();
-
-		if (daysSinceLastUpdate == day) return;
-
-		daysSinceLastUpdate = day;
 	}
 
 	public boolean shouldHaveCommodity(CommodityOnMarketAPI commodity) {
-		if (commodity.isNonEcon()) return false;
+		if (commodity.isNonEcon() || commodity.isMeta()) return false;
 		return true;
 	}
 
@@ -78,7 +72,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
 	@Override
 	public int getStockpileLimit(CommodityOnMarketAPI com) {
-		return 100000;
+		return 50000;
 	}
 
 	@Override
@@ -108,16 +102,26 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 	protected transient CargoAPI preTransactionCargoCopy = null;
 
 	public void updateCargoPrePlayerInteraction() {
-		preTransactionCargoCopy = getCargo().createCopy();
-		preTransactionCargoCopy.sort();
-		getCargo().sort();
-	}
+		final EconomyEngine engine = EconomyEngine.getInstance();
+		final String marketId = market.getId();
 
-	public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
-		sinceLastCargoUpdate = 0f;
+		getCargo().clear();
 
-		preTransactionCargoCopy = getCargo().createCopy();
-		preTransactionCargoCopy.sort();
+		for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
+			if (spec.isMeta()) continue;
+			final String comID = spec.getId();
+
+			final CommodityStats stats = engine.getComStats(comID, marketId);
+			final float stored = stats.getStored();
+			final float limit = getStockpileLimit(null);
+
+			final float displayAmount = Math.min(limit, stored);
+			if (displayAmount > 1f) {
+				cargo.addCommodity(comID, displayAmount);
+			}
+		}
+
+		cargo.sort();
 	}
 
 	protected Object readResolve() {
@@ -126,15 +130,25 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		return this;
 	}
 
-	public void absorbCargoIntoStockpiles() {
+	@Override
+	public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
 		final EconomyEngine engine = EconomyEngine.getInstance();
-		for (String comID : EconomyEngine.getEconCommodityIDs()) {
-			final CommodityStats stats = engine.getComStats(comID, market.getId());
-			final int amount = (int) cargo.getCommodityQuantity(comID);
-			if (amount < 1) continue;
-			
+		final String marketId = market.getId();
+
+		for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
+			String comId = stack.getCommodityId();
+			int amount = (int) stack.getSize();
+
+			CommodityStats stats = engine.getComStats(comId, marketId);
 			stats.addStoredAmount(amount);
-			cargo.removeCommodity(comID, amount);
+		}
+
+		for (CargoStackAPI stack : transaction.getBought().getStacksCopy()) {
+			String comId = stack.getCommodityId();
+			int amount = (int) stack.getSize();
+
+			CommodityStats stats = engine.getComStats(comId, marketId);
+			stats.addStoredAmount(-amount);
 		}
 	}
 
@@ -145,15 +159,15 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
 	@Override
 	public String getSellVerb() {
-		return "Leave";
+		return "Give";
 	}
 
 	public String getTotalTextOverride() {
-		return "Now AAAAAA";
+		return "Transfer";
 	}
 
 	public String getTotalValueOverride() {
-		return "0" + Strings.C;
+		return "";
 	}
 
 	public boolean isTooltipExpandable() {
@@ -167,19 +181,16 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 	protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
 		final float opad = 10;
 
-		tooltip.addPara(
-			"Colony Stockpiles represent the resources held by this colony that are absorbed into the economy at the end of each day. " +
-			"Any goods placed into this submarket from your cargo will be added to the colony's stored resources automatically, " +
-			"making them available for the industries." +
-			"\nResources added to the stockpiles are effectively removed from your personal cargo but remain in the economy for use by the colony." +
-			"They can help cover shortages, supply production, and support other colony operations.",
-			opad
-		);
-
 		tooltip.addSectionHeading("Player Interaction", market.getFaction().getBaseUIColor(),
 			market.getFaction().getDarkUIColor(), Alignment.MID, opad);
 
-		tooltip.addPara("You cannot directly take resources back from Colony Stockpiles. Contributions are one-way, intended to strengthen the colony's economy. " +
-			"Use this submarket to safely transfer excess goods from your cargo to the colony without risking loss or theft.", opad);
+		tooltip.addPara(
+			"Commodities can be deposited into or withdrawn from the stockpiles. " +
+			"The displayed cargo shows up to the stockpile limit of %s or the amount currently stored, whichever is lower. " +
+			"Contributions update the colony's reserves immediately, and the visible cargo reflects the current stockpile limits.",
+			opad,
+			Misc.getHighlightColor(),
+			NumFormat.engNotation(getStockpileLimit(null))
+		);
 	}
 }

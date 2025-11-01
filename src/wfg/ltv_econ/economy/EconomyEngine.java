@@ -37,7 +37,6 @@ import wfg.wrap_ui.util.NumFormat;
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
-import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 
 /**
  * Handles the trade, consumption, production and all related logic
@@ -46,10 +45,12 @@ public class EconomyEngine extends BaseCampaignEventListener
     implements PlayerColonizationListener, ColonyDecivListener {
 
     public static final String KEY = "::";
+    public static final String STOCKPILES_ID = "stockpiles";
 
     private static EconomyEngine instance;
 
     private final Set<String> m_registeredMarkets;
+    private final Set<MarketAPI> m_playerMarkets;
     private final Map<String, Long> m_marketCredits = new HashMap<>();
     private final Map<String, CommodityInfo> m_comInfo;
 
@@ -76,6 +77,7 @@ public class EconomyEngine extends BaseCampaignEventListener
     private EconomyEngine() {
         super(true);
         m_registeredMarkets = new HashSet<>();
+        m_playerMarkets = new HashSet<>();
         m_comInfo = new HashMap<>();
 
         for (MarketAPI market : getMarketsCopy()) {
@@ -83,6 +85,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
             m_registeredMarkets.add(market.getId());
             m_marketCredits.put(market.getId(), (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
+            if (market.isPlayerOwned()) m_playerMarkets.add(market);
         }
 
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
@@ -95,9 +98,6 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     public final Object readResolve() {
-        final ListenerManagerAPI listener = Global.getSector().getListenerManager();
-        if (!listener.hasListener(this)) listener.addListener(this, false);
-
         mainLoopExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "LTV-MainLoop");
             t.setDaemon(true);
@@ -206,12 +206,10 @@ public class EconomyEngine extends BaseCampaignEventListener
         m_comInfo.values().parallelStream().forEach(CommodityInfo::reset);
 
         if (!fakeAdvance) {
-            resetWorkersAssigned();
+            resetWorkersAssigned(false);
 
             m_comInfo.values().parallelStream().forEach(CommodityInfo::update);
-        }
 
-        if (!fakeAdvance) {
             assignWorkers();
         }
 
@@ -278,24 +276,20 @@ public class EconomyEngine extends BaseCampaignEventListener
 
     public void reportPlayerOpenedMarket() {
         fakeAdvance();
-        Global.getLogger(getClass()).error("MarketOpened");
     }
 
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
         final String marketID = planet.getMarket().getId();
         registerMarket(marketID);
-        planet.getMarket().addSubmarket("stockpiles");
-        Global.getLogger(getClass()).error("MarketColonized");
+        planet.getMarket().addSubmarket(STOCKPILES_ID);
     }
 
     public void reportPlayerAbandonedColony(MarketAPI market) {
         removeMarket(market.getId());
-        Global.getLogger(getClass()).error("MarketAbandoned");
     }
 
     public void reportColonyDecivilized(MarketAPI market, boolean fullyDestroyed) {
         removeMarket(market.getId());
-        Global.getLogger(getClass()).error("MarketDecivilized");
     }
 
     public void reportColonyAboutToBeDecivilized(MarketAPI a, boolean b) {}
@@ -401,10 +395,11 @@ public class EconomyEngine extends BaseCampaignEventListener
         stats.localProdMult = Math.max(1f - totalDeficit, 0.01f);
     }
 
-    private final void resetWorkersAssigned() {
+    private final void resetWorkersAssigned(boolean resetPlayerIndustries) {
         final WorkerRegistry reg = WorkerRegistry.getInstance();
 
         for (WorkerIndustryData data : reg.getRegister()) {
+            if (!resetPlayerIndustries && data.market.isPlayerOwned()) continue;
             data.resetWorkersAssigned();
         }
     }
@@ -683,7 +678,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 available += stats.getAvailable();
                 availabilityRatio += stats.getAvailabilityRatio();
                 deficit += stats.getDeficit();
-                globalStockpile += stats.getStoredAmount();
+                globalStockpile += stats.getStored();
                 totalExports += stats.getTotalExports();
                 inFactionExports += stats.inFactionExports;
                 globalExports += stats.globalExports;
@@ -742,7 +737,7 @@ public class EconomyEngine extends BaseCampaignEventListener
                 available += stats.getAvailable();
                 availabilityRatio += stats.getAvailabilityRatio();
                 deficit += stats.getDeficit();
-                globalStockpile += stats.getStoredAmount();
+                globalStockpile += stats.getStored();
                 totalExports += stats.getTotalExports();
                 inFactionExports += stats.inFactionExports;
                 globalExports += stats.globalExports;

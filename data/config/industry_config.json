@@ -590,16 +590,46 @@
 		"workerAssignable": false,
 		"workerAssignableLimit": 0.1,
 		"outputList": {
-			"imports": {
+			"supplies": {
+				"baseProd": 10,
+				"target": 8000,
 				"InputsPerUnitOutput": {
-					"supplies": 0.2,
-					"fuel": 0.4,
-					"crew": 0.1,
-					"volatiles": 0.2,
-					"rare_metals": 0.2
+					"supplies": 1
 				},
-				"usesWorkers": false,
-				"isAbstract": true
+				"usesWorkers": true
+			},
+			"fuel": {
+				"baseProd": 40,
+				"target": 25000,
+				"InputsPerUnitOutput": {
+					"fuel": 1
+				},
+				"usesWorkers": true
+			},
+			"volatiles": {
+				"baseProd": 3,
+				"target": 2000,
+				"InputsPerUnitOutput": {
+					"volatiles": 1
+				},
+				"usesWorkers": true
+			},
+			"rare_metals": {
+				"baseProd": 4,
+				"target": 3000,
+				"InputsPerUnitOutput": {
+					"rare_metals": 1
+				},
+				"usesWorkers": true
+			},
+			"crew": {
+				"baseProd": 10,
+				"target": 2000,
+				"InputsPerUnitOutput": {
+					"crew": 1
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3
 			}
 		}
 	},

@@ -10,7 +10,7 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
-import wfg.ltv_econ.configs.IndustryConfigManager.OutputCom;
+import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
@@ -247,10 +247,10 @@ public final class CompatLayer {
         float nonAbstractInput = 0f;
         float ratio = 0f;
 
-        final Map<String, OutputCom> outputs = IndustryIOs.getIndConfig(ind).outputs;
+        final Map<String, OutputConfig> outputs = IndustryIOs.getIndConfig(ind).outputs;
 
         for (String outputID : IndustryIOs.getRealOutputs(ind, true).keySet()) {
-            OutputCom output = outputs.get(outputID);
+            OutputConfig output = outputs.get(outputID);
 
             Map<String, Float> inputs = IndustryIOs.getRealInputs(ind, outputID, false);
 

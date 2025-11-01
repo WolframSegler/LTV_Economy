@@ -136,7 +136,7 @@ public class CommodityStats {
         globalExports += a;
     }
 
-    public final long getStoredAmount() {
+    public final long getStored() {
         return stored;
     }
 
@@ -215,7 +215,7 @@ public class CommodityStats {
     public float getUnitPrice(PriceType type, int amount) {
         final float basePrice = spec.getBasePrice();
 
-        final long stock = Math.max(getStoredAmount() - amount, 1);
+        final long stock = Math.max(getStored() - amount, 1);
         final float demand = EconomyConfig.DAYS_TO_COVER * Math.max(demandBase, 1);
         final float ratio = stock / demand;
 

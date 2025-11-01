@@ -79,6 +79,10 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
         if (opt.id != PluginID) {
             return;
         }
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        if (reg.getData(opt.ind.getMarket().getId(), opt.ind.getId()) == null) {
+            reg.register(opt.ind.getMarket(), opt.ind);
+        }
 
         // On Click
         final int panelWidth = 540;

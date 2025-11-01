@@ -86,7 +86,7 @@ public class NumFormat {
 
         // Check if it's basically 1.00 but not exactly
         if (Math.abs(value - 1.0) < 0.01 && Math.abs(value - 1.0) > 1e-6) {
-            formatted = "1.00...";
+            formatted = "1.00..";
         }
         // Normal formatting: drop second decimal if it's 0
         else if (Math.abs(rounded * 10 - Math.round(rounded * 10)) < 1e-9) {

@@ -100,7 +100,7 @@ public class IndustryConfigManager {
             }
 
             JSONObject outputList = industryJson.getJSONObject("outputList");
-            Map<String, OutputCom> commodityMap = new HashMap<>();
+            Map<String, OutputConfig> commodityMap = new HashMap<>();
 
             Iterator<String> outputIds = outputList.keys();
             while (outputIds.hasNext()) {
@@ -108,6 +108,7 @@ public class IndustryConfigManager {
                 JSONObject outputData = outputList.getJSONObject(outputId);
 
                 float baseProd = (float) outputData.optDouble("baseProd", 1);
+                long target = outputData.optLong("target", -1);
                 float workerAssignableLimit = (float) outputData.optDouble(
                     "workerAssignableLimit", LaborConfig.defaultWorkerCapPerOutput
                 );
@@ -158,7 +159,7 @@ public class IndustryConfigManager {
                     }
                 }
 
-                OutputCom otp = new OutputCom(
+                OutputConfig otp = new OutputConfig(
                     outputId,
                     baseProd,
                     CCMoneyDist,
@@ -170,7 +171,8 @@ public class IndustryConfigManager {
                     marketCondsAllTrue,
                     ConsumptionMap,
                     workerAssignableLimit,
-                    marketScaleBase
+                    marketScaleBase,
+                    target
                 );
 
                 commodityMap.put(outputId, otp);
@@ -205,12 +207,13 @@ public class IndustryConfigManager {
                 }
 
                 JSONObject outputList = new JSONObject();
-                for (Map.Entry<String, OutputCom> outputEntry : ind.outputs.entrySet()) {
+                for (Map.Entry<String, OutputConfig> outputEntry : ind.outputs.entrySet()) {
                     String outputId = outputEntry.getKey();
-                    OutputCom opt = outputEntry.getValue();
+                    OutputConfig opt = outputEntry.getValue();
 
                     JSONObject optJson = new JSONObject();
                     optJson.put("baseProd", opt.baseProd);
+                    optJson.put("target", opt.target);
                     optJson.put("workerAssignableLimit", opt.workerAssignableLimit);
                     optJson.put("marketScaleBase", opt.marketScaleBase);
 
@@ -260,11 +263,11 @@ public class IndustryConfigManager {
     public static class IndustryConfig {
         public final boolean workerAssignable;
         public final OCCTag occTag;
-        public final Map<String, OutputCom> outputs;
+        public final Map<String, OutputConfig> outputs;
 
         public boolean dynamic = false;
 
-        public IndustryConfig(boolean workerAssignable, Map<String, OutputCom> outputs, OCCTag occTag) {
+        public IndustryConfig(boolean workerAssignable, Map<String, OutputConfig> outputs, OCCTag occTag) {
             this.workerAssignable = workerAssignable;
             this.outputs = outputs;
             this.occTag = occTag;
@@ -280,9 +283,9 @@ public class IndustryConfigManager {
 
             // Deep copy outputs map
             if (config.outputs != null) {
-                Map<String, OutputCom> copy = new HashMap<>();
-                for (Map.Entry<String, OutputCom> e : config.outputs.entrySet()) {
-                    copy.put(e.getKey(), new OutputCom(e.getValue()));
+                Map<String, OutputConfig> copy = new HashMap<>();
+                for (Map.Entry<String, OutputConfig> e : config.outputs.entrySet()) {
+                    copy.put(e.getKey(), new OutputConfig(e.getValue()));
                 }
                 this.outputs = copy;
             } else {
@@ -300,9 +303,10 @@ public class IndustryConfigManager {
         }
     }
 
-    public static class OutputCom {
+    public static class OutputConfig {
         public final String comID;
         public final float baseProd;
+        public final long target;
         public final float workerAssignableLimit;
         public final float marketScaleBase;
 
@@ -317,14 +321,15 @@ public class IndustryConfigManager {
         public final boolean isAbstract; // Abstract outputs have no output, only inputs
         public final boolean checkLegality;
 
-        public OutputCom(
+        public OutputConfig(
             String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
             boolean usesWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketCondsAllFalse,
             List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput, float workerAssignableLimit,
-            float marketScaleBase    
+            float marketScaleBase, long target   
         ) {
             this.comID = comID;
             this.baseProd = baseProd;
+            this.target = target;
             this.CCMoneyDist = CCMoneyDist;
             this.InputsPerUnitOutput = InputsPerUnitOutput;
             this.ifMarketCondsAllFalse = ifMarketCondsAllFalse;
@@ -340,9 +345,10 @@ public class IndustryConfigManager {
         /**
          * Copy Constructor
          */
-        public OutputCom(OutputCom other) {
+        public OutputConfig(OutputConfig other) {
             this.comID = other.comID;
             this.baseProd = other.baseProd;
+            this.target = other.target;
 
             this.CCMoneyDist = (other.CCMoneyDist == null) ? null : new HashMap<>(other.CCMoneyDist);
             this.InputsPerUnitOutput = (other.InputsPerUnitOutput == null) ? null : new HashMap<>(other.InputsPerUnitOutput);
@@ -364,6 +370,7 @@ public class IndustryConfigManager {
         public final String toString() {
             return '{' +  " ,\n" +
                 "baseProd=" + baseProd + " ,\n" +
+                ", target=" + target + " ,\n" +
                 ", CCMoneyDist=" + CCMoneyDist + " ,\n" +
                 ", ConsumptionMap=" + InputsPerUnitOutput + " ,\n" +
                 ", ifMarketCondsAllFalse=" + ifMarketCondsAllFalse + " ,\n" +
