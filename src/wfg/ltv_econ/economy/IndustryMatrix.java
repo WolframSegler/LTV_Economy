@@ -11,6 +11,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
+import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class IndustryMatrix {
@@ -104,14 +105,18 @@ public class IndustryMatrix {
 
         Iterator<String> it = commodities.iterator();
         while (it.hasNext()) {
-            String com = it.next();
+            final String com = it.next();
             boolean remove = true;
             for (Map.Entry<String, Map<String, Float>> entry : baseOutputs.entrySet()) {
-                IndustrySpecAPI spec = settings.getIndustrySpec(entry.getKey());
-                if (IndustryIOs.getIndConfig(spec).workerAssignable && entry.getValue().containsKey(com)) {
-                    remove = false;
-                    break;
-                }
+                final IndustrySpecAPI spec = settings.getIndustrySpec(entry.getKey());
+                final IndustryConfig cfg = IndustryIOs.getIndConfig(spec);
+
+                if (!cfg.workerAssignable || !cfg.outputs.containsKey(com) ||
+                    !cfg.outputs.get(com).usesWorkers
+                ) continue;
+
+                remove = false;
+                break;
             }
             if (remove) it.remove();
         }
