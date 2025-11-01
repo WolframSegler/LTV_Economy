@@ -431,6 +431,7 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         final List<List<Integer>> outputsPerMarket = new ArrayList<>();
         final List<MarketAPI> markets = getMarketsCopy();
+        markets.removeIf(m -> m.isPlayerOwned());
 
         for (int i = 0; i < markets.size(); i++) {
             final List<Integer> outputIndexes = new ArrayList<>();
@@ -471,10 +472,6 @@ public class EconomyEngine extends BaseCampaignEventListener
         final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.allocateWorkersToMarkets(
             workerVector, markets, industryOutputPairs, outputsPerMarket, A
         );
-
-        WorkforcePlanner.logDemandVector(d, commodities);
-        WorkforcePlanner.logCommodityResults(A, workerVector);
-        WorkforcePlanner.logWorkerTargets(workerVector, A);
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
             final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(entry.getKey());

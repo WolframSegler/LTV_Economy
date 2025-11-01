@@ -174,9 +174,9 @@ public class WorkforcePlanner {
     }
 
     public static final void logDemandVector(double[] d, List<String> commodities) {
-        StringBuilder demandLog = new StringBuilder("=== Demand Vector d ===\n");
+        StringBuilder demandLog = new StringBuilder("\n=== Demand Vector d ===\n");
         for (int i = 0; i < commodities.size(); i++) {
-            demandLog.append(String.format("%s: %.3f\n", commodities.get(i), d[i]));
+            demandLog.append(String.format("%s: %d\n", commodities.get(i), (long) d[i]));
         }
 
         Global.getLogger(WorkforcePlanner.class).info(demandLog);
@@ -204,8 +204,8 @@ public class WorkforcePlanner {
         Global.getLogger(WorkforcePlanner.class).info(logString);
     }
 
-    public static final void logCommodityResults(GroupedMatrix group, double[] workerVector) {
-        logCommodityResults(group.reducedMatrix, workerVector, group.groupNames);
+    public static final void logCommodityResults(GroupedMatrix group, double[] workerVector, List<String> commodities) {
+        logCommodityResults(group.reducedMatrix, workerVector, commodities);
     }
 
     public static final void logCommodityResults(double[][] A, double[] workerVector, List<String> commodities) {
@@ -227,10 +227,11 @@ public class WorkforcePlanner {
             lines.add(line);
         }
 
-        String logString = lines.stream()
+        StringBuilder builder = new StringBuilder("\n=== Commodity Results ===\n");
+        builder.append(lines.stream()
                 .map(s -> "    " + s)
-                .collect(Collectors.joining("\n"));
-        Global.getLogger(WorkforcePlanner.class).info(logString);
+                .collect(Collectors.joining("\n")));
+        Global.getLogger(WorkforcePlanner.class).info(builder.toString());
     }
 
     /**
