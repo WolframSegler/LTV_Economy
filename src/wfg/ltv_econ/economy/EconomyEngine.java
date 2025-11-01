@@ -37,6 +37,7 @@ import wfg.wrap_ui.util.NumFormat;
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
+import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 
 /**
  * Handles the trade, consumption, production and all related logic
@@ -94,8 +95,8 @@ public class EconomyEngine extends BaseCampaignEventListener
     }
 
     public final Object readResolve() {
-        Global.getSector().getListenerManager().addListener(this, true);
-        Global.getSector().addListener(this);
+        final ListenerManagerAPI listener = Global.getSector().getListenerManager();
+        if (!listener.hasListener(this)) listener.addListener(this, false);
 
         mainLoopExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "LTV-MainLoop");
@@ -220,8 +221,6 @@ public class EconomyEngine extends BaseCampaignEventListener
 
         m_comInfo.values().parallelStream().forEach(CommodityInfo::trade);
         m_comInfo.values().parallelStream().forEach(c -> c.advance(fakeAdvance));
-
-        // logCreditsSnapshot();
     }
 
     public final void registerMarket(String marketID) {
@@ -285,6 +284,7 @@ public class EconomyEngine extends BaseCampaignEventListener
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
         final String marketID = planet.getMarket().getId();
         registerMarket(marketID);
+        planet.getMarket().addSubmarket("stockpiles");
         Global.getLogger(getClass()).error("MarketColonized");
     }
 

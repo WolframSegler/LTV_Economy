@@ -317,6 +317,7 @@
 					"supplies": 0.5
 				},
 				"scaleWithMarketSize": true,
+				"marketScaleBase": 9,
 				"isAbstract": true
 			},
 			"crew": {
@@ -349,9 +350,10 @@
 		"outputList": {
 			"maintenance": {
 				"InputsPerUnitOutput": {
-					"supplies": 0.05
+					"supplies": 0.083
 				},
 				"scaleWithMarketSize": true,
+				"marketScaleBase": 6,
 				"isAbstract": true
 			}
 		}
@@ -385,7 +387,7 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 11,
+					"supplies": 12.5,
 					"crew": 7
 				},
 				"isAbstract": true
@@ -397,8 +399,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 16,
-					"crew": 10
+					"supplies": 21,
+					"crew": 10.4
 				},
 				"isAbstract": true
 			}
@@ -414,6 +416,7 @@
 					"hand_weapons": 0.06
 				},
 				"scaleWithMarketSize": true,
+				"marketScaleBase": 7,
 				"isAbstract": true
 			}
 		}
@@ -428,129 +431,143 @@
 					"hand_weapons": 0.1
 				},
 				"scaleWithMarketSize": true,
+				"marketScaleBase": 7,
 				"isAbstract": true
 			}
 		}
 	},
 	"patrolhq": {
 		"occTag": "space",
+		"workerAssignable": true,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 0.3,
-					"fuel": 0.7,
-					"ships": 0.4
+					"supplies": 3,
+					"fuel": 7,
+					"ships": 4
 				},
 				"scaleWithMarketSize": true,
+				"marketScaleBase": 6.5,
 				"isAbstract": true
 			},
 			"crew": {
-				"baseProd": 0.7,
+				"baseProd": 1,
 				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
 					"ships": 0.1
 				},
-				"scaleWithMarketSize": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.08
 			}
 		}
 	},
 	"militarybase": {
 		"occTag": "space",
+		"workerAssignable": true,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 0.6,
-					"fuel": 1.6,
-					"ships": 0.8
+					"supplies": 7,
+					"fuel": 15,
+					"ships": 9
 				},
 				"scaleWithMarketSize": true,
+				"marketScaleBase": 6,
 				"isAbstract": true
 			},
 			"crew": {
-				"baseProd": 1.4,
+				"baseProd": 1,
 				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
 					"ships": 0.1
 				},
-				"scaleWithMarketSize": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.12
 			},
 			"marines": {
-				"baseProd": 0.9,
+				"baseProd": 1,
 				"CCMoneyDist": {
 					"supplies": 0.1,
 					"fuel": 0.2,
 					"ships": 0.4,
 					"hand_weapons": 0.3
 				},
-				"scaleWithMarketSize": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.1
 			}
 		}
 	},
 	"highcommand": {
 		"occTag": "space",
+		"workerAssignable": true,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 0.9,
-					"fuel": 2.9,
-					"ships": 1.2
+					"supplies": 11,
+					"fuel": 22,
+					"ships": 14
 				},
 				"scaleWithMarketSize": true,
+				"marketScaleBase": 6,
 				"isAbstract": true
 			},
 			"crew": {
-				"baseProd": 1.8,
+				"baseProd": 1.1,
 				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
 					"ships": 0.1
 				},
-				"scaleWithMarketSize": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.3
 			},
 			"marines": {
-				"baseProd": 1.3,
+				"baseProd": 1.1,
 				"CCMoneyDist": {
 					"supplies": 0.1,
 					"fuel": 0.2,
 					"ships": 0.4,
 					"hand_weapons": 0.3
 				},
-				"scaleWithMarketSize": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.2
 			}
 		}
 	},
 	"lionsguard": {
 		"occTag": "space",
+		"workerAssignable": true,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 0.7,
-					"fuel": 2.4,
-					"ships": 0.68
+					"supplies": 1800,
+					"fuel": 3700,
+					"ships": 2250
 				},
-				"scaleWithMarketSize": true,
 				"isAbstract": true
 			},
 			"crew": {
-				"baseProd": 2.6,
+				"baseProd": 2,
 				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
 					"ships": 0.1
 				},
-				"scaleWithMarketSize": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.1
 			},
 			"marines": {
 				"baseProd": 2,
 				"CCMoneyDist": {
 					"supplies": 0.1,
 					"fuel": 0.2,
-					"ships": 0.3,
-					"hand_weapons": 0.4
+					"ships": 0.4,
+					"hand_weapons": 0.3
 				},
-				"scaleWithMarketSize": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.05
 			}
 		}
 	},
@@ -559,9 +576,11 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 7,
-					"fuel": 20
+					"supplies": 17,
+					"fuel": 220
 				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
 				"isAbstract": true
 			}
 		}
@@ -609,7 +628,7 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"organics": 90
+					"organics": 175
 				},
 				"isAbstract": true
 			}

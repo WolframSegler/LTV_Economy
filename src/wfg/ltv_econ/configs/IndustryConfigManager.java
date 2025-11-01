@@ -111,6 +111,9 @@ public class IndustryConfigManager {
                 float workerAssignableLimit = (float) outputData.optDouble(
                     "workerAssignableLimit", LaborConfig.defaultWorkerCapPerOutput
                 );
+                float marketScaleBase = (float) outputData.optDouble(
+                    "marketScaleBase", 10
+                );
 
                 boolean scaleWSize = outputData.optBoolean("scaleWithMarketSize", false);
                 boolean isAbstract = outputData.optBoolean("isAbstract", false);
@@ -166,7 +169,8 @@ public class IndustryConfigManager {
                     marketCondsAllFalse,
                     marketCondsAllTrue,
                     ConsumptionMap,
-                    workerAssignableLimit
+                    workerAssignableLimit,
+                    marketScaleBase
                 );
 
                 commodityMap.put(outputId, otp);
@@ -208,6 +212,7 @@ public class IndustryConfigManager {
                     JSONObject optJson = new JSONObject();
                     optJson.put("baseProd", opt.baseProd);
                     optJson.put("workerAssignableLimit", opt.workerAssignableLimit);
+                    optJson.put("marketScaleBase", opt.marketScaleBase);
 
                     if (opt.CCMoneyDist != null && !opt.CCMoneyDist.isEmpty()) {
                         JSONObject ccJson = new JSONObject();
@@ -299,6 +304,7 @@ public class IndustryConfigManager {
         public final String comID;
         public final float baseProd;
         public final float workerAssignableLimit;
+        public final float marketScaleBase;
 
         public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
         public final Map<String, Float> InputsPerUnitOutput;
@@ -314,7 +320,8 @@ public class IndustryConfigManager {
         public OutputCom(
             String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
             boolean usesWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketCondsAllFalse,
-            List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput, float workerAssignableLimit
+            List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput, float workerAssignableLimit,
+            float marketScaleBase    
         ) {
             this.comID = comID;
             this.baseProd = baseProd;
@@ -327,6 +334,7 @@ public class IndustryConfigManager {
             this.workerAssignableLimit = workerAssignableLimit;
             this.isAbstract = isAbstract;
             this.checkLegality = checkLegality;
+            this.marketScaleBase = marketScaleBase;
         }
 
         /**
@@ -349,6 +357,7 @@ public class IndustryConfigManager {
             this.workerAssignableLimit = other.workerAssignableLimit;
             this.isAbstract = other.isAbstract;
             this.checkLegality = other.checkLegality;
+            this.marketScaleBase = other.marketScaleBase;
         }
 
         @Override
@@ -360,6 +369,7 @@ public class IndustryConfigManager {
                 ", ifMarketCondsAllFalse=" + ifMarketCondsAllFalse + " ,\n" +
                 ", ifMarketCondsAllTrue=" + ifMarketCondsAllTrue + " ,\n" +
                 ", scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +
+                ", marketScaleBase=" + marketScaleBase + " ,\n" +
                 ", usesWorkers=" + usesWorkers + " ,\n" +
                 "workerAssignableLimit: " + workerAssignableLimit + " ,\n" +
                 ", isAbstract=" + isAbstract + " ,\n" +

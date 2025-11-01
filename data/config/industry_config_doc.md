@@ -14,6 +14,7 @@ Documentation of `industry_config.json` Fields
 * `InputsPerUnitOutput`: Map\<String, Float>. Flat input amounts required per output unit. Scales with market/population if `scaleWithMarketSize = true`. Can include abstract inputs.
 * `ifMarketCondsAllFalse` / `ifMarketCondsAllTrue`: Lists of conditions affecting output; used to enable/disable production under specific market conditions.
 * `scaleWithMarketSize`: Boolean. If true, output and consumption scales proportionally to market size.
+* `marketScaleBase`: Float. Determines the per-market-size scaling factor for this output when `scaleWithMarketSize = true`.
 * `usesWorkers`: Boolean. Determines if labor calculations (RoVC, LPV\_day) are applied.
 * `workerAssignableLimit`: Limits the ratio of globally available workers that can be assigned.
 * `isAbstract`: Boolean. Indicates the output is **not physically produced**; used for accounting and value input only.
@@ -31,7 +32,7 @@ Documentation of `industry_config.json` Fields
 
 2. **Non-labor production** (`usesWorkers = false`):
 
-   * Output quantity = `baseProd` × 10^(market_size - 3) (if `scaleWithMarketSize = true`).
+   * Output quantity = `baseProd` × `marketScaleBase`^(market_size - 3) (if `scaleWithMarketSize = true`).
    * Consumption requirements from `InputsPerUnitOutput` are scaled accordingly.
    * Inputs are scaled with modifiers from outputs if the output is not abstract.
    * If both CCMoneyDist and InputsPerUnitOutput are present, which is undefined, only CCMoneyDist is used.

@@ -263,7 +263,8 @@ public class IndustryIOs {
                         emptyList,
                         emptyList,
                         InputsPerUnitOutput,
-                        LaborConfig.dynamicWorkerCapPerOutput
+                        LaborConfig.dynamicWorkerCapPerOutput,
+                        8.5f
                 );
                 configOutputs.put(outputID, optCom);
             };
@@ -390,7 +391,8 @@ public class IndustryIOs {
                         emptyList,
                         condCombo,
                         InputsPerUnitOutput,
-                        LaborConfig.dynamicWorkerCapPerOutput
+                        LaborConfig.dynamicWorkerCapPerOutput,
+                        8.5f
                     );
                     new_outputs.put(newOutput, optCom);
                 }
@@ -583,9 +585,7 @@ public class IndustryIOs {
             }
         }
 
-        final double base = cfg.dynamic ? 8.5 : 10;
-
-        if (output.scaleWithMarketSize) scale *= Math.pow(base, market.getSize() - 3);
+        if (output.scaleWithMarketSize) scale *= Math.pow(output.marketScaleBase, market.getSize() - 3);
 
         return scale;
     }
