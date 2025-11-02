@@ -70,6 +70,7 @@ public class IndustryConfigManager {
             JSONObject industryJson = root.getJSONObject(industryId);
 
             boolean workerAssignable = industryJson.optBoolean("workerAssignable", false);
+            boolean ignoreLocalStockpiles = industryJson.optBoolean("ignoreLocalStockpiles", false);
 
             String occTagStr = industryJson.optString("occTag", null);
             OCCTag occTag = OCCTag.AVERAGE;
@@ -178,7 +179,9 @@ public class IndustryConfigManager {
                 commodityMap.put(outputId, otp);
             }
             
-            IndustryConfig indConfig = new IndustryConfig(workerAssignable, commodityMap, occTag);
+            IndustryConfig indConfig = new IndustryConfig(
+                workerAssignable, commodityMap, occTag, ignoreLocalStockpiles
+            );
             result.put(industryId, indConfig);
         }
         } catch (Exception e) {
@@ -201,6 +204,7 @@ public class IndustryConfigManager {
 
                 JSONObject indJson = new JSONObject();
                 indJson.put("workerAssignable", ind.workerAssignable);
+                indJson.put("ignoreLocalStockpiles", ind.ignoreLocalStockpiles);
 
                 if (ind.occTag != null) {
                     indJson.put("occTag", ind.occTag.name().toLowerCase());
@@ -262,13 +266,17 @@ public class IndustryConfigManager {
 
     public static class IndustryConfig {
         public final boolean workerAssignable;
+        public final boolean ignoreLocalStockpiles;
         public final OCCTag occTag;
         public final Map<String, OutputConfig> outputs;
 
         public boolean dynamic = false;
 
-        public IndustryConfig(boolean workerAssignable, Map<String, OutputConfig> outputs, OCCTag occTag) {
+        public IndustryConfig(boolean workerAssignable, Map<String, OutputConfig> outputs, OCCTag occTag,
+            boolean ignoreLocalStockpiles
+        ) {
             this.workerAssignable = workerAssignable;
+            this.ignoreLocalStockpiles = ignoreLocalStockpiles;
             this.outputs = outputs;
             this.occTag = occTag;
         }
@@ -278,6 +286,7 @@ public class IndustryConfigManager {
          */
         public IndustryConfig(IndustryConfig config) {
             this.workerAssignable = config.workerAssignable;
+            this.ignoreLocalStockpiles = config.ignoreLocalStockpiles;
             this.occTag = config.occTag;
             this.dynamic = config.dynamic;
 

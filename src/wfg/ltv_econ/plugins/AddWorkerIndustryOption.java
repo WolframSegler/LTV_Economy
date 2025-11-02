@@ -46,15 +46,15 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
 
     @Override
     public void createTooltip(IndustryOptionData opt, TooltipMakerAPI tooltip, float width) {
-        if (opt.id != PluginID) {
-            return;
-        }
+        if (opt.id != PluginID) return;
 
         tooltip.addPara("Assign idle workers to increase this industry's output.", 0f);
 
-        if (industry == null) {
-            return;
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        if (reg.getData(opt.ind.getMarket().getId(), opt.ind.getId()) == null) {
+            reg.register(opt.ind.getMarket(), opt.ind);
         }
+
         tooltip.addPara(null, 0f);
         tooltip.addPara(
         "The number of workers that can be assigned to an industry is determined by the colony size, and certain industries have a natural limit on how many workers they can employ. Currently, there are %s workers employed in %s.",

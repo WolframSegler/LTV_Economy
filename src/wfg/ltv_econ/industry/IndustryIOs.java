@@ -464,14 +464,7 @@ public class IndustryIOs {
                     outputEntry.getKey(), k -> new HashMap<>()
                 );
                 
-                OutputConfig output = outputEntry.getValue();
-
-                if (output.usesWorkers && (output.CCMoneyDist == null || output.CCMoneyDist.isEmpty())) {
-                    throw new RuntimeException(
-                        "Labor-driven output " + output.comID + " in " + entry.getKey() +
-                        " must define CCMoneyDist to calculate variable capital contribution."
-                    );
-                }
+                final OutputConfig output = outputEntry.getValue();
 
                 float base = output.baseProd;
 
@@ -480,8 +473,9 @@ public class IndustryIOs {
                 }
 
                 if ((output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty())) {
-                    CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(output.comID);
-                    float Vcc = spec.getBasePrice() * LaborConfig.getRoCC(entry.getValue().occTag);
+                    final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(output.comID);
+                    final float Vcc = spec.getBasePrice() * LaborConfig.getRoCC(entry.getValue().occTag);
+                    
                     float totalWeight = 0;
                     for (float weight : output.CCMoneyDist.values()) {
                         totalWeight += weight;
@@ -495,10 +489,10 @@ public class IndustryIOs {
                             continue;
                         };
 
-                        float weight = inputEntry.getValue() / totalWeight;
-                        float inputValue = Vcc * weight;
-                        float unitPrice = Global.getSettings().getCommoditySpec(inputID).getBasePrice();
-                        float qty = inputValue * base / unitPrice;
+                        final float weight = inputEntry.getValue() / totalWeight;
+                        final float inputValue = Vcc * weight;
+                        final float unitPrice = Global.getSettings().getCommoditySpec(inputID).getBasePrice();
+                        final float qty = inputValue * base / unitPrice;
 
                         inputMap.put(inputID, qty);
                     }
@@ -513,7 +507,7 @@ public class IndustryIOs {
                     }
                 } else if (output.InputsPerUnitOutput != null && !output.InputsPerUnitOutput.isEmpty()) {
                     for (Map.Entry<String, Float> demandEntry : output.InputsPerUnitOutput.entrySet()) {
-                        String inputID = demandEntry.getKey();
+                        final String inputID = demandEntry.getKey();
                         if (inputID.equals(ABSTRACT_COM)) continue;
 
                         float qty = demandEntry.getValue() * base;
@@ -578,10 +572,12 @@ public class IndustryIOs {
     public static final float calculateScale(
         Industry ind, MarketAPI market, OutputConfig output, String outputID, IndustryConfig cfg
     ) {
-        float scale = 1f;
+        if (!output.isAbstract) {
+            final CommodityStats stats = EconomyEngine.getInstance().getComStats(output.comID, market.getId()); 
+            if (stats != null && output.target > 0 && output.target < stats.getStored()) return 0f;
+        }
 
-        final CommodityStats stats = EconomyEngine.getInstance().getComStats(output.comID, market.getId()); 
-        if (stats != null && output.target > 0 && output.target < stats.getStored()) return 0f;
+        float scale = 1f;
 
         if (output.usesWorkers && !output.isAbstract) {
             final WorkerRegistry reg = WorkerRegistry.getInstance();

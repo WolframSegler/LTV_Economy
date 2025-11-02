@@ -6,13 +6,14 @@ Documentation of `industry_config.json` Fields
 
 * `occTag`: Determines the OCC category for the industry, used to look up the labor share (RoVC).
 * `workerAssignable`: Boolean indicating if the industry can assign workers to outputs.
+* `ignoreLocalStockpiles`: Boolean. If true, this output’s demand cannot be satisfied from local production or stockpiles. Used to force imports from external markets, even if the commodity exists locally.
 
 ### Output-level fields (per commodity)
 
 * `baseProd`: Float. Acts as a scaler when `usesWorkers = true`. Represents daily production in units when used alongside InputsPerUnitOutput. The units inside InputsPerUnitOutput are multiplied with it. Default is always 1.
-* `target`: Float. Defines an upper limit for the stored amount of this commodity. When target > 0, production (or import) will scale to 0 once the stored quantity exceeds the target, effectively throttling output. A value ≤ 0 disables this limit.
+* `target`: Float. Defines an upper limit for the stored amount of this commodity. When target > 0, production (or import) will scale to 0 once the stored quantity exceeds the target, effectively throttling output. A value ≤ 0 disables this limit. Abstract outputs may not have targets.
 * `CCMoneyDist`: Map\<String, Float>. ConstantCapitalMoneyDistribution Defines **relative monetary allocation** for constant capital inputs (physical or abstract). Weights are normalized internally. Can be used with or without workers. Mutually exclusive with `InputsPerUnitOutput`. Can include abstract inputs.
-* `InputsPerUnitOutput`: Map\<String, Float>. Flat input amounts required per output unit. Scales with market/population if `scaleWithMarketSize = true`. Can include abstract inputs.
+* `InputsPerUnitOutput`: Map\<String, Float>. Flat input amounts required per output unit. Scales with market/population if `scaleWithMarketSize = true`. Can include abstract inputs and work with workers.
 * `ifMarketCondsAllFalse` / `ifMarketCondsAllTrue`: Lists of conditions affecting output; used to enable/disable production under specific market conditions.
 * `scaleWithMarketSize`: Boolean. If true, output and consumption scales proportionally to market size.
 * `marketScaleBase`: Float. Determines the per-market-size scaling factor for this output when `scaleWithMarketSize = true`.

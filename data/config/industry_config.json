@@ -587,40 +587,44 @@
 	},
 	"waystation": {
 		"occTag": "service",
-		"workerAssignable": false,
-		"workerAssignableLimit": 0.1,
+		"workerAssignable": true,
+		"ignoreLocalStockpiles": true,
 		"outputList": {
 			"supplies": {
-				"baseProd": 10,
+				"baseProd": 25,
 				"target": 8000,
 				"InputsPerUnitOutput": {
 					"supplies": 1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.05
 			},
 			"fuel": {
-				"baseProd": 40,
+				"baseProd": 80,
 				"target": 25000,
 				"InputsPerUnitOutput": {
 					"fuel": 1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.05
 			},
 			"volatiles": {
-				"baseProd": 3,
+				"baseProd": 6,
 				"target": 2000,
 				"InputsPerUnitOutput": {
 					"volatiles": 1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.1
 			},
 			"rare_metals": {
-				"baseProd": 4,
+				"baseProd": 8,
 				"target": 3000,
 				"InputsPerUnitOutput": {
 					"rare_metals": 1
 				},
-				"usesWorkers": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.1
 			},
 			"crew": {
 				"baseProd": 10,
