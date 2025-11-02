@@ -470,6 +470,10 @@ public class EconomyEngine extends BaseCampaignEventListener
             workerVector, markets, industryOutputPairs, outputsPerMarket, A
         );
 
+        WorkforcePlanner.logDemandVector(d, commodities);
+        WorkforcePlanner.logCommodityResults(A, workerVector, commodities);
+        WorkforcePlanner.logWorkerAssignments(assignedWorkersPerMarket, industryOutputPairs, workerVector);
+
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
             final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(entry.getKey());
             if (cond == null) continue;

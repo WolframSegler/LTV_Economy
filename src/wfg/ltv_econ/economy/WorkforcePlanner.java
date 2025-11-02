@@ -359,7 +359,7 @@ public class WorkforcePlanner {
         // 5) Spreading assignments across markets
         for (int j = 0; j < numOutputs; j++) {
             double totalCapacity = 0.0;
-            Map<MarketAPI, Double> effectiveCapacities = new HashMap<>();
+            double[] effectiveCapacities = new double[numMarkets];
             final String pair = groupedOutputPairs.get(j);
             final String indGroupID = pair.split(EconomyEngine.KEY)[0];
             final String outputID = pair.split(EconomyEngine.KEY)[1];
@@ -390,19 +390,18 @@ public class WorkforcePlanner {
                 double effectiveCapacity = baseCapacity + baseCapacity * outputMultiplier *
                     EconomyConfig.MARKET_MODIFIER_SCALER;
 
-                effectiveCapacities.put(market, effectiveCapacity);
+                effectiveCapacities[m] = effectiveCapacity;
                 totalCapacity += effectiveCapacity;
             }
 
             for (int m = 0; m < numMarkets; m++) {
                 if (!outputsPerMarket.get(m).contains(j)) continue;
 
-                final double marketCapacity = effectiveCapacities.getOrDefault(
-                    markets.get(m), 0.0
-                );
-
                 final double preferredWorkers = (totalCapacity > 0) ?
-                    marketCapacity / totalCapacity * targetVector[j] : 0.0;
+                    effectiveCapacities[m] / totalCapacity * targetVector[j] : 0.0;
+
+                final boolean useLEQ = baseCapacities[m] < preferredWorkers *
+                    (1 + EconomyConfig.IDEAL_SPREAD_TOLERANCE);
 
                 // x_{m,j} >= preferred - s_j
                 final double[] coeffsGE = new double[nVars];
@@ -411,6 +410,8 @@ public class WorkforcePlanner {
                 constraints.add(new LinearConstraint(
                     coeffsGE, Relationship.GEQ, preferredWorkers * (1 - EconomyConfig.IDEAL_SPREAD_TOLERANCE)
                 ));
+
+                if (!useLEQ) continue;
 
                 // x_{m,j} <= preferred + s_j
                 final double[] coeffsLE = new double[nVars];

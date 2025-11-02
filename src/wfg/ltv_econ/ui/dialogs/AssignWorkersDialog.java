@@ -339,7 +339,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             // draw icon
             tooltip.beginIconGroup();
             tooltip.setIconSpacingMedium();
-            IconRenderMode renderMode = availability < 0.99f ?
+            IconRenderMode renderMode = availability < 0.99f && !importing ?
                 IconRenderMode.DIM_RED : IconRenderMode.NORMAL;
             tooltip.addIcons(com, 1, renderMode);
             tooltip.addIconGroup(0f);

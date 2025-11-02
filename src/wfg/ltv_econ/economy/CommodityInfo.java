@@ -105,17 +105,17 @@ public class CommodityInfo {
                 indices[i], exporters, importers
             );
 
-            CommodityStats expStats = getStats(expImp.one);
-            CommodityStats impStats = getStats(expImp.two);
+            final CommodityStats expStats = getStats(expImp.one);
+            final CommodityStats impStats = getStats(expImp.two);
 
             final int exportableRemaining = (int) computeExportableRemaining(expStats);
-            final int deficitRemaining = computeProjectedImportAmount(impStats);
+            final int deficitRemaining = computeImportAmount(impStats);
 
             if (exportableRemaining < 1 || deficitRemaining < 1) continue;
 
-            boolean sameFaction = expStats.market.getFaction().equals(impStats.market.getFaction());
+            final boolean sameFaction = expStats.market.getFaction().equals(impStats.market.getFaction());
 
-            int amountToSend = Math.min(exportableRemaining, deficitRemaining);
+            final int amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
             // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
             // models supply-demand influence on transaction.
@@ -324,13 +324,13 @@ public class CommodityInfo {
         return (float) Math.sqrt(size / (float) maxSize);
     }
 
-    private static final int computeProjectedImportAmount(CommodityStats stats) {
-        final long targetStockpiles = EconomyConfig.DAYS_TO_COVER*stats.getDemandPreTrade();
+    private static final int computeImportAmount(CommodityStats stats) {
+        final long cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * stats.getDeficitPreTrade();
+        final long rawTarget = EconomyConfig.DAYS_TO_COVER * stats.getDeficitPreTrade();
+        final int target = (int) Math.max(Math.min(rawTarget - stats.getStored(), cap), 0);
+        final int exclusive = stats.getImportExclusiveDemand();
 
-        long delta = targetStockpiles - stats.getStored() - stats.getTotalImports();
-        delta = Math.min(delta, EconomyConfig.DAYS_TO_COVER_PER_IMPORT*stats.getDemandPreTrade());
-
-        return (int) Math.max(delta, 0);
+        return Math.max(target + exclusive - stats.getTotalImports(), 0);
     }
 
     private static final long computeExportableRemaining(CommodityStats stats) {
