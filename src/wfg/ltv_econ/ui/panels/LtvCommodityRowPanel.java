@@ -404,37 +404,36 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         
         y.addAndGet(iconSize + pad);
 
-        iconPath = "";
         desc = "Proportion of locally produced goods that were exported globally.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_EXPORT, root, panel, market);
         
         y.addAndGet(iconSize + pad);
 
-        iconPath = "";
         desc = "Production used for local demand.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_LOCAL_PROD, root, panel, market);
         
         y.addAndGet(iconSize + pad);
 
-        iconPath = "";
         desc = "Proportion of available goods that were imported in-faction.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_FACTION_IMPORT, root, panel, market);
         
         y.addAndGet(iconSize + pad);
 
-        iconPath = "";
         desc = "Imported or available through one-time trade or events.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_IMPORT, root, panel, market);
         
         y.addAndGet(iconSize + pad);
 
-        iconPath = "";
+        desc = "Goods that must be imported regardless of local stockpiles or demand.";
+        legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_IMPORT_EXCLUSIVE, root, panel, market);
+        
+        y.addAndGet(iconSize + pad);
+
         desc = "Excess imports beyond current demand stockpiled for future use.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_OVER_IMPORT, root, panel, market);
         
         y.addAndGet(iconSize + pad);
 
-        iconPath = "";
         desc = "Deficit - in demand, but not available. Higher prices.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_DEFICIT, root, panel, market);
     

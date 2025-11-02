@@ -218,7 +218,9 @@ public class EconomyEngine extends BaseCampaignEventListener
         weightedOutputDeficitMods();
 
         m_comInfo.values().parallelStream().forEach(CommodityInfo::trade);
-        m_comInfo.values().parallelStream().forEach(c -> c.advance(fakeAdvance));
+        if (!fakeAdvance) {
+            m_comInfo.values().parallelStream().forEach(CommodityInfo::advance);
+        }
     }
 
     public final void registerMarket(String marketID) {

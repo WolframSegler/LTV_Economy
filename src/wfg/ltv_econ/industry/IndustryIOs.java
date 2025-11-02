@@ -275,7 +275,7 @@ public class IndustryIOs {
             illegalOutputs.forEach(addOutput);
 
             IndustryConfig config = new IndustryConfig(
-                usesWorkers, configOutputs, OCCTag.AVERAGE
+                usesWorkers, configOutputs, OCCTag.AVERAGE, false
             );
             config.dynamic = true;
 

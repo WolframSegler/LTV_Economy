@@ -6,7 +6,7 @@ Documentation of `industry_config.json` Fields
 
 * `occTag`: Determines the OCC category for the industry, used to look up the labor share (RoVC).
 * `workerAssignable`: Boolean indicating if the industry can assign workers to outputs.
-* `ignoreLocalStockpiles`: Boolean. If true, this output’s demand cannot be satisfied from local production or stockpiles. Used to force imports from external markets, even if the commodity exists locally.
+* `ignoreLocalStockpiles`: Boolean. If true, this output’s demand cannot be satisfied from local production or stockpiles and is used to force imports from external markets even if the commodity exists locally. Because production occurs before imports, the inputs can only be supplied through the stockpiles, leaving industries marked with this flag unable to produce.
 
 ### Output-level fields (per commodity)
 

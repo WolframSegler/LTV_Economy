@@ -26,6 +26,7 @@ public class UiUtils {
 
     public static final Color COLOR_DEFICIT = new Color(140, 15, 15);
     public static final Color COLOR_OVER_IMPORT = new Color(180, 90, 180);
+    public static final Color COLOR_IMPORT_EXCLUSIVE = new Color(0, 180, 200);
     public static final Color COLOR_IMPORT = new Color(200, 140, 60);
     public static final Color COLOR_FACTION_IMPORT = new Color(240, 240, 100);
     public static final Color COLOR_LOCAL_PROD = new Color(122, 200, 122);
@@ -48,21 +49,23 @@ public class UiUtils {
 
         final long footprint = comStats.getEconomicFootprint();
 
-        float demandMetLocalRatio = (float)comStats.getDemandMetLocally() / footprint;
-        float inFactionImportRatio = (float)comStats.getDemandMetViaFactionTrade() / footprint;
-        float globalImportRatio = (float)comStats.getDemandMetViaGlobalTrade() / footprint;
+        float demandMetLocalRatio = (float)comStats.getDeficitMetLocally() / footprint;
+        float inFactionImportRatio = (float)comStats.getDeficitMetViaFactionTrade() / footprint;
+        float globalImportRatio = (float)comStats.getDeficitMetViaGlobalTrade() / footprint;
         float overImportRatio = (float)comStats.getOverImports() / footprint;
+        float importExclusiveRatio = (float)comStats.getImportExclusiveDemand() / footprint;
         float exportedRatio = (float)comStats.getTotalExports() / footprint;
         float notExportedRatio = (float)comStats.getCanNotExport() / footprint;
         float deficitRatio = (float)comStats.getDeficit() / footprint;
 
-        final Map<Color, Float> barMap = new LinkedHashMap<>() {{
+        final Map<Color, Float> barMap = new LinkedHashMap<>(8) {{
             put(COLOR_LOCAL_PROD, demandMetLocalRatio);
             put(COLOR_EXPORT, exportedRatio);
             put(COLOR_NOT_EXPORTED, notExportedRatio);
             put(COLOR_FACTION_IMPORT, inFactionImportRatio);
             put(COLOR_IMPORT, globalImportRatio);
             put(COLOR_OVER_IMPORT, overImportRatio);
+            put(COLOR_IMPORT_EXCLUSIVE, importExclusiveRatio);
             put(COLOR_DEFICIT, deficitRatio);
         }};
 

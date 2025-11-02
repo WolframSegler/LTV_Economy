@@ -64,29 +64,35 @@ public class CommodityStats {
     public final int getBaseDemand(boolean modified) {
         return modified ? (int) (demandBase*getStoredCoverageRatio()) : demandBase;
     }
-    public final int getDemandMet() {
-        return getDemandMetLocally() + getDemandMetViaTrade();
+    public final int getDeficitMet() {
+        return getDeficitMetLocally() + getDeficitMetViaTrade();
     }
-    public final int getDemandMetLocally() {
-        return Math.min(getLocalProduction(true), getBaseDemand(false)); 
+    public final int getDeficitMetLocally() {
+        return Math.min(getLocalProduction(true), demandBase); 
     }
     public final int getDeficitPreTrade() {
-        return getBaseDemand(false) + importExclusiveDemand - getDemandMetLocally();
+        return demandBase - getDeficitMetLocally();
     }
-    public final int getDemandMetViaTrade() {
-        return getDemandMetViaFactionTrade() + getDemandMetViaGlobalTrade();
+    public final int getDemandPreTrade() {
+        return getDeficitPreTrade() + importExclusiveDemand;
     }
-    public final int getDemandMetViaFactionTrade() {
+    public final int getImportExclusiveDemand() {
+        return importExclusiveDemand;
+    }
+    public final int getDeficitMetViaTrade() {
+        return getDeficitMetViaFactionTrade() + getDeficitMetViaGlobalTrade();
+    }
+    public final int getDeficitMetViaFactionTrade() {
         return Math.min(inFactionImports, getDeficitPreTrade());
     }
-    public final int getDemandMetViaGlobalTrade() {
-        return Math.min(globalImports, getDeficitPreTrade() - getDemandMetViaFactionTrade());
+    public final int getDeficitMetViaGlobalTrade() {
+        return Math.min(globalImports, getDeficitPreTrade() - getDeficitMetViaFactionTrade());
     }
     public final int getOverImports() {
-        return Math.max(0, getTotalImports() - getDemandMetViaTrade());
+        return Math.max(0, getTotalImports() - importExclusiveDemand - getDeficitMetViaTrade());
     }
     public final int getDeficit() {
-        return getBaseDemand(false) - getDemandMet();
+        return demandBase - getDeficitMet();
     }
     public int getTotalImports() {
         return inFactionImports + globalImports;
@@ -98,7 +104,7 @@ public class CommodityStats {
         return getLocalProduction(true) + getTotalImports();
     }
     public final int getBaseExportable() {
-        return Math.max(0, getLocalProduction(true) - getBaseDemand(false));
+        return Math.max(0, getLocalProduction(true) - demandBase);
     }
     public final int getRemainingExportable() {
         return getBaseExportable() - getTotalExports();
@@ -107,10 +113,11 @@ public class CommodityStats {
         return Math.max(0, getBaseExportable() - getTotalExports());
     }
     public final int getEconomicFootprint() {
-        return getDemandMet() + getDeficit() + getOverImports() + getTotalExports() + getCanNotExport();
+        return getDeficitMet() + getDeficit() + getImportExclusiveDemand() + getOverImports() +
+            getTotalExports() + getCanNotExport();
     }
     public final float getAvailabilityRatio() {
-        return getBaseDemand(false) == 0 ? 1f : getDemandMet() / getBaseDemand(false);
+        return demandBase == 0 ? 1f : getDeficitMet() / demandBase;
     }
     public final int getRealBalance() {
         return getAvailable() - getBaseDemand(true) - getTotalExports();
@@ -162,23 +169,27 @@ public class CommodityStats {
     public final void update() {
         localProd = 0;
         demandBase = 0;
+        importExclusiveDemand = 0;
         
         localProdMutables = new HashMap<>();
         demandBaseMutables = new HashMap<>();
 
         for (Industry industry : getVisibleIndustries(market)) {
             if (IndustryIOs.hasSupply(industry, comID)) {
-                MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);
-                localProdMutables.put(industry.getId(), supplyStat);
+                if (!IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles) {
+                    final MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);
+                    localProdMutables.put(industry.getId(), supplyStat);
+                }
 
             }
             if (IndustryIOs.hasDemand(industry, comID)) {
-                MutableStat demandStat = CompatLayer.convertIndDemandStat(industry, comID);
-                demandBaseMutables.put(industry.getId(), demandStat);
-
+                final MutableStat demandStat = CompatLayer.convertIndDemandStat(industry, comID);
+                
                 if (IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles) {
                     importExclusiveDemand += demandStat.getModifiedInt();
-                }   
+                } else {
+                    demandBaseMutables.put(industry.getId(), demandStat);
+                }
             }
         }
 
@@ -211,11 +222,8 @@ public class CommodityStats {
     /**
      * Gets called each day to update the values and the stored amount.
      */
-    public final void advance(boolean fakeAdvance) {
-        
-        if (!fakeAdvance) {
-            addStoredAmount(getRealBalance());
-        }
+    public final void advance() {
+        addStoredAmount(getRealBalance());
     }
 
     public float getUnitPrice(PriceType type, int amount) {
@@ -272,8 +280,8 @@ public class CommodityStats {
     }
 
     public void logAllInfo() {
-        float trade = getDemandMetLocally() + getTotalExports() + getCanNotExport() +
-            getDemandMetViaTrade() + getDeficit();
+        float trade = getDeficitMetLocally() + getTotalExports() + getCanNotExport() +
+            getDeficitMetViaTrade() + getDeficit();
 
         float ratio = trade / getEconomicFootprint();
 
@@ -282,7 +290,7 @@ public class CommodityStats {
             "Commodity: " + comID + "\n" +
             "economicFootprint: " + getEconomicFootprint() + "\n" +
             "localProduction: " + getLocalProduction(true) + "\n" +
-            "baseDemand: " + getBaseDemand(false) + "\n" +
+            "baseDemand: " + demandBase + "\n" +
             "deficitPreTrade: " + getDeficitPreTrade() + "\n" +
             "totalImports: " + getTotalImports() + "\n" +
             "inFactionImports: " + inFactionImports + "\n" +
@@ -291,9 +299,9 @@ public class CommodityStats {
             "inFactionExport: " + inFactionExports + "\n" +
             "globalExport: " + globalExports + "\n" +
             "canNotExport: " + getCanNotExport() + "\n" +
-            "demandMet: " + getDemandMet() + "\n" +
-            "demandMetWithLocal: " + getDemandMetLocally() + "\n" +
-            "demandMetViaTrade: " + getDemandMetViaTrade() + "\n" +
+            "demandMet: " + getDeficitMet() + "\n" +
+            "demandMetWithLocal: " + getDeficitMetLocally() + "\n" +
+            "demandMetViaTrade: " + getDeficitMetViaTrade() + "\n" +
             "ratio: " + ratio
         );
     }

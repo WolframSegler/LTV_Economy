@@ -251,8 +251,12 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final Map<String, MutableStat> supplyList = new HashMap<>();
         final Map<String, MutableStat> demandList = new HashMap<>();
 
-        for (String comID : IndustryIOs.getRealOutputs(industry, false).keySet()) {
-            supplyList.put(comID, CompatLayer.convertIndSupplyStat(industry, comID));
+        final boolean importing = IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles;
+
+        if (!importing) {
+            for (String comID : IndustryIOs.getRealOutputs(industry, false).keySet()) {
+                supplyList.put(comID, CompatLayer.convertIndSupplyStat(industry, comID));
+            }
         }
 
         for (String comID : IndustryIOs.getRealInputs(industry, false)) {
@@ -260,7 +264,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         }
 
         TooltipMakerAPI tooltip = panel.createUIElement((panelWidth / 2) - opad, panelHeight, false);
-        tooltip.addSectionHeading("Production", color, dark, Alignment.MID, opad);
+        tooltip.addSectionHeading(importing ? "---" : "Production", color, dark, Alignment.MID, opad);
         final float startY = tooltip.getHeightSoFar() + pad;
 
         // Supply
@@ -306,7 +310,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         panel.addUIElement(tooltip).inTL(opad / 2, 0);
 
         tooltip = panel.createUIElement((panelWidth / 2) - opad, panelHeight, false);
-        tooltip.addSectionHeading("Demand", color, dark, Alignment.MID, opad);
+        tooltip.addSectionHeading(importing ? "Import" : "Demand", color, dark, Alignment.MID, opad);
 
         // Demand
         x = opad;
@@ -329,7 +333,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
             final long baseDemand = stats.getBaseDemand(false) + (long) (dAmount - oldDemand);
             final long demandMet = Math.min(stats.getLocalProduction(false), baseDemand)
-                + stats.getDemandMetViaTrade();
+                + stats.getDeficitMetViaTrade();
             final float availability = baseDemand == 0 ? 1f : (float)demandMet / baseDemand;
 
             // draw icon

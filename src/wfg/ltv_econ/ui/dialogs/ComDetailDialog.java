@@ -918,27 +918,25 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
         final EconomyEngine engine = EconomyEngine.getInstance();
 
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+        for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
 
-            if (market.isHidden() || !market.isInEconomy()) {
-                continue;
-            }
+            if (market.isHidden()) continue;
 
-            CommodityStats comStats = engine.getComStats(m_com.getId(), market.getId());
+            final CommodityStats stats = engine.getComStats(m_com.getId(), market.getId());
 
-            if (comStats.globalExports < 1 && mode == 0 || comStats.getBaseDemand(false) < 1 && mode == 1) {
-                continue;
-            }
+            if (stats.globalExports < 1 && mode == 0 ||
+                stats.getBaseDemand(false) + stats.getImportExclusiveDemand() < 1 && mode == 1
+            ) continue;
 
             if (footerPanel != null && footerPanel.m_checkbox.isChecked() &&
-                !(comStats.getCanNotExport() > 0 || comStats.getDeficit() > 0)) {
+                !(stats.getCanNotExport() > 0 || stats.getDeficit() > 0)) {
                 continue;
             }
 
             String iconPath = market.getFaction().getCrest();
             SpritePanel.Base iconPanel = new Base(
                 m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new SpritePanelPlugin<>(), 
-                iconPath, null, null, comStats.getDeficit() > 0
+                iconPath, null, null, stats.getDeficit() > 0
             );
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
@@ -950,11 +948,11 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             String factionName = market.getFaction().getDisplayName();
 
             String quantityTxt = NumFormat.engNotation(
-                mode == 0 ? comStats.globalExports : comStats.globalImports
+                mode == 0 ? stats.globalExports : stats.globalImports
             );
-            long quantityValue = mode == 0 ? comStats.globalExports : comStats.globalImports;
+            long quantityValue = mode == 0 ? stats.globalExports : stats.globalImports;
 
-            CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, comStats);
+            CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, stats);
 
             int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
 
