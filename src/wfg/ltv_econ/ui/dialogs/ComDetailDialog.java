@@ -28,6 +28,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.panels.LtvComIconPanel;
@@ -42,7 +43,6 @@ import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.SortableTable;
-import wfg.wrap_ui.ui.panels.SpritePanel;
 import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
@@ -324,6 +324,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         section.addComponent(iconRight.getPanel());
 
         // Text
+        final String comID = m_com.getId();
         final int baseY = (int) (headerHeight + opad * 1.5f);
         final Color baseColor = m_parentWrapper.getFaction().getBaseUIColor();
         { // Global market value
@@ -333,32 +334,34 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(170, 0, false);
+                    final TooltipMakerAPI tooltip = m_panel.createUIElement(170, 0, false);
 
-                    String txt = "Global market value";
-                    String valueTxt = Misc.getWithDGS(m_com.getCommodityMarketData().getMarketValue()) + Strings.C;
-                    if (m_com.getCommodityMarketData().getMarketValue() < 1) {
+                    final long value = EconomyEngine.getInstance().getCommodityInfo(comID)
+                        .getMarketActivity();
+                    final String txt = "Global market value";
+                    String valueTxt = NumFormat.formatCredits(value);
+                    if (value < 1) {
                         valueTxt = "---";
                     }
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
-                    LabelAPI lbl1 = tooltip.addPara(txt, pad);
+                    final LabelAPI lbl1 = tooltip.addPara(txt, pad);
                     lbl1.setHighlightOnMouseover(true);
 
                     tooltip.setParaFontColor(highlight);
                     tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    LabelAPI lbl2 = tooltip.addPara(valueTxt, highlight, pad);
+                    final LabelAPI lbl2 = tooltip.addPara(valueTxt, highlight, pad);
                     lbl2.setHighlightOnMouseover(true);
 
-                    float textH1 = lbl1.getPosition().getHeight();
+                    final float textH1 = lbl1.getPosition().getHeight();
                     textW1 = lbl1.computeTextWidth(txt);
                     textX1 = (SECT1_WIDTH / 3f) - textW1;
 
                     lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
 
-                    float textW2 = lbl2.computeTextWidth(valueTxt);
-                    float textX2 = (textW1 / 2) - (textW2 / 2);
+                    final float textW2 = lbl2.computeTextWidth(valueTxt);
+                    final float textX2 = (textW1 / 2) - (textW2 / 2);
 
                     lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
 
@@ -377,15 +380,14 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
-                            "Total profit that can be made fulfilling the demand for " +
-                                    m_com.getCommodity().getName() + ". " +
-                                    "Will be distributed among all exporters based on their market share.\n\n" +
-                                    "More expensive commodities often have lower profit margins due to the high costs "
-                                    +
-                                    "of manufacturing and transport.\n\n" +
-                                    "The value shown here does not include the demand at your colonies, " +
-                                    "since there is no profit to be made there.",
-                            pad);
+                        "Total credits spent sector-wide for the import of " +
+                        m_com.getCommodity().getName() + ". " +
+                        "Colonies with higher accessibility, faction relations and a shorter distance will have priority when exporting.\n\n"
+                        +
+                        "The value shown here includes the demand at your colonies, " +
+                        String.format("since they must import goods as well. In-faction imports have a %d% discount.", (1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100),
+                        pad
+                    );
 
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseY;
@@ -417,7 +419,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     String txt = "Total global exports";
 
                     String valueTxt = NumFormat.engNotation(
-                        EconomyEngine.getInstance().getTotalGlobalExports(m_com.getId())
+                        EconomyEngine.getInstance().getTotalGlobalExports(comID)
                     );
 
                     tooltip.setParaFontColor(baseColor);
@@ -457,7 +459,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     tooltip.addPara(
                         "The total number of " + m_com.getCommodity().getName() + " being exported globally by all producing markets in the sector.\n\n" +
-                        "This figure reflects the total global supply that reaches exportable surplus after local and in-faction demand is met. It serves as a measure of how widely and heavily the commodity is being produced relative to consumption, and can indicate its availability or strategic importance.", pad
+                        "This figure reflects the total global supply that reaches exportable surplus after local and in-faction demand is met.", pad
                     );
 
                     final float tpX = textX1 + textW1 + opad;
@@ -503,11 +505,11 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     final String globalValue = NumFormat.engNotation(
                         EconomyEngine.getInstance().getFactionTotalGlobalExports(
-                            m_com.getId(), getFaction())
+                            comID, getFaction())
                     );
                     final String inFactionValue = NumFormat.engNotation(
                         EconomyEngine.getInstance().getTotalInFactionExports(
-                            m_com.getId(), getFaction())
+                            comID, getFaction())
                     );
 
                     String valueTxt = globalValue + "  |  " + inFactionValue;
@@ -553,8 +555,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     tooltip.addPara(
                         "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + getFaction().getPersonNamePrefix() + " control.\n\n" +
-                        "Global exports are limited by the colony's accessibility and cannot exceed the maximum global export capacity.\n\n" +
-                        "In-faction exports benefit from higher shipping limits.",
+                        "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
                         pad, new Color[] {getFaction().getBaseUIColor(), UiUtils.getInFactionColor()},
                         new String[] {"all consumers globally", "within the faction"}
                     );
@@ -587,31 +588,33 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
+                    final TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
 
-                    String factionName = m_parentWrapper.getFaction().getDisplayName();
-                    String txt = factionName + " market share";
+                    final String factionName = m_parentWrapper.getFaction().getDisplayName();
+                    final String txt = factionName + " market share";
 
-                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.getFaction()) + "%";
+                    final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
+                        comID, m_parentWrapper.getFaction().getId()
+                    ) + "%";
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
-                    LabelAPI lbl1 = tooltip.addPara(txt, pad);
+                    final LabelAPI lbl1 = tooltip.addPara(txt, pad);
                     lbl1.setHighlightOnMouseover(true);
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
+                    final LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
                     lbl2.setHighlightOnMouseover(true);
 
-                    float textH1 = lbl1.getPosition().getHeight();
+                    final float textH1 = lbl1.getPosition().getHeight();
                     textW1 = lbl1.computeTextWidth(txt);
                     textX1 = (SECT1_WIDTH / 2f) - (textW1 / 2f);
 
                     lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
 
-                    float textW2 = lbl2.computeTextWidth(valueTxt);
-                    float textX2 = (textW1 / 2) - (textW2 / 2);
+                    final float textW2 = lbl2.computeTextWidth(valueTxt);
+                    final float textX2 = (textW1 / 2) - (textW2 / 2);
 
                     lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
 
@@ -629,7 +632,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 public TooltipMakerAPI createAndAttachTp() {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
-                    String marketOwner = m_parentWrapper.getFaction().isPlayerFaction() ?
+                    final String marketOwner = m_parentWrapper.getFaction().isPlayerFaction() ?
                         "your" : m_parentWrapper.getFaction().getPersonNamePrefix(); 
 
                     tooltip.addPara(
@@ -662,31 +665,33 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
+                    final TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
 
-                    String factionName = m_selectedMarket.getFaction().getDisplayName();
-                    String txt = factionName + " market share";
+                    final String factionName = m_selectedMarket.getFaction().getDisplayName();
+                    final String txt = factionName + " market share";
 
-                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_selectedMarket.getFaction()) + "%";
+                    final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
+                        comID, m_selectedMarket.getFactionId()
+                    ) + "%";
 
                     tooltip.setParaFontColor(m_selectedMarket.getFaction().getBaseUIColor());
                     tooltip.setParaFont(Fonts.ORBITRON_12);
-                    LabelAPI lbl1 = tooltip.addPara(txt, pad);
+                    final LabelAPI lbl1 = tooltip.addPara(txt, pad);
                     lbl1.setHighlightOnMouseover(true);
 
                     tooltip.setParaFontColor(m_selectedMarket.getFaction().getBaseUIColor());
                     tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
+                    final LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
                     lbl2.setHighlightOnMouseover(true);
 
-                    float textH1 = lbl1.getPosition().getHeight();
+                    final float textH1 = lbl1.getPosition().getHeight();
                     textW1 = lbl1.computeTextWidth(txt);
                     textX1 = (SECT1_WIDTH / 3f) - (textW1 / 2f);
 
                     lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
 
-                    float textW2 = lbl2.computeTextWidth(valueTxt);
-                    float textX2 = (textW1 / 2f) - (textW2 / 2f);
+                    final float textW2 = lbl2.computeTextWidth(valueTxt);
+                    final float textX2 = (textW1 / 2f) - (textW2 / 2f);
 
                     lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
 
@@ -731,31 +736,33 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
+                    final TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
 
-                    String factionName = m_parentWrapper.getFaction().getDisplayName();
-                    String txt = factionName + " market share";
+                    final String factionName = m_parentWrapper.getFaction().getDisplayName();
+                    final String txt = factionName + " market share";
 
-                    String valueTxt = m_com.getCommodityMarketData().getMarketSharePercent(m_parentWrapper.getFaction()) + "%";
+                    final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
+                        comID, m_parentWrapper.getFaction().getId()
+                    ) + "%";
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
-                    LabelAPI lbl1 = tooltip.addPara(txt, pad);
+                    final LabelAPI lbl1 = tooltip.addPara(txt, pad);
                     lbl1.setHighlightOnMouseover(true);
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
+                    final LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
                     lbl2.setHighlightOnMouseover(true);
 
-                    float textH1 = lbl1.getPosition().getHeight();
+                    final float textH1 = lbl1.getPosition().getHeight();
                     textW1 = lbl1.computeTextWidth(txt);
                     textX1 = (SECT1_WIDTH*2 / 3f) - (textW1 / 2f);
 
                     lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
 
-                    float textW2 = lbl2.computeTextWidth(valueTxt);
-                    float textX2 = (textW1 / 2) - (textW2 / 2);
+                    final float textW2 = lbl2.computeTextWidth(valueTxt);
+                    final float textX2 = (textW1 / 2) - (textW2 / 2);
 
                     lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
 
@@ -890,6 +897,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             30
         );
 
+        final String comID = m_com.getId();
         final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
@@ -898,9 +906,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
         :
-        "The portion of the global market value that this colony contributes.\n\nIncludes player-controlled colonies, whose market value does not contribue to the global market value the player can gain export income from.";
+        "The portion of the global market value that this colony contributes.\n\nIncludes player-controlled colonies.";
         
-        final String creditTpDesc = mode == 0 ? "How much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share." 
+        final String creditTpDesc = mode == 0 ? "An estimate of how much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share." 
         :
         "How much the colony's demand contributes to the global market value for the commodity.";
 
@@ -911,7 +919,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
             "Quantity", (int)(0.05 * SECT3_WIDTH), quantityTooltip, true, true, 2,
             "", (int)(0.1 * SECT3_WIDTH), null, true, false, 2,
-            "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. The number in parentheses is the maximum out-of-faction shipping capacity, which limits how many units the colony can import, and how much its demand contributes to the global market value.\n\nIn-faction accessibility and shipping capacity are higher.", false, false, -1,
+            "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. In-faction accessibility is higher.", false, false, -1,
             marketHeader, (int)(0.15 * SECT3_WIDTH), marketTpDesc, false, false, -1,
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
         );
@@ -922,7 +930,8 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
             if (market.isHidden()) continue;
 
-            final CommodityStats stats = engine.getComStats(m_com.getId(), market.getId());
+            final String marketID = market.getId();
+            final CommodityStats stats = engine.getComStats(comID, marketID);
 
             if (stats.globalExports < 1 && mode == 0 ||
                 stats.getBaseDemand(false) + stats.getImportExclusiveDemand() < 1 && mode == 1
@@ -933,65 +942,53 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 continue;
             }
 
-            String iconPath = market.getFaction().getCrest();
-            SpritePanel.Base iconPanel = new Base(
+            final String iconPath = market.getFaction().getCrest();
+            final Base iconPanel = new Base(
                 m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new SpritePanelPlugin<>(), 
                 iconPath, null, null, stats.getDeficit() > 0
             );
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
-            String marketName = market.getName();
+            final String factionName = market.getFaction().getDisplayName();
 
-            int marketSize = market.getSize();
-
-            String factionName = market.getFaction().getDisplayName();
-
-            String quantityTxt = NumFormat.engNotation(
+            final String quantityTxt = NumFormat.engNotation(
                 mode == 0 ? stats.globalExports : stats.globalImports
             );
-            long quantityValue = mode == 0 ? stats.globalExports : stats.globalImports;
+            final int quantityValue = mode == 0 ? stats.globalExports : stats.globalImports;
 
-            CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, stats);
+            final CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, stats);
 
-            int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
+            final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
 
-            String access = (accessibility) + "%";
+            final int marketShare = mode == 0 ? engine.getExportMarketShare(comID, marketID) :
+                engine.getImportMarketShare(comID, marketID);
 
-            int marketShare = mode == 0 ? engine.getExportMarketShare(m_com.getId(), market.getId()) :
-                engine.getImportMarketShare(m_com.getId(), market.getId());
-            String marketSharePercent = marketShare + "%";
-
+            final int incomeValue = quantityValue * (int) m_com.getCommodity().getBasePrice();
             String incomeText = "---";
-            int incomeValue = 0;
 
             if (mode == 0) {
-                incomeValue = market.getCommodityData(m_com.getId()).getExportIncome();
-
-                incomeText = market.isPlayerOwned() ? Misc.getDGSCredits(incomeValue) : "---";
-
+                incomeText = market.isPlayerOwned() ? NumFormat.formatCredits(incomeValue) : "---";
             } else if (mode == 1) {
-                incomeValue = market.getCommodityData(m_com.getId()).getDemandValue();
-
-                incomeText = market.isPlayerOwned() ? "---" : Misc.getDGSCredits(incomeValue);
+                incomeText = market.isPlayerOwned() ? "---" : NumFormat.formatCredits(incomeValue);
             }
 
-            Color textColor = market.getFaction().getBaseUIColor();
+            final Color textColor = market.getFaction().getBaseUIColor();
 
             table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
-            table.addCell(marketName, cellAlg.LEFTPAD, null, textColor);
-            table.addCell(marketSize, cellAlg.MID, null, textColor);
+            table.addCell(market.getName(), cellAlg.LEFTPAD, null, textColor);
+            table.addCell(market.getSize(), cellAlg.MID, null, textColor);
             table.addCell(factionName, cellAlg.MID, null, textColor);
             table.addCell(quantityTxt, cellAlg.MID, quantityValue, null);
             table.addCell(infoBar, cellAlg.MID, null, null);
-            table.addCell(access, cellAlg.MID, accessibility, null);
-            table.addCell(marketSharePercent, cellAlg.MID, marketShare, null);
+            table.addCell(accessibility + "%", cellAlg.MID, accessibility, null);
+            table.addCell(marketShare + "%", cellAlg.MID, marketShare, null);
             table.addCell(incomeText, cellAlg.MID, incomeValue, null);
 
             // Tooltip
             PendingTooltip<CustomPanelAPI> tp = new PendingTooltip<>();
             createSection3RowsTooltip(
-                table, market, marketName, textColor, tp
+                table, market, market.getName(), textColor, tp
             );
 
             if (m_parentWrapper.getMarket() == market) {
@@ -1000,7 +997,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             }
 
             table.pushRow(
-                CodexDataV2.getCommodityEntryId(m_com.getId()),
+                CodexDataV2.getCommodityEntryId(comID),
                 market,
                 null,
                 m_parentWrapper.getFaction().getDarkUIColor(),
@@ -1078,7 +1075,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             final int tpWidth = 450;
             final CommodityOnMarketAPI com = market.getCommodityData(m_com.getId());
     
-            TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(
+            final TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(
                 tpWidth, 0, false);
     
             final FactionAPI faction = market.getFaction();

@@ -20,6 +20,8 @@ public class CommodityInfo {
     private final String comID;
     private final Map<String, CommodityStats> m_comStats = new HashMap<>();
 
+    private transient long marketActivity;
+
     public CommodityInfo(
         CommoditySpecAPI spec, Set<String> registeredMarkets
     ) {
@@ -28,6 +30,12 @@ public class CommodityInfo {
         for (String marketID : registeredMarkets) {
             m_comStats.put(marketID, new CommodityStats(comID, marketID));
         }
+    }
+
+    public Object readResolve() {
+        marketActivity = 0;
+
+        return this;
     }
 
     public final void advance() {
@@ -75,6 +83,10 @@ public class CommodityInfo {
         return new Pair<>(exporter, importer);
     }
 
+    public long getMarketActivity() {
+        return marketActivity;
+    }
+
     public final void trade() {
         final EconomyEngine engine = EconomyEngine.getInstance();
 
@@ -100,6 +112,8 @@ public class CommodityInfo {
 
         radixSortIndices(indices, pairScores);
 
+        marketActivity = 0;
+
         for (int i = 0; i < indices.length; i++) {
             Pair<String, String> expImp = getPairFromIndex(
                 indices[i], exporters, importers
@@ -124,6 +138,8 @@ public class CommodityInfo {
             final float weight = Math.min(1f, (float)impStats.getDeficitPreTrade() / amountToSend);
             final float pricePerUnit = exporterPrice * (1f - weight) + importerPrice * weight;
             final float price = pricePerUnit * amountToSend;
+
+            marketActivity += price;
 
             if(sameFaction) {
                 expStats.addInFactionExport(amountToSend);

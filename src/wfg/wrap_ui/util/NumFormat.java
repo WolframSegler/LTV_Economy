@@ -2,6 +2,8 @@ package wfg.wrap_ui.util;
 
 import java.text.DecimalFormat;
 
+import com.fs.starfarer.api.impl.campaign.ids.Strings;
+
 public class NumFormat {
 
     private static final String[] LARGE_SUFFIXES = {"", "K", "M", "B", "T", "P", "E"};
@@ -104,4 +106,8 @@ public class NumFormat {
 		}
 		return x;
 	}
+
+    public static final String formatCredits(long number) {
+        return String.format("%,d", number) + Strings.C;
+    }
 }

@@ -312,12 +312,22 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"ships": 0.1,
-					"fuel": 0.2,
-					"supplies": 0.5
+					"ships": 0.02,
+					"fuel": 0.05,
+					"supplies": 0.03
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 9,
+				"isAbstract": true
+			},
+			"maintenance": {
+				"InputsPerUnitOutput": {
+					"ships": 0.8,
+					"fuel": 1.7,
+					"supplies": 1
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 2,
 				"isAbstract": true
 			},
 			"crew": {
@@ -366,6 +376,8 @@
 					"supplies": 7,
 					"crew": 4
 				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
 				"isAbstract": true
 			}
 		}
@@ -378,6 +390,8 @@
 					"supplies": 7,
 					"crew": 4
 				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
 				"isAbstract": true
 			}
 		}
@@ -390,6 +404,8 @@
 					"supplies": 12.5,
 					"crew": 7
 				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
 				"isAbstract": true
 			}
 		}
@@ -402,6 +418,8 @@
 					"supplies": 21,
 					"crew": 10.4
 				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
 				"isAbstract": true
 			}
 		}
@@ -411,12 +429,22 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 0.2,
-					"marines": 0.4,
-					"hand_weapons": 0.06
+					"supplies": 0.05,
+					"marines": 0.1,
+					"hand_weapons": 0.02
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 7,
+				"isAbstract": true
+			},
+			"maintenance": {
+				"InputsPerUnitOutput": {
+					"supplies": 2,
+					"marines": 4,
+					"hand_weapons": 0.7
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 2,
 				"isAbstract": true
 			}
 		}
@@ -426,12 +454,22 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 0.3,
-					"marines": 0.7,
-					"hand_weapons": 0.1
+					"supplies": 0.06,
+					"marines": 0.08,
+					"hand_weapons": 0.015
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 7,
+				"isAbstract": true
+			},
+			"maintenance": {
+				"InputsPerUnitOutput": {
+					"supplies": 3,
+					"marines": 5,
+					"hand_weapons": 1.5
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 2,
 				"isAbstract": true
 			}
 		}
@@ -442,12 +480,22 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 3,
-					"fuel": 7,
-					"ships": 4
+					"supplies": 0.23,
+					"fuel": 0.4,
+					"ships": 0.2
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 6.5,
+				"marketScaleBase": 8,
+				"isAbstract": true
+			},
+			"maintenance": {
+				"InputsPerUnitOutput": {
+					"supplies": 4,
+					"fuel": 7,
+					"ships": 3
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 2,
 				"isAbstract": true
 			},
 			"crew": {
@@ -468,12 +516,22 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 7,
-					"fuel": 15,
-					"ships": 9
+					"supplies": 0.3,
+					"fuel": 0.55,
+					"ships": 0.4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 6,
+				"marketScaleBase": 8,
+				"isAbstract": true
+			},
+			"maintenance": {
+				"InputsPerUnitOutput": {
+					"supplies": 6,
+					"fuel": 20,
+					"ships": 5
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 2,
 				"isAbstract": true
 			},
 			"crew": {
@@ -505,12 +563,22 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 11,
-					"fuel": 22,
-					"ships": 14
+					"supplies": 0.4,
+					"fuel": 0.8,
+					"ships": 0.56
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 6,
+				"marketScaleBase": 8,
+				"isAbstract": true
+			},
+			"maintenance": {
+				"InputsPerUnitOutput": {
+					"supplies": 6,
+					"fuel": 20,
+					"ships": 5
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 2,
 				"isAbstract": true
 			},
 			"crew": {
@@ -580,7 +648,7 @@
 					"fuel": 220
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
+				"marketScaleBase": 2,
 				"isAbstract": true
 			}
 		}
@@ -662,7 +730,7 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"organics": 175
+					"organics": 130
 				},
 				"isAbstract": true
 			}

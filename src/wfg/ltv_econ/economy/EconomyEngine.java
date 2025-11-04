@@ -470,9 +470,7 @@ public class EconomyEngine extends BaseCampaignEventListener
             workerVector, markets, industryOutputPairs, outputsPerMarket, A
         );
 
-        WorkforcePlanner.logWorkerTargets(workerVector, A);
-        WorkforcePlanner.logDemandVector(d, commodities);
-        WorkforcePlanner.logCommodityResults(A, workerVector, commodities);
+        WorkforcePlanner.logWorkerAssignments(assignedWorkersPerMarket, industryOutputPairs, workerVector);
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
             final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(entry.getKey());
@@ -541,6 +539,20 @@ public class EconomyEngine extends BaseCampaignEventListener
         }
 
         return TotalFactionExports;
+    }
+
+    public final int getFactionTotalExportMarketShare(String comID, String factionID) {
+        final long total = getTotalGlobalExports(comID);
+        if (total == 0) return 0;
+        long totalGlobalExports = 0;
+
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
+            if (!stats.market.getFaction().getId().equals(factionID)) {
+                continue;
+            }
+            totalGlobalExports += stats.globalExports;
+        }
+        return (int) (((float) totalGlobalExports / (float) total) * 100);
     }
 
     public final long getFactionTotalGlobalExports(String comID, FactionAPI faction) {

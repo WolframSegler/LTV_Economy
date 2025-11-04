@@ -64,10 +64,10 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
         ) {
             @Override  
             public void createPanel() {
-                final String credits = Misc.getDGSCredits(engine.getCredits(getMarket().getId()));
+                final String credits = NumFormat.formatCredits(engine.getCredits(getMarket().getId()));
 
                 final LabelAPI creditLabel = settings.createLabel(
-                    "Colony Balance: " + credits, Fonts.INSIGNIA_LARGE
+                    "Colony Balance: " + credits, Fonts.ORBITRON_16
                 );
                 creditLabel.setHighlight(credits);
                 creditLabel.setHighlightColor(Misc.getHighlightColor());
@@ -89,8 +89,13 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
             public TooltipMakerAPI createAndAttachTp() {
                 final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
 
-                tp.addPara("This display shows your colony's current credit reserves. "+
-                "These funds are generated from your colony's income and are used to pay for ongoing operations, including import purchases and the maintenance of orbital stations and defenses. \n"+ "Maintaining a healthy balance is crucial to ensure your colony can afford essential imports and maintain full operational efficiency. If reserves run low, you may experience delays in trade and a reduction in colony productivity. Please note that these credits are separate from your personal funds and are managed by the colony.", 3);
+                String paragraph2 = "Maintaining a healthy balance is crucial to ensure the colony can afford essential imports and maintain full operational efficiency. If reserves run low, the colony may experience delays in trade and a reduction in productivity.";
+                if (getMarket().isPlayerOwned()) {
+                    paragraph2 = paragraph2 + "Please note that these credits are separate from your personal funds and are managed by the colony.";
+                }                
+
+                tp.addPara("This display shows the colony's current credit reserves. "+
+                "These funds are generated from the colony's income and are used to pay for ongoing operations, including import purchases and the maintenance of orbital stations and defenses. \n"+ paragraph2, 3);
 
                 add(tp);
                 WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
