@@ -283,7 +283,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         @Override
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this);
-            getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+            getPlugin().setTargetUIState(State.DIALOG);
         }
 
         @Override
@@ -510,7 +510,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
         public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this);
-            getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+            getPlugin().setTargetUIState(State.DIALOG);
         }
 
         public void createPanel() {

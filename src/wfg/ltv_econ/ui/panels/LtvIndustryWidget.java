@@ -626,7 +626,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
             }
             tradeInfoPanel = true;
 
-            UIState.setState(State.DETAIL_DIALOG);
+            UIState.setState(State.DIALOG);
         }
     }
 

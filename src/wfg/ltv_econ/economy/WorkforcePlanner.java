@@ -13,6 +13,7 @@ import org.apache.commons.math4.legacy.optim.linear.LinearConstraint;
 import org.apache.commons.math4.legacy.optim.linear.LinearConstraintSet;
 import org.apache.commons.math4.legacy.optim.linear.LinearObjectiveFunction;
 import org.apache.commons.math4.legacy.optim.linear.NonNegativeConstraint;
+import org.apache.commons.math4.legacy.optim.linear.PivotSelectionRule;
 import org.apache.commons.math4.legacy.optim.linear.Relationship;
 import org.apache.commons.math4.legacy.optim.linear.SimplexSolver;
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
@@ -56,6 +57,34 @@ public class WorkforcePlanner {
     * I might change this in the future, hence the note.
     */
 
+    /**
+    * Combined Solver Concept for Worker Assignment Optimization
+    *
+    * This describes a potential single-step approach to replace the current two-step process:  
+    * 1. The calculateGlobalWorkerTargets solver calculates total workers needed per commodity.
+    * 2. The allocateWorkersToMarkets solver assigns those workers to specific markets.
+    *
+    * In the combined solver idea, the objective function would directly encode the market-specific  
+    * production efficiencies of each worker. Each variable x_{m,j} represents workers assigned to
+    * market m for output j, and the objective would be maximized according to:
+    *
+    * objectiveCoeffs[m*numOutputs + j] = WORKER_COST - MARKET_MODIFIER_SCALER * outputMultiplier[m][j];
+    *  
+    * where outputMultiplier captures the true productivity of market m for output j.
+    *
+    * Notes on the matter:  
+    * * Constraints must still enforce market capacity, total output caps, and ideal spread
+    * * Large production multipliers may lead to over-concentration; scaling must be tuned.
+    * * This approach allows the solver to "see" the real benefit of each worker assignment directly,
+    * removing the need for the separate global-demand step.
+    * * Potentially faster convergence with fewer solver steps.
+    * * May complicate constraint balancing and require careful tuning to avoid pathological assignments.
+    *
+    * RESOLUTION:
+    * Currently, the two-step solution is sufficient. This is kept as a reference for future me.
+    */
+
+
     public static final double WORKER_COST = 1;     // penatly for a unit of worker used.
     public static final double SLACK_COST = 1300;   // penalty for a unit of deficit regardless of value.
 
@@ -73,7 +102,7 @@ public class WorkforcePlanner {
         final int m = A.length;       // number of commodities
         final int n = A[0].length;    // number of outputs
 
-        double[] objectiveCoeffs = new double[n + m];
+        final double[] objectiveCoeffs = new double[n + m];
 
         for (int j = 0; j < n; j++) {
             objectiveCoeffs[j] = WORKER_COST;
@@ -87,7 +116,7 @@ public class WorkforcePlanner {
 
         // Constraints: A*x + s >= d * buffer  ->  -A*x - s <= -d * buffer
         for (int i = 0; i < m; i++) {
-            double[] coeffs = new double[n + m];
+            final double[] coeffs = new double[n + m];
             for (int j = 0; j < n; j++) coeffs[j] = -A[i][j]; // industry coefficients
             coeffs[n + i] = -1.0; // slack variable coefficient
             constraints.add(new LinearConstraint(
@@ -96,20 +125,13 @@ public class WorkforcePlanner {
         }
 
         // total assigned workers ≤ total available workers
-        double[] totalWorkerCoeffs = new double[n + m];
+        final double[] totalWorkerCoeffs = new double[n + m];
         for (int j = 0; j < n; j++) {
             totalWorkerCoeffs[j] = 1.0;
         }
         constraints.add(new LinearConstraint(
             totalWorkerCoeffs, Relationship.LEQ, EconomyEngine.getGlobalWorkerCount()
         ));
-
-        // Non-negativity for workers
-        for (int i = 0; i < n + m; i++) {
-            double[] coeffs = new double[n + m];
-            coeffs[i] = 1.0;
-            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, 0.0));
-        }
 
         // Non-negative net production for all commodities
         for (int i = 0; i < m; i++) {
@@ -130,9 +152,9 @@ public class WorkforcePlanner {
             new NonNegativeConstraint(true)
         );
 
-        double[] vars = solution.getPoint();
+        final double[] vars = solution.getPoint();
         // First n variables are the worker assignments
-        double[] workers = new double[n];
+        final double[] workers = new double[n];
         System.arraycopy(vars, 0, workers, 0, n);
         return workers;
     }
@@ -275,17 +297,38 @@ public class WorkforcePlanner {
 
         final double[] objectiveCoeffs = new double[nVars];
 
-        for (int m = 0; m < numMarkets; m++) {
-            for (int j = 0; j < numOutputs; j++) {
-                objectiveCoeffs[m * numOutputs + j] = WORKER_COST;
+        for (int j = 0; j < numOutputs; j++) {
+            final String pair = groupedOutputPairs.get(j);
+            final String indGroupID = pair.split(EconomyEngine.KEY)[0];
+            final String outputID = pair.split(EconomyEngine.KEY)[1];
+
+            for (int m = 0; m < numMarkets; m++) {
+                if (!outputsPerMarket.get(m).contains(j)) continue;
+
+                final MarketAPI market = markets.get(m);
+                final Industry ind;
+                if (groupingData.groupToMembers.get(pair) == null) {
+                    ind = IndustryIOs.getRealIndustryFromBaseID(
+                        market, indGroupID
+                    );
+                } else {
+                    final List<String> baseIDs = groupingData.groupToMembers.get(pair).stream()
+                        .map(p -> p.split(EconomyEngine.KEY)[0]).toList();
+
+                    ind = IndustryIOs.getRealIndustryFromBaseID(market, baseIDs);
+                }
+                final float outputMultiplier = CompatLayer.getModifiersMult(ind, outputID, false);
+
+                objectiveCoeffs[m * numOutputs + j] = WORKER_COST +
+                    EconomyConfig.MARKET_MODIFIER_SCALER * outputMultiplier;
             }
         }
         for (int j = 0; j < numOutputs; j++) {
-            objectiveCoeffs[slackStart + j] = EconomyConfig.CONCENTRATION_COST;
+            objectiveCoeffs[slackStart + j] = -EconomyConfig.CONCENTRATION_COST;
         }
 
         LinearObjectiveFunction f = new LinearObjectiveFunction(objectiveCoeffs, 0.0);
-        List<LinearConstraint> constraints = new ArrayList<>();
+        final List<LinearConstraint> constraints = new ArrayList<>();
 
         // 1) Market capacity constraint: sum over outputs <= workerPool
         for (int m = 0; m < numMarkets; m++) {
@@ -295,31 +338,22 @@ public class WorkforcePlanner {
                     coeffs[m * numOutputs + j] = 1.0;
                 }
             }
-            final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(markets.get(m));
-            final double Wm = (cond != null) ? cond.getWorkerPool() : 0.0;
-            constraints.add(new LinearConstraint(coeffs, Relationship.LEQ, Wm));
+            constraints.add(new LinearConstraint(coeffs, Relationship.LEQ, baseCapacities[m]));
         }
 
-        // 2) Non-negativity constraint
-        for (int i = 0; i < nVars; i++) {
-            double[] coeffs = new double[nVars];
-            coeffs[i] = 1.0;
-            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, 0.0));
-        }
-
-        // 3) Output constraints
+        // 2) Output cap (targetVector): sum_m x_mj <= targetVector[j]
         for (int j = 0; j < numOutputs; j++) {
-            double[] coeffs = new double[nVars];
+            final double[] coeffs = new double[nVars];
             for (int m = 0; m < numMarkets; m++) {
                 if (outputsPerMarket.get(m).contains(j)) {
                     coeffs[m * numOutputs + j] = 1.0;
                 }
             }
-            coeffs[slackStart + j] = 1.0;
-            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetVector[j]));
+
+            constraints.add(new LinearConstraint(coeffs, Relationship.LEQ, targetVector[j]));
         }
 
-        // 4) Output capacity constraint: workersAssigned <= workerLimit
+        // 3) Output capacity constraint: workersAssigned <= workerLimit
         for (int j = 0; j < numOutputs; j++) {
             final String pair = groupedOutputPairs.get(j);
             final String indGroupID = pair.split(EconomyEngine.KEY)[0];
@@ -356,42 +390,18 @@ public class WorkforcePlanner {
             }
         }
 
-        // 5) Spreading assignments across markets
+        // 4) Spreading assignments across markets
         for (int j = 0; j < numOutputs; j++) {
             double totalCapacity = 0.0;
             double[] effectiveCapacities = new double[numMarkets];
-            final String pair = groupedOutputPairs.get(j);
-            final String indGroupID = pair.split(EconomyEngine.KEY)[0];
-            final String outputID = pair.split(EconomyEngine.KEY)[1];
 
             for (int m = 0; m < numMarkets; m++) {
                 if (!outputsPerMarket.get(m).contains(j)) continue;
 
-                final MarketAPI market = markets.get(m);
                 final long baseCapacity = baseCapacities[m];
 
-                final Industry ind;
-                if (groupingData.groupToMembers.get(pair) == null) {
-                    ind = IndustryIOs.getRealIndustryFromBaseID(
-                        market, indGroupID
-                    );
-                } else {
-                    final List<String> baseIDs = groupingData.groupToMembers.get(pair).stream()
-                        .map(p -> p.split(EconomyEngine.KEY)[0])
-                        .toList();
-
-                    ind = IndustryIOs.getRealIndustryFromBaseID(market, baseIDs);
-                }
-
-                float outputMultiplier = CompatLayer.getModifiersMult(
-                    ind, outputID, false
-                );
-
-                double effectiveCapacity = baseCapacity + baseCapacity * outputMultiplier *
-                    EconomyConfig.MARKET_MODIFIER_SCALER;
-
-                effectiveCapacities[m] = effectiveCapacity;
-                totalCapacity += effectiveCapacity;
+                effectiveCapacities[m] = baseCapacity;
+                totalCapacity += baseCapacity;
             }
 
             for (int m = 0; m < numMarkets; m++) {
@@ -400,36 +410,24 @@ public class WorkforcePlanner {
                 final double preferredWorkers = (totalCapacity > 0) ?
                     effectiveCapacities[m] / totalCapacity * targetVector[j] : 0.0;
 
-                final boolean useLEQ = baseCapacities[m] < preferredWorkers *
-                    (1 + EconomyConfig.IDEAL_SPREAD_TOLERANCE);
-
                 // x_{m,j} >= preferred - s_j
                 final double[] coeffsGE = new double[nVars];
-                coeffsGE[m * numOutputs + j] = 1.0;          // worker assignment
-                coeffsGE[slackStart + j] = 1.0;              // slack per output
+                coeffsGE[m * numOutputs + j] = 1.0;
+                coeffsGE[slackStart + j] = 1.0;
                 constraints.add(new LinearConstraint(
                     coeffsGE, Relationship.GEQ, preferredWorkers * (1 - EconomyConfig.IDEAL_SPREAD_TOLERANCE)
-                ));
-
-                if (!useLEQ) continue;
-
-                // x_{m,j} <= preferred + s_j
-                final double[] coeffsLE = new double[nVars];
-                coeffsLE[m * numOutputs + j] = 1.0;          // worker assignment
-                coeffsLE[slackStart + j] = -1.0;             // slack per output
-                constraints.add(new LinearConstraint(
-                    coeffsLE, Relationship.LEQ, preferredWorkers * (1 + EconomyConfig.IDEAL_SPREAD_TOLERANCE)
                 ));
             }
         }
 
         SimplexSolver solver = new SimplexSolver();
         PointValuePair solution = solver.optimize(
-            new MaxIter(4000),
+            new MaxIter(2000),
             f,
             new LinearConstraintSet(constraints),
-            GoalType.MINIMIZE,
-            new NonNegativeConstraint(true)
+            GoalType.MAXIMIZE,
+            new NonNegativeConstraint(true),
+            PivotSelectionRule.DANTZIG
         );
 
         final double[] vars = solution.getPoint();

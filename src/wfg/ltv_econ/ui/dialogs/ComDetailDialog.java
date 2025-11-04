@@ -128,7 +128,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
-        UIState.setState(State.DETAIL_DIALOG);
+        UIState.setState(State.DIALOG);
 
         CustomDetailDialogPanel<ComDetailDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
             m_parentWrapper.getRoot(),
@@ -207,7 +207,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             public void initializePlugin(boolean hasPlugin) {
                 super.initializePlugin(hasPlugin);
 
-                getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+                getPlugin().setTargetUIState(State.DIALOG);
             }
         };
 
@@ -399,7 +399,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DIALOG);
                 }
             };
 
@@ -472,7 +472,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DIALOG);
                 }
             };
 
@@ -571,7 +571,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DIALOG);
                 }
             };
 
@@ -648,7 +648,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DIALOG);
                 }
             };
 
@@ -720,7 +720,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DIALOG);
                 }
             };
 
@@ -792,7 +792,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 public void initializePlugin(boolean hasPlugin) {
                     super.initializePlugin(hasPlugin);
 
-                    getPlugin().setTargetUIState(State.DETAIL_DIALOG);
+                    getPlugin().setTargetUIState(State.DIALOG);
                 }
             };
 

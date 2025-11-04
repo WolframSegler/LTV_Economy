@@ -7,7 +7,7 @@ package wfg.wrap_ui.ui;
 public class UIState {
     public enum State {
         NONE,
-        DETAIL_DIALOG,
+        DIALOG,
         MARKET_DETAIL_SCREEN,
         CAMPAIGN
     }

@@ -79,7 +79,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
-        UIState.setState(State.DETAIL_DIALOG);
+        UIState.setState(State.DIALOG);
 
         CustomDetailDialogPanel<AssignWorkersDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
             null,

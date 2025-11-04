@@ -2,11 +2,16 @@ package wfg.ltv_econ.ui.dialogs;
 
 import java.awt.Color;
 
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.Fonts;
+import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityStats;
@@ -17,16 +22,20 @@ import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.SortableTable;
+import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.util.NumFormat;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 
 public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
 
     public static final int PANEL_W = 950;
-    public static final int PANEL_H = 600;
+    public static final int PANEL_H = 650;
 
     private final CustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
     private InteractionDialogAPI interactionDialog;
@@ -36,7 +45,9 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
     }
 
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
-        UIState.setState(State.DETAIL_DIALOG);
+        UIState.setState(State.DIALOG);
+        final SettingsAPI settings = Global.getSettings();
+        final EconomyEngine engine = EconomyEngine.getInstance();
 
         CustomDetailDialogPanel<?> m_panel = new CustomDetailDialogPanel<>(
             m_parentWrapper.getRoot(),
@@ -48,10 +59,50 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
 
         panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 
+        final TextPanel creditPanel = new TextPanel(m_parentWrapper.getRoot(), panel, m_parentWrapper.getMarket(),
+            200, 40, new BasePanelPlugin<>()
+        ) {
+            @Override  
+            public void createPanel() {
+                final String credits = Misc.getDGSCredits(engine.getCredits(getMarket().getId()));
+
+                final LabelAPI creditLabel = settings.createLabel(
+                    "Colony Balance: " + credits, Fonts.INSIGNIA_LARGE
+                );
+                creditLabel.setHighlight(credits);
+                creditLabel.setHighlightColor(Misc.getHighlightColor());
+                add(creditLabel).inTL(0, 0);
+                getPos().setSize(creditLabel.getPosition().getWidth(), creditLabel.getPosition().getHeight());
+            }
+
+            @Override
+            public void initializePlugin(boolean hasPlugin) {
+                super.initializePlugin(hasPlugin);
+                getPlugin().setIgnoreUIState(true);
+            }
+
+            @Override public CustomPanelAPI getTpParent() {
+                return getPanel();
+            }
+
+            @Override  
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
+
+                tp.addPara("This display shows your colony's current credit reserves. "+
+                "These funds are generated from your colony's income and are used to pay for ongoing operations, including import purchases and the maintenance of orbital stations and defenses. \n"+ "Maintaining a healthy balance is crucial to ensure your colony can afford essential imports and maintain full operational efficiency. If reserves run low, you may experience delays in trade and a reduction in colony productivity. Please note that these credits are separate from your personal funds and are managed by the colony.", 3);
+
+                add(tp);
+                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
+                return tp;
+            }
+        };
+        m_panel.add(creditPanel).inTL(10, 10);
+
         SortableTable table = new SortableTable(
             m_panel.getRoot(),
             m_panel.getPanel(),
-            PANEL_W - 20, PANEL_H - 20,
+            PANEL_W - 20, PANEL_H - 70,
             m_parentWrapper.getMarket(),
             20, 30
         );
@@ -71,8 +122,6 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
             "Base Balance", 130, BaseBalanceTpTxt, false, false, -1,
             "Real Balance", 120, RealBalanceTpTxt, false, false, -1
         );
-
-        final EconomyEngine engine = EconomyEngine.getInstance();
 
         for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
 
@@ -112,7 +161,7 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
             );
         }
 
-        m_panel.add(table.getPanel()).inTL(10, 10);
+        m_panel.add(table.getPanel()).inTL(10, 60);
 
         table.sortRows(2);
 
