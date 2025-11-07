@@ -30,6 +30,7 @@ public class EconomyConfigLoader {
         try {
             EconomyConfig.MULTI_THREADING = root.getBoolean("MULTI_THREADING");
             EconomyConfig.STARTING_CREDITS_FOR_MARKET = root.getInt("STARTING_CREDITS_FOR_MARKET");
+            EconomyConfig.DAILY_MAINTENANCE_SUPPLY = root.getInt("DAILY_MAINTENANCE_SUPPLY");
             EconomyConfig.CONCENTRATION_COST = root.getDouble("CONCENTRATION_COST");
             EconomyConfig.IDEAL_SPREAD_TOLERANCE = root.getDouble("IDEAL_SPREAD_TOLERANCE");
             EconomyConfig.MARKET_MODIFIER_SCALER = root.getDouble("MARKET_MODIFIER_SCALER");
@@ -57,6 +58,11 @@ public class EconomyConfigLoader {
          * The amount of credits each market begins with after creation.
          */
         public static int STARTING_CREDITS_FOR_MARKET;
+
+        /**
+         * The default daily units of supply consumed by industries who have the default maintenance turned on.
+         */
+        public static float DAILY_MAINTENANCE_SUPPLY;
 
         /**
          * Higher values lead to more worker concentration, less ideal spread and less unemployment.

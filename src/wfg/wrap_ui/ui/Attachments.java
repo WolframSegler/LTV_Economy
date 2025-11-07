@@ -11,7 +11,9 @@ import com.fs.state.AppDriver;
 import wfg.reflection.ReflectionUtils;
 
 /**
- * Provides attachment points for UI elements in a variety of contexts.
+ * Utility class providing access points to UI elements across different game contexts:
+ * campaign, interaction, and combat. Allows retrieving core panels, tab panels,
+ * dialogs, and overlays depending on the current mode. Is not null-safe.
  */
 public class Attachments {
     /**
@@ -22,6 +24,7 @@ public class Attachments {
     }
 
     /**
+     * Returns the core UI panel of the current interaction.
      * Must be interacting with an entity.
      */
     public static final UIPanelAPI getInteractionCoreUI() {
@@ -29,15 +32,24 @@ public class Attachments {
     }
 
     /**
-     * Returns the panel for the current tab (FLEET, CHARACTER, COMMAND etc.).
+     * Must be in campaign mode.
+     */
+    public static final UIPanelAPI getCoreUI() {
+        return CampaignEngine.getInstance().getCampaignUI().getCore();
+    }
+
+    /**
+     * Returns the panel for the current tab (FLEET, CHARACTER, COMMAND etc.) within an interaction.
      * Must be interacting with an entity.
      */
     public static final UIPanelAPI getInteractionCurrentTab() {
+        if (getCampaignState().getEncounterDialog() == null) return null;
+        if (getCampaignState().getEncounterDialog().getCoreUI() == null) return null;
         return getCampaignState().getEncounterDialog().getCoreUI().getCurrentTab();
     }
 
     /**
-     * Returns the panel for the current tab (FLEET, CHARACTER, COMMAND etc.).
+     * Returns the panel for the current tab (FLEET, CHARACTER, COMMAND etc.) in the campaign screen.
      * Must be in campaign mode.
      */
     public static final UIPanelAPI getCurrentTab() {
@@ -60,13 +72,6 @@ public class Attachments {
     }
 
     /**
-     * Must be in campaign mode.
-     */
-    public static final UIPanelAPI getCoreUI() {
-        return CampaignEngine.getInstance().getCampaignUI().getCore();
-    }
-
-    /**
      * Must be in combat mode.
      */
     public static final UIPanelAPI getTutorialOverlay() {
@@ -81,10 +86,16 @@ public class Attachments {
     }
 
     
+    /**
+     * @return The instance of CampaignState if the currentState is Campaign state. Fails otherwise.
+     */
     public static final CampaignState getCampaignState() {
         return ((CampaignState)AppDriver.getInstance().getCurrentState());
     }
 
+    /**
+     * @return The instance of CombatState if the current state is CombatState. Fails otherwise.
+     */
     public static final CombatState getCombatState() {
         return ((CombatState)AppDriver.getInstance().getCurrentState());
     }

@@ -5,22 +5,23 @@ Documentation of `industry_config.json` Fields
 ### Industry-level fields
 
 * `occTag`: Determines the OCC category for the industry, used to look up the labor share (RoVC).
-* `workerAssignable`: Boolean indicating if the industry can assign workers to outputs.
-* `ignoreLocalStockpiles`: Boolean. If true, this output’s demand cannot be satisfied from local production or stockpiles and is used to force imports from external markets even if the commodity exists locally. Because production occurs before imports, the inputs can only be supplied through the stockpiles, leaving industries marked with this flag unable to produce.
+* `workerAssignable`: Boolean indicating if the industry can assign workers to outputs. Default value is false.
+* `ignoreLocalStockpiles`: Boolean. If true, this output’s demand cannot be satisfied from local production or stockpiles and is used to force imports from external markets even if the commodity exists locally. Because production occurs before imports, the inputs can only be supplied through the stockpiles, leaving industries marked with this flag unable to produce. Default value is false.
+* `includeBaseMaintenance`: Boolean. Default value is true. If true, adds a small maintenance output that consumes supplies.
 
 ### Output-level fields (per commodity)
 
-* `baseProd`: Float. Acts as a scaler when `usesWorkers = true`. Represents daily production in units when used alongside InputsPerUnitOutput. The units inside InputsPerUnitOutput are multiplied with it. Default is always 1.
-* `target`: Float. Defines an upper limit for the stored amount of this commodity. When target > 0, production (or import) will scale to 0 once the stored quantity exceeds the target, effectively throttling output. A value ≤ 0 disables this limit. Abstract outputs may not have targets.
+* `baseProd`: Float. Acts as a scaler when `usesWorkers = true`. Represents daily production in units when used alongside InputsPerUnitOutput. The units inside InputsPerUnitOutput are multiplied with it. Default value is 1.
+* `target`: Float. Defines an upper limit for the stored amount of this commodity. When target > 0, production (or import) will scale to 0 once the stored quantity exceeds the target, effectively throttling output. A value ≤ 0 disables this limit. Abstract outputs may not have targets. Default value is -1.
 * `CCMoneyDist`: Map\<String, Float>. ConstantCapitalMoneyDistribution Defines **relative monetary allocation** for constant capital inputs (physical or abstract). Weights are normalized internally. Can be used with or without workers. Mutually exclusive with `InputsPerUnitOutput`. Can include abstract inputs.
 * `InputsPerUnitOutput`: Map\<String, Float>. Flat input amounts required per output unit. Scales with market/population if `scaleWithMarketSize = true`. Can include abstract inputs and work with workers.
 * `ifMarketCondsAllFalse` / `ifMarketCondsAllTrue`: Lists of conditions affecting output; used to enable/disable production under specific market conditions.
-* `scaleWithMarketSize`: Boolean. If true, output and consumption scales proportionally to market size.
-* `marketScaleBase`: Float. Determines the per-market-size scaling factor for this output when `scaleWithMarketSize = true`.
-* `usesWorkers`: Boolean. Determines if labor calculations (RoVC, LPV\_day) are applied.
+* `scaleWithMarketSize`: Boolean. If true, output and consumption scales proportionally to market size. Default value is false.
+* `marketScaleBase`: Float. Determines the per-market-size scaling factor for this output when `scaleWithMarketSize = true`. Default value is 10.
+* `usesWorkers`: Boolean. Determines if labor calculations (RoVC, LPV\_day) are applied. Default value is false.
 * `workerAssignableLimit`: Limits the ratio of globally available workers that can be assigned.
-* `isAbstract`: Boolean. Indicates the output is **not physically produced**; used for accounting and value input only.
-* `checkLegality`: Boolean. Used to flag outputs that require legality checks.
+* `isAbstract`: Boolean. Indicates the output is **not physically produced**; used for accounting and value input only. Default value is false.
+* `checkLegality`: Boolean. Used to flag outputs that require legality checks. Default value is false.
 
 ### Notes on usage
 

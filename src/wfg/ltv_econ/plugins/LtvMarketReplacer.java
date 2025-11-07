@@ -64,35 +64,28 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (masterTab == null) return;
 
         final List<?> listChildren = (List<?>) ReflectionUtils.invoke(masterTab, "getChildrenCopy");
-        if (listChildren == null) {
-            return;
-        }
-
         final UIPanelAPI outpostPanel = listChildren.stream()
                 .filter(child -> !ReflectionUtils.getMethodsMatching(child, "getOutpostPanelParams").isEmpty())
                 .map(child -> (UIPanelAPI) child)
                 .findFirst().orElse(null);
-        if (outpostPanel == null) {
-            return;
-        }
+        if (outpostPanel == null) return;
+
 
         final List<?> outpostChildren = (List<?>) ReflectionUtils.invoke(outpostPanel, "getChildrenCopy");
-        UIPanelAPI overviewPanel = outpostChildren.stream()
+        final UIPanelAPI overviewPanel = outpostChildren.stream()
                 .filter(child -> !ReflectionUtils.getMethodsMatching(child, "showOverview").isEmpty())
                 .map(child -> (UIPanelAPI) child)
                 .findFirst().orElse(null);
-        if (overviewPanel == null) {
-            return;
-        }
+        if (overviewPanel == null) return;
+
 
         final List<?> overviewChildren = (List<?>) ReflectionUtils.invoke(overviewPanel, "getChildrenCopy");
-        UIPanelAPI managementPanel = overviewChildren.stream()
+        final UIPanelAPI managementPanel = overviewChildren.stream()
                 .filter(child -> !ReflectionUtils.getMethodsMatching(child, "recreateWithEconUpdate").isEmpty())
                 .map(child -> (UIPanelAPI) child)
                 .findFirst().orElse(null);
-        if (managementPanel == null) {
-            return;
-        }
+        if (managementPanel == null) return;
+
 
         final List<?> managementChildren = (List<?>) ReflectionUtils.invoke(managementPanel, "getChildrenCopy");
 

@@ -39,7 +39,7 @@ public class IndustryMatrix {
         {
             Set<String> industrySet = new LinkedHashSet<>();
             for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
-                if (IndustryIOs.hasConfig(spec) || IndustryIOs.hasDynamicConfig(spec)) {
+                if (IndustryIOs.hasConfig(spec)) {
                     if (IndustryIOs.getIndConfig(spec).workerAssignable) {
                         industrySet.add(IndustryIOs.getBaseIndIDifNoConfig(spec));
                     }

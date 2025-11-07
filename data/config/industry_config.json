@@ -309,6 +309,7 @@
 	"spaceport": {
 		"occTag": "space",
 		"workerAssignable": false,
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -357,6 +358,7 @@
 	},
 	"commerce": {
 		"occTag": "service",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"maintenance": {
 				"InputsPerUnitOutput": {
@@ -370,6 +372,7 @@
 	},
 	"station_base": {
 		"occTag": "space",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -384,6 +387,7 @@
 	},
 	"orbitalstation": {
 		"occTag": "space",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -398,6 +402,7 @@
 	},
 	"battlestation": {
 		"occTag": "space",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -412,6 +417,7 @@
 	},
 	"starfortress": {
 		"occTag": "space",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -426,6 +432,7 @@
 	},
 	"grounddefenses": {
 		"occTag": "space",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -451,6 +458,7 @@
 	},
 	"heavybatteries": {
 		"occTag": "space",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -476,6 +484,7 @@
 	},
 	"patrolhq": {
 		"occTag": "space",
+		"includeBaseMaintenance": false,
 		"workerAssignable": true,
 		"outputList": {
 			"operation": {
@@ -513,6 +522,7 @@
 	"militarybase": {
 		"occTag": "space",
 		"workerAssignable": true,
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -560,6 +570,7 @@
 	"highcommand": {
 		"occTag": "space",
 		"workerAssignable": true,
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -607,6 +618,7 @@
 	"lionsguard": {
 		"occTag": "space",
 		"workerAssignable": true,
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -641,6 +653,7 @@
 	},
 	"planetaryshield": {
 		"occTag": "industry",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -657,6 +670,7 @@
 		"occTag": "service",
 		"workerAssignable": true,
 		"ignoreLocalStockpiles": true,
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"supplies": {
 				"baseProd": 25,
@@ -707,6 +721,7 @@
 	},
 	"cryosanctum": {
 		"occTag": "service",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -727,6 +742,7 @@
 	},
 	"cryorevival": {
 		"occTag": "service",
+		"includeBaseMaintenance": false,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
