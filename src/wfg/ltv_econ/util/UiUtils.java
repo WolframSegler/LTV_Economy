@@ -47,7 +47,7 @@ public class UiUtils {
             );
         }
 
-        final long footprint = comStats.getEconomicFootprint();
+        final float footprint = comStats.getEconomicFootprint();
 
         float demandMetLocalRatio = (float)comStats.getDeficitMetLocally() / footprint;
         float inFactionImportRatio = (float)comStats.getDeficitMetViaFactionTrade() / footprint;

@@ -130,19 +130,20 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
 
         for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
 
-            CommodityStats comStats = engine.getComStats(com.getId(), m_panel.getMarket().getId());
+            final CommodityStats stats = engine.getComStats(com.getId(), m_panel.getMarket().getId());
 
-            Base comIcon = new Base(
+            final Base comIcon = new Base(
                 m_panel.getRoot(), m_panel.getPanel(), m_panel.getMarket(),26, 26,
                 new SpritePanelPlugin<>(), com.getIconName(), null, null, false
             );
             
-            long stored = comStats.getStored();
-            long demand = comStats.getBaseDemand(false);
-            long baseProd = comStats.getLocalProduction(false);
-            long modifiedProd = comStats.getLocalProduction(true);
-            long baseBalance = comStats.getLocalProduction(true) - comStats.getBaseDemand(true);
-            long realBalance = comStats.getRealBalance();
+            final long stored = stats.getRoundedStored();
+            final int demand = (int) stats.getBaseDemand(false);
+            final int baseProd = (int) stats.getLocalProduction(false);
+            final int modifiedProd = (int) stats.getLocalProduction(true);
+            final int baseBalance = (int) (stats.getLocalProduction(true) -
+                stats.getBaseDemand(true));
+            final int realBalance = (int) stats.getRealBalance();
 
             Color baseBlcColor = baseBalance < 0 ? 
                 Misc.getNegativeHighlightColor() : baseBalance > 0 ?

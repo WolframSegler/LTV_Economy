@@ -132,7 +132,9 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
 
         // Amount label
         tooltip.setParaSmallInsignia();
-        LabelAPI amountTxt = tooltip.addPara(NumFormat.engNotation(m_comStats.getAvailable()) + Strings.X, pad);
+        final LabelAPI amountTxt = tooltip.addPara(NumFormat.engNotation(
+            (int)m_comStats.getAvailable()) + Strings.X, pad
+        );
         final int textHeight = (int) amountTxt.computeTextHeight(amountTxt.getText());
         amountTxt.setColor(baseColor);
         amountTxt.getPosition().setSize(textWidth, textHeight);
@@ -282,7 +284,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
             if (m_comStats.getCanNotExport() > 0) {
                 tooltip.addPara(
                 "Exports are reduced by %s due to insufficient accessibility.",
-                pad, negative, NumFormat.engNotation(m_comStats.getCanNotExport())
+                pad, negative, NumFormat.engNotation((int)m_comStats.getCanNotExport())
             );
             }
         }

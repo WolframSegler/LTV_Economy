@@ -134,12 +134,12 @@ public class TooltipUtils {
                         }
 
                         int unitPrice = (int) market.getDemandPrice(comID, 1, true);
-                        long deficit = comStat.getDeficit();
+                        float deficit = comStat.getDeficit();
                         Color labelColor = highlight;
                         Color deficitColor = gray;
                         String quantityLabel = "---";
                         if (deficit > 0) {
-                            quantityLabel = NumFormat.engNotation(deficit);
+                            quantityLabel = NumFormat.engNotation((long)deficit);
                             deficitColor = Misc.getNegativeHighlightColor();
                         }
 
@@ -436,7 +436,7 @@ public class TooltipUtils {
     ) {
         tooltip.setParaFontDefault();
         LabelAPI title = tooltip.addPara("Available: %s", pad, highlight,
-            NumFormat.engNotation(comStats.getAvailable()));
+            NumFormat.engNotation((long)comStats.getAvailable()));
 
         final int valueTxtWidth = 50;
         boolean firstPara = true;
@@ -554,7 +554,7 @@ public class TooltipUtils {
         }
         
         LabelAPI title = tooltip.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation(comStats.getBaseDemand(false)));
+            NumFormat.engNotation((long)comStats.getBaseDemand(false)));
 
         final int valueTxtWidth = 50;
         boolean firstPara = true;

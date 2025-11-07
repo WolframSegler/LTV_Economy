@@ -377,7 +377,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                 @Override
                 public TooltipMakerAPI createAndAttachTp() {
-                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
+                    final TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
+
+                    final int discount = (int)((1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
 
                     tooltip.addPara(
                         "Total credits spent sector-wide for the import of " +
@@ -385,8 +387,10 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                         "Colonies with higher accessibility, faction relations and a shorter distance will have priority when exporting.\n\n"
                         +
                         "The value shown here includes the demand at your colonies, " +
-                        String.format("since they must import goods as well. In-faction imports have a %d% discount.", (1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100),
-                        pad
+                        "since they must import goods as well. In-faction imports have a %s discount.",
+                        pad,
+                        Misc.getHighlightColor(),
+                        discount + "%"
                     );
 
                     final float tpX = textX1 + textW1 + opad;
@@ -953,9 +957,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             final String factionName = market.getFaction().getDisplayName();
 
             final String quantityTxt = NumFormat.engNotation(
-                mode == 0 ? stats.globalExports : stats.globalImports
+                mode == 0 ? (long) stats.globalExports : (long) stats.globalImports
             );
-            final int quantityValue = mode == 0 ? stats.globalExports : stats.globalImports;
+            final float quantityValue = mode == 0 ? stats.globalExports : stats.globalImports;
 
             final CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, stats);
 
@@ -964,7 +968,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             final int marketShare = mode == 0 ? engine.getExportMarketShare(comID, marketID) :
                 engine.getImportMarketShare(comID, marketID);
 
-            final int incomeValue = quantityValue * (int) m_com.getCommodity().getBasePrice();
+            final int incomeValue = (int) (quantityValue * m_com.getCommodity().getBasePrice());
             String incomeText = "---";
 
             if (mode == 0) {
@@ -1131,10 +1135,10 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             if (!com.isMeta()) {
                 if (comStats.getCanNotExport() > 0) {
                     tp.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), 
-                    highlight, NumFormat.engNotation(comStats.getCanNotExport()));
+                    highlight, NumFormat.engNotation((long) comStats.getCanNotExport()));
                 } else if (comStats.getDeficit() > 0) {
                     tp.addPara("Local deficit: %s units.", opad, negative, 
-                    highlight, NumFormat.engNotation(comStats.getDeficit()));
+                    highlight, NumFormat.engNotation((long) comStats.getDeficit()));
                 }
     
                 tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{

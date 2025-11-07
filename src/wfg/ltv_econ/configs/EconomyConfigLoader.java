@@ -30,14 +30,14 @@ public class EconomyConfigLoader {
         try {
             EconomyConfig.MULTI_THREADING = root.getBoolean("MULTI_THREADING");
             EconomyConfig.STARTING_CREDITS_FOR_MARKET = root.getInt("STARTING_CREDITS_FOR_MARKET");
-            EconomyConfig.DAILY_MAINTENANCE_SUPPLY = root.getInt("DAILY_MAINTENANCE_SUPPLY");
+            EconomyConfig.DAILY_MAINTENANCE_SUPPLY = (float) root.getDouble("DAILY_MAINTENANCE_SUPPLY");
             EconomyConfig.CONCENTRATION_COST = root.getDouble("CONCENTRATION_COST");
             EconomyConfig.IDEAL_SPREAD_TOLERANCE = root.getDouble("IDEAL_SPREAD_TOLERANCE");
             EconomyConfig.MARKET_MODIFIER_SCALER = root.getDouble("MARKET_MODIFIER_SCALER");
             EconomyConfig.PRODUCTION_BUFFER = 1f + root.getDouble("PRODUCTION_BUFFER");
             EconomyConfig.DAYS_TO_COVER = root.getInt("DAYS_TO_COVER");
             EconomyConfig.DAYS_TO_COVER_PER_IMPORT = root.getInt("DAYS_TO_COVER_PER_IMPORT");
-            EconomyConfig.FACTION_EXCHANGE_MULT = root.getInt("FACTION_EXCHANGE_MULT");
+            EconomyConfig.FACTION_EXCHANGE_MULT = (float) root.getDouble("FACTION_EXCHANGE_MULT");
 
         } catch (Exception e) {
             throw new RuntimeException(

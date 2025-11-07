@@ -112,7 +112,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 			final String comID = spec.getId();
 
 			final CommodityStats stats = engine.getComStats(comID, marketId);
-			final float stored = stats.getStored();
+			final long stored = stats.getRoundedStored();
 			final float limit = getStockpileLimit(null);
 
 			final float displayAmount = Math.min(limit, stored);

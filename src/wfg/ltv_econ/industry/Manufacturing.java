@@ -6,10 +6,5 @@ public class Manufacturing extends BaseIndustry {
     @Override
     public void apply() {
         super.apply(true);
-
-        if (!isFunctional()) {
-			supply.clear();
-			unapply();
-		}
     }
 }

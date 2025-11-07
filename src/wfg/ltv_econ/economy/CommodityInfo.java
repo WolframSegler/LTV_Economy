@@ -122,14 +122,14 @@ public class CommodityInfo {
             final CommodityStats expStats = getStats(expImp.one);
             final CommodityStats impStats = getStats(expImp.two);
 
-            final int exportableRemaining = (int) computeExportableRemaining(expStats);
-            final int deficitRemaining = computeImportAmount(impStats);
+            final float exportableRemaining = computeExportableRemaining(expStats);
+            final float deficitRemaining = computeImportAmount(impStats);
 
             if (exportableRemaining < 1 || deficitRemaining < 1) continue;
 
             final boolean sameFaction = expStats.market.getFaction().equals(impStats.market.getFaction());
 
-            final int amountToSend = Math.min(exportableRemaining, deficitRemaining);
+            final float amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
             // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
             // models supply-demand influence on transaction.
@@ -342,16 +342,16 @@ public class CommodityInfo {
         return (float) Math.sqrt(size / (float) maxSize);
     }
 
-    private static final int computeImportAmount(CommodityStats stats) {
-        final long cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * stats.getDeficitPreTrade();
-        final long rawTarget = EconomyConfig.DAYS_TO_COVER * stats.getDeficitPreTrade();
+    private static final float computeImportAmount(CommodityStats stats) {
+        final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * stats.getDeficitPreTrade();
+        final float rawTarget = EconomyConfig.DAYS_TO_COVER * stats.getDeficitPreTrade();
         final int target = (int) Math.max(Math.min(rawTarget - stats.getStored(), cap), 0);
-        final int exclusive = stats.getImportExclusiveDemand();
+        final float exclusive = stats.getImportExclusiveDemand();
 
         return Math.max(target + exclusive - stats.getTotalImports(), 0);
     }
 
-    private static final long computeExportableRemaining(CommodityStats stats) {
+    private static final float computeExportableRemaining(CommodityStats stats) {
         if (stats.getDeficitPreTrade() > 0) {
             return 0;
         }
