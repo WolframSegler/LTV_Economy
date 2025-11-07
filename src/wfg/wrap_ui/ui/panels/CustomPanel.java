@@ -18,10 +18,10 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.campaign.CampaignEngine;
 
 import wfg.reflection.ReflectionUtils;
 import wfg.reflection.ReflectionUtils.ReflectedField;
+import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
 import wfg.wrap_ui.ui.systems.ActionListenerSystem;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
@@ -117,11 +117,7 @@ public abstract class CustomPanel<
     }
 
     public final UIPanelAPI getRoot() {
-        return m_root == null ? getDialogParent() : m_root;
-    }
-
-    public static final UIPanelAPI getDialogParent() {
-        return CampaignEngine.getInstance().getCampaignUI().getDialogParent();
+        return m_root == null ? Attachments.getCampaignScreenPanel() : m_root;
     }
 
     public final PluginType getPlugin() {

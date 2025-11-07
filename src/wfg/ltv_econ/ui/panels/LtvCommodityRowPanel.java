@@ -1,7 +1,6 @@
 package wfg.ltv_econ.ui.panels;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.econ.CommodityMarketDataAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -157,9 +156,8 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         tooltip.getPrev().getPosition().inBL(labelWidth + iconSize + opad/2, (rowHeight - iconSize) / 2);
 
         // Source Icon
-        CommodityMarketDataAPI commodityData = m_com.getCommodityMarketData();
         getPanel().addComponent(
-            getSourceIcon(baseColor, commodityData, rowHeight - 4, m_panel).getPanel())
+            getSourceIcon(baseColor, rowHeight - 4, m_panel).getPanel())
             .inBL(2, 2);
 
         if (m_comStats.globalExports > 0) {
@@ -174,9 +172,9 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         getPanel().addUIElement(tooltip).inBL(pad + iconSize, 0);
     }
 
-    private Base getSourceIcon(Color color, CommodityMarketDataAPI commodityData, int size,
-        UIPanelAPI parent) {
-        boolean isSourceIllegal = commodityData.getMarketShareData(getMarket()).isSourceIsIllegal();
+    private Base getSourceIcon(Color color, int size, UIPanelAPI parent) {
+        boolean isSourceIllegal = false;
+        // boolean isSourceIllegal = commodityData.getMarketShareData(getMarket()).isSourceIsIllegal();
 
         String iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
         Color baseColor = color;
@@ -190,7 +188,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
             }
         }
 
-        Base iconPanel = new Base(getRoot(), parent, getMarket(), size, size,
+        final Base iconPanel = new Base(getRoot(), parent, getMarket(), size, size,
             new SpritePanelPlugin<>(), iconPath, baseColor, null, isSourceIllegal
         );
         if (isSourceIllegal) {

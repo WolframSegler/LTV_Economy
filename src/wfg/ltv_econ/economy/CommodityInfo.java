@@ -87,7 +87,7 @@ public class CommodityInfo {
         return marketActivity;
     }
 
-    public final void trade() {
+    public final void trade(boolean fakeAdvance) {
         final EconomyEngine engine = EconomyEngine.getInstance();
 
         List<MarketAPI> importers = getImporters();
@@ -145,6 +145,7 @@ public class CommodityInfo {
                 expStats.addInFactionExport(amountToSend);
                 impStats.addInFactionImport(amountToSend);
 
+                if (fakeAdvance) continue;
                 engine.addCredits(expStats.marketID, (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT));
                 engine.addCredits(impStats.marketID, (int) (-price * EconomyConfig.FACTION_EXCHANGE_MULT));
 
@@ -152,6 +153,7 @@ public class CommodityInfo {
                 expStats.addGlobalExport(amountToSend);
                 impStats.addGlobalImport(amountToSend);
 
+                if (fakeAdvance) continue;
                 engine.addCredits(expStats.marketID, (int) price);
                 engine.addCredits(impStats.marketID, (int) -price);
             }

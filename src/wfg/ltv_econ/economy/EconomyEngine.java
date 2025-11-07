@@ -217,7 +217,7 @@ public class EconomyEngine extends BaseCampaignEventListener
         
         weightedOutputDeficitMods();
 
-        m_comInfo.values().parallelStream().forEach(CommodityInfo::trade);
+        m_comInfo.values().parallelStream().forEach(info -> info.trade(fakeAdvance));
         if (!fakeAdvance) {
             m_comInfo.values().parallelStream().forEach(CommodityInfo::advance);
         }
@@ -469,8 +469,6 @@ public class EconomyEngine extends BaseCampaignEventListener
         final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.allocateWorkersToMarkets(
             workerVector, markets, industryOutputPairs, outputsPerMarket, A
         );
-
-        WorkforcePlanner.logWorkerAssignments(assignedWorkersPerMarket, industryOutputPairs, workerVector);
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
             final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(entry.getKey());

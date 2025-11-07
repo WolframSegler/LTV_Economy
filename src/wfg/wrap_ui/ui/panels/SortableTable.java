@@ -394,7 +394,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             }
 
             getParent().addUIElement(tooltip);
-            WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
+            WrapUiUtils.anchorPanelWithBounds(tooltip, getPanel(), AnchorType.TopLeft, 0);
 
             return tooltip;
         }

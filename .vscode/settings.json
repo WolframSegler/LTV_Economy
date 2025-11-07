@@ -15,5 +15,6 @@
         "e:\\Games\\Starsector Mod Testing\\mods\\LTV_Economy\\jars\\libs\\reflection.jar"
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
-    "search.useIgnoreFiles": false
+    "search.useIgnoreFiles": false,
+    "java.errors.incompleteClasspath.severity": "ignore"
 }

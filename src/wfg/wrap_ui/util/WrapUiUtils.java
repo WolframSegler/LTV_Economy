@@ -19,6 +19,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.codex2.CodexDialog;
 
 import wfg.reflection.ReflectionUtils;
+import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
 
 public class WrapUiUtils {
@@ -404,8 +405,7 @@ public class WrapUiUtils {
     public static final void CustomDialogViewer(
         final WrapDialogDelegate dialogPanel, float width, float height
     ) {
-        final InteractionDialogAPI dialog = Global.getSector().getCampaignUI()
-            .getCurrentInteractionDialog();
+        final InteractionDialogAPI dialog = Attachments.getInteractionDialog();
 
         if (dialog != null) { // Local
             dialog.showCustomDialog(width, height, dialogPanel);
