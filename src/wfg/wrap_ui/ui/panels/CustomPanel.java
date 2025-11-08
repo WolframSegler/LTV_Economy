@@ -196,7 +196,7 @@ public abstract class CustomPanel<
      * Marks a panel as being able to accept and store a {@link HasActionListener}.
      * <p>
      * This interface is primarily intended for panels that work with the explicit
-     * interaction methods defined in {@link HasActionListener}, allowing {@code ActionListenerComponent} 
+     * interaction methods defined in {@link HasActionListener}, allowing {@code ActionListenerSystem} 
      * to automatically invoke those callbacks.
      * </p>
      *

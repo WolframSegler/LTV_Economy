@@ -33,6 +33,8 @@ Extra Instructions:
 
 runcode for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Mesha")) { p.getSpec().setTexture("graphics/planets/US_planet_textureAtoll.jpg"); p.applySpecChanges(); break; }
 
+TextFieldAPI is useful
+
 runcode SectorEntityToken fleet = Global.getSector().getPlayerFleet();  
       StarSystemAPI sys = (StarSystemAPI)fleet.getContainingLocation();
       SectorEntityToken stable = fleet.getContainingLocation().addCustomEntity(null, null, "stable_location", "neutral");
