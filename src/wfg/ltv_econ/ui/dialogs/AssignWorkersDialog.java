@@ -82,7 +82,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         UIState.setState(State.DIALOG);
 
         CustomDetailDialogPanel<AssignWorkersDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
-            null,
             panel,
             market,
             panelWidth, panelHeight,
@@ -111,7 +110,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         m_panel.add(lbl).inTL(textX, pad*2);
 
         inputOutputContainer = new BasePanel(
-            null, m_panel.getPanel(), market, (int) m_panel.getPos().getWidth(),
+            m_panel.getPanel(), market, (int) m_panel.getPos().getWidth(),
             180, new BasePanelPlugin<>()
         ) {
             @Override
@@ -127,7 +126,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
         // Draw separator line
         final BasePanel separator = new BasePanel(
-            null, m_panel.getPanel(), market, panelWidth, 1, new BasePanelPlugin<>()
+            m_panel.getPanel(), market, panelWidth, 1, new BasePanelPlugin<>()
         ) {
             @Override
             public Color getBgColor() {
@@ -138,7 +137,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         m_panel.add(separator);
 
         SpritePanelWithTp help_button = new SpritePanelWithTp(
-            null, m_panel.getPanel(), market, 20 , 20, new SpritePanelPlugin<>(),
+            m_panel.getPanel(), market, 20 , 20, new SpritePanelPlugin<>(),
             WARNING_BUTTON_PATH, null, null, false
         ) {
             @Override

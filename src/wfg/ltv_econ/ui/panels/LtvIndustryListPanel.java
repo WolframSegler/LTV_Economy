@@ -75,9 +75,9 @@ public class LtvIndustryListPanel
 	private TooltipMakerAPI buildButtonTp;
 	private boolean buildDialogOpen = false;
 
-	public LtvIndustryListPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market, 
+	public LtvIndustryListPanel(UIPanelAPI parent, int width, int height, MarketAPI market, 
 		UIPanelAPI industryPanel) {
-		super(root, parent, width, height, new IndustryListPanelPlugin(), market);
+		super(parent, width, height, new IndustryListPanelPlugin(), market);
 
 		originalIndustryPanel = (IndustryListPanel) industryPanel;
 
@@ -132,8 +132,7 @@ public class LtvIndustryListPanel
 			int j = index / columnAmount;
 			Industry ind = industries.get(index);
 
-			LtvIndustryWidget widget = new LtvIndustryWidget(
-				getRoot(),
+			final LtvIndustryWidget widget = new LtvIndustryWidget(
 				wrappertp,
 				new IndustryWidgetPlugin(),
 				getMarket(),
@@ -157,8 +156,7 @@ public class LtvIndustryListPanel
 			int j = (index + industries.size()) / columnAmount;
 			Industry ind = getMarket().instantiateIndustry(queuedIndustries.get(index).id);
 
-			LtvIndustryWidget widget = new LtvIndustryWidget(
-				getRoot(),
+			final LtvIndustryWidget widget = new LtvIndustryWidget(
 				wrappertp,
 				new IndustryWidgetPlugin(),
 				getMarket(),
@@ -189,9 +187,9 @@ public class LtvIndustryListPanel
 		TextPanel maxIndLblPanel = null;
 
 		{ // creditLbl
-			creditLblPanel = new TextPanel(
-                getRoot(), getPanel(), getMarket(), 200, 25,
-                new BasePanelPlugin<>()) {
+			creditLblPanel = new TextPanel(getPanel(), getMarket(), 200, 25,
+                new BasePanelPlugin<>()
+			) {
 
                 @Override
                 public void createPanel() {
@@ -234,9 +232,9 @@ public class LtvIndustryListPanel
         }
 
 		{ // maxIndLbl
-			maxIndLblPanel = new TextPanel(
-                getRoot(), getPanel(), getMarket(), 200, 25,
-                new BasePanelPlugin<>()) {
+			maxIndLblPanel = new TextPanel(getPanel(), getMarket(), 200, 25,
+                new BasePanelPlugin<>()
+			) {
 
                 @Override
                 public void createPanel() {

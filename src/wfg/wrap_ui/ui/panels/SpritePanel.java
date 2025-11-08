@@ -45,9 +45,9 @@ public class SpritePanel<
     implements HasOutline{
 
     public static class Base extends SpritePanel<Base> {
-        public Base(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+        public Base(UIPanelAPI parent, MarketAPI market, int width, int height,
             SpritePanelPlugin<Base> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-            super(root, parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+            super(parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
         }
     }
 
@@ -59,9 +59,9 @@ public class SpritePanel<
     public boolean drawBorder = false;
     public boolean drawTexOutline = false;
 
-    public SpritePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+    public SpritePanel(UIPanelAPI parent, MarketAPI market, int width, int height,
         SpritePanelPlugin<PanelType> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-        super(root, parent, width, height, plugin, market);
+        super(parent, width, height, plugin, market);
 
         m_sprite = Global.getSettings().getSprite(spriteID);
         this.color = color;

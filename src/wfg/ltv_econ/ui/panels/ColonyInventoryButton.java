@@ -25,8 +25,8 @@ public class ColonyInventoryButton extends CustomPanel<
 
     public static final int ButtonH = 20;
 
-    public ColonyInventoryButton(UIPanelAPI root, UIPanelAPI parent, MarketAPI market) {
-        super(root, parent, LtvCommodityPanel.STANDARD_WIDTH, ButtonH, new ColonyInvButtonPlugin(), market);
+    public ColonyInventoryButton(UIPanelAPI parent, MarketAPI market) {
+        super(parent, LtvCommodityPanel.STANDARD_WIDTH, ButtonH, new ColonyInvButtonPlugin(), market);
 
         initializePlugin(hasPlugin);
         createPanel();

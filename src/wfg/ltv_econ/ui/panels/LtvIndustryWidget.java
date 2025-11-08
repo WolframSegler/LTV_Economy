@@ -93,15 +93,15 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     private FaderUtil m_fader = null;
     public PendingTooltip<CustomPanelAPI> m_tooltip = null;
 
-    public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryWidgetPlugin plugin,
+    public LtvIndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
         MarketAPI market, Industry ind, LtvIndustryListPanel indPanel) {
 
-        this(root, parent, plugin, market, ind, indPanel, -1);
+        this(parent, plugin, market, ind, indPanel, -1);
     }
 
-    public LtvIndustryWidget(UIPanelAPI root, UIPanelAPI parent, IndustryWidgetPlugin plugin,
+    public LtvIndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
             MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, int queue) {
-        super(root, parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin, market);
+        super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin, market);
 
         constructionMode = ConstructionMode.NORMAL;
         m_industry = ind;
@@ -177,7 +177,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     public void createPanel() {
 
         BasePanel titlePanel = new BasePanel(
-            getRoot(), getPanel(), getMarket(), PANEL_WIDTH, TITLE_HEIGHT, new BasePanelPlugin<>()
+            getPanel(), getMarket(), PANEL_WIDTH, TITLE_HEIGHT, new BasePanelPlugin<>()
         ) {
             @Override
             public void createPanel() {
@@ -205,7 +205,6 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
 
         industryIcon = new IndustryImagePanel(
-            getRoot(),
             m_panel,
             getMarket(),
             PANEL_WIDTH,
@@ -299,7 +298,6 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
             SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(item.getId());
 
             SpritePanel.Base itemPanel = new SpritePanel.Base(
-                getRoot(),
                 m_panel,
                 getMarket(),
                 28, 28,
@@ -320,7 +318,6 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
             CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(m_industry.getAICoreId());
 
             SpritePanel.Base aiCorePanel = new SpritePanel.Base(
-                getRoot(),
                 m_panel,
                 getMarket(),
                 28, 28,
@@ -684,9 +681,9 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
         HasActionListener m_listener = null;
 
-        public IndustryImagePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+        public IndustryImagePanel(UIPanelAPI parent, MarketAPI market, int width, int height,
             SpritePanelPlugin<IndustryImagePanel> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-            super(root, parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+            super(parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
         }
 
         @Override

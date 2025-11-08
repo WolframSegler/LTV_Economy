@@ -131,7 +131,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         UIState.setState(State.DIALOG);
 
         CustomDetailDialogPanel<ComDetailDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
-            m_parentWrapper.getRoot(),
             panel,
             m_parentWrapper.getMarket(),
             (int) panel.getPosition().getWidth(),
@@ -162,7 +161,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             }
         };
 
-        footerPanel = new TextPanel(m_parentWrapper.getRoot(), m_panel.getPanel(),
+        footerPanel = new TextPanel(m_panel.getPanel(),
             m_parentWrapper.getMarket(), 400, footerH, fPlugin) {
 
             @Override
@@ -307,7 +306,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
         String comIconID = m_com.getCommodity().getIconName();
 
-        LtvComIconPanel iconLeft = new LtvComIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(),
+        LtvComIconPanel iconLeft = new LtvComIconPanel(section, m_parentWrapper.getMarket(),
                 iconSize, iconSize, new SpritePanelPlugin<>(), comIconID, null, null);
         iconLeft.setCommodity(m_com);
 
@@ -315,7 +314,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconLeft.getPanel());
 
-        LtvComIconPanel iconRight = new LtvComIconPanel(m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(),
+        LtvComIconPanel iconRight = new LtvComIconPanel(section, m_parentWrapper.getMarket(),
                 iconSize, iconSize, new SpritePanelPlugin<>(), comIconID, null, null);
         iconRight.setCommodity(m_com);
 
@@ -328,9 +327,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         final int baseY = (int) (headerHeight + opad * 1.5f);
         final Color baseColor = m_parentWrapper.getFaction().getBaseUIColor();
         { // Global market value
-            TextPanel textPanel = new TextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 170, 0,
-                    new BasePanelPlugin<>()) {
+            final TextPanel textPanel = new TextPanel(section, m_parentWrapper.getMarket(), 170, 0,
+                new BasePanelPlugin<>()
+            ) {
 
                 @Override
                 public void createPanel() {
@@ -412,9 +411,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseY);
         }
         { // Total global exports
-            TextPanel textPanel = new TextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 170, 0,
-                    new BasePanelPlugin<>()) {
+            final TextPanel textPanel = new TextPanel(section, m_parentWrapper.getMarket(), 170, 0,
+                new BasePanelPlugin<>()
+            ) {
 
                 @Override
                 public void createPanel() {
@@ -494,9 +493,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 currMarket = m_parentWrapper.getMarket();
             }
 
-            TextPanel textPanel = new TextPanel(
-                    m_parentWrapper.getRoot(), section, currMarket, 210, 0,
-                    new BasePanelPlugin<>()) {
+            final TextPanel textPanel = new TextPanel(section, currMarket, 210, 0,
+                new BasePanelPlugin<>()
+            ) {
 
                 @Override
                 public void createPanel() {
@@ -586,9 +585,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         final int baseRow2Y = baseY * 3 + pad;
 
         if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
-            TextPanel textPanel = new TextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
-                    new BasePanelPlugin<>()) {
+            final TextPanel textPanel = new TextPanel(section, m_parentWrapper.getMarket(), 250, 0,
+                new BasePanelPlugin<>()
+            ) {
 
                 @Override
                 public void createPanel() {
@@ -663,9 +662,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         }
 
         else { // Faction market share
-            TextPanel textPanelLeft = new TextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
-                    new BasePanelPlugin<>()) {
+            TextPanel textPanelLeft = new TextPanel(section, m_parentWrapper.getMarket(), 250, 0,
+                new BasePanelPlugin<>()
+            ) {
 
                 @Override
                 public void createPanel() {
@@ -734,9 +733,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             };
 
 
-            TextPanel textPanelRight = new TextPanel(
-                    m_parentWrapper.getRoot(), section, m_parentWrapper.getMarket(), 250, 0,
-                    new BasePanelPlugin<>()) {
+            final TextPanel textPanelRight = new TextPanel(section, m_parentWrapper.getMarket(), 250, 0,
+                new BasePanelPlugin<>()
+            ) {
 
                 @Override
                 public void createPanel() {
@@ -892,7 +891,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         }
 
         SortableTable table = new SortableTable(
-            m_parentWrapper.getRoot(),
             section,
             SECT3_WIDTH,
             SECT3_HEIGHT,
@@ -948,7 +946,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
             final String iconPath = market.getFaction().getCrest();
             final Base iconPanel = new Base(
-                m_parentWrapper.getRoot(), section, market, iconSize, iconSize, new SpritePanelPlugin<>(), 
+                section, market, iconSize, iconSize, new SpritePanelPlugin<>(), 
                 iconPath, null, null, stats.getDeficit() > 0
             );
             iconPanel.setOutlineColor(Color.RED);
@@ -1027,17 +1025,15 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     }
 
     private void createSection4(CustomPanelAPI section) {
-        BasePanelPlugin<LtvCommodityPanel> comPanelPlugin = new BasePanelPlugin<>();
-
         section4ComPanel = new LtvCommodityPanel(
-                m_parentWrapper.getRoot(),
-                section,
-                (int) section.getPosition().getWidth(),
-                (int) section.getPosition().getHeight(),
-                m_parentWrapper.getMarket(),
-                comPanelPlugin,
-                m_parentWrapper.getMarket().getName() + " - Commodities",
-                true);
+            section,
+            (int) section.getPosition().getWidth(),
+            (int) section.getPosition().getHeight(),
+            m_parentWrapper.getMarket(),
+            new BasePanelPlugin<>(),
+            m_parentWrapper.getMarket().getName() + " - Commodities",
+            true
+        );
         section4ComPanel.setRowSelectable(true);
         section4ComPanel.selectRow(m_com.getId());
 
@@ -1228,7 +1224,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 tp,
                 y,
                 26,
-                m_parentWrapper.getRoot(),
                 m_parentWrapper.getPanel(),
                 m_parentWrapper.getMarket()
             );

@@ -21,7 +21,6 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.reflection.ReflectionUtils;
 import wfg.reflection.ReflectionUtils.ReflectedField;
-import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
 import wfg.wrap_ui.ui.systems.ActionListenerSystem;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
@@ -59,7 +58,6 @@ public abstract class CustomPanel<
     protected final ParentType m_parent;
     protected final CustomPanelAPI m_panel;
     protected final PluginType m_plugin;
-    private final UIPanelAPI m_root;
     private FactionAPI m_faction = null;
     private MarketAPI m_market = null;
 
@@ -79,9 +77,8 @@ public abstract class CustomPanel<
      * </ul>
      */
     @SuppressWarnings("unchecked")
-    public CustomPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, PluginType plugin,
+    public CustomPanel(UIPanelAPI parent, int width, int height, PluginType plugin,
         MarketAPI market) {
-        m_root = root;
         m_parent = (ParentType) parent;
         m_plugin = plugin;
         m_market = market;
@@ -114,10 +111,6 @@ public abstract class CustomPanel<
      */
     public final ParentType getParent() {
         return m_parent;
-    }
-
-    public final UIPanelAPI getRoot() {
-        return m_root == null ? Attachments.getCampaignScreenPanel() : m_root;
     }
 
     public final PluginType getPlugin() {
@@ -185,8 +178,20 @@ public abstract class CustomPanel<
         m_panel.removeComponent(a);
     }
 
-    public void clearChildren() {
+    public final void clearChildren() {
         ReflectionUtils.invoke(m_panel, "clearChildren");
+    }
+
+    public final void setSize(int width, int height) {
+        m_panel.getPosition().setSize(width, height);
+    }
+
+    public final void setWidth(int width) {
+        m_panel.getPosition().setSize(width, getPos().getHeight());
+    }
+
+    public final void setHeight(int height) {
+        m_panel.getPosition().setSize(getPos().getWidth(), height);
     }
 
     /**
@@ -208,6 +213,16 @@ public abstract class CustomPanel<
      */
     public abstract void createPanel();
 
+    public static interface HasMarket {
+        MarketAPI getMarket();
+    }
+
+    public interface HasFaction {
+        default FactionAPI getFaction() {
+            return Global.getSector().getPlayerFaction();
+        }
+    }
+
     /**
      * Marks a panel as being able to accept and store a {@link HasActionListener}.
      * <p>
@@ -222,7 +237,7 @@ public abstract class CustomPanel<
      * strongly-typed {@link HasActionListener} methods for clarity and composability.
      * </p>
      */
-    public interface AcceptsActionListener {
+    public static interface AcceptsActionListener {
         default Optional<HasActionListener> getActionListener() {
             return Optional.empty();
         }

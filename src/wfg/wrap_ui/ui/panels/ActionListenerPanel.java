@@ -15,7 +15,7 @@ public class ActionListenerPanel extends CustomPanel<
 > implements HasActionListener {
 
     public ActionListenerPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market) {
-        super(root, parent, width, width, new BasePanelPlugin<>(), market);
+        super(parent, width, width, new BasePanelPlugin<>(), market);
     }
 
     public void createPanel() {}

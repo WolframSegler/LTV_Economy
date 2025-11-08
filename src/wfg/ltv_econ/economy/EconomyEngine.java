@@ -646,6 +646,16 @@ public class EconomyEngine extends BaseCampaignEventListener
         return m_marketCredits.getOrDefault(marketID, 0l);
     }
 
+    @Override
+    public void reportEconomyMonthEnd() { 
+        // TODO disable industry upkeep and income cost before monthly tick for player industries
+    }
+
+    @Override
+    public void reportEconomyTick(int iterIndex) { 
+        // TODO
+    }
+
     /**
      * 1 is no deficit and 0 is max deficit
      */

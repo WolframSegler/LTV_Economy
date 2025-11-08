@@ -135,7 +135,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
 
         ColonyInventoryButton inventoryBtn = new ColonyInventoryButton(
-            managementPanel, managementPanel, market
+            managementPanel, market
         );
 
         managementPanel.addComponent(inventoryBtn.getPanel()).inBL(0, 0);
@@ -171,7 +171,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
         final int height = (int) industryPanel.getPosition().getHeight();
 
         final LtvIndustryListPanel replacement = new LtvIndustryListPanel(
-            managementPanel,
             managementPanel,
             width,
             height,
@@ -236,7 +235,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
             int height = (int) commodityPanel.getPosition().getHeight();
 
             LtvCommodityPanel replacement = new LtvCommodityPanel(
-                managementPanel,
                 managementPanel,
                 width,
                 height,

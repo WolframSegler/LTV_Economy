@@ -21,9 +21,9 @@ public class BasePanel extends CustomPanel<
     public Color BgColor = Color.BLACK;
     public boolean isBgEnabled = true;
 
-    public BasePanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+    public BasePanel(UIPanelAPI parent, MarketAPI market, int width, int height,
         BasePanelPlugin<BasePanel> plugin) {
-        super(root, parent, width, height, plugin, market);
+        super(parent, width, height, plugin, market);
 
         initializePlugin(hasPlugin);
         createPanel();

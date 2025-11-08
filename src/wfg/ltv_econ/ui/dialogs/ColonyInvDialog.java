@@ -50,7 +50,6 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
         final EconomyEngine engine = EconomyEngine.getInstance();
 
         CustomDetailDialogPanel<?> m_panel = new CustomDetailDialogPanel<>(
-            m_parentWrapper.getRoot(),
             panel,
             m_parentWrapper.getMarket(),
             PANEL_W, PANEL_H,
@@ -59,7 +58,7 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
 
         panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 
-        final TextPanel creditPanel = new TextPanel(m_parentWrapper.getRoot(), panel, m_parentWrapper.getMarket(),
+        final TextPanel creditPanel = new TextPanel(panel, m_parentWrapper.getMarket(),
             200, 40, new BasePanelPlugin<>()
         ) {
             @Override  
@@ -105,7 +104,6 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
         m_panel.add(creditPanel).inTL(10, 10);
 
         SortableTable table = new SortableTable(
-            m_panel.getRoot(),
             m_panel.getPanel(),
             PANEL_W - 20, PANEL_H - 70,
             m_parentWrapper.getMarket(),
@@ -133,7 +131,7 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
             final CommodityStats stats = engine.getComStats(com.getId(), m_panel.getMarket().getId());
 
             final Base comIcon = new Base(
-                m_panel.getRoot(), m_panel.getPanel(), m_panel.getMarket(),26, 26,
+                m_panel.getPanel(), m_panel.getMarket(),26, 26,
                 new SpritePanelPlugin<>(), com.getIconName(), null, null, false
             );
             

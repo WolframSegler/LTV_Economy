@@ -45,9 +45,9 @@ import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
  */
 public class SpritePanelWithTp extends SpritePanel<SpritePanelWithTp> implements HasTooltip, HasFader {
 
-    public SpritePanelWithTp(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+    public SpritePanelWithTp(UIPanelAPI parent, MarketAPI market, int width, int height,
         SpritePanelPlugin<SpritePanelWithTp> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-        super(root, parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+        super(parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
 
         initializePlugin(hasPlugin);
     }

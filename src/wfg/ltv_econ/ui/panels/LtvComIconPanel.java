@@ -40,9 +40,9 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
     public boolean isExpanded = false;
     public CommodityOnMarketAPI m_com;
 
-    public LtvComIconPanel(UIPanelAPI root, UIPanelAPI parent, MarketAPI market, int width, int height,
+    public LtvComIconPanel(UIPanelAPI parent, MarketAPI market, int width, int height,
         SpritePanelPlugin<LtvComIconPanel> plugin, String iconSpriteID, Color color, Color fillColor) {
-        super(root, parent, market, width, height, plugin, iconSpriteID, color, fillColor, false);
+        super(parent, market, width, height, plugin, iconSpriteID, color, fillColor, false);
 
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
     }

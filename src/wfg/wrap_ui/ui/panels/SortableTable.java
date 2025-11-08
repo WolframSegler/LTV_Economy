@@ -138,13 +138,13 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         sortIconPath = Global.getSettings().getSpriteName("ui", "sortIcon");
     }
 
-    public SortableTable(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market) {
-        this(root, parent, width, height, market, 20, 28);
+    public SortableTable(UIPanelAPI parent, int width, int height, MarketAPI market) {
+        this(parent, width, height, market, 20, 28);
     }
 
-    public SortableTable(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
+    public SortableTable(UIPanelAPI parent, int width, int height, MarketAPI market,
             int headerHeight, int rowHeight) {
-        super(root, parent, width, height, null, market);
+        super(parent, width, height, null, market);
         m_headerHeight = headerHeight;
         m_rowHeight = rowHeight;
 
@@ -190,11 +190,11 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
                 if (column.tooltip == null) {
                     panel = new HeaderPanel(
-                        getRoot(), getPanel(), mergedWidth - pad, m_headerHeight, getMarket(), column, i
+                        getPanel(), mergedWidth - pad, m_headerHeight, getMarket(), column, i
                     );
                 } else {
                     panel = new HeaderPanelWithTooltip(
-                        getRoot(), getPanel(), mergedWidth - pad, m_headerHeight, getMarket(), column, i
+                        getPanel(), mergedWidth - pad, m_headerHeight, getMarket(), column, i
                     );
                 }
 
@@ -206,12 +206,12 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             } else {
                 if (column.tooltip == null) {
                     panel = new HeaderPanel(
-                        getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
+                        getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         getMarket(), column, i
                     );
                 } else {
                     panel = new HeaderPanelWithTooltip(
-                        getRoot(), getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
+                        getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
                         getMarket(), column, i
                     );
                 }
@@ -260,9 +260,9 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         private boolean isPersistentGlow = false;
         private FaderUtil m_fader = null;
 
-        public HeaderPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
+        public HeaderPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
                 ColumnManager column, int listIndex) {
-            super(root, parent, width, height, new BasePanelPlugin<>() {
+            super(parent, width, height, new BasePanelPlugin<>() {
                 @Override
                 public void advance(float amount) {
                     super.advance(amount);
@@ -304,16 +304,16 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                 (getPos().getHeight() / 2f) - (lblHeight / 2f) 
             );
 
-            SpritePanel.Base sortIcon = new Base(
-                    getRoot(),
-                    panel,
-                    getMarket(),
-                    m_headerHeight - 2, m_headerHeight,
-                    new SpritePanelPlugin<>(),
-                    sortIconPath,
-                    getFaction().getBaseUIColor(),
-                    null,
-                    false);
+            final Base sortIcon = new Base(
+                panel,
+                getMarket(),
+                m_headerHeight - 2, m_headerHeight,
+                new SpritePanelPlugin<>(),
+                sortIconPath,
+                getFaction().getBaseUIColor(),
+                null,
+                false
+            );
 
             tooltip.addComponent(sortIcon.getPanel()).inBR(1, 0);
 
@@ -350,9 +350,9 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     }
 
     public class HeaderPanelWithTooltip extends HeaderPanel implements HasTooltip {
-        public HeaderPanelWithTooltip(UIPanelAPI root, UIPanelAPI parent, int width, int height,
+        public HeaderPanelWithTooltip(UIPanelAPI parent, int width, int height,
                 MarketAPI market, ColumnManager column, int listIndex) {
-            super(root, parent, width, height, market, column, listIndex);
+            super(parent, width, height, market, column, listIndex);
         }
 
         private boolean isExpanded = false;
@@ -482,9 +482,9 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         private Outline outline = Outline.NONE;
         private Color outlineColor = Misc.getDarkPlayerColor();
 
-        public RowManager(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
+        public RowManager(UIPanelAPI parent, int width, int height, MarketAPI market,
                 RowSelectionListener listener) {
-            super(root, parent, width, height, new BasePanelPlugin<>() {
+            super(parent, width, height, new BasePanelPlugin<>() {
                 
                 @Override
                 public void advance(float amount) {
@@ -779,17 +779,16 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     public void addCell(Object cell, cellAlg alg, Object sortValue, Color textColor) {
         if (pendingRow == null) {
             pendingRow = new RowManager(
-                    getRoot(),
-                    getParent(),
-                    (int) getPos().getWidth() - 2,
-                    m_rowHeight,
-                    getMarket(),
-                    new RowSelectionListener() {
-                        @Override
-                        public void onRowSelected(RowManager row) {
-                            m_selectedRow = row;
-                        }
-                    });
+                getParent(),
+                (int) getPos().getWidth() - 2,
+                m_rowHeight,
+                getMarket(),
+                new RowSelectionListener() {
+                    @Override
+                    public void onRowSelected(RowManager row) {
+                        m_selectedRow = row;
+                    }
+                });
         }
 
         pendingRow.addCell(cell, alg, sortValue, textColor);

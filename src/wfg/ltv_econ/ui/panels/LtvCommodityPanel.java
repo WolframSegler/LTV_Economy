@@ -33,24 +33,24 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
     public boolean isRowSelectable = false;
     public boolean m_canViewPrices = false;
 
-    public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
         BasePanelPlugin<LtvCommodityPanel> plugin, String headerTxt) {
-        this(root, parent, width, height, market, plugin, headerTxt, false);
+        this(parent, width, height, market, plugin, headerTxt, false);
     }
 
-    public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
         BasePanelPlugin<LtvCommodityPanel> plugin) {
-        this(root, parent, width, height, market, plugin, "Commodities", false);
+        this(parent, width, height, market, plugin, "Commodities", false);
     }
 
-    public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
         BasePanelPlugin<LtvCommodityPanel> plugin, boolean childrenIgnoreUIState) {
-        this(root, parent, width, height, market, plugin, "Commodities", childrenIgnoreUIState);
+        this(parent, width, height, market, plugin, "Commodities", childrenIgnoreUIState);
     }
 
-    public LtvCommodityPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
         BasePanelPlugin<LtvCommodityPanel> plugin, String headerTxt, boolean childrenIgnoreUIState) {
-        super(root, parent, width, height, plugin, market);
+        super(parent, width, height, plugin, market);
 
         m_headerTxt = headerTxt;
         this.childrenIgnoreUIState = childrenIgnoreUIState;
@@ -115,7 +115,7 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
 
         for (CommoditySpecAPI com : commodities) {
             LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(
-                getRoot(), getPanel(), getMarket(), com.getId(), this, (int)(getPos().getWidth() - opad * 2), 
+                getPanel(), getMarket(), com.getId(), this, (int)(getPos().getWidth() - opad * 2), 
                 rowHeight, childrenIgnoreUIState, m_canViewPrices
             );
 

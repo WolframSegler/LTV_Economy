@@ -185,7 +185,7 @@ public class TooltipUtils {
                             SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                             SpritePanel.Base arrowPanel = new Base(
-                                null, tooltip, null, 20, 20,
+                                tooltip, null, 20, 20,
                                 new SpritePanelPlugin<>(), "", null,
                                 null, false
                             );
@@ -295,8 +295,9 @@ public class TooltipUtils {
                         // Arrow Sprite
                         SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
-                        SpritePanel.Base arrowPanel = new Base(null, tooltip, null,
-                                20, 20, new SpritePanelPlugin<>(), "", null, null, false);
+                        final Base arrowPanel = new Base(tooltip, null, 20, 20,
+                            new SpritePanelPlugin<>(), "", null, null, false
+                        );
 
                         arrowPanel.setSprite(arrow);
 
