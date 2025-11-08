@@ -25,8 +25,12 @@ public class ColonyInventoryButton extends CustomPanel<
 
     public static final int ButtonH = 20;
 
+    private final MarketAPI m_market;
+
     public ColonyInventoryButton(UIPanelAPI parent, MarketAPI market) {
-        super(parent, LtvCommodityPanel.STANDARD_WIDTH, ButtonH, new ColonyInvButtonPlugin(), market);
+        super(parent, LtvCommodityPanel.STANDARD_WIDTH, ButtonH, new ColonyInvButtonPlugin());
+
+        m_market = market;
 
         initializePlugin(hasPlugin);
         createPanel();
@@ -46,7 +50,7 @@ public class ColonyInventoryButton extends CustomPanel<
 
         buttonWrapper.setActionListenerDelegate(this);
 
-        ButtonAPI buildButton = buttonWrapper.addButton(
+        final ButtonAPI buildButton = buttonWrapper.addButton(
             "Colony Inventory",
             null,
             Misc.getBasePlayerColor(),
@@ -66,7 +70,7 @@ public class ColonyInventoryButton extends CustomPanel<
     }
 
     public void actionPerformed(Object data, Object source) {
-        final ColonyInvDialog dialogPanel = new ColonyInvDialog(this);
+        final ColonyInvDialog dialogPanel = new ColonyInvDialog(m_market);
 
         WrapUiUtils.CustomDialogViewer(
             dialogPanel, ColonyInvDialog.PANEL_W, ColonyInvDialog.PANEL_H

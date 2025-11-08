@@ -1,6 +1,5 @@
 package wfg.wrap_ui.ui.panels;
 
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -73,9 +72,9 @@ public class TextPanel extends CustomPanel<BasePanelPlugin<TextPanel>, TextPanel
 
     private boolean isSoundEnabled = true;
 
-    public TextPanel(UIPanelAPI parent, MarketAPI market, int width, int height,
+    public TextPanel(UIPanelAPI parent, int width, int height,
         BasePanelPlugin<TextPanel> plugin) {
-        super(parent, width, height, plugin, market);
+        super(parent, width, height, plugin);
 
         initializePlugin(hasPlugin);
         createPanel();

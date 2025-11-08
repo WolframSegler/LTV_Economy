@@ -18,13 +18,15 @@ import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasMarket;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 
 public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel, CustomPanelAPI>
-    implements HasBackground, HasOutline {
+    implements HasBackground, HasOutline, HasMarket {
 
     protected List<LtvCommodityRowPanel> commodityRows = new ArrayList<>();
+    protected MarketAPI m_market = null;
 
     public static final int STANDARD_WIDTH = 264;
     public String m_headerTxt;
@@ -33,24 +35,24 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
     public boolean isRowSelectable = false;
     public boolean m_canViewPrices = false;
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
         BasePanelPlugin<LtvCommodityPanel> plugin, String headerTxt) {
-        this(parent, width, height, market, plugin, headerTxt, false);
+        this(parent, width, height, plugin, headerTxt, false);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
         BasePanelPlugin<LtvCommodityPanel> plugin) {
-        this(parent, width, height, market, plugin, "Commodities", false);
+        this(parent, width, height, plugin, "Commodities", false);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
         BasePanelPlugin<LtvCommodityPanel> plugin, boolean childrenIgnoreUIState) {
-        this(parent, width, height, market, plugin, "Commodities", childrenIgnoreUIState);
+        this(parent, width, height, plugin, "Commodities", childrenIgnoreUIState);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
         BasePanelPlugin<LtvCommodityPanel> plugin, String headerTxt, boolean childrenIgnoreUIState) {
-        super(parent, width, height, plugin, market);
+        super(parent, width, height, plugin);
 
         m_headerTxt = headerTxt;
         this.childrenIgnoreUIState = childrenIgnoreUIState;
@@ -142,5 +144,13 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
         for (LtvCommodityRowPanel row : commodityRows) {
             row.setPersistentGlow(row == selectedRow);
         }
+    }
+
+    public MarketAPI getMarket() {
+        return m_market;
+    }
+
+    public void setMarket(MarketAPI a) {
+        m_market = a;
     }
 }

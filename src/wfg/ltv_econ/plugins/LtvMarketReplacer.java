@@ -229,24 +229,20 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         try {
             // Steal the members for the constructor
-            MarketAPI market = (MarketAPI)(ReflectionUtils.get(commodityPanel, null, MarketAPI.class));
+            final MarketAPI market = (MarketAPI)(ReflectionUtils.get(commodityPanel, null, MarketAPI.class));
 
-            int width = (int) commodityPanel.getPosition().getWidth();
-            int height = (int) commodityPanel.getPosition().getHeight();
+            final int width = (int) commodityPanel.getPosition().getWidth();
+            final int height = (int) commodityPanel.getPosition().getHeight();
 
-            LtvCommodityPanel replacement = new LtvCommodityPanel(
+            final LtvCommodityPanel replacement = new LtvCommodityPanel(
                 managementPanel,
                 width,
                 height,
-                market,
                 new BasePanelPlugin<LtvCommodityPanel>()
             );
+            replacement.setMarket(market);
 
-            ActionListenerPanel listener = new ActionListenerPanel(
-                managementPanel,
-                managementPanel,
-                0, 0, market
-            ) {
+            final ActionListenerPanel listener = new ActionListenerPanel(managementPanel,0, 0) {
                 @Override
                 public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
                     if (!isLeftClick) {
@@ -258,7 +254,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     replacement.selectRow(panel);
 
                     if (replacement.m_canViewPrices) {
-                        final ComDetailDialog dialogPanel = new ComDetailDialog(panel, panel.getCommodity());
+                        final ComDetailDialog dialogPanel = new ComDetailDialog(market, panel.getCommodity());
 
                         WrapUiUtils.CustomDialogViewer(
                             dialogPanel, dialogPanel.PANEL_W, dialogPanel.PANEL_H

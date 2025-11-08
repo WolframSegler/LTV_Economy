@@ -2,7 +2,6 @@ package wfg.wrap_ui.ui.panels;
 
 import java.awt.Color;
 
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
@@ -21,9 +20,9 @@ public class BasePanel extends CustomPanel<
     public Color BgColor = Color.BLACK;
     public boolean isBgEnabled = true;
 
-    public BasePanel(UIPanelAPI parent, MarketAPI market, int width, int height,
+    public BasePanel(UIPanelAPI parent, int width, int height,
         BasePanelPlugin<BasePanel> plugin) {
-        super(parent, width, height, plugin, market);
+        super(parent, width, height, plugin);
 
         initializePlugin(hasPlugin);
         createPanel();

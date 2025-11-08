@@ -60,9 +60,11 @@ public class LtvIndustryListPanel
 	public static final ReflectedConstructor indPickCtor = ReflectionUtils.getConstructorsMatching(IndustryPickerDialog.class, 3).get(0);
 	public static ReflectedConstructor indOptCtor = null;
 	public final UIComponentAPI dummyWidget;
-	private final IndustryListPanel originalIndustryPanel;
 
-	private List<Object> widgets = new ArrayList<>();
+	private final IndustryListPanel originalIndustryPanel;
+	private final List<Object> widgets = new ArrayList<>();
+	private final MarketAPI m_market;
+
 	public List<Object> getWidgets() {
 		return widgets;
 	}
@@ -77,8 +79,9 @@ public class LtvIndustryListPanel
 
 	public LtvIndustryListPanel(UIPanelAPI parent, int width, int height, MarketAPI market, 
 		UIPanelAPI industryPanel) {
-		super(parent, width, height, new IndustryListPanelPlugin(), market);
+		super(parent, width, height, new IndustryListPanelPlugin());
 
+		m_market = market;
 		originalIndustryPanel = (IndustryListPanel) industryPanel;
 
 		dummyWidget = originalIndustryPanel.getWidgets().get(0);
@@ -106,9 +109,9 @@ public class LtvIndustryListPanel
 		clearChildren();
 		widgets.clear();
 
-		List<Industry> industries = CommodityStats.getVisibleIndustries(getMarket());
+		List<Industry> industries = CommodityStats.getVisibleIndustries(m_market);
 		Collections.sort(industries, getIndustryOrderComparator());
-		List<ConstructionQueueItem> queuedIndustries = getMarket().getConstructionQueue().getItems();
+		List<ConstructionQueueItem> queuedIndustries = m_market.getConstructionQueue().getItems();
 	
 		final byte columnAmount = 4;
 
@@ -135,7 +138,7 @@ public class LtvIndustryListPanel
 			final LtvIndustryWidget widget = new LtvIndustryWidget(
 				wrappertp,
 				new IndustryWidgetPlugin(),
-				getMarket(),
+				m_market,
 				ind,
 				this
 			);
@@ -154,12 +157,12 @@ public class LtvIndustryListPanel
 		for (int index = 0; index < queuedIndustries.size(); index++) {
 			int i = (index + industries.size()) % columnAmount;
 			int j = (index + industries.size()) / columnAmount;
-			Industry ind = getMarket().instantiateIndustry(queuedIndustries.get(index).id);
+			Industry ind = m_market.instantiateIndustry(queuedIndustries.get(index).id);
 
 			final LtvIndustryWidget widget = new LtvIndustryWidget(
 				wrappertp,
 				new IndustryWidgetPlugin(),
-				getMarket(),
+				m_market,
 				ind,
 				this,
 				index
@@ -187,9 +190,7 @@ public class LtvIndustryListPanel
 		TextPanel maxIndLblPanel = null;
 
 		{ // creditLbl
-			creditLblPanel = new TextPanel(getPanel(), getMarket(), 200, 25,
-                new BasePanelPlugin<>()
-			) {
+			creditLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
@@ -232,13 +233,11 @@ public class LtvIndustryListPanel
         }
 
 		{ // maxIndLbl
-			maxIndLblPanel = new TextPanel(getPanel(), getMarket(), 200, 25,
-                new BasePanelPlugin<>()
-			) {
+			maxIndLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
 
                 @Override
                 public void createPanel() {
-                    LabelAPI maxIndLbl = UiUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, getMarket());
+                    LabelAPI maxIndLbl = UiUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
 					maxIndLbl.setHighlightOnMouseover(true);
 
 					getPos().setSize(
@@ -264,10 +263,10 @@ public class LtvIndustryListPanel
 						"Maximum number of industries, based on the size of a colony and other factors.", 0
 					);
 					tooltip.beginTable(
-						getFaction(), 20, new Object[]{"Colony size", 120, "Base industries", 120}
+						m_market.getFaction(), 20, new Object[]{"Colony size", 120, "Base industries", 120}
 					);
 
-					for(int i = 3; i <= Misc.getMaxMarketSize(getMarket()); i++) {
+					for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
 						tooltip.addRow(new Object[]{Misc.getHighlightColor(), "" + i, Misc.getHighlightColor(),
 						"" + LtvPopulationAndInfrastructure.getMaxIndustries(i)});
 					}
@@ -278,11 +277,11 @@ public class LtvIndustryListPanel
 						"Colonies that exceed this limit for any reason have their stability reduced by %s.", 20,
 						Misc.getHighlightColor(), new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
 					);
-					tooltip.addPara("Industries on %s:", 10, getFaction().getBaseUIColor(),
-						new String[]{getMarket().getName()}
+					tooltip.addPara("Industries on %s:", 10, m_market.getFaction().getBaseUIColor(),
+						new String[]{m_market.getName()}
 					);
 
-					List<Industry> industries = CommodityStats.getVisibleIndustries(getMarket());
+					List<Industry> industries = CommodityStats.getVisibleIndustries(m_market);
 					Collections.sort(industries, getIndustryOrderComparator());
 
 					final String indent = "    ";
@@ -297,7 +296,7 @@ public class LtvIndustryListPanel
 						} else if (industry.isUpgrading()) {
 							String upgradeId = industry.getSpec().getUpgrade();
 							if (upgradeId != null) {
-								Industry upgradedIndustry = getMarket().instantiateIndustry(upgradeId);
+								Industry upgradedIndustry = m_market.instantiateIndustry(upgradeId);
 								if (upgradedIndustry.isIndustry()) {
 									tooltip.addPara(
 										indent + industry.getCurrentName() + " (upgrading to " + 
@@ -310,10 +309,10 @@ public class LtvIndustryListPanel
 						}
 					}
 
-					for (ConstructionQueueItem item : getMarket().getConstructionQueue().getItems()) {
+					for (ConstructionQueueItem item : m_market.getConstructionQueue().getItems()) {
 						final IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
 						if (spec.hasTag("industry")) {
-							Industry ind = getMarket().instantiateIndustry(item.id);
+							Industry ind = m_market.instantiateIndustry(item.id);
 							tooltip.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
 							paragraphSpacing = 3;
 							anyIndustryAdded = true;
@@ -359,7 +358,7 @@ public class LtvIndustryListPanel
 		add(creditLblPanel.getPanel()).inBL(buildBtnWidth + 70, BUTTON_SECTION_HEIGHT);
 		add(maxIndLblPanel.getPanel()).inBR(40, BUTTON_SECTION_HEIGHT);
 
-		if (!DebugFlags.COLONY_DEBUG && !getMarket().isPlayerOwned()) {
+		if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
 			buildButton.setEnabled(false);
 			if (DebugFlags.HIDE_COLONY_CONTROLS) {
 				creditLblPanel.getPanel().setOpacity(0);
@@ -393,7 +392,7 @@ public class LtvIndustryListPanel
 	}
 
 	public void advanceImpl(float amount) {
-		boolean shouldEnableButton = DebugFlags.COLONY_DEBUG || getMarket().isPlayerOwned();
+		boolean shouldEnableButton = DebugFlags.COLONY_DEBUG || m_market.isPlayerOwned();
 		
 		if (shouldEnableButton != buildButton.isEnabled()) {
 			buildButton.setEnabled(shouldEnableButton);
@@ -416,7 +415,7 @@ public class LtvIndustryListPanel
 		 * Call dialogDismissed for this class when the original listPanel's method runs. 
 		 */
 		if (buildDialogOpen) {
-			int currentSize = getMarket().getConstructionQueue().getItems().size();
+			int currentSize = m_market.getConstructionQueue().getItems().size();
 			if (currentSize > previousQueueSize) {
 				buildDialogOpen = false;
 				dialogDismissed();
@@ -484,7 +483,7 @@ public class LtvIndustryListPanel
 			 * Poll for queue size change to detect when the
 			 * dialogDismissed method for originalIndustryPanel is called.
 			 */
-			previousQueueSize = getMarket().getConstructionQueue().getItems().size();
+			previousQueueSize = m_market.getConstructionQueue().getItems().size();
 
 			// Get the button of the original widget to call its actionPerformed succesfully
 			Object originalBtn = ReflectionUtils.get(originalIndustryPanel, "build", ButtonAPI.class);

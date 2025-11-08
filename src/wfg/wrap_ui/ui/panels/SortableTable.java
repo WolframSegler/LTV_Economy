@@ -138,13 +138,12 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         sortIconPath = Global.getSettings().getSpriteName("ui", "sortIcon");
     }
 
-    public SortableTable(UIPanelAPI parent, int width, int height, MarketAPI market) {
-        this(parent, width, height, market, 20, 28);
+    public SortableTable(UIPanelAPI parent, int width, int height) {
+        this(parent, width, height, 20, 28);
     }
 
-    public SortableTable(UIPanelAPI parent, int width, int height, MarketAPI market,
-            int headerHeight, int rowHeight) {
-        super(parent, width, height, null, market);
+    public SortableTable(UIPanelAPI parent, int width, int height, int headerHeight, int rowHeight) {
+        super(parent, width, height, null);
         m_headerHeight = headerHeight;
         m_rowHeight = rowHeight;
 
@@ -190,11 +189,11 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
                 if (column.tooltip == null) {
                     panel = new HeaderPanel(
-                        getPanel(), mergedWidth - pad, m_headerHeight, getMarket(), column, i
+                        getPanel(), mergedWidth - pad, m_headerHeight, column, i
                     );
                 } else {
                     panel = new HeaderPanelWithTooltip(
-                        getPanel(), mergedWidth - pad, m_headerHeight, getMarket(), column, i
+                        getPanel(), mergedWidth - pad, m_headerHeight, column, i
                     );
                 }
 
@@ -207,12 +206,12 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                 if (column.tooltip == null) {
                     panel = new HeaderPanel(
                         getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
-                        getMarket(), column, i
+                        column, i
                     );
                 } else {
                     panel = new HeaderPanelWithTooltip(
                         getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
-                        getMarket(), column, i
+                        column, i
                     );
                 }
 
@@ -253,15 +252,14 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     }
 
     private class HeaderPanel extends CustomPanel<BasePanelPlugin<HeaderPanel>, HeaderPanel, CustomPanelAPI> 
-        implements HasOutline, HasBackground, HasFader, HasAudioFeedback {
+        implements HasOutline, HasBackground, HasFader, HasAudioFeedback, HasFaction {
         protected final ColumnManager column;
         public int listIndex = -1;
 
         private boolean isPersistentGlow = false;
         private FaderUtil m_fader = null;
 
-        public HeaderPanel(UIPanelAPI parent, int width, int height, MarketAPI market,
-                ColumnManager column, int listIndex) {
+        public HeaderPanel(UIPanelAPI parent, int width, int height, ColumnManager column, int listIndex) {
             super(parent, width, height, new BasePanelPlugin<>() {
                 @Override
                 public void advance(float amount) {
@@ -271,7 +269,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                         SortableTable.this.sortRows(getPanel().listIndex);
                     }
                 }
-            }, market);
+            });
             this.column = column;
             this.listIndex = listIndex;
             m_fader = new FaderUtil(0, 0, 0.2f, true, true);
@@ -292,7 +290,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             TooltipMakerAPI tooltip = panel.createUIElement(
                     getPos().getWidth(), getPos().getHeight(), false);
 
-            tooltip.setParaFontColor(getMarket().getFaction().getBaseUIColor());
+            tooltip.setParaFontColor(getFaction().getBaseUIColor());
             tooltip.setParaFont(Fonts.ORBITRON_12);
 
             LabelAPI lbl = tooltip.addPara(column.title, pad);
@@ -306,7 +304,6 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
             final Base sortIcon = new Base(
                 panel,
-                getMarket(),
                 m_headerHeight - 2, m_headerHeight,
                 new SpritePanelPlugin<>(),
                 sortIconPath,
@@ -351,8 +348,8 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
     public class HeaderPanelWithTooltip extends HeaderPanel implements HasTooltip {
         public HeaderPanelWithTooltip(UIPanelAPI parent, int width, int height,
-                MarketAPI market, ColumnManager column, int listIndex) {
-            super(parent, width, height, market, column, listIndex);
+            ColumnManager column, int listIndex) {
+            super(parent, width, height, column, listIndex);
         }
 
         private boolean isExpanded = false;
@@ -465,7 +462,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     }
 
     public class RowManager extends CustomPanel<BasePanelPlugin<RowManager>, RowManager, CustomPanelAPI> 
-        implements HasTooltip, HasFader, HasOutline, HasAudioFeedback {
+        implements HasTooltip, HasFader, HasOutline, HasAudioFeedback, HasMarket {
 
         protected final List<Object> m_cellData = new ArrayList<>();
         protected final List<cellAlg> m_cellAlignment = new ArrayList<>();
@@ -481,9 +478,10 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         private Color glowColor = Misc.getDarkPlayerColor();
         private Outline outline = Outline.NONE;
         private Color outlineColor = Misc.getDarkPlayerColor();
+        private MarketAPI m_market = null;
 
-        public RowManager(UIPanelAPI parent, int width, int height, MarketAPI market,
-                RowSelectionListener listener) {
+        public RowManager(UIPanelAPI parent, int width, int height,
+            RowSelectionListener listener) {
             super(parent, width, height, new BasePanelPlugin<>() {
                 
                 @Override
@@ -501,7 +499,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                         inputSnapshot.hasLMBClickedBefore = false;
                     }
                 }
-            }, market);
+            });
 
             m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
@@ -683,6 +681,16 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                 return m_tooltip.getParent.get();
             }
         }
+
+        @Override
+        public MarketAPI getMarket() {
+            return m_market;
+        }
+
+        @Override
+        public void setMarket(MarketAPI market) {
+            m_market = market;
+        }
         
         @Override
         public TooltipMakerAPI createAndAttachTp() {
@@ -782,7 +790,6 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                 getParent(),
                 (int) getPos().getWidth() - 2,
                 m_rowHeight,
-                getMarket(),
                 new RowSelectionListener() {
                     @Override
                     public void onRowSelected(RowManager row) {

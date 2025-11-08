@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.SpecialItemSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -45,6 +46,7 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
+import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
@@ -85,6 +87,8 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     private LabelAPI constructionStatusText;
     private ConstructionMode constructionMode;
     private Color BgColor = null;
+    private final MarketAPI m_market;
+    private final FactionAPI m_faction;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
     /*
@@ -100,18 +104,21 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     }
 
     public LtvIndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
-            MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, int queue) {
-        super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin, market);
+        MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, int queue) {
+        super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin);
+
+        m_market = market;
+        m_faction = market.getFaction();
 
         constructionMode = ConstructionMode.NORMAL;
         m_industry = ind;
         IndustryPanel = indPanel;
         constructionQueueIndex = queue;
 
-        baseColor = getFaction().getBaseUIColor();
-        darkColor = getFaction().getDarkUIColor();
-        gridColor = getFaction().getGridUIColor();
-        brightColor = getFaction().getBrightUIColor();
+        baseColor = m_faction.getBaseUIColor();
+        darkColor = m_faction.getDarkUIColor();
+        gridColor = m_faction.getGridUIColor();
+        brightColor = m_faction.getBrightUIColor();
 
         BgColor = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
 
@@ -166,7 +173,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
     @Override
     public Color getGlowColor() {
-        return getFaction().getBaseUIColor();
+        return m_faction.getBaseUIColor();
     }
 
     @Override
@@ -177,7 +184,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     public void createPanel() {
 
         BasePanel titlePanel = new BasePanel(
-            getPanel(), getMarket(), PANEL_WIDTH, TITLE_HEIGHT, new BasePanelPlugin<>()
+            getPanel(), PANEL_WIDTH, TITLE_HEIGHT, new BasePanelPlugin<>()
         ) {
             @Override
             public void createPanel() {
@@ -206,7 +213,6 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
         industryIcon = new IndustryImagePanel(
             m_panel,
-            getMarket(),
             PANEL_WIDTH,
             IMAGE_HEIGHT,
             new SpritePanelPlugin<>(),
@@ -221,7 +227,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
             industryIcon.setColor(darkColor);
         }
 
-        if (!DebugFlags.COLONY_DEBUG && !getMarket().isPlayerOwned()) {
+        if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
             industryIcon.setColor(Color.white);
             isListenerEnabled = false;
         }
@@ -230,7 +236,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
 
         final WorkerIndustryData data = WorkerRegistry.getInstance().getData(
-            getMarket().getId(), m_industry.getSpec()
+            m_market.getId(), m_industry.getSpec()
         );
         LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(Misc.getHighlightColor());
@@ -259,7 +265,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         if (hasConfig && m_industry.isFunctional() && !m_industry.isBuilding()) {
             for (String comID : IndustryIOs.getRealInputs(m_industry, false)) {
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID);
-                CommodityStats stats = engine.getComStats(comID, getMarket().getId());
+                CommodityStats stats = engine.getComStats(comID, m_market.getId());
 
                 if (stats == null || stats.getDeficit() < 1) continue;
 
@@ -272,7 +278,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         } else if (m_industry.isFunctional() && !m_industry.isBuilding()) {
             for (Pair<String, Integer> pair : m_industry.getAllDeficit()) {
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(pair.one);
-                CommodityStats stats = engine.getComStats(pair.one, getMarket().getId());
+                CommodityStats stats = engine.getComStats(pair.one, m_market.getId());
 
                 if (stats == null || stats.getDeficit() < 1) continue;
 
@@ -297,9 +303,8 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
             SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(item.getId());
 
-            SpritePanel.Base itemPanel = new SpritePanel.Base(
+            Base itemPanel = new Base(
                 m_panel,
-                getMarket(),
                 28, 28,
                 new SpritePanelPlugin<>(),
                 spec.getIconName(),
@@ -317,9 +322,8 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
             CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(m_industry.getAICoreId());
 
-            SpritePanel.Base aiCorePanel = new SpritePanel.Base(
+            Base aiCorePanel = new Base(
                 m_panel,
-                getMarket(),
                 28, 28,
                 new SpritePanelPlugin<>(),
                 spec.getIconName(),
@@ -377,7 +381,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     public void setNormalMode() {
         clearLabels();
         String txt = "Queued";
-        if (Misc.getCurrentlyBeingConstructed(getMarket()) == null && constructionQueueIndex == 0) {
+        if (Misc.getCurrentlyBeingConstructed(m_market) == null && constructionQueueIndex == 0) {
             txt = "Building";
         }
 
@@ -397,8 +401,8 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
     public void setRemoveMode() {
         ConstructionQueueItem queueItem = null;
-        if (getMarket().getConstructionQueue().getItems().size() > constructionQueueIndex && constructionQueueIndex >= 0) {
-            queueItem = getMarket().getConstructionQueue().getItems().get(constructionQueueIndex);
+        if (m_market.getConstructionQueue().getItems().size() > constructionQueueIndex && constructionQueueIndex >= 0) {
+            queueItem = m_market.getConstructionQueue().getItems().get(constructionQueueIndex);
         }
 
         if (queueItem != null) {
@@ -456,8 +460,8 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     }
 
     protected void addCostTimeLabels() {
-        if (getMarket().getConstructionQueue().getItems().size() > constructionQueueIndex && constructionQueueIndex >= 0) {
-            ConstructionQueueItem queueItem = (ConstructionQueueItem) getMarket()
+        if (m_market.getConstructionQueue().getItems().size() > constructionQueueIndex && constructionQueueIndex >= 0) {
+            final ConstructionQueueItem queueItem = (ConstructionQueueItem) m_market
                 .getConstructionQueue().getItems().get(constructionQueueIndex);
             if (queueItem != null) {
                 final int buildTime = (int) m_industry.getSpec().getBuildTime();
@@ -557,7 +561,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
                 // Swap industries
 
-                List<ConstructionQueueItem> queueItems = getMarket().getConstructionQueue().getItems();
+                List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
                 if (targetInd != null && targetInd.constructionQueueIndex >= 0 && targetInd.constructionQueueIndex < queueItems.size()
                     && constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
 
@@ -575,11 +579,11 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                     IndustryPanel.createPanel();
                 }
             } else if (constructionMode == ConstructionMode.REMOVE) {
-                List<ConstructionQueueItem> queueItems = getMarket().getConstructionQueue().getItems();
+                List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
                 if (constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
 
                     final ConstructionQueueItem item = queueItems.get(constructionQueueIndex);
-                    getMarket().getConstructionQueue().removeItem(item.id);
+                    m_market.getConstructionQueue().removeItem(item.id);
 
                     int itemCost = item.cost;
                     if (itemCost > 0) {
@@ -610,7 +614,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                 DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptCtor.newInstance(
                     m_industry,
                     getIndustryPanel().dummyWidget,
-                    LtvIndustryListPanel.getMarketInteractionMode(getMarket()),
+                    LtvIndustryListPanel.getMarketInteractionMode(m_market),
                     CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
                     listener
                 );
@@ -681,9 +685,9 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
         HasActionListener m_listener = null;
 
-        public IndustryImagePanel(UIPanelAPI parent, MarketAPI market, int width, int height,
+        public IndustryImagePanel(UIPanelAPI parent, int width, int height,
             SpritePanelPlugin<IndustryImagePanel> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-            super(parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+            super(parent, width, height, plugin, spriteID, color, fillColor, drawBorder);
         }
 
         @Override

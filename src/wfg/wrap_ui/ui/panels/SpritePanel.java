@@ -3,7 +3,6 @@ package wfg.wrap_ui.ui.panels;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -45,9 +44,9 @@ public class SpritePanel<
     implements HasOutline{
 
     public static class Base extends SpritePanel<Base> {
-        public Base(UIPanelAPI parent, MarketAPI market, int width, int height,
+        public Base(UIPanelAPI parent, int width, int height,
             SpritePanelPlugin<Base> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-            super(parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+            super(parent, width, height, plugin, spriteID, color, fillColor, drawBorder);
         }
     }
 
@@ -59,9 +58,9 @@ public class SpritePanel<
     public boolean drawBorder = false;
     public boolean drawTexOutline = false;
 
-    public SpritePanel(UIPanelAPI parent, MarketAPI market, int width, int height,
+    public SpritePanel(UIPanelAPI parent, int width, int height,
         SpritePanelPlugin<PanelType> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-        super(parent, width, height, plugin, market);
+        super(parent, width, height, plugin);
 
         m_sprite = Global.getSettings().getSprite(spriteID);
         this.color = color;

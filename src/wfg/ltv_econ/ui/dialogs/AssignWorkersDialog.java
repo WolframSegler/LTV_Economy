@@ -81,9 +81,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
         UIState.setState(State.DIALOG);
 
-        CustomDetailDialogPanel<AssignWorkersDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
+        final CustomDetailDialogPanel<AssignWorkersDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
             panel,
-            market,
             panelWidth, panelHeight,
             new AssignWorkersDialogPlugin(this)
         ) {
@@ -103,14 +102,14 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final int iconSize = 26;
 
         // Draw Titel
-        String txt = "Assign workers to " + industry.getCurrentName();
-        LabelAPI lbl = Global.getSettings().createLabel(txt, Fonts.ORBITRON_20AA);
+        final String txt = "Assign workers to " + industry.getCurrentName();
+        final LabelAPI lbl = Global.getSettings().createLabel(txt, Fonts.ORBITRON_20AA);
 
         final float textX = (panelWidth - lbl.computeTextWidth(txt)) / 2;
         m_panel.add(lbl).inTL(textX, pad*2);
 
         inputOutputContainer = new BasePanel(
-            m_panel.getPanel(), market, (int) m_panel.getPos().getWidth(),
+            m_panel.getPanel(), (int) m_panel.getPos().getWidth(),
             180, new BasePanelPlugin<>()
         ) {
             @Override
@@ -126,7 +125,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
         // Draw separator line
         final BasePanel separator = new BasePanel(
-            m_panel.getPanel(), market, panelWidth, 1, new BasePanelPlugin<>()
+            m_panel.getPanel(), panelWidth, 1, new BasePanelPlugin<>()
         ) {
             @Override
             public Color getBgColor() {
@@ -136,8 +135,8 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         separator.getPos().inTL(0, sliderY - opad);
         m_panel.add(separator);
 
-        SpritePanelWithTp help_button = new SpritePanelWithTp(
-            m_panel.getPanel(), market, 20 , 20, new SpritePanelPlugin<>(),
+        final SpritePanelWithTp help_button = new SpritePanelWithTp(
+            m_panel.getPanel(), 20 , 20, new SpritePanelPlugin<>(),
             WARNING_BUTTON_PATH, null, null, false
         ) {
             @Override

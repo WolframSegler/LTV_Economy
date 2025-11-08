@@ -7,6 +7,7 @@ import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
@@ -20,7 +21,6 @@ import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
-import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
@@ -37,11 +37,11 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
     public static final int PANEL_W = 950;
     public static final int PANEL_H = 650;
 
-    private final CustomPanel<?, ?, CustomPanelAPI> m_parentWrapper;
+    private final MarketAPI m_market;
     private InteractionDialogAPI interactionDialog;
 
-    public ColonyInvDialog(CustomPanel<?, ?, CustomPanelAPI> parent) {
-        m_parentWrapper = parent;
+    public ColonyInvDialog(MarketAPI market) {
+        m_market = market;
     }
 
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
@@ -51,19 +51,16 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
 
         CustomDetailDialogPanel<?> m_panel = new CustomDetailDialogPanel<>(
             panel,
-            m_parentWrapper.getMarket(),
             PANEL_W, PANEL_H,
             null
         );
 
         panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 
-        final TextPanel creditPanel = new TextPanel(panel, m_parentWrapper.getMarket(),
-            200, 40, new BasePanelPlugin<>()
-        ) {
+        final TextPanel creditPanel = new TextPanel(panel, 200, 40, new BasePanelPlugin<>()) {
             @Override  
             public void createPanel() {
-                final String credits = NumFormat.formatCredits(engine.getCredits(getMarket().getId()));
+                final String credits = NumFormat.formatCredits(engine.getCredits(m_market.getId()));
 
                 final LabelAPI creditLabel = settings.createLabel(
                     "Colony Balance: " + credits, Fonts.ORBITRON_16
@@ -89,7 +86,7 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
                 final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
 
                 String paragraph2 = "Maintaining a healthy balance is crucial to ensure the colony can afford essential imports and maintain full operational efficiency. If reserves run low, the colony may experience delays in trade and a reduction in productivity.";
-                if (getMarket().isPlayerOwned()) {
+                if (m_market.isPlayerOwned()) {
                     paragraph2 = paragraph2 + "Please note that these credits are separate from your personal funds and are managed by the colony.";
                 }                
 
@@ -103,10 +100,9 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
         };
         m_panel.add(creditPanel).inTL(10, 10);
 
-        SortableTable table = new SortableTable(
+        final SortableTable table = new SortableTable(
             m_panel.getPanel(),
             PANEL_W - 20, PANEL_H - 70,
-            m_parentWrapper.getMarket(),
             20, 30
         );
 
@@ -128,10 +124,10 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
 
         for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
 
-            final CommodityStats stats = engine.getComStats(com.getId(), m_panel.getMarket().getId());
+            final CommodityStats stats = engine.getComStats(com.getId(), m_market.getId());
 
             final Base comIcon = new Base(
-                m_panel.getPanel(), m_panel.getMarket(),26, 26,
+                m_panel.getPanel(), 26, 26,
                 new SpritePanelPlugin<>(), com.getIconName(), null, null, false
             );
             
@@ -161,7 +157,7 @@ public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
             table.addCell(NumFormat.engNotation(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             table.pushRow(
-                CodexDataV2.getCommodityEntryId(com.getId()), m_panel.getMarket(), null, null, null
+                CodexDataV2.getCommodityEntryId(com.getId()), m_market, null, null, null
             );
         }
 

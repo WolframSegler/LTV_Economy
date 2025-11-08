@@ -1,6 +1,5 @@
 package wfg.wrap_ui.ui.panels;
 
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
@@ -14,8 +13,8 @@ public class ActionListenerPanel extends CustomPanel<
     BasePanelPlugin<ActionListenerPanel>, ActionListenerPanel, UIPanelAPI
 > implements HasActionListener {
 
-    public ActionListenerPanel(UIPanelAPI root, UIPanelAPI parent, int width, int height, MarketAPI market) {
-        super(parent, width, width, new BasePanelPlugin<>(), market);
+    public ActionListenerPanel(UIPanelAPI parent, int width, int height) {
+        super(parent, width, width, new BasePanelPlugin<>());
     }
 
     public void createPanel() {}

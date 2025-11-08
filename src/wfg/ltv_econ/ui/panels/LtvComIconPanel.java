@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -36,15 +36,17 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
     private static final String codexF2 = "F2 open Codex";
     private TooltipMakerAPI m_tooltip;
     private FaderUtil m_fader = null;
+    private FactionAPI m_faction = null;
 
     public boolean isExpanded = false;
     public CommodityOnMarketAPI m_com;
 
-    public LtvComIconPanel(UIPanelAPI parent, MarketAPI market, int width, int height,
+    public LtvComIconPanel(UIPanelAPI parent, FactionAPI faction, int width, int height,
         SpritePanelPlugin<LtvComIconPanel> plugin, String iconSpriteID, Color color, Color fillColor) {
-        super(parent, market, width, height, plugin, iconSpriteID, color, fillColor, false);
+        super(parent, width, height, plugin, iconSpriteID, color, fillColor, false);
 
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
+        m_faction = faction;
     }
 
     public void setCommodity(CommodityOnMarketAPI a) {
@@ -113,7 +115,7 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
 
         m_tooltip.setParaFont(Fonts.ORBITRON_12);
-        m_tooltip.addPara(m_com.getCommodity().getName(), getFaction().getBaseUIColor(), pad);
+        m_tooltip.addPara(m_com.getCommodity().getName(), m_faction.getBaseUIColor(), pad);
 
         m_tooltip.setParaFontDefault();
         m_tooltip.addPara(comDesc, opad);

@@ -58,8 +58,6 @@ public abstract class CustomPanel<
     protected final ParentType m_parent;
     protected final CustomPanelAPI m_panel;
     protected final PluginType m_plugin;
-    private FactionAPI m_faction = null;
-    private MarketAPI m_market = null;
 
     protected boolean hasPlugin = false;
 
@@ -77,18 +75,13 @@ public abstract class CustomPanel<
      * </ul>
      */
     @SuppressWarnings("unchecked")
-    public CustomPanel(UIPanelAPI parent, int width, int height, PluginType plugin,
-        MarketAPI market) {
+    public CustomPanel(UIPanelAPI parent, int width, int height, PluginType plugin) {
         m_parent = (ParentType) parent;
         m_plugin = plugin;
-        m_market = market;
-        if (market != null) {
-            m_faction = market.getFaction();
-        }
 
         hasPlugin = plugin != null;
         
-        m_panel = Global.getSettings().createCustom(width, height, hasPlugin ? plugin : null);
+        m_panel = Global.getSettings().createCustom(width, height, plugin);
     }
 
     public final CustomPanelAPI getPanel() {
@@ -121,33 +114,6 @@ public abstract class CustomPanel<
         ReflectedField plugin = ReflectionUtils.getFieldsMatching(m_panel, null, CustomUIPanelPlugin.class).get(0);
 
         plugin.set(m_panel, newPlugin);
-    }
-
-    /**
-     * Has a default value for no faction.
-     */
-    public final FactionAPI getFaction() {
-        if (m_faction == null) {
-            final String factionID = "player";
-
-            if (Global.getSector().getFaction(factionID) == null) {
-                return Global.getSettings().createBaseFaction(factionID);
-            }
-
-            return Global.getSector().getFaction(factionID);
-        }
-        else {
-            return m_faction;
-        }
-    }
-
-    public final MarketAPI getMarket() {
-        return m_market;
-    }
-
-    public final void setMarket(MarketAPI market) {
-        m_market = market;
-        m_faction = market.getFaction();
     }
 
     public final PositionAPI add(LabelAPI a) {
@@ -215,12 +181,15 @@ public abstract class CustomPanel<
 
     public static interface HasMarket {
         MarketAPI getMarket();
+        default void setMarket(MarketAPI market) {}
     }
 
     public interface HasFaction {
         default FactionAPI getFaction() {
             return Global.getSector().getPlayerFaction();
         }
+
+        default void setFaction(FactionAPI faction) {}
     }
 
     /**
@@ -386,11 +355,10 @@ public abstract class CustomPanel<
         }
 
         /**
-         * default is 0.65f which looks vanilla-like.
-         * Vanilla uses 0.85 in reality.
+         * default is 0.85f.
          */
         default float getBgTransparency() {
-            return 0.65f;
+            return 0.85f;
         }
     }
 

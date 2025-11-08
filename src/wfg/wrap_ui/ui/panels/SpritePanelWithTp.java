@@ -2,7 +2,6 @@ package wfg.wrap_ui.ui.panels;
 
 import java.awt.Color;
 
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -45,9 +44,9 @@ import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
  */
 public class SpritePanelWithTp extends SpritePanel<SpritePanelWithTp> implements HasTooltip, HasFader {
 
-    public SpritePanelWithTp(UIPanelAPI parent, MarketAPI market, int width, int height,
+    public SpritePanelWithTp(UIPanelAPI parent, int width, int height,
         SpritePanelPlugin<SpritePanelWithTp> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-        super(parent, market, width, height, plugin, spriteID, color, fillColor, drawBorder);
+        super(parent, width, height, plugin, spriteID, color, fillColor, drawBorder);
 
         initializePlugin(hasPlugin);
     }

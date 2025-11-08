@@ -2,7 +2,6 @@ package wfg.wrap_ui.ui.dialogs;
 
 import java.awt.Color;
 
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
@@ -31,9 +30,9 @@ public class CustomDetailDialogPanel<
     public Color BgColor = Color.BLACK;
     public boolean isBgEnabled = true;
 
-    public CustomDetailDialogPanel(UIPanelAPI parent, MarketAPI market, int width, int height,
+    public CustomDetailDialogPanel(UIPanelAPI parent, int width, int height,
         PluginType plugin) {
-        super(parent, width, height, plugin, market);
+        super(parent, width, height, plugin);
 
         initializePlugin(hasPlugin);
         createPanel();
