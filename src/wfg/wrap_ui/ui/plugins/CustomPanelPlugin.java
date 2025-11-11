@@ -67,6 +67,9 @@ public abstract class CustomPanelPlugin<
         public boolean hoveredLastFrame = false;
         public boolean hoverStarted = false;
         public boolean hoverEnded = false;
+        public boolean isActive = false;
+
+        public InputEventAPI mouseEvent = null;
 
         public void resetFrameFlags() {
             LMBDownLastFrame = false;
@@ -179,8 +182,9 @@ public abstract class CustomPanelPlugin<
         for (InputEventAPI event : events) {
 
             if (event.isMouseEvent()) {
-
                 if (event.isMouseMoveEvent()) {
+                    inputSnapshot.mouseEvent = event;
+
                     final float mouseX = event.getX();
                     final float mouseY = event.getY();
     
@@ -191,36 +195,33 @@ public abstract class CustomPanelPlugin<
                     final float h = pos.getHeight();
     
                     // Check for mouse over panel
-                    boolean hoveredBefore = inputSnapshot.hoveredLastFrame;
+                    final boolean hoveredBefore = inputSnapshot.hoveredLastFrame;
                     inputSnapshot.hoveredLastFrame = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
     
                     inputSnapshot.hoverStarted = inputSnapshot.hoveredLastFrame && !hoveredBefore;
                     inputSnapshot.hoverEnded   = !inputSnapshot.hoveredLastFrame && hoveredBefore;
                 }
 
-                if (!inputSnapshot.hoveredLastFrame) {
-                    inputSnapshot.hasLMBClickedBefore = false;
-                    inputSnapshot.hasRMBClickedBefore = false;
+                if (event.isLMBDownEvent() && inputSnapshot.hoveredLastFrame) {
+                    inputSnapshot.LMBDownLastFrame = true;
+                    inputSnapshot.hasLMBClickedBefore = true;
+                    inputSnapshot.isActive = true;
                 }
 
-                if (inputSnapshot.hoveredLastFrame) {
-                    if (inputSnapshot.hasLMBClickedBefore && event.isLMBUpEvent()) {
-                        inputSnapshot.LMBUpLastFrame = true;
-                    }
+                if (event.isLMBUpEvent()) {
+                    if (inputSnapshot.hasLMBClickedBefore) inputSnapshot.LMBUpLastFrame = true;
+                    inputSnapshot.isActive = false;
+                    inputSnapshot.hasLMBClickedBefore = false;
+                }
 
-                    if (inputSnapshot.hasRMBClickedBefore && event.isRMBUpEvent()) {
-                        inputSnapshot.RMBUpLastFrame = true;
-                    }
+                if (event.isRMBDownEvent() && inputSnapshot.hoveredLastFrame) {
+                    inputSnapshot.RMBDownLastFrame = true;
+                    inputSnapshot.hasRMBClickedBefore = true;
+                }
 
-                    if (event.isLMBDownEvent()) {
-                        inputSnapshot.LMBDownLastFrame = true;
-                        inputSnapshot.hasLMBClickedBefore = true;
-                    }
-
-                    if (event.isRMBDownEvent()) {
-                        inputSnapshot.RMBDownLastFrame = true;
-                        inputSnapshot.hasRMBClickedBefore = true;
-                    }
+                if (event.isRMBUpEvent()) {
+                    if (inputSnapshot.hasRMBClickedBefore) inputSnapshot.RMBUpLastFrame = true;
+                    inputSnapshot.hasRMBClickedBefore = false;
                 }
             }
         }

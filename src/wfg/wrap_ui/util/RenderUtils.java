@@ -175,43 +175,6 @@ public class RenderUtils {
         sprite.setNormalBlend();
     }
 
-    public static final void drawGradientLine(
-        float x1, float y1, float x2, float y2,
-        float thickness, Color color, boolean additive,
-        float alphaStart, float alphaMiddle, float alphaEnd
-    ) {
-        // Compute perpendicular offset vector
-        final Vector2f offset = new Vector2f(x2 - x1, y2 - y1);
-        if (offset.lengthSquared() > Float.MIN_VALUE) {
-            offset.normalise();
-        }
-        // Rotate 90 degrees clockwise to get perpendicular
-        offset.set(offset.y, -offset.x);
-        offset.scale(thickness * 0.5f);
-
-        GL11.glPushMatrix();
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, additive ? GL11.GL_ONE : GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        GL11.glBegin(GL11.GL_QUADS);
-
-        GL11.glColor4ub((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue(),
-                (byte) (color.getAlpha() * alphaStart));
-        GL11.glVertex2f(x1 - offset.x, y1 - offset.y);
-
-        GL11.glVertex2f(x1 + offset.x, y1 + offset.y);
-
-        GL11.glColor4ub((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue(),
-                (byte) (color.getAlpha() * alphaMiddle));
-        GL11.glVertex2f((x1 + x2) * 0.5f - offset.x, (y1 + y2) * 0.5f - offset.y);
-
-        GL11.glTexCoord2f((x1 + x2) * 0.5f + offset.x, (y1 + y2) * 0.5f + offset.y);
-
-        GL11.glEnd();
-        GL11.glPopMatrix();
-    }
-
     public static void drawGradientSprite(
         float x1, float y1,
         float x2, float y2,
@@ -253,11 +216,11 @@ public class RenderUtils {
         edge.scale(gradientWidth * 0.5f);
 
         // Draw the quad with gradient alpha
-        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glBegin(GL11.GL_QUAD_STRIP);
 
         // Left edge
         GL11.glColor4ub((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue(),
-                (byte) (color.getAlpha() * alphaStart));
+            (byte)Math.min(255, (int)(color.getAlpha() * alphaStart)));
         GL11.glTexCoord2f(0f, 0f);
         GL11.glVertex2f(x1 - edge.x, y1 - edge.y);
         GL11.glTexCoord2f(0f, 1f);
@@ -265,7 +228,7 @@ public class RenderUtils {
 
         // Middle
         GL11.glColor4ub((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue(),
-                (byte) (color.getAlpha() * alphaMiddle));
+            (byte)Math.min(255, (int)(color.getAlpha() * alphaMiddle)));
         GL11.glTexCoord2f(0.5f, 0f);
         GL11.glVertex2f((x1 + x2) * 0.5f - edge.x, (y1 + y2) * 0.5f - edge.y);
         GL11.glTexCoord2f(0.5f, 1f);
@@ -273,7 +236,7 @@ public class RenderUtils {
 
         // Right edge
         GL11.glColor4ub((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue(),
-                (byte) (color.getAlpha() * alphaEnd));
+            (byte)Math.min(255, (int)(color.getAlpha() * alphaEnd)));
         GL11.glTexCoord2f(1f, 0f);
         GL11.glVertex2f(x2 - edge.x, y2 - edge.y);
         GL11.glTexCoord2f(1f, 1f);
@@ -284,10 +247,10 @@ public class RenderUtils {
     }
 
     public static void drawHighlightBar(
-        float x, float y, float width, float height,
+        float x, float y, float w, float h,
         Color baseColor, float alpha, float highlightIntensity, boolean darkOverlay
     ) {
-        if (height <= 1f) return;
+        if (h <= 1f) return;
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
@@ -299,16 +262,21 @@ public class RenderUtils {
 
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glColor4ub((byte) shineColor.getRed(), (byte) shineColor.getGreen(), (byte) shineColor.getBlue(),
-                        (byte) (alpha * shineColor.getAlpha() * 0.75f));
+            (byte) (alpha * shineColor.getAlpha() * 0.75f));
         GL11.glVertex2f(x, y);
-        GL11.glVertex2f(x + width, y);
-        GL11.glVertex2f(x + width, y + height / 2f);
-        GL11.glVertex2f(x, y + height / 2f);
+        GL11.glVertex2f(x + w, y);
+        GL11.glVertex2f(x + w, y + h / 2f);
+        GL11.glVertex2f(x, y + h / 2f);
+        GL11.glVertex2f(x + w, y + h / 2f);
+        GL11.glVertex2f(x, y + h / 2f);
+        GL11.glVertex2f(x, y + h);
+        GL11.glVertex2f(x + w, y + h);
         GL11.glEnd();
 
         // Main gradient
         float mainFactor = alpha * 0.75f + 0.25f * highlightIntensity;
         Color mainColor = baseColor;
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         if (darkOverlay) {
             mainColor = new Color(0, 0, 0, 127);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -318,21 +286,21 @@ public class RenderUtils {
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glColor4ub((byte) mainColor.getRed(), (byte) mainColor.getGreen(), (byte) mainColor.getBlue(), (byte) 0);
         GL11.glVertex2f(x, y);
-        GL11.glVertex2f(x + width, y);
+        GL11.glVertex2f(x + w, y);
 
         GL11.glColor4ub((byte) mainColor.getRed(), (byte) mainColor.getGreen(), (byte) mainColor.getBlue(),
                         (byte) (mainFactor * mainColor.getAlpha()));
-        GL11.glVertex2f(x + width, y + height / 2f);
-        GL11.glVertex2f(x, y + height / 2f);
+        GL11.glVertex2f(x + w, y + h / 2f);
+        GL11.glVertex2f(x, y + h / 2f);
 
         GL11.glColor4ub((byte) mainColor.getRed(), (byte) mainColor.getGreen(), (byte) mainColor.getBlue(),
                         (byte) (mainFactor * mainColor.getAlpha()));
-        GL11.glVertex2f(x + width, y + height / 2f);
-        GL11.glVertex2f(x, y + height / 2f);
+        GL11.glVertex2f(x + w, y + h / 2f);
+        GL11.glVertex2f(x, y + h / 2f);
 
         GL11.glColor4ub((byte) mainColor.getRed(), (byte) mainColor.getGreen(), (byte) mainColor.getBlue(), (byte) 0);
-        GL11.glVertex2f(x, y + height);
-        GL11.glVertex2f(x + width, y + height);
+        GL11.glVertex2f(x, y + h);
+        GL11.glVertex2f(x + w, y + h);
         GL11.glEnd();
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);

@@ -2,12 +2,11 @@ package wfg.ltv_econ.ui.plugins;
 
 import java.util.Map;
 
-import com.fs.starfarer.campaign.ui.N;
-
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.ui.dialogs.AssignWorkersDialog;
 import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
+import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
 
 public class AssignWorkersDialogPlugin extends CustomPanelPlugin<
@@ -35,9 +34,9 @@ CustomDetailDialogPanel<AssignWorkersDialogPlugin>, AssignWorkersDialogPlugin
 
         boolean update = false;
 
-        for (Map.Entry<String, N> entry : dialog.outputSliders.entrySet()) {
+        for (Map.Entry<String, Slider> entry : dialog.outputSliders.entrySet()) {
             final String comID = entry.getKey();
-            final N slider = entry.getValue();
+            final Slider slider = entry.getValue();
 
             final float sliderValue = slider.getProgress() / 100f;
 
@@ -50,7 +49,7 @@ CustomDetailDialogPanel<AssignWorkersDialogPlugin>, AssignWorkersDialogPlugin
                 sliderValue + getNewFreeWorkerRatio()
             );
 
-            slider.setMax(max*100);
+            slider.maxValue = max*100;
         }
 
         if (update) {

@@ -4,7 +4,6 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.graphics.util.Fader;
 import com.fs.graphics.util.GLListManager;
 import com.fs.graphics.util.GLListManager.GLListToken;
 import com.fs.starfarer.api.ui.Alignment;
@@ -12,18 +11,19 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.ui.plugins.SliderPlugin;
+import wfg.wrap_ui.ui.plugins.CustomPanelPlugin.InputSnapshot;
 import wfg.wrap_ui.util.NumUtils;
 import wfg.wrap_ui.util.RenderUtils;
 
 import java.awt.Color;
-import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
-public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanelAPI> {
+public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
 
     public float minRange = 0f;
     public float maxRange = 1f;
@@ -58,12 +58,12 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
     private float CachedShowNotchOnIfBelowProgress = -3.4028235E38f;
     private float showNotchOnIfBelowProgress = -3.4028235E38f;
     private SpriteAPI lineTexture;
-    private Fader barHighlightFader = null;
+    private FaderUtil barHighlightFader = null;
     private boolean userAdjustable = false;
     private Color barColor = new Color(107, 175, 0, 255);
     private Color barColorOverflow;
     private boolean shouldInterpolateCachedValues = false;
-    private Fader flashOnOverflowFader = null;
+    private FaderUtil flashOnOverflowFader = null;
     private GLListToken GLListToken;
     private boolean lineUpTextOnCenter = false;
     private float lineUpTextOnCenterWidth = 0f;
@@ -73,33 +73,36 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
     private float cachedHighlightBrightness = -1f;
 
     public Slider(UIPanelAPI parent, String initialText, float minRange, float maxRange, int width, int height) {
-        super(parent, width, height, new BasePanelPlugin<>());
+        super(parent, width, height, new SliderPlugin());
         final SettingsAPI settings = Global.getSettings();
 
         barColorOverflow = settings.getColor("progressBarOverflowColor");
         widgetColor = settings.getColor("widgetBorderColorBright");
         lineTexture = settings.getSprite("graphics/hud/line4x4.png");
 
-        label = settings.createLabel("", Fonts.DEFAULT_SMALL);
-        label.setColor(labelColor);
-        label.setHighlightOnMouseover(true);
-        label.setAlignment(Alignment.MID);
-        add(label).inMid();
-
-        setProgress(progressValue);
-
         this.labelText = initialText;
         this.minRange = minRange;
         this.maxRange = maxRange;
         cachedMaxValue = maxRange;
+
+        initializePlugin(hasPlugin);
+        createLabel(null);
+        setProgress(progressValue);
     }
 
     public void initializePlugin(boolean hasPlugin) {
-
+        getPlugin().init(this);
     }
+    public void createPanel() {}
 
-    public void createPanel() {
-
+    private void createLabel(String fontInput) {
+        final String font = fontInput == null ? Fonts.DEFAULT_SMALL : fontInput;
+        label = Global.getSettings().createLabel("", font);
+        label.setColor(labelColor);
+        label.setHighlightOnMouseover(true);
+        label.setAlignment(Alignment.MID);
+        add(label).inMid();
+        label.autoSizeToWidth(label.computeTextWidth(label.getText()));
     }
 
     public void setPotentialDecreaseAmount(float amount) {
@@ -124,7 +127,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
     public void setHighlightOnMouseover(boolean bool) {
         if (bool) {
-            barHighlightFader = new Fader(0.05f, 0.25f);
+            barHighlightFader = new FaderUtil(0.05f, 0.25f);
         } else {
             barHighlightFader = null;
         }
@@ -145,7 +148,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
         lineUpTextOnCenterWidth = width;
     }
 
-    public Fader getBarHighlightFader() {
+    public FaderUtil getBarHighlightFader() {
         return barHighlightFader;
     }
 
@@ -173,6 +176,12 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
         return barColor;
     }
 
+    public void setLabelFont(String font) {
+        final String text = label.getText();
+        createLabel(font);
+        label.setText(text);
+    }
+
     public void setBarColorOverflow(Color color) {
         if (!barColorOverflow.equals(color)) {
             GLListManager.invalidateList(GLListToken);
@@ -181,7 +190,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
         barColorOverflow = color;
     }
 
-    public Fader getHighlight() {
+    public FaderUtil getHighlight() {
         return barHighlightFader;
     }
 
@@ -215,7 +224,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
         }
     }
 
-    protected void renderImpl(float alphaMult) {
+    public void renderImpl(float alphaMult) {
         float roundedProgress = cachedProgressValue;
         if (roundBarValue) {
             roundedProgress = Math.round(roundedProgress / roundingIncrement) * roundingIncrement;
@@ -225,8 +234,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
         }
 
         float highlightBrightness = (barHighlightFader != null)
-                ? barHighlightFader.getBrightness()
-                : -1f;
+            ? barHighlightFader.getBrightness() : -1f;
 
         if (highlightBrightnessOverride) {
             highlightBrightness = highlightBrightnessOverrideValue;
@@ -278,8 +286,10 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
                 overAmount = roundedProgress - cachedMaxValue;
             }
 
+            final boolean thin = h <= 5f;
+
             { // Gradient Border Glow
-                final boolean thin = h <= 5f;
+                
                 // Left edge
                 RenderUtils.drawGradientSprite(x, y, x, y + h, 2f, widgetColor, false, 0.5f * alphaMult, 0.5f * alphaMult, 0.5f * alphaMult);
                 RenderUtils.drawGradientSprite(x + 1f, y, x + 1f, y + h, 2f, widgetColor, true, 1f * alphaMult, 1f * alphaMult, alphaMult);
@@ -304,8 +314,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                 // Top underfill segment
                 RenderUtils.drawGradientSprite(
-                    lineTexture,
-                    leftMargin - 2f, y + 1f,
+                    lineTexture, leftMargin - 2f, y + 1f,
                     leftMargin - 2f + overAmount, y + 1f,
                     1f,
                     widgetColor, false,
@@ -314,8 +323,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                 // Top main bar segment
                 RenderUtils.drawGradientSprite(
-                    lineTexture,
-                    leftMargin - 2f + overAmount, y + 1f,
+                    lineTexture, leftMargin - 2f + overAmount, y + 1f,
                     leftMargin + minBarWidth - 1.5f, y + 1f,
                     1f,
                     widgetColor, false,
@@ -324,8 +332,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                 // Bottom underfill segment
                 RenderUtils.drawGradientSprite(
-                    lineTexture,
-                    leftMargin - 2f, y + h - 2f,
+                    lineTexture, leftMargin - 2f, y + h - 2f,
                     leftMargin - 2f + overAmount, y + h - 2f,
                     1f,
                     widgetColor, false,
@@ -334,8 +341,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                 // Bottom main bar segment
                 RenderUtils.drawGradientSprite(
-                    lineTexture,
-                    leftMargin - 2f + overAmount, y + h - 2f,
+                    lineTexture, leftMargin - 2f + overAmount, y + h - 2f,
                     leftMargin + minBarWidth - 1.5f, y + h - 2f,
                     1f,
                     widgetColor, false,
@@ -344,8 +350,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                 // Right vertical bar
                 RenderUtils.drawGradientSprite(
-                    lineTexture,
-                    leftMargin + minBarWidth - 1.5f, y + 1f,
+                    lineTexture, leftMargin + minBarWidth - 1.5f, y + 1f,
                     leftMargin + minBarWidth - 1.5f, y + h - 1f,
                     1f,
                     widgetColor, false,
@@ -354,8 +359,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                 // Right white edge
                 RenderUtils.drawGradientSprite(
-                    lineTexture,
-                    leftMargin + minBarWidth - 1.5f, y + 1f,
+                    lineTexture, leftMargin + minBarWidth - 1.5f, y + 1f,
                     leftMargin + minBarWidth - 1.5f, y + h - 1f,
                     1f,
                     Color.WHITE, true,
@@ -369,7 +373,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
                 overAmount = Math.min(10f, underfillWidth);
                 float rightEdgeX = x + 6f + usableWidth;
 
-                if (h <= 5f) {
+                if (thin) {
                     // Small slider: single horizontal lines
                     RenderUtils.drawGradientSprite(rightEdgeX, y + 1f, rightEdgeX - underfillWidth - 1f, y + 1f,
                             1f, widgetColor, false, alphaMult, alphaMult, alphaMult);
@@ -414,27 +418,28 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                         if (-maxNotchOffset <= 2f) {
                             // Simple notch rectangle
-                            RenderUtils.drawHighlightBar(leftMargin, y + 1f, overAmount, h - 2f, barColor, alphaMult, highlightIntensity, false);
+                            RenderUtils.drawHighlightBar(leftMargin, y + 1f, overAmount, h - 2f, barColor,
+                                alphaMult, highlightIntensity, false
+                            );
                         } else {
                             // Split the highlight bar for the notch
-                            RenderUtils.drawHighlightBar(leftMargin, y + 1f, overAmount + maxNotchOffset, h - 2f, barColor, alphaMult, highlightIntensity, false);
+                            RenderUtils.drawHighlightBar(leftMargin, y + 1f, overAmount + maxNotchOffset,
+                                h - 2f, barColor, alphaMult, highlightIntensity, false
+                            );
 
                             if (-maxNotchOffset > 0f) {
                                 RenderUtils.drawHighlightBar(
-                                    leftMargin + overAmount + maxNotchOffset,
-                                    y + 1f,
-                                    -maxNotchOffset,
-                                    h - 2f,
-                                    barColor,
-                                    alphaMult * 0.7f,
-                                    highlightIntensity,
-                                    false
+                                    leftMargin + overAmount + maxNotchOffset, y + 1f, -maxNotchOffset, h - 2f,
+                                    barColor, alphaMult * 0.7f, highlightIntensity, false
                                 );
                             }
                         }
                     } else {
                         // CachedShowNotchOnIfBelowProgress is outside range
-                        RenderUtils.drawHighlightBar(leftMargin, y + 1f, overAmount, h - 2f, barColor, alphaMult, highlightIntensity, false);
+                        RenderUtils.drawHighlightBar(
+                            leftMargin, y + 1f, overAmount, h - 2f,
+                            barColor, alphaMult, highlightIntensity, false
+                        );
                     }
                 }
 
@@ -456,13 +461,14 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                 // Draw the vertical end line
                 RenderUtils.drawGradientSprite(
+                    lineTexture,
                     leftMargin + overAmount + 4f + maxNotchOffset + 1.5f, y + 2f,
                     leftMargin + overAmount + 4f + maxNotchOffset + 1.5f, y + h - 2f,
-                    1f,
-                    widgetColor, false,
+                    1f, widgetColor, false,
                     alphaMult, alphaMult, alphaMult
                 );
-            } else { // drawOverflowAndNotches
+            }
+            else { // drawOverflowAndNotches
                 if (overAmount > 0f) {
 
                     // Draw max progress notch if current progress is near the cached max
@@ -528,14 +534,8 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
                     if (overflowNotchOffset > 0f) {
                         RenderUtils.drawHighlightBar(
-                            leftMargin + overAmount + 5f,
-                            y + 3f,
-                            overflowNotchOffset,
-                            h - 6f,
-                            barColor,
-                            alphaMult * 0.65f,
-                            highlightIntensity * 1f,
-                            true
+                            leftMargin + overAmount + 5f, y + 3f, overflowNotchOffset, h - 6f,
+                            barColor, alphaMult * 0.65f, highlightIntensity * 1f, true
                         );
                     }
                 }
@@ -552,11 +552,8 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
                     lineTexture,
                     x + notchX + 5.5f, y,
                     x + notchX + 5.5f, y + h,
-                    1f,
-                    widgetColor, false,
-                    0.5f * alphaMult,
-                    alphaMult,
-                    0.5f * alphaMult
+                    1f, widgetColor, false,
+                    0.5f * alphaMult, alphaMult, 0.5f * alphaMult
                 );
 
                 // Draw the additive white highlight on top
@@ -564,11 +561,8 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
                     lineTexture,
                     x + notchX + 5.5f, y,
                     x + notchX + 5.5f, y + h,
-                    1f,
-                    Color.white, true,
-                    0f,
-                    alphaMult,
-                    0f
+                    1f, Color.white, true,
+                    0f, alphaMult, 0f
                 );
             }
 
@@ -630,7 +624,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
             if (numSubdivisions > 0) { // Subdivision Notches & Underfill Highlight
                 for (int i = 0; i < numSubdivisions - 1; ++i) {
-                    final float subdivisionX = (usableWidth / (float) numSubdivisions) * (i + 1) + 2.0f;
+                    final float subdivisionX = (int)(usableWidth / (float) numSubdivisions) * (i + 1) + 2;
                     final float notchPadding = 3.0f;
                     final float topOffset = getXCoordinateForProgressValue(progressValue) >
                         leftMargin + subdivisionX ? 1.0f : 3.0f;
@@ -711,54 +705,30 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
         GL11.glPopMatrix();
     }
 
-    protected float mapInputToProgress(InputEventAPI inputEvent) {
-        float relativeX = inputEvent.getX() - getPos().getX() - 6f;
-        float maxBarWidth = getPos().getWidth() - 6f;
-
-        if (relativeX > maxBarWidth) relativeX = maxBarWidth;
-
-        float minBarWidth = maxBarWidth * cachedMin / (cachedMaxValue - minRange);
-        if (relativeX < minBarWidth) relativeX = minBarWidth;
-
-        float progressValue = relativeX / maxBarWidth * (maxRange - minRange) + minRange;
-        if (clampCurrToMax && progressValue > maxValue) progressValue = maxValue;
-
-        setProgress(progressValue);
-        forceSync();
-
-        return progressValue;
-    }
-
-    protected void processInputImpl(List<InputEventAPI> events) {
+    public void processInputImpl(InputSnapshot snapshot) {
         if (!userAdjustable && barHighlightFader == null) return;
 
-        for (InputEventAPI event : events) {
-            if (event.isConsumed()) continue;
+        final InputEventAPI event = snapshot.mouseEvent;
+        if (event == null) return;
 
-            if (barHighlightFader != null) {
-                if (!event.isMouseMoveEvent() || !getPos().containsEvent(event)) {
-                    barHighlightFader.fadeOut();
-                } else {
-                    barHighlightFader.fadeIn();
-                }
+        if (barHighlightFader != null) {
+            if ((event.isMouseMoveEvent() && snapshot.isActive) || snapshot.hoveredLastFrame) {
+                barHighlightFader.fadeIn();
+            } else {
+                barHighlightFader.fadeOut();
             }
+        }
 
-            if (!userAdjustable) continue;
+        if (!userAdjustable || event.isConsumed()) return;
 
-            if (event.isLMBDownEvent() && getPos().containsEvent(event)) {
-                mapInputToProgress(event);
-                event.consume();
-            } else if (event.isMouseMoveEvent()) {
-                mapInputToProgress(event);
-                event.consume();
-            } else if (event.isLMBUpEvent()) {
-                mapInputToProgress(event);
-                event.consume();
-            }
+        // Only update slider if left-click is active or mouse is dragging
+        if (snapshot.isActive || (event.isMouseMoveEvent() && snapshot.LMBDownLastFrame)) {
+            mapInputToProgress(event);
+            event.consume();
         }
     }
 
-    protected void advanceImpl(float delta) {
+    public void advanceImpl(float delta) {
         if (roundBarValue && roundingIncrement > 0) {
             cachedProgressValue = Math.round(cachedProgressValue / roundingIncrement) * roundingIncrement;
             if (roundingIncrement != 1) {
@@ -790,7 +760,7 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
 
         if (overflowRatio > flashOnOverflowFraction) {
             if (flashOnOverflowFader == null) {
-                flashOnOverflowFader = new Fader(0.25f, 0.25f);
+                flashOnOverflowFader = new FaderUtil(0.25f, 0.25f);
                 flashOnOverflowFader.setBounce(true, true);
                 flashOnOverflowFader.fadeIn();
             }
@@ -870,40 +840,39 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
         }
 
         shouldInterpolateCachedValues = false;
-        float labelWidth = 0f;
-        String displayText;
         if (showLabelOnly) {
             label.setText(labelText);
 
         } else if (showPercent) {
-            displayText = String.format("%d%%", Math.round(cachedProgressValue));
+            final String displayText = String.format("%d%%", Math.round(cachedProgressValue));
             label.setText(displayText);
 
         } else if (showPercentAndTitle) {
-            displayText = String.format("%d%%", Math.round(cachedProgressValue));
+            final String displayText = String.format("%d%%", Math.round(cachedProgressValue));
             label.setText(String.format("%s: %s", labelText, displayText));
-
         } else if (showValueOnly) {
-            if (showDecimalForValueOnlyMode) {
-                displayText = String.format("%.2f", cachedProgressValue);
-            } else {
-                displayText = String.format("%d", Math.round(cachedProgressValue));
-            }
+            final String displayText = showDecimalForValueOnlyMode ? 
+                String.format("%.2f", cachedProgressValue) :
+                String.format("%d", Math.round(cachedProgressValue));
+
             label.setText(displayText);
 
         } else if (labelText != null) {
-            displayText = String.format("%d / %d", Math.round(cachedProgressValue), Math.round(cachedMaxValue));
+            final String displayText = String.format(
+                "%d / %d", Math.round(cachedProgressValue), Math.round(cachedMaxValue)
+            );
             label.setText(String.format("%s: %s", labelText, displayText));
 
-            labelWidth = label.computeTextWidth(label.getText());
-
         } else {
-            displayText = String.format("%d / %d", Math.round(cachedProgressValue), Math.round(cachedMaxValue));
+            final String displayText = String.format(
+                "%d / %d", Math.round(cachedProgressValue), Math.round(cachedMaxValue)
+            );
             label.setText(displayText);
         }
 
         if (showNoText) label.setText("");
 
+        float labelWidth = label.computeTextWidth(label.getText());
         label.autoSizeToWidth(labelWidth);
         label.setColor(labelColor);
         label.setHighlightColor(labelValueColor);
@@ -916,5 +885,23 @@ public class Slider extends CustomPanel<BasePanelPlugin<Slider>, Slider, UIPanel
         if (cachedProgressValue < cachedMin) {
             cachedProgressValue = cachedMin;
         }
+    }
+
+    protected float mapInputToProgress(InputEventAPI inputEvent) {
+        float relativeX = inputEvent.getX() - getPos().getX() - 6f;
+        float maxBarWidth = getPos().getWidth() - 6f;
+
+        if (relativeX > maxBarWidth) relativeX = maxBarWidth;
+
+        float minBarWidth = maxBarWidth * cachedMin / (cachedMaxValue - minRange);
+        if (relativeX < minBarWidth) relativeX = minBarWidth;
+
+        float progressValue = relativeX / maxBarWidth * (maxRange - minRange) + minRange;
+        if (clampCurrToMax && progressValue > maxValue) progressValue = maxValue;
+
+        setProgress(progressValue);
+        forceSync();
+
+        return progressValue;
     }
 }

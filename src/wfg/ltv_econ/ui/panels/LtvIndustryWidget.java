@@ -41,6 +41,7 @@ import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.BasePanel;
 import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SpritePanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
@@ -57,9 +58,6 @@ import wfg.reflection.ReflectionUtils;
 // import com.fs.starfarer.campaign.ui.marketinfo.b;
 // import com.fs.starfarer.campaign.ui.marketinfo.intnew;
 // import com.fs.starfarer.ui.impl.o0OO;
-import com.fs.graphics.A.D;
-import com.fs.starfarer.campaign.ui.N;
-
 
 public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndustryWidget, TooltipMakerAPI>
     implements HasBackground, HasFader, HasActionListener {
@@ -254,7 +252,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
         add(workerCountLabel).inTL(pad*2, TITLE_HEIGHT + pad*2);
 
-        TooltipMakerAPI tp = getPanel().createUIElement(PANEL_WIDTH, IMAGE_HEIGHT, false);
+        final TooltipMakerAPI tp = getPanel().createUIElement(PANEL_WIDTH, IMAGE_HEIGHT, false);
 
         tp.beginIconGroup();
         tp.setIconSpacingMedium();
@@ -350,17 +348,20 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                 constructionStatusText.getPosition().inMid().setYAlignOffset(-TITLE_HEIGHT / 2);
             }
 
-            N slider = new N((String) null, 0, 100);
-
-            slider.getValue().getRenderer().o00000(D.Ò00000(Fonts.VICTOR_10));
-            slider.getValue().getPosition().setYAlignOffset(1);
-            slider.setBarColor(Misc.interpolateColor(baseColor, darkColor, 0.5f));
-            slider.setTextColor(baseColor);
-            slider.setProgress(m_industry.getBuildOrUpgradeProgress() * 100);
-            slider.setText(m_industry.getBuildOrUpgradeProgressText());
-            slider.setShowLabelOnly(true);
             final int sliderHeight = 12;
-            tp.addComponent(slider).setSize(PANEL_WIDTH, sliderHeight).inBL(0, -sliderHeight - 2);
+            final Slider slider = new Slider(
+                tp, null, 0, 100, PANEL_WIDTH, sliderHeight
+            );
+
+            slider.setLabelFont(Fonts.VICTOR_10);
+            slider.label.getPosition().setYAlignOffset(1);
+            slider.setBarColor(Misc.interpolateColor(baseColor, darkColor, 0.5f));
+            slider.labelColor = baseColor;
+            slider.setProgress(m_industry.getBuildOrUpgradeProgress() * 100);
+            slider.labelText = m_industry.getBuildOrUpgradeProgressText();
+            slider.showLabelOnly = true;
+            
+            tp.addComponent(slider.getPanel()).inBL(0, -sliderHeight - 2);
         }
 
         tp.setHeightSoFar(IMAGE_HEIGHT);

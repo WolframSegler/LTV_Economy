@@ -21,15 +21,13 @@ public final class ActionListenerSystem<
     @Override
     public final void advance(float amount, InputSnapshot input) {
         getPanel().getActionListener().ifPresent(listener -> {
-            if (!listener.isListenerEnabled()) {
-                return;
-            }
+            if (!listener.isListenerEnabled()) return;
             
-            if (input.LMBUpLastFrame) {
+            if (input.LMBUpLastFrame && input.hoveredLastFrame) {
                 listener.onClicked(getPanel(), true);
             }
 
-            if (input.RMBUpLastFrame) {
+            if (input.RMBUpLastFrame && input.hoveredLastFrame) {
                 listener.onClicked(getPanel(), false);
             }
 

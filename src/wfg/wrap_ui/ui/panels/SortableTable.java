@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -252,7 +253,9 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     }
 
     private class HeaderPanel extends CustomPanel<BasePanelPlugin<HeaderPanel>, HeaderPanel, CustomPanelAPI> 
-        implements HasOutline, HasBackground, HasFader, HasAudioFeedback, HasFaction {
+        implements HasOutline, HasBackground, HasFader, HasAudioFeedback, HasFaction, HasActionListener,
+        AcceptsActionListener
+    {
         protected final ColumnManager column;
         public int listIndex = -1;
 
@@ -260,16 +263,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         private FaderUtil m_fader = null;
 
         public HeaderPanel(UIPanelAPI parent, int width, int height, ColumnManager column, int listIndex) {
-            super(parent, width, height, new BasePanelPlugin<>() {
-                @Override
-                public void advance(float amount) {
-                    super.advance(amount);
-
-                    if (inputSnapshot.LMBUpLastFrame && inputSnapshot.hasLMBClickedBefore) {
-                        SortableTable.this.sortRows(getPanel().listIndex);
-                    }
-                }
-            });
+            super(parent, width, height, new BasePanelPlugin<>());
             this.column = column;
             this.listIndex = listIndex;
             m_fader = new FaderUtil(0, 0, 0.2f, true, true);
@@ -315,6 +309,14 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             tooltip.addComponent(sortIcon.getPanel()).inBR(1, 0);
 
             panel.addUIElement(tooltip).inBL(0, 0);
+        }
+
+        public Optional<HasActionListener> getActionListener() {
+            return Optional.of(this);
+        }
+
+        public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
+            SortableTable.this.sortRows(listIndex);
         }
 
         public FaderUtil getFader() {

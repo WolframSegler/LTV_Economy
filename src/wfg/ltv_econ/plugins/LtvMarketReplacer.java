@@ -245,9 +245,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             final ActionListenerPanel listener = new ActionListenerPanel(managementPanel,0, 0) {
                 @Override
                 public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
-                    if (!isLeftClick) {
-                        return;
-                    }
+                    if (!isLeftClick) return;
                     
                     LtvCommodityRowPanel panel = ((LtvCommodityRowPanel)source);
 

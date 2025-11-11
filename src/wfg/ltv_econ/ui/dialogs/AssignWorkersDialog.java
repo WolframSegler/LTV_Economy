@@ -23,8 +23,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
-import com.fs.starfarer.campaign.ui.N; //Current slider class (v.0.98 R8).
-// Here is a unique method it has: public float getShowNotchOnIfBelowProgress()
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityStats;
@@ -38,6 +36,7 @@ import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.panels.BasePanel;
+import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
@@ -59,7 +58,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
     public final WorkerIndustryData data;
     public final WorkerIndustryData previewData;
-    public final Map<String, N> outputSliders;
+    public final Map<String, Slider> outputSliders;
 
     public BasePanel inputOutputContainer;
 
@@ -179,27 +178,26 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final TooltipMakerAPI outputsTp = outputsPanel.createUIElement(panelWidth, 180, true);
 
         final SettingsAPI settings = Global.getSettings();
-
+        
         int cumulativeYOffset = pad;
         for (String comID : data.getRegisteredOutputs()) {
             final CommoditySpecAPI spec = settings.getCommoditySpec(comID);
             outputsTp.addImage(spec.getIconName(), iconSize, iconSize, pad);
             outputsTp.getPrev().getPosition().inTL(pad, cumulativeYOffset);
 
-            N outputSlider = new N(null, 0, 100);
+            final Slider outputSlider = new Slider(
+                m_panel.getPanel(), null, 0, 100, sliderWidth, sliderHeight
+            );
             outputSliders.put(comID, outputSlider);
 
-            // Create the slider
+            // Configure the slider
             outputSlider.setHighlightOnMouseover(true);
             outputSlider.setUserAdjustable(true);
-            outputSlider.setShowValueOnly(true);
-            outputSlider.setRoundBarValue(true);
-            outputSlider.setClampCurrToMax(true);
-
-            outputSlider.setRoundingIncrement(1);
             outputSlider.setBarColor(new Color(20, 125, 200));
-            outputSlider.setHeight(sliderHeight);
-            outputSlider.setWidth(sliderWidth);
+            outputSlider.showValueOnly = true;
+            outputSlider.roundBarValue = true;
+            outputSlider.clampCurrToMax = true;
+            outputSlider.roundingIncrement = 1;
 
             final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(market);
             pool.recalculateWorkerPool();
@@ -208,11 +206,11 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
                 data.getAssignedRatioForOutput(comID) + pool.getFreeWorkerRatio()
             );
             
-            outputSlider.setMax(max * 100);
+            outputSlider.maxValue = max * 100;
 
             outputSlider.setProgress(data.getAssignedRatioForOutput(comID) * 100);
 
-            outputsTp.addComponent(outputSlider).inTL(iconSize + pad*2, cumulativeYOffset);
+            outputsTp.addComponent(outputSlider.getPanel()).inTL(iconSize + pad*2, cumulativeYOffset);
             cumulativeYOffset += pad + sliderHeight;
         }
 

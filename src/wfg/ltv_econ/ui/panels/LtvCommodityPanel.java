@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
@@ -80,6 +81,10 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
     }
 
     public HasActionListener selectionListener;
+
+    public Optional<HasActionListener> getActionListener() {
+        return Optional.ofNullable(selectionListener);
+    }
     public void setActionListener(HasActionListener listener) {
         selectionListener = listener;
     }

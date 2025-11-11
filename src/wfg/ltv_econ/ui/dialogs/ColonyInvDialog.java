@@ -23,7 +23,6 @@ import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
@@ -32,7 +31,7 @@ import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 
-public class ColonyInvDialog implements WrapDialogDelegate, HasActionListener {
+public class ColonyInvDialog implements WrapDialogDelegate {
 
     public static final int PANEL_W = 950;
     public static final int PANEL_H = 650;
