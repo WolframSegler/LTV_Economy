@@ -10,6 +10,4 @@ public class BasePanelPlugin<
         PanelType,
         ? extends UIPanelAPI
     >
-> extends CustomPanelPlugin<PanelType, BasePanelPlugin<PanelType>> {
-
-}
+> extends CustomPanelPlugin<PanelType, BasePanelPlugin<PanelType>> {}

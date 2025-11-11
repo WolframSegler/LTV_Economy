@@ -15,7 +15,7 @@ public class NumUtils {
         float delta = target - current;
         float change = (Math.signum(delta) * baseSpeed + delta * accel) * deltaTime;
         if (Math.abs(change) > Math.abs(delta)) {
-            change = delta; // clamp to not overshoot
+            change = delta;
         }
         return current + change;
     }

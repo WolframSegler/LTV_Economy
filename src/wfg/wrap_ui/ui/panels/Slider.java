@@ -21,6 +21,7 @@ import wfg.wrap_ui.util.RenderUtils;
 
 import java.awt.Color;
 
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
 public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
@@ -47,6 +48,9 @@ public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
     public int roundingIncrement = 1;
     public Color widgetColor;
     public boolean showAdjustableIndicator = false;
+
+    private final int windowWidth = Display.getWidth();
+    private final int windowHeight = Display.getWidth();
 
     private float cachedMaxValue = 1f;
     private float progressValue = 0f;
@@ -87,7 +91,6 @@ public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
 
         initializePlugin(hasPlugin);
         createLabel(null);
-        setProgress(progressValue);
     }
 
     public void initializePlugin(boolean hasPlugin) {
@@ -712,7 +715,7 @@ public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
         if (event == null) return;
 
         if (barHighlightFader != null) {
-            if ((event.isMouseMoveEvent() && snapshot.isActive) || snapshot.hoveredLastFrame) {
+            if (snapshot.isActive || snapshot.hoveredLastFrame) {
                 barHighlightFader.fadeIn();
             } else {
                 barHighlightFader.fadeOut();
@@ -721,8 +724,7 @@ public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
 
         if (!userAdjustable || event.isConsumed()) return;
 
-        // Only update slider if left-click is active or mouse is dragging
-        if (snapshot.isActive || (event.isMouseMoveEvent() && snapshot.LMBDownLastFrame)) {
+        if ((snapshot.isActive)) {
             mapInputToProgress(event);
             event.consume();
         }
@@ -881,15 +883,21 @@ public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
             label.getPosition().setXAlignOffset(offset);
         }
 
-        // Clamp cached progress value
         if (cachedProgressValue < cachedMin) {
             cachedProgressValue = cachedMin;
         }
     }
 
     protected float mapInputToProgress(InputEventAPI inputEvent) {
-        float relativeX = inputEvent.getX() - getPos().getX() - 6f;
-        float maxBarWidth = getPos().getWidth() - 6f;
+        final float mouseX = inputEvent.getX();
+        final float mouseY = inputEvent.getY();
+        if (mouseX < 0 || mouseX > windowWidth || mouseY < 0 || mouseY > windowHeight) {
+            return progressValue;
+        }
+
+        final float offset = 6f;
+        final float maxBarWidth = getPos().getWidth() - offset;
+        float relativeX = mouseX - getPos().getX() - offset;
 
         if (relativeX > maxBarWidth) relativeX = maxBarWidth;
 

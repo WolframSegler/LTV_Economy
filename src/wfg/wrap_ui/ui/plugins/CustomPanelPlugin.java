@@ -3,6 +3,8 @@ package wfg.wrap_ui.ui.plugins;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Mouse;
+
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -180,49 +182,47 @@ public abstract class CustomPanelPlugin<
 
         // General events used by most components
         for (InputEventAPI event : events) {
+            
+            if (event.isMouseMoveEvent()) {
+                inputSnapshot.mouseEvent = event;
 
-            if (event.isMouseEvent()) {
-                if (event.isMouseMoveEvent()) {
-                    inputSnapshot.mouseEvent = event;
+                final float mouseX = event.getX();
+                final float mouseY = event.getY();
 
-                    final float mouseX = event.getX();
-                    final float mouseY = event.getY();
-    
-                    final PositionAPI pos = m_panel.getPos();
-                    final float x = pos.getX();
-                    final float y = pos.getY();
-                    final float w = pos.getWidth();
-                    final float h = pos.getHeight();
-    
-                    // Check for mouse over panel
-                    final boolean hoveredBefore = inputSnapshot.hoveredLastFrame;
-                    inputSnapshot.hoveredLastFrame = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
-    
-                    inputSnapshot.hoverStarted = inputSnapshot.hoveredLastFrame && !hoveredBefore;
-                    inputSnapshot.hoverEnded   = !inputSnapshot.hoveredLastFrame && hoveredBefore;
-                }
+                final PositionAPI pos = m_panel.getPos();
+                final float x = pos.getX();
+                final float y = pos.getY();
+                final float w = pos.getWidth();
+                final float h = pos.getHeight();
 
-                if (event.isLMBDownEvent() && inputSnapshot.hoveredLastFrame) {
-                    inputSnapshot.LMBDownLastFrame = true;
-                    inputSnapshot.hasLMBClickedBefore = true;
-                    inputSnapshot.isActive = true;
-                }
+                // Check for mouse over panel
+                final boolean hoveredBefore = inputSnapshot.hoveredLastFrame;
+                inputSnapshot.hoveredLastFrame = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
 
-                if (event.isLMBUpEvent()) {
-                    if (inputSnapshot.hasLMBClickedBefore) inputSnapshot.LMBUpLastFrame = true;
-                    inputSnapshot.isActive = false;
-                    inputSnapshot.hasLMBClickedBefore = false;
-                }
+                inputSnapshot.hoverStarted = inputSnapshot.hoveredLastFrame && !hoveredBefore;
+                inputSnapshot.hoverEnded   = !inputSnapshot.hoveredLastFrame && hoveredBefore;
+            }
 
-                if (event.isRMBDownEvent() && inputSnapshot.hoveredLastFrame) {
-                    inputSnapshot.RMBDownLastFrame = true;
-                    inputSnapshot.hasRMBClickedBefore = true;
-                }
+            if (event.isLMBDownEvent() && inputSnapshot.hoveredLastFrame) {
+                inputSnapshot.LMBDownLastFrame = true;
+                inputSnapshot.hasLMBClickedBefore = true;
+                inputSnapshot.isActive = true;
+            }
 
-                if (event.isRMBUpEvent()) {
-                    if (inputSnapshot.hasRMBClickedBefore) inputSnapshot.RMBUpLastFrame = true;
-                    inputSnapshot.hasRMBClickedBefore = false;
-                }
+            if (event.isLMBUpEvent() || !Mouse.isButtonDown(0)) {
+                if (inputSnapshot.hasLMBClickedBefore) inputSnapshot.LMBUpLastFrame = true;
+                inputSnapshot.isActive = false;
+                inputSnapshot.hasLMBClickedBefore = false;
+            }
+
+            if (event.isRMBDownEvent() && inputSnapshot.hoveredLastFrame) {
+                inputSnapshot.RMBDownLastFrame = true;
+                inputSnapshot.hasRMBClickedBefore = true;
+            }
+
+            if (event.isRMBUpEvent() || !Mouse.isButtonDown(1)) {
+                if (inputSnapshot.hasRMBClickedBefore) inputSnapshot.RMBUpLastFrame = true;
+                inputSnapshot.hasRMBClickedBefore = false;
             }
         }
 
