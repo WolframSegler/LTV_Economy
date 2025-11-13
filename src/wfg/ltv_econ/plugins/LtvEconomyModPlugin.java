@@ -1,9 +1,13 @@
 package wfg.ltv_econ.plugins;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.campaign.CampaignEventListener;
+import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
@@ -13,6 +17,7 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
+import wfg.reflection.ReflectionUtils;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
@@ -36,8 +41,10 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     public void onGameLoad(boolean newGame) {
         WorkerPoolCondition.initialize();
 
-        final Map<String, Object> persistentData = Global.getSector().getPersistentData();
-        final ListenerManagerAPI listener = Global.getSector().getListenerManager();
+        final SectorAPI sector = Global.getSector();
+        final SettingsAPI settings = Global.getSettings();
+        final Map<String, Object> persistentData = sector.getPersistentData();
+        final ListenerManagerAPI listener = sector.getListenerManager();
 
         final EconomyEngine engine = (EconomyEngine) persistentData.get(EconEngine);
         final WorkerRegistry workerRegistry = (WorkerRegistry) persistentData.get(WorkerReg);
@@ -46,7 +53,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             EconomyEngine.setInstance(engine);
         } else {
             EconomyEngine.createInstance();
-            if (Global.getSettings().isDevMode()) {
+            if (settings.isDevMode()) {
                 Global.getLogger(getClass()).info("Economy Engine constructed");
             }
         }
@@ -54,15 +61,22 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             WorkerRegistry.setInstance(workerRegistry);
         } else {
             WorkerRegistry.createInstance();
-            if (Global.getSettings().isDevMode()) {
+            if (settings.isDevMode()) {
                 Global.getLogger(getClass()).info("Worker Registery constructed");
             }
         }
 
-        listener.addListener(EconomyEngine.getInstance(), false);
-        listener.addListener(new AddWorkerIndustryOption(), true);
-        Global.getSector().addTransientScript(new LtvMarketReplacer());
-        Global.getSector().addTransientScript(new EconomyEngineScript());
+        @SuppressWarnings("unchecked")
+        final List<CampaignEventListener> listeners = (List<CampaignEventListener>) ReflectionUtils.get(
+            sector, "listeners", List.class, false
+        );
+        listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
+        listeners.add(0, EconomyEngine.getInstance());
+
+        sector.addTransientScript(new LtvMarketReplacer());
+        sector.addTransientScript(new EconomyEngineScript());
+        listener.addListener(new AddWorkerIndustryOption());
+        listener.addListener(EconomyEngine.getInstance(), true);
     }
 
     @Override
@@ -71,6 +85,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
         persistentData.put(EconEngine, EconomyEngine.getInstance());
         persistentData.put(WorkerReg, WorkerRegistry.getInstance());
+
+        Global.getSector().removeListener(EconomyEngine.getInstance());
     }
 
     private static final void addManufacturingToMarkets() {
