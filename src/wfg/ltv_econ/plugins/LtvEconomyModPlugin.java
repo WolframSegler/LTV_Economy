@@ -71,7 +71,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             sector, "listeners", List.class, false
         );
         listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
-        listeners.add(0, EconomyEngine.getInstance());
+        // listeners.add(0, EconomyEngine.getInstance());
 
         sector.addTransientScript(new LtvMarketReplacer());
         sector.addTransientScript(new EconomyEngineScript());
