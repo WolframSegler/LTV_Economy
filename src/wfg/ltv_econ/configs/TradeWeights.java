@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy;
+package wfg.ltv_econ.configs;
 
 /**
  * Base Deficit weights for each indicator. 

@@ -17,6 +17,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
+import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -39,7 +40,55 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 
 /**
- * Handles the trade, consumption, production and all related logic
+ * The {@link EconomyEngine} is the core controller for the LTV_Economy simulation.
+ * <p>
+ * It manages all economic activity across markets, including:
+ * <ul>
+ *     <li>Commodity production, demand, and trade flows</li>
+ *     <li>Market credit balances and transactions</li>
+ *     <li>Worker assignment and labor optimization</li>
+ *     <li>Synchronization with the Starsector campaign economy</li>
+ * </ul>
+ *
+ * <h3>Overview</h3>
+ * Each {@link MarketAPI} in the sector is represented internally by:
+ * <ul>
+ *     <li>A credit balance (per-market budget)</li>
+ *     <li>A set of active commodities ({@link CommodityInfo})</li>
+ *     <li>Dynamic production and demand statistics ({@link CommodityStats})</li>
+ * </ul>
+ * The engine runs continuously as a listener to the campaign economy. It replaces
+ * vanilla credit flows with its own localized financial model, while remaining compatible
+ * with other game systems and mods.
+ *
+ * <h3>Main Responsibilities</h3>
+ * <ul>
+ *     <li>Maintain lists of all registered and player-owned markets.</li>
+ *     <li>Track and update per-market credit balances.</li>
+ *     <li>Run the economic update loop (production → demand → trade → post-processing).</li>
+ *     <li>Handle market lifecycle events such as colonization, decivilization, and abandonment.</li>
+ * </ul>
+ *
+ * <h3>Internal Structure</h3>
+ * <ul>
+ *     <li>{@code m_registeredMarkets} – All markets currently part of the simulation.</li>
+ *     <li>{@code m_playerMarkets} – Subset of markets owned by the player.</li>
+ *     <li>{@code m_marketCredits} – Per-market credit reserves.</li>
+ *     <li>{@code m_comInfo} – Mapping of commodity IDs to {@link CommodityInfo} containers.</li>
+ *     <li>{@code mainLoopExecutor} – A single-thread executor that runs the simulation asynchronously. Can be toggled.</li>
+ * </ul>
+ *
+ * <h3>Main Loop</h3>
+ * The {@link #mainLoop(boolean)} method executes the economic simulation for one tick:
+ * <ol>
+ *     <li>Refreshes the list of active markets.</li>
+ *     <li>Resets and recalculates commodity production/demand via {@link CommodityInfo}.</li>
+ *     <li>Assigns workers using a solver-based optimization step.</li>
+ *     <li>Executes trade and adjusts credit balances accordingly.</li>
+ *     <li>Advances all commodities to persist state.</li>
+ * </ol>
+ *
+ * @author Wolfram Segler
  */
 public class EconomyEngine extends BaseCampaignEventListener implements
     PlayerColonizationListener, ColonyDecivListener
@@ -76,7 +125,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     private EconomyEngine() {
-        super(true);
+        super(false);
         m_registeredMarkets = new HashSet<>();
         m_playerMarkets = new HashSet<>();
         m_comInfo = new HashMap<>();
@@ -141,7 +190,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     /**
-     * Advances the economy by one production & trade cycle.
+     * Advances the economy by one cycle.
      * <p>
      * This method is the central loop for processing all markets, industries, and commodities
      * within the EconomyEngine. It handles production, labor assignment, input deficit adjustments,
@@ -161,11 +210,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      *   </li>
      *   <li>
      *     <b>Worker-independent industry update</b> - Updates commodities produced by industries that
-     *     do not depend on workers. Worker-dependent industries are temporarily ignored, so their
-     *     demand does not affect the calculation.
+     *     do not depend on workers. Worker-dependent industries are implicity ignored after
+     *     {@link #resetWorkersAssigned} is executed, as they have no demand.
      *   </li>
      *   <li>
-     *     <b>assignWorkers()</b> - Assigns workers to worker-dependent industries using the
+     *     <b>assignWorkers()</b> - Assigns workers to worker-dependent industries using a
      *     matrix-based solver. This step uses only the demand from worker-independent industries,
      *     ensuring optimal allocation without iterative guesswork. Runs only if
      *     <code>fakeAdvance == false</code>.
@@ -186,7 +235,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      *   </li>
      *   <li>
      *     <b>comInfo.advance(fakeAdvance)</b> - Updates stockpiles after production and trade.
-     *     If <code>fakeAdvance</code> is true, this step does nothing. Stockpiles now include
+     *     If <code>fakeAdvance</code> is true, this step does nothing. Stockpiles now include produced and
      *     newly imported goods ready for the next cycle.
      *   </li>
      * </ol>
@@ -196,7 +245,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      *   <li>Worker assignment must occur after worker-independent production is updated but before
      *       worker-dependent industries are updated, to ensure demand reflects actual unmet needs.</li>
      *   <li>If <code>fakeAdvance</code> is true, worker assignments and stockpile updates are skipped,
-     *       allowing simulation previews without altering the economy state.</li>
+     *       allowing simulation previews without advancing the economy.</li>
      * </ul>
      *
      * @param fakeAdvance If true, simulates a tick without modifying worker assignments or
@@ -653,10 +702,38 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         for (String marketID : m_playerMarkets) {
             final MarketAPI market = econ.getMarket(marketID);
             for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
+
                 ind.getIncome().unmodify();
                 ind.getIncome().base = 0f;
                 ind.getUpkeep().unmodify();
                 ind.getUpkeep().base = 0f;
+            }
+
+            /**
+             * TODO: Player Export Income Nullification
+             *
+             * Context:
+             * - Export income is computed dynamically via CommodityMarketData and MarketShareData.
+             *
+             * Observations:
+             * - CommodityOnMarketAPI.getExportIncome() = exportMarketShare * getMarketValue() * incomeMult
+             * - MarketShareData is created on-demand in CommodityMarketData.getMarketShareData().
+             * - Modifying exportMarketShare or marketValue can zero player exports but may break:
+             *     - Colony crises events
+             *     - AI trade decisions
+             *     - Global trade calculations
+             *
+             * Risks:
+             * - Zeroing exportMarketShare may prevent events from triggering.
+             * - Changes are per tick; may be overridden by vanilla updates.
+             * - Direct reflection modification may be reverted if applied at wrong timing.
+             *
+             * Notes / Potential Solutions:
+             * - Modify the entries of this.marketValuePerFaction inside CommodityMarketData instead.
+             * - Modify market.getIncomeMult() instead.
+             */
+            for (CommodityOnMarketAPI com : market.getAllCommodities()) {
+                com.getCommodityMarketData().getMarketShareData(market).setExportMarketShare(0);
             }
         }
     }

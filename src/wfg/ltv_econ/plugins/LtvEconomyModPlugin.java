@@ -24,6 +24,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     public static final String EconEngine = "ltv_econ_econ_engine";
     public static final String WorkerReg = "ltv_econ_worker_registry";
 
+    public static List<CampaignEventListener> listeners;
+
     @Override
     public void onApplicationLoad() throws Exception {}
 
@@ -38,6 +40,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onGameLoad(boolean newGame) {
         WorkerPoolCondition.initialize();
 
@@ -66,16 +69,16 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             }
         }
 
-        @SuppressWarnings("unchecked")
-        final List<CampaignEventListener> listeners = (List<CampaignEventListener>) ReflectionUtils.get(
-            sector, "listeners", List.class, false
+        listeners = (List<CampaignEventListener>) ReflectionUtils.get(
+            Global.getSector(), "listeners", List.class, false
         );
+
         listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
-        // listeners.add(0, EconomyEngine.getInstance());
+        listeners.add(0, EconomyEngine.getInstance());
 
         sector.addTransientScript(new LtvMarketReplacer());
         sector.addTransientScript(new EconomyEngineScript());
-        listener.addListener(new AddWorkerIndustryOption());
+        listener.addListener(new AddWorkerIndustryOption(), true);
         listener.addListener(EconomyEngine.getInstance(), true);
     }
 
@@ -87,6 +90,11 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         persistentData.put(WorkerReg, WorkerRegistry.getInstance());
 
         Global.getSector().removeListener(EconomyEngine.getInstance());
+    }
+
+    public void afterGameSave() {
+        listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
+        listeners.add(0, EconomyEngine.getInstance());
     }
 
     private static final void addManufacturingToMarkets() {

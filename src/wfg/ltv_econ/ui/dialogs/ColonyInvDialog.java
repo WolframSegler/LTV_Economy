@@ -21,6 +21,7 @@ import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
+import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
@@ -48,6 +49,9 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
 
+        final int tableStartY = 140;
+        final int sliderWidth = 32;
+
         CustomDetailDialogPanel<?> m_panel = new CustomDetailDialogPanel<>(
             panel,
             PANEL_W, PANEL_H,
@@ -56,10 +60,13 @@ public class ColonyInvDialog implements WrapDialogDelegate {
 
         panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 
-        final TextPanel creditPanel = new TextPanel(panel, 200, 40, new BasePanelPlugin<>()) {
+        final long colonyCredits = engine.getCredits(m_market.getId());
+        final float playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits().get();
+
+        final TextPanel colonyCreditPanel = new TextPanel(panel, 200, 40, new BasePanelPlugin<>()) {
             @Override  
             public void createPanel() {
-                final String credits = NumFormat.formatCredits(engine.getCredits(m_market.getId()));
+                final String credits = NumFormat.formatCredits(colonyCredits);
 
                 final LabelAPI creditLabel = settings.createLabel(
                     "Colony Balance: " + credits, Fonts.ORBITRON_16
@@ -84,24 +91,99 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             public TooltipMakerAPI createAndAttachTp() {
                 final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
 
-                String paragraph2 = "Maintaining a healthy balance is crucial to ensure the colony can afford essential imports and maintain full operational efficiency. If reserves run low, the colony may experience delays in trade and a reduction in productivity.";
-                if (m_market.isPlayerOwned()) {
-                    paragraph2 = paragraph2 + "Please note that these credits are separate from your personal funds and are managed by the colony.";
-                }                
-
-                tp.addPara("This display shows the colony's current credit reserves. "+
-                "These funds are generated from the colony's income and are used to pay for ongoing operations, including import purchases and the maintenance of orbital stations and defenses. \n"+ paragraph2, 3);
+                tp.addPara(
+                    "Shows the colony's current credit reserves. These funds cover operating costs, import purchases, and upkeep for industries and structures. " +
+                    "A low balance can slow trade and reduce output. " +
+                    (m_market.isPlayerOwned()
+                        ? "Colony reserves are separate from your personal credits."
+                        : ""),
+                    3
+                );
 
                 add(tp);
                 WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
                 return tp;
             }
         };
-        m_panel.add(creditPanel).inTL(10, 10);
+        m_panel.add(colonyCreditPanel).inTL(10, 10);
+
+        if (m_market.isPlayerOwned()) {
+        final TextPanel playerCreditPanel = new TextPanel(panel, 200, 40, new BasePanelPlugin<>()) {
+            @Override  
+            public void createPanel() {
+                final String credits = NumFormat.formatCredits((long) playerCredits);
+
+                final LabelAPI creditLabel = settings.createLabel(
+                    "Your Balance: " + credits, Fonts.ORBITRON_16
+                );
+                creditLabel.setHighlight(credits);
+                creditLabel.setHighlightColor(Misc.getHighlightColor());
+                add(creditLabel).inTL(0, 0);
+                getPos().setSize(creditLabel.getPosition().getWidth(), creditLabel.getPosition().getHeight());
+            }
+
+            @Override
+            public void initializePlugin(boolean hasPlugin) {
+                super.initializePlugin(hasPlugin);
+                getPlugin().setIgnoreUIState(true);
+            }
+
+            @Override public CustomPanelAPI getTpParent() {
+                return getPanel();
+            }
+
+            @Override  
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
+
+                tp.addPara(
+                    "Shows your personal credits for transferring funds to or from the colony's reserves.",
+                    3
+                );
+
+                add(tp);
+                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
+                return tp;
+            }
+        };
+        m_panel.add(playerCreditPanel).inTL(10, 50);
+        }
+
+        final LabelAPI depositLabel = settings.createLabel(
+            "Deposit:", Fonts.ORBITRON_16
+        );
+        float labelW = depositLabel.computeTextHeight(depositLabel.getText());
+        m_panel.add(depositLabel).inTL(300, 10 + (sliderWidth - labelW) / 2f);
+
+        final LabelAPI withdrawLabel = settings.createLabel(
+            "Withdraw:", Fonts.ORBITRON_16
+        );
+        labelW = withdrawLabel.computeTextHeight(withdrawLabel.getText());
+        m_panel.add(withdrawLabel).inTL(300, 50 + (sliderWidth - labelW) / 2f);
+
+        
+        final Slider depositSlider = new Slider(
+            m_panel.getPanel(), "", 0, playerCredits, 300, sliderWidth
+        );
+        depositSlider.setHighlightOnMouseover(true);
+        depositSlider.setUserAdjustable(true);
+        depositSlider.setBarColor(new Color(90, 150, 110));
+        depositSlider.showValueOnly = true;
+        m_panel.add(depositSlider).inTL(400, 10);
+        
+        final Slider withdrawSlider = new Slider(
+            m_panel.getPanel(), "", 0, colonyCredits, 300, sliderWidth
+        );
+        withdrawSlider.setHighlightOnMouseover(true);
+        withdrawSlider.setUserAdjustable(true);
+        withdrawSlider.setBarColor(new Color(180, 110, 90));
+        withdrawSlider.showValueOnly = true;
+        m_panel.add(withdrawSlider).inTL(400, 50);
+
 
         final SortableTable table = new SortableTable(
             m_panel.getPanel(),
-            PANEL_W - 20, PANEL_H - 70,
+            PANEL_W - 20, PANEL_H - (tableStartY + 10),
             20, 30
         );
 
@@ -160,7 +242,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             );
         }
 
-        m_panel.add(table.getPanel()).inTL(10, 60);
+        m_panel.add(table.getPanel()).inTL(10, tableStartY);
 
         table.sortRows(2);
 
