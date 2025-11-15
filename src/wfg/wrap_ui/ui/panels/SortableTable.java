@@ -343,7 +343,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             return new Color(0, 0, 0, 255);
         }
 
-        public float getBgTransparency() {
+        public float getBgAlpha() {
             return 0.65f;
         }
     }

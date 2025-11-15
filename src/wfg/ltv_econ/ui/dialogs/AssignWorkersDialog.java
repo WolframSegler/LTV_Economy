@@ -86,7 +86,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             new AssignWorkersDialogPlugin(this)
         ) {
             @Override
-            public float getBgTransparency() {
+            public float getBgAlpha() {
                 return 0f;
             }
         };
@@ -112,7 +112,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             180, new BasePanelPlugin<>()
         ) {
             @Override
-            public float getBgTransparency() {
+            public float getBgAlpha() {
                 return 0f;
             }
         };

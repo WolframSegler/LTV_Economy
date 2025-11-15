@@ -74,10 +74,6 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
 
     public void setPersistentGlow(boolean a) {}
 
-    public float getOverlayBrightness() {
-        return 1.2f;
-    }
-
     public Color getGlowColor() {
         return Color.WHITE;
     }

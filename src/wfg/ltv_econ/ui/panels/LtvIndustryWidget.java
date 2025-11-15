@@ -146,7 +146,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         return true;
     }
 
-    public float getBgTransparency() {
+    public float getBgAlpha() {
         return 1;
     }
 

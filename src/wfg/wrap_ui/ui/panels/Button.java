@@ -9,8 +9,10 @@ import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
@@ -19,16 +21,16 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.wrap_ui.ui.panels.CustomPanel.AcceptsActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.ui.plugins.ButtonPlugin;
+import wfg.wrap_ui.util.RenderUtils;
 
-public class Button extends CustomPanel<BasePanelPlugin<Button>, Button, UIPanelAPI> implements 
-    HasAudioFeedback, HasFader, HasActionListener, AcceptsActionListener, HasTooltip, HasBackground
+public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implements 
+    HasAudioFeedback, HasFader, HasActionListener, AcceptsActionListener, HasTooltip
 {
 
-    public float highlightBrightness = 1.2f;
+    public float highlightBrightness = 0.2f;
     public boolean checked = false;
     public boolean disabled = false;
     public boolean quickMode = false;
@@ -51,6 +53,8 @@ public class Button extends CustomPanel<BasePanelPlugin<Button>, Button, UIPanel
     private String buttonPressedSound = "ui_button_pressed";
     private String mouseOverSound = "ui_button_mouseover";
     private boolean appendShortcutToText = true;
+    private CutStyle cutStyle = CutStyle.NONE;
+    private int overrideCut = 0;
     private final FaderUtil fader = new FaderUtil(0, 0, 0.2f, true, true);
     private final PendingTooltip<CustomPanelAPI> tooltip = new PendingTooltip<>();
     
@@ -58,7 +62,7 @@ public class Button extends CustomPanel<BasePanelPlugin<Button>, Button, UIPanel
      * @param onClick default action toggles the checked state.
      */
     public Button(UIPanelAPI parent, int width, int height, String text, String font, Runnable onClick) {
-        super(parent, width, height, new BasePanelPlugin<>());
+        super(parent, width, height, new ButtonPlugin());
 
         labelText = text;
         labelFont = font;
@@ -70,14 +74,24 @@ public class Button extends CustomPanel<BasePanelPlugin<Button>, Button, UIPanel
 
     public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
+        getPlugin().setIgnoreUIState(true);
     }
 
     public void createPanel() {
         final SettingsAPI settings = Global.getSettings();
+        final PositionAPI pos = getPos();
 
+        if (label != null) remove(label);
         label = settings.createLabel(labelText, labelFont);
-        
         add(label);
+
+        label.setAlignment(Alignment.MID);
+
+        final float centerX = pos.getX() + pos.getWidth() / 2f;
+        final float centerY = pos.getY() + pos.getHeight() / 2f;
+        final float labelW = label.computeTextWidth(labelText);
+        final float labelH = label.computeTextHeight(labelText);
+        label.getPosition().inBL(centerX - labelW / 2f, centerY - labelH / 2f);
     }
 
     public Optional<HasActionListener> getActionListener() {
@@ -174,7 +188,7 @@ public class Button extends CustomPanel<BasePanelPlugin<Button>, Button, UIPanel
     public void setText(String text) {
         shortcutText = appendShortcutToText ? Keyboard.getKeyName(shortcut) : "";
         labelText = text;
-        label.setText(text + " ["+shortcutText+"]");
+        createPanel();
         if (appendShortcutToText) {
             label.setHighlightColor(Misc.getHighlightColor());
             label.setHighlight(shortcutText);
@@ -183,6 +197,11 @@ public class Button extends CustomPanel<BasePanelPlugin<Button>, Button, UIPanel
 
     public String getText() {
         return labelText;
+    }
+
+    public void setFont(String font) {
+        labelFont = font;
+        createPanel();
     }
 
     public void setAppendShortcutToText(boolean a) {
@@ -208,7 +227,86 @@ public class Button extends CustomPanel<BasePanelPlugin<Button>, Button, UIPanel
         return disabled ? bgDisabledColor : bgColor;
     }
 
-    public float getBgTransparency() {
+    public float getBgAlpha() {
         return disabled ? 0.75f : 0.85f;
+    }
+
+    public void setCutStyle(CutStyle style) {
+        cutStyle = style;
+    }
+
+    public Button setCutSize(int px) {
+        overrideCut = px;
+        return this;
+    }
+
+    public float[] getFaderMaskVertices() {
+        final PositionAPI pos = getPos();
+        final float cutSize = computeCut((int) pos.getWidth(), (int) pos.getHeight());
+
+        final float[] cuts = cutStyle.toVector4();
+        for (int i = 0; i < 4; i++) cuts[i] *= cutSize;
+
+        return RenderUtils.buildCornersVertices(
+            pos.getX() + getPlugin().offsetX,
+            pos.getY() + getPlugin().offsetY,
+            pos.getWidth() + getPlugin().offsetW,
+            pos.getHeight() + getPlugin().offsetH,
+            cuts
+        );
+    }
+
+    public void renderImpl(float alphaMult) {
+        final PositionAPI pos = getPos();
+
+        final float x = pos.getX() + getPlugin().offsetX;
+        final float y = pos.getY() + getPlugin().offsetY;
+        final float w = pos.getWidth() + getPlugin().offsetW;
+        final float h = pos.getHeight() + getPlugin().offsetH;
+        final float cutSize = computeCut((int) w, (int) h);
+
+        final float[] cuts = cutStyle.toVector4();
+        for (int i = 0; i < 4; i++) cuts[i] *= cutSize;
+        final float[] verts = RenderUtils.buildCornersVertices(x, y, w, h, cuts);
+
+        RenderUtils.drawPolygon(verts, getBgColor(), alphaMult * getBgAlpha());
+    }
+
+    protected float computeCut(int w, int h) {
+        if (overrideCut > 0) return overrideCut;
+        return Math.min(w, h) * 0.2f;
+    }
+
+    public enum CutStyle {
+        NONE, TL, TR, BL, BR,
+        TL_TR, TL_BL, TL_BR,
+        TR_BL, TR_BR, BL_BR,
+        TL_TR_BL, TL_TR_BR, TL_BL_BR,
+        TR_BL_BR, ALL;
+
+        /**  
+         * 4-element array of the corners: [BL, BR, TR, TL]  
+         * 1f = cut, 0f = no cut
+         */
+        public float[] toVector4() {
+            switch (this) {
+                case TL:       return new float[]{0f, 0f, 0f, 1f};
+                case TR:       return new float[]{0f, 0f, 1f, 0f};
+                case BL:       return new float[]{1f, 0f, 0f, 0f};
+                case BR:       return new float[]{0f, 1f, 0f, 0f};
+                case TL_TR:    return new float[]{0f, 0f, 1f, 1f};
+                case TL_BL:    return new float[]{1f, 0f, 0f, 1f};
+                case TL_BR:    return new float[]{0f, 1f, 0f, 1f};
+                case TR_BL:    return new float[]{1f, 0f, 1f, 0f};
+                case TR_BR:    return new float[]{0f, 1f, 1f, 0f};
+                case BL_BR:    return new float[]{1f, 1f, 0f, 0f};
+                case TL_TR_BL: return new float[]{1f, 0f, 1f, 1f};
+                case TL_TR_BR: return new float[]{0f, 1f, 1f, 1f};
+                case TL_BL_BR: return new float[]{1f, 1f, 0f, 1f};
+                case TR_BL_BR: return new float[]{1f, 1f, 1f, 0f};
+                case ALL:      return new float[]{1f, 1f, 1f, 1f};
+                default:       return new float[]{0f, 0f, 0f, 0f};
+            }
+        }
     }
 }

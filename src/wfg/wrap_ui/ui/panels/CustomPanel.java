@@ -280,6 +280,17 @@ public abstract class CustomPanel<
 
         FaderUtil getFader();
 
+        /**
+         * Returns the type of glow this panel should use.
+         *
+         * <ul>
+         *     <li>{@link Glow#OVERLAY} or {@link Glow#UNDERLAY}: supports polygon-shaped glow.</li>
+         *     <li>{@link Glow#ADDITIVE}: works with convex/polygon shapes too; a sprite texture is optional.
+         *         If a sprite is provided via {@link #getSprite()}, it will be used for rendering,
+         *         otherwise a colored quad/polygon will be drawn.</li>
+         *     <li>{@link Glow#NONE}: no glow.</li>
+         * </ul>
+         */
         default Glow getGlowType() {
             return Glow.OVERLAY;
         }
@@ -289,7 +300,7 @@ public abstract class CustomPanel<
         }
 
         default float getOverlayBrightness() {
-            return 1.2f;
+            return 0.25f;
         }
 
         default float getAdditiveBrightness() {
@@ -301,10 +312,21 @@ public abstract class CustomPanel<
         }
 
         /**
-         * Used for additive Glow. Leave as null if not using it.
+         * Returns the sprite used for additive glow.
+         *
+         * <p>Providing a sprite will render the glow using the texture, otherwise the system will
+         * draw a colored polygon/quad according to {@link #getFaderMaskVertices()} (if applicable). 
          */
         default Optional<SpriteAPI> getSprite() {
             return Optional.empty();
+        }
+
+        /**
+         * Returns the polygon vertices of the background shape in CCW order.
+         * Returning null is a rectangle.
+         */
+        default float[] getFaderMaskVertices() {
+            return null;
         }
     }
 
@@ -345,7 +367,7 @@ public abstract class CustomPanel<
         /**
          * default is 0.85f.
          */
-        default float getBgTransparency() {
+        default float getBgAlpha() {
             return 0.85f;
         }
     }

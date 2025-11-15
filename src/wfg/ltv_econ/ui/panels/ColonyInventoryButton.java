@@ -77,7 +77,7 @@ public class ColonyInventoryButton extends CustomPanel<
         );
     }
 
-    public float getBgTransparency() {
+    public float getBgAlpha() {
         return 0.85f;
     }
 

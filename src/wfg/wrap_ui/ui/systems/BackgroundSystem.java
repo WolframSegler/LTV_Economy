@@ -27,6 +27,6 @@ public final class BackgroundSystem<
         final int w = (int) pos.getWidth() + getPlugin().offsetW;
         final int h = (int) pos.getHeight() + getPlugin().offsetH;
 
-        RenderUtils.drawQuad(x, y, w, h, getPanel().getBgColor(), getPanel().getBgTransparency(), false);
+        RenderUtils.drawQuad(x, y, w, h, getPanel().getBgColor(), getPanel().getBgAlpha(), false);
     }
 }

@@ -73,49 +73,26 @@ public class RenderUtils {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
-    public static void drawGlowOverlay(float x, float y, float w, float h, Color color, float alphaMult) {
-        Color baseClr = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (50 * alphaMult));
-
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        setGlColor(baseClr, alphaMult);
-
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex2f(x, y);
-        GL11.glVertex2f(x + w, y);
-        GL11.glVertex2f(x + w, y + h);
-        GL11.glVertex2f(x, y + h);
-        GL11.glEnd();
-
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-    }
-
     public static void drawAdditiveGlow(SpriteAPI sprite, float x, float y, Color glowColor, float intensity) {
-        if (sprite == null || intensity <= 0f) {
-            return;
-        }
+        if (sprite == null || intensity <= 0f) return;
 
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glPushMatrix();
-
         GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE); // Additive blending
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
-        Color base = new Color(
-                Math.min(255, (int) (glowColor.getRed() * intensity)),
-                Math.min(255, (int) (glowColor.getGreen() * intensity)),
-                Math.min(255, (int) (glowColor.getBlue() * intensity)),
-                Math.min(255, (int) (255 * intensity)));
-        sprite.setColor(base);
+        final int r = Math.min(255, (int)(glowColor.getRed() * intensity));
+        final int g = Math.min(255, (int)(glowColor.getGreen() * intensity));
+        final int b = Math.min(255, (int)(glowColor.getBlue() * intensity));
+        final int a = Math.min(255, (int)(255 * intensity));
+        sprite.setColor(new Color(r, g, b, a));
+
         sprite.setAdditiveBlend();
         sprite.render(x, y);
 
         sprite.setNormalBlend();
-        sprite.setColor(Color.white); // Reset
+        sprite.setColor(Color.white);
+
         GL11.glPopMatrix();
-        GL11.glPopAttrib();
     }
 
     public static final void setGlColor(Color color, float alphaMult) {
@@ -316,6 +293,54 @@ public class RenderUtils {
         int a = Math.min(255, Math.max(0, Math.round(c1.getAlpha() + (c2.getAlpha() - c1.getAlpha()) * t)));
 
         return new Color(r, g, b, a);
+    }
+
+    /**
+     * Draws a filled convex polygon using CCW vertices.
+     *
+     * @param verts  float array of XY pairs: [x0, y0, x1, y1, ...]
+     * @param color  fill color
+     * @param alpha  transparency multiplier (0..1)
+     */
+    public static final void drawPolygon(float[] verts, Color color, float alpha) {
+        if (verts == null || verts.length < 6) return; // at least 3 points
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        setGlColor(color, alpha);
+
+        GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+        for (int i = 0; i < verts.length; i += 2) {
+            GL11.glVertex2f(verts[i], verts[i + 1]);
+        }
+        GL11.glEnd();
+    }
+
+    /**
+     * Builds a CCW vertex array for a rectangle with corner cuts.
+     *
+     * @param x     bottom-left X
+     * @param y     bottom-left Y
+     * @param w     width
+     * @param h     height
+     * @param cuts  4-element array [BL, BR, TR, TL] in pixels
+     * @return      float array of XY pairs for the convex polygon
+     */
+    public static final float[] buildCornersVertices(float x, float y, float w, float h, float[] cuts) {
+        if (cuts == null || cuts.length != 4) cuts = new float[]{0f, 0f, 0f, 0f};
+        final float cutBL = cuts[0], cutBR = cuts[1], cutTR = cuts[2], cutTL = cuts[3];
+
+        return new float[] {
+            x + cutBL,        y,             // bottom-left inner
+            x + w - cutBR,    y,             // bottom-right inner
+            x + w,            y + cutBR,     // bottom-right vertical
+            x + w,            y + h - cutTR, // top-right vertical
+            x + w - cutTR,    y + h,         // top-right horizontal
+            x + cutTL,        y + h,         // top-left horizontal
+            x,                y + h - cutTL, // top-left vertical
+            x,                y + cutBL      // bottom-left vertical
+        };
     }
 
     private static final void quadWithBlend(float x, float y, float w, float h, Color color, float alphaMult) {

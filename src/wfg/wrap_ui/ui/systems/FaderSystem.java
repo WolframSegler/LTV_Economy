@@ -45,31 +45,6 @@ public final class FaderSystem<
         getPanel().getFader().advance(amount);
     }
 
-    private final void drawGlowLayer(float alphaMult, InputSnapshot input) {
-        final PanelType panel = getPanel();
-        final PositionAPI pos = panel.getPos();
-
-        final float glowAmount = panel.getOverlayBrightness() * getPanel().getFader().getBrightness() * alphaMult;
-
-        RenderUtils.drawGlowOverlay(
-            pos.getX() + getPlugin().offsetX,
-            pos.getY() + getPlugin().offsetY,
-            pos.getWidth() + getPlugin().offsetW,
-            pos.getHeight() + getPlugin().offsetH,
-            panel.getGlowColor(), glowAmount
-        );
-
-        if (input.hasLMBClickedBefore) {
-            RenderUtils.drawGlowOverlay(
-                pos.getX() + getPlugin().offsetX,
-                pos.getY() + getPlugin().offsetY,
-                pos.getWidth() + getPlugin().offsetW,
-                pos.getHeight() + getPlugin().offsetH,
-                panel.getGlowColor(), glowAmount / 2
-            );
-        }
-    }
-
     @Override
     public final void renderBelow(float alphaMult, InputSnapshot input) {
         if (getPanel().getGlowType() != Glow.UNDERLAY || getPanel().getFader().getBrightness() <= 0) return;
@@ -80,23 +55,66 @@ public final class FaderSystem<
     @Override
     public final void render(float alphaMult, InputSnapshot input) {
         final FaderUtil fader = getPanel().getFader();
+        if (fader.getBrightness() <= 0) return;
 
-        if (getPanel().getGlowType() == Glow.OVERLAY && fader.getBrightness() > 0) {
+        if (getPanel().getGlowType() == Glow.OVERLAY) {
             drawGlowLayer(alphaMult, input);
         }
 
-        if (getPanel().getGlowType() == Glow.ADDITIVE && fader.getBrightness() > 0) {
-            float glowAmount = getPanel().getAdditiveBrightness() * fader.getBrightness() * alphaMult;
-
-            getPanel().getSprite().ifPresent(sprite -> {
-                RenderUtils.drawAdditiveGlow(
+        if (getPanel().getGlowType() == Glow.ADDITIVE) {
+            final float glowAmount = getPanel().getAdditiveBrightness() * fader.getBrightness() * alphaMult;
+            getPanel().getSprite().ifPresentOrElse(
+                sprite -> RenderUtils.drawAdditiveGlow(
                     sprite,
                     getPanel().getPos().getX(),
-                    getPanel().getPos().getY(), 
+                    getPanel().getPos().getY(),
                     getPanel().getGlowColor(),
                     glowAmount
-                );
-            });
+                ),
+                () -> drawGlowLayer(alphaMult, input)
+            );
+        }
+    }
+
+    private final void drawGlowLayer(float alphaMult, InputSnapshot input) {
+        final PanelType panel = getPanel();
+        final float glowAmount = panel.getOverlayBrightness() * getPanel().getFader().getBrightness() * alphaMult;
+        final float[] verts = panel.getFaderMaskVertices();
+
+        if (verts != null) {
+            for (int i = 0; i < verts.length; i += 2) {
+                verts[i] = verts[i] + getPlugin().offsetX;
+                verts[i + 1] = verts[i + 1] + getPlugin().offsetY;
+            }
+        }   
+
+        if (verts != null) {
+            RenderUtils.drawPolygon(verts, panel.getGlowColor(), glowAmount);
+        } else {
+            final PositionAPI pos = panel.getPos();
+            RenderUtils.drawQuad(
+                pos.getX() + getPlugin().offsetX,
+                pos.getY() + getPlugin().offsetY,
+                pos.getWidth() + getPlugin().offsetW,
+                pos.getHeight() + getPlugin().offsetH,
+                panel.getGlowColor(), glowAmount, getPanel().getGlowType() == Glow.ADDITIVE
+            );
+        }
+
+        if (!input.hasLMBClickedBefore) return;
+        
+        if (verts != null) {
+            RenderUtils.drawPolygon(verts, panel.getGlowColor(), glowAmount / 2f);
+        } else {
+            final PositionAPI pos = panel.getPos();
+            RenderUtils.drawQuad(
+                pos.getX() + getPlugin().offsetX,
+                pos.getY() + getPlugin().offsetY,
+                pos.getWidth() + getPlugin().offsetW,
+                pos.getHeight() + getPlugin().offsetH,
+                panel.getGlowColor(),
+                glowAmount / 2f, getPanel().getGlowType() == Glow.ADDITIVE
+            );
         }
     }
 }
