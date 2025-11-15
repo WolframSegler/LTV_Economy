@@ -2,6 +2,7 @@ package wfg.wrap_ui.ui.panels;
 
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
@@ -69,6 +70,8 @@ public class TextPanel extends CustomPanel<BasePanelPlugin<TextPanel>, TextPanel
     public float textW2 = 0;
     public float textH1 = 0;
     public float textH2 = 0;
+    public LabelAPI label1 = null;
+    public LabelAPI label2 = null;
 
     private boolean isSoundEnabled = true;
 

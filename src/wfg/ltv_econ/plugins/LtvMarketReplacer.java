@@ -1,23 +1,25 @@
 package wfg.ltv_econ.plugins;
 
 import java.util.List;
+import java.awt.Color;
 
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 
+import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
-import wfg.ltv_econ.ui.panels.ColonyInventoryButton;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
-import wfg.ltv_econ.ui.panels.ColonyInventoryButton.ColonyInvButtonPlugin;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.panels.ActionListenerPanel;
+import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.ui.plugins.ButtonPlugin;
 import wfg.reflection.ReflectionUtils;
 import wfg.reflection.ReflectionUtils.ReflectedConstructor;
 
@@ -29,7 +31,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 public class LtvMarketReplacer implements EveryFrameScript {
@@ -123,20 +127,33 @@ public class LtvMarketReplacer implements EveryFrameScript {
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
         for (Object child : managementChildren) {
-            if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof ColonyInvButtonPlugin) {
+            if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof ButtonPlugin) {
                 return;
             }
         }
 
-        ShippingPanel shipPanel = (ShippingPanel) ReflectionUtils.invoke(colonyInfoPanel, "getShipping");
+        final ShippingPanel shipPanel = (ShippingPanel) ReflectionUtils.invoke(colonyInfoPanel, "getShipping");
 
-        ButtonAPI useStockpilesBtn = (ButtonAPI) ReflectionUtils.invoke(shipPanel, "getUseStockpiles");
+        final ButtonAPI useStockpilesBtn = (ButtonAPI) ReflectionUtils.invoke(shipPanel, "getUseStockpiles");
 
-        MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
+        final MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
 
-        ColonyInventoryButton inventoryBtn = new ColonyInventoryButton(
-            managementPanel, market
+        final Runnable buildButtonRunnable = () -> {
+            final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);
+
+            WrapUiUtils.CustomDialogViewer(
+                dialogPanel, ColonyInvDialog.PANEL_W, ColonyInvDialog.PANEL_H
+            );
+        };
+
+        final Button inventoryBtn = new Button(
+            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Inventory",
+            Fonts.ORBITRON_12, buildButtonRunnable
         );
+        inventoryBtn.setLabeColor(Misc.getBasePlayerColor());
+        inventoryBtn.bgColor = new Color(0, 0, 0, 255);
+        inventoryBtn.bgDisabledColor = new Color(0, 0, 0, 255);
+        inventoryBtn.quickMode = true;
 
         managementPanel.addComponent(inventoryBtn.getPanel()).inBL(0, 0);
 

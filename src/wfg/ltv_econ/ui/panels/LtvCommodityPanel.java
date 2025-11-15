@@ -158,4 +158,8 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
     public void setMarket(MarketAPI a) {
         m_market = a;
     }
+
+    public float getBgAlpha() {
+        return 0.65f;
+    }
 }

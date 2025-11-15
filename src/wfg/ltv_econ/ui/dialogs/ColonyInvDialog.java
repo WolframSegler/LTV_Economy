@@ -14,6 +14,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
@@ -56,7 +57,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final int sliderW = 300;
         final int buttonH = 28;
         final int buttonW = 70;
-        final int tableStartY = 140;
+        final int tableStartY = 110;
         final int buttonY = (sliderH - buttonH) / 2; 
         final Color withdrawColor = new Color(180, 110, 90);
         final Color depositColor = new Color(90, 150, 110);
@@ -70,21 +71,21 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 
         final long colonyCredits = engine.getCredits(m_market.getId());
-        final float playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits().get();
+        final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
         final TextPanel colonyCreditPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
             @Override  
             public void createPanel() {
                 final String credits = NumFormat.formatCredits(colonyCredits);
 
-                final LabelAPI creditLabel = settings.createLabel(
+                label1 = settings.createLabel(
                     "Colony Balance: " + credits, Fonts.ORBITRON_16
                 );
-                creditLabel.setHighlight(credits);
-                creditLabel.setHighlightColor(Misc.getHighlightColor());
-                final float height = creditLabel.computeTextHeight(creditLabel.getText());
-                add(creditLabel).inTL(0, (sliderH - height) / 2f);
-                getPos().setSize(creditLabel.getPosition().getWidth(), sliderH);
+                label1.setHighlight(credits);
+                label1.setHighlightColor(Misc.getHighlightColor());
+                final float height = label1.computeTextHeight(label1.getText());
+                add(label1).inTL(0, (sliderH - height) / 2f);
+                getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
 
             @Override
@@ -117,20 +118,19 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         };
         m_panel.add(colonyCreditPanel).inTL(opad, 10);
 
-        if (m_market.isPlayerOwned()) {
         final TextPanel playerCreditPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
             @Override  
             public void createPanel() {
-                final String credits = NumFormat.formatCredits((long) playerCredits);
+                final String credits = NumFormat.formatCredits((long) playerCredits.get());
 
-                final LabelAPI creditLabel = settings.createLabel(
+                label1 = settings.createLabel(
                     "Your Balance: " + credits, Fonts.ORBITRON_16
                 );
-                creditLabel.setHighlight(credits);
-                creditLabel.setHighlightColor(Misc.getHighlightColor());
-                final float height = creditLabel.computeTextHeight(creditLabel.getText());
-                add(creditLabel).inTL(0, (sliderH - height) / 2f);
-                getPos().setSize(creditLabel.getPosition().getWidth(), sliderH);
+                label1.setHighlight(credits);
+                label1.setHighlightColor(Misc.getHighlightColor());
+                final float height = label1.computeTextHeight(label1.getText());
+                add(label1).inTL(0, (sliderH - height) / 2f);
+                getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
 
             @Override
@@ -157,20 +157,21 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 return tp;
             }
         };
-        m_panel.add(playerCreditPanel).inTL(opad, 50);
+        if (m_market.isPlayerOwned()) {
+            m_panel.add(playerCreditPanel).inTL(opad, 50);
         }
 
         final LabelAPI withdrawLabel = settings.createLabel(
             "Withdraw:", Fonts.ORBITRON_16
         );
         float labelH = withdrawLabel.computeTextHeight(withdrawLabel.getText());
-        m_panel.add(withdrawLabel).inTL(300, 10 + (sliderH - labelH) / 2f);
+        m_panel.add(withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
 
         final LabelAPI depositLabel = settings.createLabel(
             "Deposit:", Fonts.ORBITRON_16
         );
         labelH = depositLabel.computeTextHeight(depositLabel.getText());
-        m_panel.add(depositLabel).inTL(300, 50 + (sliderH - labelH) / 2f);
+        m_panel.add(depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
 
         
         final Slider withdrawSlider = new Slider(
@@ -180,20 +181,53 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         withdrawSlider.setUserAdjustable(true);
         withdrawSlider.setBarColor(withdrawColor);
         withdrawSlider.showValueOnly = true;
-        m_panel.add(withdrawSlider).inTL(400, 10);
+        m_panel.add(withdrawSlider).inTL(500, 10);
 
         final Slider depositSlider = new Slider(
-            m_panel.getPanel(), "", 0, playerCredits, sliderW, sliderH
+            m_panel.getPanel(), "", 0, playerCredits.get(), sliderW, sliderH
         );
         depositSlider.setHighlightOnMouseover(true);
         depositSlider.setUserAdjustable(true);
         depositSlider.setBarColor(depositColor);
         depositSlider.showValueOnly = true;
-        m_panel.add(depositSlider).inTL(400, 50);
+        m_panel.add(depositSlider).inTL(500, 50);
 
+        final Runnable refreshUI = () -> {
+            final float colonyCred = playerCredits.get();
+            final long playerCred = engine.getCredits(m_market.getId());
+            final LabelAPI colonyLbl = colonyCreditPanel.label1;
+            final LabelAPI playerLbl = playerCreditPanel.label1;
+            
+            depositSlider.setProgress(0);
+            depositSlider.maxRange = colonyCred;
+            withdrawSlider.setProgress(0);
+            withdrawSlider.maxRange = playerCred;
 
-        final Runnable withdrawRunnable = () -> {};
-        final Runnable depositRunnable = () -> {};
+            colonyLbl.setText(
+                "Colony Balance: " + NumFormat.formatCredits(playerCred)
+            );
+            colonyLbl.setHighlight(NumFormat.formatCredits(playerCred));
+            colonyLbl.autoSizeToWidth(colonyLbl.computeTextWidth(colonyLbl.getText()));
+            colonyCreditPanel.getPos().setSize(colonyLbl.getPosition().getWidth(), sliderH);
+
+            playerLbl.setText(
+                "Your Balance: " + NumFormat.formatCredits((long) colonyCred)
+            );
+            playerLbl.setHighlight(NumFormat.formatCredits((long) colonyCred));
+            playerLbl.autoSizeToWidth(playerLbl.computeTextWidth(playerLbl.getText()));
+            playerCreditPanel.getPos().setSize(playerLbl.getPosition().getWidth(), sliderH);
+        };
+
+        final Runnable withdrawRunnable = () -> {
+            engine.addCredits(m_market.getId(), (int) -withdrawSlider.getProgress());
+            playerCredits.add((int) withdrawSlider.getProgress());
+            refreshUI.run();
+        };
+        final Runnable depositRunnable = () -> {
+            engine.addCredits(m_market.getId(), (int) depositSlider.getProgress());
+            playerCredits.add((int) -depositSlider.getProgress());
+            refreshUI.run();
+        };
 
         final Button withdrawBtn = new Button(
             m_panel.getPanel(), buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
@@ -206,8 +240,8 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         depositBtn.quickMode = true;
         withdrawBtn.setCutStyle(CutStyle.ALL);
         depositBtn.setCutStyle(CutStyle.ALL);
-        m_panel.add(withdrawBtn).inTL(400 + sliderW + opad, 10 + buttonY);
-        m_panel.add(depositBtn).inTL(400 + sliderW + opad, 50 + buttonY);
+        m_panel.add(withdrawBtn).inTL(500 + sliderW + opad, 10 + buttonY);
+        m_panel.add(depositBtn).inTL(500 + sliderW + opad, 50 + buttonY);
 
 
         final SortableTable table = new SortableTable(

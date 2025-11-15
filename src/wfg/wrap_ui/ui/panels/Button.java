@@ -42,6 +42,7 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     public boolean tooltipEnabled = false;
     public Color bgColor = new Color(20, 125, 200);
     public Color bgDisabledColor = new Color(100, 100, 100);
+    public Color highlightColor = Color.LIGHT_GRAY;
     public Object customData = null;
 
     private String labelText = "";
@@ -55,6 +56,7 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     private boolean appendShortcutToText = true;
     private CutStyle cutStyle = CutStyle.NONE;
     private int overrideCut = 0;
+    private Color labelColor = Misc.getButtonTextColor();
     private final FaderUtil fader = new FaderUtil(0, 0, 0.2f, true, true);
     private final PendingTooltip<CustomPanelAPI> tooltip = new PendingTooltip<>();
     
@@ -211,6 +213,19 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
 
     public void setHighlightBounceDown(boolean bool) {
         fader.setBounceDown(bool);
+    }
+
+    public Color getLabelColor() {
+        return labelColor;
+    }
+
+    public void setLabeColor(Color color) {
+        labelColor = color;
+        label.setColor(color);
+    }
+
+    public Color getGlowColor() {
+        return highlightColor;
     }
 
     public void setTooltipFactory(Supplier<TooltipMakerAPI> factory) {
