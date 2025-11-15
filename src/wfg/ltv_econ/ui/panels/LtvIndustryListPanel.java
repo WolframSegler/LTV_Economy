@@ -373,17 +373,17 @@ public class LtvIndustryListPanel
 
 		PendingTooltip<CustomPanelAPI> wrapper = widget.m_tooltip;
 
-		wrapper.getParent = () -> {
+		wrapper.parentSupplier = () -> {
 			return LtvIndustryListPanel.this.getPanel();
 		};
 
 		wrapper.factory = () -> {
-			TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(ind.getTooltipWidth(), 0, false);
+			TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(ind.getTooltipWidth(), 0, false);
 
 			// ind.createTooltip(mode, tp, false);
 			IndustryTooltips.createIndustryTooltip(mode, tp, false, ind);
 
-			wrapper.getParent.get().addUIElement(tp);
+			wrapper.parentSupplier.get().addUIElement(tp);
 			
 			WrapUiUtils.anchorPanelWithBounds(tp, widget.getPanel(), AnchorType.RightTop, pad*2);
 

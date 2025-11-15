@@ -134,47 +134,38 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         getPlugin().setOffsets(-1, -1, 2, 2 - hOffset);
     }
 
-    @Override
     public Color getBgColor() {
         return BgColor;
     }
 
-    @Override
     public void setBgColor(Color color) {
         BgColor = color;
     }
 
-    @Override
     public boolean isBgEnabled() {
         return true;
     }
 
-    @Override
     public float getBgTransparency() {
         return 1;
     }
 
-    @Override
     public FaderUtil getFader() {
         return m_fader;
     }
 
-    @Override
     public boolean isFaderOwner() {
         return false;
     }
 
-    @Override
     public Glow getGlowType() {
         return Glow.UNDERLAY;
     }
 
-    @Override
     public Color getGlowColor() {
         return m_faction.getBaseUIColor();
     }
 
-    @Override
     public boolean isListenerEnabled() {
         return isListenerEnabled;
     }
@@ -729,7 +720,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
         @Override
         public CustomPanelAPI getTpParent() {
-            return m_tooltip.getParent.get();
+            return m_tooltip.parentSupplier.get();
         }
 
         @Override

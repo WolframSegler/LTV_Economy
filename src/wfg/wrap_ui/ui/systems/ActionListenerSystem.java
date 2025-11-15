@@ -31,8 +31,8 @@ public final class ActionListenerSystem<
                 listener.onClicked(getPanel(), false);
             }
 
-            listener.getShortcut().ifPresent(shortcut -> {
-                if (Keyboard.isKeyDown(shortcut)) {
+            if (listener.getShortcut() > 0) {
+                if (Keyboard.isKeyDown(listener.getShortcut())) {
                     if (!shortcutKeyDown) {
                         listener.onShortcutPressed(getPanel());
                     }
@@ -40,7 +40,7 @@ public final class ActionListenerSystem<
                 } else {
                     shortcutKeyDown = false;
                 }
-            });
+            };
 
             if (input.hoverStarted) {
                 listener.onHoverStarted(getPanel());

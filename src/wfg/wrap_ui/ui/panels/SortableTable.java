@@ -366,7 +366,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             if (column.getTooltipType() == String.class) {
                 return getParent();
             } else if (column.getTooltipType() == PendingTooltip.class) {
-                return ((PendingTooltip<? extends CustomPanelAPI>) column.tooltip).getParent.get();
+                return ((PendingTooltip<? extends CustomPanelAPI>) column.tooltip).parentSupplier.get();
             } else {
                 throw new IllegalArgumentException(
                     "Tooltip for header '" + column.title + "' has an illegal type."
@@ -625,76 +625,62 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             }
         }
 
-        @Override
         public FaderUtil getFader() {
             return m_fader;
         }
 
-        @Override
         public Glow getGlowType() {
             return Glow.UNDERLAY;
         }
 
-        @Override
         public boolean isPersistentGlow() {
             return isPersistentGlow;
         }
 
-        @Override
         public void setPersistentGlow(boolean a) {
             isPersistentGlow = a;
         }
 
-        @Override
         public Color getGlowColor() {
             return glowColor;
         }
 
-        @Override
         public void setGlowColor(Color a) {
             glowColor = a;
         }
 
-        @Override
         public void setOutline(Outline a) {
             outline = a;
         }
 
-        @Override
         public Outline getOutline() {
             return outline;
         }
 
-        @Override
         public Color getOutlineColor() {
             return outlineColor;
         }
 
-        @Override
         public void setOutlineColor(Color color) {
             outlineColor = color;
         }
 
-        @Override
         public CustomPanelAPI getTpParent() {
             if (m_tooltip == null) {
                 return getParent();
             } else {
-                return m_tooltip.getParent.get();
+                return m_tooltip.parentSupplier.get();
             }
         }
 
-        @Override
         public MarketAPI getMarket() {
             return m_market;
         }
 
-        @Override
         public void setMarket(MarketAPI market) {
             m_market = market;
         }
         
-        @Override
         public TooltipMakerAPI createAndAttachTp() {
             if (m_tooltip == null) {
                 // Invisible header

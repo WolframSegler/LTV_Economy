@@ -35,11 +35,11 @@ public final class AudioFeedbackSystem<
             accumulatedGameTicks > initCompTicks
         ) {
             if (!playedUIHoverSound) {
-                Global.getSoundPlayer().playUISound("ui_button_mouseover", 1, 1);
+                Global.getSoundPlayer().playUISound(getPanel().getMouseOverSound(), 1, 1);
                 playedUIHoverSound = true;
             }
             if (input.LMBUpLastFrame) {
-                Global.getSoundPlayer().playUISound("ui_button_pressed", 1, 1);
+                Global.getSoundPlayer().playUISound(getPanel().getButtonPressedSound(), 1, 1);
             }
         }
 

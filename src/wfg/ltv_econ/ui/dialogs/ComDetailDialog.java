@@ -1053,7 +1053,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     private void createSection3RowsTooltip(SortableTable table, MarketAPI market,
         String marketName, Color baseColor, PendingTooltip<CustomPanelAPI> wrapper) {
 
-        wrapper.getParent = () -> {
+        wrapper.parentSupplier = () -> {
             return table.getPanel();
         };
 
@@ -1062,7 +1062,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             final int tpWidth = 450;
             final CommodityOnMarketAPI com = market.getCommodityData(m_com.getId());
     
-            final TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(
+            final TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
                 tpWidth, 0, false);
     
             final FactionAPI faction = market.getFaction();
@@ -1187,7 +1187,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             ? "Units of this commodity exported globally."
             : "Units of this commodity imported globally to meet demand.";
 
-        wrapper.getParent = () -> {
+        wrapper.parentSupplier = () -> {
             for (ColumnManager column : table.getColumns()) {
                 if ("Quantity".equals(column.title)) {
                     return ((HeaderPanelWithTooltip) column.getHeaderPanel()).getParent();
@@ -1198,7 +1198,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         };
 
         wrapper.factory = () -> {
-            TooltipMakerAPI tp = wrapper.getParent.get().createUIElement(
+            TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
                 SortableTable.headerTooltipWidth*2, 0, false
             );
 

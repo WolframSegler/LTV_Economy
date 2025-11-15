@@ -80,12 +80,10 @@ public class TextPanel extends CustomPanel<BasePanelPlugin<TextPanel>, TextPanel
         createPanel();
     }
 
-    @Override
     public void setSoundEnabled(boolean a) {
         isSoundEnabled = a;
     }
 
-    @Override
     public boolean isSoundEnabled() {
         return isSoundEnabled;
     }
@@ -96,12 +94,10 @@ public class TextPanel extends CustomPanel<BasePanelPlugin<TextPanel>, TextPanel
 
     public void createPanel() {}
 
-    @Override
     public CustomPanelAPI getTpParent() {
         return null;
     }
 
-    @Override
     public TooltipMakerAPI createAndAttachTp() {
         return null;
     }

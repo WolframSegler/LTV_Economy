@@ -46,7 +46,6 @@ public class CustomDetailDialogPanel<
 
     public void createPanel() {}
 
-    @Override
     public void setBgColor(Color color) {
         BgColor = color;
 

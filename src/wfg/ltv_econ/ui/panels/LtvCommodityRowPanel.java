@@ -101,7 +101,6 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         return persistentGlow;
     }
 
-    @Override
     public void setPersistentGlow(boolean a) {
         persistentGlow = a;
     }

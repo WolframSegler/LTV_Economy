@@ -188,8 +188,6 @@ public abstract class CustomPanel<
         default FactionAPI getFaction() {
             return Global.getSector().getPlayerFaction();
         }
-
-        default void setFaction(FactionAPI faction) {}
     }
 
     /**
@@ -261,10 +259,10 @@ public abstract class CustomPanel<
         default void onShortcutPressed(CustomPanel<?, ?, ?> source) {}
 
         /**
-         * Use org.lwjgl.input.Keyboard
+         * Use org.lwjgl.input.Keyboard. Default of 0 means no shortcut.
          */
-        default Optional<Integer> getShortcut() {
-            return Optional.empty();
+        default int getShortcut() {
+            return 0;
         } 
     }
 
@@ -280,9 +278,7 @@ public abstract class CustomPanel<
             return true;
         }
 
-        default FaderUtil getFader() {
-            return new FaderUtil(0, 0, 0.2f, true, true);
-        }
+        FaderUtil getFader();
 
         default Glow getGlowType() {
             return Glow.OVERLAY;
@@ -292,8 +288,6 @@ public abstract class CustomPanel<
             return false;
         }
 
-        default void setPersistentGlow(boolean a) {}
-
         default float getOverlayBrightness() {
             return 1.2f;
         }
@@ -302,9 +296,9 @@ public abstract class CustomPanel<
             return 0.6f;
         }
 
-        Color getGlowColor();
-
-        default void setGlowColor(Color a) {}
+        default Color getGlowColor() {
+            return Color.WHITE;
+        }
 
         /**
          * Used for additive Glow. Leave as null if not using it.
@@ -315,9 +309,6 @@ public abstract class CustomPanel<
     }
 
     public static interface HasOutline {
-        default void setOutline(Outline a) {
-
-        }
 
         default Outline getOutline() {
             return Outline.LINE;
@@ -326,9 +317,6 @@ public abstract class CustomPanel<
         default Color getOutlineColor() {
             return Misc.getDarkPlayerColor();
         }
-        default void setOutlineColor(Color color) {
-
-        }
     }
 
     public static interface HasAudioFeedback {
@@ -336,18 +324,18 @@ public abstract class CustomPanel<
             return true;
         }
 
-        default void setSoundEnabled(boolean a) {
+        default String getButtonPressedSound() {
+            return "ui_button_pressed";
+        }
 
+        default String getMouseOverSound() {
+            return "ui_button_mouseover";
         }
     }
 
     public static interface HasBackground {
         default Color getBgColor() {
             return new Color(0, 0, 0, 255);
-        }
-
-        default void setBgColor(Color color) {
-
         }
 
         default boolean isBgEnabled() {
@@ -462,7 +450,7 @@ public abstract class CustomPanel<
              * Must return a non-null UIPanelAPI.
              * Classes that support PendingTooltip will use this factory.
              */
-            public  Supplier<ParentType> getParent;
+            public  Supplier<ParentType> parentSupplier;
         }
     }
 }

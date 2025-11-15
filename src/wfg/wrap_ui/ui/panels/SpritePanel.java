@@ -77,17 +77,14 @@ public class SpritePanel<
         getPlugin().init();
     }
 
-    @Override
     public Outline getOutline() {
         return drawBorder ? Outline.VERY_THIN : Outline.NONE;
     }
 
-    @Override
     public Color getOutlineColor() {
         return outlineColor;
     }
 
-    @Override
     public void setOutlineColor(Color a) {
         outlineColor = a;
     }
@@ -99,6 +96,7 @@ public class SpritePanel<
     public void setSprite(String spriteID) {
         m_sprite = Global.getSettings().getSprite(spriteID);
     }
+    
     public void setSprite(SpriteAPI sprite) {
         m_sprite = sprite;
     }
