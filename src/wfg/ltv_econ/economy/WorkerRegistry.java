@@ -34,8 +34,9 @@ public class WorkerRegistry {
         }
     }
 
-    public static final void createInstance() {
-        instance = new WorkerRegistry();
+    public static final WorkerRegistry createInstance() {
+        if (instance == null) instance = new WorkerRegistry();
+        return instance;
     }
 
     public static final void setInstance(WorkerRegistry a) {

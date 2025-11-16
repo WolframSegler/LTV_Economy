@@ -29,6 +29,7 @@ import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
+import wfg.ltv_econ.constants.SubmarketsID;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -37,6 +38,7 @@ import wfg.wrap_ui.util.NumFormat;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 
 /**
@@ -95,7 +97,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 {
 
     public static final String KEY = "::";
-    public static final String STOCKPILES_ID = "stockpiles";
 
     private static EconomyEngine instance;
 
@@ -106,10 +107,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     private transient ExecutorService mainLoopExecutor;
 
-    public static void createInstance() {
+    public static EconomyEngine createInstance() {
         if (instance == null) {
             instance = new EconomyEngine();
         }
+        return instance;
     }
 
     public static void setInstance(EconomyEngine a) {
@@ -332,7 +334,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
         final MarketAPI market = planet.getMarket();
         registerMarket(market);
-        planet.getMarket().addSubmarket(STOCKPILES_ID);
+        planet.getMarket().addSubmarket(SubmarketsID.STOCKPILES);
+        planet.getMarket().removeSubmarket(Submarkets.LOCAL_RESOURCES);
     }
 
     public void reportPlayerAbandonedColony(MarketAPI market) {

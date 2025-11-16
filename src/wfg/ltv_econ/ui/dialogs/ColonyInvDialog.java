@@ -181,7 +181,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         withdrawSlider.setUserAdjustable(true);
         withdrawSlider.setBarColor(withdrawColor);
         withdrawSlider.showValueOnly = true;
-        withdrawSlider.customText = () -> Misc.getDGSCredits(withdrawSlider.getProgress());
+        withdrawSlider.customText = () -> Misc.getDGSCredits(withdrawSlider.getProgressInterpolated());
         m_panel.add(withdrawSlider).inTL(500, 10);
 
         final Slider depositSlider = new Slider(
@@ -191,7 +191,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         depositSlider.setUserAdjustable(true);
         depositSlider.setBarColor(depositColor);
         depositSlider.showValueOnly = true;
-        depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgress());
+        depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgressInterpolated());
         m_panel.add(depositSlider).inTL(500, 50);
 
         final Runnable refreshUI = () -> {

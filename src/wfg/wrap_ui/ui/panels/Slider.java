@@ -156,6 +156,10 @@ public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
         return progressValue;
     }
 
+    public float getProgressInterpolated() {
+        return cachedProgressValue;
+    }
+
     public void setLineUpTextOnCenter(boolean bool, float width) {
         lineUpTextOnCenter = bool;
         lineUpTextOnCenterWidth = width;

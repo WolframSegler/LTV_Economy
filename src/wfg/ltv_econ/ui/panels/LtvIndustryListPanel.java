@@ -422,9 +422,8 @@ public class LtvIndustryListPanel extends CustomPanel<
 			InputEventAPI targetEvent = null;
 
 			for (InputEventAPI event : events) {
-				if (event.isConsumed()) {
-					continue;
-				}
+				if (event.isConsumed()) continue;
+
 				if (event.isLMBDownEvent() || event.isRMBDownEvent()) {
 					targetEvent = event;
 					break;

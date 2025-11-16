@@ -124,12 +124,6 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		cargo.sort();
 	}
 
-	protected Object readResolve() {
-		super.readResolve();
-
-		return this;
-	}
-
 	@Override
 	public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
 		final EconomyEngine engine = EconomyEngine.getInstance();

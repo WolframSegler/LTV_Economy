@@ -49,23 +49,23 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         final Map<String, Object> persistentData = sector.getPersistentData();
         final ListenerManagerAPI listener = sector.getListenerManager();
 
-        final EconomyEngine engine = (EconomyEngine) persistentData.get(EconEngine);
-        final WorkerRegistry workerRegistry = (WorkerRegistry) persistentData.get(WorkerReg);
+        WorkerRegistry workerRegistry = (WorkerRegistry) persistentData.get(WorkerReg);
+        EconomyEngine engine = (EconomyEngine) persistentData.get(EconEngine);
 
-        if (engine != null) {
-            EconomyEngine.setInstance(engine);
-        } else {
-            EconomyEngine.createInstance();
-            if (settings.isDevMode()) {
-                Global.getLogger(getClass()).info("Economy Engine constructed");
-            }
-        }
         if (workerRegistry != null) {
             WorkerRegistry.setInstance(workerRegistry);
         } else {
-            WorkerRegistry.createInstance();
+            workerRegistry = WorkerRegistry.createInstance();
             if (settings.isDevMode()) {
                 Global.getLogger(getClass()).info("Worker Registery constructed");
+            }
+        }
+        if (engine != null) {
+            EconomyEngine.setInstance(engine);
+        } else {
+            engine = EconomyEngine.createInstance();
+            if (settings.isDevMode()) {
+                Global.getLogger(getClass()).info("Economy Engine constructed");
             }
         }
 
@@ -74,12 +74,12 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         );
 
         listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
-        listeners.add(0, EconomyEngine.getInstance());
+        listeners.add(0, engine);
 
         sector.addTransientScript(new LtvMarketReplacer());
         sector.addTransientScript(new EconomyEngineScript());
         listener.addListener(new AddWorkerIndustryOption(), true);
-        listener.addListener(EconomyEngine.getInstance(), true);
+        listener.addListener(engine, true);
     }
 
     @Override
