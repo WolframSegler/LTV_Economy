@@ -20,6 +20,7 @@ import wfg.wrap_ui.util.NumUtils;
 import wfg.wrap_ui.util.RenderUtils;
 
 import java.awt.Color;
+import java.util.function.Supplier;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -48,6 +49,15 @@ public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
     public int roundingIncrement = 1;
     public Color widgetColor;
     public boolean showAdjustableIndicator = false;
+    /**
+     * Optional supplier that dynamically provides the label's text.
+     *
+     * Example:
+     * <pre>
+     * slider.customText = () -> Misc.getDGSCredits(slider.getProgress());
+     * </pre>
+     */
+    public Supplier<String> customText = null;
 
     private final int windowWidth = Display.getWidth();
     private final int windowHeight = Display.getWidth();
@@ -842,7 +852,10 @@ public class Slider extends CustomPanel<SliderPlugin, Slider, UIPanelAPI> {
         }
 
         shouldInterpolateCachedValues = false;
-        if (showLabelOnly) {
+        if (customText != null) {
+            label.setText(customText.get());
+
+        } else if (showLabelOnly) {
             label.setText(labelText);
 
         } else if (showPercent) {

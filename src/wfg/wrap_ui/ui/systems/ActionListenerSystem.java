@@ -31,7 +31,7 @@ public final class ActionListenerSystem<
                 listener.onClicked(getPanel(), false);
             }
 
-            if (listener.getShortcut() > 0) {
+            if (listener.getShortcut() > 0 && getPlugin().isValidUIContext()) {
                 if (Keyboard.isKeyDown(listener.getShortcut())) {
                     if (!shortcutKeyDown) {
                         listener.onShortcutPressed(getPanel());

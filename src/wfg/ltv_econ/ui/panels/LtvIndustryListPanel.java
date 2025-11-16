@@ -8,7 +8,6 @@ import java.util.List;
 import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignUIAPI.DismissDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -19,16 +18,13 @@ import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
-import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
@@ -39,19 +35,25 @@ import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
 import wfg.ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
 import wfg.ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
+import wfg.ltv_econ.util.ListenerFactory;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.UIState;
+import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.TextPanel;
+import wfg.wrap_ui.ui.panels.Button.CutStyle;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.reflection.ReflectionUtils;
 import wfg.reflection.ReflectionUtils.ReflectedConstructor;
 
-public class LtvIndustryListPanel
-	extends CustomPanel<IndustryListPanelPlugin, LtvIndustryListPanel, UIPanelAPI>
-	implements ActionListenerDelegate, DismissDialogDelegate {
+public class LtvIndustryListPanel extends CustomPanel<
+	IndustryListPanelPlugin, LtvIndustryListPanel, UIPanelAPI
+> {
 
 	public static final int BUTTON_SECTION_HEIGHT = 45;
 	public static final int pad = 3;
@@ -59,10 +61,9 @@ public class LtvIndustryListPanel
 
 	public static final ReflectedConstructor indPickCtor = ReflectionUtils.getConstructorsMatching(IndustryPickerDialog.class, 3).get(0);
 	public static ReflectedConstructor indOptCtor = null;
-	public final UIComponentAPI dummyWidget;
-
-	private final IndustryListPanel originalIndustryPanel;
+	
 	private final List<Object> widgets = new ArrayList<>();
+	public final UIPanelAPI dummyWidget;
 	private final MarketAPI m_market;
 
 	public List<Object> getWidgets() {
@@ -73,25 +74,21 @@ public class LtvIndustryListPanel
 		return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
 	}
 
-	private ButtonAPI buildButton;
-	private TooltipMakerAPI buildButtonTp;
-	private boolean buildDialogOpen = false;
+	private Button buildButton;
 
 	public LtvIndustryListPanel(UIPanelAPI parent, int width, int height, MarketAPI market, 
 		UIPanelAPI industryPanel) {
 		super(parent, width, height, new IndustryListPanelPlugin());
 
 		m_market = market;
-		originalIndustryPanel = (IndustryListPanel) industryPanel;
 
-		dummyWidget = originalIndustryPanel.getWidgets().get(0);
+		dummyWidget = ((IndustryListPanel)industryPanel).getWidgets().get(0);
 		dummyWidget.setOpacity(0);
 
 		initializePlugin(hasPlugin);
 		createPanel();
    	}
 
-	@Override
 	public void initializePlugin(boolean hasPlugin) {
 		getPlugin().init(this);
 	}
@@ -100,11 +97,6 @@ public class LtvIndustryListPanel
 		indOptCtor = a;
 	}
 
-	public UIPanelAPI getOverview() {
-		return originalIndustryPanel.getOverview();
-	}
-
-	@Override
 	public void createPanel() {
 		clearChildren();
 		widgets.clear();
@@ -181,10 +173,6 @@ public class LtvIndustryListPanel
 
 		widgetWrapper.addUIElement(wrappertp).inTL(-pad, 0);
 		add(widgetWrapper).inTL(0, 0);
-
-		TooltipMakerAPI buttonWrapper = getPanel().createUIElement(
-            getPos().getWidth(), getPos().getHeight(), false
-        );
 		
 		TextPanel creditLblPanel = null;
 		TextPanel maxIndLblPanel = null;
@@ -337,36 +325,50 @@ public class LtvIndustryListPanel
             };
         }
 
-		buttonWrapper.setButtonFontOrbitron20Bold();
-		buttonWrapper.setActionListenerDelegate(this);
+		final Runnable buildBtnRunnable = () -> {
+			UIState.setState(State.DIALOG);
+
+			final Object listener = new ListenerFactory.DialogDismissedListener() {
+				@Override
+				public void trigger(Object... args) {
+					dialogDismissed(args);
+				}
+			}.getProxy();
+
+			UIPanelAPI coreUI = Attachments.getInteractionCoreUI();
+			if (coreUI == null) Attachments.getCoreUI();
+			IndustryPickerDialog dialog = (IndustryPickerDialog) indPickCtor.newInstance(
+				m_market,
+				coreUI,
+				listener
+			);
+			dialog.show(0.3F, 0.2F);
+		};
 
 		final int buildBtnWidth = 350;
-		buildButton = buttonWrapper.addButton(
-            "   Add industry or structure...",
-            null,
-            Misc.getBasePlayerColor(),
-            Misc.getDarkPlayerColor(),
-            Alignment.LMID,
-            CutStyle.TL_BR,
-            buildBtnWidth,
-            25,
-            pad
-        );
-		buildButton.setShortcut(Keyboard.KEY_Q, false);
+		buildButton = new Button(
+			getPanel(), buildBtnWidth, 25,
+			"      Add industry or structure...", Fonts.ORBITRON_20AABOLD,
+			buildBtnRunnable
+		);
+		buildButton.setCutStyle(CutStyle.TL_BR);
+		buildButton.setAlignment(Alignment.LMID);
+		buildButton.setLabelColor(Misc.getBasePlayerColor());
+		buildButton.setShortcut(Keyboard.KEY_A);
+		buildButton.getPlugin().setIgnoreUIState(false);
+		buildButton.getPlugin().setTargetUIState(State.NONE);
 		
-		buttonWrapper.addComponent(buildButton).inBL(0, BUTTON_SECTION_HEIGHT);
+		add(buildButton).inBL(0, BUTTON_SECTION_HEIGHT);
 		add(creditLblPanel.getPanel()).inBL(buildBtnWidth + 70, BUTTON_SECTION_HEIGHT);
 		add(maxIndLblPanel.getPanel()).inBR(40, BUTTON_SECTION_HEIGHT);
 
 		if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
-			buildButton.setEnabled(false);
+			buildButton.disabled = true;
 			if (DebugFlags.HIDE_COLONY_CONTROLS) {
 				creditLblPanel.getPanel().setOpacity(0);
-				buildButton.setOpacity(0);
+				buildButton.getPanel().setOpacity(0);
 			}
 		}
-
-		add(buttonWrapper).inBL(0, 0);
 	}
 
 	public final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, LtvIndustryWidget widget) {
@@ -389,38 +391,6 @@ public class LtvIndustryListPanel
 
 			return tp;
 		};
-	}
-
-	public void advanceImpl(float amount) {
-		boolean shouldEnableButton = DebugFlags.COLONY_DEBUG || m_market.isPlayerOwned();
-		
-		if (shouldEnableButton != buildButton.isEnabled()) {
-			buildButton.setEnabled(shouldEnableButton);
-			if (!shouldEnableButton) {
-				buildButtonTp = getPanel().createUIElement(300, 0, false);
-
-				buildButtonTp.addPara("Maximum number of industries reached.", 0);
-
-				add(buildButtonTp);
-				WrapUiUtils.anchorPanel(buildButtonTp, buildButton, AnchorType.LeftBottom, 0);
-
-			} else {
-				remove(buildButtonTp);
-
-				buildButtonTp = null;
-			}
-		}
-
-		/*
-		 * Call dialogDismissed for this class when the original listPanel's method runs. 
-		 */
-		if (buildDialogOpen) {
-			int currentSize = m_market.getConstructionQueue().getItems().size();
-			if (currentSize > previousQueueSize) {
-				buildDialogOpen = false;
-				dialogDismissed();
-			}
-		}
 	}
 
 	public void processInputImpl(List<InputEventAPI> events) {
@@ -472,72 +442,37 @@ public class LtvIndustryListPanel
 		}
 	}
 
+	public void dialogDismissed(Object... args) {
+		UIState.setState(State.NONE);
+			
+		// final List<?> chldr = CampaignEngine.getInstance().getCampaignUI()
+		// 	.getDialogParent().getChildrenNonCopy();
+		// IndustryPickerDialog buildDialog = chldr.stream()
+		// 	.filter(child -> child instanceof IndustryPickerDialog && child instanceof UIPanelAPI)
+		// 	.map(child -> (IndustryPickerDialog) child)
+		// 	.findFirst().orElse(null);
 
-	private int previousQueueSize = 0;
+		final IndustryPickerDialog buildDialog = (IndustryPickerDialog) args[0];
+		if (buildDialog.getSelected() == null) return;
 
-	public void actionPerformed(Object data, Object source) {
-		if (source == buildButton) {
-			buildDialogOpen = true;
+		Industry selectedIndustry = buildDialog.getSelected().getIndustry();
+		final int buildCost = (int) selectedIndustry.getBuildCost();
 
-			/*
-			 * Poll for queue size change to detect when the
-			 * dialogDismissed method for originalIndustryPanel is called.
-			 */
-			previousQueueSize = m_market.getConstructionQueue().getItems().size();
+		Misc.getCurrentlyBeingConstructed(m_market);
+		m_market.getConstructionQueue().addToEnd(selectedIndustry.getId(), buildCost);
 
-			// Get the button of the original widget to call its actionPerformed succesfully
-			Object originalBtn = ReflectionUtils.get(originalIndustryPanel, "build", ButtonAPI.class);
+		final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
+		playerCredits.subtract(buildCost);
+		if (playerCredits.get() <= 0) playerCredits.set(0);
 
-			// Call the original actionPerformed to set up the isDialogOpen enum. First parameter not used.
-			originalIndustryPanel.actionPerformed(null, originalBtn);
+		Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
+			String.format("Spent %s", Misc.getDGSCredits(buildCost)),
+			Misc.getTooltipTitleAndLightHighlightColor(),
+			Misc.getDGSCredits(buildCost),
+			Misc.getHighlightColor()
+		);
 
-			// The original method call handles this
-			// IndustryPickerDialog dialog = (IndustryPickerDialog) indPickCtor.newInstance(
-			// 	getMarket(),
-			// 	m_coreUI,
-			// 	originalIndustryPanel
-			// );
-			// dialog.show(0.3F, 0.2F);
-		}
-	}
-
-	public void dialogDismissed() {
-
-		if (buildDialogOpen) {
-			// // The dialogDismissed method of originalIndustryPanel already does the following.
-			// List<?> chldr = CampaignEngine.getInstance().getCampaignUI().getDialogParent().getChildrenNonCopy();
-    
-			// IndustryPickerDialog buildDialog = chldr.stream()
-			// 	.filter(child -> child instanceof IndustryPickerDialog && child instanceof UIPanelAPI)
-			// 	.map(child -> (IndustryPickerDialog) child)
-			// 	.findFirst().orElse(null);
-
-			// if (buildDialog.getSelected() != null) {
-			// 	Industry selectedIndustry = buildDialog.getSelected().getIndustry();
-			// 	final int buildCost = (int) selectedIndustry.getBuildCost();
-
-			// 	Misc.getCurrentlyBeingConstructed(getMarket());
-			// 	getMarket().getConstructionQueue().addToEnd(selectedIndustry.getId(), buildCost);
-
-			// 	MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
-			// 	playerCredits.subtract(buildCost);
-			// 	if (playerCredits.get() <= 0) {
-			// 		playerCredits.set(0);
-			// 	}
-
-			// 	CampaignEngine.getInstance().getCampaignUI().getMessageDisplay().addMessage(
-			// 		String.format(
-			// 			"Spent %s",
-			// 			Misc.getDGSCredits(buildCost)
-			// 		),
-			// 		Misc.getTooltipTitleAndLightHighlightColor(),
-			// 		Misc.getDGSCredits(buildCost),
-			// 		Misc.getHighlightColor()
-			// 	);
-			// }
-		} else {
-			buildDialogOpen = false;
-		}
+		createPanel();
 	}
 
 	public static MarketInteractionMode getMarketInteractionMode(MarketAPI market) {

@@ -181,6 +181,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         withdrawSlider.setUserAdjustable(true);
         withdrawSlider.setBarColor(withdrawColor);
         withdrawSlider.showValueOnly = true;
+        withdrawSlider.customText = () -> Misc.getDGSCredits(withdrawSlider.getProgress());
         m_panel.add(withdrawSlider).inTL(500, 10);
 
         final Slider depositSlider = new Slider(
@@ -190,6 +191,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         depositSlider.setUserAdjustable(true);
         depositSlider.setBarColor(depositColor);
         depositSlider.showValueOnly = true;
+        depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgress());
         m_panel.add(depositSlider).inTL(500, 50);
 
         final Runnable refreshUI = () -> {
@@ -197,7 +199,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             final long playerCred = engine.getCredits(m_market.getId());
             final LabelAPI colonyLbl = colonyCreditPanel.label1;
             final LabelAPI playerLbl = playerCreditPanel.label1;
-            
+
             depositSlider.setProgress(0);
             depositSlider.maxRange = colonyCred;
             withdrawSlider.setProgress(0);

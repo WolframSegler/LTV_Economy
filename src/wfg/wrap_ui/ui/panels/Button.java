@@ -2,10 +2,9 @@ package wfg.wrap_ui.ui.panels;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.awt.Color;
 
 import org.lwjgl.input.Keyboard;
-
-import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -40,20 +39,20 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     public boolean performActionWhenDisabled = false;
     public boolean tooltipExpanded = false;
     public boolean tooltipEnabled = false;
-    public Color bgColor = new Color(20, 125, 200);
-    public Color bgDisabledColor = new Color(100, 100, 100);
+    public Color bgColor = Misc.getDarkPlayerColor();
+    public Color bgDisabledColor = new Color(17, 52, 62);
     public Color highlightColor = Color.LIGHT_GRAY;
     public Object customData = null;
 
     private String labelText = "";
-    private String shortcutText = "";
+    private Alignment labelAlg = Alignment.MID;
     private String labelFont = "";
     private LabelAPI label = null;
     private Runnable onClick;
     private int shortcut = 0;
     private String buttonPressedSound = "ui_button_pressed";
     private String mouseOverSound = "ui_button_mouseover";
-    private boolean appendShortcutToText = true;
+    private boolean appendShortcutToText = false;
     private CutStyle cutStyle = CutStyle.NONE;
     private int overrideCut = 0;
     private Color labelColor = Misc.getButtonTextColor();
@@ -61,7 +60,7 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     private final PendingTooltip<CustomPanelAPI> tooltip = new PendingTooltip<>();
     
     /**
-     * @param onClick default action toggles the checked state.
+     * @param onClick default action toggles the checked state. Otherwise the toggle must be done by the Runnable
      */
     public Button(UIPanelAPI parent, int width, int height, String text, String font, Runnable onClick) {
         super(parent, width, height, new ButtonPlugin());
@@ -82,17 +81,24 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     public void createPanel() {
         final SettingsAPI settings = Global.getSettings();
         final PositionAPI pos = getPos();
-
         if (label != null) remove(label);
-        label = settings.createLabel(labelText, labelFont);
+
+        String finalText = labelText;
+        if (appendShortcutToText) finalText = finalText + " [" + Keyboard.getKeyName(shortcut) + "]";
+        label = settings.createLabel(finalText, labelFont);
+        label.getPosition().setSize(pos.getWidth(), pos.getHeight());
+        label.setColor(labelColor);
+        label.setAlignment(labelAlg);
+        if (appendShortcutToText) {
+            label.setHighlightColor(Misc.getHighlightColor());
+            label.setHighlight(Keyboard.getKeyName(shortcut));
+        }
+
         add(label);
-
-        label.setAlignment(Alignment.MID);
-
         final float centerX = pos.getX() + pos.getWidth() / 2f;
         final float centerY = pos.getY() + pos.getHeight() / 2f;
-        final float labelW = label.computeTextWidth(labelText);
-        final float labelH = label.computeTextHeight(labelText);
+        final float labelW = label.getPosition().getWidth();
+        final float labelH = label.getPosition().getHeight();
         label.getPosition().inBL(centerX - labelW / 2f, centerY - labelH / 2f);
     }
 
@@ -117,8 +123,10 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
 
     public void onShortcutPressed(CustomPanel<?, ?, ?> source) {
         if (disabled && !performActionWhenDisabled) return;
-        if (onClick != null) onClick.run();
-        if (!quickMode) checked = !checked;
+
+        if (onClick != null) {
+            onClick.run();
+        } else if (!quickMode) checked = !checked;
     }
 
     public int getShortcut() {
@@ -129,7 +137,9 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
      * @param keyCode the key code corresponding to {@link org.lwjgl.input.Keyboard} constants
      */
     public void setShortcut(int keyCode) {
-        this.shortcut = keyCode;
+        shortcut = keyCode;
+        appendShortcutToText = true;
+        createPanel();
     }
 
     public boolean isSoundEnabled() {
@@ -180,7 +190,7 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     }
 
     public boolean isPersistentGlow() {
-        return checked;
+        return checked && !disabled && !quickMode;
     }
 
     public float getOverlayBrightness() {
@@ -188,13 +198,8 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     }
 
     public void setText(String text) {
-        shortcutText = appendShortcutToText ? Keyboard.getKeyName(shortcut) : "";
         labelText = text;
         createPanel();
-        if (appendShortcutToText) {
-            label.setHighlightColor(Misc.getHighlightColor());
-            label.setHighlight(shortcutText);
-        }
     }
 
     public String getText() {
@@ -208,7 +213,7 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
 
     public void setAppendShortcutToText(boolean a) {
         appendShortcutToText = a;
-        setText(labelText);
+        createPanel();
     }
 
     public void setHighlightBounceDown(boolean bool) {
@@ -219,13 +224,18 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
         return labelColor;
     }
 
-    public void setLabeColor(Color color) {
+    public void setLabelColor(Color color) {
         labelColor = color;
-        label.setColor(color);
+        createPanel();
     }
 
     public Color getGlowColor() {
         return highlightColor;
+    }
+
+    public void setAlignment(Alignment alg) {
+        labelAlg = alg;
+        createPanel();
     }
 
     public void setTooltipFactory(Supplier<TooltipMakerAPI> factory) {

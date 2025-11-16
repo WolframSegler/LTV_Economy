@@ -18,7 +18,6 @@ import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.MapParams;
@@ -41,9 +40,11 @@ import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
+import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.TextPanel;
+import wfg.wrap_ui.ui.panels.Button.CutStyle;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.SortableTable.ColumnManager;
@@ -97,8 +98,8 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     }
 
     public TextPanel footerPanel = null;
-    public ButtonAPI producerButton = null;
-    public ButtonAPI consumerButton = null;
+    public Button producerButton = null;
+    public Button consumerButton = null;
     public LtvCommodityPanel section4ComPanel = null;
 
     public ComDetailDialog(MarketAPI market, CommodityOnMarketAPI com) {
@@ -273,10 +274,8 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         m_dialogPanel.removeComponent(section3);
 
         section3 = Global.getSettings().createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
-        TooltipMakerAPI tooltip = section3.createUIElement(SECT3_WIDTH, SECT3_HEIGHT, false);
-        section3.addUIElement(tooltip).inTL(0, 0);
 
-        createSection3(section3, tooltip, mode);
+        createSection3(section3, mode);
         m_dialogPanel.addComponent(section3).belowLeft(section1, opad);
     }
 
@@ -835,47 +834,55 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         map.getPosition().inTL(0, 0);
     }
 
-    private void createSection3(CustomPanelAPI section, TooltipMakerAPI tooltip, int mode) {
+    private void createSection3(CustomPanelAPI section, int mode) {
+        final Runnable producerRunnable = () -> {
+            if (producerButton.checked) return;
+
+            producerButton.checked = true;
+            consumerButton.checked = false;
+            updateSection3(0);
+        };
+
+        final Runnable consumerRunnable = () -> {
+            if (consumerButton.checked) return;
+            
+            consumerButton.checked = true;
+            producerButton.checked = false;
+            updateSection3(1);
+        };
 
         // Table buttons
         final int btnWidth = 200;
         final int btnHeight = 18;
 
-        producerButton = tooltip.addButton(
-            "Producers",
-            null,
-            Misc.getBasePlayerColor(),
-            Misc.getDarkPlayerColor(),
-            Alignment.MID,
-            CutStyle.TOP,
-            btnWidth, btnHeight, pad
+        producerButton = new Button(
+            section, btnWidth, btnHeight,
+            "Producers", Fonts.ORBITRON_12,
+            producerRunnable
         );
-        consumerButton = tooltip.addButton(
-            "Consumers",
-            null,
-            Misc.getBasePlayerColor(),
-            Misc.getDarkPlayerColor(),
-            Alignment.MID,
-            CutStyle.TOP,
-            btnWidth, btnHeight, pad
+        consumerButton = new Button(
+            section, btnWidth, btnHeight,
+            "Consumers", Fonts.ORBITRON_12,
+            consumerRunnable
         );
+        producerButton.setLabelColor(Misc.getBasePlayerColor());
+        consumerButton.setLabelColor(Misc.getBasePlayerColor());
+        producerButton.setCutStyle(CutStyle.TL_TR);
+        consumerButton.setCutStyle(CutStyle.TL_TR);
+        producerButton.setShortcut(Keyboard.KEY_1);
+        consumerButton.setShortcut(Keyboard.KEY_2);
+        producerButton.setAppendShortcutToText(true);
+        consumerButton.setAppendShortcutToText(true);
 
-        producerButton.setShortcut(Keyboard.KEY_1, false);
-        consumerButton.setShortcut(Keyboard.KEY_2, false);
-
-        producerButton.getPosition().inTL(0, -btnHeight);
-        consumerButton.getPosition().inTL(btnWidth, -btnHeight);
+        section.addComponent(producerButton.getPanel()).inTL(0, -btnHeight);
+        section.addComponent(consumerButton.getPanel()).inTL(btnWidth, -btnHeight);
         
         if (mode == 0) {
-            producerButton.setChecked(true);
-            consumerButton.setChecked(false);
-
-            producerButton.highlight();
+            producerButton.checked = true;
+            consumerButton.checked = false;
         } else if (mode == 1) {
-            producerButton.setChecked(false);
-            consumerButton.setChecked(true);
-
-            consumerButton.highlight();
+            producerButton.checked = false;
+            consumerButton.checked = true;
         }
 
         final SortableTable table = new SortableTable(
@@ -1032,11 +1039,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
     @Override
     public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
-        if (!isLeftClick) {
-            return;
-        }
+        if (!isLeftClick) return;
 
-        LtvCommodityRowPanel panel = ((LtvCommodityRowPanel)source);
+        final LtvCommodityRowPanel panel = ((LtvCommodityRowPanel)source);
         m_com = panel.getCommodity();
 
         section4ComPanel.selectRow(panel);
@@ -1044,7 +1049,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         if (section4ComPanel.m_canViewPrices) {
             updateSection1();
             
-            final int mode = producerButton.isChecked() ? 0 : 1;
+            final int mode = producerButton.checked ? 0 : 1;
 
             updateSection3(mode);
         } 

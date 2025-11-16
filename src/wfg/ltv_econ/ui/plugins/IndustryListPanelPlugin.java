@@ -10,13 +10,6 @@ import wfg.wrap_ui.ui.plugins.CustomPanelPlugin;
 public class IndustryListPanelPlugin extends CustomPanelPlugin<LtvIndustryListPanel, IndustryListPanelPlugin>  {
     
     @Override
-    public void advance(float amount) {
-        super.advance(amount);
-
-        getPanel().advanceImpl(amount);
-    }
-
-    @Override
     public void processInput(List<InputEventAPI> events) {
         super.processInput(events);
 
