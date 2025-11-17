@@ -161,16 +161,24 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     protected int dayTracker = -1;
+    protected int monthTracker = -1;
 
     public final void advance(float delta) {
         final int day = Global.getSector().getClock().getDay();
+        final int month = Global.getSector().getClock().getMonth();
 
-        if (dayTracker == -1) {
-            dayTracker = day;
+        if (dayTracker == -1) dayTracker = day;
+        if (monthTracker == -1) monthTracker = month;
+
+        if (monthTracker != month) {
+            monthTracker = month;
+
+            for (CommodityInfo info : m_comInfo.values()) {
+                info.endMonth();
+            }
         }
-
-        if (dayTracker == day)
-            return;
+        
+        if (dayTracker == day) return;
 
         dayTracker = day;
 
@@ -179,7 +187,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 try {
                     mainLoop(false);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Global.getLogger(EconomyEngine.class).error(e);
                 }
             });
         } else {
@@ -280,26 +288,26 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         final String marketID = market.getId();
         if (!m_registeredMarkets.add(marketID)) return;
 
+        WorkerRegistry.getInstance().register(marketID);
+        m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
+        if (market.isPlayerOwned()) m_playerMarkets.add(marketID);
+
         for (CommodityInfo comInfo : m_comInfo.values()) {
             comInfo.addMarket(marketID);
         }
-
-        if (market.isPlayerOwned()) m_playerMarkets.add(marketID);
-        m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
-        WorkerRegistry.getInstance().register(marketID);
     }
 
     public final void removeMarket(MarketAPI market) {
         final String marketID = market.getId();
-        if (m_registeredMarkets.remove(marketID)) {
-            for (CommodityInfo comInfo : m_comInfo.values()) {
-                comInfo.removeMarket(marketID);
-            }
+        if (!m_registeredMarkets.remove(marketID)) return;
 
-            if (market.isPlayerOwned()) m_playerMarkets.remove(marketID);
-            m_marketCredits.remove(marketID);
-            WorkerRegistry.getInstance().remove(marketID);
+        for (CommodityInfo comInfo : m_comInfo.values()) {
+            comInfo.removeMarket(marketID);
         }
+
+        if (market.isPlayerOwned()) m_playerMarkets.remove(marketID);
+        m_marketCredits.remove(marketID);
+        WorkerRegistry.getInstance().remove(marketID);
     }
 
     public final void refreshMarkets() {
@@ -325,6 +333,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         List<MarketAPI> markets = Global.getSector().getEconomy().getMarketsCopy();
         markets.removeIf(m -> !m.isInEconomy());
         return markets;
+    }
+
+    public final boolean isPlayerMarket(String marketID) {
+        return m_playerMarkets.contains(marketID);
     }
 
     public void reportPlayerOpenedMarket() {

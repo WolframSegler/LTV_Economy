@@ -147,7 +147,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         };
 
         final Button inventoryBtn = new Button(
-            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Inventory",
+            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Stockpiles",
             Fonts.ORBITRON_12, buildButtonRunnable
         );
         inventoryBtn.setLabelColor(Misc.getBasePlayerColor());

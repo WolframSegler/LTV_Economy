@@ -20,21 +20,28 @@ public class CommodityInfo {
 
     private final String comID;
     private final Map<String, CommodityStats> m_comStats = new HashMap<>();
+    private final Map<String, IncomeLedger> incomeLedgers = new HashMap<>();
 
     private transient long marketActivity;
+    private transient EconomyEngine engine;
 
     public CommodityInfo(
         CommoditySpecAPI spec, Set<String> registeredMarkets
     ) {
         comID = spec.getId();
+        final EconomyEngine engine = EconomyEngine.getInstance();
 
         for (String marketID : registeredMarkets) {
             m_comStats.put(marketID, new CommodityStats(comID, marketID));
+
+            if (!engine.isPlayerMarket(marketID)) continue;
+            incomeLedgers.put(marketID, new IncomeLedger());
         }
     }
 
     public Object readResolve() {
         marketActivity = 0;
+        engine = EconomyEngine.getInstance();
 
         return this;
     }
@@ -51,12 +58,24 @@ public class CommodityInfo {
         m_comStats.values().parallelStream().forEach(CommodityStats::update);
     }
 
+    public void endMonth() {
+        for (IncomeLedger ledger : incomeLedgers.values()) {
+            ledger.endMonth();
+        }
+    }
+
     public final void addMarket(String marketID) {
         m_comStats.putIfAbsent(marketID, new CommodityStats(comID, marketID));
+
+        if (!engine.isPlayerMarket(marketID)) return;
+        incomeLedgers.put(marketID, new IncomeLedger());
     }
 
     public final void removeMarket(String marketID) {
         m_comStats.remove(marketID);
+
+        if (!engine.isPlayerMarket(marketID)) return;
+        incomeLedgers.remove(marketID);
     }
 
     public final CommodityStats getStats(String marketID) {
@@ -69,6 +88,14 @@ public class CommodityInfo {
 
     public final Map<String, CommodityStats> getStatsMap() {
         return m_comStats;
+    }
+
+    public IncomeLedger getLedger(String marketID) {
+        return incomeLedgers.computeIfAbsent(marketID, k -> new IncomeLedger());
+    }
+
+    public boolean hasLedger(String marketID) {
+        return incomeLedgers.containsKey(marketID);
     }
 
     public static final Pair<String, String> getPairFromIndex(int index, List<MarketAPI> exporters,     
@@ -84,6 +111,9 @@ public class CommodityInfo {
         return new Pair<>(exporter, importer);
     }
 
+    /**
+     * @return The total credits spent on imports in the last trade cycle.
+     */
     public long getMarketActivity() {
         return marketActivity;
     }
@@ -147,9 +177,13 @@ public class CommodityInfo {
                 impStats.addInFactionImport(amountToSend);
 
                 if (fakeAdvance) continue;
-                engine.addCredits(expStats.marketID, (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT));
-                engine.addCredits(impStats.marketID, (int) (-price * EconomyConfig.FACTION_EXCHANGE_MULT));
+                final int credits = (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT);
+                engine.addCredits(expStats.marketID, credits);
+                engine.addCredits(impStats.marketID, -credits);
 
+                getLedger(expStats.marketID).recordExport(credits);
+                getLedger(impStats.marketID).recordImport(credits);
+                
             } else {
                 expStats.addGlobalExport(amountToSend);
                 impStats.addGlobalImport(amountToSend);
@@ -157,6 +191,9 @@ public class CommodityInfo {
                 if (fakeAdvance) continue;
                 engine.addCredits(expStats.marketID, (int) price);
                 engine.addCredits(impStats.marketID, (int) -price);
+
+                getLedger(expStats.marketID).recordExport((int) price);
+                getLedger(impStats.marketID).recordImport((int) price);
             }
         }
     }
@@ -189,16 +226,16 @@ public class CommodityInfo {
      * Descending order: highest score first.
      */
     public static void radixSortIndices(int[] indices, int[] pairScores) {
-        int n = indices.length;
-        int[] output = new int[n];
+        final int n = indices.length;
+        final int[] output = new int[n];
 
         int maxScore = 0;
         for (int i = 0; i < n; i++) {
             if (pairScores[indices[i]] > maxScore) maxScore = pairScores[indices[i]];
         }
 
-        int[] count = new int[256];
-        int shift = 0; // start with least significant byte
+        final int[] count = new int[256];
+        int shift = 0;
 
         while ((maxScore >> shift) != 0) {
             for (int i = 0; i < 256; i++) count[i] = 0;
@@ -221,7 +258,7 @@ public class CommodityInfo {
 
             System.arraycopy(output, 0, indices, 0, n);
 
-            shift += 8; // next byte
+            shift += 8;
         }
     }
 
@@ -267,7 +304,7 @@ public class CommodityInfo {
         if (value == 1f) return 1f;
         if (value > 1f) {
             return 1f + (float)Math.pow(value - 1f, 0.8f);  // diminishing growth
-        } else { // value < 1
+        } else {
             return 1f - (float)Math.pow(1f - value, 1.4f);  // harsher penalty
         }
     }

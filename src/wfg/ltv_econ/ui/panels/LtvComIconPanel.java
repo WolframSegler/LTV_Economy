@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -39,7 +39,7 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
     private FactionAPI m_faction = null;
 
     public boolean isExpanded = false;
-    public CommodityOnMarketAPI m_com;
+    public CommoditySpecAPI m_com;
 
     public LtvComIconPanel(UIPanelAPI parent, FactionAPI faction, int width, int height,
         SpritePanelPlugin<LtvComIconPanel> plugin, String iconSpriteID, Color color, Color fillColor) {
@@ -49,7 +49,7 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
         m_faction = faction;
     }
 
-    public void setCommodity(CommodityOnMarketAPI a) {
+    public void setCommodity(CommoditySpecAPI a) {
         m_com = a;
     }
 
@@ -100,9 +100,7 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
 
     @Override
     public TooltipMakerAPI createAndAttachTp() {
-        if (m_com == null) {
-            return null;
-        }
+        if (m_com == null) return null;
 
         final Color gray = new Color(100, 100, 100);
 
@@ -111,12 +109,12 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
 
         m_tooltip.setParaFont(Fonts.ORBITRON_12);
-        m_tooltip.addPara(m_com.getCommodity().getName(), m_faction.getBaseUIColor(), pad);
+        m_tooltip.addPara(m_com.getName(), m_faction.getBaseUIColor(), pad);
 
         m_tooltip.setParaFontDefault();
         m_tooltip.addPara(comDesc, opad);
 
-        String basePrice = ((int)m_com.getCommodity().getBasePrice()) + Strings.C;
+        String basePrice = ((int)m_com.getBasePrice()) + Strings.C;
         m_tooltip.addPara("Base value: %s per unit.", opad, Misc.getHighlightColor(), basePrice);
 
         if (!isExpanded) {
@@ -125,7 +123,7 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
         } else {
             m_tooltip.addSpacer(opad);
 
-            TooltipUtils.cargoComTooltip(m_tooltip, pad, opad, m_com.getCommodity(), 5,
+            TooltipUtils.cargoComTooltip(m_tooltip, pad, opad, m_com, 5,
                 true, true, true); 
         }
         

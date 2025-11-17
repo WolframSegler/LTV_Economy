@@ -12,7 +12,6 @@ import java.awt.Color;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -22,7 +21,6 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
-import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
@@ -34,9 +32,9 @@ import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.submarkets.OpenSubmarketPlugin;
 import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.SpritePanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
@@ -58,10 +56,12 @@ public class TooltipUtils {
      * Reflectively calls the original factory method
      */
     public static void cargoTooltipFactory(TooltipMakerAPI tooltip, float pad, CommoditySpecAPI com,
-            int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy) {
-
-        ReflectionUtils.invoke(CargoTooltipFactory.class, "super", tooltip, pad, com, rowsPerTable, showExplanation,
-                showBestSell, showBestBuy);
+        int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy
+    ) {
+        ReflectionUtils.invoke(
+            CargoTooltipFactory.class, "super", tooltip, pad, com, rowsPerTable,
+            showExplanation, showBestSell, showBestBuy
+        );
         tooltip.getPosition().setSize(1000, 0);
     }
 
@@ -69,47 +69,40 @@ public class TooltipUtils {
      * Literally copied this from com.fs.starfarer.ui.impl.CargoTooltipFactory.
      * Only modified the parts that concern me. All hail Alex, the Lion of Sindria.
      * 
-     * @param showExplanation
-     *                        Displays explanation paragraphs
-     * 
-     * @param showBestSell
-     *                        Shows the best places to make a profit selling the
-     *                        commodity.
-     * 
-     * @param showBestBuy
-     *                        Shows the best places to buy the commodity at a
-     *                        discount.
+     * @param showExplanation Displays explanation paragraphs
+     * @param showBestSell Shows the best places to make a profit selling the commodity.
+     * @param showBestBuy Shows the best places to buy the commodity at a discount.
      */
-    public static void cargoComTooltip(TooltipMakerAPI tooltip, int pad, int opad, CommoditySpecAPI comSpec,
-            int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy) {
-
+    public static void cargoComTooltip(TooltipMakerAPI tooltip, int pad, int opad, CommoditySpecAPI spec,
+        int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy
+    ) {
         final Color gray = Misc.getGrayColor();
         final Color highlight = Misc.getHighlightColor();
         final int rowH = 20;
+        final EconomyEngine engine = EconomyEngine.getInstance();
 
         if (!Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay()) {
             if (showExplanation) {
                 tooltip.addPara(
-                        "Seeing remote price data for various colonies requires being within range of a functional comm relay.",
-                        gray, pad);
+                    "Seeing remote price data for various colonies requires being within range of a functional comm relay.",
+                    gray, pad
+                );
             }
             return;
         }
 
         final CountingMap<String> countingMap = new CountingMap<>();
-        final String comID = comSpec.getId();
-        final int econUnit = (int) comSpec.getEconUnit();
+        final String comID = spec.getId();
+        final int econUnit = (int) spec.getEconUnit();
 
         if (showBestSell) {
-            ArrayList<MarketAPI> marketList = new ArrayList<>();
-            for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-                if (!market.isHidden() && market.getEconGroup() == null &&
-                        market.hasSubmarket(Submarkets.SUBMARKET_OPEN)) {
-                    CommodityOnMarketAPI comData = market.getCommodityData(comID);
-                    int demandScore = (int) (comData.getDemand().getDemand().getModifiedValue()
-                            + comData.getGreedValue());
-                    if (demandScore > 0 && demandScore >= econUnit) {
-                        marketList.add(market);
+            final ArrayList<CommodityStats> marketList = new ArrayList<>();
+            for (CommodityStats stats : engine.getCommodityInfo(comID).getAllStats()) {
+                if (!stats.market.isHidden() && stats.market.getEconGroup() == null &&
+                    stats.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
+                ) {
+                    if (1f - stats.getAvailabilityRatio() > 0 && stats.getDeficit() > econUnit) {
+                        marketList.add(stats);
                     }
                 }
             }
@@ -117,24 +110,22 @@ public class TooltipUtils {
             Collections.sort(marketList, createSellComparator(comID, econUnit));
             if (!marketList.isEmpty()) {
                 tooltip.addPara("Best places to sell:", pad);
-                int relativeY = (int) tooltip.getPosition().getY() - (int) tooltip.getPrev().getPosition().getY();
-                tooltip.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[] { "Price", 100,
-                        "Demand", 70, "Deficit", 70, "Location", 230, "Star system", 140, "Dist (ly)", 80 });
+                final int relativeY = (int) tooltip.getPosition().getY() -
+                    (int) tooltip.getPrev().getPosition().getY();
+
+                tooltip.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[] {
+                    "Price", 100, "Demand", 70, "Deficit", 70, "Location", 230,
+                    "Star system", 140, "Dist (ly)", 80
+                });
                 countingMap.clear();
 
                 int rowCount = 0;
-                for (MarketAPI market : marketList) {
+                for (CommodityStats stats : marketList) {
+                    final MarketAPI market = stats.market;
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
-                        CommodityOnMarketAPI com = market.getCommodityData(comID);
-                        CommodityStats comStat = EconomyEngine.getInstance().getComStats(comID, market.getId());
-                        long marketDemand = com.getMaxDemand() - com.getPlayerTradeNetQuantity();
-                        if (marketDemand < 0) {
-                            marketDemand = 0;
-                        }
 
-                        int unitPrice = (int) market.getDemandPrice(comID, 1, true);
-                        float deficit = comStat.getDeficit();
+                        final float deficit = stats.getDeficit();
                         Color labelColor = highlight;
                         Color deficitColor = gray;
                         String quantityLabel = "---";
@@ -143,67 +134,65 @@ public class TooltipUtils {
                             deficitColor = Misc.getNegativeHighlightColor();
                         }
 
-                        if (marketDemand > 0) {
-                            String lessThanSymbol = "";
-                            marketDemand = marketDemand / 100 * 100;
-                            if (marketDemand < 100) {
-                                marketDemand = 100;
-                                lessThanSymbol = "<";
-                                labelColor = gray;
-                            }
+                        String lessThanSymbol = "";
+                        long marketDemand = (long) stats.getBaseDemand(false);
+                        marketDemand = marketDemand / 100 * 100;
+                        if (marketDemand < 100) {
+                            marketDemand = 100;
+                            lessThanSymbol = "<";
+                            labelColor = gray;
+                        }
 
-                            String factionName = market.getFaction().getDisplayName();
-                            String location = "In hyperspace";
-                            Color locationColor = gray;
-                            if (market.getStarSystem() != null) {
-                                StarSystemAPI starSystem = market.getStarSystem();
-                                location = starSystem.getBaseName();
-                                PlanetAPI star = starSystem.getStar();
-                                locationColor = star.getSpec().getIconColor();
-                                locationColor = Misc.setBrightness(locationColor, 235);
-                            }
+                        final String factionName = market.getFaction().getDisplayName();
+                        String location = "In hyperspace";
+                        Color locationColor = gray;
+                        if (market.getStarSystem() != null) {
+                            final StarSystemAPI starSystem = market.getStarSystem();
+                            location = starSystem.getBaseName();
+                            final PlanetAPI star = starSystem.getStar();
+                            locationColor = star.getSpec().getIconColor();
+                            locationColor = Misc.setBrightness(locationColor, 235);
+                        }
 
-                            float distanceToPlayer = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
+                        final float distanceToPlayer = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
 
-                            tooltip.addRow(new java.lang.Object[] {
-                                    highlight,
-                                    Misc.getDGSCredits(unitPrice),
-                                    labelColor,
-                                    lessThanSymbol + NumFormat.engNotation(marketDemand),
-                                    deficitColor,
-                                    quantityLabel,
-                                    Alignment.LMID,
-                                    market.getFaction().getBaseUIColor(),
-                                    market.getName() + " - " + factionName,
-                                    locationColor,
-                                    location,
-                                    highlight,
-                                    Misc.getRoundedValueMaxOneAfterDecimal(distanceToPlayer)
-                            });
+                        tooltip.addRow(new java.lang.Object[] {
+                            highlight,
+                            Misc.getDGSCredits(stats.getPlayerSellPrice(econUnit)),
+                            labelColor,
+                            lessThanSymbol + NumFormat.engNotation(marketDemand),
+                            deficitColor,
+                            quantityLabel,
+                            Alignment.LMID,
+                            market.getFaction().getBaseUIColor(),
+                            market.getName() + " - " + factionName,
+                            locationColor,
+                            location,
+                            highlight,
+                            Misc.getRoundedValueMaxOneAfterDecimal(distanceToPlayer)
+                        });
 
-                            // Arrow Sprite
-                            SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
+                        final SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
-                            SpritePanel.Base arrowPanel = new Base(
-                                tooltip, 20, 20,
-                                new SpritePanelPlugin<>(), "", null,
-                                null, false
-                            );
+                        final Base arrowPanel = new Base(
+                            tooltip, 20, 20,
+                            new SpritePanelPlugin<>(), "", null,
+                            null, false
+                        );
 
-                            arrowPanel.setSprite(arrow);
+                        arrowPanel.setSprite(arrow);
 
-                            Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
-                            Vector2f targetLoc = market.getStarSystem().getLocation();
+                        final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
+                        final Vector2f targetLoc = market.getStarSystem().getLocation();
 
-                            arrow.setAngle(WrapUiUtils.rotateSprite(playerLoc, targetLoc));
+                        arrow.setAngle(WrapUiUtils.rotateSprite(playerLoc, targetLoc));
 
-                            int arrowY = relativeY + rowH * (2 + rowCount);
-                            tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
+                        final int arrowY = relativeY + rowH * (2 + rowCount);
+                        tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
 
-                            ++rowCount;
-                            if (rowCount >= rowsPerTable) {
-                                break;
-                            }
+                        ++rowCount;
+                        if (rowCount >= rowsPerTable) {
+                            break;
                         }
                     }
                 }
@@ -213,42 +202,44 @@ public class TooltipUtils {
         }
 
         if (showBestBuy) {
-            ArrayList<MarketAPI> marketList = new ArrayList<>();
-            for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-                if (!market.isHidden() && market.getEconGroup() == null &&
-                        market.hasSubmarket(Submarkets.SUBMARKET_OPEN)) {
-                    CommodityOnMarketAPI comData = market.getCommodityData(comID);
-                    int stockpileLimit = OpenMarketPlugin.getApproximateStockpileLimit(comData);
+            final ArrayList<CommodityStats> marketList = new ArrayList<>();
+            for (CommodityStats stats : engine.getCommodityInfo(comID).getAllStats()) {
+                if (!stats.market.isHidden() && stats.market.getEconGroup() == null &&
+                    stats.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
+                ) {
+                    final int stockpileLimit = (int) OpenSubmarketPlugin.getBaseStockpileLimit(
+                        stats.comID, stats.marketID
+                    );
                     if (stockpileLimit > 0 && stockpileLimit >= econUnit) {
-                        marketList.add(market);
+                        marketList.add(stats);
                     }
                 }
             }
 
             Collections.sort(marketList, createBuyComparator(comID, econUnit));
             if (!marketList.isEmpty()) {
-                int dynaOpad = showBestSell ? opad * 2 : opad;
 
-                tooltip.addPara("Best places to buy:", dynaOpad);
-                int relativeY = (int) tooltip.getPosition().getY() - (int) tooltip.getPrev().getPosition().getY();
-                tooltip.beginTable(Global.getSector().getPlayerFaction(), 20, new java.lang.Object[] { "Price", 100,
-                        "Available", 70, "Excess", 70, "Location", 230, "Star system", 140, "Dist (ly)", 80 });
+                tooltip.addPara("Best places to buy:", showBestSell ? opad * 2 : opad);
+                final int relativeY = (int) tooltip.getPosition().getY() -
+                    (int) tooltip.getPrev().getPosition().getY();
+                tooltip.beginTable(Global.getSector().getPlayerFaction(), 20, new java.lang.Object[] {
+                    "Price", 100, "Available", 70, "Excess", 70, "Location", 230,
+                    "Star system", 140, "Dist (ly)", 80 
+                });
                 countingMap.clear();
 
                 int rowCount = 0;
-                for (MarketAPI market : marketList) {
-                    CommodityOnMarketAPI com = market.getCommodityData(comID);
-
+                for (CommodityStats stats : marketList) {
+                    final MarketAPI market = stats.market;
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
-                        long stockpileLimit = OpenMarketPlugin.getApproximateStockpileLimit(com);
-                        int unitPrice = (int) market.getSupplyPrice(comID, 1, true);
-                        stockpileLimit += com.getPlayerTradeNetQuantity();
-                        if (stockpileLimit < 0) {
-                            stockpileLimit = 0;
-                        }
+                        long stockpileLimit = (long) OpenSubmarketPlugin.getBaseStockpileLimit(
+                            stats.comID, stats.marketID
+                        );
+                        stockpileLimit += market.getCommodityData(comID).getPlayerTradeNetQuantity();
+                        if (stockpileLimit < 0) stockpileLimit = 0;
 
-                        int excess = com.getExcessQuantity();
+                        int excess = (int) stats.getCanNotExport();
                         Color excessColor = gray;
                         String excessStr = "---";
                         if (excess > 0) {
@@ -263,37 +254,36 @@ public class TooltipUtils {
                             availableStr = "<";
                         }
 
-                        String factionName = market.getFaction().getDisplayName();
+                        final String factionName = market.getFaction().getDisplayName();
                         String location = "In hyperspace";
                         Color locationColor = gray;
                         if (market.getStarSystem() != null) {
-                            StarSystemAPI StarSystem = market.getStarSystem();
+                            final StarSystemAPI StarSystem = market.getStarSystem();
                             location = StarSystem.getBaseName();
-                            PlanetAPI star = StarSystem.getStar();
+                            final PlanetAPI star = StarSystem.getStar();
                             locationColor = star.getSpec().getIconColor();
                             locationColor = Misc.setBrightness(locationColor, 235);
                         }
 
-                        float distance = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
+                        final float distance = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
 
                         tooltip.addRow(new java.lang.Object[] {
-                                highlight,
-                                Misc.getDGSCredits(unitPrice),
-                                highlight,
-                                availableStr + NumFormat.engNotation(stockpileLimit),
-                                excessColor,
-                                excessStr,
-                                Alignment.LMID,
-                                market.getFaction().getBaseUIColor(),
-                                market.getName() + " - " + factionName,
-                                locationColor,
-                                location,
-                                highlight,
-                                Misc.getRoundedValueMaxOneAfterDecimal(distance)
+                            highlight,
+                            Misc.getDGSCredits(stats.getPlayerBuyPrice(econUnit)),
+                            highlight,
+                            availableStr + NumFormat.engNotation(stockpileLimit),
+                            excessColor,
+                            excessStr,
+                            Alignment.LMID,
+                            market.getFaction().getBaseUIColor(),
+                            market.getName() + " - " + factionName,
+                            locationColor,
+                            location,
+                            highlight,
+                            Misc.getRoundedValueMaxOneAfterDecimal(distance)
                         });
 
-                        // Arrow Sprite
-                        SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
+                        final SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                         final Base arrowPanel = new Base(tooltip, 20, 20,
                             new SpritePanelPlugin<>(), "", null, null, false
@@ -301,12 +291,12 @@ public class TooltipUtils {
 
                         arrowPanel.setSprite(arrow);
 
-                        Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
-                        Vector2f targetLoc = market.getStarSystem().getLocation();
+                        final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
+                        final Vector2f targetLoc = market.getStarSystem().getLocation();
 
                         arrow.setAngle(WrapUiUtils.rotateSprite(playerLoc, targetLoc));
 
-                        int arrowY = relativeY + rowH * (2 + rowCount);
+                        final int arrowY = relativeY + rowH * (2 + rowCount);
                         tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
 
                         rowCount++;
@@ -322,14 +312,16 @@ public class TooltipUtils {
 
         if (showExplanation) {
             tooltip.addPara(
-                    "All values approximate. Prices do not include tariffs, which can be avoided through black market trade.",
-                    Misc.getGrayColor(), opad);
+                "All values approximate. Prices do not include tariffs, which can be avoided through black market trade.",
+                Misc.getGrayColor(), opad);
 
-            // final Color txtColor = Misc.setAlpha(highlight, 155);
-            // tooltip.addPara("*Per unit prices assume buying or selling a batch of %s
-            // units. Each unit bought costs more as the market's supply is reduced, and
-            // each unit sold brings in less as demand is fulfilled.", opad, gray, txtColor,
-            // new String[]{"" + econUnit});
+            final Color txtColor = Misc.setAlpha(highlight, 155);
+            tooltip.addPara(
+                "*Per unit prices assume buying or selling a batch of %s" +
+                "units. Each unit bought costs more as the market's supply is reduced, and" +
+                "each unit sold brings in less as demand is fulfilled.",
+                opad, gray, txtColor, new String[]{"" + econUnit}
+            );
         }
     }
 
@@ -365,18 +357,18 @@ public class TooltipUtils {
         return codexTooltip;
     }
 
-    private static Comparator<MarketAPI> createSellComparator(String comID, int econUnit) {
-        return (m1, m2) -> {
-            int price1 = (int) (m1.getDemandPrice(comID, (double) econUnit, true) / econUnit);
-            int price2 = (int) (m2.getDemandPrice(comID, (double) econUnit, true) / econUnit);
+    private static Comparator<CommodityStats> createSellComparator(String comID, int econUnit) {
+        return (s1, s2) -> {
+            int price1 = (int) s1.getPlayerSellPrice(econUnit);
+            int price2 = (int) s2.getPlayerSellPrice(econUnit);
             return Integer.compare(price2, price1);
         };
     }
 
-    private static Comparator<MarketAPI> createBuyComparator(String comID, int econUnit) {
-        return (m1, m2) -> {
-            int price1 = (int) (m1.getSupplyPrice(comID, (double) econUnit, true) / econUnit);
-            int price2 = (int) (m2.getSupplyPrice(comID, (double) econUnit, true) / econUnit);
+    private static Comparator<CommodityStats> createBuyComparator(String comID, int econUnit) {
+        return (s1, s2) -> {
+            int price1 = (int) s1.getPlayerBuyPrice(econUnit);
+            int price2 = (int) s2.getPlayerBuyPrice(econUnit);
             return Integer.compare(price1, price2);
         };
     }
@@ -430,7 +422,6 @@ public class TooltipUtils {
 
     public static void createCommodityProductionBreakdown(
         TooltipMakerAPI tooltip,
-        CommodityOnMarketAPI com,
         CommodityStats comStats,
         Color highlight,
         Color negative
@@ -544,7 +535,6 @@ public class TooltipUtils {
 
     public static void createCommodityDemandBreakdown(
         TooltipMakerAPI tooltip,
-        CommodityOnMarketAPI com,
         CommodityStats comStats,
         Color highlight,
         Color negative

@@ -223,9 +223,6 @@ public class CommodityStats {
         demandBase = 0;
     }
 
-    /**
-     * Gets called each day to update the values and the stored amount.
-     */
     public final void advance() {
         addStoredAmount(getRealBalance());
     }
@@ -257,6 +254,16 @@ public class CommodityStats {
         float price = basePrice * scarcityMult * directionBias;
 
         return Math.max(price, 1f);
+    }
+
+    public final float getPlayerSellPrice(int amount) {
+        float value = getUnitPrice(PriceType.BUYING, amount); // The market is buying from the player
+        return market.getCommodityData(comID).getPlayerDemandPriceMod().computeEffective(value);
+    }
+
+    public final float getPlayerBuyPrice(int amount) {
+        float value = getUnitPrice(PriceType.SELLING, amount); // The market is selling to the player
+        return market.getCommodityData(comID).getPlayerSupplyPriceMod().computeEffective(value);
     }
 
     public static List<MarketAPI> getFactionMarkets(String factionId) {

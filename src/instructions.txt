@@ -12,8 +12,6 @@ Word Wrap shortcut: Alt + Z
 4. Compile the main project. Navigate to Ltv_Economy and run:
     mvn clean package
 
-6. Delete the logs from starsector_core/starsector.log
-
 Extra Instructions:
 
 - Use VisualVM OQL Console to look for strings in the game to find and update broken obfuscated code
@@ -29,8 +27,6 @@ Extra Instructions:
   -> Create me a porter message with all the relevant info about what we were working on and the overall project. This chat is getting slow. Paragraph format.
 
 runcode for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Mesha")) { p.getSpec().setTexture("graphics/planets/US_planet_textureAtoll.jpg"); p.applySpecChanges(); break; }
-
-TextFieldAPI is useful
 
 runcode SectorEntityToken fleet = Global.getSector().getPlayerFleet();  
       StarSystemAPI sys = (StarSystemAPI)fleet.getContainingLocation();

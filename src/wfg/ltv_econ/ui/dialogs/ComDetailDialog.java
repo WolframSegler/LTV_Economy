@@ -10,7 +10,7 @@ import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -90,11 +90,11 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     
     private final Color highlight = Misc.getHighlightColor();
 
-    private CommodityOnMarketAPI m_com;
+    private CommoditySpecAPI m_com;
     public MarketAPI m_selectedMarket = null;
 
     public void setCommodity(String comID) {
-        m_com = m_selectedMarket.getCommodityData(comID);
+        m_com = Global.getSettings().getCommoditySpec(comID);
     }
 
     public TextPanel footerPanel = null;
@@ -102,12 +102,12 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     public Button consumerButton = null;
     public LtvCommodityPanel section4ComPanel = null;
 
-    public ComDetailDialog(MarketAPI market, CommodityOnMarketAPI com) {
+    public ComDetailDialog(MarketAPI market, CommoditySpecAPI com) {
         // Measured using very precise tools!! (my eyes)
         this(market, com, 1166, 658 + 20);
     }
 
-    public ComDetailDialog(MarketAPI market, CommodityOnMarketAPI com, int panelW, int panelH) {
+    public ComDetailDialog(MarketAPI market, CommoditySpecAPI com, int panelW, int panelH) {
         this.PANEL_W = panelW;
         this.PANEL_H = panelH;
 
@@ -292,16 +292,15 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     }
 
     private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip, Color highlight) {
-        if (m_com == null) {
-            return;
-        }
-        tooltip.addSectionHeading(m_com.getCommodity().getName(), Alignment.MID, pad);
+        if (m_com == null) return;
+
+        tooltip.addSectionHeading(m_com.getName(), Alignment.MID, pad);
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
 
         // Icons
         final int iconSize = (int) (section.getPosition().getHeight() / 2.2f);
 
-        String comIconID = m_com.getCommodity().getIconName();
+        String comIconID = m_com.getIconName();
 
         final LtvComIconPanel iconLeft = new LtvComIconPanel(section, m_market.getFaction(),
             iconSize, iconSize, new SpritePanelPlugin<>(), comIconID, null, null
@@ -379,7 +378,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     tooltip.addPara(
                         "Total credits spent sector-wide for the import of " +
-                        m_com.getCommodity().getName() + ". " +
+                        m_com.getName() + ". " +
                         "Colonies with higher accessibility, faction relations and a shorter distance will have priority when exporting.\n\n"
                         +
                         "The value shown here includes the demand at your colonies, " +
@@ -456,7 +455,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
-                        "The total number of " + m_com.getCommodity().getName() + " being exported globally by all producing markets in the sector.\n\n" +
+                        "The total number of " + m_com.getName() + " being exported globally by all producing markets in the sector.\n\n" +
                         "This figure reflects the total global supply that reaches exportable surplus after local and in-faction demand is met.", pad
                     );
 
@@ -630,7 +629,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                         "your" : m_market.getFaction().getPersonNamePrefix(); 
 
                     tooltip.addPara(
-                            "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + marketOwner + " control.",
+                            "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
                             pad);
 
                     final float tpX = textX1 + textW1 + opad;
@@ -702,7 +701,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
 
                     tooltip.addPara(
-                        "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
+                        "Total export market share for " + m_com.getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
                         pad);
 
                     final float tpX = textX1 + textW1 + opad;
@@ -774,7 +773,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                         "your" : m_market.getFaction().getPersonNamePrefix(); 
 
                     tooltip.addPara(
-                            "Total export market share for " + m_com.getCommodity().getName() + " for all colonies under " + marketOwner + " control.",
+                            "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
                             pad);
 
                     final float tpX = textX1 + textW1 + opad;
@@ -904,7 +903,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         :
         "The portion of the global market value that this colony contributes.\n\nIncludes player-controlled colonies.";
         
-        final String creditTpDesc = mode == 0 ? "An estimate of how much income the colony is getting from exporting its production of the commodity. A lack of income means that the export activity is underground, most likely due to the commodity being illegal.\n\nIncome also depends on colony stability, so may not directly correlate with market share." 
+        final String creditTpDesc = mode == 0 ? "An estimate of how much daily income the colony is getting from exporting its production of the commodity.\n\nIncome also depends on colony stability, so may not directly correlate with market share." 
         :
         "How much the colony's demand contributes to the global market value for the commodity.";
 
@@ -951,7 +950,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             final String quantityTxt = NumFormat.engNotation(
                 mode == 0 ? (long) stats.globalExports : (long) stats.globalImports
             );
-            final float quantityValue = mode == 0 ? stats.globalExports : stats.globalImports;
+            final float quantityValue = mode == 0 ?
+                stats.globalExports + stats.inFactionExports * EconomyConfig.FACTION_EXCHANGE_MULT:
+                stats.globalImports + stats.inFactionImports * EconomyConfig.FACTION_EXCHANGE_MULT;
 
             final CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, stats);
 
@@ -960,14 +961,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             final int marketShare = mode == 0 ? engine.getExportMarketShare(comID, marketID) :
                 engine.getImportMarketShare(comID, marketID);
 
-            final int incomeValue = (int) (quantityValue * m_com.getCommodity().getBasePrice());
-            String incomeText = "---";
-
-            if (mode == 0) {
-                incomeText = market.isPlayerOwned() ? NumFormat.formatCredits(incomeValue) : "---";
-            } else if (mode == 1) {
-                incomeText = market.isPlayerOwned() ? "---" : NumFormat.formatCredits(incomeValue);
-            }
+            final int incomeValue = (int) (quantityValue * m_com.getBasePrice());
 
             final Color textColor = market.getFaction().getBaseUIColor();
 
@@ -979,7 +973,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             table.addCell(infoBar, cellAlg.MID, null, null);
             table.addCell(accessibility + "%", cellAlg.MID, accessibility, null);
             table.addCell(marketShare + "%", cellAlg.MID, marketShare, null);
-            table.addCell(incomeText, cellAlg.MID, incomeValue, null);
+            table.addCell(NumFormat.formatCredits(incomeValue), cellAlg.MID, incomeValue, null);
 
             // Tooltip
             PendingTooltip<CustomPanelAPI> tp = new PendingTooltip<>();
@@ -1063,21 +1057,22 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         };
 
         wrapper.factory = () -> {
-
             final int tpWidth = 450;
-            final CommodityOnMarketAPI com = market.getCommodityData(m_com.getId());
-    
-            final TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
-                tpWidth, 0, false);
-    
             final FactionAPI faction = market.getFaction();
+            final CommodityStats stats = EconomyEngine.getInstance().getComStats(
+                m_com.getId(), market.getId()
+            );
     
             final Color highlight = Misc.getHighlightColor();
             final Color negative = Misc.getNegativeHighlightColor();
             final Color darkColor = faction.getDarkUIColor();
+            
+            final TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
+                tpWidth, 0, false
+            );
     
             tp.setParaFont(Fonts.ORBITRON_12);
-            tp.addPara(marketName + " - " + com.getCommodity().getName(), baseColor, pad);
+            tp.addPara(marketName + " - " + m_com.getName(), baseColor, pad);
             tp.setParaFontDefault();
     
             String locString = "in the " + market.getContainingLocation().getNameWithLowercaseType();
@@ -1101,32 +1096,28 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 market.getIncomeMult(), null
             );
     
-            tp.addSectionHeading(com.getCommodity().getName() + " production & availability",
+            tp.addSectionHeading(m_com.getName() + " production & availability",
             baseColor, darkColor, Alignment.MID, opad);
-
-            CommodityStats comStats = EconomyEngine.getInstance().getComStats(com.getId(), market.getId());
                 
             TooltipUtils.createCommodityProductionBreakdown(
-                tp, com, comStats, highlight, negative
+                tp, stats, highlight, negative
             );
     
             TooltipUtils.createCommodityDemandBreakdown(
-                tp, com, comStats, highlight, negative
+                tp, stats, highlight, negative
             );
     
-            final int econUnit = (int)com.getCommodity().getEconUnit();
-            final int sellPrice = (int)market.getDemandPrice(
-                com.getId(), (double)econUnit, true) / econUnit;
-            final int buyPrice = (int)market.getSupplyPrice(
-                com.getId(), (double)econUnit, true) / econUnit;
+            final int econUnit = (int) m_com.getEconUnit();
+            final int sellPrice = (int) stats.getPlayerSellPrice(econUnit);
+            final int buyPrice = (int) stats.getPlayerBuyPrice(econUnit);
     
-            if (!com.isMeta()) {
-                if (comStats.getCanNotExport() > 0) {
+            if (!m_com.isMeta()) {
+                if (stats.getCanNotExport() > 0) {
                     tp.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), 
-                    highlight, NumFormat.engNotation((long) comStats.getCanNotExport()));
-                } else if (comStats.getDeficit() > 0) {
+                    highlight, NumFormat.engNotation((long) stats.getCanNotExport()));
+                } else if (stats.getDeficit() > 0) {
                     tp.addPara("Local deficit: %s units.", opad, negative, 
-                    highlight, NumFormat.engNotation((long) comStats.getDeficit()));
+                    highlight, NumFormat.engNotation((long) stats.getDeficit()));
                 }
     
                 tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{
@@ -1136,7 +1127,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     
             tp.addSectionHeading("Colony accessibility", baseColor, darkColor, Alignment.MID, opad);
     
-            int stability = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
+            final int stability = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
             Color valueColor = highlight;
             if (stability <= 0) {
                 valueColor = negative;
@@ -1146,36 +1137,28 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     
             tp.addStatModGrid(tpWidth, 50, opad, pad, market.getAccessibilityMod(),
                 new StatModValueGetter() {
-                public String getPercentValue(StatMod value) {
-                    return null;
+                    public String getPercentValue(StatMod value) {
+                        return null;
+                    }
+        
+                    public String getMultValue(StatMod value) {
+                        return null;
+                    }
+        
+                    public Color getModColor(StatMod value) {
+                        return value.value < 0 ? negative : null;
+                    }
+        
+                    public String getFlatValue(StatMod value) {
+                        return value.value >= 0 ? "+" + Math.round(value.value * 100) +
+                            "%" : Math.round(value.value * 100) + "%";
+                    }
                 }
+            );
     
-                public String getMultValue(StatMod value) {
-                    return null;
-                }
-    
-                public Color getModColor(StatMod value) {
-                    return value.value < 0 ? negative : null;
-                }
-    
-                public String getFlatValue(StatMod value) {
-                    return value.value >= 0 ? "+" + Math.round(value.value * 100) + "%" : Math.round(value.value * 100) + "%";
-                }
-            });
-    
-            final String seperator = "   - ";
-            int shippingGlobal = Global.getSettings().getShippingCapacity(market, false);
-            int shippingInFaction = Global.getSettings().getShippingCapacity(market, true);
-    
-            tp.addPara(seperator + "Same-faction imports and exports limited to %s units",
-                opad, highlight, NumFormat.engNotation(shippingInFaction));
-            tp.addPara(seperator + "Other imports and exports limited to %s units",
-                0, highlight, NumFormat.engNotation(shippingGlobal));
-    
-            stability = Math.max(stability, 0);
-            
-            tp.addPara(seperator + "Market share of exports multiplied by %s",
-                0, highlight, Strings.X + Misc.getRoundedValue(stability / 100.0F));
+            tp.addPara("   - " + "Market share of exports multiplied by %s",
+                0, highlight, Strings.X + Misc.getRoundedValue(Math.max(stability, 0) / 100.0F)
+            );
             tp.addPara(
                 "The same-faction export bonus does not increase market share or income from exports.", opad
             );
@@ -1203,20 +1186,16 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         };
 
         wrapper.factory = () -> {
-            TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
+            final TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
                 SortableTable.headerTooltipWidth*2, 0, false
             );
 
             tp.addPara(quantityDesc, pad);
 
-            AtomicInteger y = new AtomicInteger((int) tp.getHeightSoFar() + pad + opad);
+            final AtomicInteger y = new AtomicInteger((int) tp.getHeightSoFar() + pad + opad);
 
             LtvCommodityRowPanel.legendRowCreator(
-                1,
-                tp,
-                y,
-                26,
-                m_market
+                1, tp, y, 26, m_market
             );
 
             return tp;

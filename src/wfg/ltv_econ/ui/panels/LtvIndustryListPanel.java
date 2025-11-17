@@ -443,13 +443,6 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 	public void dialogDismissed(Object... args) {
 		UIState.setState(State.NONE);
-			
-		// final List<?> chldr = CampaignEngine.getInstance().getCampaignUI()
-		// 	.getDialogParent().getChildrenNonCopy();
-		// IndustryPickerDialog buildDialog = chldr.stream()
-		// 	.filter(child -> child instanceof IndustryPickerDialog && child instanceof UIPanelAPI)
-		// 	.map(child -> (IndustryPickerDialog) child)
-		// 	.findFirst().orElse(null);
 
 		final IndustryPickerDialog buildDialog = (IndustryPickerDialog) args[0];
 		if (buildDialog.getSelected() == null) return;

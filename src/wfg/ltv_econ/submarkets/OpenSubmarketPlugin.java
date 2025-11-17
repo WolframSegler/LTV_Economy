@@ -18,7 +18,7 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 
-public class OpenMarketSubmarketPlugin extends BaseSubmarketPlugin {
+public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	
 	public void init(SubmarketAPI submarket) {
 		super.init(submarket);
@@ -130,39 +130,61 @@ public class OpenMarketSubmarketPlugin extends BaseSubmarketPlugin {
             Global.getSector().getClock().getMonth() * 170000
         );
 
-        float limit = OpenMarketSubmarketPlugin.getBaseStockpileLimit(com);
+        float limit = OpenSubmarketPlugin.getBaseStockpileLimit(com.getId(), market.getId());
 		
 		limit *= 0.9f + 0.2f * random.nextFloat();
 		
 		final float sm = market.getStabilityValue() / 10f;
 		limit *= (0.25f + 0.75f * sm);
 		
-		return (int) Math.max(0, limit);
+		return (int) Math.max(0f, limit);
 	}
 	
-	public static final int ECON_UNIT_MULT_EXTRA = 9;
-	public static final int ECON_UNIT_MULT_PRODUCTION = 4;
-	public static final int ECON_UNIT_MULT_IMPORTS = 1;
-	public static final int ECON_UNIT_MULT_DEFICIT = 2;
-    public static final int ECON_UNIT_MULT_BASE = 3;
-	
-	public static float getBaseStockpileLimit(CommodityOnMarketAPI com) {
-        final CommodityStats stats = EconomyEngine.getInstance().getComStats(
-            com.getId(), com.getMarket().getId()
-        );
-		
-		float limit = 0f;
-		limit += stats.getTotalImports() * ECON_UNIT_MULT_IMPORTS;
-		limit += stats.getLocalProduction(true) * ECON_UNIT_MULT_PRODUCTION;
-		limit += stats.getCanNotExport() * ECON_UNIT_MULT_EXTRA;
-		limit -= stats.getDeficit() * ECON_UNIT_MULT_DEFICIT;
-        limit *= ECON_UNIT_MULT_BASE;
+    public static final float ECON_UNIT_MULT_BASE = 0.6f;
+	public static final float ECON_UNIT_MULT_EXTRA = 2f;
+	public static final float ECON_UNIT_MULT_PRODUCTION = 1.5f;
+	public static final float ECON_UNIT_MULT_IMPORTS = 1.2f;
+	public static final float ECON_UNIT_MULT_DEFICIT = 1.3f;
 
-		return (int) Math.max(0f, limit);
+	private static final float STOCKPILE_DEMAND_BASELINE = 900f;
+	private static final float RATIO_EXP = 0.4f;
+	private static final float STOCKPILE_SCALE_MIN = 0.01f;
+	private static final float STOCKPILE_SCALE_MAX = 4f;
+	
+	public static float getBaseStockpileLimit(String comID, String marketID) {
+        final CommodityStats stats = EconomyEngine.getInstance().getComStats(
+            comID, marketID
+        );
+
+		final float demand = Math.max(1f,stats.getBaseDemand(false));
+
+		final float impRatio = stats.getTotalImports() / demand;
+		final float prodRatio = stats.getLocalProduction(true) / demand;
+		final float extraRatio = stats.getCanNotExport() / demand;
+		final float defRatio = stats.getDeficit() / demand;
+
+		final float mult = 1f
+			+ impRatio  * ECON_UNIT_MULT_IMPORTS
+			+ prodRatio * ECON_UNIT_MULT_PRODUCTION
+			+ extraRatio * ECON_UNIT_MULT_EXTRA
+			- defRatio  * ECON_UNIT_MULT_DEFICIT
+		;
+
+		final float baseLinear = demand * ECON_UNIT_MULT_BASE * mult;
+
+		final float ratio = STOCKPILE_DEMAND_BASELINE / demand;
+		float scale = (float) Math.pow(ratio, RATIO_EXP);
+
+		if (scale < STOCKPILE_SCALE_MIN) scale = STOCKPILE_SCALE_MIN;
+		if (scale > STOCKPILE_SCALE_MAX) scale = STOCKPILE_SCALE_MAX;
+
+		final float finalLimit = Math.max(0f, baseLinear * scale);
+		return (int) finalLimit;
 	}
 	
     @Override
     public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
+		super.reportPlayerMarketTransaction(transaction);
         if (getTariff() <= 0f) return;
 
         final float tariffValue = transaction.getCreditValue() * getTariff();
