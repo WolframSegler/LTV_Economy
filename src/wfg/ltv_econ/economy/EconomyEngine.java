@@ -144,7 +144,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
             if (spec.isNonEcon()) continue;
 
-            m_comInfo.put(spec.getId(), new CommodityInfo(spec, m_registeredMarkets));
+            m_comInfo.put(spec.getId(), new CommodityInfo(spec, m_registeredMarkets, this));
         }
 
         readResolve();

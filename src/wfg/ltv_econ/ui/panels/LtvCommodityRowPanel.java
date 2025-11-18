@@ -271,18 +271,18 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
             opad, highlight,
             engine.getExportMarketShare(comID, m_comStats.marketID) + "%"
         );
-        } else if (exportIncomeLastMonth < 1) {
+        } else if (exportIncomeLastMonth < 1 && exportIncomeThisMonth < 1) {
             tooltip.addPara(
                 m_market.getName() + " is exporting %s units of " + commodityName + " and controls %s of the global market share. Income from exports are not tracked for non-player colonies.",
                 opad, highlight,
-                m_comStats.globalExports + "",
+                NumFormat.engNotation((long) m_comStats.getTotalExports()),
                 engine.getExportMarketShare(comID, m_comStats.marketID) + "%"
             );
         } else {
             tooltip.addPara(
                 m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. They generated %s last month and %s so far this month.",
                 opad, highlight,
-                m_comStats.globalExports + "",
+                NumFormat.engNotation((long) m_comStats.getTotalExports()),
                 engine.getExportMarketShare(comID, m_comStats.marketID) + "%",
                 NumFormat.formatCredits(exportIncomeLastMonth),
                 NumFormat.formatCredits(exportIncomeThisMonth)

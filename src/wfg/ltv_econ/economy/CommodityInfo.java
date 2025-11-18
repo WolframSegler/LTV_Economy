@@ -23,25 +23,22 @@ public class CommodityInfo {
     private final Map<String, IncomeLedger> incomeLedgers = new HashMap<>();
 
     private transient long marketActivity;
-    private transient EconomyEngine engine;
 
     public CommodityInfo(
-        CommoditySpecAPI spec, Set<String> registeredMarkets
+        CommoditySpecAPI spec, Set<String> registeredMarkets, EconomyEngine engine
     ) {
         comID = spec.getId();
-        final EconomyEngine engine = EconomyEngine.getInstance();
-
         for (String marketID : registeredMarkets) {
             m_comStats.put(marketID, new CommodityStats(comID, marketID));
 
-            if (!engine.isPlayerMarket(marketID)) continue;
-            incomeLedgers.put(marketID, new IncomeLedger());
+            if (engine.isPlayerMarket(marketID)) {
+                incomeLedgers.put(marketID, new IncomeLedger());
+            }
         }
     }
 
     public Object readResolve() {
         marketActivity = 0;
-        engine = EconomyEngine.getInstance();
 
         return this;
     }
@@ -67,15 +64,17 @@ public class CommodityInfo {
     public final void addMarket(String marketID) {
         m_comStats.putIfAbsent(marketID, new CommodityStats(comID, marketID));
 
-        if (!engine.isPlayerMarket(marketID)) return;
-        incomeLedgers.put(marketID, new IncomeLedger());
+        if (EconomyEngine.getInstance().isPlayerMarket(marketID)) {
+            incomeLedgers.put(marketID, new IncomeLedger());
+        }
     }
 
     public final void removeMarket(String marketID) {
         m_comStats.remove(marketID);
 
-        if (!engine.isPlayerMarket(marketID)) return;
-        incomeLedgers.remove(marketID);
+        if (EconomyEngine.getInstance().isPlayerMarket(marketID)) {
+            incomeLedgers.remove(marketID);
+        }
     }
 
     public final CommodityStats getStats(String marketID) {
@@ -91,7 +90,7 @@ public class CommodityInfo {
     }
 
     public IncomeLedger getLedger(String marketID) {
-        return incomeLedgers.computeIfAbsent(marketID, k -> new IncomeLedger());
+        return incomeLedgers.get(marketID);
     }
 
     public boolean hasLedger(String marketID) {
@@ -156,10 +155,9 @@ public class CommodityInfo {
             final float exportableRemaining = computeExportableRemaining(expStats);
             final float deficitRemaining = computeImportAmount(impStats);
 
-            if (exportableRemaining < 1 || deficitRemaining < 1) continue;
+            if (exportableRemaining < 0.01f || deficitRemaining < 0.01f) continue;
 
             final boolean sameFaction = expStats.market.getFaction().equals(impStats.market.getFaction());
-
             final float amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
             // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
@@ -181,8 +179,8 @@ public class CommodityInfo {
                 engine.addCredits(expStats.marketID, credits);
                 engine.addCredits(impStats.marketID, -credits);
 
-                getLedger(expStats.marketID).recordExport(credits);
-                getLedger(impStats.marketID).recordImport(credits);
+                if (engine.isPlayerMarket(expStats.marketID)) getLedger(expStats.marketID).recordExport(credits);
+                if (engine.isPlayerMarket(impStats.marketID)) getLedger(impStats.marketID).recordImport(credits);
                 
             } else {
                 expStats.addGlobalExport(amountToSend);
@@ -192,8 +190,8 @@ public class CommodityInfo {
                 engine.addCredits(expStats.marketID, (int) price);
                 engine.addCredits(impStats.marketID, (int) -price);
 
-                getLedger(expStats.marketID).recordExport((int) price);
-                getLedger(impStats.marketID).recordImport((int) price);
+                if (engine.isPlayerMarket(expStats.marketID)) getLedger(expStats.marketID).recordExport((int) price);
+                if (engine.isPlayerMarket(impStats.marketID)) getLedger(impStats.marketID).recordImport((int) price);
             }
         }
     }

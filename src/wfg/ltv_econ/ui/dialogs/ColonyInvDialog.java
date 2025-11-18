@@ -303,7 +303,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             table.addCell(NumFormat.engNotation(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             table.pushRow(
-                CodexDataV2.getCommodityEntryId(com.getId()), m_market, null, null, null
+                CodexDataV2.getCommodityEntryId(com.getId()), m_market, null, null, null, null
             );
         }
 

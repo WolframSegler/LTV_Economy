@@ -49,11 +49,13 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.SortableTable.ColumnManager;
 import wfg.wrap_ui.ui.panels.SortableTable.HeaderPanelWithTooltip;
+import wfg.wrap_ui.ui.panels.SortableTable.RowManager;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
+import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.reflection.ReflectionUtils;
 
@@ -986,12 +988,17 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 table.getPendingRow().setOutlineColor(Misc.getBasePlayerColor());
             }
 
+            final CallbackRunnable<RowManager> rowSelectedRunnable = (row) -> {
+                m_selectedMarket = row.getMarket();
+                updateSection1();
+                updateSection2();
+            };
+
             table.pushRow(
                 CodexDataV2.getCommodityEntryId(comID),
-                market,
-                null,
+                market, null,
                 m_market.getFaction().getDarkUIColor(),
-                tp
+                tp, rowSelectedRunnable
             );
 
             if (m_market == market) {
@@ -1004,12 +1011,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         table.sortRows(6);
 
         table.createPanel();
-
-        table.setRowSelectionListener(selectedRow -> {
-            m_selectedMarket = selectedRow.getMarket();
-            updateSection1();
-            updateSection2();
-        });
     }
 
     private void createSection4(CustomPanelAPI section) {

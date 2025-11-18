@@ -18,6 +18,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.UIState.State;
@@ -99,20 +100,10 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     private int selectedSortColumnIndex = -1;
     private boolean ascending = true;
 
-    RowSelectionListener selectionListener;
-
     private RowManager m_selectedRow;
 
     private CustomPanelAPI m_headerContainer = null;
     private CustomPanelAPI m_rowContainer = null;
-
-    public interface RowSelectionListener {
-        void onRowSelected(RowManager selectedRow);
-    }
-
-    public void setRowSelectionListener(RowSelectionListener a) {
-        selectionListener = a;
-    }
 
     public RowManager getPendingRow() {
         return pendingRow;
@@ -464,44 +455,27 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     }
 
     public class RowManager extends CustomPanel<BasePanelPlugin<RowManager>, RowManager, CustomPanelAPI> 
-        implements HasTooltip, HasFader, HasOutline, HasAudioFeedback, HasMarket {
-
+        implements HasTooltip, HasFader, HasOutline, HasAudioFeedback, HasMarket, HasActionListener, AcceptsActionListener
+    {
+        public Color textColor = Misc.getBasePlayerColor();
+        public PendingTooltip<? extends UIPanelAPI> m_tooltip = null;
+        public CallbackRunnable<RowManager> onRowClicked = null;
+        
         protected final List<Object> m_cellData = new ArrayList<>();
         protected final List<cellAlg> m_cellAlignment = new ArrayList<>();
         protected final List<Object> m_sortValues = new ArrayList<>();
         protected final List<Color> m_useColor = new ArrayList<>();
         protected String codexID = null;
-        
-        public Color textColor = Misc.getBasePlayerColor();
-        public PendingTooltip<? extends UIPanelAPI> m_tooltip = null;
-        
-        private FaderUtil m_fader = null;
+
+        private final FaderUtil m_fader;
         private boolean isPersistentGlow = false;
         private Color glowColor = Misc.getDarkPlayerColor();
         private Outline outline = Outline.NONE;
         private Color outlineColor = Misc.getDarkPlayerColor();
         private MarketAPI m_market = null;
 
-        public RowManager(UIPanelAPI parent, int width, int height,
-            RowSelectionListener listener) {
-            super(parent, width, height, new BasePanelPlugin<>() {
-                
-                @Override
-                public void advance(float amount) {
-                    super.advance(amount);
-
-                    if (inputSnapshot.LMBUpLastFrame && inputSnapshot.hasLMBClickedBefore) {
-                        SortableTable table = SortableTable.this;
-                        table.selectRow(m_panel);
-
-                        if (table.selectionListener != null) {
-                            table.selectionListener.onRowSelected(m_panel);
-                        }
-
-                        inputSnapshot.hasLMBClickedBefore = false;
-                    }
-                }
-            });
+        public RowManager(UIPanelAPI parent, int width, int height) {
+            super(parent, width, height, new BasePanelPlugin<>());
 
             m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
@@ -627,6 +601,17 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
         public FaderUtil getFader() {
             return m_fader;
+        }
+
+        public Optional<HasActionListener> getActionListener() {
+            return Optional.of(this);
+        }
+
+        public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
+            SortableTable table = SortableTable.this;
+            table.selectRow(this);
+            m_selectedRow = this;
+            if (onRowClicked != null) onRowClicked.run(this);
         }
 
         public Glow getGlowType() {
@@ -777,13 +762,8 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             pendingRow = new RowManager(
                 getParent(),
                 (int) getPos().getWidth() - 2,
-                m_rowHeight,
-                new RowSelectionListener() {
-                    @Override
-                    public void onRowSelected(RowManager row) {
-                        m_selectedRow = row;
-                    }
-                });
+                m_rowHeight
+            );
         }
 
         pendingRow.addCell(cell, alg, sortValue, textColor);
@@ -799,7 +779,8 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
      * The {@link PendingTooltip} can be null.
      */
     public <TpType extends CustomPanelAPI> void pushRow(String codexID, MarketAPI market, Color textColor,
-        Color glowClr, PendingTooltip<TpType> tp) {
+        Color glowClr, PendingTooltip<TpType> tp, CallbackRunnable<RowManager> onRowClicked
+    ) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
                     + "Call addCell() before pushRow().");
@@ -812,9 +793,8 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         pendingRow.setCodexId(codexID);
         pendingRow.setMarket(market);
         pendingRow.setTextColor(textColor);
-        if (glowClr != null) {
-            pendingRow.setGlowColor(glowClr);
-        }
+        if (glowClr != null) pendingRow.setGlowColor(glowClr);
+        if (onRowClicked != null) pendingRow.onRowClicked = onRowClicked;
 
         pendingRow.m_tooltip = tp;
         
