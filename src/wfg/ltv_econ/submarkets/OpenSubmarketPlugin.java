@@ -146,8 +146,8 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	public static final float ECON_UNIT_MULT_IMPORTS = 1.2f;
 	public static final float ECON_UNIT_MULT_DEFICIT = 1.3f;
 
-	private static final float STOCKPILE_DEMAND_BASELINE = 900f;
-	private static final float RATIO_EXP = 0.4f;
+	private static final float STOCKPILE_BASELINE = 900f;
+	private static final float RATIO_EXP = 0.5f;
 	private static final float STOCKPILE_SCALE_MIN = 0.01f;
 	private static final float STOCKPILE_SCALE_MAX = 4f;
 	
@@ -156,7 +156,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
             comID, marketID
         );
 
-		final float demand = Math.max(1f,stats.getBaseDemand(false));
+		final float demand = Math.max(stats.getAvailable(), stats.getBaseDemand(false));
 
 		final float impRatio = stats.getTotalImports() / demand;
 		final float prodRatio = stats.getLocalProduction(true) / demand;
@@ -172,7 +172,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 		final float baseLinear = demand * ECON_UNIT_MULT_BASE * mult;
 
-		final float ratio = STOCKPILE_DEMAND_BASELINE / demand;
+		final float ratio = STOCKPILE_BASELINE / demand;
 		float scale = (float) Math.pow(ratio, RATIO_EXP);
 
 		if (scale < STOCKPILE_SCALE_MIN) scale = STOCKPILE_SCALE_MIN;

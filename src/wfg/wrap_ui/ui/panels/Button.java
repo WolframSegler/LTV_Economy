@@ -23,6 +23,8 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.plugins.ButtonPlugin;
+import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
+import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.RenderUtils;
 
 public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implements 
@@ -39,30 +41,34 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     public boolean performActionWhenDisabled = false;
     public boolean tooltipExpanded = false;
     public boolean tooltipEnabled = false;
+    public boolean disabledWhileInvisible = true;
     public Color bgColor = Misc.getDarkPlayerColor();
     public Color bgDisabledColor = new Color(17, 52, 62);
-    public Color highlightColor = Color.LIGHT_GRAY;
+    public Color highlightColor = Misc.getBasePlayerColor();
+    public Glow highlightType = Glow.OVERLAY;
     public Object customData = null;
 
-    private String labelText = "";
-    private Alignment labelAlg = Alignment.MID;
-    private String labelFont = "";
-    private LabelAPI label = null;
-    private Runnable onClick;
-    private int shortcut = 0;
-    private String buttonPressedSound = "ui_button_pressed";
-    private String mouseOverSound = "ui_button_mouseover";
-    private boolean appendShortcutToText = false;
-    private CutStyle cutStyle = CutStyle.NONE;
-    private int overrideCut = 0;
-    private Color labelColor = Misc.getButtonTextColor();
-    private final FaderUtil fader = new FaderUtil(0, 0, 0.2f, true, true);
-    private final PendingTooltip<CustomPanelAPI> tooltip = new PendingTooltip<>();
+    protected String labelText = "";
+    protected Alignment labelAlg = Alignment.MID;
+    protected String labelFont = "";
+    protected LabelAPI label = null;
+    protected CallbackRunnable<Button> onClick;
+    protected int shortcut = 0;
+    protected String buttonPressedSound = "ui_button_pressed";
+    protected String mouseOverSound = "ui_button_mouseover";
+    protected boolean appendShortcutToText = false;
+    protected CutStyle cutStyle = CutStyle.NONE;
+    protected int overrideCut = 0;
+    protected Color labelColor = Misc.getButtonTextColor();
+    protected final FaderUtil fader = new FaderUtil(0, 0, 0.2f, true, true);
+    protected final PendingTooltip<CustomPanelAPI> tooltip = new PendingTooltip<>();
     
     /**
      * @param onClick default action toggles the checked state. Otherwise the toggle must be done by the Runnable
      */
-    public Button(UIPanelAPI parent, int width, int height, String text, String font, Runnable onClick) {
+    public Button(UIPanelAPI parent, int width, int height, String text, String font,
+        CallbackRunnable<Button> onClick
+    ) {
         super(parent, width, height, new ButtonPlugin());
 
         labelText = text;
@@ -117,16 +123,19 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
         onShortcutPressed(source);
     }
 
-    public void setOnClick(Runnable r) {
+    public void setOnClick(CallbackRunnable<Button> r) {
         onClick = r;
     }
 
     public void onShortcutPressed(CustomPanel<?, ?, ?> source) {
         if (disabled && !performActionWhenDisabled) return;
+        if (getPanel().getOpacity() <= 0f && !disabledWhileInvisible) return;
 
         if (onClick != null) {
-            onClick.run();
+            onClick.run(this);
         } else if (!quickMode) checked = !checked;
+
+        label.flash(0.2f, 1f);
     }
 
     public int getShortcut() {
@@ -233,6 +242,10 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
         return highlightColor;
     }
 
+    public Glow getGlowType() {
+        return highlightType;
+    }
+
     public void setAlignment(Alignment alg) {
         labelAlg = alg;
         createPanel();
@@ -253,7 +266,7 @@ public class Button extends CustomPanel<ButtonPlugin, Button, UIPanelAPI> implem
     }
 
     public float getBgAlpha() {
-        return disabled ? 0.75f : 0.85f;
+        return disabled ? 0.8f : 0.9f;
     }
 
     public void setCutStyle(CutStyle style) {

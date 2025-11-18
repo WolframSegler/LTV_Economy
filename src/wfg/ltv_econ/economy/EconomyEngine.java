@@ -97,9 +97,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 {
 
     public static final String KEY = "::";
-
     private static EconomyEngine instance;
-
+    
     private final Set<String> m_registeredMarkets;
     private final Set<String> m_playerMarkets;
     private final Map<String, Long> m_marketCredits = new HashMap<>();
@@ -499,11 +498,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             final MarketAPI market = markets.get(i);
 
             for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
-                /* NOTE: We intentionally do not skip non-functional industries here.
-                 * The solver treats them as still "visible" to model market lag.
-                 * The player never sees their worker counts since UI hides non-functional industries.
-                 * if (!ind.isFunctional()) continue;
-                */ 
+                if (!ind.isFunctional()) continue;
 
                 final IndustryConfig config = IndustryIOs.getIndConfig(ind);
                 if (!config.workerAssignable) continue;

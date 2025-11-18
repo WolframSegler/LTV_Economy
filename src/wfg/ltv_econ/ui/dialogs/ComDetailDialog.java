@@ -836,7 +836,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     }
 
     private void createSection3(CustomPanelAPI section, int mode) {
-        final Runnable producerRunnable = () -> {
+        final CallbackRunnable<Button> producerRunnable = (btn) -> {
             if (producerButton.checked) return;
 
             producerButton.checked = true;
@@ -844,7 +844,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             updateSection3(0);
         };
 
-        final Runnable consumerRunnable = () -> {
+        final CallbackRunnable<Button> consumerRunnable = (btn) -> {
             if (consumerButton.checked) return;
             
             consumerButton.checked = true;

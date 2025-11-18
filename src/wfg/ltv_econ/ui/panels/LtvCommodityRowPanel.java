@@ -177,9 +177,6 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
     }
 
     private Base getSourceIcon(Color color, int size, UIPanelAPI parent) {
-        boolean isSourceIllegal = false;
-        // boolean isSourceIllegal = commodityData.getMarketShareData(getMarket()).isSourceIsIllegal();
-
         String iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
         Color baseColor = color;
 
@@ -191,15 +188,10 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
                 iconPath = Global.getSettings().getSpriteName("commodity_markers", "production");
             }
         }
-
-        final Base iconPanel = new Base(parent, size, size, new SpritePanelPlugin<>(),
-            iconPath, baseColor, null, isSourceIllegal
+        
+        return new Base(parent, size, size, new SpritePanelPlugin<>(),
+            iconPath, baseColor, null, false
         );
-        if (isSourceIllegal) {
-            iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
-            iconPanel.setOutlineColor(Color.RED);
-        }
-        return iconPanel;
     }
 
     @Override

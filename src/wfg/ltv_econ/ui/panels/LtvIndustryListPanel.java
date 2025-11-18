@@ -37,6 +37,7 @@ import wfg.ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg.ltv_econ.util.ListenerFactory;
 import wfg.ltv_econ.util.UiUtils;
+import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
@@ -325,7 +326,7 @@ public class LtvIndustryListPanel extends CustomPanel<
             };
         }
 
-		final Runnable buildBtnRunnable = () -> {
+		final CallbackRunnable<Button> buildBtnRunnable = (btn) -> {
 			UIState.setState(State.DIALOG);
 
 			final Object listener = new ListenerFactory.DialogDismissedListener() {

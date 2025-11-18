@@ -31,6 +31,7 @@ import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
@@ -220,12 +221,12 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             playerCreditPanel.getPos().setSize(playerLbl.getPosition().getWidth(), sliderH);
         };
 
-        final Runnable withdrawRunnable = () -> {
+        final CallbackRunnable<Button> withdrawRunnable = (btn) -> {
             engine.addCredits(m_market.getId(), (int) -withdrawSlider.getProgress());
             playerCredits.add((int) withdrawSlider.getProgress());
             refreshUI.run();
         };
-        final Runnable depositRunnable = () -> {
+        final CallbackRunnable<Button> depositRunnable = (btn) -> {
             engine.addCredits(m_market.getId(), (int) depositSlider.getProgress());
             playerCredits.add((int) -depositSlider.getProgress());
             refreshUI.run();

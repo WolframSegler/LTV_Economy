@@ -12,6 +12,7 @@ import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
+import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
@@ -38,9 +39,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 public class LtvMarketReplacer implements EveryFrameScript {
 
-    public static final int pad = 3;
-    public static final SectorAPI sector = Global.getSector();
-
+    private static final SectorAPI sector = Global.getSector();
     private int frames = 0;
 
     @Override
@@ -138,7 +137,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         final MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
 
-        final Runnable buildButtonRunnable = () -> {
+        final CallbackRunnable<Button> buildButtonRunnable = (btn) -> {
             final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);
 
             WrapUiUtils.CustomDialogViewer(
