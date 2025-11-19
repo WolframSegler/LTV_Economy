@@ -14,13 +14,11 @@ import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
 
 public class EconomyOverviewPanel extends CustomPanel<
-    BasePanelPlugin<EconomyOverviewPanel>, EconomyOverviewPanel, UIPanelAPI> implements
-    HasBackground
+    BasePanelPlugin<EconomyOverviewPanel>, EconomyOverviewPanel, UIPanelAPI>
 {
 
     public static final int opad = 10;
@@ -137,9 +135,5 @@ public class EconomyOverviewPanel extends CustomPanel<
         caller.checked = true;
         ReflectionUtils.invoke(contentPanel, "clearChildren");
         ReflectionUtils.invoke(optionsPanel, "clearChildren");
-    }
-
-    public float getBgAlpha() {
-        return 0.8f;
     }
 }

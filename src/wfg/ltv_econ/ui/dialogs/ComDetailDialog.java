@@ -294,6 +294,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
     private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip, Color highlight) {
         if (m_com == null) return;
+        final EconomyEngine engine = EconomyEngine.getInstance();
 
         tooltip.addSectionHeading(m_com.getName(), Alignment.MID, pad);
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
@@ -332,7 +333,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 public void createPanel() {
                     final TooltipMakerAPI tooltip = m_panel.createUIElement(170, 0, false);
 
-                    final long value = EconomyEngine.getInstance().getCommodityInfo(comID)
+                    final long value = engine.getCommodityInfo(comID)
                         .getMarketActivity();
                     final String txt = "Global market value";
                     String valueTxt = NumFormat.formatCredits(value);
@@ -417,7 +418,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     String txt = "Total global exports";
 
                     String valueTxt = NumFormat.engNotation(
-                        EconomyEngine.getInstance().getTotalGlobalExports(comID)
+                        engine.getTotalGlobalExports(comID)
                     );
 
                     tooltip.setParaFontColor(baseColor);
@@ -500,11 +501,11 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     String txt = "Total " + factionName + " exports";
 
                     final String globalValue = NumFormat.engNotation(
-                        EconomyEngine.getInstance().getFactionTotalGlobalExports(
+                        engine.getFactionTotalGlobalExports(
                             comID, currMarket.getFaction())
                     );
                     final String inFactionValue = NumFormat.engNotation(
-                        EconomyEngine.getInstance().getTotalInFactionExports(
+                        engine.getTotalInFactionExports(
                             comID, currMarket.getFaction())
                     );
 
@@ -587,9 +588,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     final String factionName = m_market.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
+                    final String valueTxt = (int)(engine.getFactionTotalExportMarketShare(
                         comID, m_market.getFaction().getId()
-                    ) * 100 + "%";
+                    ) * 100) + "%";
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -662,9 +663,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     final String factionName = m_selectedMarket.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
+                    final String valueTxt = (int) (engine.getFactionTotalExportMarketShare(
                         comID, m_selectedMarket.getFactionId()
-                    ) * 100 + "%";
+                    ) * 100) + "%";
 
                     tooltip.setParaFontColor(m_selectedMarket.getFaction().getBaseUIColor());
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -731,9 +732,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     final String factionName = m_market.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
+                    final String valueTxt = (int) (engine.getFactionTotalExportMarketShare(
                         comID, m_market.getFaction().getId()
-                    ) * 100 + "%";
+                    ) * 100) + "%";
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -920,7 +921,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
         );
 
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = engine;
 
         for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
 
@@ -948,12 +949,8 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
             final String factionName = market.getFaction().getDisplayName();
 
-            final String quantityTxt = NumFormat.engNotation(
-                mode == 0 ? (long) stats.globalExports : (long) stats.globalImports
-            );
-            final float quantityValue = mode == 0 ?
-                stats.globalExports + stats.inFactionExports * EconomyConfig.FACTION_EXCHANGE_MULT:
-                stats.globalImports + stats.inFactionImports * EconomyConfig.FACTION_EXCHANGE_MULT;
+            final float quantityValue = mode == 0 ? stats.globalExports : stats.globalImports;
+            final String quantityTxt = NumFormat.engNotation((long) quantityValue);
 
             final CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, stats);
 

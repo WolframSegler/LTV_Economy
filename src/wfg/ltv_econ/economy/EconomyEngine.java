@@ -560,6 +560,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return total;
     }
 
+    public final long getTotalFactionExports(String comID) {
+        long total = 0;
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats())
+        total += stats.inFactionExports;
+
+        return total;
+    }
+
     public final int getExportMarketShare(String comID, String marketID) {
         final long total = getTotalGlobalExports(comID);
         if (total == 0)
@@ -610,6 +618,20 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             totalGlobalExports += stats.globalExports;
         }
         return (float) totalGlobalExports / (float) total;
+    }
+
+    public final float getFactionTotalImportMarketShare(String comID, String factionID) {
+        final long total = getTotalGlobalImports(comID);
+        if (total == 0) return 0;
+        long totalGlobalImports = 0;
+
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
+            if (!stats.market.getFaction().getId().equals(factionID)) {
+                continue;
+            }
+            totalGlobalImports += stats.globalImports;
+        }
+        return (float) totalGlobalImports / (float) total;
     }
 
     public final long getFactionTotalGlobalExports(String comID, FactionAPI faction) {
@@ -726,6 +748,15 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         total += stats.getUnitPrice(PriceType.NEUTRAL, units);
 
         return total / allStats.size();
+    }
+
+    public final long getGlobalStockpiles(String comID) {
+        double total = 0;
+
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats())
+        total += stats.getStored();
+
+        return (long) total;
     }
 
     public void addCredits(String marketID, int amount) {

@@ -86,7 +86,7 @@ public class PieChart extends CustomPanel<PieChartPlugin, PieChart, UIPanelAPI> 
     public TooltipMakerAPI createAndAttachTp() {
         final TooltipMakerAPI tp = pendingTp.factory.get();
 
-        pendingTp.parentSupplier.get().addComponent(tp);
+        pendingTp.parentSupplier.get().addUIElement(tp);
         WrapUiUtils.mouseCornerPos(tp, opad);
         return tp;
     }

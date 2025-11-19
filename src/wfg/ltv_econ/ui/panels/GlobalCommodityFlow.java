@@ -3,6 +3,7 @@ package wfg.ltv_econ.ui.panels;
 import java.awt.Color;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -17,9 +18,13 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityInfo;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.PieChart;
@@ -50,6 +55,8 @@ public class GlobalCommodityFlow extends
     public final int PANEL_W;
     public final int PANEL_H;
     public final int ICON_SIZE;
+
+    public static Color backgroundColor = new Color(20, 30, 60);
 
     public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
         super(parent, width, height, new BasePanelPlugin<>());
@@ -129,9 +136,7 @@ public class GlobalCommodityFlow extends
                 tooltip.addPara(
                     "The combined daily output of %s across all colonies in the Sector. " +
                     "Represents active industrial production, excluding existing stockpiles.",
-                    pad,
-                    Misc.getHighlightColor(),
-                    selectedCom.getName()
+                    pad, highlight, selectedCom.getName()
                 );
 
                 getPanel().addUIElement(tooltip);
@@ -195,9 +200,7 @@ public class GlobalCommodityFlow extends
                 tooltip.addPara(
                     "The combined daily demand of all colonies for %s. " +
                     "Demand reflects how much the sector needs to maintain standard production, growth, and stability.",
-                    pad,
-                    Misc.getHighlightColor(),
-                    selectedCom.getName()
+                    pad, highlight, selectedCom.getName()
                 );
 
                 getPanel().addUIElement(tooltip);
@@ -339,9 +342,7 @@ public class GlobalCommodityFlow extends
                 tooltip.addPara(
                     "The amount of %s that the sector produced beyond what was demanded. " +
                     "A higher surplus means that, even after all importing markets had their needs filled, some production still remained unused.",
-                    pad,
-                    Misc.getHighlightColor(),
-                    selectedCom.getName()
+                    pad, highlight, selectedCom.getName()
                 );
 
                 getPanel().addUIElement(tooltip);
@@ -469,9 +470,7 @@ public class GlobalCommodityFlow extends
 
                 tooltip.addPara(
                     "The total number of units of %s traded across the sector during the current cycle, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
-                    pad,
-                    Misc.getHighlightColor(),
-                    selectedCom.getName()
+                    pad, highlight, selectedCom.getName()
                 );
 
                 getPanel().addUIElement(tooltip);
@@ -534,9 +533,7 @@ public class GlobalCommodityFlow extends
 
                 tooltip.addPara(
                     "The total monetary value (in credits) of all %s trades across the entire sector during the current cycle. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
-                    pad,
-                    Misc.getHighlightColor(),
-                    selectedCom.getName()
+                    pad, highlight, selectedCom.getName()
                 );
 
                 getPanel().addUIElement(tooltip);
@@ -599,9 +596,7 @@ public class GlobalCommodityFlow extends
 
                 tooltip.addPara(
                     "The average price of %s across all markets in the sector during the current cycle, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
-                    pad,
-                    Misc.getHighlightColor(),
-                    selectedCom.getName()
+                    pad, highlight, selectedCom.getName()
                 );
 
                 getPanel().addUIElement(tooltip);
@@ -664,9 +659,7 @@ public class GlobalCommodityFlow extends
 
                 tooltip.addPara(
                     "The total count of markets in the sector that exported %s during the current cycle. Only markets that actually sent units to other markets are included, regardless of faction.",
-                    pad,
-                    Misc.getHighlightColor(),
-                    selectedCom.getName()
+                    pad, highlight, selectedCom.getName()
                 );
 
                 getPanel().addUIElement(tooltip);
@@ -729,9 +722,7 @@ public class GlobalCommodityFlow extends
 
                 tooltip.addPara(
                     "The total count of markets in the sector that imported %s during the current cycle. Only markets that actually received units from other markets are included, regardless of faction.",
-                    pad,
-                    Misc.getHighlightColor(),
-                    selectedCom.getName()
+                    pad, highlight, selectedCom.getName()
                 );
 
                 getPanel().addUIElement(tooltip);
@@ -752,89 +743,382 @@ public class GlobalCommodityFlow extends
         }
 
         { // Global export share per faction (percent)
-            final ArrayList<PieSlice> data = new ArrayList<>(); 
-            final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
-            for (FactionSpecAPI faction : factionList) {
-                final float value = engine.getFactionTotalExportMarketShare(comID, faction.getId());
-                if (value < 0.01f){
-                    factionList.remove(faction);
-                    continue;
+        final ArrayList<PieSlice> data = new ArrayList<>(); 
+        final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
+        for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
+            final FactionSpecAPI faction = iter.next();
+            final float value = engine.getFactionTotalExportMarketShare(comID, faction.getId());
+            if (value < 0.01f) {
+                iter.remove();
+                continue;
+            }
+            data.add(new PieSlice(
+                null,
+                faction.getBaseUIColor(),
+                value
+            ));
+        }
+        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+
+        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        add(chart).inBL(opad*3 + TABLE_W*2, 0);
+
+        pendingTp.parentSupplier = chart::getPanel;
+        pendingTp.factory = () -> {
+            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.setParaFontColor(baseColor);
+            tp.addPara("Global Export Share by Faction", pad);
+            tp.setParaFontDefault();
+            tp.setParaFontColor(Misc.getTextColor());
+            tp.addPara(
+                "Shows the percentage of total exports controlled by each faction. " +
+                "Percentages do not include in-faction trade." +
+                "Values are based on the last cycle.",
+                pad
+            );
+
+            tp.beginTable(
+                baseColor, dark, highlight, 20, true, true, new Object[] {
+                    "Faction", 200, "Share", 100
                 }
-                data.add(new PieSlice(null, faction.getColor(), value));
+            );
+
+            for (FactionSpecAPI faction : factionList) {
+                tp.addRow(new Object[] {
+                    faction.getBaseUIColor(),
+                    faction.getDisplayName(),
+                    highlight,
+                    (int) (engine.getFactionTotalExportMarketShare(comID, faction.getId()) * 100) + "%"
+                });
             }
 
-            final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+            tp.addTable("", 0, opad);
+            tp.getPosition().setSize(400, tp.getHeightSoFar());
+            return tp;
+        };
+        chart.pendingTp = pendingTp;
 
-            final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
-            add(chart).inBL(opad*3 + TABLE_W*2, 0);
-
-            pendingTp.parentSupplier = chart::getPanel;
-            pendingTp.factory = () -> {
-                final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 0, false);
-                tp.setParaFont(Fonts.ORBITRON_16);
-                tp.setParaFontColor(baseColor);
-                tp.addPara("Global Commodity Trade Share by Faction", pad);
-                tp.setParaFont(Fonts.DEFAULT_SMALL);
-                tp.setParaFontColor(Misc.getTextColor());
-                tp.addPara(
-                    "Shows the percentage of total exports/imports controlled by each faction. " +
-                    "Percentages are sector-wide and do not include in-faction trade." +
-                    "Values are based on the last cycle.",
-                    pad
-                );
-
-                final UIPanelAPI table = tp.beginTable(
-                    baseColor, dark, highlight, 20, true, true, new Object[] {
-                        "Faction", 100, "Share", 50
-                    }
-                );
-
-                for (FactionSpecAPI faction : factionList) {
-                    tp.addRow(new Object[] {
-                        faction.getBaseUIColor(),
-                        faction.getDisplayName(),
-                        highlight,
-                        engine.getFactionTotalExportMarketShare(comID, faction.getId()) * 100 + "%"
-                    });
-                }
-
-                tp.addComponent(table);
-                return tp;
-            };
-            chart.pendingTp = pendingTp;
-
-            final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
-            final float labelW = label.computeTextWidth(label.getText());
-            label.setColor(baseColor);
-            add(label).inBL(opad*3 + TABLE_W*2 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
+        final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
+        final float labelW = label.computeTextWidth(label.getText());
+        label.setColor(baseColor);
+        add(label).inBL(opad*3 + TABLE_W*2 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
         }
 
         { // Global import share per faction (percent)
+        final ArrayList<PieSlice> data = new ArrayList<>(); 
+        final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
+        for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
+            final FactionSpecAPI faction = iter.next();
+            final float value = engine.getFactionTotalImportMarketShare(comID, faction.getId());
+            if (value < 0.01f) {
+                iter.remove();
+                continue;
+            }
+            data.add(new PieSlice(
+                null,
+                faction.getBaseUIColor(),
+                value
+            ));
+        }
+        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
 
+        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        add(chart).inBL(opad*4 + TABLE_W*2 + PIECHART_W, 0);
+
+        pendingTp.parentSupplier = chart::getPanel;
+        pendingTp.factory = () -> {
+            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.setParaFontColor(baseColor);
+            tp.addPara("Global Import Share by Faction", pad);
+            tp.setParaFontDefault();
+            tp.setParaFontColor(Misc.getTextColor());
+            tp.addPara(
+                "Shows the percentage of total imports made by each faction. " +
+                "Percentages do not include in-faction trade." +
+                "Values are based on the last cycle.",
+                pad
+            );
+
+            tp.beginTable(
+                baseColor, dark, highlight, 20, true, true, new Object[] {
+                    "Faction", 200, "Share", 100
+                }
+            );
+
+            for (FactionSpecAPI faction : factionList) {
+                tp.addRow(new Object[] {
+                    faction.getBaseUIColor(),
+                    faction.getDisplayName(),
+                    highlight,
+                    (int) (engine.getFactionTotalImportMarketShare(comID, faction.getId()) * 100) + "%"
+                });
+            }
+
+            tp.addTable("", 0, opad);
+            tp.getPosition().setSize(400, tp.getHeightSoFar());
+            return tp;
+        };
+        chart.pendingTp = pendingTp;
+
+        final LabelAPI label = settings.createLabel("Import share", Fonts.ORBITRON_16);
+        final float labelW = label.computeTextWidth(label.getText());
+        label.setColor(baseColor);
+        add(label).inBL(opad*4 + TABLE_W*2 + PIECHART_W + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
         }
 
         { // In-faction vs out-of-faction trade share
+        final ArrayList<PieSlice> data = new ArrayList<>();
+        final long total = engine.getTotalGlobalExports(comID) + engine.getTotalFactionExports(comID);
+        final float globalTradeShare = (float) engine.getTotalGlobalExports(comID) / (float) total;
+            
+        data.add(new PieSlice(
+            null,
+            UiUtils.COLOR_IMPORT,
+            globalTradeShare
+        ));
+        data.add(new PieSlice(
+            null,
+            UiUtils.getInFactionColor(),
+            1f - globalTradeShare
+        ));
 
+        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+
+        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        add(chart).inTL(opad, opad*4 + ICON_SIZE);
+
+        pendingTp.parentSupplier = chart::getPanel;
+        pendingTp.factory = () -> {
+            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.setParaFontColor(baseColor);
+            tp.addPara("Global vs In-Faction Trade Share", pad);
+            tp.setParaFontDefault();
+            tp.setParaFontColor(Misc.getTextColor());
+            tp.addPara(
+                "Shows the proportion of this commodity's total exports that are traded outside the producing faction (%s)" +
+                " versus exports consumed within the same faction (%s). " +
+                "Values are based on the last cycle.",
+                pad,
+                highlight, ((int)(globalTradeShare*100)) + "%", ((int)((1f-globalTradeShare)*100)) + "%"
+            );
+
+            tp.getPosition().setSize(400, tp.getHeightSoFar());
+            return tp;
+        };
+        chart.pendingTp = pendingTp;
+
+        final LabelAPI label = settings.createLabel("Trade Breakdown", Fonts.ORBITRON_16);
+        final float labelW = label.computeTextWidth(label.getText());
+        final float labelH = label.computeTextHeight(label.getText());
+        label.setColor(baseColor);
+        add(label).inTL(opad + (PIECHART_W - labelW) / 2f, opad*4 + ICON_SIZE - pad - labelH);
         }
 
         { // Trade volatility (month-over-month volume change)
+        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
 
+            public void createPanel() {
+                final float value = info.getTradeVolatility();
+                final String txt = "Trade volatility";
+                final String valueTxt = (int) (value * 100f) + "%";
+
+                Color volatilityColor;
+                if (value <= 10f) volatilityColor = Color.GREEN;
+                else if (value <= 30f) volatilityColor = Color.YELLOW;
+                else if (value <= 50f) volatilityColor = Color.ORANGE;
+                else volatilityColor = Color.RED;
+
+                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                lbl1.setColor(baseColor);
+                lbl1.setHighlightOnMouseover(true);
+
+                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                lbl2.setColor(volatilityColor);
+                lbl2.setHighlightOnMouseover(true);
+
+                final float textH1 = lbl1.getPosition().getHeight();
+                final float textW1 = lbl1.computeTextWidth(txt);
+
+                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
+
+                final float textH2 = lbl2.getPosition().getHeight();
+                final float textW2 = lbl2.computeTextWidth(valueTxt);
+                final float textX2 = (textW1 / 2) - (textW2 / 2);
+
+                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
+
+                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+            }
+
+            public CustomPanelAPI getTpParent() {
+                return getPanel();
+            }
+
+            @Override
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+
+                tooltip.addPara(
+                    "Trade Volatility for the last %s days. " +
+                    "Indicates how much the daily export volume for %s fluctuates relative to its average.",
+                    pad,
+                    new Color[] {baseColor, highlight},
+                    EconomyConfig.VOLATILITY_WINDOW + "",
+                    selectedCom.getName()
+                );
+
+                getPanel().addUIElement(tooltip);
+                WrapUiUtils.mouseCornerPos(tooltip, opad);
+
+                return tooltip;
+            }
+
+            @Override
+            public void initializePlugin(boolean hasPlugin) {
+                super.initializePlugin(hasPlugin);
+
+                getPlugin().setTargetUIState(State.NONE);
+            }
+        };
+
+        add(textPanel).inTL(ICON_SIZE + opad, pad + 100);
         }
 
-        { // Stockpile ratio (global stored amount / global demand)
+        { // Global stockpiles
+        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
 
+            public void createPanel() {
+                final long value = engine.getGlobalStockpiles(comID);
+                final String valueTxt = NumFormat.engNotation(value);
+                final String txt = "Global stockpiles";
+
+                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                lbl1.setColor(baseColor);
+                lbl1.setHighlightOnMouseover(true);
+
+                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                lbl2.setColor(baseColor);
+                lbl2.setHighlightOnMouseover(true);
+
+                final float textH1 = lbl1.getPosition().getHeight();
+                final float textW1 = lbl1.computeTextWidth(txt);
+
+                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
+
+                final float textH2 = lbl2.getPosition().getHeight();
+                final float textW2 = lbl2.computeTextWidth(valueTxt);
+                final float textX2 = (textW1 / 2) - (textW2 / 2);
+
+                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
+
+                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+            }
+
+            public CustomPanelAPI getTpParent() {
+                return getPanel();
+            }
+
+            @Override
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+
+                tooltip.addPara(
+                    "Shows the total amount of %s currently stored across all markets in the sector. " +
+                    "This value reflects available stock and does not account for daily production or consumption. " +
+                    "High stockpiles indicate abundance, while low stockpiles signal scarcity and potential trade opportunities.",
+                    pad, highlight, selectedCom.getName()
+                );
+
+                getPanel().addUIElement(tooltip);
+                WrapUiUtils.mouseCornerPos(tooltip, opad);
+
+                return tooltip;
+            }
+
+            @Override
+            public void initializePlugin(boolean hasPlugin) {
+                super.initializePlugin(hasPlugin);
+
+                getPlugin().setTargetUIState(State.NONE);
+            }
+        };
+
+        add(textPanel).inTL(ICON_SIZE*2 + opad, pad + 100);
         }
 
         { // Worker allocation (total workers producing it)
+        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
 
+            public void createPanel() {
+                long value = 0;
+                for (WorkerIndustryData data : WorkerRegistry.getInstance().getRegister()) {
+                    value += data.getAssignedForOutput(comID);
+                }
+                final String txt = "Worker allocation";
+                final String valueTxt = NumFormat.engNotation(value);
+
+                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                lbl1.setColor(baseColor);
+                lbl1.setHighlightOnMouseover(true);
+
+                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                lbl2.setColor(baseColor);
+                lbl2.setHighlightOnMouseover(true);
+
+                final float textH1 = lbl1.getPosition().getHeight();
+                final float textW1 = lbl1.computeTextWidth(txt);
+
+                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
+
+                final float textH2 = lbl2.getPosition().getHeight();
+                final float textW2 = lbl2.computeTextWidth(valueTxt);
+                final float textX2 = (textW1 / 2) - (textW2 / 2);
+
+                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
+
+                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+            }
+
+            public CustomPanelAPI getTpParent() {
+                return getPanel();
+            }
+
+            @Override
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+
+                tooltip.addPara(
+                    "Displays the total number of workers currently assigned to producing %s across all markets in the sector ."+
+                    "Workers are counted based on the output of industries producing this commodity, not the industry as a whole.",
+                    pad, highlight, selectedCom.getName()
+                );
+
+                getPanel().addUIElement(tooltip);
+                WrapUiUtils.mouseCornerPos(tooltip, opad);
+
+                return tooltip;
+            }
+
+            @Override
+            public void initializePlugin(boolean hasPlugin) {
+                super.initializePlugin(hasPlugin);
+
+                getPlugin().setTargetUIState(State.NONE);
+            }
+        };
+
+        add(textPanel).inTL(ICON_SIZE*3 + opad, pad + 100);
         }
     }
 
     public float getBgAlpha() {
-        return 0.1f;
+        return 0.25f;
     }
 
     public Color getBgColor() {
-        return Color.BLUE;
+        return backgroundColor;
     }
 }

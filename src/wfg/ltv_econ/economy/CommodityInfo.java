@@ -24,6 +24,9 @@ public class CommodityInfo {
     private final Map<String, IncomeLedger> incomeLedgers = new HashMap<>();
 
     private transient long marketActivity;
+    private transient int currentIndex = 0;
+    private transient boolean filled = false;
+    private float[] lastNDaysVolume = new float[EconomyConfig.VOLATILITY_WINDOW];
 
     public CommodityInfo(
         CommoditySpecAPI spec, Set<String> registeredMarkets, EconomyEngine engine
@@ -41,11 +44,28 @@ public class CommodityInfo {
     public Object readResolve() {
         marketActivity = 0;
 
+        final float[] newArray = new float[EconomyConfig.VOLATILITY_WINDOW];
+
+        int oldLength = 0;
+        if (lastNDaysVolume != null) {
+            oldLength = lastNDaysVolume.length;
+            System.arraycopy(lastNDaysVolume, 0, newArray, 0,
+                Math.min(oldLength, newArray.length)
+            );
+        }
+
+        lastNDaysVolume = newArray;
+
+        currentIndex = Math.min(oldLength, newArray.length);
+        filled = oldLength >= newArray.length;
+
         return this;
     }
 
     public final void advance() {
         m_comStats.values().parallelStream().forEach(CommodityStats::advance);
+
+        recordDailyVolume();
     }
 
     public final void reset() {
@@ -138,6 +158,26 @@ public class CommodityInfo {
      */
     public long getMarketActivity() {
         return marketActivity;
+    }
+
+    public float getTradeVolatility() {
+        int length = filled ? EconomyConfig.VOLATILITY_WINDOW : currentIndex;
+        if (length == 0) return 0f;
+
+        float sum = 0f;
+        for (int i = 0; i < length; i++) sum += lastNDaysVolume[i];
+        float mean = sum / length;
+
+        if (mean == 0f) return 0f;
+
+        float variance = 0f;
+        for (int i = 0; i < length; i++) {
+            float diff = lastNDaysVolume[i] - mean;
+            variance += diff * diff;
+        }
+        variance /= length;
+
+        return (float) Math.sqrt(variance) / mean;
     }
 
     public final void trade(boolean fakeAdvance) {
@@ -417,5 +457,13 @@ public class CommodityInfo {
             return 0;
         }
         return stats.getRemainingExportable();
+    }
+
+    private void recordDailyVolume() {
+        long total = 0;
+        for (CommodityStats stats : m_comStats.values()) total += stats.getTotalExports();
+        lastNDaysVolume[currentIndex] = total;
+        currentIndex = (currentIndex + 1) % EconomyConfig.VOLATILITY_WINDOW;
+        if (currentIndex == 0) filled = true;
     }
 }

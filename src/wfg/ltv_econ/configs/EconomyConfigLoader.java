@@ -38,6 +38,7 @@ public class EconomyConfigLoader {
             EconomyConfig.DAYS_TO_COVER = root.getInt("DAYS_TO_COVER");
             EconomyConfig.DAYS_TO_COVER_PER_IMPORT = root.getInt("DAYS_TO_COVER_PER_IMPORT");
             EconomyConfig.FACTION_EXCHANGE_MULT = (float) root.getDouble("FACTION_EXCHANGE_MULT");
+            EconomyConfig.VOLATILITY_WINDOW = root.getInt("VOLATILITY_WINDOW");
 
         } catch (Exception e) {
             throw new RuntimeException(
@@ -98,6 +99,11 @@ public class EconomyConfigLoader {
          * Multiplicative discount applied to trade between markets of the same faction
          */
         public static float FACTION_EXCHANGE_MULT;
+
+        /**
+         * The <code>x</code> amount of days which will be used calculate the volatility of a commodity.
+         */
+        public static int VOLATILITY_WINDOW;
 
         static {
             EconomyConfigLoader.loadConfig();
