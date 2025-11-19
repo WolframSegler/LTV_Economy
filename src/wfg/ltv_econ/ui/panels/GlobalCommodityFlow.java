@@ -1,10 +1,12 @@
 package wfg.ltv_econ.ui.panels;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.ArrayList;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
@@ -20,10 +22,13 @@ import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.PieChart;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
+import wfg.wrap_ui.ui.panels.PieChart.PieSlice;
 import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.NumFormat;
@@ -38,8 +43,10 @@ public class GlobalCommodityFlow extends
     public static final int opad = 10;
     public static final int TABLE_W = 240;
     public static final int TABLE_H = 28*5 + 20 + opad*3;
+    public static final int PIECHART_W = TABLE_H;
+    public static final int PIECHART_H = TABLE_H;
 
-    public static CommoditySpecAPI selectedCom = Global.getSettings().getCommoditySpec(Commodities.SUPPLIES);
+    public static CommoditySpecAPI selectedCom = Global.getSettings().getCommoditySpec(Commodities.FOOD);
     public final int PANEL_W;
     public final int PANEL_H;
     public final int ICON_SIZE;
@@ -67,8 +74,9 @@ public class GlobalCommodityFlow extends
         final String comID = selectedCom.getId();
         final CommodityInfo info = engine.getCommodityInfo(comID);
 
-        final Color baseColor = sector.getPlayerFaction().getBaseUIColor();
+        final Color baseColor = Misc.getBasePlayerColor();
         final Color highlight = Misc.getHighlightColor();
+        final Color dark = Misc.getDarkPlayerColor();
 
         final ComIconPanel comIcon = new ComIconPanel(
             getPanel(), sector.getPlayerFaction(), ICON_SIZE, ICON_SIZE,
@@ -743,11 +751,65 @@ public class GlobalCommodityFlow extends
         add(textPanel).inTL(ICON_SIZE*4 + opad, pad + 50);
         }
 
-        { // Global export share per factions (percent)
+        { // Global export share per faction (percent)
+            final ArrayList<PieSlice> data = new ArrayList<>(); 
+            final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
+            for (FactionSpecAPI faction : factionList) {
+                final float value = engine.getFactionTotalExportMarketShare(comID, faction.getId());
+                if (value < 0.01f){
+                    factionList.remove(faction);
+                    continue;
+                }
+                data.add(new PieSlice(null, faction.getColor(), value));
+            }
 
+            final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+
+            final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+            add(chart).inBL(opad*3 + TABLE_W*2, 0);
+
+            pendingTp.parentSupplier = chart::getPanel;
+            pendingTp.factory = () -> {
+                final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 0, false);
+                tp.setParaFont(Fonts.ORBITRON_16);
+                tp.setParaFontColor(baseColor);
+                tp.addPara("Global Commodity Trade Share by Faction", pad);
+                tp.setParaFont(Fonts.DEFAULT_SMALL);
+                tp.setParaFontColor(Misc.getTextColor());
+                tp.addPara(
+                    "Shows the percentage of total exports/imports controlled by each faction. " +
+                    "Percentages are sector-wide and do not include in-faction trade." +
+                    "Values are based on the last cycle.",
+                    pad
+                );
+
+                final UIPanelAPI table = tp.beginTable(
+                    baseColor, dark, highlight, 20, true, true, new Object[] {
+                        "Faction", 100, "Share", 50
+                    }
+                );
+
+                for (FactionSpecAPI faction : factionList) {
+                    tp.addRow(new Object[] {
+                        faction.getBaseUIColor(),
+                        faction.getDisplayName(),
+                        highlight,
+                        engine.getFactionTotalExportMarketShare(comID, faction.getId()) * 100 + "%"
+                    });
+                }
+
+                tp.addComponent(table);
+                return tp;
+            };
+            chart.pendingTp = pendingTp;
+
+            final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
+            final float labelW = label.computeTextWidth(label.getText());
+            label.setColor(baseColor);
+            add(label).inBL(opad*3 + TABLE_W*2 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
         }
 
-        { // Global import share per factions (percent)
+        { // Global import share per faction (percent)
 
         }
 

@@ -155,7 +155,7 @@ public class TooltipUtils {
 
                         final float distanceToPlayer = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
 
-                        tooltip.addRow(new java.lang.Object[] {
+                        tooltip.addRow(new Object[] {
                             highlight,
                             Misc.getDGSCredits(stats.getPlayerSellPrice(econUnit)),
                             labelColor,

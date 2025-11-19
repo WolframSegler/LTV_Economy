@@ -589,7 +589,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
                         comID, m_market.getFaction().getId()
-                    ) + "%";
+                    ) * 100 + "%";
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -653,7 +653,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         }
 
         else { // Faction market share
-            TextPanel textPanelLeft = new TextPanel(section, 250, 0, new BasePanelPlugin<>()) {
+            final TextPanel textPanelLeft = new TextPanel(section, 250, 0) {
 
                 @Override
                 public void createPanel() {
@@ -664,7 +664,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
                         comID, m_selectedMarket.getFactionId()
-                    ) + "%";
+                    ) * 100 + "%";
 
                     tooltip.setParaFontColor(m_selectedMarket.getFaction().getBaseUIColor());
                     tooltip.setParaFont(Fonts.ORBITRON_12);
@@ -733,7 +733,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     final String valueTxt = EconomyEngine.getInstance().getFactionTotalExportMarketShare(
                         comID, m_market.getFaction().getId()
-                    ) + "%";
+                    ) * 100 + "%";
 
                     tooltip.setParaFontColor(baseColor);
                     tooltip.setParaFont(Fonts.ORBITRON_12);
