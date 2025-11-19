@@ -290,12 +290,11 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         List<SpecialItemData> visibleItems = m_industry.getVisibleInstalledItems();
         for (SpecialItemData item : visibleItems) {
 
-            SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(item.getId());
+            final SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(item.getId());
 
-            Base itemPanel = new Base(
+            final Base itemPanel = new Base(
                 m_panel,
                 28, 28,
-                new SpritePanelPlugin<>(),
                 spec.getIconName(),
                 Color.WHITE, null, false
             );
@@ -309,12 +308,11 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
         if (m_industry.getAICoreId() != null) {
 
-            CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(m_industry.getAICoreId());
+            final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(m_industry.getAICoreId());
 
-            Base aiCorePanel = new Base(
+            final Base aiCorePanel = new Base(
                 m_panel,
                 28, 28,
-                new SpritePanelPlugin<>(),
                 spec.getIconName(),
                 Color.WHITE, null, false
             );

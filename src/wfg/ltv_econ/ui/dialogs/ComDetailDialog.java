@@ -30,7 +30,7 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.ui.panels.LtvComIconPanel;
+import wfg.ltv_econ.ui.panels.ComIconPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg.ltv_econ.ui.plugins.ComDetailDialogPlugin;
@@ -53,7 +53,6 @@ import wfg.wrap_ui.ui.panels.SortableTable.RowManager;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
@@ -304,8 +303,8 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
         String comIconID = m_com.getIconName();
 
-        final LtvComIconPanel iconLeft = new LtvComIconPanel(section, m_market.getFaction(),
-            iconSize, iconSize, new SpritePanelPlugin<>(), comIconID, null, null
+        final ComIconPanel iconLeft = new ComIconPanel(section, m_market.getFaction(),
+            iconSize, iconSize, comIconID, null, null
         );
         iconLeft.setCommodity(m_com);
 
@@ -313,8 +312,8 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconLeft.getPanel());
 
-        final LtvComIconPanel iconRight = new LtvComIconPanel(section, m_market.getFaction(),
-            iconSize, iconSize, new SpritePanelPlugin<>(), comIconID, null, null
+        final ComIconPanel iconRight = new ComIconPanel(section, m_market.getFaction(),
+            iconSize, iconSize, comIconID, null, null
         );
         iconRight.setCommodity(m_com);
 
@@ -941,8 +940,8 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
             final String iconPath = market.getFaction().getCrest();
             final Base iconPanel = new Base(
-                section, iconSize, iconSize, new SpritePanelPlugin<>(), 
-                iconPath, null, null, stats.getDeficit() > 0
+                section, iconSize, iconSize, iconPath, null,
+                null, stats.getDeficit() > 0
             );
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
@@ -989,15 +988,14 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             }
 
             final CallbackRunnable<RowManager> rowSelectedRunnable = (row) -> {
-                m_selectedMarket = row.getMarket();
+                m_selectedMarket = (MarketAPI) row.customData;
                 updateSection1();
                 updateSection2();
             };
 
             table.pushRow(
-                CodexDataV2.getCommodityEntryId(comID),
-                market, null,
-                m_market.getFaction().getDarkUIColor(),
+                CodexDataV2.getCommodityEntryId(comID), market,
+                null, m_market.getFaction().getDarkUIColor(),
                 tp, rowSelectedRunnable
             );
 

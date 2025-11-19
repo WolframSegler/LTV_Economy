@@ -29,7 +29,6 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -166,8 +165,9 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
 
         if (m_comStats.globalExports > 0) {
             final String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
-            Base iconPanel = new Base(m_panel, rowHeight - 4, rowHeight 
-            - 4, new SpritePanelPlugin<>(), iconPath, null, null, false);
+            final Base iconPanel = new Base(m_panel, rowHeight - 4, rowHeight 
+                - 4, iconPath, null, null, false
+            );
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
             getPanel().addComponent(iconPanel.getPanel()).inRMid(pad);
@@ -189,9 +189,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
             }
         }
         
-        return new Base(parent, size, size, new SpritePanelPlugin<>(),
-            iconPath, baseColor, null, false
-        );
+        return new Base(parent, size, size, iconPath, baseColor, null, false);
     }
 
     @Override
@@ -445,7 +443,8 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
     ) {
 
         final Base iconPanel = new Base(tooltip, lgdIconSize, lgdIconSize,
-            new SpritePanelPlugin<>(), iconPath, null, drawFilledIcon, drawRedBorder);
+            iconPath, null, drawFilledIcon, drawRedBorder
+        );
         if (drawRedBorder) {
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(2, 2, -4, -4);

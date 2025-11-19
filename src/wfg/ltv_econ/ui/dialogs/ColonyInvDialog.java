@@ -30,7 +30,6 @@ import wfg.wrap_ui.ui.panels.Button.CutStyle;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -274,8 +273,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             final CommodityStats stats = engine.getComStats(com.getId(), m_market.getId());
 
             final Base comIcon = new Base(
-                m_panel.getPanel(), 26, 26,
-                new SpritePanelPlugin<>(), com.getIconName(), null, null, false
+                m_panel.getPanel(), 26, 26, com.getIconName(), null, null, false
             );
             
             final long stored = stats.getRoundedStored();
@@ -304,7 +302,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             table.addCell(NumFormat.engNotation(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             table.pushRow(
-                CodexDataV2.getCommodityEntryId(com.getId()), m_market, null, null, null, null
+                CodexDataV2.getCommodityEntryId(com.getId()), null, null, null, null, null
             );
         }
 

@@ -37,7 +37,6 @@ import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 
@@ -175,8 +174,7 @@ public class TooltipUtils {
                         final SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                         final Base arrowPanel = new Base(
-                            tooltip, 20, 20,
-                            new SpritePanelPlugin<>(), "", null,
+                            tooltip, 20, 20, "", null,
                             null, false
                         );
 
@@ -286,7 +284,7 @@ public class TooltipUtils {
                         final SpriteAPI arrow = Global.getSettings().getSprite(cargoTooltipArrow_PATH);
 
                         final Base arrowPanel = new Base(tooltip, 20, 20,
-                            new SpritePanelPlugin<>(), "", null, null, false
+                            "", null, null, false
                         );
 
                         arrowPanel.setSprite(arrow);

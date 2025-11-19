@@ -19,6 +19,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.command.CommandTabData;
 
+import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.panels.EconomyOverviewPanel;
 import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.Attachments;
@@ -118,6 +119,7 @@ public class EconomyButtonInjector implements EveryFrameScript, CallbackRunnable
             }
         }
 
+        EconomyEngine.getInstance().fakeAdvance();
         overviewPanel = new EconomyOverviewPanel(root);
         root.addComponent(overviewPanel.getPanel()).inTL(0, 20);
     }

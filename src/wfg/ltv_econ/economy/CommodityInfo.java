@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -89,11 +90,33 @@ public class CommodityInfo {
         return m_comStats;
     }
 
-    public IncomeLedger getLedger(String marketID) {
+    public final ArrayList<CommodityStats> getSortedByProduction(int listSize) {
+        return m_comStats.values()
+            .stream()
+            .filter(stats -> stats.getLocalProduction(true) > 0)
+            .sorted((a, b) -> Float.compare(
+                b.getLocalProduction(true), a.getLocalProduction(true)
+            ))
+            .limit(listSize)
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public final ArrayList<CommodityStats> getSortedByDemand(int listSize) {
+        return m_comStats.values()
+            .stream()
+            .filter(stats -> stats.getBaseDemand(false) > 0)
+            .sorted((a, b) -> Float.compare(
+                b.getBaseDemand(false), a.getBaseDemand(false)
+            ))
+            .limit(listSize)
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public final IncomeLedger getLedger(String marketID) {
         return incomeLedgers.get(marketID);
     }
 
-    public boolean hasLedger(String marketID) {
+    public final boolean hasLedger(String marketID) {
         return incomeLedgers.containsKey(marketID);
     }
 
@@ -168,14 +191,14 @@ public class CommodityInfo {
             final float pricePerUnit = exporterPrice * (1f - weight) + importerPrice * weight;
             final float price = pricePerUnit * amountToSend;
 
-            marketActivity += price;
-
             if(sameFaction) {
                 expStats.addInFactionExport(amountToSend);
                 impStats.addInFactionImport(amountToSend);
 
-                if (fakeAdvance) continue;
                 final int credits = (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT);
+                marketActivity += credits;
+
+                if (fakeAdvance) continue;
                 engine.addCredits(expStats.marketID, credits);
                 engine.addCredits(impStats.marketID, -credits);
 
@@ -186,6 +209,8 @@ public class CommodityInfo {
                 expStats.addGlobalExport(amountToSend);
                 impStats.addGlobalImport(amountToSend);
 
+                marketActivity += price;
+                
                 if (fakeAdvance) continue;
                 engine.addCredits(expStats.marketID, (int) price);
                 engine.addCredits(impStats.marketID, (int) -price);

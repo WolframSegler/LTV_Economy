@@ -30,6 +30,7 @@ import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.constants.SubmarketsID;
+import wfg.ltv_econ.economy.CommodityStats.PriceType;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -680,6 +681,52 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         total += stats.getBaseDemand(false);
 
         return total;
+    }
+
+    public final long getGlobalProduction(String comID) {
+        long total = 0;
+
+        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
+        total += stats.getLocalProduction(true);
+
+        return total;
+    }
+
+    public final long getGlobalSurplus(String comID) {
+        long total = 0;
+
+        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
+        total += stats.getCanNotExport();
+
+        return total;
+    }
+
+    public final long getGlobalDeficit(String comID) {
+        long total = 0;
+
+        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
+        total += stats.getDeficit();
+
+        return total;
+    }
+    
+    public final long getGlobalTradeVolume(String comID) {
+        long total = 0;
+
+        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
+        total += stats.getTotalExports();
+
+        return total;
+    }
+
+    public final double getGlobalAveragePrice(String comID, int units) {
+        double total = 0;
+
+        final Collection<CommodityStats> allStats = getCommodityInfo(comID).getAllStats();
+        for (CommodityStats stats : allStats)
+        total += stats.getUnitPrice(PriceType.NEUTRAL, units);
+
+        return total / allStats.size();
     }
 
     public void addCredits(String marketID, int amount) {

@@ -44,9 +44,10 @@ public class SpritePanel<
     implements HasOutline{
 
     public static class Base extends SpritePanel<Base> {
-        public Base(UIPanelAPI parent, int width, int height,
-            SpritePanelPlugin<Base> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-            super(parent, width, height, plugin, spriteID, color, fillColor, drawBorder);
+        public Base(UIPanelAPI parent, int width, int height, String spriteID, Color color,
+            Color fillColor, boolean drawBorder
+        ) {
+            super(parent, width, height, new SpritePanelPlugin<Base>(), spriteID, color, fillColor, drawBorder);
         }
     }
 

@@ -75,8 +75,11 @@ public class TextPanel extends CustomPanel<BasePanelPlugin<TextPanel>, TextPanel
 
     private boolean isSoundEnabled = true;
 
-    public TextPanel(UIPanelAPI parent, int width, int height,
-        BasePanelPlugin<TextPanel> plugin) {
+    public TextPanel(UIPanelAPI parent, int width, int height) {
+        this(parent, width, height, new BasePanelPlugin<>());
+    }
+
+    public TextPanel(UIPanelAPI parent, int width, int height, BasePanelPlugin<TextPanel> plugin) {
         super(parent, width, height, plugin);
 
         initializePlugin(hasPlugin);

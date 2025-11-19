@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
@@ -24,15 +25,22 @@ public class EconomyOverviewPanel extends CustomPanel<
 
     public static final int opad = 10;
     public static final int pad = 3;
-    public static final int MAIN_PANEL_W = 1200;
+    public static final int MAIN_PANEL_W = 1250;
     public static final int MAIN_PANEL_H = 700;
+    public static final int NAVBAR_W = 200;
     public static final int NAV_BUTTON_W = 160;
     public static final int NAV_BUTTON_H = 22;
-    public static final int NAVBAR_W = 200;
+    public static final int CONTENT_PANEL_W = 1045;
+    public static final int CONTENT_PANEL_H = 700;
+    public static final int OPTIONS_PANEL_W = 200;
+    public static final int OPTIONS_PANEL_H = 400;
 
     private static LabelAPI title = null;
     private static LabelAPI subtitle = null;
+    private static CustomPanelAPI contentPanel = null;
+    private static CustomPanelAPI optionsPanel = null;
     private static List<Button> navButtons = new ArrayList<>();
+    private static Button firstButton = null;
 
     public EconomyOverviewPanel(UIPanelAPI parent) {
         super(parent, MAIN_PANEL_W, MAIN_PANEL_H, new BasePanelPlugin<>());
@@ -52,7 +60,7 @@ public class EconomyOverviewPanel extends CustomPanel<
         final float titleY = opad;
         add(title).inTL(pad, titleY);
 
-        subtitle = settings.createLabel("Sector-wide activity summary", Fonts.ORBITRON_20AA);
+        subtitle = settings.createLabel("Sector-wide activity summary", Fonts.ORBITRON_12);
         final float subtitleH = subtitle.computeTextHeight(title.getText());
         final float subtitleY = titleY + titleH + pad*2;
         add(subtitle).inTL(pad, subtitleY);
@@ -68,25 +76,36 @@ public class EconomyOverviewPanel extends CustomPanel<
         currentY += opad*2;
 
         navbar.getPosition().setSize(NAVBAR_W, currentY);
+        final float navbarY = subtitleY + subtitleH + pad*2;
+        add(navbar).inTL(pad, navbarY);
 
-        add(navbar).inTL(pad, subtitleY + subtitleH + pad*2);
+        contentPanel = settings.createCustom(CONTENT_PANEL_W, CONTENT_PANEL_H, null);
+        optionsPanel = settings.createCustom(OPTIONS_PANEL_W, OPTIONS_PANEL_H, null);
+        add(contentPanel).inTL(pad + NAVBAR_W + opad, titleY);
+        add(optionsPanel).inTL(pad, navbarY + pad*2);
+
+        firstButton.click(false);
     }
 
     private final void createNavButtons() {
         navButtons.clear();
         CallbackRunnable<Button> buttonRunnable = (btn) -> {
-            navButtons.forEach(b -> b.checked = false);
-            btn.checked = true;
+            clearPanelAndButtonState(btn);
+            final GlobalCommodityFlow comFlow = new GlobalCommodityFlow(
+                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+            );
+            contentPanel.addComponent(comFlow.getPanel()).inBL(0, 0);
         };
         Button button = new Button(
-            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "BUTTON A", Fonts.ORBITRON_12, buttonRunnable
+            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Global Commodity Flow",
+            Fonts.ORBITRON_12, buttonRunnable
         );
         button.setCutStyle(CutStyle.TL_BR);
         navButtons.add(button);
+        firstButton = button;
 
         buttonRunnable = (btn) -> {
-            navButtons.forEach(b -> b.checked = false);
-            btn.checked = true;
+            clearPanelAndButtonState(btn);
         };
         button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "BUTTON B", Fonts.ORBITRON_12, buttonRunnable
@@ -95,8 +114,7 @@ public class EconomyOverviewPanel extends CustomPanel<
         navButtons.add(button);
 
         buttonRunnable = (btn) -> {
-            navButtons.forEach(b -> b.checked = false);
-            btn.checked = true;
+            clearPanelAndButtonState(btn);
         };
         button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "BUTTON C", Fonts.ORBITRON_12, buttonRunnable
@@ -105,14 +123,20 @@ public class EconomyOverviewPanel extends CustomPanel<
         navButtons.add(button);
         
         buttonRunnable = (btn) -> {
-            navButtons.forEach(b -> b.checked = false);
-            btn.checked = true;
+            clearPanelAndButtonState(btn);
         };
         button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "BUTTON D", Fonts.ORBITRON_12, buttonRunnable
         );
         button.setCutStyle(CutStyle.TL_BR);
         navButtons.add(button);
+    }
+
+    private static final void clearPanelAndButtonState(Button caller) {
+        navButtons.forEach(b -> b.checked = false);
+        caller.checked = true;
+        ReflectionUtils.invoke(contentPanel, "clearChildren");
+        ReflectionUtils.invoke(optionsPanel, "clearChildren");
     }
 
     public float getBgAlpha() {

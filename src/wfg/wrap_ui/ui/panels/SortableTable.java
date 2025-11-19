@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -25,7 +24,6 @@ import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 
@@ -53,7 +51,7 @@ import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
  * </p>
  * <b>Typical usage example:</b>
  * <pre>{@code
- * SortableTable table = new SortableTable(root, parentPanel, width, height, market, headerH, rowH);
+ * SortableTable table = new SortableTable(...);
  *
  * // Setup headers with labels, widths, tooltips, merge flags and merge group
  * table.addHeaders(
@@ -66,22 +64,23 @@ import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
  *
  * // Add rows with multiple typed cells and associated tooltips
  * table.addCell(iconPanel, cellAlg.LEFT, null, null);
- * table.addCell("Colony Name", cellAlg.LEFT, null, textColor);
+ * table.addCell(colonyName, cellAlg.LEFT, null, textColor);
  * table.addCell(5, cellAlg.MID, null, textColor);
  * // ...
- * table.pushRow(codexID, market, null, highlightColor, tooltip);
+ * 
+ * // Register a listener for row selection
+ * final CallbackRunnable<RowManager> rowSelectedRunnable = (row) -> {
+ *      ...
+ * };
+ *
+ * table.pushRow(codexID, customData, null, highlightColor, tooltip, rowSelectedRunnable);
  *
  * // Add table to UI panel and initialize it
  * parentPanel.addComponent(table.getPanel()).inTL(0, 0);
  * table.createPanel();
  *
- * // Enable sorting by a particular column index
+ * // Enable sorting by a particular column index. Calls createPanel() internally
  * table.sortRows(columnIndex);
- *
- * // Register a listener for row selection
- * table.setRowSelectionListener(selectedRow -> {
- *     // Handle selection change
- * });
  * }</pre>
  * <p>
  * This component supports tooltips both for headers and rows via {@link PendingTooltip}.
@@ -290,7 +289,6 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             final Base sortIcon = new Base(
                 panel,
                 m_headerHeight - 2, m_headerHeight,
-                new SpritePanelPlugin<>(),
                 sortIconPath,
                 getFaction().getBaseUIColor(),
                 null,
@@ -455,11 +453,12 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     }
 
     public class RowManager extends CustomPanel<BasePanelPlugin<RowManager>, RowManager, CustomPanelAPI> 
-        implements HasTooltip, HasFader, HasOutline, HasAudioFeedback, HasMarket, HasActionListener, AcceptsActionListener
+        implements HasTooltip, HasFader, HasOutline, HasAudioFeedback, HasActionListener, AcceptsActionListener
     {
         public Color textColor = Misc.getBasePlayerColor();
         public PendingTooltip<? extends UIPanelAPI> m_tooltip = null;
         public CallbackRunnable<RowManager> onRowClicked = null;
+        public Object customData = null;
         
         protected final List<Object> m_cellData = new ArrayList<>();
         protected final List<cellAlg> m_cellAlignment = new ArrayList<>();
@@ -472,7 +471,6 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         private Color glowColor = Misc.getDarkPlayerColor();
         private Outline outline = Outline.NONE;
         private Color outlineColor = Misc.getDarkPlayerColor();
-        private MarketAPI m_market = null;
 
         public RowManager(UIPanelAPI parent, int width, int height) {
             super(parent, width, height, new BasePanelPlugin<>());
@@ -657,14 +655,6 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                 return m_tooltip.parentSupplier.get();
             }
         }
-
-        public MarketAPI getMarket() {
-            return m_market;
-        }
-
-        public void setMarket(MarketAPI market) {
-            m_market = market;
-        }
         
         public TooltipMakerAPI createAndAttachTp() {
             if (m_tooltip == null) {
@@ -772,14 +762,15 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
     /**
      * Uses the added cells to create a row and clears the {@code pendingRow}.
      * The amount of cells must match the column amount.
-     * The {@code textColor} sets all the cells to that color.
-     * The {@code market} is used for certain colors and location info.
-     * {@code glowClr} can be null.
-     * {@code codexID} is optional.
-     * The {@link PendingTooltip} can be null.
+     * @param codexID optional.
+     * @param customData stored by RowManager instance.
+     * @param textColor sets all the cells to that color.
+     * @param highlight optional.
+     * @param tp optional.
+     * @param onRowClicked gets called when the row is clicked.
      */
-    public <TpType extends CustomPanelAPI> void pushRow(String codexID, MarketAPI market, Color textColor,
-        Color glowClr, PendingTooltip<TpType> tp, CallbackRunnable<RowManager> onRowClicked
+    public <TpType extends CustomPanelAPI> void pushRow(String codexID, Object customData, Color textColor,
+        Color highlight, PendingTooltip<TpType> tp, CallbackRunnable<RowManager> onRowClicked
     ) {
         if (pendingRow == null || pendingRow.m_cellData.isEmpty()) {
             throw new IllegalStateException("Cannot push row: no cells have been added yet. "
@@ -791,9 +782,9 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
         }
         pendingRow.setCodexId(codexID);
-        pendingRow.setMarket(market);
         pendingRow.setTextColor(textColor);
-        if (glowClr != null) pendingRow.setGlowColor(glowClr);
+        pendingRow.customData = customData;
+        if (highlight != null) pendingRow.setGlowColor(highlight);
         if (onRowClicked != null) pendingRow.onRowClicked = onRowClicked;
 
         pendingRow.m_tooltip = tp;

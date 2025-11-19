@@ -260,6 +260,18 @@
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.3
+			},
+			"lobster": {
+				"baseProd": 0.22,
+				"CCMoneyDist": {
+					"heavy_machinery": 0.5,
+					"abstract": 0.5
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 6,
+				"ifMarketCondsAllTrue": [
+					"volturnian_lobster_pens"
+				]
 			}
 		}
 	},

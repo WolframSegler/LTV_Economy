@@ -26,7 +26,7 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 
-public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements HasTooltip, HasFader {
+public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasTooltip, HasFader {
 
     private static final int pad = 3;
     private static final int opad = 10;
@@ -41,9 +41,10 @@ public class LtvComIconPanel extends SpritePanel<LtvComIconPanel> implements Has
     public boolean isExpanded = false;
     public CommoditySpecAPI m_com;
 
-    public LtvComIconPanel(UIPanelAPI parent, FactionAPI faction, int width, int height,
-        SpritePanelPlugin<LtvComIconPanel> plugin, String iconSpriteID, Color color, Color fillColor) {
-        super(parent, width, height, plugin, iconSpriteID, color, fillColor, false);
+    public ComIconPanel(UIPanelAPI parent, FactionAPI faction, int width, int height,
+        String iconSpriteID, Color color, Color fillColor
+    ) {
+        super(parent, width, height, new SpritePanelPlugin<>(), iconSpriteID, color, fillColor, false);
 
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
         m_faction = faction;
