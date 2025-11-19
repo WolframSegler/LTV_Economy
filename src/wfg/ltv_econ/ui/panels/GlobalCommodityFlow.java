@@ -926,9 +926,9 @@ public class GlobalCommodityFlow extends
                 final String valueTxt = (int) (value * 100f) + "%";
 
                 Color volatilityColor;
-                if (value <= 10f) volatilityColor = Color.GREEN;
-                else if (value <= 30f) volatilityColor = Color.YELLOW;
-                else if (value <= 50f) volatilityColor = Color.ORANGE;
+                if (value <= 0.1f) volatilityColor = Color.GREEN;
+                else if (value <= 0.3f) volatilityColor = Color.YELLOW;
+                else if (value <= 0.5f) volatilityColor = Color.ORANGE;
                 else volatilityColor = Color.RED;
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);

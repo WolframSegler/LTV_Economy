@@ -34,13 +34,14 @@ public class EconomyButtonInjector implements EveryFrameScript, CallbackRunnable
     public static final int BUTTON_HEIGHT = 18;
     public static final int BUTTON_WIDTH = 130;
 
-    private static final SectorAPI sector = Global.getSector();
     private static Button econButton = null;
     private static UIPanelAPI root = null;
     private static List<Object> rootChildren = null;
     private static List<UIPanelAPI> rootPanels = new ArrayList<>(6);
     private static EconomyOverviewPanel overviewPanel = null;
 
+    private final SectorAPI sector = Global.getSector();
+    
     private int frames = 0;
     public void advance(float amount) {
         if (!sector.isPaused()) {

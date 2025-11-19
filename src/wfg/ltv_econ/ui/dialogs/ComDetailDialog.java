@@ -921,7 +921,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
         );
 
-        final EconomyEngine engine = engine;
+        final EconomyEngine engine = EconomyEngine.getInstance();
 
         for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
 

@@ -56,7 +56,7 @@ public class CommodityInfo {
 
         lastNDaysVolume = newArray;
 
-        currentIndex = Math.min(oldLength, newArray.length);
+        currentIndex = Math.min(currentIndex, lastNDaysVolume.length - 1);
         filled = oldLength >= newArray.length;
 
         return this;

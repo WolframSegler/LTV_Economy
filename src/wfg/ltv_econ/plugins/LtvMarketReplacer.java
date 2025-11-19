@@ -39,7 +39,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 public class LtvMarketReplacer implements EveryFrameScript {
 
-    private static final SectorAPI sector = Global.getSector();
+    private final SectorAPI sector = Global.getSector();
     private int frames = 0;
 
     @Override

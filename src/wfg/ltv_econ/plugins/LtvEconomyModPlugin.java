@@ -70,7 +70,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         }
 
         listeners = (List<CampaignEventListener>) ReflectionUtils.get(
-            Global.getSector(), "listeners", List.class, false
+            sector, "listeners", List.class, false
         );
 
         listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
@@ -93,6 +93,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         Global.getSector().removeListener(EconomyEngine.getInstance());
     }
 
+    @Override
     public void afterGameSave() {
         listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
         listeners.add(0, EconomyEngine.getInstance());
