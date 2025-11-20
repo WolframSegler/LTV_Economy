@@ -23,8 +23,10 @@ import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.ButtonPlugin;
 import wfg.reflection.ReflectionUtils;
 import wfg.reflection.ReflectionUtils.ReflectedConstructor;
+import wfg.reflection.ReflectionUtils.ReflectedField;
 
 import com.fs.starfarer.campaign.CampaignEngine;
+import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
 import com.fs.starfarer.api.campaign.SectorAPI;
@@ -120,6 +122,9 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         // Replace the Commodity Panel which shows the total imports and exports
         replaceCommodityPanel(managementPanel, managementChildren, anchorChild);
+
+        // Replace the market instance of the TransferHandler
+        replaceMarketInstanceForPriceControl(managementPanel);
     }
 
     private static final void replaceUseStockpilesButton(
@@ -295,6 +300,18 @@ public class LtvMarketReplacer implements EveryFrameScript {
             Global.getLogger(LtvMarketReplacer.class).info("Replaced CommodityPanel");
         }
     }
+
+    private static final void replaceMarketInstanceForPriceControl(UIPanelAPI managementPanel) {
+        final UIPanelAPI handler = (UIPanelAPI) ReflectionUtils.invoke(managementPanel, "getTransferHandler");
+        final ReflectedField field = ReflectionUtils.getFieldsMatching(handler, null, Market.class)
+            .get(0);
+
+        if (field.get(handler) instanceof MarketWrapper) return;
+
+        MarketAPI ltvMarket = new MarketWrapper((Market) field.get(handler));
+        field.set(handler, ltvMarket);
+    }
+
 
     @Override
     public boolean isDone() {

@@ -118,8 +118,8 @@ public class PieChart extends CustomPanel<PieChartPlugin, PieChart, UIPanelAPI> 
             }
             GL11.glEnd();
 
-            GL11.glColor4f(0f, 0f, 0f, 1f);
-            GL11.glLineWidth(2f);
+            GL11.glColor4f(0f, 0f, 0f, 0.8f);
+            GL11.glLineWidth(1f);
             GL11.glBegin(GL11.GL_LINES);
             float startRad = (float)Math.toRadians(startDeg);
             GL11.glVertex2f(cx, cy);
