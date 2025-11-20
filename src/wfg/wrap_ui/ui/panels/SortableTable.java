@@ -87,20 +87,22 @@ import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
  * <p>
  */
 public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, SortableTable, CustomPanelAPI> {
+
+    public boolean showSortIcon = true;
+    public boolean sortingEnabled = true;
+
     private final List<ColumnManager> m_columns = new ArrayList<>();
     private final List<RowManager> m_rows = new ArrayList<>();
-
     private RowManager pendingRow = null;
 
-    private final int m_headerHeight;
-    private final int m_rowHeight;
+    private final int HEADER_HEIGHT;
+    private final int ROW_HEIGHT;
 
     private int prevSelectedSortColumnIndex = -1;
     private int selectedSortColumnIndex = -1;
     private boolean ascending = true;
 
     private RowManager m_selectedRow;
-
     private CustomPanelAPI m_headerContainer = null;
     private CustomPanelAPI m_rowContainer = null;
 
@@ -135,8 +137,8 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
     public SortableTable(UIPanelAPI parent, int width, int height, int headerHeight, int rowHeight) {
         super(parent, width, height, null);
-        m_headerHeight = headerHeight;
-        m_rowHeight = rowHeight;
+        HEADER_HEIGHT = headerHeight;
+        ROW_HEIGHT = rowHeight;
 
         // The Table itself needs to be created after the rows are ready
         initializePlugin(hasPlugin);
@@ -151,7 +153,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         // Create headers
         m_headerContainer = Global.getSettings().createCustom(
             getPos().getWidth(),
-            m_headerHeight,
+            HEADER_HEIGHT,
             null
         );
 
@@ -180,11 +182,11 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
                 if (column.tooltip == null) {
                     panel = new HeaderPanel(
-                        getPanel(), mergedWidth - pad, m_headerHeight, column, i
+                        getPanel(), mergedWidth - pad, HEADER_HEIGHT, column, i
                     );
                 } else {
                     panel = new HeaderPanelWithTooltip(
-                        getPanel(), mergedWidth - pad, m_headerHeight, column, i
+                        getPanel(), mergedWidth - pad, HEADER_HEIGHT, column, i
                     );
                 }
 
@@ -196,12 +198,12 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             } else {
                 if (column.tooltip == null) {
                     panel = new HeaderPanel(
-                        getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
+                        getPanel(), column.width + lastHeaderPad - pad, HEADER_HEIGHT,
                         column, i
                     );
                 } else {
                     panel = new HeaderPanelWithTooltip(
-                        getPanel(), column.width + lastHeaderPad - pad, m_headerHeight,
+                        getPanel(), column.width + lastHeaderPad - pad, HEADER_HEIGHT,
                         column, i
                     );
                 }
@@ -219,13 +221,13 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         // Create rows
         m_rowContainer = Global.getSettings().createCustom(
             getPos().getWidth(),
-            getPos().getHeight() - (m_headerHeight + pad),
+            getPos().getHeight() - (HEADER_HEIGHT + pad),
             null
         );
 
         TooltipMakerAPI tp = m_rowContainer.createUIElement(
             getPos().getWidth() + pad,
-            getPos().getHeight() - (m_headerHeight + pad),
+            getPos().getHeight() - (HEADER_HEIGHT + pad),
             true
         );
 
@@ -233,13 +235,13 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         for (RowManager row : m_rows) {
             tp.addComponent(row.getPanel()).inTL(pad, cumulativeYOffset);
 
-            cumulativeYOffset += pad + m_rowHeight;
+            cumulativeYOffset += pad + ROW_HEIGHT;
         }
 
         tp.setHeightSoFar(cumulativeYOffset);
 
         m_rowContainer.addUIElement(tp).inTL(-pad, 0);
-        getPanel().addComponent(m_rowContainer).inTL(0, m_headerHeight + pad);
+        add(m_rowContainer).inTL(0, HEADER_HEIGHT + pad);
     }
 
     private class HeaderPanel extends CustomPanel<BasePanelPlugin<HeaderPanel>, HeaderPanel, CustomPanelAPI> 
@@ -250,13 +252,12 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         public int listIndex = -1;
 
         private boolean isPersistentGlow = false;
-        private FaderUtil m_fader = null;
+        private final FaderUtil m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
         public HeaderPanel(UIPanelAPI parent, int width, int height, ColumnManager column, int listIndex) {
             super(parent, width, height, new BasePanelPlugin<>());
             this.column = column;
             this.listIndex = listIndex;
-            m_fader = new FaderUtil(0, 0, 0.2f, true, true);
 
             createPanel();
             initializePlugin(hasPlugin);
@@ -270,14 +271,8 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
 
         @Override
         public void createPanel() {
-            CustomPanelAPI panel = SortableTable.HeaderPanel.this.getPanel();
-            TooltipMakerAPI tooltip = panel.createUIElement(
-                    getPos().getWidth(), getPos().getHeight(), false);
-
-            tooltip.setParaFontColor(getFaction().getBaseUIColor());
-            tooltip.setParaFont(Fonts.ORBITRON_12);
-
-            LabelAPI lbl = tooltip.addPara(column.title, pad);
+            final LabelAPI lbl = Global.getSettings().createLabel(column.title, Fonts.ORBITRON_12);
+            lbl.setColor(getFaction().getBaseUIColor());
             final float lblWidth = lbl.computeTextWidth(lbl.getText());
             final float lblHeight = lbl.computeTextHeight(lbl.getText());
 
@@ -285,19 +280,20 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                 (getPos().getWidth() / 2f) - (lblWidth / 2f),
                 (getPos().getHeight() / 2f) - (lblHeight / 2f) 
             );
+            add(lbl);
 
-            final Base sortIcon = new Base(
-                panel,
-                m_headerHeight - 2, m_headerHeight,
-                sortIconPath,
-                getFaction().getBaseUIColor(),
-                null,
-                false
-            );
-
-            tooltip.addComponent(sortIcon.getPanel()).inBR(1, 0);
-
-            panel.addUIElement(tooltip).inBL(0, 0);
+            if (showSortIcon) {
+                final Base sortIcon = new Base(
+                    getPanel(),
+                    HEADER_HEIGHT - 2, HEADER_HEIGHT,
+                    sortIconPath,
+                    getFaction().getBaseUIColor(),
+                    null,
+                    false
+                );
+    
+                add(sortIcon).inBR(1, 0);
+            }
         }
 
         public Optional<HasActionListener> getActionListener() {
@@ -305,6 +301,8 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
         }
 
         public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
+            if (!sortingEnabled) return;
+            
             SortableTable.this.sortRows(listIndex);
         }
 
@@ -550,7 +548,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
                 }
 
                 float xOffset = calcXOffset(cumulativeXOffset, colWidth, compWidth, alignment);
-                float yOffset = (m_rowHeight/2) - (compHeight/2);
+                float yOffset = (ROW_HEIGHT/2) - (compHeight/2);
                 rowPanel.addComponent(comp).inBL(xOffset, yOffset);
 
                 cumulativeXOffset += colWidth;
@@ -752,7 +750,7 @@ public class SortableTable extends CustomPanel<BasePanelPlugin<SortableTable>, S
             pendingRow = new RowManager(
                 getParent(),
                 (int) getPos().getWidth() - 2,
-                m_rowHeight
+                ROW_HEIGHT
             );
         }
 

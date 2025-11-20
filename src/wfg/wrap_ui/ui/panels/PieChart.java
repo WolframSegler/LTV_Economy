@@ -58,9 +58,9 @@ public class PieChart extends CustomPanel<PieChartPlugin, PieChart, UIPanelAPI> 
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
         GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
-        final int haloRings = 70;
+        final int haloRings = 64;
         final int haloSegments = 30;
         final float haloMaxAlpha = 0.4f;
         final float minRadiusFactor = 0.9f;
@@ -85,6 +85,8 @@ public class PieChart extends CustomPanel<PieChartPlugin, PieChart, UIPanelAPI> 
             }
             GL11.glEnd();
         }
+
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         for (PieSlice slice : data) {
             final float sweepDeg = slice.fraction * 360f;
@@ -128,6 +130,49 @@ public class PieChart extends CustomPanel<PieChartPlugin, PieChart, UIPanelAPI> 
             GL11.glEnd();
 
             startDeg += sweepDeg;
+        }
+    
+        { // Radial Highlight
+            final float centerHighlightAlpha = 0.2f;
+            final float edgeAlpha = 0.0f;
+            final int segments = 56;
+
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+
+            GL11.glColor4f(1f, 1f, 1f, centerHighlightAlpha);
+            GL11.glVertex2f(cx, cy + radiusY * 0.1f);
+
+            for (int i = 0; i <= segments; i++) {
+                float rad = (float)(2 * Math.PI * (i / (float)segments));
+                float x = cx + (float)Math.cos(rad) * radiusX;
+                float y = cy + (float)Math.sin(rad) * radiusY;
+
+                GL11.glColor4f(1f, 1f, 1f, edgeAlpha);
+                GL11.glVertex2f(x, y);
+            }
+
+            GL11.glEnd();
+        }
+
+        { // Border Vignette
+            final float edgeDarkAlpha = 0.08f;
+            final int segments = 64;
+
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+
+            GL11.glColor4f(0f, 0f, 0f, 0f);
+            GL11.glVertex2f(cx, cy);
+
+            for (int i = 0; i <= segments; i++) {
+                float rad = (float)(2 * Math.PI * (i / (float)segments));
+                float x = cx + (float)Math.cos(rad) * radiusX;
+                float y = cy + (float)Math.sin(rad) * radiusY;
+
+                GL11.glColor4f(0f, 0f, 0f, edgeDarkAlpha);
+                GL11.glVertex2f(x, y);
+            }
+
+            GL11.glEnd();
         }
     }
 

@@ -26,12 +26,12 @@ public class EconomyOverviewPanel extends CustomPanel<
     public static final int MAIN_PANEL_W = 1250;
     public static final int MAIN_PANEL_H = 700;
     public static final int NAVBAR_W = 200;
-    public static final int NAV_BUTTON_W = 160;
-    public static final int NAV_BUTTON_H = 22;
+    public static final int NAV_BUTTON_W = 180;
+    public static final int NAV_BUTTON_H = 28;
     public static final int CONTENT_PANEL_W = 1045;
     public static final int CONTENT_PANEL_H = 700;
     public static final int OPTIONS_PANEL_W = 200;
-    public static final int OPTIONS_PANEL_H = 400;
+    public static final int OPTIONS_PANEL_H = 450;
 
     private static LabelAPI title = null;
     private static LabelAPI subtitle = null;
@@ -69,7 +69,7 @@ public class EconomyOverviewPanel extends CustomPanel<
         int currentY = opad*2; 
         for (Button btn : navButtons) {
             navbar.addComponent(btn.getPanel()).inTL(opad, currentY);
-            currentY += pad + NAV_BUTTON_H;
+            currentY += pad*2 + NAV_BUTTON_H;
         }
         currentY += opad*2;
 
@@ -80,7 +80,7 @@ public class EconomyOverviewPanel extends CustomPanel<
         contentPanel = settings.createCustom(CONTENT_PANEL_W, CONTENT_PANEL_H, null);
         optionsPanel = settings.createCustom(OPTIONS_PANEL_W, OPTIONS_PANEL_H, null);
         add(contentPanel).inTL(pad + NAVBAR_W + opad, titleY);
-        add(optionsPanel).inTL(pad, navbarY + pad*2);
+        add(optionsPanel).inBL(pad, 0);
 
         firstButton.click(false);
     }
@@ -89,10 +89,15 @@ public class EconomyOverviewPanel extends CustomPanel<
         navButtons.clear();
         CallbackRunnable<Button> buttonRunnable = (btn) -> {
             clearPanelAndButtonState(btn);
-            final GlobalCommodityFlow comFlow = new GlobalCommodityFlow(
+            final GlobalCommodityFlow content = new GlobalCommodityFlow(
                 contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
             );
-            contentPanel.addComponent(comFlow.getPanel()).inBL(0, 0);
+            contentPanel.addComponent(content.getPanel()).inBL(0, 0);
+
+            final CommoditySelectionPanel options = new CommoditySelectionPanel(
+                optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
+            );
+            optionsPanel.addComponent(options.getPanel()).inBL(0, 0);
         };
         Button button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Global Commodity Flow",

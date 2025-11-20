@@ -34,8 +34,8 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
     private static final String notExpandedCodexF1 = "F1 more info";
     private static final String ExpandedCodexF1 = "F1 hide";
     private static final String codexF2 = "F2 open Codex";
+    private final FaderUtil m_fader = new FaderUtil(0, 0, 0.2f, true, true);;
     private TooltipMakerAPI m_tooltip;
-    private FaderUtil m_fader = null;
     private FactionAPI m_faction = null;
 
     public boolean isExpanded = false;
@@ -46,7 +46,6 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
     ) {
         super(parent, width, height, new SpritePanelPlugin<>(), iconSpriteID, color, fillColor, false);
 
-        m_fader = new FaderUtil(0, 0, 0.2f, true, true);
         m_faction = faction;
     }
 

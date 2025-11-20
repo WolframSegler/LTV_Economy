@@ -31,7 +31,6 @@ import wfg.wrap_ui.ui.panels.PieChart;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.PieChart.PieSlice;
 import wfg.wrap_ui.ui.panels.TextPanel;
@@ -40,31 +39,29 @@ import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 
 public class GlobalCommodityFlow extends
-    CustomPanel<BasePanelPlugin<GlobalCommodityFlow>, GlobalCommodityFlow, CustomPanelAPI> implements
-    HasBackground
+    CustomPanel<BasePanelPlugin<GlobalCommodityFlow>, GlobalCommodityFlow, CustomPanelAPI>
 {
 
     public static final int pad = 3;
     public static final int opad = 10;
+    public static final int ICON_SIZE = 135;
+    public static final int LABEL_W = 140;
+    public static final int LABEL_H = 50;
     public static final int TABLE_W = 240;
     public static final int TABLE_H = 28*5 + 20 + opad*3;
     public static final int PIECHART_W = TABLE_H;
     public static final int PIECHART_H = TABLE_H;
 
-    public static CommoditySpecAPI selectedCom = Global.getSettings().getCommoditySpec(Commodities.FOOD);
-    public final int PANEL_W;
-    public final int PANEL_H;
-    public final int ICON_SIZE;
+    public static final int LEFT_WALL = 320;
+    public static final int Right_WALL = 720;
+
+    public static CommoditySpecAPI selectedCom = Global.getSettings().getCommoditySpec(Commodities.SUPPLIES);
+    
 
     public static Color backgroundColor = new Color(20, 30, 60);
 
     public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
         super(parent, width, height, new BasePanelPlugin<>());
-
-        PANEL_W = width;
-        PANEL_H = height;
-
-        ICON_SIZE = width / 7;
 
         initializePlugin(hasPlugin);
         createPanel();
@@ -85,15 +82,17 @@ public class GlobalCommodityFlow extends
         final Color highlight = Misc.getHighlightColor();
         final Color dark = Misc.getDarkPlayerColor();
 
+        clearChildren();
+
         final ComIconPanel comIcon = new ComIconPanel(
             getPanel(), sector.getPlayerFaction(), ICON_SIZE, ICON_SIZE,
             selectedCom.getIconName(), null, null
         );
         comIcon.setCommodity(selectedCom);
-        add(comIcon).inTL(opad, opad);
+        add(comIcon).inTL(opad*7, 0);
 
         { // Total global production
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final long value = engine.getGlobalProduction(comID);
@@ -153,11 +152,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE + opad, pad);
+        add(textPanel).inTL(opad, ICON_SIZE + pad*3);
         }
 
         { // Total global demand
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final long value = engine.getGlobalDemand(comID);
@@ -217,89 +216,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE*2 + opad, pad);
-        }
-
-        { // Top 5 producers
-        final SortableTable table = new SortableTable(getParent(), TABLE_W, TABLE_H);
-
-        table.addHeaders(
-            "", 40, null, true, false, 1, // Icon header
-            "Colony", 100, "Colony name", true, true, 1,
-            "Production", 100, "Daily units of " + selectedCom.getName() + " produced", false, false, -1
-        );
-
-        final ArrayList<CommodityStats> producers = info.getSortedByProduction(5);
-
-        for (CommodityStats stats : producers) {
-
-            final String iconPath = stats.market.getFaction().getCrest();
-            final Base iconPanel = new Base(
-                table.getPanel(), 28, 28, iconPath, null,
-                null, false
-            );
-            final Color textColor = stats.market.getFaction().getBaseUIColor();
-            final long value = (long) stats.getLocalProduction(true);
-
-            table.addCell(iconPanel, cellAlg.LEFT, null, null);
-            table.addCell(stats.market.getName(), cellAlg.LEFT, null, textColor);
-            table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
-
-            table.pushRow(
-                null, null, null, null, null, null
-            );
-        }
-
-        add(table).inBL(opad, 0);
-        table.createPanel();
-
-        final LabelAPI label = settings.createLabel("Top 5 producers", Fonts.ORBITRON_16);
-        final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
-        add(label).inBL(opad + (TABLE_W - labelW) / 2f, TABLE_H + pad*2);
-        }
-
-        { // Top 5 consumers
-        final SortableTable table = new SortableTable(getParent(), TABLE_W, TABLE_H);
-
-        table.addHeaders(
-            "", 40, null, true, false, 1, // Icon header
-            "Colony", 100, "Colony name", true, true, 1,
-            "Demand", 100, "Daily units of " + selectedCom.getName() + " demanded", false, false, -1
-        );
-
-        final ArrayList<CommodityStats> consumers = info.getSortedByDemand(5);
-
-        for (CommodityStats stats : consumers) {
-
-            final String iconPath = stats.market.getFaction().getCrest();
-            final Base iconPanel = new Base(
-                table.getPanel(), 28, 28, iconPath, null,
-                null, false
-            );
-            final Color textColor = stats.market.getFaction().getBaseUIColor();
-            final long value = (long) stats.getBaseDemand(false);
-
-            table.addCell(iconPanel, cellAlg.LEFT, null, null);
-            table.addCell(stats.market.getName(), cellAlg.LEFT, null, textColor);
-            table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
-
-            table.pushRow(
-                null, null, null, null, null, null
-            );
-        }
-
-        add(table).inBL(opad + TABLE_W + opad, 0);
-        table.createPanel();
-
-        final LabelAPI label = settings.createLabel("Top 5 consumers", Fonts.ORBITRON_16);
-        final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
-        add(label).inBL(opad + TABLE_W + opad + (TABLE_W - labelW) / 2f, TABLE_H + pad*2);
+        add(textPanel).inTL(opad + LABEL_W, ICON_SIZE + pad*3);
         }
 
         { // Total global surplus
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final long value = engine.getGlobalSurplus(comID);
@@ -359,11 +280,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE*3 + opad, pad);
+        add(textPanel).inTL(opad, ICON_SIZE + LABEL_H + pad*4);
         }
 
         { // Total global deficit
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final long value = engine.getGlobalDeficit(comID);
@@ -424,11 +345,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE*4 + opad, pad);
+        add(textPanel).inTL(opad + LABEL_W, ICON_SIZE + LABEL_H + pad*4);
         }
 
         { // Total trade volume (units)
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final long value = engine.getGlobalTradeVolume(comID);
@@ -487,11 +408,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE*5 + opad, pad);
+        add(textPanel).inTL(LEFT_WALL, pad);
         }
 
         { // Total trade value (credits)
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final long value = info.getMarketActivity();
@@ -550,11 +471,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE + opad, pad + 50);
+        add(textPanel).inTL(Right_WALL - LABEL_W, pad);
         }
 
         { // Average sector price
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final long value = (long) engine.getGlobalAveragePrice(comID, 1);
@@ -613,312 +534,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE*2 + opad, pad + 50);
-        }
-
-        { // Number of exporting markets
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
-
-            public void createPanel() {
-                final long value = info.getExporters().size();
-                final String txt = "Global Exporters";
-                String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
-
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
-                lbl1.setHighlightOnMouseover(true);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
-
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
-            }
-
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
-
-                tooltip.addPara(
-                    "The total count of markets in the sector that exported %s during the current cycle. Only markets that actually sent units to other markets are included, regardless of faction.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
-
-                return tooltip;
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
-        };
-
-        add(textPanel).inTL(ICON_SIZE*3 + opad, pad + 50);
-        }
-
-        { // Number of importing markets
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
-
-            public void createPanel() {
-                final long value = info.getImporters().size();
-                final String txt = "Global Importers";
-                String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
-
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
-                lbl1.setHighlightOnMouseover(true);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
-
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
-            }
-
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
-
-                tooltip.addPara(
-                    "The total count of markets in the sector that imported %s during the current cycle. Only markets that actually received units from other markets are included, regardless of faction.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
-
-                return tooltip;
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
-        };
-
-        add(textPanel).inTL(ICON_SIZE*4 + opad, pad + 50);
-        }
-
-        { // Global export share per faction (percent)
-        final ArrayList<PieSlice> data = new ArrayList<>(); 
-        final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
-        for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
-            final FactionSpecAPI faction = iter.next();
-            final float value = engine.getFactionTotalExportMarketShare(comID, faction.getId());
-            if (value < 0.01f) {
-                iter.remove();
-                continue;
-            }
-            data.add(new PieSlice(
-                null,
-                faction.getBaseUIColor(),
-                value
-            ));
-        }
-        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
-
-        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
-        add(chart).inBL(opad*3 + TABLE_W*2, 0);
-
-        pendingTp.parentSupplier = chart::getPanel;
-        pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
-            tp.setParaFont(Fonts.ORBITRON_12);
-            tp.setParaFontColor(baseColor);
-            tp.addPara("Global Export Share by Faction", pad);
-            tp.setParaFontDefault();
-            tp.setParaFontColor(Misc.getTextColor());
-            tp.addPara(
-                "Shows the percentage of total exports controlled by each faction. " +
-                "Percentages do not include in-faction trade." +
-                "Values are based on the last cycle.",
-                pad
-            );
-
-            tp.beginTable(
-                baseColor, dark, highlight, 20, true, true, new Object[] {
-                    "Faction", 200, "Share", 100
-                }
-            );
-
-            for (FactionSpecAPI faction : factionList) {
-                tp.addRow(new Object[] {
-                    faction.getBaseUIColor(),
-                    faction.getDisplayName(),
-                    highlight,
-                    (int) (engine.getFactionTotalExportMarketShare(comID, faction.getId()) * 100) + "%"
-                });
-            }
-
-            tp.addTable("", 0, opad);
-            tp.getPosition().setSize(400, tp.getHeightSoFar());
-            return tp;
-        };
-        chart.pendingTp = pendingTp;
-
-        final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
-        final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
-        add(label).inBL(opad*3 + TABLE_W*2 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
-        }
-
-        { // Global import share per faction (percent)
-        final ArrayList<PieSlice> data = new ArrayList<>(); 
-        final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
-        for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
-            final FactionSpecAPI faction = iter.next();
-            final float value = engine.getFactionTotalImportMarketShare(comID, faction.getId());
-            if (value < 0.01f) {
-                iter.remove();
-                continue;
-            }
-            data.add(new PieSlice(
-                null,
-                faction.getBaseUIColor(),
-                value
-            ));
-        }
-        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
-
-        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
-        add(chart).inBL(opad*4 + TABLE_W*2 + PIECHART_W, 0);
-
-        pendingTp.parentSupplier = chart::getPanel;
-        pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
-            tp.setParaFont(Fonts.ORBITRON_12);
-            tp.setParaFontColor(baseColor);
-            tp.addPara("Global Import Share by Faction", pad);
-            tp.setParaFontDefault();
-            tp.setParaFontColor(Misc.getTextColor());
-            tp.addPara(
-                "Shows the percentage of total imports made by each faction. " +
-                "Percentages do not include in-faction trade." +
-                "Values are based on the last cycle.",
-                pad
-            );
-
-            tp.beginTable(
-                baseColor, dark, highlight, 20, true, true, new Object[] {
-                    "Faction", 200, "Share", 100
-                }
-            );
-
-            for (FactionSpecAPI faction : factionList) {
-                tp.addRow(new Object[] {
-                    faction.getBaseUIColor(),
-                    faction.getDisplayName(),
-                    highlight,
-                    (int) (engine.getFactionTotalImportMarketShare(comID, faction.getId()) * 100) + "%"
-                });
-            }
-
-            tp.addTable("", 0, opad);
-            tp.getPosition().setSize(400, tp.getHeightSoFar());
-            return tp;
-        };
-        chart.pendingTp = pendingTp;
-
-        final LabelAPI label = settings.createLabel("Import share", Fonts.ORBITRON_16);
-        final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
-        add(label).inBL(opad*4 + TABLE_W*2 + PIECHART_W + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
-        }
-
-        { // In-faction vs out-of-faction trade share
-        final ArrayList<PieSlice> data = new ArrayList<>();
-        final long total = engine.getTotalGlobalExports(comID) + engine.getTotalFactionExports(comID);
-        final float globalTradeShare = (float) engine.getTotalGlobalExports(comID) / (float) total;
-            
-        data.add(new PieSlice(
-            null,
-            UiUtils.COLOR_IMPORT,
-            globalTradeShare
-        ));
-        data.add(new PieSlice(
-            null,
-            UiUtils.getInFactionColor(),
-            1f - globalTradeShare
-        ));
-
-        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
-
-        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
-        add(chart).inTL(opad, opad*4 + ICON_SIZE);
-
-        pendingTp.parentSupplier = chart::getPanel;
-        pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
-            tp.setParaFont(Fonts.ORBITRON_12);
-            tp.setParaFontColor(baseColor);
-            tp.addPara("Global vs In-Faction Trade Share", pad);
-            tp.setParaFontDefault();
-            tp.setParaFontColor(Misc.getTextColor());
-            tp.addPara(
-                "Shows the proportion of this commodity's total exports that are traded outside the producing faction (%s)" +
-                " versus exports consumed within the same faction (%s). " +
-                "Values are based on the last cycle.",
-                pad,
-                highlight, ((int)(globalTradeShare*100)) + "%", ((int)((1f-globalTradeShare)*100)) + "%"
-            );
-
-            tp.getPosition().setSize(400, tp.getHeightSoFar());
-            return tp;
-        };
-        chart.pendingTp = pendingTp;
-
-        final LabelAPI label = settings.createLabel("Trade Breakdown", Fonts.ORBITRON_16);
-        final float labelW = label.computeTextWidth(label.getText());
-        final float labelH = label.computeTextHeight(label.getText());
-        label.setColor(baseColor);
-        add(label).inTL(opad + (PIECHART_W - labelW) / 2f, opad*4 + ICON_SIZE - pad - labelH);
+        add(textPanel).inTL(LEFT_WALL, pad + LABEL_H);
         }
 
         { // Trade volatility (month-over-month volume change)
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final float value = info.getTradeVolatility();
@@ -984,11 +604,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE + opad, pad + 100);
+        add(textPanel).inTL(Right_WALL - LABEL_W, pad + LABEL_H);
         }
 
         { // Global stockpiles
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 final long value = engine.getGlobalStockpiles(comID);
@@ -1046,11 +666,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE*2 + opad, pad + 100);
+        add(textPanel).inTL(LEFT_WALL, pad + LABEL_H*2);
         }
 
         { // Worker allocation (total workers producing it)
-        final TextPanel textPanel = new TextPanel(getPanel(), 170, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
             public void createPanel() {
                 long value = 0;
@@ -1110,15 +730,386 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(ICON_SIZE*3 + opad, pad + 100);
+        add(textPanel).inTL(Right_WALL - LABEL_W, pad + LABEL_H*2);
         }
-    }
 
-    public float getBgAlpha() {
-        return 0.25f;
-    }
+        { // Number of exporting markets
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
 
-    public Color getBgColor() {
-        return backgroundColor;
+            public void createPanel() {
+                final long value = info.getExporters().size();
+                final String txt = "Global Exporters";
+                String valueTxt = NumFormat.engNotation(value);
+                if (value < 1) {
+                    valueTxt = "---";
+                }
+
+                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                lbl1.setColor(baseColor);
+                lbl1.setHighlightOnMouseover(true);
+
+                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                lbl2.setColor(highlight);
+                lbl2.setHighlightOnMouseover(true);
+
+                final float textH1 = lbl1.getPosition().getHeight();
+                final float textW1 = lbl1.computeTextWidth(txt);
+
+                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
+
+                final float textH2 = lbl2.getPosition().getHeight();
+                final float textW2 = lbl2.computeTextWidth(valueTxt);
+                final float textX2 = (textW1 / 2) - (textW2 / 2);
+
+                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
+
+                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+            }
+
+            public CustomPanelAPI getTpParent() {
+                return getPanel();
+            }
+
+            @Override
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+
+                tooltip.addPara(
+                    "The total count of markets in the sector that exported %s during the current cycle. Only markets that actually sent units to other markets are included, regardless of faction.",
+                    pad, highlight, selectedCom.getName()
+                );
+
+                getPanel().addUIElement(tooltip);
+                WrapUiUtils.mouseCornerPos(tooltip, opad);
+
+                return tooltip;
+            }
+
+            @Override
+            public void initializePlugin(boolean hasPlugin) {
+                super.initializePlugin(hasPlugin);
+
+                getPlugin().setTargetUIState(State.NONE);
+            }
+        };
+
+        add(textPanel).inTL(Right_WALL + LABEL_W, pad);
+        }
+
+        { // Number of importing markets
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+
+            public void createPanel() {
+                final long value = info.getImporters().size();
+                final String txt = "Global Importers";
+                String valueTxt = NumFormat.engNotation(value);
+                if (value < 1) {
+                    valueTxt = "---";
+                }
+
+                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                lbl1.setColor(baseColor);
+                lbl1.setHighlightOnMouseover(true);
+
+                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                lbl2.setColor(highlight);
+                lbl2.setHighlightOnMouseover(true);
+
+                final float textH1 = lbl1.getPosition().getHeight();
+                final float textW1 = lbl1.computeTextWidth(txt);
+
+                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
+
+                final float textH2 = lbl2.getPosition().getHeight();
+                final float textW2 = lbl2.computeTextWidth(valueTxt);
+                final float textX2 = (textW1 / 2) - (textW2 / 2);
+
+                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
+
+                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+            }
+
+            public CustomPanelAPI getTpParent() {
+                return getPanel();
+            }
+
+            @Override
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+
+                tooltip.addPara(
+                    "The total count of markets in the sector that imported %s during the current cycle. Only markets that actually received units from other markets are included, regardless of faction.",
+                    pad, highlight, selectedCom.getName()
+                );
+
+                getPanel().addUIElement(tooltip);
+                WrapUiUtils.mouseCornerPos(tooltip, opad);
+
+                return tooltip;
+            }
+
+            @Override
+            public void initializePlugin(boolean hasPlugin) {
+                super.initializePlugin(hasPlugin);
+
+                getPlugin().setTargetUIState(State.NONE);
+            }
+        };
+
+        add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H);
+        }
+
+        { // Top 5 producers
+        final SortableTable table = new SortableTable(getParent(), TABLE_W, TABLE_H);
+
+        table.addHeaders(
+            "", 40, null, true, false, 1, // Icon header
+            "Colony", 100, "Colony name", true, true, 1,
+            "Production", 100, "Daily units of " + selectedCom.getName() + " produced", false, false, -1
+        );
+
+        final ArrayList<CommodityStats> producers = info.getSortedByProduction(5);
+
+        for (CommodityStats stats : producers) {
+
+            final String iconPath = stats.market.getFaction().getCrest();
+            final Base iconPanel = new Base(
+                table.getPanel(), 28, 28, iconPath, null,
+                null, false
+            );
+            final Color textColor = stats.market.getFaction().getBaseUIColor();
+            final long value = (long) stats.getLocalProduction(true);
+
+            table.addCell(iconPanel, cellAlg.LEFT, null, null);
+            table.addCell(stats.market.getName(), cellAlg.LEFT, null, textColor);
+            table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
+
+            table.pushRow(
+                null, null, null, null, null, null
+            );
+        }
+
+        table.showSortIcon = false;
+        table.sortingEnabled = false;
+        add(table).inBL(opad, TABLE_H + LABEL_H / 2f);
+        table.createPanel();
+
+        final LabelAPI label = settings.createLabel("Top 5 producers", Fonts.ORBITRON_16);
+        final float labelW = label.computeTextWidth(label.getText());
+        label.setColor(baseColor);
+        add(label).inBL(opad + (TABLE_W - labelW) / 2f, TABLE_H*2 + LABEL_H / 2f + pad*2);
+        }
+
+        { // Top 5 consumers
+        final SortableTable table = new SortableTable(getParent(), TABLE_W, TABLE_H);
+
+        table.addHeaders(
+            "", 40, null, true, false, 1, // Icon header
+            "Colony", 100, "Colony name", true, true, 1,
+            "Demand", 100, "Daily units of " + selectedCom.getName() + " demanded", false, false, -1
+        );
+
+        final ArrayList<CommodityStats> consumers = info.getSortedByDemand(5);
+
+        for (CommodityStats stats : consumers) {
+
+            final String iconPath = stats.market.getFaction().getCrest();
+            final Base iconPanel = new Base(
+                table.getPanel(), 28, 28, iconPath, null,
+                null, false
+            );
+            final Color textColor = stats.market.getFaction().getBaseUIColor();
+            final long value = (long) stats.getBaseDemand(false);
+
+            table.addCell(iconPanel, cellAlg.LEFT, null, null);
+            table.addCell(stats.market.getName(), cellAlg.LEFT, null, textColor);
+            table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
+
+            table.pushRow(
+                null, null, null, null, null, null
+            );
+        }
+
+        table.showSortIcon = false;
+        table.sortingEnabled = false;
+        add(table).inBL(opad, 0);
+        table.createPanel();
+
+        final LabelAPI label = settings.createLabel("Top 5 consumers", Fonts.ORBITRON_16);
+        final float labelW = label.computeTextWidth(label.getText());
+        label.setColor(baseColor);
+        add(label).inBL(opad + (TABLE_W - labelW) / 2f, TABLE_H + pad*2);
+        }
+      
+        { // Global export share per faction (percent)
+        final ArrayList<PieSlice> data = new ArrayList<>(); 
+        final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
+        for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
+            final FactionSpecAPI faction = iter.next();
+            final float value = engine.getFactionTotalExportMarketShare(comID, faction.getId());
+            if (value < 0.001f) {
+                iter.remove();
+                continue;
+            }
+            data.add(new PieSlice(
+                null,
+                faction.getBaseUIColor(),
+                value
+            ));
+        }
+        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+
+        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        add(chart).inBL(360, pad);
+
+        pendingTp.parentSupplier = chart::getPanel;
+        pendingTp.factory = () -> {
+            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.setParaFontColor(baseColor);
+            tp.addPara("Global Export Share by Faction", pad);
+            tp.setParaFontDefault();
+            tp.setParaFontColor(Misc.getTextColor());
+            tp.addPara(
+                "Shows the percentage of total exports controlled by each faction. " +
+                "Percentages do not include in-faction trade." +
+                "Values are based on the last cycle.",
+                pad
+            );
+
+            tp.beginTable(
+                baseColor, dark, highlight, 20, true, true, new Object[] {
+                    "Faction", 200, "Share", 100
+                }
+            );
+
+            for (FactionSpecAPI faction : factionList) {
+                tp.addRow(new Object[] {
+                    faction.getBaseUIColor(),
+                    faction.getDisplayName(),
+                    highlight,
+                    (int) (engine.getFactionTotalExportMarketShare(comID, faction.getId()) * 100) + "%"
+                });
+            }
+
+            tp.addTable("", 0, opad);
+            return tp;
+        };
+        chart.pendingTp = pendingTp;
+
+        final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
+        final float labelW = label.computeTextWidth(label.getText());
+        label.setColor(baseColor);
+        add(label).inBL(360 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
+        }
+
+        { // Global import share per faction (percent)
+        final ArrayList<PieSlice> data = new ArrayList<>(); 
+        final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
+        for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
+            final FactionSpecAPI faction = iter.next();
+            final float value = engine.getFactionTotalImportMarketShare(comID, faction.getId());
+            if (value < 0.001f) {
+                iter.remove();
+                continue;
+            }
+            data.add(new PieSlice(
+                null,
+                faction.getBaseUIColor(),
+                value
+            ));
+        }
+        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+
+        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        add(chart).inBL(580, pad);
+
+        pendingTp.parentSupplier = chart::getPanel;
+        pendingTp.factory = () -> {
+            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.setParaFontColor(baseColor);
+            tp.addPara("Global Import Share by Faction", pad);
+            tp.setParaFontDefault();
+            tp.setParaFontColor(Misc.getTextColor());
+            tp.addPara(
+                "Shows the percentage of total imports made by each faction. " +
+                "Percentages do not include in-faction trade." +
+                "Values are based on the last cycle.",
+                pad
+            );
+
+            tp.beginTable(
+                baseColor, dark, highlight, 20, true, true, new Object[] {
+                    "Faction", 200, "Share", 100
+                }
+            );
+
+            for (FactionSpecAPI faction : factionList) {
+                tp.addRow(new Object[] {
+                    faction.getBaseUIColor(),
+                    faction.getDisplayName(),
+                    highlight,
+                    (int) (engine.getFactionTotalImportMarketShare(comID, faction.getId()) * 100) + "%"
+                });
+            }
+
+            tp.addTable("", 0, opad);
+            return tp;
+        };
+        chart.pendingTp = pendingTp;
+
+        final LabelAPI label = settings.createLabel("Import share", Fonts.ORBITRON_16);
+        final float labelW = label.computeTextWidth(label.getText());
+        label.setColor(baseColor);
+        add(label).inBL(580 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
+        }
+
+        { // In-faction vs out-of-faction trade share
+        final ArrayList<PieSlice> data = new ArrayList<>();
+        final long total = engine.getTotalGlobalExports(comID) + engine.getTotalFactionExports(comID);
+        final float globalTradeShare = (float) engine.getTotalGlobalExports(comID) / (float) total;
+            
+        data.add(new PieSlice(
+            null,
+            UiUtils.COLOR_IMPORT,
+            globalTradeShare
+        ));
+        data.add(new PieSlice(
+            null,
+            UiUtils.getInFactionColor(),
+            1f - globalTradeShare
+        ));
+
+        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+
+        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        add(chart).inBL(800, pad);
+
+        pendingTp.parentSupplier = chart::getPanel;
+        pendingTp.factory = () -> {
+            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.setParaFontColor(baseColor);
+            tp.addPara("Global vs In-Faction Trade Share", pad);
+            tp.setParaFontDefault();
+            tp.setParaFontColor(Misc.getTextColor());
+            tp.addPara(
+                "Shows the proportion of this commodity's total exports that are traded outside the producing faction (%s)" +
+                " versus exports consumed within the same faction (%s). " +
+                "Values are based on the last cycle.",
+                pad,
+                highlight, ((int)(globalTradeShare*100)) + "%", ((int)((1f-globalTradeShare)*100)) + "%"
+            );
+
+            return tp;
+        };
+        chart.pendingTp = pendingTp;
+
+        final LabelAPI label = settings.createLabel("Trade Breakdown", Fonts.ORBITRON_16);
+        final float labelW = label.computeTextWidth(label.getText());
+        label.setColor(baseColor);
+        add(label).inBL(800 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
+        }
     }
 }
