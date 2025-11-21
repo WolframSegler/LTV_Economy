@@ -123,8 +123,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
         // Replace the Commodity Panel which shows the total imports and exports
         replaceCommodityPanel(managementPanel, managementChildren, anchorChild);
 
-        // Replace the market instance of the TransferHandler
-        replaceMarketInstanceForPriceControl(managementPanel);
+        // Replace the market instance of the masterTab
+        replaceMarketInstanceForPriceControl(masterTab);
     }
 
     private static final void replaceUseStockpilesButton(
@@ -301,24 +301,23 @@ public class LtvMarketReplacer implements EveryFrameScript {
         }
     }
 
-    private static final void replaceMarketInstanceForPriceControl(UIPanelAPI managementPanel) {
-        final UIPanelAPI handler = (UIPanelAPI) ReflectionUtils.invoke(managementPanel, "getTransferHandler");
-        final ReflectedField field = ReflectionUtils.getFieldsMatching(handler, null, Market.class)
-            .get(0);
+    private static final void replaceMarketInstanceForPriceControl(UIPanelAPI masterTab) {
+        final UIPanelAPI handler = (UIPanelAPI) ReflectionUtils.invoke(masterTab, "getTransferHandler");
+        final ReflectedField field = ReflectionUtils.getFieldsMatching(
+            handler, null, Market.class
+        ).get(0);
 
-        if (field.get(handler) instanceof MarketWrapper) return;
+        final Market original = (Market) field.get(handler);
+        if (original instanceof MarketWrapper) return;
 
-        MarketAPI ltvMarket = new MarketWrapper((Market) field.get(handler));
+        MarketAPI ltvMarket = new MarketWrapper(original);
         field.set(handler, ltvMarket);
     }
 
-
-    @Override
     public boolean isDone() {
         return false;
     }
 
-    @Override
     public boolean runWhilePaused() {
         return true;
     }

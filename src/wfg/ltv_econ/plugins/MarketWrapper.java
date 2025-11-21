@@ -1,6 +1,7 @@
 package wfg.ltv_econ.plugins;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -45,17 +46,117 @@ import com.fs.starfarer.campaign.econ.Submarket;
 import com.fs.starfarer.campaign.fleet.MutableMarketStats;
 import com.fs.starfarer.rpg.Person;
 
+import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.reflection.ReflectionUtils;
 
 public class MarketWrapper extends Market {
     public final Market original;
 
+    private boolean ready;
+
     public MarketWrapper(Market original) {
         super(original.getId(), original.getName(), original.getSize(), original.getEconomy());
 
         this.original = original;
+        ready = true;
     }
 
+    // MODIFIED METHODS
+    public float getDemandPrice(String comID, double quantity, boolean isPlayer) {
+        return getDemandPriceAssumingExistingTransaction(
+            comID, quantity, 0d, isPlayer
+        );
+    }
+
+    public float getDemandPriceAssumingExistingTransaction(
+        String comID, double quantity, double existingTransactionValue, boolean isPlayer
+    ) {
+        return getDemandPriceAssumingStockpileUtility(
+            getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
+        );
+    }
+
+    public float getDemandPriceAssumingStockpileUtility(
+        CommodityOnMarket com, double stockpiles, float quantity, boolean isPlayer
+    ) {
+        if (quantity <= 0) return 0f;
+
+        final CommodityStats stats = EconomyEngine.getInstance().getComStats(
+            com.getId(), com.getMarket().getId()
+        );
+        final int amount = (int) quantity;
+
+        if (isPlayer) return stats.getPlayerSellPrice(amount);
+        return stats.computeVanillaPrice(amount, true);
+    }
+
+    public float getSupplyPrice(String comID, double quantity, boolean isPlayer) {
+        return getSupplyPriceAssumingExistingTransaction(
+            comID, quantity, 0d, isPlayer
+        );
+    }
+
+    public float getSupplyPriceAssumingExistingTransaction(
+        String comID, double quantity, double existingTransactionValue, boolean isPlayer
+    ) {
+        return getDemandPriceAssumingStockpileUtility(
+            getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
+        );
+    }
+
+    public float getSupplyPriceAssumingStockpileUtility(
+        CommodityOnMarket com, double stockpiles, double quantity, boolean isPlayer
+    ) {
+        if (quantity <= 0) return 0f;
+
+        final CommodityStats stats = EconomyEngine.getInstance().getComStats(
+            com.getId(), com.getMarket().getId()
+        );
+        final int amount = (int) quantity;
+
+        if (isPlayer) return stats.getPlayerBuyPrice(amount);
+        return stats.computeVanillaPrice(amount, false);
+    }
+
+    public float getIndustryUpkeep() {
+        return original.getIndustryUpkeep();
+    }
+
+    public float getIndustryIncome() {
+        return original.getIndustryIncome();
+    }
+
+    public float getExportIncome(boolean var1) {
+        return original.getExportIncome(var1);
+    }
+
+    public float getNetIncome() {
+        return original.getNetIncome();
+    }
+
+    public float getGrossIncome() {
+        return original.getGrossIncome();
+    }
+
+    public float getImmigrationIncentivesCost() {
+        return original.getImmigrationIncentivesCost();
+    }
+
+    public float getShortageCounteringCost() {
+        return original.getShortageCounteringCost();
+    }
+
+    public float getIncentiveCredits() {
+        return original.getIncentiveCredits();
+    }
+
+    public void setIncentiveCredits(float var1) {
+        original.setIncentiveCredits(var1);
+    }
+
+
+    // WRAPPER METHODS
     public int hashCode() {
         return original.hashCode();
     }
@@ -284,6 +385,7 @@ public class MarketWrapper extends Market {
         return original.getAccessibilityMod();
     }
 
+    @SuppressWarnings("all")
     private Object readResolve() {
         return ReflectionUtils.invoke(original, "readResolve");
     }
@@ -300,6 +402,7 @@ public class MarketWrapper extends Market {
         original.clearCommodities();
     }
 
+    @SuppressWarnings("all")
     private Object writeReplace() {
         return ReflectionUtils.invoke(original, "writeReplace");
     }
@@ -364,34 +467,6 @@ public class MarketWrapper extends Market {
         return original.getCommodityData(var1);
     }
 
-    public float getDemandPrice(String var1, double var2, boolean var4) {
-        return this.getDemandPriceAssumingExistingTransaction(var1, var2, 0.0D, var4);
-    }
-
-    public float getDemandPriceAssumingExistingTransaction(String var1, double var2, double var4, boolean var6) {
-        return 0;
-    }
-
-    public float getDemandPriceAssumingStockpileUtility(
-        CommodityOnMarket var1, double var2, double var4, boolean var6
-    ) {
-        return 0;
-    }
-
-    public float getSupplyPrice(String var1, double var2, boolean var4) {
-        return this.getSupplyPriceAssumingExistingTransaction(var1, var2, 0.0D, var4);
-    }
-
-    public float getSupplyPriceAssumingExistingTransaction(String var1, double var2, double var4, boolean var6) {
-        return 0;
-    }
-
-    public float getSupplyPriceAssumingStockpileUtility(
-        CommodityOnMarket var1, double var2, double var4, boolean var6
-    ) {
-        return 0;
-    }
-
     public MarketDemandData getDemandData() {
         return original.getDemandData();
     }
@@ -425,6 +500,7 @@ public class MarketWrapper extends Market {
     }
 
     public List<CommodityOnMarketAPI> getAllCommodities() {
+        if (!ready) return Collections.emptyList();
         return original.getAllCommodities();
     }
 
@@ -593,34 +669,6 @@ public class MarketWrapper extends Market {
         original.clearHostileCache();
     }
 
-    public float getIndustryUpkeep() {
-        return original.getIndustryUpkeep();
-    }
-
-    public float getIndustryIncome() {
-        return original.getIndustryIncome();
-    }
-
-    public float getExportIncome(boolean var1) {
-        return original.getExportIncome(var1);
-    }
-
-    public float getNetIncome() {
-        return original.getNetIncome();
-    }
-
-    public float getGrossIncome() {
-        return original.getGrossIncome();
-    }
-
-    public float getImmigrationIncentivesCost() {
-        return original.getImmigrationIncentivesCost();
-    }
-
-    public float getShortageCounteringCost() {
-        return original.getShortageCounteringCost();
-    }
-
     public boolean hasWaystation() {
         return original.hasWaystation();
     }
@@ -691,14 +739,6 @@ public class MarketWrapper extends Market {
 
     public void setAllowExport(boolean var1) {
         original.setAllowExport(var1);
-    }
-
-    public float getIncentiveCredits() {
-        return original.getIncentiveCredits();
-    }
-
-    public void setIncentiveCredits(float var1) {
-        original.setIncentiveCredits(var1);
     }
 
     public boolean isFreePort() {

@@ -266,7 +266,7 @@ public class CommodityInfo {
 
         for (CommodityStats stats : m_comStats.values()) {
 
-            if (stats.getDemandPreTrade() > 0) {
+            if (computeImportAmount(stats) > 0) {
                 importers.add(stats.market);
             }
         }
@@ -278,7 +278,7 @@ public class CommodityInfo {
         List <MarketAPI> exporters = new ArrayList<>(50);
 
         for (CommodityStats stats : m_comStats.values()) {
-            if (stats.getBaseExportable() > 0) exporters.add(stats.market);
+            if (stats.getRemainingExportableWithPreferredStockpile() > 0) exporters.add(stats.market);
         }
 
         return exporters;
@@ -445,7 +445,7 @@ public class CommodityInfo {
 
     private static final float computeImportAmount(CommodityStats stats) {
         final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * stats.getDeficitPreTrade();
-        final float rawTarget = EconomyConfig.DAYS_TO_COVER * stats.getDeficitPreTrade();
+        final float rawTarget = stats.getPreferredStockpile();
         final int target = (int) Math.max(Math.min(rawTarget - stats.getStored(), cap), 0);
         final float exclusive = stats.getImportExclusiveDemand();
 
@@ -456,7 +456,7 @@ public class CommodityInfo {
         if (stats.getDeficitPreTrade() > 0) {
             return 0;
         }
-        return stats.getRemainingExportable();
+        return stats.getRemainingExportableWithPreferredStockpile();
     }
 
     private void recordDailyVolume() {

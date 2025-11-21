@@ -9,7 +9,10 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.PriceVariability;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.StatBonus;
+import com.fs.starfarer.campaign.econ.Market;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -108,6 +111,12 @@ public class CommodityStats {
     }
     public final float getRemainingExportable() {
         return getBaseExportable() - getTotalExports();
+    }
+    public final float getRemainingExportableWithPreferredStockpile() {
+        return Math.max(0, getBaseExportable() - getTotalExports() - getPreferredStockpile());
+    }
+    public final float getPreferredStockpile() {
+        return EconomyConfig.DAYS_TO_COVER * demandBase;
     }
     public final float getCanNotExport() {
         return Math.max(0, getBaseExportable() - getTotalExports());
@@ -256,13 +265,31 @@ public class CommodityStats {
         return Math.max(price, 1f);
     }
 
+    public float computeVanillaPrice(int amount, boolean isSelling) {
+        if (amount < 1) return 0f;
+
+        final Market mkt = (Market) market;
+        if (spec.getPriceVariability() == PriceVariability.V0) {
+            return spec.getBasePrice() * amount;
+        }
+
+        final PriceType type = isSelling ? PriceType.BUYING : PriceType.SELLING;
+        final float unitPrice = getUnitPrice(type, amount);
+
+        final StatBonus priceMod = isSelling ? mkt.getDemandPriceMod() : mkt.getSupplyPriceMod();
+
+        final float totalPrice = priceMod.computeEffective(unitPrice) * amount;
+
+        return (float)Math.floor(Math.max(totalPrice, amount));
+    }
+
     public final float getPlayerSellPrice(int amount) {
-        float value = getUnitPrice(PriceType.BUYING, amount); // The market is buying from the player
+        float value = computeVanillaPrice(amount, true); // market buys from player
         return market.getCommodityData(comID).getPlayerDemandPriceMod().computeEffective(value);
     }
 
     public final float getPlayerBuyPrice(int amount) {
-        float value = getUnitPrice(PriceType.SELLING, amount); // The market is selling to the player
+        float value = computeVanillaPrice(amount, false); // market sells to player
         return market.getCommodityData(comID).getPlayerSupplyPriceMod().computeEffective(value);
     }
 
