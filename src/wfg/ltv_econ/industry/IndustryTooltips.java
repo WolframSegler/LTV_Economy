@@ -317,7 +317,7 @@ public class IndustryTooltips {
 			for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
 				CommodityStats stats = engine.getComStats(spec.getId(), ind.getMarket().getId());
 
-				if (stats.getLocalProductionStat(ind.getId()).getModifiedInt() > 0) {
+				if (stats.getProductionStat(ind.getId()).getModifiedInt() > 0) {
 					supplyList.add(stats);
 				}
 				if (stats.getBaseDemandStat(ind.getId()).getModifiedInt() > 0) {
@@ -341,7 +341,7 @@ public class IndustryTooltips {
 				for (CommodityStats stats : supplyList) {
 					CommoditySpecAPI commodity = market.getCommodityData(stats.comID).getCommodity();
 
-					int pAmount = stats.getLocalProductionStat(ind.getId()).getModifiedInt();
+					int pAmount = stats.getProductionStat(ind.getId()).getModifiedInt();
 
 					if (pAmount < 1) continue;
 
@@ -420,7 +420,7 @@ public class IndustryTooltips {
 					// draw icon
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
-					if (stats.getAvailabilityRatio() < 0.99f) {
+					if (stats.getFlowAvailabilityRatio() < 0.99f) {
 						tp.addIcons(commodity, 1, IconRenderMode.DIM_RED);
 					} else {
 						tp.addIcons(commodity, 1, IconRenderMode.NORMAL);

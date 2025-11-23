@@ -17,6 +17,32 @@ import com.fs.starfarer.campaign.econ.Market;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
 
+/**
+ * <h3>Naming Convention: <code>Flow</code> vs. <code>Stored</code></h3>
+ *
+ * <p>The naming convention to distinguish between
+ * values that represent <strong>per-tick quantities</strong> and values that
+ * represent <strong>stored quantities</strong>.</p>
+ *
+ * <h3>1. <code>Flow*</code> methods</h3>
+ * <ul>
+ *   <li>Represent tick-based production, consumption, imports, exports,
+ *       and all other transient values.</li>
+ *   <li>Apply only to the current simulation tick.</li>
+ * </ul>
+ *
+ * <h3>2. <code>Stored*</code> methods</h3>
+ * <ul>
+ *   <li>Represent persistent stored quantities carried across ticks.</li>
+ *   <li>Define the market’s reserves, deficits, and long-term stability.</li>
+ * </ul>
+ *
+ * <p>Any method that does <em>not</em> use one of these prefixes should be treated as a
+ * derived or conceptual value, independent of the flow/stock distinction.</p>
+ *
+ * <p>This convention ensures that the meaning of each getter is always clear and
+ * prevents subtle logic errors when computing balances or updating stored amounts.</p>
+ */
 public class CommodityStats {
 
     public static final String WORKER_MOD_ID = "worker_assigned";
@@ -47,13 +73,13 @@ public class CommodityStats {
     public transient float inFactionExports = 0;
     public transient float globalExports = 0;
 
-    public final Map<String, MutableStat> getLocalProductionStat() {
+    public final Map<String, MutableStat> getFlowProductionStat() {
         return localProdMutables;
     }
-    public final Map<String, MutableStat> getBaseDemandStat() {
+    public final Map<String, MutableStat> getFlowBaseDemandStat() {
         return demandBaseMutables;
     }
-    public final MutableStat getLocalProductionStat(String industryID) {
+    public final MutableStat getProductionStat(String industryID) {
         final MutableStat mutable = localProdMutables.get(industryID);
         return mutable == null ? new MutableStat(0) : mutable;
     }
@@ -61,41 +87,41 @@ public class CommodityStats {
         final MutableStat mutable = demandBaseMutables.get(industryID);
         return mutable == null ? new MutableStat(0) : mutable;
     }
-    public final float getLocalProduction(boolean modified) {
+    public final float getProduction(boolean modified) {
         return modified ? localProd*localProdMult : localProd;
     }
     public final float getBaseDemand(boolean modified) {
-        return modified ? demandBase*getStoredCoverageRatio() : demandBase;
+        return modified ? demandBase*getStoredAvailabilityRatio() : demandBase;
     }
-    public final float getDeficitMet() {
-        return getDeficitMetLocally() + getDeficitMetViaTrade();
+    public final float getFlowDeficitMet() {
+        return getFlowDeficitMetLocally() + getFlowDeficitMetViaTrade();
     }
-    public final float getDeficitMetLocally() {
-        return Math.min(getLocalProduction(true), demandBase); 
+    public final float getFlowDeficitMetLocally() {
+        return Math.min(getProduction(true), demandBase); 
     }
-    public final float getDeficitPreTrade() {
-        return demandBase - getDeficitMetLocally();
+    public final float getFlowDeficitPreTrade() {
+        return demandBase - getFlowDeficitMetLocally();
     }
-    public final float getDemandPreTrade() {
-        return getDeficitPreTrade() + importExclusiveDemand;
+    public final float getFlowDemandPreTrade() {
+        return getFlowDeficitPreTrade() + importExclusiveDemand;
     }
     public final float getImportExclusiveDemand() {
         return importExclusiveDemand;
     }
-    public final float getDeficitMetViaTrade() {
-        return getDeficitMetViaFactionTrade() + getDeficitMetViaGlobalTrade();
+    public final float getFlowDeficitMetViaTrade() {
+        return getFlowDeficitMetViaFactionTrade() + getFlowDeficitMetViaGlobalTrade();
     }
-    public final float getDeficitMetViaFactionTrade() {
-        return Math.min(inFactionImports, getDeficitPreTrade());
+    public final float getFlowDeficitMetViaFactionTrade() {
+        return Math.min(inFactionImports, getFlowDeficitPreTrade());
     }
-    public final float getDeficitMetViaGlobalTrade() {
-        return Math.min(globalImports, getDeficitPreTrade() - getDeficitMetViaFactionTrade());
+    public final float getFlowDeficitMetViaGlobalTrade() {
+        return Math.min(globalImports, getFlowDeficitPreTrade() - getFlowDeficitMetViaFactionTrade());
     }
-    public final float getOverImports() {
-        return Math.max(0, getTotalImports() - importExclusiveDemand - getDeficitMetViaTrade());
+    public final float getFlowOverImports() {
+        return Math.max(0, getTotalImports() - importExclusiveDemand - getFlowDeficitMetViaTrade());
     }
-    public final float getDeficit() {
-        return demandBase - getDeficitMet();
+    public final float getFlowDeficit() {
+        return demandBase - getFlowDeficitMet();
     }
     public final float getTotalImports() {
         return inFactionImports + globalImports;
@@ -103,38 +129,51 @@ public class CommodityStats {
     public final float getTotalExports() {
         return inFactionExports + globalExports;
     }
-    public final float getAvailable() {
-        return getLocalProduction(true) + getTotalImports();
+    public final float getFlowAvailable() {
+        return getProduction(true) + getTotalImports();
     }
-    public final float getBaseExportable() {
-        return Math.max(0, getLocalProduction(true) - demandBase);
-    }
-    public final float getRemainingExportable() {
-        return getBaseExportable() - getTotalExports();
-    }
-    public final float getRemainingExportableWithPreferredStockpile() {
-        return Math.max(0, getBaseExportable() - getTotalExports() - getPreferredStockpile());
+    public final double getStoredAvailable() {
+        return getStored() + getFlowAvailable();
     }
     public final float getPreferredStockpile() {
         return EconomyConfig.DAYS_TO_COVER * demandBase;
     }
-    public final float getCanNotExport() {
-        return Math.max(0, getBaseExportable() - getTotalExports());
+    public final float getFlowProductionSurplus() {
+        return Math.max(0, getProduction(true) - demandBase);
     }
-    public final float getEconomicFootprint() {
-        return getDeficitMet() + getDeficit() + getImportExclusiveDemand() + getOverImports() +
-            getTotalExports() + getCanNotExport();
+    public final float getFlowRemainingExportable() {
+        return getFlowProductionSurplus() - getTotalExports();
     }
-    public final float getAvailabilityRatio() {
-        return demandBase == 0 ? 1f : getDeficitMet() / demandBase;
+    public final double getStoredRemainingExportable() {
+        return Math.max(0, stored + getFlowRemainingExportable() - getPreferredStockpile());
     }
-    public final float getRealBalance() {
-        return getAvailable() - getBaseDemand(true) - getTotalExports();
+    public final float getFlowCanNotExport() {
+        return Math.max(0, getFlowRemainingExportable());
     }
-    public final float getStoredCoverageRatio() {
-        if (demandBase <= 0) return 1f;
-
-        return (float) Math.min(stored / demandBase, 1f);
+    public final float getFlowEconomicFootprint() {
+        return getFlowDeficitMet() + getFlowDeficit() + getImportExclusiveDemand() + getFlowOverImports() +
+            getTotalExports() + getFlowCanNotExport();
+    }
+    public final double getStoredEconomicFootprint() {
+        return getStoredAvailabilityRatio() * getPreferredStockpile() +
+            getStoredRemainingExportable() +
+            getImportExclusiveDemand() +
+            getTotalExports();
+    }
+    public final float getFlowRealBalance() {
+        return getFlowAvailable() - getBaseDemand(true) - getTotalExports();
+    }
+    public final float getFlowAvailabilityRatio() {
+        return demandBase == 0 ? 1f : getFlowDeficitMet() / demandBase;
+    }
+    public final float getStoredAvailabilityRatio() {
+        return demandBase <= 0 ? 1f : (float) Math.min(stored / demandBase, 1f);
+    }
+    public final double getStored() {
+        return stored;
+    }
+    public final long getRoundedStored() {
+        return (long) stored;
     }
 
     public final void addInFactionImport(float a) {
@@ -151,14 +190,6 @@ public class CommodityStats {
 
     public final void addGlobalExport(float a) {
         globalExports += a;
-    }
-
-    public final double getStored() {
-        return stored;
-    }
-
-    public final long getRoundedStored() {
-        return (long) stored;
     }
 
     public final void addStoredAmount(double a) {
@@ -233,39 +264,37 @@ public class CommodityStats {
     }
 
     public final void advance() {
-        addStoredAmount(getRealBalance());
+        addStoredAmount(getFlowRealBalance());
     }
 
+    public static final float MAX_SUBMARKET_STOCK_MULT = 50f;
     public float getUnitPrice(PriceType type, int amount) {
+        final int n = Math.abs(amount);
+        final boolean isBuying = type == PriceType.MARKET_BUYING;
+        final int signedAmount = isBuying ? n : -n;
+
         final float basePrice = spec.getBasePrice();
+        final float demand = getPreferredStockpile();
+        final double storedAfter = stored + signedAmount;
 
-        final double stock = Math.max(getStored() - amount, 1);
-        final float demand = EconomyConfig.DAYS_TO_COVER * Math.max(demandBase, 1);
-        final float ratio = (float) stock / demand;
+        final double SHIFT = demand * MAX_SUBMARKET_STOCK_MULT;
+        final float buyExp  = 0.25f * MAX_SUBMARKET_STOCK_MULT;
+        final float sellExp = 0.5f * MAX_SUBMARKET_STOCK_MULT;
+        final float exponent = isBuying ? buyExp : sellExp;
 
-        final float ELASTICITY = 0.65f;
-        float scarcityMult = (float) Math.pow(1f / ratio, ELASTICITY);
-        scarcityMult = Math.max(0.25f, Math.min(4f, scarcityMult));
+        final float avgMultiplier = (float)((Math.pow(demand, exponent) / (1.0 - exponent)) *
+            (Math.pow(Math.max(SHIFT + storedAfter,1), 1.0 - exponent) -
+            Math.pow(SHIFT + stored, 1.0 - exponent))
+        ) / signedAmount;
 
-        float directionBias;
-        switch (type) {
-        case BUYING:
-            directionBias = 0.9f;
-            break;
-        case SELLING:
-            directionBias = 1.1f;
-            break;
-        case NEUTRAL: default:
-            directionBias = 1f;
-            break;
-        }
+        final float equilibrium = (float) Math.pow(demand / (SHIFT + demand), exponent);
+        final float scarcityNorm = avgMultiplier / equilibrium;
 
-        float price = basePrice * scarcityMult * directionBias;
-
-        return Math.max(price, 1f);
+        final float priceMult = (float) Math.max(0.25, Math.min(4.0, scarcityNorm));
+        return Math.max(basePrice * priceMult, 1f);
     }
 
-    public float computeVanillaPrice(int amount, boolean isSelling) {
+    public float computeVanillaPrice(int amount, boolean isSellingToMarket, boolean isPlayer) {
         if (amount < 1) return 0f;
 
         final Market mkt = (Market) market;
@@ -273,27 +302,23 @@ public class CommodityStats {
             return spec.getBasePrice() * amount;
         }
 
-        final PriceType type = isSelling ? PriceType.BUYING : PriceType.SELLING;
+        final PriceType type = isSellingToMarket ? PriceType.MARKET_BUYING : PriceType.MARKET_SELLING;
         final float unitPrice = getUnitPrice(type, amount);
 
-        final StatBonus priceMod = isSelling ? mkt.getDemandPriceMod() : mkt.getSupplyPriceMod();
+        final StatBonus priceMod;
+        if (isPlayer) {
+            priceMod = isSellingToMarket ? mkt.getCommodityData(comID).getPlayerDemandPriceMod() :
+                mkt.getCommodityData(comID).getPlayerSupplyPriceMod();
+        } else {
+            priceMod = isSellingToMarket ? mkt.getDemandPriceMod() : mkt.getSupplyPriceMod();
+        }
 
         final float totalPrice = priceMod.computeEffective(unitPrice) * amount;
 
         return (float)Math.floor(Math.max(totalPrice, amount));
     }
 
-    public final float getPlayerSellPrice(int amount) {
-        float value = computeVanillaPrice(amount, true); // market buys from player
-        return market.getCommodityData(comID).getPlayerDemandPriceMod().computeEffective(value);
-    }
-
-    public final float getPlayerBuyPrice(int amount) {
-        float value = computeVanillaPrice(amount, false); // market sells to player
-        return market.getCommodityData(comID).getPlayerSupplyPriceMod().computeEffective(value);
-    }
-
-    public static List<MarketAPI> getFactionMarkets(String factionId) {
+    public static final List<MarketAPI> getFactionMarkets(String factionId) {
         List<MarketAPI> result = new ArrayList<>();
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
@@ -305,48 +330,48 @@ public class CommodityStats {
         return result;
     }
 
-    public List<Industry> getVisibleIndustries() {
+    public final List<Industry> getVisibleIndustries() {
         List<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);
         return industries;
     }
 
-    public static List<Industry> getVisibleIndustries(MarketAPI market) {
+    public static final List<Industry> getVisibleIndustries(MarketAPI market) {
         List<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);
         return industries;
     }
 
-    public void logAllInfo() {
-        float trade = getDeficitMetLocally() + getTotalExports() + getCanNotExport() +
-            getDeficitMetViaTrade() + getDeficit();
+    public final void logAllInfo() {
+        float trade = getFlowDeficitMetLocally() + getTotalExports() + getFlowCanNotExport() +
+            getFlowDeficitMetViaTrade() + getFlowDeficit();
 
-        float ratio = trade / getEconomicFootprint();
+        float ratio = trade / getFlowEconomicFootprint();
 
         Global.getLogger(getClass()).info("\n" +
             "---- COMMODITY STATS LOG ----" + "\n" +
             "Commodity: " + comID + "\n" +
-            "economicFootprint: " + getEconomicFootprint() + "\n" +
-            "localProduction: " + getLocalProduction(true) + "\n" +
+            "economicFootprint: " + getFlowEconomicFootprint() + "\n" +
+            "localProduction: " + getProduction(true) + "\n" +
             "baseDemand: " + demandBase + "\n" +
-            "deficitPreTrade: " + getDeficitPreTrade() + "\n" +
+            "deficitPreTrade: " + getFlowDeficitPreTrade() + "\n" +
             "totalImports: " + getTotalImports() + "\n" +
             "inFactionImports: " + inFactionImports + "\n" +
             "globalImports: " + globalImports + "\n" +
             "totalExports: " + getTotalExports() + "\n" +
             "inFactionExport: " + inFactionExports + "\n" +
             "globalExport: " + globalExports + "\n" +
-            "canNotExport: " + getCanNotExport() + "\n" +
-            "demandMet: " + getDeficitMet() + "\n" +
-            "demandMetWithLocal: " + getDeficitMetLocally() + "\n" +
-            "demandMetViaTrade: " + getDeficitMetViaTrade() + "\n" +
+            "canNotExport: " + getFlowCanNotExport() + "\n" +
+            "demandMet: " + getFlowDeficitMet() + "\n" +
+            "demandMetWithLocal: " + getFlowDeficitMetLocally() + "\n" +
+            "demandMetViaTrade: " + getFlowDeficitMetViaTrade() + "\n" +
             "ratio: " + ratio
         );
     }
 
     public static enum PriceType {
-        BUYING,   // what the market will pay when buying from others
-        SELLING,  // what the market charges when selling to others
+        MARKET_BUYING,   // what the market will pay when buying from others
+        MARKET_SELLING,  // what the market charges when selling to others
         NEUTRAL  // internal baseline
     }
 }

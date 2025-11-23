@@ -85,10 +85,8 @@ public class MarketWrapper extends Market {
         final CommodityStats stats = EconomyEngine.getInstance().getComStats(
             com.getId(), com.getMarket().getId()
         );
-        final int amount = (int) quantity;
 
-        if (isPlayer) return stats.getPlayerSellPrice(amount);
-        return stats.computeVanillaPrice(amount, true);
+        return stats.computeVanillaPrice((int) quantity, true, isPlayer);
     }
 
     public float getSupplyPrice(String comID, double quantity, boolean isPlayer) {
@@ -100,7 +98,7 @@ public class MarketWrapper extends Market {
     public float getSupplyPriceAssumingExistingTransaction(
         String comID, double quantity, double existingTransactionValue, boolean isPlayer
     ) {
-        return getDemandPriceAssumingStockpileUtility(
+        return getSupplyPriceAssumingStockpileUtility(
             getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
         );
     }
@@ -113,10 +111,8 @@ public class MarketWrapper extends Market {
         final CommodityStats stats = EconomyEngine.getInstance().getComStats(
             com.getId(), com.getMarket().getId()
         );
-        final int amount = (int) quantity;
 
-        if (isPlayer) return stats.getPlayerBuyPrice(amount);
-        return stats.computeVanillaPrice(amount, false);
+        return stats.computeVanillaPrice((int) quantity, false, isPlayer);
     }
 
     public float getIndustryUpkeep() {

@@ -418,10 +418,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     private final void computeStatsDeficits(CommodityStats stats) {
         float totalDeficit = 0f;
-        final float totalMarketOutput = stats.getLocalProduction(false);
+        final float totalMarketOutput = stats.getProduction(false);
         final float invMarketOutput = 1f / totalMarketOutput;
 
-        for (Map.Entry<String, MutableStat> industryEntry : stats.getLocalProductionStat().entrySet()) {
+        for (Map.Entry<String, MutableStat> industryEntry : stats.getFlowProductionStat().entrySet()) {
             final String industryID = industryEntry.getKey();
             final MutableStat industryStat = industryEntry.getValue();
 
@@ -452,7 +452,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
                 final float weightNorm = inputEntry.getValue() / sum;
 
-                industryDeficit += weightNorm * (1 - inputStats.getStoredCoverageRatio());
+                industryDeficit += weightNorm * (1 - inputStats.getStoredAvailabilityRatio());
             }
 
             totalDeficit += industryDeficit * industryShare;
@@ -659,7 +659,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             }
             CommodityStats stats = info.getStats(market.getId());
 
-            totalActivity += stats.getAvailable();
+            totalActivity += stats.getFlowAvailable();
         }
 
         return totalActivity;
@@ -689,7 +689,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         for (CommodityInfo info : m_comInfo.values()) {
             CommodityStats stats = info.getStats(market.getId());
 
-            ratio += Math.abs(stats.globalImports - stats.getAvailable()) / activity;
+            ratio += Math.abs(stats.globalImports - stats.getFlowAvailable()) / activity;
         }
 
         return ratio;
@@ -708,7 +708,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         long total = 0;
 
         for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
-        total += stats.getLocalProduction(true);
+        total += stats.getProduction(true);
 
         return total;
     }
@@ -717,7 +717,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         long total = 0;
 
         for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
-        total += stats.getCanNotExport();
+        total += stats.getFlowCanNotExport();
 
         return total;
     }
@@ -726,7 +726,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         long total = 0;
 
         for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
-        total += stats.getDeficit();
+        total += stats.getFlowDeficit();
 
         return total;
     }
@@ -839,7 +839,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 				return result;
 			}
 
-			float available = stats.getStoredCoverageRatio();
+			float available = stats.getStoredAvailabilityRatio();
 
 			if (available < result.two) {
 				result.one = id;
@@ -866,13 +866,13 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             long globalExports = 0;
 
             for (CommodityStats stats : info.getValue().getAllStats()) {
-                potencialProd += stats.getLocalProduction(false);
-                realProd += stats.getLocalProduction(true);
+                potencialProd += stats.getProduction(false);
+                realProd += stats.getProduction(true);
                 potencialDemand += stats.getBaseDemand(false);
                 realDemand += stats.getBaseDemand(true);
-                available += stats.getAvailable();
-                availabilityRatio += stats.getAvailabilityRatio();
-                deficit += stats.getDeficit();
+                available += stats.getFlowAvailable();
+                availabilityRatio += stats.getFlowAvailabilityRatio();
+                deficit += stats.getFlowDeficit();
                 globalStockpile += stats.getStored();
                 totalExports += stats.getTotalExports();
                 inFactionExports += stats.inFactionExports;
@@ -925,13 +925,13 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
             Collection<CommodityStats> allStats = info.getAllStats();
             for (CommodityStats stats : allStats) {
-                potencialProd += stats.getLocalProduction(false);
-                realProd += stats.getLocalProduction(true);
+                potencialProd += stats.getProduction(false);
+                realProd += stats.getProduction(true);
                 potencialDemand += stats.getBaseDemand(false);
                 realDemand += stats.getBaseDemand(true);
-                available += stats.getAvailable();
-                availabilityRatio += stats.getAvailabilityRatio();
-                deficit += stats.getDeficit();
+                available += stats.getFlowAvailable();
+                availabilityRatio += stats.getFlowAvailabilityRatio();
+                deficit += stats.getFlowDeficit();
                 globalStockpile += stats.getStored();
                 totalExports += stats.getTotalExports();
                 inFactionExports += stats.inFactionExports;

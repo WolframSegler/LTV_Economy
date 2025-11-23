@@ -278,11 +278,11 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             
             final long stored = stats.getRoundedStored();
             final int demand = (int) stats.getBaseDemand(false);
-            final int baseProd = (int) stats.getLocalProduction(false);
-            final int modifiedProd = (int) stats.getLocalProduction(true);
-            final int baseBalance = (int) (stats.getLocalProduction(true) -
+            final int baseProd = (int) stats.getProduction(false);
+            final int modifiedProd = (int) stats.getProduction(true);
+            final int baseBalance = (int) (stats.getProduction(true) -
                 stats.getBaseDemand(true));
-            final int realBalance = (int) stats.getRealBalance();
+            final int realBalance = (int) stats.getFlowRealBalance();
 
             Color baseBlcColor = baseBalance < 0 ? 
                 Misc.getNegativeHighlightColor() : baseBalance > 0 ?

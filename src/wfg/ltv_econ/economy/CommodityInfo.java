@@ -113,9 +113,9 @@ public class CommodityInfo {
     public final ArrayList<CommodityStats> getSortedByProduction(int listSize) {
         return m_comStats.values()
             .stream()
-            .filter(stats -> stats.getLocalProduction(true) > 0)
+            .filter(stats -> stats.getProduction(true) > 0)
             .sorted((a, b) -> Float.compare(
-                b.getLocalProduction(true), a.getLocalProduction(true)
+                b.getProduction(true), a.getProduction(true)
             ))
             .limit(listSize)
             .collect(Collectors.toCollection(ArrayList::new));
@@ -215,19 +215,19 @@ public class CommodityInfo {
             final CommodityStats expStats = getStats(expImp.one);
             final CommodityStats impStats = getStats(expImp.two);
 
-            final float exportableRemaining = computeExportableRemaining(expStats);
+            final double exportableRemaining = expStats.getStoredRemainingExportable();
             final float deficitRemaining = computeImportAmount(impStats);
 
             if (exportableRemaining < 0.01f || deficitRemaining < 0.01f) continue;
 
             final boolean sameFaction = expStats.market.getFaction().equals(impStats.market.getFaction());
-            final float amountToSend = Math.min(exportableRemaining, deficitRemaining);
+            final float amountToSend = (float) Math.min(exportableRemaining, deficitRemaining);
 
             // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
             // models supply-demand influence on transaction.
-            final float exporterPrice = expStats.getUnitPrice(PriceType.SELLING, (int)amountToSend);
-            final float importerPrice = impStats.getUnitPrice(PriceType.BUYING, (int)amountToSend);
-            final float weight = Math.min(1f, (float)impStats.getDeficitPreTrade() / amountToSend);
+            final float exporterPrice = expStats.getUnitPrice(PriceType.MARKET_SELLING, (int)amountToSend);
+            final float importerPrice = impStats.getUnitPrice(PriceType.MARKET_BUYING, (int)amountToSend);
+            final float weight = Math.min(1f, (float)impStats.getFlowDeficitPreTrade() / amountToSend);
             final float pricePerUnit = exporterPrice * (1f - weight) + importerPrice * weight;
             final float price = pricePerUnit * amountToSend;
 
@@ -278,7 +278,7 @@ public class CommodityInfo {
         List <MarketAPI> exporters = new ArrayList<>(50);
 
         for (CommodityStats stats : m_comStats.values()) {
-            if (stats.getRemainingExportableWithPreferredStockpile() > 0) exporters.add(stats.market);
+            if (stats.getStoredRemainingExportable() > 0) exporters.add(stats.market);
         }
 
         return exporters;
@@ -405,7 +405,7 @@ public class CommodityInfo {
     private static final float priceFactor(String comID, MarketAPI importer) {
         final CommodityStats stats = EconomyEngine.getInstance().getComStats(comID, importer.getId());
 
-        final float price = stats.getUnitPrice(PriceType.BUYING, 1);
+        final float price = stats.getUnitPrice(PriceType.MARKET_BUYING, 1);
         final float base = stats.spec.getBasePrice();
 
         final float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
@@ -444,19 +444,12 @@ public class CommodityInfo {
     }
 
     private static final float computeImportAmount(CommodityStats stats) {
-        final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * stats.getDeficitPreTrade();
+        final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * stats.getBaseDemand(false);
         final float rawTarget = stats.getPreferredStockpile();
         final int target = (int) Math.max(Math.min(rawTarget - stats.getStored(), cap), 0);
         final float exclusive = stats.getImportExclusiveDemand();
 
         return Math.max(target + exclusive - stats.getTotalImports(), 0);
-    }
-
-    private static final float computeExportableRemaining(CommodityStats stats) {
-        if (stats.getDeficitPreTrade() > 0) {
-            return 0;
-        }
-        return stats.getRemainingExportableWithPreferredStockpile();
     }
 
     private void recordDailyVolume() {

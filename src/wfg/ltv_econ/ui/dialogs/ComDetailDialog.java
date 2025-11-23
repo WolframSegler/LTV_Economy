@@ -935,14 +935,14 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             ) continue;
 
             if (footerPanel != null && footerPanel.m_checkbox.isChecked() &&
-                !(stats.getCanNotExport() > 0 || stats.getDeficit() > 0)) {
+                !(stats.getFlowCanNotExport() > 0 || stats.getFlowDeficit() > 0)) {
                 continue;
             }
 
             final String iconPath = market.getFaction().getCrest();
             final Base iconPanel = new Base(
                 section, iconSize, iconSize, iconPath, null,
-                null, stats.getDeficit() > 0
+                null, stats.getFlowDeficit() > 0
             );
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
@@ -1103,17 +1103,17 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 tp, stats, highlight, negative
             );
     
-            final int econUnit = (int) m_com.getEconUnit();
-            final int sellPrice = (int) stats.getPlayerSellPrice(econUnit);
-            final int buyPrice = (int) stats.getPlayerBuyPrice(econUnit);
+            final float econUnit = m_com.getEconUnit();
+            final int sellPrice = (int) (stats.computeVanillaPrice((int)econUnit, true, true) / econUnit);
+            final int buyPrice = (int) (stats.computeVanillaPrice((int)econUnit, false, true) / econUnit);
     
             if (!m_com.isMeta()) {
-                if (stats.getCanNotExport() > 0) {
+                if (stats.getFlowCanNotExport() > 0) {
                     tp.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), 
-                    highlight, NumFormat.engNotation((long) stats.getCanNotExport()));
-                } else if (stats.getDeficit() > 0) {
+                    highlight, NumFormat.engNotation((long) stats.getFlowCanNotExport()));
+                } else if (stats.getFlowDeficit() > 0) {
                     tp.addPara("Local deficit: %s units.", opad, negative, 
-                    highlight, NumFormat.engNotation((long) stats.getDeficit()));
+                    highlight, NumFormat.engNotation((long) stats.getFlowDeficit()));
                 }
     
                 tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{

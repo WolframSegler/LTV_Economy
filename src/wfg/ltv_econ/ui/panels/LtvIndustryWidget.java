@@ -256,11 +256,11 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID);
                 CommodityStats stats = engine.getComStats(comID, m_market.getId());
 
-                if (stats == null || stats.getDeficit() < 1) continue;
+                if (stats == null || stats.getFlowDeficit() < 1) continue;
 
                 int iconCount = 1;
-                if (stats.getAvailabilityRatio() < 0.67f) iconCount = 2;
-                if (stats.getAvailabilityRatio() < 0.33f) iconCount = 3;
+                if (stats.getFlowAvailabilityRatio() < 0.67f) iconCount = 2;
+                if (stats.getFlowAvailabilityRatio() < 0.33f) iconCount = 3;
 
                 tp.addIcons(spec, iconCount, IconRenderMode.RED);
             }
@@ -269,12 +269,12 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                 CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(pair.one);
                 CommodityStats stats = engine.getComStats(pair.one, m_market.getId());
 
-                if (stats == null || stats.getDeficit() < 1) continue;
+                if (stats == null || stats.getFlowDeficit() < 1) continue;
 
                 int iconCount = 1;
 
-                if (stats.getAvailabilityRatio() < 0.67f) iconCount = 2;
-                if (stats.getAvailabilityRatio() < 0.33f) iconCount = 3;
+                if (stats.getFlowAvailabilityRatio() < 0.67f) iconCount = 2;
+                if (stats.getFlowAvailabilityRatio() < 0.33f) iconCount = 3;
 
                 tp.addIcons(spec, iconCount, IconRenderMode.RED);
             }

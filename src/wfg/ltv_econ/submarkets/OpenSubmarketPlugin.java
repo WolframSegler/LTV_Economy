@@ -54,8 +54,8 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 			getCargo().getMothballedShips().clear();
 
-            final float shipProd = (float) Math.log10(Math.max(1f, shipsStats.getAvailable()));
-            final float fuelProd = (float) Math.log10(Math.max(1f, fuelStats.getAvailable()));
+            final float shipProd = (float) Math.log10(Math.max(1f, shipsStats.getFlowAvailable()));
+            final float fuelProd = (float) Math.log10(Math.max(1f, fuelStats.getFlowAvailable()));
 
             final float combatShips = Math.min(10f + 5f * shipProd, 70);
             final float freighters  = Math.min(10f + 10f * shipProd, 40f);
@@ -140,14 +140,14 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 		return (int) Math.max(0f, limit);
 	}
 	
-    public static final float ECON_UNIT_MULT_BASE = 0.6f;
+    public static final float ECON_UNIT_MULT_BASE = 0.4f;
 	public static final float ECON_UNIT_MULT_EXTRA = 2f;
 	public static final float ECON_UNIT_MULT_PRODUCTION = 1.5f;
 	public static final float ECON_UNIT_MULT_IMPORTS = 1.2f;
 	public static final float ECON_UNIT_MULT_DEFICIT = 1.3f;
 
 	private static final float STOCKPILE_BASELINE = 900f;
-	private static final float RATIO_EXP = 0.5f;
+	private static final float RATIO_EXP = 0.6f;
 	private static final float STOCKPILE_SCALE_MIN = 0.01f;
 	private static final float STOCKPILE_SCALE_MAX = 4f;
 	
@@ -156,12 +156,12 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
             comID, marketID
         );
 
-		final float demand = Math.max(stats.getAvailable(), stats.getBaseDemand(false));
+		final float base = Math.max(stats.getFlowAvailable(), stats.getBaseDemand(false));
 
-		final float impRatio = stats.getTotalImports() / demand;
-		final float prodRatio = stats.getLocalProduction(true) / demand;
-		final float extraRatio = stats.getCanNotExport() / demand;
-		final float defRatio = stats.getDeficit() / demand;
+		final float impRatio = stats.getTotalImports() / base;
+		final float prodRatio = stats.getProduction(true) / base;
+		final float extraRatio = stats.getFlowCanNotExport() / base;
+		final float defRatio = stats.getFlowDeficit() / base;
 
 		final float mult = 1f
 			+ impRatio  * ECON_UNIT_MULT_IMPORTS
@@ -170,16 +170,16 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 			- defRatio  * ECON_UNIT_MULT_DEFICIT
 		;
 
-		final float baseLinear = demand * ECON_UNIT_MULT_BASE * mult;
+		final float baseLinear = base * ECON_UNIT_MULT_BASE * mult;
 
-		final float ratio = STOCKPILE_BASELINE / demand;
+		final float ratio = STOCKPILE_BASELINE / base;
 		float scale = (float) Math.pow(ratio, RATIO_EXP);
 
 		if (scale < STOCKPILE_SCALE_MIN) scale = STOCKPILE_SCALE_MIN;
 		if (scale > STOCKPILE_SCALE_MAX) scale = STOCKPILE_SCALE_MAX;
 
 		final float finalLimit = Math.max(0f, baseLinear * scale);
-		return (int) finalLimit;
+		return (int) Math.min(finalLimit, stats.getStored() * CommodityStats.MAX_SUBMARKET_STOCK_MULT);
 	}
 	
     @Override

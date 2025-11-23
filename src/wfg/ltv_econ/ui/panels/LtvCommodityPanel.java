@@ -100,7 +100,7 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
             CommodityStats stats = EconomyEngine.getInstance().getComStats(com.getId(), getMarket().getId());
-            return stats.getEconomicFootprint() <= 0;
+            return stats.getFlowEconomicFootprint() <= 0;
         });
 
         final TooltipMakerAPI tooltip = m_panel.createUIElement(

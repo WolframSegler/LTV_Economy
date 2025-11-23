@@ -40,23 +40,23 @@ public class UiUtils {
     }
 
     public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStats comStats) {
-        if (comStats.getEconomicFootprint() <= 0) {
+        if (comStats.getFlowEconomicFootprint() <= 0) {
             throw new IllegalStateException(
                 "CommodityInfoBar cannot display info: economic footprint is zero for " 
                 + comStats.comID
             );
         }
 
-        final float footprint = comStats.getEconomicFootprint();
+        final float footprint = comStats.getFlowEconomicFootprint();
 
-        float demandMetLocalRatio = (float)comStats.getDeficitMetLocally() / footprint;
-        float inFactionImportRatio = (float)comStats.getDeficitMetViaFactionTrade() / footprint;
-        float globalImportRatio = (float)comStats.getDeficitMetViaGlobalTrade() / footprint;
-        float overImportRatio = (float)comStats.getOverImports() / footprint;
+        float demandMetLocalRatio = (float)comStats.getFlowDeficitMetLocally() / footprint;
+        float inFactionImportRatio = (float)comStats.getFlowDeficitMetViaFactionTrade() / footprint;
+        float globalImportRatio = (float)comStats.getFlowDeficitMetViaGlobalTrade() / footprint;
+        float overImportRatio = (float)comStats.getFlowOverImports() / footprint;
         float importExclusiveRatio = (float)comStats.getImportExclusiveDemand() / footprint;
         float exportedRatio = (float)comStats.getTotalExports() / footprint;
-        float notExportedRatio = (float)comStats.getCanNotExport() / footprint;
-        float deficitRatio = (float)comStats.getDeficit() / footprint;
+        float notExportedRatio = (float)comStats.getFlowCanNotExport() / footprint;
+        float deficitRatio = (float)comStats.getFlowDeficit() / footprint;
 
         final Map<Color, Float> barMap = new LinkedHashMap<>(8) {{
             put(COLOR_LOCAL_PROD, demandMetLocalRatio);

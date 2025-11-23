@@ -878,7 +878,7 @@ public class GlobalCommodityFlow extends
                 null, false
             );
             final Color textColor = stats.market.getFaction().getBaseUIColor();
-            final long value = (long) stats.getLocalProduction(true);
+            final long value = (long) stats.getProduction(true);
 
             table.addCell(iconPanel, cellAlg.LEFT, null, null);
             table.addCell(stats.market.getName(), cellAlg.LEFT, null, textColor);

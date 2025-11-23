@@ -100,7 +100,7 @@ public class TooltipUtils {
                 if (!stats.market.isHidden() && stats.market.getEconGroup() == null &&
                     stats.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
                 ) {
-                    if (1f - stats.getAvailabilityRatio() > 0 && stats.getDeficit() > econUnit) {
+                    if (1f - stats.getFlowAvailabilityRatio() > 0 && stats.getFlowDeficit() > econUnit) {
                         marketList.add(stats);
                     }
                 }
@@ -124,7 +124,7 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
 
-                        final float deficit = stats.getDeficit();
+                        final float deficit = stats.getFlowDeficit();
                         Color labelColor = highlight;
                         Color deficitColor = gray;
                         String quantityLabel = "---";
@@ -157,7 +157,7 @@ public class TooltipUtils {
 
                         tooltip.addRow(new Object[] {
                             highlight,
-                            Misc.getDGSCredits(stats.getPlayerSellPrice(econUnit)),
+                            Misc.getDGSCredits(stats.computeVanillaPrice(econUnit, true, true)),
                             labelColor,
                             lessThanSymbol + NumFormat.engNotation(marketDemand),
                             deficitColor,
@@ -237,7 +237,7 @@ public class TooltipUtils {
                         stockpileLimit += market.getCommodityData(comID).getPlayerTradeNetQuantity();
                         if (stockpileLimit < 0) stockpileLimit = 0;
 
-                        int excess = (int) stats.getCanNotExport();
+                        int excess = (int) stats.getFlowCanNotExport();
                         Color excessColor = gray;
                         String excessStr = "---";
                         if (excess > 0) {
@@ -267,7 +267,7 @@ public class TooltipUtils {
 
                         tooltip.addRow(new java.lang.Object[] {
                             highlight,
-                            Misc.getDGSCredits(stats.getPlayerBuyPrice(econUnit)),
+                            Misc.getDGSCredits(stats.computeVanillaPrice(econUnit, false, true)),
                             highlight,
                             availableStr + NumFormat.engNotation(stockpileLimit),
                             excessColor,
@@ -357,16 +357,16 @@ public class TooltipUtils {
 
     private static Comparator<CommodityStats> createSellComparator(String comID, int econUnit) {
         return (s1, s2) -> {
-            int price1 = (int) s1.getPlayerSellPrice(econUnit);
-            int price2 = (int) s2.getPlayerSellPrice(econUnit);
+            int price1 = (int) s1.computeVanillaPrice(econUnit, true, true);
+            int price2 = (int) s2.computeVanillaPrice(econUnit, true, true);
             return Integer.compare(price2, price1);
         };
     }
 
     private static Comparator<CommodityStats> createBuyComparator(String comID, int econUnit) {
         return (s1, s2) -> {
-            int price1 = (int) s1.getPlayerBuyPrice(econUnit);
-            int price2 = (int) s2.getPlayerBuyPrice(econUnit);
+            int price1 = (int) s1.computeVanillaPrice(econUnit, false, true);
+            int price2 = (int) s2.computeVanillaPrice(econUnit, false, true);
             return Integer.compare(price1, price2);
         };
     }
@@ -425,14 +425,19 @@ public class TooltipUtils {
         Color negative
     ) {
         tooltip.setParaFontDefault();
-        LabelAPI title = tooltip.addPara("Available: %s", pad, highlight,
-            NumFormat.engNotation((long)comStats.getAvailable()));
+        tooltip.addPara(
+            "Values reflect the current economic cycle. Stockpiles are ignored for display purposes",
+            new Color(100, 100, 100), pad
+        );
+
+        final LabelAPI title = tooltip.addPara("Available: %s", pad, highlight,
+            NumFormat.engNotation((long)comStats.getFlowAvailable()));
 
         final int valueTxtWidth = 50;
         boolean firstPara = true;
 		float y = tooltip.getHeightSoFar() + pad;
 
-        for (Map.Entry<String, MutableStat> entry : comStats.getLocalProductionStat().entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : comStats.getFlowProductionStat().entrySet()) {
             MutableStat stat = entry.getValue();
             Industry ind = comStats.market.getIndustry(entry.getKey());
 
@@ -477,7 +482,7 @@ public class TooltipUtils {
         }
 
         
-        if (comStats.localProdMult != 1f && comStats.getLocalProduction(false) > 0) {
+        if (comStats.localProdMult != 1f && comStats.getProduction(false) > 0) {
             final float value =  ((int) (comStats.localProdMult * 100f)) / 100f;
 
             y = TooltipUtils.createStatModGridRow(
@@ -503,8 +508,8 @@ public class TooltipUtils {
             firstPara = false;
         }
 
-        if (comStats.getDeficit() > 0) {
-            y = addRow(tooltip, y, valueTxtWidth, firstPara, -comStats.getDeficit(),
+        if (comStats.getFlowDeficit() > 0) {
+            y = addRow(tooltip, y, valueTxtWidth, firstPara, -comStats.getFlowDeficit(),
                 "Post-trade shortage", highlight, negative
             );
             firstPara = false;
@@ -538,7 +543,7 @@ public class TooltipUtils {
         Color negative
     ) {
         Color valueColor = highlight;
-        if (comStats.getDeficit() > 0) {
+        if (comStats.getFlowDeficit() > 0) {
             valueColor = negative;
         }
         
@@ -549,7 +554,7 @@ public class TooltipUtils {
         boolean firstPara = true;
 		float y = tooltip.getHeightSoFar() + pad;
 
-        for (Map.Entry<String, MutableStat> entry : comStats.getBaseDemandStat().entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : comStats.getFlowBaseDemandStat().entrySet()) {
             MutableStat stat = entry.getValue();
             Industry ind = comStats.market.getIndustry(entry.getKey());
 
