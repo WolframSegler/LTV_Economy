@@ -24,6 +24,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketDemandAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
+import com.fs.starfarer.api.campaign.econ.PriceVariability;
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
@@ -63,12 +64,14 @@ public class MarketWrapper extends Market {
     }
 
     // MODIFIED METHODS
+    @Override
     public float getDemandPrice(String comID, double quantity, boolean isPlayer) {
         return getDemandPriceAssumingExistingTransaction(
             comID, quantity, 0d, isPlayer
         );
     }
 
+    @Override
     public float getDemandPriceAssumingExistingTransaction(
         String comID, double quantity, double existingTransactionValue, boolean isPlayer
     ) {
@@ -77,10 +80,16 @@ public class MarketWrapper extends Market {
         );
     }
 
+    @Override
     public float getDemandPriceAssumingStockpileUtility(
-        CommodityOnMarket com, double stockpiles, float quantity, boolean isPlayer
+        CommodityOnMarket com, double stockpiles, double quantity, boolean isPlayer
     ) {
         if (quantity <= 0) return 0f;
+
+        final CommoditySpecAPI spec = com.getCommodity();
+        if (spec.getPriceVariability() == PriceVariability.V0) {
+            return spec.getBasePrice() * (float) quantity;
+        }
 
         final CommodityStats stats = EconomyEngine.getInstance().getComStats(
             com.getId(), com.getMarket().getId()
@@ -89,12 +98,14 @@ public class MarketWrapper extends Market {
         return stats.computeVanillaPrice((int) quantity, true, isPlayer);
     }
 
+    @Override
     public float getSupplyPrice(String comID, double quantity, boolean isPlayer) {
         return getSupplyPriceAssumingExistingTransaction(
             comID, quantity, 0d, isPlayer
         );
     }
 
+    @Override
     public float getSupplyPriceAssumingExistingTransaction(
         String comID, double quantity, double existingTransactionValue, boolean isPlayer
     ) {
@@ -103,10 +114,16 @@ public class MarketWrapper extends Market {
         );
     }
 
+    @Override
     public float getSupplyPriceAssumingStockpileUtility(
         CommodityOnMarket com, double stockpiles, double quantity, boolean isPlayer
     ) {
         if (quantity <= 0) return 0f;
+
+        final CommoditySpecAPI spec = com.getCommodity();
+        if (spec.getPriceVariability() == PriceVariability.V0) {
+            return spec.getBasePrice() * (float) quantity;
+        }
 
         final CommodityStats stats = EconomyEngine.getInstance().getComStats(
             com.getId(), com.getMarket().getId()

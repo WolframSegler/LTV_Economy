@@ -9,7 +9,6 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.PriceVariability;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.campaign.econ.Market;
@@ -290,7 +289,7 @@ public class CommodityStats {
         final float equilibrium = (float) Math.pow(demand / (SHIFT + demand), exponent);
         final float scarcityNorm = avgMultiplier / equilibrium;
 
-        final float priceMult = (float) Math.max(0.25, Math.min(4.0, scarcityNorm));
+        final float priceMult = Math.max(0.25f, Math.min(4f, scarcityNorm));
         return Math.max(basePrice * priceMult, 1f);
     }
 
@@ -298,9 +297,6 @@ public class CommodityStats {
         if (amount < 1) return 0f;
 
         final Market mkt = (Market) market;
-        if (spec.getPriceVariability() == PriceVariability.V0) {
-            return spec.getBasePrice() * amount;
-        }
 
         final PriceType type = isSellingToMarket ? PriceType.MARKET_BUYING : PriceType.MARKET_SELLING;
         final float unitPrice = getUnitPrice(type, amount);
@@ -313,7 +309,9 @@ public class CommodityStats {
             priceMod = isSellingToMarket ? mkt.getDemandPriceMod() : mkt.getSupplyPriceMod();
         }
 
-        final float totalPrice = priceMod.computeEffective(unitPrice) * amount;
+        final float directionMult = isSellingToMarket ? 0.95f : 1.05f;
+
+        final float totalPrice = priceMod.computeEffective(unitPrice) * amount * directionMult;
 
         return (float)Math.floor(Math.max(totalPrice, amount));
     }
