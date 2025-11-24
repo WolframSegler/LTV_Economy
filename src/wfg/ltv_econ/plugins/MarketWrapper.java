@@ -95,7 +95,9 @@ public class MarketWrapper extends Market {
             com.getId(), com.getMarket().getId()
         );
 
-        return stats.computeVanillaPrice((int) quantity, true, isPlayer);
+        return stats.computeVanillaPrice(
+            (int) quantity, true, isPlayer
+        );
     }
 
     @Override
@@ -129,7 +131,9 @@ public class MarketWrapper extends Market {
             com.getId(), com.getMarket().getId()
         );
 
-        return stats.computeVanillaPrice((int) quantity, false, isPlayer);
+        return stats.computeVanillaPrice(
+            (int) quantity, false, isPlayer
+        );
     }
 
     public float getIndustryUpkeep() {
@@ -150,6 +154,14 @@ public class MarketWrapper extends Market {
 
     public float getGrossIncome() {
         return original.getGrossIncome();
+    }
+
+    public MutableStat getIncomeMult() {
+        return original.getIncomeMult();
+    }
+
+    public MutableStat getUpkeepMult() {
+        return original.getUpkeepMult();
     }
 
     public float getImmigrationIncentivesCost() {
@@ -348,14 +360,6 @@ public class MarketWrapper extends Market {
 
     public void removeSubmarket(String var1) {
         original.removeSubmarket(var1);
-    }
-
-    public MutableStat getIncomeMult() {
-        return original.getIncomeMult();
-    }
-
-    public MutableStat getUpkeepMult() {
-        return original.getUpkeepMult();
     }
 
     public MutableStat getHazard() {

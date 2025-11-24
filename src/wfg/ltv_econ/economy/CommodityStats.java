@@ -268,6 +268,10 @@ public class CommodityStats {
 
     public static final float MAX_SUBMARKET_STOCK_MULT = 50f;
     public float getUnitPrice(PriceType type, int amount) {
+        return getUnitPrice(type, amount, stored);
+    }
+
+    public float getUnitPrice(PriceType type, int amount, double stored) {
         final int n = Math.abs(amount);
         final boolean isBuying = type == PriceType.MARKET_BUYING;
         final int signedAmount = isBuying ? n : -n;
@@ -299,7 +303,9 @@ public class CommodityStats {
         final Market mkt = (Market) market;
 
         final PriceType type = isSellingToMarket ? PriceType.MARKET_BUYING : PriceType.MARKET_SELLING;
-        final float unitPrice = getUnitPrice(type, amount);
+        final float unitPrice = getUnitPrice(
+            type, amount, stored + market.getCommodityData(comID).getTradeModPlus().getModifiedInt()
+        );
 
         final StatBonus priceMod;
         if (isPlayer) {

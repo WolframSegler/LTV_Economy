@@ -1,6 +1,8 @@
 package wfg.wrap_ui.ui.systems;
 
-import org.lwjgl.input.Keyboard;
+import java.util.List;
+
+import com.fs.starfarer.api.input.InputEventAPI;
 
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.AcceptsActionListener;
@@ -12,14 +14,12 @@ public final class ActionListenerSystem<
     PanelType extends CustomPanel<PluginType, PanelType, ?> & AcceptsActionListener
 > extends BaseSystem<PluginType, PanelType>{
 
-    boolean shortcutKeyDown = false;
-
     public ActionListenerSystem(PluginType plugin) {
         super(plugin);
     }
 
     @Override
-    public final void advance(float amount, InputSnapshot input) {
+    public void processInput(List<InputEventAPI> events, InputSnapshot input) {
         getPanel().getActionListener().ifPresent(listener -> {
             if (!listener.isListenerEnabled()) return;
             
@@ -32,13 +32,12 @@ public final class ActionListenerSystem<
             }
 
             if (listener.getShortcut() > 0 && getPlugin().isValidUIContext()) {
-                if (Keyboard.isKeyDown(listener.getShortcut())) {
-                    if (!shortcutKeyDown) {
+                for (InputEventAPI event : events) {
+                    if (!event.isConsumed() && event.isKeyDownEvent() &&
+                        event.getEventValue() == listener.getShortcut()
+                    ) {
                         listener.onShortcutPressed(getPanel());
                     }
-                    shortcutKeyDown = true;
-                } else {
-                    shortcutKeyDown = false;
                 }
             };
 
