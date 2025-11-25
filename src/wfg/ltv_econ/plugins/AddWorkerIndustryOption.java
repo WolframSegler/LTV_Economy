@@ -4,6 +4,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.campaign.listeners.IndustryOptionProvider;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.EconomyEngine;
@@ -23,9 +24,8 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
     public boolean isSuitable(Industry ind, boolean allowUnderConstruction){
         if (ind == null || ind.getMarket() == null ||
             (!allowUnderConstruction && (ind.isBuilding() || ind.isUpgrading()))
-        ) {
-            return false;
-        }
+        ) return false;
+        if (!DebugFlags.COLONY_DEBUG && !ind.getMarket().isPlayerOwned()) return false;
 
         return EconomyEngine.isWorkerAssignable(ind);
     }
@@ -34,10 +34,10 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
     public List<IndustryOptionData> getIndustryOptions(Industry ind) {
         if (!isSuitable(ind, false)) return null;
 
-        List<IndustryOptionData> result = new ArrayList<IndustryOptionData>();
+        final List<IndustryOptionData> result = new ArrayList<IndustryOptionData>();
         industry = ind;
 
-        IndustryOptionData opt = new IndustryOptionData("Assign Workers...", PluginID, ind, this);
+        final IndustryOptionData opt = new IndustryOptionData("Assign Workers...", PluginID, ind, this);
         opt.color = ind.getMarket().getFaction().getBrightUIColor();
         result.add(opt);
 

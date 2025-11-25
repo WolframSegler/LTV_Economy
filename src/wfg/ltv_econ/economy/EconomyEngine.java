@@ -16,7 +16,9 @@ import java.util.stream.Collectors;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
@@ -38,9 +40,14 @@ import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 import wfg.wrap_ui.util.NumFormat;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.impl.campaign.graid.CommodityGroundRaidObjectivePluginImpl;
+import com.fs.starfarer.api.impl.campaign.graid.GroundRaidObjectivePlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
+import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidType;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
+import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
 
 /**
  * The {@link EconomyEngine} is the core controller for the LTV_Economy simulation.
@@ -94,7 +101,7 @@ import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
  * @author Wolfram Segler
  */
 public class EconomyEngine extends BaseCampaignEventListener implements
-    PlayerColonizationListener, ColonyDecivListener
+    PlayerColonizationListener, ColonyDecivListener, GroundRaidObjectivesListener
 {
 
     public static final String KEY = "::";
@@ -157,11 +164,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             return t;
         });
 
+        cyclesSinceWorkerAssign = EconomyConfig.WORKER_ASSIGN_INTERVAL;
+
         return this;
     }
 
     protected int dayTracker = -1;
     protected int monthTracker = -1;
+    protected int cyclesSinceWorkerAssign = 0;
 
     public final void advance(float delta) {
         final int day = Global.getSector().getClock().getDay();
@@ -267,11 +277,15 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         m_comInfo.values().forEach(CommodityInfo::reset);
 
         if (!fakeAdvance) {
-            resetWorkersAssigned(false);
+            if (cyclesSinceWorkerAssign >= EconomyConfig.WORKER_ASSIGN_INTERVAL) {
+                resetWorkersAssigned(false);
+                m_comInfo.values().forEach(CommodityInfo::update);
 
-            m_comInfo.values().forEach(CommodityInfo::update);
-
-            assignWorkers();
+                assignWorkers();
+                cyclesSinceWorkerAssign = 0;
+            } else {
+                cyclesSinceWorkerAssign++;
+            }
         }
 
         m_comInfo.values().forEach(CommodityInfo::update);
@@ -848,6 +862,23 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 		}
 		return result;
 	}
+
+    public void modifyRaidObjectives(MarketAPI market, SectorEntityToken entity,
+        List<GroundRaidObjectivePlugin> objectives, RaidType type, int marineTokens, int priority
+    ) {}
+	
+	public void reportRaidObjectivesAchieved(RaidResultData data, InteractionDialogAPI dialog,
+        Map<String, MemoryAPI> memoryMap
+    ) {
+        if (!data.market.isInEconomy()) return;
+        for (GroundRaidObjectivePlugin objective : data.objectives) {
+            if (objective instanceof CommodityGroundRaidObjectivePluginImpl obj) {
+                if (!m_comInfo.containsKey(objective.getId())) continue;
+                final CommodityStats stats = getComStats(obj.getId(), data.market.getId());
+                stats.addStoredAmount(-obj.getQuantityLooted());
+            }
+        }
+    }
 
     public final void logEconomySnapshot() {
         Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT START ----");

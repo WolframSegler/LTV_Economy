@@ -32,6 +32,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
@@ -142,29 +143,31 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         final MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
 
-        final CallbackRunnable<Button> buildButtonRunnable = (btn) -> {
-            final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);
+        if (DebugFlags.COLONY_DEBUG || market.isPlayerOwned()) {
+            final CallbackRunnable<Button> buildButtonRunnable = (btn) -> {
+                final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);
 
-            WrapUiUtils.CustomDialogViewer(
-                dialogPanel, ColonyInvDialog.PANEL_W, ColonyInvDialog.PANEL_H
+                WrapUiUtils.CustomDialogViewer(
+                    dialogPanel, ColonyInvDialog.PANEL_W, ColonyInvDialog.PANEL_H
+                );
+            };
+			
+            final Button inventoryBtn = new Button(
+                managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Stockpiles",
+                Fonts.ORBITRON_12, buildButtonRunnable
             );
-        };
-
-        final Button inventoryBtn = new Button(
-            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Stockpiles",
-            Fonts.ORBITRON_12, buildButtonRunnable
-        );
-        inventoryBtn.setLabelColor(Misc.getBasePlayerColor());
-        inventoryBtn.bgColor = new Color(0, 0, 0, 255);
-        inventoryBtn.bgDisabledColor = new Color(0, 0, 0, 255);
-        inventoryBtn.quickMode = true;
-
-        managementPanel.addComponent(inventoryBtn.getPanel()).inBL(0, 0);
-
-        final int xOffset = (int) (useStockpilesBtn.getPosition().getX() - inventoryBtn.getPos().getX());
-        final int yOffset = (int) (useStockpilesBtn.getPosition().getY() - inventoryBtn.getPos().getY());
-
-        inventoryBtn.getPos().inBL(xOffset, yOffset);
+            inventoryBtn.setLabelColor(Misc.getBasePlayerColor());
+            inventoryBtn.bgColor = new Color(0, 0, 0, 255);
+            inventoryBtn.bgDisabledColor = new Color(0, 0, 0, 255);
+            inventoryBtn.quickMode = true;
+    
+            managementPanel.addComponent(inventoryBtn.getPanel()).inBL(0, 0);
+    
+            final int xOffset = (int) (useStockpilesBtn.getPosition().getX() - inventoryBtn.getPos().getX());
+            final int yOffset = (int) (useStockpilesBtn.getPosition().getY() - inventoryBtn.getPos().getY());
+    
+            inventoryBtn.getPos().inBL(xOffset, yOffset);
+		}
 
         useStockpilesBtn.setOpacity(0);
         useStockpilesBtn.setEnabled(false);

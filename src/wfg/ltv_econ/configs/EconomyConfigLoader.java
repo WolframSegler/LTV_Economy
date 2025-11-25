@@ -39,6 +39,7 @@ public class EconomyConfigLoader {
             EconomyConfig.DAYS_TO_COVER_PER_IMPORT = root.getInt("DAYS_TO_COVER_PER_IMPORT");
             EconomyConfig.FACTION_EXCHANGE_MULT = (float) root.getDouble("FACTION_EXCHANGE_MULT");
             EconomyConfig.VOLATILITY_WINDOW = root.getInt("VOLATILITY_WINDOW");
+            EconomyConfig.WORKER_ASSIGN_INTERVAL = root.getInt("WORKER_ASSIGN_INTERVAL");
 
         } catch (Exception e) {
             throw new RuntimeException(
@@ -104,6 +105,11 @@ public class EconomyConfigLoader {
          * The <code>x</code> amount of days which will be used calculate the volatility of a commodity.
          */
         public static int VOLATILITY_WINDOW;
+
+        /**
+         * The method {@link #assignWorkers()} will be called once every <code>x</code> days.
+         */
+        public static int WORKER_ASSIGN_INTERVAL;
 
         static {
             EconomyConfigLoader.loadConfig();
