@@ -62,6 +62,13 @@
   </build>
 
   <dependencies>
+  <dependency>
+      <groupId>local</groupId>
+      <artifactId>wrap_ui</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/../WrapUI/jars/main/wrap_ui.jar</systemPath>
+    </dependency>
     <dependency>
       <groupId>local</groupId>
       <artifactId>lwjgl</artifactId>
