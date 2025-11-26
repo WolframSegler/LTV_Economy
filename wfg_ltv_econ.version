@@ -11,3 +11,18 @@
 	"starsectorVersion":"0.97a-RC11",
 	"directDownloadURL":"https://github.com/WolframSegler/LTV_Economy/releases/download/...",
 }
+
+{
+	"masterVersionFile":"https://raw.githubusercontent.com/WolframSegler/LTV_Economy/main/wfg_ltv_econ.version",
+	"modName":"LTV Economy",
+	"modThreadId":-1,
+	"modVersion":
+	{
+		"major":0,
+		"minor":1,
+		"patch":0
+	},
+	"starsectorVersion":"0.97a-RC11",
+	"directDownloadURL":"https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV_Economy.zip",
+	"changelogURL":"https://raw.githubusercontent.com/WolframSegler/LTV_Economy/main/changelog.txt"
+}
