@@ -1,18 +1,4 @@
 {
-	"masterVersionFile":"",
-	"modName":"LTV Economy",
-	"modThreadId":,
-	"modVersion":
-	{
-		"major":0,
-		"minor":1,
-		"patch":0,
-	},
-	"starsectorVersion":"0.97a-RC11",
-	"directDownloadURL":"https://github.com/WolframSegler/LTV_Economy/releases/download/...",
-}
-
-{
 	"masterVersionFile":"https://raw.githubusercontent.com/WolframSegler/LTV_Economy/main/wfg_ltv_econ.version",
 	"modName":"LTV Economy",
 	"modThreadId":-1,
