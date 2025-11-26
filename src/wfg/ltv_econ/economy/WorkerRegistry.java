@@ -186,7 +186,6 @@ public class WorkerRegistry {
 
         public final long getWorkersAssigned() {
             final WorkerPoolCondition pool = getPoolCondition(market);
-            if (pool == null) return 0;
 
             return (long) (outputRatioSum * pool.getWorkerPool());
         }
@@ -195,7 +194,6 @@ public class WorkerRegistry {
             if (!outputRatios.containsKey(comID)) return 0;
 
             final WorkerPoolCondition pool = getPoolCondition(market);
-            if (pool == null) return 0;
 
             return (long) (pool.getWorkerPool() * outputRatios.get(comID));
         }
@@ -220,14 +218,14 @@ public class WorkerRegistry {
 
             // compute allowed adjustment based on total sum
             final float maxAllowedDiff = 1f - outputRatioSum;
-            final float minAllowedDiff = -getPoolCondition(market).getFreeWorkerRatio();
+            final float minAllowedDiff = -oldRatio;
 
             // clamp the diff to the allowed range
             if (diff > maxAllowedDiff) diff = maxAllowedDiff;
             if (diff < minAllowedDiff) diff = minAllowedDiff;
 
             // apply adjusted ratio
-            float newRatio = oldRatio + diff;
+            final float newRatio = oldRatio + diff;
             outputRatios.put(comID, newRatio);
             outputRatioSum += diff;
 
@@ -236,10 +234,8 @@ public class WorkerRegistry {
 
 
         public final void recalculateOutputRatioSum() {
-            float sum = 0f;
-            for (float value : outputRatios.values()) sum += value;
-
-            outputRatioSum = sum;
+            outputRatioSum = 0f;
+            for (float value : outputRatios.values()) outputRatioSum += value;
         }
 
         public final void resetWorkersAssigned() {
@@ -259,7 +255,7 @@ public class WorkerRegistry {
                 WorkerPoolCondition.addConditionToMarket(market);
                 cond = market.getCondition(WorkerPoolCondition.ConditionID);
             }
-            return (cond != null) ? (WorkerPoolCondition) cond.getPlugin() : null;
+            return (WorkerPoolCondition) cond.getPlugin();
         }
     }
 }

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.dialogs.AssignWorkersDialog;
 import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.panels.Slider;
@@ -49,7 +50,10 @@ CustomDetailDialogPanel<AssignWorkersDialogPlugin>, AssignWorkersDialogPlugin
                 sliderValue + getNewFreeWorkerRatio()
             );
 
-            slider.maxValue = max*100;
+            slider.maxValue = Math.min(
+                max,
+                IndustryIOs.getIndConfig(dialog.industry).outputs.get(comID).workerAssignableLimit
+            ) * 100;
         }
 
         if (update) {
