@@ -25,7 +25,6 @@ import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.PieChart;
 import wfg.wrap_ui.ui.panels.SortableTable;
@@ -63,12 +62,8 @@ public class GlobalCommodityFlow extends
     public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
         super(parent, width, height, new BasePanelPlugin<>());
 
-        initializePlugin(hasPlugin);
-        createPanel();
-    }
-
-    public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
+        createPanel();
     }
 
     public void createPanel() {
@@ -143,13 +138,6 @@ public class GlobalCommodityFlow extends
 
                 return tooltip;
             }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
         };
 
         add(textPanel).inTL(opad, ICON_SIZE + pad*3);
@@ -207,13 +195,6 @@ public class GlobalCommodityFlow extends
 
                 return tooltip;
             }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
         };
 
         add(textPanel).inTL(opad + LABEL_W, ICON_SIZE + pad*3);
@@ -270,13 +251,6 @@ public class GlobalCommodityFlow extends
                 WrapUiUtils.mouseCornerPos(tooltip, opad);
 
                 return tooltip;
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
             }
         };
 
@@ -336,13 +310,6 @@ public class GlobalCommodityFlow extends
 
                 return tooltip;
             }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
         };
 
         add(textPanel).inTL(opad + LABEL_W, ICON_SIZE + LABEL_H + pad*4);
@@ -398,13 +365,6 @@ public class GlobalCommodityFlow extends
                 WrapUiUtils.mouseCornerPos(tooltip, opad);
 
                 return tooltip;
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
             }
         };
 
@@ -462,13 +422,6 @@ public class GlobalCommodityFlow extends
 
                 return tooltip;
             }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
         };
 
         add(textPanel).inTL(Right_WALL - LABEL_W, pad);
@@ -524,13 +477,6 @@ public class GlobalCommodityFlow extends
                 WrapUiUtils.mouseCornerPos(tooltip, opad);
 
                 return tooltip;
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
             }
         };
 
@@ -595,13 +541,6 @@ public class GlobalCommodityFlow extends
 
                 return tooltip;
             }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
         };
 
         add(textPanel).inTL(Right_WALL - LABEL_W, pad + LABEL_H);
@@ -656,13 +595,6 @@ public class GlobalCommodityFlow extends
                 WrapUiUtils.mouseCornerPos(tooltip, opad);
 
                 return tooltip;
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
             }
         };
 
@@ -721,13 +653,6 @@ public class GlobalCommodityFlow extends
 
                 return tooltip;
             }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
         };
 
         add(textPanel).inTL(Right_WALL - LABEL_W, pad + LABEL_H*2);
@@ -784,13 +709,6 @@ public class GlobalCommodityFlow extends
 
                 return tooltip;
             }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
-            }
         };
 
         add(textPanel).inTL(Right_WALL + LABEL_W, pad);
@@ -846,13 +764,6 @@ public class GlobalCommodityFlow extends
                 WrapUiUtils.mouseCornerPos(tooltip, opad);
 
                 return tooltip;
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.NONE);
             }
         };
 

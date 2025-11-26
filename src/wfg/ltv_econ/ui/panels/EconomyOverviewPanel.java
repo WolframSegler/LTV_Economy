@@ -43,12 +43,8 @@ public class EconomyOverviewPanel extends CustomPanel<
     public EconomyOverviewPanel(UIPanelAPI parent) {
         super(parent, MAIN_PANEL_W, MAIN_PANEL_H, new BasePanelPlugin<>());
 
-        initializePlugin(hasPlugin);
-        createPanel();
-    }
-
-    public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
+        createPanel();
     }
 
     public void createPanel() {

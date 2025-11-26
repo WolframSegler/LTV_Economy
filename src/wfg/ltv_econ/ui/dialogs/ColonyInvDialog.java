@@ -74,6 +74,10 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
         final TextPanel colonyCreditPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
+            {
+                getPlugin().setIgnoreUIState(true);
+            }
+
             @Override  
             public void createPanel() {
                 final String credits = NumFormat.formatCredits(colonyCredits);
@@ -86,12 +90,6 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 final float height = label1.computeTextHeight(label1.getText());
                 add(label1).inTL(0, (sliderH - height) / 2f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-                getPlugin().setIgnoreUIState(true);
             }
 
             @Override public CustomPanelAPI getTpParent() {
@@ -119,6 +117,10 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         m_panel.add(colonyCreditPanel).inTL(opad, 10);
 
         final TextPanel playerCreditPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
+            {
+                getPlugin().setIgnoreUIState(true);
+            }
+            
             @Override  
             public void createPanel() {
                 final String credits = NumFormat.formatCredits((long) playerCredits.get());
@@ -131,12 +133,6 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 final float height = label1.computeTextHeight(label1.getText());
                 add(label1).inTL(0, (sliderH - height) / 2f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-                getPlugin().setIgnoreUIState(true);
             }
 
             @Override public CustomPanelAPI getTpParent() {

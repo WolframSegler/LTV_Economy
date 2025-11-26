@@ -86,13 +86,9 @@ public class LtvIndustryListPanel extends CustomPanel<
 		dummyWidget = ((IndustryListPanel)industryPanel).getWidgets().get(0);
 		dummyWidget.setOpacity(0);
 
-		initializePlugin(hasPlugin);
+		getPlugin().init(this);
 		createPanel();
    	}
-
-	public void initializePlugin(boolean hasPlugin) {
-		getPlugin().init(this);
-	}
 
 	public static void setindustryOptionsPanelConstructor(ReflectedConstructor a) {
 		indOptCtor = a;
@@ -213,11 +209,6 @@ public class LtvIndustryListPanel extends CustomPanel<
 
                     return tooltip;
                 }
-
-                @Override
-                public void initializePlugin(boolean hasPlugin) {
-                    super.initializePlugin(hasPlugin);
-                }
             };
         }
 
@@ -317,11 +308,6 @@ public class LtvIndustryListPanel extends CustomPanel<
 					WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
 
                     return tooltip;
-                }
-
-                @Override
-                public void initializePlugin(boolean hasPlugin) {
-                    super.initializePlugin(hasPlugin);
                 }
             };
         }

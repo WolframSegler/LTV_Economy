@@ -123,15 +123,11 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         m_fader = new FaderUtil(0.3f, 0.1f, 0.4f, true, false);
         m_tooltip = new PendingTooltip<>();
 
-        initializePlugin(hasPlugin);
-        createPanel();
-    }
-
-    public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
-
         final int hOffset = m_industry.isStructure() ? TITLE_HEIGHT : 0;
         getPlugin().setOffsets(-1, -1, 2, 2 - hOffset);
+
+        createPanel();
     }
 
     public Color getBgColor() {

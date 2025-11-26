@@ -138,10 +138,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             m_panel.getPanel(), 20 , 20, new SpritePanelPlugin<>(),
             WARNING_BUTTON_PATH, null, null, false
         ) {
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-                
+            {
                 getPlugin().setIgnoreUIState(true);
             }
 

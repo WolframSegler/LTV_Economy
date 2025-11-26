@@ -15,7 +15,6 @@ import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
@@ -38,12 +37,8 @@ public class CommoditySelectionPanel extends
 
         contentPanel = content;
 
-        initializePlugin(hasPlugin);
-        createPanel();
-    }
-
-    public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
+        createPanel();
     }
 
     public void createPanel() {
@@ -85,13 +80,8 @@ public class CommoditySelectionPanel extends
 
             spec = com;
 
-            initializePlugin(hasPlugin);
-            createPanel();
-        }
-
-        public void initializePlugin(boolean hasPlugin) {
             getPlugin().init(this);
-            getPlugin().setTargetUIState(State.NONE);
+            createPanel();
         }
 
         public void createPanel() {

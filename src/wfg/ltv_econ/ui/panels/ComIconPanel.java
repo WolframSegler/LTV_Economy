@@ -45,19 +45,13 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
         String iconSpriteID, Color color, Color fillColor
     ) {
         super(parent, width, height, new SpritePanelPlugin<>(), iconSpriteID, color, fillColor, false);
+        getPlugin().setIgnoreUIState(true);
 
         m_faction = faction;
     }
 
     public void setCommodity(CommoditySpecAPI a) {
         m_com = a;
-    }
-
-    @Override
-    public void initializePlugin(boolean hasPlugin) {
-        getPlugin().init(this);
-        getPlugin().init();
-        getPlugin().setIgnoreUIState(true);
     }
 
     @Override

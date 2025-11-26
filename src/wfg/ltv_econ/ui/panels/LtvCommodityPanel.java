@@ -61,10 +61,6 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
         boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
         m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
 
-        initializePlugin(hasPlugin);
-    }
-
-    public void initializePlugin(boolean hasPlugin) {
         getPlugin().init(this);
     }
 

@@ -73,10 +73,10 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
 
         m_canViewPrices = canViewPrices;
 
-        initializePlugin(hasPlugin);
-        createPanel();
-
+        getPlugin().init(this);
         getPlugin().setIgnoreUIState(childrenIgnoreUIState);
+
+        createPanel();
     }
 
     public CommoditySpecAPI getCommodity() {
@@ -85,10 +85,6 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
 
     public LtvCommodityPanel getParentWrapper() {
         return m_parent;
-    }
-
-    public void initializePlugin(boolean hasPlugin) {
-        getPlugin().init(this);
     }
 
     @Override

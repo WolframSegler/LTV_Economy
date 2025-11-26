@@ -163,6 +163,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         };
 
         footerPanel = new TextPanel(m_panel.getPanel(), 400, footerH, fPlugin) {
+            {
+                getPlugin().setTargetUIState(State.DIALOG);
+            }
 
             @Override
             public void createPanel() {
@@ -200,13 +203,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 add(tooltip).inBL(0, getPos().getHeight());
 
                 return tooltip;
-            }
-
-            @Override
-            public void initializePlugin(boolean hasPlugin) {
-                super.initializePlugin(hasPlugin);
-
-                getPlugin().setTargetUIState(State.DIALOG);
             }
         };
 
@@ -328,6 +324,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         final Color baseColor = m_market.getFaction().getBaseUIColor();
         { // Global market value
             final TextPanel textPanel = new TextPanel(section, 170, 0, new BasePanelPlugin<>()) {
+                {
+                    getPlugin().setTargetUIState(State.DIALOG);
+                }
 
                 @Override
                 public void createPanel() {
@@ -397,19 +396,15 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     return tooltip;
                 }
-
-                @Override
-                public void initializePlugin(boolean hasPlugin) {
-                    super.initializePlugin(hasPlugin);
-
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
             };
 
             tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseY);
         }
         { // Total global exports
             final TextPanel textPanel = new TextPanel(section, 170, 0, new BasePanelPlugin<>()) {
+                {
+                    getPlugin().setTargetUIState(State.DIALOG);
+                }
 
                 @Override
                 public void createPanel() {
@@ -468,13 +463,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     return tooltip;
                 }
-
-                @Override
-                public void initializePlugin(boolean hasPlugin) {
-                    super.initializePlugin(hasPlugin);
-
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
             };
 
             tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseY);
@@ -490,6 +478,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             }
 
             final TextPanel textPanel = new TextPanel(section, 210, 0, new BasePanelPlugin<>()) {
+                {
+                    getPlugin().setTargetUIState(State.DIALOG);
+                }
 
                 @Override
                 public void createPanel() {
@@ -564,13 +555,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     return tooltip;
                 }
-
-                @Override
-                public void initializePlugin(boolean hasPlugin) {
-                    super.initializePlugin(hasPlugin);
-
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
             };
 
             tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseY);
@@ -580,6 +564,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
         if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
             final TextPanel textPanel = new TextPanel(section, 250, 0, new BasePanelPlugin<>()) {
+                {
+                    getPlugin().setTargetUIState(State.DIALOG);
+                }
 
                 @Override
                 public void createPanel() {
@@ -641,13 +628,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     return tooltip;
                 }
-
-                @Override
-                public void initializePlugin(boolean hasPlugin) {
-                    super.initializePlugin(hasPlugin);
-
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
             };
 
             tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseRow2Y);
@@ -655,6 +635,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
         else { // Faction market share
             final TextPanel textPanelLeft = new TextPanel(section, 250, 0) {
+                {
+                    getPlugin().setTargetUIState(State.DIALOG);
+                }
 
                 @Override
                 public void createPanel() {
@@ -713,17 +696,13 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
                     return tooltip;
                 }
-
-                @Override
-                public void initializePlugin(boolean hasPlugin) {
-                    super.initializePlugin(hasPlugin);
-
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
             };
 
 
             final TextPanel textPanelRight = new TextPanel(section, 250, 0, new BasePanelPlugin<>()) {
+                {
+                    getPlugin().setTargetUIState(State.DIALOG);
+                }
 
                 @Override
                 public void createPanel() {
@@ -784,13 +763,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     getParent().addUIElement(tooltip).inTL(tpX, tpY);
 
                     return tooltip;
-                }
-
-                @Override
-                public void initializePlugin(boolean hasPlugin) {
-                    super.initializePlugin(hasPlugin);
-
-                    getPlugin().setTargetUIState(State.DIALOG);
                 }
             };
 
