@@ -203,7 +203,10 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
                 data.getAssignedRatioForOutput(comID) + pool.getFreeWorkerRatio()
             );
             
-            outputSlider.maxValue = max * 100;
+            outputSlider.maxValue = Math.min(
+                max,
+                IndustryIOs.getIndConfig(industry).outputs.get(comID).workerAssignableLimit
+            ) * 100;
 
             outputSlider.setProgress(data.getAssignedRatioForOutput(comID) * 100);
 

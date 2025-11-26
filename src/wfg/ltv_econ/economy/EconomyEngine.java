@@ -295,6 +295,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         m_comInfo.values().parallelStream().forEach(info -> info.trade(fakeAdvance));
         if (!fakeAdvance) {
             m_comInfo.values().forEach(CommodityInfo::advance);
+
+            applyWages();
+            redistributeFactionCredits();
+            applyCreditStabilityModifiers();
         }
     }
 
@@ -566,6 +570,63 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         }
     }
 
+    public final void applyWages() {
+        for (String marketID : m_registeredMarkets) {
+        float wage = 0;
+            for (WorkerIndustryData data : WorkerRegistry.getInstance().getIndustriesaUsingWorkers(marketID)) {
+                wage += data.getWorkersAssigned() * (LaborConfig.LPV_day / LaborConfig.RoSV);
+            }
+            addCredits(marketID, (int) -wage);
+        }
+    }
+
+    public final void redistributeFactionCredits() {
+        final float REDISTRIBUTION_STRENGTH = 0.2f;
+        for (FactionAPI faction : Global.getSector().getAllFactions()) {
+            final ArrayList<MarketAPI> markets = new ArrayList<>();
+            for (MarketAPI market : getMarketsCopy()) {
+                if (market.getFaction().equals(faction)) markets.add(market);
+            }
+            if (markets.size() < 2) continue;
+
+            long totalCredits = 0;
+            for (MarketAPI market : markets) {
+                totalCredits += getCredits(market.getId());
+            }
+
+            final long avg = (long) (totalCredits / (float)markets.size());
+
+            for (MarketAPI market : markets) {
+                final long diff = avg - getCredits(market.getId());
+                addCredits(market.getId(), (long) (diff * REDISTRIBUTION_STRENGTH));
+            }
+        }
+    }
+
+    public final void applyCreditStabilityModifiers() {
+        for (MarketAPI market : getMarketsCopy()) {
+            final long credits = getCredits(market.getId());
+
+            long penalty = 0;
+            final long[] tier = EconomyConfig.DEBT_DEBUFF_TIERS;
+            for (int i = 0; i < tier.length; i += 2) {
+                if (credits < tier[i]) {
+                    penalty = tier[i + 1];
+                } else break;
+            }
+
+            if (penalty < 0) {
+                market.getStability().modifyFlat(
+                    "ltv_econ_debt_debuff",
+                    penalty,
+                    "market debt"
+                );
+            } else {
+                market.getStability().unmodify("ltv_econ_debt_debuff");
+            }
+        }
+    }
+
     public final long getTotalGlobalExports(String comID) {
         long total = 0;
         for (CommodityStats stats : m_comInfo.get(comID).getAllStats())
@@ -773,7 +834,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return (long) total;
     }
 
-    public void addCredits(String marketID, int amount) {
+    public void addCredits(String marketID, long amount) {
         long current = m_marketCredits.getOrDefault(marketID, 0l);
 
         if (amount > 0 && current > Long.MAX_VALUE - amount) {

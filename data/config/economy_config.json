@@ -4,6 +4,13 @@
 
     "STARTING_CREDITS_FOR_MARKET": 50000,
     "DAILY_MAINTENANCE_SUPPLY": 2.4,
+    "DEBT_DEBUFF_TIERS": [
+        { "threshold": -1e8,  "stabilityPenalty": -1 },
+        { "threshold": -1e9,  "stabilityPenalty": -2 },
+        { "threshold": -1e10, "stabilityPenalty": -3 },
+        { "threshold": -1e11, "stabilityPenalty": -4 },
+        { "threshold": -1e12, "stabilityPenalty": -5 }
+    ],
     
     "PRODUCTION_BUFFER": 0.3,
     "CONCENTRATION_COST": 2,

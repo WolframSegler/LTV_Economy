@@ -17,6 +17,9 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
 
+/**
+ * The registry always uses IndustryIOs.getBaseIndIDifNoConfig() internally to manage industry IDs
+ */
 public class WorkerRegistry {
     public static final String KEY = "::";
 
@@ -78,7 +81,7 @@ public class WorkerRegistry {
         return false;
     }
 
-    public final int getIndustriesUsingWorkers(String marketID) {
+    public final int getIndustryCountUsingWorkers(String marketID) {
         int count = 0;
         for (String dataID : registry.keySet()) {
             if (dataID.startsWith(marketID + KEY)) {
@@ -87,6 +90,17 @@ public class WorkerRegistry {
         }
 
         return count;
+    }
+
+    public final List<WorkerIndustryData> getIndustriesaUsingWorkers(String marketID) {
+        final ArrayList<WorkerIndustryData> list = new ArrayList<>(6); 
+        for (Map.Entry<String, WorkerIndustryData> data : registry.entrySet()) {
+            if (data.getKey().startsWith(marketID + KEY)) {
+                list.add(data.getValue());
+            }
+        }
+
+        return list;
     }
 
     public static final long getWorkerCap(MarketAPI market) {
@@ -108,12 +122,12 @@ public class WorkerRegistry {
         registry.put(makeKey(data.marketID, data.indID), data);
     }
 
-    private static final String makeKey(String marketID, String industryID) {
-        return marketID + KEY + industryID;
-    }
-
     public final List<WorkerIndustryData> getRegister() {
         return Collections.unmodifiableList(new ArrayList<>(registry.values()));
+    }
+
+    private static final String makeKey(String marketID, String industryID) {
+        return marketID + KEY + industryID;
     }
 
     public static class WorkerIndustryData {
@@ -128,7 +142,7 @@ public class WorkerRegistry {
 
         public WorkerIndustryData(MarketAPI market, Industry industry) {
             this.marketID = market.getId();
-            this.indID = industry.getId();
+            this.indID = IndustryIOs.getBaseIndIDifNoConfig(industry.getSpec());
             this.outputRatios = new HashMap<>();
 
             for (OutputConfig output : IndustryIOs.getIndConfig(industry).outputs.values()) {

@@ -1,5 +1,6 @@
 package wfg.ltv_econ.configs;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
@@ -40,6 +41,16 @@ public class EconomyConfigLoader {
             EconomyConfig.FACTION_EXCHANGE_MULT = (float) root.getDouble("FACTION_EXCHANGE_MULT");
             EconomyConfig.VOLATILITY_WINDOW = root.getInt("VOLATILITY_WINDOW");
             EconomyConfig.WORKER_ASSIGN_INTERVAL = root.getInt("WORKER_ASSIGN_INTERVAL");
+
+            final JSONArray arr = root.getJSONArray("DEBT_DEBUFF_TIERS");
+            EconomyConfig.DEBT_DEBUFF_TIERS = new long[arr.length() * 2];
+            for (int i = 0; i < arr.length(); i++) {
+                final JSONObject o = arr.getJSONObject(i);
+
+                final int base = i * 2;
+                EconomyConfig.DEBT_DEBUFF_TIERS[base] = (long) o.getDouble("threshold");
+                EconomyConfig.DEBT_DEBUFF_TIERS[base + 1] = o.getInt("stabilityPenalty");
+            }
 
         } catch (Exception e) {
             throw new RuntimeException(
@@ -110,6 +121,15 @@ public class EconomyConfigLoader {
          * The method {@link #assignWorkers()} will be called once every <code>x</code> days.
          */
         public static int WORKER_ASSIGN_INTERVAL;
+
+        /**
+         * Debt debuff tiers for markets:
+         *   [i] = threshold in credits (negative value, long)
+         *   [i + 1] = stability penalty applied if market debt < threshold
+         * 
+         * The list should be sorted from smallest (least negative) to largest (most negative) threshold.
+         */
+        public static long[] DEBT_DEBUFF_TIERS;
 
         static {
             EconomyConfigLoader.loadConfig();
