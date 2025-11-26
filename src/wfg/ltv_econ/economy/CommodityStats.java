@@ -11,6 +11,8 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.StatBonus;
+import com.fs.starfarer.api.impl.campaign.econ.ShippingDisruption;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.campaign.econ.Market;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
@@ -66,6 +68,7 @@ public class CommodityStats {
     // Import
     public transient float inFactionImports = 0;
     public transient float globalImports = 0;
+    public transient float importEffectiveness = 1f;
     private transient float importExclusiveDemand = 0;
 
     // Export
@@ -117,19 +120,20 @@ public class CommodityStats {
         return Math.min(globalImports, getFlowDeficitPreTrade() - getFlowDeficitMetViaFactionTrade());
     }
     public final float getFlowOverImports() {
-        return Math.max(0, getTotalImports() - importExclusiveDemand - getFlowDeficitMetViaTrade());
+        return Math.max(0, getTotalImports(false) - importExclusiveDemand - getFlowDeficitMetViaTrade());
     }
     public final float getFlowDeficit() {
         return demandBase - getFlowDeficitMet();
     }
-    public final float getTotalImports() {
+    public final float getTotalImports(boolean modified) {
+        if (modified) return (inFactionImports + globalImports) * importEffectiveness;
         return inFactionImports + globalImports;
     }
     public final float getTotalExports() {
         return inFactionExports + globalExports;
     }
     public final float getFlowAvailable() {
-        return getProduction(true) + getTotalImports();
+        return getProduction(true) + getTotalImports(true);
     }
     public final double getStoredAvailable() {
         return getStored() + getFlowAvailable();
@@ -246,12 +250,20 @@ public class CommodityStats {
 
         localProd = localProd < 1 ? 0 : localProd;
         demandBase = demandBase < 1 ? 0 : demandBase;
+
+        for (StatMod mod : market.getCommodityData(comID).getAvailableStat().getFlatMods().values()) {
+            if (!mod.source.contains(ShippingDisruption.COMMODITY_LOSS_PREFIX)) continue;
+
+            importEffectiveness = 1f + 0.4f*mod.value; // Can be -1 or -2.
+            break;
+        }
     }
 
     public final void reset() {
         inFactionImports = 0;
         globalImports = 0;
         importExclusiveDemand = 0;
+        importEffectiveness = 1f;
 
         inFactionExports = 0;
         globalExports = 0;
@@ -346,6 +358,7 @@ public class CommodityStats {
         return industries;
     }
 
+    @Deprecated
     public final void logAllInfo() {
         float trade = getFlowDeficitMetLocally() + getTotalExports() + getFlowCanNotExport() +
             getFlowDeficitMetViaTrade() + getFlowDeficit();
@@ -359,7 +372,7 @@ public class CommodityStats {
             "localProduction: " + getProduction(true) + "\n" +
             "baseDemand: " + demandBase + "\n" +
             "deficitPreTrade: " + getFlowDeficitPreTrade() + "\n" +
-            "totalImports: " + getTotalImports() + "\n" +
+            "totalImports: " + getTotalImports(false) + "\n" +
             "inFactionImports: " + inFactionImports + "\n" +
             "globalImports: " + globalImports + "\n" +
             "totalExports: " + getTotalExports() + "\n" +

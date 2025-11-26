@@ -449,7 +449,7 @@ public class CommodityInfo {
         final int target = (int) Math.max(Math.min(rawTarget - stats.getStored(), cap), 0);
         final float exclusive = stats.getImportExclusiveDemand();
 
-        return Math.max(target + exclusive - stats.getTotalImports(), 0);
+        return Math.max(target + exclusive - stats.getTotalImports(false), 0);
     }
 
     private void recordDailyVolume() {

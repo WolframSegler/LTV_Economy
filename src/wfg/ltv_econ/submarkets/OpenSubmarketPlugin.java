@@ -158,7 +158,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 		final float base = Math.max(stats.getFlowAvailable(), stats.getBaseDemand(false));
 
-		final float impRatio = stats.getTotalImports() / base;
+		final float impRatio = stats.getTotalImports(true) / base;
 		final float prodRatio = stats.getProduction(true) / base;
 		final float extraRatio = stats.getFlowCanNotExport() / base;
 		final float defRatio = stats.getFlowDeficit() / base;

@@ -508,7 +508,17 @@ public class TooltipUtils {
             firstPara = false;
         }
 
-        if (comStats.getFlowDeficit() > 0) {
+        if (comStats.importEffectiveness < 1f) {
+            final float value = ((int) (comStats.importEffectiveness * 100f)) / 100f;
+
+            y = TooltipUtils.createStatModGridRow(
+                tooltip, y, valueTxtWidth, firstPara, negative, value, false, true,
+                "Shipping losses", null, Strings.X
+            );
+            firstPara = false;
+        }
+
+        if (comStats.getFlowDeficit() >= 1) {
             y = addRow(tooltip, y, valueTxtWidth, firstPara, -comStats.getFlowDeficit(),
                 "Post-trade shortage", highlight, negative
             );
