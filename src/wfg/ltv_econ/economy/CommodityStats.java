@@ -278,7 +278,7 @@ public class CommodityStats {
         addStoredAmount(getFlowRealBalance());
     }
 
-    public static final float MAX_SUBMARKET_STOCK_MULT = 50f;
+    public static final float MAX_SUBMARKET_STOCK_MULT = 40f;
     public float getUnitPrice(PriceType type, int amount) {
         return getUnitPrice(type, amount, stored);
     }
@@ -291,6 +291,10 @@ public class CommodityStats {
         final float basePrice = spec.getBasePrice();
         final float demand = getPreferredStockpile();
         final double storedAfter = stored + signedAmount;
+
+        if (amount == 0) {
+            return spec.getBasePrice() * (float) (demand / Math.max(stored, 1));
+        }
 
         final double SHIFT = demand * MAX_SUBMARKET_STOCK_MULT;
         final float buyExp  = 0.25f * MAX_SUBMARKET_STOCK_MULT;

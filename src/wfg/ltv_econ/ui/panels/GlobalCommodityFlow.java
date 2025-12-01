@@ -11,6 +11,7 @@ import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
+import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -44,7 +45,7 @@ public class GlobalCommodityFlow extends
     public static final int pad = 3;
     public static final int opad = 10;
     public static final int ICON_SIZE = 135;
-    public static final int LABEL_W = 140;
+    public static final int LABEL_W = 150;
     public static final int LABEL_H = 50;
     public static final int TABLE_W = 240;
     public static final int TABLE_H = 28*5 + 20 + opad*3;
@@ -56,7 +57,6 @@ public class GlobalCommodityFlow extends
 
     public static CommoditySpecAPI selectedCom = Global.getSettings().getCommoditySpec(Commodities.SUPPLIES);
     
-
     public static Color backgroundColor = new Color(20, 30, 60);
 
     public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
@@ -84,10 +84,10 @@ public class GlobalCommodityFlow extends
             selectedCom.getIconName(), null, null
         );
         comIcon.setCommodity(selectedCom);
-        add(comIcon).inTL(opad*7, 0);
+        add(comIcon).inTL((LABEL_W*2 - ICON_SIZE) / 2f, 0);
 
         { // Total global production
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.getGlobalProduction(comID);
@@ -100,23 +100,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -140,11 +134,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(opad, ICON_SIZE + pad*3);
+        add(textPanel).inTL(0, ICON_SIZE + pad*3);
         }
 
         { // Total global demand
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.getGlobalDemand(comID);
@@ -157,23 +151,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -197,11 +185,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(opad + LABEL_W, ICON_SIZE + pad*3);
+        add(textPanel).inTL(LABEL_W, ICON_SIZE + pad*3);
         }
 
         { // Total global surplus
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.getGlobalSurplus(comID);
@@ -214,23 +202,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -254,11 +236,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(opad, ICON_SIZE + LABEL_H + pad*4);
+        add(textPanel).inTL(0, ICON_SIZE + LABEL_H + pad*4);
         }
 
         { // Total global deficit
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.getGlobalDeficit(comID);
@@ -271,23 +253,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -312,11 +288,12 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(opad + LABEL_W, ICON_SIZE + LABEL_H + pad*4);
+        add(textPanel).inTL(LABEL_W, ICON_SIZE + LABEL_H + pad*4);
         }
 
+        final int largeLabelShift = 30;
         { // Total trade volume (units)
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W + largeLabelShift, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.getGlobalTradeVolume(comID);
@@ -329,23 +306,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W + largeLabelShift, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W + largeLabelShift, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -368,11 +339,11 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(LEFT_WALL, pad);
+        add(textPanel).inTL(LEFT_WALL - largeLabelShift/2f, pad);
         }
 
         { // Total trade value (credits)
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W + largeLabelShift, LABEL_H) {
 
             public void createPanel() {
                 final long value = info.getMarketActivity();
@@ -385,23 +356,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W + largeLabelShift, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W + largeLabelShift, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -424,40 +389,31 @@ public class GlobalCommodityFlow extends
             }
         };
 
-        add(textPanel).inTL(Right_WALL - LABEL_W, pad);
+        add(textPanel).inTL(Right_WALL - LABEL_W - largeLabelShift/2f, pad);
         }
 
         { // Average sector price
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = (long) engine.getGlobalAveragePrice(comID, 1);
+                final int value = (int) engine.getGlobalAveragePrice(comID, 0);
                 final String txt = "Global average price";
-                String valueTxt = NumFormat.formatCredits(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                final String valueTxt = NumFormat.formatCredits(value);
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -484,7 +440,7 @@ public class GlobalCommodityFlow extends
         }
 
         { // Trade volatility (month-over-month volume change)
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final float value = info.getTradeVolatility();
@@ -500,23 +456,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(volatilityColor);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -547,7 +497,7 @@ public class GlobalCommodityFlow extends
         }
 
         { // Global stockpiles
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.getGlobalStockpiles(comID);
@@ -557,23 +507,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(baseColor);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -602,7 +546,7 @@ public class GlobalCommodityFlow extends
         }
 
         { // Worker allocation (total workers producing it)
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 long value = 0;
@@ -615,23 +559,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(baseColor);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -659,7 +597,7 @@ public class GlobalCommodityFlow extends
         }
 
         { // Number of exporting markets
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = info.getExporters().size();
@@ -672,23 +610,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -715,7 +647,7 @@ public class GlobalCommodityFlow extends
         }
 
         { // Number of importing markets
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, 0) {
+        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = info.getImporters().size();
@@ -728,23 +660,17 @@ public class GlobalCommodityFlow extends
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);
                 lbl1.setHighlightOnMouseover(true);
+                lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                 lbl2.setColor(highlight);
                 lbl2.setHighlightOnMouseover(true);
+                lbl2.setAlignment(Alignment.MID);
 
                 final float textH1 = lbl1.getPosition().getHeight();
-                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-
-                final float textH2 = lbl2.getPosition().getHeight();
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
-                final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                add(lbl2).inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                m_panel.getPosition().setSize(textW1, textH1 + textH2 + pad);
+                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
             }
 
             public CustomPanelAPI getTpParent() {
@@ -802,13 +728,13 @@ public class GlobalCommodityFlow extends
 
         table.showSortIcon = false;
         table.sortingEnabled = false;
-        add(table).inBL(opad, TABLE_H + LABEL_H / 2f);
+        add(table).inBL(opad*2, TABLE_H + LABEL_H / 2f);
         table.createPanel();
 
         final LabelAPI label = settings.createLabel("Top 5 producers", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(baseColor);
-        add(label).inBL(opad + (TABLE_W - labelW) / 2f, TABLE_H*2 + LABEL_H / 2f + pad*2);
+        add(label).inBL(opad*2 + (TABLE_W - labelW) / 2f, TABLE_H*2 + LABEL_H / 2f + pad*2);
         }
 
         { // Top 5 consumers
@@ -843,13 +769,13 @@ public class GlobalCommodityFlow extends
 
         table.showSortIcon = false;
         table.sortingEnabled = false;
-        add(table).inBL(opad, 0);
+        add(table).inBL(opad*2, 0);
         table.createPanel();
 
         final LabelAPI label = settings.createLabel("Top 5 consumers", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(baseColor);
-        add(label).inBL(opad + (TABLE_W - labelW) / 2f, TABLE_H + pad*2);
+        add(label).inBL(opad*2 + (TABLE_W - labelW) / 2f, TABLE_H + pad*2);
         }
       
         { // Global export share per faction (percent)

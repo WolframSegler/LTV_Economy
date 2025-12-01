@@ -815,14 +815,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return total;
     }
 
-    public final double getGlobalAveragePrice(String comID, int units) {
-        double total = 0;
+    public final float getGlobalAveragePrice(String comID, int units) {
+        float total = 0;
 
         final Collection<CommodityStats> allStats = getCommodityInfo(comID).getAllStats();
         for (CommodityStats stats : allStats)
         total += stats.getUnitPrice(PriceType.NEUTRAL, units);
 
-        return total / allStats.size();
+        return total / (float) allStats.size();
     }
 
     public final long getGlobalStockpiles(String comID) {
@@ -855,6 +855,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      */
     public long getCredits(String marketID) {
         return m_marketCredits.getOrDefault(marketID, 0l);
+    }
+
+    public int getNetIncome(MarketAPI market) {
+        return 0;
     }
 
     @Override
