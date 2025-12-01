@@ -25,13 +25,3 @@ Extra Instructions:
 
 - Standard porter message for AI agent:
   -> Create me a porter message with all the relevant info about what we were working on and the overall project. This chat is getting slow. Paragraph format.
-
-runcode for (PlanetAPI p : Global.getSector().getPlayerFleet().getStarSystem().getPlanets()) if (p.getFullName().contains("Mesha")) { p.getSpec().setTexture("graphics/planets/US_planet_textureAtoll.jpg"); p.applySpecChanges(); break; }
-
-runcode SectorEntityToken fleet = Global.getSector().getPlayerFleet();  
-      StarSystemAPI sys = (StarSystemAPI)fleet.getContainingLocation();
-      SectorEntityToken stable = fleet.getContainingLocation().addCustomEntity(null, null, "stable_location", "neutral");
-      float orbitRadius = com.fs.starfarer.api.util.Misc.getDistance(fleet, sys.getCenter());
-      float orbitDays = orbitRadius / (20f + new Random().nextFloat() * 5f);
-      float angle = com.fs.starfarer.api.util.Misc.getAngleInDegrees(sys.getCenter().getLocation(), fleet.getLocation());
-      stable.setCircularOrbit(sys.getCenter(), angle, orbitRadius, orbitDays);
