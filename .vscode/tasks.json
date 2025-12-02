@@ -4,34 +4,25 @@
     {
       "label": "delete-logs",
       "type": "shell",
-      "command": "if (Test-Path -Path '${workspaceFolder}\\..\\..\\starsector-core\\starsector.log') { Remove-Item -Force '${workspaceFolder}\\..\\..\\starsector-core\\starsector.log' }",
-      "group": {
-        "kind": "build",
-        "isDefault": false
-      }
+      "command": "rm -f \"${workspaceFolder}/../../starsector.log\"",
+      "group": { "kind": "build", "isDefault": false }
     },
     {
       "label": "compile",
       "type": "shell",
       "command": "mvn clean package",
       "dependsOn": "delete-logs",
-      "group": {
-        "kind": "build",
-        "isDefault": false
-      }
+      "group": { "kind": "build", "isDefault": false }
     },
     {
       "label": "launch-game",
       "type": "shell",
-      "command": "${workspaceFolder}\\..\\..\\starsector.exe",
+      "command": "\"${workspaceFolder}/../../starsector.sh\"",
       "dependsOn": "compile",
       "options": {
-        "cwd": "${workspaceFolder}\\..\\.."
+        "cwd": "${workspaceFolder}/../.."
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
+      "group": { "kind": "build", "isDefault": true },
       "presentation": {
         "reveal": "always",
         "panel": "shared"

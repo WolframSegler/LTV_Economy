@@ -278,38 +278,42 @@ public class CommodityStats {
         addStoredAmount(getFlowRealBalance());
     }
 
-    public static final float MAX_SUBMARKET_STOCK_MULT = 40f;
     public float getUnitPrice(PriceType type, int amount) {
         return getUnitPrice(type, amount, stored);
     }
 
+    public static final float MAX_SUBMARKET_STOCK_MULT = 40f;
+    public static final float INHERENT_DEMAND = 20;
     public float getUnitPrice(PriceType type, int amount, double stored) {
         final int n = Math.abs(amount);
-        final boolean isBuying = type == PriceType.MARKET_BUYING;
-        final int signedAmount = isBuying ? n : -n;
+        final int signedAmount = type == PriceType.MARKET_SELLING ? -n : n;
 
         final float basePrice = spec.getBasePrice();
-        final float demand = getPreferredStockpile();
+        final float demand = Math.max(getPreferredStockpile(), INHERENT_DEMAND);
         final double storedAfter = stored + signedAmount;
-
-        if (amount == 0) {
-            return spec.getBasePrice() * (float) (demand / Math.max(stored, 1));
-        }
 
         final double SHIFT = demand * MAX_SUBMARKET_STOCK_MULT;
         final float buyExp  = 0.25f * MAX_SUBMARKET_STOCK_MULT;
         final float sellExp = 0.5f * MAX_SUBMARKET_STOCK_MULT;
-        final float exponent = isBuying ? buyExp : sellExp;
+        final float neutralExp = (buyExp + sellExp) / 2f;
+        final float exp = switch (type) {
+            case MARKET_BUYING  -> buyExp;
+            case MARKET_SELLING -> sellExp;
+            default             -> neutralExp;
+        };
 
-        final float avgMultiplier = (float)((Math.pow(demand, exponent) / (1.0 - exponent)) *
-            (Math.pow(Math.max(SHIFT + storedAfter,1), 1.0 - exponent) -
-            Math.pow(SHIFT + stored, 1.0 - exponent))
+        final float avgMultiplier = n == 0 ?
+            (float) Math.pow(demand / Math.max(SHIFT + stored, 1), exp) :
+            (float)((Math.pow(demand, exp) / (1.0 - exp)) *
+            (Math.pow(Math.max(SHIFT + storedAfter,1), 1.0 - exp) -
+            Math.pow(SHIFT + stored, 1.0 - exp))
         ) / signedAmount;
 
-        final float equilibrium = (float) Math.pow(demand / (SHIFT + demand), exponent);
+        final float equilibrium = (float) Math.pow(demand / (SHIFT + demand), exp);
         final float scarcityNorm = avgMultiplier / equilibrium;
 
         final float priceMult = Math.max(0.25f, Math.min(4f, scarcityNorm));
+
         return Math.max(basePrice * priceMult, 1f);
     }
 

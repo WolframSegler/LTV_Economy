@@ -391,6 +391,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             .collect(Collectors.toList());
     }
 
+    public final List<CommodityInfo> getCommodityInfos() {
+        return new ArrayList<>(m_comInfo.values());
+    }
+
     public final CommodityInfo getCommodityInfo(String comID) {
         return m_comInfo.get(comID);
     }
@@ -857,8 +861,45 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return m_marketCredits.getOrDefault(marketID, 0l);
     }
 
-    public int getNetIncome(MarketAPI market) {
-        return 0;
+    /*
+     * Works properly only for player colonies. 
+     */
+    public long getNetIncome(MarketAPI market, boolean lastMonth) {
+        // Exports
+        final long exportIncome = getExportIncome(market, lastMonth);
+        final long importCost = getImportExpense(market, lastMonth);
+
+        return exportIncome - importCost;
+    }
+
+    /*
+     * Works properly only for player colonies. 
+     */
+    public long getExportIncome(MarketAPI market, boolean lastMonth) {
+        long exportIncome = 0;
+        if (m_playerMarkets.contains(market.getId())) {
+            for (CommodityInfo info : m_comInfo.values()) {
+                final IncomeLedger ledger = info.getLedger(market.getId());
+                exportIncome += lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
+            }
+        }
+
+        return exportIncome;
+    }
+
+    /*
+     * Works properly only for player colonies. 
+     */
+    public long getImportExpense(MarketAPI market, boolean lastMonth) {
+        long importCost = 0;
+        if (m_playerMarkets.contains(market.getId())) {
+            for (CommodityInfo info : m_comInfo.values()) {
+                final IncomeLedger ledger = info.getLedger(market.getId());
+                importCost += lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
+            }
+        }
+
+        return importCost;
     }
 
     @Override

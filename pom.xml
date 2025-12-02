@@ -74,56 +74,56 @@
       <artifactId>lwjgl</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../../starsector-core/lwjgl.jar</systemPath>
+      <systemPath>${project.basedir}/../../lwjgl.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>
       <artifactId>starfarer.api</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../../starsector-core/starfarer.api.jar</systemPath>
+      <systemPath>${project.basedir}/../../starfarer.api.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.9</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../../starsector-core/log4j-1.2.9.jar</systemPath>
+      <systemPath>${project.basedir}/../../log4j-1.2.9.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>
       <artifactId>lwjgl_util</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../../starsector-core/lwjgl_util.jar</systemPath>
+      <systemPath>${project.basedir}/../../lwjgl_util.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>
       <artifactId>json</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../../starsector-core/json.jar</systemPath>
+      <systemPath>${project.basedir}/../../json.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>
       <artifactId>fs.common_obf</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../../starsector-core/fs.common_obf.jar</systemPath>
+      <systemPath>${project.basedir}/../../fs.common_obf.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>
       <artifactId>starfarer_obf</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../../starsector-core/starfarer_obf.jar</systemPath>
+      <systemPath>${project.basedir}/../../starfarer_obf.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>
       <artifactId>xstream</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../../starsector-core/xstream-1.4.10.jar</systemPath>
+      <systemPath>${project.basedir}/../../xstream-1.4.10.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>

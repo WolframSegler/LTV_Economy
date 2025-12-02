@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -20,6 +21,9 @@ import wfg.ltv_econ.economy.CommodityStats.PriceType;
 public class CommodityInfo {
 
     private final String comID;
+    public transient CommoditySpecAPI spec;
+
+
     private final Map<String, CommodityStats> m_comStats = new HashMap<>();
     private final Map<String, IncomeLedger> incomeLedgers = new HashMap<>();
 
@@ -58,6 +62,8 @@ public class CommodityInfo {
 
         currentIndex = Math.min(currentIndex, lastNDaysVolume.length - 1);
         filled = oldLength >= newArray.length;
+
+        spec = Global.getSettings().getCommoditySpec(comID);
 
         return this;
     }

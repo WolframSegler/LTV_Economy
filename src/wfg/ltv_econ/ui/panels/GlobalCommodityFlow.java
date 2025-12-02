@@ -348,7 +348,7 @@ public class GlobalCommodityFlow extends
             public void createPanel() {
                 final long value = info.getMarketActivity();
                 final String txt = "Sector-wide trade value";
-                String valueTxt = NumFormat.formatCredits(value);
+                String valueTxt = NumFormat.formatCredit(value);
                 if (value < 1) {
                     valueTxt = "---";
                 }
@@ -398,7 +398,7 @@ public class GlobalCommodityFlow extends
             public void createPanel() {
                 final int value = (int) engine.getGlobalAveragePrice(comID, 0);
                 final String txt = "Global average price";
-                final String valueTxt = NumFormat.formatCredits(value);
+                final String valueTxt = NumFormat.formatCredit(value);
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 lbl1.setColor(baseColor);

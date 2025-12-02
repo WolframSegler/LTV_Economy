@@ -335,7 +335,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     final long value = engine.getCommodityInfo(comID)
                         .getMarketActivity();
                     final String txt = "Global market value";
-                    String valueTxt = NumFormat.formatCredits(value);
+                    String valueTxt = NumFormat.formatCredit(value);
                     if (value < 1) {
                         valueTxt = "---";
                     }
@@ -943,7 +943,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             table.addCell(infoBar, cellAlg.MID, null, null);
             table.addCell(accessibility + "%", cellAlg.MID, accessibility, null);
             table.addCell(marketShare + "%", cellAlg.MID, marketShare, null);
-            table.addCell(NumFormat.formatCredits(incomeValue), cellAlg.MID, incomeValue, null);
+            table.addCell(NumFormat.formatCredit(incomeValue), cellAlg.MID, incomeValue, null);
 
             // Tooltip
             PendingTooltip<CustomPanelAPI> tp = new PendingTooltip<>();

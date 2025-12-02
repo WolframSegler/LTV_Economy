@@ -270,8 +270,8 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
                 opad, highlight,
                 NumFormat.engNotation((long) m_comStats.getTotalExports()),
                 engine.getExportMarketShare(comID, m_comStats.marketID) + "%",
-                NumFormat.formatCredits(exportIncomeLastMonth),
-                NumFormat.formatCredits(exportIncomeThisMonth)
+                NumFormat.formatCredit(exportIncomeLastMonth),
+                NumFormat.formatCredit(exportIncomeThisMonth)
             );
 
             if (m_comStats.getFlowCanNotExport() > 0) {

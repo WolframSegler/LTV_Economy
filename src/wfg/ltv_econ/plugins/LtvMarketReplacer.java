@@ -1,8 +1,6 @@
 package wfg.ltv_econ.plugins;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.awt.Color;
 
@@ -10,6 +8,7 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 
+import wfg.ltv_econ.economy.CommodityInfo;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
@@ -37,7 +36,6 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
@@ -150,8 +148,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
     private static final void replaceUseStockpilesButton(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
-        Global.getLogger(LtvMarketReplacer.class).error(colonyInfoPanel.getClass());
-        
         for (Object child : managementChildren) {
             if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof ButtonPlugin) {
                 return;
@@ -199,27 +195,30 @@ public class LtvMarketReplacer implements EveryFrameScript {
     private static final void replaceMarketCreditsLabel(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
-        Global.getLogger(LtvMarketReplacer.class).error(colonyInfoPanel.getClass());
-        final UIPanelAPI incomePanel = (UIPanelAPI) ReflectionUtils.invoke(colonyInfoPanel, "getIncome");
-
-        final List<?> children = (List<?>) ReflectionUtils.invoke(incomePanel, "getChildrenCopy");
+        final List<?> children = (List<?>) ReflectionUtils.invoke(colonyInfoPanel, "getChildrenCopy");
         for (Object child : children) {
             if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof BasePanelPlugin) {
                 return;
             }
         }
-        final MarketAPI market = (MarketAPI) ReflectionUtils.get(incomePanel, null, MarketAPI.class);
-        final ButtonAPI oldBtn = children.stream().filter(c -> c instanceof ButtonAPI).findFirst()
-                .map(c -> (ButtonAPI) c).get();
+        
+        final var fields = ReflectionUtils.getMethodsMatching(colonyInfoPanel, "getIncome", UIPanelAPI.class, 0);
+        if (fields.isEmpty()) return;
+        
+        final UIPanelAPI incomePanel = (UIPanelAPI) fields.get(0).invoke(colonyInfoPanel);
+        final List<?> incomePanelChildren = (List<?>) ReflectionUtils.invoke(incomePanel, "getChildrenCopy");
+        
+        final ButtonAPI oldBtn = incomePanelChildren.stream().filter(c -> c instanceof ButtonAPI).findFirst()
+            .map(c -> (ButtonAPI) c).get();
         incomePanel.removeComponent(oldBtn);
 
-        final int LABEL_W = 100;
-        final TextPanel creditsLabel = new TextPanel(incomePanel, 150, 50) {
+        final MarketAPI market = (MarketAPI) ReflectionUtils.get(colonyInfoPanel, null, MarketAPI.class);
+        final TextPanel creditsLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
             public void createPanel() {
-                final long value = EconomyEngine.getInstance().getNetIncome(market);
+                final long value = EconomyEngine.getInstance().getNetIncome(market, true);
                 final String txt = "Credits/month";
-                final String valueTxt = NumFormat.formatCredits(value);
+                final String valueTxt = NumFormat.formatCredit(value);
                 final Color valueColor = value < 0 ? Misc.getNegativeHighlightColor()
                         : market.getFaction().getBrightUIColor();
 
@@ -233,10 +232,14 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 lbl2.setHighlightOnMouseover(true);
                 lbl2.setAlignment(Alignment.MID);
 
-                final float textH1 = lbl1.getPosition().getHeight();
+                final float textH1 = lbl1.computeTextHeight(txt);
+                final float textH2 = lbl2.computeTextHeight(valueTxt);
+                final float textW1 = lbl1.computeTextWidth(txt);
 
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(textW1, textH2);
+
+                getPos().setSize(textW1, textH1 + pad + textH2);
             }
 
             @Override
@@ -247,22 +250,23 @@ public class LtvMarketReplacer implements EveryFrameScript {
             @Override
             public TooltipMakerAPI createAndAttachTp() {
                 final int TP_WIDTH = 450;
-                final TooltipMakerAPI tp = getPanel().createUIElement(TP_WIDTH, 1, false);
+                final TooltipMakerAPI tp = getPanel().createUIElement(TP_WIDTH, 0, false);
 
                 final Color highlight = Misc.getHighlightColor();
                 final Color negative = Misc.getNegativeHighlightColor();
                 final FactionAPI faction = market.getFaction();
                 final Color base = faction.getBaseUIColor();
                 final Color dark = faction.getDarkUIColor();
+                final EconomyEngine engine = EconomyEngine.getInstance();
 
                 tp.addTitle("Monthly Income & Upkeep", base);
-                final int income = EconomyEngine.getInstance().getNetIncome(market);
+                final long income = engine.getNetIncome(market, true);
 
-                final String incomeTxt = Misc.getDGSCredits(Math.abs(income));
+                final String incomeTxt = NumFormat.formatCreditAbs(income);
                 if (income >= 0) {
-                    tp.addPara("The net monthly income of this colony is %s.", opad, highlight, incomeTxt);
+                    tp.addPara("The net monthly income of this colony last month was %s.", opad, highlight, incomeTxt);
                 } else {
-                    tp.addPara("The net monthly upkeep for this colony is %s.", opad, negative, incomeTxt);
+                    tp.addPara("The net monthly upkeep for this colony last month was %s.", opad, negative, incomeTxt);
                 }
 
                 tp.addPara(
@@ -278,8 +282,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                 tp.addStatModGrid(
                         TP_WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null);
-                final String indIncome = Misc.getDGSCredits(Math.round(market.getIndustryIncome()));
-                final String indUpkeep = Misc.getDGSCredits(Math.round(market.getIndustryUpkeep()));
+                final String indIncome = NumFormat.formatCredit(Math.round(market.getIndustryIncome()));
+                final String indUpkeep = NumFormat.formatCredit(Math.round(market.getIndustryUpkeep()));
 
                 final ArrayList<Industry> industries = new ArrayList<>(market.getIndustries());
 
@@ -291,13 +295,13 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 }
 
                 tp.addPara("Local income: %s", opad, highlight, indIncome);
-                if (!hasUpkeep) {
-                    Collections.sort(industries, new Comparator<Industry>() {
-                        @Override
-                        public int compare(Industry i1, Industry i2) {
-                            return Integer.compare(i2.getIncome().getModifiedInt(), i1.getIncome().getModifiedInt());
-                        }
-                    });
+                if (hasUpkeep) {
+                    industries.sort((i1, i2) ->
+                        Long.compare(
+                            i2.getIncome().getModifiedInt(),
+                            i1.getIncome().getModifiedInt()
+                        )
+                    );
                     tp.beginGridFlipped(TP_WIDTH, 1, 65.0F, opad);
 
                     int indCount = 0;
@@ -305,7 +309,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                         int perIndIncome = ind.getIncome().getModifiedInt();
                         if (perIndIncome > 0) {
                             tp.addToGrid(0, indCount++, ind.getCurrentName(),
-                                    Misc.getDGSCredits(perIndIncome), highlight);
+                                    NumFormat.formatCredit(perIndIncome), highlight);
                         }
                     }
 
@@ -316,45 +320,48 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     }
                 }
 
-                int exportIncome = (int) market.getExportIncome(false);
-                tp.addPara("Exports: %s", opad, highlight, Misc.getDGSCredits(exportIncome));
-                if (hasUpkeep && exportIncome > 0) {
+                final long exportIncome = engine.getExportIncome(market, true);
+                tp.addPara("Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
+                if (exportIncome > 0) {
                     final int maxCommoditiesToDisplay = 10;
                     final float somethingWidth = 500f - 14f - 395f;
                     final float extraPad = ((int)(somethingWidth / 3f));
 
                     tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
                     int cumulativeIncome = 0;
-                    final List<CommodityOnMarketAPI> commodities = market.getCommoditiesCopy();
-                    for (CommodityOnMarketAPI com : commodities) {
-                        if (com.getExportIncome() > 0) {
+                    final List<CommodityInfo> commodities = engine.getCommodityInfos();
+                    for (CommodityInfo com : commodities) {
+                        if (com.getLedger(market.getId())
+                                .lastMonthExportIncome > 0
+                            ) {
                             ++cumulativeIncome;
                         }
                     }
 
-                    Collections.sort(commodities, new Comparator<CommodityOnMarketAPI>() {
-                        @Override
-                        public int compare(CommodityOnMarketAPI c1, CommodityOnMarketAPI c2) {
-                            return Long.compare(c2.getExportIncome(), c1.getExportIncome());
-                        }
-                    });
-                    int var16 = 0;
-                    for (CommodityOnMarketAPI com : commodities) {
-                        final String name = com.getCommodity().getName();
-                        final int comExportIncome = com.getExportIncome();
-                        if (comExportIncome <= 0) continue;
+                    commodities.sort((c1, c2) ->
+                        Long.compare(
+                            c2.getLedger(market.getId()).lastMonthExportIncome,
+                            c1.getLedger(market.getId()).lastMonthExportIncome
+                        )
+                    );
+                    int comCount = 0;
+                    for (CommodityInfo com : commodities) {
+                        final String name = com.spec.getName();
+                        final long comExportIncome = com.getLedger(market.getId()).lastMonthExportIncome;
+                        if (comExportIncome < 1) continue;
 
-                        final int exportMarketShare = EconomyEngine.getInstance()
-                            .getExportMarketShare(com.getId(), market.getId());
+                        final int exportMarketShare = engine.getExportMarketShare(
+                            com.spec.getId(), market.getId()
+                        );
 
-                        tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, highlight, exportMarketShare + "%", highlight, Misc.getDGSCredits(comExportIncome));
-                        var16++;
-                        if (var16 + 1 > maxCommoditiesToDisplay && cumulativeIncome - var16 > 1) {
-                        break;
+                        tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, highlight, exportMarketShare + "%", highlight, NumFormat.formatCredit(comExportIncome));
+                        comCount++;
+                        if (comCount + 1 > maxCommoditiesToDisplay && cumulativeIncome - comCount > 1) {
+                            break;
                         }
                     }
 
-                    tp.addTable("No exports", cumulativeIncome - var16, opad);
+                    tp.addTable("No exports", cumulativeIncome - comCount, opad);
                 }
 
                 if (hasUpkeep) {
@@ -363,12 +370,12 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                 tp.addPara("Industry and structure upkeep: %s", opad, negative, indUpkeep);
                 if (hasUpkeep) {
-                    Collections.sort(industries, new Comparator<Industry>() {
-                        @Override
-                        public int compare(Industry i1, Industry i2) {
-                            return Integer.compare(i2.getIncome().getModifiedInt(), i1.getIncome().getModifiedInt());
-                        }
-                    });
+                    industries.sort((i1, i2) ->
+                        Long.compare(
+                            i2.getIncome().getModifiedInt(),
+                            i1.getIncome().getModifiedInt()
+                        )
+                    );
                     tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
                     int indCount = 0;
 
@@ -396,11 +403,16 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 if (incentive > 0 && market.isImmigrationIncentivesOn()) {
                     tp.addPara("Hazard pay: %s", opad, negative, Misc.getDGSCredits(incentive));
                 }
+
+                add(tp);
+                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.LeftTop, 50);
                 return tp;
             }
         };
 
-        incomePanel.addComponent(creditsLabel.getPanel()).inTL(0, 0);
+        colonyInfoPanel.addComponent(creditsLabel.getPanel()).inTR(
+            318, 0
+        );
     }
 
     private static final void replaceIndustryListPanel(

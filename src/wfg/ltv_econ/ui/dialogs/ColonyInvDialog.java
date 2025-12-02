@@ -80,7 +80,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
 
             @Override  
             public void createPanel() {
-                final String credits = NumFormat.formatCredits(colonyCredits);
+                final String credits = NumFormat.formatCredit(colonyCredits);
 
                 label1 = settings.createLabel(
                     "Colony Balance: " + credits, Fonts.ORBITRON_16
@@ -123,7 +123,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             
             @Override  
             public void createPanel() {
-                final String credits = NumFormat.formatCredits((long) playerCredits.get());
+                final String credits = NumFormat.formatCredit((long) playerCredits.get());
 
                 label1 = settings.createLabel(
                     "Your Balance: " + credits, Fonts.ORBITRON_16
@@ -202,16 +202,16 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             withdrawSlider.maxRange = playerCred;
 
             colonyLbl.setText(
-                "Colony Balance: " + NumFormat.formatCredits(playerCred)
+                "Colony Balance: " + NumFormat.formatCredit(playerCred)
             );
-            colonyLbl.setHighlight(NumFormat.formatCredits(playerCred));
+            colonyLbl.setHighlight(NumFormat.formatCredit(playerCred));
             colonyLbl.autoSizeToWidth(colonyLbl.computeTextWidth(colonyLbl.getText()));
             colonyCreditPanel.getPos().setSize(colonyLbl.getPosition().getWidth(), sliderH);
 
             playerLbl.setText(
-                "Your Balance: " + NumFormat.formatCredits((long) colonyCred)
+                "Your Balance: " + NumFormat.formatCredit((long) colonyCred)
             );
-            playerLbl.setHighlight(NumFormat.formatCredits((long) colonyCred));
+            playerLbl.setHighlight(NumFormat.formatCredit((long) colonyCred));
             playerLbl.autoSizeToWidth(playerLbl.computeTextWidth(playerLbl.getText()));
             playerCreditPanel.getPos().setSize(playerLbl.getPosition().getWidth(), sliderH);
         };
