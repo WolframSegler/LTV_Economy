@@ -336,21 +336,35 @@ public class TooltipUtils {
         final Color highlight = Misc.getHighlightColor();
 
         // Create the custom Footer
-        TooltipMakerAPI codexTooltip = ((CustomPanelAPI)panel.getCodexParent().get()).createUIElement(codexW, 0, false);
+        final TooltipMakerAPI codexTooltip = panel.getCodexParent().get().createUIElement(codexW, 0, false);
 
         codexTooltip.setParaFont(Fonts.ORBITRON_12);
 
         codexTooltip.setParaFontColor(gray);
-        LabelAPI lbl1 = codexTooltip.addPara(codexF1, 0, highlight, "F1");
-        LabelAPI lbl2 = codexTooltip.addPara(codexF2, 0, highlight, "F2");
 
-        lbl1.getPosition().inTL(opad / 2f, -2);
-        int lbl2X = (int) (lbl1.computeTextWidth(lbl1.getText()) + opad + pad);
-        lbl2.getPosition().inTL(lbl2X, -2);
+        LabelAPI lbl1 = null;
+        LabelAPI lbl2 = null;
+        if (codexF1 != null) {
+            lbl1 = codexTooltip.addPara(codexF1, 0, highlight, "F1");
+            lbl1.getPosition().inTL(opad / 2f, -2);
+        }
+        if (codexF2 != null) {
+            lbl2 = codexTooltip.addPara(codexF2, 0, highlight, "F2");
 
-        int tooltipH = (int) lbl1.computeTextHeight(lbl1.getText()) - opad / 2;
+            if (lbl1 != null) {
+                int lbl2X = (int) (lbl1.computeTextWidth(codexF1) + opad + pad);
+                lbl2.getPosition().inTL(lbl2X, -2);
+            } else {
+                lbl2.getPosition().inTL(opad / 2f, -2);
+            }
+        }
+
+        final int tooltipH = lbl1 != null ?
+            (int) lbl1.computeTextHeight(codexF1) - opad / 2:
+            (int) lbl2.computeTextHeight(codexF2) - opad / 2;
 
         codexTooltip.setHeightSoFar(tooltipH);
+        panel.getCodexParent().get().addUIElement(codexTooltip);
 
         return codexTooltip;
     }

@@ -249,8 +249,17 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         final boolean isIllegal = m_market.isIllegal(comID);
         final String commodityName = m_com.getName();
 
-        if (m_comStats.getTotalExports() < 1) {
-            tooltip.addPara("No local production to export.", opad);
+        if (exportIncomeLastMonth > 1 || exportIncomeThisMonth > 1) {
+            tooltip.addPara(
+                m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. They generated %s last month and %s so far this month.",
+                opad, highlight,
+                NumFormat.engNotation((long) m_comStats.getTotalExports()),
+                engine.getExportMarketShare(comID, m_comStats.marketID) + "%",
+                NumFormat.formatCredit(exportIncomeLastMonth),
+                NumFormat.formatCredit(exportIncomeThisMonth)
+            );
+        } else if (m_comStats.getTotalExports() < 1) {
+            tooltip.addPara("No recent local production to export.", opad);
         } else if (isIllegal) {
             tooltip.addPara(
             m_market.getName() + " controls %s of the export market share for " + commodityName + ".This trade brings in no income due to being underground.",
@@ -264,22 +273,13 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
                 NumFormat.engNotation((long) m_comStats.getTotalExports()),
                 engine.getExportMarketShare(comID, m_comStats.marketID) + "%"
             );
-        } else {
-            tooltip.addPara(
-                m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. They generated %s last month and %s so far this month.",
-                opad, highlight,
-                NumFormat.engNotation((long) m_comStats.getTotalExports()),
-                engine.getExportMarketShare(comID, m_comStats.marketID) + "%",
-                NumFormat.formatCredit(exportIncomeLastMonth),
-                NumFormat.formatCredit(exportIncomeThisMonth)
-            );
+        }
 
-            if (m_comStats.getFlowCanNotExport() > 0) {
-                tooltip.addPara(
-                    "Exports are reduced by %s due to insufficient importers.",
-                    pad, negative, NumFormat.engNotation((int)m_comStats.getFlowCanNotExport())
-                );
-            }
+        if (m_comStats.getFlowCanNotExport() > 0) {
+            tooltip.addPara(
+                "Exports are reduced by %s due to insufficient importers.",
+                pad, negative, NumFormat.engNotation((int)m_comStats.getFlowCanNotExport())
+            );
         }
 
         // Bottom tip
@@ -332,7 +332,6 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
             codex = TooltipUtils.createCustomCodex(this, ExpandedCodexF1, codexF2, codexW); 
         }
 
-        getParent().addUIElement(codex);
         WrapUiUtils.anchorPanel(codex, m_tooltip, AnchorType.BottomLeft, opad + pad);
 
         return Optional.ofNullable(codex);

@@ -145,7 +145,6 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
             codex = TooltipUtils.createCustomCodex(this, ExpandedCodexF1, codexF2, codexW);  
         }
 
-        getParent().addUIElement(codex);
         WrapUiUtils.anchorPanel(codex, m_tooltip, AnchorType.BottomLeft, opad + pad);
 
         return Optional.ofNullable(codex);

@@ -92,7 +92,7 @@ public class WorkerRegistry {
         return count;
     }
 
-    public final List<WorkerIndustryData> getIndustriesaUsingWorkers(String marketID) {
+    public final List<WorkerIndustryData> getIndustriesUsingWorkers(String marketID) {
         final ArrayList<WorkerIndustryData> list = new ArrayList<>(6); 
         for (Map.Entry<String, WorkerIndustryData> data : registry.entrySet()) {
             if (data.getKey().startsWith(marketID + KEY)) {

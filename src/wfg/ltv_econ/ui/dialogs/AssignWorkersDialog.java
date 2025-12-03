@@ -12,6 +12,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -22,6 +23,7 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
@@ -40,6 +42,7 @@ import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
@@ -162,6 +165,16 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
                 WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.TopLeft, 0);
 
                 return tp;
+            }
+        
+            @Override 
+            public Glow getGlowType() {
+                return Glow.ADDITIVE;
+            }
+
+            @Override 
+            public Optional<SpriteAPI> getSprite() {
+                return Optional.of(m_sprite);
             }
         };
 

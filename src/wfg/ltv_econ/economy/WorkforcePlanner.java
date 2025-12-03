@@ -130,7 +130,7 @@ public class WorkforcePlanner {
             totalWorkerCoeffs[j] = 1.0;
         }
         constraints.add(new LinearConstraint(
-            totalWorkerCoeffs, Relationship.LEQ, EconomyEngine.getGlobalWorkerCount()
+            totalWorkerCoeffs, Relationship.LEQ, EconomyEngine.getGlobalWorkerCount(false)
         ));
 
         // Non-negative net production for all commodities

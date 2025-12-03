@@ -294,7 +294,7 @@ public class CommodityInfo {
      * Sorts the indices array in-place based on pairScores using radix sort with radix = 256.
      * Descending order: highest score first.
      */
-    public static void radixSortIndices(int[] indices, int[] pairScores) {
+    private static void radixSortIndices(int[] indices, int[] pairScores) {
         final int n = indices.length;
         final int[] output = new int[n];
 
@@ -331,7 +331,7 @@ public class CommodityInfo {
         }
     }
 
-    public final int computePairScore(MarketAPI exporter, MarketAPI importer) {
+    private final int computePairScore(MarketAPI exporter, MarketAPI importer) {
 
         int score = 0;
 

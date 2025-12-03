@@ -576,11 +576,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     public final void applyWages() {
         for (String marketID : m_registeredMarkets) {
-        float wage = 0;
-            for (WorkerIndustryData data : WorkerRegistry.getInstance().getIndustriesaUsingWorkers(marketID)) {
-                wage += data.getWorkersAssigned() * (LaborConfig.LPV_day / LaborConfig.RoSV);
-            }
-            addCredits(marketID, (int) -wage);
+            addCredits(marketID, (int) -getWagesForMarket(marketID));
         }
     }
 
@@ -744,9 +740,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return totalActivity;
     }
 
-    public static final long getGlobalWorkerCount() {
+    public static final long getGlobalWorkerCount(boolean includePlayerMarkets) {
         long total = 0;
         for (MarketAPI market : getMarketsCopy()) {
+            if (!includePlayerMarkets && market.isPlayerOwned()) continue;
+            
             final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(market);
             if (cond == null) continue;
 
@@ -838,7 +836,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return (long) total;
     }
 
-    public void addCredits(String marketID, long amount) {
+    public final void addCredits(String marketID, long amount) {
         long current = m_marketCredits.getOrDefault(marketID, 0l);
 
         if (amount > 0 && current > Long.MAX_VALUE - amount) {
@@ -857,25 +855,29 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     /**
      * Returns 0 if no market is registered
      */
-    public long getCredits(String marketID) {
+    public final long getCredits(String marketID) {
         return m_marketCredits.getOrDefault(marketID, 0l);
     }
 
     /*
      * Works properly only for player colonies. 
      */
-    public long getNetIncome(MarketAPI market, boolean lastMonth) {
-        // Exports
+    public final long getNetIncome(MarketAPI market, boolean lastMonth) {
         final long exportIncome = getExportIncome(market, lastMonth);
         final long importCost = getImportExpense(market, lastMonth);
+        final int wageCost = (int) getWagesForMarket(market.getId());
+        final int indIncome = getIndustryIncome(market);
+        final int indUpkeep = getIndustryUpkeep(market);
+        final int hazardPay = market.isImmigrationIncentivesOn() ?
+            (int) market.getImmigrationIncentivesCost() : 0;
 
-        return exportIncome - importCost;
+        return exportIncome + indIncome - hazardPay - importCost - wageCost - indUpkeep;
     }
 
     /*
      * Works properly only for player colonies. 
      */
-    public long getExportIncome(MarketAPI market, boolean lastMonth) {
+    public final long getExportIncome(MarketAPI market, boolean lastMonth) {
         long exportIncome = 0;
         if (m_playerMarkets.contains(market.getId())) {
             for (CommodityInfo info : m_comInfo.values()) {
@@ -890,7 +892,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     /*
      * Works properly only for player colonies. 
      */
-    public long getImportExpense(MarketAPI market, boolean lastMonth) {
+    public final long getImportExpense(MarketAPI market, boolean lastMonth) {
         long importCost = 0;
         if (m_playerMarkets.contains(market.getId())) {
             for (CommodityInfo info : m_comInfo.values()) {
@@ -902,12 +904,70 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return importCost;
     }
 
+    /**
+     * Per day value
+     */
+    public final float getWagesForMarket(String marketID) {
+        float wage = 0f;
+
+        for (WorkerIndustryData data : WorkerRegistry.getInstance().getIndustriesUsingWorkers(marketID)) {
+            wage += data.getWorkersAssigned() * (LaborConfig.LPV_day / LaborConfig.RoSV);
+        }
+
+        // Wages are an expense → negative value
+        return wage;
+    }
+
+    public final int getIndustryIncome(MarketAPI market) {
+        float income = 0f;
+        for (Industry ind : market.getIndustries()) {
+            income += getIndustryIncome(ind, market).getModifiedValue();
+        }
+
+        return (int) income;
+    }
+
+    public final int getIndustryUpkeep(MarketAPI market) {
+        float upkeep = 0f;
+        for (Industry ind : market.getIndustries()) {
+            upkeep += getIndustryUpkeep(ind, market).getModifiedValue();
+        }
+
+        return (int) upkeep;
+    }
+
+    public final MutableStat getIndustryIncome(Industry ind, MarketAPI market) {
+        final MutableStat income = new MutableStat(ind.getSpec().getIncome());
+        income.modifyMult("market_size", market.getSize() - 2);
+        income.modifyMult("market_income_mods", market.getIncomeMult().getModifiedValue());
+
+        return income;
+    }
+
+    public final MutableStat getIndustryUpkeep(Industry ind, MarketAPI market) {
+        final MutableStat upkeep = new MutableStat(ind.getSpec().getUpkeep());
+        upkeep.modifyMult("market_size", market.getSize() - 2);
+		upkeep.modifyMultAlways(
+            "ind_hazard", market.getUpkeepMult().getModifiedValue(), "Market upkeep multiplier"
+        );
+
+        return upkeep;
+    }
+
+    private transient Set<String> turnedOffIncentiveMarkets = new HashSet<>();
     @Override
     public void reportEconomyTick(int iterIndex) {
         final EconomyAPI econ = Global.getSector().getEconomy();
 
+        if (turnedOffIncentiveMarkets == null) turnedOffIncentiveMarkets = new HashSet<>();
+        turnedOffIncentiveMarkets.clear();
+
         for (String marketID : m_playerMarkets) {
             final MarketAPI market = econ.getMarket(marketID);
+            if (market == null) {
+                m_playerMarkets.remove(marketID);
+                continue;
+            }
             for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
 
                 ind.getIncome().unmodify();
@@ -942,6 +1002,23 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             for (CommodityOnMarketAPI com : market.getAllCommodities()) {
                 com.getCommodityMarketData().getMarketShareData(market).setExportMarketShare(0);
             }
+
+            if (market.isImmigrationIncentivesOn()) {
+                turnedOffIncentiveMarkets.add(marketID);
+                market.setImmigrationIncentivesOn(false);
+            }
+        }
+    }
+
+    /**
+     * This method runs after {@link #reportEconomyTick}. Practically the same method but delayed.
+     */
+    @Override
+    public void reportEconomyMonthEnd() {
+        final EconomyAPI econ = Global.getSector().getEconomy();
+
+        for (String marketID : turnedOffIncentiveMarkets) {
+            econ.getMarket(marketID).setImmigrationIncentivesOn(true);
         }
     }
 

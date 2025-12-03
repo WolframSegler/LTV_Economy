@@ -148,7 +148,7 @@ public class CommodityStats {
         return getFlowProductionSurplus() - getTotalExports();
     }
     public final double getStoredRemainingExportable() {
-        return Math.max(0, stored + getFlowRemainingExportable() - getPreferredStockpile());
+        return Math.max(0, stored + getFlowRemainingExportable() - getPreferredStockpile() * EconomyConfig.EXPORT_THRESHOLD_FACTOR);
     }
     public final float getFlowCanNotExport() {
         return Math.max(0, getFlowRemainingExportable());

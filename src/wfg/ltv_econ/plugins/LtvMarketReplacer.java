@@ -2,6 +2,7 @@ package wfg.ltv_econ.plugins;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.awt.Color;
 
 import com.fs.starfarer.api.EveryFrameScript;
@@ -15,6 +16,7 @@ import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
+import wfg.ltv_econ.util.TooltipUtils;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -156,7 +158,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         final ShippingPanel shipPanel = (ShippingPanel) ReflectionUtils.invoke(colonyInfoPanel, "getShipping");
 
-        final ButtonAPI useStockpilesBtn = (ButtonAPI) shipPanel.getUseStockpiles();
+        // final ButtonAPI useStockpilesBtn = (ButtonAPI) shipPanel.getUseStockpiles();
+        final ButtonAPI useStockpilesBtn = (ButtonAPI) ReflectionUtils.invoke(shipPanel, "getUseStockpiles");
 
         final MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
 
@@ -213,7 +216,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         incomePanel.removeComponent(oldBtn);
 
         final MarketAPI market = (MarketAPI) ReflectionUtils.get(colonyInfoPanel, null, MarketAPI.class);
-        final TextPanel creditsLabel = new TextPanel(colonyInfoPanel, 150, 50) {
+        final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
             public void createPanel() {
                 final long value = EconomyEngine.getInstance().getNetIncome(market, true);
@@ -247,10 +250,12 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 return getPanel();
             }
 
+            private TooltipMakerAPI m_tp;
+
             @Override
             public TooltipMakerAPI createAndAttachTp() {
                 final int TP_WIDTH = 450;
-                final TooltipMakerAPI tp = getPanel().createUIElement(TP_WIDTH, 0, false);
+                m_tp = getPanel().createUIElement(TP_WIDTH, 0, false);
 
                 final Color highlight = Misc.getHighlightColor();
                 final Color negative = Misc.getNegativeHighlightColor();
@@ -259,82 +264,79 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 final Color dark = faction.getDarkUIColor();
                 final EconomyEngine engine = EconomyEngine.getInstance();
 
-                tp.addTitle("Monthly Income & Upkeep", base);
+                m_tp.addTitle("Monthly Income & Upkeep", base);
                 final long income = engine.getNetIncome(market, true);
 
                 final String incomeTxt = NumFormat.formatCreditAbs(income);
                 if (income >= 0) {
-                    tp.addPara("The net monthly income of this colony last month was %s.", opad, highlight, incomeTxt);
+                    m_tp.addPara("The net monthly income of this colony last month was %s.", opad, highlight, incomeTxt);
                 } else {
-                    tp.addPara("The net monthly upkeep for this colony last month was %s.", opad, negative, incomeTxt);
+                    m_tp.addPara("The net monthly upkeep for this colony last month was %s.", opad, negative, incomeTxt);
                 }
 
-                tp.addPara(
-                        "Income multiplier: %s", opad, highlight,
-                        Math.round(market.getIncomeMult().getModifiedValue() * 100f) + "%");
+                m_tp.addPara(
+                    "Income multiplier: %s", opad, highlight,
+                    Math.round(market.getIncomeMult().getModifiedValue() * 100f) + "%"
+                );
+                m_tp.addStatModGrid(
+                    TP_WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null
+                );
 
-                tp.addStatModGrid(
-                        TP_WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null);
+                m_tp.addPara(
+                    "Upkeep multiplier: %s", opad, highlight,
+                    Math.round(market.getUpkeepMult().getModifiedValue() * 100f) + "%"
+                );
+                m_tp.addStatModGrid(
+                    TP_WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null
+                );
 
-                tp.addPara(
-                        "Upkeep multiplier: %s", opad, highlight,
-                        Math.round(market.getUpkeepMult().getModifiedValue() * 100f) + "%");
-
-                tp.addStatModGrid(
-                        TP_WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null);
-                final String indIncome = NumFormat.formatCredit(Math.round(market.getIndustryIncome()));
-                final String indUpkeep = NumFormat.formatCredit(Math.round(market.getIndustryUpkeep()));
+                final String indIncome = NumFormat.formatCredit(engine.getIndustryIncome(market));
+                final String indUpkeep = NumFormat.formatCredit(engine.getIndustryUpkeep(market));
 
                 final ArrayList<Industry> industries = new ArrayList<>(market.getIndustries());
 
-                final boolean hasUpkeep = Math.round(market.getIndustryUpkeep()) > 0;
-                if (hasUpkeep) {
-                    tp.addSectionHeading("Income & Upkeep", base, dark, Alignment.MID, opad);
-                } else {
-                    tp.addSectionHeading("Income", base, dark, Alignment.MID, opad);
+                m_tp.addSectionHeading("Income", base, dark, Alignment.MID, opad);
+
+                m_tp.addPara("Local income: %s", opad, highlight, indIncome);
+                industries.sort((i1, i2) ->
+                    Integer.compare(
+                        engine.getIndustryIncome(i2, market).getModifiedInt(),
+                        engine.getIndustryIncome(i1, market).getModifiedInt()
+                    )
+                );
+                m_tp.beginGridFlipped(TP_WIDTH, 1, 65.0F, opad);
+
+                int indCount = 0;
+                for (Industry ind : industries) {
+                    int perIndIncome = engine.getIndustryIncome(ind, market).getModifiedInt();
+                    if (perIndIncome > 0) {
+                        m_tp.addToGrid(0, indCount++, ind.getCurrentName(),
+                            NumFormat.formatCredit(perIndIncome), highlight
+                        );
+                    }
                 }
 
-                tp.addPara("Local income: %s", opad, highlight, indIncome);
-                if (hasUpkeep) {
-                    industries.sort((i1, i2) ->
-                        Long.compare(
-                            i2.getIncome().getModifiedInt(),
-                            i1.getIncome().getModifiedInt()
-                        )
-                    );
-                    tp.beginGridFlipped(TP_WIDTH, 1, 65.0F, opad);
-
-                    int indCount = 0;
-                    for (Industry ind : industries) {
-                        int perIndIncome = ind.getIncome().getModifiedInt();
-                        if (perIndIncome > 0) {
-                            tp.addToGrid(0, indCount++, ind.getCurrentName(),
-                                    NumFormat.formatCredit(perIndIncome), highlight);
-                        }
-                    }
-
-                    if (indCount > 0) {
-                        tp.addGrid(pad);
-                    } else {
-                        tp.cancelGrid();
-                    }
+                if (indCount > 0) {
+                    m_tp.addGrid(pad);
+                } else {
+                    m_tp.cancelGrid();
                 }
 
                 final long exportIncome = engine.getExportIncome(market, true);
-                tp.addPara("Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
-                if (exportIncome > 0) {
+                m_tp.addPara("Last Month's Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
+                if (exportIncome > 0 && expanded) {
                     final int maxCommoditiesToDisplay = 10;
                     final float somethingWidth = 500f - 14f - 395f;
                     final float extraPad = ((int)(somethingWidth / 3f));
 
-                    tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
-                    int cumulativeIncome = 0;
+                    m_tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
+                    int exportedCount = 0;
                     final List<CommodityInfo> commodities = engine.getCommodityInfos();
                     for (CommodityInfo com : commodities) {
                         if (com.getLedger(market.getId())
                                 .lastMonthExportIncome > 0
                             ) {
-                            ++cumulativeIncome;
+                            ++exportedCount;
                         }
                     }
 
@@ -354,63 +356,148 @@ public class LtvMarketReplacer implements EveryFrameScript {
                             com.spec.getId(), market.getId()
                         );
 
-                        tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, highlight, exportMarketShare + "%", highlight, NumFormat.formatCredit(comExportIncome));
+                        m_tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, highlight, exportMarketShare + "%", highlight, NumFormat.formatCredit(comExportIncome));
                         comCount++;
-                        if (comCount + 1 > maxCommoditiesToDisplay && cumulativeIncome - comCount > 1) {
+                        if (comCount + 1 > maxCommoditiesToDisplay && exportedCount - comCount > 1) {
                             break;
                         }
                     }
 
-                    tp.addTable("No exports", cumulativeIncome - comCount, opad);
+                    m_tp.addTable("No exports", exportedCount - comCount, opad);
                 }
 
-                if (hasUpkeep) {
-                    tp.addSectionHeading("Upkeep", base, dark, Alignment.MID, opad);
-                }
+                m_tp.addSectionHeading("Upkeep", base, dark, Alignment.MID, opad);
+                if (expanded && engine.getIndustryUpkeep(market) > 0) {
+                    m_tp.addPara("Industry and structure upkeep: %s", opad, negative, indUpkeep);
 
-                tp.addPara("Industry and structure upkeep: %s", opad, negative, indUpkeep);
-                if (hasUpkeep) {
                     industries.sort((i1, i2) ->
-                        Long.compare(
-                            i2.getIncome().getModifiedInt(),
-                            i1.getIncome().getModifiedInt()
+                        Integer.compare(
+                            engine.getIndustryUpkeep(i2, market).getModifiedInt(),
+                            engine.getIndustryUpkeep(i1, market).getModifiedInt()
                         )
                     );
-                    tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
-                    int indCount = 0;
+
+                    m_tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
+                    indCount = 0;
 
                     for (Industry ind : industries) {
-                        int var24 = ind.getUpkeep().getModifiedInt();
-                        if (var24 > 0) {
-                            java.lang.String var25 = Misc.getDGSCredits((float) var24);
-                            tp.addToGrid(0, indCount++, ind.getCurrentName(), var25, negative);
+                        int perIndIncome = engine.getIndustryUpkeep(ind, market).getModifiedInt();
+                        if (perIndIncome > 0) {
+                            m_tp.addToGrid(0, indCount++, ind.getCurrentName(),
+                                NumFormat.formatCredit(perIndIncome), negative
+                            );
                         }
                     }
 
                     if (indCount > 0) {
-                        tp.addGrid(pad);
+                        m_tp.addGrid(pad);
                     } else {
-                        tp.cancelGrid();
+                        m_tp.cancelGrid();
                     }
                 }
 
-                final int shortage = (int) market.getShortageCounteringCost();
-                if (shortage > 0 && market.isUseStockpilesForShortages()) {
-                    tp.addPara("Shortage countering: %s", opad, negative, Misc.getDGSCredits(shortage));
+                final long importExpense = engine.getImportExpense(market, true);
+                m_tp.addPara("Last Month's Imports: %s", opad, negative, NumFormat.formatCredit(importExpense));
+                if (importExpense > 0 && expanded) {
+                    final int maxCommoditiesToDisplay = 10;
+                    final float somethingWidth = 500f - 14f - 395f;
+                    final float extraPad = ((int)(somethingWidth / 3f));
+
+                    m_tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Expense", 100f + extraPad);
+                    int importedCount = 0;
+                    final List<CommodityInfo> commodities = engine.getCommodityInfos();
+                    for (CommodityInfo com : commodities) {
+                        if (com.getLedger(market.getId())
+                                .lastMonthImportExpense > 0
+                            ) {
+                            ++importedCount;
+                        }
+                    }
+
+                    commodities.sort((c1, c2) ->
+                        Long.compare(
+                            c2.getLedger(market.getId()).lastMonthImportExpense,
+                            c1.getLedger(market.getId()).lastMonthImportExpense
+                        )
+                    );
+                    int comCount = 0;
+                    for (CommodityInfo com : commodities) {
+                        final String name = com.spec.getName();
+                        final long comImportExpense = com.getLedger(market.getId()).lastMonthImportExpense;
+                        if (comImportExpense < 1) continue;
+
+                        final int importMarketShare = engine.getImportMarketShare(
+                            com.spec.getId(), market.getId()
+                        );
+
+                        m_tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, negative, importMarketShare + "%", negative, NumFormat.formatCredit(comImportExpense));
+                        comCount++;
+                        if (comCount + 1 > maxCommoditiesToDisplay && importedCount - comCount > 1) {
+                            break;
+                        }
+                    }
+
+                    m_tp.addTable("No imports", importedCount - comCount, opad);
+                }
+
+                final long monthlyWages = ((long) engine.getWagesForMarket(market.getId())) * 30;
+                if (monthlyWages > 0) {
+                    m_tp.addPara("Worker wages: %s", opad, negative,
+                        NumFormat.formatCredit(monthlyWages)
+                    );
                 }
 
                 final int incentive = (int) market.getImmigrationIncentivesCost();
                 if (incentive > 0 && market.isImmigrationIncentivesOn()) {
-                    tp.addPara("Hazard pay: %s", opad, negative, Misc.getDGSCredits(incentive));
+                    m_tp.addPara("Hazard pay: %s", opad, negative, Misc.getDGSCredits(incentive));
                 }
 
-                add(tp);
-                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.LeftTop, 50);
-                return tp;
+                add(m_tp);
+                WrapUiUtils.anchorPanel(m_tp, getPanel(), AnchorType.LeftTop, 50);
+                return m_tp;
+            }
+            
+            private boolean expanded = false;
+
+            @Override
+            public boolean isExpanded() {
+                return expanded;
+            };
+
+            @Override
+            public void setExpanded(boolean a) {
+                expanded = a;
+            };
+
+            @Override
+            public Optional<CustomPanelAPI> getCodexParent() {
+                return Optional.ofNullable(getPanel());
+            }
+
+            private static final String notExpandedCodexF1 = "F1 more info";
+            private static final String ExpandedCodexF1 = "F1 hide";
+
+            @Override
+            public Optional<TooltipMakerAPI> createAndAttachCodex() {
+                TooltipMakerAPI codex;
+
+                if (!expanded) {
+                    final int codexW = 100;
+
+                    codex = TooltipUtils.createCustomCodex(this, notExpandedCodexF1, null, codexW);
+                } else {
+                    final int codexW = 70;
+
+                    codex = TooltipUtils.createCustomCodex(this, ExpandedCodexF1, null, codexW);  
+                }
+
+                WrapUiUtils.anchorPanel(codex, m_tp, AnchorType.BottomLeft, opad + pad);
+
+                return Optional.ofNullable(codex);
             }
         };
 
-        colonyInfoPanel.addComponent(creditsLabel.getPanel()).inTR(
+        colonyInfoPanel.addComponent(colonyCreditLabel.getPanel()).inTR(
             318, 0
         );
     }

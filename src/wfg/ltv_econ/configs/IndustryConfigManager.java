@@ -14,10 +14,8 @@ import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.characters.MarketConditionSpecAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
-import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.CompatLayer;
@@ -107,7 +105,6 @@ public class IndustryConfigManager {
 
             final boolean workerAssignable = industryJson.optBoolean("workerAssignable", false);
             final boolean ignoreLocalStockpiles = industryJson.optBoolean("ignoreLocalStockpiles", false);
-            final boolean includeBaseMaintenance = industryJson.optBoolean("includeBaseMaintenance", true);
 
             final String occTagStr = industryJson.optString("occTag", null);
             OCCTag occTag = OCCTag.AVERAGE;
@@ -139,26 +136,6 @@ public class IndustryConfigManager {
 
             final JSONObject outputList = industryJson.getJSONObject("outputList");
             final Map<String, OutputConfig> commodityMap = new HashMap<>();
-
-            if (includeBaseMaintenance) {
-                final OutputConfig opt = new OutputConfig(
-                    BASE_MAINTENANCE_ID,
-                    1,
-                    new HashMap<>(),
-                    false,
-                    false,
-                    true,
-                    false,
-                    new ArrayList<>(),
-                    new ArrayList<>(),
-                    Map.of(Commodities.SUPPLIES, EconomyConfig.DAILY_MAINTENANCE_SUPPLY),
-                    0,
-                    10,
-                    -1
-                );
-
-                commodityMap.put(BASE_MAINTENANCE_ID, opt);
-            }
 
             Iterator<String> outputIds = outputList.keys();
             while (outputIds.hasNext()) {
@@ -237,7 +214,7 @@ public class IndustryConfigManager {
             }
             
             IndustryConfig indConfig = new IndustryConfig(
-                workerAssignable, commodityMap, occTag, ignoreLocalStockpiles, includeBaseMaintenance
+                workerAssignable, commodityMap, occTag, ignoreLocalStockpiles
             );
             result.put(industryId, indConfig);
         }
@@ -262,7 +239,6 @@ public class IndustryConfigManager {
                 JSONObject indJson = new JSONObject();
                 indJson.put("workerAssignable", ind.workerAssignable);
                 indJson.put("ignoreLocalStockpiles", ind.ignoreLocalStockpiles);
-                indJson.put("includeBaseMaintenance", ind.includeBaseMaintenance);
 
                 if (ind.occTag != null) {
                     indJson.put("occTag", ind.occTag.name().toLowerCase());
@@ -320,6 +296,137 @@ public class IndustryConfigManager {
         }
 
         return root;
+    }
+
+    public static class IndustryConfig {
+        public final boolean workerAssignable;
+        public final boolean ignoreLocalStockpiles;
+        public final OCCTag occTag;
+        public final Map<String, OutputConfig> outputs;
+
+        public boolean dynamic = false;
+
+        public IndustryConfig(boolean workerAssignable, Map<String, OutputConfig> outputs, OCCTag occTag,
+            boolean ignoreLocalStockpiles
+        ) {
+            this.workerAssignable = workerAssignable;
+            this.ignoreLocalStockpiles = ignoreLocalStockpiles;
+            this.outputs = outputs;
+            this.occTag = occTag;
+        }
+
+        /**
+         * Copy Constructor
+         */
+        public IndustryConfig(IndustryConfig config) {
+            this.workerAssignable = config.workerAssignable;
+            this.ignoreLocalStockpiles = config.ignoreLocalStockpiles;
+            this.occTag = config.occTag;
+            this.dynamic = config.dynamic;
+
+            // Deep copy outputs map
+            if (config.outputs != null) {
+                Map<String, OutputConfig> copy = new HashMap<>();
+                for (Map.Entry<String, OutputConfig> e : config.outputs.entrySet()) {
+                    copy.put(e.getKey(), new OutputConfig(e.getValue()));
+                }
+                this.outputs = copy;
+            } else {
+                this.outputs = new HashMap<>();
+            }
+        }
+
+        @Override
+        public final String toString() {
+            return '{' + " ,\n"
+                + "workerAssignable: " + workerAssignable + " ,\n"
+                + "occTag: " + occTag.toString() + " ,\n"
+                + "ignoreLocalStockpiles: " + ignoreLocalStockpiles + " ,\n"
+                + outputs.toString()
+                + '}';
+        }
+    }
+
+    public static class OutputConfig {
+        public final String comID;
+        public final float baseProd;
+        public final long target;
+        public final float workerAssignableLimit;
+        public final float marketScaleBase;
+
+        public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
+        public final Map<String, Float> InputsPerUnitOutput;
+
+        public List<String> ifMarketCondsAllFalse;
+        public List<String> ifMarketCondsAllTrue;
+
+        public final boolean scaleWithMarketSize; // Base size where no scaling happens is 3.
+        public final boolean usesWorkers;
+        public final boolean isAbstract; // Abstract outputs have no output, only inputs
+        public final boolean checkLegality;
+
+        public OutputConfig(
+            String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
+            boolean usesWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketCondsAllFalse,
+            List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput, float workerAssignableLimit,
+            float marketScaleBase, long target   
+        ) {
+            this.comID = comID;
+            this.baseProd = baseProd;
+            this.target = target;
+            this.CCMoneyDist = CCMoneyDist;
+            this.InputsPerUnitOutput = InputsPerUnitOutput;
+            this.ifMarketCondsAllFalse = ifMarketCondsAllFalse;
+            this.ifMarketCondsAllTrue = ifMarketCondsAllTrue;
+            this.scaleWithMarketSize = scaleWithMarketSize;
+            this.usesWorkers = usesWorkers;
+            this.workerAssignableLimit = workerAssignableLimit;
+            this.isAbstract = isAbstract;
+            this.checkLegality = checkLegality;
+            this.marketScaleBase = marketScaleBase;
+        }
+
+        /**
+         * Copy Constructor
+         */
+        public OutputConfig(OutputConfig other) {
+            this.comID = other.comID;
+            this.baseProd = other.baseProd;
+            this.target = other.target;
+
+            this.CCMoneyDist = (other.CCMoneyDist == null) ? null : new HashMap<>(other.CCMoneyDist);
+            this.InputsPerUnitOutput = (other.InputsPerUnitOutput == null) ? null : new HashMap<>(other.InputsPerUnitOutput);
+
+            this.ifMarketCondsAllFalse = (other.ifMarketCondsAllFalse == null)
+                ? null : new ArrayList<>(other.ifMarketCondsAllFalse);
+            this.ifMarketCondsAllTrue = (other.ifMarketCondsAllTrue == null)
+                ? null : new ArrayList<>(other.ifMarketCondsAllTrue);
+
+            this.scaleWithMarketSize = other.scaleWithMarketSize;
+            this.usesWorkers = other.usesWorkers;
+            this.workerAssignableLimit = other.workerAssignableLimit;
+            this.isAbstract = other.isAbstract;
+            this.checkLegality = other.checkLegality;
+            this.marketScaleBase = other.marketScaleBase;
+        }
+
+        @Override
+        public final String toString() {
+            return '{' +  " ,\n" +
+                "baseProd=" + baseProd + " ,\n" +
+                ", target=" + target + " ,\n" +
+                ", CCMoneyDist=" + CCMoneyDist + " ,\n" +
+                ", ConsumptionMap=" + InputsPerUnitOutput + " ,\n" +
+                ", ifMarketCondsAllFalse=" + ifMarketCondsAllFalse + " ,\n" +
+                ", ifMarketCondsAllTrue=" + ifMarketCondsAllTrue + " ,\n" +
+                ", scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +
+                ", marketScaleBase=" + marketScaleBase + " ,\n" +
+                ", usesWorkers=" + usesWorkers + " ,\n" +
+                "workerAssignableLimit: " + workerAssignableLimit + " ,\n" +
+                ", isAbstract=" + isAbstract + " ,\n" +
+                ", checkLegality=" + checkLegality + " ,\n" +
+                '}';
+        }
     }
 
     /**
@@ -467,7 +574,7 @@ public class IndustryConfigManager {
             illegalOutputs.forEach(addOutput);
 
             final IndustryConfig config = new IndustryConfig(
-                usesWorkers, configOutputs, OCCTag.AVERAGE, false, true
+                usesWorkers, configOutputs, OCCTag.AVERAGE, false
             );
             config.dynamic = true;
 
@@ -636,141 +743,6 @@ public class IndustryConfigManager {
                 "Failed to write dynamic industry configuration to common JSON file '"
                 + IndustryConfigManager.DYNAMIC_CONFIG_NAME, e
             );
-        }
-    }
-
-    public static class IndustryConfig {
-        public final boolean workerAssignable;
-        public final boolean ignoreLocalStockpiles;
-        public final boolean includeBaseMaintenance;
-        public final OCCTag occTag;
-        public final Map<String, OutputConfig> outputs;
-
-        public boolean dynamic = false;
-
-        public IndustryConfig(boolean workerAssignable, Map<String, OutputConfig> outputs, OCCTag occTag,
-            boolean ignoreLocalStockpiles, boolean includeBaseMaintenance
-        ) {
-            this.workerAssignable = workerAssignable;
-            this.ignoreLocalStockpiles = ignoreLocalStockpiles;
-            this.includeBaseMaintenance = includeBaseMaintenance;
-            this.outputs = outputs;
-            this.occTag = occTag;
-        }
-
-        /**
-         * Copy Constructor
-         */
-        public IndustryConfig(IndustryConfig config) {
-            this.workerAssignable = config.workerAssignable;
-            this.ignoreLocalStockpiles = config.ignoreLocalStockpiles;
-            this.includeBaseMaintenance = config.includeBaseMaintenance;
-            this.occTag = config.occTag;
-            this.dynamic = config.dynamic;
-
-            // Deep copy outputs map
-            if (config.outputs != null) {
-                Map<String, OutputConfig> copy = new HashMap<>();
-                for (Map.Entry<String, OutputConfig> e : config.outputs.entrySet()) {
-                    copy.put(e.getKey(), new OutputConfig(e.getValue()));
-                }
-                this.outputs = copy;
-            } else {
-                this.outputs = new HashMap<>();
-            }
-        }
-
-        @Override
-        public final String toString() {
-            return '{' + " ,\n"
-                + "workerAssignable: " + workerAssignable + " ,\n"
-                + "occTag: " + occTag.toString() + " ,\n"
-                + "ignoreLocalStockpiles: " + ignoreLocalStockpiles + " ,\n"
-                + "includeBaseMaintenance: " + includeBaseMaintenance + " ,\n"
-                + outputs.toString()
-                + '}';
-        }
-    }
-
-    public static class OutputConfig {
-        public final String comID;
-        public final float baseProd;
-        public final long target;
-        public final float workerAssignableLimit;
-        public final float marketScaleBase;
-
-        public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
-        public final Map<String, Float> InputsPerUnitOutput;
-
-        public List<String> ifMarketCondsAllFalse;
-        public List<String> ifMarketCondsAllTrue;
-
-        public final boolean scaleWithMarketSize; // Base size where no scaling happens is 3.
-        public final boolean usesWorkers;
-        public final boolean isAbstract; // Abstract outputs have no output, only inputs
-        public final boolean checkLegality;
-
-        public OutputConfig(
-            String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
-            boolean usesWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketCondsAllFalse,
-            List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput, float workerAssignableLimit,
-            float marketScaleBase, long target   
-        ) {
-            this.comID = comID;
-            this.baseProd = baseProd;
-            this.target = target;
-            this.CCMoneyDist = CCMoneyDist;
-            this.InputsPerUnitOutput = InputsPerUnitOutput;
-            this.ifMarketCondsAllFalse = ifMarketCondsAllFalse;
-            this.ifMarketCondsAllTrue = ifMarketCondsAllTrue;
-            this.scaleWithMarketSize = scaleWithMarketSize;
-            this.usesWorkers = usesWorkers;
-            this.workerAssignableLimit = workerAssignableLimit;
-            this.isAbstract = isAbstract;
-            this.checkLegality = checkLegality;
-            this.marketScaleBase = marketScaleBase;
-        }
-
-        /**
-         * Copy Constructor
-         */
-        public OutputConfig(OutputConfig other) {
-            this.comID = other.comID;
-            this.baseProd = other.baseProd;
-            this.target = other.target;
-
-            this.CCMoneyDist = (other.CCMoneyDist == null) ? null : new HashMap<>(other.CCMoneyDist);
-            this.InputsPerUnitOutput = (other.InputsPerUnitOutput == null) ? null : new HashMap<>(other.InputsPerUnitOutput);
-
-            this.ifMarketCondsAllFalse = (other.ifMarketCondsAllFalse == null)
-                ? null : new ArrayList<>(other.ifMarketCondsAllFalse);
-            this.ifMarketCondsAllTrue = (other.ifMarketCondsAllTrue == null)
-                ? null : new ArrayList<>(other.ifMarketCondsAllTrue);
-
-            this.scaleWithMarketSize = other.scaleWithMarketSize;
-            this.usesWorkers = other.usesWorkers;
-            this.workerAssignableLimit = other.workerAssignableLimit;
-            this.isAbstract = other.isAbstract;
-            this.checkLegality = other.checkLegality;
-            this.marketScaleBase = other.marketScaleBase;
-        }
-
-        @Override
-        public final String toString() {
-            return '{' +  " ,\n" +
-                "baseProd=" + baseProd + " ,\n" +
-                ", target=" + target + " ,\n" +
-                ", CCMoneyDist=" + CCMoneyDist + " ,\n" +
-                ", ConsumptionMap=" + InputsPerUnitOutput + " ,\n" +
-                ", ifMarketCondsAllFalse=" + ifMarketCondsAllFalse + " ,\n" +
-                ", ifMarketCondsAllTrue=" + ifMarketCondsAllTrue + " ,\n" +
-                ", scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +
-                ", marketScaleBase=" + marketScaleBase + " ,\n" +
-                ", usesWorkers=" + usesWorkers + " ,\n" +
-                "workerAssignableLimit: " + workerAssignableLimit + " ,\n" +
-                ", isAbstract=" + isAbstract + " ,\n" +
-                ", checkLegality=" + checkLegality + " ,\n" +
-                '}';
         }
     }
 
