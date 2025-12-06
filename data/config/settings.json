@@ -5,7 +5,12 @@
       "glow_bg": "graphics/ui/text_glow.png",
       "warning_button": "graphics/ui/news.png",
       "worker_helmet": "graphics/ui/worker_helmet.png",
-      "three_workers": "graphics/ui/three_workers.png"
+      "three_workers": "graphics/ui/three_workers.png",
+      "health": "graphics/ui/health.png",
+      "smiling_face": "graphics/ui/smiling_face.png",
+      "society": "graphics/ui/society.png",
+      "solidarity_colored": "graphics/ui/solidarity_colored.png",
+      "solidarity_empty": "graphics/ui/solidarity_empty.png"
     }
   }
 }

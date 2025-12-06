@@ -338,7 +338,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             }
 
             final CommodityStats stats = engine.getComStats(entry.getKey(), market.getId());
-            final float oldDemand = stats.getBaseDemandStat(industry.getId()).getModifiedValue();
+            final float oldDemand = stats.getDemandIndStat(industry.getId()).getModifiedValue();
 
             final float baseDemand = stats.getBaseDemand(false) + (long) (dAmount - oldDemand);
             final float demandMet = Math.min(stats.getProduction(false), baseDemand)

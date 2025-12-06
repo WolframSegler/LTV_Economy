@@ -298,11 +298,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         
         weightedOutputDeficitMods();
 
+        if (!fakeAdvance) m_playerMarketData.values().forEach(PlayerMarketData::advance);
+
         m_comInfo.values().parallelStream().forEach(info -> info.trade(fakeAdvance));
         if (!fakeAdvance) {
             m_comInfo.values().forEach(CommodityInfo::advance);
 
-            m_playerMarketData.values().forEach(PlayerMarketData::advance);
             applyWages();
             redistributeFactionCredits();
             applyCreditStabilityModifiers();
@@ -454,7 +455,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         final float totalMarketOutput = stats.getProduction(false);
         final float invMarketOutput = 1f / totalMarketOutput;
 
-        for (Map.Entry<String, MutableStat> industryEntry : stats.getFlowProductionStat().entrySet()) {
+        for (Map.Entry<String, MutableStat> industryEntry : stats.getFlowProdIndStats().entrySet()) {
             final String industryID = industryEntry.getKey();
             final MutableStat industryStat = industryEntry.getValue();
 
@@ -491,7 +492,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             totalDeficit += industryDeficit * industryShare;
         }
 
-        stats.localProdMult = Math.max(1f - totalDeficit, 0.01f);
+        stats.getProductionStat().modifyMult(
+            "deficits", Math.max(1f - totalDeficit, 0.01f), "Input shortages"
+        );
     }
 
     private final void resetWorkersAssigned(boolean resetPlayerIndustries) {

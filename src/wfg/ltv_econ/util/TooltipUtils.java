@@ -386,27 +386,44 @@ public class TooltipUtils {
     }
 
     public static float createStatModGridRow(
-            TooltipMakerAPI tooltip,
-            float currentY,
-            float valueTxtWidth,
-            boolean firstPara,
-            Color valueColor,
-            float value,
-            boolean engNotate,
-            boolean flatNum,
-            String desc,
-            String modSource,
-            String valuePrefix // "+", "x", or ""
+        TooltipMakerAPI tooltip,
+        float currentY,
+        float valueTxtWidth,
+        boolean firstPara,
+        Color valueColor,
+        float value,
+        boolean engNotate,
+        boolean flatNum,
+        String desc,
+        String modSource,
+        String valuePrefix // "+", "x", or ""
+    ) {
+        return createStatModGridRow(tooltip, currentY, valueTxtWidth, firstPara, valueColor, value, engNotate, flatNum, desc, modSource, valuePrefix, "");
+    }
+
+    public static float createStatModGridRow(
+        TooltipMakerAPI tooltip,
+        float currentY,
+        float valueTxtWidth,
+        boolean firstPara,
+        Color valueColor,
+        float value,
+        boolean engNotate,
+        boolean flatNum,
+        String desc,
+        String modSource,
+        String valuePrefix,
+        String valueSuffix
     ) {
         final String valueTxt;
         if (engNotate) {
             if (Math.abs(value) < 1000 && !flatNum) {
-                valueTxt = valuePrefix + NumFormat.formatSmart(value);
+                valueTxt = valuePrefix + NumFormat.formatSmart(value) + valueSuffix;
             } else {
-                valueTxt = valuePrefix + NumFormat.engNotation((long) value);
+                valueTxt = valuePrefix + NumFormat.engNotation((long) value) + valueSuffix;
             } 
         } else {
-            valueTxt = valuePrefix + value;
+            valueTxt = valuePrefix + value + valueSuffix;
         }
 
         String fullDesc = desc;
@@ -451,7 +468,7 @@ public class TooltipUtils {
         boolean firstPara = true;
 		float y = tooltip.getHeightSoFar() + pad;
 
-        for (Map.Entry<String, MutableStat> entry : comStats.getFlowProductionStat().entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : comStats.getFlowProdIndStats().entrySet()) {
             MutableStat stat = entry.getValue();
             Industry ind = comStats.market.getIndustry(entry.getKey());
 
@@ -495,16 +512,39 @@ public class TooltipUtils {
             }
         }
 
-        
-        if (comStats.localProdMult != 1f && comStats.getProduction(false) > 0) {
-            final float value =  ((int) (comStats.localProdMult * 100f)) / 100f;
+        if (comStats.getProduction(false) > 0) {
+            for (StatMod mod : comStats.getProductionStat().getFlatMods().values()) {
+                if (mod.desc == null) continue;
 
-            y = TooltipUtils.createStatModGridRow(
-                tooltip, y, valueTxtWidth, firstPara, negative, value, false, true,
-                "Input shortages", null, Strings.X
-            );
+                y = TooltipUtils.createStatModGridRow(
+                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, true,
+                    mod.source, mod.source, "+"
+                );
 
-            firstPara = false;
+                firstPara = false;
+            }
+            for (StatMod mod : comStats.getProductionStat().getPercentMods().values()) {
+                if (mod.desc == null) continue;
+
+                final String prefix = mod.value < 0f ? "" : "+";
+
+                y = TooltipUtils.createStatModGridRow(
+                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, false,
+                    mod.desc, mod.source, prefix, "%"
+                );
+
+                firstPara = false;
+            }
+            for (StatMod mod : comStats.getProductionStat().getMultMods().values()) {
+                if (mod.desc == null) continue;
+
+                y = TooltipUtils.createStatModGridRow(
+                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, false,
+                    mod.desc, mod.source, Strings.X
+                );
+
+                firstPara = false;
+            }
         }
 
         // Import mods
@@ -578,7 +618,7 @@ public class TooltipUtils {
         boolean firstPara = true;
 		float y = tooltip.getHeightSoFar() + pad;
 
-        for (Map.Entry<String, MutableStat> entry : comStats.getFlowBaseDemandStat().entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : comStats.getFlowDemandIndStats().entrySet()) {
             MutableStat stat = entry.getValue();
             Industry ind = comStats.market.getIndustry(entry.getKey());
 

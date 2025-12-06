@@ -1,7 +1,6 @@
 package wfg.ltv_econ.economy;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -54,16 +53,18 @@ public class PlayerMarketData {
      * Advances the statistics concerning the Market by one day.
      */
     public void advance(int days) {
-        for (MarketPolicy policy : policies) policy.preAdvance(this);
+        for (MarketPolicy policy : policies) {
+            if (policy.isActive()) policy.preAdvance(this);
+        }
 
         advanceMarket(days);
 
-        for (MarketPolicy policy : policies) policy.postAdvance(this);
+        for (MarketPolicy policy : policies) {
+            if (policy.isActive())  policy.postAdvance(this);
+        }
 
-        for (final Iterator<MarketPolicy> it = policies.iterator(); it.hasNext();) {
-            final MarketPolicy p = it.next();
-            p.advanceDuration(days);
-            if (p.duration <= 0) it.remove();
+        for (MarketPolicy policy : policies) {
+            policy.advanceTime(days);
         }
     }
     public void advance() {

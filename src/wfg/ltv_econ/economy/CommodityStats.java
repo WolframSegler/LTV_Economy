@@ -10,6 +10,7 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.MutableStatWithTempMods;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.impl.campaign.econ.ShippingDisruption;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
@@ -57,13 +58,11 @@ public class CommodityStats {
     // Storage
     private double stored = 0;
 
-    private transient float localProd = 0;
+    private MutableStatWithTempMods localProd = new MutableStatWithTempMods(0f);
     private transient float demandBase = 0;
 
     private transient Map<String, MutableStat> localProdMutables = new HashMap<>();
     private transient Map<String, MutableStat> demandBaseMutables = new HashMap<>();
-
-    public transient float localProdMult = 1f;
 
     // Import
     public transient float inFactionImports = 0;
@@ -75,25 +74,28 @@ public class CommodityStats {
     public transient float inFactionExports = 0;
     public transient float globalExports = 0;
 
-    public final Map<String, MutableStat> getFlowProductionStat() {
+    public final Map<String, MutableStat> getFlowProdIndStats() {
         return localProdMutables;
     }
-    public final Map<String, MutableStat> getFlowBaseDemandStat() {
+    public final Map<String, MutableStat> getFlowDemandIndStats() {
         return demandBaseMutables;
     }
-    public final MutableStat getProductionStat(String industryID) {
+    public final MutableStat getProdIndStat(String industryID) {
         final MutableStat mutable = localProdMutables.get(industryID);
         return mutable == null ? new MutableStat(0) : mutable;
     }
-    public final MutableStat getBaseDemandStat(String industryID) {
+    public final MutableStat getDemandIndStat(String industryID) {
         final MutableStat mutable = demandBaseMutables.get(industryID);
         return mutable == null ? new MutableStat(0) : mutable;
     }
     public final float getProduction(boolean modified) {
-        return modified ? localProd*localProdMult : localProd;
+        return modified ? localProd.getModifiedValue() : localProd.base;
     }
     public final float getBaseDemand(boolean modified) {
         return modified ? demandBase*getStoredAvailabilityRatio() : demandBase;
+    }
+    public final MutableStatWithTempMods getProductionStat() {
+        return localProd;
     }
     public final float getFlowDeficitMet() {
         return getFlowDeficitMetLocally() + getFlowDeficitMetViaTrade();
@@ -214,7 +216,7 @@ public class CommodityStats {
     }
 
     public final void update() {
-        localProd = 0;
+        localProd.base = 0;
         demandBase = 0;
         importExclusiveDemand = 0;
         
@@ -241,14 +243,13 @@ public class CommodityStats {
         }
 
         for (MutableStat stat : localProdMutables.values()) {
-            localProd += stat.getModifiedValue();
+            localProd.base += stat.getModifiedValue();
         }
 
         for (MutableStat stat : demandBaseMutables.values()) {
             demandBase += stat.getModifiedValue();
         }
 
-        localProd = localProd < 1 ? 0 : localProd;
         demandBase = demandBase < 1 ? 0 : demandBase;
 
         for (StatMod mod : market.getCommodityData(comID).getAvailableStat().getFlatMods().values()) {
@@ -268,14 +269,14 @@ public class CommodityStats {
         inFactionExports = 0;
         globalExports = 0;
 
-        localProdMult = 1f;
-
-        localProd = 0;
+        localProd.base = 0;
         demandBase = 0;
     }
 
     public final void advance() {
         addStoredAmount(getFlowRealBalance());
+
+        localProd.advance(1);
     }
 
     public float getUnitPrice(PriceType type, int amount) {

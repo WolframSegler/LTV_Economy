@@ -46,8 +46,16 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
     private InteractionDialogAPI interactionDialog;
     private static final Color negativeColor = new Color(210, 115, 90);
     private static final Color positiveColor = new Color(90, 150, 110);
-    public static final String WORKER_ICON_PATH = Global.getSettings()
+    public static final String WORKER_ICON = Global.getSettings()
         .getSpriteName("ui", "three_workers");
+    public static final String HEALTH_ICON = Global.getSettings()
+        .getSpriteName("ui", "health");
+    public static final String SMILING_ICON = Global.getSettings()
+        .getSpriteName("ui", "smiling_face");
+    public static final String SOCIETY_ICON = Global.getSettings()
+        .getSpriteName("ui", "society");
+    public static final String SOLIDARITY_ICON = Global.getSettings()
+        .getSpriteName("ui", "solidarity_colored");
 
     public Slider exploitationSlider = null;
 
@@ -68,7 +76,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final Color baseColor = m_market.getFaction().getBaseUIColor();
         final Color highlight = Misc.getHighlightColor();
         final Color negative = Misc.getNegativeHighlightColor();
-        final int LABEL_W = 150;
+        final int LABEL_W = 140;
         final int LABEL_H = 40;
         final int opad = 10;
         final int pad = 3;
@@ -281,9 +289,9 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W+100, label2.getPosition().getHeight());
 
                 final Base workerIcon = new Base(
-                    mainCont, ICON_S, ICON_S, WORKER_ICON_PATH, Misc.getBasePlayerColor(), null, false
+                    mainCont, ICON_S, ICON_S, WORKER_ICON, Misc.getBasePlayerColor(), null, false
                 );
-                add(workerIcon).inBR(opad + ICON_S, -pad);
+                add(workerIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
 
             public CustomPanelAPI getTpParent() {
@@ -313,7 +321,158 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         subtitle.setAlignment(Alignment.LMID);
         mainCont.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_II_H);
 
+        final TextPanel healthLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+            public void createPanel() {
+                final String txt = "Health";
+                final String valueTxt = String.format("%.0f", mData.getHealth());
 
+                label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                label1.setColor(baseColor);
+                label1.setHighlightOnMouseover(true);
+                label1.setAlignment(Alignment.MID);
+
+                label2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                label2.setColor(highlight);
+                label2.setHighlightOnMouseover(true);
+                label2.setAlignment(Alignment.MID);
+
+                final float textH1 = label1.getPosition().getHeight();
+                add(label1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
+
+                final Base healthIcon = new Base(
+                    mainCont, ICON_S, ICON_S, HEALTH_ICON, Misc.getBasePlayerColor(), null, false
+                );
+                add(healthIcon).inBL(0, (LABEL_H - ICON_S)/2f);
+            }
+
+            public CustomPanelAPI getTpParent() { return m_panel; }
+
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                tp.addPara("Overall health of the population. A higher value indicates better living conditions, food availability, and lower hazard exposure.", pad);
+                add(tp);
+                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, opad);
+                return tp;
+            }
+        };
+
+        final TextPanel happinessLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+            public void createPanel() {
+                final String txt = "Happiness";
+                final String valueTxt = String.format("%.0f", mData.getHappiness());
+
+                label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                label1.setColor(baseColor);
+                label1.setHighlightOnMouseover(true);
+                label1.setAlignment(Alignment.MID);
+
+                label2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                label2.setColor(highlight);
+                label2.setHighlightOnMouseover(true);
+                label2.setAlignment(Alignment.MID);
+
+                final float textH1 = label1.getPosition().getHeight();
+                add(label1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
+
+                final Base happinessIcon = new Base(
+                    mainCont, ICON_S, ICON_S, SMILING_ICON, Misc.getBasePlayerColor(), null, false
+                );
+                add(happinessIcon).inBL(0, (LABEL_H - ICON_S)/2f);
+            }
+
+            public CustomPanelAPI getTpParent() { return m_panel; }
+
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and cultural cohesion.", pad);
+                add(tp);
+                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, opad);
+                return tp;
+            }
+        };
+
+        final TextPanel cohesionLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+            public void createPanel() {
+                final String txt = "Cohesion";
+                final String valueTxt = String.format("%.0f", mData.getCulturalCohesion());
+
+                label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                label1.setColor(baseColor);
+                label1.setHighlightOnMouseover(true);
+                label1.setAlignment(Alignment.MID);
+
+                label2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                label2.setColor(highlight);
+                label2.setHighlightOnMouseover(true);
+                label2.setAlignment(Alignment.MID);
+
+                final float textH1 = label1.getPosition().getHeight();
+                add(label1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
+
+                final Base cohesionIcon = new Base(
+                    mainCont, ICON_S, ICON_S, SOCIETY_ICON, Misc.getBasePlayerColor(), null, false
+                );
+                add(cohesionIcon).inBL(0, (LABEL_H - ICON_S)/2f);
+            }
+
+            public CustomPanelAPI getTpParent() { return m_panel; }
+
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                tp.addPara("Degree of cultural cohesion within the population. High cohesion reduces conflict and increases social stability.", pad);
+                add(tp);
+                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, opad);
+                return tp;
+            }
+        };
+
+        final TextPanel consciousnessLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+            public void createPanel() {
+                final String txt = "Class Consc.";
+                final String valueTxt = String.format("%.0f", mData.getClassConsciousness());
+
+                label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                label1.setColor(baseColor);
+                label1.setHighlightOnMouseover(true);
+                label1.setAlignment(Alignment.MID);
+
+                label2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                label2.setColor(highlight);
+                label2.setHighlightOnMouseover(true);
+                label2.setAlignment(Alignment.MID);
+
+                final float textH1 = label1.getPosition().getHeight();
+                add(label1).inTL(0, 0).setSize(LABEL_W, textH1);
+                add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
+
+                final Base classConsciousnessIcon = new Base(
+                    mainCont, ICON_S, ICON_S, SOLIDARITY_ICON, Misc.getBasePlayerColor(), null, false
+                );
+                add(classConsciousnessIcon).inBL(0, (LABEL_H - ICON_S)/2f);
+            }
+
+            public CustomPanelAPI getTpParent() { return m_panel; }
+
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                tp.addPara(
+                    "The population's awareness of exploitation and social hierarchy. Higher values indicate a greater likelihood of collective action. " +
+                    "Can be lowered by increasing wages, improving health, raising happiness, or implementing policies that reduce perceived inequities."
+                    , pad
+                );
+                add(tp);
+                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, opad);
+                return tp;
+            }
+        };
+
+        mainCont.addComponent(healthLabel.getPanel()).inTL(opad, SECT_II_H + opad*3);
+        mainCont.addComponent(happinessLabel.getPanel()).inTL(opad + LABEL_W + pad, SECT_II_H + opad*3);
+        mainCont.addComponent(cohesionLabel.getPanel()).inTL(opad + LABEL_W*2 + pad*2, SECT_II_H + opad*3);
+        mainCont.addComponent(consciousnessLabel.getPanel()).inTL(opad + LABEL_W*3 + pad*3, SECT_II_H + opad*3);
         }
     }
 
