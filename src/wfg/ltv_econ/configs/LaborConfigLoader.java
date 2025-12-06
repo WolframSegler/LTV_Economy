@@ -28,6 +28,7 @@ public class LaborConfigLoader {
 
         try {
             LaborConfig.RoSV = root.getInt("RoSV");
+            LaborConfig.MAX_RoSV = root.getInt("MAX_RoSV");
             LaborConfig.LPV_month = root.getInt("LPV_month");
             LaborConfig.LPV_day = LaborConfig.LPV_month / 30f;
             LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
@@ -55,6 +56,7 @@ public class LaborConfigLoader {
 
         public static float avg_wage;
         public static int RoSV;
+        public static int MAX_RoSV;
         public static int LPV_month;
         public static float LPV_day;
 

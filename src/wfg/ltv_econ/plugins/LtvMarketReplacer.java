@@ -3,6 +3,9 @@ package wfg.ltv_econ.plugins;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.lwjgl.input.Keyboard;
+
 import java.awt.Color;
 
 import com.fs.starfarer.api.EveryFrameScript;
@@ -13,6 +16,7 @@ import wfg.ltv_econ.economy.CommodityInfo;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
+import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
@@ -132,7 +136,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             return;
 
         // Replace the "Use stockpiles during shortages" button
-        replaceUseStockpilesButton(managementPanel, managementChildren, anchorChild);
+        replaceUseStockpilesBtnAddManageWorkersBtn(managementPanel, managementChildren, anchorChild);
 
         // Replaces the Colony effective income label
         replaceMarketCreditsLabel(managementPanel, managementChildren, anchorChild);
@@ -147,7 +151,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         replaceMarketInstanceForPriceControl(masterTab);
     }
 
-    private static final void replaceUseStockpilesButton(
+    private static final void replaceUseStockpilesBtnAddManageWorkersBtn(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
         for (Object child : managementChildren) {
@@ -164,7 +168,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         final MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
 
         if (DebugFlags.COLONY_DEBUG || market.isPlayerOwned()) {
-            final CallbackRunnable<Button> buildButtonRunnable = (btn) -> {
+            final CallbackRunnable<Button> stockpilesBtnRunnable = (btn) -> {
                 final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);
 
                 WrapUiUtils.CustomDialogViewer(
@@ -173,11 +177,12 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
             final Button inventoryBtn = new Button(
                     managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Stockpiles",
-                    Fonts.ORBITRON_12, buildButtonRunnable);
+                    Fonts.ORBITRON_12, stockpilesBtnRunnable);
             inventoryBtn.setLabelColor(Misc.getBasePlayerColor());
             inventoryBtn.bgColor = new Color(0, 0, 0, 255);
             inventoryBtn.bgDisabledColor = new Color(0, 0, 0, 255);
             inventoryBtn.quickMode = true;
+            inventoryBtn.setShortcut(Keyboard.KEY_G);
 
             managementPanel.addComponent(inventoryBtn.getPanel()).inBL(0, 0);
 
@@ -185,6 +190,29 @@ public class LtvMarketReplacer implements EveryFrameScript {
             final int yOffset = (int) (useStockpilesBtn.getPosition().getY() - inventoryBtn.getPos().getY());
 
             inventoryBtn.getPos().inBL(xOffset, yOffset);
+
+            if (!EconomyEngine.getInstance().isPlayerMarket(market.getId())) return;
+
+            final CallbackRunnable<Button> manageWorkersBtnRunnable = (btn) -> {
+                final ManageWorkersDialog dialogPanel = new ManageWorkersDialog(market);
+
+                WrapUiUtils.CustomDialogViewer(
+                        dialogPanel, ManageWorkersDialog.PANEL_W, ManageWorkersDialog.PANEL_H);
+            };
+
+            final Button manageBtn = new Button(
+                    managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Manage Workers",
+                    Fonts.ORBITRON_12, manageWorkersBtnRunnable);
+            manageBtn.setLabelColor(Misc.getBasePlayerColor());
+            manageBtn.bgColor = new Color(0, 0, 0, 255);
+            manageBtn.bgDisabledColor = new Color(0, 0, 0, 255);
+            manageBtn.quickMode = true;
+            manageBtn.setShortcut(Keyboard.KEY_W);
+
+            managementPanel.addComponent(manageBtn.getPanel()).inBL(0, 0);
+            WrapUiUtils.anchorPanel(
+                manageBtn.getPanel(), inventoryBtn.getPanel(), AnchorType.TopMid, opad
+            );
         }
 
         useStockpilesBtn.setOpacity(0);
@@ -192,6 +220,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         if (Global.getSettings().isDevMode()) {
             Global.getLogger(LtvMarketReplacer.class).info("Replaced UseStockpilesButton");
+            Global.getLogger(LtvMarketReplacer.class).info("Added manageWorkersButton");
         }
     }
 
@@ -440,7 +469,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     m_tp.addTable("No imports", importedCount - comCount, opad);
                 }
 
-                final long monthlyWages = ((long) engine.getWagesForMarket(market.getId())) * 30;
+                final long monthlyWages = (long) (engine.getWagesForMarket(market.getId())*30);
                 if (monthlyWages > 0) {
                     m_tp.addPara("Worker wages: %s", opad, negative,
                         NumFormat.formatCredit(monthlyWages)

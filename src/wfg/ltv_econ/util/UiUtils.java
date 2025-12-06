@@ -136,4 +136,16 @@ public class UiUtils {
         label.highlightLast(text);
         return label;
     }
+
+    /**
+     * @param t Must be between 0 and 1
+     */
+    public static Color lerpColor(Color c1, Color c2, float t) {
+        final int r = (int) (c1.getRed() + t * (c2.getRed() - c1.getRed()));
+        final int g = (int) (c1.getGreen() + t * (c2.getGreen() - c1.getGreen()));
+        final int b = (int) (c1.getBlue() + t * (c2.getBlue() - c1.getBlue()));
+        final int a = (int) (c1.getAlpha() + t * (c2.getAlpha() - c1.getAlpha()));
+
+        return new Color(r, g, b, a);
+    }
 }

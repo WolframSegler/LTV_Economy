@@ -43,6 +43,8 @@ public class CommodityInfo {
                 incomeLedgers.put(marketID, new IncomeLedger());
             }
         }
+    
+        readResolve();
     }
 
     public Object readResolve() {

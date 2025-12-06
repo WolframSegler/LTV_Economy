@@ -245,7 +245,7 @@
 					"abstract": 0.1
 				},
 				"usesWorkers": true,
-				"workerAssignableLimit": 0.2
+				"workerAssignableLimit": 0.1
 			}
 		}
 	},
@@ -259,7 +259,7 @@
 					"abstract": 0.1
 				},
 				"usesWorkers": true,
-				"workerAssignableLimit": 0.3
+				"workerAssignableLimit": 0.2
 			},
 			"lobster": {
 				"baseProd": 0.22,

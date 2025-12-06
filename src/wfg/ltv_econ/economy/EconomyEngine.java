@@ -82,7 +82,7 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  * <h3>Internal Structure</h3>
  * <ul>
  *     <li>{@code m_registeredMarkets} – All markets currently part of the simulation.</li>
- *     <li>{@code m_playerMarkets} – Subset of markets owned by the player.</li>
+ *     <li>{@code m_playerMarketData} – Subset of markets owned by the player with unique data attached.</li>
  *     <li>{@code m_marketCredits} – Per-market credit reserves.</li>
  *     <li>{@code m_comInfo} – Mapping of commodity IDs to {@link CommodityInfo} containers.</li>
  *     <li>{@code mainLoopExecutor} – A single-thread executor that runs the simulation asynchronously. Can be toggled.</li>
@@ -108,7 +108,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     private static EconomyEngine instance;
     
     private final Set<String> m_registeredMarkets;
-    private final Set<String> m_playerMarkets;
+    private final Map<String, PlayerMarketData> m_playerMarketData;
     private final Map<String, Long> m_marketCredits = new HashMap<>();
     private final Map<String, CommodityInfo> m_comInfo;
 
@@ -136,7 +136,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     private EconomyEngine() {
         super(false);
         m_registeredMarkets = new HashSet<>();
-        m_playerMarkets = new HashSet<>();
+        m_playerMarketData = new HashMap<>();
         m_comInfo = new HashMap<>();
 
         for (MarketAPI market : getMarketsCopy()) {
@@ -145,7 +145,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             final String marketID = market.getId();
             m_registeredMarkets.add(marketID);
             m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
-            if (market.isPlayerOwned()) m_playerMarkets.add(marketID);
+            if (market.isPlayerOwned()) m_playerMarketData.put(
+                marketID, new PlayerMarketData(marketID)
+            );
         }
 
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
@@ -258,6 +260,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      *     If <code>fakeAdvance</code> is true, this step does nothing. Stockpiles now include produced and
      *     newly imported goods ready for the next cycle.
      *   </li>
+     *   <li>
+     *     <b>playerMarketData.advance(fakeAdvance)</b> - Updates population statistics of player markets.
+     *     If <code>fakeAdvance</code> is true, this step does nothing.
+     *   </li>
      * </ol>
      *
      * <p><b>Important notes:</b></p>
@@ -296,6 +302,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (!fakeAdvance) {
             m_comInfo.values().forEach(CommodityInfo::advance);
 
+            m_playerMarketData.values().forEach(PlayerMarketData::advance);
             applyWages();
             redistributeFactionCredits();
             applyCreditStabilityModifiers();
@@ -308,7 +315,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         WorkerRegistry.getInstance().register(marketID);
         m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
-        if (market.isPlayerOwned()) m_playerMarkets.add(marketID);
+        if (market.isPlayerOwned()) m_playerMarketData.put(marketID, new PlayerMarketData(marketID));
 
         for (CommodityInfo comInfo : m_comInfo.values()) {
             comInfo.addMarket(marketID);
@@ -323,7 +330,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             comInfo.removeMarket(marketID);
         }
 
-        if (market.isPlayerOwned()) m_playerMarkets.remove(marketID);
+        if (market.isPlayerOwned()) m_playerMarketData.remove(marketID);
         m_marketCredits.remove(marketID);
         WorkerRegistry.getInstance().remove(marketID);
     }
@@ -354,7 +361,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final boolean isPlayerMarket(String marketID) {
-        return m_playerMarkets.contains(marketID);
+        return m_playerMarketData.keySet().contains(marketID);
+    }
+
+    public final PlayerMarketData getPlayerMarketData(String marketID) {
+        return m_playerMarketData.get(marketID);
     }
 
     public void reportPlayerOpenedMarket() {
@@ -879,7 +890,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      */
     public final long getExportIncome(MarketAPI market, boolean lastMonth) {
         long exportIncome = 0;
-        if (m_playerMarkets.contains(market.getId())) {
+        if (m_playerMarketData.keySet().contains(market.getId())) {
             for (CommodityInfo info : m_comInfo.values()) {
                 final IncomeLedger ledger = info.getLedger(market.getId());
                 exportIncome += lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
@@ -894,7 +905,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      */
     public final long getImportExpense(MarketAPI market, boolean lastMonth) {
         long importCost = 0;
-        if (m_playerMarkets.contains(market.getId())) {
+        if (m_playerMarketData.keySet().contains(market.getId())) {
             for (CommodityInfo info : m_comInfo.values()) {
                 final IncomeLedger ledger = info.getLedger(market.getId());
                 importCost += lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
@@ -911,7 +922,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         float wage = 0f;
 
         for (WorkerIndustryData data : WorkerRegistry.getInstance().getIndustriesUsingWorkers(marketID)) {
-            wage += data.getWorkersAssigned() * (LaborConfig.LPV_day / LaborConfig.RoSV);
+            wage += data.getWorkersAssigned() * (LaborConfig.LPV_day /
+                (isPlayerMarket(marketID) ? m_playerMarketData.get(marketID).getRoSV() : LaborConfig.RoSV));
         }
 
         // Wages are an expense → negative value
@@ -962,10 +974,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (turnedOffIncentiveMarkets == null) turnedOffIncentiveMarkets = new HashSet<>();
         turnedOffIncentiveMarkets.clear();
 
-        for (String marketID : m_playerMarkets) {
+        for (String marketID : m_playerMarketData.keySet()) {
             final MarketAPI market = econ.getMarket(marketID);
             if (market == null) {
-                m_playerMarkets.remove(marketID);
+                m_playerMarketData.remove(marketID);
                 continue;
             }
             for (Industry ind : CommodityStats.getVisibleIndustries(market)) {

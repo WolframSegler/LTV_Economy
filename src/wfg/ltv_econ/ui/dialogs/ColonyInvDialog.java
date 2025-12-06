@@ -13,6 +13,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
@@ -20,7 +21,6 @@ import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
-import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.Slider;
@@ -61,14 +61,6 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final int buttonY = (sliderH - buttonH) / 2; 
         final Color withdrawColor = new Color(180, 110, 90);
         final Color depositColor = new Color(90, 150, 110);
-
-        CustomDetailDialogPanel<?> m_panel = new CustomDetailDialogPanel<>(
-            panel,
-            PANEL_W, PANEL_H,
-            null
-        );
-
-        panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 
         final long colonyCredits = engine.getCredits(m_market.getId());
         final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
@@ -114,7 +106,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 return tp;
             }
         };
-        m_panel.add(colonyCreditPanel).inTL(opad, 10);
+        panel.addComponent(colonyCreditPanel.getPanel()).inTL(opad, 10);
 
         final TextPanel playerCreditPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
             {
@@ -154,41 +146,41 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             }
         };
         if (m_market.isPlayerOwned()) {
-            m_panel.add(playerCreditPanel).inTL(opad, 50);
+            panel.addComponent(playerCreditPanel.getPanel()).inTL(opad, 50);
         }
 
         final LabelAPI withdrawLabel = settings.createLabel(
             "Withdraw:", Fonts.ORBITRON_16
         );
         float labelH = withdrawLabel.computeTextHeight(withdrawLabel.getText());
-        m_panel.add(withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
+        panel.addComponent((UIComponentAPI)withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
 
         final LabelAPI depositLabel = settings.createLabel(
             "Deposit:", Fonts.ORBITRON_16
         );
         labelH = depositLabel.computeTextHeight(depositLabel.getText());
-        m_panel.add(depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
+        panel.addComponent((UIComponentAPI)depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
 
         
         final Slider withdrawSlider = new Slider(
-            m_panel.getPanel(), "", 0, colonyCredits, sliderW, sliderH
+            panel, "", 0, colonyCredits, sliderW, sliderH
         );
         withdrawSlider.setHighlightOnMouseover(true);
         withdrawSlider.setUserAdjustable(true);
         withdrawSlider.setBarColor(withdrawColor);
         withdrawSlider.showValueOnly = true;
         withdrawSlider.customText = () -> Misc.getDGSCredits(withdrawSlider.getProgressInterpolated());
-        m_panel.add(withdrawSlider).inTL(500, 10);
+        panel.addComponent(withdrawSlider.getPanel()).inTL(500, 10);
 
         final Slider depositSlider = new Slider(
-            m_panel.getPanel(), "", 0, playerCredits.get(), sliderW, sliderH
+            panel, "", 0, playerCredits.get(), sliderW, sliderH
         );
         depositSlider.setHighlightOnMouseover(true);
         depositSlider.setUserAdjustable(true);
         depositSlider.setBarColor(depositColor);
         depositSlider.showValueOnly = true;
         depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgressInterpolated());
-        m_panel.add(depositSlider).inTL(500, 50);
+        panel.addComponent(depositSlider.getPanel()).inTL(500, 50);
 
         final Runnable refreshUI = () -> {
             final float colonyCred = playerCredits.get();
@@ -228,22 +220,22 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         };
 
         final Button withdrawBtn = new Button(
-            m_panel.getPanel(), buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
+            panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
         );
         final Button depositBtn = new Button(
-            m_panel.getPanel(), buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, depositRunnable
+            panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, depositRunnable
         );
 
         withdrawBtn.quickMode = true;
         depositBtn.quickMode = true;
         withdrawBtn.setCutStyle(CutStyle.ALL);
         depositBtn.setCutStyle(CutStyle.ALL);
-        m_panel.add(withdrawBtn).inTL(500 + sliderW + opad, 10 + buttonY);
-        m_panel.add(depositBtn).inTL(500 + sliderW + opad, 50 + buttonY);
+        panel.addComponent(withdrawBtn.getPanel()).inTL(500 + sliderW + opad, 10 + buttonY);
+        panel.addComponent(depositBtn.getPanel()).inTL(500 + sliderW + opad, 50 + buttonY);
 
 
         final SortableTable table = new SortableTable(
-            m_panel.getPanel(),
+            panel,
             PANEL_W - 20, PANEL_H - (tableStartY + 10),
             20, 30
         );
@@ -269,7 +261,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             final CommodityStats stats = engine.getComStats(com.getId(), m_market.getId());
 
             final Base comIcon = new Base(
-                m_panel.getPanel(), 26, 26, com.getIconName(), null, null, false
+                panel, 26, 26, com.getIconName(), null, null, false
             );
             
             final long stored = stats.getRoundedStored();
@@ -302,7 +294,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             );
         }
 
-        m_panel.add(table.getPanel()).inTL(10, tableStartY);
+        panel.addComponent(table.getPanel()).inTL(10, tableStartY);
 
         table.sortRows(2);
 

@@ -3,7 +3,9 @@
     "ui": {
       "cargoTooltipArrow": "graphics/ui/cargoTooltipArrow.png",
       "glow_bg": "graphics/ui/text_glow.png",
-      "warning_button": "graphics/ui/news.png"
+      "warning_button": "graphics/ui/news.png",
+      "worker_helmet": "graphics/ui/worker_helmet.png",
+      "three_workers": "graphics/ui/three_workers.png"
     }
   }
 }
