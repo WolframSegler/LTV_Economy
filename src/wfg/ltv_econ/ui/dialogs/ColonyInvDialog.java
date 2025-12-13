@@ -35,6 +35,8 @@ import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 
+import static wfg.wrap_ui.util.UIConstants.*;
+
 public class ColonyInvDialog implements WrapDialogDelegate {
 
     public static final int PANEL_W = 950;
@@ -52,7 +54,6 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
 
-        final int opad = 10;
         final int sliderH = 32;
         final int sliderW = 300;
         final int buttonH = 28;
@@ -78,7 +79,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                     "Colony Balance: " + credits, Fonts.ORBITRON_16
                 );
                 label1.setHighlight(credits);
-                label1.setHighlightColor(Misc.getHighlightColor());
+                label1.setHighlightColor(highlight);
                 final float height = label1.computeTextHeight(label1.getText());
                 add(label1).inTL(0, (sliderH - height) / 2f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
@@ -121,7 +122,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                     "Your Balance: " + credits, Fonts.ORBITRON_16
                 );
                 label1.setHighlight(credits);
-                label1.setHighlightColor(Misc.getHighlightColor());
+                label1.setHighlightColor(highlight);
                 final float height = label1.computeTextHeight(label1.getText());
                 add(label1).inTL(0, (sliderH - height) / 2f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
@@ -273,19 +274,19 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             final int realBalance = (int) stats.getFlowRealBalance();
 
             Color baseBlcColor = baseBalance < 0 ? 
-                Misc.getNegativeHighlightColor() : baseBalance > 0 ?
-                Misc.getPositiveHighlightColor() : Misc.getTextColor();
+                negative : baseBalance > 0 ?
+                positive : Misc.getTextColor();
 
             Color realBlcColor = realBalance < 0 ? 
-                Misc.getNegativeHighlightColor() : realBalance > 0 ?
-                Misc.getPositiveHighlightColor() : Misc.getTextColor();
+                negative : realBalance > 0 ?
+                positive : Misc.getTextColor();
 
             table.addCell(comIcon, cellAlg.MID, null, null);
-            table.addCell(com.getName(), cellAlg.LEFT, com.getName(), Misc.getBasePlayerColor());
+            table.addCell(com.getName(), cellAlg.LEFT, com.getName(), base);
             table.addCell(NumFormat.engNotation(stored), cellAlg.LEFTOPAD, stored, null);
-            table.addCell(NumFormat.engNotation(demand), cellAlg.LEFTOPAD, demand, Misc.getNegativeHighlightColor());
-            table.addCell(NumFormat.engNotation(baseProd), cellAlg.LEFTOPAD, baseProd, Misc.getHighlightColor());
-            table.addCell(NumFormat.engNotation(modifiedProd), cellAlg.LEFTOPAD, modifiedProd, Misc.getHighlightColor());
+            table.addCell(NumFormat.engNotation(demand), cellAlg.LEFTOPAD, demand, negative);
+            table.addCell(NumFormat.engNotation(baseProd), cellAlg.LEFTOPAD, baseProd, highlight);
+            table.addCell(NumFormat.engNotation(modifiedProd), cellAlg.LEFTOPAD, modifiedProd, highlight);
             table.addCell(NumFormat.engNotation(baseBalance), cellAlg.LEFTOPAD, baseBalance, baseBlcColor);
             table.addCell(NumFormat.engNotation(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 

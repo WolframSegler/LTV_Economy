@@ -57,6 +57,7 @@ import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.reflection.ReflectionUtils;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
@@ -81,15 +82,11 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     protected CustomPanelAPI section3; // Prod&Consump Tables
     protected CustomPanelAPI section4; // Commodity Panel
 
-    public final static int pad = 3;
-    public final static int opad = 10;
     public final static int iconSize = 24;
 
     private final MarketAPI m_market;
     private InteractionDialogAPI interactionDialog;
     private CustomPanelAPI m_dialogPanel;
-    
-    private final Color highlight = Misc.getHighlightColor();
 
     private CommoditySpecAPI m_com;
     public MarketAPI m_selectedMarket = null;
@@ -230,7 +227,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         TooltipMakerAPI tooltip = section1.createUIElement(SECT1_WIDTH, SECT1_HEIGHT, false);
         section1.addUIElement(tooltip).inTL(0, 0);
 
-        createSection1(section1, tooltip, highlight);
+        createSection1(section1, tooltip);
         m_dialogPanel.addComponent(section1).inTL(pad, pad);
 
         // Update anchors
@@ -288,7 +285,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         m_dialogPanel.addComponent(section4).belowLeft(section2, opad);
     }
 
-    private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip, Color highlight) {
+    private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip) {
         if (m_com == null) return;
         final EconomyEngine engine = EconomyEngine.getInstance();
 
@@ -385,7 +382,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                         "The value shown here includes the demand at your colonies, " +
                         "since they must import goods as well. In-faction imports have a %s discount.",
                         pad,
-                        Misc.getHighlightColor(),
+                        highlight,
                         discount + "%"
                     );
 
@@ -507,7 +504,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     LabelAPI lbl1 = tooltip.addPara(txt, pad);
                     lbl1.setHighlightOnMouseover(true);
 
-                    tooltip.setParaFontColor(Misc.getBasePlayerColor());
+                    tooltip.setParaFontColor(base);
                     tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
                     LabelAPI lbl2 = tooltip.addPara(valueTxt, pad, new Color[] {
                         factionColor, UiUtils.getInFactionColor()
@@ -838,8 +835,8 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             "Consumers", Fonts.ORBITRON_12,
             consumerRunnable
         );
-        producerButton.setLabelColor(Misc.getBasePlayerColor());
-        consumerButton.setLabelColor(Misc.getBasePlayerColor());
+        producerButton.setLabelColor(base);
+        consumerButton.setLabelColor(base);
         producerButton.setCutStyle(CutStyle.TL_TR);
         consumerButton.setCutStyle(CutStyle.TL_TR);
         producerButton.setShortcut(Keyboard.KEY_1);
@@ -953,7 +950,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
             if (m_market == market) {
                 table.getPendingRow().setOutline(Outline.TEX_THIN);
-                table.getPendingRow().setOutlineColor(Misc.getBasePlayerColor());
+                table.getPendingRow().setOutlineColor(base);
             }
 
             final CallbackRunnable<RowManager> rowSelectedRunnable = (row) -> {
@@ -1031,8 +1028,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 m_com.getId(), market.getId()
             );
     
-            final Color highlight = Misc.getHighlightColor();
-            final Color negative = Misc.getNegativeHighlightColor();
             final Color darkColor = faction.getDarkUIColor();
             
             final TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
@@ -1067,13 +1062,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             tp.addSectionHeading(m_com.getName() + " production & availability",
             baseColor, darkColor, Alignment.MID, opad);
                 
-            TooltipUtils.createCommodityProductionBreakdown(
-                tp, stats, highlight, negative
-            );
+            TooltipUtils.createCommodityProductionBreakdown(tp, stats);
     
-            TooltipUtils.createCommodityDemandBreakdown(
-                tp, stats, highlight, negative
-            );
+            TooltipUtils.createCommodityDemandBreakdown(tp, stats);
     
             final float econUnit = m_com.getEconUnit();
             final int sellPrice = (int) (stats.computeVanillaPrice((int)econUnit, true, true) / econUnit);
@@ -1081,7 +1072,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     
             if (!m_com.isMeta()) {
                 if (stats.getFlowCanNotExport() > 0) {
-                    tp.addPara("Excess stockpiles: %s units.", opad, Misc.getPositiveHighlightColor(), 
+                    tp.addPara("Excess stockpiles: %s units.", opad, positive, 
                     highlight, NumFormat.engNotation((long) stats.getFlowCanNotExport()));
                 } else if (stats.getFlowDeficit() > 0) {
                     tp.addPara("Local deficit: %s units.", opad, negative, 

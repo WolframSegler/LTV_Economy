@@ -12,7 +12,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityInfo;
 import wfg.ltv_econ.economy.CommodityStats;
@@ -38,13 +37,11 @@ import com.fs.starfarer.api.loading.Description.Type;
 import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodityRowPanel>, LtvCommodityRowPanel, CustomPanelAPI>
     implements HasTooltip, HasFader, HasAudioFeedback, AcceptsActionListener
 {
-    public static final int pad = 3;
-    public static final int opad = 10;
-
     private static final int iconSize = 24;
     private static final String notExpandedCodexF1 = "F1 show legend";
     private static final String ExpandedCodexF1 = "F1 go back";
@@ -103,7 +100,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
 
     @Override
     public Color getGlowColor() {
-        return Misc.getBasePlayerColor();
+        return base;
     }
 
     @Override
@@ -195,11 +192,6 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
 
     @Override
     public TooltipMakerAPI createAndAttachTp() {
-
-        final Color highlight = Misc.getHighlightColor();
-        final Color gray = new Color(100, 100, 100);
-        final Color positive = Misc.getPositiveHighlightColor();
-        final Color negative = Misc.getNegativeHighlightColor();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final TooltipMakerAPI tooltip = getParent().createUIElement(500f, 0,false);
         final String comID = m_com.getId();
@@ -224,17 +216,13 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         tooltip.setParaFont(Fonts.ORBITRON_12);
         tooltip.addSectionHeading("Production, imports and demand", Alignment.MID, opad);
 
-        // // Production
-        TooltipUtils.createCommodityProductionBreakdown(
-            tooltip, m_comStats, highlight, negative
-        );
+        // Production
+        TooltipUtils.createCommodityProductionBreakdown(tooltip, m_comStats);
         
         tooltip.addPara("All production sources contribute cumulatively to the commodity's availability. Imports and smuggling add to supply to help meet demand.", gray ,pad);
 
         // Demand
-        TooltipUtils.createCommodityDemandBreakdown(
-            tooltip, m_comStats, highlight, negative
-        );
+        TooltipUtils.createCommodityDemandBreakdown(tooltip, m_comStats);
 
         // Divider
         tooltip.addSectionHeading("Exports", Alignment.MID, opad);

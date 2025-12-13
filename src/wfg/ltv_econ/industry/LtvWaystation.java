@@ -10,11 +10,12 @@ import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.intel.events.ht.HyperspaceTopographyEventIntel;
 import com.fs.starfarer.api.impl.campaign.intel.events.ht.HyperspaceTopographyEventIntel.Stage;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.util.Misc;
+
+import static wfg.wrap_ui.util.UIConstants.highlight;
+import static wfg.wrap_ui.util.UIConstants.negative;
+import static wfg.wrap_ui.util.UIConstants.opad;
 
 public class LtvWaystation extends BaseIndustry {
-
-	public static final float opad = 10;
 	
 	public static float UPKEEP_MULT_PER_DEFICIT = 0.1f;
 	public static float BASE_ACCESSIBILITY = 0.1f;
@@ -63,7 +64,7 @@ public class LtvWaystation extends BaseIndustry {
 		if (!market.isPlayerOwned()) return;
 		
 		tooltip.addPara("Increases the range at which slipstreams are detected around the colony by %s, once "
-			+ "the capability to do so is available.", opad, Misc.getHighlightColor(),
+			+ "the capability to do so is available.", opad, highlight,
 			"" + (int)HyperspaceTopographyEventIntel.WAYSTATION_BONUS);
 	}
 
@@ -81,9 +82,9 @@ public class LtvWaystation extends BaseIndustry {
 			}
 
 			String totalStr = "+" + (int)Math.round(BASE_ACCESSIBILITY * 100f) + "%";
-			Color h = Misc.getHighlightColor();
+			Color h = highlight;
 			if (BASE_ACCESSIBILITY < 0) {
-				h = Misc.getNegativeHighlightColor();
+				h = negative;
 				totalStr = "" + (int)Math.round(BASE_ACCESSIBILITY * 100f) + "%";
 			}
 			if (BASE_ACCESSIBILITY >= 0) {
@@ -118,8 +119,6 @@ public class LtvWaystation extends BaseIndustry {
 	
 	@Override
 	protected void addAlphaCoreDescription(TooltipMakerAPI tooltip, AICoreDescriptionMode mode) {
-		final Color highlight = Misc.getHighlightColor();
-		
 		String pre = "Alpha-level AI core currently assigned. ";
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
 			pre = "Alpha-level AI core. ";
@@ -172,8 +171,6 @@ public class LtvWaystation extends BaseIndustry {
 	
 	@Override
 	public void addImproveDesc(TooltipMakerAPI info, ImprovementDescriptionMode mode) {
-		final Color highlight = Misc.getHighlightColor();
-		
 		final String aStr = (int)Math.round(IMPROVE_ACCESSIBILITY * 100f) + "%";
 		
 		if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {

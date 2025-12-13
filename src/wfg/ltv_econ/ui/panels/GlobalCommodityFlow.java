@@ -37,13 +37,12 @@ import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class GlobalCommodityFlow extends
     CustomPanel<BasePanelPlugin<GlobalCommodityFlow>, GlobalCommodityFlow, CustomPanelAPI>
 {
 
-    public static final int pad = 3;
-    public static final int opad = 10;
     public static final int ICON_SIZE = 135;
     public static final int LABEL_W = 150;
     public static final int LABEL_H = 50;
@@ -73,10 +72,6 @@ public class GlobalCommodityFlow extends
         final String comID = selectedCom.getId();
         final CommodityInfo info = engine.getCommodityInfo(comID);
 
-        final Color baseColor = Misc.getBasePlayerColor();
-        final Color highlight = Misc.getHighlightColor();
-        final Color dark = Misc.getDarkPlayerColor();
-
         clearChildren();
 
         final ComIconPanel comIcon = new ComIconPanel(
@@ -98,7 +93,7 @@ public class GlobalCommodityFlow extends
                 }
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -149,7 +144,7 @@ public class GlobalCommodityFlow extends
                 }
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -200,7 +195,7 @@ public class GlobalCommodityFlow extends
                 }
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -251,7 +246,7 @@ public class GlobalCommodityFlow extends
                 }
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -304,7 +299,7 @@ public class GlobalCommodityFlow extends
                 }
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -354,7 +349,7 @@ public class GlobalCommodityFlow extends
                 }
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -401,7 +396,7 @@ public class GlobalCommodityFlow extends
                 final String valueTxt = NumFormat.formatCredit(value);
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -454,7 +449,7 @@ public class GlobalCommodityFlow extends
                 else volatilityColor = Color.RED;
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -481,7 +476,7 @@ public class GlobalCommodityFlow extends
                     "Trade Volatility for the last %s days. " +
                     "Indicates how much the daily export volume for %s fluctuates relative to its average.",
                     pad,
-                    new Color[] {baseColor, highlight},
+                    new Color[] {base, highlight},
                     EconomyConfig.VOLATILITY_WINDOW + "",
                     selectedCom.getName()
                 );
@@ -505,12 +500,12 @@ public class GlobalCommodityFlow extends
                 final String txt = "Global stockpiles";
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(baseColor);
+                lbl2.setColor(base);
                 lbl2.setHighlightOnMouseover(true);
                 lbl2.setAlignment(Alignment.MID);
 
@@ -557,12 +552,12 @@ public class GlobalCommodityFlow extends
                 final String valueTxt = NumFormat.engNotation(value);
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
                 final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(baseColor);
+                lbl2.setColor(base);
                 lbl2.setHighlightOnMouseover(true);
                 lbl2.setAlignment(Alignment.MID);
 
@@ -608,7 +603,7 @@ public class GlobalCommodityFlow extends
                 }
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -658,7 +653,7 @@ public class GlobalCommodityFlow extends
                 }
 
                 final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(baseColor);
+                lbl1.setColor(base);
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -733,7 +728,7 @@ public class GlobalCommodityFlow extends
 
         final LabelAPI label = settings.createLabel("Top 5 producers", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
+        label.setColor(base);
         add(label).inBL(opad*2 + (TABLE_W - labelW) / 2f, TABLE_H*2 + LABEL_H / 2f + pad*2);
         }
 
@@ -774,7 +769,7 @@ public class GlobalCommodityFlow extends
 
         final LabelAPI label = settings.createLabel("Top 5 consumers", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
+        label.setColor(base);
         add(label).inBL(opad*2 + (TABLE_W - labelW) / 2f, TABLE_H + pad*2);
         }
       
@@ -803,7 +798,7 @@ public class GlobalCommodityFlow extends
         pendingTp.factory = () -> {
             final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
             tp.setParaFont(Fonts.ORBITRON_12);
-            tp.setParaFontColor(baseColor);
+            tp.setParaFontColor(base);
             tp.addPara("Global Export Share by Faction", pad);
             tp.setParaFontDefault();
             tp.setParaFontColor(Misc.getTextColor());
@@ -815,7 +810,7 @@ public class GlobalCommodityFlow extends
             );
 
             tp.beginTable(
-                baseColor, dark, highlight, 20, true, true, new Object[] {
+                base, dark, highlight, 20, true, true, new Object[] {
                     "Faction", 200, "Share", 100
                 }
             );
@@ -836,7 +831,7 @@ public class GlobalCommodityFlow extends
 
         final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
+        label.setColor(base);
         add(label).inBL(360 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
         }
 
@@ -865,7 +860,7 @@ public class GlobalCommodityFlow extends
         pendingTp.factory = () -> {
             final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
             tp.setParaFont(Fonts.ORBITRON_12);
-            tp.setParaFontColor(baseColor);
+            tp.setParaFontColor(base);
             tp.addPara("Global Import Share by Faction", pad);
             tp.setParaFontDefault();
             tp.setParaFontColor(Misc.getTextColor());
@@ -877,7 +872,7 @@ public class GlobalCommodityFlow extends
             );
 
             tp.beginTable(
-                baseColor, dark, highlight, 20, true, true, new Object[] {
+                base, dark, highlight, 20, true, true, new Object[] {
                     "Faction", 200, "Share", 100
                 }
             );
@@ -898,7 +893,7 @@ public class GlobalCommodityFlow extends
 
         final LabelAPI label = settings.createLabel("Import share", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
+        label.setColor(base);
         add(label).inBL(580 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
         }
 
@@ -927,7 +922,7 @@ public class GlobalCommodityFlow extends
         pendingTp.factory = () -> {
             final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
             tp.setParaFont(Fonts.ORBITRON_12);
-            tp.setParaFontColor(baseColor);
+            tp.setParaFontColor(base);
             tp.addPara("Global vs In-Faction Trade Share", pad);
             tp.setParaFontDefault();
             tp.setParaFontColor(Misc.getTextColor());
@@ -945,7 +940,7 @@ public class GlobalCommodityFlow extends
 
         final LabelAPI label = settings.createLabel("Trade Breakdown", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
-        label.setColor(baseColor);
+        label.setColor(base);
         add(label).inBL(800 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
         }
     }

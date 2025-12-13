@@ -1,5 +1,7 @@
 package wfg.ltv_econ.submarkets;
 
+import static wfg.wrap_ui.util.UIConstants.negative;
+
 import java.util.Random;
 
 import com.fs.starfarer.api.Global;
@@ -271,7 +273,7 @@ public class BlackSubmarketPlugin extends BaseSubmarketPlugin {
 		
 		Highlights h = new Highlights();
 		h.setText(appendix);
-		h.setColors(Misc.getNegativeHighlightColor());
+		h.setColors(negative);
 		return h;
 	}
 }

@@ -51,14 +51,13 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.reflection.ReflectionUtils;
 import wfg.reflection.ReflectionUtils.ReflectedConstructor;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvIndustryListPanel extends CustomPanel<
 	IndustryListPanelPlugin, LtvIndustryListPanel, UIPanelAPI
 > {
 
 	public static final int BUTTON_SECTION_HEIGHT = 45;
-	public static final int pad = 3;
-	public static final int opad = 20;
 
 	public static final ReflectedConstructor indPickCtor = ReflectionUtils.getConstructorsMatching(IndustryPickerDialog.class, 3).get(0);
 	public static ReflectedConstructor indOptCtor = null;
@@ -247,7 +246,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 					);
 
 					for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
-						tooltip.addRow(new Object[]{Misc.getHighlightColor(), "" + i, Misc.getHighlightColor(),
+						tooltip.addRow(new Object[]{highlight, "" + i, highlight,
 						"" + LtvPopulationAndInfrastructure.getMaxIndustries(i)});
 					}
 
@@ -255,7 +254,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 					tooltip.addPara(
 						"Structures such as spaceports or orbital stations do not count against this limit." + 
 						"Colonies that exceed this limit for any reason have their stability reduced by %s.", 20,
-						Misc.getHighlightColor(), new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
+						highlight, new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
 					);
 					tooltip.addPara("Industries on %s:", 10, m_market.getFaction().getBaseUIColor(),
 						new String[]{m_market.getName()}
@@ -340,7 +339,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		);
 		buildButton.setCutStyle(CutStyle.TL_BR);
 		buildButton.setAlignment(Alignment.LMID);
-		buildButton.setLabelColor(Misc.getBasePlayerColor());
+		buildButton.setLabelColor(base);
 		buildButton.setShortcut(Keyboard.KEY_A);
 		buildButton.getPlugin().setIgnoreUIState(false);
 		buildButton.getPlugin().setTargetUIState(State.NONE);
@@ -448,7 +447,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 			String.format("Spent %s", Misc.getDGSCredits(buildCost)),
 			Misc.getTooltipTitleAndLightHighlightColor(),
 			Misc.getDGSCredits(buildCost),
-			Misc.getHighlightColor()
+			highlight
 		);
 
 		createPanel();

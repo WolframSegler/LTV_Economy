@@ -1,13 +1,17 @@
 package wfg.ltv_econ.ui.dialogs;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -17,30 +21,44 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.policies.MarketPolicy;
+import wfg.ltv_econ.economy.policies.MarketPolicy.PolicyState;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
 import wfg.wrap_ui.ui.panels.Button;
+import wfg.wrap_ui.ui.panels.CustomPanel;
+import wfg.wrap_ui.ui.panels.ListenerProviderPanel;
+import wfg.wrap_ui.ui.panels.PieChart;
+import wfg.wrap_ui.ui.panels.ScrollPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
+import wfg.wrap_ui.ui.panels.PieChart.PieSlice;
+import wfg.wrap_ui.ui.panels.ScrollPanel.ScrollType;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.ui.panels.Slider;
+import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
 import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class ManageWorkersDialog implements WrapDialogDelegate {
     public static final int PANEL_W = 950;
-    public static final int PANEL_H = 650;
+    public static final int PANEL_H = 680;
+    public static final int SELECTED_P_H = 230;
 
     private final MarketAPI m_market;
     private InteractionDialogAPI interactionDialog;
@@ -59,6 +77,9 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
 
     public Slider exploitationSlider = null;
 
+    private MarketPolicy selectedPolicy = null;
+    private CustomPanelAPI selectedPolicyCont = null;
+
     public ManageWorkersDialog(MarketAPI market) {
         m_market = market;
     }
@@ -71,36 +92,34 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(m_market);
 
         final int SECT_I_H = 30;
-        final int SECT_II_H = 185;
+        final int SECT_II_H = 160;
+        final int SECT_III_H = 245;
 
         final Color baseColor = m_market.getFaction().getBaseUIColor();
-        final Color highlight = Misc.getHighlightColor();
-        final Color negative = Misc.getNegativeHighlightColor();
         final int LABEL_W = 140;
         final int LABEL_H = 40;
-        final int opad = 10;
-        final int pad = 3;
         final int sliderH = 32;
         final int sliderW = 300;
         final int buttonH = 28;
         final int buttonW = 70;
         final int ICON_S = 28;
+        final int gridWidth = 350;
+        final int valueWidth = 60;
+        final int policyWidth = 100;
+        final int policyHeight = 141;
 
         final LabelAPI title = settings.createLabel("Manage Workers", Fonts.INSIGNIA_VERY_LARGE);
         title.autoSizeToWidth(PANEL_W);
         title.setAlignment(Alignment.MID);
         panel.addComponent((UIComponentAPI)title).inTL(0, 0);
 
-        final TooltipMakerAPI mainCont = panel.createUIElement(PANEL_W, PANEL_H - SECT_I_H, true);
-        panel.addUIElement(mainCont).inBL(0, 0);
-
         { // SECTION I
         final LabelAPI subtitle = settings.createLabel("Income", Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
-        mainCont.addComponent((UIComponentAPI)subtitle).inTL(opad, 0);
+        panel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_I_H);
 
-        final TextPanel RoSVLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+        final TextPanel RoSVLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Rate of Exploitation";
                 final String valueTxt = ((int)mData.getRoSV())+"";
@@ -142,7 +161,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        final TextPanel wagesLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+        final TextPanel wagesLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Monthly Wages";
                 final String valueTxt = NumFormat.formatCredit((int)(engine.getWagesForMarket(m_market.getId())*30));
@@ -180,7 +199,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        final TextPanel avgWageLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+        final TextPanel avgWageLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Average Wage";
                 final float value = LaborConfig.LPV_month / mData.getRoSV();
@@ -221,12 +240,12 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        mainCont.addComponent(RoSVLabel.getPanel()).inTL(opad, opad*3);
-        mainCont.addComponent(wagesLabel.getPanel()).inTL(opad, LABEL_H + opad*4);
-        mainCont.addComponent(avgWageLabel.getPanel()).inTL(opad, LABEL_H*2 + opad*5);
+        panel.addComponent(RoSVLabel.getPanel()).inTL(opad, opad*3 + SECT_I_H);
+        panel.addComponent(wagesLabel.getPanel()).inTL(opad, LABEL_H + opad*4 + SECT_I_H);
+        panel.addComponent(avgWageLabel.getPanel()).inTL(opad + LABEL_W, LABEL_H + opad*4 + SECT_I_H);
 
         exploitationSlider = new Slider(
-            mainCont, "", 1, LaborConfig.MAX_RoSV, sliderW, sliderH
+            panel, "", 1, LaborConfig.MAX_RoSV, sliderW, sliderH
         );
         exploitationSlider.setHighlightOnMouseover(true);
         exploitationSlider.setUserAdjustable(true);
@@ -238,7 +257,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             positiveColor, negativeColor, mData.getRoSV()/(float)(LaborConfig.MAX_RoSV - 1)
         ));
         exploitationSlider.showValueOnly = true;
-        mainCont.addComponent(exploitationSlider.getPanel()).inTL(opad*2 + LABEL_W, opad*3);
+        panel.addComponent(exploitationSlider.getPanel()).inTL(opad*2 + LABEL_W, opad*3 + SECT_I_H);
 
         final CallbackRunnable<Button> exploitationRunnable = (btn) -> {
             mData.setRoSV(exploitationSlider.getProgress());
@@ -257,14 +276,14 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         };
 
         final Button exploitationBtn = new Button(
-            mainCont, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, exploitationRunnable
+            panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, exploitationRunnable
         );
 
         exploitationBtn.quickMode = true;
         exploitationBtn.setCutStyle(CutStyle.ALL);
-        mainCont.addComponent(exploitationBtn.getPanel()).inTL(opad*3 + LABEL_W + sliderW, opad*3);
+        panel.addComponent(exploitationBtn.getPanel()).inTL(opad*3 + LABEL_W + sliderW, opad*3 + SECT_I_H);
 
-        final TextPanel workerAmount = new TextPanel(mainCont, LABEL_W+100, LABEL_H) {
+        final TextPanel workerAmount = new TextPanel(panel, LABEL_W+100, LABEL_H) {
             public void createPanel() {
                 final String txt = "Workforce: Employed / Total";
                 final long value2 = cond.getWorkerPool();
@@ -289,7 +308,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W+100, label2.getPosition().getHeight());
 
                 final Base workerIcon = new Base(
-                    mainCont, ICON_S, ICON_S, WORKER_ICON, Misc.getBasePlayerColor(), null, false
+                    panel, ICON_S, ICON_S, WORKER_ICON, base, null, false
                 );
                 add(workerIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -312,16 +331,31 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        mainCont.addComponent(workerAmount.getPanel()).inTR(opad, opad*3);
+        panel.addComponent(workerAmount.getPanel()).inTR(opad, opad*3 + SECT_I_H);
         }
     
         { // SECTION II
         final LabelAPI subtitle = settings.createLabel("Population", Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
-        mainCont.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_II_H);
+        panel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_II_H);
 
-        final TextPanel healthLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+        final StatModValueGetter tpGridGetter = new StatModValueGetter() {
+            public String getFlatValue(StatMod mod) {
+                return String.format("%.3f", mod.value);
+            }
+            public String getPercentValue(StatMod mod) {
+                return mod.value + "%";
+            }
+            public String getMultValue(StatMod mod) {
+                return Strings.X + String.format("%.1f", mod.value);
+            }
+            public Color getModColor(StatMod mod) {
+                return highlight;
+            }
+        };
+
+        final TextPanel healthLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Health";
                 final String valueTxt = String.format("%.0f", mData.getHealth());
@@ -341,7 +375,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base healthIcon = new Base(
-                    mainCont, ICON_S, ICON_S, HEALTH_ICON, Misc.getBasePlayerColor(), null, false
+                    panel, ICON_S, ICON_S, HEALTH_ICON, base, null, false
                 );
                 add(healthIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -351,13 +385,19 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             public TooltipMakerAPI createAndAttachTp() {
                 final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
                 tp.addPara("Overall health of the population. A higher value indicates better living conditions, food availability, and lower hazard exposure.", pad);
+                
+                final float value = mData.healthDelta
+                    .computeEffective(mData.getHealth()) - mData.getHealth();
+                tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
+                tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.healthDelta, tpGridGetter);
+
                 add(tp);
-                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, opad);
+                WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 return tp;
             }
         };
 
-        final TextPanel happinessLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+        final TextPanel happinessLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Happiness";
                 final String valueTxt = String.format("%.0f", mData.getHappiness());
@@ -377,7 +417,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base happinessIcon = new Base(
-                    mainCont, ICON_S, ICON_S, SMILING_ICON, Misc.getBasePlayerColor(), null, false
+                    panel, ICON_S, ICON_S, SMILING_ICON, base, null, false
                 );
                 add(happinessIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -386,14 +426,20 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
 
             public TooltipMakerAPI createAndAttachTp() {
                 final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
-                tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and cultural cohesion.", pad);
+                tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and cultural cohesion.", opad);
+
+                final float value = mData.happinessDelta
+                    .computeEffective(mData.getHappiness()) - mData.getHappiness();
+                tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
+                tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.happinessDelta, tpGridGetter);
+
                 add(tp);
-                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, opad);
+                WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 return tp;
             }
         };
 
-        final TextPanel cohesionLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+        final TextPanel cohesionLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Cohesion";
                 final String valueTxt = String.format("%.0f", mData.getCulturalCohesion());
@@ -413,7 +459,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base cohesionIcon = new Base(
-                    mainCont, ICON_S, ICON_S, SOCIETY_ICON, Misc.getBasePlayerColor(), null, false
+                    panel, ICON_S, ICON_S, SOCIETY_ICON, base, null, false
                 );
                 add(cohesionIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -422,14 +468,20 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
 
             public TooltipMakerAPI createAndAttachTp() {
                 final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
-                tp.addPara("Degree of cultural cohesion within the population. High cohesion reduces conflict and increases social stability.", pad);
+                tp.addPara("Degree of cultural cohesion within the population. High cohesion reduces conflict and increases social stability.", opad);
+
+                final float value = mData.culturalCohesionDelta.computeEffective(
+                    mData.getCulturalCohesion()) - mData.getCulturalCohesion();
+                tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
+                tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.culturalCohesionDelta, tpGridGetter);
+
                 add(tp);
-                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, opad);
+                WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 return tp;
             }
         };
 
-        final TextPanel consciousnessLabel = new TextPanel(mainCont, LABEL_W, LABEL_H) {
+        final TextPanel consciousnessLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Class Consc.";
                 final String valueTxt = String.format("%.0f", mData.getClassConsciousness());
@@ -449,31 +501,279 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base classConsciousnessIcon = new Base(
-                    mainCont, ICON_S, ICON_S, SOLIDARITY_ICON, Misc.getBasePlayerColor(), null, false
+                    panel, ICON_S, ICON_S, SOLIDARITY_ICON, base, null, false
                 );
-                add(classConsciousnessIcon).inBL(0, (LABEL_H - ICON_S)/2f);
+                add(classConsciousnessIcon).inBL(-pad, (LABEL_H - ICON_S)/2f);
             }
 
             public CustomPanelAPI getTpParent() { return m_panel; }
 
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = m_panel.createUIElement(380, 0, false);
                 tp.addPara(
                     "The population's awareness of exploitation and social hierarchy. Higher values indicate a greater likelihood of collective action. " +
                     "Can be lowered by increasing wages, improving health, raising happiness, or implementing policies that reduce perceived inequities."
-                    , pad
+                    , opad
                 );
+
+                final float value = mData.classConsciousnessDelta.computeEffective(
+                    mData.getClassConsciousness()) - mData.getClassConsciousness();
+                tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
+                tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.classConsciousnessDelta, tpGridGetter);
+
                 add(tp);
-                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, opad);
+                WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, 0);
                 return tp;
             }
         };
 
-        mainCont.addComponent(healthLabel.getPanel()).inTL(opad, SECT_II_H + opad*3);
-        mainCont.addComponent(happinessLabel.getPanel()).inTL(opad + LABEL_W + pad, SECT_II_H + opad*3);
-        mainCont.addComponent(cohesionLabel.getPanel()).inTL(opad + LABEL_W*2 + pad*2, SECT_II_H + opad*3);
-        mainCont.addComponent(consciousnessLabel.getPanel()).inTL(opad + LABEL_W*3 + pad*3, SECT_II_H + opad*3);
+        panel.addComponent(healthLabel.getPanel()).inTL(opad, SECT_II_H + opad*3);
+        panel.addComponent(happinessLabel.getPanel()).inTL(opad + LABEL_W + pad, SECT_II_H + opad*3);
+        panel.addComponent(cohesionLabel.getPanel()).inTL(opad + LABEL_W*2 + pad*2, SECT_II_H + opad*3);
+        panel.addComponent(consciousnessLabel.getPanel()).inTL(opad + LABEL_W*3 + pad*3, SECT_II_H + opad*3);
         }
+    
+        { // SECTION III
+        final LabelAPI subtitle = settings.createLabel("Policies", Fonts.INSIGNIA_LARGE);
+        subtitle.autoSizeToWidth(PANEL_W - opad);
+        subtitle.setAlignment(Alignment.LMID);
+        panel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_III_H);
+        final int subtitleH = (int) subtitle.computeTextHeight(subtitle.getText());
+
+        final ScrollPanel policyContainer = new ScrollPanel(panel, PANEL_W - opad, policyHeight + opad);
+        policyContainer.scrollType = ScrollType.HORIZONTAL;
+        panel.addComponent(policyContainer.getPanel()).inTL(opad/2f, SECT_III_H + subtitleH + pad);
+
+        int posterCount = 0;
+        for (MarketPolicy policy : mData.getPolicies()) {
+            if (policy.state == PolicyState.DISABLED) { continue;}
+
+            final int posterIndex = posterCount;
+            final HasActionListener listener = new HasActionListener() {
+                public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
+                    if (selectedPolicy == policy) return;
+
+                    selectedPolicy = policy;
+                    panel.removeComponent(selectedPolicyCont);
+                    selectedPolicyCont = settings.createCustom(
+                        PANEL_W, SELECTED_P_H, null
+                    );
+                    panel.addComponent(selectedPolicyCont).inTL(
+                        opad, SECT_III_H + subtitleH + opad*2 + policyHeight
+                    );
+
+                    final HasActionListener self = this;
+                    final CallbackRunnable<Button> activateRun = new CallbackRunnable<>() {
+                        public void run(Button btn) {
+                            policy.activate(mData);
+                            buildPoster(policyContainer.getContentPanel(), panel, policy, mData,
+                                self, policyWidth, policyHeight
+                            ).inBL(pad + posterIndex*(policyWidth + pad), opad/2f);
+
+                            panel.removeComponent(selectedPolicyCont);
+                            selectedPolicyCont = settings.createCustom(
+                                PANEL_W, SELECTED_P_H, null
+                            );
+                            panel.addComponent(selectedPolicyCont).inTL(
+                                opad, SECT_III_H + subtitleH + opad*2 + policyHeight
+                            );
+
+                            source.getParent().removeComponent(source.getPanel());
+                            buildSelectedPosterMenu(selectedPolicyCont, panel, policy, mData, this);
+                        };
+                    };
+
+                    buildSelectedPosterMenu(selectedPolicyCont, panel, policy, mData, activateRun);
+                }
+            };
+
+            buildPoster(policyContainer.getContentPanel(), panel, policy, mData, listener,  
+                policyWidth, policyHeight
+            ).inBL(pad + posterCount*(policyWidth + pad), opad/2f);
+
+            posterCount++;
+        }
+        policyContainer.setContentWidth(pad + (policyWidth+pad)*posterCount);
+        }
+    }
+
+    private final PositionAPI buildPoster(CustomPanelAPI cont, CustomPanelAPI dialogPanel,   
+        MarketPolicy policy, PlayerMarketData mData, HasActionListener listener, int width, int height
+    ) {
+        final SettingsAPI settings = Global.getSettings();
+        
+        try {
+            settings.loadTexture(policy.spec.iconPath);
+        } catch (Exception e) {
+            Global.getLogger(getClass()).warn(e);
+        }
+
+        final ListenerProviderPanel posterWrap = new ListenerProviderPanel(
+            cont, width, height
+        ) {
+            @Override
+            public Optional<HasActionListener> getActionListener() {
+                return Optional.ofNullable(listener);
+            }
+        };
+
+        final SpritePanelWithTp poster = new SpritePanelWithTp(posterWrap.getPanel(),
+            width, height, new SpritePanelPlugin<>(), policy.spec.iconPath,
+            policy.isOnCooldown() ? Color.GRAY : null, null, policy.isActive()
+        ) {
+            {
+                getPlugin().setTargetUIState(State.DIALOG);
+                outlineColor = Color.ORANGE;
+                createPanel();
+            }
+            @Override
+            public void createPanel() {
+                if (!policy.isOnCooldown()) return;
+
+                final float cooledRatio = (float) policy.cooldownDaysRemaining/policy.spec.cooldownDays;
+                final ArrayList<PieSlice> data = new ArrayList<>(
+                    List.of(
+                        new PieSlice(null, gray, cooledRatio),
+                        new PieSlice(null, Color.ORANGE, 1f - cooledRatio)
+                    )
+                );
+                final int clockD = 30;
+                final PieChart cooldownClock = new PieChart(
+                    getPanel(), clockD, clockD, data
+                );
+
+                add(cooldownClock).inBL(
+                    (width - clockD) / 2f,
+                    (height - clockD) / 2f
+                );
+            }
+
+            @Override
+            public CustomPanelAPI getTpParent() {
+                return dialogPanel;
+            }
+
+            @Override
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tp = dialogPanel.createUIElement(400, 0, false);
+
+                policy.createTooltip(mData, tp);
+
+                dialogPanel.addUIElement(tp);
+                WrapUiUtils.mouseCornerPos(tp, opad);
+                return tp;
+            }
+        
+            @Override
+            public Glow getGlowType() { return Glow.ADDITIVE; }
+
+            @Override
+            public Optional<SpriteAPI> getSprite() {
+                return Optional.ofNullable(m_sprite);
+            }
+        };
+
+        posterWrap.add(poster).inBL(0, 0);
+        return cont.addComponent(posterWrap.getPanel());
+    }
+
+    private final void buildSelectedPosterMenu(CustomPanelAPI cont, CustomPanelAPI dialogPanel,
+        MarketPolicy policy, PlayerMarketData mData, CallbackRunnable<Button> activateRun
+    ) {
+        final SettingsAPI settings = Global.getSettings();
+        final int posterW = 163;
+        final int buttonW = 140;
+        final int buttonH = 30;
+
+        buildPoster(cont, dialogPanel, policy, mData, null,  
+            posterW, SELECTED_P_H
+        ).inTL(opad*2, 0);
+
+        final String buttonTxt;
+        final String buttonSideTxt;
+        final String buttonSideHighlight;
+        switch (policy.state) {
+        case COOLDOWN:
+            buttonTxt = "On Cooldown";
+            buttonSideTxt = "Available in " + policy.cooldownDaysRemaining + " days";
+            buttonSideHighlight = Integer.toString(policy.cooldownDaysRemaining);
+            break;
+        case ACTIVE:
+            buttonTxt = "Already Active";
+            buttonSideTxt = "Effect lasts for " + policy.activeDaysRemaining + " days";
+            buttonSideHighlight = Integer.toString(policy.activeDaysRemaining);
+            break;
+        default:
+            buttonTxt = "Activate";
+            buttonSideTxt = "Active for " + policy.spec.durationDays + " days";
+            buttonSideHighlight = Integer.toString(policy.spec.durationDays);
+            break;
+        }
+        final Button activateButton = new Button(
+            cont, buttonW, buttonH, buttonTxt, Fonts.ORBITRON_12, activateRun
+        );
+        activateButton.quickMode = true;
+        activateButton.setCutStyle(CutStyle.TL_BR);
+        activateButton.bgAlpha = 1f;
+        if (!policy.isAvailable()) {
+            activateButton.disabled = true;
+        }
+
+        cont.addComponent(activateButton.getPanel()).inBR(opad + PANEL_W/2f, pad);
+
+        final String costTxt = policy.spec.cost > 0 ? " - "+NumFormat.formatCredit(policy.spec.cost) : "";
+        final LabelAPI title = settings.createLabel(policy.spec.name + costTxt, Fonts.ORBITRON_12);
+
+        title.setHighlightColor(highlight);
+        title.setHighlight(NumFormat.formatCredit(policy.spec.cost));
+        title.setColor(base);
+        cont.addComponent((UIComponentAPI)title).inTL(posterW + opad*3, pad);
+        
+        final LabelAPI desc = settings.createLabel(policy.spec.description, Fonts.DEFAULT_SMALL);
+        desc.getPosition().setSize(PANEL_W/2f - 4*opad - posterW, 100);
+        cont.addComponent((UIComponentAPI)desc).inTL(posterW + opad*3, opad);
+
+        final LabelAPI buttonSide = settings.createLabel(buttonSideTxt, Fonts.DEFAULT_SMALL);
+        buttonSide.setHighlightColor(highlight);
+        buttonSide.setHighlight(buttonSideHighlight);
+        buttonSide.setColor(base);
+        buttonSide.getPosition().setSize(posterW/2f + opad, 30);
+        cont.addComponent((UIComponentAPI)buttonSide).inBR(opad*2 + buttonW + PANEL_W/2f, pad);
+
+        final CallbackRunnable<Button> availableRn = (btn) -> {
+            btn.checked = !btn.checked;
+            policy.notifyWhenAvailable = btn.checked;
+        };
+
+        final CallbackRunnable<Button> finishedRn = (btn) -> {
+            btn.checked = !btn.checked;
+            policy.notifyWhenFinished = btn.checked;
+        };
+
+        final LabelAPI notifyAvailableTxt = settings.createLabel(
+            "Notify when available", Fonts.DEFAULT_SMALL
+        );
+        final LabelAPI notifyFinishedTxt = settings.createLabel(
+            "Notify when finished", Fonts.DEFAULT_SMALL
+        );
+        final int size = (int) notifyAvailableTxt.computeTextHeight(notifyAvailableTxt.getText());
+        final Button notifyAvailableBtn = new Button(
+            cont, size, size, null, null, availableRn
+        );
+        final Button notifyFinishedBtn = new Button(
+            cont, size, size, null, null, finishedRn
+        );
+
+        notifyAvailableTxt.setColor(base);
+        notifyFinishedTxt.setColor(base);
+        notifyAvailableBtn.checked = policy.notifyWhenAvailable;
+        notifyFinishedBtn.checked = policy.notifyWhenFinished;
+        cont.addComponent(notifyAvailableBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*2);
+        cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
+        cont.addComponent((UIComponentAPI)notifyAvailableTxt).inBL(
+            PANEL_W/2f + opad + size + pad, pad + opad*2);
+        cont.addComponent((UIComponentAPI)notifyFinishedTxt).inBL(
+            PANEL_W/2f + opad + size + pad, pad);
     }
 
     @Override

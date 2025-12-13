@@ -1,5 +1,8 @@
 package wfg.ltv_econ.util;
 
+import static wfg.wrap_ui.util.UIConstants.highlight;
+import static wfg.wrap_ui.util.UIConstants.negative;
+
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,10 +18,9 @@ import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.ui.plugins.CommodityinfobarPlugin;
+import static wfg.wrap_ui.util.UIConstants.gray;
 
 public class UiUtils {
-
-    public static final int opad = 10;
 
     public static final Color getInFactionColor() {
         return new Color(35, 70, 130, 255);
@@ -96,13 +98,13 @@ public class UiUtils {
         if (font == "small_insignia") {
             label.setAlignment(Alignment.LMID);
         }
-        label.setColor(Global.getSettings().getColor("textGrayColor"));
+        label.setColor(gray);
         label.autoSizeToWidth(label.computeTextWidth(label.getText()));
         if (height > 0) {
             label.getPosition().setSize(label.getPosition().getWidth(), height);
         }
 
-        label.setHighlightColor(Misc.getHighlightColor());
+        label.setHighlightColor(highlight);
         label.highlightLast(Misc.getWithDGS(credits.get()));
         return label;
     }
@@ -122,15 +124,15 @@ public class UiUtils {
             label.setAlignment(Alignment.LMID);
         }
 
-        label.setColor(Global.getSettings().getColor("textGrayColor"));
+        label.setColor(gray);
         label.autoSizeToWidth(label.computeTextWidth(label.getText()));
         if (height > 0) {
             label.getPosition().setSize(label.getPosition().getWidth(), height);
         }
         if (numInd > maxInd) {
-            label.setHighlightColor(Misc.getNegativeHighlightColor());
+            label.setHighlightColor(negative);
         } else {
-            label.setHighlightColor(Misc.getHighlightColor());
+            label.setHighlightColor(highlight);
         }
 
         label.highlightLast(text);

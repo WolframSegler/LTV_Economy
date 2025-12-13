@@ -1,0 +1,24 @@
+{
+  "policies": [
+    {
+      "id": "extended_shifts",
+      "name": "Extended Work Shifts",
+      "class": "wfg.ltv_econ.economy.policies.ExtendedShiftsPolicy",
+      "iconPath": "graphics/policies/extended_shifts.png",
+      "cost": 500,
+      "durationDays": 21,
+      "cooldownDays": 42,
+      "description": "Working hours are temporarily extended to boost production at the cost of worker well-being."
+    },
+    {
+      "id": "luddic_prophet_festival",
+      "name": "Festival of the Founding Prophet",
+      "class": "wfg.ltv_econ.economy.policies.LuddicFestivalPolicy",
+      "iconPath": "graphics/policies/luddic_prophet_festival.png",
+      "cost": 6e5,
+      "durationDays": 7,
+      "cooldownDays": 120,
+      "description": "Colonists gather to honor Prophet Ludd's teachings and the founding of Gilead."
+    }
+  ]
+}

@@ -15,7 +15,6 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -25,11 +24,9 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasTooltip, HasFader {
-
-    private static final int pad = 3;
-    private static final int opad = 10;
 
     private static final String notExpandedCodexF1 = "F1 more info";
     private static final String ExpandedCodexF1 = "F1 hide";
@@ -96,8 +93,6 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
     public TooltipMakerAPI createAndAttachTp() {
         if (m_com == null) return null;
 
-        final Color gray = new Color(100, 100, 100);
-
         m_tooltip = getParent().createUIElement(720, 0, false);
 
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
@@ -109,7 +104,7 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
         m_tooltip.addPara(comDesc, opad);
 
         String basePrice = ((int)m_com.getBasePrice()) + Strings.C;
-        m_tooltip.addPara("Base value: %s per unit.", opad, Misc.getHighlightColor(), basePrice);
+        m_tooltip.addPara("Base value: %s per unit.", opad, highlight, basePrice);
 
         if (!isExpanded) {
             m_tooltip.addPara("Expand to see remote price data.", gray, opad);

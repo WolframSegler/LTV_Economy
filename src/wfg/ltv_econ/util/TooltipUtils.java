@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.MutableStatWithTempMods;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
@@ -39,13 +40,11 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class TooltipUtils {
 
     private final static String cargoTooltipArrow_PATH;
-
-    private final static int pad = 3;
-    private final static int opad = 10;
 
     static {
         cargoTooltipArrow_PATH = Global.getSettings().getSpriteName("ui", "cargoTooltipArrow");
@@ -75,8 +74,6 @@ public class TooltipUtils {
     public static void cargoComTooltip(TooltipMakerAPI tooltip, int pad, int opad, CommoditySpecAPI spec,
         int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy
     ) {
-        final Color gray = Misc.getGrayColor();
-        final Color highlight = Misc.getHighlightColor();
         final int rowH = 20;
         final EconomyEngine engine = EconomyEngine.getInstance();
 
@@ -130,7 +127,7 @@ public class TooltipUtils {
                         String quantityLabel = "---";
                         if (deficit > 0) {
                             quantityLabel = NumFormat.engNotation((long)deficit);
-                            deficitColor = Misc.getNegativeHighlightColor();
+                            deficitColor = negative;
                         }
 
                         String lessThanSymbol = "";
@@ -242,7 +239,7 @@ public class TooltipUtils {
                         String excessStr = "---";
                         if (excess > 0) {
                             excessStr = NumFormat.engNotation(excess);
-                            excessColor = Misc.getPositiveHighlightColor();
+                            excessColor = positive;
                         }
 
                         String availableStr = "";
@@ -311,7 +308,7 @@ public class TooltipUtils {
         if (showExplanation) {
             tooltip.addPara(
                 "All values approximate. Prices do not include tariffs, which can be avoided through black market trade.",
-                Misc.getGrayColor(), opad);
+                gray, opad);
 
             final Color txtColor = Misc.setAlpha(highlight, 155);
             tooltip.addPara(
@@ -331,9 +328,6 @@ public class TooltipUtils {
      */
     public static <PanelType extends CustomPanel<?, ?, CustomPanelAPI> & HasTooltip> TooltipMakerAPI 
         createCustomCodex(PanelType panel, String codexF1, String codexF2, int codexW) {
-
-        final Color gray = new Color(100, 100, 100);
-        final Color highlight = Misc.getHighlightColor();
 
         // Create the custom Footer
         final TooltipMakerAPI codexTooltip = panel.getCodexParent().get().createUIElement(codexW, 0, false);
@@ -385,294 +379,148 @@ public class TooltipUtils {
         };
     }
 
-    public static float createStatModGridRow(
-        TooltipMakerAPI tooltip,
-        float currentY,
-        float valueTxtWidth,
-        boolean firstPara,
-        Color valueColor,
-        float value,
-        boolean engNotate,
-        boolean flatNum,
-        String desc,
-        String modSource,
-        String valuePrefix // "+", "x", or ""
-    ) {
-        return createStatModGridRow(tooltip, currentY, valueTxtWidth, firstPara, valueColor, value, engNotate, flatNum, desc, modSource, valuePrefix, "");
-    }
-
-    public static float createStatModGridRow(
-        TooltipMakerAPI tooltip,
-        float currentY,
-        float valueTxtWidth,
-        boolean firstPara,
-        Color valueColor,
-        float value,
-        boolean engNotate,
-        boolean flatNum,
-        String desc,
-        String modSource,
-        String valuePrefix,
-        String valueSuffix
-    ) {
-        final String valueTxt;
-        if (engNotate) {
-            if (Math.abs(value) < 1000 && !flatNum) {
-                valueTxt = valuePrefix + NumFormat.formatSmart(value) + valueSuffix;
-            } else {
-                valueTxt = valuePrefix + NumFormat.engNotation((long) value) + valueSuffix;
-            } 
-        } else {
-            valueTxt = valuePrefix + value + valueSuffix;
-        }
-
-        String fullDesc = desc;
-        if (modSource != null) {
-            fullDesc = desc + " (" + modSource + ")";
-        } 
-
-        // Draw text
-        LabelAPI lbl = tooltip.addPara(valueTxt, pad, valueColor, valueTxt);
-
-        float textH = lbl.computeTextHeight(valueTxt);
-        float textX = (valueTxtWidth - lbl.computeTextWidth(valueTxt)) + pad;
-
-        if (!firstPara) {
-            currentY += textH + pad;
-        }
-
-        lbl.getPosition().inTL(textX, currentY);
-
-        lbl = tooltip.addPara(fullDesc, pad);
-        lbl.getPosition().inTL(valueTxtWidth + opad, currentY);
-
-        return currentY; // return updated Y offset
-    }
-
     public static void createCommodityProductionBreakdown(
-        TooltipMakerAPI tooltip,
-        CommodityStats comStats,
-        Color highlight,
-        Color negative
+        TooltipMakerAPI tp,
+        CommodityStats comStats
     ) {
-        tooltip.setParaFontDefault();
-        tooltip.addPara(
-            "Values reflect the current economic cycle. Stockpiles are ignored for display purposes",
-            new Color(100, 100, 100), pad
-        );
-
-        final LabelAPI title = tooltip.addPara("Available: %s", pad, highlight,
+        tp.setParaFontDefault();
+        final LabelAPI title = tp.addPara("Available: %s", pad, highlight,
             NumFormat.engNotation((long)comStats.getFlowAvailable()));
+        final int gridWidth = 430;
+        final int valueWidth = 50;
+        int rowCount = 0;
 
-        final int valueTxtWidth = 50;
-        boolean firstPara = true;
-		float y = tooltip.getHeightSoFar() + pad;
+        tp.addPara(
+            "Values reflect the current economic cycle. Stockpiles are ignored for display purposes",
+            gray, pad
+        );
+        tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
         for (Map.Entry<String, MutableStat> entry : comStats.getFlowProdIndStats().entrySet()) {
-            MutableStat stat = entry.getValue();
-            Industry ind = comStats.market.getIndustry(entry.getKey());
+            final MutableStat mutable = entry.getValue();
+            final Industry ind = comStats.market.getIndustry(entry.getKey());
 
-            if (stat.getModifiedInt() > 0) {
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, stat.base, true, true,
-                    BaseIndustry.BASE_VALUE_TEXT, ind.getCurrentName(), "+"
-                );
-
-                firstPara = false;
+            if (mutable.getModifiedInt() > 0) {
+                tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getCurrentName()+")",
+                    "+" + NumFormat.engNotation((long)mutable.base));
             }
 
-            // Flat mods
-            for (StatMod mod : stat.getFlatMods().values()) {
-                if (mod.getDesc() == null || mod.getValue() < 1) {
-                    continue;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, true,
-                    mod.getDesc(), ind.getCurrentName(), "+"
-                );
-
-                firstPara = false;
+            for (StatMod mod : mutable.getFlatMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                    "+" + NumFormat.formatMagnitudeAware(mod.value));
+            }
+            for (StatMod mod : mutable.getPercentMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                    "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
             }
 
-            // Mult mods
-            for (StatMod mod : stat.getMultMods().values()) {
-                if (!(stat.base > 0)) break;
-
-                if (mod.getDesc() == null || mod.getValue() < 0) {
-                    continue;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, false,
-                    mod.getDesc(), ind.getCurrentName(), Strings.X
-                );
-
-                firstPara = false;
+            if (mutable.base > 0) {
+            for (StatMod mod : mutable.getMultMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                    Strings.X + NumFormat.formatMagnitudeAware(mod.value),
+                mod.value < 1f ? negative:highlight
+            );
+            }
             }
         }
 
         if (comStats.getProduction(false) > 0) {
-            for (StatMod mod : comStats.getProductionStat().getFlatMods().values()) {
-                if (mod.desc == null) continue;
+            final MutableStatWithTempMods mutable = comStats.getProductionStat();
 
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, true,
-                    mod.source, mod.source, "+"
-                );
-
-                firstPara = false;
+            for (StatMod mod : mutable.getFlatMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+mod.source+")",
+                    "+" + NumFormat.formatMagnitudeAware(mod.value));
             }
-            for (StatMod mod : comStats.getProductionStat().getPercentMods().values()) {
-                if (mod.desc == null) continue;
-
-                final String prefix = mod.value < 0f ? "" : "+";
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, false,
-                    mod.desc, mod.source, prefix, "%"
-                );
-
-                firstPara = false;
+            for (StatMod mod : mutable.getPercentMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+mod.source+")",
+                    "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
             }
-            for (StatMod mod : comStats.getProductionStat().getMultMods().values()) {
-                if (mod.desc == null) continue;
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, highlight, mod.getValue(), true, false,
-                    mod.desc, mod.source, Strings.X
+            if (mutable.base > 0) {
+            for (StatMod mod : mutable.getMultMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+mod.source+")",
+                    Strings.X + NumFormat.formatMagnitudeAware(mod.value),
+                    mod.value < 1f ? negative:highlight
                 );
-
-                firstPara = false;
+            }
             }
         }
 
         // Import mods
         if (comStats.inFactionImports > 0) {
-            y = addRow(tooltip, y, valueTxtWidth, firstPara, 
-                comStats.inFactionImports, "In-faction imports", highlight, negative
-            );
-            firstPara = false;
+            tp.addToGrid(0, rowCount++, "In-faction imports", "+" + NumFormat.engNotation(
+                (long) comStats.inFactionImports), comStats.inFactionImports < 0 ? negative : highlight);
         }
 
         if (comStats.globalImports > 0) {
-            y = addRow(tooltip, y, valueTxtWidth, firstPara, 
-                comStats.globalImports, "Global imports", highlight, negative
-            );
-            firstPara = false;
+            tp.addToGrid(0, rowCount++, "Global imports", "+" + NumFormat.engNotation(
+                (long) comStats.globalImports), comStats.globalImports < 0 ? negative : highlight);
         }
 
         if (comStats.importEffectiveness < 1f) {
             final float value = ((int) (comStats.importEffectiveness * 100f)) / 100f;
 
-            y = TooltipUtils.createStatModGridRow(
-                tooltip, y, valueTxtWidth, firstPara, negative, value, false, true,
-                "Shipping losses", null, Strings.X
-            );
-            firstPara = false;
+            tp.setGridValueColor(negative);
+            tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value);
         }
 
         if (comStats.getFlowDeficit() >= 1) {
-            y = addRow(tooltip, y, valueTxtWidth, firstPara, -comStats.getFlowDeficit(),
-                "Post-trade shortage", highlight, negative
-            );
-            firstPara = false;
+            tp.addToGrid(0, rowCount++, "Post-trade shortage", "" + NumFormat.engNotation(
+                (long)-comStats.getFlowDeficit()), negative);
         }
 
-        if (firstPara) {
+        if (rowCount < 0) {
             title.setText("Not available.");
             title.setHighlight("");
         }
 
-        tooltip.setHeightSoFar(y);
-        WrapUiUtils.resetFlowLeft(tooltip, opad);
-    }
-
-    private static final float addRow(TooltipMakerAPI tooltip, float y, float valueTxtWidth, boolean firstPara,
-        float value, String desc, Color highlight, Color negative) {
-
-        String symbol = value >= 0 ? "+" : "";
-        Color valueColor = value >= 0 ? highlight : negative;
-
-        return TooltipUtils.createStatModGridRow(
-            tooltip, y, valueTxtWidth, firstPara,
-            valueColor, value, true, true, desc, null, symbol
-        );
+        tp.addGrid(0);
     }
 
     public static void createCommodityDemandBreakdown(
-        TooltipMakerAPI tooltip,
-        CommodityStats comStats,
-        Color highlight,
-        Color negative
+        TooltipMakerAPI tp,
+        CommodityStats comStats
     ) {
-        Color valueColor = highlight;
-        if (comStats.getFlowDeficit() > 0) {
-            valueColor = negative;
-        }
+        final Color valueColor = comStats.getFlowDeficit() > 0 ? negative : highlight;
+        final int gridWidth = 430;
+        final int valueWidth = 50;
+        int rowCount = 0;
         
-        LabelAPI title = tooltip.addPara("Total demand: %s", opad, valueColor,
+        LabelAPI title = tp.addPara("Total demand: %s", opad, valueColor,
             NumFormat.engNotation((long)comStats.getBaseDemand(false)));
 
-        final int valueTxtWidth = 50;
-        boolean firstPara = true;
-		float y = tooltip.getHeightSoFar() + pad;
+        tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
         for (Map.Entry<String, MutableStat> entry : comStats.getFlowDemandIndStats().entrySet()) {
-            MutableStat stat = entry.getValue();
-            Industry ind = comStats.market.getIndustry(entry.getKey());
+            final MutableStat mutable = entry.getValue();
+            final Industry ind = comStats.market.getIndustry(entry.getKey());
 
-            if (stat.getModifiedInt() > 0) {
-                if (firstPara) {
-                    firstPara = false;
-                    y -= pad;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, stat.base, true, true,
-                    BaseIndustry.BASE_VALUE_TEXT, ind.getCurrentName(), "+"
-                );
-
-                firstPara = false;
+            if (mutable.getModifiedInt() > 0) {
+                tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getCurrentName()+")",
+                    "+" + NumFormat.engNotation((long)mutable.base), valueColor);
             }
 
-            // Flat mods
-            for (StatMod mod : stat.getFlatMods().values()) {
-                if (mod.getValue() < 1) {
-                    continue;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, mod.getValue(), true, true,
-                    "Needed by " + ind.getCurrentName(), null, "+"
-                );
-
-                firstPara = false;
+            for (StatMod mod : mutable.getFlatMods().values()) {
+                tp.addToGrid(0, rowCount++, "Needed by " + ind.getCurrentName(),
+                    "+" + NumFormat.formatMagnitudeAware(mod.value), valueColor);
+            }
+            for (StatMod mod : mutable.getPercentMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                    "+" + NumFormat.formatMagnitudeAware(mod.value) + "%", valueColor);
             }
 
-            // Mult mods
-            for (StatMod mod : stat.getMultMods().values()) {
-                if (!(stat.base > 0)) break;
-
-                if (mod.getDesc() == null || mod.getValue() < 0) {
-                    continue;
-                }
-
-                y = TooltipUtils.createStatModGridRow(
-                    tooltip, y, valueTxtWidth, firstPara, valueColor, mod.getValue(), true, false,
-                    mod.getDesc(), ind.getCurrentName(), Strings.X
-                );
-
-                firstPara = false;
+            if (mutable.base > 0) {
+            for (StatMod mod : mutable.getMultMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                    Strings.X + NumFormat.formatMagnitudeAware(mod.value), valueColor);
+            }
             }
         }
 
-        if (firstPara) {
+        if (rowCount < 1) {
             title.setText("No local demand.");
             title.setHighlight("");
         }
 
-        tooltip.setHeightSoFar(y);
-        WrapUiUtils.resetFlowLeft(tooltip, opad);
+        tp.addGrid(0);
     }
 }

@@ -12,7 +12,6 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.ui.panels.CustomPanel;
@@ -22,13 +21,12 @@ import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class CommoditySelectionPanel extends
     CustomPanel<BasePanelPlugin<CommoditySelectionPanel>, CommoditySelectionPanel, CustomPanelAPI> implements
     HasOutline, HasBackground
 {
-    private static final int pad = 3;
-    private static final int opad = 10;
     private static final int ROW_H = 32;
     private static GlobalCommodityFlow contentPanel = null;
 
@@ -66,7 +64,7 @@ public class CommoditySelectionPanel extends
     }
 
     public Color getOutlineColor() {
-        return Misc.getDarkPlayerColor();
+        return dark;
     }
 
     public static class RowPanel extends CustomPanel<BasePanelPlugin<RowPanel>, RowPanel, CustomPanelAPI> 
@@ -94,7 +92,7 @@ public class CommoditySelectionPanel extends
             RowPanel.this.add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
 
             final LabelAPI comNameLabel = Global.getSettings().createLabel(spec.getName(), Fonts.ORBITRON_12);
-            comNameLabel.setColor(Misc.getBasePlayerColor());
+            comNameLabel.setColor(base);
             final float labelW = comNameLabel.computeTextHeight(spec.getName());
              RowPanel.this.add(comNameLabel).inBL(iconSize + opad, (ROW_H - labelW) / 2f);
         }

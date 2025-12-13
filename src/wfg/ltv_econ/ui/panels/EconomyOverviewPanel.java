@@ -16,13 +16,12 @@ import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class EconomyOverviewPanel extends CustomPanel<
     BasePanelPlugin<EconomyOverviewPanel>, EconomyOverviewPanel, UIPanelAPI>
 {
 
-    public static final int opad = 10;
-    public static final int pad = 3;
     public static final int MAIN_PANEL_W = 1250;
     public static final int MAIN_PANEL_H = 700;
     public static final int NAVBAR_W = 200;

@@ -37,11 +37,9 @@ import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.reflection.ReflectionUtils;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class IndustryTooltips {
-    public static final int pad = 3;
-	public static final int opad = 10;
-
     public static final float ALPHA_CORE_PRODUCTION_BOOST = 1.3f;
 
 	public static final float ALPHA_CORE_UPKEEP_REDUCTION_MULT = 0.75f;
@@ -68,10 +66,6 @@ public class IndustryTooltips {
 		final FactionAPI faction = orgMarket.getFaction();
 		final Color color = faction.getBaseUIColor();
 		final Color dark = faction.getDarkUIColor();
-
-		final Color gray = Misc.getGrayColor();
-		final Color highlight = Misc.getHighlightColor();
-		final Color bad = Misc.getNegativeHighlightColor();
 
 		MarketAPI copy = ind.getMarket().clone(); // shallow
 
@@ -152,7 +146,7 @@ public class IndustryTooltips {
 			if (num > max) {
 
 				num--;
-				tp.addPara("Maximum number of industries reached", bad, opad);
+				tp.addPara("Maximum number of industries reached", negative, opad);
 			}
 		}
 
@@ -169,21 +163,21 @@ public class IndustryTooltips {
 				days = "day";
 
 			tp.addPara("Operations disrupted! %s " + days + " until return to normal function.",
-					opad, Misc.getNegativeHighlightColor(), highlight, Integer.toString(left));
+					opad, negative, highlight, Integer.toString(left));
 		}
 
 		if (DebugFlags.COLONY_DEBUG || market.isPlayerOwned()) {
 			if (mode == IndustryTooltipMode.NORMAL) {
 				if (ind.getSpec().getUpgrade() != null && !ind.isBuilding()) {
-					tp.addPara("Click to manage or upgrade", Misc.getPositiveHighlightColor(), opad);
+					tp.addPara("Click to manage or upgrade", positive, opad);
 				} else {
-					tp.addPara("Click to manage", Misc.getPositiveHighlightColor(), opad);
+					tp.addPara("Click to manage", positive, opad);
 				}
 			}
 		}
 
 		if (mode == IndustryTooltipMode.QUEUED) {
-			tp.addPara("Click to remove or adjust position in queue", Misc.getPositiveHighlightColor(), opad);
+			tp.addPara("Click to remove or adjust position in queue", positive, opad);
 			tp.addPara("Currently queued for construction. Does not have any impact on the colony.", opad);
 
 			int left = Math.round((ind.getSpec().getBuildTime()));
@@ -212,7 +206,7 @@ public class IndustryTooltips {
 						mode == IndustryTooltipMode.DOWNGRADE)) {
 			String reason = ind.getUnavailableReason();
 			if (reason != null) {
-				tp.addPara(reason, bad, opad);
+				tp.addPara(reason, negative, opad);
 			}
 		}
 
@@ -242,7 +236,7 @@ public class IndustryTooltips {
 				if (credits >= cost) {
 					label.setHighlightColors(highlight, highlight, highlight);
 				} else {
-					label.setHighlightColors(bad, highlight, highlight);
+					label.setHighlightColors(negative, highlight, highlight);
 				}
 			} else if (mode == IndustryTooltipMode.DOWNGRADE) {
 				if (ind.getSpec().getUpgrade() != null) {
@@ -531,8 +525,6 @@ public class IndustryTooltips {
 	public static void addAlphaCoreDescription(
         TooltipMakerAPI tp, AICoreDescriptionMode mode, Industry ind
     ) {
-		final float opad = 10f;
-		final Color highlight = Misc.getHighlightColor();
 
 		String pre = "Alpha-level AI core currently assigned. ";
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
@@ -560,9 +552,6 @@ public class IndustryTooltips {
 	public static void addBetaCoreDescription(
         TooltipMakerAPI tp, AICoreDescriptionMode mode, Industry ind
     ) {
-		final float opad = 10f;
-		final Color highlight = Misc.getHighlightColor();
-
 		String pre = "Beta-level AI core currently assigned. ";
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
 			pre = "Beta-level AI core. ";
@@ -587,9 +576,6 @@ public class IndustryTooltips {
 	public static void addGammaCoreDescription(
         TooltipMakerAPI tp, AICoreDescriptionMode mode, Industry ind
     ) {
-		final float opad = 10f;
-		final Color highlight = Misc.getHighlightColor();
-
 		String pre = "Gamma-level AI core currently assigned. ";
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
 			pre = "Gamma-level AI core. ";
@@ -630,10 +616,10 @@ public class IndustryTooltips {
         boolean canImprove = (boolean) ReflectionUtils.invoke(ind, "canImproveToIncreaseProduction");
 		if (canImprove) {
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
-				info.addPara("Production increased by %s.", initPad, Misc.getHighlightColor(),
+				info.addPara("Production increased by %s.", initPad, highlight,
 						Strings.X + DEFAULT_IMPROVE_PRODUCTION_BONUS);
 			} else {
-				info.addPara("Increases production by %s.", initPad, Misc.getHighlightColor(),
+				info.addPara("Increases production by %s.", initPad, highlight,
 						Strings.X + DEFAULT_IMPROVE_PRODUCTION_BONUS);
 			}
 			initPad = opad;

@@ -5,7 +5,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.campaign.listeners.IndustryOptionProvider;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
@@ -14,6 +13,9 @@ import wfg.wrap_ui.util.NumFormat;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static wfg.wrap_ui.util.UIConstants.*;
+
 import java.awt.Color;
 
 public class AddWorkerIndustryOption implements IndustryOptionProvider {
@@ -60,8 +62,8 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
         "The number of workers that can be assigned to an industry is determined by the colony size, and certain industries have a natural limit on how many workers they can employ. Currently, there are %s workers employed in %s.",
         0f,
         new Color[] {
-            Misc.getHighlightColor(),
-            Misc.getBasePlayerColor()
+            highlight,
+            base
         },
         NumFormat.engNotation(WorkerRegistry.getInstance().getData(
             industry.getMarket().getId(), industry.getSpec()).getWorkersAssigned()),

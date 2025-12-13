@@ -16,11 +16,13 @@ import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.submarkets.BaseSubmarketPlugin;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.util.NumFormat;
+
+import static wfg.wrap_ui.util.UIConstants.highlight;
+import static wfg.wrap_ui.util.UIConstants.opad;
 
 public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
@@ -173,8 +175,6 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 	}
 
 	protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
-		final float opad = 10;
-
 		tooltip.addSectionHeading("Player Interaction", market.getFaction().getBaseUIColor(),
 			market.getFaction().getDarkUIColor(), Alignment.MID, opad);
 
@@ -183,7 +183,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 			"The displayed cargo shows up to the stockpile limit of %s or the amount currently stored, whichever is lower. " +
 			"Contributions update the colony's reserves immediately, and the visible cargo reflects the current stockpile limits.",
 			opad,
-			Misc.getHighlightColor(),
+			highlight,
 			NumFormat.engNotation(getStockpileLimit(null))
 		);
 	}

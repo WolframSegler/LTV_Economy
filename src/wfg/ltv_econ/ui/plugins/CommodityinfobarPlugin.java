@@ -2,10 +2,9 @@ package wfg.ltv_econ.ui.plugins;
 
 import java.util.List;
 import java.util.Map;
+import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
-
-import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -13,15 +12,14 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.wrap_ui.util.RenderUtils;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 
 public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
 
     public static final String GLOW_BG = Global.getSettings().getSpriteName("ui", "glow_bg");
-    public static final Color sideBarColor = Misc.getDarkPlayerColor();
 
     private CustomPanelAPI m_panel;
     private Map<Color, Float> m_barMap;
@@ -51,7 +49,7 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
             );
         }
 
-        RenderUtils.drawQuad(x, y, 2, h, sideBarColor, alphaMult, false);
+        RenderUtils.drawQuad(x, y, 2, h, dark, alphaMult, false);
         final int sideBarGap = 4;
 
         float offsetX = x + sideBarGap;

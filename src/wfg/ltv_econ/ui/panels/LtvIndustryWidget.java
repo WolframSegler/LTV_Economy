@@ -54,16 +54,11 @@ import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.reflection.ReflectionUtils;
-
-// import com.fs.starfarer.campaign.ui.marketinfo.b;
-// import com.fs.starfarer.campaign.ui.marketinfo.intnew;
-// import com.fs.starfarer.ui.impl.o0OO;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndustryWidget, TooltipMakerAPI>
     implements HasBackground, HasFader, HasActionListener {
 
-    public final static int pad = 3;
-    public final static int opad = 10;
     public final static int PANEL_WIDTH = 190;
     public final static int TITLE_HEIGHT = 15 + pad;
     public final static int IMAGE_HEIGHT = 95;
@@ -224,7 +219,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
             m_market.getId(), m_industry.getSpec()
         );
         LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
-        workerCountLabel.setColor(Misc.getHighlightColor());
+        workerCountLabel.setColor(highlight);
         workerCountLabel.setHighlightColor(
             WrapUiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
         );
@@ -404,7 +399,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
             LabelAPI refundLabel = Global.getSettings().createLabel(
                 Misc.getDGSCredits(queueItem.cost), Fonts.DEFAULT_SMALL
             );
-            refundLabel.setColor(Misc.getHighlightColor());
+            refundLabel.setColor(highlight);
             refundLabel.setHighlightColor(
                 WrapUiUtils.adjustBrightness(refundLabel.getColor(), 1.33f)
             );
@@ -459,7 +454,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                 LabelAPI buildTimeLabel = Global.getSettings().createLabel(
                     "" + buildTime, Fonts.DEFAULT_SMALL
                 );
-                buildTimeLabel.setColor(Misc.getHighlightColor());
+                buildTimeLabel.setColor(highlight);
                 buildTimeLabel.setHighlightColor(
                     WrapUiUtils.adjustBrightness(buildTimeLabel.getColor(), 1.33f)
                 );
@@ -475,7 +470,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                 LabelAPI costLabel = Global.getSettings().createLabel(
                     Misc.getDGSCredits(queueItem.cost), Fonts.DEFAULT_SMALL
                 );
-                costLabel.setColor(Misc.getHighlightColor());
+                costLabel.setColor(highlight);
                 costLabel.setHighlightColor(
                     WrapUiUtils.adjustBrightness(costLabel.getColor(), 1.33f)
                 );

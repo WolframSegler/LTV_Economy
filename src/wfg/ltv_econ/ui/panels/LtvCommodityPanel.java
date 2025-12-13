@@ -22,6 +22,7 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasMarket;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel, CustomPanelAPI>
     implements HasBackground, HasOutline, HasMarket {
@@ -86,13 +87,10 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
     }
 
     public void createPanel() {
-        final int pad = 3;
-        final int opad = 10;
-
         EconomyEngine.getInstance().fakeAdvance();
 
         // Select relevant commodities
-        List<CommoditySpecAPI> commodities = EconomyEngine.getEconCommodities();
+        final List<CommoditySpecAPI> commodities = EconomyEngine.getEconCommodities();
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
             CommodityStats stats = EconomyEngine.getInstance().getComStats(com.getId(), getMarket().getId());

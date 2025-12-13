@@ -6,12 +6,12 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.wrap_ui.util.NumFormat;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
@@ -90,13 +90,11 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     @Override
     protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
-        final float pad = 10f;
-
-        tooltip.addPara("Total Workers: %s", pad, Misc.getHighlightColor(),
+        tooltip.addPara("Total Workers: %s", opad, highlight,
             NumFormat.engNotation(getWorkerPool())
         );
         tooltip.addPara(
-            "Free Workers: %s (%s%%)", pad, Misc.getHighlightColor(),
+            "Free Workers: %s (%s%%)", opad, highlight,
             NumFormat.engNotation((long)(freeWorkerRatio * getWorkerPool())),
             String.format("%.1f", freeWorkerRatio * 100)
         );

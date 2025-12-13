@@ -4,15 +4,24 @@ import java.util.ArrayList;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
+import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.policies.MarketPolicy;
+import wfg.reflection.ReflectionUtils;
 
 public class PlayerMarketData {
     public final String marketID;
     public transient MarketAPI market;
+
+    public final StatBonus healthDelta = new StatBonus();
+    public final StatBonus happinessDelta = new StatBonus();
+    public final StatBonus culturalCohesionDelta = new StatBonus();
+    public final StatBonus classConsciousnessDelta = new StatBonus();
 
     public static final float BASELINE_VALUE = 50f;
     private float RoSV = LaborConfig.RoSV;
@@ -26,6 +35,18 @@ public class PlayerMarketData {
     public PlayerMarketData(String marketID) {
         this.marketID = marketID;
         readResolve();
+
+        try {
+            for (PolicySpec spec : PolicyConfig.map.values()) {
+                final MarketPolicy policy = (MarketPolicy) ReflectionUtils.getConstructorsMatching(
+                    spec.marketPolicyClass, 0).get(0).newInstance();
+                policies.add(policy);
+                policy.spec = spec;
+                policy.id = spec.id;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to assign policies to "+marketID+". ", e);
+        }
     }
 
     public Object readResolve() {
@@ -45,7 +66,7 @@ public class PlayerMarketData {
     public void setHappiness(float happiness) { popHappiness = clamp(happiness); }
     public void setCulturalCohesion(float cohesion) { popCulturalCohesion = clamp(cohesion); }
     public void setClassConsciousness(float consciousness) { popClassConsciousness = clamp(consciousness); }
-
+    public ArrayList<MarketPolicy> getPolicies() { return new ArrayList<>(policies); }
     public void addPolicy(MarketPolicy policy) { policies.add(policy); }
     public void removePolicy(MarketPolicy policy) { policies.remove(policy); }
 
@@ -64,7 +85,7 @@ public class PlayerMarketData {
         }
 
         for (MarketPolicy policy : policies) {
-            policy.advanceTime(days);
+            policy.advanceTime(this, days);
         }
     }
     public void advance() {
@@ -74,68 +95,76 @@ public class PlayerMarketData {
 
     // PRIVATE METHODS
     private void advanceMarket(int days) {
-        updateHealth(days);
+        updateHealthDelta();
+        updateHappinessDelta();
+        updateCulturalCohesionDelta();
+        updateClassConsciousnessDelta();
 
-        updateHappiness(days);
-
-        updateCulturalCohesion(days);
-        
-        updateClassConsciousness(days);
+        setHealth(healthDelta.computeEffective(popHealth) * days);
+        setHappiness(happinessDelta.computeEffective(popHappiness) * days);
+        setCulturalCohesion(culturalCohesionDelta.computeEffective(popCulturalCohesion) * days);
+        setClassConsciousness(classConsciousnessDelta.computeEffective(popClassConsciousness) * days);
     }
 
-    private void updateHealth(int days) {
-        float foodRatio = EconomyEngine.getMaxDeficit(market, Commodities.FOOD).two;
-        if (!market.hasCondition(Conditions.HABITABLE)) {
-            foodRatio = EconomyEngine.getMaxDeficit(market, Commodities.FOOD, Commodities.ORGANICS).two;
-        }
-        float modifier = 0f;
-        if (foodRatio < 0.1f) modifier = -0.2f;
-        else if (foodRatio < 0.4f) modifier = -0.1f;
-        else if (foodRatio < 0.7f) modifier = -0.05f;
+    private void updateHealthDelta() {
+        final float foodRatio = market.hasCondition(Conditions.HABITABLE) ?
+            EconomyEngine.getMaxDeficit(market, Commodities.FOOD).two :
+            EconomyEngine.getMaxDeficit(market, Commodities.FOOD, Commodities.ORGANICS).two;
+        final float modifier = 
+            foodRatio < 0.1 ? -0.2f :
+            foodRatio < 0.4 ? -0.1f :
+            foodRatio < 0.7 ? -0.05f : 0;
 
-        modifier += (1f - market.getHazardValue()) * 0.16f;
+        healthDelta.modifyFlat("food_organic_deficit", modifier, "Food or organics deficit");
 
-        modifier += (LaborConfig.LPV_month / RoSV - 1f) * 0.1f;
+        healthDelta.modifyFlat("hazard", (1f - market.getHazardValue()) * 0.16f, "Hazard rating");
 
-        popHealth = clamp(popHealth + modifier*days);
+        healthDelta.modifyFlat("wage", (LaborConfig.LPV_month / RoSV - 1f) * 0.1f, "Wages");
     }
 
-    private void updateHappiness(int days) {
-        float modifier = (popHealth - BASELINE_VALUE) * 0.2f;
+    private void updateHappinessDelta() {
+        happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.2f, "Health");
 
-        modifier += (market.getStability().getModifiedValue() - 5f) * 0.03f;
+        happinessDelta.modifyFlat(
+            "stability", (market.getStability().getModifiedValue() - 5f) * 0.03f, "Stability"
+        );
 
-        modifier += (LaborConfig.RoSV - RoSV) * 0.06f;
+        happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.06f, "Wages");
 
-        modifier += (popCulturalCohesion - BASELINE_VALUE) * 0.0008f;
-
-        popHappiness = clamp(popHappiness + modifier*days);
+        happinessDelta.modifyFlat(
+            "cohesion", (popCulturalCohesion - BASELINE_VALUE) * 0.0008f, "Cultural Cohesion"
+        );
     }
 
-    private void updateCulturalCohesion(int days) {
+    private void updateCulturalCohesionDelta() {
         float diversityScore = 0f;
         for (Float pct : market.getPopulation().getComp().values()) {
-            diversityScore += pct * pct;
+            diversityScore += (pct/100f) * (pct/100f);
         }
-        float modifier = (1f - diversityScore) * -0.05f;
 
-        modifier += +popClassConsciousness * 0.0007f;
+        culturalCohesionDelta.modifyFlat(
+            "composition", (1f - diversityScore) * -0.05f, "Cultural Composition"
+        );
 
-        modifier += (float) (Math.random() * 0.006 - 0.003);
+        culturalCohesionDelta.modifyFlat(
+            "consciousness", popClassConsciousness * 0.0007f, "Class Consciousness"
+        );
 
-        popCulturalCohesion = clamp(popCulturalCohesion + modifier*days);
+        culturalCohesionDelta.modifyFlat(
+            "random", (float) (Math.random() * 0.006 - 0.003), "Natural drift factor"
+        );
     }
 
-    private void updateClassConsciousness(int days) {
-        float modifier = -0.005f;
+    private void updateClassConsciousnessDelta() {
+        classConsciousnessDelta.modifyFlat("base", -0.005f, "Base change");
 
-        modifier += 0.05f * (RoSV - 1f) / RoSV;
+        classConsciousnessDelta.modifyFlat("wage", 0.05f * (RoSV - 1f) / RoSV, "Wages");
 
-        modifier += (BASELINE_VALUE - popHealth) * 0.0002f;
+        classConsciousnessDelta.modifyFlat("health", (BASELINE_VALUE - popHealth) * 0.0002f, "Health");
 
-        modifier += (BASELINE_VALUE - popHappiness) * 0.00016f;
-
-        popClassConsciousness = clamp(popClassConsciousness + modifier * days);
+        classConsciousnessDelta.modifyFlat(
+            "happiness", (BASELINE_VALUE - popHappiness) * 0.00016f, "Happiness"
+        );
     }
 
     private static final float clamp(float value) {

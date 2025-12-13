@@ -1,6 +1,7 @@
 package wfg.ltv_econ.submarkets;
 
-import java.awt.Color;
+import static wfg.wrap_ui.util.UIConstants.negative;
+
 import java.util.Random;
 
 import com.fs.starfarer.api.Global;
@@ -195,14 +196,13 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 	public Highlights getIllegalTransferTextHighlights(CargoStackAPI stack, TransferAction action) {
 		final RepLevel req = getRequiredLevelAssumingLegal(stack, action);
 		if (req != null) {
-			Color c = Misc.getNegativeHighlightColor();
 			Highlights h = new Highlights();
 			RepLevel level = submarket.getFaction().getRelationshipLevel(Global.getSector().getFaction(Factions.PLAYER));
 			if (!level.isAtWorst(req)) {
-				h.append(submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase(), c);
+				h.append(submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase(), negative);
 			}
 			if (requiresCommission(req) && !hasCommission()) {
-				h.append("commission", c);
+				h.append("commission", negative);
 			}
 			return h;
 		}
@@ -295,16 +295,15 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 		
 		final RepLevel req = getRequiredLevelAssumingLegal(member, action);
 		if (req != null) {
-			final Color c = Misc.getNegativeHighlightColor();
 			final Highlights h = new Highlights();
 			final RepLevel level = submarket.getFaction().getRelationshipLevel(
 				Global.getSector().getFaction(Factions.PLAYER)
 			);
 			if (!level.isAtWorst(req)) {
-				h.append("Req: " + submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase(), c);
+				h.append("Req: " + submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase(), negative);
 			}
 			if (requiresCommission(req) && !hasCommission()) {
-				h.append("Req: " + submarket.getFaction().getDisplayName() + " - commission", c);
+				h.append("Req: " + submarket.getFaction().getDisplayName() + " - commission", negative);
 			}
 			return h;
 		}
@@ -354,7 +353,7 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 		
 		final Highlights h = new Highlights();
 		h.setText(appendix);
-		h.setColors(Misc.getNegativeHighlightColor());
+		h.setColors(negative);
 		return h;
 	}
 	

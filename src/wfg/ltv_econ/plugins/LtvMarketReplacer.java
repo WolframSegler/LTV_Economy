@@ -26,10 +26,10 @@ import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.panels.ActionListenerPanel;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.TextPanel;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.ButtonPlugin;
 import wfg.reflection.ReflectionUtils;
@@ -55,11 +55,9 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvMarketReplacer implements EveryFrameScript {
-
-    private static final int pad = 3;
-    private static final int opad = 10;
 
     private final SectorAPI sector = Global.getSector();
     private int frames = 0;
@@ -178,7 +176,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             final Button inventoryBtn = new Button(
                     managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Stockpiles",
                     Fonts.ORBITRON_12, stockpilesBtnRunnable);
-            inventoryBtn.setLabelColor(Misc.getBasePlayerColor());
+            inventoryBtn.setLabelColor(base);
             inventoryBtn.bgColor = new Color(0, 0, 0, 255);
             inventoryBtn.bgDisabledColor = new Color(0, 0, 0, 255);
             inventoryBtn.quickMode = true;
@@ -203,7 +201,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             final Button manageBtn = new Button(
                     managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Manage Workers",
                     Fonts.ORBITRON_12, manageWorkersBtnRunnable);
-            manageBtn.setLabelColor(Misc.getBasePlayerColor());
+            manageBtn.setLabelColor(base);
             manageBtn.bgColor = new Color(0, 0, 0, 255);
             manageBtn.bgDisabledColor = new Color(0, 0, 0, 255);
             manageBtn.quickMode = true;
@@ -251,7 +249,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 final long value = EconomyEngine.getInstance().getNetIncome(market, true);
                 final String txt = "Credits/month";
                 final String valueTxt = NumFormat.formatCredit(value);
-                final Color valueColor = value < 0 ? Misc.getNegativeHighlightColor()
+                final Color valueColor = value < 0 ? negative
                         : market.getFaction().getBrightUIColor();
 
                 final LabelAPI lbl1 = Global.getSettings().createLabel(txt, Fonts.ORBITRON_12);
@@ -267,11 +265,12 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 final float textH1 = lbl1.computeTextHeight(txt);
                 final float textH2 = lbl2.computeTextHeight(valueTxt);
                 final float textW1 = lbl1.computeTextWidth(txt);
+                final float textW2 = lbl2.computeTextWidth(valueTxt);
 
                 add(lbl1).inTL(0, 0).setSize(textW1, textH1);
                 add(lbl2).inTL(0, textH1 + pad).setSize(textW1, textH2);
 
-                getPos().setSize(textW1, textH1 + pad + textH2);
+                getPos().setSize(Math.max(textW1, textW2), textH1 + pad + textH2);
             }
 
             @Override
@@ -286,8 +285,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 final int TP_WIDTH = 450;
                 m_tp = getPanel().createUIElement(TP_WIDTH, 0, false);
 
-                final Color highlight = Misc.getHighlightColor();
-                final Color negative = Misc.getNegativeHighlightColor();
                 final FactionAPI faction = market.getFaction();
                 final Color base = faction.getBaseUIColor();
                 final Color dark = faction.getDarkUIColor();
@@ -619,7 +616,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     new BasePanelPlugin<LtvCommodityPanel>());
             replacement.setMarket(market);
 
-            final ActionListenerPanel listener = new ActionListenerPanel(managementPanel, 0, 0) {
+            final HasActionListener listener = new HasActionListener() {
                 @Override
                 public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
                     if (!isLeftClick)
@@ -630,10 +627,13 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     replacement.selectRow(panel);
 
                     if (replacement.m_canViewPrices) {
-                        final ComDetailDialog dialogPanel = new ComDetailDialog(market, panel.getCommodity());
+                        final ComDetailDialog dialogPanel = new ComDetailDialog(
+                            market, panel.getCommodity()
+                        );
 
                         WrapUiUtils.CustomDialogViewer(
-                                dialogPanel, dialogPanel.PANEL_W, dialogPanel.PANEL_H);
+                            dialogPanel, dialogPanel.PANEL_W, dialogPanel.PANEL_H
+                        );
                     }
                 }
             };

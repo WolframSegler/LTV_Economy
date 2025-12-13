@@ -1,50 +1,122 @@
 package wfg.ltv_econ.economy.policies;
 
+import static wfg.wrap_ui.util.UIConstants.*;
+
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.Misc;
+
+import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
+import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
+import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
 
+/**
+ * Subclasses can use {@link #apply(PlayerMarketData data)} as a sort of constructor.
+ */
 public abstract class MarketPolicy {
-    public enum PolicyState { ACTIVE, COOLDOWN, AVAILABLE }
+    public enum PolicyState { ACTIVE, COOLDOWN, AVAILABLE, DISABLED }
     
     public String id;
-    public String name;
-    public String description;
+    public transient PolicySpec spec;
 
-    public PolicyState state;
-    public float duration; // in days
-    public float cooldown; // remaining days until reusable
+    public PolicyState state = PolicyState.AVAILABLE;
+    public int activeDaysRemaining;
+    public int cooldownDaysRemaining;
+    public boolean notifyWhenAvailable = false;
+    public boolean notifyWhenFinished = false;
 
-    public abstract void applyEffect(PlayerMarketData data);
+    public abstract void apply(PlayerMarketData data);
+    public abstract void unapply(PlayerMarketData data);
     public abstract void preAdvance(PlayerMarketData data);
     public abstract void postAdvance(PlayerMarketData data);
     public boolean isActive() { return state == PolicyState.ACTIVE; }
     public boolean isAvailable() { return state == PolicyState.AVAILABLE; }
+    public boolean isOnCooldown() { return state == PolicyState.COOLDOWN; }
 
-    public final void advanceTime(int days) {
+    public Object readResolve() {
+        spec = PolicyConfig.map.get(id);
+
+        return this;
+    }
+
+    public final void advanceTime(PlayerMarketData data, int days) {
         switch (state) {
         case ACTIVE:
-            duration -= days;
-            if (duration <= 0) {
-                duration = 0;
-                state = PolicyState.COOLDOWN;
+            activeDaysRemaining -= days;
+            if (activeDaysRemaining <= 0) {
+                deactivate(data);
+                if (notifyWhenFinished) notifyFinished(data);
             }
             break;
+
         case COOLDOWN:
-            cooldown -= days;
-            if (cooldown <= 0) {
-                cooldown = 0;
+            cooldownDaysRemaining -= days;
+            if (cooldownDaysRemaining <= 0) {
                 state = PolicyState.AVAILABLE;
+                if (notifyWhenAvailable) notifyAvailable(data);
             }
             break;
+
         default:
             break;
         }
     }
 
-    public final void activate(float durationDays, float cooldownDays) {
+    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+        tp.setParaFontOrbitron();
+        tp.addPara(spec.name, opad);
+        
+        tp.setParaFontDefault();
+        tp.addPara(spec.description, pad);
+
+        if (state == PolicyState.COOLDOWN) {
+            tp.addPara(String.format(
+                "Policy currently on cooldown. Available in %d days.", cooldownDaysRemaining), pad
+            );
+        }
+    }
+
+    public void notifyAvailable(PlayerMarketData data) {
+        Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
+            String.format("Policy available: %s", spec.name),
+            Misc.getTooltipTitleAndLightHighlightColor(),
+            spec.name,
+            highlight
+        );
+    }
+
+    public void notifyFinished(PlayerMarketData data) {
+        Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
+            String.format("Policy finished: %s", spec.name),
+            Misc.getTooltipTitleAndLightHighlightColor(),
+            spec.name,
+            highlight
+        );
+    }
+
+    public final void activate(PlayerMarketData data) {
+        activate(data, spec.durationDays);
+    }
+
+    public final void activate(PlayerMarketData data, int durationDays) {
         if (state != PolicyState.AVAILABLE) return;
 
-        this.duration = durationDays;
-        this.cooldown = cooldownDays;
+        EconomyEngine.getInstance().addCredits(data.marketID, -spec.cost);
+        activeDaysRemaining = durationDays;
         state = PolicyState.ACTIVE;
+        apply(data);
+    }
+
+    public final void deactivate(PlayerMarketData data) {
+        deactivate(data, spec.cooldownDays);
+    }
+
+    public final void deactivate(PlayerMarketData data, int cooldownDays) {
+        if (state != PolicyState.ACTIVE) return;
+
+        cooldownDaysRemaining = cooldownDays;
+        state = PolicyState.COOLDOWN;
+        unapply(data);
     }
 }

@@ -7,7 +7,6 @@ import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.util.Misc;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -46,6 +45,7 @@ import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 public class AssignWorkersDialog implements CustomDialogDelegate {
 
@@ -96,8 +96,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
         panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 
-        final int pad = 3;
-        final int opad = 10;
         final int sliderHeight = 32;
         final int sliderWidth = 380;
         final int sliderY = 225;
@@ -249,7 +247,6 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final float iconSize = 32f;
         final int itemsPerRow = 2;
         final float sectionWidth = ((panelWidth / 2) / itemsPerRow) - opad;
-        final Color highlight = Misc.getHighlightColor();
 
         final EconomyEngine engine = EconomyEngine.getInstance();
 
