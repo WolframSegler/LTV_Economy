@@ -56,6 +56,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.economyValues.*;
 
 public class LtvMarketReplacer implements EveryFrameScript {
 
@@ -167,7 +168,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         if (DebugFlags.COLONY_DEBUG || market.isPlayerOwned()) {
             final CallbackRunnable<Button> stockpilesBtnRunnable = (btn) -> {
-                final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);
+                final ColonyInvDialog dialogPanel = new ColonyInvDialog(market, btn);
 
                 WrapUiUtils.CustomDialogViewer(
                         dialogPanel, ColonyInvDialog.PANEL_W, ColonyInvDialog.PANEL_H);
@@ -466,7 +467,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     m_tp.addTable("No imports", importedCount - comCount, opad);
                 }
 
-                final long monthlyWages = (long) (engine.getWagesForMarket(market.getId())*30);
+                final long monthlyWages = (long) (engine.getWagesForMarket(market.getId())*MONTH);
                 if (monthlyWages > 0) {
                     m_tp.addPara("Worker wages: %s", opad, negative,
                         NumFormat.formatCredit(monthlyWages)
@@ -599,8 +600,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 break;
             }
         }
-        if (commodityPanel == null)
-            return;
+        if (commodityPanel == null) return;
 
         try {
             // Steal the members for the constructor
@@ -610,17 +610,17 @@ public class LtvMarketReplacer implements EveryFrameScript {
             final int height = (int) commodityPanel.getPosition().getHeight();
 
             final LtvCommodityPanel replacement = new LtvCommodityPanel(
-                    managementPanel,
-                    width,
-                    height,
-                    new BasePanelPlugin<LtvCommodityPanel>());
+                managementPanel,
+                width,
+                height,
+                new BasePanelPlugin<LtvCommodityPanel>()
+            );
             replacement.setMarket(market);
 
             final HasActionListener listener = new HasActionListener() {
                 @Override
                 public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
-                    if (!isLeftClick)
-                        return;
+                    if (!isLeftClick) return;
 
                     LtvCommodityRowPanel panel = ((LtvCommodityRowPanel) source);
 

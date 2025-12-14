@@ -603,7 +603,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final SettingsAPI settings = Global.getSettings();
         
         try {
-            settings.loadTexture(policy.spec.iconPath);
+            settings.loadTexture(policy.spec.posterPath);
         } catch (Exception e) {
             Global.getLogger(getClass()).warn(e);
         }
@@ -618,7 +618,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         };
 
         final SpritePanelWithTp poster = new SpritePanelWithTp(posterWrap.getPanel(),
-            width, height, new SpritePanelPlugin<>(), policy.spec.iconPath,
+            width, height, new SpritePanelPlugin<>(), policy.spec.posterPath,
             policy.isOnCooldown() ? Color.GRAY : null, null, policy.isActive()
         ) {
             {
@@ -715,8 +715,22 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         activateButton.quickMode = true;
         activateButton.setCutStyle(CutStyle.TL_BR);
         activateButton.bgAlpha = 1f;
-        if (!policy.isAvailable()) {
+        final long marketCredits = EconomyEngine.getInstance().getCredits(m_market.getId());
+        final boolean hasSufficientCredits = Math.max(0, marketCredits) >= policy.spec.cost;
+        if (!policy.isAvailable() || !hasSufficientCredits) {
             activateButton.disabled = true;
+
+            activateButton.setTooltipFactory(() -> {
+                final TooltipMakerAPI tp = activateButton.getPanel().createUIElement(400, 0, false);
+
+                tp.addPara("Not enough market credits to activate this policy", pad);
+
+                activateButton.add(tp);
+                WrapUiUtils.anchorPanel(tp, activateButton.getPanel(), AnchorType.TopLeft, pad);
+                return tp;
+            });
+            activateButton.setParentSupplier(() -> { return activateButton.getPanel();});
+            activateButton.showTooltipWhileInactive = true;
         }
 
         cont.addComponent(activateButton.getPanel()).inBR(opad + PANEL_W/2f, pad);
@@ -724,7 +738,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final String costTxt = policy.spec.cost > 0 ? " - "+NumFormat.formatCredit(policy.spec.cost) : "";
         final LabelAPI title = settings.createLabel(policy.spec.name + costTxt, Fonts.ORBITRON_12);
 
-        title.setHighlightColor(highlight);
+        title.setHighlightColor(hasSufficientCredits ? highlight : negative);
         title.setHighlight(NumFormat.formatCredit(policy.spec.cost));
         title.setColor(base);
         cont.addComponent((UIComponentAPI)title).inTL(posterW + opad*3, pad);
@@ -740,11 +754,11 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         buttonSide.getPosition().setSize(posterW/2f + opad, 30);
         cont.addComponent((UIComponentAPI)buttonSide).inBR(opad*2 + buttonW + PANEL_W/2f, pad);
 
+        // NOTIFICATION BUTTONS
         final CallbackRunnable<Button> availableRn = (btn) -> {
             btn.checked = !btn.checked;
             policy.notifyWhenAvailable = btn.checked;
         };
-
         final CallbackRunnable<Button> finishedRn = (btn) -> {
             btn.checked = !btn.checked;
             policy.notifyWhenFinished = btn.checked;
@@ -768,6 +782,8 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         notifyFinishedTxt.setColor(base);
         notifyAvailableBtn.checked = policy.notifyWhenAvailable;
         notifyFinishedBtn.checked = policy.notifyWhenFinished;
+        notifyAvailableBtn.bgSelectedColor = new Color(60, 230, 250);
+        notifyFinishedBtn.bgSelectedColor = new Color(60, 230, 250);
         cont.addComponent(notifyAvailableBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*2);
         cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
         cont.addComponent((UIComponentAPI)notifyAvailableTxt).inBL(

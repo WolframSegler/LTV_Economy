@@ -11,6 +11,9 @@
       "society": "graphics/ui/society.png",
       "solidarity_colored": "graphics/ui/solidarity_colored.png",
       "solidarity_empty": "graphics/ui/solidarity_empty.png"
+    },
+    "icons": {
+      "policy_icon": "graphics/icons/intel/policy_icon.png"
     }
   }
 }

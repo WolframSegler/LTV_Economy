@@ -45,7 +45,7 @@ public class PolicyConfigLoader {
                 spec.marketPolicyClass = (Class<? extends MarketPolicy>)
                     settings.getScriptClassLoader().loadClass(obj.getString("class")
                 );
-                spec.iconPath = obj.getString("iconPath");
+                spec.posterPath = obj.getString("posterPath");
                 spec.cost = obj.getInt("cost");
                 spec.durationDays = obj.getInt("durationDays");
                 spec.cooldownDays = obj.getInt("cooldownDays");
@@ -78,7 +78,7 @@ public class PolicyConfigLoader {
         public String id;
         public String name;
         public Class<? extends MarketPolicy> marketPolicyClass; 
-        public String iconPath;
+        public String posterPath;
         public int cost;
         public int durationDays;
         public int cooldownDays;

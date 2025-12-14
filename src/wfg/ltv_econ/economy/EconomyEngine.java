@@ -24,6 +24,8 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MonthlyReport;
+import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
@@ -38,6 +40,7 @@ import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 import wfg.wrap_ui.util.NumFormat;
+import static wfg.ltv_econ.constants.economyValues.*;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -46,6 +49,7 @@ import com.fs.starfarer.api.impl.campaign.graid.CommodityGroundRaidObjectivePlug
 import com.fs.starfarer.api.impl.campaign.graid.GroundRaidObjectivePlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidType;
+import com.fs.starfarer.api.impl.campaign.shared.SharedData;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
 
@@ -172,23 +176,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     protected int dayTracker = -1;
-    protected int monthTracker = -1;
     protected int cyclesSinceWorkerAssign = 0;
 
     public final void advance(float delta) {
         final int day = Global.getSector().getClock().getDay();
-        final int month = Global.getSector().getClock().getMonth();
 
         if (dayTracker == -1) dayTracker = day;
-        if (monthTracker == -1) monthTracker = month;
-
-        if (monthTracker != month) {
-            monthTracker = month;
-
-            for (CommodityInfo info : m_comInfo.values()) {
-                info.endMonth();
-            }
-        }
         
         if (dayTracker == day) return;
 
@@ -879,7 +872,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getNetIncome(MarketAPI market, boolean lastMonth) {
         final long exportIncome = getExportIncome(market, lastMonth);
         final long importCost = getImportExpense(market, lastMonth);
-        final int wageCost = (int) getWagesForMarket(market.getId());
+        final int wageCost = (int) getWagesForMarket(market.getId())*MONTH;
         final int indIncome = getIndustryIncome(market);
         final int indUpkeep = getIndustryUpkeep(market);
         final int hazardPay = market.isImmigrationIncentivesOn() ?
@@ -903,6 +896,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return exportIncome;
     }
 
+    public final long getExportIncome(MarketAPI market, String comID, boolean lastMonth) {
+        if (m_playerMarketData.keySet().contains(market.getId())) {
+            final IncomeLedger ledger = m_comInfo.get(comID).getLedger(market.getId());
+            return lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
+        }
+        return 0;
+    }
+
     /*
      * Works properly only for player colonies. 
      */
@@ -918,6 +919,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return importCost;
     }
 
+    public final long getImportExpense(MarketAPI market, String comID, boolean lastMonth) {
+        if (m_playerMarketData.keySet().contains(market.getId())) {
+            final IncomeLedger ledger = m_comInfo.get(comID).getLedger(market.getId());
+            return lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
+        }
+        return 0;
+    }
+
     /**
      * Per day value
      */
@@ -929,7 +938,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 (isPlayerMarket(marketID) ? m_playerMarketData.get(marketID).getRoSV() : LaborConfig.RoSV));
         }
 
-        // Wages are an expense → negative value
         return wage;
     }
 
@@ -1034,6 +1042,70 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         for (String marketID : turnedOffIncentiveMarkets) {
             econ.getMarket(marketID).setImmigrationIncentivesOn(true);
+        }
+
+        for (CommodityInfo info : m_comInfo.values()) {
+            info.endMonth();
+        }
+
+        final MonthlyReport report = SharedData.getData().getCurrentReport();
+        FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
+		marketsNode.name = "Colonies";
+		marketsNode.custom = MonthlyReport.OUTPOSTS;
+		marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
+
+        for (PlayerMarketData data : m_playerMarketData.values()) {
+            final long netIncome = getNetIncome(data.market, true);
+            final float playerIncome = Math.max(netIncome, 0) * data.playerProfitRatio;
+            addCredits(data.marketID, (long) -playerIncome);
+            Global.getSector().getPlayerFleet().getCargo().getCredits().add(playerIncome);
+
+            final MarketAPI market = data.market;
+            final FDNode mNode = report.getNode(marketsNode, market.getId());
+            mNode.name = market.getName() + " (" + market.getSize() + ")";
+            mNode.custom = market;
+
+            // Industries & structures
+            final FDNode indNode = report.getNode(mNode, "industries"); 
+            indNode.name = "Industries & structures";
+            indNode.custom = MonthlyReport.INDUSTRIES;
+            indNode.mapEntity = market.getPrimaryEntity();
+            indNode.tooltipCreator = report.getMonthlyReportTooltip();
+            for (Industry ind : market.getIndustries()) {
+                final FDNode iNode = report.getNode(indNode, ind.getId());
+                iNode.name = ind.getCurrentName();
+                iNode.income += getIndustryIncome(ind, market).getModifiedInt();
+                iNode.upkeep += getIndustryUpkeep(ind, market).getModifiedInt();
+                iNode.custom = ind;
+                iNode.mapEntity = market.getPrimaryEntity();
+            }
+
+            // Exports
+            final FDNode exportNode = report.getNode(mNode, "exports"); 
+            exportNode.name = "Exports";
+            exportNode.custom = MonthlyReport.EXPORTS;
+            exportNode.mapEntity = market.getPrimaryEntity();
+            exportNode.tooltipCreator = report.getMonthlyReportTooltip();
+            for (CommodityOnMarketAPI com : market.getCommoditiesCopy()) {
+                final FDNode eNode = report.getNode(exportNode, com.getId());
+                final String comID = com.getId();
+                eNode.name = com.getCommodity().getName();
+                eNode.income += getExportIncome(market, comID, true);
+                eNode.upkeep += getImportExpense(market, comID, true);
+                eNode.custom = com;
+                eNode.mapEntity = market.getPrimaryEntity();
+            }
+
+            // Player cut node
+            FDNode playerIncomeNode = report.getNode(mNode, "player_share");
+            playerIncomeNode.name = "Player share (" + Math.round(data.playerProfitRatio * 100) + "%)";
+            playerIncomeNode.income += playerIncome;
+            playerIncomeNode.custom = data;
+            playerIncomeNode.tooltipCreator = report.getMonthlyReportTooltip();
+
+            if (playerIncome < 1) {
+                playerIncomeNode.name += " - none";
+            }
         }
     }
 

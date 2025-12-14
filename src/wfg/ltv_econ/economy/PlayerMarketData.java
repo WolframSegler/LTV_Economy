@@ -18,6 +18,11 @@ public class PlayerMarketData {
     public final String marketID;
     public transient MarketAPI market;
 
+    /**
+     * Value must be between 0 and 1.
+     */
+    public float playerProfitRatio = 0f;
+
     public final StatBonus healthDelta = new StatBonus();
     public final StatBonus happinessDelta = new StatBonus();
     public final StatBonus culturalCohesionDelta = new StatBonus();
@@ -123,13 +128,13 @@ public class PlayerMarketData {
     }
 
     private void updateHappinessDelta() {
-        happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.2f, "Health");
+        happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.08f, "Health");
 
         happinessDelta.modifyFlat(
             "stability", (market.getStability().getModifiedValue() - 5f) * 0.03f, "Stability"
         );
 
-        happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.06f, "Wages");
+        happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.05f, "Wages");
 
         happinessDelta.modifyFlat(
             "cohesion", (popCulturalCohesion - BASELINE_VALUE) * 0.0008f, "Cultural Cohesion"

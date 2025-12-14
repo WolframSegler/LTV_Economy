@@ -1,6 +1,7 @@
 package wfg.ltv_econ.ui.dialogs;
 
 import java.awt.Color;
+import java.util.List;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -19,6 +20,9 @@ import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
+import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
@@ -34,7 +38,6 @@ import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
-
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class ColonyInvDialog implements WrapDialogDelegate {
@@ -43,22 +46,25 @@ public class ColonyInvDialog implements WrapDialogDelegate {
     public static final int PANEL_H = 650;
 
     private final MarketAPI m_market;
+    private final Button m_btn;
     private InteractionDialogAPI interactionDialog;
 
-    public ColonyInvDialog(MarketAPI market) {
+    public ColonyInvDialog(MarketAPI market, Button btn) {
         m_market = market;
+        m_btn = btn;
     }
 
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
         UIState.setState(State.DIALOG);
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
+        final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
 
         final int sliderH = 32;
         final int sliderW = 300;
         final int buttonH = 28;
         final int buttonW = 70;
-        final int tableStartY = 110;
+        final int tableStartY = 160;
         final int buttonY = (sliderH - buttonH) / 2; 
         final Color withdrawColor = new Color(180, 110, 90);
         final Color depositColor = new Color(90, 150, 110);
@@ -99,7 +105,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                     (m_market.isPlayerOwned()
                         ? "Colony reserves are separate from your personal credits."
                         : ""),
-                    3
+                    pad
                 );
 
                 add(tp);
@@ -138,7 +144,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
 
                 tp.addPara(
                     "Shows your personal credits for transferring funds to or from the colony's reserves.",
-                    3
+                    pad
                 );
 
                 add(tp);
@@ -146,9 +152,55 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 return tp;
             }
         };
-        if (m_market.isPlayerOwned()) {
-            panel.addComponent(playerCreditPanel.getPanel()).inTL(opad, 50);
-        }
+        panel.addComponent(playerCreditPanel.getPanel()).inTL(opad, 50);
+
+        final TextPanel playerProfitPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
+            {
+                getPlugin().setIgnoreUIState(true);
+            }
+            
+            @Override  
+            public void createPanel() {
+                final String ratio = Math.round(data.playerProfitRatio * 100) + "%";
+
+                label1 = settings.createLabel(
+                    "Auto Transfer Ratio: " + ratio, Fonts.ORBITRON_16
+                );
+                label1.setHighlight(ratio);
+                label1.setHighlightColor(base);
+                final float height = label1.computeTextHeight(label1.getText());
+                add(label1).inTL(0, (sliderH - height) / 2f);
+                getPos().setSize(label1.getPosition().getWidth(), sliderH);
+            }
+
+            @Override public CustomPanelAPI getTpParent() {
+                return getPanel();
+            }
+
+            @Override  
+            public TooltipMakerAPI createAndAttachTp() {
+                final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
+
+                tp.addPara(
+                    "The ratio of monthly profits that get automatically transferred to the player",
+                    pad
+                );
+
+                tp.addPara(
+                    "You would receive %s from this colony this month. "+
+                    "Note: some values are current so far, others are full-month estimates.",
+                    pad,
+                    highlight,
+                    NumFormat.formatCredit((long) (engine.getNetIncome(
+                        m_market, false)*data.playerProfitRatio
+                    )));
+
+                add(tp);
+                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
+                return tp;
+            }
+        };
+        if (m_market.isPlayerOwned()) panel.addComponent(playerProfitPanel.getPanel()).inTL(opad, 90);
 
         final LabelAPI withdrawLabel = settings.createLabel(
             "Withdraw:", Fonts.ORBITRON_16
@@ -162,9 +214,15 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         labelH = depositLabel.computeTextHeight(depositLabel.getText());
         panel.addComponent((UIComponentAPI)depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
 
+        final LabelAPI profitLabel = settings.createLabel(
+            "Allocate:", Fonts.ORBITRON_16
+        );
+        labelH = profitLabel.computeTextHeight(profitLabel.getText());
+        panel.addComponent((UIComponentAPI)profitLabel).inTL(400, 90 + (sliderH - labelH) / 2f);
+
         
         final Slider withdrawSlider = new Slider(
-            panel, "", 0, colonyCredits, sliderW, sliderH
+            panel, "", 0f, colonyCredits, sliderW, sliderH
         );
         withdrawSlider.setHighlightOnMouseover(true);
         withdrawSlider.setUserAdjustable(true);
@@ -174,7 +232,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         panel.addComponent(withdrawSlider.getPanel()).inTL(500, 10);
 
         final Slider depositSlider = new Slider(
-            panel, "", 0, playerCredits.get(), sliderW, sliderH
+            panel, "", 0f, playerCredits.get(), sliderW, sliderH
         );
         depositSlider.setHighlightOnMouseover(true);
         depositSlider.setUserAdjustable(true);
@@ -183,16 +241,29 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgressInterpolated());
         panel.addComponent(depositSlider.getPanel()).inTL(500, 50);
 
+        final Slider profitSlider = new Slider(
+            panel, "", 0f, 100f, sliderW, sliderH
+        );
+        profitSlider.setHighlightOnMouseover(true);
+        profitSlider.setUserAdjustable(true);
+        profitSlider.showPercent = true;
+        profitSlider.roundBarValue = true;
+        profitSlider.setProgress(data.playerProfitRatio * 100);
+        if (m_market.isPlayerOwned()) panel.addComponent(profitSlider.getPanel()).inTL(500, 90);
+
         final Runnable refreshUI = () -> {
             final float colonyCred = playerCredits.get();
             final long playerCred = engine.getCredits(m_market.getId());
+            final int profitRatio = (int) data.playerProfitRatio * 100;
             final LabelAPI colonyLbl = colonyCreditPanel.label1;
             final LabelAPI playerLbl = playerCreditPanel.label1;
+            final LabelAPI profitLbl = playerProfitPanel.label1;
 
             depositSlider.setProgress(0);
             depositSlider.maxRange = colonyCred;
             withdrawSlider.setProgress(0);
             withdrawSlider.maxRange = playerCred;
+            profitSlider.setProgress(profitRatio);
 
             colonyLbl.setText(
                 "Colony Balance: " + NumFormat.formatCredit(playerCred)
@@ -207,6 +278,11 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             playerLbl.setHighlight(NumFormat.formatCredit((long) colonyCred));
             playerLbl.autoSizeToWidth(playerLbl.computeTextWidth(playerLbl.getText()));
             playerCreditPanel.getPos().setSize(playerLbl.getPosition().getWidth(), sliderH);
+
+            profitLbl.setText("Auto Transfer Ratio: " + profitRatio + "%");
+            profitLbl.setHighlight(profitRatio + "%");
+            profitLbl.autoSizeToWidth(profitLbl.computeTextWidth(profitLbl.getText()));
+            playerProfitPanel.getPos().setSize(profitLbl.getPosition().getWidth(), sliderH);
         };
 
         final CallbackRunnable<Button> withdrawRunnable = (btn) -> {
@@ -219,6 +295,10 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             playerCredits.add((int) -depositSlider.getProgress());
             refreshUI.run();
         };
+        final CallbackRunnable<Button> profitRunnable = (btn) -> {
+            data.playerProfitRatio = profitSlider.getProgress() / 100f;
+            refreshUI.run();
+        };
 
         final Button withdrawBtn = new Button(
             panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
@@ -226,13 +306,19 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final Button depositBtn = new Button(
             panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, depositRunnable
         );
+        final Button profitBtn = new Button(
+            panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, profitRunnable
+        );
 
         withdrawBtn.quickMode = true;
         depositBtn.quickMode = true;
+        profitBtn.quickMode = true;
         withdrawBtn.setCutStyle(CutStyle.ALL);
         depositBtn.setCutStyle(CutStyle.ALL);
+        profitBtn.setCutStyle(CutStyle.ALL);
         panel.addComponent(withdrawBtn.getPanel()).inTL(500 + sliderW + opad, 10 + buttonY);
         panel.addComponent(depositBtn.getPanel()).inTL(500 + sliderW + opad, 50 + buttonY);
+        panel.addComponent(profitBtn.getPanel()).inTL(500 + sliderW + opad, 90 + buttonY);
 
 
         final SortableTable table = new SortableTable(
@@ -318,6 +404,15 @@ public class ColonyInvDialog implements WrapDialogDelegate {
 
         if (interactionDialog != null) {
             interactionDialog.dismiss();
+        }
+
+        // Refresh the panel
+        final List<?> children = (List<?>)ReflectionUtils.invoke(m_btn.getParent(), "getChildrenNonCopy");
+        for (Object child : children) {
+            if (child instanceof LtvIndustryListPanel indListPanel) {
+                indListPanel.createPanel();
+                break;
+            }
         }
     }
 

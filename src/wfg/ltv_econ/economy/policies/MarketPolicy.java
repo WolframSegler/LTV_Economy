@@ -4,12 +4,12 @@ import static wfg.wrap_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.intel.PolicyNotificationIntel;
 
 /**
  * Subclasses can use {@link #apply(PlayerMarketData data)} as a sort of constructor.
@@ -78,20 +78,16 @@ public abstract class MarketPolicy {
     }
 
     public void notifyAvailable(PlayerMarketData data) {
-        Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
-            String.format("Policy available: %s", spec.name),
-            Misc.getTooltipTitleAndLightHighlightColor(),
-            spec.name,
-            highlight
+        Global.getSector().getIntelManager().addIntel(
+            new PolicyNotificationIntel(data, this, true),
+            false
         );
     }
 
     public void notifyFinished(PlayerMarketData data) {
-        Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
-            String.format("Policy finished: %s", spec.name),
-            Misc.getTooltipTitleAndLightHighlightColor(),
-            spec.name,
-            highlight
+        Global.getSector().getIntelManager().addIntel(
+            new PolicyNotificationIntel(data, this, false),
+            false
         );
     }
 
@@ -101,6 +97,7 @@ public abstract class MarketPolicy {
 
     public final void activate(PlayerMarketData data, int durationDays) {
         if (state != PolicyState.AVAILABLE) return;
+        if (EconomyEngine.getInstance().getCredits(data.marketID) < spec.cost) return;
 
         EconomyEngine.getInstance().addCredits(data.marketID, -spec.cost);
         activeDaysRemaining = durationDays;

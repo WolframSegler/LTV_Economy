@@ -170,145 +170,186 @@ public class LtvIndustryListPanel extends CustomPanel<
 		widgetWrapper.addUIElement(wrappertp).inTL(-pad, 0);
 		add(widgetWrapper).inTL(0, 0);
 		
-		TextPanel creditLblPanel = null;
+		TextPanel playerCreditLblPanel = null;
+		TextPanel colonyCreditLblPanel = null;
 		TextPanel maxIndLblPanel = null;
 
-		{ // creditLbl
-			creditLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
+		{ // player creditLbl
+		playerCreditLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
 
-                @Override
-                public void createPanel() {
-                    LabelAPI creditLbl = UiUtils.createCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
-					creditLbl.setHighlightOnMouseover(true);
+			@Override
+			public void createPanel() {
+				LabelAPI creditLbl = UiUtils.createPlayerCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
+				creditLbl.setHighlightOnMouseover(true);
 
-					getPos().setSize(
-						creditLbl.computeTextWidth(creditLbl.getText()),
-						getPos().getHeight()
-					);
+				getPos().setSize(
+					creditLbl.computeTextWidth(creditLbl.getText()),
+					getPos().getHeight()
+				);
 
-					add(creditLbl).inBL(0, 0);
-                }
+				add(creditLbl).inBL(0, 0);
+			}
 
-                @Override
-                public CustomPanelAPI getTpParent() {
-                    return getParent();
-                }
+			@Override
+			public CustomPanelAPI getTpParent() {
+				return getParent();
+			}
 
-                @Override
-                public TooltipMakerAPI createAndAttachTp() {
-					final int tpWidth = 400;
+			@Override
+			public TooltipMakerAPI createAndAttachTp() {
+				final int tpWidth = 400;
 
-                    TooltipMakerAPI tooltip = getParent().createUIElement(tpWidth, 0, false);
+				final TooltipMakerAPI tooltip = getParent().createUIElement(tpWidth, 0, false);
 
-					tooltip.addPara("Credits available.", 0);
+				tooltip.addPara("Player credits available.", 0);
 
-					getParent().addUIElement(tooltip);
+				getParent().addUIElement(tooltip);
 
-					WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
+				WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
 
-                    return tooltip;
-                }
-            };
+				return tooltip;
+			}
+		};
+        }
+
+		{ // colony creditLbl
+		colonyCreditLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
+
+			@Override
+			public void createPanel() {
+				LabelAPI creditLbl = UiUtils.createColonyCreditsLabel(
+					Fonts.INSIGNIA_LARGE, 25, m_market.getId()
+				);
+				creditLbl.setHighlightOnMouseover(true);
+
+				getPos().setSize(
+					creditLbl.computeTextWidth(creditLbl.getText()),
+					getPos().getHeight()
+				);
+
+				add(creditLbl).inBL(0, 0);
+			}
+
+			@Override
+			public CustomPanelAPI getTpParent() {
+				return getParent();
+			}
+
+			@Override
+			public TooltipMakerAPI createAndAttachTp() {
+				final int tpWidth = 400;
+
+				final TooltipMakerAPI tooltip = getParent().createUIElement(tpWidth, 0, false);
+
+				tooltip.addPara("Colony credits available.", 0);
+
+				getParent().addUIElement(tooltip);
+
+				WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
+
+				return tooltip;
+			}
+		};
         }
 
 		{ // maxIndLbl
-			maxIndLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
+		maxIndLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
 
-                @Override
-                public void createPanel() {
-                    LabelAPI maxIndLbl = UiUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
-					maxIndLbl.setHighlightOnMouseover(true);
+			@Override
+			public void createPanel() {
+				LabelAPI maxIndLbl = UiUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
+				maxIndLbl.setHighlightOnMouseover(true);
 
-					getPos().setSize(
-						maxIndLbl.computeTextWidth(maxIndLbl.getText()),
-						getPos().getHeight()
-					);
+				getPos().setSize(
+					maxIndLbl.computeTextWidth(maxIndLbl.getText()),
+					getPos().getHeight()
+				);
 
-					add(maxIndLbl).inBL(0, 0);
-                }
+				add(maxIndLbl).inBL(0, 0);
+			}
 
-                @Override
-                public CustomPanelAPI getTpParent() {
-                    return getParent();
-                }
+			@Override
+			public CustomPanelAPI getTpParent() {
+				return getParent();
+			}
 
-                @Override
-                public TooltipMakerAPI createAndAttachTp() {
-					final int tpWidth = 400;
+			@Override
+			public TooltipMakerAPI createAndAttachTp() {
+				final int tpWidth = 400;
 
-                    TooltipMakerAPI tooltip = getParent().createUIElement(tpWidth, 0, false);
+				TooltipMakerAPI tooltip = getParent().createUIElement(tpWidth, 0, false);
 
-					tooltip.addPara(
-						"Maximum number of industries, based on the size of a colony and other factors.", 0
-					);
-					tooltip.beginTable(
-						m_market.getFaction(), 20, new Object[]{"Colony size", 120, "Base industries", 120}
-					);
+				tooltip.addPara(
+					"Maximum number of industries, based on the size of a colony and other factors.", 0
+				);
+				tooltip.beginTable(
+					m_market.getFaction(), 20, new Object[]{"Colony size", 120, "Base industries", 120}
+				);
 
-					for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
-						tooltip.addRow(new Object[]{highlight, "" + i, highlight,
-						"" + LtvPopulationAndInfrastructure.getMaxIndustries(i)});
-					}
+				for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
+					tooltip.addRow(new Object[]{highlight, "" + i, highlight,
+					"" + LtvPopulationAndInfrastructure.getMaxIndustries(i)});
+				}
 
-					tooltip.addTable("", 0, 10);
-					tooltip.addPara(
-						"Structures such as spaceports or orbital stations do not count against this limit." + 
-						"Colonies that exceed this limit for any reason have their stability reduced by %s.", 20,
-						highlight, new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
-					);
-					tooltip.addPara("Industries on %s:", 10, m_market.getFaction().getBaseUIColor(),
-						new String[]{m_market.getName()}
-					);
+				tooltip.addTable("", 0, 10);
+				tooltip.addPara(
+					"Structures such as spaceports or orbital stations do not count against this limit." + 
+					"Colonies that exceed this limit for any reason have their stability reduced by %s.", 20,
+					highlight, new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
+				);
+				tooltip.addPara("Industries on %s:", 10, m_market.getFaction().getBaseUIColor(),
+					new String[]{m_market.getName()}
+				);
 
-					List<Industry> industries = CommodityStats.getVisibleIndustries(m_market);
-					Collections.sort(industries, getIndustryOrderComparator());
+				List<Industry> industries = CommodityStats.getVisibleIndustries(m_market);
+				Collections.sort(industries, getIndustryOrderComparator());
 
-					final String indent = "    ";
-					boolean anyIndustryAdded = false;
-					int paragraphSpacing = 5;
+				final String indent = "    ";
+				boolean anyIndustryAdded = false;
+				int paragraphSpacing = 5;
 
-					for (Industry industry : industries) {
-						if (industry.isIndustry()) {
-							tooltip.addPara(indent + industry.getCurrentName(), paragraphSpacing);
-							paragraphSpacing = 3;
-							anyIndustryAdded = true;
-						} else if (industry.isUpgrading()) {
-							String upgradeId = industry.getSpec().getUpgrade();
-							if (upgradeId != null) {
-								Industry upgradedIndustry = m_market.instantiateIndustry(upgradeId);
-								if (upgradedIndustry.isIndustry()) {
-									tooltip.addPara(
-										indent + industry.getCurrentName() + " (upgrading to " + 
-										upgradedIndustry.getCurrentName() + ")", paragraphSpacing
-									);
-									paragraphSpacing = 3;
-									anyIndustryAdded = true;
-								}
+				for (Industry industry : industries) {
+					if (industry.isIndustry()) {
+						tooltip.addPara(indent + industry.getCurrentName(), paragraphSpacing);
+						paragraphSpacing = 3;
+						anyIndustryAdded = true;
+					} else if (industry.isUpgrading()) {
+						String upgradeId = industry.getSpec().getUpgrade();
+						if (upgradeId != null) {
+							Industry upgradedIndustry = m_market.instantiateIndustry(upgradeId);
+							if (upgradedIndustry.isIndustry()) {
+								tooltip.addPara(
+									indent + industry.getCurrentName() + " (upgrading to " + 
+									upgradedIndustry.getCurrentName() + ")", paragraphSpacing
+								);
+								paragraphSpacing = 3;
+								anyIndustryAdded = true;
 							}
 						}
 					}
+				}
 
-					for (ConstructionQueueItem item : m_market.getConstructionQueue().getItems()) {
-						final IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
-						if (spec.hasTag("industry")) {
-							Industry ind = m_market.instantiateIndustry(item.id);
-							tooltip.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
-							paragraphSpacing = 3;
-							anyIndustryAdded = true;
-						}
+				for (ConstructionQueueItem item : m_market.getConstructionQueue().getItems()) {
+					final IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
+					if (spec.hasTag("industry")) {
+						Industry ind = m_market.instantiateIndustry(item.id);
+						tooltip.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
+						paragraphSpacing = 3;
+						anyIndustryAdded = true;
 					}
+				}
 
-					if (!anyIndustryAdded) {
-						tooltip.addPara(indent + "None", paragraphSpacing);
-					}
+				if (!anyIndustryAdded) {
+					tooltip.addPara(indent + "None", paragraphSpacing);
+				}
 
-					getParent().addUIElement(tooltip);
+				getParent().addUIElement(tooltip);
 
-					WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
+				WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
 
-                    return tooltip;
-                }
-            };
+				return tooltip;
+			}
+		};
         }
 
 		final CallbackRunnable<Button> buildBtnRunnable = (btn) -> {
@@ -345,13 +386,14 @@ public class LtvIndustryListPanel extends CustomPanel<
 		buildButton.getPlugin().setTargetUIState(State.NONE);
 		
 		add(buildButton).inBL(0, BUTTON_SECTION_HEIGHT);
-		add(creditLblPanel.getPanel()).inBL(buildBtnWidth + 70, BUTTON_SECTION_HEIGHT);
-		add(maxIndLblPanel.getPanel()).inBR(40, BUTTON_SECTION_HEIGHT);
+		add(playerCreditLblPanel).inBL(buildBtnWidth + 40, BUTTON_SECTION_HEIGHT + 18);
+		add(colonyCreditLblPanel).inBL(buildBtnWidth + 40, BUTTON_SECTION_HEIGHT - 18);
+		add(maxIndLblPanel).inBR(40, BUTTON_SECTION_HEIGHT);
 
 		if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
 			buildButton.disabled = true;
 			if (DebugFlags.HIDE_COLONY_CONTROLS) {
-				creditLblPanel.getPanel().setOpacity(0);
+				playerCreditLblPanel.getPanel().setOpacity(0);
 				buildButton.getPanel().setOpacity(0);
 			}
 		}
@@ -430,6 +472,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 	public void dialogDismissed(Object... args) {
 		UIState.setState(State.NONE);
 
+		if (((int) args[1]) != 0) return; // 0 means confirm
 		final IndustryPickerDialog buildDialog = (IndustryPickerDialog) args[0];
 		if (buildDialog.getSelected() == null) return;
 

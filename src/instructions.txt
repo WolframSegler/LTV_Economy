@@ -17,10 +17,6 @@ Extra Instructions:
 - Use VisualVM OQL Console to look for strings in the game to find and update broken obfuscated code
   -> select s from java.lang.String s where s.toString().contains("target_string")
 
-- Renamed libs temporarily to txt files so the compiler doesn't try to compile them (Win10):
-  -> Get-ChildItem -Path src\com -Recurse -Filter *.java | Rename-Item -NewName { $_.Name -replace '\.java$','.txt' }
-  -> Get-ChildItem -Path src\com_core -Recurse -Filter *.java | Rename-Item -NewName { $_.Name -replace '\.java$','.txt' }
-
 - Add the prefix "Ltv" to classes who also have a vanilla counterpart. Like BaseIndustry and LtvBaseIndustry
 
 - Standard porter message for AI agent:

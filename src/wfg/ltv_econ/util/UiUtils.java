@@ -17,7 +17,9 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.plugins.CommodityinfobarPlugin;
+
 import static wfg.wrap_ui.util.UIConstants.gray;
 
 public class UiUtils {
@@ -91,13 +93,14 @@ public class UiUtils {
      * I copied and cleaned this from the obfuscated code.
      * Because this is not available through the API for some reason.
      */
-    public static final LabelAPI createCreditsLabel(String font, int height) {
-        MutableValue credits = Global.getSector().getPlayerFleet().getCargo().getCredits();
+    public static final LabelAPI createPlayerCreditsLabel(String font, int height) {
+        final MutableValue credits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
-        LabelAPI label = Global.getSettings().createLabel("Credits: " + Misc.getWithDGS(credits.get()), font);
-        if (font == "small_insignia") {
-            label.setAlignment(Alignment.LMID);
-        }
+        final LabelAPI label = Global.getSettings().createLabel(
+            "Player Credits: " + Misc.getWithDGS(credits.get()), font
+        );
+        if (font == "small_insignia") label.setAlignment(Alignment.LMID);
+        
         label.setColor(gray);
         label.autoSizeToWidth(label.computeTextWidth(label.getText()));
         if (height > 0) {
@@ -106,6 +109,23 @@ public class UiUtils {
 
         label.setHighlightColor(highlight);
         label.highlightLast(Misc.getWithDGS(credits.get()));
+        return label;
+    }
+
+    public static final LabelAPI createColonyCreditsLabel(String font, int height, String marketID) {
+        final long credits = EconomyEngine.getInstance().getCredits(marketID);
+
+        final LabelAPI label = Global.getSettings().createLabel(
+            "Colony Credits: " + String.format("%,d", credits), font
+        );
+        if (font == "small_insignia") label.setAlignment(Alignment.LMID);
+        
+        label.setColor(gray);
+        label.autoSizeToWidth(label.computeTextWidth(label.getText()));
+        if (height > 0) label.getPosition().setSize(label.getPosition().getWidth(), height);
+
+        label.setHighlightColor(credits < 0 ? negative : highlight);
+        label.highlightLast(String.format("%,d", credits));
         return label;
     }
 
