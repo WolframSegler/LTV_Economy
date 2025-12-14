@@ -372,10 +372,10 @@
 		"outputList": {
 			"maintenance": {
 				"InputsPerUnitOutput": {
-					"supplies": 0.083
+					"supplies": 0.13
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 6,
+				"marketScaleBase": 3,
 				"isAbstract": true
 			}
 		}

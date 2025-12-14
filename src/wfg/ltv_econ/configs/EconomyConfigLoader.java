@@ -1,5 +1,8 @@
 package wfg.ltv_econ.configs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -43,13 +46,17 @@ public class EconomyConfigLoader {
             EconomyConfig.EXPORT_THRESHOLD_FACTOR = (float) root.getDouble("EXPORT_THRESHOLD_FACTOR");
 
             final JSONArray arr = root.getJSONArray("DEBT_DEBUFF_TIERS");
-            EconomyConfig.DEBT_DEBUFF_TIERS = new long[arr.length() * 2];
+            EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>();
             for (int i = 0; i < arr.length(); i++) {
                 final JSONObject o = arr.getJSONObject(i);
-
-                final int base = i * 2;
-                EconomyConfig.DEBT_DEBUFF_TIERS[base] = (long) o.getDouble("threshold");
-                EconomyConfig.DEBT_DEBUFF_TIERS[base + 1] = o.getInt("stabilityPenalty");
+                EconomyConfig.DEBT_DEBUFF_TIERS.add(
+                    new DebtDebuffTier(
+                        (long) o.getDouble("threshold"),
+                        o.getInt("stabilityPenalty"),
+                        o.getInt("upkeepMultiplierPercent"),
+                        o.getInt("immigrationModifier")
+                    )
+                );
             }
 
         } catch (Exception e) {
@@ -118,13 +125,9 @@ public class EconomyConfigLoader {
         public static int WORKER_ASSIGN_INTERVAL;
 
         /**
-         * Debt debuff tiers for markets:
-         *   [i] = threshold in credits (negative value, long)
-         *   [i + 1] = stability penalty applied if market debt < threshold
-         * 
-         * The list should be sorted from smallest (least negative) to largest (most negative) threshold.
+         * Debt debuffs by tiers for markets
          */
-        public static long[] DEBT_DEBUFF_TIERS;
+        public static List<DebtDebuffTier> DEBT_DEBUFF_TIERS;
 
         /**
          * Multiplier applied to preferredStockpiles to determine the minimum stock level
@@ -136,4 +139,11 @@ public class EconomyConfigLoader {
             EconomyConfigLoader.loadConfig();
         }
     }
+
+    public static record DebtDebuffTier(
+        long threshold,
+        int stabilityPenalty,
+        int upkeepMultiplierPercent,
+        int immigrationModifier
+    ) {}
 }

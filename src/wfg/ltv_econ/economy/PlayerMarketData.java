@@ -97,6 +97,19 @@ public class PlayerMarketData {
         advance(1);
     }
 
+    /**
+     * Assumes end-of-month
+     */
+    public final float getEffectiveProfitRatio() {
+        final EconomyEngine engine = EconomyEngine.getInstance();
+        final double net = engine.getNetIncome(market, true);
+        if (net <= 0) return 0f;
+
+        final double endCredits = engine.getCredits(marketID) + net;
+        if (endCredits <= 0) return 0f;
+
+        return (float) Math.min(playerProfitRatio, endCredits / net);
+    }
 
     // PRIVATE METHODS
     private void advanceMarket(int days) {

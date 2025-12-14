@@ -1053,12 +1053,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                 }
             );
     
-            tp.addPara("Income modifiers:", opad);
-    
-            tp.addStatModGrid(tpWidth, 50, opad, pad,
-                market.getIncomeMult(), null
-            );
-    
             tp.addSectionHeading(m_com.getName() + " production & availability",
             baseColor, darkColor, Alignment.MID, opad);
                 

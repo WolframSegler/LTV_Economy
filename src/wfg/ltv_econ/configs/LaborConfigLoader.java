@@ -1,4 +1,6 @@
 package wfg.ltv_econ.configs;
+import static wfg.ltv_econ.constants.economyValues.MONTH;
+
 import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
@@ -30,7 +32,7 @@ public class LaborConfigLoader {
             LaborConfig.RoSV = root.getInt("RoSV");
             LaborConfig.MAX_RoSV = root.getInt("MAX_RoSV");
             LaborConfig.LPV_month = root.getInt("LPV_month");
-            LaborConfig.LPV_day = LaborConfig.LPV_month / 30f;
+            LaborConfig.LPV_day = LaborConfig.LPV_month / (float) MONTH;
             LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
             LaborConfig.populationRatioThatAreWorkers = (float) root.getDouble("populationRatioThatAreWorkers");
             LaborConfig.defaultWorkerCapPerOutput = (float) root.getDouble("defaultWorkerCapPerOutput");

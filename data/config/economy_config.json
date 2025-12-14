@@ -3,12 +3,38 @@
     "WORKER_ASSIGN_INTERVAL": 15,
 
     "STARTING_CREDITS_FOR_MARKET": 50000,
+
     "DEBT_DEBUFF_TIERS": [
-        { "threshold": -1e8,  "stabilityPenalty": -1 },
-        { "threshold": -1e9,  "stabilityPenalty": -2 },
-        { "threshold": -1e10, "stabilityPenalty": -3 },
-        { "threshold": -1e11, "stabilityPenalty": -4 },
-        { "threshold": -1e12, "stabilityPenalty": -5 }
+        {
+            "threshold": -1e6,
+            "stabilityPenalty": -1,
+            "upkeepMultiplierPercent": 5,
+            "immigrationModifier": -3
+        },
+        {
+            "threshold": -1e7,
+            "stabilityPenalty": -2,
+            "upkeepMultiplierPercent": 10,
+            "immigrationModifier": -8
+        },
+        {
+            "threshold": -1e8,
+            "stabilityPenalty": -3,
+            "upkeepMultiplierPercent": 15,
+            "immigrationModifier": -12
+        },
+        {
+            "threshold": -5e8,
+            "stabilityPenalty": -4,
+            "upkeepMultiplierPercent": 20,
+            "immigrationModifier": -18
+        },
+        {
+            "threshold": -1e10,
+            "stabilityPenalty": -5,
+            "upkeepMultiplierPercent": 40,
+            "immigrationModifier": -25
+        }
     ],
     
     "PRODUCTION_BUFFER": 0.2,

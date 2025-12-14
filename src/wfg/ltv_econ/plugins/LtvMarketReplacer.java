@@ -308,6 +308,13 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 m_tp.addStatModGrid(
                     TP_WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null
                 );
+                m_tp.setParaFontColor(gray);
+                m_tp.addPara(
+                    "This multiplier affects industry income & upkeep and wages, "+ 
+                    "but does not affect trade (exports/imports).",
+                    opad
+                );
+                m_tp.setParaFontColor(Color.WHITE);
 
                 m_tp.addPara(
                     "Upkeep multiplier: %s", opad, highlight,
@@ -331,7 +338,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                         engine.getIndustryIncome(i1, market).getModifiedInt()
                     )
                 );
-                m_tp.beginGridFlipped(TP_WIDTH, 1, 65.0F, opad);
+                m_tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
 
                 int indCount = 0;
                 for (Industry ind : industries) {
@@ -467,7 +474,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     m_tp.addTable("No imports", importedCount - comCount, opad);
                 }
 
-                final long monthlyWages = (long) (engine.getWagesForMarket(market.getId())*MONTH);
+                final long monthlyWages = (long) (engine.getWagesForMarket(market)*MONTH);
                 if (monthlyWages > 0) {
                     m_tp.addPara("Worker wages: %s", opad, negative,
                         NumFormat.formatCredit(monthlyWages)

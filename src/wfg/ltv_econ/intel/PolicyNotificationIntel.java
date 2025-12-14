@@ -1,5 +1,6 @@
 package wfg.ltv_econ.intel;
 
+import static wfg.ltv_econ.constants.economyValues.*;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
@@ -23,7 +24,7 @@ public class PolicyNotificationIntel extends BaseIntelPlugin {
         this.available = available;
 
         important = false;
-        endingTimeRemaining = 30f;
+        endingTimeRemaining = (float) MONTH;
     }
 
     @Override

@@ -29,6 +29,7 @@ import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.configs.EconomyConfigLoader.DebtDebuffTier;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
@@ -297,12 +298,13 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (!fakeAdvance) m_playerMarketData.values().forEach(PlayerMarketData::advance);
 
         m_comInfo.values().parallelStream().forEach(info -> info.trade(fakeAdvance));
+
         if (!fakeAdvance) {
             m_comInfo.values().forEach(CommodityInfo::advance);
 
             applyWages();
             redistributeFactionCredits();
-            applyCreditStabilityModifiers();
+            applyDebtEffects();
         }
     }
 
@@ -583,8 +585,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final void applyWages() {
+        final EconomyAPI econ = Global.getSector().getEconomy(); 
         for (String marketID : m_registeredMarkets) {
-            addCredits(marketID, (int) -getWagesForMarket(marketID));
+            addCredits(marketID, (int) -getWagesForMarket(econ.getMarket(marketID)));
         }
     }
 
@@ -611,26 +614,38 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         }
     }
 
-    public final void applyCreditStabilityModifiers() {
+    public final void applyDebtEffects() {
         for (MarketAPI market : getMarketsCopy()) {
             final long credits = getCredits(market.getId());
+            DebtDebuffTier appliedTier = null;
 
-            long penalty = 0;
-            final long[] tier = EconomyConfig.DEBT_DEBUFF_TIERS;
-            for (int i = 0; i < tier.length; i += 2) {
-                if (credits < tier[i]) {
-                    penalty = tier[i + 1];
-                } else break;
+            for (DebtDebuffTier tier : EconomyConfig.DEBT_DEBUFF_TIERS) {
+                if (credits < tier.threshold()) appliedTier = tier;
+                else break;
             }
 
-            if (penalty < 0) {
+            final String src = "ltv_econ_debt_debuff";
+
+            if (appliedTier == null) {
+                market.getStability().unmodify(src);
+                market.getUpkeepMult().unmodify(src);
+                market.getIncoming().getWeight().unmodify(src);
+            } else {
                 market.getStability().modifyFlat(
-                    "ltv_econ_debt_debuff",
-                    penalty,
+                    src,
+                    appliedTier.stabilityPenalty(),
                     "market debt"
                 );
-            } else {
-                market.getStability().unmodify("ltv_econ_debt_debuff");
+                market.getUpkeepMult().modifyPercent(
+                    src,
+                    appliedTier.upkeepMultiplierPercent(),
+                    "inefficiencies caused by market debt"
+                );
+                market.getIncoming().getWeight().modifyFlat(
+                    src,
+                    appliedTier.immigrationModifier(),
+                    "Unattractiveness caused by market debt"
+                );
             }
         }
     }
@@ -867,13 +882,17 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return m_marketCredits.getOrDefault(marketID, 0l);
     }
 
-    /*
-     * Works properly only for player colonies. 
+    /**
+     * Works properly only for player colonies.
+     *
+     * <p>{@code getIncomeMult()} does not affect trade income. It represents
+     * administrative efficiency and applies only to abstract income, upkeep,
+     * and wage-related systems.</p>
      */
     public final long getNetIncome(MarketAPI market, boolean lastMonth) {
         final long exportIncome = getExportIncome(market, lastMonth);
         final long importCost = getImportExpense(market, lastMonth);
-        final int wageCost = (int) getWagesForMarket(market.getId())*MONTH;
+        final int wageCost = (int) getWagesForMarket(market)*MONTH;
         final int indIncome = getIndustryIncome(market);
         final int indUpkeep = getIndustryUpkeep(market);
         final int hazardPay = market.isImmigrationIncentivesOn() ?
@@ -932,7 +951,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     /**
      * Per day value
      */
-    public final float getWagesForMarket(String marketID) {
+    public final float getWagesForMarket(MarketAPI market) {
+        final String marketID = market.getId();
         float wage = 0f;
 
         for (WorkerIndustryData data : WorkerRegistry.getInstance().getIndustriesUsingWorkers(marketID)) {
@@ -940,7 +960,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 (isPlayerMarket(marketID) ? m_playerMarketData.get(marketID).getRoSV() : LaborConfig.RoSV));
         }
 
-        return wage;
+        return wage * market.getUpkeepMult().getModifiedValue();
     }
 
     public final int getIndustryIncome(MarketAPI market) {
@@ -1059,8 +1079,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         for (PlayerMarketData data : m_playerMarketData.values()) {
             final MarketAPI market = data.market;
             final long netIncome = getNetIncome(market, true);
-            final float playerIncome = Math.max(netIncome, 0) * data.playerProfitRatio;
-            final float r = data.playerProfitRatio;
+            final float r = data.getEffectiveProfitRatio();
+            final float playerIncome = Math.max(netIncome, 0) * r;
             addCredits(data.marketID, (long) -playerIncome);
 
             
@@ -1070,7 +1090,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
             // Player cut node
             final FDNode playerIncomeNode = report.getNode(mNode, "player_share");
-            playerIncomeNode.name = "Player share (" + Math.round(data.playerProfitRatio * 100) + "%)";
+            playerIncomeNode.name = "Effective player share (" + Math.round(r * 100) + "%)";
             playerIncomeNode.icon = Global.getSettings().getSpriteName("icons", "player_ratio");
             playerIncomeNode.income = 0.0001f;
             playerIncomeNode.tooltipCreator = new TooltipCreator() {
@@ -1079,17 +1099,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 public float getTooltipWidth(Object params) {return 400f;}
 
                 public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
-                    final PlayerMarketData data = getPlayerMarketData(market.getId());
-                    final float netIncome = getNetIncome(market, true)
-                        * data.playerProfitRatio;
-
                     tp.addPara(
                         "The ratio of monthly profits that get automatically transferred to you: %s.",
-                        pad,
-                        highlight,
-                        NumFormat.formatCredit((long) netIncome)
+                        pad, highlight, NumFormat.formatCredit((long) netIncome)
                     );
-
+                    tp.addPara(
+                        "The effective value can be below the chosen value if the colony is in debt.", 
+                        pad
+                    );
                     tp.addPara("All income values are modified by this value", pad);
                 }
             };
@@ -1148,7 +1165,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             final FDNode wageNode = report.getNode(mNode, "wages"); 
             wageNode.name = "Wages";
             wageNode.mapEntity = market.getPrimaryEntity();
-            wageNode.upkeep += getWagesForMarket(market.getId())*MONTH * r;
+            wageNode.upkeep += getWagesForMarket(market)*MONTH * r;
             wageNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}
 
