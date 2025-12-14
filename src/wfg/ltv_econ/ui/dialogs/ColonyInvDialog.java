@@ -254,7 +254,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final Runnable refreshUI = () -> {
             final float colonyCred = playerCredits.get();
             final long playerCred = engine.getCredits(m_market.getId());
-            final int profitRatio = (int) data.playerProfitRatio * 100;
+            final int profitRatio = (int) (data.playerProfitRatio * 100);
             final LabelAPI colonyLbl = colonyCreditPanel.label1;
             final LabelAPI playerLbl = playerCreditPanel.label1;
             final LabelAPI profitLbl = playerProfitPanel.label1;

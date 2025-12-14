@@ -13,7 +13,9 @@
       "solidarity_empty": "graphics/ui/solidarity_empty.png"
     },
     "icons": {
-      "policy_icon": "graphics/icons/intel/policy_icon.png"
+      "policy_icon": "graphics/icons/intel/policy_icon.png",
+      "player_ratio": "graphics/icons/reports/player_ratio.png",
+      "ratio_chart": "graphics/icons/reports/ratio_chart.png"
     }
   }
 }

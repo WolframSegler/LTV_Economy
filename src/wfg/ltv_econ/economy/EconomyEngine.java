@@ -41,6 +41,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 import wfg.wrap_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.economyValues.*;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -50,6 +51,8 @@ import com.fs.starfarer.api.impl.campaign.graid.GroundRaidObjectivePlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidType;
 import com.fs.starfarer.api.impl.campaign.shared.SharedData;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
 
@@ -311,9 +314,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) m_playerMarketData.put(marketID, new PlayerMarketData(marketID));
 
-        for (CommodityInfo comInfo : m_comInfo.values()) {
-            comInfo.addMarket(marketID);
-        }
+        m_comInfo.values().forEach(c -> c.addMarket(marketID));
     }
 
     public final void removeMarket(MarketAPI market) {
@@ -898,6 +899,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     public final long getExportIncome(MarketAPI market, String comID, boolean lastMonth) {
         if (m_playerMarketData.keySet().contains(market.getId())) {
+
             final IncomeLedger ledger = m_comInfo.get(comID).getLedger(market.getId());
             return lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
         }
@@ -1055,15 +1057,46 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 		marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
 
         for (PlayerMarketData data : m_playerMarketData.values()) {
-            final long netIncome = getNetIncome(data.market, true);
-            final float playerIncome = Math.max(netIncome, 0) * data.playerProfitRatio;
-            addCredits(data.marketID, (long) -playerIncome);
-            Global.getSector().getPlayerFleet().getCargo().getCredits().add(playerIncome);
-
             final MarketAPI market = data.market;
+            final long netIncome = getNetIncome(market, true);
+            final float playerIncome = Math.max(netIncome, 0) * data.playerProfitRatio;
+            final float r = data.playerProfitRatio;
+            addCredits(data.marketID, (long) -playerIncome);
+
+            
             final FDNode mNode = report.getNode(marketsNode, market.getId());
             mNode.name = market.getName() + " (" + market.getSize() + ")";
             mNode.custom = market;
+
+            // Player cut node
+            final FDNode playerIncomeNode = report.getNode(mNode, "player_share");
+            playerIncomeNode.name = "Player share (" + Math.round(data.playerProfitRatio * 100) + "%)";
+            playerIncomeNode.icon = Global.getSettings().getSpriteName("icons", "player_ratio");
+            playerIncomeNode.income = 0.0001f;
+            playerIncomeNode.tooltipCreator = new TooltipCreator() {
+                public boolean isTooltipExpandable(Object params) {return false;}
+
+                public float getTooltipWidth(Object params) {return 400f;}
+
+                public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
+                    final PlayerMarketData data = getPlayerMarketData(market.getId());
+                    final float netIncome = getNetIncome(market, true)
+                        * data.playerProfitRatio;
+
+                    tp.addPara(
+                        "The ratio of monthly profits that get automatically transferred to you: %s.",
+                        pad,
+                        highlight,
+                        NumFormat.formatCredit((long) netIncome)
+                    );
+
+                    tp.addPara("All income values are modified by this value", pad);
+                }
+            };
+
+            if (playerIncome < 1) {
+                playerIncomeNode.name += " - none";
+            }
 
             // Industries & structures
             final FDNode indNode = report.getNode(mNode, "industries"); 
@@ -1074,8 +1107,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             for (Industry ind : market.getIndustries()) {
                 final FDNode iNode = report.getNode(indNode, ind.getId());
                 iNode.name = ind.getCurrentName();
-                iNode.income += getIndustryIncome(ind, market).getModifiedInt();
-                iNode.upkeep += getIndustryUpkeep(ind, market).getModifiedInt();
+                iNode.income += getIndustryIncome(ind, market).getModifiedInt() * r;
+                iNode.upkeep += getIndustryUpkeep(ind, market).getModifiedInt() * r;
                 iNode.custom = ind;
                 iNode.mapEntity = market.getPrimaryEntity();
             }
@@ -1085,27 +1118,48 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             exportNode.name = "Exports";
             exportNode.custom = MonthlyReport.EXPORTS;
             exportNode.mapEntity = market.getPrimaryEntity();
-            exportNode.tooltipCreator = report.getMonthlyReportTooltip();
-            for (CommodityOnMarketAPI com : market.getCommoditiesCopy()) {
+            exportNode.tooltipCreator = new TooltipCreator() {
+                public boolean isTooltipExpandable(Object params) {return false;}
+
+                public float getTooltipWidth(Object params) {return 400f;}
+
+                public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
+                    final String inFactionBonus = String.format("%d%%",
+                        (int)(1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
+
+                    tp.addPara(
+                        "Income from exports by this outpost or colony. " +
+                        "Smuggling exports do not produce income. " +
+                        "In-faction imports are %s cheaper than normal",
+                        pad, highlight, inFactionBonus
+                    );
+                }
+            };
+            for (CommoditySpecAPI com : getEconCommodities()) {
                 final FDNode eNode = report.getNode(exportNode, com.getId());
                 final String comID = com.getId();
-                eNode.name = com.getCommodity().getName();
-                eNode.income += getExportIncome(market, comID, true);
-                eNode.upkeep += getImportExpense(market, comID, true);
-                eNode.custom = com;
+                eNode.name = com.getName();
+                eNode.income += getExportIncome(market, comID, true) * r;
+                eNode.upkeep += getImportExpense(market, comID, true) * r;
                 eNode.mapEntity = market.getPrimaryEntity();
             }
 
-            // Player cut node
-            FDNode playerIncomeNode = report.getNode(mNode, "player_share");
-            playerIncomeNode.name = "Player share (" + Math.round(data.playerProfitRatio * 100) + "%)";
-            playerIncomeNode.income += playerIncome;
-            playerIncomeNode.custom = data;
-            playerIncomeNode.tooltipCreator = report.getMonthlyReportTooltip();
+            // Wages
+            final FDNode wageNode = report.getNode(mNode, "wages"); 
+            wageNode.name = "Wages";
+            wageNode.mapEntity = market.getPrimaryEntity();
+            wageNode.upkeep += getWagesForMarket(market.getId())*MONTH * r;
+            wageNode.tooltipCreator = new TooltipCreator() {
+                public boolean isTooltipExpandable(Object params) {return false;}
 
-            if (playerIncome < 1) {
-                playerIncomeNode.name += " - none";
-            }
+                public float getTooltipWidth(Object params) {return 400f;}
+
+                public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
+                    tp.addPara(
+                        "Monthly wages for workers at this colony.", pad
+                    );
+                }
+            };
         }
     }
 
