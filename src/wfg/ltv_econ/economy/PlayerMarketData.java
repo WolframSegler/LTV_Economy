@@ -141,7 +141,7 @@ public class PlayerMarketData {
     }
 
     private void updateHappinessDelta() {
-        happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.08f, "Health");
+        happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.02f, "Health");
 
         happinessDelta.modifyFlat(
             "stability", (market.getStability().getModifiedValue() - 5f) * 0.03f, "Stability"
@@ -162,7 +162,7 @@ public class PlayerMarketData {
 
         final float baseline = 0.6f;
         socialCohesionDelta.modifyFlat(
-            "composition", (homogeneity - baseline) * 0.005f, "Cultural Composition"
+            "composition", (homogeneity - baseline) * 0.0002f, "Cultural Composition"
         );
 
         socialCohesionDelta.modifyFlat(

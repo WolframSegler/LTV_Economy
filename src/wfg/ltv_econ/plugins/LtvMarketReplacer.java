@@ -51,6 +51,7 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -239,9 +240,11 @@ public class LtvMarketReplacer implements EveryFrameScript {
         final UIPanelAPI incomePanel = (UIPanelAPI) fields.get(0).invoke(colonyInfoPanel);
         final List<?> incomePanelChildren = (List<?>) ReflectionUtils.invoke(incomePanel, "getChildrenCopy");
         
-        final ButtonAPI oldBtn = incomePanelChildren.stream().filter(c -> c instanceof ButtonAPI).findFirst()
-            .map(c -> (ButtonAPI) c).get();
-        incomePanel.removeComponent(oldBtn);
+        final var Buttons = (List<ButtonAPI>) incomePanelChildren.stream()
+            .filter(c -> c instanceof ButtonAPI).map(c -> (ButtonAPI) c).toList();
+        final ButtonAPI creditBtn = Buttons.get(0);
+        final ButtonAPI hazardBtn = Buttons.get(1);
+        incomePanel.removeComponent(creditBtn);
 
         final MarketAPI market = (MarketAPI) ReflectionUtils.get(colonyInfoPanel, null, MarketAPI.class);
         final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
@@ -265,13 +268,12 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                 final float textH1 = lbl1.computeTextHeight(txt);
                 final float textH2 = lbl2.computeTextHeight(valueTxt);
-                final float textW1 = lbl1.computeTextWidth(txt);
-                final float textW2 = lbl2.computeTextWidth(valueTxt);
+                final float textW = Math.max(lbl1.computeTextWidth(txt), lbl2.computeTextWidth(valueTxt));
 
-                add(lbl1).inTL(0, 0).setSize(textW1, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(textW1, textH2);
+                add(lbl1).inTL(0, 0).setSize(textW, textH1);
+                add(lbl2).inTL(0, textH1 + pad).setSize(textW, textH2);
 
-                getPos().setSize(Math.max(textW1, textW2), textH1 + pad + textH2);
+                getPos().setSize(textW, textH1 + pad + textH2);
             }
 
             @Override
@@ -531,8 +533,10 @@ public class LtvMarketReplacer implements EveryFrameScript {
             }
         };
 
-        colonyInfoPanel.addComponent(colonyCreditLabel.getPanel()).inTR(
-            318, 0
+        final PositionAPI posS = colonyCreditLabel.getPos();
+        final PositionAPI posA = hazardBtn.getPosition();
+        colonyInfoPanel.addComponent(colonyCreditLabel.getPanel()).inTL(
+            (posA.getX() - posS.getX()) + (posA.getWidth() - posS.getWidth()) / 2f, 0
         );
     }
 

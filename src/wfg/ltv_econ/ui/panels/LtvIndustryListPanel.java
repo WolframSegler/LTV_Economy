@@ -133,7 +133,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 			wrappertp.addComponent(widget.getPanel()).inTL(
 				i * (LtvIndustryWidget.PANEL_WIDTH + opad) + pad,
-				wrapperTpHeight = j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
+				wrapperTpHeight = j * (LtvIndustryWidget.TOTAL_HEIGHT + pad*5)
 			);
 
 			addWidgetTooltip(IndustryTooltipMode.NORMAL, ind, widget);
@@ -158,7 +158,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 			wrappertp.addComponent(widget.getPanel()).inTL(
 				i * (LtvIndustryWidget.PANEL_WIDTH + opad) + pad,
-				wrapperTpHeight = j * (LtvIndustryWidget.TOTAL_HEIGHT + opad)
+				wrapperTpHeight = j * (LtvIndustryWidget.TOTAL_HEIGHT + pad*5)
 			);
 
 			addWidgetTooltip(IndustryTooltipMode.QUEUED, ind, widget);

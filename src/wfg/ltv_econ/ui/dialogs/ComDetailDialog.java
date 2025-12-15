@@ -128,6 +128,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     @Override
     public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
         UIState.setState(State.DIALOG);
+        interactionDialog.setBackgroundDimAmount(0.01f);
 
         final CustomDetailDialogPanel<ComDetailDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
             panel,
@@ -1168,10 +1169,6 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     @Override
     public void customDialogCancel() {
         UIState.setState(State.NONE);
-
-        if (interactionDialog != null) {
-            interactionDialog.dismiss();
-        }
     }
 
     public float getCustomDialogWidth() {

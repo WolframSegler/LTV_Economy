@@ -334,6 +334,18 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         WorkerRegistry.getInstance().remove(marketID);
     }
 
+    public final void removeMarket(String marketID) {
+        if (!m_registeredMarkets.remove(marketID)) return;
+
+        for (CommodityInfo comInfo : m_comInfo.values()) {
+            comInfo.removeMarket(marketID);
+        }
+
+        m_playerMarketData.remove(marketID);
+        m_marketCredits.remove(marketID);
+        WorkerRegistry.getInstance().remove(marketID);
+    }
+
     public final void refreshMarkets() {
         final Map<String, MarketAPI> currentMarkets = getMarketsCopy().stream()
             .collect(Collectors.toMap(MarketAPI::getId, m -> m));
@@ -589,6 +601,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final void applyWages() {
         final EconomyAPI econ = Global.getSector().getEconomy(); 
         for (String marketID : m_registeredMarkets) {
+            final MarketAPI market = econ.getMarket(marketID);
+            if (market == null) {
+                removeMarket(marketID);
+                continue;
+            }
             addCredits(marketID, (int) -getWagesForMarket(econ.getMarket(marketID)));
         }
     }

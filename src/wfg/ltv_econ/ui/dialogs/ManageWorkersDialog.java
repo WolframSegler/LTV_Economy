@@ -92,6 +92,8 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final PlayerMarketData mData = engine.getPlayerMarketData(m_market.getId());
         final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(m_market);
 
+        interactionDialog.setBackgroundDimAmount(0.01f);
+
         final int SECT_I_H = 30;
         final int SECT_II_H = 160;
         final int SECT_III_H = 245;
@@ -793,10 +795,6 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
     @Override
     public void customDialogCancel() {
         UIState.setState(State.NONE);
-
-        if (interactionDialog != null) {
-            interactionDialog.dismiss();
-        }
     }
 
     public String getCancelText() {

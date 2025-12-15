@@ -87,12 +87,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             panel,
             panelWidth, panelHeight,
             new AssignWorkersDialogPlugin(this)
-        ) {
-            @Override
-            public float getBgAlpha() {
-                return 0f;
-            }
-        };
+        ) {};
 
         panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 

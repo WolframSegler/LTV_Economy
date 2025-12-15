@@ -60,6 +60,8 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
 
+        interactionDialog.setBackgroundDimAmount(0.01f);
+
         final int sliderH = 32;
         final int sliderW = 300;
         final int buttonH = 28;
@@ -161,6 +163,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             
             @Override  
             public void createPanel() {
+                if (data == null) return;
                 final String ratio = Math.round(data.playerProfitRatio * 100) + "%";
 
                 label1 = settings.createLabel(
@@ -198,6 +201,11 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 add(tp);
                 WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
                 return tp;
+            }
+        
+            @Override
+            public boolean isTooltipEnabled() {
+                return data == null;
             }
         };
         if (m_market.isPlayerOwned()) panel.addComponent(playerProfitPanel.getPanel()).inTL(opad, 90);
@@ -244,17 +252,19 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final Slider profitSlider = new Slider(
             panel, "", 0f, 100f, sliderW, sliderH
         );
-        profitSlider.setHighlightOnMouseover(true);
-        profitSlider.setUserAdjustable(true);
-        profitSlider.showPercent = true;
-        profitSlider.roundBarValue = true;
-        profitSlider.setProgress(data.playerProfitRatio * 100);
-        if (m_market.isPlayerOwned()) panel.addComponent(profitSlider.getPanel()).inTL(500, 90);
+        if (data != null) {
+            profitSlider.setHighlightOnMouseover(true);
+            profitSlider.setUserAdjustable(true);
+            profitSlider.showPercent = true;
+            profitSlider.roundBarValue = true;
+            profitSlider.setProgress(data.playerProfitRatio * 100);
+            panel.addComponent(profitSlider.getPanel()).inTL(500, 90);
+        }
 
         final Runnable refreshUI = () -> {
             final float colonyCred = playerCredits.get();
             final long playerCred = engine.getCredits(m_market.getId());
-            final int profitRatio = (int) (data.playerProfitRatio * 100);
+            final int profitRatio = data != null ? (int) (data.playerProfitRatio * 100) : 0;
             final LabelAPI colonyLbl = colonyCreditPanel.label1;
             final LabelAPI playerLbl = playerCreditPanel.label1;
             final LabelAPI profitLbl = playerProfitPanel.label1;
@@ -296,7 +306,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             refreshUI.run();
         };
         final CallbackRunnable<Button> profitRunnable = (btn) -> {
-            data.playerProfitRatio = profitSlider.getProgress() / 100f;
+            if (data != null) data.playerProfitRatio = profitSlider.getProgress() / 100f;
             refreshUI.run();
         };
 
@@ -401,10 +411,6 @@ public class ColonyInvDialog implements WrapDialogDelegate {
     @Override
     public void customDialogCancel() {
         UIState.setState(State.NONE);
-
-        if (interactionDialog != null) {
-            interactionDialog.dismiss();
-        }
 
         // Refresh the panel
         final List<?> children = (List<?>)ReflectionUtils.invoke(m_btn.getParent(), "getChildrenNonCopy");
