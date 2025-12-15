@@ -12,13 +12,13 @@ public class LuddicFestivalPolicy extends MarketPolicy {
 
     public void apply(PlayerMarketData data) {
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
-        data.culturalCohesionDelta.modifyFlat(id, COHESION_BUFF, spec.name);
+        data.socialCohesionDelta.modifyFlat(id, COHESION_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
     }
 
     public void unapply(PlayerMarketData data) {
         data.happinessDelta.unmodifyFlat(id);
-        data.culturalCohesionDelta.unmodifyFlat(id);
+        data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
     }
 
@@ -38,7 +38,7 @@ public class LuddicFestivalPolicy extends MarketPolicy {
         tp.addPara("Daily effects", pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
         tp.addToGrid(0, 0, "Happiness", String.format("%+.1f", HAPPINESS_BUFF));
-        tp.addToGrid(0, 1, "Cultural Cohesion", String.format("%+.1f", COHESION_BUFF));
+        tp.addToGrid(0, 1, "Social Cohesion", String.format("%+.1f", COHESION_BUFF));
         tp.addToGrid(0, 2, "Class Consciousness", String.format("%+.3f", CLASS_BUFF));
 
         tp.addGrid(0);

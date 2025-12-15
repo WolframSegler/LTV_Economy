@@ -25,14 +25,14 @@ public class PlayerMarketData {
 
     public final StatBonus healthDelta = new StatBonus();
     public final StatBonus happinessDelta = new StatBonus();
-    public final StatBonus culturalCohesionDelta = new StatBonus();
+    public final StatBonus socialCohesionDelta = new StatBonus();
     public final StatBonus classConsciousnessDelta = new StatBonus();
 
     public static final float BASELINE_VALUE = 50f;
     private float RoSV = LaborConfig.RoSV;
     private float popHealth = BASELINE_VALUE;
     private float popHappiness = BASELINE_VALUE;
-    private float popCulturalCohesion = BASELINE_VALUE;
+    private float popSocialCohesion = BASELINE_VALUE;
     private float popClassConsciousness = 0f;
 
     private final ArrayList<MarketPolicy> policies = new ArrayList<>();
@@ -63,13 +63,13 @@ public class PlayerMarketData {
     public float getRoSV() { return RoSV; }
     public float getHealth() { return popHealth; }
     public float getHappiness() { return popHappiness; }
-    public float getCulturalCohesion() { return popCulturalCohesion; }
+    public float getSocialCohesion() { return popSocialCohesion; }
     public float getClassConsciousness() { return popClassConsciousness; }
 
     public void setRoSV(float rate) { RoSV = rate; }
     public void setHealth(float health) { popHealth = clamp(health); }
     public void setHappiness(float happiness) { popHappiness = clamp(happiness); }
-    public void setCulturalCohesion(float cohesion) { popCulturalCohesion = clamp(cohesion); }
+    public void setSocialCohesion(float cohesion) { popSocialCohesion = clamp(cohesion); }
     public void setClassConsciousness(float consciousness) { popClassConsciousness = clamp(consciousness); }
     public ArrayList<MarketPolicy> getPolicies() { return new ArrayList<>(policies); }
     public void addPolicy(MarketPolicy policy) { policies.add(policy); }
@@ -115,12 +115,12 @@ public class PlayerMarketData {
     private void advanceMarket(int days) {
         updateHealthDelta();
         updateHappinessDelta();
-        updateCulturalCohesionDelta();
+        updateSocialCohesionDelta();
         updateClassConsciousnessDelta();
 
         setHealth(healthDelta.computeEffective(popHealth) * days);
         setHappiness(happinessDelta.computeEffective(popHappiness) * days);
-        setCulturalCohesion(culturalCohesionDelta.computeEffective(popCulturalCohesion) * days);
+        setSocialCohesion(socialCohesionDelta.computeEffective(popSocialCohesion) * days);
         setClassConsciousness(classConsciousnessDelta.computeEffective(popClassConsciousness) * days);
     }
 
@@ -150,26 +150,27 @@ public class PlayerMarketData {
         happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.05f, "Wages");
 
         happinessDelta.modifyFlat(
-            "cohesion", (popCulturalCohesion - BASELINE_VALUE) * 0.0008f, "Cultural Cohesion"
+            "cohesion", (popSocialCohesion - BASELINE_VALUE) * 0.0008f, "Social Cohesion"
         );
     }
 
-    private void updateCulturalCohesionDelta() {
-        float diversityScore = 0f;
-        for (Float pct : market.getPopulation().getComp().values()) {
-            diversityScore += (pct/100f) * (pct/100f);
+    private void updateSocialCohesionDelta() {
+        float homogeneity = 0f;
+        for (float pct : market.getPopulation().getComp().values()) {
+            homogeneity += (pct/100f) * (pct/100f);
         }
 
-        culturalCohesionDelta.modifyFlat(
-            "composition", (1f - diversityScore) * -0.05f, "Cultural Composition"
+        final float baseline = 0.6f;
+        socialCohesionDelta.modifyFlat(
+            "composition", (homogeneity - baseline) * 0.005f, "Cultural Composition"
         );
 
-        culturalCohesionDelta.modifyFlat(
+        socialCohesionDelta.modifyFlat(
             "consciousness", popClassConsciousness * 0.0007f, "Class Consciousness"
         );
 
-        culturalCohesionDelta.modifyFlat(
-            "random", (float) (Math.random() * 0.006 - 0.003), "Natural drift factor"
+        socialCohesionDelta.modifyFlat(
+            "random", (float) (Math.random() * 0.006 - 0.003), "Natural drift"
         );
     }
 

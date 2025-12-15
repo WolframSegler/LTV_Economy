@@ -427,7 +427,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
 
             public TooltipMakerAPI createAndAttachTp() {
                 final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
-                tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and cultural cohesion.", opad);
+                tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and social cohesion.", opad);
 
                 final float value = mData.happinessDelta
                     .computeEffective(mData.getHappiness()) - mData.getHappiness();
@@ -443,7 +443,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final TextPanel cohesionLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Cohesion";
-                final String valueTxt = String.format("%.0f", mData.getCulturalCohesion());
+                final String valueTxt = String.format("%.0f", mData.getSocialCohesion());
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -469,12 +469,12 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
 
             public TooltipMakerAPI createAndAttachTp() {
                 final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
-                tp.addPara("Degree of cultural cohesion within the population. High cohesion reduces conflict and increases social stability.", opad);
+                tp.addPara("Degree of social cohesion within the population. High cohesion reduces conflict and increases stability.", opad);
 
-                final float value = mData.culturalCohesionDelta.computeEffective(
-                    mData.getCulturalCohesion()) - mData.getCulturalCohesion();
+                final float value = mData.socialCohesionDelta.computeEffective(
+                    mData.getSocialCohesion()) - mData.getSocialCohesion();
                 tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
-                tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.culturalCohesionDelta, tpGridGetter);
+                tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.socialCohesionDelta, tpGridGetter);
 
                 add(tp);
                 WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
