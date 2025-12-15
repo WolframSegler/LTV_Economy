@@ -367,32 +367,84 @@ public class CommodityStats {
         return industries;
     }
 
-    @Deprecated
     public final void logAllInfo() {
-        float trade = getFlowDeficitMetLocally() + getTotalExports() + getFlowCanNotExport() +
-            getFlowDeficitMetViaTrade() + getFlowDeficit();
 
-        float ratio = trade / getFlowEconomicFootprint();
+        final float accountedFlow
+            = getFlowDeficitMetLocally()
+            + getFlowDeficitMetViaTrade()
+            + getFlowDeficit()
+            + getTotalExports()
+            + getFlowCanNotExport()
+            + getImportExclusiveDemand();
 
-        Global.getLogger(getClass()).info("\n" +
-            "---- COMMODITY STATS LOG ----" + "\n" +
-            "Commodity: " + comID + "\n" +
-            "economicFootprint: " + getFlowEconomicFootprint() + "\n" +
-            "localProduction: " + getProduction(true) + "\n" +
-            "baseDemand: " + demandBase + "\n" +
-            "deficitPreTrade: " + getFlowDeficitPreTrade() + "\n" +
-            "totalImports: " + getTotalImports(false) + "\n" +
-            "inFactionImports: " + inFactionImports + "\n" +
-            "globalImports: " + globalImports + "\n" +
-            "totalExports: " + getTotalExports() + "\n" +
-            "inFactionExport: " + inFactionExports + "\n" +
-            "globalExport: " + globalExports + "\n" +
-            "canNotExport: " + getFlowCanNotExport() + "\n" +
-            "demandMet: " + getFlowDeficitMet() + "\n" +
-            "demandMetWithLocal: " + getFlowDeficitMetLocally() + "\n" +
-            "demandMetViaTrade: " + getFlowDeficitMetViaTrade() + "\n" +
-            "ratio: " + ratio
-        );
+        final float footprint = getFlowEconomicFootprint();
+        final float ratio = footprint <= 0 ? 1f : accountedFlow / footprint;
+
+        final StringBuilder sb = new StringBuilder(512);
+
+        sb.append("\n---- COMMODITY STATS LOG ----\n");
+        sb.append("Commodity: ").append(comID).append("\n\n");
+
+        // ===== CORE SCALE =====
+        sb.append("[Scale]\n");
+        sb.append(" economicFootprint: ").append(footprint).append("\n");
+        sb.append(" baseDemand: ").append(demandBase).append("\n");
+        sb.append(" preferredStockpile: ").append(getPreferredStockpile()).append("\n\n");
+
+        // ===== PRODUCTION =====
+        sb.append("[Production]\n");
+        sb.append(" localProduction (modified): ").append(getProduction(true)).append("\n");
+        sb.append(" localProduction (base): ").append(getProduction(false)).append("\n");
+        sb.append(" productionSurplus: ").append(getFlowProductionSurplus()).append("\n\n");
+
+        // ===== DEMAND & DEFICIT =====
+        sb.append("[Demand]\n");
+        sb.append(" demandMetTotal: ").append(getFlowDeficitMet()).append("\n");
+        sb.append(" demandMetLocally: ").append(getFlowDeficitMetLocally()).append("\n");
+        sb.append(" demandMetViaTrade: ").append(getFlowDeficitMetViaTrade()).append("\n");
+        sb.append(" deficitPreTrade: ").append(getFlowDeficitPreTrade()).append("\n");
+        sb.append(" finalDeficit: ").append(getFlowDeficit()).append("\n");
+        sb.append(" availabilityRatio: ").append(getFlowAvailabilityRatio()).append("\n\n");
+
+        // ===== IMPORTS =====
+        sb.append("[Imports]\n");
+        sb.append(" totalImports (raw): ").append(getTotalImports(false)).append("\n");
+        sb.append(" totalImports (effective): ").append(getTotalImports(true)).append("\n");
+        sb.append(" inFactionImports: ").append(inFactionImports).append("\n");
+        sb.append(" globalImports: ").append(globalImports).append("\n");
+        sb.append(" importEffectiveness: ").append(importEffectiveness).append("\n");
+        sb.append(" importExclusiveDemand: ").append(importExclusiveDemand).append("\n");
+        sb.append(" overImports: ").append(getFlowOverImports()).append("\n\n");
+
+        // ===== EXPORTS =====
+        sb.append("[Exports]\n");
+        sb.append(" totalExports: ").append(getTotalExports()).append("\n");
+        sb.append(" inFactionExports: ").append(inFactionExports).append("\n");
+        sb.append(" globalExports: ").append(globalExports).append("\n");
+        sb.append(" remainingExportable: ").append(getFlowRemainingExportable()).append("\n");
+        sb.append(" canNotExport: ").append(getFlowCanNotExport()).append("\n\n");
+
+        // ===== FLOW BALANCE =====
+        sb.append("[Flow Balance]\n");
+        sb.append(" flowAvailable: ").append(getFlowAvailable()).append("\n");
+        sb.append(" realBalance: ").append(getFlowRealBalance()).append("\n\n");
+
+        // ===== STORAGE =====
+        sb.append("[Storage]\n");
+        sb.append(" stored: ").append(stored).append("\n");
+        sb.append(" storedRounded: ").append(getRoundedStored()).append("\n");
+        sb.append(" storedAvailabilityRatio: ").append(getStoredAvailabilityRatio()).append("\n");
+        sb.append(" storedAvailable (flow + storage): ").append(getStoredAvailable()).append("\n");
+        sb.append(" storedRemainingExportable: ").append(getStoredRemainingExportable()).append("\n");
+        sb.append(" storedEconomicFootprint: ").append(getStoredEconomicFootprint()).append("\n\n");
+
+        // ===== CONSISTENCY =====
+        sb.append("[Consistency]\n");
+        sb.append(" accountedFlow: ").append(accountedFlow).append("\n");
+        sb.append(" footprint: ").append(footprint).append("\n");
+        sb.append(" ratio: ").append(ratio).append("\n");
+
+        Global.getLogger(getClass()).info(sb.toString());
     }
 
     public static enum PriceType {

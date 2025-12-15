@@ -122,6 +122,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     private transient ExecutorService mainLoopExecutor;
 
+    public PlayerFactionSettings playerFactionSettings = new PlayerFactionSettings();
+
     public static EconomyEngine createInstance() {
         if (instance == null) {
             instance = new EconomyEngine();
@@ -303,7 +305,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             m_comInfo.values().forEach(CommodityInfo::advance);
 
             applyWages();
-            redistributeFactionCredits();
+            redistributeFactionCredits(playerFactionSettings.redistributeCredits);
             applyDebtEffects();
         }
     }
@@ -591,24 +593,35 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         }
     }
 
-    public final void redistributeFactionCredits() {
+    public final void redistributeFactionCredits(boolean includePlayerFaction) {
         final float REDISTRIBUTION_STRENGTH = 0.2f;
+        final int DAYS_AFTER_REDISTRIBUTION = 30;
+
         for (FactionAPI faction : Global.getSector().getAllFactions()) {
+            if (!includePlayerFaction && faction.isPlayerFaction()) continue;
+
             final ArrayList<MarketAPI> markets = new ArrayList<>();
             for (MarketAPI market : getMarketsCopy()) {
+                if (market.getDaysInExistence() < DAYS_AFTER_REDISTRIBUTION) continue;
                 if (market.getFaction().equals(faction)) markets.add(market);
             }
             if (markets.size() < 2) continue;
 
-            long totalCredits = 0;
+            double weightedCredits = 0;
+            double totalWeight = 0;
+
             for (MarketAPI market : markets) {
-                totalCredits += getCredits(market.getId());
+                final double weight = Math.pow(10, market.getSize() - 3);
+                weightedCredits += getCredits(market.getId()) * weight;
+                totalWeight += weight;
             }
+            if (totalWeight <= 0) continue;
 
-            final long avg = (long) (totalCredits / (float)markets.size());
+            final long weightedAvg = (long) (weightedCredits / totalWeight);
 
             for (MarketAPI market : markets) {
-                final long diff = avg - getCredits(market.getId());
+                final long credits = getCredits(market.getId());
+                final long diff = weightedAvg - credits;
                 addCredits(market.getId(), (long) (diff * REDISTRIBUTION_STRENGTH));
             }
         }
@@ -1101,7 +1114,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
                     tp.addPara(
                         "The ratio of monthly profits that get automatically transferred to you: %s.",
-                        pad, highlight, NumFormat.formatCredit((long) netIncome)
+                        pad, highlight, NumFormat.formatCredit((long) playerIncome)
                     );
                     tp.addPara(
                         "The effective value can be below the chosen value if the colony is in debt.", 

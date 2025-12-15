@@ -31,6 +31,7 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.policies.MarketPolicy;
 import wfg.ltv_econ.economy.policies.MarketPolicy.PolicyState;
 import wfg.ltv_econ.util.UiUtils;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
@@ -764,32 +765,19 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             policy.notifyWhenFinished = btn.checked;
         };
 
-        final LabelAPI notifyAvailableTxt = settings.createLabel(
-            "Notify when available", Fonts.DEFAULT_SMALL
+        final Button notifyAvailableBtn = ComponentFactory.createCheckboxWithText(
+            cont, 18, "Notify when available",
+            Fonts.DEFAULT_SMALL, availableRn, base, pad
         );
-        final LabelAPI notifyFinishedTxt = settings.createLabel(
-            "Notify when finished", Fonts.DEFAULT_SMALL
-        );
-        final int size = (int) notifyAvailableTxt.computeTextHeight(notifyAvailableTxt.getText());
-        final Button notifyAvailableBtn = new Button(
-            cont, size, size, null, null, availableRn
-        );
-        final Button notifyFinishedBtn = new Button(
-            cont, size, size, null, null, finishedRn
+        final Button notifyFinishedBtn = ComponentFactory.createCheckboxWithText(
+            cont, 18, "Notify when finished",
+            Fonts.DEFAULT_SMALL, finishedRn, base, pad
         );
 
-        notifyAvailableTxt.setColor(base);
-        notifyFinishedTxt.setColor(base);
         notifyAvailableBtn.checked = policy.notifyWhenAvailable;
         notifyFinishedBtn.checked = policy.notifyWhenFinished;
-        notifyAvailableBtn.bgSelectedColor = new Color(60, 230, 250);
-        notifyFinishedBtn.bgSelectedColor = new Color(60, 230, 250);
         cont.addComponent(notifyAvailableBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*2);
         cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
-        cont.addComponent((UIComponentAPI)notifyAvailableTxt).inBL(
-            PANEL_W/2f + opad + size + pad, pad + opad*2);
-        cont.addComponent((UIComponentAPI)notifyFinishedTxt).inBL(
-            PANEL_W/2f + opad + size + pad, pad);
     }
 
     @Override

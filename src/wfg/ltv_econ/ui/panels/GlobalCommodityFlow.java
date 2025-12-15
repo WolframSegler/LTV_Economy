@@ -55,8 +55,6 @@ public class GlobalCommodityFlow extends
     public static final int Right_WALL = 720;
 
     public static CommoditySpecAPI selectedCom = Global.getSettings().getCommoditySpec(Commodities.SUPPLIES);
-    
-    public static Color backgroundColor = new Color(20, 30, 60);
 
     public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
         super(parent, width, height, new BasePanelPlugin<>());

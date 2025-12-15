@@ -53,7 +53,7 @@ public class EconomyOverviewPanel extends CustomPanel<
         final float titleY = opad;
         add(title).inTL(pad, titleY);
 
-        subtitle = settings.createLabel("Sector-wide activity summary", Fonts.ORBITRON_12);
+        subtitle = settings.createLabel("Sector oversight and administration", Fonts.VICTOR_10);
         final float subtitleH = subtitle.computeTextHeight(title.getText());
         final float subtitleY = titleY + titleH + pad*2;
         add(subtitle).inTL(pad, subtitleY);
@@ -104,9 +104,13 @@ public class EconomyOverviewPanel extends CustomPanel<
 
         buttonRunnable = (btn) -> {
             clearPanelAndButtonState(btn);
+            final FactionAdministrationPanel content = new FactionAdministrationPanel(
+                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+            );
+            contentPanel.addComponent(content.getPanel()).inBL(0, 0);
         };
         button = new Button(
-            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "BUTTON B", Fonts.ORBITRON_12, buttonRunnable
+            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Faction Administration", Fonts.ORBITRON_12, buttonRunnable
         );
         button.setCutStyle(CutStyle.TL_BR);
         navButtons.add(button);
