@@ -3,7 +3,7 @@
 A deep overhaul of Starsector’s economic and colony systems.  
 LTV_Economy replaces abstract income with a unit-based simulation where production, trade, labor, and policy decisions all interact in concrete, traceable ways.
 
-This mod is designed to make the economy **interesting, legible, and consequential** without turning it into a spreadsheet you have to babysit.
+This mod is designed to make the economy **interesting, legible, and consequential** without turning it into a spreadsheet nightmare.
 
 [![Download](https://img.shields.io/badge/Download-Latest%20Release-brightgreen)](https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV_Economy.zip)
 
@@ -37,7 +37,7 @@ This mod is designed to make the economy **interesting, legible, and consequenti
 
 ## Trade & AI Behavior
 
-- Markets trade using a **pairing-score system**, moving real units.
+- Markets trade using a **pairing-score system** ti determine trade order.
 - Non-player markets assign workers via a **two-stage solver**:
   1. Compute global demand and required labor per output.
   2. Distribute labor fairly across markets with capacity constraints.
@@ -74,20 +74,6 @@ They respond to wages, stability, exploitation, and policies.
 
 <br>
 
-## UI & UX
-
-- Large parts of the colony UI have been rewritten or replaced.
-- New panels include:
-  - **Global Commodity Flow** (sector-wide inspection)
-  - **Administration** (faction economic policies)
-- Colony screens now support:
-  - Worker management
-  - Stockpile management
-  - Detailed economic breakdowns
-- Extensive tooltips explain *what affects what* (and what does not).
-
-All UI changes are built on **WrapUI**, a custom UI framework developed alongside this mod.
-
 <br>
 
 ## Modding & Compatibility
@@ -101,25 +87,34 @@ All UI changes are built on **WrapUI**, a custom UI framework developed alongsid
 
 ## Scope & Status
 
-- Over **7 months of development** and hundreds of hours of work.
-- Stable and feature-complete for the current design phase.
+- Over **8 months of development** and hundreds of hours of work.
 - Balance is intentionally conservative and will be refined through player feedback.
 
 <br>
 
-## Philosophy
+## Compatibility
 
-LTV_Economy is not about perfect realism.  
-It is about **coherent systems**, **traceable outcomes**, and giving players meaningful economic levers without hiding the logic behind opaque modifiers.
+Due to the intrusive nature of the mod, anything that modifies the Colony Info Panel are likely to cause problems. Here are mods that are definitely incompatible:
+- <a href="https://fractalsoftworks.com/forum/index.php?topic=20986.0">Grand.Colonies</a>
 
-If a colony makes money, you can see *why*.  
-If it collapses, you probably deserved it.
+<br>
+
+## For Other Modders
+
+If you want your mod's industries to be compatible, you can add an <code>industry_config.json</code> entry under <code>data/config/</code> inside your own mod folder. The documentation file <code>data/config/industry_config_doc.md</code> provides the necessary information.
+
+<br><br>
+
+## Roadmap
+- Add more policies
+- Add more market events as a consequence of the population
+- LunaLib support
 
 <br><br>
 
 ## Credits
 
-Lukas04 - for providing ReflectionUtils and providing the correct hirearchy for accessing certain classes under LtvMarketWidgetReplacer.
+Lukas04 - for providing ReflectionUtils and providing the correct hirearchy for accessing certain classes under LtvMarketReplacer.
 
 SirHartley - for helping with IndustryOptionProvider
 

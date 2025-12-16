@@ -3,7 +3,7 @@
 	"name":"LTV Economy",
 	"author":"WolframSegler",
 	"version": "0.1.0",
-	"description":"Overhauls the economic system and how colonies are managed. This mod aims to make the economy interesting.",
+	"description":"A deep overhaul of Starsector's economic and colony systems.",
 	"gameVersion":"0.98a-RC7",
 	"utility": false,
 	"jars": [
