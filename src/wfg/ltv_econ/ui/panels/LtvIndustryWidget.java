@@ -29,13 +29,14 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 import com.fs.starfarer.campaign.CampaignEngine;
 
+import rolflectionlib.util.ListenerFactory;
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
-import wfg.ltv_econ.util.ListenerFactory;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
@@ -53,7 +54,6 @@ import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.reflection.ReflectionUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndustryWidget, TooltipMakerAPI>
@@ -583,23 +583,22 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
             }
 
             if (LtvIndustryListPanel.indOptCtor != null && getIndustryPanel().dummyWidget != null) {
-                // b var17 = new b(this.øôöO00, this, var14, CampaignEngine.getInstance().getCampaignUI().getDialogParent(), this);
-
-                Object listener = new ListenerFactory.DialogDismissedListener() {
+                final Object listener = new ListenerFactory.DialogDismissedListener() {
                     @Override
                     public void trigger(Object... args) {
                         dialogDismissed();
                     }
                 }.getProxy();
 
-                DialogCreatorUI dialog = (DialogCreatorUI) LtvIndustryListPanel.indOptCtor.newInstance(
+                final DialogCreatorUI dialog = (DialogCreatorUI) RolfLectionUtil.instantiateClass(
+                    LtvIndustryListPanel.indOptCtor,
                     m_industry,
                     getIndustryPanel().dummyWidget,
                     LtvIndustryListPanel.getMarketInteractionMode(m_market),
                     CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
                     listener
                 );
-                ReflectionUtils.invoke(dialog, "show", 0f, 0f);
+                RolfLectionUtil.invokeMethod("show", dialog);
 
                 WrapUiUtils.anchorPanel(
                     ((UIPanelAPI)dialog), industryIcon.getPanel(), AnchorType.MidTopLeft, 0
@@ -637,8 +636,8 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
     public void dialogDismissed() {
         tradeInfoPanel = false;
-        ReflectionUtils.getMethodsMatching(getIndustryPanel().dummyWidget, "dialogDismissed", void.class, 2)
-        .get(0).invoke(getIndustryPanel().dummyWidget, null, 0);
+        RolfLectionUtil.getMethodAndInvokeDirectly("dialogDismissed",
+            getIndustryPanel().dummyWidget, null, 0);
 
         UIState.setState(State.NONE);
     }

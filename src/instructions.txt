@@ -1,15 +1,7 @@
 DO NOT INCLUDE THIS FILE IN RELEASE
 Word Wrap shortcut: Alt + Z
 
-1. Compile the ReflectionUtils.kt:
-    kotlinc src/wfg/reflection/ReflectionUtils.kt -d jars/libs/compiled/
-
-2. Package it as a jar:
-    jar cf jars/libs/reflection.jar -C jars/libs/compiled .
-
-3. Delete the directory jars/libs/compiled/
-
-4. Compile the main project. Navigate to Ltv_Economy and run:
+1. Compile the main project. Navigate to Ltv_Economy and run:
     mvn clean package
 
 Extra Instructions:

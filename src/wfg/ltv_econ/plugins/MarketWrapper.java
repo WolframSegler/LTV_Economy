@@ -47,9 +47,9 @@ import com.fs.starfarer.campaign.econ.Submarket;
 import com.fs.starfarer.campaign.fleet.MutableMarketStats;
 import com.fs.starfarer.rpg.Person;
 
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.reflection.ReflectionUtils;
 
 public class MarketWrapper extends Market {
     public final Market original;
@@ -404,7 +404,7 @@ public class MarketWrapper extends Market {
 
     @SuppressWarnings("all")
     private Object readResolve() {
-        return ReflectionUtils.invoke(original, "readResolve");
+        return RolfLectionUtil.invokeMethod("readResolve", original);
     }
 
     public boolean isUseStockpilesForShortages() {
@@ -421,7 +421,7 @@ public class MarketWrapper extends Market {
 
     @SuppressWarnings("all")
     private Object writeReplace() {
-        return ReflectionUtils.invoke(original, "writeReplace");
+        return RolfLectionUtil.invokeMethod("writeReplace", original);
     }
 
     public Market clone() {

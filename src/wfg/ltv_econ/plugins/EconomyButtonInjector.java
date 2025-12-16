@@ -19,9 +19,9 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.command.CommandTabData;
 
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.panels.EconomyOverviewPanel;
-import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
@@ -72,7 +72,7 @@ public class EconomyButtonInjector implements EveryFrameScript, CallbackRunnable
 
     @SuppressWarnings("unchecked")
     private final void addButton() {
-        rootChildren = (List<Object>) ReflectionUtils.invoke(root, "getChildrenCopy");
+        rootChildren = (List<Object>) RolfLectionUtil.invokeMethod("getChildrenCopy", root);
         for (Object child : rootChildren) {
             if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof ButtonPlugin) {
                 return;

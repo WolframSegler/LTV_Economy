@@ -12,7 +12,7 @@
         "../../fs.common_obf.jar",
         "../../starfarer_obf.jar",
         "../../xstream-1.4.10.jar",
-        "jars/libs/reflection.jar"
+        "jars/libs/RolflectionLib.jar"
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
     "search.useIgnoreFiles": false,

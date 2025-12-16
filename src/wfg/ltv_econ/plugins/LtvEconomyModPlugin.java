@@ -13,11 +13,11 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
-import wfg.reflection.ReflectionUtils;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
@@ -69,9 +69,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             }
         }
 
-        listeners = (List<CampaignEventListener>) ReflectionUtils.get(
-            sector, "listeners", List.class, false
-        );
+        listeners = (List<CampaignEventListener>) RolfLectionUtil.getPrivateVariable(
+            "listeners", sector);
 
         listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
         listeners.add(0, engine);

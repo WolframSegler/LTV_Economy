@@ -3,10 +3,9 @@ package wfg.ltv_econ.plugins;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.awt.Color;
 
 import org.lwjgl.input.Keyboard;
-
-import java.awt.Color;
 
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.GameState;
@@ -32,14 +31,14 @@ import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.ButtonPlugin;
-import wfg.reflection.ReflectionUtils;
-import wfg.reflection.ReflectionUtils.ReflectedConstructor;
-import wfg.reflection.ReflectionUtils.ReflectedField;
 
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
+
+import rolflectionlib.util.RolfLectionUtil;
+
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -63,6 +62,12 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
     private final SectorAPI sector = Global.getSector();
     private int frames = 0;
+
+    public static Object marketAPIField = null;
+    public static Object marketField = null;
+
+    public static MarketAPI marketAPI = null;
+    public static Market market = null;
 
     @Override
     public void advance(float amount) {
@@ -89,31 +94,38 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (masterTab == null)
             return;
 
-        final List<?> listChildren = (List<?>) ReflectionUtils.invoke(masterTab, "getChildrenCopy");
+        final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenCopy", masterTab);
         final UIPanelAPI outpostPanel = listChildren.stream()
-                .filter(child -> !ReflectionUtils.getMethodsMatching(child, "getOutpostPanelParams").isEmpty())
-                .map(child -> (UIPanelAPI) child)
-                .findFirst().orElse(null);
-        if (outpostPanel == null)
-            return;
+            .filter(c -> RolfLectionUtil.hasMethodOfName("getOutpostPanelParams", c))
+            .map(child -> (UIPanelAPI) child)
+            .findFirst().orElse(null);
+        if (outpostPanel == null) return;
 
-        final List<?> outpostChildren = (List<?>) ReflectionUtils.invoke(outpostPanel, "getChildrenCopy");
+        final List<?> outpostChildren = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenCopy", outpostPanel);
         final UIPanelAPI overviewPanel = outpostChildren.stream()
-                .filter(child -> !ReflectionUtils.getMethodsMatching(child, "showOverview").isEmpty())
-                .map(child -> (UIPanelAPI) child)
-                .findFirst().orElse(null);
-        if (overviewPanel == null)
-            return;
+            .filter(c -> RolfLectionUtil.hasMethodOfName("showOverview", c))
+            .map(child -> (UIPanelAPI) child)
+            .findFirst().orElse(null);
+        if (overviewPanel == null) return;
 
-        final List<?> overviewChildren = (List<?>) ReflectionUtils.invoke(overviewPanel, "getChildrenCopy");
+        final List<?> overviewChildren = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenCopy", overviewPanel);
         final UIPanelAPI managementPanel = overviewChildren.stream()
-                .filter(child -> !ReflectionUtils.getMethodsMatching(child, "recreateWithEconUpdate").isEmpty())
-                .map(child -> (UIPanelAPI) child)
-                .findFirst().orElse(null);
-        if (managementPanel == null)
-            return;
+            .filter(c -> RolfLectionUtil.hasMethodOfName("recreateWithEconUpdate", c))
+            .map(child -> (UIPanelAPI) child)
+            .findFirst().orElse(null);
+        if (managementPanel == null) return;
 
-        final List<?> managementChildren = (List<?>) ReflectionUtils.invoke(managementPanel, "getChildrenCopy");
+        if (marketAPIField == null) {
+            marketAPIField = RolfLectionUtil.getAllFields(managementPanel.getClass())
+                .stream().filter(c -> c instanceof MarketAPI).findFirst().get();
+        }
+        marketAPI = (MarketAPI) RolfLectionUtil.getPrivateVariable(marketAPIField, managementPanel);
+
+        final List<?> managementChildren = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenCopy", managementPanel);
 
         final Class<?> knownClass1 = IndustryListPanel.class;
         final Class<?> knownClass2 = LtvIndustryListPanel.class;
@@ -132,8 +144,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 break;
             }
         }
-        if (anchorChild == null)
-            return;
+        if (anchorChild == null) return;
 
         // Replace the "Use stockpiles during shortages" button
         replaceUseStockpilesBtnAddManageWorkersBtn(managementPanel, managementChildren, anchorChild);
@@ -160,16 +171,16 @@ public class LtvMarketReplacer implements EveryFrameScript {
             }
         }
 
-        final ShippingPanel shipPanel = (ShippingPanel) ReflectionUtils.invoke(colonyInfoPanel, "getShipping");
+        final ShippingPanel shipPanel = (ShippingPanel) RolfLectionUtil.invokeMethod(
+            "getShipping", colonyInfoPanel);
 
         // final ButtonAPI useStockpilesBtn = (ButtonAPI) shipPanel.getUseStockpiles();
-        final ButtonAPI useStockpilesBtn = (ButtonAPI) ReflectionUtils.invoke(shipPanel, "getUseStockpiles");
+        final ButtonAPI useStockpilesBtn = (ButtonAPI) RolfLectionUtil.invokeMethod(
+            "getUseStockpiles", shipPanel);
 
-        final MarketAPI market = (MarketAPI) ReflectionUtils.get(shipPanel, null, MarketAPI.class);
-
-        if (DebugFlags.COLONY_DEBUG || market.isPlayerOwned()) {
+        if (DebugFlags.COLONY_DEBUG || marketAPI.isPlayerOwned()) {
             final CallbackRunnable<Button> stockpilesBtnRunnable = (btn) -> {
-                final ColonyInvDialog dialogPanel = new ColonyInvDialog(market, btn);
+                final ColonyInvDialog dialogPanel = new ColonyInvDialog(marketAPI, btn);
 
                 WrapUiUtils.CustomDialogViewer(
                         dialogPanel, ColonyInvDialog.PANEL_W, ColonyInvDialog.PANEL_H);
@@ -191,10 +202,10 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
             inventoryBtn.getPos().inBL(xOffset, yOffset);
 
-            if (!EconomyEngine.getInstance().isPlayerMarket(market.getId())) return;
+            if (!EconomyEngine.getInstance().isPlayerMarket(marketAPI.getId())) return;
 
             final CallbackRunnable<Button> manageWorkersBtnRunnable = (btn) -> {
-                final ManageWorkersDialog dialogPanel = new ManageWorkersDialog(market);
+                final ManageWorkersDialog dialogPanel = new ManageWorkersDialog(marketAPI);
 
                 WrapUiUtils.CustomDialogViewer(
                         dialogPanel, ManageWorkersDialog.PANEL_W, ManageWorkersDialog.PANEL_H);
@@ -227,18 +238,21 @@ public class LtvMarketReplacer implements EveryFrameScript {
     private static final void replaceMarketCreditsLabel(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
-        final List<?> children = (List<?>) ReflectionUtils.invoke(colonyInfoPanel, "getChildrenCopy");
+        final List<?> children = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenCopy", colonyInfoPanel);
+        RolfLectionUtil.invokeMethod("getChildrenCopy", colonyInfoPanel);
         for (Object child : children) {
             if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof BasePanelPlugin) {
                 return;
             }
         }
         
-        final var fields = ReflectionUtils.getMethodsMatching(colonyInfoPanel, "getIncome", UIPanelAPI.class, 0);
-        if (fields.isEmpty()) return;
+        if (!RolfLectionUtil.hasMethodOfName("getIncome", colonyInfoPanel)) return;
         
-        final UIPanelAPI incomePanel = (UIPanelAPI) fields.get(0).invoke(colonyInfoPanel);
-        final List<?> incomePanelChildren = (List<?>) ReflectionUtils.invoke(incomePanel, "getChildrenCopy");
+        final UIPanelAPI incomePanel = (UIPanelAPI) RolfLectionUtil.getMethodAndInvokeDirectly(
+            "getIncome", colonyInfoPanel);
+        final List<?> incomePanelChildren = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenCopy",incomePanel);
         
         final var Buttons = (List<ButtonAPI>) incomePanelChildren.stream()
             .filter(c -> c instanceof ButtonAPI).map(c -> (ButtonAPI) c).toList();
@@ -246,18 +260,17 @@ public class LtvMarketReplacer implements EveryFrameScript {
         final ButtonAPI hazardBtn = Buttons.get(1);
         incomePanel.removeComponent(creditBtn);
 
-        final MarketAPI market = (MarketAPI) ReflectionUtils.get(colonyInfoPanel, null, MarketAPI.class);
         final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
             public void createPanel() {
-                final long value = EconomyEngine.getInstance().getNetIncome(market, true);
+                final long value = EconomyEngine.getInstance().getNetIncome(marketAPI, true);
                 final String txt = "Credits/month";
                 final String valueTxt = NumFormat.formatCredit(value);
                 final Color valueColor = value < 0 ? negative
-                        : market.getFaction().getBrightUIColor();
+                        : marketAPI.getFaction().getBrightUIColor();
 
                 final LabelAPI lbl1 = Global.getSettings().createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(market.getFaction().getBaseUIColor());
+                lbl1.setColor(marketAPI.getFaction().getBaseUIColor());
                 lbl1.setHighlightOnMouseover(true);
                 lbl1.setAlignment(Alignment.MID);
 
@@ -288,13 +301,13 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 final int TP_WIDTH = 450;
                 m_tp = getPanel().createUIElement(TP_WIDTH, 0, false);
 
-                final FactionAPI faction = market.getFaction();
+                final FactionAPI faction = marketAPI.getFaction();
                 final Color base = faction.getBaseUIColor();
                 final Color dark = faction.getDarkUIColor();
                 final EconomyEngine engine = EconomyEngine.getInstance();
 
                 m_tp.addTitle("Monthly Income & Upkeep", base);
-                final long income = engine.getNetIncome(market, true);
+                final long income = engine.getNetIncome(marketAPI, true);
 
                 final String incomeTxt = NumFormat.formatCreditAbs(income);
                 if (income >= 0) {
@@ -305,10 +318,10 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                 m_tp.addPara(
                     "Income multiplier: %s", opad, highlight,
-                    Math.round(market.getIncomeMult().getModifiedValue() * 100f) + "%"
+                    Math.round(marketAPI.getIncomeMult().getModifiedValue() * 100f) + "%"
                 );
                 m_tp.addStatModGrid(
-                    TP_WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null
+                    TP_WIDTH, 50f, opad, pad, marketAPI.getIncomeMult(), true, null
                 );
                 m_tp.setParaFontColor(gray);
                 m_tp.addPara(
@@ -320,31 +333,31 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                 m_tp.addPara(
                     "Upkeep multiplier: %s", opad, highlight,
-                    Math.round(market.getUpkeepMult().getModifiedValue() * 100f) + "%"
+                    Math.round(marketAPI.getUpkeepMult().getModifiedValue() * 100f) + "%"
                 );
                 m_tp.addStatModGrid(
-                    TP_WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null
+                    TP_WIDTH, 50f, opad, pad, marketAPI.getUpkeepMult(), true, null
                 );
 
-                final String indIncome = NumFormat.formatCredit(engine.getIndustryIncome(market));
-                final String indUpkeep = NumFormat.formatCredit(engine.getIndustryUpkeep(market));
+                final String indIncome = NumFormat.formatCredit(engine.getIndustryIncome(marketAPI));
+                final String indUpkeep = NumFormat.formatCredit(engine.getIndustryUpkeep(marketAPI));
 
-                final ArrayList<Industry> industries = new ArrayList<>(market.getIndustries());
+                final ArrayList<Industry> industries = new ArrayList<>(marketAPI.getIndustries());
 
                 m_tp.addSectionHeading("Income", base, dark, Alignment.MID, opad);
 
                 m_tp.addPara("Local income: %s", opad, highlight, indIncome);
                 industries.sort((i1, i2) ->
                     Integer.compare(
-                        engine.getIndustryIncome(i2, market).getModifiedInt(),
-                        engine.getIndustryIncome(i1, market).getModifiedInt()
+                        engine.getIndustryIncome(i2, marketAPI).getModifiedInt(),
+                        engine.getIndustryIncome(i1, marketAPI).getModifiedInt()
                     )
                 );
                 m_tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
 
                 int indCount = 0;
                 for (Industry ind : industries) {
-                    int perIndIncome = engine.getIndustryIncome(ind, market).getModifiedInt();
+                    int perIndIncome = engine.getIndustryIncome(ind, marketAPI).getModifiedInt();
                     if (perIndIncome > 0) {
                         m_tp.addToGrid(0, indCount++, ind.getCurrentName(),
                             NumFormat.formatCredit(perIndIncome), highlight
@@ -358,7 +371,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     m_tp.cancelGrid();
                 }
 
-                final long exportIncome = engine.getExportIncome(market, true);
+                final long exportIncome = engine.getExportIncome(marketAPI, true);
                 m_tp.addPara("Last Month's Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
                 if (exportIncome > 0 && expanded) {
                     final int maxCommoditiesToDisplay = 10;
@@ -369,7 +382,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     int exportedCount = 0;
                     final List<CommodityInfo> commodities = engine.getCommodityInfos();
                     for (CommodityInfo com : commodities) {
-                        if (com.getLedger(market.getId())
+                        if (com.getLedger(marketAPI.getId())
                                 .lastMonthExportIncome > 0
                             ) {
                             ++exportedCount;
@@ -378,18 +391,18 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                     commodities.sort((c1, c2) ->
                         Long.compare(
-                            c2.getLedger(market.getId()).lastMonthExportIncome,
-                            c1.getLedger(market.getId()).lastMonthExportIncome
+                            c2.getLedger(marketAPI.getId()).lastMonthExportIncome,
+                            c1.getLedger(marketAPI.getId()).lastMonthExportIncome
                         )
                     );
                     int comCount = 0;
                     for (CommodityInfo com : commodities) {
                         final String name = com.spec.getName();
-                        final long comExportIncome = com.getLedger(market.getId()).lastMonthExportIncome;
+                        final long comExportIncome = com.getLedger(marketAPI.getId()).lastMonthExportIncome;
                         if (comExportIncome < 1) continue;
 
                         final int exportMarketShare = engine.getExportMarketShare(
-                            com.spec.getId(), market.getId()
+                            com.spec.getId(), marketAPI.getId()
                         );
 
                         m_tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, highlight, exportMarketShare + "%", highlight, NumFormat.formatCredit(comExportIncome));
@@ -403,13 +416,13 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 }
 
                 m_tp.addSectionHeading("Upkeep", base, dark, Alignment.MID, opad);
-                if (expanded && engine.getIndustryUpkeep(market) > 0) {
+                if (expanded && engine.getIndustryUpkeep(marketAPI) > 0) {
                     m_tp.addPara("Industry and structure upkeep: %s", opad, negative, indUpkeep);
 
                     industries.sort((i1, i2) ->
                         Integer.compare(
-                            engine.getIndustryUpkeep(i2, market).getModifiedInt(),
-                            engine.getIndustryUpkeep(i1, market).getModifiedInt()
+                            engine.getIndustryUpkeep(i2, marketAPI).getModifiedInt(),
+                            engine.getIndustryUpkeep(i1, marketAPI).getModifiedInt()
                         )
                     );
 
@@ -417,7 +430,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     indCount = 0;
 
                     for (Industry ind : industries) {
-                        int perIndIncome = engine.getIndustryUpkeep(ind, market).getModifiedInt();
+                        int perIndIncome = engine.getIndustryUpkeep(ind, marketAPI).getModifiedInt();
                         if (perIndIncome > 0) {
                             m_tp.addToGrid(0, indCount++, ind.getCurrentName(),
                                 NumFormat.formatCredit(perIndIncome), negative
@@ -432,7 +445,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     }
                 }
 
-                final long importExpense = engine.getImportExpense(market, true);
+                final long importExpense = engine.getImportExpense(marketAPI, true);
                 m_tp.addPara("Last Month's Imports: %s", opad, negative, NumFormat.formatCredit(importExpense));
                 if (importExpense > 0 && expanded) {
                     final int maxCommoditiesToDisplay = 10;
@@ -443,7 +456,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     int importedCount = 0;
                     final List<CommodityInfo> commodities = engine.getCommodityInfos();
                     for (CommodityInfo com : commodities) {
-                        if (com.getLedger(market.getId())
+                        if (com.getLedger(marketAPI.getId())
                                 .lastMonthImportExpense > 0
                             ) {
                             ++importedCount;
@@ -452,18 +465,18 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                     commodities.sort((c1, c2) ->
                         Long.compare(
-                            c2.getLedger(market.getId()).lastMonthImportExpense,
-                            c1.getLedger(market.getId()).lastMonthImportExpense
+                            c2.getLedger(marketAPI.getId()).lastMonthImportExpense,
+                            c1.getLedger(marketAPI.getId()).lastMonthImportExpense
                         )
                     );
                     int comCount = 0;
                     for (CommodityInfo com : commodities) {
                         final String name = com.spec.getName();
-                        final long comImportExpense = com.getLedger(market.getId()).lastMonthImportExpense;
+                        final long comImportExpense = com.getLedger(marketAPI.getId()).lastMonthImportExpense;
                         if (comImportExpense < 1) continue;
 
                         final int importMarketShare = engine.getImportMarketShare(
-                            com.spec.getId(), market.getId()
+                            com.spec.getId(), marketAPI.getId()
                         );
 
                         m_tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, negative, importMarketShare + "%", negative, NumFormat.formatCredit(comImportExpense));
@@ -476,15 +489,15 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     m_tp.addTable("No imports", importedCount - comCount, opad);
                 }
 
-                final long monthlyWages = (long) (engine.getWagesForMarket(market)*MONTH);
+                final long monthlyWages = (long) (engine.getWagesForMarket(marketAPI)*MONTH);
                 if (monthlyWages > 0) {
                     m_tp.addPara("Worker wages: %s", opad, negative,
                         NumFormat.formatCredit(monthlyWages)
                     );
                 }
 
-                final int incentive = (int) market.getImmigrationIncentivesCost();
-                if (incentive > 0 && market.isImmigrationIncentivesOn()) {
+                final int incentive = (int) marketAPI.getImmigrationIncentivesCost();
+                if (incentive > 0 && marketAPI.isImmigrationIncentivesOn()) {
                     m_tp.addPara("Hazard pay: %s", opad, negative, Misc.getDGSCredits(incentive));
                 }
 
@@ -553,7 +566,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
             return;
 
         // Steal the members for the constructor
-        final MarketAPI market = (MarketAPI) ReflectionUtils.get(industryPanel, null, MarketAPI.class);
         final int width = (int) industryPanel.getPosition().getWidth();
         final int height = (int) industryPanel.getPosition().getHeight();
 
@@ -561,7 +573,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 managementPanel,
                 width,
                 height,
-                market,
+                marketAPI,
                 industryPanel);
 
         managementPanel.addComponent(replacement.getPanel());
@@ -571,8 +583,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
             // Acquire the popup class from one of the widgets
             final Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
 
-            // Attach the popup
-            ReflectionUtils.invoke(widget0, "actionPerformed", null, null);
+            // Attach the popup;
+            RolfLectionUtil.invokeMethod("actionPerformed", widget0, null, null);
 
             // Now the popup class is a child of:
             // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
@@ -585,13 +597,14 @@ public class LtvMarketReplacer implements EveryFrameScript {
                     .map(child -> (UIPanelAPI) child)
                     .findFirst().orElse(null);
 
-            final ReflectedConstructor indOpsPanelConstr = ReflectionUtils.getConstructorsMatching(
-                    indOps.getClass(), 5).get(0);
+            final Object indOpsPanelConstr = RolfLectionUtil.getConstructor(indOps.getClass(),
+                RolfLectionUtil.getConstructorParamTypesSingleConstructor(indOps.getClass())
+            );
 
             LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
 
             // Dismiss the indOpsPanel after getting its constructor
-            ReflectionUtils.invoke(indOps, "dismiss", 0);
+            RolfLectionUtil.invokeMethodDirectly("dismiss", indOps, 0);
         }
 
         // No need for the old panel
@@ -614,9 +627,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (commodityPanel == null) return;
 
         try {
-            // Steal the members for the constructor
-            final MarketAPI market = (MarketAPI) (ReflectionUtils.get(commodityPanel, null, MarketAPI.class));
-
             final int width = (int) commodityPanel.getPosition().getWidth();
             final int height = (int) commodityPanel.getPosition().getHeight();
 
@@ -626,7 +636,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 height,
                 new BasePanelPlugin<LtvCommodityPanel>()
             );
-            replacement.setMarket(market);
+            replacement.setMarket(marketAPI);
 
             final HasActionListener listener = new HasActionListener() {
                 @Override
@@ -639,7 +649,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                     if (replacement.m_canViewPrices) {
                         final ComDetailDialog dialogPanel = new ComDetailDialog(
-                            market, panel.getCommodity()
+                            marketAPI, panel.getCommodity()
                         );
 
                         WrapUiUtils.CustomDialogViewer(
@@ -670,16 +680,17 @@ public class LtvMarketReplacer implements EveryFrameScript {
     }
 
     private static final void replaceMarketInstanceForPriceControl(UIPanelAPI masterTab) {
-        final UIPanelAPI handler = (UIPanelAPI) ReflectionUtils.invoke(masterTab, "getTransferHandler");
-        final ReflectedField field = ReflectionUtils.getFieldsMatching(
-                handler, null, Market.class).get(0);
+        final UIPanelAPI handler = (UIPanelAPI) RolfLectionUtil.invokeMethod(
+            "getTransferHandler", masterTab);
+        if (marketField == null) {
+            marketField = RolfLectionUtil.getAllFields(handler.getClass())
+                .stream().filter(c -> c instanceof Market).findFirst().get();
+        }
 
-        final Market original = (Market) field.get(handler);
-        if (original instanceof MarketWrapper)
-            return;
+        final Market original = (Market) RolfLectionUtil.getPrivateVariable(marketField, handler);
+        if (original instanceof MarketWrapper) return;
 
-        MarketAPI ltvMarket = new MarketWrapper(original);
-        field.set(handler, ltvMarket);
+        RolfLectionUtil.setPrivateVariable(marketField, handler, new MarketWrapper(original));
     }
 
     public boolean isDone() {

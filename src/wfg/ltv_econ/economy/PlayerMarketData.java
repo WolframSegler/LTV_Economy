@@ -8,11 +8,11 @@ import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.policies.MarketPolicy;
-import wfg.reflection.ReflectionUtils;
 
 public class PlayerMarketData {
     public final String marketID;
@@ -43,8 +43,9 @@ public class PlayerMarketData {
 
         try {
             for (PolicySpec spec : PolicyConfig.map.values()) {
-                final MarketPolicy policy = (MarketPolicy) ReflectionUtils.getConstructorsMatching(
-                    spec.marketPolicyClass, 0).get(0).newInstance();
+                final MarketPolicy policy = (MarketPolicy) RolfLectionUtil.instantiateClass(
+                    RolfLectionUtil.getConstructor(spec.marketPolicyClass, null)
+                );
                 policies.add(policy);
                 policy.spec = spec;
                 policy.id = spec.id;

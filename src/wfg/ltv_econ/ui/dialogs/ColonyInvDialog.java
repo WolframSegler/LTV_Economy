@@ -18,11 +18,11 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
-import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
@@ -413,7 +413,8 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         UIState.setState(State.NONE);
 
         // Refresh the panel
-        final List<?> children = (List<?>)ReflectionUtils.invoke(m_btn.getParent(), "getChildrenNonCopy");
+        final List<?> children = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenNonCopy", m_btn.getParent());
         for (Object child : children) {
             if (child instanceof LtvIndustryListPanel indListPanel) {
                 indListPanel.createPanel();

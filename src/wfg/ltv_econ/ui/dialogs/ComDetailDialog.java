@@ -56,7 +56,6 @@ import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
-import wfg.reflection.ReflectionUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
@@ -264,7 +263,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     public void updateSection3(int mode) {
         if (section3 != null) {
             // Otherwise the anchor of the tooltips gets removed before the tooltips, causing a crash.
-            ReflectionUtils.invoke(section3, "clearChildren");
+            // ReflectionU.invoke(section3, "clearChildren");
         }
         m_dialogPanel.removeComponent(section3);
 

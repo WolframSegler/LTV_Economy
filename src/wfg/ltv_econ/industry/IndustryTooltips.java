@@ -32,11 +32,11 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.reflection.ReflectionUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class IndustryTooltips {
@@ -98,9 +98,8 @@ public class IndustryTooltips {
 		tp.addTitle(ind.getCurrentName() + type, color);
 
 		String desc = ind.getSpec().getDesc();
-        String override = (String) ReflectionUtils.getMethodsMatching(
-            BaseIndustry.class, "getDescriptionOverride", String.class, 0).get(0
-        ).invoke(ind);
+        String override = (String) RolfLectionUtil.getMethodAndInvokeDirectly(
+			"getDescriptionOverride", ind);
 		if (override != null) {
 			desc = override;
 		}
@@ -150,9 +149,8 @@ public class IndustryTooltips {
 			}
 		}
 
-        ReflectionUtils.getMethodsMatching(
-            BaseIndustry.class, "addRightAfterDescriptionSection", void.class, 2).get(0
-        ).invoke(ind, tp, mode);
+		RolfLectionUtil.getMethodAndInvokeDirectly(
+			"addRightAfterDescriptionSection", ind, tp, mode);
 
 		if (ind.isDisrupted()) {
 			int left = (int) ind.getDisruptedDays();
@@ -192,7 +190,7 @@ public class IndustryTooltips {
 				opad
 			);
 
-			float buildTime = (float) ReflectionUtils.get(ind, "buildTime", float.class, true);
+			float buildTime = (float) RolfLectionUtil.getPrivateVariable("buildTime", ind);
 			int left = Math.round((buildTime - ((BaseIndustry)ind).getBuildProgress()));
 			String days = "days";
 			if (left < 2)
@@ -250,9 +248,8 @@ public class IndustryTooltips {
 				}
 			}
 
-            ReflectionUtils.getMethodsMatching(
-                BaseIndustry.class, "addPostDescriptionSection", void.class, 2).get(0
-            ).invoke(ind, tp, mode);
+            RolfLectionUtil.getMethodAndInvokeDirectly("addPostDescriptionSection",
+				ind, tp, mode);
 
 			if (!ind.getIncome().isUnmodified()) {
 				int income = ind.getIncome().getModifiedInt();
@@ -299,9 +296,8 @@ public class IndustryTooltips {
 				});
 			}
 
-            ReflectionUtils.getMethodsMatching(
-                BaseIndustry.class, "addPostUpkeepSection", void.class, 2).get(0
-            ).invoke(ind, tp, mode);
+            RolfLectionUtil.getMethodAndInvokeDirectly("addPostUpkeepSection",
+				ind, tp, mode);
 
 			List<CommodityStats> supplyList = new ArrayList<>();
 			List<CommodityStats> demandList = new ArrayList<>();
@@ -373,14 +369,13 @@ public class IndustryTooltips {
 				WrapUiUtils.resetFlowLeft(tp, opad);
 			}
 
-            ReflectionUtils.getMethodsMatching(
-                BaseIndustry.class, "addPostSupplySection", void.class, 3).get(0
-            ).invoke(ind, tp, !supplyList.isEmpty(), mode);
+            RolfLectionUtil.getMethodAndInvokeDirectly("addPostSupplySection",
+				ind, tp, !supplyList.isEmpty(), mode);
 
 			float headerHeight = 0;
-            boolean hasPostDemandSection = (boolean) ReflectionUtils.getMethodsMatching(
-                BaseIndustry.class, "hasPostDemandSection", boolean.class, 2).get(0
-            ).invoke(ind, !demandList.isEmpty(), mode);
+            boolean hasPostDemandSection = (boolean) RolfLectionUtil.getMethodAndInvokeDirectly(
+				"hasPostDemandSection", ind, !demandList.isEmpty(), mode);
+
 			if (!demandList.isEmpty() || hasPostDemandSection) {
 				tp.addSectionHeading("Demand & effects", color, dark, Alignment.MID, opad);
 				headerHeight = tp.getPrev().getPosition().getHeight();
@@ -441,9 +436,8 @@ public class IndustryTooltips {
 				WrapUiUtils.resetFlowLeft(tp, opad);
 			}
 
-            ReflectionUtils.getMethodsMatching(
-                BaseIndustry.class, "addPostDemandSection", void.class, 3).get(0
-            ).invoke(ind, tp, !demandList.isEmpty(), mode);
+            RolfLectionUtil.getMethodAndInvokeDirectly(
+				"addPostDemandSection", ind, tp, !demandList.isEmpty(), mode);
 
 			if (!needToAddIndustry) {
 				addInstalledItemsSection(mode, tp, expanded, ind);
@@ -484,9 +478,8 @@ public class IndustryTooltips {
 			addAICoreSection(tooltip, ind.getAICoreId(), aiCoreDescMode, ind);
 			addedSomething = true;
 		}
-        boolean r = (boolean) ReflectionUtils.getMethodsMatching(
-            BaseIndustry.class, "addNonAICoreInstalledItems", boolean.class, 3).get(0
-        ).invoke(ind, mode, tooltip, expanded);
+        boolean r = (boolean) RolfLectionUtil.getMethodAndInvokeDirectly(
+			"addNonAICoreInstalledItems", ind, mode, tooltip, expanded);
 		addedSomething |= r;
 		
 		if (!addedSomething) {
@@ -516,9 +509,8 @@ public class IndustryTooltips {
 		} else if (gamma) {
 			addGammaCoreDescription(tooltip, mode, ind);
 		} else {
-            ReflectionUtils.getMethodsMatching(
-                BaseIndustry.class, "addUnknownCoreDescription", void.class, 3).get(0
-            ).invoke(ind, coreId, tooltip, mode);
+            RolfLectionUtil.getMethodAndInvokeDirectly(
+			"addUnknownCoreDescription", ind, coreId, tooltip, mode);
 		}
 	}
 
@@ -613,7 +605,8 @@ public class IndustryTooltips {
 		float initPad = 0f;
 
 		boolean addedSomething = false;
-        boolean canImprove = (boolean) ReflectionUtils.invoke(ind, "canImproveToIncreaseProduction");
+        boolean canImprove = (boolean) RolfLectionUtil.invokeMethod(
+			"canImproveToIncreaseProduction", ind);
 		if (canImprove) {
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
 				info.addPara("Production increased by %s.", initPad, highlight,

@@ -10,7 +10,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.reflection.ReflectionUtils;
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
@@ -137,7 +137,7 @@ public class EconomyOverviewPanel extends CustomPanel<
     private static final void clearPanelAndButtonState(Button caller) {
         navButtons.forEach(b -> b.checked = false);
         caller.checked = true;
-        ReflectionUtils.invoke(contentPanel, "clearChildren");
-        ReflectionUtils.invoke(optionsPanel, "clearChildren");
+        RolfLectionUtil.invokeMethod("clearChildren", contentPanel);
+        RolfLectionUtil.invokeMethod("clearChildren", optionsPanel);
     }
 }

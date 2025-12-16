@@ -29,13 +29,14 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
+import rolflectionlib.util.ListenerFactory;
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
 import wfg.ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
 import wfg.ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
-import wfg.ltv_econ.util.ListenerFactory;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -49,8 +50,6 @@ import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.reflection.ReflectionUtils;
-import wfg.reflection.ReflectionUtils.ReflectedConstructor;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvIndustryListPanel extends CustomPanel<
@@ -59,8 +58,11 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 	public static final int BUTTON_SECTION_HEIGHT = 45;
 
-	public static final ReflectedConstructor indPickCtor = ReflectionUtils.getConstructorsMatching(IndustryPickerDialog.class, 3).get(0);
-	public static ReflectedConstructor indOptCtor = null;
+	public static final Object indPickCtor = RolfLectionUtil.getConstructor(
+		IndustryPickerDialog.class, 
+		RolfLectionUtil.getConstructorParamTypesSingleConstructor(IndustryPickerDialog.class)
+	);
+	public static Object indOptCtor = null;
 	
 	private final List<Object> widgets = new ArrayList<>();
 	public final UIPanelAPI dummyWidget;
@@ -89,7 +91,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		createPanel();
    	}
 
-	public static void setindustryOptionsPanelConstructor(ReflectedConstructor a) {
+	public static void setindustryOptionsPanelConstructor(Object a) {
 		indOptCtor = a;
 	}
 
@@ -362,9 +364,10 @@ public class LtvIndustryListPanel extends CustomPanel<
 				}
 			}.getProxy();
 
-			UIPanelAPI coreUI = Attachments.getInteractionCoreUI();
+			final UIPanelAPI coreUI = Attachments.getInteractionCoreUI();
 			if (coreUI == null) Attachments.getCoreUI();
-			IndustryPickerDialog dialog = (IndustryPickerDialog) indPickCtor.newInstance(
+			final IndustryPickerDialog dialog = (IndustryPickerDialog) RolfLectionUtil.instantiateClass(
+				indPickCtor,
 				m_market,
 				coreUI,
 				listener

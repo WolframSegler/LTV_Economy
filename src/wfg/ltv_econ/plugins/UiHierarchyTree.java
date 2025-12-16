@@ -13,7 +13,7 @@ import javax.swing.tree.DefaultTreeModel;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.reflection.ReflectionUtils;
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.wrap_ui.ui.Attachments;
 
 public class UiHierarchyTree implements EveryFrameScript {
@@ -52,7 +52,8 @@ public class UiHierarchyTree implements EveryFrameScript {
             masterTab = Attachments.getCurrentTab();
         }
         if (masterTab == null) return;
-        final List<?> listChildren = (List<?>) ReflectionUtils.invoke(masterTab, "getChildrenCopy");
+        final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenNonCopy", masterTab);
         if (listChildren == null) return;
 
         for (Object child : listChildren) {
@@ -70,7 +71,8 @@ public class UiHierarchyTree implements EveryFrameScript {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(className);
 
         // Recursively add children
-        final List<?> children = (List<?>) ReflectionUtils.invoke(panel, "getChildrenCopy");
+        final List<?> children = (List<?>) RolfLectionUtil.invokeMethod(
+            "getChildrenNonCopy", panel);
         if (children != null) {
             for (Object child : children) {
                 if (child instanceof UIPanelAPI) {

@@ -29,12 +29,10 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.ui.impl.CargoTooltipFactory;
 
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.submarkets.OpenSubmarketPlugin;
-import wfg.reflection.ReflectionUtils;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
@@ -48,19 +46,6 @@ public class TooltipUtils {
 
     static {
         cargoTooltipArrow_PATH = Global.getSettings().getSpriteName("ui", "cargoTooltipArrow");
-    }
-
-    /**
-     * Reflectively calls the original factory method
-     */
-    public static void cargoTooltipFactory(TooltipMakerAPI tooltip, float pad, CommoditySpecAPI com,
-        int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy
-    ) {
-        ReflectionUtils.invoke(
-            CargoTooltipFactory.class, "super", tooltip, pad, com, rowsPerTable,
-            showExplanation, showBestSell, showBestBuy
-        );
-        tooltip.getPosition().setSize(1000, 0);
     }
 
     /**
