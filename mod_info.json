@@ -8,7 +8,7 @@
 	"utility": false,
 	"jars": [
         "jars/main/ltv_economy.jar",
-		"jars/libs/reflection.jar",
+		"jars/libs/RolflectionLib.jar",
 		"jars/libs/commons-math4-core-4.0-beta1.jar",
 		"jars/libs/commons-math4-legacy-4.0-beta1.jar",
 		"jars/libs/commons-math4-legacy-exception-4.0-beta1.jar",
