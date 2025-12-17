@@ -202,7 +202,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             outputSlider.clampCurrToMax = true;
             outputSlider.roundingIncrement = 1;
 
-            final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(market);
+            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
             pool.recalculateWorkerPool();
 
             final float max = Math.max(0,

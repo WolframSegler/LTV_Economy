@@ -14,6 +14,7 @@ import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.submarkets.BaseSubmarketPlugin;
+import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
 import com.fs.starfarer.api.util.Highlights;
 import com.fs.starfarer.api.util.Misc;
 
@@ -126,6 +127,10 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	
 	@Override
 	public int getStockpileLimit(CommodityOnMarketAPI com) {
+		if (EconomyEngine.getInstance() == null) {
+			return (int) OpenMarketPlugin.getBaseStockpileLimit(com);
+		}
+
         final Random random = new Random(
             market.getId().hashCode() +
             submarket.getSpecId().hashCode() +

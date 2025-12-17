@@ -4,7 +4,7 @@
 	"author":"WolframSegler",
 	"version": "0.1.0",
 	"description":"A deep overhaul of Starsector's economic and colony systems.",
-	"gameVersion":"0.98a-RC7",
+	"gameVersion":"0.98a-RC8",
 	"utility": false,
 	"jars": [
         "jars/main/ltv_economy.jar",

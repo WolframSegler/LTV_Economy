@@ -15,8 +15,11 @@ import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
+import com.fs.starfarer.api.campaign.BattleAPI;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
@@ -577,7 +580,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         );
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
-            final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(entry.getKey());
+            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(entry.getKey());
             if (cond == null) continue;
 
             final String marketID = entry.getKey().getId();
@@ -798,7 +801,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         for (MarketAPI market : getMarketsCopy()) {
             if (!includePlayerMarkets && market.isPlayerOwned()) continue;
             
-            final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(market);
+            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
             if (cond == null) continue;
 
             total += cond.getWorkerPool();
@@ -1249,6 +1252,30 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 stats.addStoredAmount(-obj.getQuantityLooted());
             }
         }
+    }
+
+    public void reportFleetSpawned(CampaignFleetAPI fleet) {
+
+    }
+
+    public void reportBattleOccurred(CampaignFleetAPI primaryWinner, BattleAPI battle) {
+
+    }
+
+    public void reportBattleFinished(CampaignFleetAPI primaryWinner, BattleAPI battle) {
+
+    }
+
+    public void reportFleetDespawned(CampaignFleetAPI fleet, FleetDespawnReason reason, Object param) {
+
+    }
+
+    public void reportFleetJumped(CampaignFleetAPI fleet, SectorEntityToken from, JumpDestination to) {
+
+    }
+
+    public void reportFleetReachedEntity(CampaignFleetAPI fleet, SectorEntityToken entity) {
+        
     }
 
     public final void logEconomySnapshot() {

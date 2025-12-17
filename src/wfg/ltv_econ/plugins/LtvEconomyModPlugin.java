@@ -32,6 +32,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void onNewGame() {
         WorkerPoolCondition.initialize();
+
+        onGameLoad(true);
     }
 
     @Override

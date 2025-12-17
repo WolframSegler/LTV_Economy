@@ -3,7 +3,6 @@ package wfg.ltv_econ.ui.plugins;
 import java.util.Map;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.dialogs.AssignWorkersDialog;
 import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
@@ -20,7 +19,7 @@ CustomDetailDialogPanel<AssignWorkersDialogPlugin>, AssignWorkersDialogPlugin
     public AssignWorkersDialogPlugin(AssignWorkersDialog dialog) {
         this.dialog = dialog;
 
-        final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(dialog.market);
+        final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(dialog.market);
         initialFreeWorkerRatio = pool.getFreeWorkerRatio();
     }
 

@@ -4,9 +4,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.fs.starfarer.api.FactoryAPI;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.SectorAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -51,10 +55,6 @@ public class IndustryConfigManager {
     public static Map<String, IndustryConfig> ind_config;
 
     static {
-        init();
-    }
-
-    private static final void init() {
         ind_config = IndustryConfigManager.loadAsMap(false);
 
         validateOrRebuildDynamicConfigs();
@@ -463,11 +463,20 @@ public class IndustryConfigManager {
         final String factionID = "ltv_test";
         final String marketID1 = "ltv_dynamic_ind_test_market1";
         final String marketID2 = "ltv_dynamic_ind_test_market2";
+        final String testEntity = "ltv_dynamic_entity";
         final String abstractOutput = "atLeastOneOutputForAbstractInputs";
-        final MarketAPI testMarket1 = Global.getFactory().createMarket(marketID1, marketID1, TEST_MARKET_SIZE);
-        final MarketAPI testMarket2 = Global.getFactory().createMarket(marketID2, marketID2, 5);
+        final FactoryAPI factory = Global.getFactory();
+        final SectorAPI sector = Global.getSector();
+        final MarketAPI testMarket1 = factory.createMarket(marketID1, marketID1, TEST_MARKET_SIZE);
+        final MarketAPI testMarket2 = factory.createMarket(marketID2, marketID2, 5);
+        final StarSystemAPI testStarSystem = sector.createStarSystem(testEntity);
+        final SectorEntityToken testPlanet = testStarSystem.addPlanet(
+            testEntity, testStarSystem.getCenter(), testEntity, "frozen", 0f, 1f, 1f, 1f
+        );
         testMarket1.setFactionId(factionID);
         testMarket2.setFactionId(factionID);
+        testMarket1.setPrimaryEntity(testPlanet);
+        testMarket2.setPrimaryEntity(testPlanet);
         final FactionAPI testFaction = testMarket1.getFaction();
 
         final Set<String> scaleWithMarketSize = new HashSet<>(8);
@@ -744,6 +753,10 @@ public class IndustryConfigManager {
                 + IndustryConfigManager.DYNAMIC_CONFIG_NAME, e
             );
         }
+    
+        // CLEANUP
+        testStarSystem.removeEntity(testPlanet);
+        sector.removeStarSystem(testStarSystem);
     }
 
     private static final void populateInputs(

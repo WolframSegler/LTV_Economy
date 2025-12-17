@@ -25,7 +25,6 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
@@ -291,7 +290,7 @@ public class WorkforcePlanner {
         final long[] baseCapacities = new long[numMarkets];
         for (int m = 0; m < numMarkets; m++) {
             final MarketAPI market = markets.get(m);
-            final WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(market);
+            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
             baseCapacities[m] = (pool != null) ? pool.getWorkerPool() : 0;
         }
 
@@ -474,20 +473,20 @@ public class WorkforcePlanner {
 
         // 2. Market-level details
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
-            MarketAPI market = entry.getKey();
-            WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(market);
-            float pool = (cond != null) ? cond.getWorkerPool() : 0f;
-            float used = 0f;
+            final MarketAPI market = entry.getKey();
+            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
+            final float pool = (cond != null) ? cond.getWorkerPool() : 0f;
 
+            float used = 0f;
             for (float v : entry.getValue()) used += v;
 
-            float utilization = (pool > 0) ? used / pool : 0f;
+            final float utilization = (pool > 0) ? used / pool : 0f;
             sb.append(String.format(Locale.ROOT,
                     "[%s] used %.0f / %.0f (%.1f%%)\n",
                     market.getName(), used, pool, utilization * 100f));
 
             for (int i = 0; i < industryOutputPairs.size(); i++) {
-                float assigned = entry.getValue()[i];
+                final float assigned = entry.getValue()[i];
                 if (assigned > 0.01f * pool) {
                     sb.append(String.format("   - %-25s : %.0f (%.2f%%)\n",
                             industryOutputPairs.get(i),

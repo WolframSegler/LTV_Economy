@@ -28,7 +28,6 @@ import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.policies.MarketPolicy;
 import wfg.ltv_econ.economy.policies.MarketPolicy.PolicyState;
 import wfg.ltv_econ.util.UiUtils;
@@ -93,7 +92,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerMarketData mData = engine.getPlayerMarketData(m_market.getId());
-        final WorkerPoolCondition cond = WorkerIndustryData.getPoolCondition(m_market);
+        final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
 
         interactionDialog.setBackgroundDimAmount(0.01f);
 

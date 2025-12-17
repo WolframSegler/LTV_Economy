@@ -10,7 +10,6 @@ import java.util.Set;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
@@ -104,7 +103,7 @@ public class WorkerRegistry {
     }
 
     public static final long getWorkerCap(MarketAPI market) {
-        WorkerPoolCondition pool = WorkerIndustryData.getPoolCondition(market);
+        WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
         if (pool == null) return 0;
 
         return pool.getWorkerPool();
@@ -185,7 +184,7 @@ public class WorkerRegistry {
         }
 
         public final long getWorkersAssigned() {
-            final WorkerPoolCondition pool = getPoolCondition(market);
+            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
 
             return (long) (outputRatioSum * pool.getWorkerPool());
         }
@@ -193,7 +192,7 @@ public class WorkerRegistry {
         public final long getAssignedForOutput(String comID) {
             if (!outputRatios.containsKey(comID)) return 0;
 
-            final WorkerPoolCondition pool = getPoolCondition(market);
+            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
 
             return (long) (pool.getWorkerPool() * outputRatios.get(comID));
         }
@@ -246,16 +245,6 @@ public class WorkerRegistry {
 
         public final Set<String> getRegisteredOutputs() {
             return outputRatios.keySet();
-        }
-
-        public static final WorkerPoolCondition getPoolCondition(MarketAPI market) {
-
-            MarketConditionAPI cond = market.getCondition(WorkerPoolCondition.ConditionID);
-            if (cond == null) {
-                WorkerPoolCondition.addConditionToMarket(market);
-                cond = market.getCondition(WorkerPoolCondition.ConditionID);
-            }
-            return (WorkerPoolCondition) cond.getPlugin();
         }
     }
 }
