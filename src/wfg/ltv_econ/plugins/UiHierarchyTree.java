@@ -15,6 +15,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.panels.CustomPanel;
 
 public class UiHierarchyTree implements EveryFrameScript {
     private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
@@ -52,8 +53,8 @@ public class UiHierarchyTree implements EveryFrameScript {
             masterTab = Attachments.getCurrentTab();
         }
         if (masterTab == null) return;
-        final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethod(
-            "getChildrenNonCopy", masterTab);
+        final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, masterTab);
         if (listChildren == null) return;
 
         for (Object child : listChildren) {
@@ -71,8 +72,8 @@ public class UiHierarchyTree implements EveryFrameScript {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(className);
 
         // Recursively add children
-        final List<?> children = (List<?>) RolfLectionUtil.invokeMethod(
-            "getChildrenNonCopy", panel);
+        final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, panel);
         if (children != null) {
             for (Object child : children) {
                 if (child instanceof UIPanelAPI) {

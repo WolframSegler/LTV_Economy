@@ -137,7 +137,7 @@ public class EconomyOverviewPanel extends CustomPanel<
     private static final void clearPanelAndButtonState(Button caller) {
         navButtons.forEach(b -> b.checked = false);
         caller.checked = true;
-        RolfLectionUtil.invokeMethod("clearChildren", contentPanel);
-        RolfLectionUtil.invokeMethod("clearChildren", optionsPanel);
+        RolfLectionUtil.invokeMethodDirectly(CustomPanel.clearChildrenMethod, contentPanel);
+        RolfLectionUtil.invokeMethodDirectly(CustomPanel.clearChildrenMethod, optionsPanel);
     }
 }

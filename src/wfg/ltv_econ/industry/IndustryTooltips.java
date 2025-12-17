@@ -2,7 +2,9 @@ package wfg.ltv_econ.industry;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -40,6 +42,55 @@ import wfg.wrap_ui.util.WrapUiUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class IndustryTooltips {
+
+	private static final Map<String, Object> hasPostDemandSectionMethodCache = new HashMap<>();
+	private static final Class<?>[] hasPostDemandSectionparamTypes = new Class<?>[]{
+		boolean.class,IndustryTooltipMode.class};
+
+	private static final Map<String, Object> addNonAICoreInstalledItemsMethodCache = new HashMap<>();
+	private static final Class<?>[] addNonAICoreInstalledItemsparamTypes = new Class<?>[]{
+		IndustryTooltipMode.class, TooltipMakerAPI.class, boolean.class};
+
+	/**
+     * @param ind The industry instance
+     * @return The resolved Method object
+     */
+    public static Object getHasPostDemandSectionMethod(Industry ind) {
+        final String id = ind.getId();
+
+        if (hasPostDemandSectionMethodCache.containsKey(id)) {
+            return hasPostDemandSectionMethodCache.get(id);
+        }
+
+        final Object method = RolfLectionUtil.getMethodExplicitFromSuperclass(
+			"hasPostDemandSection",
+			hasPostDemandSectionparamTypes,
+			ind
+        );
+        hasPostDemandSectionMethodCache.put(id, method);
+        return method;
+    }
+
+	/**
+     * @param ind The industry instance
+     * @return The resolved Method object
+     */
+    public static Object getAddNonAICoreInstalledItemsMethod(Industry ind) {
+        final String id = ind.getId();
+
+        if (addNonAICoreInstalledItemsMethodCache.containsKey(id)) {
+            return addNonAICoreInstalledItemsMethodCache.get(id);
+        }
+
+        final Object method = RolfLectionUtil.getMethodExplicitFromSuperclass(
+			"addNonAICoreInstalledItems",
+			addNonAICoreInstalledItemsparamTypes,
+			ind
+        );
+        addNonAICoreInstalledItemsMethodCache.put(id, method);
+        return method;
+    }
+
     public static final float ALPHA_CORE_PRODUCTION_BOOST = 1.3f;
 
 	public static final float ALPHA_CORE_UPKEEP_REDUCTION_MULT = 0.75f;
@@ -98,7 +149,7 @@ public class IndustryTooltips {
 		tp.addTitle(ind.getCurrentName() + type, color);
 
 		String desc = ind.getSpec().getDesc();
-        String override = (String) RolfLectionUtil.getMethodAndInvokeDirectly(
+        String override = (String) RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
 			"getDescriptionOverride", ind);
 		if (override != null) {
 			desc = override;
@@ -149,8 +200,8 @@ public class IndustryTooltips {
 			}
 		}
 
-		RolfLectionUtil.getMethodAndInvokeDirectly(
-			"addRightAfterDescriptionSection", ind, tp, mode);
+		RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
+				"addRightAfterDescriptionSection", ind, tp, mode);
 
 		if (ind.isDisrupted()) {
 			int left = (int) ind.getDisruptedDays();
@@ -250,6 +301,8 @@ public class IndustryTooltips {
 
             RolfLectionUtil.getMethodAndInvokeDirectly("addPostDescriptionSection",
 				ind, tp, mode);
+			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
+				"addPostDescriptionSection", ind, tp, mode);
 
 			if (!ind.getIncome().isUnmodified()) {
 				int income = ind.getIncome().getModifiedInt();
@@ -296,8 +349,8 @@ public class IndustryTooltips {
 				});
 			}
 
-            RolfLectionUtil.getMethodAndInvokeDirectly("addPostUpkeepSection",
-				ind, tp, mode);
+			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
+				"addPostUpkeepSection", ind, tp, mode);
 
 			List<CommodityStats> supplyList = new ArrayList<>();
 			List<CommodityStats> demandList = new ArrayList<>();
@@ -369,12 +422,14 @@ public class IndustryTooltips {
 				WrapUiUtils.resetFlowLeft(tp, opad);
 			}
 
-            RolfLectionUtil.getMethodAndInvokeDirectly("addPostSupplySection",
-				ind, tp, !supplyList.isEmpty(), mode);
+			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
+				"addPostSupplySection", ind, tp, !demandList.isEmpty(), mode);
+			
 
 			float headerHeight = 0;
-            boolean hasPostDemandSection = (boolean) RolfLectionUtil.getMethodAndInvokeDirectly(
-				"hasPostDemandSection", ind, !demandList.isEmpty(), mode);
+			final boolean hasPostDemandSection = (Boolean) RolfLectionUtil.invokePrivateMethodDirectly(
+				getHasPostDemandSectionMethod(ind), ind, !demandList.isEmpty(), mode);
+
 
 			if (!demandList.isEmpty() || hasPostDemandSection) {
 				tp.addSectionHeading("Demand & effects", color, dark, Alignment.MID, opad);
@@ -436,7 +491,7 @@ public class IndustryTooltips {
 				WrapUiUtils.resetFlowLeft(tp, opad);
 			}
 
-            RolfLectionUtil.getMethodAndInvokeDirectly(
+			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
 				"addPostDemandSection", ind, tp, !demandList.isEmpty(), mode);
 
 			if (!needToAddIndustry) {
@@ -478,8 +533,8 @@ public class IndustryTooltips {
 			addAICoreSection(tooltip, ind.getAICoreId(), aiCoreDescMode, ind);
 			addedSomething = true;
 		}
-        boolean r = (boolean) RolfLectionUtil.getMethodAndInvokeDirectly(
-			"addNonAICoreInstalledItems", ind, mode, tooltip, expanded);
+        final boolean r = (boolean) RolfLectionUtil.invokePrivateMethodDirectly(
+			getAddNonAICoreInstalledItemsMethod(ind), ind, mode, tooltip, expanded);
 		addedSomething |= r;
 		
 		if (!addedSomething) {
@@ -605,7 +660,7 @@ public class IndustryTooltips {
 		float initPad = 0f;
 
 		boolean addedSomething = false;
-        boolean canImprove = (boolean) RolfLectionUtil.invokeMethod(
+        boolean canImprove = (boolean) RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
 			"canImproveToIncreaseProduction", ind);
 		if (canImprove) {
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {

@@ -598,7 +598,8 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                     CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
                     listener
                 );
-                RolfLectionUtil.invokeMethod("show", dialog);
+                RolfLectionUtil.getMethodAndInvokeDirectly(
+                    "show", dialog, 0f, 0f);
 
                 WrapUiUtils.anchorPanel(
                     ((UIPanelAPI)dialog), industryIcon.getPanel(), AnchorType.MidTopLeft, 0

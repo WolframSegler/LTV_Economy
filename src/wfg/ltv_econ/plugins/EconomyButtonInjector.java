@@ -24,6 +24,7 @@ import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.panels.EconomyOverviewPanel;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.panels.Button;
+import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
 import wfg.wrap_ui.ui.plugins.ButtonPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
@@ -72,7 +73,8 @@ public class EconomyButtonInjector implements EveryFrameScript, CallbackRunnable
 
     @SuppressWarnings("unchecked")
     private final void addButton() {
-        rootChildren = (List<Object>) RolfLectionUtil.invokeMethod("getChildrenCopy", root);
+        rootChildren = (List<Object>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, root);
         for (Object child : rootChildren) {
             if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof ButtonPlugin) {
                 return;

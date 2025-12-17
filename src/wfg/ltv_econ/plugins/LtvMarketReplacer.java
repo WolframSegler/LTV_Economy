@@ -94,24 +94,24 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (masterTab == null)
             return;
 
-        final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethod(
-            "getChildrenCopy", masterTab);
+        final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, masterTab);
         final UIPanelAPI outpostPanel = listChildren.stream()
             .filter(c -> RolfLectionUtil.hasMethodOfName("getOutpostPanelParams", c))
             .map(child -> (UIPanelAPI) child)
             .findFirst().orElse(null);
         if (outpostPanel == null) return;
 
-        final List<?> outpostChildren = (List<?>) RolfLectionUtil.invokeMethod(
-            "getChildrenCopy", outpostPanel);
+        final List<?> outpostChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, outpostPanel);
         final UIPanelAPI overviewPanel = outpostChildren.stream()
             .filter(c -> RolfLectionUtil.hasMethodOfName("showOverview", c))
             .map(child -> (UIPanelAPI) child)
             .findFirst().orElse(null);
         if (overviewPanel == null) return;
 
-        final List<?> overviewChildren = (List<?>) RolfLectionUtil.invokeMethod(
-            "getChildrenCopy", overviewPanel);
+        final List<?> overviewChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, overviewPanel);
         final UIPanelAPI managementPanel = overviewChildren.stream()
             .filter(c -> RolfLectionUtil.hasMethodOfName("recreateWithEconUpdate", c))
             .map(child -> (UIPanelAPI) child)
@@ -120,12 +120,14 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         if (marketAPIField == null) {
             marketAPIField = RolfLectionUtil.getAllFields(managementPanel.getClass())
-                .stream().filter(c -> c instanceof MarketAPI).findFirst().get();
+                .stream().filter(f -> MarketAPI.class.isAssignableFrom(
+                    RolfLectionUtil.getFieldType(f)
+                )).findFirst().get();
         }
         marketAPI = (MarketAPI) RolfLectionUtil.getPrivateVariable(marketAPIField, managementPanel);
 
-        final List<?> managementChildren = (List<?>) RolfLectionUtil.invokeMethod(
-            "getChildrenCopy", managementPanel);
+        final List<?> managementChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, managementPanel);
 
         final Class<?> knownClass1 = IndustryListPanel.class;
         final Class<?> knownClass2 = LtvIndustryListPanel.class;
@@ -238,9 +240,9 @@ public class LtvMarketReplacer implements EveryFrameScript {
     private static final void replaceMarketCreditsLabel(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
-        final List<?> children = (List<?>) RolfLectionUtil.invokeMethod(
-            "getChildrenCopy", colonyInfoPanel);
-        RolfLectionUtil.invokeMethod("getChildrenCopy", colonyInfoPanel);
+        final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
+        RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
         for (Object child : children) {
             if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof BasePanelPlugin) {
                 return;
@@ -251,8 +253,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
         
         final UIPanelAPI incomePanel = (UIPanelAPI) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getIncome", colonyInfoPanel);
-        final List<?> incomePanelChildren = (List<?>) RolfLectionUtil.invokeMethod(
-            "getChildrenCopy",incomePanel);
+        final List<?> incomePanelChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, incomePanel);
         
         final var Buttons = (List<ButtonAPI>) incomePanelChildren.stream()
             .filter(c -> c instanceof ButtonAPI).map(c -> (ButtonAPI) c).toList();
@@ -584,7 +586,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
             final Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
 
             // Attach the popup;
-            RolfLectionUtil.invokeMethod("actionPerformed", widget0, null, null);
+            RolfLectionUtil.getMethodAndInvokeDirectly(
+                "actionPerformed", widget0, null, null);
 
             // Now the popup class is a child of:
             // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
@@ -604,7 +607,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
             LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
 
             // Dismiss the indOpsPanel after getting its constructor
-            RolfLectionUtil.invokeMethodDirectly("dismiss", indOps, 0);
+            RolfLectionUtil.getMethodAndInvokeDirectly(
+                "dismiss", indOps, 0);
         }
 
         // No need for the old panel
@@ -684,7 +688,9 @@ public class LtvMarketReplacer implements EveryFrameScript {
             "getTransferHandler", masterTab);
         if (marketField == null) {
             marketField = RolfLectionUtil.getAllFields(handler.getClass())
-                .stream().filter(c -> c instanceof Market).findFirst().get();
+                .stream().filter(f -> Market.class.isAssignableFrom(
+                    RolfLectionUtil.getFieldType(f)
+                )).findFirst().get();
         }
 
         final Market original = (Market) RolfLectionUtil.getPrivateVariable(marketField, handler);

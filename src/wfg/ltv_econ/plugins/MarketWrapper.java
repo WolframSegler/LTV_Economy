@@ -404,7 +404,8 @@ public class MarketWrapper extends Market {
 
     @SuppressWarnings("all")
     private Object readResolve() {
-        return RolfLectionUtil.invokeMethod("readResolve", original);
+        return RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
+            "readResolve", original);
     }
 
     public boolean isUseStockpilesForShortages() {
@@ -421,7 +422,8 @@ public class MarketWrapper extends Market {
 
     @SuppressWarnings("all")
     private Object writeReplace() {
-        return RolfLectionUtil.invokeMethod("writeReplace", original);
+        return RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
+            "writeReplace", original);
     }
 
     public Market clone() {

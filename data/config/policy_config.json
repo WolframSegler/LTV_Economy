@@ -15,7 +15,7 @@
       "name": "Festival of the Founding Prophet",
       "class": "wfg.ltv_econ.economy.policies.LuddicFestivalPolicy",
       "posterPath": "graphics/policies/luddic_prophet_festival.png",
-      "cost": 6e5,
+      "cost": 6e4,
       "durationDays": 7,
       "cooldownDays": 120,
       "description": "Colonists gather to honor Prophet Ludd's teachings and the founding of Gilead."
