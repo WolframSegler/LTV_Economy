@@ -364,8 +364,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 				}
 			}.getProxy();
 
-			final UIPanelAPI coreUI = Attachments.getInteractionCoreUI();
-			if (coreUI == null) Attachments.getCoreUI();
+			final UIPanelAPI coreUI = Attachments.getCoreUI();
 			final IndustryPickerDialog dialog = (IndustryPickerDialog) RolfLectionUtil.instantiateClass(
 				indPickCtor,
 				m_market,

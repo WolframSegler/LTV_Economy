@@ -60,11 +60,7 @@ public class EconomyButtonInjector implements EveryFrameScript, CallbackRunnable
             return;
         }
 
-        // Get the management panel depending on context
-        root = Attachments.getInteractionCurrentTab();
-        if (root == null) { // If there is no interaction target
-            root = Attachments.getCurrentTab();
-        }
+        root = Attachments.getCurrentTab();
         if (root == null || campaignUI.getCurrentCoreTab() != CoreUITabId.OUTPOSTS) return;
 
         addButton();

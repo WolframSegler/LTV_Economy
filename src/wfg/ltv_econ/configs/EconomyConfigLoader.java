@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
 
+import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
+
 public class EconomyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/economy_config.json";
 
@@ -44,6 +46,7 @@ public class EconomyConfigLoader {
             EconomyConfig.VOLATILITY_WINDOW = root.getInt("VOLATILITY_WINDOW");
             EconomyConfig.WORKER_ASSIGN_INTERVAL = root.getInt("WORKER_ASSIGN_INTERVAL");
             EconomyConfig.EXPORT_THRESHOLD_FACTOR = (float) root.getDouble("EXPORT_THRESHOLD_FACTOR");
+            EconomyConfig.SHOW_MARKET_POLICIES = root.getBoolean("SHOW_MARKET_POLICIES");
 
             final JSONArray arr = root.getJSONArray("DEBT_DEBUFF_TIERS");
             EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>();
@@ -134,6 +137,11 @@ public class EconomyConfigLoader {
          * a market must exceed before it is allowed to export this commodity.
          */
         public static float EXPORT_THRESHOLD_FACTOR;
+
+        /**
+         * Determines the visibility of policies under the {@link ManageWorkersDialog} dialog.
+         */
+        public static boolean SHOW_MARKET_POLICIES;
 
         static {
             EconomyConfigLoader.loadConfig();

@@ -48,10 +48,7 @@ public class UiHierarchyTree implements EveryFrameScript {
     private void updateTree() {
         root.removeAllChildren();
 
-        UIPanelAPI masterTab = Attachments.getInteractionCurrentTab();
-        if (masterTab == null) {
-            masterTab = Attachments.getCurrentTab();
-        }
+        final UIPanelAPI masterTab = Attachments.getCurrentTab();
         if (masterTab == null) return;
         final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, masterTab);

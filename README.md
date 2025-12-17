@@ -118,7 +118,7 @@ Lukas04 - for providing ReflectionUtils and providing the correct hirearchy for 
 
 SirHartley - for helping with IndustryOptionProvider
 
-rolfosian - for the ListenerFactory and the RfReflectionUtils
+rolfosian - for RolflectionLib-SS
 
 <br>
 

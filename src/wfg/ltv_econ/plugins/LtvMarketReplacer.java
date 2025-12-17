@@ -86,11 +86,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
             return;
         }
 
-        // Get the management panel depending on context
-        UIPanelAPI masterTab = Attachments.getInteractionCurrentTab();
-        if (masterTab == null) { // If there is no interaction target
-            masterTab = Attachments.getCurrentTab();
-        }
+        final UIPanelAPI masterTab = Attachments.getCurrentTab();
         if (masterTab == null)
             return;
 

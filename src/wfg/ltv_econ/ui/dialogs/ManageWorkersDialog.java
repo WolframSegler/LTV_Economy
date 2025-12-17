@@ -24,6 +24,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
@@ -60,6 +61,8 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
     public static final int PANEL_W = 950;
     public static final int PANEL_H = 680;
     public static final int SELECTED_P_H = 230;
+
+    public static boolean showPolicies = true;
 
     private final MarketAPI m_market;
     private InteractionDialogAPI interactionDialog;
@@ -536,7 +539,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         panel.addComponent(consciousnessLabel.getPanel()).inTL(opad + LABEL_W*3 + pad*3, SECT_II_H + opad*3);
         }
     
-        { // SECTION III
+        if (showPolicies && EconomyConfig.SHOW_MARKET_POLICIES) { // SECTION III
         final LabelAPI subtitle = settings.createLabel("Policies", Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);

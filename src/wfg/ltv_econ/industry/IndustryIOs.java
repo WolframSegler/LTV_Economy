@@ -71,24 +71,16 @@ public class IndustryIOs {
     private static final Map<String, Set<String>> inputToInd = new HashMap<>();
     private static final Map<String, Set<String>> outputToInd = new HashMap<>();
 
-    
-
     public static final String ABSTRACT_COM = "abstract";
 
     private IndustryIOs() {}
     static {
-        init();
-    }
-
-    private static final void init() {
         ConfigInputOutputMaps();
 
         buildInputToOutput();
 
         buildInputOutputToIndustries();
     }
-
-    
 
     private static final void ConfigInputOutputMaps() {
         for (Map.Entry<String, IndustryConfig> entry : IndustryConfigManager.ind_config.entrySet()) {
@@ -114,7 +106,9 @@ public class IndustryIOs {
                     base /= EconomyEngine.getWorkersPerUnit(output.comID, entry.getValue().occTag);
                 }
 
-                if ((output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty())) {
+                if (output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty() &&
+                    !output.isAbstract
+                ) {
                     final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(output.comID);
                     final float Vcc = spec.getBasePrice() * LaborConfig.getRoCC(entry.getValue().occTag);
                     
