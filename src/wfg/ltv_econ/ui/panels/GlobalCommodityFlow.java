@@ -897,8 +897,8 @@ public class GlobalCommodityFlow extends
 
         { // In-faction vs out-of-faction trade share
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final long total = engine.getTotalGlobalExports(comID) + engine.getTotalFactionExports(comID);
-        final float globalTradeShare = (float) engine.getTotalGlobalExports(comID) / (float) total;
+        final double total = engine.getTotalGlobalExports(comID) + engine.getTotalFactionExports(comID);
+        final float globalTradeShare = (float) (engine.getTotalGlobalExports(comID) / total);
             
         data.add(new PieSlice(
             null,

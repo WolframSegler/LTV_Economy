@@ -65,6 +65,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
 
     private final MarketAPI m_market;
     private InteractionDialogAPI interactionDialog;
+    private boolean wasDialogCreated = false;
     private static final Color negativeColor = new Color(210, 115, 90);
     private static final Color positiveColor = new Color(90, 150, 110);
     public static final String WORKER_ICON = Global.getSettings()
@@ -784,19 +785,24 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
     }
 
-    @Override
     public void setInteractionDialog(InteractionDialogAPI a) {
         interactionDialog = a;
     }
 
-    @Override
+    public void setWasInteractionDialogCreated(boolean a) {
+        wasDialogCreated = a;
+    }
+
     public void customDialogConfirm() {
         customDialogCancel();
     }
 
-    @Override
     public void customDialogCancel() {
         UIState.setState(State.NONE);
+
+        if (wasDialogCreated) {
+            handleClosingForDialogCreated(interactionDialog);
+        }
     }
 
     public String getCancelText() {

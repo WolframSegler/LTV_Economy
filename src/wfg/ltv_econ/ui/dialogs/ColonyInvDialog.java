@@ -49,6 +49,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
     private final MarketAPI m_market;
     private final Button m_btn;
     private InteractionDialogAPI interactionDialog;
+    private boolean wasDialogCreated = false;
 
     public ColonyInvDialog(MarketAPI market, Button btn) {
         m_market = market;
@@ -399,9 +400,12 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         table.createPanel();
     }
 
-    @Override
     public void setInteractionDialog(InteractionDialogAPI a) {
         interactionDialog = a;
+    }
+
+    public void setWasInteractionDialogCreated(boolean a) {
+        wasDialogCreated = a;
     }
 
     @Override
@@ -421,6 +425,10 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 indListPanel.createPanel();
                 break;
             }
+        }
+
+        if (wasDialogCreated) {
+            handleClosingForDialogCreated(interactionDialog);
         }
     }
 

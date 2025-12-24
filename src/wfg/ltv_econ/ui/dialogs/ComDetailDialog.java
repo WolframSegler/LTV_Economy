@@ -85,6 +85,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
     private final MarketAPI m_market;
     private InteractionDialogAPI interactionDialog;
+    private boolean wasDialogCreated = false;
     private CustomPanelAPI m_dialogPanel;
 
     private CommoditySpecAPI m_com;
@@ -410,7 +411,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
                     String txt = "Total global exports";
 
                     String valueTxt = NumFormat.engNotation(
-                        engine.getTotalGlobalExports(comID)
+                        (long) engine.getTotalGlobalExports(comID)
                     );
 
                     tooltip.setParaFontColor(baseColor);
@@ -1155,19 +1156,24 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         };
     }
     
-    @Override
     public void setInteractionDialog(InteractionDialogAPI a) {
         interactionDialog = a;
     }
 
-    @Override
+    public void setWasInteractionDialogCreated(boolean a) {
+        wasDialogCreated = a;
+    }
+
     public void customDialogConfirm() {
         customDialogCancel();
     }
 
-    @Override
     public void customDialogCancel() {
         UIState.setState(State.NONE);
+
+        if (wasDialogCreated) {
+            handleClosingForDialogCreated(interactionDialog);
+        }
     }
 
     public float getCustomDialogWidth() {

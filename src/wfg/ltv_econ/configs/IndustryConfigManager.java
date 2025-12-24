@@ -729,13 +729,13 @@ public class IndustryConfigManager {
         }
 
         // Test triplets
-        for (int i = 0; i < conds.size(); i++) {
-            for (int j = i + 1; j < conds.size(); j++) {
-                for (int k = j + 1; k < conds.size(); k++) {
-                    applyAndTestCombo.accept(Arrays.asList(conds.get(i), conds.get(j), conds.get(k)));
-                }
-            }
-        }
+        // for (int i = 0; i < conds.size(); i++) {
+        //     for (int j = i + 1; j < conds.size(); j++) {
+        //         for (int k = j + 1; k < conds.size(); k++) {
+        //             applyAndTestCombo.accept(Arrays.asList(conds.get(i), conds.get(j), conds.get(k)));
+        //         }
+        //     }
+        // }
     
         ind_config.putAll(new_dynamic_config);
 

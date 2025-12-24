@@ -683,16 +683,16 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         }
     }
 
-    public final long getTotalGlobalExports(String comID) {
-        long total = 0;
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats())
+    public final double getTotalGlobalExports(String comID) {
+        double total = 0;
+        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) 
         total += stats.globalExports;
 
         return total;
     }
 
-    public final long getTotalFactionExports(String comID) {
-        long total = 0;
+    public final double getTotalFactionExports(String comID) {
+        double total = 0;
         for (CommodityStats stats : m_comInfo.get(comID).getAllStats())
         total += stats.inFactionExports;
 
@@ -700,15 +700,15 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final int getExportMarketShare(String comID, String marketID) {
-        final long total = getTotalGlobalExports(comID);
+        final double total = getTotalGlobalExports(comID);
         if (total == 0)
             return 0;
 
         return (int) (((float) getComStats(comID, marketID).globalExports / (float) total) * 100);
     }
 
-    public final long getTotalGlobalImports(String comID) {
-        long totalGlobalImports = 0;
+    public final double getTotalGlobalImports(String comID) {
+        double totalGlobalImports = 0;
         for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             totalGlobalImports += stats.globalImports;
         }
@@ -717,15 +717,15 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final int getImportMarketShare(String comID, String marketID) {
-        final long total = getTotalGlobalImports(comID);
+        final double total = getTotalGlobalImports(comID);
         if (total == 0)
             return 0;
 
         return (int) (((float) getComStats(comID, marketID).globalImports / (float) total) * 100);
     }
 
-    public final long getTotalInFactionExports(String comID, FactionAPI faction) {
-        long TotalFactionExports = 0;
+    public final double getTotalInFactionExports(String comID, FactionAPI faction) {
+        double TotalFactionExports = 0;
 
         for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             if (!stats.market.getFaction().getId().equals(faction.getId())) {
@@ -738,9 +738,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final float getFactionTotalExportMarketShare(String comID, String factionID) {
-        final long total = getTotalGlobalExports(comID);
+        final double total = getTotalGlobalExports(comID);
         if (total == 0) return 0;
-        long totalGlobalExports = 0;
+        double totalGlobalExports = 0;
 
         for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             if (!stats.market.getFaction().getId().equals(factionID)) {
@@ -752,9 +752,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final float getFactionTotalImportMarketShare(String comID, String factionID) {
-        final long total = getTotalGlobalImports(comID);
+        final double total = getTotalGlobalImports(comID);
         if (total == 0) return 0;
-        long totalGlobalImports = 0;
+        double totalGlobalImports = 0;
 
         for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             if (!stats.market.getFaction().getId().equals(factionID)) {
@@ -762,11 +762,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             }
             totalGlobalImports += stats.globalImports;
         }
-        return (float) totalGlobalImports / (float) total;
+        return (float) (totalGlobalImports / total);
     }
 
-    public final long getFactionTotalGlobalExports(String comID, FactionAPI faction) {
-        long totalGlobalExports = 0;
+    public final double getFactionTotalGlobalExports(String comID, FactionAPI faction) {
+        double totalGlobalExports = 0;
 
         for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
             if (!stats.market.getFaction().getId().equals(faction.getId())) {
@@ -782,8 +782,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     /**
      * Returns the sum of all the available commodity counts of a market
      */
-    public final long getMarketActivity(MarketAPI market) {
-        long totalActivity = 0;
+    public final double getMarketActivity(MarketAPI market) {
+        double totalActivity = 0;
         for (CommodityInfo info : m_comInfo.values()) {
             if (!getRegisteredMarkets().contains(market.getId())) {
                 registerMarket(market);
