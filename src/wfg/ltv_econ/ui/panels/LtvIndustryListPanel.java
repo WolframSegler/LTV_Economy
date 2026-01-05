@@ -377,7 +377,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		final int buildBtnWidth = 350;
 		buildButton = new Button(
 			getPanel(), buildBtnWidth, 25,
-			"      Add industry or structure...", Fonts.ORBITRON_20AABOLD,
+			"   Add industry or structure...", Fonts.ORBITRON_20AABOLD,
 			buildBtnRunnable
 		);
 		buildButton.setCutStyle(CutStyle.TL_BR);
