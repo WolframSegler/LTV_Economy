@@ -20,6 +20,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
  * The registry always uses IndustryIOs.getBaseIndIDifNoConfig() internally to manage industry IDs
  */
 public class WorkerRegistry {
+    public static final String WorkerRegSerialID = "ltv_econ_worker_registry";
     public static final String KEY = "::";
 
     private final Map<String, WorkerIndustryData> registry = new HashMap<>();
@@ -38,6 +39,22 @@ public class WorkerRegistry {
 
     public static final WorkerRegistry createInstance() {
         if (instance == null) instance = new WorkerRegistry();
+        return instance;
+    }
+
+    public static final WorkerRegistry loadInstance() {
+        WorkerRegistry workerRegistry = (WorkerRegistry) Global.getSector()
+            .getPersistentData().get(WorkerRegSerialID);
+
+        if (workerRegistry != null) {
+            instance = workerRegistry;
+        } else {
+            workerRegistry = WorkerRegistry.createInstance();
+            if (Global.getSettings().isDevMode()) {
+                Global.getLogger(WorkerRegistry.class).info("Worker Registery constructed");
+            }
+        }
+
         return instance;
     }
 

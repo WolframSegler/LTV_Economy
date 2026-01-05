@@ -13,14 +13,17 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.BattleAPI;
+import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.PlanetAPI;
+import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -42,6 +45,7 @@ import wfg.ltv_econ.economy.CommodityStats.PriceType;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.plugins.LtvEconomyModPlugin;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 import wfg.wrap_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.economyValues.*;
@@ -112,9 +116,10 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  * @author Wolfram Segler
  */
 public class EconomyEngine extends BaseCampaignEventListener implements
-    PlayerColonizationListener, ColonyDecivListener, GroundRaidObjectivesListener
+    EveryFrameScript, PlayerColonizationListener, ColonyDecivListener, GroundRaidObjectivesListener
 {
 
+    public static final String EconEngineSerialID = "ltv_econ_econ_engine";
     public static final String KEY = "::";
     private static EconomyEngine instance;
     
@@ -128,9 +133,31 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public PlayerFactionSettings playerFactionSettings = new PlayerFactionSettings();
 
     public static EconomyEngine createInstance() {
-        if (instance == null) {
-            instance = new EconomyEngine();
+        if (instance == null) instance = new EconomyEngine();
+        return instance;
+    }
+
+    public static EconomyEngine loadInstance() {
+        final SectorAPI sector = Global.getSector();
+
+        EconomyEngine engine = (EconomyEngine) sector.getPersistentData().get(EconEngineSerialID);
+
+        if (engine != null) {
+            instance = engine;
+        } else {
+            engine = EconomyEngine.createInstance();
+            if (Global.getSettings().isDevMode()) {
+                Global.getLogger(EconomyEngine.class).info("Economy Engine constructed");
+            }
         }
+
+        final List<CampaignEventListener> listeners = LtvEconomyModPlugin.getListeners();
+
+        listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
+        listeners.add(0, engine);
+        sector.addTransientScript(engine);
+        sector.getListenerManager().addListener(engine, true);
+
         return instance;
     }
 
@@ -139,6 +166,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public static EconomyEngine getInstance() {
+        if (instance == null) return loadInstance();
         return instance;
     }
 
@@ -187,6 +215,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     protected int dayTracker = -1;
     protected int cyclesSinceWorkerAssign = 0;
 
+    public boolean isDone() { return false;}
+    public boolean runWhilePaused() { return false;}
     public final void advance(float delta) {
         final int day = Global.getSector().getClock().getDay();
 
