@@ -1,10 +1,13 @@
 DO NOT INCLUDE THIS FILE IN RELEASE
-Word Wrap shortcut: Alt + Z
+
+This project uses maven.
 
 1. Compile the main project. Navigate to Ltv_Economy and run:
     mvn clean package
 
 Extra Instructions:
+
+- Word Wrap shortcut: Alt + Z
 
 - Use VisualVM OQL Console to look for strings in the game to find and update broken obfuscated code
   -> select s from java.lang.String s where s.toString().contains("target_string")
