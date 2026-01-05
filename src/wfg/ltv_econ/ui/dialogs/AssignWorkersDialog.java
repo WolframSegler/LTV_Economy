@@ -1,12 +1,8 @@
 package wfg.ltv_econ.ui.dialogs;
 
-import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.IconRenderMode;
-import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
+import static wfg.wrap_ui.util.UIConstants.highlight;
+import static wfg.wrap_ui.util.UIConstants.opad;
+import static wfg.wrap_ui.util.UIConstants.pad;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -15,8 +11,6 @@ import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
-import com.fs.starfarer.api.campaign.CustomDialogDelegate;
-import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -24,6 +18,13 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.Fonts;
+import com.fs.starfarer.api.ui.IconRenderMode;
+import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityStats;
@@ -32,10 +33,10 @@ import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.ui.plugins.AssignWorkersDialogPlugin;
+import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
-import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
+import wfg.wrap_ui.ui.dialogs.DialogPanel;
 import wfg.wrap_ui.ui.panels.BasePanel;
 import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
@@ -45,51 +46,47 @@ import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
-import static wfg.wrap_ui.util.UIConstants.*;
 
-public class AssignWorkersDialog implements CustomDialogDelegate {
+public class AssignWorkersDialog extends DialogPanel {
 
     public static final String WARNING_BUTTON_PATH = Global.getSettings()
         .getSpriteName("ui", "warning_button");
+    public static final int panelWidth = 540;
+    public static final int panelHeight = 400;
 
     public final WorkerRegistry reg;
-
     public final Industry industry;
     public final MarketAPI market;
-    public final int panelWidth;
-    public final int panelHeight;
-
     public final WorkerIndustryData data;
     public final WorkerIndustryData previewData;
     public final Map<String, Slider> outputSliders;
 
     public BasePanel inputOutputContainer;
 
-    public AssignWorkersDialog(Industry ind, int panelWidth, int panelHeight) {
-        this.reg = WorkerRegistry.getInstance();
+    private final float initialFreeWorkerRatio;
 
-        this.industry = ind;
-        this.market = ind.getMarket();
-        this.panelWidth = panelWidth;
-        this.panelHeight = panelHeight;
-        this.data = reg.getData(ind.getMarket().getId(), ind.getSpec());
-        this.previewData = new WorkerIndustryData(data);
+    public AssignWorkersDialog(Industry ind) {
+        super(Attachments.getScreenPanel(), panelWidth, panelHeight, null, null, "Confirm", "Cancel");
+        setConfirmShortcut();
+
+        reg = WorkerRegistry.getInstance();
+        industry = ind;
+        market = ind.getMarket();
+        data = reg.getData(ind.getMarket().getId(), ind.getSpec());
+        previewData = new WorkerIndustryData(data);
+        outputSliders = new HashMap<>();
+
         reg.setData(previewData);
+        initialFreeWorkerRatio = WorkerPoolCondition.getPoolCondition(market).getFreeWorkerRatio();
 
-        this.outputSliders = new HashMap<>();
+        getHolo().setBackgroundAlpha(1, 1);
+
+        createPanel();
     }
 
     @Override
-    public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
+    public void createPanel() {
         UIState.setState(State.DIALOG);
-
-        final CustomDetailDialogPanel<AssignWorkersDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
-            panel,
-            panelWidth, panelHeight,
-            new AssignWorkersDialogPlugin(this)
-        ) {};
-
-        panel.addComponent(m_panel.getPanel()).inBL(0, 0);
 
         final int sliderHeight = 32;
         final int sliderWidth = 380;
@@ -101,10 +98,10 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         final LabelAPI lbl = Global.getSettings().createLabel(txt, Fonts.ORBITRON_20AA);
 
         final float textX = (panelWidth - lbl.computeTextWidth(txt)) / 2;
-        m_panel.add(lbl).inTL(textX, pad*2);
+        innerPanel.addComponent((UIComponentAPI)lbl).inTL(textX, pad*2);
 
         inputOutputContainer = new BasePanel(
-            m_panel.getPanel(), (int) m_panel.getPos().getWidth(),
+            innerPanel, (int) innerPanel.getPosition().getWidth(),
             180, new BasePanelPlugin<>()
         ) {
             @Override
@@ -116,11 +113,12 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         // Draw Production
         drawProductionAndConsumption(inputOutputContainer.getPanel(), pad, opad);
 
-        m_panel.add(inputOutputContainer).inTL(0, lbl.computeTextHeight(txt) + opad);
+        innerPanel.addComponent(inputOutputContainer.getPanel())
+            .inTL(0, lbl.computeTextHeight(txt) + opad);
 
         // Draw separator line
         final BasePanel separator = new BasePanel(
-            m_panel.getPanel(), panelWidth, 1, new BasePanelPlugin<>()
+            innerPanel, panelWidth, 1, new BasePanelPlugin<>()
         ) {
             @Override
             public Color getBgColor() {
@@ -128,10 +126,10 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             }
         };
         separator.getPos().inTL(0, sliderY - opad);
-        m_panel.add(separator);
+        innerPanel.addComponent(separator.getPanel());
 
         final SpritePanelWithTp help_button = new SpritePanelWithTp(
-            m_panel.getPanel(), 20 , 20, new SpritePanelPlugin<>(),
+            innerPanel, 20 , 20, new SpritePanelPlugin<>(),
             WARNING_BUTTON_PATH, null, null, false
         ) {
             {
@@ -171,7 +169,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             }
         };
 
-        m_panel.add(help_button).inTR(pad, sliderY + pad);
+        innerPanel.addComponent(help_button.getPanel()).inTR(pad, sliderY + pad);
 
         final CustomPanelAPI outputsPanel = Global.getSettings().createCustom(
             panelWidth,
@@ -189,7 +187,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
             outputsTp.getPrev().getPosition().inTL(pad, cumulativeYOffset);
 
             final Slider outputSlider = new Slider(
-                m_panel.getPanel(), null, 0, 100, sliderWidth, sliderHeight
+                innerPanel, null, 0, 100, sliderWidth, sliderHeight
             );
             outputSliders.put(comID, outputSlider);
 
@@ -223,19 +221,7 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
         outputsTp.setHeightSoFar(cumulativeYOffset);
 
         outputsPanel.addUIElement(outputsTp).inTL(-pad, 0);
-        m_panel.add(outputsPanel).inTL(opad, sliderY);
-    }
-
-    @Override
-    public void customDialogConfirm() {
-        UIState.setState(State.NONE);
-    }
-
-    @Override
-    public void customDialogCancel() {
-        reg.setData(data);
-
-        UIState.setState(State.NONE);
+        innerPanel.addComponent(outputsPanel).inTL(opad, sliderY);
     }
 
     public void drawProductionAndConsumption(CustomPanelAPI panel, int pad, int opad) {
@@ -367,27 +353,50 @@ public class AssignWorkersDialog implements CustomDialogDelegate {
 
     }
 
-    public float getCustomDialogWidth() {
-        return panelWidth;
+    private final float getNewFreeWorkerRatio() {
+        return initialFreeWorkerRatio + (data.getWorkerAssignedRatio(false) -
+            previewData.getWorkerAssignedRatio(false));
     }
 
-    public float getCustomDialogHeight() {
-        return panelHeight;
+    @Override
+    public void advanceImpl(float amount) {
+        super.advanceImpl(amount);
+
+        boolean update = false;
+
+        for (Map.Entry<String, Slider> entry : outputSliders.entrySet()) {
+            final String comID = entry.getKey();
+            final Slider slider = entry.getValue();
+
+            final float sliderValue = slider.getProgress() / 100f;
+
+            if (previewData.getAssignedRatioForOutput(comID) != sliderValue) {
+                previewData.setRatioForOutput(comID, sliderValue);
+                update = true;
+            }
+
+            final float max = Math.max(0,
+                sliderValue + getNewFreeWorkerRatio()
+            );
+
+            slider.maxValue = Math.min(
+                max,
+                IndustryIOs.getIndConfig(industry).outputs.get(comID).workerAssignableLimit
+            ) * 100;
+        }
+
+        if (update) {
+            inputOutputContainer.clearChildren();
+            drawProductionAndConsumption(inputOutputContainer.getPanel(), 3, 10);
+        }
     }
 
-    public String getCancelText() {
-        return "Cancel";
-    }
+    @Override
+    public void dismiss(int option) {
+        super.dismiss(option);
 
-    public String getConfirmText() {
-        return "Confirm";
-    }
+        if (option == 1) reg.setData(data);
 
-    public boolean hasCancelButton() {
-        return true;
-    }
-
-    public CustomUIPanelPlugin getCustomPanelPlugin() {
-        return null;
+        UIState.setState(State.NONE);
     }
 }

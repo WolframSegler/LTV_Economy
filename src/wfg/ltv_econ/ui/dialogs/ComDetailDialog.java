@@ -1,14 +1,15 @@
 package wfg.ltv_econ.ui.dialogs;
 
-import java.awt.Color;
+import static wfg.wrap_ui.util.UIConstants.*;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.lwjgl.input.Keyboard;
 
+import java.awt.Color;
+
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -17,14 +18,15 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
+import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.MapParams;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
@@ -33,32 +35,30 @@ import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.panels.ComIconPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
-import wfg.ltv_econ.ui.plugins.ComDetailDialogPlugin;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
+import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
-import wfg.wrap_ui.ui.dialogs.CustomDetailDialogPanel;
-import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
+import wfg.wrap_ui.ui.dialogs.DialogPanel;
 import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.SortableTable;
-import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
+import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
+import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.SortableTable.ColumnManager;
 import wfg.wrap_ui.ui.panels.SortableTable.HeaderPanelWithTooltip;
 import wfg.wrap_ui.ui.panels.SortableTable.RowManager;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
-import static wfg.wrap_ui.util.UIConstants.*;
 
-public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
+public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
     // this.PANEL_W = 1206; // Exact width using VisualVM. Includes pad.
     // this.PANEL_H = 728; // Exact height using VisualVM. Includes pad.
@@ -84,16 +84,9 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     public final static int iconSize = 24;
 
     private final MarketAPI m_market;
-    private InteractionDialogAPI interactionDialog;
-    private boolean wasDialogCreated = false;
-    private CustomPanelAPI m_dialogPanel;
 
     private CommoditySpecAPI m_com;
     public MarketAPI m_selectedMarket = null;
-
-    public void setCommodity(String comID) {
-        m_com = Global.getSettings().getCommoditySpec(comID);
-    }
 
     public TextPanel footerPanel = null;
     public Button producerButton = null;
@@ -106,8 +99,10 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     }
 
     public ComDetailDialog(MarketAPI market, CommoditySpecAPI com, int panelW, int panelH) {
-        this.PANEL_W = panelW;
-        this.PANEL_H = panelH;
+        super(Attachments.getScreenPanel(), panelW, panelH, null, null, "Dismiss");
+
+        PANEL_W = panelW;
+        PANEL_H = panelH;
 
         SECT1_WIDTH = (int) (PANEL_W * 0.76f - opad);
         SECT1_HEIGHT = (int) (PANEL_H * 0.28f - opad);
@@ -123,35 +118,31 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
 
         m_market = market;
         m_com = com;
+
+        setConfirmShortcut();
+
+        getHolo().setBackgroundAlpha(1, 1);
+        backgroundDimAmount = 0f;
+
+        createPanel();
     }
 
     @Override
-    public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
+    public void createPanel() {
         UIState.setState(State.DIALOG);
-        interactionDialog.setBackgroundDimAmount(0.01f);
-
-        final CustomDetailDialogPanel<ComDetailDialogPlugin> m_panel = new CustomDetailDialogPanel<>(
-            panel,
-            (int) panel.getPosition().getWidth(),
-            (int) panel.getPosition().getHeight(),
-            new ComDetailDialogPlugin(this)
-        );
-
-        panel.addComponent(m_panel.getPanel()).inBL(0, 0);
-        m_dialogPanel = m_panel.getPanel();
 
         createSections();
 
         // Footer
         final int footerH = 40;
 
-        BasePanelPlugin<TextPanel> fPlugin = new BasePanelPlugin<>() {
+        final BasePanelPlugin<TextPanel> fPlugin = new BasePanelPlugin<>() {
             @Override
             public void advance(float amount) {
                 super.advance(amount);
 
                 if (inputSnapshot.hoveredLastFrame && inputSnapshot.LMBUpLastFrame) {
-                    ButtonAPI checkbox = getPanel().m_checkbox;
+                    final ButtonAPI checkbox = m_panel.m_checkbox;
 
                     if (checkbox != null) {
                         checkbox.setChecked(!checkbox.isChecked());
@@ -160,14 +151,21 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             }
         };
 
-        footerPanel = new TextPanel(m_panel.getPanel(), 400, footerH, fPlugin) {
+        footerPanel = new TextPanel(innerPanel, 400, footerH, fPlugin) {
             {
                 getPlugin().setTargetUIState(State.DIALOG);
             }
 
             @Override
             public void createPanel() {
-                TooltipMakerAPI footer = m_panel.createUIElement(PANEL_W, footerH, false);
+                final TooltipMakerAPI footer = m_panel.createUIElement(PANEL_W, footerH, false);
+                footer.setActionListenerDelegate(
+                    new ActionListenerDelegate() {
+                        public void actionPerformed(Object data, Object source) {
+                            updateSection3(producerButton.checked ? 0 : 1);
+                        }
+                    }
+                );
                 m_checkbox = footer.addCheckbox(20, 20, "", "stockpile_toggle",
                         Fonts.ORBITRON_12, highlight, UICheckboxSize.SMALL, 0);
 
@@ -204,14 +202,10 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             }
         };
 
-        m_panel.add(footerPanel.getPanel()).inBL(pad, -opad * 3.5f);
+        innerPanel.addComponent(footerPanel.getPanel()).inBL(pad, -opad * 3.5f);
     }
 
     public void createSections() {
-        if (m_dialogPanel == null) {
-            return;
-        }
-
         EconomyEngine.getInstance().fakeAdvance();
 
         updateSection1();
@@ -221,15 +215,15 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     }
 
     public void updateSection1() {
-        m_dialogPanel.removeComponent(section1);
+        innerPanel.removeComponent(section1);
 
         section1 = Global.getSettings().createCustom(SECT1_WIDTH, SECT1_HEIGHT, null);
 
-        TooltipMakerAPI tooltip = section1.createUIElement(SECT1_WIDTH, SECT1_HEIGHT, false);
+        final TooltipMakerAPI tooltip = section1.createUIElement(SECT1_WIDTH, SECT1_HEIGHT, false);
         section1.addUIElement(tooltip).inTL(0, 0);
 
         createSection1(section1, tooltip);
-        m_dialogPanel.addComponent(section1).inTL(pad, pad);
+        innerPanel.addComponent(section1).inTL(pad, pad);
 
         // Update anchors
         if (section2 == null || section3 == null) {
@@ -240,15 +234,15 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
     }
 
     public void updateSection2() {
-        m_dialogPanel.removeComponent(section2);
+        innerPanel.removeComponent(section2);
 
         section2 = Global.getSettings().createCustom(SECT2_WIDTH, SECT2_HEIGHT, null);
 
-        TooltipMakerAPI tooltip = section2.createUIElement(SECT2_WIDTH, SECT2_HEIGHT, false);
+        final TooltipMakerAPI tooltip = section2.createUIElement(SECT2_WIDTH, SECT2_HEIGHT, false);
         section2.addUIElement(tooltip).inTL(0, 0);
 
         createSection2(section2, tooltip);
-        m_dialogPanel.addComponent(section2).rightOfTop(section1, opad * 1.5f);
+        innerPanel.addComponent(section2).rightOfTop(section1, opad * 1.5f);
 
         // Update anchors
         if (section4 == null) {
@@ -262,28 +256,24 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
      *  MODE_1: Displays the Consumers
      */
     public void updateSection3(int mode) {
-        if (section3 != null) {
-            // Otherwise the anchor of the tooltips gets removed before the tooltips, causing a crash.
-            // ReflectionU.invoke(section3, "clearChildren");
-        }
-        m_dialogPanel.removeComponent(section3);
+        innerPanel.removeComponent(section3);
 
         section3 = Global.getSettings().createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
 
         createSection3(section3, mode);
-        m_dialogPanel.addComponent(section3).belowLeft(section1, opad);
+        innerPanel.addComponent(section3).belowLeft(section1, opad);
     }
 
     public void updateSection4() {
-        m_dialogPanel.removeComponent(section4);
+        innerPanel.removeComponent(section4);
 
         section4 = Global.getSettings().createCustom(SECT4_WIDTH, SECT4_HEIGHT, null);
 
-        TooltipMakerAPI tooltip = section4.createUIElement(SECT4_WIDTH, SECT4_HEIGHT, false);
+        final TooltipMakerAPI tooltip = section4.createUIElement(SECT4_WIDTH, SECT4_HEIGHT, false);
         section4.addUIElement(tooltip).inTL(0, 0);
 
         createSection4(section4);
-        m_dialogPanel.addComponent(section4).belowLeft(section2, opad);
+        innerPanel.addComponent(section4).belowLeft(section2, opad);
     }
 
     private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip) {
@@ -296,7 +286,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         // Icons
         final int iconSize = (int) (section.getPosition().getHeight() / 2.2f);
 
-        String comIconID = m_com.getIconName();
+        final String comIconID = m_com.getIconName();
 
         final ComIconPanel iconLeft = new ComIconPanel(section, m_market.getFaction(),
             iconSize, iconSize, comIconID, null, null
@@ -775,7 +765,7 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
         final StarSystemAPI starSystem = m_market.getStarSystem();
         String title = m_market.getName();
 
-        MapParams params = new MapParams();
+        final MapParams params = new MapParams();
         params.showFilter = false;
         params.showTabs = false;
         params.withLayInCourse = false;
@@ -1155,48 +1145,10 @@ public class ComDetailDialog implements WrapDialogDelegate, HasActionListener {
             return tp;
         };
     }
-    
-    public void setInteractionDialog(InteractionDialogAPI a) {
-        interactionDialog = a;
-    }
 
-    public void setWasInteractionDialogCreated(boolean a) {
-        wasDialogCreated = a;
-    }
+    public void dismiss(int option) {
+        super.dismiss(option);
 
-    public void customDialogConfirm() {
-        customDialogCancel();
-    }
-
-    public void customDialogCancel() {
         UIState.setState(State.NONE);
-
-        if (wasDialogCreated) {
-            handleClosingForDialogCreated(interactionDialog);
-        }
-    }
-
-    public float getCustomDialogWidth() {
-        return PANEL_W;
-    }
-
-    public float getCustomDialogHeight() {
-        return PANEL_H;
-    }
-
-    public String getCancelText() {
-        return "Dismiss";
-    }
-
-    public String getConfirmText() {
-        return "Dismiss";
-    }
-
-    public boolean hasCancelButton() {
-        return false;
-    }
-
-    public CustomUIPanelPlugin getCustomPanelPlugin() {
-        return null;
     }
 }

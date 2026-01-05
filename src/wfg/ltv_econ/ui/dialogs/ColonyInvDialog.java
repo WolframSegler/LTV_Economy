@@ -1,12 +1,12 @@
 package wfg.ltv_econ.ui.dialogs;
 
-import java.awt.Color;
+import static wfg.wrap_ui.util.UIConstants.*;
+
 import java.util.List;
+import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
-import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
-import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -23,46 +23,51 @@ import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
+import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
-import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
+import wfg.wrap_ui.ui.dialogs.DialogPanel;
 import wfg.wrap_ui.ui.panels.Button;
+import wfg.wrap_ui.ui.panels.Button.CutStyle;
+import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SortableTable;
-import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
-import static wfg.wrap_ui.util.UIConstants.*;
 
-public class ColonyInvDialog implements WrapDialogDelegate {
+public class ColonyInvDialog extends DialogPanel {
 
     public static final int PANEL_W = 950;
     public static final int PANEL_H = 650;
 
     private final MarketAPI m_market;
     private final Button m_btn;
-    private InteractionDialogAPI interactionDialog;
-    private boolean wasDialogCreated = false;
 
     public ColonyInvDialog(MarketAPI market, Button btn) {
+        super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
+        setConfirmShortcut();
+
         m_market = market;
         m_btn = btn;
+
+        getHolo().setBackgroundAlpha(1, 1);
+        backgroundDimAmount = 0.2f;
+
+        createPanel();
     }
 
-    public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
+    @Override
+    public void createPanel() {
         UIState.setState(State.DIALOG);
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
-
-        interactionDialog.setBackgroundDimAmount(0.01f);
 
         final int sliderH = 32;
         final int sliderW = 300;
@@ -76,7 +81,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         final long colonyCredits = engine.getCredits(m_market.getId());
         final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
-        final TextPanel colonyCreditPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
+        final TextPanel colonyCreditPanel = new TextPanel(innerPanel, 200, 1, new BasePanelPlugin<>()) {
             {
                 getPlugin().setIgnoreUIState(true);
             }
@@ -117,9 +122,9 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 return tp;
             }
         };
-        panel.addComponent(colonyCreditPanel.getPanel()).inTL(opad, 10);
+        innerPanel.addComponent(colonyCreditPanel.getPanel()).inTL(opad, 10);
 
-        final TextPanel playerCreditPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
+        final TextPanel playerCreditPanel = new TextPanel(innerPanel, 200, 1, new BasePanelPlugin<>()) {
             {
                 getPlugin().setIgnoreUIState(true);
             }
@@ -156,9 +161,9 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 return tp;
             }
         };
-        panel.addComponent(playerCreditPanel.getPanel()).inTL(opad, 50);
+        innerPanel.addComponent(playerCreditPanel.getPanel()).inTL(opad, 50);
 
-        final TextPanel playerProfitPanel = new TextPanel(panel, 200, 1, new BasePanelPlugin<>()) {
+        final TextPanel playerProfitPanel = new TextPanel(innerPanel, 200, 1, new BasePanelPlugin<>()) {
             {
                 getPlugin().setIgnoreUIState(true);
             }
@@ -210,49 +215,49 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 return data == null;
             }
         };
-        if (m_market.isPlayerOwned()) panel.addComponent(playerProfitPanel.getPanel()).inTL(opad, 90);
+        if (m_market.isPlayerOwned()) innerPanel.addComponent(playerProfitPanel.getPanel()).inTL(opad, 90);
 
         final LabelAPI withdrawLabel = settings.createLabel(
             "Withdraw:", Fonts.ORBITRON_16
         );
         float labelH = withdrawLabel.computeTextHeight(withdrawLabel.getText());
-        panel.addComponent((UIComponentAPI)withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
+        innerPanel.addComponent((UIComponentAPI)withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
 
         final LabelAPI depositLabel = settings.createLabel(
             "Deposit:", Fonts.ORBITRON_16
         );
         labelH = depositLabel.computeTextHeight(depositLabel.getText());
-        panel.addComponent((UIComponentAPI)depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
+        innerPanel.addComponent((UIComponentAPI)depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
 
         final LabelAPI profitLabel = settings.createLabel(
             "Allocate:", Fonts.ORBITRON_16
         );
         labelH = profitLabel.computeTextHeight(profitLabel.getText());
-        panel.addComponent((UIComponentAPI)profitLabel).inTL(400, 90 + (sliderH - labelH) / 2f);
+        innerPanel.addComponent((UIComponentAPI)profitLabel).inTL(400, 90 + (sliderH - labelH) / 2f);
 
         
         final Slider withdrawSlider = new Slider(
-            panel, "", 0f, colonyCredits, sliderW, sliderH
+            innerPanel, "", 0f, colonyCredits, sliderW, sliderH
         );
         withdrawSlider.setHighlightOnMouseover(true);
         withdrawSlider.setUserAdjustable(true);
         withdrawSlider.setBarColor(withdrawColor);
         withdrawSlider.showValueOnly = true;
         withdrawSlider.customText = () -> Misc.getDGSCredits(withdrawSlider.getProgressInterpolated());
-        panel.addComponent(withdrawSlider.getPanel()).inTL(500, 10);
+        innerPanel.addComponent(withdrawSlider.getPanel()).inTL(500, 10);
 
         final Slider depositSlider = new Slider(
-            panel, "", 0f, playerCredits.get(), sliderW, sliderH
+            innerPanel, "", 0f, playerCredits.get(), sliderW, sliderH
         );
         depositSlider.setHighlightOnMouseover(true);
         depositSlider.setUserAdjustable(true);
         depositSlider.setBarColor(depositColor);
         depositSlider.showValueOnly = true;
         depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgressInterpolated());
-        panel.addComponent(depositSlider.getPanel()).inTL(500, 50);
+        innerPanel.addComponent(depositSlider.getPanel()).inTL(500, 50);
 
         final Slider profitSlider = new Slider(
-            panel, "", 0f, 100f, sliderW, sliderH
+            innerPanel, "", 0f, 100f, sliderW, sliderH
         );
         if (data != null) {
             profitSlider.setHighlightOnMouseover(true);
@@ -260,7 +265,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             profitSlider.showPercent = true;
             profitSlider.roundBarValue = true;
             profitSlider.setProgress(data.playerProfitRatio * 100);
-            panel.addComponent(profitSlider.getPanel()).inTL(500, 90);
+            innerPanel.addComponent(profitSlider.getPanel()).inTL(500, 90);
         }
 
         final Runnable refreshUI = () -> {
@@ -313,13 +318,13 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         };
 
         final Button withdrawBtn = new Button(
-            panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
+            innerPanel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
         );
         final Button depositBtn = new Button(
-            panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, depositRunnable
+            innerPanel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, depositRunnable
         );
         final Button profitBtn = new Button(
-            panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, profitRunnable
+            innerPanel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, profitRunnable
         );
 
         withdrawBtn.quickMode = true;
@@ -328,13 +333,13 @@ public class ColonyInvDialog implements WrapDialogDelegate {
         withdrawBtn.setCutStyle(CutStyle.ALL);
         depositBtn.setCutStyle(CutStyle.ALL);
         profitBtn.setCutStyle(CutStyle.ALL);
-        panel.addComponent(withdrawBtn.getPanel()).inTL(500 + sliderW + opad, 10 + buttonY);
-        panel.addComponent(depositBtn.getPanel()).inTL(500 + sliderW + opad, 50 + buttonY);
-        panel.addComponent(profitBtn.getPanel()).inTL(500 + sliderW + opad, 90 + buttonY);
+        innerPanel.addComponent(withdrawBtn.getPanel()).inTL(500 + sliderW + opad, 10 + buttonY);
+        innerPanel.addComponent(depositBtn.getPanel()).inTL(500 + sliderW + opad, 50 + buttonY);
+        innerPanel.addComponent(profitBtn.getPanel()).inTL(500 + sliderW + opad, 90 + buttonY);
 
 
         final SortableTable table = new SortableTable(
-            panel,
+            innerPanel,
             PANEL_W - 20, PANEL_H - (tableStartY + 10),
             20, 30
         );
@@ -360,7 +365,7 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             final CommodityStats stats = engine.getComStats(com.getId(), m_market.getId());
 
             final Base comIcon = new Base(
-                panel, 26, 26, com.getIconName(), null, null, false
+                innerPanel, 26, 26, com.getIconName(), null, null, false
             );
             
             final long stored = stats.getRoundedStored();
@@ -393,28 +398,17 @@ public class ColonyInvDialog implements WrapDialogDelegate {
             );
         }
 
-        panel.addComponent(table.getPanel()).inTL(10, tableStartY);
+        innerPanel.addComponent(table.getPanel()).inTL(10, tableStartY);
 
         table.sortRows(2);
 
         table.createPanel();
     }
 
-    public void setInteractionDialog(InteractionDialogAPI a) {
-        interactionDialog = a;
-    }
-
-    public void setWasInteractionDialogCreated(boolean a) {
-        wasDialogCreated = a;
-    }
-
     @Override
-    public void customDialogConfirm() {
-        customDialogCancel();
-    }
+    public void dismiss(int option) {
+        super.dismiss(option);
 
-    @Override
-    public void customDialogCancel() {
         UIState.setState(State.NONE);
 
         // Refresh the panel
@@ -426,25 +420,5 @@ public class ColonyInvDialog implements WrapDialogDelegate {
                 break;
             }
         }
-
-        if (wasDialogCreated) {
-            handleClosingForDialogCreated(interactionDialog);
-        }
-    }
-
-    public String getCancelText() {
-        return "Dismiss";
-    }
-
-    public String getConfirmText() {
-        return "Dismiss";
-    }
-
-    public boolean hasCancelButton() {
-        return false;
-    }
-
-    public CustomUIPanelPlugin getCustomPanelPlugin() {
-        return null;
     }
 }

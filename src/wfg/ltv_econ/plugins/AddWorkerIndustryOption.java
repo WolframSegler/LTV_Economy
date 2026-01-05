@@ -78,17 +78,14 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
 
     @Override
     public void optionSelected(IndustryOptionData opt, DialogCreatorUI ui) {
-        if (opt.id != PluginID) {
-            return;
-        }
+        if (opt.id != PluginID) return;
+        
         final WorkerRegistry reg = WorkerRegistry.getInstance();
         if (reg.getData(opt.ind.getMarket().getId(), opt.ind.getId()) == null) {
             reg.register(opt.ind.getMarket(), opt.ind);
         }
 
-        // On Click
-        final int panelWidth = 540;
-        final int panelHeight = 400;
-        ui.showDialog(panelWidth, panelHeight, new AssignWorkersDialog(opt.ind, panelWidth, panelHeight));
+        final AssignWorkersDialog dialog = new AssignWorkersDialog(opt.ind);
+        dialog.show(0.3f, 0.3f);
     }
 }

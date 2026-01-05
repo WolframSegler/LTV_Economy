@@ -1,27 +1,27 @@
 package wfg.ltv_econ.ui.dialogs;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static wfg.wrap_ui.util.UIConstants.*;
+
+import java.awt.Color;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
-import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
-import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
-import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
@@ -31,43 +31,38 @@ import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.policies.MarketPolicy;
 import wfg.ltv_econ.economy.policies.MarketPolicy.PolicyState;
 import wfg.ltv_econ.util.UiUtils;
+import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
-import wfg.wrap_ui.ui.dialogs.WrapDialogDelegate;
+import wfg.wrap_ui.ui.dialogs.DialogPanel;
 import wfg.wrap_ui.ui.panels.Button;
+import wfg.wrap_ui.ui.panels.Button.CutStyle;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.ListenerProviderPanel;
 import wfg.wrap_ui.ui.panels.PieChart;
-import wfg.wrap_ui.ui.panels.ScrollPanel;
-import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.PieChart.PieSlice;
+import wfg.wrap_ui.ui.panels.ScrollPanel;
 import wfg.wrap_ui.ui.panels.ScrollPanel.ScrollType;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
-import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.ui.panels.Slider;
+import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
 import wfg.wrap_ui.ui.panels.TextPanel;
+import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
+import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
-import static wfg.wrap_ui.util.UIConstants.*;
 
-public class ManageWorkersDialog implements WrapDialogDelegate {
+public class ManageWorkersDialog extends DialogPanel {
+
     public static final int PANEL_W = 950;
     public static final int PANEL_H = 680;
     public static final int SELECTED_P_H = 230;
 
     public static boolean showPolicies = true;
 
-    private final MarketAPI m_market;
-    private InteractionDialogAPI interactionDialog;
-    private boolean wasDialogCreated = false;
-    private static final Color negativeColor = new Color(210, 115, 90);
-    private static final Color positiveColor = new Color(90, 150, 110);
     public static final String WORKER_ICON = Global.getSettings()
         .getSpriteName("ui", "three_workers");
     public static final String HEALTH_ICON = Global.getSettings()
@@ -78,24 +73,34 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         .getSpriteName("ui", "society");
     public static final String SOLIDARITY_ICON = Global.getSettings()
         .getSpriteName("ui", "solidarity_colored");
+    private final MarketAPI m_market;
+    private static final Color negativeColor = new Color(210, 115, 90);
+    private static final Color positiveColor = new Color(90, 150, 110);
 
     public Slider exploitationSlider = null;
 
     private MarketPolicy selectedPolicy = null;
     private CustomPanelAPI selectedPolicyCont = null;
-
+    
     public ManageWorkersDialog(MarketAPI market) {
+        super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
+        setConfirmShortcut();
+
         m_market = market;
+
+        getHolo().setBackgroundAlpha(1, 1);
+        backgroundDimAmount = 0.2f;
+
+        createPanel();
     }
 
-    public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
+    @Override
+    public void createPanel() {
         UIState.setState(State.DIALOG);
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerMarketData mData = engine.getPlayerMarketData(m_market.getId());
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
-
-        interactionDialog.setBackgroundDimAmount(0.01f);
 
         final int SECT_I_H = 30;
         final int SECT_II_H = 160;
@@ -117,15 +122,15 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final LabelAPI title = settings.createLabel("Manage Workers", Fonts.INSIGNIA_VERY_LARGE);
         title.autoSizeToWidth(PANEL_W);
         title.setAlignment(Alignment.MID);
-        panel.addComponent((UIComponentAPI)title).inTL(0, 0);
+        innerPanel.addComponent((UIComponentAPI)title).inTL(0, 0);
 
         { // SECTION I
         final LabelAPI subtitle = settings.createLabel("Income", Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
-        panel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_I_H);
+        innerPanel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_I_H);
 
-        final TextPanel RoSVLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
+        final TextPanel RoSVLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Rate of Exploitation";
                 final String valueTxt = ((int)mData.getRoSV())+"";
@@ -167,7 +172,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        final TextPanel wagesLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
+        final TextPanel wagesLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Monthly Wages";
                 final String valueTxt = NumFormat.formatCredit((int)(engine.getWagesForMarket(m_market)*30));
@@ -205,7 +210,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        final TextPanel avgWageLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
+        final TextPanel avgWageLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Average Wage";
                 final float value = LaborConfig.LPV_month / mData.getRoSV();
@@ -246,12 +251,12 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        panel.addComponent(RoSVLabel.getPanel()).inTL(opad, opad*3 + SECT_I_H);
-        panel.addComponent(wagesLabel.getPanel()).inTL(opad, LABEL_H + opad*4 + SECT_I_H);
-        panel.addComponent(avgWageLabel.getPanel()).inTL(opad + LABEL_W, LABEL_H + opad*4 + SECT_I_H);
+        innerPanel.addComponent(RoSVLabel.getPanel()).inTL(opad, opad*3 + SECT_I_H);
+        innerPanel.addComponent(wagesLabel.getPanel()).inTL(opad, LABEL_H + opad*4 + SECT_I_H);
+        innerPanel.addComponent(avgWageLabel.getPanel()).inTL(opad + LABEL_W, LABEL_H + opad*4 + SECT_I_H);
 
         exploitationSlider = new Slider(
-            panel, "", 1, LaborConfig.MAX_RoSV, sliderW, sliderH
+            innerPanel, "", 1, LaborConfig.MAX_RoSV, sliderW, sliderH
         );
         exploitationSlider.setHighlightOnMouseover(true);
         exploitationSlider.setUserAdjustable(true);
@@ -263,7 +268,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             positiveColor, negativeColor, mData.getRoSV()/(float)(LaborConfig.MAX_RoSV - 1)
         ));
         exploitationSlider.showValueOnly = true;
-        panel.addComponent(exploitationSlider.getPanel()).inTL(opad*2 + LABEL_W, opad*3 + SECT_I_H);
+        innerPanel.addComponent(exploitationSlider.getPanel()).inTL(opad*2 + LABEL_W, opad*3 + SECT_I_H);
 
         final CallbackRunnable<Button> exploitationRunnable = (btn) -> {
             mData.setRoSV(exploitationSlider.getProgress());
@@ -282,14 +287,14 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         };
 
         final Button exploitationBtn = new Button(
-            panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, exploitationRunnable
+            innerPanel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, exploitationRunnable
         );
 
         exploitationBtn.quickMode = true;
         exploitationBtn.setCutStyle(CutStyle.ALL);
-        panel.addComponent(exploitationBtn.getPanel()).inTL(opad*3 + LABEL_W + sliderW, opad*3 + SECT_I_H);
+        innerPanel.addComponent(exploitationBtn.getPanel()).inTL(opad*3 + LABEL_W + sliderW, opad*3 + SECT_I_H);
 
-        final TextPanel workerAmount = new TextPanel(panel, LABEL_W+100, LABEL_H) {
+        final TextPanel workerAmount = new TextPanel(innerPanel, LABEL_W+100, LABEL_H) {
             public void createPanel() {
                 final String txt = "Workforce: Employed / Total";
                 final long value2 = cond.getWorkerPool();
@@ -314,7 +319,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W+100, label2.getPosition().getHeight());
 
                 final Base workerIcon = new Base(
-                    panel, ICON_S, ICON_S, WORKER_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, WORKER_ICON, base, null, false
                 );
                 add(workerIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -337,14 +342,14 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        panel.addComponent(workerAmount.getPanel()).inTR(opad, opad*3 + SECT_I_H);
+        innerPanel.addComponent(workerAmount.getPanel()).inTR(opad, opad*3 + SECT_I_H);
         }
     
         { // SECTION II
         final LabelAPI subtitle = settings.createLabel("Population", Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
-        panel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_II_H);
+        innerPanel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_II_H);
 
         final StatModValueGetter tpGridGetter = new StatModValueGetter() {
             public String getFlatValue(StatMod mod) {
@@ -361,7 +366,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        final TextPanel healthLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
+        final TextPanel healthLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Health";
                 final String valueTxt = String.format("%.0f", mData.getHealth());
@@ -381,7 +386,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base healthIcon = new Base(
-                    panel, ICON_S, ICON_S, HEALTH_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, HEALTH_ICON, base, null, false
                 );
                 add(healthIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -403,7 +408,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        final TextPanel happinessLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
+        final TextPanel happinessLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Happiness";
                 final String valueTxt = String.format("%.0f", mData.getHappiness());
@@ -423,7 +428,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base happinessIcon = new Base(
-                    panel, ICON_S, ICON_S, SMILING_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, SMILING_ICON, base, null, false
                 );
                 add(happinessIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -445,7 +450,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        final TextPanel cohesionLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
+        final TextPanel cohesionLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Cohesion";
                 final String valueTxt = String.format("%.0f", mData.getSocialCohesion());
@@ -465,7 +470,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base cohesionIcon = new Base(
-                    panel, ICON_S, ICON_S, SOCIETY_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, SOCIETY_ICON, base, null, false
                 );
                 add(cohesionIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -487,7 +492,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        final TextPanel consciousnessLabel = new TextPanel(panel, LABEL_W, LABEL_H) {
+        final TextPanel consciousnessLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Class Consc.";
                 final String valueTxt = String.format("%.0f", mData.getClassConsciousness());
@@ -507,7 +512,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base classConsciousnessIcon = new Base(
-                    panel, ICON_S, ICON_S, SOLIDARITY_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, SOLIDARITY_ICON, base, null, false
                 );
                 add(classConsciousnessIcon).inBL(-pad, (LABEL_H - ICON_S)/2f);
             }
@@ -533,22 +538,22 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
             }
         };
 
-        panel.addComponent(healthLabel.getPanel()).inTL(opad, SECT_II_H + opad*3);
-        panel.addComponent(happinessLabel.getPanel()).inTL(opad + LABEL_W + pad, SECT_II_H + opad*3);
-        panel.addComponent(cohesionLabel.getPanel()).inTL(opad + LABEL_W*2 + pad*2, SECT_II_H + opad*3);
-        panel.addComponent(consciousnessLabel.getPanel()).inTL(opad + LABEL_W*3 + pad*3, SECT_II_H + opad*3);
+        innerPanel.addComponent(healthLabel.getPanel()).inTL(opad, SECT_II_H + opad*3);
+        innerPanel.addComponent(happinessLabel.getPanel()).inTL(opad + LABEL_W + pad, SECT_II_H + opad*3);
+        innerPanel.addComponent(cohesionLabel.getPanel()).inTL(opad + LABEL_W*2 + pad*2, SECT_II_H + opad*3);
+        innerPanel.addComponent(consciousnessLabel.getPanel()).inTL(opad + LABEL_W*3 + pad*3, SECT_II_H + opad*3);
         }
     
         if (showPolicies && EconomyConfig.SHOW_MARKET_POLICIES) { // SECTION III
         final LabelAPI subtitle = settings.createLabel("Policies", Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
-        panel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_III_H);
+        innerPanel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_III_H);
         final int subtitleH = (int) subtitle.computeTextHeight(subtitle.getText());
 
-        final ScrollPanel policyContainer = new ScrollPanel(panel, PANEL_W - opad, policyHeight + opad);
+        final ScrollPanel policyContainer = new ScrollPanel(innerPanel, PANEL_W - opad, policyHeight + opad);
         policyContainer.scrollType = ScrollType.HORIZONTAL;
-        panel.addComponent(policyContainer.getPanel()).inTL(opad/2f, SECT_III_H + subtitleH + pad);
+        innerPanel.addComponent(policyContainer.getPanel()).inTL(opad/2f, SECT_III_H + subtitleH + pad);
 
         int posterCount = 0;
         for (MarketPolicy policy : mData.getPolicies()) {
@@ -560,11 +565,11 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                     if (selectedPolicy == policy) return;
 
                     selectedPolicy = policy;
-                    panel.removeComponent(selectedPolicyCont);
+                    innerPanel.removeComponent(selectedPolicyCont);
                     selectedPolicyCont = settings.createCustom(
                         PANEL_W, SELECTED_P_H, null
                     );
-                    panel.addComponent(selectedPolicyCont).inTL(
+                    innerPanel.addComponent(selectedPolicyCont).inTL(
                         opad, SECT_III_H + subtitleH + opad*2 + policyHeight
                     );
 
@@ -572,28 +577,28 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
                     final CallbackRunnable<Button> activateRun = new CallbackRunnable<>() {
                         public void run(Button btn) {
                             policy.activate(mData);
-                            buildPoster(policyContainer.getContentPanel(), panel, policy, mData,
+                            buildPoster(policyContainer.getContentPanel(), policy, mData,
                                 self, policyWidth, policyHeight
                             ).inBL(pad + posterIndex*(policyWidth + pad), opad/2f);
 
-                            panel.removeComponent(selectedPolicyCont);
+                            innerPanel.removeComponent(selectedPolicyCont);
                             selectedPolicyCont = settings.createCustom(
                                 PANEL_W, SELECTED_P_H, null
                             );
-                            panel.addComponent(selectedPolicyCont).inTL(
+                            innerPanel.addComponent(selectedPolicyCont).inTL(
                                 opad, SECT_III_H + subtitleH + opad*2 + policyHeight
                             );
 
                             source.getParent().removeComponent(source.getPanel());
-                            buildSelectedPosterMenu(selectedPolicyCont, panel, policy, mData, this);
+                            buildSelectedPosterMenu(selectedPolicyCont, policy, mData, this);
                         };
                     };
 
-                    buildSelectedPosterMenu(selectedPolicyCont, panel, policy, mData, activateRun);
+                    buildSelectedPosterMenu(selectedPolicyCont, policy, mData, activateRun);
                 }
             };
 
-            buildPoster(policyContainer.getContentPanel(), panel, policy, mData, listener,  
+            buildPoster(policyContainer.getContentPanel(), policy, mData, listener,  
                 policyWidth, policyHeight
             ).inBL(pad + posterCount*(policyWidth + pad), opad/2f);
 
@@ -603,8 +608,8 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         }
     }
 
-    private final PositionAPI buildPoster(CustomPanelAPI cont, CustomPanelAPI dialogPanel,   
-        MarketPolicy policy, PlayerMarketData mData, HasActionListener listener, int width, int height
+    private final PositionAPI buildPoster(CustomPanelAPI cont, MarketPolicy policy,
+        PlayerMarketData mData, HasActionListener listener, int width, int height
     ) {
         final SettingsAPI settings = Global.getSettings();
         
@@ -656,16 +661,16 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
 
             @Override
             public CustomPanelAPI getTpParent() {
-                return dialogPanel;
+                return cont;
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = dialogPanel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = cont.createUIElement(400, 0, false);
 
                 policy.createTooltip(mData, tp);
 
-                dialogPanel.addUIElement(tp);
+                cont.addUIElement(tp);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             }
@@ -683,7 +688,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         return cont.addComponent(posterWrap.getPanel());
     }
 
-    private final void buildSelectedPosterMenu(CustomPanelAPI cont, CustomPanelAPI dialogPanel,
+    private final void buildSelectedPosterMenu(CustomPanelAPI cont,
         MarketPolicy policy, PlayerMarketData mData, CallbackRunnable<Button> activateRun
     ) {
         final SettingsAPI settings = Global.getSettings();
@@ -691,7 +696,7 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         final int buttonW = 140;
         final int buttonH = 30;
 
-        buildPoster(cont, dialogPanel, policy, mData, null,  
+        buildPoster(cont, policy, mData, null,  
             posterW, SELECTED_P_H
         ).inTL(opad*2, 0);
 
@@ -785,56 +790,24 @@ public class ManageWorkersDialog implements WrapDialogDelegate {
         cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
     }
 
-    public void setInteractionDialog(InteractionDialogAPI a) {
-        interactionDialog = a;
+    float sliderValue = 0f;
+
+    @Override
+    public void advanceImpl(float delta) {
+        super.advanceImpl(delta);
+
+        if (exploitationSlider.getProgressInterpolated() == sliderValue) return;
+
+        sliderValue = exploitationSlider.getProgressInterpolated();
+        exploitationSlider.setBarColor(UiUtils.lerpColor(
+            positiveColor, negativeColor, sliderValue/(float)(LaborConfig.MAX_RoSV - 1)
+        ));
     }
 
-    public void setWasInteractionDialogCreated(boolean a) {
-        wasDialogCreated = a;
-    }
+    @Override
+    public void dismiss(int option) {
+        super.dismiss(option);
 
-    public void customDialogConfirm() {
-        customDialogCancel();
-    }
-
-    public void customDialogCancel() {
         UIState.setState(State.NONE);
-
-        if (wasDialogCreated) {
-            handleClosingForDialogCreated(interactionDialog);
-        }
     }
-
-    public String getCancelText() {
-        return "Dismiss";
-    }
-
-    public String getConfirmText() {
-        return "Dismiss";
-    }
-
-    public boolean hasCancelButton() {
-        return false;
-    }
-
-    public CustomUIPanelPlugin getCustomPanelPlugin() {
-        return new CustomUIPanelPlugin() {
-            final ManageWorkersDialog dialog = ManageWorkersDialog.this;
-            float sliderValue = 0f;
-            
-            public void advance(float arg0) {
-                if (dialog.exploitationSlider.getProgressInterpolated() == sliderValue) return;
-
-                sliderValue = dialog.exploitationSlider.getProgressInterpolated();
-                dialog.exploitationSlider.setBarColor(UiUtils.lerpColor(
-                    positiveColor, negativeColor, sliderValue/(float)(LaborConfig.MAX_RoSV - 1)
-                ));
-            }
-            public void processInput(List<InputEventAPI> arg0) {}
-            public void positionChanged(PositionAPI arg0) {}
-            public void renderBelow(float arg0) {}
-            public void render(float arg0) {}
-            public void buttonPressed(Object arg0) {}
-        };
-    }   
 }

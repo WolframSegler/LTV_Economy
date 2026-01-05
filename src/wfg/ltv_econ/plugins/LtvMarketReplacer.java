@@ -183,11 +183,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         final CallbackRunnable<Button> stockpilesBtnRunnable = (btn) -> {
             final ColonyInvDialog dialogPanel = new ColonyInvDialog(marketAPI, btn);
-
-            WrapUiUtils.showCustomDialog(
-                dialogPanel, ColonyInvDialog.PANEL_W, ColonyInvDialog.PANEL_H,
-                marketAPI.getPrimaryEntity(), null
-            );
+            dialogPanel.show(0.2f, 0.2f);
         };
 
         final Button inventoryBtn = new Button(
@@ -213,11 +209,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         final CallbackRunnable<Button> manageWorkersBtnRunnable = (btn) -> {
             final ManageWorkersDialog dialogPanel = new ManageWorkersDialog(marketAPI);
-
-            WrapUiUtils.showCustomDialog(
-                dialogPanel, ManageWorkersDialog.PANEL_W, ManageWorkersDialog.PANEL_H,
-                marketAPI.getPrimaryEntity(), null
-            );
+            dialogPanel.show(0.3f, 0.3f);
         };
 
         final Button manageBtn = new Button(
@@ -659,11 +651,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                         final ComDetailDialog dialogPanel = new ComDetailDialog(
                             marketAPI, panel.getCommodity()
                         );
-
-                        WrapUiUtils.showCustomDialog(
-                            dialogPanel, dialogPanel.PANEL_W, dialogPanel.PANEL_H,
-                            marketAPI.getPrimaryEntity(), null
-                        );
+                        dialogPanel.show(0.3f, 0.3f);
                     }
                 }
             };
