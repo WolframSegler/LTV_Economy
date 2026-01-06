@@ -10,7 +10,8 @@
       "smiling_face": "graphics/ui/smiling_face.png",
       "society": "graphics/ui/society.png",
       "solidarity_colored": "graphics/ui/solidarity_colored.png",
-      "solidarity_empty": "graphics/ui/solidarity_empty.png"
+      "solidarity_empty": "graphics/ui/solidarity_empty.png",
+      "restricted": "graphics/ui/restricted.png"
     },
     "icons": {
       "policy_icon": "graphics/icons/intel/policy_icon.png",

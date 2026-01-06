@@ -499,9 +499,8 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
     @Override
     public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
-        if (tradeInfoPanel) {
-            return;
-        }
+        if (tradeInfoPanel) return;
+
         LtvIndustryWidget targetInd;
 
         if (constructionQueueIndex >= 0) {
@@ -715,6 +714,10 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         @Override
         public TooltipMakerAPI createAndAttachTp() {
             return m_tooltip.factory.get();
+        }
+
+        public boolean isUseDisableSound() {
+            return (!DebugFlags.COLONY_DEBUG && !m_industry.getMarket().isPlayerOwned());
         }
     }
 }

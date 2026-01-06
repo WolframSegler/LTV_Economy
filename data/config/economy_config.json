@@ -49,5 +49,6 @@
 
     "VOLATILITY_WINDOW": 90,
 
-    "SHOW_MARKET_POLICIES": true
+    "SHOW_MARKET_POLICIES": true,
+    "EMBARGO_REP_DROP": 40
 }

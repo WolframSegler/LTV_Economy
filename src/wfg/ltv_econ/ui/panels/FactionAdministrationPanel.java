@@ -31,11 +31,24 @@ public class FactionAdministrationPanel extends
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerFactionSettings factionSettings = engine.playerFactionSettings;
-    
+
+        final int SECTION_I = opad;
+        final int SECTION_II = SECTION_I + 420;
+
+        final LabelAPI tradeDiploLbl = settings.createLabel(
+            "Trade & Diplomacy", Fonts.INSIGNIA_LARGE);
+        add(tradeDiploLbl).inTL(opad, SECTION_I);
+        int lblW = (int) tradeDiploLbl.getPosition().getHeight();
+        
+        final FactionSelectionPanel factionEmbargoPanel = new FactionSelectionPanel(
+            m_panel, 200, 350 
+        );
+        add(factionEmbargoPanel).inTL(opad, SECTION_I + lblW + opad);
+        
         final LabelAPI financePoliciesLbl = settings.createLabel(
             "Financial Policies", Fonts.INSIGNIA_LARGE);
-        add(financePoliciesLbl).inTL(0, opad);
-        int lblW = (int) financePoliciesLbl.getPosition().getHeight();
+        add(financePoliciesLbl).inTL(opad, SECTION_II);
+        lblW = (int) financePoliciesLbl.getPosition().getHeight();
 
         final CallbackRunnable<Button> redistributeRun = (btn) -> {
             btn.checked = !btn.checked;
@@ -48,6 +61,6 @@ public class FactionAdministrationPanel extends
             Fonts.DEFAULT_SMALL, redistributeRun, base, pad
         );
         redistributeBtn.checked = factionSettings.redistributeCredits;
-        add(redistributeBtn).inTL(opad, opad + lblW + pad);
+        add(redistributeBtn).inTL(opad, SECTION_II + lblW + pad);
     }
 }

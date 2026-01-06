@@ -195,10 +195,10 @@ public class IndustryIOs {
         final MarketAPI market = ind.getMarket();
         if (output.checkLegality && market.isIllegal(outputID)) return false;
 
-        if (output == null || output.isAbstract
-            || ind.isDisrupted()
-            || (ind.isBuilding() && !output.activeDuringBuilding)
-            || (ind.isFunctional() && output.activeDuringBuilding)) {
+        if (output == null ||
+            ind.isDisrupted() ||
+            (ind.isBuilding() && !output.activeDuringBuilding) ||
+            (ind.isFunctional() && output.activeDuringBuilding)) {
             return false;
         }
 
@@ -246,6 +246,7 @@ public class IndustryIOs {
         final IndustryConfig cfg = getIndConfig(ind);
         final OutputConfig output = cfg.outputs.get(outputID);
 
+        if (output == null || output.isAbstract) return 0f;
         final float value = getBaseOutput(ind.getSpec(), outputID);
         if (value == 0) return 0f;
 

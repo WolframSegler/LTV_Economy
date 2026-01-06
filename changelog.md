@@ -1,4 +1,4 @@
-v0.1.1-beta
+v0.1.1-beta | NOT SAVE COMPATIBLE
 - Switched to RolflectionLib to stop relying on kotlin
 - Switched to WrapUI Dialogs for more consistent behaviour
 - Bug fixes

@@ -223,6 +223,15 @@ public class CommodityInfo {
             final CommodityStats expStats = getStats(expImp.one);
             final CommodityStats impStats = getStats(expImp.two);
 
+            if (expStats.market.isPlayerOwned()^impStats.market.isPlayerOwned()) {
+                final String tradingFactionID = expStats.market.isPlayerOwned() ?
+                    impStats.market.getFaction().getId() : expStats.market.getFaction().getId();
+
+                if (engine.playerFactionSettings.embargoedFactions.contains(tradingFactionID)) {
+                    continue;
+                }
+            }
+
             final double exportableRemaining = expStats.getStoredRemainingExportable();
             final float deficitRemaining = computeImportAmount(impStats);
 

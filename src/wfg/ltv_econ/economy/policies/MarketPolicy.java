@@ -25,6 +25,7 @@ public abstract class MarketPolicy {
     public int cooldownDaysRemaining;
     public boolean notifyWhenAvailable = false;
     public boolean notifyWhenFinished = false;
+    public boolean repeatAfterCooldown = false;
 
     public abstract void apply(PlayerMarketData data);
     public abstract void unapply(PlayerMarketData data);
@@ -55,6 +56,7 @@ public abstract class MarketPolicy {
             if (cooldownDaysRemaining <= 0) {
                 state = PolicyState.AVAILABLE;
                 if (notifyWhenAvailable) notifyAvailable(data);
+                if (repeatAfterCooldown) activate(data);
             }
             break;
 

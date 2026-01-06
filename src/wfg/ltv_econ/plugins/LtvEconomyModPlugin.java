@@ -113,7 +113,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         final EconomyEngine engine = EconomyEngine.getInstance();
         for (CommodityInfo info : engine.getCommodityInfos()) {
             for (CommodityStats stats : info.getAllStats()) {
-                stats.addStoredAmount(stats.getPreferredStockpile());
+                stats.addStoredAmount(stats.getPreferredStockpile() * 0.8f);
             }
         }
     }

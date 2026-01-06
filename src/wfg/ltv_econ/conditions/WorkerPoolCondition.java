@@ -114,12 +114,12 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
             case 1, 2: return 1f;
             case 3: return 0.9f;
             case 4: return 0.8f;
-            case 5: return 0.6f;
-            case 6: return 0.5f;
-            case 7: return 0.35f;
-            case 8: return 0.23f;
+            case 5: return 0.68f;
+            case 6: return 0.52f;
+            case 7: return 0.4f;
+            case 8: return 0.26f;
             case 9: return 0.15f;
-            case 10: return 0.07f;
+            case 10: return 0.08f;
             default: return 0.05f;
         }
     }

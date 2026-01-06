@@ -140,6 +140,8 @@ rolfosian - for RolflectionLib-SS
 
 <a href="https://www.freepik.com/premium-vector/beautiful-medical-healthcare-heart-icon-vector-illustration_358640287.htm">Heart</a>
 
+<a target="_blank" href="https://icons8.com/icon/eXZFp2e0w8EX/no-entry">Restricted</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+
 <br>
 
 ## AI Generated Assets

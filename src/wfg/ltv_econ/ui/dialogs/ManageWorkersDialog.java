@@ -765,7 +765,7 @@ public class ManageWorkersDialog extends DialogPanel {
         buttonSide.getPosition().setSize(posterW/2f + opad, 30);
         cont.addComponent((UIComponentAPI)buttonSide).inBR(opad*2 + buttonW + PANEL_W/2f, pad);
 
-        // NOTIFICATION BUTTONS
+        // OPTION BUTTONS
         final CallbackRunnable<Button> availableRn = (btn) -> {
             btn.checked = !btn.checked;
             policy.notifyWhenAvailable = btn.checked;
@@ -773,6 +773,10 @@ public class ManageWorkersDialog extends DialogPanel {
         final CallbackRunnable<Button> finishedRn = (btn) -> {
             btn.checked = !btn.checked;
             policy.notifyWhenFinished = btn.checked;
+        };
+        final CallbackRunnable<Button> repeatRn = (btn) -> {
+            btn.checked = !btn.checked;
+            policy.repeatAfterCooldown = btn.checked;
         };
 
         final Button notifyAvailableBtn = ComponentFactory.createCheckboxWithText(
@@ -783,11 +787,17 @@ public class ManageWorkersDialog extends DialogPanel {
             cont, 18, "Notify when finished",
             Fonts.DEFAULT_SMALL, finishedRn, base, pad
         );
+        final Button repeatAfterCooldownBtn = ComponentFactory.createCheckboxWithText(
+            cont, 18, "Repeat after cooldown",
+            Fonts.DEFAULT_SMALL, repeatRn, base, pad
+        );
 
         notifyAvailableBtn.checked = policy.notifyWhenAvailable;
         notifyFinishedBtn.checked = policy.notifyWhenFinished;
-        cont.addComponent(notifyAvailableBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*2);
-        cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
+        repeatAfterCooldownBtn.checked = policy.repeatAfterCooldown;
+        cont.addComponent(notifyAvailableBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*4);
+        cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*2);
+        cont.addComponent(repeatAfterCooldownBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
     }
 
     float sliderValue = 0f;

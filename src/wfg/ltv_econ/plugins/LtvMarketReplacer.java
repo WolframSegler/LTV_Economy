@@ -177,7 +177,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         useStockpilesBtn.setOpacity(0);
         useStockpilesBtn.setEnabled(false);
-        if (!DebugFlags.COLONY_DEBUG && !marketAPI.isPlayerOwned()) return;
+        if (!DebugFlags.COLONY_DEBUG && !marketAPI.isPlayerOwned() && DebugFlags.HIDE_COLONY_CONTROLS) return;
 
         final CallbackRunnable<Button> stockpilesBtnRunnable = (btn) -> {
             final ColonyInvDialog dialogPanel = new ColonyInvDialog(marketAPI);
