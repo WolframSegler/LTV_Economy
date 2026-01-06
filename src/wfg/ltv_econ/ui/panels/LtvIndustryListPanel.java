@@ -68,14 +68,6 @@ public class LtvIndustryListPanel extends CustomPanel<
 	public final UIPanelAPI dummyWidget;
 	private final MarketAPI m_market;
 
-	public List<Object> getWidgets() {
-		return widgets;
-	}
-
-	public static Comparator<Industry> getIndustryOrderComparator() {
-		return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
-	}
-
 	private Button buildButton;
 
 	public LtvIndustryListPanel(UIPanelAPI parent, int width, int height, MarketAPI market, 
@@ -89,10 +81,18 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 		getPlugin().init(this);
 		createPanel();
+
+		instance = this;
    	}
 
-	public static void setindustryOptionsPanelConstructor(Object a) {
+	public static final void setindustryOptionsPanelConstructor(Object a) {
 		indOptCtor = a;
+	}
+
+	private static LtvIndustryListPanel instance;
+	public static final void refreshPanel() {
+		if (instance == null) return;
+		instance.createPanel();
 	}
 
 	public void createPanel() {
@@ -377,7 +377,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		final int buildBtnWidth = 350;
 		buildButton = new Button(
 			getPanel(), buildBtnWidth, 25,
-			" Add industry or structure...", Fonts.ORBITRON_20AABOLD,
+			"Add industry or structure...", Fonts.ORBITRON_20AABOLD,
 			buildBtnRunnable
 		);
 		buildButton.setCutStyle(CutStyle.TL_BR);
@@ -423,7 +423,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		};
 	}
 
-	public void processInputImpl(List<InputEventAPI> events) {
+	public final void processInputImpl(List<InputEventAPI> events) {
 		boolean anyWidgetNotNormal = false;
 
 		for (Object widgetObj : widgets) {
@@ -471,7 +471,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		}
 	}
 
-	public void dialogDismissed(Object... args) {
+	public final void dialogDismissed(Object... args) {
 		UIState.setState(State.NONE);
 
 		if (((int) args[1]) != 0) return; // 0 means confirm
@@ -510,5 +510,13 @@ public class LtvIndustryListPanel extends CustomPanel<
 		} else {
 			return MarketInteractionMode.REMOTE;
 		}
+	}
+
+	public final List<Object> getWidgets() {
+		return widgets;
+	}
+
+	private static final Comparator<Industry> getIndustryOrderComparator() {
+		return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
 	}
 }

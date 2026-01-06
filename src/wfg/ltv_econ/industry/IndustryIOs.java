@@ -191,8 +191,16 @@ public class IndustryIOs {
         }
     }
 
-    public static final boolean isOutputValidForMarket(OutputConfig output, MarketAPI market, String outputID) {
+    public static final boolean isOutputValidForMarket(OutputConfig output, Industry ind, String outputID) {
+        final MarketAPI market = ind.getMarket();
         if (output.checkLegality && market.isIllegal(outputID)) return false;
+
+        if (output == null || output.isAbstract
+            || ind.isDisrupted()
+            || (ind.isBuilding() && !output.activeDuringBuilding)
+            || (ind.isFunctional() && output.activeDuringBuilding)) {
+            return false;
+        }
 
         for (String cond : output.ifMarketCondsAllFalse) {
             if (market.hasCondition(cond)) return false;
@@ -206,8 +214,9 @@ public class IndustryIOs {
     }
 
     public static final float calculateScale(
-        Industry ind, MarketAPI market, OutputConfig output, String outputID, IndustryConfig cfg
+        Industry ind, OutputConfig output, String outputID, IndustryConfig cfg
     ) {
+        final MarketAPI market = ind.getMarket();
         if (!output.isAbstract) {
             final CommodityStats stats = EconomyEngine.getInstance().getComStats(output.comID, market.getId()); 
             if (stats != null && output.target > 0 && output.target < stats.getStored()) return 0f;
@@ -236,16 +245,13 @@ public class IndustryIOs {
     public static final float getRealOutput(Industry ind, String outputID) {
         final IndustryConfig cfg = getIndConfig(ind);
         final OutputConfig output = cfg.outputs.get(outputID);
-        if (output == null || output.isAbstract) return 0;
 
         final float value = getBaseOutput(ind.getSpec(), outputID);
-        if (value == 0) return 0;
+        if (value == 0) return 0f;
 
-        final MarketAPI market = ind.getMarket();
+        if (!isOutputValidForMarket(output, ind, outputID)) return 0f;
 
-        if (!isOutputValidForMarket(output, market, outputID)) return 0;
-
-        final float scale = calculateScale(ind, market, output, outputID, cfg);
+        final float scale = calculateScale(ind, output, outputID, cfg);
 
         return value * scale;
     }
@@ -260,13 +266,11 @@ public class IndustryIOs {
         final OutputConfig output = cfg.outputs.get(outputID);
 
         final float value = getBaseInput(ind.getSpec(), outputID, inputID);
-        if (value == 0) return 0;
+        if (value == 0f) return 0f;
 
-        final MarketAPI market = ind.getMarket();
+        if (!isOutputValidForMarket(output, ind, outputID)) return 0f;
 
-        if (!isOutputValidForMarket(output, market, outputID)) return 0;
-
-        final float scale = calculateScale(ind, market, output, outputID, cfg);
+        final float scale = calculateScale(ind, output, outputID, cfg);
 
         return value * scale;
     }
@@ -277,7 +281,6 @@ public class IndustryIOs {
     public static final float getRealSumInput(Industry ind, String inputID) {
         final Map<String, Map<String, Float>> indMap = getBaseInputs(ind.getSpec());
         final IndustryConfig cfg = getIndConfig(ind);
-        final MarketAPI market = ind.getMarket();
 
         float total = 0f;
         for (Map.Entry<String,Map<String,Float>> inputMap : indMap.entrySet()) {
@@ -285,9 +288,9 @@ public class IndustryIOs {
 
             for (Map.Entry<String, Float> entry : inputMap.getValue().entrySet()) {
                 if (entry.getKey().equals(inputID)) {
-                    if (!isOutputValidForMarket(output, market, inputMap.getKey())) continue;
+                    if (!isOutputValidForMarket(output, ind, inputMap.getKey())) continue;
 
-                    final float scale = calculateScale(ind, market, output, inputMap.getKey(), cfg);
+                    final float scale = calculateScale(ind, output, inputMap.getKey(), cfg);
 
                     total += entry.getValue() * scale;
                 }
@@ -421,12 +424,12 @@ public class IndustryIOs {
             || IndustryConfigManager.ind_config.containsKey(getBaseIndustryID(ind));
     }
 
-    public static final boolean hasSupply(Industry ind, String comID) {
+    public static final boolean hasOutput(Industry ind, String comID) {
         String indID = getBaseIndIDifNoConfig(ind.getSpec());
         return outputToInd.getOrDefault(comID, Collections.emptySet()).contains(indID);
     }
 
-    public static final boolean hasDemand(Industry ind, String comID) {
+    public static final boolean hasInput(Industry ind, String comID) {
         String id = getBaseIndIDifNoConfig(ind.getSpec());
         return inputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }

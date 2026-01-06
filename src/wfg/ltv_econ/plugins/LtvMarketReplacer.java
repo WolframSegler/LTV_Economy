@@ -180,7 +180,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         if (!DebugFlags.COLONY_DEBUG && !marketAPI.isPlayerOwned()) return;
 
         final CallbackRunnable<Button> stockpilesBtnRunnable = (btn) -> {
-            final ColonyInvDialog dialogPanel = new ColonyInvDialog(marketAPI, btn);
+            final ColonyInvDialog dialogPanel = new ColonyInvDialog(marketAPI);
             dialogPanel.show(0.2f, 0.2f);
         };
 
@@ -566,18 +566,19 @@ public class LtvMarketReplacer implements EveryFrameScript {
         final int height = (int) industryPanel.getPosition().getHeight();
 
         final LtvIndustryListPanel replacement = new LtvIndustryListPanel(
-                managementPanel,
-                width,
-                height,
-                marketAPI,
-                industryPanel);
+            managementPanel,
+            width,
+            height,
+            marketAPI,
+            industryPanel
+        );
 
         managementPanel.addComponent(replacement.getPanel());
         WrapUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomLeft, 25);
 
         if (LtvIndustryListPanel.indOptCtor == null) {
             // Acquire the popup class from one of the widgets
-            final List<?> widgets = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            final List<?> widgets = (List<?>) RolfLectionUtil.getMethodAndInvokeDirectly(
                 "getWidgets", industryPanel);
             final Object widget0 = widgets.get(0);
 

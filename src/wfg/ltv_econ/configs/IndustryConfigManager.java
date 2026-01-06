@@ -155,6 +155,7 @@ public class IndustryConfigManager {
                 final boolean isAbstract = outputData.optBoolean("isAbstract", false);
                 final boolean useWorkers = outputData.optBoolean("usesWorkers", false);
                 final boolean checkLegality = outputData.optBoolean("checkLegality", false);
+                final boolean activeBuilding = outputData.optBoolean("activeDuringBuilding", false);
 
                 final List<String> marketCondsAllFalse = new ArrayList<>();
                 if (outputData.has("ifMarketCondsAllFalse")) {
@@ -207,7 +208,8 @@ public class IndustryConfigManager {
                     ConsumptionMap,
                     workerAssignableLimit,
                     marketScaleBase,
-                    target
+                    target,
+                    activeBuilding
                 );
 
                 commodityMap.put(outputId, opt);
@@ -283,6 +285,7 @@ public class IndustryConfigManager {
                     optJson.put("usesWorkers", opt.usesWorkers);
                     optJson.put("isAbstract", opt.isAbstract);
                     optJson.put("checkLegality", opt.checkLegality);
+                    optJson.put("activeDuringBuilding", opt.activeDuringBuilding);
 
                     outputList.put(outputId, optJson);
                 }
@@ -354,7 +357,7 @@ public class IndustryConfigManager {
         public final float workerAssignableLimit;
         public final float marketScaleBase;
 
-        public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input
+        public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input.
         public final Map<String, Float> InputsPerUnitOutput;
 
         public List<String> ifMarketCondsAllFalse;
@@ -362,14 +365,15 @@ public class IndustryConfigManager {
 
         public final boolean scaleWithMarketSize; // Base size where no scaling happens is 3.
         public final boolean usesWorkers;
-        public final boolean isAbstract; // Abstract outputs have no output, only inputs
+        public final boolean isAbstract; // Abstract outputs have no output, only inputs.
         public final boolean checkLegality;
+        public final boolean activeDuringBuilding; // will be inactive during normal operations.
 
         public OutputConfig(
             String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
             boolean usesWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketCondsAllFalse,
             List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput, float workerAssignableLimit,
-            float marketScaleBase, long target   
+            float marketScaleBase, long target, boolean activeDuringBuilding
         ) {
             this.comID = comID;
             this.baseProd = baseProd;
@@ -384,6 +388,7 @@ public class IndustryConfigManager {
             this.isAbstract = isAbstract;
             this.checkLegality = checkLegality;
             this.marketScaleBase = marketScaleBase;
+            this.activeDuringBuilding = activeDuringBuilding;
         }
 
         /**
@@ -408,23 +413,25 @@ public class IndustryConfigManager {
             this.isAbstract = other.isAbstract;
             this.checkLegality = other.checkLegality;
             this.marketScaleBase = other.marketScaleBase;
+            this.activeDuringBuilding = other.activeDuringBuilding;
         }
 
         @Override
         public final String toString() {
             return '{' +  " ,\n" +
                 "baseProd=" + baseProd + " ,\n" +
-                ", target=" + target + " ,\n" +
-                ", CCMoneyDist=" + CCMoneyDist + " ,\n" +
-                ", ConsumptionMap=" + InputsPerUnitOutput + " ,\n" +
-                ", ifMarketCondsAllFalse=" + ifMarketCondsAllFalse + " ,\n" +
-                ", ifMarketCondsAllTrue=" + ifMarketCondsAllTrue + " ,\n" +
-                ", scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +
-                ", marketScaleBase=" + marketScaleBase + " ,\n" +
-                ", usesWorkers=" + usesWorkers + " ,\n" +
+                "target=" + target + " ,\n" +
+                "CCMoneyDist=" + CCMoneyDist + " ,\n" +
+                "ConsumptionMap=" + InputsPerUnitOutput + " ,\n" +
+                "ifMarketCondsAllFalse=" + ifMarketCondsAllFalse + " ,\n" +
+                "ifMarketCondsAllTrue=" + ifMarketCondsAllTrue + " ,\n" +
+                "scaleWithMarketSize=" + scaleWithMarketSize + " ,\n" +
+                "marketScaleBase=" + marketScaleBase + " ,\n" +
+                "usesWorkers=" + usesWorkers + " ,\n" +
                 "workerAssignableLimit: " + workerAssignableLimit + " ,\n" +
-                ", isAbstract=" + isAbstract + " ,\n" +
-                ", checkLegality=" + checkLegality + " ,\n" +
+                "isAbstract=" + isAbstract + " ,\n" +
+                "checkLegality=" + checkLegality + " ,\n" +
+                "activeDuringBuilding=" + activeDuringBuilding + " ,\n" +
                 '}';
         }
     }
@@ -440,7 +447,8 @@ public class IndustryConfigManager {
      */
     private static final void validateOrRebuildDynamicConfigs() {
         final SettingsAPI settings = Global.getSettings();
-        final Map<String, IndustryConfig> dynamic_config = IndustryConfigManager.loadAsMap(true);
+        final Map<String, IndustryConfig> dynamic_config =
+            IndustryConfigManager.loadAsMap(true);
 
         boolean allIndustriesHaveConfig = true;
         for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
@@ -575,7 +583,8 @@ public class IndustryConfigManager {
                         InputsPerUnitOutput,
                         LaborConfig.dynamicWorkerCapPerOutput,
                         8.5f,
-                        -1
+                        -1,
+                        false
                 );
                 configOutputs.put(outputID, optCom);
             };
@@ -705,7 +714,8 @@ public class IndustryConfigManager {
                         InputsPerUnitOutput,
                         LaborConfig.dynamicWorkerCapPerOutput,
                         8f,
-                        -1
+                        -1,
+                        false
                     );
                     new_outputs.put(newOutput, optCom);
                 }

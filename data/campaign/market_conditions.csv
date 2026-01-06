@@ -1,2 +1,2 @@
 name,id,tags,planetary,decivRemove,script,desc,icon,order
-Worker Pool,worker_pool,,FALSE,TRUE,"wfg.ltv_econ.conditions.WorkerPoolCondition","The pool of workers assignable to industries. This determines the production of said industires.",graphics/icons/markets/wfg_labor.png,200
+Worker Pool,worker_pool,,FALSE,TRUE,"wfg.ltv_econ.conditions.WorkerPoolCondition","The pool of workers assignable to industries.",graphics/icons/markets/wfg_labor.png,200

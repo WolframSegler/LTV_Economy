@@ -74,8 +74,9 @@ public final class CompatLayer {
      * Retrieve the base value (worker-dependent) of an industry for a given commodity.
      */
     public static final float getBaseValue(Industry ind, String comID, boolean isDemand) {
-        float value = isDemand ? IndustryIOs.getRealSumInput(ind, comID) : IndustryIOs.getRealOutput(ind, comID);
-        boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
+        final float value = isDemand ? IndustryIOs.getRealSumInput(ind, comID)
+            : IndustryIOs.getRealOutput(ind, comID);
+        final boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
         return hasRelevantCondition ? value : 0f;
     }
 
@@ -83,9 +84,9 @@ public final class CompatLayer {
     public static final MutableStat getModifiers(
         Industry ind, String comID, MutableStat base, MutableStat bonus
     ) {
-        MutableStat modifierStat = new MutableStat(1f);
+        final MutableStat modifierStat = new MutableStat(1f);
 
-        String installedItemID = ind.getSpecialItem() != null ? ind.getSpecialItem().getId() : null;
+        final String installedItemID = ind.getSpecialItem() != null ? ind.getSpecialItem().getId() : null;
 
         if (installedItemID != null) {
             for (StatMod mod : base.getFlatMods().values()) {
@@ -206,16 +207,16 @@ public final class CompatLayer {
 
     public static final void applyResourceDepositMods(Industry ind, MutableStat dest, String comID) {
         for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
-            String commodityId = ResourceDepositsCondition.COMMODITY.get(cond.getId());
+            final String commodityId = ResourceDepositsCondition.COMMODITY.get(cond.getId());
             if (commodityId == null || !commodityId.equals(comID)) continue;
 
-            String industryId = ResourceDepositsCondition.INDUSTRY.get(commodityId);
+            final String industryId = ResourceDepositsCondition.INDUSTRY.get(commodityId);
             if (industryId == null || !industryId.equals(ind.getId())) continue;
 
-            Integer mod = ResourceDepositsCondition.MODIFIER.get(cond.getId());
+            final Integer mod = ResourceDepositsCondition.MODIFIER.get(cond.getId());
             if (mod == null) continue;
 
-            float converted = marketConditionModConverter(mod);
+            final float converted = marketConditionModConverter(mod);
             dest.modifyMult(cond.getId() + EconomyEngine.KEY + ind.getId(), converted, cond.getName());
         }
     }
@@ -245,9 +246,8 @@ public final class CompatLayer {
             if (mod.value > 0) mod.value = -mod.value;
         }
 
-        float totalInput = IndustryIOs.getRealSumInput(ind, inputID);
+        final float totalInput = IndustryIOs.getRealSumInput(ind, inputID);
         float nonAbstractInput = 0f;
-        float ratio = 0f;
 
         final Map<String, OutputConfig> outputs = IndustryIOs.getIndConfig(ind).outputs;
 
@@ -260,7 +260,7 @@ public final class CompatLayer {
                 nonAbstractInput += inputs.get(inputID);
             }
         }
-        ratio = totalInput > 0 ? nonAbstractInput / totalInput : 0f;
+        final float ratio = totalInput > 0 ? nonAbstractInput / totalInput : 0f;
 
 
         if (ind.getSupplyBonus() != null && ratio > 0) {

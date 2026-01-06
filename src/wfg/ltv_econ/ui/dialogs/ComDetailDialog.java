@@ -202,7 +202,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             }
         };
 
-        innerPanel.addComponent(footerPanel.getPanel()).inBL(pad, -opad * 3.5f);
+        innerPanel.addComponent(footerPanel.getPanel()).inBL(pad, -BUTTON_H*0.5f);
     }
 
     public void createSections() {

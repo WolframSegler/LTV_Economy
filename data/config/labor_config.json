@@ -2,7 +2,6 @@
     "RoSV": 4,
     "MAX_RoSV": 10,
     "LPV_month": 8,
-    "populationRatioThatAreWorkers": 0.56,
 
     "defaultWorkerCapPerOutput": 0.6,
     "dynamicWorkerCapPerOutput": 0.8,

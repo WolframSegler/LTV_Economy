@@ -8,7 +8,6 @@ import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.wrap_ui.util.NumFormat;
@@ -29,9 +28,9 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         recalculateWorkerPool();
     }
 
-    public void recalculateWorkerPool() {
+    public final void recalculateWorkerPool() {
         setWorkerPool((long)(
-            LaborConfig.populationRatioThatAreWorkers * Math.pow(10, market.getSize())
+            getWorkerRatio(market.getSize()) * Math.pow(10, market.getSize())
         ));
 
         float totalAssigned = 0;
@@ -47,22 +46,22 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         setFreeWorkerRatio(Math.max(0f, 1f - totalAssigned));
     }
 
-    public long getWorkerPool() {
+    public final long getWorkerPool() {
         return workerPool;
     }
 
-    public float getFreeWorkerRatio() {
+    public final float getFreeWorkerRatio() {
         return freeWorkerRatio;
     }
 
-    public void setWorkerPool(long workers) {
+    public final void setWorkerPool(long workers) {
         if (workers < 0) {
             return;
         }
         workerPool = workers;
     }
 
-    public boolean setFreeWorkerRatio(float workers) {
+    public final boolean setFreeWorkerRatio(float workers) {
         if (0f > workers || workers > 1f) {
             return false;
         }
@@ -70,11 +69,11 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         return true;
     }
 
-    public boolean isWorkerRatioAssignable(float amount) {
+    public final boolean isWorkerRatioAssignable(float amount) {
         return freeWorkerRatio >= amount;
     }
 
-    public boolean assignFreeWorkers(float assignedWorkers) {
+    public final boolean assignFreeWorkers(float assignedWorkers) {
         if (freeWorkerRatio < assignedWorkers)
             return false;
 
@@ -82,7 +81,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         return true;
     }
 
-    public void releaseWorkers(float releasedWorkers) {
+    public final void releaseWorkers(float releasedWorkers) {
         freeWorkerRatio += releasedWorkers;
         if (freeWorkerRatio > 1f) {
             freeWorkerRatio = 1f;
@@ -91,11 +90,15 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     @Override
     protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
+        tooltip.addPara(
+            "Smaller colonies have mostly workers, while larger colonies house more families and independent residents, limiting the labor controlled by the government.", opad
+        );
+
         tooltip.addPara("Total Workers: %s", opad, highlight,
             NumFormat.engNotation(getWorkerPool())
         );
         tooltip.addPara(
-            "Free Workers: %s (%s%%)", opad, highlight,
+            "Unemployed Workers: %s (%s%%)", opad, highlight,
             NumFormat.engNotation((long)(freeWorkerRatio * getWorkerPool())),
             String.format("%.1f", freeWorkerRatio * 100)
         );
@@ -106,8 +109,22 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         return true;
     }
 
+    public static final float getWorkerRatio(int size) {
+        switch (size) {
+            case 1, 2: return 1f;
+            case 3: return 0.9f;
+            case 4: return 0.8f;
+            case 5: return 0.6f;
+            case 6: return 0.5f;
+            case 7: return 0.35f;
+            case 8: return 0.23f;
+            case 9: return 0.15f;
+            case 10: return 0.07f;
+            default: return 0.05f;
+        }
+    }
+
     public static final void initialize() {
-        // All existing markets
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
             addConditionToMarket(market);
         }

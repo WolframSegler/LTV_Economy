@@ -13,6 +13,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Industries;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.economy.CommodityInfo;
+import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
@@ -54,6 +56,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         sector.addTransientScript(new EconomyButtonInjector());
         sector.addTransientScript(new LtvMarketReplacer());
         sector.getListenerManager().addListener(new AddWorkerIndustryOption(), true);
+
+        if (newGame) injectStockpiles();
     }
 
     @Override
@@ -102,6 +106,15 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
             market.addIndustry("manufacturing");
             market.reapplyIndustries();
+        }
+    }
+
+    private static final void injectStockpiles() {
+        final EconomyEngine engine = EconomyEngine.getInstance();
+        for (CommodityInfo info : engine.getCommodityInfos()) {
+            for (CommodityStats stats : info.getAllStats()) {
+                stats.addStoredAmount(stats.getPreferredStockpile());
+            }
         }
     }
 }

@@ -588,7 +588,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 for (String outputID : IndustryIOs.getIndConfig(ind).outputs.keySet()) {
                     if (!CompatLayer.hasRelevantCondition(outputID, market)) continue;
                     if (!IndustryIOs.isOutputValidForMarket(
-                        config.outputs.get(outputID), market, outputID
+                        config.outputs.get(outputID), ind, outputID
                     )) continue;
 
                     for (int j = 0; j < industryOutputPairs.size(); j++) {
@@ -633,13 +633,18 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     public final void applyWages() {
         final EconomyAPI econ = Global.getSector().getEconomy(); 
+        final List<String> toRemove = new ArrayList<>(4);
+
         for (String marketID : m_registeredMarkets) {
-            final MarketAPI market = econ.getMarket(marketID);
-            if (market == null) {
-                removeMarket(marketID);
-                continue;
+            if (econ.getMarket(marketID) == null) {
+                toRemove.add(marketID);
+            } else {
+                addCredits(marketID, (int) -getWagesForMarket(econ.getMarket(marketID)));
             }
-            addCredits(marketID, (int) -getWagesForMarket(econ.getMarket(marketID)));
+        }
+
+        for (String marketID : toRemove) {
+            removeMarket(marketID);
         }
     }
 

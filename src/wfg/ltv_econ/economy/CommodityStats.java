@@ -224,14 +224,14 @@ public class CommodityStats {
         demandBaseMutables = new HashMap<>();
 
         for (Industry industry : getVisibleIndustries(market)) {
-            if (IndustryIOs.hasSupply(industry, comID)) {
+            if (IndustryIOs.hasOutput(industry, comID)) {
                 if (!IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles) {
                     final MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);
                     localProdMutables.put(industry.getId(), supplyStat);
                 }
 
             }
-            if (IndustryIOs.hasDemand(industry, comID)) {
+            if (IndustryIOs.hasInput(industry, comID)) {
                 final MutableStat demandStat = CompatLayer.convertIndDemandStat(industry, comID);
                 
                 if (IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles) {

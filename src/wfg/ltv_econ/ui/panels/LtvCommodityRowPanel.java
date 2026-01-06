@@ -385,7 +385,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         
         y.addAndGet(iconSize + pad);
 
-        desc = "Proportion of locally produced goods that were exported globally.";
+        desc = "Local production that was exported.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_EXPORT);
         
         y.addAndGet(iconSize + pad);
@@ -395,7 +395,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         
         y.addAndGet(iconSize + pad);
 
-        desc = "Proportion of available goods that were imported in-faction.";
+        desc = "Goods that were imported in-faction.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_FACTION_IMPORT);
         
         y.addAndGet(iconSize + pad);
@@ -415,7 +415,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         
         y.addAndGet(iconSize + pad);
 
-        desc = "Deficit - in demand, but not available. Higher prices.";
+        desc = "Deficit not covered by production or imports. Does not indicate lack of stockpiles.";
         legendRowHelper(tooltip, y.get(), iconPath, desc, iconSize, false, UiUtils.COLOR_DEFICIT);
     
         tooltip.setHeightSoFar(y.get() + opad*2);

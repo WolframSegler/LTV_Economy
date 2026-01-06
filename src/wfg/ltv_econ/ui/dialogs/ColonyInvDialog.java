@@ -2,7 +2,6 @@ package wfg.ltv_econ.ui.dialogs;
 
 import static wfg.wrap_ui.util.UIConstants.*;
 
-import java.util.List;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
@@ -18,7 +17,6 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
@@ -30,7 +28,6 @@ import wfg.wrap_ui.ui.dialogs.DialogPanel;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
-import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
@@ -47,14 +44,12 @@ public class ColonyInvDialog extends DialogPanel {
     public static final int PANEL_H = 650;
 
     private final MarketAPI m_market;
-    private final Button m_btn;
 
-    public ColonyInvDialog(MarketAPI market, Button btn) {
+    public ColonyInvDialog(MarketAPI market) {
         super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
         setConfirmShortcut();
 
         m_market = market;
-        m_btn = btn;
 
         getHolo().setBackgroundAlpha(1, 1);
         backgroundDimAmount = 0.2f;
@@ -410,15 +405,6 @@ public class ColonyInvDialog extends DialogPanel {
         super.dismiss(option);
 
         UIState.setState(State.NONE);
-
-        // Refresh the panel
-        final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, m_btn.getParent());
-        for (Object child : children) {
-            if (child instanceof LtvIndustryListPanel indListPanel) {
-                indListPanel.createPanel();
-                break;
-            }
-        }
+        LtvIndustryListPanel.refreshPanel();
     }
 }

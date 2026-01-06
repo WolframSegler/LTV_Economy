@@ -33,6 +33,7 @@ import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
@@ -398,5 +399,6 @@ public class AssignWorkersDialog extends DialogPanel {
         if (option == 1) reg.setData(data);
 
         UIState.setState(State.NONE);
+        LtvIndustryListPanel.refreshPanel();
     }
 }

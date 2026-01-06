@@ -21,6 +21,7 @@ Documentation of `industry_config.json` Fields
 * `workerAssignableLimit`: Limits the ratio of globally available workers that can be assigned.
 * `isAbstract`: Boolean. Indicates the output is **not physically produced**; used for accounting and value input only. Default value is false.
 * `checkLegality`: Boolean. Used to flag outputs that require legality checks. Default value is false.
++ `activeDuringBuilding`: Boolean. Marks outputs to be active during construction phase only. Default is false.
 
 ### Notes on usage
 

@@ -34,7 +34,6 @@ public class LaborConfigLoader {
             LaborConfig.LPV_month = root.getInt("LPV_month");
             LaborConfig.LPV_day = LaborConfig.LPV_month / (float) MONTH;
             LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
-            LaborConfig.populationRatioThatAreWorkers = (float) root.getDouble("populationRatioThatAreWorkers");
             LaborConfig.defaultWorkerCapPerOutput = (float) root.getDouble("defaultWorkerCapPerOutput");
             LaborConfig.dynamicWorkerCapPerOutput = (float) root.getDouble("dynamicWorkerCapPerOutput");
             LaborConfig.RoVC_average = (float) root.getDouble("RoVC_average");
@@ -62,7 +61,6 @@ public class LaborConfigLoader {
         public static int LPV_month;
         public static float LPV_day;
 
-        public static float populationRatioThatAreWorkers;
         public static float defaultWorkerCapPerOutput;
         public static float dynamicWorkerCapPerOutput;
 
