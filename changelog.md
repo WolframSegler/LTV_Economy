@@ -4,6 +4,7 @@ v0.1.1-beta | NOT SAVE COMPATIBLE
 - Bug fixes
 - The sector now starts with stockpiles to prevent death spirals.
 - Larger markets now have a smaller ratio of their population as workers, while smaller markets more.
+- The player can now embargo other factions at the cost of reputation
 
 v0.1.0-beta
 - Initial release
