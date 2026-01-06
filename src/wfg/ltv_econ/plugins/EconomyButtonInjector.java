@@ -50,10 +50,10 @@ public class EconomyButtonInjector implements EveryFrameScript, CallbackRunnable
             return;
         }
 
-        if (!sector.getCampaignUI().isShowingDialog()) {
+        final CampaignUIAPI campaignUI = sector.getCampaignUI();
+        if (!campaignUI.isShowingDialog()) {
             return;
         }
-        final CampaignUIAPI campaignUI = sector.getCampaignUI();
 
         frames++;
         if (frames < 2 || Global.getCurrentState() != GameState.CAMPAIGN) {

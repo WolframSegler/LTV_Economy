@@ -43,8 +43,8 @@ public final class IndustryGrouper {
         List<String> industryOutputPairs,
         double similarityTolerance
     ) {
-        final int rows = A.length;       // commodities
-        final int columns = A[0].length;    // industry::output pairs
+        final int rows = A.length; // commodities
+        final int columns = A[0].length; // industry::output pairs
 
         final boolean[] grouped = new boolean[columns];
         final Map<String, List<String>> groupToMembers = new LinkedHashMap<>();
@@ -66,13 +66,16 @@ public final class IndustryGrouper {
 
             // merge similar columns only if same input/output pattern
             for (int k = j + 1; k < columns; k++) {
-                if (grouped[k] || !haveSameCommodityPattern(A, j, k)) continue;
+                final String outputJ = industryOutputPairs.get(j).split("::")[1];
+                final String outputK = industryOutputPairs.get(k).split("::")[1];
+                if (!outputJ.equals(outputK)) continue;
 
-                final double dist = columnDistance(A, baseCol, k);
-                if (dist < similarityTolerance) {
-                    members.add(industryOutputPairs.get(k));
-                    grouped[k] = true;
-                }
+                if (grouped[k] || !haveSameCommodityPattern(A, j, k)) continue;                
+
+                if (columnDistance(A, baseCol, k) > similarityTolerance) continue;
+
+                members.add(industryOutputPairs.get(k));
+                grouped[k] = true;
             }
 
             final double[] avgCol = new double[rows];

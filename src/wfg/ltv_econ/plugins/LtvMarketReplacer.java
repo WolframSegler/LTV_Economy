@@ -32,7 +32,6 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.plugins.ButtonPlugin;
 
-import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
@@ -173,7 +172,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
         final ShippingPanel shipPanel = (ShippingPanel) RolfLectionUtil.invokeMethod(
             "getShipping", colonyInfoPanel);
 
-        // final ButtonAPI useStockpilesBtn = (ButtonAPI) shipPanel.getUseStockpiles();
         final ButtonAPI useStockpilesBtn = (ButtonAPI) RolfLectionUtil.invokeMethod(
             "getUseStockpiles", shipPanel);
 
@@ -234,6 +232,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
     private static final void replaceMarketCreditsLabel(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
+        if (!DebugFlags.COLONY_DEBUG && !marketAPI.isPlayerOwned()) return;
+
         final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
         RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
@@ -255,8 +255,6 @@ public class LtvMarketReplacer implements EveryFrameScript {
         final ButtonAPI creditBtn = Buttons.get(0);
         final ButtonAPI hazardBtn = Buttons.get(1);
         incomePanel.removeComponent(creditBtn);
-
-        if (!DebugFlags.COLONY_DEBUG && !marketAPI.isPlayerOwned()) return;
 
         final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
@@ -551,8 +549,9 @@ public class LtvMarketReplacer implements EveryFrameScript {
         );
     }
 
-    private static final void replaceIndustryListPanel(
-            UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI anchor) {
+    private static final void replaceIndustryListPanel(UIPanelAPI managementPanel,
+        List<?> managementChildren, UIPanelAPI anchor
+    ) {
         UIPanelAPI industryPanel = null;
         for (Object child : managementChildren) {
             if (child instanceof IndustryListPanel) {
@@ -560,8 +559,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 break;
             }
         }
-        if (industryPanel == null)
-            return;
+        if (industryPanel == null) return;
 
         // Steal the members for the constructor
         final int width = (int) industryPanel.getPosition().getWidth();
@@ -579,17 +577,18 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         if (LtvIndustryListPanel.indOptCtor == null) {
             // Acquire the popup class from one of the widgets
-            final Object widget0 = ((IndustryListPanel) industryPanel).getWidgets().get(0);
+            final List<?> widgets = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+                "getWidgets", industryPanel);
+            final Object widget0 = widgets.get(0);
 
             // Attach the popup;
             RolfLectionUtil.getMethodAndInvokeDirectly(
                 "actionPerformed", widget0, null, null);
 
             // Now the popup class is a child of:
-            // CampaignEngine.getInstance().getCampaignUI().getDialogParent();
-
-            final List<?> children = CampaignEngine.getInstance().getCampaignUI().getDialogParent()
-                    .getChildrenNonCopy();
+            final UIPanelAPI dialogParent = Attachments.getCampaignScreenPanel();
+            final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+                CustomPanel.getChildrenNonCopyMethod, dialogParent);
 
             final UIPanelAPI indOps = children.stream()
                     .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
@@ -615,8 +614,9 @@ public class LtvMarketReplacer implements EveryFrameScript {
         }
     }
 
-    private static final void replaceCommodityPanel(
-            UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI anchor) {
+    private static final void replaceCommodityPanel(UIPanelAPI managementPanel,
+        List<?> managementChildren,UIPanelAPI anchor
+    ) {
         UIPanelAPI commodityPanel = null;
         for (Object child : managementChildren) {
             if (child instanceof CommodityPanel) {

@@ -27,7 +27,6 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
-import com.fs.starfarer.campaign.CampaignEngine;
 
 import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
@@ -38,6 +37,7 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.BasePanel;
@@ -595,7 +595,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                     m_industry,
                     getIndustryPanel().dummyWidget,
                     LtvIndustryListPanel.getMarketInteractionMode(m_market),
-                    CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
+                    Attachments.getCampaignScreenPanel(),
                     listener
                 );
                 RolfLectionUtil.getMethodAndInvokeDirectly(

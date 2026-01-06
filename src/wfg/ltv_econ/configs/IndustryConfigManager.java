@@ -493,17 +493,17 @@ public class IndustryConfigManager {
         for (IndustrySpecAPI indSpec : settings.getAllIndustrySpecs()) { 
             if (IndustryIOs.getIndConfig(indSpec) != null) continue;
 
-            String indID = indSpec.getId();
-            Map<String, OutputConfig> configOutputs = new HashMap<>();
+            final String indID = indSpec.getId();
+            final Map<String, OutputConfig> configOutputs = new HashMap<>();
             
             testMarket1.addIndustry(indID);
             testMarket2.addIndustry(indID);
 
-            Industry ind1 = testMarket1.getIndustry(indID);
-            Industry ind2 = testMarket1.getIndustry(indID);
+            final Industry ind1 = testMarket1.getIndustry(indID);
+            final Industry ind2 = testMarket1.getIndustry(indID);
             
-            List<String> outputs = new ArrayList<>(6);
-            Set<String> illegalOutputs = new HashSet<>(6);
+            final List<String> outputs = new ArrayList<>(6);
+            final Set<String> illegalOutputs = new HashSet<>(6);
 
             for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
                 outputs.add(mutable.getCommodityId());
@@ -529,7 +529,9 @@ public class IndustryConfigManager {
                 if (scaleWithSize) scaleWithMarketSize.add(comID);
             }
 
-            if (outputs.isEmpty() && illegalOutputs.isEmpty()) {
+            final boolean hasNoRealOutputs = outputs.isEmpty() && illegalOutputs.isEmpty();
+            final boolean usesWorkers = EconomyEngine.isWorkerAssignable(ind1) && !hasNoRealOutputs;
+            if (hasNoRealOutputs) {
                 outputs.add(abstractOutput);
 
                 Optional<MutableCommodityQuantity> firstDemand = ind1.getAllDemand().stream().findFirst();
@@ -548,7 +550,6 @@ public class IndustryConfigManager {
             populateInputs(ind1, inputs, scaleWithMarketSize);
             inputCache.put(indID, new HashMap<>(inputs));
 
-            final boolean usesWorkers = EconomyEngine.isWorkerAssignable(ind1);
             final Map<String, Float> CCMoneyDist = usesWorkers ?
                 inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, i -> 1f)) : null;
 
@@ -637,7 +638,7 @@ public class IndustryConfigManager {
                 final Industry ind2 = testMarket2.getIndustry(indID);
 
                 final Set<String> currentOutputs = new HashSet<>();
-                final Set<String> baselineOutputs = config.outputs.keySet();
+                final Set<String> baselineOutputs = new HashSet<>(config.outputs.keySet());
                 final Map<String, OutputConfig> new_outputs = new_dynamic_config.get(indID).outputs;
 
                 for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
@@ -687,14 +688,16 @@ public class IndustryConfigManager {
                 disappearingOutputs.addAll(baselineOutputs);
                 disappearingOutputs.removeAll(currentOutputs);
 
+                if (!appearingOutputs.isEmpty()) new_outputs.remove(abstractOutput);
+
                 for (String newOutput : appearingOutputs) {
-                    boolean isAbstract = settings.getCommoditySpec(newOutput) == null;
-                    OutputConfig optCom = new OutputConfig(
+                    final boolean isAbstract = settings.getCommoditySpec(newOutput) == null;
+                    final OutputConfig optCom = new OutputConfig(
                         newOutput,
                         1,
                         CCMoneyDist,
                         scaleWithMarketSize.contains(newOutput),
-                        config.workerAssignable,
+                        config.workerAssignable && !isAbstract,
                         isAbstract,
                         false,
                         emptyList,

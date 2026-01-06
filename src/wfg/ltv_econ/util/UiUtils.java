@@ -1,7 +1,6 @@
 package wfg.ltv_econ.util;
 
-import static wfg.wrap_ui.util.UIConstants.highlight;
-import static wfg.wrap_ui.util.UIConstants.negative;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 import java.awt.Color;
 import java.util.LinkedHashMap;
@@ -19,8 +18,6 @@ import com.fs.starfarer.api.util.MutableValue;
 import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.plugins.CommodityinfobarPlugin;
-
-import static wfg.wrap_ui.util.UIConstants.gray;
 
 public class UiUtils {
 

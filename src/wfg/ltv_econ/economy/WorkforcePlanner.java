@@ -282,6 +282,8 @@ public class WorkforcePlanner {
         final List<String> groupedOutputPairs = groupedData.one;
         outputsPerMarket = groupedData.two;
 
+        Global.getLogger(EconomyEngine.class).error(groupingData.groupToMembers);
+
         final int numMarkets = markets.size();
         final int numOutputs = groupedOutputPairs.size();
         final int nVars = numMarkets * numOutputs + numOutputs; // original + slack per output
@@ -376,7 +378,8 @@ public class WorkforcePlanner {
                     ind = IndustryIOs.getRealIndustryFromBaseID(market, baseIDs);
                 }
 
-                final float limit = IndustryIOs.getIndConfig(ind).outputs.get(outputID).workerAssignableLimit;
+                final float limit = IndustryIOs.getIndConfig(ind)
+                    .outputs.get(outputID).workerAssignableLimit;
 
                 // create constraint: x_{m,j} <= limit * baseCapacity
                 final double[] coeffsLimit = new double[nVars];
