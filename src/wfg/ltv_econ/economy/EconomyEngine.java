@@ -140,7 +140,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (engine != null && !forceRefresh) {
             instance = engine;
         } else {
-            instance = new EconomyEngine();
+            new EconomyEngine();
             if (Global.getSettings().isDevMode()) {
                 Global.getLogger(EconomyEngine.class).info("Economy Engine constructed");
             }
@@ -181,6 +181,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         m_registeredMarkets = new HashSet<>();
         m_playerMarketData = new HashMap<>();
         m_comDomains = new HashMap<>();
+
+        instance = this;
 
         for (String comID : getEconCommodityIDs()) {
             m_comDomains.put(comID, new CommodityDomain(comID));
@@ -339,10 +341,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final void registerMarket(MarketAPI market) {
+        // Order here is very important
         final String marketID = market.getId();
         if (!m_registeredMarkets.add(marketID)) return;
 
-        WorkerRegistry.getInstance().register(marketID);
+        WorkerRegistry.getInstance().register(market);
         m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) m_playerMarketData.put(marketID, new PlayerMarketData(marketID));
 

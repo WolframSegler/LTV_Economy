@@ -84,6 +84,10 @@ public class WorkerRegistry {
         for (Industry ind : getVisibleIndustries(market)) register(market, ind);
     }
 
+    public final void register(MarketAPI market) {
+        for (Industry ind : getVisibleIndustries(market)) register(market, ind);
+    }
+
     public final void register(Industry ind) {
         register(ind.getMarket(), ind);
     }
