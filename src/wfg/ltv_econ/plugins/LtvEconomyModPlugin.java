@@ -55,7 +55,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         final SectorAPI sector = Global.getSector();
 
         sector.addTransientScript(new EconomyButtonInjector());
-        sector.addTransientScript(new LtvMarketReplacer());
+        sector.addTransientScript(new MarketUIReplacer());
         sector.getListenerManager().addListener(new AddWorkerIndustryOption(), true);
 
         if (newGame) injectStockpiles();

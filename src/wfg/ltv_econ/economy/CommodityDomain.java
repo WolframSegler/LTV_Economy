@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
@@ -32,17 +31,8 @@ public class CommodityDomain {
     private transient boolean filled = false;
     private float[] lastNDaysVolume = new float[EconomyConfig.VOLATILITY_WINDOW];
 
-    public CommodityDomain(
-        CommoditySpecAPI spec, Set<String> registeredMarkets, EconomyEngine engine
-    ) {
-        comID = spec.getId();
-        for (String marketID : registeredMarkets) {
-            m_comCells.put(marketID, new CommodityCell(comID, marketID));
-
-            if (engine.isPlayerMarket(marketID)) {
-                incomeLedgers.put(marketID, new IncomeLedger());
-            }
-        }
+    public CommodityDomain(String comID) {
+        this.comID = comID;
     
         readResolve();
     }

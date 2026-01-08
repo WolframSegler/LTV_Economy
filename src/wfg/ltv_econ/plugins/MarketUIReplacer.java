@@ -17,7 +17,7 @@ import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
-import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
+import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.wrap_ui.util.CallbackRunnable;
@@ -57,7 +57,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 import static wfg.wrap_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.economyValues.*;
 
-public class LtvMarketReplacer implements EveryFrameScript {
+public class MarketUIReplacer implements EveryFrameScript {
 
     private final SectorAPI sector = Global.getSector();
     private int frames = 0;
@@ -203,7 +203,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         inventoryBtn.getPos().inBL(xOffset, yOffset);
 
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketReplacer.class).info("Replaced UseStockpilesButton");
+            Global.getLogger(MarketUIReplacer.class).info("Replaced UseStockpilesButton");
         }
         if (!EconomyEngine.getInstance().isPlayerMarket(marketAPI.getId())) return;
 
@@ -227,7 +227,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         );
 
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketReplacer.class).info("Added manageWorkersButton");
+            Global.getLogger(MarketUIReplacer.class).info("Added manageWorkersButton");
         }
     }
 
@@ -613,7 +613,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
         managementPanel.removeComponent(industryPanel);
 
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketReplacer.class).info("Replaced IndustryListPanel");
+            Global.getLogger(MarketUIReplacer.class).info("Replaced IndustryListPanel");
         }
     }
 
@@ -646,7 +646,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                 public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
                     if (!isLeftClick) return;
 
-                    LtvCommodityRowPanel panel = ((LtvCommodityRowPanel) source);
+                    CommodityRowPanel panel = ((CommodityRowPanel) source);
 
                     replacement.selectRow(panel);
 
@@ -671,11 +671,11 @@ public class LtvMarketReplacer implements EveryFrameScript {
             managementPanel.removeComponent(commodityPanel);
 
         } catch (Exception e) {
-            Global.getLogger(LtvMarketReplacer.class).error("Failed to replace CommodityPanel", e);
+            Global.getLogger(MarketUIReplacer.class).error("Failed to replace CommodityPanel", e);
         }
 
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(LtvMarketReplacer.class).info("Replaced CommodityPanel");
+            Global.getLogger(MarketUIReplacer.class).info("Replaced CommodityPanel");
         }
     }
 

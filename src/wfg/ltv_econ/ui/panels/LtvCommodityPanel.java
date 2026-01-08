@@ -26,7 +26,7 @@ import static wfg.wrap_ui.util.UIConstants.*;
 public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel, CustomPanelAPI>
     implements HasBackground, HasOutline, HasMarket {
 
-    protected List<LtvCommodityRowPanel> commodityRows = new ArrayList<>();
+    protected List<CommodityRowPanel> commodityRows = new ArrayList<>();
     protected MarketAPI m_market = null;
 
     public static final int STANDARD_WIDTH = 264;
@@ -72,7 +72,7 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
         isRowSelectable = a;
     }
     
-    public List<LtvCommodityRowPanel> getCommodityRows() {
+    public List<CommodityRowPanel> getCommodityRows() {
         return commodityRows;
     }
 
@@ -114,7 +114,7 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
         int cumulativeYOffset = opad;
 
         for (CommoditySpecAPI com : commodities) {
-            LtvCommodityRowPanel comRow = new LtvCommodityRowPanel(
+            CommodityRowPanel comRow = new CommodityRowPanel(
                 getPanel(), getMarket(), com.getId(), this, (int)(getPos().getWidth() - opad * 2), 
                 rowHeight, childrenIgnoreUIState, m_canViewPrices
             );
@@ -133,13 +133,13 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
 
     public void selectRow(String comID) {
         CommodityOnMarketAPI com = getMarket().getCommodityData(comID);
-        for (LtvCommodityRowPanel row : commodityRows) {
+        for (CommodityRowPanel row : commodityRows) {
             row.setPersistentGlow(row.getCommodity() == com);
         }
     }
 
-    public void selectRow(LtvCommodityRowPanel selectedRow) {
-        for (LtvCommodityRowPanel row : commodityRows) {
+    public void selectRow(CommodityRowPanel selectedRow) {
+        for (CommodityRowPanel row : commodityRows) {
             row.setPersistentGlow(row == selectedRow);
         }
     }

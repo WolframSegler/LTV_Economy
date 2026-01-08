@@ -56,7 +56,7 @@ import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
-public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndustryWidget, TooltipMakerAPI>
+public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWidget, TooltipMakerAPI>
     implements HasBackground, HasFader, HasActionListener {
 
     public final static int PANEL_WIDTH = 190;
@@ -90,13 +90,13 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     private FaderUtil m_fader = null;
     public PendingTooltip<CustomPanelAPI> m_tooltip = null;
 
-    public LtvIndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
+    public IndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
         MarketAPI market, Industry ind, LtvIndustryListPanel indPanel) {
 
         this(parent, plugin, market, ind, indPanel, -1);
     }
 
-    public LtvIndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
+    public IndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
         MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, int queue) {
         super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin);
 
@@ -497,13 +497,13 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
     public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
         if (tradeInfoPanel) return;
 
-        LtvIndustryWidget targetInd;
+        IndustryWidget targetInd;
 
         if (constructionQueueIndex >= 0) {
 
             if (!isLeftClick) {
                 for (Object widgetObj : IndustryPanel.getWidgets()) {
-                    if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
+                    if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                         widget.setNormalMode();
                     }
                 }
@@ -513,7 +513,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
 
             if (constructionMode == ConstructionMode.NORMAL) {
                 for (Object widgetObj : IndustryPanel.getWidgets()) {
-                if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
+                if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                     if (widget == this) {
                         widget.setRemoveMode();
                     } else {
@@ -526,7 +526,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
                 targetInd = null;
 
                 for (Object widgetObj : IndustryPanel.getWidgets()) {
-                    if (widgetObj instanceof LtvIndustryWidget widget &&
+                    if (widgetObj instanceof IndustryWidget widget &&
                         widget.getQueueIndex() >= 0 &&
                         widget.constructionMode == ConstructionMode.REMOVE
                     ) {
@@ -572,7 +572,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
             }
         } else {
             for (Object widgetObj : IndustryPanel.getWidgets()) {
-                if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
+                if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                     widget.setNormalMode();
                 }
             }

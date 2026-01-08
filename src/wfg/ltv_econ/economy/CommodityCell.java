@@ -368,12 +368,6 @@ public class CommodityCell {
         return industries;
     }
 
-    public static final List<Industry> getVisibleIndustries(MarketAPI market) {
-        List<Industry> industries = new ArrayList<>(market.getIndustries());
-        industries.removeIf(Industry::isHidden);
-        return industries;
-    }
-
     public final void logAllInfo() {
 
         final float accountedFlow

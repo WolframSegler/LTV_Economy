@@ -182,21 +182,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         m_playerMarketData = new HashMap<>();
         m_comDomains = new HashMap<>();
 
+        for (String comID : getEconCommodityIDs()) {
+            m_comDomains.put(comID, new CommodityDomain(comID));
+        }
+
         for (MarketAPI market : getMarketsCopy()) {
             if (!market.isInEconomy()) continue;
 
-            final String marketID = market.getId();
-            m_registeredMarkets.add(marketID);
-            m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
-            if (market.isPlayerOwned()) m_playerMarketData.put(
-                marketID, new PlayerMarketData(marketID)
-            );
-        }
-
-        for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
-            if (spec.isNonEcon()) continue;
-
-            m_comDomains.put(spec.getId(), new CommodityDomain(spec, m_registeredMarkets, this));
+            registerMarket(market);
         }
 
         readResolve();
@@ -204,7 +197,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     public final Object readResolve() {
         mainLoopExecutor = Executors.newSingleThreadExecutor(r -> {
-            Thread t = new Thread(r, "LTV-MainLoop");
+            final Thread t = new Thread(r, "LTV-MainLoop");
             t.setDaemon(true);
             return t;
         });
@@ -579,7 +572,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             final List<Integer> outputIndexes = new ArrayList<>();
             final MarketAPI market = markets.get(i);
 
-            for (Industry ind : CommodityCell.getVisibleIndustries(market)) {
+            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
                 if (!ind.isFunctional()) continue;
 
                 final IndustryConfig config = IndustryIOs.getIndConfig(ind);
@@ -1080,7 +1073,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 m_playerMarketData.remove(marketID);
                 continue;
             }
-            for (Industry ind : CommodityCell.getVisibleIndustries(market)) {
+            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
 
                 ind.getIncome().unmodify();
                 ind.getIncome().base = 0f;

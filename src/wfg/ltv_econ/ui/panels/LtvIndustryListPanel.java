@@ -31,10 +31,10 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.economy.CommodityCell;
+import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
-import wfg.ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
+import wfg.ltv_econ.ui.panels.IndustryWidget.ConstructionMode;
 import wfg.ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg.ltv_econ.util.UiUtils;
@@ -99,7 +99,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		clearChildren();
 		widgets.clear();
 
-		List<Industry> industries = CommodityCell.getVisibleIndustries(m_market);
+		final List<Industry> industries = WorkerRegistry.getVisibleIndustries(m_market);
 		Collections.sort(industries, getIndustryOrderComparator());
 		List<ConstructionQueueItem> queuedIndustries = m_market.getConstructionQueue().getItems();
 	
@@ -125,7 +125,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 			int j = index / columnAmount;
 			Industry ind = industries.get(index);
 
-			final LtvIndustryWidget widget = new LtvIndustryWidget(
+			final IndustryWidget widget = new IndustryWidget(
 				wrappertp,
 				new IndustryWidgetPlugin(),
 				m_market,
@@ -134,8 +134,8 @@ public class LtvIndustryListPanel extends CustomPanel<
 			);
 
 			wrappertp.addComponent(widget.getPanel()).inTL(
-				i * (LtvIndustryWidget.PANEL_WIDTH + opad) + pad,
-				wrapperTpHeight = j * (LtvIndustryWidget.TOTAL_HEIGHT + pad*5)
+				i * (IndustryWidget.PANEL_WIDTH + opad) + pad,
+				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + pad*5)
 			);
 
 			addWidgetTooltip(IndustryTooltipMode.NORMAL, ind, widget);
@@ -149,7 +149,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 			int j = (index + industries.size()) / columnAmount;
 			Industry ind = m_market.instantiateIndustry(queuedIndustries.get(index).id);
 
-			final LtvIndustryWidget widget = new LtvIndustryWidget(
+			final IndustryWidget widget = new IndustryWidget(
 				wrappertp,
 				new IndustryWidgetPlugin(),
 				m_market,
@@ -159,15 +159,15 @@ public class LtvIndustryListPanel extends CustomPanel<
 			);
 
 			wrappertp.addComponent(widget.getPanel()).inTL(
-				i * (LtvIndustryWidget.PANEL_WIDTH + opad) + pad,
-				wrapperTpHeight = j * (LtvIndustryWidget.TOTAL_HEIGHT + pad*5)
+				i * (IndustryWidget.PANEL_WIDTH + opad) + pad,
+				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + pad*5)
 			);
 
 			addWidgetTooltip(IndustryTooltipMode.QUEUED, ind, widget);
 
 			widgets.add(widget);
 		}
-		wrappertp.setHeightSoFar(wrapperTpHeight + LtvIndustryWidget.TOTAL_HEIGHT + opad*1.5f);
+		wrappertp.setHeightSoFar(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + opad*1.5f);
 
 		widgetWrapper.addUIElement(wrappertp).inTL(-pad, 0);
 		add(widgetWrapper).inTL(0, 0);
@@ -303,7 +303,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 					new String[]{m_market.getName()}
 				);
 
-				List<Industry> industries = CommodityCell.getVisibleIndustries(m_market);
+				final List<Industry> industries = WorkerRegistry.getVisibleIndustries(m_market);
 				Collections.sort(industries, getIndustryOrderComparator());
 
 				final String indent = "    ";
@@ -400,7 +400,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		}
 	}
 
-	public final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, LtvIndustryWidget widget) {
+	public final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, IndustryWidget widget) {
 
 		PendingTooltip<CustomPanelAPI> wrapper = widget.m_tooltip;
 
@@ -426,7 +426,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		boolean anyWidgetNotNormal = false;
 
 		for (Object widgetObj : widgets) {
-			if (widgetObj instanceof LtvIndustryWidget widget) {
+			if (widgetObj instanceof IndustryWidget widget) {
 				if (widget.getMode() != ConstructionMode.NORMAL) {
 					anyWidgetNotNormal = true;
 					break;
@@ -439,7 +439,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 			boolean mouseOverWidget = events.stream()
 				.filter(InputEventAPI::isMouseMoveEvent)
 				.anyMatch(event -> widgets.stream()
-				.anyMatch(widget -> ((LtvIndustryWidget) widget).getIndustryIcon().getPos()
+				.anyMatch(widget -> ((IndustryWidget) widget).getIndustryIcon().getPos()
 				.containsEvent(event)));
 
 			if (mouseOverWidget) {
@@ -461,7 +461,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 			if (targetEvent != null) {
 				for (Object widgetObj : widgets) {
-					if (widgetObj instanceof LtvIndustryWidget widget && widget.getQueueIndex() >= 0) {
+					if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
 						widget.setNormalMode();
 					}
 				}

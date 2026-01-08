@@ -27,15 +27,7 @@ public class WorkerRegistry {
 
     private static WorkerRegistry instance;
 
-    private WorkerRegistry() {
-        for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
-        for (Industry ind : CommodityCell.getVisibleIndustries(market)) {
-            if (EconomyEngine.isWorkerAssignable(ind)) {
-                register(market, ind);
-            }
-        }
-        }
-    }
+    private WorkerRegistry() {}
 
     public static final WorkerRegistry loadInstance(boolean forceRefresh) {
         WorkerRegistry workerRegistry = (WorkerRegistry) Global.getSector()
@@ -74,6 +66,12 @@ public class WorkerRegistry {
         }
     }
 
+    public static final List<Industry> getVisibleIndustries(MarketAPI market) {
+        List<Industry> industries = new ArrayList<>(market.getIndustries());
+        industries.removeIf(Industry::isHidden);
+        return industries;
+    }
+
     public final void register(MarketAPI market, Industry ind) {
         if (!IndustryIOs.getIndConfig(ind).workerAssignable) return;
 
@@ -83,9 +81,7 @@ public class WorkerRegistry {
 
     public final void register(String marketID) {
         final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
-        for (Industry ind : market.getIndustries()) {
-            register(market, ind);
-        }
+        for (Industry ind : getVisibleIndustries(market)) register(market, ind);
     }
 
     public final void register(Industry ind) {

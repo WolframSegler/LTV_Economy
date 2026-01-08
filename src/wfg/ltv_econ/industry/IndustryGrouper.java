@@ -12,9 +12,9 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
-import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.IndustryMatrix;
+import wfg.ltv_econ.economy.WorkerRegistry;
 
 public final class IndustryGrouper {
 
@@ -175,7 +175,7 @@ public final class IndustryGrouper {
                 final List<String> originals = group.groupToMembers.get(groupKey);
 
                 final List<String> valid = new ArrayList<>(3);
-                for (Industry ind : CommodityCell.getVisibleIndustries(market)) {
+                for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
                     for (String pair : originals) {
                         if (IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec()).equals(
                             pair.split(EconomyEngine.KEY)[0]

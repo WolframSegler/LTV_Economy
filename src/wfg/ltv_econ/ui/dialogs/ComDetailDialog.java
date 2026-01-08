@@ -33,7 +33,7 @@ import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
-import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
+import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
@@ -991,7 +991,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
         if (!isLeftClick) return;
 
-        final LtvCommodityRowPanel panel = ((LtvCommodityRowPanel)source);
+        final CommodityRowPanel panel = ((CommodityRowPanel)source);
         m_com = panel.getCommodity();
 
         section4ComPanel.selectRow(panel);
@@ -1138,7 +1138,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
             final AtomicInteger y = new AtomicInteger((int) tp.getHeightSoFar() + pad + opad);
 
-            LtvCommodityRowPanel.legendRowCreator(
+            CommodityRowPanel.legendRowCreator(
                 1, tp, y, 26, m_market
             );
 

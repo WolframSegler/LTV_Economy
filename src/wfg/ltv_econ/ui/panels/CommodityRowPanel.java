@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import static wfg.wrap_ui.util.UIConstants.*;
 
-public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodityRowPanel>, LtvCommodityRowPanel, CustomPanelAPI>
+public class CommodityRowPanel extends CustomPanel<BasePanelPlugin<CommodityRowPanel>, CommodityRowPanel, CustomPanelAPI>
     implements HasTooltip, HasFader, HasAudioFeedback, AcceptsActionListener
 {
     private static final int iconSize = 24;
@@ -58,7 +58,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
     public boolean persistentGlow = false;
     public boolean m_canViewPrices = false;
 
-    public LtvCommodityRowPanel(UIPanelAPI parent, MarketAPI market, String comID,
+    public CommodityRowPanel(UIPanelAPI parent, MarketAPI market, String comID,
         LtvCommodityPanel parentWrapper, int width, int height, boolean childrenIgnoreUIState, boolean canViewPrices) {
 
         super(parent, width, height, new BasePanelPlugin<>());
