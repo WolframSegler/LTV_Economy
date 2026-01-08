@@ -471,6 +471,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         }
 
         final CommodityCell cell = dom.getCell(marketID);
+        if (cell == null) {
+            final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
+            if (market.isInEconomy()) { registerMarket(market); return dom.getCell(marketID); }
+            else { return new CommodityCell(comID, marketID); }
+        }
         return cell;
     }
 
