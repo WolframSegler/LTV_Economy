@@ -13,8 +13,8 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 
-import wfg.ltv_econ.economy.CommodityInfo;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityDomain;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
@@ -50,7 +50,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
     private final CommoditySpecAPI m_com;
     private final LtvCommodityPanel m_parent;
     private final FaderUtil m_fader;
-    private final CommodityStats m_comStats;
+    private final CommodityCell m_comCell;
     private final MarketAPI m_market;
     public TooltipMakerAPI m_tooltip = null;
 
@@ -62,7 +62,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         LtvCommodityPanel parentWrapper, int width, int height, boolean childrenIgnoreUIState, boolean canViewPrices) {
 
         super(parent, width, height, new BasePanelPlugin<>());
-        m_comStats = EconomyEngine.getInstance().getComStats(comID, market.getId());
+        m_comCell = EconomyEngine.getInstance().getComCell(comID, market.getId());
         m_com = Global.getSettings().getCommoditySpec(comID);
         m_parent = parentWrapper;
         m_fader = new FaderUtil(0, 0, 0.2f, true, true);
@@ -127,7 +127,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         // Amount label
         tooltip.setParaSmallInsignia();
         final LabelAPI amountTxt = tooltip.addPara(NumFormat.engNotation(
-            (int)m_comStats.getFlowAvailable()) + Strings.X, pad
+            (int)m_comCell.getFlowAvailable()) + Strings.X, pad
         );
         final int textHeight = (int) amountTxt.computeTextHeight(amountTxt.getText());
         amountTxt.setColor(baseColor);
@@ -148,7 +148,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
             (rowHeight - iconSize) / 2);
 
         // Info Bar
-        UiUtils.CommodityInfoBar(tooltip, iconSize, 85, m_comStats);
+        UiUtils.CommodityInfoBar(tooltip, iconSize, 85, m_comCell);
         tooltip.getPrev().getPosition().inBL(labelWidth + iconSize + opad/2, (rowHeight - iconSize) / 2);
 
         // Source Icon
@@ -156,7 +156,7 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
             getSourceIcon(baseColor, rowHeight - 4, m_panel).getPanel())
             .inBL(2, 2);
 
-        if (m_comStats.globalExports > 0) {
+        if (m_comCell.globalExports > 0) {
             final String iconPath = Global.getSettings().getSpriteName("commodity_markers", "exports");
             final Base iconPanel = new Base(m_panel, rowHeight - 4, rowHeight 
                 - 4, iconPath, null, null, false
@@ -173,8 +173,8 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         String iconPath = Global.getSettings().getSpriteName("commodity_markers", "imports");
         Color baseColor = color;
 
-        if (m_comStats.globalImports < 0) {
-            if (m_comStats.inFactionImports > 0) {
+        if (m_comCell.globalImports < 0) {
+            if (m_comCell.inFactionImports > 0) {
                 iconPath = m_market.getFaction().getCrest();
                 baseColor = null;
             } else {
@@ -217,23 +217,23 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
         tooltip.addSectionHeading("Production, imports and demand", Alignment.MID, opad);
 
         // Production
-        TooltipUtils.createCommodityProductionBreakdown(tooltip, m_comStats);
+        TooltipUtils.createCommodityProductionBreakdown(tooltip, m_comCell);
         
         tooltip.addPara("All production sources contribute cumulatively to the commodity's availability. Imports and smuggling add to supply to help meet demand.", gray ,pad);
 
         // Demand
-        TooltipUtils.createCommodityDemandBreakdown(tooltip, m_comStats);
+        TooltipUtils.createCommodityDemandBreakdown(tooltip, m_comCell);
 
         // Divider
         tooltip.addSectionHeading("Exports", Alignment.MID, opad);
 
         // Export stats
-        final CommodityInfo info = engine.getCommodityInfo(comID);
+        final CommodityDomain dom = engine.getComDomain(comID);
         
-        final long exportIncomeLastMonth = info.hasLedger(m_comStats.marketID) ?
-            info.getLedger(m_comStats.marketID).lastMonthExportIncome : 0;
-        final long exportIncomeThisMonth = info.hasLedger(m_comStats.marketID) ?
-            info.getLedger(m_comStats.marketID).monthlyExportIncome : 0;
+        final long exportIncomeLastMonth = dom.hasLedger(m_comCell.marketID) ?
+            dom.getLedger(m_comCell.marketID).lastMonthExportIncome : 0;
+        final long exportIncomeThisMonth = dom.hasLedger(m_comCell.marketID) ?
+            dom.getLedger(m_comCell.marketID).monthlyExportIncome : 0;
         final boolean isIllegal = m_market.isIllegal(comID);
         final String commodityName = m_com.getName();
 
@@ -241,32 +241,32 @@ public class LtvCommodityRowPanel extends CustomPanel<BasePanelPlugin<LtvCommodi
             tooltip.addPara(
                 m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. They generated %s last month and %s so far this month.",
                 opad, highlight,
-                NumFormat.engNotation((long) m_comStats.getTotalExports()),
-                engine.getExportMarketShare(comID, m_comStats.marketID) + "%",
+                NumFormat.engNotation((long) m_comCell.getTotalExports()),
+                engine.getExportMarketShare(comID, m_comCell.marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
             );
-        } else if (m_comStats.getTotalExports() < 1) {
+        } else if (m_comCell.getTotalExports() < 1) {
             tooltip.addPara("No recent local production to export.", opad);
         } else if (isIllegal) {
             tooltip.addPara(
             m_market.getName() + " controls %s of the export market share for " + commodityName + ".This trade brings in no income due to being underground.",
             opad, highlight,
-            engine.getExportMarketShare(comID, m_comStats.marketID) + "%"
+            engine.getExportMarketShare(comID, m_comCell.marketID) + "%"
         );
         } else if (exportIncomeLastMonth < 1 && exportIncomeThisMonth < 1) {
             tooltip.addPara(
                 m_market.getName() + " is exporting %s units of " + commodityName + " and controls %s of the global market share. Income from exports are not tracked for non-player colonies.",
                 opad, highlight,
-                NumFormat.engNotation((long) m_comStats.getTotalExports()),
-                engine.getExportMarketShare(comID, m_comStats.marketID) + "%"
+                NumFormat.engNotation((long) m_comCell.getTotalExports()),
+                engine.getExportMarketShare(comID, m_comCell.marketID) + "%"
             );
         }
 
-        if (m_comStats.getFlowCanNotExport() > 0) {
+        if (m_comCell.getFlowCanNotExport() > 0) {
             tooltip.addPara(
                 "Exports are reduced by %s due to insufficient importers.",
-                pad, negative, NumFormat.engNotation((int)m_comStats.getFlowCanNotExport())
+                pad, negative, NumFormat.engNotation((int)m_comCell.getFlowCanNotExport())
             );
         }
 

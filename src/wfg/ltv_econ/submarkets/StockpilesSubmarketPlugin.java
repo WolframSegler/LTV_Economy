@@ -17,7 +17,7 @@ import com.fs.starfarer.api.impl.campaign.submarkets.BaseSubmarketPlugin;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.util.NumFormat;
 
@@ -113,8 +113,8 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 			if (spec.isMeta()) continue;
 			final String comID = spec.getId();
 
-			final CommodityStats stats = engine.getComStats(comID, marketId);
-			final long stored = stats.getRoundedStored();
+			final CommodityCell cell = engine.getComCell(comID, marketId);
+			final long stored = cell.getRoundedStored();
 			final float limit = getStockpileLimit(null);
 
 			final float displayAmount = Math.min(limit, stored);
@@ -129,22 +129,16 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 	@Override
 	public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
 		final EconomyEngine engine = EconomyEngine.getInstance();
-		final String marketId = market.getId();
+		final String marketID = market.getId();
 
 		for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
-			String comId = stack.getCommodityId();
-			int amount = (int) stack.getSize();
-
-			CommodityStats stats = engine.getComStats(comId, marketId);
-			stats.addStoredAmount(amount);
+			final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
+			cell.addStoredAmount(stack.getSize());
 		}
 
 		for (CargoStackAPI stack : transaction.getBought().getStacksCopy()) {
-			String comId = stack.getCommodityId();
-			int amount = (int) stack.getSize();
-
-			CommodityStats stats = engine.getComStats(comId, marketId);
-			stats.addStoredAmount(-amount);
+			final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
+			cell.addStoredAmount(-stack.getSize());
 		}
 	}
 

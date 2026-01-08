@@ -45,8 +45,8 @@ public class PolicyNotificationIntel extends BaseIntelPlugin {
 	}
 
     @Override
-    public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
-        info.addPara(
+    public void createSmallDescription(TooltipMakerAPI tp, float width, float height) {
+        tp.addPara(
             available
                 ? "The policy %s is now available on %s."
                 : "The policy %s has finished on %s.",

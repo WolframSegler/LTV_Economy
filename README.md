@@ -142,6 +142,8 @@ rolfosian - for RolflectionLib-SS
 
 <a target="_blank" href="https://icons8.com/icon/eXZFp2e0w8EX/no-entry">Restricted</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 
+<a target="_blank" href="https://icons8.com/icon/9028/automatic">Settings</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+
 <br>
 
 ## AI Generated Assets
@@ -149,6 +151,16 @@ rolfosian - for RolflectionLib-SS
 <ul>
     <li>graphics/policies/extended_shifts.png</li>
     <li>graphics/policies/luddic_prophet_festival.png</li>
+    <li>graphics/policies/bulwark_of_orichalcum.png</li>
+    <li>graphics/policies/default_policy_poster.png</li>
+    <li>graphics/policies/fleet_mobilization_order.png</li>
+    <li>graphics/policies/iron_fist_decree.png</li>
+    <li>graphics/policies/organ_harvesting_program.png</li>
+    <li>graphics/policies/pharmaceutical_promotion.png</li>
+    <li>graphics/policies/urban_renewal_initiative.png</li>
+    <li>graphics/policies/public_health_education.png</li>
+    <li>graphics/policies/bres_vitalis.png</li>
+    <li>graphics/policies/convergence_festival.png</li>
     <li>graphics/icons/markets/wfg_labor.png</li>
     <li>graphics/icons/intel/policy_icon.png</li>
     <li>graphics/icons/industry/manufacturing.png</li>

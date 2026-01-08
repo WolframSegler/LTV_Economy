@@ -1,6 +1,7 @@
 package wfg.ltv_econ.economy;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -61,20 +62,24 @@ public class PlayerMarketData {
         return this;
     }
 
-    public float getRoSV() { return RoSV; }
-    public float getHealth() { return popHealth; }
-    public float getHappiness() { return popHappiness; }
-    public float getSocialCohesion() { return popSocialCohesion; }
-    public float getClassConsciousness() { return popClassConsciousness; }
+    public final float getRoSV() { return RoSV; }
+    public final float getHealth() { return popHealth; }
+    public final float getHappiness() { return popHappiness; }
+    public final float getSocialCohesion() { return popSocialCohesion; }
+    public final float getClassConsciousness() { return popClassConsciousness; }
 
-    public void setRoSV(float rate) { RoSV = rate; }
-    public void setHealth(float health) { popHealth = clamp(health); }
-    public void setHappiness(float happiness) { popHappiness = clamp(happiness); }
-    public void setSocialCohesion(float cohesion) { popSocialCohesion = clamp(cohesion); }
-    public void setClassConsciousness(float consciousness) { popClassConsciousness = clamp(consciousness); }
-    public ArrayList<MarketPolicy> getPolicies() { return new ArrayList<>(policies); }
-    public void addPolicy(MarketPolicy policy) { policies.add(policy); }
-    public void removePolicy(MarketPolicy policy) { policies.remove(policy); }
+    public final void setRoSV(float rate) { RoSV = rate; }
+    public final void setHealth(float health) { popHealth = clamp(health); }
+    public final void setHappiness(float happiness) { popHappiness = clamp(happiness); }
+    public final void setSocialCohesion(float cohesion) { popSocialCohesion = clamp(cohesion); }
+    public final void setClassConsciousness(float consciousness) { popClassConsciousness = clamp(consciousness); }
+    public final ArrayList<MarketPolicy> getPolicies() { return new ArrayList<>(policies); }
+    public final void addPolicy(MarketPolicy policy) { policies.add(policy); }
+    public final void removePolicy(MarketPolicy policy) { policies.remove(policy); }
+    public final MarketPolicy getPolicy(String policyID) {
+        for (MarketPolicy policy : policies) if (policy.id.equals(policyID)) return policy;
+        return null;
+    }
 
     /**
      * Advances the statistics concerning the Market by one day.
@@ -94,7 +99,7 @@ public class PlayerMarketData {
             policy.advanceTime(this, days);
         }
     }
-    public void advance() {
+    public final void advance() {
         advance(1);
     }
 
@@ -113,7 +118,7 @@ public class PlayerMarketData {
     }
 
     // PRIVATE METHODS
-    private void advanceMarket(int days) {
+    private final void advanceMarket(int days) {
         updateHealthDelta();
         updateHappinessDelta();
         updateSocialCohesionDelta();
@@ -125,7 +130,7 @@ public class PlayerMarketData {
         setClassConsciousness(classConsciousnessDelta.computeEffective(popClassConsciousness) * days);
     }
 
-    private void updateHealthDelta() {
+    private final void updateHealthDelta() {
         final float foodRatio = market.hasCondition(Conditions.HABITABLE) ?
             EconomyEngine.getMaxDeficit(market, Commodities.FOOD).two :
             EconomyEngine.getMaxDeficit(market, Commodities.FOOD, Commodities.ORGANICS).two;
@@ -141,7 +146,7 @@ public class PlayerMarketData {
         healthDelta.modifyFlat("wage", (LaborConfig.LPV_month / RoSV - 1f) * 0.1f, "Wages");
     }
 
-    private void updateHappinessDelta() {
+    private final void updateHappinessDelta() {
         happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.02f, "Health");
 
         happinessDelta.modifyFlat(
@@ -155,10 +160,17 @@ public class PlayerMarketData {
         );
     }
 
-    private void updateSocialCohesionDelta() {
+    private final void updateSocialCohesionDelta() {
+        Map<String, Float> comp = market.getPopulation().getComp();
+        float sum = 0f;
+        for (float v : comp.values()) sum += v;
+
         float homogeneity = 0f;
-        for (float pct : market.getPopulation().getComp().values()) {
-            homogeneity += (pct/100f) * (pct/100f);
+        if (sum > 0f) {
+            for (float v : comp.values()) {
+                final float frac = v / sum;
+                homogeneity += frac * frac;
+            }
         }
 
         final float baseline = 0.6f;
@@ -175,7 +187,7 @@ public class PlayerMarketData {
         );
     }
 
-    private void updateClassConsciousnessDelta() {
+    private final void updateClassConsciousnessDelta() {
         classConsciousnessDelta.modifyFlat("base", -0.005f, "Base change");
 
         classConsciousnessDelta.modifyFlat("wage", 0.05f * (RoSV - 1f) / RoSV, "Wages");

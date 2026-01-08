@@ -31,7 +31,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
 import wfg.ltv_econ.ui.panels.LtvIndustryWidget.ConstructionMode;
@@ -99,7 +99,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		clearChildren();
 		widgets.clear();
 
-		List<Industry> industries = CommodityStats.getVisibleIndustries(m_market);
+		List<Industry> industries = CommodityCell.getVisibleIndustries(m_market);
 		Collections.sort(industries, getIndustryOrderComparator());
 		List<ConstructionQueueItem> queuedIndustries = m_market.getConstructionQueue().getItems();
 	
@@ -303,7 +303,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 					new String[]{m_market.getName()}
 				);
 
-				List<Industry> industries = CommodityStats.getVisibleIndustries(m_market);
+				List<Industry> industries = CommodityCell.getVisibleIndustries(m_market);
 				Collections.sort(industries, getIndustryOrderComparator());
 
 				final String indent = "    ";
@@ -392,12 +392,11 @@ public class LtvIndustryListPanel extends CustomPanel<
 		add(colonyCreditLblPanel).inBL(buildBtnWidth + 40, BUTTON_SECTION_HEIGHT - 18);
 		add(maxIndLblPanel).inBR(40, BUTTON_SECTION_HEIGHT);
 
-		if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
+		if (!m_market.isPlayerOwned() && !DebugFlags.COLONY_DEBUG) {
 			buildButton.disabled = true;
-			if (DebugFlags.HIDE_COLONY_CONTROLS) {
-				playerCreditLblPanel.getPanel().setOpacity(0);
-				buildButton.getPanel().setOpacity(0);
-			}
+			playerCreditLblPanel.getPanel().setOpacity(0f);
+			colonyCreditLblPanel.getPanel().setOpacity(0f);
+			if (DebugFlags.HIDE_COLONY_CONTROLS) buildButton.getPanel().setOpacity(0f);
 		}
 	}
 

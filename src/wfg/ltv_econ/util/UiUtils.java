@@ -15,7 +15,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.plugins.CommodityinfobarPlugin;
 
@@ -34,30 +34,30 @@ public class UiUtils {
     public static final Color COLOR_EXPORT = new Color(63,  175, 63);
     public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
 
-    public static void CommodityInfoBar(TooltipMakerAPI tooltip, int barHeight, int barWidth, CommodityStats comStats) {
-        final CustomPanelAPI infoBar = CommodityInfoBar(barHeight, barWidth, comStats);
+    public static void CommodityInfoBar(TooltipMakerAPI tooltip, int barHeight, int barWidth, CommodityCell comCell) {
+        final CustomPanelAPI infoBar = CommodityInfoBar(barHeight, barWidth, comCell);
 
         tooltip.addCustom(infoBar, 3);
     }
 
-    public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityStats comStats) {
-        if (comStats.getFlowEconomicFootprint() <= 0) {
+    public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityCell cell) {
+        if (cell.getFlowEconomicFootprint() <= 0) {
             throw new IllegalStateException(
                 "CommodityInfoBar cannot display info: economic footprint is zero for " 
-                + comStats.comID
+                + cell.comID
             );
         }
 
-        final float footprint = comStats.getFlowEconomicFootprint();
+        final float footprint = cell.getFlowEconomicFootprint();
 
-        float demandMetLocalRatio = (float)comStats.getFlowDeficitMetLocally() / footprint;
-        float inFactionImportRatio = (float)comStats.getFlowDeficitMetViaFactionTrade() / footprint;
-        float globalImportRatio = (float)comStats.getFlowDeficitMetViaGlobalTrade() / footprint;
-        float overImportRatio = (float)comStats.getFlowOverImports() / footprint;
-        float importExclusiveRatio = (float)comStats.getImportExclusiveDemand() / footprint;
-        float exportedRatio = (float)comStats.getTotalExports() / footprint;
-        float notExportedRatio = (float)comStats.getFlowCanNotExport() / footprint;
-        float deficitRatio = (float)comStats.getFlowDeficit() / footprint;
+        float demandMetLocalRatio = (float)cell.getFlowDeficitMetLocally() / footprint;
+        float inFactionImportRatio = (float)cell.getFlowDeficitMetViaFactionTrade() / footprint;
+        float globalImportRatio = (float)cell.getFlowDeficitMetViaGlobalTrade() / footprint;
+        float overImportRatio = (float)cell.getFlowOverImports() / footprint;
+        float importExclusiveRatio = (float)cell.getImportExclusiveDemand() / footprint;
+        float exportedRatio = (float)cell.getTotalExports() / footprint;
+        float notExportedRatio = (float)cell.getFlowCanNotExport() / footprint;
+        float deficitRatio = (float)cell.getFlowDeficit() / footprint;
 
         final Map<Color, Float> barMap = new LinkedHashMap<>(8) {{
             put(COLOR_LOCAL_PROD, demandMetLocalRatio);

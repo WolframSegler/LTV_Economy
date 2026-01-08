@@ -3,6 +3,7 @@ package wfg.ltv_econ.economy.policies;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
@@ -15,7 +16,7 @@ import wfg.ltv_econ.intel.PolicyNotificationIntel;
  * Subclasses can use {@link #apply(PlayerMarketData data)} as a sort of constructor.
  */
 public abstract class MarketPolicy {
-    public enum PolicyState { ACTIVE, COOLDOWN, AVAILABLE, DISABLED }
+    public enum PolicyState { ACTIVE, COOLDOWN, AVAILABLE }
     
     public String id;
     public transient PolicySpec spec;
@@ -29,8 +30,9 @@ public abstract class MarketPolicy {
 
     public abstract void apply(PlayerMarketData data);
     public abstract void unapply(PlayerMarketData data);
-    public abstract void preAdvance(PlayerMarketData data);
-    public abstract void postAdvance(PlayerMarketData data);
+    public void preAdvance(PlayerMarketData data) {};
+    public void postAdvance(PlayerMarketData data) {};
+    public boolean isEnabled(PlayerMarketData data) { return true; }
     public boolean isActive() { return state == PolicyState.ACTIVE; }
     public boolean isAvailable() { return state == PolicyState.AVAILABLE; }
     public boolean isOnCooldown() { return state == PolicyState.COOLDOWN; }
@@ -67,7 +69,7 @@ public abstract class MarketPolicy {
 
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
         tp.setParaFontOrbitron();
-        tp.addPara(spec.name, opad);
+        tp.addPara(spec.name, pad, base);
         
         tp.setParaFontDefault();
         tp.addPara(spec.description, pad);
@@ -99,7 +101,9 @@ public abstract class MarketPolicy {
 
     public final void activate(PlayerMarketData data, int durationDays) {
         if (state != PolicyState.AVAILABLE) return;
-        if (EconomyEngine.getInstance().getCredits(data.marketID) < spec.cost) return;
+        if (EconomyEngine.getInstance().getCredits(data.marketID) < spec.cost &&
+            DebugFlags.COLONY_DEBUG
+        ) return;
 
         EconomyEngine.getInstance().addCredits(data.marketID, -spec.cost);
         activeDaysRemaining = durationDays;

@@ -30,7 +30,7 @@ import com.fs.starfarer.api.util.Pair;
 
 import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
@@ -215,9 +215,7 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         add(industryIcon.getPanel()).inBL(0, 0);
 
 
-        final WorkerIndustryData data = WorkerRegistry.getInstance().getData(
-            m_market.getId(), m_industry.getSpec()
-        );
+        final WorkerIndustryData data = WorkerRegistry.getInstance().getData(m_industry);
         LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(highlight);
         workerCountLabel.setHighlightColor(
@@ -239,35 +237,33 @@ public class LtvIndustryWidget extends CustomPanel<IndustryWidgetPlugin, LtvIndu
         tp.beginIconGroup();
         tp.setIconSpacingMedium();
 
-        boolean hasConfig = IndustryIOs.hasConfig(m_industry);
+        final boolean hasConfig = IndustryIOs.hasConfig(m_industry);
         final EconomyEngine engine = EconomyEngine.getInstance();
 
         if (hasConfig && m_industry.isFunctional() && !m_industry.isBuilding()) {
             for (String comID : IndustryIOs.getRealInputs(m_industry, false)) {
-                CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(comID);
-                CommodityStats stats = engine.getComStats(comID, m_market.getId());
+                final CommodityCell cell = engine.getComCell(comID, m_market.getId());
 
-                if (stats == null || stats.getFlowDeficit() < 1) continue;
+                if (cell == null || cell.getFlowDeficit() < 1) continue;
 
                 int iconCount = 1;
-                if (stats.getFlowAvailabilityRatio() < 0.67f) iconCount = 2;
-                if (stats.getFlowAvailabilityRatio() < 0.33f) iconCount = 3;
+                if (cell.getFlowAvailabilityRatio() < 0.67f) iconCount = 2;
+                if (cell.getFlowAvailabilityRatio() < 0.33f) iconCount = 3;
 
-                tp.addIcons(spec, iconCount, IconRenderMode.RED);
+                tp.addIcons(cell.spec, iconCount, IconRenderMode.RED);
             }
         } else if (m_industry.isFunctional() && !m_industry.isBuilding()) {
             for (Pair<String, Integer> pair : m_industry.getAllDeficit()) {
-                CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(pair.one);
-                CommodityStats stats = engine.getComStats(pair.one, m_market.getId());
+                final CommodityCell cell = engine.getComCell(pair.one, m_market.getId());
 
-                if (stats == null || stats.getFlowDeficit() < 1) continue;
+                if (cell == null || cell.getFlowDeficit() < 1) continue;
 
                 int iconCount = 1;
 
-                if (stats.getFlowAvailabilityRatio() < 0.67f) iconCount = 2;
-                if (stats.getFlowAvailabilityRatio() < 0.33f) iconCount = 3;
+                if (cell.getFlowAvailabilityRatio() < 0.67f) iconCount = 2;
+                if (cell.getFlowAvailabilityRatio() < 0.33f) iconCount = 3;
 
-                tp.addIcons(spec, iconCount, IconRenderMode.RED);
+                tp.addIcons(cell.spec, iconCount, IconRenderMode.RED);
             }
         }
         tp.addIconGroup(24, 1, pad);

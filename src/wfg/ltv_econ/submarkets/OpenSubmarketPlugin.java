@@ -18,7 +18,7 @@ import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
 import com.fs.starfarer.api.util.Highlights;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 
 public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
@@ -52,13 +52,13 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 			
 
             final EconomyEngine engine = EconomyEngine.getInstance(); 
-            final CommodityStats shipsStats = engine.getComStats(Commodities.SHIPS, market.getId());
-            final CommodityStats fuelStats  = engine.getComStats(Commodities.FUEL,  market.getId());
+            final CommodityCell shipsCell = engine.getComCell(Commodities.SHIPS, market.getId());
+            final CommodityCell fuelCell  = engine.getComCell(Commodities.FUEL,  market.getId());
 
 			getCargo().getMothballedShips().clear();
 
-            final float shipProd = (float) Math.log10(Math.max(1f, shipsStats.getFlowAvailable()));
-            final float fuelProd = (float) Math.log10(Math.max(1f, fuelStats.getFlowAvailable()));
+            final float shipProd = (float) Math.log10(Math.max(1f, shipsCell.getFlowAvailable()));
+            final float fuelProd = (float) Math.log10(Math.max(1f, fuelCell.getFlowAvailable()));
 
             final float combatShips = Math.min(10f + 5f * shipProd, 70);
             final float freighters  = Math.min(10f + 10f * shipProd, 40f);
@@ -159,16 +159,16 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	private static final float STOCKPILE_SCALE_MAX = 4f;
 	
 	public static float getBaseStockpileLimit(String comID, String marketID) {
-        final CommodityStats stats = EconomyEngine.getInstance().getComStats(
+        final CommodityCell cell = EconomyEngine.getInstance().getComCell(
             comID, marketID
         );
 
-		final float base = Math.max(stats.getFlowAvailable(), stats.getBaseDemand(false));
+		final float base = Math.max(cell.getFlowAvailable(), cell.getBaseDemand(true));
 
-		final float impRatio = stats.getTotalImports(true) / base;
-		final float prodRatio = stats.getProduction(true) / base;
-		final float extraRatio = stats.getFlowCanNotExport() / base;
-		final float defRatio = stats.getFlowDeficit() / base;
+		final float impRatio = cell.getTotalImports(true) / base;
+		final float prodRatio = cell.getProduction(true) / base;
+		final float extraRatio = cell.getFlowCanNotExport() / base;
+		final float defRatio = cell.getFlowDeficit() / base;
 
 		final float mult = 1f
 			+ impRatio  * ECON_UNIT_MULT_IMPORTS
@@ -186,7 +186,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 		if (scale > STOCKPILE_SCALE_MAX) scale = STOCKPILE_SCALE_MAX;
 
 		final float finalLimit = Math.max(0f, baseLinear * scale);
-		return (int) Math.min(finalLimit, stats.getStored() * CommodityStats.MAX_SUBMARKET_STOCK_MULT);
+		return (int) Math.min(finalLimit, cell.getStored() * CommodityCell.MAX_SUBMARKET_STOCK_MULT);
 	}
 	
     @Override

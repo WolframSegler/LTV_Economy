@@ -15,7 +15,6 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.economy.CommodityStats;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
@@ -87,14 +86,14 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
     }
 
     public void createPanel() {
-        EconomyEngine.getInstance().fakeAdvance();
+        final EconomyEngine engine = EconomyEngine.getInstance();
+        engine.fakeAdvance();
 
         // Select relevant commodities
         final List<CommoditySpecAPI> commodities = EconomyEngine.getEconCommodities();
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
-            CommodityStats stats = EconomyEngine.getInstance().getComStats(com.getId(), getMarket().getId());
-            return stats.getFlowEconomicFootprint() <= 0;
+            return engine.getComCell(com.getId(), getMarket().getId()).getFlowEconomicFootprint() <= 0;
         });
 
         final TooltipMakerAPI tooltip = m_panel.createUIElement(

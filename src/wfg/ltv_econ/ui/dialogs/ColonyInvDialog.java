@@ -17,7 +17,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
@@ -357,19 +357,19 @@ public class ColonyInvDialog extends DialogPanel {
 
         for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
 
-            final CommodityStats stats = engine.getComStats(com.getId(), m_market.getId());
+            final CommodityCell cell = engine.getComCell(com.getId(), m_market.getId());
 
             final Base comIcon = new Base(
                 innerPanel, 26, 26, com.getIconName(), null, null, false
             );
             
-            final long stored = stats.getRoundedStored();
-            final int demand = (int) stats.getBaseDemand(false);
-            final int baseProd = (int) stats.getProduction(false);
-            final int modifiedProd = (int) stats.getProduction(true);
-            final int baseBalance = (int) (stats.getProduction(true) -
-                stats.getBaseDemand(true));
-            final int realBalance = (int) stats.getFlowRealBalance();
+            final long stored = cell.getRoundedStored();
+            final int demand = (int) cell.getBaseDemand(true);
+            final int baseProd = (int) cell.getProduction(false);
+            final int modifiedProd = (int) cell.getProduction(true);
+            final int baseBalance = (int) (cell.getProduction(true) -
+                cell.getDemand());
+            final int realBalance = (int) cell.getFlowRealBalance();
 
             Color baseBlcColor = baseBalance < 0 ? 
                 negative : baseBalance > 0 ?

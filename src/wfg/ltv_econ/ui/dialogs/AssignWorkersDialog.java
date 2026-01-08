@@ -27,7 +27,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
@@ -73,7 +73,7 @@ public class AssignWorkersDialog extends DialogPanel {
         reg = WorkerRegistry.getInstance();
         industry = ind;
         market = ind.getMarket();
-        data = reg.getData(ind.getMarket().getId(), ind.getSpec());
+        data = reg.getData(ind);
         previewData = new WorkerIndustryData(data);
         outputSliders = new HashMap<>();
 
@@ -112,7 +112,7 @@ public class AssignWorkersDialog extends DialogPanel {
         };
 
         // Draw Production
-        drawProductionAndConsumption(inputOutputContainer.getPanel(), pad, opad);
+        drawProductionAndConsumption(inputOutputContainer.getPanel());
 
         innerPanel.addComponent(inputOutputContainer.getPanel())
             .inTL(0, lbl.computeTextHeight(txt) + opad);
@@ -225,7 +225,7 @@ public class AssignWorkersDialog extends DialogPanel {
         innerPanel.addComponent(outputsPanel).inTL(opad, sliderY);
     }
 
-    public void drawProductionAndConsumption(CustomPanelAPI panel, int pad, int opad) {
+    public void drawProductionAndConsumption(CustomPanelAPI panel) {
         final float iconSize = 32f;
         final int itemsPerRow = 2;
         final float sectionWidth = ((panelWidth / 2) / itemsPerRow) - opad;
@@ -316,34 +316,34 @@ public class AssignWorkersDialog extends DialogPanel {
                 y += iconSize + 5f; // line height + padding between rows
             }
 
-            final CommodityStats stats = engine.getComStats(entry.getKey(), market.getId());
-            final float oldDemand = stats.getDemandIndStat(industry.getId()).getModifiedValue();
+            final CommodityCell cell = engine.getComCell(entry.getKey(), market.getId());
+            final float oldDemand = cell.getDemandIndStat(industry.getId()).getModifiedValue();
 
-            final float baseDemand = stats.getBaseDemand(false) + (long) (dAmount - oldDemand);
-            final float demandMet = Math.min(stats.getProduction(false), baseDemand)
-                + stats.getFlowDeficitMetViaTrade();
+            final float baseDemand = cell.getBaseDemand(true) + (long) (dAmount - oldDemand);
+            final float demandMet = Math.min(cell.getProduction(false), baseDemand)
+                + cell.getFlowDeficitMetViaTrade();
             final float availability = baseDemand == 0 ? 1f : (float)demandMet / baseDemand;
 
             // draw icon
             tooltip.beginIconGroup();
             tooltip.setIconSpacingMedium();
-            IconRenderMode renderMode = availability < 0.99f && !importing ?
+            IconRenderMode renderMode = availability < 0.9f && !importing ?
                 IconRenderMode.DIM_RED : IconRenderMode.NORMAL;
             tooltip.addIcons(com, 1, renderMode);
             tooltip.addIconGroup(0f);
-            UIComponentAPI iconComp = tooltip.getPrev();
+            final UIComponentAPI iconComp = tooltip.getPrev();
 
             // Add extra padding for thinner icons
-            float actualIconWidth = iconSize * com.getIconWidthMult();
+            final float actualIconWidth = iconSize * com.getIconWidthMult();
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
-            String txt = Strings.X + NumFormat.engNotation(dAmount);
-            LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
+            final String txt = Strings.X + NumFormat.engNotation(dAmount);
+            final LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
 
-            float textH = lbl.computeTextHeight(txt);
-            float textX = x + iconSize + pad;
-            float textY = y + (iconSize - textH) * 0.5f;
+            final float textH = lbl.computeTextHeight(txt);
+            final float textX = x + iconSize + pad;
+            final float textY = y + (iconSize - textH) * 0.5f;
             lbl.getPosition().inTL(textX, textY);
 
             // advance X
@@ -388,7 +388,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         if (update) {
             inputOutputContainer.clearChildren();
-            drawProductionAndConsumption(inputOutputContainer.getPanel(), 3, 10);
+            drawProductionAndConsumption(inputOutputContainer.getPanel());
         }
     }
 

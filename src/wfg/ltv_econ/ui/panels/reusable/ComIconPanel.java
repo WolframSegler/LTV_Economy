@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.panels;
+package wfg.ltv_econ.ui.panels.reusable;
 
 import java.awt.Color;
 import java.util.Optional;

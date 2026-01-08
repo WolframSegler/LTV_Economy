@@ -34,11 +34,11 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         ));
 
         float totalAssigned = 0;
-        final WorkerRegistry registry = WorkerRegistry.getInstance();
-        if (registry == null) return;
+        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        if (reg == null) return;
 
         for (Industry ind : market.getIndustries()) {
-            WorkerIndustryData data = registry.getData(market.getId(), ind.getId());
+            final WorkerIndustryData data = reg.getData(ind);
             if (data != null) {
                 totalAssigned += data.getWorkerAssignedRatio(false);
             }

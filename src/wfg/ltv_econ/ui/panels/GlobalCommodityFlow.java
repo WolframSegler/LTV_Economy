@@ -20,11 +20,12 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
-import wfg.ltv_econ.economy.CommodityInfo;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityDomain;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.PieChart;
@@ -68,7 +69,7 @@ public class GlobalCommodityFlow extends
         final SectorAPI sector = Global.getSector();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final String comID = selectedCom.getId();
-        final CommodityInfo info = engine.getCommodityInfo(comID);
+        final CommodityDomain dom = engine.getComDomain(comID);
 
         clearChildren();
 
@@ -339,7 +340,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W + largeLabelShift, LABEL_H) {
 
             public void createPanel() {
-                final long value = info.getMarketActivity();
+                final long value = dom.getMarketActivity();
                 final String txt = "Sector-wide trade value";
                 String valueTxt = NumFormat.formatCredit(value);
                 if (value < 1) {
@@ -436,7 +437,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final float value = info.getTradeVolatility();
+                final float value = dom.getTradeVolatility();
                 final String txt = "Trade volatility";
                 final String valueTxt = (int) (value * 100f) + "%";
 
@@ -593,7 +594,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = info.getExporters().size();
+                final long value = dom.getExporters().size();
                 final String txt = "Global Exporters";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) {
@@ -643,7 +644,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = info.getImporters().size();
+                final long value = dom.getImporters().size();
                 final String txt = "Global Importers";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) {
@@ -698,20 +699,20 @@ public class GlobalCommodityFlow extends
             "Production", 100, "Daily units of " + selectedCom.getName() + " produced", false, false, -1
         );
 
-        final ArrayList<CommodityStats> producers = info.getSortedByProduction(5);
+        final ArrayList<CommodityCell> producers = dom.getSortedByProduction(5);
 
-        for (CommodityStats stats : producers) {
+        for (CommodityCell cell : producers) {
 
-            final String iconPath = stats.market.getFaction().getCrest();
+            final String iconPath = cell.market.getFaction().getCrest();
             final Base iconPanel = new Base(
                 table.getPanel(), 28, 28, iconPath, null,
                 null, false
             );
-            final Color textColor = stats.market.getFaction().getBaseUIColor();
-            final long value = (long) stats.getProduction(true);
+            final Color textColor = cell.market.getFaction().getBaseUIColor();
+            final long value = (long) cell.getProduction(true);
 
             table.addCell(iconPanel, cellAlg.LEFT, null, null);
-            table.addCell(stats.market.getName(), cellAlg.LEFT, null, textColor);
+            table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
 
             table.pushRow(
@@ -739,20 +740,20 @@ public class GlobalCommodityFlow extends
             "Demand", 100, "Daily units of " + selectedCom.getName() + " demanded", false, false, -1
         );
 
-        final ArrayList<CommodityStats> consumers = info.getSortedByDemand(5);
+        final ArrayList<CommodityCell> consumers = dom.getSortedByDemand(5);
 
-        for (CommodityStats stats : consumers) {
+        for (CommodityCell cell : consumers) {
 
-            final String iconPath = stats.market.getFaction().getCrest();
+            final String iconPath = cell.market.getFaction().getCrest();
             final Base iconPanel = new Base(
                 table.getPanel(), 28, 28, iconPath, null,
                 null, false
             );
-            final Color textColor = stats.market.getFaction().getBaseUIColor();
-            final long value = (long) stats.getBaseDemand(false);
+            final Color textColor = cell.market.getFaction().getBaseUIColor();
+            final long value = (long) cell.getBaseDemand(true);
 
             table.addCell(iconPanel, cellAlg.LEFT, null, null);
-            table.addCell(stats.market.getName(), cellAlg.LEFT, null, textColor);
+            table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
 
             table.pushRow(

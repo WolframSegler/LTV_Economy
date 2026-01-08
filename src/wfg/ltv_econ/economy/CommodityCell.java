@@ -10,7 +10,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
-import com.fs.starfarer.api.combat.MutableStatWithTempMods;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.impl.campaign.econ.ShippingDisruption;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
@@ -45,7 +44,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
  * <p>This convention ensures that the meaning of each getter is always clear and
  * prevents subtle logic errors when computing balances or updating stored amounts.</p>
  */
-public class CommodityStats {
+public class CommodityCell {
 
     public static final String WORKER_MOD_ID = "worker_assigned";
 
@@ -58,8 +57,8 @@ public class CommodityStats {
     // Storage
     private double stored = 0;
 
-    private MutableStatWithTempMods localProd = new MutableStatWithTempMods(0f);
-    private transient float demandBase = 0;
+    private MutableStat localProd = new MutableStat(0f);
+    private MutableStat baseDemand = new MutableStat(0f);
 
     private transient Map<String, MutableStat> localProdMutables = new HashMap<>();
     private transient Map<String, MutableStat> demandBaseMutables = new HashMap<>();
@@ -92,19 +91,25 @@ public class CommodityStats {
         return modified ? localProd.getModifiedValue() : localProd.base;
     }
     public final float getBaseDemand(boolean modified) {
-        return modified ? demandBase*getStoredAvailabilityRatio() : demandBase;
+        return modified ? baseDemand.getModifiedValue() : baseDemand.base;
     }
-    public final MutableStatWithTempMods getProductionStat() {
+    public final float getDemand() {
+        return getBaseDemand(true)*getStoredAvailabilityRatio();
+    }
+    public final MutableStat getProductionStat() {
         return localProd;
+    }
+    public final MutableStat getDemandStat() {
+        return baseDemand;
     }
     public final float getFlowDeficitMet() {
         return getFlowDeficitMetLocally() + getFlowDeficitMetViaTrade();
     }
     public final float getFlowDeficitMetLocally() {
-        return Math.min(getProduction(true), demandBase); 
+        return Math.min(getProduction(true), getBaseDemand(true));
     }
     public final float getFlowDeficitPreTrade() {
-        return demandBase - getFlowDeficitMetLocally();
+        return getBaseDemand(true) - getFlowDeficitMetLocally();
     }
     public final float getFlowDemandPreTrade() {
         return getFlowDeficitPreTrade() + importExclusiveDemand;
@@ -125,7 +130,7 @@ public class CommodityStats {
         return Math.max(0, getTotalImports(false) - importExclusiveDemand - getFlowDeficitMetViaTrade());
     }
     public final float getFlowDeficit() {
-        return demandBase - getFlowDeficitMet();
+        return getBaseDemand(true) - getFlowDeficitMet();
     }
     public final float getTotalImports(boolean modified) {
         if (modified) return (inFactionImports + globalImports) * importEffectiveness;
@@ -141,10 +146,10 @@ public class CommodityStats {
         return getStored() + getFlowAvailable();
     }
     public final float getPreferredStockpile() {
-        return EconomyConfig.DAYS_TO_COVER * demandBase;
+        return EconomyConfig.DAYS_TO_COVER * getBaseDemand(true);
     }
     public final float getFlowProductionSurplus() {
-        return Math.max(0, getProduction(true) - demandBase);
+        return Math.max(0, getProduction(true) - getBaseDemand(true));
     }
     public final float getFlowRemainingExportable() {
         return getFlowProductionSurplus() - getTotalExports();
@@ -166,13 +171,13 @@ public class CommodityStats {
             getTotalExports();
     }
     public final float getFlowRealBalance() {
-        return getFlowAvailable() - getBaseDemand(true) - getTotalExports();
+        return getFlowAvailable() - getDemand() - getTotalExports();
     }
     public final float getFlowAvailabilityRatio() {
-        return demandBase == 0 ? 1f : getFlowDeficitMet() / demandBase;
+        return getBaseDemand(true) == 0 ? 1f : getFlowDeficitMet() / getBaseDemand(true);
     }
     public final float getStoredAvailabilityRatio() {
-        return demandBase <= 0 ? 1f : (float) Math.min(stored / demandBase, 1f);
+        return getBaseDemand(true) <= 0 ? 1f : (float) Math.min(stored / getBaseDemand(true), 1f);
     }
     public final double getStored() {
         return stored;
@@ -201,7 +206,7 @@ public class CommodityStats {
         stored = Math.max(0, stored + a);
     }
 
-    public CommodityStats(String comID, String marketID) {
+    public CommodityCell(String comID, String marketID) {
         this.marketID = marketID;
         this.comID = comID;
 
@@ -212,18 +217,17 @@ public class CommodityStats {
         market = Global.getSector().getEconomy().getMarket(marketID);
         spec = Global.getSettings().getCommoditySpec(comID);
 
+        localProdMutables = new HashMap<>();
+        demandBaseMutables = new HashMap<>();
+
         return this;
     }
 
     public final void update() {
-        localProd.base = 0;
-        demandBase = 0;
-        importExclusiveDemand = 0;
-        
-        localProdMutables = new HashMap<>();
-        demandBaseMutables = new HashMap<>();
+        localProdMutables.clear();
+        demandBaseMutables.clear();
 
-        for (Industry industry : getVisibleIndustries(market)) {
+        for (Industry industry : getVisibleIndustries()) {
             if (IndustryIOs.hasOutput(industry, comID)) {
                 if (!IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles) {
                     final MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);
@@ -242,15 +246,20 @@ public class CommodityStats {
             }
         }
 
+        float localProdBase = 0;
+        float baseDemandBase = 0;
+
         for (MutableStat stat : localProdMutables.values()) {
-            localProd.base += stat.getModifiedValue();
+            localProdBase += stat.getModifiedValue();
         }
 
         for (MutableStat stat : demandBaseMutables.values()) {
-            demandBase += stat.getModifiedValue();
+            baseDemandBase += stat.getModifiedValue();
         }
 
-        demandBase = demandBase < 1 ? 0 : demandBase;
+        if (baseDemandBase < 1f) baseDemandBase = 0;
+        localProd.setBaseValue(localProdBase);
+        baseDemand.setBaseValue(baseDemandBase);
 
         for (StatMod mod : market.getCommodityData(comID).getAvailableStat().getFlatMods().values()) {
             if (!mod.source.contains(ShippingDisruption.COMMODITY_LOSS_PREFIX)) continue;
@@ -269,14 +278,12 @@ public class CommodityStats {
         inFactionExports = 0;
         globalExports = 0;
 
-        localProd.base = 0;
-        demandBase = 0;
+        localProd.setBaseValue(0f);
+        baseDemand.setBaseValue(0f);
     }
 
     public final void advance() {
         addStoredAmount(getFlowRealBalance());
-
-        localProd.advance(1);
     }
 
     public float getUnitPrice(PriceType type, int amount) {
@@ -383,12 +390,13 @@ public class CommodityStats {
         final StringBuilder sb = new StringBuilder(512);
 
         sb.append("\n---- COMMODITY STATS LOG ----\n");
-        sb.append("Commodity: ").append(comID).append("\n\n");
+        sb.append("Commodity&market: ").append(comID + "__" + marketID).append("\n\n");
 
         // ===== CORE SCALE =====
         sb.append("[Scale]\n");
         sb.append(" economicFootprint: ").append(footprint).append("\n");
-        sb.append(" baseDemand: ").append(demandBase).append("\n");
+        sb.append(" baseDemand (modified): ").append(baseDemand.getModifiedValue()).append("\n");
+        sb.append(" baseDemand (base): ").append(baseDemand.base).append("\n");
         sb.append(" preferredStockpile: ").append(getPreferredStockpile()).append("\n\n");
 
         // ===== PRODUCTION =====

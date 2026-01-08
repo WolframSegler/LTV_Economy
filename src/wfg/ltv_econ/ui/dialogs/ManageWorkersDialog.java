@@ -13,6 +13,7 @@ import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -29,7 +30,6 @@ import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.policies.MarketPolicy;
-import wfg.ltv_econ.economy.policies.MarketPolicy.PolicyState;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;
@@ -553,11 +553,11 @@ public class ManageWorkersDialog extends DialogPanel {
 
         final ScrollPanel policyContainer = new ScrollPanel(innerPanel, PANEL_W - opad, policyHeight + opad);
         policyContainer.scrollType = ScrollType.HORIZONTAL;
-        innerPanel.addComponent(policyContainer.getPanel()).inTL(opad/2f, SECT_III_H + subtitleH + pad);
+        innerPanel.addComponent(policyContainer.getPanel()).inTL(opad/2f, SECT_III_H + subtitleH + pad*2);
 
         int posterCount = 0;
         for (MarketPolicy policy : mData.getPolicies()) {
-            if (policy.state == PolicyState.DISABLED) { continue;}
+            if (!policy.isEnabled(mData)) continue;
 
             final int posterIndex = posterCount;
             final HasActionListener listener = new HasActionListener() {
@@ -661,16 +661,16 @@ public class ManageWorkersDialog extends DialogPanel {
 
             @Override
             public CustomPanelAPI getTpParent() {
-                return cont;
+                return m_panel;
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = cont.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
 
                 policy.createTooltip(mData, tp);
 
-                cont.addUIElement(tp);
+                m_panel.addUIElement(tp);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             }
@@ -728,7 +728,7 @@ public class ManageWorkersDialog extends DialogPanel {
         activateButton.bgAlpha = 1f;
         final long marketCredits = EconomyEngine.getInstance().getCredits(m_market.getId());
         final boolean hasSufficientCredits = Math.max(0, marketCredits) >= policy.spec.cost;
-        if (!policy.isAvailable() || !hasSufficientCredits) {
+        if ((!policy.isAvailable() || !hasSufficientCredits) && !DebugFlags.COLONY_DEBUG) {
             activateButton.disabled = true;
 
             activateButton.setTooltipFactory(() -> {
@@ -755,8 +755,9 @@ public class ManageWorkersDialog extends DialogPanel {
         cont.addComponent((UIComponentAPI)title).inTL(posterW + opad*3, pad);
         
         final LabelAPI desc = settings.createLabel(policy.spec.description, Fonts.DEFAULT_SMALL);
-        desc.getPosition().setSize(PANEL_W/2f - 4*opad - posterW, 100);
-        cont.addComponent((UIComponentAPI)desc).inTL(posterW + opad*3, opad);
+        desc.getPosition().setSize(PANEL_W/1.5f - 4*opad - posterW, 120);
+        cont.addComponent((UIComponentAPI)desc);
+        WrapUiUtils.anchorPanel((UIComponentAPI)desc, (UIComponentAPI)title, AnchorType.BottomLeft, pad*2);
 
         final LabelAPI buttonSide = settings.createLabel(buttonSideTxt, Fonts.DEFAULT_SMALL);
         buttonSide.setHighlightColor(highlight);

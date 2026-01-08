@@ -170,16 +170,16 @@ public class LtvWaystation extends BaseIndustry {
 	}
 	
 	@Override
-	public void addImproveDesc(TooltipMakerAPI info, ImprovementDescriptionMode mode) {
+	public void addImproveDesc(TooltipMakerAPI tp, ImprovementDescriptionMode mode) {
 		final String aStr = (int)Math.round(IMPROVE_ACCESSIBILITY * 100f) + "%";
 		
 		if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
-			info.addPara("Accessibility increased by %s.", 0f, highlight, aStr);
+			tp.addPara("Accessibility increased by %s.", 0f, highlight, aStr);
 		} else {
-			info.addPara("Increases accessibility by %s.", 0f, highlight, aStr);
+			tp.addPara("Increases accessibility by %s.", 0f, highlight, aStr);
 		}
 
-		info.addSpacer(opad);
-		super.addImproveDesc(info, mode);
+		tp.addSpacer(opad);
+		super.addImproveDesc(tp, mode);
 	}
 }

@@ -11,7 +11,7 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 
-import wfg.ltv_econ.economy.CommodityInfo;
+import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
@@ -177,7 +177,9 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
         useStockpilesBtn.setOpacity(0);
         useStockpilesBtn.setEnabled(false);
-        if (!DebugFlags.COLONY_DEBUG && !marketAPI.isPlayerOwned() && DebugFlags.HIDE_COLONY_CONTROLS) return;
+        if (!marketAPI.isPlayerOwned() &&
+            (!DebugFlags.COLONY_DEBUG || DebugFlags.HIDE_COLONY_CONTROLS)
+        ) return;
 
         final CallbackRunnable<Button> stockpilesBtnRunnable = (btn) -> {
             final ColonyInvDialog dialogPanel = new ColonyInvDialog(marketAPI);
@@ -376,8 +378,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                     m_tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
                     int exportedCount = 0;
-                    final List<CommodityInfo> commodities = engine.getCommodityInfos();
-                    for (CommodityInfo com : commodities) {
+                    final List<CommodityDomain> commodities = engine.getComDomains();
+                    for (CommodityDomain com : commodities) {
                         if (com.getLedger(marketAPI.getId())
                                 .lastMonthExportIncome > 0
                             ) {
@@ -392,7 +394,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                         )
                     );
                     int comCount = 0;
-                    for (CommodityInfo com : commodities) {
+                    for (CommodityDomain com : commodities) {
                         final String name = com.spec.getName();
                         final long comExportIncome = com.getLedger(marketAPI.getId()).lastMonthExportIncome;
                         if (comExportIncome < 1) continue;
@@ -450,8 +452,8 @@ public class LtvMarketReplacer implements EveryFrameScript {
 
                     m_tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Expense", 100f + extraPad);
                     int importedCount = 0;
-                    final List<CommodityInfo> commodities = engine.getCommodityInfos();
-                    for (CommodityInfo com : commodities) {
+                    final List<CommodityDomain> commodities = engine.getComDomains();
+                    for (CommodityDomain com : commodities) {
                         if (com.getLedger(marketAPI.getId())
                                 .lastMonthImportExpense > 0
                             ) {
@@ -466,7 +468,7 @@ public class LtvMarketReplacer implements EveryFrameScript {
                         )
                     );
                     int comCount = 0;
-                    for (CommodityInfo com : commodities) {
+                    for (CommodityDomain com : commodities) {
                         final String name = com.spec.getName();
                         final long comImportExpense = com.getLedger(marketAPI.getId()).lastMonthImportExpense;
                         if (comImportExpense < 1) continue;

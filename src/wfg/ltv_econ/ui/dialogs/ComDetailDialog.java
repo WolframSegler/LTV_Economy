@@ -30,11 +30,11 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
-import wfg.ltv_econ.ui.panels.ComIconPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.LtvCommodityRowPanel;
+import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.Attachments;
@@ -202,7 +202,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             }
         };
 
-        innerPanel.addComponent(footerPanel.getPanel()).inBL(pad, -BUTTON_H*0.5f);
+        innerPanel.addComponent(footerPanel.getPanel()).inBL(pad, pad);
     }
 
     public void createSections() {
@@ -320,7 +320,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                 public void createPanel() {
                     final TooltipMakerAPI tooltip = m_panel.createUIElement(170, 0, false);
 
-                    final long value = engine.getCommodityInfo(comID)
+                    final long value = engine.getComDomain(comID)
                         .getMarketActivity();
                     final String txt = "Global market value";
                     String valueTxt = NumFormat.formatCredit(value);
@@ -888,31 +888,31 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             if (market.isHidden()) continue;
 
             final String marketID = market.getId();
-            final CommodityStats stats = engine.getComStats(comID, marketID);
+            final CommodityCell cell = engine.getComCell(comID, marketID);
 
-            if (stats.globalExports < 1 && mode == 0 ||
-                stats.getBaseDemand(false) + stats.getImportExclusiveDemand() < 1 && mode == 1
+            if (cell.globalExports < 1 && mode == 0 ||
+                cell.getBaseDemand(true) + cell.getImportExclusiveDemand() < 1 && mode == 1
             ) continue;
 
             if (footerPanel != null && footerPanel.m_checkbox.isChecked() &&
-                !(stats.getFlowCanNotExport() > 0 || stats.getFlowDeficit() > 0)) {
+                !(cell.getFlowCanNotExport() > 0 || cell.getFlowDeficit() > 0)) {
                 continue;
             }
 
             final String iconPath = market.getFaction().getCrest();
             final Base iconPanel = new Base(
                 section, iconSize, iconSize, iconPath, null,
-                null, stats.getFlowDeficit() > 0
+                null, cell.getFlowDeficit() > 0
             );
             iconPanel.setOutlineColor(Color.RED);
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
             final String factionName = market.getFaction().getDisplayName();
 
-            final float quantityValue = mode == 0 ? stats.globalExports : stats.globalImports;
+            final float quantityValue = mode == 0 ? cell.globalExports : cell.globalImports;
             final String quantityTxt = NumFormat.engNotation((long) quantityValue);
 
-            final CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, stats);
+            final CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, cell);
 
             final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
 
@@ -1015,7 +1015,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         wrapper.factory = () -> {
             final int tpWidth = 450;
             final FactionAPI faction = market.getFaction();
-            final CommodityStats stats = EconomyEngine.getInstance().getComStats(
+            final CommodityCell cell = EconomyEngine.getInstance().getComCell(
                 m_com.getId(), market.getId()
             );
     
@@ -1047,21 +1047,21 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             tp.addSectionHeading(m_com.getName() + " production & availability",
             baseColor, darkColor, Alignment.MID, opad);
                 
-            TooltipUtils.createCommodityProductionBreakdown(tp, stats);
+            TooltipUtils.createCommodityProductionBreakdown(tp, cell);
     
-            TooltipUtils.createCommodityDemandBreakdown(tp, stats);
+            TooltipUtils.createCommodityDemandBreakdown(tp, cell);
     
             final float econUnit = m_com.getEconUnit();
-            final int sellPrice = (int) (stats.computeVanillaPrice((int)econUnit, true, true) / econUnit);
-            final int buyPrice = (int) (stats.computeVanillaPrice((int)econUnit, false, true) / econUnit);
+            final int sellPrice = (int) (cell.computeVanillaPrice((int)econUnit, true, true) / econUnit);
+            final int buyPrice = (int) (cell.computeVanillaPrice((int)econUnit, false, true) / econUnit);
     
             if (!m_com.isMeta()) {
-                if (stats.getFlowCanNotExport() > 0) {
+                if (cell.getFlowCanNotExport() > 0) {
                     tp.addPara("Excess stockpiles: %s units.", opad, positive, 
-                    highlight, NumFormat.engNotation((long) stats.getFlowCanNotExport()));
-                } else if (stats.getFlowDeficit() > 0) {
+                    highlight, NumFormat.engNotation((long) cell.getFlowCanNotExport()));
+                } else if (cell.getFlowDeficit() > 0) {
                     tp.addPara("Local deficit: %s units.", opad, negative, 
-                    highlight, NumFormat.engNotation((long) stats.getFlowDeficit()));
+                    highlight, NumFormat.engNotation((long) cell.getFlowDeficit()));
                 }
     
                 tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{

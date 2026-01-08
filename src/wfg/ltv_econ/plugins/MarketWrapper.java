@@ -48,7 +48,7 @@ import com.fs.starfarer.campaign.fleet.MutableMarketStats;
 import com.fs.starfarer.rpg.Person;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 
 public class MarketWrapper extends Market {
@@ -91,11 +91,11 @@ public class MarketWrapper extends Market {
             return spec.getBasePrice() * (float) quantity;
         }
 
-        final CommodityStats stats = EconomyEngine.getInstance().getComStats(
+        final CommodityCell cell = EconomyEngine.getInstance().getComCell(
             com.getId(), com.getMarket().getId()
         );
 
-        return stats.computeVanillaPrice(
+        return cell.computeVanillaPrice(
             (int) quantity, true, isPlayer
         );
     }
@@ -127,11 +127,11 @@ public class MarketWrapper extends Market {
             return spec.getBasePrice() * (float) quantity;
         }
 
-        final CommodityStats stats = EconomyEngine.getInstance().getComStats(
+        final CommodityCell cell = EconomyEngine.getInstance().getComCell(
             com.getId(), com.getMarket().getId()
         );
 
-        return stats.computeVanillaPrice(
+        return cell.computeVanillaPrice(
             (int) quantity, false, isPlayer
         );
     }

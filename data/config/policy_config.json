@@ -8,7 +8,7 @@
       "cost": 500,
       "durationDays": 21,
       "cooldownDays": 42,
-      "description": "Working hours are temporarily extended to boost production at the cost of worker well-being."
+      "description": "Management mandates longer work shifts to maximize output. Colonists labor harder, producing more for the market, but the added strain leaves them fatigued and less content."
     },
     {
       "id": "luddic_prophet_festival",
@@ -18,7 +18,107 @@
       "cost": 6e4,
       "durationDays": 7,
       "cooldownDays": 120,
-      "description": "Colonists gather to honor Prophet Ludd's teachings and the founding of Gilead."
+      "description": "Colonists gather to honor Prophet Ludd's teachings and the founding of Gilead. For several days, the faithful celebrate, meditate, and reject the trappings of machinery. The air hums with hymns and ritual, reminding all of the strength of the community over industry."
+    },
+    {
+      "id": "organ_harvesting_program",
+      "name": "Human Capital Recovery Program",
+      "class": "wfg.ltv_econ.economy.policies.OrganHarvestingPolicy",
+      "posterPath": "graphics/policies/organ_harvesting_program.png",
+      "cost": 7500,
+      "durationDays": 60,
+      "cooldownDays": 180,
+      "description": "A covert recovery initiative targeting non-viable citizens by health and productivity metrics. Through discreet seizures and asset liquidation, biological resources and property are reclaimed to support the broader colony. The program relies on significant administrative and compliance expenditures."
+    },
+    {
+      "id": "pharmaceutical_promotion",
+      "name": "Pharmaceutical Promotion",
+      "class": "wfg.ltv_econ.economy.policies.PharmaceuticalPromotionPolicy",
+      "posterPath": "graphics/policies/pharmaceutical_promotion.png",
+      "cost": 3000,
+      "durationDays": 30,
+      "cooldownDays": 210,
+      "description": "Legalizes and subsidizes production of local recreational substances for the populace. The program boosts public morale but takes a toll on health and subtly undermines social cohesion. Factions controlling markets where these substances are illegal may disapprove, while others welcome it."
+    },
+    {
+      "id": "fleet_mobilization_order",
+      "name": "Fleet Mobilization Order",
+      "class": "wfg.ltv_econ.economy.policies.FleetMobilizationPolicy",
+      "posterPath": "graphics/policies/fleet_mobilization_order.png",
+      "cost": 5e5,
+      "durationDays": 35,
+      "cooldownDays": 240,
+      "description": "Temporarily bolsters the number of active fleets under colony control, allowing for greater projection of force. The operation requires substantial funding and logistical support, limiting how frequently it can be deployed."
+    },
+    {
+      "id": "bulwark_of_orichalcum",
+      "name": "Bulwark of Orichalcum",
+      "class": "wfg.ltv_econ.economy.policies.BulwarkOrichalcumPolicy",
+      "posterPath": "graphics/policies/bulwark_of_orichalcum.png",
+      "cost": 250000,
+      "durationDays": 50,
+      "cooldownDays": 360,
+      "description": "A top-priority planetary defense initiative. Defensive emplacements, garrisons, and fortifications are reinforced to near-mythical standards, ensuring the colony can withstand prolonged assaults. The program requires massive logistical support and sustained maintenance."
+    },
+    {
+      "id": "iron_fist_decree",
+      "name": "Iron Fist Decree",
+      "class": "wfg.ltv_econ.economy.policies.IronFistPolicy",
+      "posterPath": "graphics/policies/iron_fist_decree.png",
+      "cost": 0,
+      "durationDays": 60,
+      "cooldownDays": 180,
+      "description": "Declares a state of martial enforcement across the colony. Security forces are granted sweeping authority to suppress unrest, dismantle dissent, and impose absolute order. Social cohesion rises sharply under strict control, but public morale, and happiness suffer as civil liberties are suspended and compliance is enforced by force."
+    },
+    {
+      "id": "urban_renewal_initiative",
+      "name": "Urban Renewal Initiative",
+      "class": "wfg.ltv_econ.economy.policies.UrbanRenewalPolicy",
+      "posterPath": "graphics/policies/urban_renewal_initiative.png",
+      "cost": 1e6,
+      "durationDays": 120,
+      "cooldownDays": 480,
+      "description": "A comprehensive housing development plan designed to improve living conditions, public health, and overall morale of the colony. Massive construction and infrastructure investment aims to foster population growth and enhance well-being over time."
+    },
+    {
+      "id": "public_health_education",
+      "name": "Public Health Education Program",
+      "class": "wfg.ltv_econ.economy.policies.PublicHealthEducationPolicy",
+      "posterPath": "graphics/policies/public_health_education.png",
+      "cost": 1e5,
+      "durationDays": 120,
+      "cooldownDays": 0,
+      "description": "Colony-wide public health campaigns educate citizens on hygiene, nutrition, and disease prevention. These initiatives improve overall health and social cohesion, fostering a more resilient population with minimal disruption to daily life. Has no cooldown."
+    },
+    {
+      "id": "bres_vitalis",
+      "name": "Bres Vitalis",
+      "class": "wfg.ltv_econ.economy.policies.BresVitalisPolicy",
+      "posterPath": "graphics/policies/bres_vitalis.png",
+      "cost": 3e4,
+      "durationDays": 60,
+      "cooldownDays": 360,
+      "description": "The colony administration, in consultation with Tri-Tachyon advisors, has developed a new beverage: Bres Vitalis. Marketed as a revitalizing tonic, it subtly incorporates additives that lift morale and stimulate productivity, while leaving health effects largely unnoticed and avoiding scrutiny from factions or rival interests."
+    },
+    {
+      "id": "wellness_compliance_directive",
+      "name": "Wellness Compliance Directive",
+      "class": "wfg.ltv_econ.economy.policies.WellnessCompliancePolicy",
+      "posterPath": "graphics/policies/wellness_compliance_directive.png",
+      "cost": 2000,
+      "durationDays": 45,
+      "cooldownDays": 360,
+      "description": "A public health initiative distributing advisories and educational material emphasizing vigilance and personal responsibility. Reports highlight varying health outcomes across neighborhoods and professions, encouraging citizens to monitor those deemed most at risk."
+    },
+    {
+      "id": "convergence_festival",
+      "name": "The Convergence Festival",
+      "class": "wfg.ltv_econ.economy.policies.ConvergenceFestivalPolicy",
+      "posterPath": "graphics/policies/convergence_festival.png",
+      "cost": 750000,
+      "durationDays": 30,
+      "cooldownDays": 360,
+      "description": "A monumental civic celebration featuring mass performances, public assemblies, and sector-wide broadcasts. The Convergence Festival brings the population together through shared spectacle and coordinated participation. The scale of the festivities requires significant logistical support."
     }
   ]
 }

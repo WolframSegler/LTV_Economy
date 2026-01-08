@@ -35,7 +35,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -109,9 +109,6 @@ public class IndustryTooltips {
 			SharedUnlockData.get().reportPlayerAwareOfIndustry(ind.getSpec().getId(), true);
 		}
 		tp.setCodexEntryId(CodexDataV2.getIndustryEntryId(ind.getSpec().getId()));
-
-		// This line does not do anything
-		// ind.currTooltipMode = mode;
 
 		final MarketAPI orgMarket = ind.getMarket();
 		final FactionAPI faction = orgMarket.getFaction();
@@ -352,19 +349,19 @@ public class IndustryTooltips {
 			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
 				"addPostUpkeepSection", ind, tp, mode);
 
-			List<CommodityStats> supplyList = new ArrayList<>();
-			List<CommodityStats> demandList = new ArrayList<>();
+			List<CommodityCell> supplyList = new ArrayList<>();
+			List<CommodityCell> demandList = new ArrayList<>();
 
 			final EconomyEngine engine = EconomyEngine.getInstance();
 
 			for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
-				CommodityStats stats = engine.getComStats(spec.getId(), ind.getMarket().getId());
+				final CommodityCell cell = engine.getComCell(spec.getId(), ind.getMarket().getId());
 
-				if (stats.getProdIndStat(ind.getId()).getModifiedInt() > 0) {
-					supplyList.add(stats);
+				if (cell.getProdIndStat(ind.getId()).getModifiedInt() > 0) {
+					supplyList.add(cell);
 				}
-				if (stats.getDemandIndStat(ind.getId()).getModifiedInt() > 0) {
-					demandList.add(stats);
+				if (cell.getDemandIndStat(ind.getId()).getModifiedInt() > 0) {
+					demandList.add(cell);
 				}
 			}
 
@@ -381,12 +378,10 @@ public class IndustryTooltips {
 				float sectionWidth = (ind.getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (CommodityStats stats : supplyList) {
-					CommoditySpecAPI commodity = market.getCommodityData(stats.comID).getCommodity();
+				for (CommodityCell cell : supplyList) {
+					final CommoditySpecAPI com = market.getCommodityData(cell.comID).getCommodity();
 
-					int pAmount = stats.getProdIndStat(ind.getId()).getModifiedInt();
-
-					if (pAmount < 1) continue;
+					final int pAmount = cell.getProdIndStat(ind.getId()).getModifiedInt();
 
 					// wrap to next line if needed
 					count++;
@@ -398,12 +393,12 @@ public class IndustryTooltips {
 					// draw icon
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
-					tp.addIcons(commodity, 1, IconRenderMode.NORMAL);
+					tp.addIcons(com, 1, IconRenderMode.NORMAL);
 					tp.addIconGroup(0f);
 					UIComponentAPI iconComp = tp.getPrev();
 
 					// Add extra padding for thinner icons
-					float actualIconWidth = iconSize * commodity.getIconWidthMult();
+					float actualIconWidth = iconSize * com.getIconWidthMult();
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
@@ -447,12 +442,10 @@ public class IndustryTooltips {
 				float sectionWidth = (ind.getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (CommodityStats stats : demandList) {
-					CommoditySpecAPI commodity = market.getCommodityData(stats.comID).getCommodity();
+				for (CommodityCell cell : demandList) {
+					final CommoditySpecAPI com = market.getCommodityData(cell.comID).getCommodity();
 
-					int dAmount = stats.getDemandIndStat(ind.getId()).getModifiedInt();
-
-					if (dAmount < 1) continue;
+					final int dAmount = cell.getDemandIndStat(ind.getId()).getModifiedInt();
 
 					// wrap to next line if needed
 					count++;
@@ -464,16 +457,16 @@ public class IndustryTooltips {
 					// draw icon
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
-					if (stats.getFlowAvailabilityRatio() < 0.99f) {
-						tp.addIcons(commodity, 1, IconRenderMode.DIM_RED);
+					if (cell.getFlowAvailabilityRatio() < 0.99f) {
+						tp.addIcons(com, 1, IconRenderMode.DIM_RED);
 					} else {
-						tp.addIcons(commodity, 1, IconRenderMode.NORMAL);
+						tp.addIcons(com, 1, IconRenderMode.NORMAL);
 					}
 					tp.addIconGroup(0f);
 					UIComponentAPI iconComp = tp.getPrev();
 
 					// Add extra padding for thinner icons
-					float actualIconWidth = iconSize * commodity.getIconWidthMult();
+					float actualIconWidth = iconSize * com.getIconWidthMult();
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
@@ -655,7 +648,7 @@ public class IndustryTooltips {
 	}
 
     public static void addImproveDesc(
-        TooltipMakerAPI info, ImprovementDescriptionMode mode, Industry ind
+        TooltipMakerAPI tp, ImprovementDescriptionMode mode, Industry ind
     ) {
 		float initPad = 0f;
 
@@ -664,10 +657,10 @@ public class IndustryTooltips {
 			"canImproveToIncreaseProduction", ind);
 		if (canImprove) {
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
-				info.addPara("Production increased by %s.", initPad, highlight,
+				tp.addPara("Production increased by %s.", initPad, highlight,
 						Strings.X + DEFAULT_IMPROVE_PRODUCTION_BONUS);
 			} else {
-				info.addPara("Increases production by %s.", initPad, highlight,
+				tp.addPara("Increases production by %s.", initPad, highlight,
 						Strings.X + DEFAULT_IMPROVE_PRODUCTION_BONUS);
 			}
 			initPad = opad;
@@ -676,13 +669,13 @@ public class IndustryTooltips {
 
 		if (mode != ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
 
-			info.addPara("Each improvement made at a colony doubles the number of " +
+			tp.addPara("Each improvement made at a colony doubles the number of " +
 					"" + Misc.STORY + " points required to make an additional improvement.", initPad,
 					Misc.getStoryOptionColor(), Misc.STORY + " points");
 			addedSomething = true;
 		}
 		if (!addedSomething) {
-			info.addSpacer(-opad);
+			tp.addSpacer(-opad);
 		}
 	}
 }

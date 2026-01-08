@@ -1,7 +1,6 @@
 package wfg.ltv_econ.plugins;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
@@ -10,14 +9,18 @@ import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
+import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.economy.CommodityInfo;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityDomain;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
+import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
+import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
+import wfg.ltv_econ.intel.bar.events.WellnessComplianceBarEvent.WellnessComplianceBarEventCreator;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
     public static List<CampaignEventListener> listeners;
@@ -46,10 +49,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
-        WorkerPoolCondition.initialize();
-
-        WorkerRegistry.loadInstance();
-        EconomyEngine.loadInstance();
+        WorkerRegistry.loadInstance(false);
+        EconomyEngine.loadInstance(false);
 
         final SectorAPI sector = Global.getSector();
 
@@ -58,22 +59,24 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         sector.getListenerManager().addListener(new AddWorkerIndustryOption(), true);
 
         if (newGame) injectStockpiles();
+
+        final BarEventManager barManager = BarEventManager.getInstance();
+
+        barManager.addEventCreator(new BresVitalisBarEventCreator());
+        barManager.addEventCreator(new WellnessComplianceBarEventCreator());
+        barManager.addEventCreator(new ConvergenceFestivalBarEventCreator());
     }
 
     @Override
     public void beforeGameSave() {
-        final Map<String, Object> persistentData = Global.getSector().getPersistentData();
-
-        persistentData.put(EconomyEngine.EconEngineSerialID, EconomyEngine.getInstance());
-        persistentData.put(WorkerRegistry.WorkerRegSerialID, WorkerRegistry.getInstance());
-
-        Global.getSector().removeListener(EconomyEngine.getInstance());
+        EconomyEngine.saveInstance();
+        WorkerRegistry.saveInstance();
     }
 
     @Override
     public void afterGameSave() {
-        listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
-        listeners.add(0, EconomyEngine.getInstance());
+        WorkerRegistry.loadInstance(false);
+        EconomyEngine.loadInstance(false);
     }
 
     private static final void addManufacturingToMarkets() {
@@ -111,9 +114,9 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     private static final void injectStockpiles() {
         final EconomyEngine engine = EconomyEngine.getInstance();
-        for (CommodityInfo info : engine.getCommodityInfos()) {
-            for (CommodityStats stats : info.getAllStats()) {
-                stats.addStoredAmount(stats.getPreferredStockpile() * 0.8f);
+        for (CommodityDomain dom : engine.getComDomains()) {
+            for (CommodityCell cell : dom.getAllCells()) {
+                cell.addStoredAmount(cell.getPreferredStockpile() * 0.8f);
             }
         }
     }

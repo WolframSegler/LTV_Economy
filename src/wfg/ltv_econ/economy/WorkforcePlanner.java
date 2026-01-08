@@ -282,8 +282,6 @@ public class WorkforcePlanner {
         final List<String> groupedOutputPairs = groupedData.one;
         outputsPerMarket = groupedData.two;
 
-        Global.getLogger(EconomyEngine.class).error(groupingData.groupToMembers);
-
         final int numMarkets = markets.size();
         final int numOutputs = groupedOutputPairs.size();
         final int nVars = numMarkets * numOutputs + numOutputs; // original + slack per output

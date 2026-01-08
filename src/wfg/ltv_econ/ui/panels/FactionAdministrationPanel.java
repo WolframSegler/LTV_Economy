@@ -35,20 +35,28 @@ public class FactionAdministrationPanel extends
         final int SECTION_I = opad;
         final int SECTION_II = SECTION_I + 420;
 
+        { // SECTION I
         final LabelAPI tradeDiploLbl = settings.createLabel(
-            "Trade & Diplomacy", Fonts.INSIGNIA_LARGE);
+            "Trade & Diplomacy", Fonts.INSIGNIA_VERY_LARGE);
         add(tradeDiploLbl).inTL(opad, SECTION_I);
         int lblW = (int) tradeDiploLbl.getPosition().getHeight();
+
+        final LabelAPI embargoListLbl = settings.createLabel(
+            "Embargo Menu", Fonts.INSIGNIA_LARGE);
+        add(embargoListLbl).inTL(opad + pad, SECTION_I + lblW + opad);
+        lblW += (int) embargoListLbl.getPosition().getHeight();
         
         final FactionSelectionPanel factionEmbargoPanel = new FactionSelectionPanel(
-            m_panel, 200, 350 
+            m_panel, 220, 320 
         );
-        add(factionEmbargoPanel).inTL(opad, SECTION_I + lblW + opad);
+        add(factionEmbargoPanel).inTL(opad + pad, SECTION_I + lblW + opad + pad*2);
+        }
         
+        { // SECTION II
         final LabelAPI financePoliciesLbl = settings.createLabel(
-            "Financial Policies", Fonts.INSIGNIA_LARGE);
+            "Financial Policies", Fonts.INSIGNIA_VERY_LARGE);
         add(financePoliciesLbl).inTL(opad, SECTION_II);
-        lblW = (int) financePoliciesLbl.getPosition().getHeight();
+        final int lblW = (int) financePoliciesLbl.getPosition().getHeight();
 
         final CallbackRunnable<Button> redistributeRun = (btn) -> {
             btn.checked = !btn.checked;
@@ -61,6 +69,7 @@ public class FactionAdministrationPanel extends
             Fonts.DEFAULT_SMALL, redistributeRun, base, pad
         );
         redistributeBtn.checked = factionSettings.redistributeCredits;
-        add(redistributeBtn).inTL(opad, SECTION_II + lblW + pad);
+        add(redistributeBtn).inTL(opad + pad, SECTION_II + lblW + pad);
+        }
     }
 }

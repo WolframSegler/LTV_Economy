@@ -16,7 +16,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
-import com.fs.starfarer.api.combat.MutableStatWithTempMods;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
@@ -30,7 +29,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.submarkets.OpenSubmarketPlugin;
 import wfg.wrap_ui.ui.panels.CustomPanel;
@@ -77,13 +76,13 @@ public class TooltipUtils {
         final int econUnit = (int) spec.getEconUnit();
 
         if (showBestSell) {
-            final ArrayList<CommodityStats> marketList = new ArrayList<>();
-            for (CommodityStats stats : engine.getCommodityInfo(comID).getAllStats()) {
-                if (!stats.market.isHidden() && stats.market.getEconGroup() == null &&
-                    stats.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
+            final ArrayList<CommodityCell> marketList = new ArrayList<>();
+            for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
+                if (!cell.market.isHidden() && cell.market.getEconGroup() == null &&
+                    cell.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
                 ) {
-                    if (1f - stats.getFlowAvailabilityRatio() > 0 && stats.getFlowDeficit() > econUnit) {
-                        marketList.add(stats);
+                    if (1f - cell.getFlowAvailabilityRatio() > 0 && cell.getFlowDeficit() > econUnit) {
+                        marketList.add(cell);
                     }
                 }
             }
@@ -101,12 +100,12 @@ public class TooltipUtils {
                 countingMap.clear();
 
                 int rowCount = 0;
-                for (CommodityStats stats : marketList) {
-                    final MarketAPI market = stats.market;
+                for (CommodityCell cell : marketList) {
+                    final MarketAPI market = cell.market;
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
 
-                        final float deficit = stats.getFlowDeficit();
+                        final float deficit = cell.getFlowDeficit();
                         Color labelColor = highlight;
                         Color deficitColor = gray;
                         String quantityLabel = "---";
@@ -116,7 +115,7 @@ public class TooltipUtils {
                         }
 
                         String lessThanSymbol = "";
-                        long marketDemand = (long) stats.getBaseDemand(false);
+                        long marketDemand = (long) cell.getBaseDemand(true);
                         marketDemand = marketDemand / 100 * 100;
                         if (marketDemand < 100) {
                             marketDemand = 100;
@@ -139,7 +138,7 @@ public class TooltipUtils {
 
                         tooltip.addRow(new Object[] {
                             highlight,
-                            Misc.getDGSCredits(stats.computeVanillaPrice(econUnit, true, true)),
+                            Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, true, true)),
                             labelColor,
                             lessThanSymbol + NumFormat.engNotation(marketDemand),
                             deficitColor,
@@ -182,16 +181,16 @@ public class TooltipUtils {
         }
 
         if (showBestBuy) {
-            final ArrayList<CommodityStats> marketList = new ArrayList<>();
-            for (CommodityStats stats : engine.getCommodityInfo(comID).getAllStats()) {
-                if (!stats.market.isHidden() && stats.market.getEconGroup() == null &&
-                    stats.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
+            final ArrayList<CommodityCell> marketList = new ArrayList<>();
+            for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
+                if (!cell.market.isHidden() && cell.market.getEconGroup() == null &&
+                    cell.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
                 ) {
                     final int stockpileLimit = (int) OpenSubmarketPlugin.getBaseStockpileLimit(
-                        stats.comID, stats.marketID
+                        cell.comID, cell.marketID
                     );
                     if (stockpileLimit > 0 && stockpileLimit >= econUnit) {
-                        marketList.add(stats);
+                        marketList.add(cell);
                     }
                 }
             }
@@ -209,17 +208,17 @@ public class TooltipUtils {
                 countingMap.clear();
 
                 int rowCount = 0;
-                for (CommodityStats stats : marketList) {
-                    final MarketAPI market = stats.market;
+                for (CommodityCell cell : marketList) {
+                    final MarketAPI market = cell.market;
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
                         long stockpileLimit = (long) OpenSubmarketPlugin.getBaseStockpileLimit(
-                            stats.comID, stats.marketID
+                            cell.comID, cell.marketID
                         );
                         stockpileLimit += market.getCommodityData(comID).getPlayerTradeNetQuantity();
                         if (stockpileLimit < 0) stockpileLimit = 0;
 
-                        int excess = (int) stats.getFlowCanNotExport();
+                        int excess = (int) cell.getFlowCanNotExport();
                         Color excessColor = gray;
                         String excessStr = "---";
                         if (excess > 0) {
@@ -249,7 +248,7 @@ public class TooltipUtils {
 
                         tooltip.addRow(new java.lang.Object[] {
                             highlight,
-                            Misc.getDGSCredits(stats.computeVanillaPrice(econUnit, false, true)),
+                            Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, false, true)),
                             highlight,
                             availableStr + NumFormat.engNotation(stockpileLimit),
                             excessColor,
@@ -348,7 +347,7 @@ public class TooltipUtils {
         return codexTooltip;
     }
 
-    private static Comparator<CommodityStats> createSellComparator(String comID, int econUnit) {
+    private static Comparator<CommodityCell> createSellComparator(String comID, int econUnit) {
         return (s1, s2) -> {
             int price1 = (int) s1.computeVanillaPrice(econUnit, true, true);
             int price2 = (int) s2.computeVanillaPrice(econUnit, true, true);
@@ -356,7 +355,7 @@ public class TooltipUtils {
         };
     }
 
-    private static Comparator<CommodityStats> createBuyComparator(String comID, int econUnit) {
+    private static Comparator<CommodityCell> createBuyComparator(String comID, int econUnit) {
         return (s1, s2) -> {
             int price1 = (int) s1.computeVanillaPrice(econUnit, false, true);
             int price2 = (int) s2.computeVanillaPrice(econUnit, false, true);
@@ -366,11 +365,11 @@ public class TooltipUtils {
 
     public static void createCommodityProductionBreakdown(
         TooltipMakerAPI tp,
-        CommodityStats comStats
+        CommodityCell comCell
     ) {
         tp.setParaFontDefault();
         final LabelAPI title = tp.addPara("Available: %s", pad, highlight,
-            NumFormat.engNotation((long)comStats.getFlowAvailable()));
+            NumFormat.engNotation((long)comCell.getFlowAvailable()));
         final int gridWidth = 430;
         final int valueWidth = 50;
         int rowCount = 0;
@@ -381,9 +380,9 @@ public class TooltipUtils {
         );
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
-        for (Map.Entry<String, MutableStat> entry : comStats.getFlowProdIndStats().entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : comCell.getFlowProdIndStats().entrySet()) {
             final MutableStat mutable = entry.getValue();
-            final Industry ind = comStats.market.getIndustry(entry.getKey());
+            final Industry ind = comCell.market.getIndustry(entry.getKey());
 
             if (mutable.getModifiedInt() > 0) {
                 tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getCurrentName()+")",
@@ -409,20 +408,20 @@ public class TooltipUtils {
             }
         }
 
-        if (comStats.getProduction(false) > 0) {
-            final MutableStatWithTempMods mutable = comStats.getProductionStat();
+        if (comCell.getProduction(false) > 0) {
+            final MutableStat mutable = comCell.getProductionStat();
 
             for (StatMod mod : mutable.getFlatMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+mod.source+")",
+                tp.addToGrid(0, rowCount++, mod.desc,
                     "+" + NumFormat.formatMagnitudeAware(mod.value));
             }
             for (StatMod mod : mutable.getPercentMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+mod.source+")",
+                tp.addToGrid(0, rowCount++, mod.desc,
                     "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
             }
             if (mutable.base > 0) {
             for (StatMod mod : mutable.getMultMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+mod.source+")",
+                tp.addToGrid(0, rowCount++, mod.desc,
                     Strings.X + NumFormat.formatMagnitudeAware(mod.value),
                     mod.value < 1f ? negative:highlight
                 );
@@ -431,26 +430,26 @@ public class TooltipUtils {
         }
 
         // Import mods
-        if (comStats.inFactionImports > 0) {
+        if (comCell.inFactionImports > 0) {
             tp.addToGrid(0, rowCount++, "In-faction imports", "+" + NumFormat.engNotation(
-                (long) comStats.inFactionImports), comStats.inFactionImports < 0 ? negative : highlight);
+                (long) comCell.inFactionImports), comCell.inFactionImports < 0 ? negative : highlight);
         }
 
-        if (comStats.globalImports > 0) {
+        if (comCell.globalImports > 0) {
             tp.addToGrid(0, rowCount++, "Global imports", "+" + NumFormat.engNotation(
-                (long) comStats.globalImports), comStats.globalImports < 0 ? negative : highlight);
+                (long) comCell.globalImports), comCell.globalImports < 0 ? negative : highlight);
         }
 
-        if (comStats.importEffectiveness < 1f) {
-            final float value = ((int) (comStats.importEffectiveness * 100f)) / 100f;
+        if (comCell.importEffectiveness < 1f) {
+            final float value = ((int) (comCell.importEffectiveness * 100f)) / 100f;
 
             tp.setGridValueColor(negative);
             tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value);
         }
 
-        if (comStats.getFlowDeficit() >= 1) {
+        if (comCell.getFlowDeficit() >= 1) {
             tp.addToGrid(0, rowCount++, "Post-trade shortage", "" + NumFormat.engNotation(
-                (long)-comStats.getFlowDeficit()), negative);
+                (long)-comCell.getFlowDeficit()), negative);
         }
 
         if (rowCount < 0) {
@@ -463,21 +462,21 @@ public class TooltipUtils {
 
     public static void createCommodityDemandBreakdown(
         TooltipMakerAPI tp,
-        CommodityStats comStats
+        CommodityCell comCell
     ) {
-        final Color valueColor = comStats.getFlowDeficit() > 0 ? negative : highlight;
+        final Color valueColor = comCell.getFlowDeficit() > 0 ? negative : highlight;
         final int gridWidth = 430;
         final int valueWidth = 50;
         int rowCount = 0;
         
         LabelAPI title = tp.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation((long)comStats.getBaseDemand(false)));
+            NumFormat.engNotation((long)comCell.getBaseDemand(true)));
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
-        for (Map.Entry<String, MutableStat> entry : comStats.getFlowDemandIndStats().entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : comCell.getFlowDemandIndStats().entrySet()) {
             final MutableStat mutable = entry.getValue();
-            final Industry ind = comStats.market.getIndustry(entry.getKey());
+            final Industry ind = comCell.market.getIndustry(entry.getKey());
 
             if (mutable.getModifiedInt() > 0) {
                 tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getCurrentName()+")",
@@ -497,6 +496,27 @@ public class TooltipUtils {
             for (StatMod mod : mutable.getMultMods().values()) {
                 tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
                     Strings.X + NumFormat.formatMagnitudeAware(mod.value), valueColor);
+            }
+            }
+        }
+
+        if (comCell.getBaseDemand(false) > 0) {
+            final MutableStat mutable = comCell.getDemandStat();
+
+            for (StatMod mod : mutable.getFlatMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc,
+                    "+" + NumFormat.formatMagnitudeAware(mod.value));
+            }
+            for (StatMod mod : mutable.getPercentMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc,
+                    "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
+            }
+            if (mutable.base > 0) {
+            for (StatMod mod : mutable.getMultMods().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc,
+                    Strings.X + NumFormat.formatMagnitudeAware(mod.value),
+                    mod.value < 1f ? negative:highlight
+                );
             }
             }
         }

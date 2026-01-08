@@ -79,7 +79,6 @@ public final class CompatLayer {
         final boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
         return hasRelevantCondition ? value : 0f;
     }
-
     
     public static final MutableStat getModifiers(
         Industry ind, String comID, MutableStat base, MutableStat bonus

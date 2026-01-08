@@ -20,7 +20,7 @@ import wfg.ltv_econ.configs.IndustryConfigManager;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.economy.CommodityStats;
+import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
@@ -218,15 +218,14 @@ public class IndustryIOs {
     ) {
         final MarketAPI market = ind.getMarket();
         if (!output.isAbstract) {
-            final CommodityStats stats = EconomyEngine.getInstance().getComStats(output.comID, market.getId()); 
-            if (stats != null && output.target > 0 && output.target < stats.getStored()) return 0f;
+            final CommodityCell cell = EconomyEngine.getInstance().getComCell(output.comID, market.getId()); 
+            if (cell != null && output.target > 0 && output.target < cell.getStored()) return 0f;
         }
 
         float scale = 1f;
 
         if (output.usesWorkers && !output.isAbstract) {
-            final WorkerRegistry reg = WorkerRegistry.getInstance();
-            final WorkerIndustryData data = reg.getData(market.getId(), ind.getSpec());
+            final WorkerIndustryData data = WorkerRegistry.getInstance().getData(ind);
             if (data != null) {
                 scale *= data.getAssignedForOutput(outputID);
             }
@@ -435,16 +434,10 @@ public class IndustryIOs {
         return inputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }
 
-    /**
-     * Works for both dynamic and static configs.
-     */
     public static final IndustryConfig getIndConfig(Industry ind) {
         return getIndConfig(ind.getSpec());
     }
 
-    /**
-     * Works for both dynamic and static configs.
-     */
     public static final IndustryConfig getIndConfig(IndustrySpecAPI ind) {
         IndustryConfig indConfig = IndustryConfigManager.ind_config.get(ind.getId());
 

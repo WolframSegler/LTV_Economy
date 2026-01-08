@@ -17,7 +17,7 @@ import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
- * The registry always uses IndustryIOs.getBaseIndIDifNoConfig() internally to manage industry IDs
+ * The registry always uses IndustryIOs.getBaseIndustryID() internally to manage industry IDs
  */
 public class WorkerRegistry {
     public static final String WorkerRegSerialID = "ltv_econ_worker_registry";
@@ -29,7 +29,7 @@ public class WorkerRegistry {
 
     private WorkerRegistry() {
         for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
-        for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
+        for (Industry ind : CommodityCell.getVisibleIndustries(market)) {
             if (EconomyEngine.isWorkerAssignable(ind)) {
                 register(market, ind);
             }
@@ -37,19 +37,14 @@ public class WorkerRegistry {
         }
     }
 
-    public static final WorkerRegistry createInstance() {
-        if (instance == null) instance = new WorkerRegistry();
-        return instance;
-    }
-
-    public static final WorkerRegistry loadInstance() {
+    public static final WorkerRegistry loadInstance(boolean forceRefresh) {
         WorkerRegistry workerRegistry = (WorkerRegistry) Global.getSector()
             .getPersistentData().get(WorkerRegSerialID);
 
-        if (workerRegistry != null) {
+        if (workerRegistry != null && !forceRefresh) {
             instance = workerRegistry;
         } else {
-            workerRegistry = WorkerRegistry.createInstance();
+            instance = new WorkerRegistry();
             if (Global.getSettings().isDevMode()) {
                 Global.getLogger(WorkerRegistry.class).info("Worker Registery constructed");
             }
@@ -58,19 +53,32 @@ public class WorkerRegistry {
         return instance;
     }
 
+    public static final void saveInstance() {
+        Global.getSector().getPersistentData().put(WorkerRegSerialID, instance);
+        instance = null;
+    }
+
     public static final void setInstance(WorkerRegistry a) {
         instance = a;
     }
 
     public static final WorkerRegistry getInstance() {
+        if (instance == null) loadInstance(false);
         return instance;
     }
 
-    public final void register(MarketAPI market, Industry ind) {
-        final String key = makeKey(market.getId(), IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec()));
-        if (EconomyEngine.isWorkerAssignable(ind)) {
-            registry.putIfAbsent(key, new WorkerIndustryData(market, ind));
+    public final void resetWorkersAssigned(boolean resetPlayerIndustries) {
+        for (WorkerIndustryData data : registry.values()) {
+            if (!resetPlayerIndustries && data.market.isPlayerOwned()) continue;
+            data.resetWorkersAssigned();
         }
+    }
+
+    public final void register(MarketAPI market, Industry ind) {
+        if (!IndustryIOs.getIndConfig(ind).workerAssignable) return;
+
+        final String key = makeKey(market.getId(), IndustryIOs.getBaseIndustryID(ind));
+        registry.putIfAbsent(key, new WorkerIndustryData(market, ind));
     }
 
     public final void register(String marketID) {
@@ -80,8 +88,12 @@ public class WorkerRegistry {
         }
     }
 
+    public final void register(Industry ind) {
+        register(ind.getMarket(), ind);
+    }
+
     public final void remove(String marketID, IndustrySpecAPI ind) {
-        registry.remove(makeKey(marketID, IndustryIOs.getBaseIndIDifNoConfig(ind)));
+        registry.remove(makeKey(marketID, IndustryIOs.getBaseIndustryID(ind)));
     }
 
     public final void remove(String marketID) {
@@ -109,7 +121,7 @@ public class WorkerRegistry {
     }
 
     public final List<WorkerIndustryData> getIndustriesUsingWorkers(String marketID) {
-        final ArrayList<WorkerIndustryData> list = new ArrayList<>(6); 
+        final ArrayList<WorkerIndustryData> list = new ArrayList<>(8); 
         for (Map.Entry<String, WorkerIndustryData> data : registry.entrySet()) {
             if (data.getKey().startsWith(marketID + KEY)) {
                 list.add(data.getValue());
@@ -120,8 +132,7 @@ public class WorkerRegistry {
     }
 
     public static final long getWorkerCap(MarketAPI market) {
-        WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
-        if (pool == null) return 0;
+        final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
 
         return pool.getWorkerPool();
     }
@@ -131,7 +142,11 @@ public class WorkerRegistry {
     }
 
     public final WorkerIndustryData getData(String marketID, IndustrySpecAPI ind) {
-        return getData(marketID, IndustryIOs.getBaseIndIDifNoConfig(ind));
+        return getData(marketID, IndustryIOs.getBaseIndustryID(ind));
+    }
+
+    public final WorkerIndustryData getData(Industry ind) {
+        return getData(ind.getMarket().getId(), IndustryIOs.getBaseIndustryID(ind));
     }
 
     public final void setData(WorkerIndustryData data) {
@@ -158,7 +173,7 @@ public class WorkerRegistry {
 
         public WorkerIndustryData(MarketAPI market, Industry industry) {
             this.marketID = market.getId();
-            this.indID = IndustryIOs.getBaseIndIDifNoConfig(industry.getSpec());
+            this.indID = IndustryIOs.getBaseIndustryID(industry);
             this.outputRatios = new HashMap<>();
 
             for (OutputConfig output : IndustryIOs.getIndConfig(industry).outputs.values()) {

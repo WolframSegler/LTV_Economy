@@ -16,15 +16,15 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.configs.TradeWeights;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
-import wfg.ltv_econ.economy.CommodityStats.PriceType;
+import wfg.ltv_econ.economy.CommodityCell.PriceType;
 
-public class CommodityInfo {
+public class CommodityDomain {
 
     private final String comID;
     public transient CommoditySpecAPI spec;
 
 
-    private final Map<String, CommodityStats> m_comStats = new HashMap<>();
+    private final Map<String, CommodityCell> m_comCells = new HashMap<>();
     private final Map<String, IncomeLedger> incomeLedgers = new HashMap<>();
 
     private transient long marketActivity;
@@ -32,12 +32,12 @@ public class CommodityInfo {
     private transient boolean filled = false;
     private float[] lastNDaysVolume = new float[EconomyConfig.VOLATILITY_WINDOW];
 
-    public CommodityInfo(
+    public CommodityDomain(
         CommoditySpecAPI spec, Set<String> registeredMarkets, EconomyEngine engine
     ) {
         comID = spec.getId();
         for (String marketID : registeredMarkets) {
-            m_comStats.put(marketID, new CommodityStats(comID, marketID));
+            m_comCells.put(marketID, new CommodityCell(comID, marketID));
 
             if (engine.isPlayerMarket(marketID)) {
                 incomeLedgers.put(marketID, new IncomeLedger());
@@ -71,17 +71,17 @@ public class CommodityInfo {
     }
 
     public final void advance() {
-        m_comStats.values().parallelStream().forEach(CommodityStats::advance);
+        m_comCells.values().parallelStream().forEach(CommodityCell::advance);
 
         recordDailyVolume();
     }
 
     public final void reset() {
-        m_comStats.values().parallelStream().forEach(CommodityStats::reset);
+        m_comCells.values().parallelStream().forEach(CommodityCell::reset);
     }
 
     public final void update() {
-        m_comStats.values().parallelStream().forEach(CommodityStats::update);
+        m_comCells.values().parallelStream().forEach(CommodityCell::update);
     }
 
     public void endMonth() {
@@ -91,7 +91,7 @@ public class CommodityInfo {
     }
 
     public final void addMarket(String marketID) {
-        m_comStats.putIfAbsent(marketID, new CommodityStats(comID, marketID));
+        m_comCells.putIfAbsent(marketID, new CommodityCell(comID, marketID));
 
         if (EconomyEngine.getInstance().isPlayerMarket(marketID)) {
             incomeLedgers.put(marketID, new IncomeLedger());
@@ -99,29 +99,29 @@ public class CommodityInfo {
     }
 
     public final void removeMarket(String marketID) {
-        m_comStats.remove(marketID);
+        m_comCells.remove(marketID);
 
         if (EconomyEngine.getInstance().isPlayerMarket(marketID)) {
             incomeLedgers.remove(marketID);
         }
     }
 
-    public final CommodityStats getStats(String marketID) {
-        return m_comStats.get(marketID);
+    public final CommodityCell getCell(String marketID) {
+        return m_comCells.get(marketID);
     }
 
-    public final Collection<CommodityStats> getAllStats() {
-        return m_comStats.values();
+    public final Collection<CommodityCell> getAllCells() {
+        return m_comCells.values();
     }
 
-    public final Map<String, CommodityStats> getStatsMap() {
-        return m_comStats;
+    public final Map<String, CommodityCell> getCellsMap() {
+        return m_comCells;
     }
 
-    public final ArrayList<CommodityStats> getSortedByProduction(int listSize) {
-        return m_comStats.values()
+    public final ArrayList<CommodityCell> getSortedByProduction(int listSize) {
+        return m_comCells.values()
             .stream()
-            .filter(stats -> stats.getProduction(true) > 0)
+            .filter(cell -> cell.getProduction(true) > 0)
             .sorted((a, b) -> Float.compare(
                 b.getProduction(true), a.getProduction(true)
             ))
@@ -129,12 +129,12 @@ public class CommodityInfo {
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public final ArrayList<CommodityStats> getSortedByDemand(int listSize) {
-        return m_comStats.values()
+    public final ArrayList<CommodityCell> getSortedByDemand(int listSize) {
+        return m_comCells.values()
             .stream()
-            .filter(stats -> stats.getBaseDemand(false) > 0)
+            .filter(cell -> cell.getBaseDemand(true) > 0)
             .sorted((a, b) -> Float.compare(
-                b.getBaseDemand(false), a.getBaseDemand(false)
+                b.getBaseDemand(true), a.getBaseDemand(true)
             ))
             .limit(listSize)
             .collect(Collectors.toCollection(ArrayList::new));
@@ -220,60 +220,60 @@ public class CommodityInfo {
                 indices[i], exporters, importers
             );
 
-            final CommodityStats expStats = getStats(expImp.one);
-            final CommodityStats impStats = getStats(expImp.two);
+            final CommodityCell expCell = getCell(expImp.one);
+            final CommodityCell impCell = getCell(expImp.two);
 
-            if (expStats.market.isPlayerOwned()^impStats.market.isPlayerOwned()) {
-                final String tradingFactionID = expStats.market.isPlayerOwned() ?
-                    impStats.market.getFaction().getId() : expStats.market.getFaction().getId();
+            if (expCell.market.isPlayerOwned()^impCell.market.isPlayerOwned()) {
+                final String tradingFactionID = expCell.market.isPlayerOwned() ?
+                    impCell.market.getFaction().getId() : expCell.market.getFaction().getId();
 
                 if (engine.playerFactionSettings.embargoedFactions.contains(tradingFactionID)) {
                     continue;
                 }
             }
 
-            final double exportableRemaining = expStats.getStoredRemainingExportable();
-            final float deficitRemaining = computeImportAmount(impStats);
+            final double exportableRemaining = expCell.getStoredRemainingExportable();
+            final float deficitRemaining = computeImportAmount(impCell);
 
             if (exportableRemaining < 0.01f || deficitRemaining < 0.01f) continue;
 
-            final boolean sameFaction = expStats.market.getFaction().equals(impStats.market.getFaction());
+            final boolean sameFaction = expCell.market.getFaction().equals(impCell.market.getFaction());
             final float amountToSend = (float) Math.min(exportableRemaining, deficitRemaining);
 
             // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
             // models supply-demand influence on transaction.
-            final float exporterPrice = expStats.getUnitPrice(PriceType.MARKET_SELLING, (int)amountToSend);
-            final float importerPrice = impStats.getUnitPrice(PriceType.MARKET_BUYING, (int)amountToSend);
-            final float weight = Math.min(1f, (float)impStats.getFlowDeficitPreTrade() / amountToSend);
+            final float exporterPrice = expCell.getUnitPrice(PriceType.MARKET_SELLING, (int)amountToSend);
+            final float importerPrice = impCell.getUnitPrice(PriceType.MARKET_BUYING, (int)amountToSend);
+            final float weight = Math.min(1f, (float)impCell.getFlowDeficitPreTrade() / amountToSend);
             final float pricePerUnit = exporterPrice * (1f - weight) + importerPrice * weight;
             final float price = pricePerUnit * amountToSend;
 
             if(sameFaction) {
-                expStats.addInFactionExport(amountToSend);
-                impStats.addInFactionImport(amountToSend);
+                expCell.addInFactionExport(amountToSend);
+                impCell.addInFactionImport(amountToSend);
 
                 final int credits = (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT);
                 marketActivity += credits;
 
                 if (fakeAdvance) continue;
-                engine.addCredits(expStats.marketID, credits);
-                engine.addCredits(impStats.marketID, -credits);
+                engine.addCredits(expCell.marketID, credits);
+                engine.addCredits(impCell.marketID, -credits);
 
-                if (engine.isPlayerMarket(expStats.marketID)) getLedger(expStats.marketID).recordExport(credits);
-                if (engine.isPlayerMarket(impStats.marketID)) getLedger(impStats.marketID).recordImport(credits);
+                if (engine.isPlayerMarket(expCell.marketID)) getLedger(expCell.marketID).recordExport(credits);
+                if (engine.isPlayerMarket(impCell.marketID)) getLedger(impCell.marketID).recordImport(credits);
                 
             } else {
-                expStats.addGlobalExport(amountToSend);
-                impStats.addGlobalImport(amountToSend);
+                expCell.addGlobalExport(amountToSend);
+                impCell.addGlobalImport(amountToSend);
 
                 marketActivity += price;
                 
                 if (fakeAdvance) continue;
-                engine.addCredits(expStats.marketID, (int) price);
-                engine.addCredits(impStats.marketID, (int) -price);
+                engine.addCredits(expCell.marketID, (int) price);
+                engine.addCredits(impCell.marketID, (int) -price);
 
-                if (engine.isPlayerMarket(expStats.marketID)) getLedger(expStats.marketID).recordExport((int) price);
-                if (engine.isPlayerMarket(impStats.marketID)) getLedger(impStats.marketID).recordImport((int) price);
+                if (engine.isPlayerMarket(expCell.marketID)) getLedger(expCell.marketID).recordExport((int) price);
+                if (engine.isPlayerMarket(impCell.marketID)) getLedger(impCell.marketID).recordImport((int) price);
             }
         }
     }
@@ -281,10 +281,10 @@ public class CommodityInfo {
     public final List<MarketAPI> getImporters() {
         List <MarketAPI> importers = new ArrayList<>(50);
 
-        for (CommodityStats stats : m_comStats.values()) {
+        for (CommodityCell cell : m_comCells.values()) {
 
-            if (computeImportAmount(stats) > 0) {
-                importers.add(stats.market);
+            if (computeImportAmount(cell) > 0) {
+                importers.add(cell.market);
             }
         }
 
@@ -294,8 +294,8 @@ public class CommodityInfo {
     public final List<MarketAPI> getExporters() {
         List <MarketAPI> exporters = new ArrayList<>(50);
 
-        for (CommodityStats stats : m_comStats.values()) {
-            if (stats.getStoredRemainingExportable() > 0) exporters.add(stats.market);
+        for (CommodityCell cell : m_comCells.values()) {
+            if (cell.getStoredRemainingExportable() > 0) exporters.add(cell.market);
         }
 
         return exporters;
@@ -420,10 +420,10 @@ public class CommodityInfo {
     * dynamics beyond simple supply/demand ratio.
     */
     private static final float priceFactor(String comID, MarketAPI importer) {
-        final CommodityStats stats = EconomyEngine.getInstance().getComStats(comID, importer.getId());
+        final CommodityCell cell = EconomyEngine.getInstance().getComCell(comID, importer.getId());
 
-        final float price = stats.getUnitPrice(PriceType.MARKET_BUYING, 1);
-        final float base = stats.spec.getBasePrice();
+        final float price = cell.getUnitPrice(PriceType.MARKET_BUYING, 1);
+        final float base = cell.spec.getBasePrice();
 
         final float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
 
@@ -460,18 +460,18 @@ public class CommodityInfo {
         return (float) Math.sqrt(size / (float) maxSize);
     }
 
-    private static final float computeImportAmount(CommodityStats stats) {
-        final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * stats.getBaseDemand(false);
-        final float rawTarget = stats.getPreferredStockpile();
-        final int target = (int) Math.max(Math.min(rawTarget - stats.getStored(), cap), 0);
-        final float exclusive = stats.getImportExclusiveDemand();
+    private static final float computeImportAmount(CommodityCell cell) {
+        final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * cell.getBaseDemand(true);
+        final float rawTarget = cell.getPreferredStockpile();
+        final int target = (int) Math.max(Math.min(rawTarget - cell.getStored(), cap), 0);
+        final float exclusive = cell.getImportExclusiveDemand();
 
-        return Math.max(target + exclusive - stats.getTotalImports(false), 0);
+        return Math.max(target + exclusive - cell.getTotalImports(false), 0);
     }
 
     private void recordDailyVolume() {
         long total = 0;
-        for (CommodityStats stats : m_comStats.values()) total += stats.getTotalExports();
+        for (CommodityCell cell : m_comCells.values()) total += cell.getTotalExports();
         lastNDaysVolume[currentIndex] = total;
         currentIndex = (currentIndex + 1) % EconomyConfig.VOLATILITY_WINDOW;
         if (currentIndex == 0) filled = true;

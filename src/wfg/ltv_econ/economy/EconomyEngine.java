@@ -41,7 +41,7 @@ import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.constants.SubmarketsID;
-import wfg.ltv_econ.economy.CommodityStats.PriceType;
+import wfg.ltv_econ.economy.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -79,8 +79,8 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  * Each {@link MarketAPI} in the sector is represented internally by:
  * <ul>
  *     <li>A credit balance (per-market budget)</li>
- *     <li>A set of active commodities ({@link CommodityInfo})</li>
- *     <li>Dynamic production and demand statistics ({@link CommodityStats})</li>
+ *     <li>A set of active commodities ({@link CommodityDomain})</li>
+ *     <li>Dynamic production and demand statistics ({@link CommodityCell})</li>
  * </ul>
  * The engine runs continuously as a listener to the campaign economy. It replaces
  * vanilla credit flows with its own localized financial model, while remaining compatible
@@ -99,7 +99,7 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  *     <li>{@code m_registeredMarkets} – All markets currently part of the simulation.</li>
  *     <li>{@code m_playerMarketData} – Subset of markets owned by the player with unique data attached.</li>
  *     <li>{@code m_marketCredits} – Per-market credit reserves.</li>
- *     <li>{@code m_comInfo} – Mapping of commodity IDs to {@link CommodityInfo} containers.</li>
+ *     <li>{@code m_comDomains} – Mapping of commodity IDs to {@link CommodityDomain} containers.</li>
  *     <li>{@code mainLoopExecutor} – A single-thread executor that runs the simulation asynchronously. Can be toggled.</li>
  * </ul>
  *
@@ -107,7 +107,7 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  * The {@link #mainLoop(boolean)} method executes the economic simulation for one tick:
  * <ol>
  *     <li>Refreshes the list of active markets.</li>
- *     <li>Resets and recalculates commodity production/demand via {@link CommodityInfo}.</li>
+ *     <li>Resets and recalculates commodity production/demand via {@link CommodityDomain}.</li>
  *     <li>Assigns workers using a solver-based optimization step.</li>
  *     <li>Executes trade and adjusts credit balances accordingly.</li>
  *     <li>Advances all commodities to persist state.</li>
@@ -126,26 +126,21 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     private final Set<String> m_registeredMarkets;
     private final Map<String, PlayerMarketData> m_playerMarketData;
     private final Map<String, Long> m_marketCredits = new HashMap<>();
-    private final Map<String, CommodityInfo> m_comInfo;
+    private final Map<String, CommodityDomain> m_comDomains;
 
     private transient ExecutorService mainLoopExecutor;
 
     public PlayerFactionSettings playerFactionSettings = new PlayerFactionSettings();
 
-    public static EconomyEngine createInstance() {
-        if (instance == null) instance = new EconomyEngine();
-        return instance;
-    }
-
-    public static EconomyEngine loadInstance() {
+    public static EconomyEngine loadInstance(boolean forceRefresh) {
         final SectorAPI sector = Global.getSector();
 
         EconomyEngine engine = (EconomyEngine) sector.getPersistentData().get(EconEngineSerialID);
 
-        if (engine != null) {
+        if (engine != null && !forceRefresh) {
             instance = engine;
         } else {
-            engine = EconomyEngine.createInstance();
+            instance = new EconomyEngine();
             if (Global.getSettings().isDevMode()) {
                 Global.getLogger(EconomyEngine.class).info("Economy Engine constructed");
             }
@@ -153,20 +148,27 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         final List<CampaignEventListener> listeners = LtvEconomyModPlugin.getListeners();
 
-        listeners.removeIf(l -> l.getClass() == EconomyEngine.class);
-        listeners.add(0, engine);
-        sector.addTransientScript(engine);
-        sector.getListenerManager().addListener(engine, true);
+        listeners.add(0, instance);
+        sector.addTransientScript(instance);
+        sector.getListenerManager().addListener(instance, true);
 
         return instance;
     }
+
+    public static void saveInstance() {
+        final SectorAPI sector = Global.getSector();
+        sector.getPersistentData().put(EconEngineSerialID, instance);
+
+        sector.removeListener(instance);
+        instance = null;
+    } 
 
     public static void setInstance(EconomyEngine a) {
         instance = a;
     }
 
     public static EconomyEngine getInstance() {
-        if (instance == null) return loadInstance();
+        if (instance == null) return loadInstance(false);
         return instance;
     }
 
@@ -178,7 +180,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         super(false);
         m_registeredMarkets = new HashSet<>();
         m_playerMarketData = new HashMap<>();
-        m_comInfo = new HashMap<>();
+        m_comDomains = new HashMap<>();
 
         for (MarketAPI market : getMarketsCopy()) {
             if (!market.isInEconomy()) continue;
@@ -194,7 +196,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
             if (spec.isNonEcon()) continue;
 
-            m_comInfo.put(spec.getId(), new CommodityInfo(spec, m_registeredMarkets, this));
+            m_comDomains.put(spec.getId(), new CommodityDomain(spec, m_registeredMarkets, this));
         }
 
         readResolve();
@@ -259,7 +261,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      *     official Economy. Adds new markets and removes non-existent ones.
      *   </li>
      *   <li>
-     *     <b>comInfo.reset()</b> - Resets per-commodity values such as imports, exports, and
+     *     <b>CommodityDomain.reset()</b> - Resets per-commodity values such as imports, exports, and
      *     stockpile usage from the previous cycle. Ensures a clean slate for updates.
      *   </li>
      *   <li>
@@ -274,7 +276,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      *     <code>fakeAdvance == false</code>.
      *   </li>
      *   <li>
-     *     <b>comInfo.update()</b> - Updates all commodities to account for the newly assigned workers,
+     *     <b>CommodityDomain.update()</b> - Updates all commodities to account for the newly assigned workers,
      *     converting production into LTV-based stats, calculating base demand, and updating local production.
      *   </li>
      *   <li>
@@ -283,12 +285,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      *     ensures industries cannot consume unavailable inputs.
      *   </li>
      *   <li>
-     *     <b>comInfo.trade()</b> - Handles exports of surplus commodities and imports to
+     *     <b>CommodityDomain.trade()</b> - Handles exports of surplus commodities and imports to
      *     fill storage for the next cycle. Trade occurs after production so industries
      *     always consume existing stockpiles. Imports feed storage for future production.
      *   </li>
      *   <li>
-     *     <b>comInfo.advance(fakeAdvance)</b> - Updates stockpiles after production and trade.
+     *     <b>CommodityDomain.advance(fakeAdvance)</b> - Updates stockpiles after production and trade.
      *     If <code>fakeAdvance</code> is true, this step does nothing. Stockpiles now include produced and
      *     newly imported goods ready for the next cycle.
      *   </li>
@@ -312,12 +314,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     private final void mainLoop(boolean fakeAdvance) {
         refreshMarkets();
 
-        m_comInfo.values().forEach(CommodityInfo::reset);
+        m_comDomains.values().forEach(CommodityDomain::reset);
 
         if (!fakeAdvance) {
             if (cyclesSinceWorkerAssign >= EconomyConfig.WORKER_ASSIGN_INTERVAL) {
-                resetWorkersAssigned(false);
-                m_comInfo.values().forEach(CommodityInfo::update);
+                WorkerRegistry.getInstance().resetWorkersAssigned(false);
+                m_comDomains.values().forEach(CommodityDomain::update);
 
                 assignWorkers();
                 cyclesSinceWorkerAssign = 0;
@@ -326,16 +328,16 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             }
         }
 
-        m_comInfo.values().forEach(CommodityInfo::update);
+        m_comDomains.values().forEach(CommodityDomain::update);
         
         weightedOutputDeficitMods();
 
         if (!fakeAdvance) m_playerMarketData.values().forEach(PlayerMarketData::advance);
 
-        m_comInfo.values().parallelStream().forEach(info -> info.trade(fakeAdvance));
+        m_comDomains.values().parallelStream().forEach(dom -> dom.trade(fakeAdvance));
 
         if (!fakeAdvance) {
-            m_comInfo.values().forEach(CommodityInfo::advance);
+            m_comDomains.values().forEach(CommodityDomain::advance);
 
             applyWages();
             redistributeFactionCredits(playerFactionSettings.redistributeCredits);
@@ -351,15 +353,15 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) m_playerMarketData.put(marketID, new PlayerMarketData(marketID));
 
-        m_comInfo.values().forEach(c -> c.addMarket(marketID));
+        m_comDomains.values().forEach(c -> c.addMarket(marketID));
     }
 
     public final void removeMarket(MarketAPI market) {
         final String marketID = market.getId();
         if (!m_registeredMarkets.remove(marketID)) return;
 
-        for (CommodityInfo comInfo : m_comInfo.values()) {
-            comInfo.removeMarket(marketID);
+        for (CommodityDomain dom : m_comDomains.values()) {
+            dom.removeMarket(marketID);
         }
 
         if (market.isPlayerOwned()) m_playerMarketData.remove(marketID);
@@ -370,8 +372,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final void removeMarket(String marketID) {
         if (!m_registeredMarkets.remove(marketID)) return;
 
-        for (CommodityInfo comInfo : m_comInfo.values()) {
-            comInfo.removeMarket(marketID);
+        for (CommodityDomain dom : m_comDomains.values()) {
+            dom.removeMarket(marketID);
         }
 
         m_playerMarketData.remove(marketID);
@@ -412,6 +414,13 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return m_playerMarketData.get(marketID);
     }
 
+    public final PlayerMarketData addPlayerMarketData(String marketID) {
+        if (m_playerMarketData.containsKey(marketID)) return m_playerMarketData.get(marketID);
+        final PlayerMarketData data = new PlayerMarketData(marketID);
+        m_playerMarketData.put(marketID, data);
+        return data;
+    }
+
     public void reportPlayerOpenedMarket() {
         fakeAdvance();
     }
@@ -446,27 +455,27 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             .collect(Collectors.toList());
     }
 
-    public final List<CommodityInfo> getCommodityInfos() {
-        return new ArrayList<>(m_comInfo.values());
+    public final List<CommodityDomain> getComDomains() {
+        return new ArrayList<>(m_comDomains.values());
     }
 
-    public final CommodityInfo getCommodityInfo(String comID) {
-        return m_comInfo.get(comID);
+    public final CommodityDomain getComDomain(String comID) {
+        return m_comDomains.get(comID);
     }
 
     public final boolean hasCommodity(String comID) {
-        return m_comInfo.containsKey(comID);
+        return m_comDomains.containsKey(comID);
     }
 
-    public final CommodityStats getComStats(String comID, String marketID) {
-        final CommodityInfo comInfo = m_comInfo.get(comID);
+    public final CommodityCell getComCell(String comID, String marketID) {
+        final CommodityDomain dom = m_comDomains.get(comID);
 
-        if (comInfo == null) {
+        if (dom == null) {
             throw new RuntimeException("Referencing a non-econ or missing commodity: " + comID);
         }
 
-        final CommodityStats stats = comInfo.getStats(marketID);
-        return stats;
+        final CommodityCell cell = dom.getCell(marketID);
+        return cell;
     }
 
     public static final boolean isWorkerAssignable(Industry ind) {
@@ -487,18 +496,18 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     } 
 
     public final void weightedOutputDeficitMods() {
-        m_comInfo.values().stream()
-            .flatMap(comInfo -> comInfo.getStatsMap().values().stream())
+        m_comDomains.values().stream()
+            .flatMap(dom -> dom.getCellsMap().values().stream())
             .parallel()
-            .forEach(this::computeStatsDeficits);
+            .forEach(this::computeComDeficits);
     }
 
-    private final void computeStatsDeficits(CommodityStats stats) {
+    private final void computeComDeficits(CommodityCell cell) {
         float totalDeficit = 0f;
-        final float totalMarketOutput = stats.getProduction(false);
+        final float totalMarketOutput = cell.getProduction(false);
         final float invMarketOutput = 1f / totalMarketOutput;
 
-        for (Map.Entry<String, MutableStat> industryEntry : stats.getFlowProdIndStats().entrySet()) {
+        for (Map.Entry<String, MutableStat> industryEntry : cell.getFlowProdIndStats().entrySet()) {
             final String industryID = industryEntry.getKey();
             final MutableStat industryStat = industryEntry.getValue();
 
@@ -507,12 +516,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
             final float industryShare = industryOutput * invMarketOutput;
 
-            final Industry ind = stats.market.getIndustry(industryID);
+            final Industry ind = cell.market.getIndustry(industryID);
 
             Map<String, Float> inputWeights;
             float sum = 0f;
 
-            inputWeights = IndustryIOs.getRealInputs(ind, stats.comID, true);
+            inputWeights = IndustryIOs.getRealInputs(ind, cell.comID, true);
             if (inputWeights.isEmpty()) continue;
             for (float value : inputWeights.values()) {
                 sum += value;
@@ -525,28 +534,21 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 String inputID = inputEntry.getKey();
                 if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
                 
-                final CommodityStats inputStats = getComStats(inputID, stats.market.getId());
+                final CommodityCell inputCell = getComCell(inputID, cell.market.getId());
 
                 final float weightNorm = inputEntry.getValue() / sum;
 
-                industryDeficit += weightNorm * (1 - inputStats.getStoredAvailabilityRatio());
+                industryDeficit += weightNorm * (1 - inputCell.getStoredAvailabilityRatio());
             }
 
             totalDeficit += industryDeficit * industryShare;
         }
 
-        stats.getProductionStat().modifyMult(
-            "deficits", Math.max(1f - totalDeficit, 0.01f), "Input shortages"
-        );
-    }
-
-    private final void resetWorkersAssigned(boolean resetPlayerIndustries) {
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
-
-        for (WorkerIndustryData data : reg.getRegister()) {
-            if (!resetPlayerIndustries && data.market.isPlayerOwned()) continue;
-            data.resetWorkersAssigned();
-        }
+        if (totalDeficit > 0f) {
+            cell.getProductionStat().modifyMult(
+                "deficits", Math.max(1f - totalDeficit, 0.01f), "Input shortages"
+            );
+        } else cell.getProductionStat().unmodifyMult("deficits");
     }
 
     public final void assignWorkers() {
@@ -577,7 +579,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             final List<Integer> outputIndexes = new ArrayList<>();
             final MarketAPI market = markets.get(i);
 
-            for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
+            for (Industry ind : CommodityCell.getVisibleIndustries(market)) {
                 if (!ind.isFunctional()) continue;
 
                 final IndustryConfig config = IndustryIOs.getIndConfig(ind);
@@ -611,7 +613,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
             final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(entry.getKey());
-            if (cond == null) continue;
 
             final String marketID = entry.getKey().getId();
             final float[] assignments = entry.getValue();
@@ -621,12 +622,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 if (assignments[i] == 0) continue;
 
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(KEY), 2);
-                final String indID = indAndOutputID[0];
-                final String outputID = indAndOutputID[1];
+                final var ind = Global.getSettings().getIndustrySpec(indAndOutputID[0]);
 
                 final float ratio = (assignments[i] / totalWorkers);
-
-                reg.getData(marketID, indID).setRatioForOutput(outputID, ratio);
+                reg.getData(marketID, ind).setRatioForOutput(indAndOutputID[1], ratio);
             }
         }
     }
@@ -720,16 +719,16 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     public final double getTotalGlobalExports(String comID) {
         double total = 0;
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) 
-        total += stats.globalExports;
+        for (CommodityCell cell : m_comDomains.get(comID).getAllCells()) 
+        total += cell.globalExports;
 
         return total;
     }
 
     public final double getTotalFactionExports(String comID) {
         double total = 0;
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats())
-        total += stats.inFactionExports;
+        for (CommodityCell cell : m_comDomains.get(comID).getAllCells())
+        total += cell.inFactionExports;
 
         return total;
     }
@@ -739,13 +738,13 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (total == 0)
             return 0;
 
-        return (int) (((float) getComStats(comID, marketID).globalExports / (float) total) * 100);
+        return (int) (((float) getComCell(comID, marketID).globalExports / (float) total) * 100);
     }
 
     public final double getTotalGlobalImports(String comID) {
         double totalGlobalImports = 0;
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
-            totalGlobalImports += stats.globalImports;
+        for (CommodityCell cell : m_comDomains.get(comID).getAllCells()) {
+            totalGlobalImports += cell.globalImports;
         }
 
         return totalGlobalImports;
@@ -756,17 +755,17 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (total == 0)
             return 0;
 
-        return (int) (((float) getComStats(comID, marketID).globalImports / (float) total) * 100);
+        return (int) (((float) getComCell(comID, marketID).globalImports / (float) total) * 100);
     }
 
     public final double getTotalInFactionExports(String comID, FactionAPI faction) {
         double TotalFactionExports = 0;
 
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
-            if (!stats.market.getFaction().getId().equals(faction.getId())) {
+        for (CommodityCell cell : m_comDomains.get(comID).getAllCells()) {
+            if (!cell.market.getFaction().getId().equals(faction.getId())) {
                 continue;
             }
-            TotalFactionExports += stats.inFactionExports;
+            TotalFactionExports += cell.inFactionExports;
         }
 
         return TotalFactionExports;
@@ -777,11 +776,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (total == 0) return 0;
         double totalGlobalExports = 0;
 
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
-            if (!stats.market.getFaction().getId().equals(factionID)) {
+        for (CommodityCell cell : m_comDomains.get(comID).getAllCells()) {
+            if (!cell.market.getFaction().getId().equals(factionID)) {
                 continue;
             }
-            totalGlobalExports += stats.globalExports;
+            totalGlobalExports += cell.globalExports;
         }
         return (float) totalGlobalExports / (float) total;
     }
@@ -791,11 +790,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (total == 0) return 0;
         double totalGlobalImports = 0;
 
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
-            if (!stats.market.getFaction().getId().equals(factionID)) {
+        for (CommodityCell cell : m_comDomains.get(comID).getAllCells()) {
+            if (!cell.market.getFaction().getId().equals(factionID)) {
                 continue;
             }
-            totalGlobalImports += stats.globalImports;
+            totalGlobalImports += cell.globalImports;
         }
         return (float) (totalGlobalImports / total);
     }
@@ -803,12 +802,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final double getFactionTotalGlobalExports(String comID, FactionAPI faction) {
         double totalGlobalExports = 0;
 
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats()) {
-            if (!stats.market.getFaction().getId().equals(faction.getId())) {
+        for (CommodityCell cell : m_comDomains.get(comID).getAllCells()) {
+            if (!cell.market.getFaction().getId().equals(faction.getId())) {
                 continue;
             }
 
-            totalGlobalExports += stats.globalExports;
+            totalGlobalExports += cell.globalExports;
         }
 
         return totalGlobalExports;
@@ -819,13 +818,13 @@ public class EconomyEngine extends BaseCampaignEventListener implements
      */
     public final double getMarketActivity(MarketAPI market) {
         double totalActivity = 0;
-        for (CommodityInfo info : m_comInfo.values()) {
+        for (CommodityDomain dom : m_comDomains.values()) {
             if (!getRegisteredMarkets().contains(market.getId())) {
                 registerMarket(market);
             }
-            CommodityStats stats = info.getStats(market.getId());
+            final CommodityCell cell = dom.getCell(market.getId());
 
-            totalActivity += stats.getFlowAvailable();
+            totalActivity += cell.getFlowAvailable();
         }
 
         return totalActivity;
@@ -854,10 +853,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         float ratio = 0f;
 
-        for (CommodityInfo info : m_comInfo.values()) {
-            CommodityStats stats = info.getStats(market.getId());
+        for (CommodityDomain dom : m_comDomains.values()) {
+            final CommodityCell cell = dom.getCell(market.getId());
 
-            ratio += Math.abs(stats.globalImports - stats.getFlowAvailable()) / activity;
+            ratio += Math.abs(cell.globalImports - cell.getFlowAvailable()) / activity;
         }
 
         return ratio;
@@ -866,8 +865,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getGlobalDemand(String comID) {
         long total = 0;
 
-        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
-        total += stats.getBaseDemand(false);
+        for (CommodityCell cell : getComDomain(comID).getAllCells())
+        total += cell.getBaseDemand(true);
 
         return total;
     }
@@ -875,8 +874,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getGlobalProduction(String comID) {
         long total = 0;
 
-        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
-        total += stats.getProduction(true);
+        for (CommodityCell cell : getComDomain(comID).getAllCells())
+        total += cell.getProduction(true);
 
         return total;
     }
@@ -884,8 +883,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getGlobalSurplus(String comID) {
         long total = 0;
 
-        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
-        total += stats.getFlowCanNotExport();
+        for (CommodityCell cell : getComDomain(comID).getAllCells())
+        total += cell.getFlowCanNotExport();
 
         return total;
     }
@@ -893,8 +892,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getGlobalDeficit(String comID) {
         long total = 0;
 
-        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
-        total += stats.getFlowDeficit();
+        for (CommodityCell cell : getComDomain(comID).getAllCells())
+        total += cell.getFlowDeficit();
 
         return total;
     }
@@ -902,8 +901,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getGlobalTradeVolume(String comID) {
         long total = 0;
 
-        for (CommodityStats stats : getCommodityInfo(comID).getAllStats())
-        total += stats.getTotalExports();
+        for (CommodityCell cell : getComDomain(comID).getAllCells())
+        total += cell.getTotalExports();
 
         return total;
     }
@@ -911,18 +910,18 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final float getGlobalAveragePrice(String comID, int units) {
         float total = 0;
 
-        final Collection<CommodityStats> allStats = getCommodityInfo(comID).getAllStats();
-        for (CommodityStats stats : allStats)
-        total += stats.getUnitPrice(PriceType.NEUTRAL, units);
+        final Collection<CommodityCell> allCells = getComDomain(comID).getAllCells();
+        for (CommodityCell cell : allCells)
+        total += cell.getUnitPrice(PriceType.NEUTRAL, units);
 
-        return total / (float) allStats.size();
+        return total / (float) allCells.size();
     }
 
     public final long getGlobalStockpiles(String comID) {
         double total = 0;
 
-        for (CommodityStats stats : m_comInfo.get(comID).getAllStats())
-        total += stats.getStored();
+        for (CommodityCell cell : m_comDomains.get(comID).getAllCells())
+        total += cell.getStored();
 
         return (long) total;
     }
@@ -975,8 +974,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getExportIncome(MarketAPI market, boolean lastMonth) {
         long exportIncome = 0;
         if (m_playerMarketData.keySet().contains(market.getId())) {
-            for (CommodityInfo info : m_comInfo.values()) {
-                final IncomeLedger ledger = info.getLedger(market.getId());
+            for (CommodityDomain dom : m_comDomains.values()) {
+                final IncomeLedger ledger = dom.getLedger(market.getId());
                 exportIncome += lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
             }
         }
@@ -987,7 +986,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getExportIncome(MarketAPI market, String comID, boolean lastMonth) {
         if (m_playerMarketData.keySet().contains(market.getId())) {
 
-            final IncomeLedger ledger = m_comInfo.get(comID).getLedger(market.getId());
+            final IncomeLedger ledger = m_comDomains.get(comID).getLedger(market.getId());
             return lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
         }
         return 0;
@@ -999,8 +998,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final long getImportExpense(MarketAPI market, boolean lastMonth) {
         long importCost = 0;
         if (m_playerMarketData.keySet().contains(market.getId())) {
-            for (CommodityInfo info : m_comInfo.values()) {
-                final IncomeLedger ledger = info.getLedger(market.getId());
+            for (CommodityDomain dom : m_comDomains.values()) {
+                final IncomeLedger ledger = dom.getLedger(market.getId());
                 importCost += lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
             }
         }
@@ -1010,7 +1009,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     public final long getImportExpense(MarketAPI market, String comID, boolean lastMonth) {
         if (m_playerMarketData.keySet().contains(market.getId())) {
-            final IncomeLedger ledger = m_comInfo.get(comID).getLedger(market.getId());
+            final IncomeLedger ledger = m_comDomains.get(comID).getLedger(market.getId());
             return lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
         }
         return 0;
@@ -1081,7 +1080,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 m_playerMarketData.remove(marketID);
                 continue;
             }
-            for (Industry ind : CommodityStats.getVisibleIndustries(market)) {
+            for (Industry ind : CommodityCell.getVisibleIndustries(market)) {
 
                 ind.getIncome().unmodify();
                 ind.getIncome().base = 0f;
@@ -1134,8 +1133,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             econ.getMarket(marketID).setImmigrationIncentivesOn(true);
         }
 
-        for (CommodityInfo info : m_comInfo.values()) {
-            info.endMonth();
+        for (CommodityDomain dom : m_comDomains.values()) {
+            dom.endMonth();
         }
 
         final MonthlyReport report = SharedData.getData().getCurrentReport();
@@ -1257,12 +1256,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 		if (Global.CODEX_TOOLTIP_MODE || !EconomyEngine.isInitialized()) return result;
 
 		for (String id : commodityIds) {
-			final CommodityStats stats = EconomyEngine.getInstance().getComStats(id, market.getId());
-			if (stats == null) {
+			final CommodityCell cell = instance.getComCell(id, market.getId());
+			if (cell == null) {
 				return result;
 			}
 
-			float available = stats.getStoredAvailabilityRatio();
+			float available = cell.getStoredAvailabilityRatio();
 
 			if (available < result.two) {
 				result.one = id;
@@ -1282,9 +1281,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (!data.market.isInEconomy()) return;
         for (GroundRaidObjectivePlugin objective : data.objectives) {
             if (objective instanceof CommodityGroundRaidObjectivePluginImpl obj) {
-                if (!m_comInfo.containsKey(objective.getId())) continue;
-                final CommodityStats stats = getComStats(obj.getId(), data.market.getId());
-                stats.addStoredAmount(-obj.getQuantityLooted());
+                if (!m_comDomains.containsKey(objective.getId())) continue;
+                final CommodityCell cell = getComCell(obj.getId(), data.market.getId());
+                cell.addStoredAmount(-obj.getQuantityLooted());
             }
         }
     }
@@ -1316,7 +1315,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final void logEconomySnapshot() {
         Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT START ----");
 
-        for (Map.Entry<String, CommodityInfo> info : m_comInfo.entrySet()) {
+        for (Map.Entry<String, CommodityDomain> dom : m_comDomains.entrySet()) {
             long potencialProd = 0;
             long realProd = 0;
             long potencialDemand = 0;
@@ -1329,24 +1328,24 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             long inFactionExports = 0;
             long globalExports = 0;
 
-            for (CommodityStats stats : info.getValue().getAllStats()) {
-                potencialProd += stats.getProduction(false);
-                realProd += stats.getProduction(true);
-                potencialDemand += stats.getBaseDemand(false);
-                realDemand += stats.getBaseDemand(true);
-                available += stats.getFlowAvailable();
-                availabilityRatio += stats.getFlowAvailabilityRatio();
-                deficit += stats.getFlowDeficit();
-                globalStockpile += stats.getStored();
-                totalExports += stats.getTotalExports();
-                inFactionExports += stats.inFactionExports;
-                globalExports += stats.globalExports;
+            for (CommodityCell cell : dom.getValue().getAllCells()) {
+                potencialProd += cell.getProduction(false);
+                realProd += cell.getProduction(true);
+                potencialDemand += cell.getBaseDemand(true);
+                realDemand += cell.getDemand();
+                available += cell.getFlowAvailable();
+                availabilityRatio += cell.getFlowAvailabilityRatio();
+                deficit += cell.getFlowDeficit();
+                globalStockpile += cell.getStored();
+                totalExports += cell.getTotalExports();
+                inFactionExports += cell.inFactionExports;
+                globalExports += cell.globalExports;
             }
 
-            availabilityRatio /= (float) info.getValue().getAllStats().size();
+            availabilityRatio /= (float) dom.getValue().getAllCells().size();
 
             Global.getLogger(getClass()).info("\n"+
-                "Commodity: " + info.getKey() + "\n"+
+                "Commodity: " + dom.getKey() + "\n"+
                 "potencialProd: " + NumFormat.engNotation(potencialProd) + "\n"+
                 "realProd: " + NumFormat.engNotation(realProd) + "\n"+
                 "potencialDemand: " + NumFormat.engNotation(potencialDemand) + "\n"+
@@ -1371,9 +1370,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         csv.append("Commodity,PotencialProd,RealProd,PotencialDemand,RealDemand,Available,AvailabilityRatio,Deficit,GlobalStockpile,TotalExports,InFactionExports,GlobalExports\n");
 
-        for (Map.Entry<String, CommodityInfo> entry : m_comInfo.entrySet()) {
-            String commodity = entry.getKey();
-            CommodityInfo info = entry.getValue();
+        for (Map.Entry<String, CommodityDomain> entry : m_comDomains.entrySet()) {
+            final String comID = entry.getKey();
+            final CommodityDomain dom = entry.getValue();
 
             long potencialProd = 0;
             long realProd = 0;
@@ -1387,25 +1386,25 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             long inFactionExports = 0;
             long globalExports = 0;
 
-            Collection<CommodityStats> allStats = info.getAllStats();
-            for (CommodityStats stats : allStats) {
-                potencialProd += stats.getProduction(false);
-                realProd += stats.getProduction(true);
-                potencialDemand += stats.getBaseDemand(false);
-                realDemand += stats.getBaseDemand(true);
-                available += stats.getFlowAvailable();
-                availabilityRatio += stats.getFlowAvailabilityRatio();
-                deficit += stats.getFlowDeficit();
-                globalStockpile += stats.getStored();
-                totalExports += stats.getTotalExports();
-                inFactionExports += stats.inFactionExports;
-                globalExports += stats.globalExports;
+            final Collection<CommodityCell> allCells = dom.getAllCells();
+            for (CommodityCell cell : allCells) {
+                potencialProd += cell.getProduction(false);
+                realProd += cell.getProduction(true);
+                potencialDemand += cell.getBaseDemand(true);
+                realDemand += cell.getDemand();
+                available += cell.getFlowAvailable();
+                availabilityRatio += cell.getFlowAvailabilityRatio();
+                deficit += cell.getFlowDeficit();
+                globalStockpile += cell.getStored();
+                totalExports += cell.getTotalExports();
+                inFactionExports += cell.inFactionExports;
+                globalExports += cell.globalExports;
             }
 
-            availabilityRatio /= (double) allStats.size();
+            availabilityRatio /= (double) allCells.size();
 
             csv.append(String.format("%s,%d,%d,%d,%d,%d,%.4f,%d,%d,%d,%d,%d\n",
-                commodity,
+                comID,
                 potencialProd,
                 realProd,
                 potencialDemand,
