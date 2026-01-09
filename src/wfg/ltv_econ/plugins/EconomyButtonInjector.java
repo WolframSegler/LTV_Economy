@@ -20,7 +20,6 @@ import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.command.CommandTabData;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.ui.panels.EconomyOverviewPanel;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.panels.Button;
@@ -118,7 +117,6 @@ public class EconomyButtonInjector implements EveryFrameScript, CallbackRunnable
             }
         }
 
-        EconomyEngine.getInstance().fakeAdvance();
         overviewPanel = new EconomyOverviewPanel(root);
         root.addComponent(overviewPanel.getPanel()).inTL(0, 20);
     }

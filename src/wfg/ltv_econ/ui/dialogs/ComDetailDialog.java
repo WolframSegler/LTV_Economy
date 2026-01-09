@@ -31,7 +31,8 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
@@ -401,7 +402,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     String txt = "Total global exports";
 
                     String valueTxt = NumFormat.engNotation(
-                        (long) engine.getTotalGlobalExports(comID)
+                        engine.info.getTotalGlobalExports(comID)
                     );
 
                     tooltip.setParaFontColor(baseColor);
@@ -480,11 +481,11 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     String txt = "Total " + factionName + " exports";
 
                     final String globalValue = NumFormat.engNotation(
-                        engine.getFactionTotalGlobalExports(
+                        engine.info.getFactionTotalGlobalExports(
                             comID, currMarket.getFaction())
                     );
                     final String inFactionValue = NumFormat.engNotation(
-                        engine.getTotalInFactionExports(
+                        engine.info.getTotalInFactionExports(
                             comID, currMarket.getFaction())
                     );
 
@@ -563,7 +564,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     final String factionName = m_market.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int)(engine.getFactionTotalExportMarketShare(
+                    final String valueTxt = (int)(engine.info.getFactionTotalExportMarketShare(
                         comID, m_market.getFaction().getId()
                     ) * 100) + "%";
 
@@ -634,7 +635,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     final String factionName = m_selectedMarket.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int) (engine.getFactionTotalExportMarketShare(
+                    final String valueTxt = (int) (engine.info.getFactionTotalExportMarketShare(
                         comID, m_selectedMarket.getFactionId()
                     ) * 100) + "%";
 
@@ -699,7 +700,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     final String factionName = m_market.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int) (engine.getFactionTotalExportMarketShare(
+                    final String valueTxt = (int) (engine.info.getFactionTotalExportMarketShare(
                         comID, m_market.getFaction().getId()
                     ) * 100) + "%";
 
@@ -883,7 +884,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
         final EconomyEngine engine = EconomyEngine.getInstance();
 
-        for (MarketAPI market : EconomyEngine.getMarketsCopy()) {
+        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
 
             if (market.isHidden()) continue;
 
@@ -916,8 +917,8 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
             final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
 
-            final int marketShare = mode == 0 ? engine.getExportMarketShare(comID, marketID) :
-                engine.getImportMarketShare(comID, marketID);
+            final int marketShare = mode == 0 ? engine.info.getExportMarketShare(comID, marketID) :
+                engine.info.getImportMarketShare(comID, marketID);
 
             final int incomeValue = (int) (quantityValue * m_com.getBasePrice());
 

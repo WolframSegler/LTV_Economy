@@ -30,7 +30,7 @@ import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.submarkets.OpenSubmarketPlugin;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;

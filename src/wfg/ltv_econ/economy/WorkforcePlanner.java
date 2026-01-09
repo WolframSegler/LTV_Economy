@@ -25,6 +25,8 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
@@ -129,7 +131,7 @@ public class WorkforcePlanner {
             totalWorkerCoeffs[j] = 1.0;
         }
         constraints.add(new LinearConstraint(
-            totalWorkerCoeffs, Relationship.LEQ, EconomyEngine.getGlobalWorkerCount(false)
+            totalWorkerCoeffs, Relationship.LEQ, EconomyInfo.getGlobalWorkerCount(false)
         ));
 
         // Non-negative net production for all commodities

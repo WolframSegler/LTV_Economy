@@ -18,7 +18,8 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.wrap_ui.util.NumFormat;
 
 import static wfg.wrap_ui.util.UIConstants.highlight;
@@ -109,7 +110,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
 		getCargo().clear();
 
-		for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
+		for (CommoditySpecAPI spec : EconomyInfo.getEconCommodities()) {
 			if (spec.isMeta()) continue;
 			final String comID = spec.getId();
 

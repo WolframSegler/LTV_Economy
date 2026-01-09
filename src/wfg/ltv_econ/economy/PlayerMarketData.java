@@ -13,6 +13,7 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.policies.MarketPolicy;
 
 public class PlayerMarketData {
@@ -108,7 +109,7 @@ public class PlayerMarketData {
      */
     public final float getEffectiveProfitRatio() {
         final EconomyEngine engine = EconomyEngine.getInstance();
-        final double net = engine.getNetIncome(market, true);
+        final double net = engine.info.getNetIncome(market, true);
         if (net <= 0) return 0f;
 
         final double endCredits = engine.getCredits(marketID) + net;

@@ -14,8 +14,8 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 
 import wfg.ltv_econ.economy.CommodityDomain;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.util.NumFormat;
@@ -242,7 +242,7 @@ public class CommodityRowPanel extends CustomPanel<BasePanelPlugin<CommodityRowP
                 m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. They generated %s last month and %s so far this month.",
                 opad, highlight,
                 NumFormat.engNotation((long) m_comCell.getTotalExports()),
-                engine.getExportMarketShare(comID, m_comCell.marketID) + "%",
+                engine.info.getExportMarketShare(comID, m_comCell.marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
             );
@@ -252,14 +252,14 @@ public class CommodityRowPanel extends CustomPanel<BasePanelPlugin<CommodityRowP
             tooltip.addPara(
             m_market.getName() + " controls %s of the export market share for " + commodityName + ".This trade brings in no income due to being underground.",
             opad, highlight,
-            engine.getExportMarketShare(comID, m_comCell.marketID) + "%"
+            engine.info.getExportMarketShare(comID, m_comCell.marketID) + "%"
         );
         } else if (exportIncomeLastMonth < 1 && exportIncomeThisMonth < 1) {
             tooltip.addPara(
                 m_market.getName() + " is exporting %s units of " + commodityName + " and controls %s of the global market share. Income from exports are not tracked for non-player colonies.",
                 opad, highlight,
                 NumFormat.engNotation((long) m_comCell.getTotalExports()),
-                engine.getExportMarketShare(comID, m_comCell.marketID) + "%"
+                engine.info.getExportMarketShare(comID, m_comCell.marketID) + "%"
             );
         }
 

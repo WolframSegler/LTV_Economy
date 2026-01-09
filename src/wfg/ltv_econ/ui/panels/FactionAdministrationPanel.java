@@ -9,8 +9,8 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;

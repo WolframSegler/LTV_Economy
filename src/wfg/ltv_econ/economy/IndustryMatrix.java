@@ -12,6 +12,8 @@ import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class IndustryMatrix {
@@ -101,7 +103,7 @@ public class IndustryMatrix {
         final SettingsAPI settings = Global.getSettings();
         final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
 
-        final List<String> commodities = EconomyEngine.getEconCommodityIDs();
+        final List<String> commodities = EconomyInfo.getEconCommodityIDs();
 
         Iterator<String> it = commodities.iterator();
         while (it.hasNext()) {

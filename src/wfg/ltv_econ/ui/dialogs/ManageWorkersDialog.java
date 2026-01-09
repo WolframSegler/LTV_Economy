@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static wfg.ltv_econ.constants.economyValues.*;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 import java.awt.Color;
@@ -27,8 +28,8 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.policies.MarketPolicy;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.Attachments;
@@ -175,7 +176,7 @@ public class ManageWorkersDialog extends DialogPanel {
         final TextPanel wagesLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Monthly Wages";
-                final String valueTxt = NumFormat.formatCredit((int)(engine.getWagesForMarket(m_market)*30));
+                final String valueTxt = NumFormat.formatCredit((int)(engine.info.getWagesForMarket(m_market)*MONTH));
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -278,7 +279,7 @@ public class ManageWorkersDialog extends DialogPanel {
             );
 
             wagesLabel.label2.setText(
-                NumFormat.formatCredit((int)(engine.getWagesForMarket(m_market)*30))
+                NumFormat.formatCredit((int)(engine.info.getWagesForMarket(m_market)*30))
             );
 
             avgWageLabel.label2.setText(

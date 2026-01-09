@@ -14,8 +14,8 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEvent;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator;
 
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class WellnessComplianceBarEvent extends BaseBarEvent {
 

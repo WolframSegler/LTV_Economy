@@ -9,8 +9,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.wrap_ui.util.NumFormat;
 
 public class OrganHarvestingPolicy extends MarketPolicy implements MarketImmigrationModifier {

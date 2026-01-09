@@ -16,7 +16,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.plugins.CommodityinfobarPlugin;
 
 public class UiUtils {

@@ -8,8 +8,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class BulwarkOrichalcumPolicy extends MarketPolicy {
     public static final float HAPPINESS_BUFF = 0.05f;

@@ -16,6 +16,7 @@ import com.fs.starfarer.api.util.Pair;
 import wfg.ltv_econ.configs.TradeWeights;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityCell.PriceType;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class CommodityDomain {
 

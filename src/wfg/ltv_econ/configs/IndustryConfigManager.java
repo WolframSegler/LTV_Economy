@@ -23,7 +23,7 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.CompatLayer;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 import java.util.List;
@@ -538,7 +538,7 @@ public class IndustryConfigManager {
             }
 
             final boolean hasNoRealOutputs = outputs.isEmpty() && illegalOutputs.isEmpty();
-            final boolean usesWorkers = EconomyEngine.isWorkerAssignable(ind1) && !hasNoRealOutputs;
+            final boolean usesWorkers = EconomyInfo.isWorkerAssignable(ind1) && !hasNoRealOutputs;
             if (hasNoRealOutputs) {
                 outputs.add(abstractOutput);
 

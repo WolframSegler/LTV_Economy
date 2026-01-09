@@ -12,7 +12,7 @@ import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 
 import wfg.ltv_econ.economy.CommodityDomain;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
@@ -261,7 +261,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
             public void createPanel() {
-                final long value = EconomyEngine.getInstance().getNetIncome(marketAPI, true);
+                final long value = EconomyEngine.getInstance().info.getNetIncome(marketAPI, true);
                 final String txt = "Credits/month";
                 final String valueTxt = NumFormat.formatCredit(value);
                 final Color valueColor = value < 0 ? negative
@@ -305,7 +305,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                 final EconomyEngine engine = EconomyEngine.getInstance();
 
                 m_tp.addTitle("Monthly Income & Upkeep", base);
-                final long income = engine.getNetIncome(marketAPI, true);
+                final long income = engine.info.getNetIncome(marketAPI, true);
 
                 final String incomeTxt = NumFormat.formatCreditAbs(income);
                 if (income >= 0) {
@@ -337,8 +337,8 @@ public class MarketUIReplacer implements EveryFrameScript {
                     TP_WIDTH, 50f, opad, pad, marketAPI.getUpkeepMult(), true, null
                 );
 
-                final String indIncome = NumFormat.formatCredit(engine.getIndustryIncome(marketAPI));
-                final String indUpkeep = NumFormat.formatCredit(engine.getIndustryUpkeep(marketAPI));
+                final String indIncome = NumFormat.formatCredit(engine.info.getIndustryIncome(marketAPI));
+                final String indUpkeep = NumFormat.formatCredit(engine.info.getIndustryUpkeep(marketAPI));
 
                 final ArrayList<Industry> industries = new ArrayList<>(marketAPI.getIndustries());
 
@@ -347,15 +347,15 @@ public class MarketUIReplacer implements EveryFrameScript {
                 m_tp.addPara("Local income: %s", opad, highlight, indIncome);
                 industries.sort((i1, i2) ->
                     Integer.compare(
-                        engine.getIndustryIncome(i2, marketAPI).getModifiedInt(),
-                        engine.getIndustryIncome(i1, marketAPI).getModifiedInt()
+                        engine.info.getIndustryIncome(i2).getModifiedInt(),
+                        engine.info.getIndustryIncome(i1).getModifiedInt()
                     )
                 );
                 m_tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
 
                 int indCount = 0;
                 for (Industry ind : industries) {
-                    int perIndIncome = engine.getIndustryIncome(ind, marketAPI).getModifiedInt();
+                    int perIndIncome = engine.info.getIndustryIncome(ind).getModifiedInt();
                     if (perIndIncome > 0) {
                         m_tp.addToGrid(0, indCount++, ind.getCurrentName(),
                             NumFormat.formatCredit(perIndIncome), highlight
@@ -369,7 +369,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                     m_tp.cancelGrid();
                 }
 
-                final long exportIncome = engine.getExportIncome(marketAPI, true);
+                final long exportIncome = engine.info.getExportIncome(marketAPI, true);
                 m_tp.addPara("Last Month's Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
                 if (exportIncome > 0 && expanded) {
                     final int maxCommoditiesToDisplay = 10;
@@ -399,7 +399,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                         final long comExportIncome = com.getLedger(marketAPI.getId()).lastMonthExportIncome;
                         if (comExportIncome < 1) continue;
 
-                        final int exportMarketShare = engine.getExportMarketShare(
+                        final int exportMarketShare = engine.info.getExportMarketShare(
                             com.spec.getId(), marketAPI.getId()
                         );
 
@@ -414,13 +414,13 @@ public class MarketUIReplacer implements EveryFrameScript {
                 }
 
                 m_tp.addSectionHeading("Upkeep", base, dark, Alignment.MID, opad);
-                if (expanded && engine.getIndustryUpkeep(marketAPI) > 0) {
+                if (expanded && engine.info.getIndustryUpkeep(marketAPI) > 0) {
                     m_tp.addPara("Industry and structure upkeep: %s", opad, negative, indUpkeep);
 
                     industries.sort((i1, i2) ->
                         Integer.compare(
-                            engine.getIndustryUpkeep(i2, marketAPI).getModifiedInt(),
-                            engine.getIndustryUpkeep(i1, marketAPI).getModifiedInt()
+                            engine.info.getIndustryUpkeep(i2).getModifiedInt(),
+                            engine.info.getIndustryUpkeep(i1).getModifiedInt()
                         )
                     );
 
@@ -428,7 +428,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                     indCount = 0;
 
                     for (Industry ind : industries) {
-                        int perIndIncome = engine.getIndustryUpkeep(ind, marketAPI).getModifiedInt();
+                        int perIndIncome = engine.info.getIndustryUpkeep(ind).getModifiedInt();
                         if (perIndIncome > 0) {
                             m_tp.addToGrid(0, indCount++, ind.getCurrentName(),
                                 NumFormat.formatCredit(perIndIncome), negative
@@ -443,7 +443,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                     }
                 }
 
-                final long importExpense = engine.getImportExpense(marketAPI, true);
+                final long importExpense = engine.info.getImportExpense(marketAPI, true);
                 m_tp.addPara("Last Month's Imports: %s", opad, negative, NumFormat.formatCredit(importExpense));
                 if (importExpense > 0 && expanded) {
                     final int maxCommoditiesToDisplay = 10;
@@ -473,7 +473,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                         final long comImportExpense = com.getLedger(marketAPI.getId()).lastMonthImportExpense;
                         if (comImportExpense < 1) continue;
 
-                        final int importMarketShare = engine.getImportMarketShare(
+                        final int importMarketShare = engine.info.getImportMarketShare(
                             com.spec.getId(), marketAPI.getId()
                         );
 
@@ -487,7 +487,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                     m_tp.addTable("No imports", importedCount - comCount, opad);
                 }
 
-                final long monthlyWages = (long) (engine.getWagesForMarket(marketAPI)*MONTH);
+                final long monthlyWages = (long) (engine.info.getWagesForMarket(marketAPI)*MONTH);
                 if (monthlyWages > 0) {
                     m_tp.addPara("Worker wages: %s", opad, negative,
                         NumFormat.formatCredit(monthlyWages)

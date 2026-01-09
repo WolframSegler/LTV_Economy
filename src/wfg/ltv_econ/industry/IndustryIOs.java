@@ -21,9 +21,10 @@ import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 
 /**
  * <h3>IndustryIOs</h3>
@@ -103,7 +104,7 @@ public class IndustryIOs {
                 float base = output.baseProd;
 
                 if (output.usesWorkers && !output.isAbstract) {
-                    base /= EconomyEngine.getWorkersPerUnit(output.comID, entry.getValue().occTag);
+                    base /= EconomyInfo.getWorkersPerUnit(output.comID, entry.getValue().occTag);
                 }
 
                 if (output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty() &&

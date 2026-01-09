@@ -22,9 +22,9 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.panels.CustomPanel;
@@ -84,7 +84,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = engine.getGlobalProduction(comID);
+                final long value = engine.info.getGlobalProduction(comID);
                 final String txt = "Global production";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) {
@@ -135,7 +135,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = engine.getGlobalDemand(comID);
+                final long value = engine.info.getGlobalDemand(comID);
                 final String txt = "Global demand";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) {
@@ -186,7 +186,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = engine.getGlobalSurplus(comID);
+                final long value = engine.info.getGlobalSurplus(comID);
                 final String txt = "Global surplus";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) {
@@ -237,7 +237,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = engine.getGlobalDeficit(comID);
+                final long value = engine.info.getGlobalDeficit(comID);
                 final String txt = "Global deficit";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) {
@@ -290,7 +290,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W + largeLabelShift, LABEL_H) {
 
             public void createPanel() {
-                final long value = engine.getGlobalTradeVolume(comID);
+                final long value = engine.info.getGlobalTradeVolume(comID);
                 final String txt = "Sector-wide trade volume";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) {
@@ -390,7 +390,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final int value = (int) engine.getGlobalAveragePrice(comID, 0);
+                final int value = (int) engine.info.getGlobalAveragePrice(comID, 0);
                 final String txt = "Global average price";
                 final String valueTxt = NumFormat.formatCredit(value);
 
@@ -494,7 +494,7 @@ public class GlobalCommodityFlow extends
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = engine.getGlobalStockpiles(comID);
+                final long value = engine.info.getGlobalStockpiles(comID);
                 final String valueTxt = NumFormat.engNotation(value);
                 final String txt = "Global stockpiles";
 
@@ -777,7 +777,7 @@ public class GlobalCommodityFlow extends
         final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
         for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
             final FactionSpecAPI faction = iter.next();
-            final float value = engine.getFactionTotalExportMarketShare(comID, faction.getId());
+            final float value = engine.info.getFactionTotalExportMarketShare(comID, faction.getId());
             if (value < 0.001f) {
                 iter.remove();
                 continue;
@@ -819,7 +819,7 @@ public class GlobalCommodityFlow extends
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),
                     highlight,
-                    (int) (engine.getFactionTotalExportMarketShare(comID, faction.getId()) * 100) + "%"
+                    (int) (engine.info.getFactionTotalExportMarketShare(comID, faction.getId()) * 100) + "%"
                 });
             }
 
@@ -839,7 +839,7 @@ public class GlobalCommodityFlow extends
         final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
         for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
             final FactionSpecAPI faction = iter.next();
-            final float value = engine.getFactionTotalImportMarketShare(comID, faction.getId());
+            final float value = engine.info.getFactionTotalImportMarketShare(comID, faction.getId());
             if (value < 0.001f) {
                 iter.remove();
                 continue;
@@ -881,7 +881,7 @@ public class GlobalCommodityFlow extends
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),
                     highlight,
-                    (int) (engine.getFactionTotalImportMarketShare(comID, faction.getId()) * 100) + "%"
+                    (int) (engine.info.getFactionTotalImportMarketShare(comID, faction.getId()) * 100) + "%"
                 });
             }
 
@@ -898,8 +898,8 @@ public class GlobalCommodityFlow extends
 
         { // In-faction vs out-of-faction trade share
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final double total = engine.getTotalGlobalExports(comID) + engine.getTotalFactionExports(comID);
-        final float globalTradeShare = (float) (engine.getTotalGlobalExports(comID) / total);
+        final double total = engine.info.getTotalGlobalExports(comID) + engine.info.getTotalFactionExports(comID);
+        final float globalTradeShare = (float) (engine.info.getTotalGlobalExports(comID) / total);
             
         data.add(new PieSlice(
             null,

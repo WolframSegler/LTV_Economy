@@ -16,7 +16,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.dialogs.ConfirmEmbargoDialog;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;

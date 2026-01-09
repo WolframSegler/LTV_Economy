@@ -19,7 +19,7 @@ import com.fs.starfarer.api.util.Highlights;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	

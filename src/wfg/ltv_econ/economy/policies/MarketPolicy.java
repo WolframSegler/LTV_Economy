@@ -8,8 +8,8 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.PolicyNotificationIntel;
 
 /**

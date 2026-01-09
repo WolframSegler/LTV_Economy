@@ -12,9 +12,9 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public final class IndustryGrouper {
 

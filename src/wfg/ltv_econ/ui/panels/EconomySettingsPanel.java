@@ -14,9 +14,9 @@ import java.util.List;
 
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
@@ -88,10 +88,9 @@ public class EconomySettingsPanel extends CustomPanel<
 
                 domains.forEach(CommodityDomain::reset);
                 WorkerRegistry.getInstance().resetWorkersAssigned(false);
-
                 domains.forEach(CommodityDomain::update);
-                engine.assignWorkers();
 
+                engine.assignWorkers();
                 domains.forEach(CommodityDomain::update);
                 
                 engine.weightedOutputDeficitMods();
@@ -140,8 +139,8 @@ public class EconomySettingsPanel extends CustomPanel<
 
         { // LOG ECONOMY INFO
             final CallbackRunnable<Button> run = (btn) -> {
-                engine.logEconomySnapshot();
-                engine.logCreditsSnapshot();
+                engine.logger.logEconomySnapshot();
+                engine.logger.logCreditsSnapshot();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 "Log Economy Information", Fonts.DEFAULT_SMALL, run

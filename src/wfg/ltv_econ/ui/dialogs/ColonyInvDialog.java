@@ -18,8 +18,9 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.UIState;
@@ -196,7 +197,7 @@ public class ColonyInvDialog extends DialogPanel {
                     "Note: some values are current so far, others are full-month estimates.",
                     pad,
                     highlight,
-                    NumFormat.formatCredit((long) (engine.getNetIncome(
+                    NumFormat.formatCredit((long) (engine.info.getNetIncome(
                         m_market, false)*data.playerProfitRatio
                     )));
 
@@ -355,7 +356,7 @@ public class ColonyInvDialog extends DialogPanel {
             "Real Balance", 120, RealBalanceTpTxt, false, false, -1
         );
 
-        for (CommoditySpecAPI com : EconomyEngine.getEconCommodities()) {
+        for (CommoditySpecAPI com : EconomyInfo.getEconCommodities()) {
 
             final CommodityCell cell = engine.getComCell(com.getId(), m_market.getId());
 

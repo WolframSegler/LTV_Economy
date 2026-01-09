@@ -49,7 +49,7 @@ import com.fs.starfarer.rpg.Person;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class MarketWrapper extends Market {
     public final Market original;

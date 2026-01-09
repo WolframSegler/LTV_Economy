@@ -224,6 +224,9 @@ public class CommodityCell {
     }
 
     public final void update() {
+        // RESET UPDATE SPECIFIC FLAGS
+        importExclusiveDemand = 0;
+        importEffectiveness = 1f;
         localProdMutables.clear();
         demandBaseMutables.clear();
 
@@ -257,7 +260,6 @@ public class CommodityCell {
             baseDemandBase += stat.getModifiedValue();
         }
 
-        if (baseDemandBase < 1f) baseDemandBase = 0;
         localProd.setBaseValue(localProdBase);
         baseDemand.setBaseValue(baseDemandBase);
 
@@ -272,11 +274,15 @@ public class CommodityCell {
     public final void reset() {
         inFactionImports = 0;
         globalImports = 0;
-        importExclusiveDemand = 0;
-        importEffectiveness = 1f;
 
         inFactionExports = 0;
         globalExports = 0;
+
+        importExclusiveDemand = 0;
+        importEffectiveness = 1f;
+
+        localProdMutables.clear();
+        demandBaseMutables.clear();
 
         localProd.setBaseValue(0f);
         baseDemand.setBaseValue(0f);

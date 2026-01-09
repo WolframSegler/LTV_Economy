@@ -36,7 +36,8 @@ import com.fs.starfarer.api.util.Misc;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
@@ -354,7 +355,7 @@ public class IndustryTooltips {
 
 			final EconomyEngine engine = EconomyEngine.getInstance();
 
-			for (CommoditySpecAPI spec : EconomyEngine.getEconCommodities()) {
+			for (CommoditySpecAPI spec : EconomyInfo.getEconCommodities()) {
 				final CommodityCell cell = engine.getComCell(spec.getId(), ind.getMarket().getId());
 
 				if (cell.getProdIndStat(ind.getId()).getModifiedInt() > 0) {

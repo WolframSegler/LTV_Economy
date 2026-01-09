@@ -13,7 +13,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 
-import wfg.ltv_econ.economy.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
@@ -44,7 +44,7 @@ public class CommoditySelectionPanel extends
         final TooltipMakerAPI container = getPanel().createUIElement(
             width, getPos().getHeight(), true
         );
-        final List<CommoditySpecAPI> commodities = EconomyEngine.getEconCommodities();
+        final List<CommoditySpecAPI> commodities = EconomyInfo.getEconCommodities();
 
         float yCoord = pad;
         for (CommoditySpecAPI spec : commodities) {

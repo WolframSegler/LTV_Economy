@@ -16,8 +16,9 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyEngineSerializer;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.WellnessComplianceBarEvent.WellnessComplianceBarEventCreator;
@@ -50,7 +51,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void onGameLoad(boolean newGame) {
         WorkerRegistry.loadInstance(false);
-        EconomyEngine.loadInstance(false);
+        EconomyEngineSerializer.loadInstance(false);
 
         final SectorAPI sector = Global.getSector();
 
@@ -69,14 +70,14 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void beforeGameSave() {
-        EconomyEngine.saveInstance();
+        EconomyEngineSerializer.saveInstance();
         WorkerRegistry.saveInstance();
     }
 
     @Override
     public void afterGameSave() {
         WorkerRegistry.loadInstance(false);
-        EconomyEngine.loadInstance(false);
+        EconomyEngineSerializer.loadInstance(false);
     }
 
     private static final void addManufacturingToMarkets() {
