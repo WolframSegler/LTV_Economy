@@ -33,7 +33,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
-import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.DebtDebuffTier;
@@ -1290,65 +1289,43 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         
     }
     
-    /**
-     * 1 is no deficit and 0 is max deficit
-     */
-    private static final Pair<String, Float> getMaxDeficit(MarketAPI market, String... commodityIds) {
-		Pair<String, Float> result = new Pair<String, Float>();
-		result.two = 1f;
-		if (Global.CODEX_TOOLTIP_MODE || !EconomyEngine.isInitialized()) return result;
-
-		for (String id : commodityIds) {
-			final CommodityCell cell = instance.getComCell(id, market.getId());
-
-			final float available = cell.getStoredAvailabilityRatio();
-
-			if (available < result.two) {
-				result.one = id;
-				result.two = available;
-			}
-		}
-		return result;
-	}
-
-    private static final void applyPopulationStabilityMods() {
+    private final void applyPopulationStabilityMods() {
         for (MarketAPI market : getMarketsCopy()) {
             applyPopulationStabilityMods(market);
         }
     }
 
-    public static final void applyPopulationStabilityMods(MarketAPI market) {
+    public final void applyPopulationStabilityMods(MarketAPI market) {
+        final String marketID = market.getId();
         final String popID = "ind_" + Industries.POPULATION + "_";
+        final CommodityCell domCell = getComCell(Commodities.DOMESTIC_GOODS, marketID);
+        final CommodityCell luxCell = getComCell(Commodities.LUXURY_GOODS, marketID);
+        final CommodityCell foodCell = getComCell(Commodities.FOOD, marketID);
+        final CommodityCell orgCell = getComCell(Commodities.ORGANICS, marketID);
         
-        Pair<String, Float> availableRatio = getMaxDeficit(market, Commodities.DOMESTIC_GOODS);
-        if (availableRatio.two > 0.9) { // 90% or more
+        if (domCell.getStoredAvailabilityRatio() > 0.9) { // 90% or more
             market.getStability().modifyFlat(popID + 0, 1, "Domestic goods demand met");
-        } else {
-            market.getStability().unmodifyFlat(popID + 0);
-        }
+        } else market.getStability().unmodifyFlat(popID + 0);
 
         final int luxuryThreshold = 3;
-        availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.LUXURY_GOODS);
-        if (availableRatio.two > 0.9 && market.getSize() > luxuryThreshold) { // 90% or more
+        if (luxCell.getStoredAvailabilityRatio() > 0.9 && market.getSize() > luxuryThreshold) {
             market.getStability().modifyFlat(popID + 1, 1, "Luxury goods demand met");
-        } else {
-            market.getStability().unmodifyFlat(popID + 1);
-        }
+        } else market.getStability().unmodifyFlat(popID + 1);
 
-        availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.FOOD);
-        if (!market.hasCondition(Conditions.HABITABLE)) {
-            availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.FOOD, Commodities.ORGANICS);
-        }
-        if (availableRatio.two < 0.9) { // less than 90%
+        final boolean useOrganicsValues = foodCell.getStoredAvailabilityRatio() >
+            orgCell.getStoredAvailabilityRatio() && !market.hasCondition(Conditions.HABITABLE);
+        
+        final String com = useOrganicsValues ? Commodities.FOOD : Commodities.ORGANICS;
+        final float ratio = useOrganicsValues ? orgCell.getStoredAvailabilityRatio() :
+           foodCell.getStoredAvailabilityRatio();
+
+        if (ratio < 0.9) { // less than 90%
             final int stabilityPenalty = 
-                availableRatio.two < 0.1 ? -3 :
-                availableRatio.two < 0.4 ? -2 :
-                availableRatio.two < 0.7 ? -1 : 0;
-            market.getStability().modifyFlat(popID + 2, stabilityPenalty,
-                BaseIndustry.getDeficitText(availableRatio.one));
-        } else {
-            market.getStability().unmodifyFlat(popID + 2);
-        }
+                ratio < 0.1 ? -3 :
+                ratio < 0.4 ? -2 :
+                ratio < 0.7 ? -1 : 0;
+            market.getStability().modifyFlat(popID + 2, stabilityPenalty, BaseIndustry.getDeficitText(com));
+        } else market.getStability().unmodifyFlat(popID + 2);
     }
 
     public final void logEconomySnapshot() {

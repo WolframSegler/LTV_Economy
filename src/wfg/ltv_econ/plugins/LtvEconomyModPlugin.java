@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 
@@ -17,7 +18,6 @@ import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.EconomyEngine;
 import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.WellnessComplianceBarEvent.WellnessComplianceBarEventCreator;
@@ -99,7 +99,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
             if (!hasRequiredIndustry) continue;
 
-            if (LtvPopulationAndInfrastructure.getMaxIndustries(market.getSize()) >
+            if (PopulationAndInfrastructure.getMaxIndustries(market.getSize()) >
                 market.getIndustries().size()
             ) continue;
 

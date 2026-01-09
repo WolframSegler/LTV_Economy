@@ -15,6 +15,7 @@ import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
+import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
@@ -33,7 +34,6 @@ import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
-import wfg.ltv_econ.industry.LtvPopulationAndInfrastructure;
 import wfg.ltv_econ.ui.panels.IndustryWidget.ConstructionMode;
 import wfg.ltv_econ.ui.plugins.IndustryListPanelPlugin;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
@@ -290,7 +290,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 				for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
 					tooltip.addRow(new Object[]{highlight, "" + i, highlight,
-					"" + LtvPopulationAndInfrastructure.getMaxIndustries(i)});
+					"" + PopulationAndInfrastructure.getMaxIndustries(i)});
 				}
 
 				tooltip.addTable("", 0, 10);

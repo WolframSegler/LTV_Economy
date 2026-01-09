@@ -131,13 +131,16 @@ public class PlayerMarketData {
     }
 
     private final void updateHealthDelta() {
-        final float foodRatio = market.hasCondition(Conditions.HABITABLE) ?
-            EconomyEngine.getMaxDeficit(market, Commodities.FOOD).two :
-            EconomyEngine.getMaxDeficit(market, Commodities.FOOD, Commodities.ORGANICS).two;
+        final EconomyEngine engine = EconomyEngine.getInstance();
+        final CommodityCell foodCell = engine.getComCell(Commodities.FOOD, market.getId());
+        final CommodityCell organicsCell = engine.getComCell(Commodities.ORGANICS, market.getId());
+        final float fulfillmentRatio = market.hasCondition(Conditions.HABITABLE) ?
+            foodCell.getStoredAvailabilityRatio() :
+            Math.min(foodCell.getStoredAvailabilityRatio(), organicsCell.getStoredAvailabilityRatio());
         final float modifier = 
-            foodRatio < 0.1 ? -0.2f :
-            foodRatio < 0.4 ? -0.1f :
-            foodRatio < 0.7 ? -0.05f : 0;
+            fulfillmentRatio < 0.1 ? -0.2f :
+            fulfillmentRatio < 0.4 ? -0.1f :
+            fulfillmentRatio < 0.7 ? -0.05f : 0;
 
         healthDelta.modifyFlat("food_organic_deficit", modifier, "Food or organics deficit");
 
