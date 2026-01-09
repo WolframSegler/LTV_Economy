@@ -81,13 +81,9 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     private static final void addManufacturingToMarkets() {
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (!market.isInEconomy() || market.hasIndustry("manufacturing")) continue;
-
+            if (market.hasIndustry("manufacturing")) continue;
             if (market.getSize() < 4 || market.isPlayerOwned()) continue;
-
             if (market.getPlanetEntity() == null || market.getPlanetEntity().isGasGiant()) continue;
-
-            
 
             boolean hasRequiredIndustry = false;
             for (Industry ind : market.getIndustries()) {

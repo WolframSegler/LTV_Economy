@@ -132,8 +132,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     public static final void addConditionToMarket(MarketAPI market) {
         if (market.hasCondition(ConditionID) ||
-            market.getFactionId().equals(Factions.NEUTRAL) ||
-            !market.isInEconomy()
+            market.getFactionId().equals(Factions.NEUTRAL)
         ) return;
 
         market.addCondition(ConditionID);

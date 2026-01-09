@@ -17,6 +17,7 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.BattleAPI;
+import com.fs.starfarer.api.campaign.CampaignClockAPI;
 import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -54,8 +55,12 @@ import static wfg.wrap_ui.util.UIConstants.*;
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.graid.CommodityGroundRaidObjectivePluginImpl;
 import com.fs.starfarer.api.impl.campaign.graid.GroundRaidObjectivePlugin;
+import com.fs.starfarer.api.impl.campaign.ids.Commodities;
+import com.fs.starfarer.api.impl.campaign.ids.Conditions;
+import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidType;
 import com.fs.starfarer.api.impl.campaign.shared.SharedData;
@@ -188,11 +193,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             m_comDomains.put(comID, new CommodityDomain(comID));
         }
 
-        for (MarketAPI market : getMarketsCopy()) {
-            if (!market.isInEconomy()) continue;
-
-            registerMarket(market);
-        }
+        for (MarketAPI market : getMarketsCopy()) registerMarket(market);
 
         readResolve();
     }
@@ -211,17 +212,21 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     protected int dayTracker = -1;
     protected int cyclesSinceWorkerAssign = 0;
+    protected boolean midDayApplied = false;
 
     public boolean isDone() { return false;}
     public boolean runWhilePaused() { return false;}
     public final void advance(float delta) {
-        final int day = Global.getSector().getClock().getDay();
+        final CampaignClockAPI clock = Global.getSector().getClock();
+        final int day = clock.getDay();
+        final int hour = clock.getHour();
 
-        if (dayTracker == -1) dayTracker = day;
+        if (hour >= 6 && !midDayApplied) applyPopulationStabilityMods();
         
+        if (dayTracker == -1) dayTracker = day;
         if (dayTracker == day) return;
-
         dayTracker = day;
+        midDayApplied = false;
 
         if (EconomyConfig.MULTI_THREADING) {
             mainLoopExecutor.submit(() -> {
@@ -347,7 +352,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         WorkerRegistry.getInstance().register(market);
         m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
-        if (market.isPlayerOwned()) m_playerMarketData.put(marketID, new PlayerMarketData(marketID));
+        if (market.isPlayerOwned()) {
+            m_playerMarketData.put(marketID, new PlayerMarketData(marketID));
+            market.addSubmarket(SubmarketsID.STOCKPILES);
+            market.removeSubmarket(Submarkets.LOCAL_RESOURCES);
+        }
 
         m_comDomains.values().forEach(c -> c.addMarket(marketID));
     }
@@ -398,7 +407,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     public static final List<MarketAPI> getMarketsCopy() {
         List<MarketAPI> markets = Global.getSector().getEconomy().getMarketsCopy();
-        markets.removeIf(m -> !m.isInEconomy());
         return markets;
     }
 
@@ -422,10 +430,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
-        final MarketAPI market = planet.getMarket();
-        registerMarket(market);
-        planet.getMarket().addSubmarket(SubmarketsID.STOCKPILES);
-        planet.getMarket().removeSubmarket(Submarkets.LOCAL_RESOURCES);
+        registerMarket(planet.getMarket());
     }
 
     public void reportPlayerAbandonedColony(MarketAPI market) {
@@ -471,11 +476,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         }
 
         final CommodityCell cell = dom.getCell(marketID);
-        if (cell == null) {
-            final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
-            if (market.isInEconomy()) { registerMarket(market); return dom.getCell(marketID); }
-            else { return new CommodityCell(comID, marketID); }
-        }
+        if (cell == null) return new CommodityCell(comID, marketID);
         return cell;
     }
 
@@ -1248,30 +1249,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         }
     }
 
-    /**
-     * 1 is no deficit and 0 is max deficit
-     */
-    public static final Pair<String, Float> getMaxDeficit(MarketAPI market, String... commodityIds) {
-		Pair<String, Float> result = new Pair<String, Float>();
-		result.two = 1f;
-		if (Global.CODEX_TOOLTIP_MODE || !EconomyEngine.isInitialized()) return result;
-
-		for (String id : commodityIds) {
-			final CommodityCell cell = instance.getComCell(id, market.getId());
-			if (cell == null) {
-				return result;
-			}
-
-			float available = cell.getStoredAvailabilityRatio();
-
-			if (available < result.two) {
-				result.one = id;
-				result.two = available;
-			}
-		}
-		return result;
-	}
-
     public void modifyRaidObjectives(MarketAPI market, SectorEntityToken entity,
         List<GroundRaidObjectivePlugin> objectives, RaidType type, int marineTokens, int priority
     ) {}
@@ -1311,6 +1288,67 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     public void reportFleetReachedEntity(CampaignFleetAPI fleet, SectorEntityToken entity) {
         
+    }
+    
+    /**
+     * 1 is no deficit and 0 is max deficit
+     */
+    private static final Pair<String, Float> getMaxDeficit(MarketAPI market, String... commodityIds) {
+		Pair<String, Float> result = new Pair<String, Float>();
+		result.two = 1f;
+		if (Global.CODEX_TOOLTIP_MODE || !EconomyEngine.isInitialized()) return result;
+
+		for (String id : commodityIds) {
+			final CommodityCell cell = instance.getComCell(id, market.getId());
+
+			final float available = cell.getStoredAvailabilityRatio();
+
+			if (available < result.two) {
+				result.one = id;
+				result.two = available;
+			}
+		}
+		return result;
+	}
+
+    private static final void applyPopulationStabilityMods() {
+        for (MarketAPI market : getMarketsCopy()) {
+            applyPopulationStabilityMods(market);
+        }
+    }
+
+    public static final void applyPopulationStabilityMods(MarketAPI market) {
+        final String popID = "ind_" + Industries.POPULATION + "_";
+        
+        Pair<String, Float> availableRatio = getMaxDeficit(market, Commodities.DOMESTIC_GOODS);
+        if (availableRatio.two > 0.9) { // 90% or more
+            market.getStability().modifyFlat(popID + 0, 1, "Domestic goods demand met");
+        } else {
+            market.getStability().unmodifyFlat(popID + 0);
+        }
+
+        final int luxuryThreshold = 3;
+        availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.LUXURY_GOODS);
+        if (availableRatio.two > 0.9 && market.getSize() > luxuryThreshold) { // 90% or more
+            market.getStability().modifyFlat(popID + 1, 1, "Luxury goods demand met");
+        } else {
+            market.getStability().unmodifyFlat(popID + 1);
+        }
+
+        availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.FOOD);
+        if (!market.hasCondition(Conditions.HABITABLE)) {
+            availableRatio = EconomyEngine.getMaxDeficit(market, Commodities.FOOD, Commodities.ORGANICS);
+        }
+        if (availableRatio.two < 0.9) { // less than 90%
+            final int stabilityPenalty = 
+                availableRatio.two < 0.1 ? -3 :
+                availableRatio.two < 0.4 ? -2 :
+                availableRatio.two < 0.7 ? -1 : 0;
+            market.getStability().modifyFlat(popID + 2, stabilityPenalty,
+                BaseIndustry.getDeficitText(availableRatio.one));
+        } else {
+            market.getStability().unmodifyFlat(popID + 2);
+        }
     }
 
     public final void logEconomySnapshot() {
