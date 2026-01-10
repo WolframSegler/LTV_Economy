@@ -194,7 +194,7 @@ public class PlayerMarketData {
     private final void updateClassConsciousnessDelta() {
         classConsciousnessDelta.modifyFlat("base", -0.005f, "Base change");
 
-        classConsciousnessDelta.modifyFlat("wage", 0.05f * (RoSV - 1f) / RoSV, "Wages");
+        classConsciousnessDelta.modifyFlat("wage", 0.03f * (RoSV - 1f) / RoSV, "Wages");
 
         classConsciousnessDelta.modifyFlat("health", (BASELINE_VALUE - popHealth) * 0.0002f, "Health");
 
@@ -209,5 +209,10 @@ public class PlayerMarketData {
 
     private static final float clamp(float value, float min, float max) {
         return value < min ? min : (value > max ? max : value);
+    }
+
+    @Override
+    public String toString() {
+        return "[" + marketID + "; name: " + market.getName() + "]";
     }
 }

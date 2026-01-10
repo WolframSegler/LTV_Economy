@@ -20,9 +20,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
-import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport;
@@ -256,6 +254,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return Collections.unmodifiableSet(m_registeredMarkets);
     }
 
+    public Map<String, PlayerMarketData> getPlayerMarketData() {
+        return Collections.unmodifiableMap(m_playerMarketData);
+    }
+
     public final boolean isPlayerMarket(String marketID) {
         return m_playerMarketData.keySet().contains(marketID);
     }
@@ -272,7 +274,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public void reportPlayerOpenedMarket() {
-        // fakeAdvance();
+        fakeAdvance();
     }
 
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
@@ -336,79 +338,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return m_marketCredits.getOrDefault(marketID, 0l);
     }
 
-    private transient Set<String> turnedOffIncentiveMarkets = new HashSet<>();
     @Override
     public void reportEconomyTick(int iterIndex) {
-        final EconomyAPI econ = Global.getSector().getEconomy();
-
-        if (turnedOffIncentiveMarkets == null) turnedOffIncentiveMarkets = new HashSet<>();
-        turnedOffIncentiveMarkets.clear();
-
-        for (String marketID : m_playerMarketData.keySet()) {
-            final MarketAPI market = econ.getMarket(marketID);
-            if (market == null) {
-                m_playerMarketData.remove(marketID);
-                continue;
-            }
-            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
-
-                ind.getIncome().unmodify();
-                ind.getIncome().base = 0f;
-                ind.getUpkeep().unmodify();
-                ind.getUpkeep().base = 0f;
-            }
-
-            /**
-             * TODO: Player Export Income Nullification
-             *
-             * Context:
-             * - Export income is computed dynamically via CommodityMarketData and MarketShareData.
-             *
-             * Observations:
-             * - CommodityOnMarketAPI.getExportIncome() = exportMarketShare * getMarketValue() * incomeMult
-             * - MarketShareData is created on-demand in CommodityMarketData.getMarketShareData().
-             * - Modifying exportMarketShare or marketValue can zero player exports but may break:
-             *     - Colony crises events
-             *     - AI trade decisions
-             *     - Global trade calculations
-             *
-             * Risks:
-             * - Zeroing exportMarketShare may prevent events from triggering.
-             * - Changes are per tick; may be overridden by vanilla updates.
-             * - Direct reflection modification may be reverted if applied at wrong timing.
-             *
-             * Notes / Potential Solutions:
-             * - Modify the entries of this.marketValuePerFaction inside CommodityMarketData instead.
-             * - Modify market.getIncomeMult() instead.
-             */
-            for (CommodityOnMarketAPI com : market.getAllCommodities()) {
-                com.getCommodityMarketData().getMarketShareData(market).setExportMarketShare(0);
-            }
-
-            if (market.isImmigrationIncentivesOn()) {
-                turnedOffIncentiveMarkets.add(marketID);
-                market.setImmigrationIncentivesOn(false);
-            }
-        }
-    }
-
-    /**
-     * This method runs after {@link #reportEconomyTick}. Practically the same method but delayed.
-     */
-    @Override
-    public void reportEconomyMonthEnd() {
-        final EconomyAPI econ = Global.getSector().getEconomy();
-
-        for (String marketID : turnedOffIncentiveMarkets) {
-            econ.getMarket(marketID).setImmigrationIncentivesOn(true);
-        }
-
         for (CommodityDomain dom : m_comDomains.values()) {
             dom.endMonth();
         }
-
+        
         final MonthlyReport report = SharedData.getData().getCurrentReport();
-        FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
+        final FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
 		marketsNode.name = "Colonies";
 		marketsNode.custom = MonthlyReport.OUTPOSTS;
 		marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
@@ -419,7 +356,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             final float r = data.getEffectiveProfitRatio();
             final float playerIncome = Math.max(netIncome, 0) * r;
             addCredits(data.marketID, (long) -playerIncome);
-
             
             final FDNode mNode = report.getNode(marketsNode, market.getId());
             mNode.name = market.getName() + " (" + market.getSize() + ")";
@@ -428,7 +364,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             // Player cut node
             final FDNode playerIncomeNode = report.getNode(mNode, "player_share");
             playerIncomeNode.name = "Effective player share (" + Math.round(r * 100) + "%)";
-            playerIncomeNode.icon = Global.getSettings().getSpriteName("icons", "player_ratio");
+            playerIncomeNode.icon = Global.getSettings().getSpriteName("icons", "ratio_chart");
             playerIncomeNode.income = 0.0001f;
             playerIncomeNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}
@@ -448,9 +384,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 }
             };
 
-            if (playerIncome < 1) {
-                playerIncomeNode.name += " - none";
-            }
+            if (playerIncome < 1) playerIncomeNode.name += " - none";
 
             // Industries & structures
             final FDNode indNode = report.getNode(mNode, "industries"); 
@@ -458,6 +392,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             indNode.custom = MonthlyReport.INDUSTRIES;
             indNode.mapEntity = market.getPrimaryEntity();
             indNode.tooltipCreator = report.getMonthlyReportTooltip();
+            indNode.getChildren().clear();
             for (Industry ind : market.getIndustries()) {
                 final FDNode iNode = report.getNode(indNode, ind.getId());
                 iNode.name = ind.getCurrentName();
@@ -472,6 +407,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             exportNode.name = "Exports";
             exportNode.custom = MonthlyReport.EXPORTS;
             exportNode.mapEntity = market.getPrimaryEntity();
+            exportNode.getChildren().clear();
             exportNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}
 
@@ -516,6 +452,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             };
         }
     }
+
+    /**
+     * This method runs after {@link #reportEconomyTick}. Practically the same method but delayed.
+     */
+    @Override
+    public void reportEconomyMonthEnd() {}
 
     public void modifyRaidObjectives(MarketAPI market, SectorEntityToken entity,
         List<GroundRaidObjectivePlugin> objectives, RaidType type, int marineTokens, int priority

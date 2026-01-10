@@ -1,12 +1,7 @@
 package wfg.ltv_econ.economy.engine;
 
-import java.util.List;
-
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.SectorAPI;
-
-import wfg.ltv_econ.plugins.LtvEconomyModPlugin;
 
 public class EconomyEngineSerializer {
     public static final String EconEngineSerialID = "ltv_econ_econ_engine";
@@ -29,9 +24,8 @@ public class EconomyEngineSerializer {
         attachModules(engine);
         engine.fakeAdvanceWithAssignWorkers();
 
-        final List<CampaignEventListener> listeners = LtvEconomyModPlugin.getListeners();
-        listeners.add(0, engine);
         sector.addTransientScript(engine);
+        sector.addTransientListener(engine);
         sector.getListenerManager().addListener(engine, true);
 
         return engine;
@@ -41,10 +35,10 @@ public class EconomyEngineSerializer {
         final SectorAPI sector = Global.getSector();
         final EconomyEngine instance = EconomyEngine.getInstance();
 
-        sector.getPersistentData().put(EconEngineSerialID, instance);
-
         sector.removeListener(instance);
         EconomyEngine.setInstance(null);
+
+        sector.getPersistentData().put(EconEngineSerialID, instance);
     }
 
     static final void attachModules(EconomyEngine engine) {

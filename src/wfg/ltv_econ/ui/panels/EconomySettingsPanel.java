@@ -10,10 +10,13 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import static wfg.wrap_ui.util.UIConstants.*;
 
+import org.apache.log4j.Logger;
+
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
@@ -27,6 +30,8 @@ public class EconomySettingsPanel extends CustomPanel<
     public static final int LABEL_H = 50;
     public static final int BUTTON_W = 250;
     public static final int BUTTON_H = 25;
+
+    public static final Logger logger = Global.getLogger(EconomySettingsPanel.class); 
 
     public EconomySettingsPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height, new BasePanelPlugin<>());
@@ -47,7 +52,7 @@ public class EconomySettingsPanel extends CustomPanel<
         final int lblH = (int) debuOptions.computeTextHeight("Debug Options");
         add(debuOptions).inTL(opad, SECTION_I);
 
-        { // REFRESH PLAYER_MARKET_DATA
+        { // REFRESH MARKETS
             final CallbackRunnable<Button> run = (btn) -> {
                 engine.refreshMarkets();
                 
@@ -59,7 +64,7 @@ public class EconomySettingsPanel extends CustomPanel<
                 }
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                "Refresh Player Market Data", Fonts.DEFAULT_SMALL, run
+                "Refresh Markets", Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + lblH + pad*2);
 
@@ -67,9 +72,7 @@ public class EconomySettingsPanel extends CustomPanel<
             button.setTooltipFactory(() -> {
                 final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
 
-                tp.addPara("Synchronizes EconomyEngine markets with vanilla Economy markets. "+
-                    "If a player market has no data, creates the data for it", pad 
-                );
+                tp.addPara("Synchronizes EconomyEngine markets with vanilla Economy markets. ", pad );
 
                 add(tp);
                 WrapUiUtils.mouseCornerPos(tp, opad);
@@ -140,6 +143,48 @@ public class EconomySettingsPanel extends CustomPanel<
                 final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
 
                 tp.addPara("Logs all the information about the Economy", pad);
+
+                add(tp);
+                WrapUiUtils.mouseCornerPos(tp, opad);
+                return tp;
+            });
+        }
+
+        { // LOG PLAYER MARKET DATA
+            final CallbackRunnable<Button> run = (btn) -> {
+                logger.info(engine.getPlayerMarketData().values());
+            };
+            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+                "Log Player Market Data", Fonts.DEFAULT_SMALL, run
+            );
+            add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
+
+            button.setParentSupplier(() -> { return m_panel; });
+            button.setTooltipFactory(() -> {
+                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+
+                tp.addPara("Logs all player market data's", pad);
+
+                add(tp);
+                WrapUiUtils.mouseCornerPos(tp, opad);
+                return tp;
+            });
+        }
+
+        { // INDUSTRY IO MAPS LOG
+            final CallbackRunnable<Button> run = (btn) -> {
+                IndustryIOs.logMaps();
+            };
+            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+                "Log Industry IO Maps", Fonts.DEFAULT_SMALL, run
+            );
+            add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
+
+            button.setParentSupplier(() -> { return m_panel; });
+            button.setTooltipFactory(() -> {
+                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+
+                tp.addPara("Logs the maps used by IndustryIOs to manage industry inputs and outputs", pad);
 
                 add(tp);
                 WrapUiUtils.mouseCornerPos(tp, opad);

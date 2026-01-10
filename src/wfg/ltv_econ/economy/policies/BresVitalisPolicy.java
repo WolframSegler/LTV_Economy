@@ -31,7 +31,7 @@ public class BresVitalisPolicy extends MarketPolicy {
         tp.addPara("Daily effects", pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
         tp.addToGrid(0, 0, "Health", String.format("%+.2f", HEALTH_DEBUFF), negative);
-        tp.addToGrid(0, 1, "Happiness", String.format("%+.2f", HAPPINESS_BUFF));
+        tp.addToGrid(0, 1, "Happiness", String.format("%+.1f", HAPPINESS_BUFF));
         tp.addToGrid(0, 2, "Class Consciousness", String.format("%+.3f", CLASS_BUFF));
 
         tp.addGrid(0);

@@ -70,23 +70,19 @@ public class WorkerRegistry {
         return industries;
     }
 
-    public final void register(String marketID, Industry ind) {
+    public final void register(Industry ind) {
         if (!IndustryIOs.getIndConfig(ind).workerAssignable) return;
 
-        final String key = makeKey(marketID, IndustryIOs.getBaseIndustryID(ind));
-        registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind));
+        final String key = makeKey(ind.getMarket().getId(), IndustryIOs.getBaseIndustryID(ind));
+        registry.putIfAbsent(key, new WorkerIndustryData(ind.getMarket().getId(), ind));
     }
 
     public final void register(MarketAPI market) {
-        for (Industry ind : getVisibleIndustries(market)) register(market.getId(), ind);
+        for (Industry ind : getVisibleIndustries(market)) register(ind);
     }
 
     public final void register(String marketID) {
         register(Global.getSector().getEconomy().getMarket(marketID));
-    }
-
-    public final void register(Industry ind) {
-        register(ind.getMarket().getId(), ind);
     }
 
     public final void remove(String marketID, IndustrySpecAPI ind) {
@@ -150,8 +146,19 @@ public class WorkerRegistry {
         registry.put(makeKey(data.marketID, data.indID), data);
     }
 
-    public final List<WorkerIndustryData> getRegistry() {
+    public final boolean hasMarket(String marketID) {
+        for (String regID : registry.keySet()) {
+            if (regID.contains(marketID + KEY)) return true;
+        }
+        return false;
+    }
+
+    public final ArrayList<WorkerIndustryData> getRegistry() {
         return new ArrayList<>(registry.values());
+    }
+
+    public final ArrayList<String> getKeys() {
+        return new ArrayList<>(registry.keySet());
     }
 
     private static final String makeKey(String marketID, String industryID) {
@@ -169,7 +176,7 @@ public class WorkerRegistry {
         private float outputRatioSum = 0;
 
         public WorkerIndustryData(String marketID, Industry industry) {
-            this.marketID = market.getId();
+            this.marketID = marketID;
             this.indID = IndustryIOs.getBaseIndustryID(industry);
             this.outputRatios = new HashMap<>();
 

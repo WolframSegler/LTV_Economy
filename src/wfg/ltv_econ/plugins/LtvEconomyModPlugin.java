@@ -1,10 +1,8 @@
 package wfg.ltv_econ.plugins;
 
-import java.util.List;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -12,7 +10,6 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
@@ -24,17 +21,6 @@ import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFest
 import wfg.ltv_econ.intel.bar.events.WellnessComplianceBarEvent.WellnessComplianceBarEventCreator;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
-    public static List<CampaignEventListener> listeners;
-
-    @SuppressWarnings("unchecked")
-    public static final List<CampaignEventListener> getListeners() {
-        if (listeners == null) {
-            listeners = (List<CampaignEventListener>) RolfLectionUtil.getPrivateVariable(
-            "listeners", Global.getSector());
-        }
-        return listeners;
-    }
-
     @Override
     public void onApplicationLoad() throws Exception {}
 

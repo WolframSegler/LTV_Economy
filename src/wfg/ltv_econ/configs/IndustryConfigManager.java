@@ -87,9 +87,7 @@ public class IndustryConfigManager {
     }
 
     public static final JSONObject getConfig(boolean dynamicConfig) {
-        if (config == null || dynamic_config == null) {
-            load();
-        }
+        if (config == null || dynamic_config == null) load();
         return dynamicConfig ? dynamic_config : config;
     }
 

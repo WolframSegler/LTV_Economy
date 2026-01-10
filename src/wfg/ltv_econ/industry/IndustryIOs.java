@@ -14,6 +14,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.configs.IndustryConfigManager;
@@ -56,26 +57,30 @@ public class IndustryIOs {
     /**
      * Map(industryID, Map(outputID, baseOutput))
      */
-    private static Map<String, Map<String, Float>> baseOutputs = new HashMap<>(); 
+    private static final Map<String, Map<String, Float>> baseOutputs = new HashMap<>(); 
 
     /**
      * <code>Map(industryID, Map(outputID, Map(inputID, baseInput)))</code>
      */
-    private static Map<String, Map<String, Map<String, Float>>> baseInputs = new HashMap<>();
+    private static final Map<String, Map<String, Map<String, Float>>> baseInputs = new HashMap<>();
 
     /**
      * Map(inputID, List(outputID))
      */
-    private static Map<String, List<String>> inputToOutput = new HashMap<>();
+    private static final Map<String, List<String>> inputToOutput = new HashMap<>();
 
     // Map<commodityID, Set<industryID>>
     private static final Map<String, Set<String>> inputToInd = new HashMap<>();
     private static final Map<String, Set<String>> outputToInd = new HashMap<>();
 
+    private static final Map<String, String> IndToBaseInd = new HashMap<>();
+
     public static final String ABSTRACT_COM = "abstract";
 
     private IndustryIOs() {}
     static {
+        buildBaseIdMapping();
+
         ConfigInputOutputMaps();
 
         buildInputToOutput();
@@ -192,16 +197,36 @@ public class IndustryIOs {
         }
     }
 
+    private static final void buildBaseIdMapping() {
+        for (IndustrySpecAPI spec : Global.getSettings().getAllIndustrySpecs()) {
+            IndToBaseInd.put(spec.getId(), getBaseIndustryIDSpec(spec));
+        }
+    }
+
+    private static final String getBaseIndustryIDSpec(IndustrySpecAPI ind) {
+        IndustrySpecAPI currentInd = ind;
+
+        while (true) {
+            String downgradeId = currentInd.getDowngrade();
+            if (downgradeId == null) break;
+
+            currentInd = Global.getSettings().getIndustrySpec(downgradeId);
+        }
+
+        return currentInd.getId();
+    }
+
     public static final boolean isOutputValidForMarket(OutputConfig output, Industry ind, String outputID) {
         final MarketAPI market = ind.getMarket();
         if (output.checkLegality && market.isIllegal(outputID)) return false;
 
-        if (output == null ||
-            ind.isDisrupted() ||
-            (ind.isBuilding() && !output.activeDuringBuilding) ||
-            (ind.isFunctional() && output.activeDuringBuilding)) {
-            return false;
-        }
+        if (output == null || ind.isDisrupted() ||
+            (ind.isFunctional() && output.activeDuringBuilding)
+        ) return false;
+
+        if (output.activeDuringBuilding && !ind.isBuilding() &&
+            !ind.getId().contains(Industries.POPULATION)
+        ) return false;
 
         for (String cond : output.ifMarketCondsAllFalse) {
             if (market.hasCondition(cond)) return false;
@@ -422,7 +447,7 @@ public class IndustryIOs {
 
     public static final boolean hasConfig(IndustrySpecAPI ind) {
         return IndustryConfigManager.ind_config.containsKey(ind.getId()) 
-            || IndustryConfigManager.ind_config.containsKey(getBaseIndustryID(ind));
+            || IndustryConfigManager.ind_config.containsKey(getBaseIndustryID(ind.getId()));
     }
 
     public static final boolean hasOutput(Industry ind, String comID) {
@@ -443,34 +468,29 @@ public class IndustryIOs {
         IndustryConfig indConfig = IndustryConfigManager.ind_config.get(ind.getId());
 
         if (indConfig == null) {
-            indConfig = IndustryConfigManager.ind_config.get(getBaseIndustryID(ind));
+            indConfig = IndustryConfigManager.ind_config.get(getBaseIndustryID(ind.getId()));
         }
 
         return indConfig;
     }
 
-    public static final String getBaseIndustryID(Industry ind) {
-        return getBaseIndustryID(ind.getSpec());
+    public static String getBaseIndustryID(String id) {
+        return IndToBaseInd.get(id);
     }
 
-    public static final String getBaseIndustryID(IndustrySpecAPI ind) {
-        IndustrySpecAPI currentInd = ind;
+    public static String getBaseIndustryID(IndustrySpecAPI ind) {
+        return getBaseIndustryID(ind.getId());
+    }
 
-        while (true) {
-            String downgradeId = currentInd.getDowngrade();
-            if (downgradeId == null) break;
-
-            currentInd = Global.getSettings().getIndustrySpec(downgradeId);
-        }
-
-        return currentInd.getId();
+    public static String getBaseIndustryID(Industry ind) {
+        return getBaseIndustryID(ind.getId());
     }
 
     public static final String getBaseIndIDifNoConfig(IndustrySpecAPI ind) {
         if (IndustryConfigManager.ind_config.containsKey(ind.getId())) {
             return ind.getId();
         }
-        return getBaseIndustryID(ind);
+        return getBaseIndustryID(ind.getId());
     }
 
     /**
@@ -534,11 +554,14 @@ public class IndustryIOs {
             "baseInputs" + "\n" +
             baseInputs.toString() + "\n" +
             "--------------------------" + "\n" +
-            "demandsToInd" + "\n" +
+            "inputsToInd" + "\n" +
             inputToInd.toString() + "\n" +
             "--------------------------" + "\n" +
-            "supplyToInd" + "\n" +
-            outputToInd.toString()
+            "outputsToInd" + "\n" +
+            outputToInd.toString() + "\n" +
+            "--------------------------" + "\n" +
+            "IndToBaseInd" + "\n" +
+            IndToBaseInd.toString()
         );
     }
 }

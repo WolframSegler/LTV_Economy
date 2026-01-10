@@ -27,6 +27,7 @@ import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkforcePlanner;
+import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -194,9 +195,7 @@ public class EconomyLoop {
 
                 for (String outputID : IndustryIOs.getIndConfig(ind).outputs.keySet()) {
                     if (!CompatLayer.hasRelevantCondition(outputID, market)) continue;
-                    if (!IndustryIOs.isOutputValidForMarket(
-                        config.outputs.get(outputID), ind, outputID
-                    )) continue;
+                    if (!IndustryIOs.isOutputValidForMarket(config.outputs.get(outputID), ind, outputID)) continue;
 
                     final int idx = indOutputPairToColumn.getOrDefault(indID + KEY + outputID, -1);
                     if (idx != -1) outputIndexes.add(idx);
@@ -215,7 +214,6 @@ public class EconomyLoop {
             final MarketAPI market = entry.getKey();
             final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
 
-            final String marketID = market.getId();
             final float[] assignments = entry.getValue();
             final long totalWorkers = cond.getWorkerPool();
 
@@ -223,12 +221,15 @@ public class EconomyLoop {
                 if (assignments[i] == 0) continue;
 
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(KEY), 2);
-                if (!market.hasIndustry(indAndOutputID[0])) continue;
-
-                final var ind = Global.getSettings().getIndustrySpec(indAndOutputID[0]);
 
                 final float ratio = (assignments[i] / totalWorkers);
-                reg.getData(marketID, ind).setRatioForOutput(indAndOutputID[1], ratio);
+                final String baseInd = IndustryIOs.getBaseIndustryID(indAndOutputID[0]);
+                WorkerIndustryData data = reg.getData(market.getId(), baseInd);
+                if (data == null) {
+                    reg.register(market);
+                    data = reg.getData(market.getId(), baseInd);
+                }
+                data.setRatioForOutput(indAndOutputID[1], ratio);
             }
         }
     }

@@ -245,8 +245,7 @@ public class EconomyInfo {
      * Works properly only for player colonies.
      *
      * <p>{@code getIncomeMult()} does not affect trade income. It represents
-     * administrative efficiency and applies only to abstract income, upkeep,
-     * and wage-related systems.</p>
+     * administrative efficiency and applies only to abstract income and upkeep.</p>
      */
     public final long getNetIncome(MarketAPI market, boolean lastMonth) {
         final long exportIncome = getExportIncome(market, lastMonth);

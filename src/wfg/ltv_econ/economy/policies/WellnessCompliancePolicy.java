@@ -34,7 +34,7 @@ public class WellnessCompliancePolicy extends MarketPolicy {
         tp.addPara("Daily effects", pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
         tp.addToGrid(0, 0, "Health", String.format("%+.2f", HEALTH_BUFF));
-        tp.addToGrid(0, 1, "Happiness", String.format("%+.2f", HAPPINESS_DEBUFF), negative);
+        tp.addToGrid(0, 1, "Happiness", String.format("%+.1f", HAPPINESS_DEBUFF), negative);
         tp.addToGrid(0, 2, "Social Cohesion", String.format("%+.2f", COHESION_DEBUFF), negative);
         tp.addToGrid(0, 3, "Class Consciousness", String.format("%+.3f", CLASS_DEBUFF));
 

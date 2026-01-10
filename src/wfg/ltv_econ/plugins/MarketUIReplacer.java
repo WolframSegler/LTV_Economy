@@ -3,6 +3,7 @@ package wfg.ltv_econ.plugins;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.awt.Color;
 
 import org.lwjgl.input.Keyboard;
@@ -67,6 +68,8 @@ public class MarketUIReplacer implements EveryFrameScript {
 
     public static MarketAPI marketAPI = null;
     public static Market market = null;
+
+    public static UUID incomeLblID;
 
     @Override
     public void advance(float amount) {
@@ -142,8 +145,6 @@ public class MarketUIReplacer implements EveryFrameScript {
             }
         }
         if (anchorChild == null) return;
-
-        EconomyEngine.getInstance().fakeAdvance();
 
         // Replace the "Use stockpiles during shortages" button
         replaceUseStockpilesBtnAddManageWorkersBtn(managementPanel, managementChildren, anchorChild);
@@ -242,8 +243,8 @@ public class MarketUIReplacer implements EveryFrameScript {
             CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
         RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
         for (Object child : children) {
-            if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof BasePanelPlugin) {
-                return;
+            if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof BasePanelPlugin bp) {
+                if (bp.UniqueID.equals(incomeLblID)) return;
             }
         }
         
@@ -263,6 +264,8 @@ public class MarketUIReplacer implements EveryFrameScript {
         final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
             public void createPanel() {
+                incomeLblID = getPlugin().UniqueID;
+
                 final long value = EconomyEngine.getInstance().info.getNetIncome(marketAPI, true);
                 final String txt = "Credits/month";
                 final String valueTxt = NumFormat.formatCredit(value);
@@ -325,8 +328,8 @@ public class MarketUIReplacer implements EveryFrameScript {
                 );
                 m_tp.setParaFontColor(gray);
                 m_tp.addPara(
-                    "This multiplier affects industry income & upkeep and wages, "+ 
-                    "but does not affect trade (exports/imports).",
+                    "This multiplier affects industry income & upkeep, "+ 
+                    "but does not affect wages or trade (exports/imports).",
                     opad
                 );
                 m_tp.setParaFontColor(Color.WHITE);
