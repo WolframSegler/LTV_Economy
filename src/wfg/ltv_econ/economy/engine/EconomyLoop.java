@@ -223,6 +223,7 @@ public class EconomyLoop {
                 if (assignments[i] == 0) continue;
 
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(KEY), 2);
+                if (!market.hasIndustry(indAndOutputID[1])) continue;
 
                 final var ind = Global.getSettings().getIndustrySpec(indAndOutputID[0]);
 
