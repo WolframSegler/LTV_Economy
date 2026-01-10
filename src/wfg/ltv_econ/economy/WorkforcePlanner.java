@@ -25,8 +25,8 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryGrouper;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
@@ -300,8 +300,8 @@ public class WorkforcePlanner {
 
         for (int j = 0; j < numOutputs; j++) {
             final String pair = groupedOutputPairs.get(j);
-            final String indGroupID = pair.split(EconomyEngine.KEY)[0];
-            final String outputID = pair.split(EconomyEngine.KEY)[1];
+            final String indGroupID = pair.split(EconomyLoop.KEY)[0];
+            final String outputID = pair.split(EconomyLoop.KEY)[1];
 
             for (int m = 0; m < numMarkets; m++) {
                 if (!outputsPerMarket.get(m).contains(j)) continue;
@@ -314,7 +314,7 @@ public class WorkforcePlanner {
                     );
                 } else {
                     final List<String> baseIDs = groupingData.groupToMembers.get(pair).stream()
-                        .map(p -> p.split(EconomyEngine.KEY)[0]).toList();
+                        .map(p -> p.split(EconomyLoop.KEY)[0]).toList();
 
                     ind = IndustryIOs.getRealIndustryFromBaseID(market, baseIDs);
                 }
@@ -357,8 +357,8 @@ public class WorkforcePlanner {
         // 3) Output capacity constraint: workersAssigned <= workerLimit
         for (int j = 0; j < numOutputs; j++) {
             final String pair = groupedOutputPairs.get(j);
-            final String indGroupID = pair.split(EconomyEngine.KEY)[0];
-            final String outputID = pair.split(EconomyEngine.KEY)[1];
+            final String indGroupID = pair.split(EconomyLoop.KEY)[0];
+            final String outputID = pair.split(EconomyLoop.KEY)[1];
 
             for (int m = 0; m < numMarkets; m++) {
                 if (!outputsPerMarket.get(m).contains(j)) continue;
@@ -372,7 +372,7 @@ public class WorkforcePlanner {
                     );
                 } else {
                     final List<String> baseIDs = groupingData.groupToMembers.get(pair).stream()
-                        .map(p -> p.split(EconomyEngine.KEY)[0])
+                        .map(p -> p.split(EconomyLoop.KEY)[0])
                         .toList();
 
                     ind = IndustryIOs.getRealIndustryFromBaseID(market, baseIDs);

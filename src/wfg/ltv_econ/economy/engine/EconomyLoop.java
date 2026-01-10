@@ -2,8 +2,10 @@ package wfg.ltv_econ.economy.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -139,17 +141,17 @@ public class EconomyLoop {
     }
 
     public final void refreshMarkets() {
-        final Map<String, MarketAPI> currentMarkets = EconomyInfo.getMarketsCopy().stream()
-            .collect(Collectors.toMap(MarketAPI::getId, m -> m));
+        final Set<String> economyMarketIDs = EconomyInfo.getMarketsCopy().stream()
+            .map(MarketAPI::getId)
+            .collect(Collectors.toSet());
+        final Set<String> registeredMarkets = new HashSet<>(engine.m_registeredMarkets);
 
-        for (MarketAPI market : currentMarkets.values()) {
-            engine.registerMarket(market);
+        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
+            if (!registeredMarkets.contains(market.getId())) engine.registerMarket(market);
         }
 
-        currentMarkets.keySet().removeAll(engine.m_registeredMarkets);
-
-        for (MarketAPI market : currentMarkets.values()) {
-            engine.removeMarket(market);
+        for (String marketID : registeredMarkets) {
+            if (!economyMarketIDs.contains(marketID)) engine.removeMarket(marketID);
         }
     }
 
@@ -158,6 +160,7 @@ public class EconomyLoop {
 
         final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
         final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
+        final var indOutputPairToColumn = IndustryMatrix.getIndOutputPairToColumnMap();
         final GroupedMatrix A = IndustryGrouper.getStaticGrouping();
 
         Map<String, Integer> commodityToRow = new HashMap<>();
@@ -195,13 +198,8 @@ public class EconomyLoop {
                         config.outputs.get(outputID), ind, outputID
                     )) continue;
 
-                    for (int j = 0; j < industryOutputPairs.size(); j++) {
-                        String pair = industryOutputPairs.get(j);
-
-                        if (pair.equals(indID + KEY + outputID)) {
-                            outputIndexes.add(j);
-                        }
-                    }
+                    final int idx = indOutputPairToColumn.getOrDefault(indID + KEY + outputID, -1);
+                    if (idx != -1) outputIndexes.add(idx);
                 }
             }
             outputsPerMarket.add(outputIndexes);
@@ -214,9 +212,10 @@ public class EconomyLoop {
         );
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
-            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(entry.getKey());
+            final MarketAPI market = entry.getKey();
+            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
 
-            final String marketID = entry.getKey().getId();
+            final String marketID = market.getId();
             final float[] assignments = entry.getValue();
             final long totalWorkers = cond.getWorkerPool();
 
@@ -224,6 +223,7 @@ public class EconomyLoop {
                 if (assignments[i] == 0) continue;
 
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(KEY), 2);
+
                 final var ind = Global.getSettings().getIndustrySpec(indAndOutputID[0]);
 
                 final float ratio = (assignments[i] / totalWorkers);

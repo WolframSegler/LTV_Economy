@@ -1,6 +1,7 @@
 package wfg.ltv_econ.economy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,13 +13,15 @@ import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class IndustryMatrix {
     private static double[][] STATIC_MATRIX;
+    private static List<String> STATIC_WORKER_COMMODITIES;
     private static List<String> STATIC_INDUSTRY_OUTPUT_PAIRS;
+    private static Map<String, Integer> INDUSTRY_OUTPUT_PAIR_TO_COLUMN;
 
     public static final synchronized double[][] getMatrix() {
         if (STATIC_MATRIX == null) buildMatrix();
@@ -28,6 +31,23 @@ public class IndustryMatrix {
     public static final synchronized List<String> getIndustryOutputPairs() {
         if (STATIC_INDUSTRY_OUTPUT_PAIRS == null) buildMatrix();
         return STATIC_INDUSTRY_OUTPUT_PAIRS;
+    }
+
+    public static final synchronized List<String> getWorkerRelatedCommodityIDs() {
+        if (STATIC_WORKER_COMMODITIES == null) buildWorkerRelatedCommodityIDs();
+        return STATIC_WORKER_COMMODITIES;
+    }
+
+    public static final synchronized Map<String, Integer> getIndOutputPairToColumnMap() {
+        if (INDUSTRY_OUTPUT_PAIR_TO_COLUMN == null) buildMatrix();
+        return INDUSTRY_OUTPUT_PAIR_TO_COLUMN;
+    }
+
+    public static final void invalidate() {
+        STATIC_MATRIX = null;
+        STATIC_INDUSTRY_OUTPUT_PAIRS = null;
+        STATIC_WORKER_COMMODITIES = null;
+        INDUSTRY_OUTPUT_PAIR_TO_COLUMN = null;
     }
 
     private static final void buildMatrix() {
@@ -56,12 +76,12 @@ public class IndustryMatrix {
             Map<String, Float> outputs = baseOutputs.get(indID);
             if (outputs != null) {
                 for (String outputID : outputs.keySet()) {
-                    industryOutputPairs.add(indID + EconomyEngine.KEY + outputID);
+                    industryOutputPairs.add(indID + EconomyLoop.KEY + outputID);
                 }
             }
         }
 
-        List<String> pairs = new ArrayList<>();
+        STATIC_INDUSTRY_OUTPUT_PAIRS = new ArrayList<>();
         double[][] A = new double[commodities.size()][industryOutputPairs.size()];
 
         int colIndex = 0;
@@ -72,7 +92,7 @@ public class IndustryMatrix {
 
             for (Map.Entry<String, Float> out : outputs.entrySet()) {
                 final String outputID = out.getKey();
-                pairs.add(indID + EconomyEngine.KEY + outputID);
+                STATIC_INDUSTRY_OUTPUT_PAIRS.add(indID + EconomyLoop.KEY + outputID);
 
                 // Inputs
                 if (inputs != null && inputs.containsKey(outputID)) {
@@ -90,22 +110,21 @@ public class IndustryMatrix {
             }
         }
 
+        INDUSTRY_OUTPUT_PAIR_TO_COLUMN = new HashMap<>();
+        for (int i = 0; i < STATIC_INDUSTRY_OUTPUT_PAIRS.size(); i++) {
+            INDUSTRY_OUTPUT_PAIR_TO_COLUMN.put(STATIC_INDUSTRY_OUTPUT_PAIRS.get(i), i);
+        }
+
         STATIC_MATRIX = A;
-        STATIC_INDUSTRY_OUTPUT_PAIRS = pairs;
     }
 
-    public static final void invalidate() {
-        STATIC_MATRIX = null;
-        STATIC_INDUSTRY_OUTPUT_PAIRS = null;
-    }
-
-    public static final List<String> getWorkerRelatedCommodityIDs() {
+    private static final void buildWorkerRelatedCommodityIDs() {
         final SettingsAPI settings = Global.getSettings();
         final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
 
-        final List<String> commodities = EconomyInfo.getEconCommodityIDs();
+        STATIC_WORKER_COMMODITIES = EconomyInfo.getEconCommodityIDs();
 
-        Iterator<String> it = commodities.iterator();
+        Iterator<String> it = STATIC_WORKER_COMMODITIES.iterator();
         while (it.hasNext()) {
             final String com = it.next();
             boolean remove = true;
@@ -122,7 +141,5 @@ public class IndustryMatrix {
             }
             if (remove) it.remove();
         }
-
-        return commodities;
     }
 }

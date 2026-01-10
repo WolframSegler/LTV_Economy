@@ -158,8 +158,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             return t;
         });
 
-        fakeAdvanceWithAssignWorkers();
-
         return this;
     }
 
@@ -212,9 +210,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final void registerMarket(MarketAPI market) {
         // Order here is very important
         final String marketID = market.getId();
+        WorkerRegistry.getInstance().register(market);
         if (!m_registeredMarkets.add(marketID)) return;
 
-        WorkerRegistry.getInstance().register(market);
         m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) {
             m_playerMarketData.put(marketID, new PlayerMarketData(marketID));
@@ -250,6 +248,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         WorkerRegistry.getInstance().remove(marketID);
     }
 
+    public final void refreshMarkets() {
+        loop.refreshMarkets();
+    }
+
     public Set<String> getRegisteredMarkets() {
         return Collections.unmodifiableSet(m_registeredMarkets);
     }
@@ -270,7 +272,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public void reportPlayerOpenedMarket() {
-        fakeAdvance();
+        // fakeAdvance();
     }
 
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {

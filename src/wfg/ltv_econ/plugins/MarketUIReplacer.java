@@ -143,6 +143,8 @@ public class MarketUIReplacer implements EveryFrameScript {
         }
         if (anchorChild == null) return;
 
+        EconomyEngine.getInstance().fakeAdvance();
+
         // Replace the "Use stockpiles during shortages" button
         replaceUseStockpilesBtnAddManageWorkersBtn(managementPanel, managementChildren, anchorChild);
 

@@ -14,7 +14,7 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyLoop;
 
 public final class IndustryGrouper {
 
@@ -178,7 +178,7 @@ public final class IndustryGrouper {
                 for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
                     for (String pair : originals) {
                         if (IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec()).equals(
-                            pair.split(EconomyEngine.KEY)[0]
+                            pair.split(EconomyLoop.KEY)[0]
                         )) valid.add(pair);
                     }
                 }

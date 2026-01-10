@@ -19,22 +19,22 @@ public class EconomyEngineSerializer {
         if (engine != null && !forceRefresh) {
             EconomyEngine.setInstance(engine);
         } else {
-            new EconomyEngine();
+            engine = new EconomyEngine();
             if (Global.getSettings().isDevMode()) {
                 Global.getLogger(EconomyEngine.class).info("Economy Engine constructed");
             }
         }
 
-        final EconomyEngine instance = EconomyEngine.getInstance();
+        // Order very important
+        attachModules(engine);
+        engine.fakeAdvanceWithAssignWorkers();
+
         final List<CampaignEventListener> listeners = LtvEconomyModPlugin.getListeners();
+        listeners.add(0, engine);
+        sector.addTransientScript(engine);
+        sector.getListenerManager().addListener(engine, true);
 
-        attachModules(instance);
-
-        listeners.add(0, instance);
-        sector.addTransientScript(instance);
-        sector.getListenerManager().addListener(instance, true);
-
-        return instance;
+        return engine;
     }
 
     public static final void saveInstance() {
@@ -47,7 +47,7 @@ public class EconomyEngineSerializer {
         EconomyEngine.setInstance(null);
     }
 
-    private static final void attachModules(EconomyEngine engine) {
+    static final void attachModules(EconomyEngine engine) {
         engine.logger.engine = engine;
         engine.info.engine = engine;
         engine.loop.engine = engine;

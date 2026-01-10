@@ -11,7 +11,7 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
 import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
@@ -92,7 +92,7 @@ public final class CompatLayer {
             for (StatMod mod : base.getFlatMods().values()) {
                 if (mod.source.contains(installedItemID)) {
                     float converted = industryModConverter((int) mod.value);
-                    modifierStat.modifyMult(mod.source + EconomyEngine.KEY + ind.getId(), converted, mod.desc);
+                    modifierStat.modifyMult(mod.source + EconomyLoop.KEY + ind.getId(), converted, mod.desc);
                 }
             }
         }
@@ -103,17 +103,17 @@ public final class CompatLayer {
         int bonusID = 0;
 
         for (StatMod mod : bonus.getPercentMods().values()) {
-            modifierStat.modifyPercent(bonusID++ + EconomyEngine.KEY + ind.getId(), mod.value, mod.desc);
+            modifierStat.modifyPercent(bonusID++ + EconomyLoop.KEY + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getMultMods().values()) {
-            modifierStat.modifyMult(bonusID++ + EconomyEngine.KEY + ind.getId(), mod.value, mod.desc);
+            modifierStat.modifyMult(bonusID++ + EconomyLoop.KEY + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
 
-            modifierStat.modifyMult(bonusID++ + EconomyEngine.KEY + ind.getId(), converted, mod.desc);
+            modifierStat.modifyMult(bonusID++ + EconomyLoop.KEY + ind.getId(), converted, mod.desc);
         }
 
         return modifierStat;
@@ -217,7 +217,7 @@ public final class CompatLayer {
             if (mod == null) continue;
 
             final float converted = marketConditionModConverter(mod);
-            dest.modifyMult(cond.getId() + EconomyEngine.KEY + ind.getId(), converted, cond.getName());
+            dest.modifyMult(cond.getId() + EconomyLoop.KEY + ind.getId(), converted, cond.getName());
         }
     }
 

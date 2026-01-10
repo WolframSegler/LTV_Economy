@@ -662,16 +662,16 @@ public class ManageWorkersDialog extends DialogPanel {
 
             @Override
             public CustomPanelAPI getTpParent() {
-                return m_panel;
+                return ManageWorkersDialog.this.m_panel;
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = ManageWorkersDialog.this.m_panel.createUIElement(400, 0, false);
 
                 policy.createTooltip(mData, tp);
 
-                m_panel.addUIElement(tp);
+                ManageWorkersDialog.this.m_panel.addUIElement(tp);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             }
@@ -756,7 +756,7 @@ public class ManageWorkersDialog extends DialogPanel {
         cont.addComponent((UIComponentAPI)title).inTL(posterW + opad*3, pad);
         
         final LabelAPI desc = settings.createLabel(policy.spec.description, Fonts.DEFAULT_SMALL);
-        desc.getPosition().setSize(PANEL_W/1.5f - 4*opad - posterW, 120);
+        desc.autoSizeToWidth(PANEL_W/1.5f - 4*opad - posterW);
         cont.addComponent((UIComponentAPI)desc);
         WrapUiUtils.anchorPanel((UIComponentAPI)desc, (UIComponentAPI)title, AnchorType.BottomLeft, pad*2);
 

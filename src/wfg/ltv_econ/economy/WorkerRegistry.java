@@ -1,7 +1,6 @@
 package wfg.ltv_econ.economy;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +12,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
@@ -72,24 +70,23 @@ public class WorkerRegistry {
         return industries;
     }
 
-    public final void register(MarketAPI market, Industry ind) {
+    public final void register(String marketID, Industry ind) {
         if (!IndustryIOs.getIndConfig(ind).workerAssignable) return;
 
-        final String key = makeKey(market.getId(), IndustryIOs.getBaseIndustryID(ind));
-        registry.putIfAbsent(key, new WorkerIndustryData(market, ind));
-    }
-
-    public final void register(String marketID) {
-        final MarketAPI market = Global.getSector().getEconomy().getMarket(marketID);
-        for (Industry ind : getVisibleIndustries(market)) register(market, ind);
+        final String key = makeKey(marketID, IndustryIOs.getBaseIndustryID(ind));
+        registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind));
     }
 
     public final void register(MarketAPI market) {
-        for (Industry ind : getVisibleIndustries(market)) register(market, ind);
+        for (Industry ind : getVisibleIndustries(market)) register(market.getId(), ind);
+    }
+
+    public final void register(String marketID) {
+        register(Global.getSector().getEconomy().getMarket(marketID));
     }
 
     public final void register(Industry ind) {
-        register(ind.getMarket(), ind);
+        register(ind.getMarket().getId(), ind);
     }
 
     public final void remove(String marketID, IndustrySpecAPI ind) {
@@ -153,8 +150,8 @@ public class WorkerRegistry {
         registry.put(makeKey(data.marketID, data.indID), data);
     }
 
-    public final List<WorkerIndustryData> getRegister() {
-        return Collections.unmodifiableList(new ArrayList<>(registry.values()));
+    public final List<WorkerIndustryData> getRegistry() {
+        return new ArrayList<>(registry.values());
     }
 
     private static final String makeKey(String marketID, String industryID) {
@@ -171,15 +168,10 @@ public class WorkerRegistry {
         private final Map<String, Float> outputRatios;
         private float outputRatioSum = 0;
 
-        public WorkerIndustryData(MarketAPI market, Industry industry) {
+        public WorkerIndustryData(String marketID, Industry industry) {
             this.marketID = market.getId();
             this.indID = IndustryIOs.getBaseIndustryID(industry);
             this.outputRatios = new HashMap<>();
-
-            for (OutputConfig output : IndustryIOs.getIndConfig(industry).outputs.values()) {
-                if (!output.usesWorkers) continue;
-                outputRatios.put(output.comID, 0f);
-            }
 
             readResolve();
         }
@@ -206,6 +198,11 @@ public class WorkerRegistry {
             this.ind = other.ind;
         }
 
+        @Override
+        public String toString() {
+            return "["+marketID+KEY+indID+outputRatioSum+"]";
+        }
+
         public final float getWorkerAssignedRatio(boolean resetCache) {
             if (resetCache) recalculateOutputRatioSum();
             return outputRatioSum;
@@ -223,6 +220,7 @@ public class WorkerRegistry {
 
         public final long getAssignedForOutput(String comID) {
             if (!outputRatios.containsKey(comID)) return 0;
+
 
             final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
 

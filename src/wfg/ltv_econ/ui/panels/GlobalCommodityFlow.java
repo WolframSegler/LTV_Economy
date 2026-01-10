@@ -544,7 +544,7 @@ public class GlobalCommodityFlow extends
 
             public void createPanel() {
                 long value = 0;
-                for (WorkerIndustryData data : WorkerRegistry.getInstance().getRegister()) {
+                for (WorkerIndustryData data : WorkerRegistry.getInstance().getRegistry()) {
                     value += data.getAssignedForOutput(comID);
                 }
                 final String txt = "Worker allocation";

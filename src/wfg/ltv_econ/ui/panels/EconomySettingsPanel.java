@@ -10,12 +10,9 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import static wfg.wrap_ui.util.UIConstants.*;
 
-import java.util.List;
-
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.IndustryMatrix;
-import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
@@ -84,16 +81,7 @@ public class EconomySettingsPanel extends CustomPanel<
             final CallbackRunnable<Button> run = (btn) -> {
                 IndustryMatrix.invalidate();
                 
-                final List<CommodityDomain> domains = engine.getComDomains();
-
-                domains.forEach(CommodityDomain::reset);
-                WorkerRegistry.getInstance().resetWorkersAssigned(false);
-                domains.forEach(CommodityDomain::update);
-
-                engine.assignWorkers();
-                domains.forEach(CommodityDomain::update);
-                
-                engine.weightedOutputDeficitMods();
+                EconomyEngine.getInstance().fakeAdvanceWithAssignWorkers();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 "Recalculate Worker Assignments", Fonts.DEFAULT_SMALL, run
