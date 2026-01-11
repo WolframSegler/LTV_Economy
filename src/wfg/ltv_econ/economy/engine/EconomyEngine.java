@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignClockAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.PlanetAPI;
@@ -51,6 +52,7 @@ import com.fs.starfarer.api.impl.campaign.shared.SharedData;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
+import com.fs.starfarer.api.campaign.listeners.CoreUITabListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
 
 /**
@@ -105,7 +107,8 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  * @author Wolfram Segler
  */
 public class EconomyEngine extends BaseCampaignEventListener implements
-    EveryFrameScript, PlayerColonizationListener, ColonyDecivListener, GroundRaidObjectivesListener
+    EveryFrameScript, PlayerColonizationListener, ColonyDecivListener, GroundRaidObjectivesListener,
+    CoreUITabListener
 {
     private static EconomyEngine instance;
 
@@ -500,6 +503,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         
     }
     
+    public void reportAboutToOpenCoreTab(CoreUITabId tabID, Object param) {
+        if (tabID == CoreUITabId.CARGO) applyPopulationStabilityMods();
+    }
+
     private final void applyPopulationStabilityMods() {
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             applyPopulationStabilityMods(market);

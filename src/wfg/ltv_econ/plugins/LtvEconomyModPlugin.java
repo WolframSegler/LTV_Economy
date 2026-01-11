@@ -3,9 +3,9 @@ package wfg.ltv_econ.plugins;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
@@ -19,6 +19,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngineSerializer;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.WellnessComplianceBarEvent.WellnessComplianceBarEventCreator;
+import wfg.ltv_econ.ui.scripts.UIInjectorListener;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
@@ -39,19 +40,17 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         WorkerRegistry.loadInstance(false);
         EconomyEngineSerializer.loadInstance(false);
 
-        final SectorAPI sector = Global.getSector();
-
-        sector.addTransientScript(new EconomyButtonInjector());
-        sector.addTransientScript(new MarketUIReplacer());
-        sector.getListenerManager().addListener(new AddWorkerIndustryOption(), true);
-
-        if (newGame) injectStockpiles();
-
+        final ListenerManagerAPI listenerManager = Global.getSector().getListenerManager();
         final BarEventManager barManager = BarEventManager.getInstance();
+
+        listenerManager.addListener(new UIInjectorListener(), true);
+        listenerManager.addListener(new AddWorkerIndustryOption(), true);
 
         barManager.addEventCreator(new BresVitalisBarEventCreator());
         barManager.addEventCreator(new WellnessComplianceBarEventCreator());
         barManager.addEventCreator(new ConvergenceFestivalBarEventCreator());
+
+        if (newGame) injectStockpiles();
     }
 
     @Override

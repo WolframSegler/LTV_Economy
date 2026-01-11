@@ -1,4 +1,4 @@
-package wfg.ltv_econ.plugins;
+package wfg.ltv_econ.ui.scripts;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import com.fs.starfarer.api.Global;
 
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.plugins.MarketWrapper;
 import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
@@ -60,7 +61,6 @@ import static wfg.ltv_econ.constants.economyValues.*;
 
 public class MarketUIReplacer implements EveryFrameScript {
 
-    private final SectorAPI sector = Global.getSector();
     private int frames = 0;
 
     public static Object marketAPIField = null;
@@ -73,24 +73,22 @@ public class MarketUIReplacer implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
+        if (Global.getCurrentState() != GameState.CAMPAIGN) return;
 
+        final SectorAPI sector = Global.getSector();
         if (!sector.isPaused()) {
             frames = 0;
             return;
         }
-
         if (!sector.getCampaignUI().isShowingDialog()) {
             return;
         }
 
         frames++;
-        if (frames < 2 || Global.getCurrentState() != GameState.CAMPAIGN) {
-            return;
-        }
+        if (frames < 2) return;
 
         final UIPanelAPI masterTab = Attachments.getCurrentTab();
-        if (masterTab == null)
-            return;
+        if (masterTab == null) return;
 
         final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, masterTab);
@@ -607,7 +605,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                 RolfLectionUtil.getConstructorParamTypesSingleConstructor(indOps.getClass())
             );
 
-            LtvIndustryListPanel.setindustryOptionsPanelConstructor(indOpsPanelConstr);
+            LtvIndustryListPanel.indOptCtor = indOpsPanelConstr;
 
             // Dismiss the indOpsPanel after getting its constructor
             RolfLectionUtil.getMethodAndInvokeDirectly(

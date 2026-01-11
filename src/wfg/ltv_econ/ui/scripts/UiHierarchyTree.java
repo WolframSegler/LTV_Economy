@@ -1,4 +1,4 @@
-package wfg.ltv_econ.plugins;
+package wfg.ltv_econ.ui.scripts;
 
 import java.awt.BorderLayout;
 import java.util.List;

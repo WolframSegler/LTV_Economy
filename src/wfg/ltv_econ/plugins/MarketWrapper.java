@@ -142,24 +142,16 @@ public class MarketWrapper extends Market {
         );
     }
 
-    public float getIndustryUpkeep() {
-        return original.getIndustryUpkeep();
-    }
-
-    public float getIndustryIncome() {
-        return original.getIndustryIncome();
-    }
-
     public float getExportIncome(boolean var1) {
-        return original.getExportIncome(var1);
+        return EconomyEngine.getInstance().info.getExportIncome(original, true);
     }
 
     public float getNetIncome() {
-        return original.getNetIncome();
+        return EconomyEngine.getInstance().info.getNetIncome(this, true);
     }
 
     public float getGrossIncome() {
-        return original.getGrossIncome();
+        return EconomyEngine.getInstance().info.getGrossIncome(this, true);
     }
 
     public MutableStat getIncomeMult() {
@@ -168,6 +160,14 @@ public class MarketWrapper extends Market {
 
     public MutableStat getUpkeepMult() {
         return original.getUpkeepMult();
+    }
+
+    public float getIndustryUpkeep() {
+        return original.getIndustryUpkeep();
+    }
+
+    public float getIndustryIncome() {
+        return original.getIndustryIncome();
     }
 
     public float getImmigrationIncentivesCost() {
@@ -353,7 +353,7 @@ public class MarketWrapper extends Market {
     }
 
     public boolean hasSubmarket(String var1) {
-        return hasSubmarket(var1);
+        return original.hasSubmarket(var1);
     }
 
     public List<Submarket> getSubmarkets() {
@@ -381,11 +381,11 @@ public class MarketWrapper extends Market {
     }
 
     public float getStabilityValue() {
-        return getStabilityValue();
+        return original.getStabilityValue();
     }
 
     public String getFactionId() {
-        return getFactionId();
+        return original.getFactionId();
     }
 
     public void setCachedFaction(FactionAPI var1) {
@@ -485,7 +485,7 @@ public class MarketWrapper extends Market {
     }
 
     public CommodityOnMarket getCommodityData(CommoditySpecAPI var1) {
-        return getCommodityData(var1);
+        return getCommodityData(var1.getId());
     }
 
     public CommodityOnMarket getCommodityData(String var1) {
@@ -578,7 +578,7 @@ public class MarketWrapper extends Market {
     }
 
     public String addCondition(String var1) {
-        return addCondition(var1);
+        return original.addCondition(var1);
     }
 
     public String addCondition(String var1, Object var2) {

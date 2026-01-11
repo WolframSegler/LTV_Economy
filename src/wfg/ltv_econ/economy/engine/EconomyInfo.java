@@ -259,6 +259,19 @@ public class EconomyInfo {
         return exportIncome + indIncome - hazardPay - importCost - wageCost - indUpkeep;
     }
 
+    /**
+     * Works properly only for player colonies.
+     *
+     * <p>{@code getIncomeMult()} does not affect trade income. It represents
+     * administrative efficiency and applies only to abstract income and upkeep.</p>
+     */
+    public final long getGrossIncome(MarketAPI market, boolean lastMonth) {
+        final long exportIncome = getExportIncome(market, lastMonth);
+        final int indIncome = getIndustryIncome(market);
+
+        return exportIncome + indIncome;
+    }
+
     /*
      * Works properly only for player colonies. 
      */

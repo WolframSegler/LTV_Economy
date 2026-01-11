@@ -585,6 +585,12 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
                     }
                 }.getProxy();
 
+                // c var17 = new c(
+                //     this.øôöO00,
+                //     this, var14,
+                //     CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
+                //     this
+                // );
                 final DialogCreatorUI dialog = (DialogCreatorUI) RolfLectionUtil.instantiateClass(
                     LtvIndustryListPanel.indOptCtor,
                     m_industry,

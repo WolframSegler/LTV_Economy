@@ -21,7 +21,6 @@ import static wfg.wrap_ui.util.UIConstants.*;
 public class EconomyOverviewPanel extends CustomPanel<
     BasePanelPlugin<EconomyOverviewPanel>, EconomyOverviewPanel, UIPanelAPI>
 {
-
     public static final int MAIN_PANEL_W = 1250;
     public static final int MAIN_PANEL_H = 700;
     public static final int NAVBAR_W = 200;

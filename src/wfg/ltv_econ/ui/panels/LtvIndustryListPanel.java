@@ -27,7 +27,6 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import rolflectionlib.util.ListenerFactory;
@@ -65,7 +64,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 	public static Object indOptCtor = null;
 	
 	private final List<Object> widgets = new ArrayList<>();
-	public final UIPanelAPI dummyWidget;
+	public UIPanelAPI dummyWidget;
 	private final MarketAPI m_market;
 
 	private Button buildButton;
@@ -76,18 +75,18 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 		m_market = market;
 
-		dummyWidget = ((IndustryListPanel)industryPanel).getWidgets().get(0);
-		dummyWidget.setOpacity(0);
+		final List<?> widgets = (List<?>) RolfLectionUtil.getMethodAndInvokeDirectly(
+            "getWidgets", industryPanel);
+		if (!widgets.isEmpty()) {
+			dummyWidget = (UIPanelAPI) widgets.get(0);
+			dummyWidget.setOpacity(0);
+		}
 
 		getPlugin().init(this);
 		createPanel();
 
 		instance = this;
    	}
-
-	public static final void setindustryOptionsPanelConstructor(Object a) {
-		indOptCtor = a;
-	}
 
 	private static LtvIndustryListPanel instance;
 	public static final void refreshPanel() {
