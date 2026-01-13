@@ -30,7 +30,7 @@ import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.economy.policies.MarketPolicy;
+import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;

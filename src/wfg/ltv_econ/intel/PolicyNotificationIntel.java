@@ -10,7 +10,7 @@ import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
-import wfg.ltv_econ.economy.policies.MarketPolicy;
+import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 
 public class PolicyNotificationIntel extends BaseIntelPlugin {
 

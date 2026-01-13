@@ -269,8 +269,8 @@ public class GlobalCommodityFlow extends
                 final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
 
                 tooltip.addPara(
-                    "Global deficit represents the total amount of demand that remained unfulfilled during the last economic cycle." +
-                    "This value does not track shortages in stockpiles and only measures demand that was not supplied during the cycle." +
+                    "Global deficit represents the total amount of demand that remained unfulfilled on the previous day." +
+                    "This value does not track shortages in stockpiles and only measures demand that was not supplied on the previous day." +
                     "A colony may have large reserves and still contribute to the global deficit if trade routes could not deliver enough units in time.",
                     pad
                 );
@@ -322,7 +322,7 @@ public class GlobalCommodityFlow extends
                 final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
 
                 tooltip.addPara(
-                    "The total number of units of %s traded across the sector during the current cycle, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
+                    "The total number of units of %s traded across the sector on the previous day, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
                     pad, highlight, selectedCom.getName()
                 );
 
@@ -372,7 +372,7 @@ public class GlobalCommodityFlow extends
                 final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
 
                 tooltip.addPara(
-                    "The total monetary value (in credits) of all %s trades across the entire sector during the current cycle. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
+                    "The total monetary value (in credits) of all %s trades across the entire sector on the previous day. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
                     pad, highlight, selectedCom.getName()
                 );
 
@@ -419,7 +419,7 @@ public class GlobalCommodityFlow extends
                 final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
 
                 tooltip.addPara(
-                    "The average price of %s across all markets in the sector during the current cycle, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
+                    "The average price of %s across all markets in the sector on the previous day, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
                     pad, highlight, selectedCom.getName()
                 );
 
@@ -626,7 +626,7 @@ public class GlobalCommodityFlow extends
                 final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
 
                 tooltip.addPara(
-                    "The total count of markets in the sector that exported %s during the current cycle. Only markets that actually sent units to other markets are included, regardless of faction.",
+                    "The total count of markets in the sector that exported %s on the previous day. Only markets that actually sent units to other markets are included, regardless of faction.",
                     pad, highlight, selectedCom.getName()
                 );
 
@@ -676,7 +676,7 @@ public class GlobalCommodityFlow extends
                 final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
 
                 tooltip.addPara(
-                    "The total count of markets in the sector that imported %s during the current cycle. Only markets that actually received units from other markets are included, regardless of faction.",
+                    "The total count of markets in the sector that imported %s on the previous day. Only markets that actually received units from other markets are included, regardless of faction.",
                     pad, highlight, selectedCom.getName()
                 );
 
@@ -804,7 +804,7 @@ public class GlobalCommodityFlow extends
             tp.addPara(
                 "Shows the percentage of total exports controlled by each faction. " +
                 "Percentages do not include in-faction trade." +
-                "Values are based on the last cycle.",
+                "Values are based on the previous day.",
                 pad
             );
 
@@ -866,7 +866,7 @@ public class GlobalCommodityFlow extends
             tp.addPara(
                 "Shows the percentage of total imports made by each faction. " +
                 "Percentages do not include in-faction trade." +
-                "Values are based on the last cycle.",
+                "Values are based on the previous day.",
                 pad
             );
 
@@ -928,7 +928,7 @@ public class GlobalCommodityFlow extends
             tp.addPara(
                 "Shows the proportion of this commodity's total exports that are traded outside the producing faction (%s)" +
                 " versus exports consumed within the same faction (%s). " +
-                "Values are based on the last cycle.",
+                "Values are based on the previous day.",
                 pad,
                 highlight, ((int)(globalTradeShare*100)) + "%", ((int)((1f-globalTradeShare)*100)) + "%"
             );

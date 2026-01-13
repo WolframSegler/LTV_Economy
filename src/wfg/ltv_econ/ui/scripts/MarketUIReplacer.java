@@ -40,8 +40,9 @@ import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
 
 import rolflectionlib.util.RolfLectionUtil;
 
+import com.fs.starfarer.api.campaign.CampaignUIAPI;
+import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.FactionAPI;
-import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
@@ -73,22 +74,18 @@ public class MarketUIReplacer implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (Global.getCurrentState() != GameState.CAMPAIGN) return;
-
-        final SectorAPI sector = Global.getSector();
-        if (!sector.isPaused()) {
+        if (Global.getCurrentState() != GameState.CAMPAIGN) {
             frames = 0;
             return;
         }
-        if (!sector.getCampaignUI().isShowingDialog()) {
-            return;
-        }
+        final CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
+        if (!campaignUI.isShowingDialog()) return;
 
         frames++;
         if (frames < 2) return;
 
         final UIPanelAPI masterTab = Attachments.getCurrentTab();
-        if (masterTab == null) return;
+        if (masterTab == null || campaignUI.getCurrentCoreTab() != CoreUITabId.CARGO) return;
 
         final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, masterTab);
@@ -698,11 +695,6 @@ public class MarketUIReplacer implements EveryFrameScript {
         RolfLectionUtil.setPrivateVariable(marketField, handler, new MarketWrapper(original));
     }
 
-    public boolean isDone() {
-        return false;
-    }
-
-    public boolean runWhilePaused() {
-        return true;
-    }
+    public boolean isDone() { return !Global.getSector().isPaused(); }
+    public boolean runWhilePaused() { return true; }
 }

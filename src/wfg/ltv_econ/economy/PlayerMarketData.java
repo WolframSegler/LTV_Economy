@@ -8,13 +8,14 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
+import com.fs.starfarer.api.impl.campaign.ids.Stats;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.economy.policies.MarketPolicy;
+import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 
 public class PlayerMarketData {
     public final String marketID;
@@ -31,6 +32,12 @@ public class PlayerMarketData {
     public final StatBonus classConsciousnessDelta = new StatBonus();
 
     public static final float BASELINE_VALUE = 50f;
+    public static final float RoSV_Equalibrium = 1.5f;
+    public static final String healthID = "health";
+    public static final String happinessID = "happiness";
+    public static final String socialCohesionID = "cohesion";
+    public static final String classConscID = "classConsc";
+
     private float RoSV = LaborConfig.RoSV;
     private float popHealth = BASELINE_VALUE;
     private float popHappiness = BASELINE_VALUE;
@@ -129,6 +136,11 @@ public class PlayerMarketData {
         setHappiness(happinessDelta.computeEffective(popHappiness) * days);
         setSocialCohesion(socialCohesionDelta.computeEffective(popSocialCohesion) * days);
         setClassConsciousness(classConsciousnessDelta.computeEffective(popClassConsciousness) * days);
+
+        applyHealthModifiers();
+        applyHappinessModifiers();
+        applySocialCohesionModifiers();
+        applyClassConsciousnessModifiers();
     }
 
     private final void updateHealthDelta() {
@@ -194,13 +206,57 @@ public class PlayerMarketData {
     private final void updateClassConsciousnessDelta() {
         classConsciousnessDelta.modifyFlat("base", -0.005f, "Base change");
 
-        classConsciousnessDelta.modifyFlat("wage", 0.03f * (RoSV - 1f) / RoSV, "Wages");
+        classConsciousnessDelta.modifyFlat("wage", 0.02f * (RoSV - RoSV_Equalibrium) / RoSV, "Wages");
 
         classConsciousnessDelta.modifyFlat("health", (BASELINE_VALUE - popHealth) * 0.0002f, "Health");
 
         classConsciousnessDelta.modifyFlat(
             "happiness", (BASELINE_VALUE - popHappiness) * 0.00016f, "Happiness"
         );
+    }
+
+    private final void applyHealthModifiers() {
+        final String desc = "colony health";
+
+        final int baseValue = (int) ((popHealth + 5f - BASELINE_VALUE) / 10f);
+
+        if (baseValue != 0) {
+            market.getIncoming().getWeight().modifyFlat(healthID, baseValue * 2f, desc);
+            market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).modifyMult(
+                healthID, 1f + baseValue * 0.1f, desc
+            );
+        } else {
+            market.getIncoming().getWeight().unmodifyFlat(healthID);
+            market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyMult(healthID);
+        }
+    }
+
+    private final void applyHappinessModifiers() {
+        final String desc = "colony happiness";
+
+        final int baseValue = popHappiness < 20f ? -1 : (popHappiness > 80f ? 1 : 0);
+
+        if (baseValue != 0) {
+            market.getStability().modifyFlat(happinessID, baseValue, desc);
+            for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
+                dom.getCell(marketID).getProductionStat().modifyMult(
+                    happinessID, baseValue * 0.2f, desc
+                );
+            }
+        } else {
+            market.getStability().unmodifyFlat(happinessID);
+            for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
+                dom.getCell(marketID).getProductionStat().unmodifyMult(happinessID);
+            }
+        }
+    }
+
+    private final void applySocialCohesionModifiers() {
+        
+    }
+
+    private final void applyClassConsciousnessModifiers() {
+        
     }
 
     private static final float clamp(float value) {
@@ -213,6 +269,6 @@ public class PlayerMarketData {
 
     @Override
     public String toString() {
-        return "[" + marketID + "; name: " + market.getName() + "]";
+        return " [" + marketID + "; name: " + market.getName() + "] ";
     }
 }

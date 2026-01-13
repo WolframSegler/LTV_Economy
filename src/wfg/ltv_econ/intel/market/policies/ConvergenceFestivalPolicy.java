@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy.policies;
+package wfg.ltv_econ.intel.market.policies;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;

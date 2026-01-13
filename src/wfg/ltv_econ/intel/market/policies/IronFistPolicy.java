@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy.policies;
+package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.wrap_ui.util.UIConstants.*;
 

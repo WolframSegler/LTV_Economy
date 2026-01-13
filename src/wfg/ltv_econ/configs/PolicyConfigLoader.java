@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 
-import wfg.ltv_econ.economy.policies.MarketPolicy;
+import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 
 public class PolicyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/policy_config.json";

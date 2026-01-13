@@ -10,7 +10,6 @@ import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
-import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -60,14 +59,12 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
     private int frames = 0;
     @SuppressWarnings("unchecked")
     public void advance(float amount) {
-        if (Global.getCurrentState() != GameState.CAMPAIGN) return;
-        final SectorAPI sector = Global.getSector();
-        if (!sector.isPaused()) {
+        if (Global.getCurrentState() != GameState.CAMPAIGN) {
             frames = 0;
             return;
         }
 
-        final CampaignUIAPI campaignUI = sector.getCampaignUI();
+        final CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
         if (!campaignUI.isShowingDialog()) return;
 
         frames++;
@@ -200,6 +197,6 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
             )).findFirst().get();
     }
 
-    public boolean isDone() { return false; }
+    public boolean isDone() { return !Global.getSector().isPaused(); }
     public boolean runWhilePaused() { return true; }
 }

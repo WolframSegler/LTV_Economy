@@ -391,7 +391,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
             // Industries & structures
             final FDNode indNode = report.getNode(mNode, "industries"); 
-            indNode.name = "Industries & structures";
+            indNode.name = "Industries & Structures";
             indNode.custom = MonthlyReport.INDUSTRIES;
             indNode.mapEntity = market.getPrimaryEntity();
             indNode.tooltipCreator = report.getMonthlyReportTooltip();
@@ -407,7 +407,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
             // Exports
             final FDNode exportNode = report.getNode(mNode, "exports"); 
-            exportNode.name = "Exports";
+            exportNode.name = "Exports & Imports";
             exportNode.custom = MonthlyReport.EXPORTS;
             exportNode.mapEntity = market.getPrimaryEntity();
             exportNode.getChildren().clear();
@@ -435,12 +435,14 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 eNode.income += info.getExportIncome(market, comID, true) * r;
                 eNode.upkeep += info.getImportExpense(market, comID, true) * r;
                 eNode.mapEntity = market.getPrimaryEntity();
+                eNode.icon = com.getIconName();
             }
 
             // Wages
             final FDNode wageNode = report.getNode(mNode, "wages"); 
             wageNode.name = "Wages";
             wageNode.mapEntity = market.getPrimaryEntity();
+            wageNode.icon = Global.getSettings().getSpriteName("income_report", "generic_expense");
             wageNode.upkeep += info.getWagesForMarket(market)*MONTH * r;
             wageNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}
@@ -459,7 +461,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     /**
      * This method runs after {@link #reportEconomyTick}. Practically the same method but delayed.
      */
-    @Override
     public void reportEconomyMonthEnd() {}
 
     public void modifyRaidObjectives(MarketAPI market, SectorEntityToken entity,
