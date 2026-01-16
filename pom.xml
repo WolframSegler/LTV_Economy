@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>wfg_ltv_econ</groupId>
-  <artifactId>LTV_Economy</artifactId>
+  <artifactId>LTV-Economy</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>LTV Economy</name>

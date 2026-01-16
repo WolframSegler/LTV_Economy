@@ -3,7 +3,7 @@ DO NOT INCLUDE THIS FILE IN RELEASE
 This project uses maven.
 
 1. Compile the main project. Navigate to Ltv_Economy and run:
-    mvn clean package
+  mvn clean package
 
 Extra Instructions:
 

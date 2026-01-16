@@ -1,11 +1,11 @@
-# LTV_Economy
+# LTV-Economy
 
 A deep overhaul of Starsector’s economic and colony systems.  
-LTV_Economy replaces abstract income with a unit-based simulation where production, trade, labor, and policy decisions all interact in concrete, traceable ways.
+LTV-Economy replaces abstract income with a unit-based simulation where production, trade, labor, and policy decisions all interact in concrete, traceable ways.
 
 This mod is designed to make the economy **interesting, legible, and consequential** without turning it into a spreadsheet nightmare.
 
-[![Download](https://img.shields.io/badge/Download-Latest%20Release-brightgreen)](https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV_Economy.zip)
+[![Download](https://img.shields.io/badge/Download-Latest%20Release-brightgreen)](https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV-Economy.zip)
 
 <br>
 

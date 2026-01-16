@@ -56,7 +56,7 @@ import com.fs.starfarer.api.campaign.listeners.CoreUITabListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
 
 /**
- * The {@link EconomyEngine} is the core controller for the LTV_Economy simulation.
+ * The {@link EconomyEngine} is the core controller for the LTV-Economy simulation.
  * <p>
  * It manages all economic activity across markets, including:
  * <ul>
