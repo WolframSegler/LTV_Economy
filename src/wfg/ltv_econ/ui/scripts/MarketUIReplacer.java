@@ -62,8 +62,6 @@ import static wfg.ltv_econ.constants.economyValues.*;
 
 public class MarketUIReplacer implements EveryFrameScript {
 
-    private int frames = 0;
-
     public static Object marketAPIField = null;
     public static Object marketField = null;
 
@@ -74,15 +72,9 @@ public class MarketUIReplacer implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (Global.getCurrentState() != GameState.CAMPAIGN) {
-            frames = 0;
-            return;
-        }
+        if (Global.getCurrentState() != GameState.CAMPAIGN) return;
         final CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
         if (!campaignUI.isShowingDialog()) return;
-
-        frames++;
-        if (frames < 2) return;
 
         final UIPanelAPI masterTab = Attachments.getCurrentTab();
         if (masterTab == null || campaignUI.getCurrentCoreTab() != CoreUITabId.CARGO) return;

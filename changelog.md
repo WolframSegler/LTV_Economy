@@ -7,6 +7,7 @@ v0.2.0-beta | NOT SAVE COMPATIBLE
 - The player can now embargo other factions at the cost of reputation
 - Added more policies
 - Added flavor bar events dependent on colony policies
+- Population Health and Happiness now have direct effects on the colony
 
 v0.1.0-beta
 - Initial release

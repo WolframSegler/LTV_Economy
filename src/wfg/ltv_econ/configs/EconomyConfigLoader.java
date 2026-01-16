@@ -47,7 +47,7 @@ public class EconomyConfigLoader {
             EconomyConfig.WORKER_ASSIGN_INTERVAL = root.getInt("WORKER_ASSIGN_INTERVAL");
             EconomyConfig.EXPORT_THRESHOLD_FACTOR = (float) root.getDouble("EXPORT_THRESHOLD_FACTOR");
             EconomyConfig.SHOW_MARKET_POLICIES = root.getBoolean("SHOW_MARKET_POLICIES");
-            EconomyConfig.EMBARGO_REP_DROP = root.getInt("EMBARGO_REP_DROP");
+            EconomyConfig.EMBARGO_REP_DROP = (float) root.getDouble("EMBARGO_REP_DROP");
 
             final JSONArray arr = root.getJSONArray("DEBT_DEBUFF_TIERS");
             EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>();
@@ -147,7 +147,7 @@ public class EconomyConfigLoader {
         /**
          * The drop in reputation when an embargo is imposed.
          */
-        public static int EMBARGO_REP_DROP;
+        public static float EMBARGO_REP_DROP;
 
         static {
             EconomyConfigLoader.loadConfig();

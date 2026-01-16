@@ -131,7 +131,7 @@ public class EconomyOverviewPanel extends CustomPanel<
             clearPanelAndButtonState(btn);
         };
         button = new Button(
-            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "BUTTON D", Fonts.ORBITRON_12, buttonRunnable
+            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "PANEL BTN", Fonts.ORBITRON_12, buttonRunnable
         );
         button.setCutStyle(CutStyle.TL_BR);
         navButtons.add(button);

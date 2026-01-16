@@ -21,7 +21,6 @@ public class EconomyEngineSerializer {
         }
 
         // Order very important
-        attachModules(engine);
         engine.fakeAdvanceWithAssignWorkers();
 
         sector.addTransientScript(engine);
@@ -39,11 +38,5 @@ public class EconomyEngineSerializer {
         EconomyEngine.setInstance(null);
 
         sector.getPersistentData().put(EconEngineSerialID, instance);
-    }
-
-    static final void attachModules(EconomyEngine engine) {
-        engine.logger.engine = engine;
-        engine.info.engine = engine;
-        engine.loop.engine = engine;
     }
 }

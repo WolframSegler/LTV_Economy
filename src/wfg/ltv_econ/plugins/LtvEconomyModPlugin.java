@@ -1,6 +1,5 @@
 package wfg.ltv_econ.plugins;
 
-
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -9,6 +8,7 @@ import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
+import com.thoughtworks.xstream.XStream;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityDomain;
@@ -18,7 +18,6 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyEngineSerializer;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
-import wfg.ltv_econ.intel.bar.events.WellnessComplianceBarEvent.WellnessComplianceBarEventCreator;
 import wfg.ltv_econ.ui.scripts.UIInjectorListener;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
@@ -41,14 +40,11 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         EconomyEngineSerializer.loadInstance(false);
 
         final ListenerManagerAPI listenerManager = Global.getSector().getListenerManager();
-        final BarEventManager barManager = BarEventManager.getInstance();
 
         listenerManager.addListener(new UIInjectorListener(), true);
         listenerManager.addListener(new AddWorkerIndustryOption(), true);
 
-        barManager.addEventCreator(new BresVitalisBarEventCreator());
-        barManager.addEventCreator(new WellnessComplianceBarEventCreator());
-        barManager.addEventCreator(new ConvergenceFestivalBarEventCreator());
+        registerBarEvents();
 
         if (newGame) injectStockpiles();
     }
@@ -63,6 +59,25 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     public void afterGameSave() {
         WorkerRegistry.loadInstance(false);
         EconomyEngineSerializer.loadInstance(false);
+    }
+
+    @Override
+    public void configureXStream(XStream x) {
+        x.aliasPackage(
+            "wfg.ltv_econ.economy.policies",
+            "wfg.ltv_econ.intel.market.policies"
+        );
+    }
+
+    private static final void registerBarEvents() {
+        final BarEventManager barManager = BarEventManager.getInstance();
+
+        if (!barManager.hasEventCreator(BresVitalisBarEventCreator.class)) {
+            barManager.addEventCreator(new BresVitalisBarEventCreator());
+        }
+        if (!barManager.hasEventCreator(ConvergenceFestivalBarEventCreator.class)) {
+            barManager.addEventCreator(new ConvergenceFestivalBarEventCreator());
+        }
     }
 
     private static final void addManufacturingToMarkets() {

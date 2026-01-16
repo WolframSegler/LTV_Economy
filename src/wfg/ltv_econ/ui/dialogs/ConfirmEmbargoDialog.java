@@ -53,7 +53,8 @@ public class ConfirmEmbargoDialog extends DialogPanel {
             faction.adjustRelationship(Factions.PLAYER, -EconomyConfig.EMBARGO_REP_DROP);
             Global.getSoundPlayer().playUISound("ui_rep_drop", 1f, 1f);
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
-                "Relations with "+faction.getDisplayName()+" decreased by "+ EconomyConfig.EMBARGO_REP_DROP,
+                "Relations with "+faction.getDisplayName()+" decreased by " +
+                Math.round(EconomyConfig.EMBARGO_REP_DROP * 100f),
                 faction.getDisplayName(),
                 faction.getBaseUIColor()
             );

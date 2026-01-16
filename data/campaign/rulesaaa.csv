@@ -1,0 +1,26 @@
+id,trigger,conditions,script,text,options,notes
+
+#WellnessComplianceBarEvent,,,,,,
+# 1. HIJACK Bar Visit,,,,,,
+ltv_wlscmp_BarButton,PopulateOptions,"$market.policy_wellness_compliance
+!$global.ltv_wlscmp_cooldown
+RollProbability 0.3 score:10",,,ltv_marketVisitBar:Take a shuttle down to visit a dockside bar,
+
+# 2. THE ENTRY,,,,,,
+ltvWlscmpStart,DialogOptionSelected,$option == ltv_marketVisitBar,"$option = ltv_wlscmp_intro 0
+FireBest DialogOptionSelected",,,Start Event
+
+# 3. INTRO TEXT,,,,,,
+ltvWlscmpIntro,DialogOptionSelected,$option == ltv_wlscmp_intro,,"As you enter the bar, the chatter seems unusually tense. Conversations trail off mid-sentence, and people keep glancing at each other with a quiet, uneasy suspicion.",ltv_wlscmp_observe:Go to the bar counter for a drink,
+
+# 4. OBSERVE PATRONS,,,,,,
+ltvWlscmpObserve,DialogOptionSelected,$option == ltv_wlscmp_observe,,"As you make your way to the counter, you notice patrons giving each other subtle side-eye, and a few are keeping their distance without any obvious reason. Nobody seems relaxed.","ltv_wlscmp_ask:Ask the bartender what's going on
+ltv_wlscmp_leave:Leave quietly",
+
+# 5. ASK QUESTIONS,,,,,,
+ltvWlscmpAsk,DialogOptionSelected,$option == ltv_wlscmp_ask,,"He leans in, whispering that certain districts are supposedly higher-risk. He doesn't elaborate, just shrugs and straightens up again. Nobody in the bar looks comfortable hearing it said out loud.",ltv_wlscmp_leave:Leave the bar,
+
+# 6. LEAVE,,,,,,
+ltvWlscmpLeave,DialogOptionSelected,$option == ltv_wlscmp_leave,"$global.ltv_wlscmp_cooldown = true 60
+$option = gaKA_hegJustLeave 0
+FireBest DialogOptionSelected","You decide it's best not to get involved and step away.",,

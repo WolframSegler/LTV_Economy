@@ -17,6 +17,8 @@ public class WellnessCompliancePolicy extends MarketPolicy {
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
         data.socialCohesionDelta.modifyFlat(id, COHESION_DEBUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
+
+        data.market.getMemoryWithoutUpdate().set("$policy_wellness_compliance", true);
     }
 
     public void unapply(PlayerMarketData data) {
@@ -24,6 +26,8 @@ public class WellnessCompliancePolicy extends MarketPolicy {
         data.happinessDelta.unmodifyFlat(id);
         data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
+
+        data.market.getMemoryWithoutUpdate().set("$policy_wellness_compliance", false);
     }
 
     @Override

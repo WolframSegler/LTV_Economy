@@ -21,19 +21,12 @@ import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.IncomeLedger;
-import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class EconomyInfo {
     transient EconomyEngine engine;
 
     EconomyInfo(EconomyEngine engine) { this.engine = engine; }
-
-    public Object readResolve() {
-        this.engine = EconomyEngine.getInstance();
-        return this;
-    }
 
     public final double getTotalGlobalExports(String comID) {
         double total = 0;
@@ -322,14 +315,14 @@ public class EconomyInfo {
     /**
      * Per day value
      */
-    public final float getWagesForMarket(MarketAPI market) {
+    public final float getWagesForMarket(final MarketAPI market) {
         final String marketID = market.getId();
-        float wage = 0f;
 
-        for (WorkerIndustryData data : WorkerRegistry.getInstance().getIndustriesUsingWorkers(marketID)) {
-            wage += data.getWorkersAssigned() * (LaborConfig.LPV_day / (engine.isPlayerMarket(marketID) ?
-            engine.m_playerMarketData.get(marketID).getRoSV() : LaborConfig.RoSV));
-        }
+        final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
+        final float wage = cond.getWorkerPool() * (1f - cond.getFreeWorkerRatio()) *
+            (LaborConfig.LPV_day / (engine.isPlayerMarket(marketID) ?
+            engine.m_playerMarketData.get(marketID).getRoSV() : LaborConfig.RoSV)
+        );
 
         return wage * market.getUpkeepMult().getModifiedValue();
     }

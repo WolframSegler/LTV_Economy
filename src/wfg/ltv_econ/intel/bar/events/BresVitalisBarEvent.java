@@ -5,8 +5,6 @@ import java.util.Random;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
-import com.fs.starfarer.api.campaign.OptionPanelAPI;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
@@ -15,6 +13,10 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.PortsideBarEvent;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEvent;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator;
+import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin;
+import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.CustomRepImpact;
+import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActions;
+import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepRewards;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -40,7 +42,14 @@ public class BresVitalisBarEvent extends BaseBarEvent {
     public void addPromptAndOption(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
         dialog.getTextPanel().addPara("From the corner of your eye, you notice a man passed out in a table full of cans. The staff seem to ignore him.");
 
-        dialog.getOptionPanel().addOption("Inspect the sleeping man", OptionID.INSPECT_MAN);
+        dialog.getOptionPanel().addOption("Inspect the man sleeping next to the mountain of cans", this);
+    }
+
+    @Override
+    public void init(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
+        super.init(dialog, memoryMap);
+
+        optionSelected(null, OptionID.INSPECT_MAN);
     }
 
     @Override
@@ -48,8 +57,6 @@ public class BresVitalisBarEvent extends BaseBarEvent {
         if (!(optionData instanceof OptionID)) return;
 
         final OptionID option = (OptionID) optionData;
-        final TextPanelAPI text = dialog.getTextPanel();
-        final OptionPanelAPI options = dialog.getOptionPanel();
 
         options.clearOptions();
 
@@ -61,8 +68,16 @@ public class BresVitalisBarEvent extends BaseBarEvent {
             break;
 
         case CALL_HOSPITAL:
-            text.addPara("You wake the man up and call for medical assistance. The medics arrive quickly and take him to the nearest hospital.");
-            Global.getSector().getFaction(Factions.INDEPENDENT).adjustRelationship(Factions.PLAYER, 1f);
+            text.addPara("You wake the man up and call for medical assistance. The medics arrive quickly and take him to the nearest medbay.");
+
+            final CustomRepImpact impact = new CoreReputationPlugin.CustomRepImpact();
+            impact.delta = RepRewards.TINY;
+
+            Global.getSector().adjustPlayerReputation(
+                new CoreReputationPlugin.RepActionEnvelope(
+                    RepActions.CUSTOM, impact, text, true
+                ), Factions.INDEPENDENT
+            );
             endEvent(); break;
 
         default: case LEAVE:
@@ -73,7 +88,6 @@ public class BresVitalisBarEvent extends BaseBarEvent {
 
     private final void endEvent() {
         BarEventManager.getInstance().notifyWasInteractedWith(this);
-        noContinue = true;
         done = true;
     }
 

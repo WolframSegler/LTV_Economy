@@ -56,19 +56,11 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
     private List<Object> outpostsChildren = null;
     private List<UIPanelAPI> outpostsPanels = new ArrayList<>(6);
     
-    private int frames = 0;
     @SuppressWarnings("unchecked")
     public void advance(float amount) {
-        if (Global.getCurrentState() != GameState.CAMPAIGN) {
-            frames = 0;
-            return;
-        }
-
+        if (Global.getCurrentState() != GameState.CAMPAIGN) return;
         final CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
         if (!campaignUI.isShowingDialog()) return;
-
-        frames++;
-        if (frames < 2) return;
 
         final int index = CampaignEngine.getInstance().getUIData().getCommandData().getSelectedTabIndex();
         if (UiInjected) {

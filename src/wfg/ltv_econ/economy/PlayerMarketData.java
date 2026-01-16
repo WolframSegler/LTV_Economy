@@ -159,17 +159,17 @@ public class PlayerMarketData {
 
         healthDelta.modifyFlat("hazard", (1f - market.getHazardValue()) * 0.16f, "Hazard rating");
 
-        healthDelta.modifyFlat("wage", (LaborConfig.LPV_month / RoSV - 1f) * 0.1f, "Wages");
+        healthDelta.modifyFlat("wage", (LaborConfig.LPV_month / RoSV - 1f) * 0.08f, "Wages");
     }
 
     private final void updateHappinessDelta() {
-        happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.02f, "Health");
+        happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.003f, "Health");
 
         happinessDelta.modifyFlat(
-            "stability", (market.getStability().getModifiedValue() - 5f) * 0.03f, "Stability"
+            "stability", (market.getStability().getModifiedValue() - 5f) * 0.025f, "Stability"
         );
 
-        happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.05f, "Wages");
+        happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.04f, "Wages");
 
         happinessDelta.modifyFlat(
             "cohesion", (popSocialCohesion - BASELINE_VALUE) * 0.0008f, "Social Cohesion"
@@ -216,14 +216,14 @@ public class PlayerMarketData {
     }
 
     private final void applyHealthModifiers() {
-        final String desc = "colony health";
+        final String desc = "Colony health";
 
         final int baseValue = (int) ((popHealth + 5f - BASELINE_VALUE) / 10f);
 
         if (baseValue != 0) {
             market.getIncoming().getWeight().modifyFlat(healthID, baseValue * 2f, desc);
             market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).modifyMult(
-                healthID, 1f + baseValue * 0.1f, desc
+                healthID, 1f + baseValue * 0.05f, desc
             );
         } else {
             market.getIncoming().getWeight().unmodifyFlat(healthID);
@@ -232,7 +232,7 @@ public class PlayerMarketData {
     }
 
     private final void applyHappinessModifiers() {
-        final String desc = "colony happiness";
+        final String desc = "Colony happiness";
 
         final int baseValue = popHappiness < 20f ? -1 : (popHappiness > 80f ? 1 : 0);
 
@@ -240,7 +240,7 @@ public class PlayerMarketData {
             market.getStability().modifyFlat(happinessID, baseValue, desc);
             for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
                 dom.getCell(marketID).getProductionStat().modifyMult(
-                    happinessID, baseValue * 0.2f, desc
+                    happinessID, 1f + baseValue * 0.2f, desc
                 );
             }
         } else {
@@ -252,7 +252,19 @@ public class PlayerMarketData {
     }
 
     private final void applySocialCohesionModifiers() {
-        
+        // final String desc = "Social cohesion";
+
+        /*
+        Crisis response speed
+        Effect:
+            high cohesion → shortages, raids, instability resolve faster
+            low cohesion → problems linger
+
+        Expedition / event resistance
+        Effect:
+            low cohesion → hostile events advance faster
+            high cohesion → events stall or fail
+        */
     }
 
     private final void applyClassConsciousnessModifiers() {

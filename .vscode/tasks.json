@@ -5,14 +5,20 @@
       "label": "delete-logs",
       "type": "shell",
       "command": "rm -f \"${workspaceFolder}/../../starsector.log\"",
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "compile",
       "type": "shell",
       "command": "mvn clean package",
       "dependsOn": "delete-logs",
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "launch-game",
@@ -22,11 +28,32 @@
       "options": {
         "cwd": "${workspaceFolder}/../.."
       },
-      "group": { "kind": "build", "isDefault": true },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "presentation": {
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "launch-game-no-compile",
+      "type": "shell",
+      "command": "\"${workspaceFolder}/../../starsector.sh\"",
+      "dependsOn": "delete-logs",
+      "options": {
+        "cwd": "${workspaceFolder}/../.."
+      },
+      "group": {
+        "kind": "build"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
     }
   ]
 }

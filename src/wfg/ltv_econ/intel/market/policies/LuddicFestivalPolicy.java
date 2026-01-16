@@ -7,8 +7,8 @@ import wfg.ltv_econ.economy.PlayerMarketData;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LuddicFestivalPolicy extends MarketPolicy {
-    public static final float HAPPINESS_BUFF = 0.8f;
-    public static final float COHESION_BUFF = 0.5f;
+    public static final float HAPPINESS_BUFF = 0.6f;
+    public static final float COHESION_BUFF = 0.3f;
     public static final float CLASS_BUFF = 0.005f;
 
     public void apply(PlayerMarketData data) {

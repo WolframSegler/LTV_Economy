@@ -112,9 +112,9 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 {
     private static EconomyEngine instance;
 
-    public final EconomyInfo info = new EconomyInfo(this);
-    public final EconomyLogger logger = new EconomyLogger(this);
-    final EconomyLoop loop = new EconomyLoop(this);
+    public transient EconomyInfo info;
+    public transient EconomyLogger logger;
+    transient EconomyLoop loop;
     
     final Set<String> m_registeredMarkets = new HashSet<>();
     final Map<String, CommodityDomain> m_comDomains = new HashMap<>();
@@ -158,6 +158,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             t.setDaemon(true);
             return t;
         });
+
+        info = new EconomyInfo(this);
+        logger = new EconomyLogger(this);
+        loop = new EconomyLoop(this);
 
         return this;
     }
@@ -364,31 +368,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             mNode.name = market.getName() + " (" + market.getSize() + ")";
             mNode.custom = market;
 
-            // Player cut node
-            final FDNode playerIncomeNode = report.getNode(mNode, "player_share");
-            playerIncomeNode.name = "Effective player share (" + Math.round(r * 100) + "%)";
-            playerIncomeNode.icon = Global.getSettings().getSpriteName("icons", "ratio_chart");
-            playerIncomeNode.income = 0.0001f;
-            playerIncomeNode.tooltipCreator = new TooltipCreator() {
-                public boolean isTooltipExpandable(Object params) {return false;}
-
-                public float getTooltipWidth(Object params) {return 400f;}
-
-                public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
-                    tp.addPara(
-                        "The ratio of monthly profits that get automatically transferred to you: %s.",
-                        pad, highlight, NumFormat.formatCredit((long) playerIncome)
-                    );
-                    tp.addPara(
-                        "The effective value can be below the chosen value if the colony is in debt.", 
-                        pad
-                    );
-                    tp.addPara("All income values are modified by this value", pad);
-                }
-            };
-
-            if (playerIncome < 1) playerIncomeNode.name += " - none";
-
             // Industries & structures
             final FDNode indNode = report.getNode(mNode, "industries"); 
             indNode.name = "Industries & Structures";
@@ -443,7 +422,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             wageNode.name = "Wages";
             wageNode.mapEntity = market.getPrimaryEntity();
             wageNode.icon = Global.getSettings().getSpriteName("income_report", "generic_expense");
-            wageNode.upkeep += info.getWagesForMarket(market)*MONTH * r;
+            wageNode.upkeep = info.getWagesForMarket(market) * MONTH * r;
             wageNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}
 
@@ -453,6 +432,29 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                     tp.addPara(
                         "Monthly wages for workers at this colony.", pad
                     );
+                }
+            };
+        
+            // Player cut node
+            final FDNode playerIncomeNode = report.getNode(mNode, "player_share");
+            playerIncomeNode.name = "Effective player share (" + Math.round(r * 100) + "%)";
+            playerIncomeNode.icon = Global.getSettings().getSpriteName("icons", "ratio_chart");
+            playerIncomeNode.income = 0.0001f;
+            playerIncomeNode.tooltipCreator = new TooltipCreator() {
+                public boolean isTooltipExpandable(Object params) {return false;}
+
+                public float getTooltipWidth(Object params) {return 400f;}
+
+                public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
+                    tp.addPara(
+                        "The ratio of monthly profits that get automatically transferred to you: %s.",
+                        pad, highlight, NumFormat.formatCredit((long) playerIncome)
+                    );
+                    tp.addPara(
+                        "The effective value can be below the chosen value if the colony is in debt.", 
+                        pad
+                    );
+                    tp.addPara("All income values are modified by this value", pad);
                 }
             };
         }

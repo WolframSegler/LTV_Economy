@@ -102,7 +102,7 @@ public abstract class MarketPolicy {
     public final void activate(PlayerMarketData data, int durationDays) {
         if (state != PolicyState.AVAILABLE) return;
         if (EconomyEngine.getInstance().getCredits(data.marketID) < spec.cost &&
-            DebugFlags.COLONY_DEBUG
+            !DebugFlags.COLONY_DEBUG
         ) return;
 
         EconomyEngine.getInstance().addCredits(data.marketID, -spec.cost);

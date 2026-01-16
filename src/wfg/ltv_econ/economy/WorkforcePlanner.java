@@ -424,8 +424,7 @@ public class WorkforcePlanner {
 
         SimplexSolver solver = new SimplexSolver();
         PointValuePair solution = solver.optimize(
-            new MaxIter(2000),
-            f,
+            new MaxIter(2000), f,
             new LinearConstraintSet(constraints),
             GoalType.MAXIMIZE,
             new NonNegativeConstraint(true),

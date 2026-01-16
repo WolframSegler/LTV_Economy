@@ -16,8 +16,8 @@ public class PharmaceuticalPromotionPolicy extends MarketPolicy {
     public static final float HAPPINESS_BUFF = 0.5f;
     public static final float COHESION_DEBUFF = -0.03f;
     public static final float CLASS_DEBUFF = -0.001f;
-    public static final int FACTION_RELATION_DROP = 10;
-    public static final int FACTION_RELATION_INCREASE = 7;
+    public static final float FACTION_RELATION_DROP = 0.1f;
+    public static final float FACTION_RELATION_INCREASE = 0.07f;
 
     public void apply(PlayerMarketData data) {
         data.healthDelta.modifyFlat(id, HEALTH_DEBUFF, spec.name);
