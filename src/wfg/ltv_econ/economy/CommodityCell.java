@@ -143,7 +143,7 @@ public class CommodityCell {
         return getProduction(true) + getTotalImports(true);
     }
     public final double getStoredAvailable() {
-        return getStored() + getFlowAvailable();
+        return stored + getFlowAvailable();
     }
     public final float getPreferredStockpile() {
         return EconomyConfig.DAYS_TO_COVER * getBaseDemand(true);
@@ -178,6 +178,12 @@ public class CommodityCell {
     }
     public final float getStoredAvailabilityRatio() {
         return getBaseDemand(true) <= 0 ? 1f : (float) Math.min(stored / getBaseDemand(true), 1f);
+    }
+    public final double getStoredDeficit() {
+        return Math.max(0, getPreferredStockpile() - stored);
+    }
+    public final double getStoredExcess() {
+        return getStoredRemainingExportable();
     }
     public final double getStored() {
         return stored;
@@ -311,9 +317,9 @@ public class CommodityCell {
         final float sellExp = 0.5f * MAX_SUBMARKET_STOCK_MULT;
         final float neutralExp = (buyExp + sellExp) / 2f;
         final float exp = switch (type) {
-            case MARKET_BUYING  -> buyExp;
+            case MARKET_BUYING -> buyExp;
             case MARKET_SELLING -> sellExp;
-            default             -> neutralExp;
+            default -> neutralExp;
         };
 
         final float avgMultiplier = n == 0 ?

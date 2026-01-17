@@ -208,7 +208,7 @@ public class IndustryIOs {
 
         while (true) {
             String downgradeId = currentInd.getDowngrade();
-            if (downgradeId == null) break;
+            if (downgradeId == null || downgradeId == currentInd.getId()) break;
 
             currentInd = Global.getSettings().getIndustrySpec(downgradeId);
         }

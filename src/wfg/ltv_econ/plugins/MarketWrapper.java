@@ -76,7 +76,7 @@ public class MarketWrapper extends Market {
         String comID, double quantity, double existingTransactionValue, boolean isPlayer
     ) {
         return getDemandPriceAssumingStockpileUtility(
-            getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
+            original.getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
         );
     }
 
@@ -115,7 +115,7 @@ public class MarketWrapper extends Market {
         String comID, double quantity, double existingTransactionValue, boolean isPlayer
     ) {
         return getSupplyPriceAssumingStockpileUtility(
-            getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
+            original.getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
         );
     }
 
@@ -152,6 +152,11 @@ public class MarketWrapper extends Market {
 
     public float getGrossIncome() {
         return EconomyEngine.getInstance().info.getGrossIncome(this, true);
+    }
+
+
+    public CommodityOnMarket getCommodityData(String var1) {
+        return new CommodityOnMarketWrapper(original.getCommodityData(var1));
     }
 
     public MutableStat getIncomeMult() {
@@ -486,10 +491,6 @@ public class MarketWrapper extends Market {
 
     public CommodityOnMarket getCommodityData(CommoditySpecAPI var1) {
         return getCommodityData(var1.getId());
-    }
-
-    public CommodityOnMarket getCommodityData(String var1) {
-        return original.getCommodityData(var1);
     }
 
     public MarketDemandData getDemandData() {

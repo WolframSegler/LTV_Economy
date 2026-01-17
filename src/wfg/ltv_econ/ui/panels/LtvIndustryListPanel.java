@@ -474,7 +474,9 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 		if (((int) args[1]) != 0) return; // 0 means confirm
 		final IndustryPickerDialog buildDialog = (IndustryPickerDialog) args[0];
-		if (buildDialog.getSelected() == null) return;
+		final Object selectedObj = RolfLectionUtil.getMethodAndInvokeDirectly(
+			"getSelected", buildDialog);
+		if (selectedObj == null) return;
 
 		Industry selectedIndustry = buildDialog.getSelected().getIndustry();
 		final int buildCost = (int) selectedIndustry.getBuildCost();

@@ -674,6 +674,8 @@ public class MarketUIReplacer implements EveryFrameScript {
     private static final void replaceMarketInstanceForPriceControl(UIPanelAPI masterTab) {
         final UIPanelAPI handler = (UIPanelAPI) RolfLectionUtil.invokeMethod(
             "getTransferHandler", masterTab);
+
+        Global.getLogger(MarketUIReplacer.class).error(handler.getClass());
         if (marketField == null) {
             marketField = RolfLectionUtil.getAllFields(handler.getClass())
                 .stream().filter(f -> Market.class.isAssignableFrom(

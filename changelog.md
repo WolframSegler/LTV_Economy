@@ -1,7 +1,6 @@
 v0.2.1-beta | SAVE COMPATIBLE
 - Changed dynamic industry config creation to be less intrusive. This should decrease crashes.
 - More bug fixes
-- The Knights of Ludd is marked as incompatible until the issue is resolved.
 - Changed location of config files
 
 v0.2.0-beta | NOT SAVE COMPATIBLE

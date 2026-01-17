@@ -115,8 +115,8 @@ public class TooltipUtils {
                         }
 
                         String lessThanSymbol = "";
-                        long marketDemand = (long) cell.getBaseDemand(true);
-                        marketDemand = marketDemand / 100 * 100;
+                        long marketDemand = (long) cell.getStoredDeficit();
+                        marketDemand = (marketDemand / 100) * 100;
                         if (marketDemand < 100) {
                             marketDemand = 100;
                             lessThanSymbol = "<";
@@ -212,13 +212,11 @@ public class TooltipUtils {
                     final MarketAPI market = cell.market;
                     if (countingMap.getCount(market.getFactionId()) < 3) {
                         countingMap.add(market.getFactionId());
-                        long stockpileLimit = (long) OpenSubmarketPlugin.getBaseStockpileLimit(
-                            cell.comID, cell.marketID
-                        );
-                        stockpileLimit += market.getCommodityData(comID).getPlayerTradeNetQuantity();
-                        if (stockpileLimit < 0) stockpileLimit = 0;
+                        long available = cell.getRoundedStored();
+                        available += market.getCommodityData(comID).getPlayerTradeNetQuantity();
+                        if (available < 0) available = 0;
 
-                        int excess = (int) cell.getFlowCanNotExport();
+                        long excess = (long) cell.getStoredExcess();
                         Color excessColor = gray;
                         String excessStr = "---";
                         if (excess > 0) {
@@ -227,9 +225,9 @@ public class TooltipUtils {
                         }
 
                         String availableStr = "";
-                        stockpileLimit = stockpileLimit / 100 * 100;
-                        if (stockpileLimit < 100) {
-                            stockpileLimit = 100;
+                        available = available / 100 * 100;
+                        if (available < 100) {
+                            available = 100;
                             availableStr = "<";
                         }
 
@@ -250,7 +248,7 @@ public class TooltipUtils {
                             highlight,
                             Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, false, true)),
                             highlight,
-                            availableStr + NumFormat.engNotation(stockpileLimit),
+                            availableStr + NumFormat.engNotation(available),
                             excessColor,
                             excessStr,
                             Alignment.LMID,
