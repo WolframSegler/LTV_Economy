@@ -98,6 +98,7 @@ public class EconomyOverviewPanel extends CustomPanel<
             Fonts.ORBITRON_12, buttonRunnable
         );
         button.setCutStyle(CutStyle.TL_BR);
+        button.bgAlpha = 1f;
         navButtons.add(button);
         firstButton = button;
 
@@ -112,6 +113,7 @@ public class EconomyOverviewPanel extends CustomPanel<
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Faction Administration", Fonts.ORBITRON_12, buttonRunnable
         );
         button.setCutStyle(CutStyle.TL_BR);
+        button.bgAlpha = 1f;
         navButtons.add(button);
 
         buttonRunnable = (btn) -> {
@@ -125,6 +127,7 @@ public class EconomyOverviewPanel extends CustomPanel<
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Settings", Fonts.ORBITRON_12, buttonRunnable
         );
         button.setCutStyle(CutStyle.TL_BR);
+        button.bgAlpha = 1f;
         navButtons.add(button);
         
         buttonRunnable = (btn) -> {
@@ -134,6 +137,7 @@ public class EconomyOverviewPanel extends CustomPanel<
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "PANEL BTN", Fonts.ORBITRON_12, buttonRunnable
         );
         button.setCutStyle(CutStyle.TL_BR);
+        button.bgAlpha = 1f;
         navButtons.add(button);
     }
 
