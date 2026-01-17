@@ -11,7 +11,7 @@ import com.fs.starfarer.api.Global;
 import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
 
 public class EconomyConfigLoader {
-    private static final String CONFIG_PATH = "./data/config/economy_config.json";
+    private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";
 
     private static JSONObject config;
 

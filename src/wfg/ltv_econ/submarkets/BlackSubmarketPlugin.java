@@ -143,7 +143,7 @@ public class BlackSubmarketPlugin extends BaseSubmarketPlugin {
             Global.getSector().getClock().getMonth() * 170000
         );
 
-		float limit = OpenSubmarketPlugin.getBaseStockpileLimit(com.getId(), market.getId());
+		float limit = OpenSubmarketPlugin.getBaseStockpileLimit(com, market.getId());
 		
 		limit *= 0.9f + 0.2f * random.nextFloat();
 		

@@ -22,8 +22,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     @Override
     public void apply(String id) {
-        if (market == null)
-            return;
+        if (market == null) return;
 
         recalculateWorkerPool();
     }

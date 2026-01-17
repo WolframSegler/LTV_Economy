@@ -11,7 +11,7 @@ import com.fs.starfarer.api.SettingsAPI;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 
 public class PolicyConfigLoader {
-    private static final String CONFIG_PATH = "./data/config/policy_config.json";
+    private static final String CONFIG_PATH = "./data/config/ltvEcon/policy_config.json";
 
     private static JSONObject config;
 

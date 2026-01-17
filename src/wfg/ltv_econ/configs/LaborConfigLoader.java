@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import com.fs.starfarer.api.Global;
 
 public class LaborConfigLoader {
-    private static final String CONFIG_PATH = "./data/config/labor_config.json";
+    private static final String CONFIG_PATH = "./data/config/ltvEcon/labor_config.json";
 
     private static JSONObject config;
 

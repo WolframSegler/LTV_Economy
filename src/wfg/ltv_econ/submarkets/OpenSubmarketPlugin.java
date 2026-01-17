@@ -127,17 +127,13 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	
 	@Override
 	public int getStockpileLimit(CommodityOnMarketAPI com) {
-		if (EconomyEngine.getInstance() == null) {
-			return (int) OpenMarketPlugin.getBaseStockpileLimit(com);
-		}
-
-        final Random random = new Random(
+		final Random random = new Random(
             market.getId().hashCode() +
             submarket.getSpecId().hashCode() +
             Global.getSector().getClock().getMonth() * 170000
         );
 
-        float limit = OpenSubmarketPlugin.getBaseStockpileLimit(com.getId(), market.getId());
+        float limit = OpenSubmarketPlugin.getBaseStockpileLimit(com, market.getId());
 		
 		limit *= 0.9f + 0.2f * random.nextFloat();
 		
@@ -157,6 +153,13 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	private static final float RATIO_EXP = 0.6f;
 	private static final float STOCKPILE_SCALE_MIN = 0.01f;
 	private static final float STOCKPILE_SCALE_MAX = 4f;
+
+	public static float getBaseStockpileLimit(CommodityOnMarketAPI com, String marketID) {
+		if (!EconomyEngine.isInitialized()) {
+			return (int) OpenMarketPlugin.getBaseStockpileLimit(com);
+		}
+		return getBaseStockpileLimit(com.getId(), marketID);
+	}
 	
 	public static float getBaseStockpileLimit(String comID, String marketID) {
         final CommodityCell cell = EconomyEngine.getInstance().getComCell(

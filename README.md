@@ -101,7 +101,7 @@ Due to the intrusive nature of the mod, anything that modifies the Colony Info P
 
 ## For Other Modders
 
-If you want your mod's industries to be compatible, you can add an <code>industry_config.json</code> entry under <code>data/config/</code> inside your own mod folder. The documentation file <code>data/config/industry_config_doc.md</code> provides the necessary information.
+If you want your mod's industries to be compatible, you can add an <code>industry_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder. The documentation file <code>data/config/ltvEcon/industry_config_doc.md</code> provides the necessary information.
 
 <br><br>
 
@@ -130,9 +130,9 @@ rolfosian - for RolflectionLib-SS
 
 <a href="https://www.shutterstock.com/image-vector/construction-helmet-icon-simple-element-collection-2502692379?trackingId=018e5ba4-d525-4580-9880-d5b5ff10a345" title="construction helmet">Construction Helmet</a>
 
-<a target="_blank" href="https://icons8.com/icon/6kkYMKzmRC9P/solidarity">Solidarität</a> Icon von <a target="_blank" href="https://icons8.com">Icons8</a>
+<a target="_blank" href="https://icons8.com/icon/6kkYMKzmRC9P/solidarity">Solidarity</a> Icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 
-<a target="_blank" href="https://icons8.com/icon/sm20ePRz8ZPO/solidarity">Solidarität</a> Icon von <a target="_blank" href="https://icons8.com">Icons8</a>
+<a target="_blank" href="https://icons8.com/icon/sm20ePRz8ZPO/solidarity">Solidarity</a> Icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 
 <a href="https://www.freepik.com/icon/community_15329516">Icon by Nuricon</a>
 

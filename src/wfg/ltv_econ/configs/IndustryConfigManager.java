@@ -4,7 +4,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.fs.starfarer.api.FactoryAPI;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -14,11 +13,15 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.characters.MarketConditionSpecAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
+import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
+import com.fs.starfarer.campaign.econ.Market;
+import com.fs.starfarer.campaign.econ.MarketCondition;
 
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
@@ -43,7 +46,7 @@ public class IndustryConfigManager {
 
     public static final String BASE_MAINTENANCE_ID = "maintenance_base";
 
-    public static final String CONFIG_PATH = "./data/config/industry_config.json";
+    public static final String CONFIG_PATH = "./data/config/ltvEcon/industry_config.json";
     public static final String CONFIG_NAME = "industry_config.json";
     public static final String DYNAMIC_CONFIG_PATH = "./saves/common/dynamic_industry_config.json";
     public static final String DYNAMIC_CONFIG_NAME = "dynamic_industry_config.json";
@@ -72,7 +75,7 @@ public class IndustryConfigManager {
             dynamic_config = settings.readJSONFromCommon(DYNAMIC_CONFIG_NAME, false);
 
             if (dynamic_config == null || dynamic_config.length() < 1) {
-                Global.getLogger(IndustryConfigManager.class).warn(
+                Global.getLogger(IndustryConfigManager.class).info(
                     "Dynamic industry config missing or empty. Creating new JSONObject."
                 );
                 dynamic_config = new JSONObject();
@@ -80,7 +83,7 @@ public class IndustryConfigManager {
         } catch (Exception ex) {
             Global.getLogger(IndustryConfigManager.class).warn(
                 "Failed to read dynamic industry config, creating new JSONObject: " +
-                DYNAMIC_CONFIG_PATH + ".data", ex
+                DYNAMIC_CONFIG_PATH + ".data"
             );
             dynamic_config = new JSONObject();
         }
@@ -447,15 +450,32 @@ public class IndustryConfigManager {
         final SettingsAPI settings = Global.getSettings();
         final Map<String, IndustryConfig> dynamic_config =
             IndustryConfigManager.loadAsMap(true);
+        final Set<String> validIndustryIds = settings.getAllIndustrySpecs().stream()
+            .map(IndustrySpecAPI::getId).collect(Collectors.toSet());
 
         boolean allIndustriesHaveConfig = true;
+
+        // 1) Check that every existing spec has a config
         for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
-            if (!(dynamic_config.containsKey(spec.getId()) ||
-                dynamic_config.containsKey(IndustryIOs.getBaseIndustryID(spec))) &&
+            String id = spec.getId();
+            String baseId = IndustryIOs.getBaseIndustryID(spec);
+
+            if (!(dynamic_config.containsKey(id) ||
+                (baseId != null && dynamic_config.containsKey(baseId))) &&
                 !IndustryIOs.hasConfig(spec)
             ) {
                 allIndustriesHaveConfig = false;
                 break;
+            }
+        }
+
+        // 2) Check that dynamic configs don’t reference missing industries
+        if (allIndustriesHaveConfig) {
+            for (String cfgId : dynamic_config.keySet()) {
+                if (!validIndustryIds.contains(cfgId)) {
+                    allIndustriesHaveConfig = false;
+                    break;
+                }
             }
         }
 
@@ -471,10 +491,9 @@ public class IndustryConfigManager {
         final String marketID2 = "ltv_dynamic_ind_test_market2";
         final String testEntity = "ltv_dynamic_entity";
         final String abstractOutput = "atLeastOneOutputForAbstractInputs";
-        final FactoryAPI factory = Global.getFactory();
         final SectorAPI sector = Global.getSector();
-        final MarketAPI testMarket1 = factory.createMarket(marketID1, marketID1, TEST_MARKET_SIZE);
-        final MarketAPI testMarket2 = factory.createMarket(marketID2, marketID2, 5);
+        final MarketAPI testMarket1 = new Market(marketID1, marketID1, TEST_MARKET_SIZE, null);
+        final MarketAPI testMarket2 = new Market(marketID2, marketID2, TEST_MARKET_SIZE - 1, null);
         final StarSystemAPI testStarSystem = sector.createStarSystem(testEntity);
         final SectorEntityToken testPlanet = testStarSystem.addPlanet(
             testEntity, testStarSystem.getCenter(), testEntity, "frozen", 0f, 1f, 1f, 1f
@@ -483,7 +502,7 @@ public class IndustryConfigManager {
         testMarket2.setFactionId(factionID);
         testMarket1.setPrimaryEntity(testPlanet);
         testMarket2.setPrimaryEntity(testPlanet);
-        final FactionAPI testFaction = testMarket1.getFaction();
+        final FactionAPI testFaction = sector.getFaction(factionID);
 
         final Set<String> scaleWithMarketSize = new HashSet<>(8);
         final Map<String, Map<String, Float>> inputCache = new HashMap<>();
@@ -505,8 +524,17 @@ public class IndustryConfigManager {
             testMarket1.addIndustry(indID);
             testMarket2.addIndustry(indID);
 
-            final Industry ind1 = testMarket1.getIndustry(indID);
-            final Industry ind2 = testMarket1.getIndustry(indID);
+            Industry ind1 = testMarket1.getIndustry(indID);
+            Industry ind2 = testMarket2.getIndustry(indID);
+
+            if (ind1 == null || ind2 == null) {
+                for (Industry ind : testMarket1.getIndustries()) {
+                    if (ind.getSpec().getId().equals(indID)) ind1 = ind;
+                }
+                for (Industry ind : testMarket2.getIndustries()) {
+                    if (ind.getSpec().getId().equals(indID)) ind2 = ind;
+                }
+            }
             
             final List<String> outputs = new ArrayList<>(6);
             final Set<String> illegalOutputs = new HashSet<>(6);
@@ -601,12 +629,6 @@ public class IndustryConfigManager {
         final List<String> conds = settings.getAllMarketConditionSpecs()
             .stream().map(MarketConditionSpecAPI::getId).collect(Collectors.toList());
 
-        conds.removeIf(condID -> {
-            MarketConditionSpecAPI spec = settings.getMarketConditionSpec(condID);
-            String cls = spec.getScriptClass();
-            return cls.contains("FoodShortage") || cls.contains("LuddicPathCells") || cls.contains("PirateActivity");
-        });
-
         final Map<String, IndustryConfig> new_dynamic_config = new HashMap<>();
         for (Map.Entry<String, IndustryConfig> e : dynamic_config.entrySet()) {
             new_dynamic_config.put(e.getKey(), new IndustryConfig(e.getValue()));
@@ -616,33 +638,42 @@ public class IndustryConfigManager {
         final Set<String> appearingOutputs = new HashSet<>();
         final Set<String> disappearingOutputs = new HashSet<>();
 
-        final Consumer<List<String>> applyAndTestCombo = condCombo -> {
-            testMarket1.getConditions().clear();
-            testMarket2.getConditions().clear();
+        // Prime loop with inert condition
+        testMarket1.addCondition(Conditions.INDUSTRIAL_POLITY);
+        testMarket2.addCondition(Conditions.INDUSTRIAL_POLITY);
 
-            try {
-                for (String condID : condCombo) {
-                    testMarket1.addCondition(condID);
-                    testMarket2.addCondition(condID);
-                }
-            } catch (Exception e) {
-                for (String condID : condCombo) {
-                    testMarket1.removeCondition(condID);
-                    testMarket2.removeCondition(condID);
-                }
-                return;
+        final Consumer<List<String>> applyAndTestCombo = condCombo -> {
+            final List<MarketConditionAPI> market1Conds = testMarket1.getConditions();
+            final List<MarketConditionAPI> market2Conds = testMarket2.getConditions();
+
+            for (int i = market1Conds.size() - 1; i >= 0; i--) {
+                MarketConditionAPI cond = market1Conds.get(i);
+                testMarket1.removeCondition(cond.getId());
+                testMarket2.removeCondition(cond.getId());
+            }
+
+            for (String condID : condCombo) {
+                market1Conds.add(new MarketCondition(condID, testMarket1));
+                market2Conds.add(new MarketCondition(condID, testMarket2));
             }
             
-            testMarket1.reapplyConditions();
-            testMarket2.reapplyConditions();
             testMarket1.reapplyIndustries();
             testMarket2.reapplyIndustries();
 
             for (Map.Entry<String, IndustryConfig> entry : dynamic_config.entrySet()) {
                 final String indID = entry.getKey();
                 final IndustryConfig config = entry.getValue();
-                final Industry ind1 = testMarket1.getIndustry(indID);
-                final Industry ind2 = testMarket2.getIndustry(indID);
+                Industry ind1 = testMarket1.getIndustry(indID);
+                Industry ind2 = testMarket2.getIndustry(indID);
+
+                if (ind1 == null || ind2 == null) {
+                    for (Industry ind : testMarket1.getIndustries()) {
+                        if (ind.getSpec().getId().equals(indID)) ind1 = ind;
+                    }
+                    for (Industry ind : testMarket2.getIndustries()) {
+                        if (ind.getSpec().getId().equals(indID)) ind2 = ind;
+                    }
+                }
 
                 final Set<String> currentOutputs = new HashSet<>();
                 final Set<String> baselineOutputs = new HashSet<>(config.outputs.keySet());
