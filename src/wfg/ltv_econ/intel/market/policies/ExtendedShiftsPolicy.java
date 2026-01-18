@@ -1,5 +1,6 @@
 package wfg.ltv_econ.intel.market.policies;
 
+import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.CommodityDomain;
@@ -17,9 +18,11 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
 
     public void apply(PlayerMarketData data) {
         for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-            dom.getCell(data.marketID).getProductionStat().modifyPercent(
-                id, PRODUCTION_BUFF, spec.name
-            );
+            for (Industry ind : dom.getCell(data.marketID).getVisibleIndustries()) {
+                ind.getSupplyBonus().modifyPercent(
+                    id, PRODUCTION_BUFF, spec.name
+                );
+            }
         }
         
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
@@ -29,7 +32,9 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
 
     public void unapply(PlayerMarketData data) {
         for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-            dom.getCell(data.marketID).getProductionStat().unmodifyPercent(id);
+            for (Industry ind : dom.getCell(data.marketID).getVisibleIndustries()) {
+                ind.getSupplyBonus().unmodifyPercent(id);
+            }
         }
         
         data.happinessDelta.unmodifyFlat(id);

@@ -179,6 +179,9 @@ public class CommodityCell {
     public final float getStoredAvailabilityRatio() {
         return getBaseDemand(true) <= 0 ? 1f : (float) Math.min(stored / getBaseDemand(true), 1f);
     }
+    public final float getDesiredAvailabilityRatio() {
+        return getBaseDemand(true) <= 0 ? 1f : (float) Math.min(stored / getPreferredStockpile(), 1f);
+    }
     public final double getStoredDeficit() {
         return Math.max(0, getPreferredStockpile() - stored);
     }

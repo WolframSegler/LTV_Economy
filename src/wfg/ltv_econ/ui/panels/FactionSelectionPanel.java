@@ -99,16 +99,14 @@ public class FactionSelectionPanel extends
             clearChildren();
             final int iconSize = 28;
 
-            final Base comIcon = new Base(
-                getPanel(), iconSize, iconSize, faction.getCrest(),
-                null, null, false
+            final Base comIcon = new Base(getPanel(), iconSize, iconSize, faction.getCrest(),
+                null, null
             );
             add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
 
             if (alreadyEmbargoed) {
-                final Base restrictedIcon = new Base(
-                    getPanel(), iconSize, iconSize, restrictedPath,
-                    null, null, false
+                final Base restrictedIcon = new Base(getPanel(), iconSize, iconSize, restrictedPath,
+                    null, null
                 );
                 add(restrictedIcon).inBR(pad, (ROW_H - iconSize) / 2f);
             }

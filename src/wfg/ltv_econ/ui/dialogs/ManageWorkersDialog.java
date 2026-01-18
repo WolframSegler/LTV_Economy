@@ -49,7 +49,6 @@ import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
 import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
@@ -320,7 +319,7 @@ public class ManageWorkersDialog extends DialogPanel {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W+100, label2.getPosition().getHeight());
 
                 final Base workerIcon = new Base(
-                    innerPanel, ICON_S, ICON_S, WORKER_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, WORKER_ICON, base, null
                 );
                 add(workerIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -387,7 +386,7 @@ public class ManageWorkersDialog extends DialogPanel {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base healthIcon = new Base(
-                    innerPanel, ICON_S, ICON_S, HEALTH_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, HEALTH_ICON, base, null
                 );
                 add(healthIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -429,7 +428,7 @@ public class ManageWorkersDialog extends DialogPanel {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base happinessIcon = new Base(
-                    innerPanel, ICON_S, ICON_S, SMILING_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, SMILING_ICON, base, null
                 );
                 add(happinessIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -471,7 +470,7 @@ public class ManageWorkersDialog extends DialogPanel {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base cohesionIcon = new Base(
-                    innerPanel, ICON_S, ICON_S, SOCIETY_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, SOCIETY_ICON, base, null
                 );
                 add(cohesionIcon).inBL(0, (LABEL_H - ICON_S)/2f);
             }
@@ -513,7 +512,7 @@ public class ManageWorkersDialog extends DialogPanel {
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
 
                 final Base classConsciousnessIcon = new Base(
-                    innerPanel, ICON_S, ICON_S, SOLIDARITY_ICON, base, null, false
+                    innerPanel, ICON_S, ICON_S, SOLIDARITY_ICON, base, null
                 );
                 add(classConsciousnessIcon).inBL(-pad, (LABEL_H - ICON_S)/2f);
             }
@@ -629,9 +628,8 @@ public class ManageWorkersDialog extends DialogPanel {
             }
         };
 
-        final SpritePanelWithTp poster = new SpritePanelWithTp(posterWrap.getPanel(),
-            width, height, new SpritePanelPlugin<>(), policy.spec.posterPath,
-            policy.isOnCooldown() ? Color.GRAY : null, null, policy.isActive()
+        final SpritePanelWithTp poster = new SpritePanelWithTp(posterWrap.getPanel(), width, height,
+            policy.spec.posterPath, policy.isOnCooldown() ? Color.GRAY : null, null
         ) {
             {
                 getPlugin().setTargetUIState(State.DIALOG);
@@ -680,10 +678,11 @@ public class ManageWorkersDialog extends DialogPanel {
             public Glow getGlowType() { return Glow.ADDITIVE; }
 
             @Override
-            public Optional<SpriteAPI> getSprite() {
+            public Optional<SpriteAPI> getAdditiveSprite() {
                 return Optional.ofNullable(m_sprite);
             }
         };
+        poster.drawBorder = policy.isActive();
 
         posterWrap.add(poster).inBL(0, 0);
         return cont.addComponent(posterWrap.getPanel());

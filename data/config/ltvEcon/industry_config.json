@@ -408,6 +408,34 @@
 			}
 		}
 	},
+	"orbitalstation_mid": {
+		"occTag": "space",
+		"outputList": {
+			"operation": {
+				"InputsPerUnitOutput": {
+					"supplies": 7,
+					"crew": 4
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
+				"isAbstract": true
+			}
+		}
+	},
+	"orbitalstation_high": {
+		"occTag": "space",
+		"outputList": {
+			"operation": {
+				"InputsPerUnitOutput": {
+					"supplies": 7,
+					"crew": 4
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
+				"isAbstract": true
+			}
+		}
+	},
 	"battlestation": {
 		"occTag": "space",
 		"outputList": {
@@ -422,7 +450,63 @@
 			}
 		}
 	},
+	"battlestation_mid": {
+		"occTag": "space",
+		"outputList": {
+			"operation": {
+				"InputsPerUnitOutput": {
+					"supplies": 12.5,
+					"crew": 7
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
+				"isAbstract": true
+			}
+		}
+	},
+	"battlestation_high": {
+		"occTag": "space",
+		"outputList": {
+			"operation": {
+				"InputsPerUnitOutput": {
+					"supplies": 12.5,
+					"crew": 7
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
+				"isAbstract": true
+			}
+		}
+	},
 	"starfortress": {
+		"occTag": "space",
+		"outputList": {
+			"operation": {
+				"InputsPerUnitOutput": {
+					"supplies": 21,
+					"crew": 10.4
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
+				"isAbstract": true
+			}
+		}
+	},
+	"starfortress_mid": {
+		"occTag": "space",
+		"outputList": {
+			"operation": {
+				"InputsPerUnitOutput": {
+					"supplies": 21,
+					"crew": 10.4
+				},
+				"scaleWithMarketSize": true,
+				"marketScaleBase": 3,
+				"isAbstract": true
+			}
+		}
+	},
+	"starfortress_high": {
 		"occTag": "space",
 		"outputList": {
 			"operation": {

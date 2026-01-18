@@ -12,7 +12,6 @@ import wfg.wrap_ui.ui.panels.SpritePanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.AcceptsActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 
 public class SettingsIcon extends SpritePanel<SettingsIcon> implements 
     HasAudioFeedback, HasActionListener, AcceptsActionListener
@@ -21,8 +20,8 @@ public class SettingsIcon extends SpritePanel<SettingsIcon> implements
         .getSpriteName("ui", "settings");
 
     public SettingsIcon(UIPanelAPI parent, int size, Color color) {
-        super(parent, size, size, new SpritePanelPlugin<>(), SETTINGS_ICON,
-            color == null ? base : color, null, false
+        super(parent, size, size, SETTINGS_ICON,
+            color == null ? base : color, null
         );
     }
 

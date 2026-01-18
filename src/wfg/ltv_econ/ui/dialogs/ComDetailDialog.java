@@ -50,7 +50,7 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.SortableTable.ColumnManager;
 import wfg.wrap_ui.ui.panels.SortableTable.HeaderPanelWithTooltip;
-import wfg.wrap_ui.ui.panels.SortableTable.RowManager;
+import wfg.wrap_ui.ui.panels.SortableTable.RowPanel;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.panels.TextPanel;
@@ -499,7 +499,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     tooltip.setParaFontColor(base);
                     tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
                     LabelAPI lbl2 = tooltip.addPara(valueTxt, pad, new Color[] {
-                        factionColor, UiUtils.getInFactionColor()
+                        factionColor, UiUtils.inFactionColor
                     }, new String[] {
                         globalValue, inFactionValue
                     });
@@ -533,7 +533,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     tooltip.addPara(
                         "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currMarket.getFaction().getPersonNamePrefix() + " control.\n\n" +
                         "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
-                        pad, new Color[] {currMarket.getFaction().getBaseUIColor(), UiUtils.getInFactionColor()},
+                        pad, new Color[] {currMarket.getFaction().getBaseUIColor(), UiUtils.inFactionColor},
                         new String[] {"all consumers globally", "within the faction"}
                     );
 
@@ -901,11 +901,11 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             }
 
             final String iconPath = market.getFaction().getCrest();
-            final Base iconPanel = new Base(
-                section, iconSize, iconSize, iconPath, null,
-                null, cell.getFlowDeficit() > 0
+            final Base iconPanel = new Base(section, iconSize, iconSize,
+                iconPath, null, null
             );
-            iconPanel.setOutlineColor(Color.RED);
+            iconPanel.drawBorder = cell.getFlowDeficit() > 0;
+            iconPanel.outlineColor = Color.RED;
             iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
 
             final String factionName = market.getFaction().getDisplayName();
@@ -945,7 +945,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                 table.getPendingRow().setOutlineColor(base);
             }
 
-            final CallbackRunnable<RowManager> rowSelectedRunnable = (row) -> {
+            final CallbackRunnable<RowPanel> rowSelectedRunnable = (row) -> {
                 m_selectedMarket = (MarketAPI) row.customData;
                 updateSection1();
                 updateSection2();
@@ -974,12 +974,9 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             section,
             (int) section.getPosition().getWidth(),
             (int) section.getPosition().getHeight(),
-            new BasePanelPlugin<>(),
             m_market.getName() + " - Commodities",
-            true
+            true, m_market
         );
-        section4ComPanel.setMarket(m_market);
-        section4ComPanel.setRowSelectable(true);
         section4ComPanel.selectRow(m_com.getId());
 
         section4ComPanel.setActionListener(this);
@@ -997,7 +994,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
         section4ComPanel.selectRow(panel);
 
-        if (section4ComPanel.m_canViewPrices) {
+        if (UiUtils.canViewPrices()) {
             updateSection1();
             
             final int mode = producerButton.checked ? 0 : 1;

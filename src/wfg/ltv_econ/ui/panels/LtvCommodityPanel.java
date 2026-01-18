@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -19,48 +18,44 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasMarket;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel, CustomPanelAPI>
-    implements HasBackground, HasOutline, HasMarket {
-
-    protected List<CommodityRowPanel> commodityRows = new ArrayList<>();
-    protected MarketAPI m_market = null;
+    implements HasBackground, HasOutline {
 
     public static final int STANDARD_WIDTH = 264;
     public String m_headerTxt;
+    public boolean rowsIgnoreUIState = false;
 
-    public boolean childrenIgnoreUIState = false;
-    public boolean isRowSelectable = false;
-    public boolean m_canViewPrices = false;
+    protected final List<CommodityRowPanel> commodityRows = new ArrayList<>();
+    protected final MarketAPI m_market;
+    protected HasActionListener selectionListener;
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
-        BasePanelPlugin<LtvCommodityPanel> plugin, String headerTxt) {
-        this(parent, width, height, plugin, headerTxt, false);
+    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, String headerTxt, MarketAPI market) {
+        this(parent, width, height, headerTxt, false, market);
     }
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
-        BasePanelPlugin<LtvCommodityPanel> plugin) {
-        this(parent, width, height, plugin, "Commodities", false);
+        MarketAPI market) {
+        this(parent, width, height, "Commodities", false, market);
     }
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
-        BasePanelPlugin<LtvCommodityPanel> plugin, boolean childrenIgnoreUIState) {
-        this(parent, width, height, plugin, "Commodities", childrenIgnoreUIState);
+        boolean rowsIgnoreUIState, MarketAPI market
+    ) {
+        this(parent, width, height, "Commodities", rowsIgnoreUIState, market);
     }
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
-        BasePanelPlugin<LtvCommodityPanel> plugin, String headerTxt, boolean childrenIgnoreUIState) {
-        super(parent, width, height, plugin);
+        String headerTxt, boolean rowsIgnoreUIState, MarketAPI market
+    ) {
+        super(parent, width, height, new BasePanelPlugin<>());
 
+        m_market = market;
         m_headerTxt = headerTxt;
-        this.childrenIgnoreUIState = childrenIgnoreUIState;
-
-        boolean viewAnywhere = Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
-        m_canViewPrices = Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() || viewAnywhere;
+        this.rowsIgnoreUIState = rowsIgnoreUIState;
 
         getPlugin().init(this);
     }
@@ -68,16 +63,10 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
     public static Comparator<CommoditySpecAPI> getCommodityOrderComparator() {
         return Comparator.comparingDouble(com -> com.getOrder());
     }
-
-    public void setRowSelectable(boolean a) {
-        isRowSelectable = a;
-    }
     
     public List<CommodityRowPanel> getCommodityRows() {
         return commodityRows;
     }
-
-    public HasActionListener selectionListener;
 
     public Optional<HasActionListener> getActionListener() {
         return Optional.ofNullable(selectionListener);
@@ -91,7 +80,7 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
         final List<CommoditySpecAPI> commodities = EconomyInfo.getEconCommodities();
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
-            return EconomyEngine.getInstance().getComCell(com.getId(), getMarket().getId()).getFlowEconomicFootprint() <= 0;
+            return EconomyEngine.getInstance().getComCell(com.getId(), m_market.getId()).getFlowEconomicFootprint() <= 0;
         });
 
         final TooltipMakerAPI tooltip = m_panel.createUIElement(
@@ -112,14 +101,14 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
         int cumulativeYOffset = opad;
 
         for (CommoditySpecAPI com : commodities) {
-            CommodityRowPanel comRow = new CommodityRowPanel(
-                getPanel(), getMarket(), com.getId(), this, (int)(getPos().getWidth() - opad * 2), 
-                rowHeight, childrenIgnoreUIState, m_canViewPrices
+            final CommodityRowPanel comRow = new CommodityRowPanel(
+                getPanel(), m_market, com.getId(), (int)(getPos().getWidth() - opad * 2), 
+                rowHeight, rowsIgnoreUIState
             );
 
             rowTp.addComponent(comRow.getPanel()).inTL(opad, cumulativeYOffset);
 
-            cumulativeYOffset += pad + rowHeight;
+            cumulativeYOffset += pad + 2 + rowHeight;
 
             comRow.setActionListener(selectionListener);
 
@@ -130,7 +119,7 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
     }
 
     public void selectRow(String comID) {
-        CommodityOnMarketAPI com = getMarket().getCommodityData(comID);
+        final CommodityOnMarketAPI com = m_market.getCommodityData(comID);
         for (CommodityRowPanel row : commodityRows) {
             row.setPersistentGlow(row.getCommodity() == com);
         }
@@ -142,15 +131,5 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
         }
     }
 
-    public MarketAPI getMarket() {
-        return m_market;
-    }
-
-    public void setMarket(MarketAPI a) {
-        m_market = a;
-    }
-
-    public float getBgAlpha() {
-        return 0.65f;
-    }
+    public float getBgAlpha() { return 0.65f; }
 }

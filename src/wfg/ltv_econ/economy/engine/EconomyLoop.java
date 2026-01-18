@@ -307,36 +307,44 @@ public class EconomyLoop {
         }
     }
 
-    public final void redistributeFactionCredits(boolean includePlayerFaction) {
-        final float REDISTRIBUTION_STRENGTH = 0.2f;
+    public void redistributeFactionCredits(boolean includePlayerFaction) {
+        final double REDISTRIBUTION_STRENGTH = 0.2;
         final int DAYS_AFTER_REDISTRIBUTION = 30;
 
         for (FactionAPI faction : Global.getSector().getAllFactions()) {
             if (!includePlayerFaction && faction.isPlayerFaction()) continue;
 
-            final ArrayList<MarketAPI> markets = new ArrayList<>();
+            final List<MarketAPI> markets = new ArrayList<>();
             for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
                 if (market.getDaysInExistence() < DAYS_AFTER_REDISTRIBUTION) continue;
                 if (market.getFaction().equals(faction)) markets.add(market);
             }
             if (markets.size() < 2) continue;
 
-            double weightedCredits = 0;
-            double totalWeight = 0;
+            final int n = markets.size();
+            long totalCredits = 0l;
+            long totalWeight = 0l;
+            long[] weights = new long[n];
+            long[] credits = new long[n];
 
-            for (MarketAPI market : markets) {
-                final double weight = Math.pow(10, market.getSize() - 3);
-                weightedCredits += engine.getCredits(market.getId()) * weight;
-                totalWeight += weight;
+            for (int i = 0; i < n; i++) {
+                MarketAPI m = markets.get(i);
+                final long w = (long) Math.pow(10, m.getSize() - 3);
+                weights[i] = w;
+                totalWeight += w;
+
+                final long c = engine.getCredits(m.getId());
+                credits[i] = c;
+                totalCredits += c;
             }
-            if (totalWeight <= 0) continue;
+            if (totalWeight <= 0l) continue;
 
-            final long weightedAvg = (long) (weightedCredits / totalWeight);
+            for (int i = 0; i < n; i++) {
+                final double desired = totalCredits * (weights[i] / totalWeight);
+                final double diff = desired - credits[i];
+                final long change = Math.round(diff * REDISTRIBUTION_STRENGTH);
 
-            for (MarketAPI market : markets) {
-                final long credits = engine.getCredits(market.getId());
-                final long diff = weightedAvg - credits;
-                engine.addCredits(market.getId(), (long) (diff * REDISTRIBUTION_STRENGTH));
+                engine.addCredits(markets.get(i).getId(), change);
             }
         }
     }

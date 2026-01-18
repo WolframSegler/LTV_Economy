@@ -87,7 +87,7 @@ public class CommoditySelectionPanel extends
 
             final Base comIcon = new Base(
                 getPanel(), iconSize, iconSize, spec.getIconName(),
-                null, null, false
+                null, null
             );
             RowPanel.this.add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
 

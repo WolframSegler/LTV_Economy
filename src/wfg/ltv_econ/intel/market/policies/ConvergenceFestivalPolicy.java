@@ -1,5 +1,6 @@
 package wfg.ltv_econ.intel.market.policies;
 
+import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
@@ -22,9 +23,11 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
 
         for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-            dom.getCell(data.marketID).getProductionStat().modifyMult(
-                id, PRODUCTION_DEBUFF, spec.name
-            );
+            for (Industry ind : dom.getCell(data.marketID).getVisibleIndustries()) {
+                ind.getSupplyBonus().modifyMult(
+                    id, PRODUCTION_DEBUFF, spec.name
+                );
+            }
         }
     }
 
@@ -34,7 +37,9 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         data.classConsciousnessDelta.unmodifyFlat(id);
 
         for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-            dom.getCell(data.marketID).getProductionStat().unmodifyMult(id);
+            for (Industry ind : dom.getCell(data.marketID).getVisibleIndustries()) {
+                ind.getSupplyBonus().unmodifyMult(id);
+            }
         }
     }
 

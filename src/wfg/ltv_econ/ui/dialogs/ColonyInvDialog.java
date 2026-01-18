@@ -361,7 +361,7 @@ public class ColonyInvDialog extends DialogPanel {
             final CommodityCell cell = engine.getComCell(com.getId(), m_market.getId());
 
             final Base comIcon = new Base(
-                innerPanel, 26, 26, com.getIconName(), null, null, false
+                innerPanel, 26, 26, com.getIconName(), null, null
             );
             
             final long stored = cell.getRoundedStored();

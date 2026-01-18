@@ -22,6 +22,7 @@ import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.ltv_econ.util.TooltipUtils;
+import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -59,6 +60,8 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 import static wfg.wrap_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.economyValues.*;
+
+// import com.fs.starfarer.campaign.ui.trade.class;
 
 public class MarketUIReplacer implements EveryFrameScript {
 
@@ -629,9 +632,8 @@ public class MarketUIReplacer implements EveryFrameScript {
                 managementPanel,
                 width,
                 height,
-                new BasePanelPlugin<LtvCommodityPanel>()
+                marketAPI
             );
-            replacement.setMarket(marketAPI);
 
             final HasActionListener listener = new HasActionListener() {
                 @Override
@@ -642,7 +644,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
                     replacement.selectRow(panel);
 
-                    if (replacement.m_canViewPrices) {
+                    if (UiUtils.canViewPrices()) {
                         final ComDetailDialog dialogPanel = new ComDetailDialog(
                             marketAPI, panel.getCommodity()
                         );
@@ -675,7 +677,6 @@ public class MarketUIReplacer implements EveryFrameScript {
         final UIPanelAPI handler = (UIPanelAPI) RolfLectionUtil.invokeMethod(
             "getTransferHandler", masterTab);
 
-        Global.getLogger(MarketUIReplacer.class).error(handler.getClass());
         if (marketField == null) {
             marketField = RolfLectionUtil.getAllFields(handler.getClass())
                 .stream().filter(f -> Market.class.isAssignableFrom(

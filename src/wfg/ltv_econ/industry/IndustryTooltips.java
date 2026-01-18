@@ -380,8 +380,6 @@ public class IndustryTooltips {
 				int count = -1;
 
 				for (CommodityCell cell : supplyList) {
-					final CommoditySpecAPI com = market.getCommodityData(cell.comID).getCommodity();
-
 					final int pAmount = cell.getProdIndStat(ind.getId()).getModifiedInt();
 
 					// wrap to next line if needed
@@ -394,12 +392,12 @@ public class IndustryTooltips {
 					// draw icon
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
-					tp.addIcons(com, 1, IconRenderMode.NORMAL);
+					tp.addIcons(cell.spec, 1, IconRenderMode.NORMAL);
 					tp.addIconGroup(0f);
-					UIComponentAPI iconComp = tp.getPrev();
+					final UIComponentAPI iconComp = tp.getPrev();
 
 					// Add extra padding for thinner icons
-					float actualIconWidth = iconSize * com.getIconWidthMult();
+					float actualIconWidth = iconSize * cell.spec.getIconWidthMult();
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
@@ -444,8 +442,6 @@ public class IndustryTooltips {
 				int count = -1;
 
 				for (CommodityCell cell : demandList) {
-					final CommoditySpecAPI com = market.getCommodityData(cell.comID).getCommodity();
-
 					final int dAmount = cell.getDemandIndStat(ind.getId()).getModifiedInt();
 
 					// wrap to next line if needed
@@ -459,24 +455,24 @@ public class IndustryTooltips {
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
 					if (cell.getFlowAvailabilityRatio() < 0.99f) {
-						tp.addIcons(com, 1, IconRenderMode.DIM_RED);
+						tp.addIcons(cell.spec, 1, IconRenderMode.DIM_RED);
 					} else {
-						tp.addIcons(com, 1, IconRenderMode.NORMAL);
+						tp.addIcons(cell.spec, 1, IconRenderMode.NORMAL);
 					}
 					tp.addIconGroup(0f);
-					UIComponentAPI iconComp = tp.getPrev();
+					final UIComponentAPI iconComp = tp.getPrev();
 
 					// Add extra padding for thinner icons
-					float actualIconWidth = iconSize * com.getIconWidthMult();
+					final float actualIconWidth = iconSize * cell.spec.getIconWidthMult();
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					String txt = Strings.X + NumFormat.engNotation(dAmount);
-					LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
+					final String txt = Strings.X + NumFormat.engNotation(dAmount);
+					final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
-					float textH = lbl.computeTextHeight(txt);
-					float textX = x + iconSize + pad;
-					float textY = y + (iconSize - textH) * 0.5f;
+					final float textH = lbl.computeTextHeight(txt);
+					final float textX = x + iconSize + pad;
+					final float textY = y + (iconSize - textH) * 0.5f;
 					lbl.getPosition().inTL(textX, textY);
 
 					x += sectionWidth + 5f;

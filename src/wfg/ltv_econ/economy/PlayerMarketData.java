@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
@@ -239,14 +240,18 @@ public class PlayerMarketData {
         if (baseValue != 0) {
             market.getStability().modifyFlat(happinessID, baseValue, desc);
             for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-                dom.getCell(marketID).getProductionStat().modifyMult(
-                    happinessID, 1f + baseValue * 0.2f, desc
-                );
+                for (Industry ind : dom.getCell(marketID).getVisibleIndustries()) {
+                    ind.getSupplyBonus().modifyMult(
+                        happinessID, 1f + baseValue * 0.2f, desc
+                    );
+                }
             }
         } else {
             market.getStability().unmodifyFlat(happinessID);
             for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-                dom.getCell(marketID).getProductionStat().unmodifyMult(happinessID);
+                for (Industry ind : dom.getCell(marketID).getVisibleIndustries()) {
+                    ind.getSupplyBonus().unmodifyMult(happinessID);
+                }
             }
         }
     }

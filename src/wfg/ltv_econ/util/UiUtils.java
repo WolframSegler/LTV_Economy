@@ -11,7 +11,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
@@ -21,9 +20,7 @@ import wfg.ltv_econ.ui.plugins.CommodityinfobarPlugin;
 
 public class UiUtils {
 
-    public static final Color getInFactionColor() {
-        return new Color(35, 70, 130, 255);
-    }
+    public static final Color inFactionColor = new Color(35, 70, 130, 255);
 
     public static final Color COLOR_DEFICIT = new Color(140, 15, 15);
     public static final Color COLOR_OVER_IMPORT = new Color(180, 90, 180);
@@ -33,12 +30,6 @@ public class UiUtils {
     public static final Color COLOR_LOCAL_PROD = new Color(122, 200, 122);
     public static final Color COLOR_EXPORT = new Color(63,  175, 63);
     public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
-
-    public static void CommodityInfoBar(TooltipMakerAPI tooltip, int barHeight, int barWidth, CommodityCell comCell) {
-        final CustomPanelAPI infoBar = CommodityInfoBar(barHeight, barWidth, comCell);
-
-        tooltip.addCustom(infoBar, 3);
-    }
 
     public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityCell cell) {
         if (cell.getFlowEconomicFootprint() <= 0) {
@@ -130,7 +121,7 @@ public class UiUtils {
      * I copied and cleaned this from the obfuscated code.
      * Because this is not available through the API for some reason.
      */
-    public static LabelAPI createMaxIndustriesLabel(String font, int height, MarketAPI market) {
+    public static final LabelAPI createMaxIndustriesLabel(String font, int height, MarketAPI market) {
         final int numInd = Misc.getNumIndustries(market);
         final int maxInd = Misc.getMaxIndustries(market);
 
@@ -159,12 +150,17 @@ public class UiUtils {
     /**
      * @param t Must be between 0 and 1
      */
-    public static Color lerpColor(Color c1, Color c2, float t) {
+    public static final Color lerpColor(Color c1, Color c2, float t) {
         final int r = (int) (c1.getRed() + t * (c2.getRed() - c1.getRed()));
         final int g = (int) (c1.getGreen() + t * (c2.getGreen() - c1.getGreen()));
         final int b = (int) (c1.getBlue() + t * (c2.getBlue() - c1.getBlue()));
         final int a = (int) (c1.getAlpha() + t * (c2.getAlpha() - c1.getAlpha()));
 
         return new Color(r, g, b, a);
+    }
+
+    public static final boolean canViewPrices() {
+        return Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() ||
+            Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
     }
 }

@@ -2,6 +2,9 @@ package wfg.ltv_econ.ui.panels;
 
 import java.awt.Color;
 import java.util.List;
+
+import org.lwjgl.input.Keyboard;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -9,6 +12,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.ui.Alignment;
@@ -30,12 +34,14 @@ import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.PieChart;
 import wfg.wrap_ui.ui.panels.SortableTable;
+import wfg.wrap_ui.ui.panels.SortableTable.RowPanel;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.PieChart.PieSlice;
 import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
+import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
@@ -690,6 +696,19 @@ public class GlobalCommodityFlow extends
         add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H);
         }
 
+        final PendingTooltip<CustomPanelAPI> tableTp = new PendingTooltip<>();
+        tableTp.parentSupplier = () -> { return getPanel(); };
+        tableTp.factory = () -> {
+            final TooltipMakerAPI tooltip = getPanel().createUIElement(
+                400, 0, false
+            );
+            tooltip.addPara("Ctrl + Click to set course", pad, highlight, new String[]{
+                "Ctrl", "Click"
+            });
+
+            return tooltip;
+        };
+
         { // Top 5 producers
         final SortableTable table = new SortableTable(getParent(), TABLE_W, TABLE_H);
 
@@ -704,10 +723,7 @@ public class GlobalCommodityFlow extends
         for (CommodityCell cell : producers) {
 
             final String iconPath = cell.market.getFaction().getCrest();
-            final Base iconPanel = new Base(
-                table.getPanel(), 28, 28, iconPath, null,
-                null, false
-            );
+            final Base iconPanel = new Base(table.getPanel(), 28, 28, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
             final long value = (long) cell.getProduction(true);
 
@@ -715,8 +731,19 @@ public class GlobalCommodityFlow extends
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
 
+            final CallbackRunnable<RowPanel> run = (row) -> {
+                if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
+                    return;
+                }
+
+                final SectorEntityToken target = cell.market.getPrimaryEntity();
+                if (target != null) {
+                    Global.getSector().layInCourseFor(target);
+                }
+            };
+
             table.pushRow(
-                null, null, null, null, null, null
+                null, null, null, null, tableTp, run 
             );
         }
 
@@ -745,10 +772,7 @@ public class GlobalCommodityFlow extends
         for (CommodityCell cell : consumers) {
 
             final String iconPath = cell.market.getFaction().getCrest();
-            final Base iconPanel = new Base(
-                table.getPanel(), 28, 28, iconPath, null,
-                null, false
-            );
+            final Base iconPanel = new Base(table.getPanel(), 28, 28, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
             final long value = (long) cell.getBaseDemand(true);
 
@@ -756,8 +780,19 @@ public class GlobalCommodityFlow extends
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
 
+            final CallbackRunnable<RowPanel> run = (row) -> {
+                if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
+                    return;
+                }
+
+                final SectorEntityToken target = cell.market.getPrimaryEntity();
+                if (target != null) {
+                    Global.getSector().layInCourseFor(target);
+                }
+            };
+
             table.pushRow(
-                null, null, null, null, null, null
+                null, null, null, null, tableTp, run 
             );
         }
 
@@ -908,7 +943,7 @@ public class GlobalCommodityFlow extends
         ));
         data.add(new PieSlice(
             null,
-            UiUtils.getInFactionColor(),
+            UiUtils.inFactionColor,
             1f - globalTradeShare
         ));
 

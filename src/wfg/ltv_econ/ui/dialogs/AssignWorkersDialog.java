@@ -1,8 +1,6 @@
 package wfg.ltv_econ.ui.dialogs;
 
-import static wfg.wrap_ui.util.UIConstants.highlight;
-import static wfg.wrap_ui.util.UIConstants.opad;
-import static wfg.wrap_ui.util.UIConstants.pad;
+import static wfg.wrap_ui.util.UIConstants.*;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -42,7 +40,6 @@ import wfg.wrap_ui.ui.panels.BasePanel;
 import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -129,9 +126,8 @@ public class AssignWorkersDialog extends DialogPanel {
         separator.getPos().inTL(0, sliderY - opad);
         innerPanel.addComponent(separator.getPanel());
 
-        final SpritePanelWithTp help_button = new SpritePanelWithTp(
-            innerPanel, 20 , 20, new SpritePanelPlugin<>(),
-            WARNING_BUTTON_PATH, null, null, false
+        final SpritePanelWithTp help_button = new SpritePanelWithTp(innerPanel, 20 , 20,
+            WARNING_BUTTON_PATH, null, null
         ) {
             {
                 getPlugin().setIgnoreUIState(true);
@@ -165,7 +161,7 @@ public class AssignWorkersDialog extends DialogPanel {
             }
 
             @Override 
-            public Optional<SpriteAPI> getSprite() {
+            public Optional<SpriteAPI> getAdditiveSprite() {
                 return Optional.of(m_sprite);
             }
         };
@@ -174,7 +170,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         final CustomPanelAPI outputsPanel = Global.getSettings().createCustom(
             panelWidth,
-            300,
+            panelHeight - (sliderY + pad * 2),
             null
         );
         final TooltipMakerAPI outputsTp = outputsPanel.createUIElement(panelWidth, 180, true);
@@ -230,6 +226,7 @@ public class AssignWorkersDialog extends DialogPanel {
         final int itemsPerRow = 2;
         final float sectionWidth = ((panelWidth / 2) / itemsPerRow) - opad;
 
+        final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
 
         final FactionAPI faction = market.getFaction();
@@ -261,7 +258,7 @@ public class AssignWorkersDialog extends DialogPanel {
         int count = -1;
 
         for (Map.Entry<String, MutableStat> entry : supplyList.entrySet()) {
-            final CommoditySpecAPI com = market.getCommodityData(entry.getKey()).getCommodity();
+            final CommoditySpecAPI com = settings.getCommoditySpec(entry.getKey());
             final long pAmount = entry.getValue().getModifiedInt();
 
             // wrap to next line if needed
@@ -306,7 +303,7 @@ public class AssignWorkersDialog extends DialogPanel {
         count = -1;
 
         for (Map.Entry<String, MutableStat> entry : demandList.entrySet()) {
-            final CommoditySpecAPI com = market.getCommodityData(entry.getKey()).getCommodity();
+            final CommodityCell cell = engine.getComCell(entry.getKey(), market.getId());
             final long dAmount = entry.getValue().getModifiedInt();
 
             // wrap to next line if needed
@@ -315,26 +312,19 @@ public class AssignWorkersDialog extends DialogPanel {
                 x = opad;
                 y += iconSize + 5f; // line height + padding between rows
             }
-
-            final CommodityCell cell = engine.getComCell(entry.getKey(), market.getId());
-            final float oldDemand = cell.getDemandIndStat(industry.getId()).getModifiedValue();
-
-            final float baseDemand = cell.getBaseDemand(true) + (long) (dAmount - oldDemand);
-            final float demandMet = Math.min(cell.getProduction(false), baseDemand)
-                + cell.getFlowDeficitMetViaTrade();
-            final float availability = baseDemand == 0 ? 1f : (float)demandMet / baseDemand;
+            final float availability = cell.getStoredAvailabilityRatio();
 
             // draw icon
             tooltip.beginIconGroup();
             tooltip.setIconSpacingMedium();
             IconRenderMode renderMode = availability < 0.9f && !importing ?
                 IconRenderMode.DIM_RED : IconRenderMode.NORMAL;
-            tooltip.addIcons(com, 1, renderMode);
+            tooltip.addIcons(cell.spec, 1, renderMode);
             tooltip.addIconGroup(0f);
             final UIComponentAPI iconComp = tooltip.getPrev();
 
             // Add extra padding for thinner icons
-            final float actualIconWidth = iconSize * com.getIconWidthMult();
+            final float actualIconWidth = iconSize * cell.spec.getIconWidthMult();
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text

@@ -124,8 +124,6 @@ rolfosian - for RolflectionLib-SS
 
 ## Attributes
 
-<a href="https://www.flaticon.com/free-icons/business-and-finance" title="business and finance icons">Business and finance icons created by Paul J. - Flaticon</a>
-
 <a href="https://www.flaticon.com/free-icons/measurements" title="measurements icons">Measurements icons created by Vectors Tank - Flaticon</a>
 
 <a href="https://www.shutterstock.com/image-vector/construction-helmet-icon-simple-element-collection-2502692379?trackingId=018e5ba4-d525-4580-9880-d5b5ff10a345" title="construction helmet">Construction Helmet</a>
@@ -143,6 +141,8 @@ rolfosian - for RolflectionLib-SS
 <a target="_blank" href="https://icons8.com/icon/eXZFp2e0w8EX/no-entry">Restricted</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 
 <a target="_blank" href="https://icons8.com/icon/9028/automatic">Settings</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+
+Pallet by Cherry from <a href="https://thenounproject.com/browse/icons/term/pallet/" target="_blank" title="Pallet Icons">Noun Project</a> (CC BY 3.0)
 
 <br>
 

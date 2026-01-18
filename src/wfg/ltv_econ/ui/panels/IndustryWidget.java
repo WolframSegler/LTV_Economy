@@ -26,7 +26,6 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.api.util.Pair;
 
 import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
@@ -50,7 +49,6 @@ import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -162,8 +160,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
     }
 
     public void createPanel() {
-
-        BasePanel titlePanel = new BasePanel(
+        final BasePanel titlePanel = new BasePanel(
             getPanel(), PANEL_WIDTH, TITLE_HEIGHT, new BasePanelPlugin<>()
         ) {
             @Override
@@ -187,84 +184,56 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
                 return false;
             }
         };
-
-        add(titlePanel.getPanel()).inTL(0, 0);
-
+        add(titlePanel).inTL(0, 0);
 
         industryIcon = new IndustryImagePanel(
-            m_panel,
-            PANEL_WIDTH,
-            IMAGE_HEIGHT,
-            new SpritePanelPlugin<>(),
+            m_panel, PANEL_WIDTH, IMAGE_HEIGHT,
             m_industry.getCurrentImage(),
-            Color.WHITE,
-            null,
-            false
+            Color.WHITE, null
         );
         industryIcon.setActionListener(this);
 
         if (!m_industry.isFunctional() || constructionQueueIndex >= 0) {
-            industryIcon.setColor(darkColor);
+            industryIcon.color = darkColor;
         }
 
         if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
-            industryIcon.setColor(Color.white);
+            industryIcon.color = Color.white;
             isListenerEnabled = false;
         }
-
-        add(industryIcon.getPanel()).inBL(0, 0);
+        add(industryIcon).inBL(0, 0);
 
 
         final WorkerIndustryData data = WorkerRegistry.getInstance().getData(m_industry);
-        LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
+        final LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(highlight);
         workerCountLabel.setHighlightColor(
             WrapUiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
         );
         if (data != null) {
-
             final String assignedStr = NumFormat.engNotation(data.getWorkersAssigned());
 
             workerCountLabel.setText(assignedStr);
             workerCountLabel.setOpacity(0.9f);
-            workerCountLabel.autoSizeToWidth(100f);
+            workerCountLabel.autoSizeToWidth(PANEL_WIDTH - pad*4);
         }
 
         add(workerCountLabel).inTL(pad*2, TITLE_HEIGHT + pad*2);
 
-        final TooltipMakerAPI tp = getPanel().createUIElement(PANEL_WIDTH, IMAGE_HEIGHT, false);
+        final TooltipMakerAPI tp = m_panel.createUIElement(PANEL_WIDTH, IMAGE_HEIGHT, false);
 
         tp.beginIconGroup();
         tp.setIconSpacingMedium();
 
-        final boolean hasConfig = IndustryIOs.hasConfig(m_industry);
         final EconomyEngine engine = EconomyEngine.getInstance();
 
-        if (hasConfig && m_industry.isFunctional() && !m_industry.isBuilding()) {
-            for (String comID : IndustryIOs.getRealInputs(m_industry, false)) {
-                final CommodityCell cell = engine.getComCell(comID, m_market.getId());
+        if (m_industry.isFunctional() && !m_industry.isBuilding()) {
+        for (String comID : IndustryIOs.getRealInputs(m_industry, false)) {
+            final CommodityCell cell = engine.getComCell(comID, m_market.getId());
+            if (cell == null || cell.getStoredAvailabilityRatio() > 0.9f) continue;
 
-                if (cell == null || cell.getFlowDeficit() < 1) continue;
-
-                int iconCount = 1;
-                if (cell.getFlowAvailabilityRatio() < 0.67f) iconCount = 2;
-                if (cell.getFlowAvailabilityRatio() < 0.33f) iconCount = 3;
-
-                tp.addIcons(cell.spec, iconCount, IconRenderMode.RED);
-            }
-        } else if (m_industry.isFunctional() && !m_industry.isBuilding()) {
-            for (Pair<String, Integer> pair : m_industry.getAllDeficit()) {
-                final CommodityCell cell = engine.getComCell(pair.one, m_market.getId());
-
-                if (cell == null || cell.getFlowDeficit() < 1) continue;
-
-                int iconCount = 1;
-
-                if (cell.getFlowAvailabilityRatio() < 0.67f) iconCount = 2;
-                if (cell.getFlowAvailabilityRatio() < 0.33f) iconCount = 3;
-
-                tp.addIcons(cell.spec, iconCount, IconRenderMode.RED);
-            }
+            tp.addIcons(cell.spec, 1, IconRenderMode.RED);
+        }
         }
         tp.addIconGroup(24, 1, pad);
         tp.getPrev().getPosition().inBL(pad + 2, pad);
@@ -274,21 +243,15 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
         tp.setIconSpacingWide();
 
         int totalW = 0;
-        List<SpecialItemData> visibleItems = m_industry.getVisibleInstalledItems();
-        for (SpecialItemData item : visibleItems) {
+        for (SpecialItemData item : m_industry.getVisibleInstalledItems()) {
 
             final SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(item.getId());
 
-            final Base itemPanel = new Base(
-                m_panel,
-                28, 28,
-                spec.getIconName(),
-                Color.WHITE, null, false
-            );
-            itemPanel.setDrawTexOutline(true);
-            itemPanel.setTexOutlineColor(baseColor);
+            final Base itemPanel = new Base(m_panel, 28, 28, spec.getIconName(), Color.WHITE, null);
+            itemPanel.drawTextureHalo = true;
+            itemPanel.texHaloColor = baseColor;
 
-            add(itemPanel.getPanel()).inTR(pad*2 + totalW, TITLE_HEIGHT + pad*2);
+            add(itemPanel).inTR(pad*2 + totalW, TITLE_HEIGHT + pad*2);
             
             totalW += itemPanel.getPos().getWidth() + pad*2;
         }
@@ -297,20 +260,15 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
 
             final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(m_industry.getAICoreId());
 
-            final Base aiCorePanel = new Base(
-                m_panel,
-                28, 28,
-                spec.getIconName(),
-                Color.WHITE, null, false
-            );
-            aiCorePanel.setDrawTexOutline(true);
-            aiCorePanel.setTexOutlineColor(baseColor);
+            final Base aiCorePanel = new Base(m_panel, 28, 28, spec.getIconName(), Color.WHITE, null);
+            aiCorePanel.drawTextureHalo = true;
+            aiCorePanel.texHaloColor = baseColor;
 
-            add(aiCorePanel.getPanel()).inTR(pad + 2 + totalW, TITLE_HEIGHT + pad*2);
+            add(aiCorePanel).inTR(pad + 2 + totalW, TITLE_HEIGHT + pad*2);
         }
 
         
-        boolean isIndNotFunctional = m_industry.isBuilding() || m_industry.isDisrupted();
+        final boolean isIndNotFunctional = m_industry.isBuilding() || m_industry.isDisrupted();
         if (isIndNotFunctional) {
             if (m_industry.isBuilding() && !m_industry.isUpgrading() && !m_industry.isDisrupted()) {
 
@@ -343,9 +301,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
         tp.setHeightSoFar(IMAGE_HEIGHT);
         add(tp).inBL(0, 0);
 
-        if (constructionQueueIndex >= 0) {
-            setNormalMode();
-        }
+        if (constructionQueueIndex >= 0) setNormalMode();
     }
 
     public void clearLabels() {
@@ -668,8 +624,8 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
         HasActionListener m_listener = null;
 
         public IndustryImagePanel(UIPanelAPI parent, int width, int height,
-            SpritePanelPlugin<IndustryImagePanel> plugin, String spriteID, Color color, Color fillColor, boolean drawBorder) {
-            super(parent, width, height, plugin, spriteID, color, fillColor, drawBorder);
+            String spriteID, Color color, Color fillColor) {
+            super(parent, width, height, spriteID, color, fillColor);
         }
 
         @Override
@@ -688,7 +644,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
         }
 
         @Override
-        public Optional<SpriteAPI> getSprite() {
+        public Optional<SpriteAPI> getAdditiveSprite() {
             return Optional.ofNullable(m_sprite);
         }
 

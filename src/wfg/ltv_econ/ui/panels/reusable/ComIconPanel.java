@@ -22,7 +22,6 @@ import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.panels.SpritePanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
-import wfg.wrap_ui.ui.plugins.SpritePanelPlugin;
 import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import static wfg.wrap_ui.util.UIConstants.*;
 
@@ -41,7 +40,7 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
     public ComIconPanel(UIPanelAPI parent, FactionAPI faction, int width, int height,
         String iconSpriteID, Color color, Color fillColor
     ) {
-        super(parent, width, height, new SpritePanelPlugin<>(), iconSpriteID, color, fillColor, false);
+        super(parent, width, height, iconSpriteID, color, fillColor);
         getPlugin().setIgnoreUIState(true);
 
         m_faction = faction;
@@ -70,7 +69,7 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
     }
 
     @Override
-    public Optional<SpriteAPI> getSprite() {
+    public Optional<SpriteAPI> getAdditiveSprite() {
         return Optional.ofNullable(m_sprite);
     }
 

@@ -16,8 +16,11 @@
     },
     "icons": {
       "policy_icon": "graphics/icons/intel/policy_icon.png",
-      "player_ratio": "graphics/icons/reports/player_ratio.png",
-      "ratio_chart": "graphics/icons/reports/ratio_chart.png"
+      "ratio_chart": "graphics/icons/reports/ratio_chart.png",
+      "stockpiles_full": "graphics/icons/industry/stockpiles_full.png",
+      "stockpiles_medium": "graphics/icons/industry/stockpiles_medium.png",
+      "stockpiles_low": "graphics/icons/industry/stockpiles_low.png",
+      "stockpiles_empty": "graphics/icons/industry/stockpiles_empty.png"
     }
   }
 }
