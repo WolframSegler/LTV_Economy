@@ -83,14 +83,14 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
             return EconomyEngine.getInstance().getComCell(com.getId(), m_market.getId()).getFlowEconomicFootprint() <= 0;
         });
 
-        final TooltipMakerAPI tooltip = ComponentFactory.createTooltip(
-            getPos().getWidth(), true
+        final TooltipMakerAPI headerTp = ComponentFactory.createTooltip(
+            getPos().getWidth(), false
         );
-        tooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
+        headerTp.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
-        final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
-        tooltip.setHeightSoFar(headerHeight);
-        ComponentFactory.addTooltip(tooltip, headerHeight, true, m_panel).inTL(0, 0);
+        final int headerHeight = (int) headerTp.getPrev().getPosition().getHeight();
+        headerTp.setHeightSoFar(headerHeight);
+        ComponentFactory.addTooltip(headerTp, headerHeight, false, m_panel).inTL(0, 0);
         getPlugin().setOffsets(1, 1, -2, -headerHeight - 2);
 
         final TooltipMakerAPI rowTp = ComponentFactory.createTooltip(
@@ -115,7 +115,7 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
             commodityRows.add(comRow);
         }
         rowTp.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(tooltip, getPos().getHeight() - headerHeight, true, m_panel)
+        ComponentFactory.addTooltip(rowTp, getPos().getHeight() - headerHeight, true, m_panel)
             .inTL(0, headerHeight);
     }
 

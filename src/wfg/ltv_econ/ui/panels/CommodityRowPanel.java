@@ -235,8 +235,6 @@ public class CommodityRowPanel extends CustomPanel<BasePanelPlugin<CommodityRowP
             "Markets with higher production and accessibility are prioritized for exports and imports.", gray, opad
         );
 
-        tp.addSpacer(opad*1.5f);
-
         } else {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.addSectionHeading("Legend", Alignment.MID, opad);

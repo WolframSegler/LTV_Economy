@@ -1,5 +1,5 @@
 v0.2.2-beta | SAVE COMPATIBLE
-- Redistribute credits between faction markets should no longer create more credits than existing
+- Redistributing credits between faction markets should no longer create more credits than existing
 - Top 5 producers/consumers table can now be Ctrl + Clicked to set a target to the market
 - More bug fixes
 - A stockpiles icon was added to Commodity Panel inside Market Details section.
@@ -17,7 +17,7 @@ v0.2.0-beta | NOT SAVE COMPATIBLE
 - Bug fixes
 - The sector now starts with stockpiles to prevent death spirals.
 - Larger markets now have a smaller ratio of their population as workers, while smaller markets more.
-- The player can now embargo other factions at the cost of reputation
+- The player can now embargo other factions at a reputation cost
 - Added more policies
 - Added flavor bar events dependent on colony policies
 - Population Health and Happiness now have direct effects on the colony

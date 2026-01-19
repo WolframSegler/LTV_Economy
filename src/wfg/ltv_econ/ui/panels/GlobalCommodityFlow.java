@@ -243,7 +243,7 @@ public class GlobalCommodityFlow extends
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) valueTxt = "---";
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
             }
 
             public UIPanelAPI getTpParent() {
@@ -278,7 +278,7 @@ public class GlobalCommodityFlow extends
                 String valueTxt = NumFormat.formatCredit(value);
                 if (value < 1) valueTxt = "---";
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
             }
 
             public UIPanelAPI getTpParent() {
