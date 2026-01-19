@@ -17,6 +17,8 @@ import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
@@ -24,7 +26,7 @@ import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.WrapUiUtils;
 
 public class EconomySettingsPanel extends CustomPanel<
-    BasePanelPlugin<EconomySettingsPanel>, EconomySettingsPanel, UIPanelAPI
+    BasePanelPlugin<EconomySettingsPanel>, EconomySettingsPanel
 > {
     public static final int LABEL_W = 150;
     public static final int LABEL_H = 50;
@@ -68,13 +70,13 @@ public class EconomySettingsPanel extends CustomPanel<
             );
             add(button).inTL(opad, SECTION_I + lblH + pad*2);
 
-            button.setParentSupplier(() -> { return m_panel; });
+            button.setParentSupplier(() -> { return Attachments.getScreenPanel(); });
             button.setTooltipFactory(() -> {
-                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
 
                 tp.addPara("Synchronizes EconomyEngine markets with vanilla Economy markets. ", pad );
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             });
@@ -91,13 +93,13 @@ public class EconomySettingsPanel extends CustomPanel<
             );
             add(button).inTL(opad, SECTION_I + pad*4 + lblH + BUTTON_H);
 
-            button.setParentSupplier(() -> { return m_panel; });
+            button.setParentSupplier(() -> { return Attachments.getScreenPanel(); });
             button.setTooltipFactory(() -> {
-                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
 
                 tp.addPara("Recreates the production matrix, and recalculates worker assignments", pad);
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             });
@@ -116,13 +118,13 @@ public class EconomySettingsPanel extends CustomPanel<
             );
             add(button).inTL(opad, SECTION_I + pad*6 + lblH + BUTTON_H*2);
 
-            button.setParentSupplier(() -> { return m_panel; });
+            button.setParentSupplier(() -> { return Attachments.getScreenPanel(); });
             button.setTooltipFactory(() -> {
-                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
 
                 tp.addPara("Logs all the information about the CommodityCell for each cell", pad);
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             });
@@ -138,13 +140,13 @@ public class EconomySettingsPanel extends CustomPanel<
             );
             add(button).inTL(opad, SECTION_I + pad*8 + lblH + BUTTON_H*3);
 
-            button.setParentSupplier(() -> { return m_panel; });
+            button.setParentSupplier(() -> { return Attachments.getScreenPanel(); });
             button.setTooltipFactory(() -> {
-                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
 
                 tp.addPara("Logs all the information about the Economy", pad);
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             });
@@ -159,13 +161,13 @@ public class EconomySettingsPanel extends CustomPanel<
             );
             add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
 
-            button.setParentSupplier(() -> { return m_panel; });
+            button.setParentSupplier(() -> { return Attachments.getScreenPanel(); });
             button.setTooltipFactory(() -> {
-                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
 
                 tp.addPara("Logs all player market data's", pad);
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             });
@@ -180,13 +182,13 @@ public class EconomySettingsPanel extends CustomPanel<
             );
             add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
 
-            button.setParentSupplier(() -> { return m_panel; });
+            button.setParentSupplier(() -> { return Attachments.getScreenPanel(); });
             button.setTooltipFactory(() -> {
-                final TooltipMakerAPI tp = m_panel.createUIElement(400, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
 
                 tp.addPara("Logs the maps used by IndustryIOs to manage industry inputs and outputs", pad);
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.mouseCornerPos(tp, opad);
                 return tp;
             });

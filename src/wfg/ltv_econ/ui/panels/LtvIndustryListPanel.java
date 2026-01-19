@@ -26,7 +26,6 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import rolflectionlib.util.ListenerFactory;
@@ -41,6 +40,7 @@ import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.Button;
@@ -52,9 +52,8 @@ import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class LtvIndustryListPanel extends CustomPanel<
-	IndustryListPanelPlugin, LtvIndustryListPanel, UIPanelAPI
+	IndustryListPanelPlugin, LtvIndustryListPanel
 > {
-
 	public static final int BUTTON_SECTION_HEIGHT = 45;
 
 	public static final Object indPickCtor = RolfLectionUtil.getConstructor(
@@ -104,16 +103,8 @@ public class LtvIndustryListPanel extends CustomPanel<
 	
 		final byte columnAmount = 4;
 
-		CustomPanelAPI widgetWrapper = Global.getSettings().createCustom(
-            getPos().getWidth(),
-            getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.5f,
-            null
-        );
-
-		TooltipMakerAPI wrappertp = widgetWrapper.createUIElement(
-            getPos().getWidth(),
-			getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
-			true
+		final TooltipMakerAPI wrappertp = ComponentFactory.createTooltip(
+            getPos().getWidth(), true
         );
 
 		int wrapperTpHeight = 0;
@@ -168,8 +159,9 @@ public class LtvIndustryListPanel extends CustomPanel<
 		}
 		wrappertp.setHeightSoFar(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + opad*1.5f);
 
-		widgetWrapper.addUIElement(wrappertp).inTL(-pad, 0);
-		add(widgetWrapper).inTL(0, 0);
+		ComponentFactory.addTooltip(wrappertp, getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
+			true, m_panel
+		).inTL(-pad, 0);
 		
 		TextPanel playerCreditLblPanel = null;
 		TextPanel colonyCreditLblPanel = null;
@@ -192,23 +184,22 @@ public class LtvIndustryListPanel extends CustomPanel<
 			}
 
 			@Override
-			public CustomPanelAPI getTpParent() {
-				return getParent();
+			public UIPanelAPI getTpParent() {
+				return Attachments.getScreenPanel();
 			}
 
 			@Override
 			public TooltipMakerAPI createAndAttachTp() {
 				final int tpWidth = 400;
 
-				final TooltipMakerAPI tooltip = getParent().createUIElement(tpWidth, 0, false);
+				final TooltipMakerAPI tp = ComponentFactory.createTooltip(tpWidth, false);
 
-				tooltip.addPara("Player credits available.", 0);
+				tp.addPara("Player credits available.", 0);
 
-				getParent().addUIElement(tooltip);
+				ComponentFactory.addTooltip(tp, 0f, false);
+				WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.TopLeft, 0);
 
-				WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
-
-				return tooltip;
+				return tp;
 			}
 		};
         }
@@ -232,23 +223,22 @@ public class LtvIndustryListPanel extends CustomPanel<
 			}
 
 			@Override
-			public CustomPanelAPI getTpParent() {
-				return getParent();
+			public UIPanelAPI getTpParent() {
+				return Attachments.getScreenPanel();
 			}
 
 			@Override
 			public TooltipMakerAPI createAndAttachTp() {
 				final int tpWidth = 400;
 
-				final TooltipMakerAPI tooltip = getParent().createUIElement(tpWidth, 0, false);
+				final TooltipMakerAPI tp = ComponentFactory.createTooltip(tpWidth, false);
 
-				tooltip.addPara("Colony credits available.", 0);
+				tp.addPara("Colony credits available.", 0);
 
-				getParent().addUIElement(tooltip);
+				ComponentFactory.addTooltip(tp, 0f, false);
+				WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.TopLeft, 0);
 
-				WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
-
-				return tooltip;
+				return tp;
 			}
 		};
         }
@@ -270,35 +260,35 @@ public class LtvIndustryListPanel extends CustomPanel<
 			}
 
 			@Override
-			public CustomPanelAPI getTpParent() {
-				return getParent();
+			public UIPanelAPI getTpParent() {
+				return Attachments.getScreenPanel();
 			}
 
 			@Override
 			public TooltipMakerAPI createAndAttachTp() {
 				final int tpWidth = 400;
 
-				TooltipMakerAPI tooltip = getParent().createUIElement(tpWidth, 0, false);
+				final TooltipMakerAPI tp = ComponentFactory.createTooltip(tpWidth, false);
 
-				tooltip.addPara(
+				tp.addPara(
 					"Maximum number of industries, based on the size of a colony and other factors.", 0
 				);
-				tooltip.beginTable(
+				tp.beginTable(
 					m_market.getFaction(), 20, new Object[]{"Colony size", 120, "Base industries", 120}
 				);
 
 				for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
-					tooltip.addRow(new Object[]{highlight, "" + i, highlight,
+					tp.addRow(new Object[]{highlight, "" + i, highlight,
 					"" + PopulationAndInfrastructure.getMaxIndustries(i)});
 				}
 
-				tooltip.addTable("", 0, 10);
-				tooltip.addPara(
+				tp.addTable("", 0, 10);
+				tp.addPara(
 					"Structures such as spaceports or orbital stations do not count against this limit." + 
 					"Colonies that exceed this limit for any reason have their stability reduced by %s.", 20,
 					highlight, new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
 				);
-				tooltip.addPara("Industries on %s:", 10, m_market.getFaction().getBaseUIColor(),
+				tp.addPara("Industries on %s:", 10, m_market.getFaction().getBaseUIColor(),
 					new String[]{m_market.getName()}
 				);
 
@@ -311,7 +301,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 				for (Industry industry : industries) {
 					if (industry.isIndustry()) {
-						tooltip.addPara(indent + industry.getCurrentName(), paragraphSpacing);
+						tp.addPara(indent + industry.getCurrentName(), paragraphSpacing);
 						paragraphSpacing = 3;
 						anyIndustryAdded = true;
 					} else if (industry.isUpgrading()) {
@@ -319,7 +309,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 						if (upgradeId != null) {
 							Industry upgradedIndustry = m_market.instantiateIndustry(upgradeId);
 							if (upgradedIndustry.isIndustry()) {
-								tooltip.addPara(
+								tp.addPara(
 									indent + industry.getCurrentName() + " (upgrading to " + 
 									upgradedIndustry.getCurrentName() + ")", paragraphSpacing
 								);
@@ -334,21 +324,20 @@ public class LtvIndustryListPanel extends CustomPanel<
 					final IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
 					if (spec.hasTag("industry")) {
 						Industry ind = m_market.instantiateIndustry(item.id);
-						tooltip.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
+						tp.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
 						paragraphSpacing = 3;
 						anyIndustryAdded = true;
 					}
 				}
 
 				if (!anyIndustryAdded) {
-					tooltip.addPara(indent + "None", paragraphSpacing);
+					tp.addPara(indent + "None", paragraphSpacing);
 				}
 
-				getParent().addUIElement(tooltip);
+				ComponentFactory.addTooltip(tp, 0f, false);
+				WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.TopLeft, 0);
 
-				WrapUiUtils.anchorPanel(tooltip, getPanel(), AnchorType.TopLeft, 0);
-
-				return tooltip;
+				return tp;
 			}
 		};
         }
@@ -401,20 +390,19 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 	public final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, IndustryWidget widget) {
 
-		PendingTooltip<CustomPanelAPI> wrapper = widget.m_tooltip;
+		PendingTooltip<UIPanelAPI> wrapper = widget.m_tooltip;
 
 		wrapper.parentSupplier = () -> {
-			return LtvIndustryListPanel.this.getPanel();
+			return Attachments.getScreenPanel();
 		};
 
 		wrapper.factory = () -> {
-			TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(ind.getTooltipWidth(), 0, false);
+			final TooltipMakerAPI tp = ComponentFactory.createTooltip(ind.getTooltipWidth(), false);
 
 			// ind.createTooltip(mode, tp, false);
 			IndustryTooltips.createIndustryTooltip(mode, tp, false, ind);
 
-			wrapper.parentSupplier.get().addUIElement(tp);
-			
+			ComponentFactory.addTooltip(tp, 0f, false);
 			WrapUiUtils.anchorPanelWithBounds(tp, widget.getPanel(), AnchorType.RightTop, pad*2);
 
 			return tp;

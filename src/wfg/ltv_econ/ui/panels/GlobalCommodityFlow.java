@@ -15,8 +15,6 @@ import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
-import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -31,6 +29,8 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.util.UiUtils;
+import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.PieChart;
 import wfg.wrap_ui.ui.panels.SortableTable;
@@ -47,7 +47,7 @@ import wfg.wrap_ui.util.WrapUiUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class GlobalCommodityFlow extends
-    CustomPanel<BasePanelPlugin<GlobalCommodityFlow>, GlobalCommodityFlow, CustomPanelAPI>
+    CustomPanel<BasePanelPlugin<GlobalCommodityFlow>, GlobalCommodityFlow>
 {
 
     public static final int ICON_SIZE = 135;
@@ -93,44 +93,29 @@ public class GlobalCommodityFlow extends
                 final long value = engine.info.getGlobalProduction(comID);
                 final String txt = "Global production";
                 String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                if (value < 1) valueTxt = "---";
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "The combined daily output of %s across all colonies in the Sector. " +
                     "Represents active industrial production, excluding existing stockpiles.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -148,40 +133,27 @@ public class GlobalCommodityFlow extends
                     valueTxt = "---";
                 }
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "The combined daily demand of all colonies for %s. " +
                     "Demand reflects how much the sector needs to maintain standard production, growth, and stability.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -195,44 +167,29 @@ public class GlobalCommodityFlow extends
                 final long value = engine.info.getGlobalSurplus(comID);
                 final String txt = "Global surplus";
                 String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                if (value < 1) valueTxt = "---";
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "The amount of %s that the sector produced beyond what was demanded. " +
                     "A higher surplus means that, even after all importing markets had their needs filled, some production still remained unused.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -246,45 +203,30 @@ public class GlobalCommodityFlow extends
                 final long value = engine.info.getGlobalDeficit(comID);
                 final String txt = "Global deficit";
                 String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                if (value < 1) valueTxt = "---";
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "Global deficit represents the total amount of demand that remained unfulfilled on the previous day." +
                     "This value does not track shortages in stockpiles and only measures demand that was not supplied on the previous day." +
                     "A colony may have large reserves and still contribute to the global deficit if trade routes could not deliver enough units in time.",
                     pad
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -299,43 +241,28 @@ public class GlobalCommodityFlow extends
                 final long value = engine.info.getGlobalTradeVolume(comID);
                 final String txt = "Sector-wide trade volume";
                 String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                if (value < 1) valueTxt = "---";
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W + largeLabelShift, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W + largeLabelShift, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "The total number of units of %s traded across the sector on the previous day, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -349,43 +276,28 @@ public class GlobalCommodityFlow extends
                 final long value = dom.getMarketActivity();
                 final String txt = "Sector-wide trade value";
                 String valueTxt = NumFormat.formatCredit(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                if (value < 1) valueTxt = "---";
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W + largeLabelShift, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W + largeLabelShift, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "The total monetary value (in credits) of all %s trades across the entire sector on the previous day. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -400,39 +312,26 @@ public class GlobalCommodityFlow extends
                 final String txt = "Global average price";
                 final String valueTxt = NumFormat.formatCredit(value);
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "The average price of %s across all markets in the sector on the previous day, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -453,31 +352,20 @@ public class GlobalCommodityFlow extends
                 else if (value <= 0.5f) volatilityColor = Color.ORANGE;
                 else volatilityColor = Color.RED;
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(volatilityColor);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt,
+                    base, volatilityColor, LABEL_W
+                );
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "Trade Volatility for the last %s days. " +
                     "Indicates how much the daily export volume for %s fluctuates relative to its average.",
                     pad,
@@ -486,10 +374,10 @@ public class GlobalCommodityFlow extends
                     selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -504,41 +392,28 @@ public class GlobalCommodityFlow extends
                 final String valueTxt = NumFormat.engNotation(value);
                 final String txt = "Global stockpiles";
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(base);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "Shows the total amount of %s currently stored across all markets in the sector. " +
                     "This value reflects available stock and does not account for daily production or consumption. " +
                     "High stockpiles indicate abundance, while low stockpiles signal scarcity and potential trade opportunities.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -556,40 +431,27 @@ public class GlobalCommodityFlow extends
                 final String txt = "Worker allocation";
                 final String valueTxt = NumFormat.engNotation(value);
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(base);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "Displays the total number of workers currently assigned to producing %s across all markets in the sector ."+
                     "Workers are counted based on the output of industries producing this commodity, not the industry as a whole.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -603,43 +465,28 @@ public class GlobalCommodityFlow extends
                 final long value = dom.getExporters().size();
                 final String txt = "Global Exporters";
                 String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                if (value < 1) valueTxt = "---";
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "The total count of markets in the sector that exported %s on the previous day. Only markets that actually sent units to other markets are included, regardless of faction.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -653,60 +500,43 @@ public class GlobalCommodityFlow extends
                 final long value = dom.getImporters().size();
                 final String txt = "Global Importers";
                 String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                if (value < 1) valueTxt = "---";
 
-                final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(base);
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(highlight);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.getPosition().getHeight();
-
-                add(lbl1).inTL(0, 0).setSize(LABEL_W, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(LABEL_W, lbl2.getPosition().getHeight());
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tooltip = getPanel().createUIElement(460, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                tooltip.addPara(
+                tp.addPara(
                     "The total count of markets in the sector that imported %s on the previous day. Only markets that actually received units from other markets are included, regardless of faction.",
                     pad, highlight, selectedCom.getName()
                 );
 
-                getPanel().addUIElement(tooltip);
-                WrapUiUtils.mouseCornerPos(tooltip, opad);
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.mouseCornerPos(tp, opad);
 
-                return tooltip;
+                return tp;
             }
         };
 
         add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H);
         }
 
-        final PendingTooltip<CustomPanelAPI> tableTp = new PendingTooltip<>();
-        tableTp.parentSupplier = () -> { return getPanel(); };
+        final PendingTooltip<UIPanelAPI> tableTp = new PendingTooltip<>();
+        tableTp.parentSupplier = this::getPanel;
         tableTp.factory = () -> {
-            final TooltipMakerAPI tooltip = getPanel().createUIElement(
-                400, 0, false
-            );
-            tooltip.addPara("Ctrl + Click to set course", pad, highlight, new String[]{
+            final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
+            tp.addPara("Ctrl + Click to set course", pad, highlight, new String[]{
                 "Ctrl", "Click"
             });
 
-            return tooltip;
+            return tp;
         };
 
         { // Top 5 producers
@@ -823,14 +653,14 @@ public class GlobalCommodityFlow extends
                 value
             ));
         }
-        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+        final PendingTooltip<UIPanelAPI> pendingTp = new PendingTooltip<>();
 
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(360, pad);
 
         pendingTp.parentSupplier = chart::getPanel;
         pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
             tp.addPara("Global Export Share by Faction", pad);
@@ -885,14 +715,14 @@ public class GlobalCommodityFlow extends
                 value
             ));
         }
-        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+        final PendingTooltip<UIPanelAPI> pendingTp = new PendingTooltip<>();
 
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(580, pad);
 
         pendingTp.parentSupplier = chart::getPanel;
         pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
             tp.addPara("Global Import Share by Faction", pad);
@@ -947,14 +777,14 @@ public class GlobalCommodityFlow extends
             1f - globalTradeShare
         ));
 
-        final PendingTooltip<CustomPanelAPI> pendingTp = new PendingTooltip<>();
+        final PendingTooltip<UIPanelAPI> pendingTp = new PendingTooltip<>();
 
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(800, pad);
 
         pendingTp.parentSupplier = chart::getPanel;
         pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = chart.getPanel().createUIElement(400, 1, false);
+            final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
             tp.addPara("Global vs In-Faction Trade Share", pad);

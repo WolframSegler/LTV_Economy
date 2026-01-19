@@ -4,7 +4,6 @@ import static wfg.wrap_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -18,7 +17,7 @@ import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
 
 public class FactionAdministrationPanel extends
-    CustomPanel<BasePanelPlugin<FactionAdministrationPanel>, FactionAdministrationPanel, CustomPanelAPI>
+    CustomPanel<BasePanelPlugin<FactionAdministrationPanel>, FactionAdministrationPanel>
 {
     public FactionAdministrationPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height, new BasePanelPlugin<>());

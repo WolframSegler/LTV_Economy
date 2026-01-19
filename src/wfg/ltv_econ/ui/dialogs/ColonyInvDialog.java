@@ -9,11 +9,11 @@ import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
@@ -23,6 +23,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.DialogPanel;
@@ -96,13 +97,14 @@ public class ColonyInvDialog extends DialogPanel {
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
 
-            @Override public CustomPanelAPI getTpParent() {
-                return getPanel();
+            @Override
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override  
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400, false);
 
                 tp.addPara(
                     "Shows the colony's current credit reserves. These funds cover operating costs, import purchases, and upkeep for industries and structures. " +
@@ -113,7 +115,7 @@ public class ColonyInvDialog extends DialogPanel {
                     pad
                 );
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
                 return tp;
             }
@@ -139,20 +141,21 @@ public class ColonyInvDialog extends DialogPanel {
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
 
-            @Override public CustomPanelAPI getTpParent() {
-                return getPanel();
+            @Override
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override  
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
 
                 tp.addPara(
                     "Shows your personal credits for transferring funds to or from the colony's reserves.",
                     pad
                 );
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
                 return tp;
             }
@@ -179,13 +182,14 @@ public class ColonyInvDialog extends DialogPanel {
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
 
-            @Override public CustomPanelAPI getTpParent() {
-                return getPanel();
+            @Override
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override  
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = getPanel().createUIElement(400, 1, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
 
                 tp.addPara(
                     "The ratio of monthly profits that get automatically transferred to the player",
@@ -199,9 +203,10 @@ public class ColonyInvDialog extends DialogPanel {
                     highlight,
                     NumFormat.formatCredit((long) (engine.info.getNetIncome(
                         m_market, false)*data.playerProfitRatio
-                    )));
+                    ))
+                );
 
-                add(tp);
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
                 return tp;
             }

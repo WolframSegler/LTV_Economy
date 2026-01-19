@@ -2,13 +2,12 @@ package wfg.ltv_econ.ui.dialogs;
 
 import static wfg.wrap_ui.util.UIConstants.*;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -39,6 +38,7 @@ import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.DialogPanel;
@@ -58,6 +58,8 @@ import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
+import wfg.wrap_ui.util.WrapUiUtils;
+import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 
 public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
@@ -159,7 +161,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
             @Override
             public void createPanel() {
-                final TooltipMakerAPI footer = m_panel.createUIElement(PANEL_W, footerH, false);
+                final TooltipMakerAPI footer = ComponentFactory.createTooltip(PANEL_W, false);
                 footer.setActionListenerDelegate(
                     new ActionListenerDelegate() {
                         public void actionPerformed(Object data, Object source) {
@@ -181,25 +183,27 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                 int TextY = (int) txt.computeTextHeight(txt.getText());
                 txt.getPosition().inBL(20 + pad, (20 - TextY) / 2);
 
-                m_panel.addUIElement(footer);
+                ComponentFactory.addTooltip(footer, footerH, false, m_panel);
             }
 
             @Override
-            public CustomPanelAPI getTpParent() {
-                return m_panel;
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override
             public TooltipMakerAPI createAndAttachTp() {
-                TooltipMakerAPI tooltip = m_panel.createUIElement(getPos().getWidth() * 0.7f, 0, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(getPos().getWidth() * 0.7f, false);
 
-                tooltip.addPara(
-                        "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
-                        pad);
+                tp.addPara(
+                    "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
+                    pad
+                );
 
-                add(tooltip).inBL(0, getPos().getHeight());
+                ComponentFactory.addTooltip(tp, 0f, false);
+                WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, pad);
 
-                return tooltip;
+                return tp;
             }
         };
 
@@ -220,10 +224,10 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
         section1 = Global.getSettings().createCustom(SECT1_WIDTH, SECT1_HEIGHT, null);
 
-        final TooltipMakerAPI tooltip = section1.createUIElement(SECT1_WIDTH, SECT1_HEIGHT, false);
-        section1.addUIElement(tooltip).inTL(0, 0);
+        final TooltipMakerAPI tp = ComponentFactory.createTooltip(SECT1_WIDTH, false);
+        ComponentFactory.addTooltip(tp, SECT1_HEIGHT, false, section1).inTL(0, 0);
 
-        createSection1(section1, tooltip);
+        createSection1(section1, tp);
         innerPanel.addComponent(section1).inTL(pad, pad);
 
         // Update anchors
@@ -239,10 +243,10 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
         section2 = Global.getSettings().createCustom(SECT2_WIDTH, SECT2_HEIGHT, null);
 
-        final TooltipMakerAPI tooltip = section2.createUIElement(SECT2_WIDTH, SECT2_HEIGHT, false);
-        section2.addUIElement(tooltip).inTL(0, 0);
+        final TooltipMakerAPI tp = ComponentFactory.createTooltip(SECT2_WIDTH, false);
+        ComponentFactory.addTooltip(tp, SECT2_HEIGHT, false, section2).inTL(0, 0);
 
-        createSection2(section2, tooltip);
+        createSection2(section2, tp);
         innerPanel.addComponent(section2).rightOfTop(section1, opad * 1.5f);
 
         // Update anchors
@@ -270,8 +274,8 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
         section4 = Global.getSettings().createCustom(SECT4_WIDTH, SECT4_HEIGHT, null);
 
-        final TooltipMakerAPI tooltip = section4.createUIElement(SECT4_WIDTH, SECT4_HEIGHT, false);
-        section4.addUIElement(tooltip).inTL(0, 0);
+        final TooltipMakerAPI tp = ComponentFactory.createTooltip(SECT4_WIDTH, false);
+        ComponentFactory.addTooltip(tp, SECT4_HEIGHT, false, section4).inTL(0, 0);
 
         createSection4(section4);
         innerPanel.addComponent(section4).belowLeft(section2, opad);
@@ -280,6 +284,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip) {
         if (m_com == null) return;
         final EconomyEngine engine = EconomyEngine.getInstance();
+        final SettingsAPI settings = Global.getSettings();
 
         tooltip.addSectionHeading(m_com.getName(), Alignment.MID, pad);
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
@@ -319,50 +324,28 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    final TooltipMakerAPI tooltip = m_panel.createUIElement(170, 0, false);
-
                     final long value = engine.getComDomain(comID)
                         .getMarketActivity();
                     final String txt = "Global market value";
                     String valueTxt = NumFormat.formatCredit(value);
-                    if (value < 1) {
-                        valueTxt = "---";
-                    }
+                    if (value < 1) valueTxt = "---";
 
-                    tooltip.setParaFontColor(baseColor);
-                    tooltip.setParaFont(Fonts.ORBITRON_12);
-                    final LabelAPI lbl1 = tooltip.addPara(txt, pad);
-                    lbl1.setHighlightOnMouseover(true);
-
-                    tooltip.setParaFontColor(highlight);
-                    tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    final LabelAPI lbl2 = tooltip.addPara(valueTxt, highlight, pad);
-                    lbl2.setHighlightOnMouseover(true);
-
-                    final float textH1 = lbl1.getPosition().getHeight();
-                    textW1 = lbl1.computeTextWidth(txt);
-                    textX1 = (SECT1_WIDTH / 3f) - textW1;
-
-                    lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
-
-                    final float textW2 = lbl2.computeTextWidth(valueTxt);
-                    final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                    lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                    m_panel.addUIElement(tooltip).inTL(0, 0);
-
-                    m_panel.getPosition().setSize(tooltip.getWidthSoFar(), tooltip.getHeightSoFar());
+                    ComponentFactory.addCaptionValueBlock(
+                        m_panel,
+                        txt,
+                        valueTxt,
+                        baseColor
+                    );
                 }
 
                 @Override
-                public CustomPanelAPI getTpParent() {
-                    return getParent();
+                public UIPanelAPI getTpParent() {
+                    return m_parent;
                 }
 
                 @Override
                 public TooltipMakerAPI createAndAttachTp() {
-                    final TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
+                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
                     final int discount = (int)((1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
 
@@ -381,13 +364,15 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseY;
 
-                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    ComponentFactory.addTooltip(tp, 0f, false, m_parent).inTL(tpX, tpY);
 
                     return tooltip;
                 }
             };
 
-            tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseY);
+            tooltip.addComponent(textPanel.getPanel()).inTL(
+                (SECT1_WIDTH / 3f) - textPanel.getPos().getWidth(), baseY
+            );
         }
         { // Total global exports
             final TextPanel textPanel = new TextPanel(section, 170, 0, new BasePanelPlugin<>()) {
@@ -397,50 +382,30 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(170, 0, false);
+                    final String txt = "Total global exports";
 
-                    String txt = "Total global exports";
-
-                    String valueTxt = NumFormat.engNotation(
+                    final String valueTxt = NumFormat.engNotation(
                         engine.info.getTotalGlobalExports(comID)
                     );
 
-                    tooltip.setParaFontColor(baseColor);
-                    tooltip.setParaFont(Fonts.ORBITRON_12);
-                    LabelAPI lbl1 = tooltip.addPara(txt, pad);
-                    lbl1.setHighlightOnMouseover(true);
-
-                    tooltip.setParaFontColor(highlight);
-                    tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    LabelAPI lbl2 = tooltip.addPara(valueTxt, highlight, pad);
-                    lbl2.setHighlightOnMouseover(true);
-
-                    float textH1 = lbl1.getPosition().getHeight();
-                    textW1 = lbl1.computeTextWidth(txt);
-                    textX1 = (SECT1_WIDTH / 2f) - (textW1 / 2f);
-
-                    lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
-
-                    float textW2 = lbl2.computeTextWidth(valueTxt);
-                    float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                    lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                    m_panel.addUIElement(tooltip).inTL(0, 0);
-
-                    m_panel.getPosition().setSize(tooltip.getWidthSoFar(), tooltip.getHeightSoFar());
+                    ComponentFactory.addCaptionValueBlock(
+                        m_panel,
+                        txt,
+                        valueTxt,
+                        baseColor
+                    );
                 }
 
                 @Override
-                public CustomPanelAPI getTpParent() {
-                    return getParent();
+                public UIPanelAPI getTpParent() {
+                    return m_parent;
                 }
 
                 @Override
                 public TooltipMakerAPI createAndAttachTp() {
-                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
+                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                    tooltip.addPara(
+                    tp.addPara(
                         "The total number of " + m_com.getName() + " being exported globally by all producing markets in the sector.\n\n" +
                         "This figure reflects the total global supply that reaches exportable surplus after local and in-faction demand is met.", pad
                     );
@@ -448,13 +413,16 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseY;
 
-                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
+                    tp.getPosition().inTL(tpX, tpY);
 
-                    return tooltip;
+                    return tp;
                 }
             };
 
-            tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseY);
+            tooltip.addComponent(textPanel.getPanel()).inTL(
+                (SECT1_WIDTH / 3f) - textPanel.getPos().getWidth(), baseY
+            );
         }
         { // Total faction exports
 
@@ -473,12 +441,10 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    TooltipMakerAPI tooltip = m_panel.createUIElement(210, 0, false);
-                    
                     final String factionName = currMarket.getFaction().getDisplayName();
                     final Color factionColor = currMarket.getFaction().getBaseUIColor();
 
-                    String txt = "Total " + factionName + " exports";
+                    final String txt = "Total " + factionName + " exports";
 
                     final String globalValue = NumFormat.engNotation(
                         engine.info.getFactionTotalGlobalExports(
@@ -489,48 +455,33 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                             comID, currMarket.getFaction())
                     );
 
-                    String valueTxt = globalValue + "  |  " + inFactionValue;
+                    final String valueTxt = globalValue + "  |  " + inFactionValue;
 
-                    tooltip.setParaFontColor(factionColor);
-                    tooltip.setParaFont(Fonts.ORBITRON_12);
-                    LabelAPI lbl1 = tooltip.addPara(txt, pad);
+                    final LabelAPI lbl1 = settings.createLabel(txt, Fonts.ORBITRON_12);
+                    lbl1.setColor(factionColor);
                     lbl1.setHighlightOnMouseover(true);
 
-                    tooltip.setParaFontColor(base);
-                    tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    LabelAPI lbl2 = tooltip.addPara(valueTxt, pad, new Color[] {
-                        factionColor, UiUtils.inFactionColor
-                    }, new String[] {
-                        globalValue, inFactionValue
-                    });
+                    final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
+                    lbl2.setColor(base);
+                    lbl2.setHighlight(globalValue, inFactionValue);
+                    lbl2.setHighlightColors(factionColor, UiUtils.inFactionColor);
                     lbl2.setHighlightOnMouseover(true);
 
-                    float textH1 = lbl1.getPosition().getHeight();
-                    textW1 = lbl1.computeTextWidth(txt);
-                    textX1 = SECT1_WIDTH*2 / 3f;
-
-                    lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
-
-                    float textW2 = lbl2.computeTextWidth(valueTxt);
-                    float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                    lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                    m_panel.addUIElement(tooltip).inTL(0, 0);
-
-                    m_panel.getPosition().setSize(tooltip.getWidthSoFar(), tooltip.getHeightSoFar());
+                    ComponentFactory.layoutCaptionValueLabels(
+                        m_panel, lbl1, lbl2
+                    );
                 }
 
                 @Override
-                public CustomPanelAPI getTpParent() {
-                    return getParent();
+                public UIPanelAPI getTpParent() {
+                    return m_parent;
                 }
 
                 @Override
                 public TooltipMakerAPI createAndAttachTp() {
-                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
+                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                    tooltip.addPara(
+                    tp.addPara(
                         "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currMarket.getFaction().getPersonNamePrefix() + " control.\n\n" +
                         "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
                         pad, new Color[] {currMarket.getFaction().getBaseUIColor(), UiUtils.inFactionColor},
@@ -540,13 +491,14 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     final float tpX = textX1 - 460 - opad*2;
                     final float tpY = baseY;
 
-                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
+                    tp.getPosition().inTL(tpX, tpY);
 
-                    return tooltip;
+                    return tp;
                 }
             };
 
-            tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseY);
+            tooltip.addComponent(textPanel.getPanel()).inTL(SECT1_WIDTH*2 / 3f, baseY);
         }
 
         final int baseRow2Y = baseY * 3 + pad;
@@ -559,8 +511,6 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    final TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
-
                     final String factionName = m_market.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
@@ -568,58 +518,41 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                         comID, m_market.getFaction().getId()
                     ) * 100) + "%";
 
-                    tooltip.setParaFontColor(baseColor);
-                    tooltip.setParaFont(Fonts.ORBITRON_12);
-                    final LabelAPI lbl1 = tooltip.addPara(txt, pad);
-                    lbl1.setHighlightOnMouseover(true);
-
-                    tooltip.setParaFontColor(baseColor);
-                    tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    final LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
-                    lbl2.setHighlightOnMouseover(true);
-
-                    final float textH1 = lbl1.getPosition().getHeight();
-                    textW1 = lbl1.computeTextWidth(txt);
-                    textX1 = (SECT1_WIDTH / 2f) - (textW1 / 2f);
-
-                    lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
-
-                    final float textW2 = lbl2.computeTextWidth(valueTxt);
-                    final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                    lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                    add(tooltip).inTL(0, 0);
-
-                    m_panel.getPosition().setSize(tooltip.getWidthSoFar(), tooltip.getHeightSoFar());
+                    ComponentFactory.addCaptionValueBlock(
+                        m_panel, txt, valueTxt,
+                        baseColor, baseColor
+                    );
                 }
 
                 @Override
-                public CustomPanelAPI getTpParent() {
-                    return getParent();
+                public UIPanelAPI getTpParent() {
+                    return m_parent;
                 }
 
                 @Override
                 public TooltipMakerAPI createAndAttachTp() {
-                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
+                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
                     final String marketOwner = m_market.getFaction().isPlayerFaction() ?
                         "your" : m_market.getFaction().getPersonNamePrefix(); 
 
-                    tooltip.addPara(
+                    tp.addPara(
                             "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
                             pad);
 
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseRow2Y;
 
-                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
+                    tp.getPosition().inTL(tpX, tpY);
 
-                    return tooltip;
+                    return tp;
                 }
             };
 
-            tooltip.addComponent(textPanel.getPanel()).inTL(textPanel.textX1, baseRow2Y);
+            tooltip.addComponent(textPanel.getPanel()).inTL(
+                (SECT1_WIDTH - textPanel.getPos().getWidth()) / 2f, baseRow2Y
+            );
         }
 
         else { // Faction market share
@@ -630,8 +563,6 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    final TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
-
                     final String factionName = m_selectedMarket.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
@@ -639,51 +570,33 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                         comID, m_selectedMarket.getFactionId()
                     ) * 100) + "%";
 
-                    tooltip.setParaFontColor(m_selectedMarket.getFaction().getBaseUIColor());
-                    tooltip.setParaFont(Fonts.ORBITRON_12);
-                    final LabelAPI lbl1 = tooltip.addPara(txt, pad);
-                    lbl1.setHighlightOnMouseover(true);
-
-                    tooltip.setParaFontColor(m_selectedMarket.getFaction().getBaseUIColor());
-                    tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    final LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
-                    lbl2.setHighlightOnMouseover(true);
-
-                    final float textH1 = lbl1.getPosition().getHeight();
-                    textW1 = lbl1.computeTextWidth(txt);
-                    textX1 = (SECT1_WIDTH / 3f) - (textW1 / 2f);
-
-                    lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
-
-                    final float textW2 = lbl2.computeTextWidth(valueTxt);
-                    final float textX2 = (textW1 / 2f) - (textW2 / 2f);
-
-                    lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                    add(tooltip).inTL(0, 0);
-
-                    m_panel.getPosition().setSize(tooltip.getWidthSoFar(), tooltip.getHeightSoFar());
+                    ComponentFactory.addCaptionValueBlock(
+                        m_panel, txt, valueTxt,
+                        m_selectedMarket.getFaction().getBaseUIColor(),
+                        m_selectedMarket.getFaction().getBaseUIColor()
+                    );
                 }
 
                 @Override
-                public CustomPanelAPI getTpParent() {
-                    return getParent();
+                public UIPanelAPI getTpParent() {
+                    return m_parent;
                 }
                 
                 @Override
                 public TooltipMakerAPI createAndAttachTp() {
-                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
+                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
-                    tooltip.addPara(
+                    tp.addPara(
                         "Total export market share for " + m_com.getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
                         pad);
 
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseRow2Y;
 
-                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
+                    tp.getPosition().inTL(tpX, tpY);
 
-                    return tooltip;
+                    return tp;
                 }
             };
 
@@ -695,8 +608,6 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
                 @Override
                 public void createPanel() {
-                    final TooltipMakerAPI tooltip = m_panel.createUIElement(250, 0, false);
-
                     final String factionName = m_market.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
@@ -704,59 +615,44 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                         comID, m_market.getFaction().getId()
                     ) * 100) + "%";
 
-                    tooltip.setParaFontColor(baseColor);
-                    tooltip.setParaFont(Fonts.ORBITRON_12);
-                    final LabelAPI lbl1 = tooltip.addPara(txt, pad);
-                    lbl1.setHighlightOnMouseover(true);
-
-                    tooltip.setParaFontColor(baseColor);
-                    tooltip.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                    final LabelAPI lbl2 = tooltip.addPara(valueTxt, pad);
-                    lbl2.setHighlightOnMouseover(true);
-
-                    final float textH1 = lbl1.getPosition().getHeight();
-                    textW1 = lbl1.computeTextWidth(txt);
-                    textX1 = (SECT1_WIDTH*2 / 3f) - (textW1 / 2f);
-
-                    lbl1.getPosition().inTL(0, 0).setSize(textW1, lbl1.getPosition().getHeight());
-
-                    final float textW2 = lbl2.computeTextWidth(valueTxt);
-                    final float textX2 = (textW1 / 2) - (textW2 / 2);
-
-                    lbl2.getPosition().inTL(textX2, textH1 + pad).setSize(textW2, lbl2.getPosition().getHeight());
-
-                    m_panel.addUIElement(tooltip).inTL(0, 0);
-
-                    m_panel.getPosition().setSize(tooltip.getWidthSoFar(), tooltip.getHeightSoFar());
+                    ComponentFactory.addCaptionValueBlock(
+                        m_panel, txt, valueTxt,
+                        baseColor, baseColor
+                    );
                 }
 
                 @Override
-                public CustomPanelAPI getTpParent() {
-                    return getParent();
+                public UIPanelAPI getTpParent() {
+                    return m_parent;
                 }
 
                 @Override
                 public TooltipMakerAPI createAndAttachTp() {
-                    TooltipMakerAPI tooltip = getParent().createUIElement(460, 0, false);
+                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
 
                     String marketOwner = m_market.getFaction().isPlayerFaction() ?
                         "your" : m_market.getFaction().getPersonNamePrefix(); 
 
-                    tooltip.addPara(
+                    tp.addPara(
                             "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
                             pad);
 
                     final float tpX = textX1 + textW1 + opad;
                     final float tpY = baseRow2Y;
 
-                    getParent().addUIElement(tooltip).inTL(tpX, tpY);
+                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
+                    tp.getPosition().inTL(tpX, tpY);
 
-                    return tooltip;
+                    return tp;
                 }
             };
 
-            tooltip.addComponent(textPanelLeft.getPanel()).inTL(textPanelLeft.textX1, baseRow2Y);
-            tooltip.addComponent(textPanelRight.getPanel()).inTL(textPanelRight.textX1, baseRow2Y);
+            tooltip.addComponent(textPanelLeft.getPanel()).inTL(
+                (SECT1_WIDTH / 3f) - (textPanelLeft.getPos().getWidth() / 2f), baseRow2Y
+            );
+            tooltip.addComponent(textPanelRight.getPanel()).inTL(
+                (SECT1_WIDTH*2 / 3f) - (textPanelRight.getPos().getWidth() / 2f), baseRow2Y
+            );
         }
     }
 
@@ -859,7 +755,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
-        PendingTooltip<CustomPanelAPI> quantityTooltip = new PendingTooltip<>();
+        PendingTooltip<UIPanelAPI> quantityTooltip = new PendingTooltip<>();
         createSection3QuantityHeaderTooltip(mode, table, quantityTooltip);
 
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
@@ -935,7 +831,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             table.addCell(NumFormat.formatCredit(incomeValue), cellAlg.MID, incomeValue, null);
 
             // Tooltip
-            PendingTooltip<CustomPanelAPI> tp = new PendingTooltip<>();
+            final PendingTooltip<UIPanelAPI> tp = new PendingTooltip<>();
             createSection3RowsTooltip(
                 table, market, market.getName(), textColor, tp
             );
@@ -986,7 +882,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     }
 
     @Override
-    public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
+    public void onClicked(CustomPanel<?, ?> source, boolean isLeftClick) {
         if (!isLeftClick) return;
 
         final CommodityRowPanel panel = ((CommodityRowPanel)source);
@@ -1004,7 +900,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     }
 
     private void createSection3RowsTooltip(SortableTable table, MarketAPI market,
-        String marketName, Color baseColor, PendingTooltip<CustomPanelAPI> wrapper) {
+        String marketName, Color baseColor, PendingTooltip<UIPanelAPI> wrapper) {
 
         wrapper.parentSupplier = () -> {
             return table.getPanel();
@@ -1019,9 +915,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     
             final Color darkColor = faction.getDarkUIColor();
             
-            final TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
-                tpWidth, 0, false
-            );
+            final TooltipMakerAPI tp = ComponentFactory.createTooltip(tpWidth, false);
     
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.addPara(marketName + " - " + m_com.getName(), baseColor, pad);
@@ -1112,7 +1006,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     }
 
     private void createSection3QuantityHeaderTooltip(int mode, SortableTable table,
-        PendingTooltip<CustomPanelAPI> wrapper) {
+        PendingTooltip<UIPanelAPI> wrapper) {
         final String quantityDesc = mode == 0
             ? "Units of this commodity exported globally."
             : "Units of this commodity imported globally to meet demand.";
@@ -1128,13 +1022,13 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         };
 
         wrapper.factory = () -> {
-            final TooltipMakerAPI tp = wrapper.parentSupplier.get().createUIElement(
-                SortableTable.headerTooltipWidth*2, 0, false
+            final TooltipMakerAPI tp = ComponentFactory.createTooltip(
+                SortableTable.headerTooltipWidth*2, false
             );
 
             tp.addPara(quantityDesc, pad);
 
-            final AtomicInteger y = new AtomicInteger((int) tp.getHeightSoFar() + pad + opad);
+            final int y = (int) tp.getHeightSoFar() + pad + opad;
 
             CommodityRowPanel.legendRowCreator(
                 1, tp, y, 26, m_market

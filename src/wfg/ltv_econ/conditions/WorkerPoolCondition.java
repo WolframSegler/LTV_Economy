@@ -140,6 +140,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
     public static final WorkerPoolCondition getPoolCondition(MarketAPI market) {
         if (!market.hasCondition(ConditionID)) addConditionToMarket(market);
         final MarketConditionAPI cond = market.getCondition(ConditionID);
+        if (cond == null) return new WorkerPoolCondition();
         return (WorkerPoolCondition) cond.getPlugin();
     }
 }

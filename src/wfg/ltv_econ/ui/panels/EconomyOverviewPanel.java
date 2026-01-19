@@ -19,7 +19,7 @@ import wfg.wrap_ui.util.CallbackRunnable;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class EconomyOverviewPanel extends CustomPanel<
-    BasePanelPlugin<EconomyOverviewPanel>, EconomyOverviewPanel, UIPanelAPI>
+    BasePanelPlugin<EconomyOverviewPanel>, EconomyOverviewPanel>
 {
     public static final int MAIN_PANEL_W = 1250;
     public static final int MAIN_PANEL_H = 700;

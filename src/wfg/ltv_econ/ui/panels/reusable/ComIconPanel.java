@@ -10,7 +10,6 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -19,6 +18,8 @@ import com.fs.starfarer.api.util.FaderUtil;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.SpritePanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
@@ -84,15 +85,15 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
     }
 
     @Override
-    public CustomPanelAPI getTpParent() {
-        return getParent();
+    public UIPanelAPI getTpParent() {
+        return Attachments.getScreenPanel();
     }
 
     @Override
     public TooltipMakerAPI createAndAttachTp() {
         if (m_com == null) return null;
 
-        m_tooltip = getParent().createUIElement(720, 0, false);
+        m_tooltip = ComponentFactory.createTooltip(720f, false);
 
         final String comDesc = Global.getSettings().getDescription(m_com.getId(), Type.RESOURCE).getText1();
 
@@ -115,13 +116,13 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements HasToolti
                 true, true, true); 
         }
         
-        getParent().addUIElement(m_tooltip);
+        ComponentFactory.addTooltip(m_tooltip, 0f, false);
         WrapUiUtils.mouseCornerPos(m_tooltip, opad);
 
         return m_tooltip;
     }
 
-    public Optional<CustomPanelAPI> getCodexParent() {
+    public Optional<UIPanelAPI> getCodexParent() {
         return Optional.ofNullable(getParent());
     }
 

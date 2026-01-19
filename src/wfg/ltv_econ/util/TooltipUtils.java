@@ -22,7 +22,6 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -33,6 +32,7 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.submarkets.OpenSubmarketPlugin;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
@@ -298,14 +298,14 @@ public class TooltipUtils {
     /**
      * Creates a static Codex footer with no functionality.
      * The Codex is static and its labels must be updated manually.
-     * The Codex must be attached manually.
+     * The Codex must be positioned manually.
      * The F1 and F2 events must be handled using the Plugin.
      */
-    public static final <PanelType extends CustomPanel<?, ?, CustomPanelAPI> & HasTooltip> TooltipMakerAPI 
+    public static final <PanelType extends CustomPanel<?, ?> & HasTooltip> TooltipMakerAPI 
         createCustomCodex(PanelType panel, String codexF1, String codexF2, int codexW) {
 
         // Create the custom Footer
-        final TooltipMakerAPI codexTooltip = panel.getCodexParent().get().createUIElement(codexW, 0, false);
+        final TooltipMakerAPI codexTooltip = ComponentFactory.createTooltip(codexW, false);
 
         codexTooltip.setParaFont(Fonts.ORBITRON_12);
 
@@ -333,7 +333,7 @@ public class TooltipUtils {
             (int) lbl2.computeTextHeight(codexF2) - opad / 2;
 
         codexTooltip.setHeightSoFar(tooltipH);
-        panel.getCodexParent().get().addUIElement(codexTooltip);
+        ComponentFactory.addTooltip(codexTooltip, tooltipH, false, panel.getCodexParent().get());
 
         return codexTooltip;
     }

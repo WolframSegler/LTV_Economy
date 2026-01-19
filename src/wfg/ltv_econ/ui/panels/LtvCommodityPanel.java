@@ -10,19 +10,19 @@ import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
 import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import static wfg.wrap_ui.util.UIConstants.*;
 
-public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel, CustomPanelAPI>
+public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityPanel>, LtvCommodityPanel>
     implements HasBackground, HasOutline {
 
     public static final int STANDARD_WIDTH = 264;
@@ -83,18 +83,18 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
             return EconomyEngine.getInstance().getComCell(com.getId(), m_market.getId()).getFlowEconomicFootprint() <= 0;
         });
 
-        final TooltipMakerAPI tooltip = m_panel.createUIElement(
-            getPos().getWidth(), 0, false
+        final TooltipMakerAPI tooltip = ComponentFactory.createTooltip(
+            getPos().getWidth(), true
         );
         tooltip.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
         tooltip.setHeightSoFar(headerHeight);
-        getPanel().addUIElement(tooltip).inTL(0, 0);
+        ComponentFactory.addTooltip(tooltip, headerHeight, true, m_panel).inTL(0, 0);
         getPlugin().setOffsets(1, 1, -2, -headerHeight - 2);
 
-        final TooltipMakerAPI rowTp = m_panel.createUIElement(
-            getPos().getWidth(), getPos().getHeight() - headerHeight, true
+        final TooltipMakerAPI rowTp = ComponentFactory.createTooltip(
+            getPos().getWidth(), true
         );
         
         final int rowHeight = 28;
@@ -115,7 +115,8 @@ public class LtvCommodityPanel extends CustomPanel<BasePanelPlugin<LtvCommodityP
             commodityRows.add(comRow);
         }
         rowTp.setHeightSoFar(cumulativeYOffset);
-        getPanel().addUIElement(rowTp).inTL(0, headerHeight);
+        ComponentFactory.addTooltip(tooltip, getPos().getHeight() - headerHeight, true, m_panel)
+            .inTL(0, headerHeight);
     }
 
     public void selectRow(String comID) {

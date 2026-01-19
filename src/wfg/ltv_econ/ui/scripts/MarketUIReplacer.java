@@ -28,6 +28,7 @@ import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.TextPanel;
@@ -52,7 +53,6 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -262,29 +262,14 @@ public class MarketUIReplacer implements EveryFrameScript {
                 final Color valueColor = value < 0 ? negative
                         : marketAPI.getFaction().getBrightUIColor();
 
-                final LabelAPI lbl1 = Global.getSettings().createLabel(txt, Fonts.ORBITRON_12);
-                lbl1.setColor(marketAPI.getFaction().getBaseUIColor());
-                lbl1.setHighlightOnMouseover(true);
-                lbl1.setAlignment(Alignment.MID);
-
-                final LabelAPI lbl2 = Global.getSettings().createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
-                lbl2.setColor(valueColor);
-                lbl2.setHighlightOnMouseover(true);
-                lbl2.setAlignment(Alignment.MID);
-
-                final float textH1 = lbl1.computeTextHeight(txt);
-                final float textH2 = lbl2.computeTextHeight(valueTxt);
-                final float textW = Math.max(lbl1.computeTextWidth(txt), lbl2.computeTextWidth(valueTxt));
-
-                add(lbl1).inTL(0, 0).setSize(textW, textH1);
-                add(lbl2).inTL(0, textH1 + pad).setSize(textW, textH2);
-
-                getPos().setSize(textW, textH1 + pad + textH2);
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt,
+                    marketAPI.getFaction().getBaseUIColor(), valueColor
+                );
             }
 
             @Override
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             private TooltipMakerAPI m_tp;
@@ -292,7 +277,7 @@ public class MarketUIReplacer implements EveryFrameScript {
             @Override
             public TooltipMakerAPI createAndAttachTp() {
                 final int TP_WIDTH = 450;
-                m_tp = getPanel().createUIElement(TP_WIDTH, 0, false);
+                m_tp = ComponentFactory.createTooltip(TP_WIDTH, false);
 
                 final FactionAPI faction = marketAPI.getFaction();
                 final Color base = faction.getBaseUIColor();
@@ -494,7 +479,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                     m_tp.addPara("Hazard pay: %s", opad, negative, Misc.getDGSCredits(incentive));
                 }
 
-                add(m_tp);
+                ComponentFactory.addTooltip(m_tp, 0f, false);
                 WrapUiUtils.anchorPanel(m_tp, getPanel(), AnchorType.LeftTop, 50);
                 return m_tp;
             }
@@ -512,7 +497,7 @@ public class MarketUIReplacer implements EveryFrameScript {
             };
 
             @Override
-            public Optional<CustomPanelAPI> getCodexParent() {
+            public Optional<UIPanelAPI> getCodexParent() {
                 return Optional.ofNullable(getPanel());
             }
 
@@ -637,7 +622,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
             final HasActionListener listener = new HasActionListener() {
                 @Override
-                public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
+                public void onClicked(CustomPanel<?, ?> source, boolean isLeftClick) {
                     if (!isLeftClick) return;
 
                     CommodityRowPanel panel = ((CommodityRowPanel) source);

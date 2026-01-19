@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -14,6 +13,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
@@ -24,7 +24,7 @@ import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 public class CommoditySelectionPanel extends
-    CustomPanel<BasePanelPlugin<CommoditySelectionPanel>, CommoditySelectionPanel, CustomPanelAPI> implements
+    CustomPanel<BasePanelPlugin<CommoditySelectionPanel>, CommoditySelectionPanel> implements
     HasOutline, HasBackground
 {
     private static final int ROW_H = 32;
@@ -41,9 +41,7 @@ public class CommoditySelectionPanel extends
 
     public void createPanel() {
         final int width = (int) getPos().getWidth();
-        final TooltipMakerAPI container = getPanel().createUIElement(
-            width, getPos().getHeight(), true
-        );
+        final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
         final List<CommoditySpecAPI> commodities = EconomyInfo.getEconCommodities();
 
         float yCoord = pad;
@@ -56,7 +54,7 @@ public class CommoditySelectionPanel extends
             yCoord += ROW_H + pad;
         }
         container.setHeightSoFar(yCoord);
-        add(container).inTL(-pad, 0);
+        ComponentFactory.addTooltip(container, getPos().getHeight(), true, m_panel).inTL(-pad, 0);
     }
 
     public Outline getOutline() {
@@ -67,7 +65,7 @@ public class CommoditySelectionPanel extends
         return dark;
     }
 
-    public static class RowPanel extends CustomPanel<BasePanelPlugin<RowPanel>, RowPanel, CustomPanelAPI> 
+    public static class RowPanel extends CustomPanel<BasePanelPlugin<RowPanel>, RowPanel> 
         implements HasActionListener, AcceptsActionListener, HasFader, HasAudioFeedback
     {
         private final FaderUtil fader = new FaderUtil(0, 0, 0.2f, true, true);
@@ -97,7 +95,7 @@ public class CommoditySelectionPanel extends
              RowPanel.this.add(comNameLabel).inBL(iconSize + opad, (ROW_H - labelW) / 2f);
         }
 
-        public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
+        public void onClicked(CustomPanel<?, ?> source, boolean isLeftClick) {
             GlobalCommodityFlow.selectedCom = spec;
             contentPanel.createPanel();
         }

@@ -23,6 +23,7 @@ import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityCell;
@@ -33,6 +34,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.dialogs.DialogPanel;
@@ -134,13 +136,13 @@ public class AssignWorkersDialog extends DialogPanel {
             }
 
             @Override
-            public CustomPanelAPI getTpParent() {
-                return getPanel();
+            public UIPanelAPI getTpParent() {
+                return Attachments.getScreenPanel();
             }
 
             @Override  
             public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = getPanel().createUIElement(300, 1, false);
+                final TooltipMakerAPI tp = ComponentFactory.createTooltip(300f, false);
 
                 tp.addPara(
                     "Adjust each output's slider to allocate a portion of the market's total workforce. " +
@@ -148,8 +150,7 @@ public class AssignWorkersDialog extends DialogPanel {
                     pad
                 );
 
-                add(tp);
-
+                ComponentFactory.addTooltip(tp, 0f, false);
                 WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.TopLeft, 0);
 
                 return tp;
@@ -173,7 +174,7 @@ public class AssignWorkersDialog extends DialogPanel {
             panelHeight - (sliderY + pad * 2),
             null
         );
-        final TooltipMakerAPI outputsTp = outputsPanel.createUIElement(panelWidth, 180, true);
+        final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(panelWidth, true);
 
         final SettingsAPI settings = Global.getSettings();
         
@@ -216,8 +217,7 @@ public class AssignWorkersDialog extends DialogPanel {
         }
 
         outputsTp.setHeightSoFar(cumulativeYOffset);
-
-        outputsPanel.addUIElement(outputsTp).inTL(-pad, 0);
+        ComponentFactory.addTooltip(outputsTp, 180, true, outputsPanel).inTL(-pad, 0);
         innerPanel.addComponent(outputsPanel).inTL(opad, sliderY);
     }
 
@@ -248,9 +248,9 @@ public class AssignWorkersDialog extends DialogPanel {
             demandList.put(comID, CompatLayer.convertIndDemandStat(industry, comID));
         }
 
-        TooltipMakerAPI tooltip = panel.createUIElement((panelWidth / 2) - opad, panelHeight, false);
-        tooltip.addSectionHeading(importing ? "---" : "Production", color, dark, Alignment.MID, opad);
-        final float startY = tooltip.getHeightSoFar() + pad;
+        TooltipMakerAPI tp = ComponentFactory.createTooltip((panelWidth / 2) - opad, false);
+        tp.addSectionHeading(importing ? "---" : "Production", color, dark, Alignment.MID, opad);
+        final float startY = tp.getHeightSoFar() + pad;
 
         // Supply
         float x = opad;
@@ -269,11 +269,11 @@ public class AssignWorkersDialog extends DialogPanel {
             }
 
             // draw icon
-            tooltip.beginIconGroup();
-            tooltip.setIconSpacingMedium();
-            tooltip.addIcons(com, 1, IconRenderMode.NORMAL);
-            tooltip.addIconGroup(0f);
-            UIComponentAPI iconComp = tooltip.getPrev();
+            tp.beginIconGroup();
+            tp.setIconSpacingMedium();
+            tp.addIcons(com, 1, IconRenderMode.NORMAL);
+            tp.addIconGroup(0f);
+            UIComponentAPI iconComp = tp.getPrev();
 
             // Add extra padding for thinner icons
             float actualIconWidth = iconSize * com.getIconWidthMult();
@@ -281,7 +281,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
             // draw text
             String txt = Strings.X + NumFormat.engNotation(pAmount);
-            LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
+            LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
             float textH = lbl.computeTextHeight(txt);
             float textX = x + iconSize + pad;
@@ -291,11 +291,11 @@ public class AssignWorkersDialog extends DialogPanel {
             // advance X
             x += sectionWidth + 5f;
         }
-        tooltip.setHeightSoFar(y);
-        panel.addUIElement(tooltip).inTL(opad / 2, 0);
+        tp.setHeightSoFar(y);
+        ComponentFactory.addTooltip(tp, panelHeight, false, panel).inTL(opad / 2, 0);
 
-        tooltip = panel.createUIElement((panelWidth / 2) - opad, panelHeight, false);
-        tooltip.addSectionHeading(importing ? "Import" : "Demand", color, dark, Alignment.MID, opad);
+        tp = ComponentFactory.createTooltip((panelWidth / 2) - opad, false);
+        tp.addSectionHeading(importing ? "Import" : "Demand", color, dark, Alignment.MID, opad);
 
         // Demand
         x = opad;
@@ -315,13 +315,13 @@ public class AssignWorkersDialog extends DialogPanel {
             final float availability = cell.getStoredAvailabilityRatio();
 
             // draw icon
-            tooltip.beginIconGroup();
-            tooltip.setIconSpacingMedium();
+            tp.beginIconGroup();
+            tp.setIconSpacingMedium();
             IconRenderMode renderMode = availability < 0.9f && !importing ?
                 IconRenderMode.DIM_RED : IconRenderMode.NORMAL;
-            tooltip.addIcons(cell.spec, 1, renderMode);
-            tooltip.addIconGroup(0f);
-            final UIComponentAPI iconComp = tooltip.getPrev();
+            tp.addIcons(cell.spec, 1, renderMode);
+            tp.addIconGroup(0f);
+            final UIComponentAPI iconComp = tp.getPrev();
 
             // Add extra padding for thinner icons
             final float actualIconWidth = iconSize * cell.spec.getIconWidthMult();
@@ -329,7 +329,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
             // draw text
             final String txt = Strings.X + NumFormat.engNotation(dAmount);
-            final LabelAPI lbl = tooltip.addPara(txt + " / Day", 0f, highlight, txt);
+            final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
             final float textH = lbl.computeTextHeight(txt);
             final float textX = x + iconSize + pad;
@@ -339,8 +339,8 @@ public class AssignWorkersDialog extends DialogPanel {
             // advance X
             x += sectionWidth + 5f;
         }
-        tooltip.setHeightSoFar(y);
-        panel.addUIElement(tooltip).inTR(opad / 2, 0);
+        tp.setHeightSoFar(y);
+        ComponentFactory.addTooltip(tp, panelHeight, false, panel).inTR(opad / 2, 0);
 
     }
 

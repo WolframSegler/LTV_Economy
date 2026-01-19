@@ -17,7 +17,6 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -37,6 +36,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
+import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.UIState;
 import wfg.wrap_ui.ui.UIState.State;
 import wfg.wrap_ui.ui.panels.BasePanel;
@@ -54,7 +54,7 @@ import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
-public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWidget, TooltipMakerAPI>
+public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWidget>
     implements HasBackground, HasFader, HasActionListener {
 
     public final static int PANEL_WIDTH = 190;
@@ -86,7 +86,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
      * Shared both by the Widget and IndustryImagePanel
      */
     private FaderUtil m_fader = null;
-    public PendingTooltip<CustomPanelAPI> m_tooltip = null;
+    public PendingTooltip<UIPanelAPI> m_tooltip = null;
 
     public IndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
         MarketAPI market, Industry ind, LtvIndustryListPanel indPanel) {
@@ -220,7 +220,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
 
         add(workerCountLabel).inTL(pad*2, TITLE_HEIGHT + pad*2);
 
-        final TooltipMakerAPI tp = m_panel.createUIElement(PANEL_WIDTH, IMAGE_HEIGHT, false);
+        final TooltipMakerAPI tp = ComponentFactory.createTooltip(PANEL_WIDTH, false);
 
         tp.beginIconGroup();
         tp.setIconSpacingMedium();
@@ -299,7 +299,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
         }
 
         tp.setHeightSoFar(IMAGE_HEIGHT);
-        add(tp).inBL(0, 0);
+        ComponentFactory.addTooltip(tp, IMAGE_HEIGHT, false, m_panel).inBL(0, 0);
 
         if (constructionQueueIndex >= 0) setNormalMode();
     }
@@ -450,7 +450,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
    }
 
     @Override
-    public void onClicked(CustomPanel<?, ?, ?> source, boolean isLeftClick) {
+    public void onClicked(CustomPanel<?, ?> source, boolean isLeftClick) {
         if (tradeInfoPanel) return;
 
         IndustryWidget targetInd;
@@ -665,7 +665,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
         }
 
         @Override
-        public CustomPanelAPI getTpParent() {
+        public UIPanelAPI getTpParent() {
             return m_tooltip.parentSupplier.get();
         }
 
