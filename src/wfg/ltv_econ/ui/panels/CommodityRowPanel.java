@@ -4,7 +4,6 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -128,7 +127,7 @@ public class CommodityRowPanel extends CustomPanel<BasePanelPlugin<CommodityRowP
         );
         add(stockIcon).inBL(pad*3 + rowHeight + textWidth, (rowHeight - iconSize) / 2f);
 
-        final CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 85, m_cell);
+        final UIPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 85, m_cell);
         add(infoBar).inBL(pad*4 + rowHeight + textWidth + iconSize, (rowHeight - iconSize) / 2f);
 
         if (m_cell.globalExports > 0) {

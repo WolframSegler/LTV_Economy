@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -33,8 +32,8 @@ public class EconomyOverviewPanel extends CustomPanel<
 
     private static LabelAPI title = null;
     private static LabelAPI subtitle = null;
-    private static CustomPanelAPI contentPanel = null;
-    private static CustomPanelAPI optionsPanel = null;
+    private static UIPanelAPI contentPanel = null;
+    private static UIPanelAPI optionsPanel = null;
     private static List<Button> navButtons = new ArrayList<>();
     private static Button firstButton = null;
 
@@ -59,7 +58,7 @@ public class EconomyOverviewPanel extends CustomPanel<
 
         createNavButtons();
 
-        final CustomPanelAPI navbar = settings.createCustom(NAVBAR_W, 0, null);
+        final UIPanelAPI navbar = settings.createCustom(NAVBAR_W, 0, null);
         int currentY = opad*2; 
         for (Button btn : navButtons) {
             navbar.addComponent(btn.getPanel()).inTL(opad, currentY);

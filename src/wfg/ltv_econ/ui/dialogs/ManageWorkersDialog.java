@@ -17,7 +17,6 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -81,7 +80,7 @@ public class ManageWorkersDialog extends DialogPanel {
     public Slider exploitationSlider = null;
 
     private MarketPolicy selectedPolicy = null;
-    private CustomPanelAPI selectedPolicyCont = null;
+    private UIPanelAPI selectedPolicyCont = null;
     
     public ManageWorkersDialog(MarketAPI market) {
         super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
@@ -608,7 +607,7 @@ public class ManageWorkersDialog extends DialogPanel {
         }
     }
 
-    private final PositionAPI buildPoster(CustomPanelAPI cont, MarketPolicy policy,
+    private final PositionAPI buildPoster(UIPanelAPI cont, MarketPolicy policy,
         PlayerMarketData mData, HasActionListener listener, int width, int height
     ) {
         final SettingsAPI settings = Global.getSettings();
@@ -688,7 +687,7 @@ public class ManageWorkersDialog extends DialogPanel {
         return cont.addComponent(posterWrap.getPanel());
     }
 
-    private final void buildSelectedPosterMenu(CustomPanelAPI cont,
+    private final void buildSelectedPosterMenu(UIPanelAPI cont,
         MarketPolicy policy, PlayerMarketData mData, CallbackRunnable<Button> activateRun
     ) {
         final SettingsAPI settings = Global.getSettings();

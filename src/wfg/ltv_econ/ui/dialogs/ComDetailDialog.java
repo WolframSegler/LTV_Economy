@@ -18,7 +18,6 @@ import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.MapParams;
@@ -79,10 +78,10 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     public final int SECT3_HEIGHT;
     public final int SECT4_HEIGHT;
 
-    protected CustomPanelAPI section1; // CommodityInfo
-    protected CustomPanelAPI section2; // Sector Map
-    protected CustomPanelAPI section3; // Prod&Consump Tables
-    protected CustomPanelAPI section4; // Commodity Panel
+    protected UIPanelAPI section1; // CommodityInfo
+    protected UIPanelAPI section2; // Sector Map
+    protected UIPanelAPI section3; // Prod&Consump Tables
+    protected UIPanelAPI section4; // Commodity Panel
 
     public final static int iconSize = 24;
 
@@ -281,7 +280,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         innerPanel.addComponent(section4).belowLeft(section2, opad);
     }
 
-    private void createSection1(CustomPanelAPI section, TooltipMakerAPI tooltip) {
+    private void createSection1(UIPanelAPI section, TooltipMakerAPI tooltip) {
         if (m_com == null) return;
         final EconomyEngine engine = EconomyEngine.getInstance();
         final SettingsAPI settings = Global.getSettings();
@@ -656,7 +655,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         }
     }
 
-    private void createSection2(CustomPanelAPI section, TooltipMakerAPI tooltip) {
+    private void createSection2(UIPanelAPI section, TooltipMakerAPI tooltip) {
         final int mapHeight = (int) section.getPosition().getHeight() - 2 * opad;
 
         final StarSystemAPI starSystem = m_market.getStarSystem();
@@ -692,7 +691,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         map.getPosition().inTL(0, 0);
     }
 
-    private void createSection3(CustomPanelAPI section, int mode) {
+    private void createSection3(UIPanelAPI section, int mode) {
         final CallbackRunnable<Button> producerRunnable = (btn) -> {
             if (producerButton.checked) return;
 
@@ -809,7 +808,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             final float quantityValue = mode == 0 ? cell.globalExports : cell.globalImports;
             final String quantityTxt = NumFormat.engNotation((long) quantityValue);
 
-            final CustomPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, cell);
+            final UIPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, cell);
 
             final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
 
@@ -865,7 +864,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         table.createPanel();
     }
 
-    private void createSection4(CustomPanelAPI section) {
+    private void createSection4(UIPanelAPI section) {
         section4ComPanel = new LtvCommodityPanel(
             section,
             (int) section.getPosition().getWidth(),

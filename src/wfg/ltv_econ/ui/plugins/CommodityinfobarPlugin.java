@@ -10,8 +10,8 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.wrap_ui.util.RenderUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
@@ -21,11 +21,11 @@ public class CommodityinfobarPlugin implements CustomUIPanelPlugin {
 
     public static final String GLOW_BG = Global.getSettings().getSpriteName("ui", "glow_bg");
 
-    private CustomPanelAPI m_panel;
+    private UIPanelAPI m_panel;
     private Map<Color, Float> m_barMap;
     private boolean hasOutline = false;
 
-    public void init(CustomPanelAPI panel, boolean hasOutline, Map<Color, Float> barMap) {
+    public void init(UIPanelAPI panel, boolean hasOutline, Map<Color, Float> barMap) {
         m_panel = panel;
         m_barMap = barMap;
         this.hasOutline = hasOutline;

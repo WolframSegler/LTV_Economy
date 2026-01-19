@@ -17,7 +17,6 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -169,7 +168,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         innerPanel.addComponent(help_button.getPanel()).inTR(pad, sliderY + pad);
 
-        final CustomPanelAPI outputsPanel = Global.getSettings().createCustom(
+        final UIPanelAPI outputsPanel = Global.getSettings().createCustom(
             panelWidth,
             panelHeight - (sliderY + pad * 2),
             null
@@ -221,7 +220,7 @@ public class AssignWorkersDialog extends DialogPanel {
         innerPanel.addComponent(outputsPanel).inTL(opad, sliderY);
     }
 
-    public void drawProductionAndConsumption(CustomPanelAPI panel) {
+    public void drawProductionAndConsumption(UIPanelAPI panel) {
         final float iconSize = 32f;
         final int itemsPerRow = 2;
         final float sectionWidth = ((panelWidth / 2) / itemsPerRow) - opad;

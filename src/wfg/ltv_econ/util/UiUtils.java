@@ -9,8 +9,8 @@ import java.util.Map;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
@@ -31,7 +31,7 @@ public class UiUtils {
     public static final Color COLOR_EXPORT = new Color(63,  175, 63);
     public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
 
-    public static final CustomPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityCell cell) {
+    public static final UIPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityCell cell) {
         if (cell.getFlowEconomicFootprint() <= 0) {
             throw new IllegalStateException(
                 "CommodityInfoBar cannot display info: economic footprint is zero for " 
@@ -67,12 +67,11 @@ public class UiUtils {
             }
         }
 
-        CustomPanelAPI infoBar = Global.getSettings().createCustom(
-            barWidth, barHeight, new CommodityinfobarPlugin()
+        final CommodityinfobarPlugin plugin = new CommodityinfobarPlugin();
+        UIPanelAPI infoBar = Global.getSettings().createCustom(
+            barWidth, barHeight, plugin
         );
-        ((CommodityinfobarPlugin)infoBar.getPlugin()).init(
-            infoBar, true, barMap
-        );
+        plugin.init(infoBar, true, barMap);
 
         return infoBar;
     }
