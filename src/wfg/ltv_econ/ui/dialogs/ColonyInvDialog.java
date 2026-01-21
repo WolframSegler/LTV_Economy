@@ -11,9 +11,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
@@ -23,9 +21,8 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIState;
-import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.UIContext;
+import wfg.wrap_ui.ui.UIContext.Context;
 import wfg.wrap_ui.ui.dialogs.DialogPanel;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
@@ -34,7 +31,6 @@ import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
@@ -53,7 +49,7 @@ public class ColonyInvDialog extends DialogPanel {
 
         m_market = market;
 
-        getHolo().setBackgroundAlpha(1, 1);
+        holo.setBackgroundAlpha(1, 1);
         backgroundDimAmount = 0.2f;
 
         createPanel();
@@ -61,7 +57,7 @@ public class ColonyInvDialog extends DialogPanel {
 
     @Override
     public void createPanel() {
-        UIState.setState(State.DIALOG);
+        UIContext.setContext(Context.DIALOG);
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
@@ -78,11 +74,7 @@ public class ColonyInvDialog extends DialogPanel {
         final long colonyCredits = engine.getCredits(m_market.getId());
         final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
-        final TextPanel colonyCreditPanel = new TextPanel(innerPanel, 200, 1, new BasePanelPlugin<>()) {
-            {
-                getPlugin().setIgnoreUIState(true);
-            }
-
+        final TextPanel colonyCreditPanel = new TextPanel(innerPanel, 200, 1) {
             @Override  
             public void createPanel() {
                 final String credits = NumFormat.formatCredit(colonyCredits);
@@ -97,36 +89,26 @@ public class ColonyInvDialog extends DialogPanel {
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
 
-            @Override
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override  
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400, false);
-
-                tp.addPara(
-                    "Shows the colony's current credit reserves. These funds cover operating costs, import purchases, and upkeep for industries and structures. " +
-                    "A low balance can slow trade and reduce output. " +
-                    (m_market.isPlayerOwned()
-                        ? "Colony reserves are separate from your personal credits."
-                        : ""),
-                    pad
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
-                return tp;
+            {
+                context.ignore = true;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "Shows the colony's current credit reserves. These funds cover operating costs, import purchases, and upkeep for industries and structures. " +
+                        "A low balance can slow trade and reduce output. " +
+                        (m_market.isPlayerOwned()
+                            ? "Colony reserves are separate from your personal credits."
+                            : ""),
+                        pad
+                    );
+                };
+                tooltip.positioner = (tp, exp) -> {
+                    WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                };
             }
         };
         innerPanel.addComponent(colonyCreditPanel.getPanel()).inTL(opad, 10);
 
-        final TextPanel playerCreditPanel = new TextPanel(innerPanel, 200, 1, new BasePanelPlugin<>()) {
-            {
-                getPlugin().setIgnoreUIState(true);
-            }
-            
+        final TextPanel playerCreditPanel = new TextPanel(innerPanel, 200, 1) {
             @Override  
             public void createPanel() {
                 final String credits = NumFormat.formatCredit((long) playerCredits.get());
@@ -141,32 +123,22 @@ public class ColonyInvDialog extends DialogPanel {
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
 
-            @Override
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override  
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
-
-                tp.addPara(
-                    "Shows your personal credits for transferring funds to or from the colony's reserves.",
-                    pad
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
-                return tp;
+            {
+                context.ignore = true;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "Shows your personal credits for transferring funds to or from the colony's reserves.",
+                        pad
+                    );
+                };
+                tooltip.positioner = (tp, exp) -> {
+                    WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                };
             }
         };
         innerPanel.addComponent(playerCreditPanel.getPanel()).inTL(opad, 50);
 
-        final TextPanel playerProfitPanel = new TextPanel(innerPanel, 200, 1, new BasePanelPlugin<>()) {
-            {
-                getPlugin().setIgnoreUIState(true);
-            }
-            
+        final TextPanel playerProfitPanel = new TextPanel(innerPanel, 200, 1) {
             @Override  
             public void createPanel() {
                 if (data == null) return;
@@ -181,39 +153,30 @@ public class ColonyInvDialog extends DialogPanel {
                 add(label1).inTL(0, (sliderH - height) / 2f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
+            
+            {
+                context.ignore = true;
 
-            @Override
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
+                tooltip.enabled = data == null;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The ratio of monthly profits that get automatically transferred to the player",
+                        pad
+                    );
 
-            @Override  
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
-
-                tp.addPara(
-                    "The ratio of monthly profits that get automatically transferred to the player",
-                    pad
-                );
-
-                tp.addPara(
-                    "You would receive %s from this colony this month. "+
-                    "Note: some values are current so far, others are full-month estimates.",
-                    pad,
-                    highlight,
-                    NumFormat.formatCredit((long) (engine.info.getNetIncome(
-                        m_market, false)*data.playerProfitRatio
-                    ))
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.RightTop, 5);
-                return tp;
-            }
-        
-            @Override
-            public boolean isTooltipEnabled() {
-                return data == null;
+                    tp.addPara(
+                        "You would receive %s from this colony this month. "+
+                        "Note: some values are current so far, others are full-month estimates.",
+                        pad,
+                        highlight,
+                        NumFormat.formatCredit((long) (engine.info.getNetIncome(
+                            m_market, false)*data.playerProfitRatio
+                        ))
+                    );
+                };
+                tooltip.positioner = (tp, exp) -> {
+                    WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                };
             }
         };
         if (m_market.isPlayerOwned()) innerPanel.addComponent(playerProfitPanel.getPanel()).inTL(opad, 90);
@@ -328,12 +291,12 @@ public class ColonyInvDialog extends DialogPanel {
             innerPanel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, profitRunnable
         );
 
-        withdrawBtn.quickMode = true;
-        depositBtn.quickMode = true;
-        profitBtn.quickMode = true;
-        withdrawBtn.setCutStyle(CutStyle.ALL);
-        depositBtn.setCutStyle(CutStyle.ALL);
-        profitBtn.setCutStyle(CutStyle.ALL);
+        withdrawBtn.setQuickMode(true);
+        depositBtn.setQuickMode(true);
+        profitBtn.setQuickMode(true);
+        withdrawBtn.cutStyle = CutStyle.ALL;
+        depositBtn.cutStyle = CutStyle.ALL;
+        profitBtn.cutStyle = CutStyle.ALL;
         innerPanel.addComponent(withdrawBtn.getPanel()).inTL(500 + sliderW + opad, 10 + buttonY);
         innerPanel.addComponent(depositBtn.getPanel()).inTL(500 + sliderW + opad, 50 + buttonY);
         innerPanel.addComponent(profitBtn.getPanel()).inTL(500 + sliderW + opad, 90 + buttonY);
@@ -395,7 +358,7 @@ public class ColonyInvDialog extends DialogPanel {
             table.addCell(NumFormat.engNotation(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             table.pushRow(
-                CodexDataV2.getCommodityEntryId(com.getId()), null, null, null, null, null
+                null, null, null, CodexDataV2.getCommodityEntryId(com.getId()), null, null
             );
         }
 
@@ -410,7 +373,7 @@ public class ColonyInvDialog extends DialogPanel {
     public void dismiss(int option) {
         super.dismiss(option);
 
-        UIState.setState(State.NONE);
+        UIContext.setContext(Context.NONE);
         LtvIndustryListPanel.refreshPanel();
     }
 }

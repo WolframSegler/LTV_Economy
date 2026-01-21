@@ -16,7 +16,6 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -38,32 +37,28 @@ import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIState;
-import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.UIContext;
+import wfg.wrap_ui.ui.UIContext.Context;
+import wfg.wrap_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.wrap_ui.ui.components.OutlineComp.OutlineType;
+import wfg.wrap_ui.ui.components.TooltipComp.TooltipBuilder;
 import wfg.wrap_ui.ui.dialogs.DialogPanel;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.SortableTable;
-import wfg.wrap_ui.ui.panels.SortableTable.ColumnManager;
-import wfg.wrap_ui.ui.panels.SortableTable.HeaderPanelWithTooltip;
 import wfg.wrap_ui.ui.panels.SortableTable.RowPanel;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
 import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.systems.OutlineSystem.Outline;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 
-public class ComDetailDialog extends DialogPanel implements HasActionListener {
+public class ComDetailDialog extends DialogPanel {
 
-    // this.PANEL_W = 1206; // Exact width using VisualVM. Includes pad.
-    // this.PANEL_H = 728; // Exact height using VisualVM. Includes pad.
+    // PANEL_W = 1206; // Exact width using VisualVM. Includes pad.
+    // PANEL_H = 728; // Exact height using VisualVM. Includes pad.
 
     public final int PANEL_W;
     public final int PANEL_H;
@@ -123,7 +118,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
         setConfirmShortcut();
 
-        getHolo().setBackgroundAlpha(1, 1);
+        holo.setBackgroundAlpha(1, 1);
         backgroundDimAmount = 0f;
 
         createPanel();
@@ -131,45 +126,26 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
     @Override
     public void createPanel() {
-        UIState.setState(State.DIALOG);
+        UIContext.setContext(Context.DIALOG);
 
         createSections();
 
         // Footer
         final int footerH = 40;
 
-        final BasePanelPlugin<TextPanel> fPlugin = new BasePanelPlugin<>() {
-            @Override
-            public void advance(float amount) {
-                super.advance(amount);
-
-                if (inputSnapshot.hoveredLastFrame && inputSnapshot.LMBUpLastFrame) {
-                    final ButtonAPI checkbox = m_panel.m_checkbox;
-
-                    if (checkbox != null) {
-                        checkbox.setChecked(!checkbox.isChecked());
-                    }
-                }
-            }
-        };
-
-        footerPanel = new TextPanel(innerPanel, 400, footerH, fPlugin) {
-            {
-                getPlugin().setTargetUIState(State.DIALOG);
-            }
-
+        footerPanel = new TextPanel(innerPanel, 400, footerH) {
             @Override
             public void createPanel() {
                 final TooltipMakerAPI footer = ComponentFactory.createTooltip(PANEL_W, false);
                 footer.setActionListenerDelegate(
                     new ActionListenerDelegate() {
                         public void actionPerformed(Object data, Object source) {
-                            updateSection3(producerButton.checked ? 0 : 1);
+                            updateSection3(producerButton.isChecked() ? 0 : 1);
                         }
                     }
                 );
                 m_checkbox = footer.addCheckbox(20, 20, "", "stockpile_toggle",
-                        Fonts.ORBITRON_12, highlight, UICheckboxSize.SMALL, 0);
+                    Fonts.ORBITRON_12, highlight, UICheckboxSize.SMALL, 0);
 
                 m_checkbox.getPosition().inBL(0, 0);
                 m_checkbox.setShortcut(Keyboard.KEY_Q, false);
@@ -186,23 +162,29 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             }
 
             @Override
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
+            public void advance(float delta) {
+                super.advance(delta);
+
+                if (inputSnapshot.hoveredLastFrame && inputSnapshot.LMBUpLastFrame) {
+                    if (m_checkbox != null) {
+                        m_checkbox.setChecked(!m_checkbox.isChecked());
+                    }
+                }
             }
 
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(getPos().getWidth() * 0.7f, false);
+            {
+                context.target = Context.DIALOG;
 
-                tp.addPara(
-                    "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
-                    pad
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, pad);
-
-                return tp;
+                tooltip.width = getPos().getWidth() * 0.7f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
+                        pad
+                    );
+                };
+                tooltip.positioner = (tp, exp) -> {
+                    WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, pad);
+                };
             }
         };
 
@@ -230,9 +212,8 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         innerPanel.addComponent(section1).inTL(pad, pad);
 
         // Update anchors
-        if (section2 == null || section3 == null) {
-            return;
-        }
+        if (section2 == null || section3 == null) return;
+        
         section2.getPosition().rightOfTop(section1, opad * 1.5f);
         section3.getPosition().belowLeft(section1, opad);
     }
@@ -249,9 +230,8 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         innerPanel.addComponent(section2).rightOfTop(section1, opad * 1.5f);
 
         // Update anchors
-        if (section4 == null) {
-            return;
-        }
+        if (section4 == null) return;
+        
         section4.getPosition().belowLeft(section2, opad);
     }
 
@@ -291,21 +271,17 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         // Icons
         final int iconSize = (int) (section.getPosition().getHeight() / 2.2f);
 
-        final String comIconID = m_com.getIconName();
-
-        final ComIconPanel iconLeft = new ComIconPanel(section, m_market.getFaction(),
-            iconSize, iconSize, comIconID, null, null
+        final ComIconPanel iconLeft = new ComIconPanel(section, iconSize, iconSize,
+            null, null, m_com, m_market.getFaction()
         );
-        iconLeft.setCommodity(m_com);
 
         iconLeft.getPos().inTL(opad * 3,
             (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
         section.addComponent(iconLeft.getPanel());
 
-        final ComIconPanel iconRight = new ComIconPanel(section, m_market.getFaction(),
-            iconSize, iconSize, comIconID, null, null
+        final ComIconPanel iconRight = new ComIconPanel(section, iconSize, iconSize,
+            null, null, m_com, m_market.getFaction()
         );
-        iconRight.setCommodity(m_com);
 
         iconRight.getPos().inTL(SECT1_WIDTH - iconSize - opad * 3,
             (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
@@ -316,11 +292,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         final int baseY = (int) (headerHeight + opad * 1.5f);
         final Color baseColor = m_market.getFaction().getBaseUIColor();
         { // Global market value
-            final TextPanel textPanel = new TextPanel(section, 170, 0, new BasePanelPlugin<>()) {
-                {
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
-
+            final TextPanel textPanel = new TextPanel(section, 170, 0) {
                 @Override
                 public void createPanel() {
                     final long value = engine.getComDomain(comID)
@@ -337,35 +309,33 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     );
                 }
 
-                @Override
-                public UIPanelAPI getTpParent() {
-                    return m_parent;
-                }
+                {
+                    context.target = Context.DIALOG;
 
-                @Override
-                public TooltipMakerAPI createAndAttachTp() {
-                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
+                    tooltip.width = 460f;
+                    tooltip.builder = (tp, exp) -> {
+                        final int discount = (int)((1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
 
-                    final int discount = (int)((1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
-
-                    tooltip.addPara(
-                        "Total credits spent sector-wide for the import of " +
-                        m_com.getName() + ". " +
-                        "Colonies with higher accessibility, faction relations and a shorter distance will have priority when exporting.\n\n"
-                        +
-                        "The value shown here includes the demand at your colonies, " +
-                        "since they must import goods as well. In-faction imports have a %s discount.",
-                        pad,
-                        highlight,
-                        discount + "%"
-                    );
-
-                    final float tpX = textX1 + textW1 + opad;
-                    final float tpY = baseY;
-
-                    ComponentFactory.addTooltip(tp, 0f, false, m_parent).inTL(tpX, tpY);
-
-                    return tooltip;
+                        tp.addPara(
+                            "Total credits spent sector-wide for the import of " +
+                            m_com.getName() + ". " +
+                            "Colonies with higher accessibility, faction relations and a shorter distance will have priority when exporting.\n\n"
+                            +
+                            "The value shown here includes the demand at your colonies, " +
+                            "since they must import goods as well. In-faction imports have a %s discount.",
+                            pad,
+                            highlight,
+                            discount + "%"
+                        );
+                    };
+                    tooltip.positioner = (tp, exp) -> {
+                        WrapUiUtils.anchorPanel(
+                            tp,
+                            m_panel,
+                            AnchorType.RightTop,
+                            opad
+                        );
+                    };
                 }
             };
 
@@ -374,11 +344,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             );
         }
         { // Total global exports
-            final TextPanel textPanel = new TextPanel(section, 170, 0, new BasePanelPlugin<>()) {
-                {
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
-
+            final TextPanel textPanel = new TextPanel(section, 170, 0) {
                 @Override
                 public void createPanel() {
                     final String txt = "Total global exports";
@@ -395,27 +361,19 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     );
                 }
 
-                @Override
-                public UIPanelAPI getTpParent() {
-                    return m_parent;
-                }
+                {
+                    context.target = Context.DIALOG;
 
-                @Override
-                public TooltipMakerAPI createAndAttachTp() {
-                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                    tp.addPara(
-                        "The total number of " + m_com.getName() + " being exported globally by all producing markets in the sector.\n\n" +
-                        "This figure reflects the total global supply that reaches exportable surplus after local and in-faction demand is met.", pad
-                    );
-
-                    final float tpX = textX1 + textW1 + opad;
-                    final float tpY = baseY;
-
-                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
-                    tp.getPosition().inTL(tpX, tpY);
-
-                    return tp;
+                    tooltip.width = 460f;
+                    tooltip.builder = (tp, exp) -> {
+                        tp.addPara(
+                            "The total number of " + m_com.getName() + " being exported globally by all producing markets in the sector.\n\n" +
+                            "This figure reflects the total global supply that reaches exportable surplus after local and in-faction demand is met.", pad
+                        );
+                    };
+                    tooltip.positioner = (tp, exp) -> {
+                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
+                    };
                 }
             };
 
@@ -427,17 +385,10 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
             final MarketAPI currMarket;
 
-            if (m_selectedMarket != null) {
-                currMarket = m_selectedMarket;
-            } else {
-                currMarket = m_market;
-            }
+            if (m_selectedMarket != null) currMarket = m_selectedMarket;
+            else currMarket = m_market;
 
-            final TextPanel textPanel = new TextPanel(section, 210, 0, new BasePanelPlugin<>()) {
-                {
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
-
+            final TextPanel textPanel = new TextPanel(section, 210, 0) {
                 @Override
                 public void createPanel() {
                     final String factionName = currMarket.getFaction().getDisplayName();
@@ -471,29 +422,21 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     );
                 }
 
-                @Override
-                public UIPanelAPI getTpParent() {
-                    return m_parent;
-                }
+                {
+                    context.target = Context.DIALOG;
 
-                @Override
-                public TooltipMakerAPI createAndAttachTp() {
-                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                    tp.addPara(
-                        "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currMarket.getFaction().getPersonNamePrefix() + " control.\n\n" +
-                        "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
-                        pad, new Color[] {currMarket.getFaction().getBaseUIColor(), UiUtils.inFactionColor},
-                        new String[] {"all consumers globally", "within the faction"}
-                    );
-
-                    final float tpX = textX1 - 460 - opad*2;
-                    final float tpY = baseY;
-
-                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
-                    tp.getPosition().inTL(tpX, tpY);
-
-                    return tp;
+                    tooltip.width = 460f;
+                    tooltip.builder = (tp, exp) -> {
+                        tp.addPara(
+                            "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currMarket.getFaction().getPersonNamePrefix() + " control.\n\n" +
+                            "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
+                            pad, new Color[] {currMarket.getFaction().getBaseUIColor(), UiUtils.inFactionColor},
+                            new String[] {"all consumers globally", "within the faction"}
+                        );
+                    };
+                    tooltip.positioner = (tp, exp) -> {
+                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.LeftTop, opad);
+                    };
                 }
             };
 
@@ -503,11 +446,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         final int baseRow2Y = baseY * 3 + pad;
 
         if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
-            final TextPanel textPanel = new TextPanel(section, 250, 0, new BasePanelPlugin<>()) {
-                {
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
-
+            final TextPanel textPanel = new TextPanel(section, 250, 0) {
                 @Override
                 public void createPanel() {
                     final String factionName = m_market.getFaction().getDisplayName();
@@ -523,29 +462,22 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     );
                 }
 
-                @Override
-                public UIPanelAPI getTpParent() {
-                    return m_parent;
-                }
+                {
+                    context.target = Context.DIALOG;
 
-                @Override
-                public TooltipMakerAPI createAndAttachTp() {
-                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
+                    tooltip.width = 460f;
+                    tooltip.builder = (tp, exp) -> {
+                        final String marketOwner = m_market.getFaction().isPlayerFaction() ?
+                            "your" : m_market.getFaction().getPersonNamePrefix(); 
 
-                    final String marketOwner = m_market.getFaction().isPlayerFaction() ?
-                        "your" : m_market.getFaction().getPersonNamePrefix(); 
-
-                    tp.addPara(
+                        tp.addPara(
                             "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
-                            pad);
-
-                    final float tpX = textX1 + textW1 + opad;
-                    final float tpY = baseRow2Y;
-
-                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
-                    tp.getPosition().inTL(tpX, tpY);
-
-                    return tp;
+                            pad
+                        );
+                    };
+                    tooltip.positioner = (tp, exp) -> {
+                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
+                    };
                 }
             };
 
@@ -556,10 +488,6 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
         else { // Faction market share
             final TextPanel textPanelLeft = new TextPanel(section, 250, 0) {
-                {
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
-
                 @Override
                 public void createPanel() {
                     final String factionName = m_selectedMarket.getFaction().getDisplayName();
@@ -576,35 +504,24 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     );
                 }
 
-                @Override
-                public UIPanelAPI getTpParent() {
-                    return m_parent;
-                }
-                
-                @Override
-                public TooltipMakerAPI createAndAttachTp() {
-                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
+                {
+                    context.target = Context.DIALOG;
 
-                    tp.addPara(
-                        "Total export market share for " + m_com.getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
-                        pad);
-
-                    final float tpX = textX1 + textW1 + opad;
-                    final float tpY = baseRow2Y;
-
-                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
-                    tp.getPosition().inTL(tpX, tpY);
-
-                    return tp;
+                    tooltip.width = 460f;
+                    tooltip.builder = (tp, exp) -> {
+                        tp.addPara(
+                            "Total export market share for " + m_com.getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
+                            pad
+                        );
+                    };
+                    tooltip.positioner = (tp, exp) -> {
+                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
+                    };
                 }
             };
 
 
-            final TextPanel textPanelRight = new TextPanel(section, 250, 0, new BasePanelPlugin<>()) {
-                {
-                    getPlugin().setTargetUIState(State.DIALOG);
-                }
-
+            final TextPanel textPanelRight = new TextPanel(section, 250, 0) {
                 @Override
                 public void createPanel() {
                     final String factionName = m_market.getFaction().getDisplayName();
@@ -620,29 +537,22 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
                     );
                 }
 
-                @Override
-                public UIPanelAPI getTpParent() {
-                    return m_parent;
-                }
+                {
+                    context.target = Context.DIALOG;
 
-                @Override
-                public TooltipMakerAPI createAndAttachTp() {
-                    final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
+                    tooltip.width = 460f;
+                    tooltip.builder = (tp, exp) -> {
+                        String marketOwner = m_market.getFaction().isPlayerFaction() ?
+                            "your" : m_market.getFaction().getPersonNamePrefix(); 
 
-                    String marketOwner = m_market.getFaction().isPlayerFaction() ?
-                        "your" : m_market.getFaction().getPersonNamePrefix(); 
-
-                    tp.addPara(
+                        tp.addPara(
                             "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
-                            pad);
-
-                    final float tpX = textX1 + textW1 + opad;
-                    final float tpY = baseRow2Y;
-
-                    ComponentFactory.addTooltip(tp, 0f, false, m_parent);
-                    tp.getPosition().inTL(tpX, tpY);
-
-                    return tp;
+                            pad
+                        );
+                    };
+                    tooltip.positioner = (tp, exp) -> {
+                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
+                    };
                 }
             };
 
@@ -693,18 +603,18 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
 
     private void createSection3(UIPanelAPI section, int mode) {
         final CallbackRunnable<Button> producerRunnable = (btn) -> {
-            if (producerButton.checked) return;
+            if (producerButton.isChecked()) return;
 
-            producerButton.checked = true;
-            consumerButton.checked = false;
+            producerButton.setChecked(true);
+            consumerButton.setChecked(false);
             updateSection3(0);
         };
 
         final CallbackRunnable<Button> consumerRunnable = (btn) -> {
-            if (consumerButton.checked) return;
+            if (consumerButton.isChecked()) return;
             
-            consumerButton.checked = true;
-            producerButton.checked = false;
+            producerButton.setChecked(false);
+            consumerButton.setChecked(true);
             updateSection3(1);
         };
 
@@ -724,8 +634,8 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         );
         producerButton.setLabelColor(base);
         consumerButton.setLabelColor(base);
-        producerButton.setCutStyle(CutStyle.TL_TR);
-        consumerButton.setCutStyle(CutStyle.TL_TR);
+        producerButton.cutStyle = CutStyle.TL_TR;
+        consumerButton.cutStyle = CutStyle.TL_TR;
         producerButton.setShortcut(Keyboard.KEY_1);
         consumerButton.setShortcut(Keyboard.KEY_2);
         producerButton.setAppendShortcutToText(true);
@@ -735,27 +645,22 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         section.addComponent(consumerButton.getPanel()).inTL(btnWidth, -btnHeight);
         
         if (mode == 0) {
-            producerButton.checked = true;
-            consumerButton.checked = false;
+            producerButton.setChecked(true);
+            consumerButton.setChecked(false);
         } else if (mode == 1) {
-            producerButton.checked = false;
-            consumerButton.checked = true;
+            producerButton.setChecked(false);
+            consumerButton.setChecked(true);
         }
 
         final SortableTable table = new SortableTable(
-            section,
-            SECT3_WIDTH,
-            SECT3_HEIGHT,
-            20,
-            30
+            section, SECT3_WIDTH, SECT3_HEIGHT, 20, 30
         );
 
         final String comID = m_com.getId();
         final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
         final String creditHeader = mode == 0 ? "Income" : "Value";
 
-        PendingTooltip<UIPanelAPI> quantityTooltip = new PendingTooltip<>();
-        createSection3QuantityHeaderTooltip(mode, table, quantityTooltip);
+        final TooltipBuilder quantityTooltip = createSection3QuantityHeaderTooltip(mode, table);
 
         final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
         :
@@ -799,9 +704,9 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             final Base iconPanel = new Base(section, iconSize, iconSize,
                 iconPath, null, null
             );
-            iconPanel.drawBorder = cell.getFlowDeficit() > 0;
-            iconPanel.outlineColor = Color.RED;
-            iconPanel.getPlugin().setOffsets(-1, -1, 2, 2);
+            iconPanel.outline.enabled = cell.getFlowDeficit() > 0;
+            iconPanel.outline.color = Color.RED;
+            iconPanel.offset.setOffset(-1, -1, 2, 2);
 
             final String factionName = market.getFaction().getDisplayName();
 
@@ -830,38 +735,31 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             table.addCell(NumFormat.formatCredit(incomeValue), cellAlg.MID, incomeValue, null);
 
             // Tooltip
-            final PendingTooltip<UIPanelAPI> tp = new PendingTooltip<>();
-            createSection3RowsTooltip(
-                table, market, market.getName(), textColor, tp
-            );
+            table.getPendingRow().tooltip.width = 450f;
+            final TooltipBuilder tp = createSection3RowsTooltip(market, market.getName(), textColor);
 
             if (m_market == market) {
-                table.getPendingRow().setOutline(Outline.TEX_THIN);
-                table.getPendingRow().setOutlineColor(base);
+                table.getPendingRow().outline.type = OutlineType.TEX_THIN;
+                table.getPendingRow().outline.color = base;
             }
 
-            final CallbackRunnable<RowPanel> rowSelectedRunnable = (row) -> {
+            final ClickHandler<RowPanel> rowSelectedRunnable = (row, isLeftClick) -> {
                 m_selectedMarket = (MarketAPI) row.customData;
                 updateSection1();
                 updateSection2();
             };
 
             table.pushRow(
-                CodexDataV2.getCommodityEntryId(comID), market,
-                null, m_market.getFaction().getDarkUIColor(),
-                tp, rowSelectedRunnable
+                market, tp, rowSelectedRunnable, CodexDataV2.getCommodityEntryId(comID),
+                null, m_market.getFaction().getDarkUIColor()
             );
 
-            if (m_market == market) {
-                table.selectLastRow();
-            }
+            if (m_market == market) table.selectLastRow();
         }
 
         section.addComponent(table.getPanel()).inTL(0,0);
 
         table.sortRows(6);
-
-        table.createPanel();
     }
 
     private void createSection4(UIPanelAPI section) {
@@ -874,39 +772,28 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
         );
         section4ComPanel.selectRow(m_com.getId());
 
-        section4ComPanel.setActionListener(this);
+        section4ComPanel.selectionListener = (source, isLeftClick) -> {
+            if (!isLeftClick) return;
+
+            m_com = source.m_com;
+
+            section4ComPanel.selectRow(source);
+
+            if (UiUtils.canViewPrices()) {
+                updateSection1();
+                
+                final int mode = producerButton.isChecked() ? 0 : 1;
+
+                updateSection3(mode);
+            } 
+        };
         section4ComPanel.createPanel();
 
         section.addComponent(section4ComPanel.getPanel());
     }
 
-    @Override
-    public void onClicked(CustomPanel<?, ?> source, boolean isLeftClick) {
-        if (!isLeftClick) return;
-
-        final CommodityRowPanel panel = ((CommodityRowPanel)source);
-        m_com = panel.getCommodity();
-
-        section4ComPanel.selectRow(panel);
-
-        if (UiUtils.canViewPrices()) {
-            updateSection1();
-            
-            final int mode = producerButton.checked ? 0 : 1;
-
-            updateSection3(mode);
-        } 
-    }
-
-    private void createSection3RowsTooltip(SortableTable table, MarketAPI market,
-        String marketName, Color baseColor, PendingTooltip<UIPanelAPI> wrapper) {
-
-        wrapper.parentSupplier = () -> {
-            return table.getPanel();
-        };
-
-        wrapper.factory = () -> {
-            final int tpWidth = 450;
+    private TooltipBuilder createSection3RowsTooltip(MarketAPI market, String marketName, Color baseColor) {
+        return (tp, exp) -> {
             final FactionAPI faction = market.getFaction();
             final CommodityCell cell = EconomyEngine.getInstance().getComCell(
                 m_com.getId(), market.getId()
@@ -914,8 +801,6 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     
             final Color darkColor = faction.getDarkUIColor();
             
-            final TooltipMakerAPI tp = ComponentFactory.createTooltip(tpWidth, false);
-    
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.addPara(marketName + " - " + m_com.getName(), baseColor, pad);
             tp.setParaFontDefault();
@@ -970,7 +855,7 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
     
             tp.addPara("Accessibility: %s", opad, valueColor, stability + "%");
     
-            tp.addStatModGrid(tpWidth, 50, opad, pad, market.getAccessibilityMod(),
+            tp.addStatModGrid(450f, 50, opad, pad, market.getAccessibilityMod(),
                 new StatModValueGetter() {
                     public String getPercentValue(StatMod value) {
                         return null;
@@ -999,32 +884,17 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             );
     
             tp.addSpacer(opad + pad);
-    
-            return tp;
         };
     }
 
-    private void createSection3QuantityHeaderTooltip(int mode, SortableTable table,
-        PendingTooltip<UIPanelAPI> wrapper) {
+    private TooltipBuilder createSection3QuantityHeaderTooltip(
+        int mode, SortableTable table
+    ) {
         final String quantityDesc = mode == 0
             ? "Units of this commodity exported globally."
             : "Units of this commodity imported globally to meet demand.";
 
-        wrapper.parentSupplier = () -> {
-            for (ColumnManager column : table.getColumns()) {
-                if ("Quantity".equals(column.title)) {
-                    return ((HeaderPanelWithTooltip) column.getHeaderPanel()).getParent();
-                }
-            } 
-
-            return null;
-        };
-
-        wrapper.factory = () -> {
-            final TooltipMakerAPI tp = ComponentFactory.createTooltip(
-                SortableTable.headerTooltipWidth*2, false
-            );
-
+        return (tp, exp) -> {
             tp.addPara(quantityDesc, pad);
 
             final int y = (int) tp.getHeightSoFar() + pad + opad;
@@ -1032,14 +902,12 @@ public class ComDetailDialog extends DialogPanel implements HasActionListener {
             CommodityRowPanel.legendRowCreator(
                 1, tp, y, 26, m_market
             );
-
-            return tp;
         };
     }
 
     public void dismiss(int option) {
         super.dismiss(option);
 
-        UIState.setState(State.NONE);
+        UIContext.setContext(Context.NONE);
     }
 }

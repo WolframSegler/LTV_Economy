@@ -65,7 +65,7 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         final int index = CampaignEngine.getInstance().getUIData().getCommandData().getSelectedTabIndex();
         if (UiInjected) {
             if (index == BUTTON_TAB_ID) return;
-            if (index != BUTTON_TAB_ID && !econButton.checked) return;
+            if (index != BUTTON_TAB_ID && !econButton.isChecked()) return;
         }
 
         outpostsTab = Attachments.getCurrentTab();
@@ -87,7 +87,7 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         final CommandTabData data = CampaignEngine.getInstance().getUIData().getCommandData();
 
         if (data.getSelectedTabIndex() != BUTTON_TAB_ID) {
-            econButton.checked = false;
+            econButton.setChecked(false);
             if (overviewPanel != null) overviewPanel.getPanel().setOpacity(0f);
 
             outpostsPanels.forEach(p -> p.setOpacity(1f));
@@ -97,7 +97,7 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
     }
 
     public final void run(Button btn) {
-        econButton.checked = true;
+        econButton.setChecked(true);
         final CommandTabData data = CampaignEngine.getInstance().getUIData().getCommandData();
         if (data.getSelectedTabIndex() == BUTTON_TAB_ID) return;
 
@@ -132,9 +132,9 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
             outpostsTab, BUTTON_WIDTH + 25, BUTTON_HEIGHT, "Economy", Fonts.ORBITRON_12, this
         );
         econButton.setShortcut(Keyboard.KEY_6);
-        econButton.setCutStyle(CutStyle.TL_TR);
-        econButton.setCutSize(6);
-        econButton.highlightBrightness = 0.3f;
+        econButton.cutStyle = CutStyle.TL_TR;
+        econButton.overrideCutSize = 6;
+        econButton.setHighlightBrightness(0.3f);
 
         outpostsTab.addComponent(econButton.getPanel());
         econButton.getPos().rightOfTop(button5, 1);

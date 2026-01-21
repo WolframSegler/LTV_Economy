@@ -10,11 +10,11 @@ import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.panels.FactionSelectionPanel.RowPanel;
 import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.UIState;
-import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.UIContext;
+import wfg.wrap_ui.ui.UIContext.Context;
 import wfg.wrap_ui.ui.dialogs.DialogPanel;
 
-public class ConfirmEmbargoDialog extends DialogPanel {
+public class ConfirmEmbargoDialog extends DialogPanel  {
 
     final String factionID;
     final boolean alreadyEmbargoed;
@@ -34,13 +34,13 @@ public class ConfirmEmbargoDialog extends DialogPanel {
 
         backgroundDimAmount = 0f;
 
-        UIState.setState(State.DIALOG);
+        UIContext.setContext(Context.DIALOG);
     }
 
     @Override
     public void dismiss(int option) {
         super.dismiss(option);
-        UIState.setState(State.NONE);
+        UIContext.setContext(Context.NONE);
 
         if (option == 1) return;
 

@@ -33,44 +33,41 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.ui.panels.IndustryWidget.ConstructionMode;
-import wfg.ltv_econ.ui.plugins.IndustryListPanelPlugin;
-import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIState;
-import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.UIContext;
+import wfg.wrap_ui.ui.UIContext.Context;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.TextPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import static wfg.wrap_ui.util.UIConstants.*;
 
-public class LtvIndustryListPanel extends CustomPanel<
-	IndustryListPanelPlugin, LtvIndustryListPanel
-> {
+public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
+
 	public static final int BUTTON_SECTION_HEIGHT = 45;
 
 	public static final Object indPickCtor = RolfLectionUtil.getConstructor(
 		IndustryPickerDialog.class, 
 		RolfLectionUtil.getConstructorParamTypesSingleConstructor(IndustryPickerDialog.class)
 	);
+
+	private static LtvIndustryListPanel instance;
 	public static Object indOptCtor = null;
 	
-	private final List<Object> widgets = new ArrayList<>();
-	public UIPanelAPI dummyWidget;
-	private final MarketAPI m_market;
+	public final List<Object> widgets = new ArrayList<>();
+	public final MarketAPI m_market;
+	public final UIPanelAPI dummyWidget;
 
 	private Button buildButton;
 
 	public LtvIndustryListPanel(UIPanelAPI parent, int width, int height, MarketAPI market, 
 		UIPanelAPI industryPanel) {
-		super(parent, width, height, new IndustryListPanelPlugin());
+		super(parent, width, height);
 
 		m_market = market;
 
@@ -79,15 +76,13 @@ public class LtvIndustryListPanel extends CustomPanel<
 		if (!widgets.isEmpty()) {
 			dummyWidget = (UIPanelAPI) widgets.get(0);
 			dummyWidget.setOpacity(0);
-		}
+		} else { dummyWidget = null; }
 
-		getPlugin().init(this);
 		createPanel();
 
 		instance = this;
    	}
 
-	private static LtvIndustryListPanel instance;
 	public static final void refreshPanel() {
 		if (instance == null) return;
 		instance.createPanel();
@@ -117,7 +112,6 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 			final IndustryWidget widget = new IndustryWidget(
 				wrappertp,
-				new IndustryWidgetPlugin(),
 				m_market,
 				ind,
 				this
@@ -141,7 +135,6 @@ public class LtvIndustryListPanel extends CustomPanel<
 
 			final IndustryWidget widget = new IndustryWidget(
 				wrappertp,
-				new IndustryWidgetPlugin(),
 				m_market,
 				ind,
 				this,
@@ -168,7 +161,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 		TextPanel maxIndLblPanel = null;
 
 		{ // player creditLbl
-		playerCreditLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
+		playerCreditLblPanel = new TextPanel(m_panel, 200, 25) {
 
 			@Override
 			public void createPanel() {
@@ -183,29 +176,19 @@ public class LtvIndustryListPanel extends CustomPanel<
 				add(creditLbl).inBL(0, 0);
 			}
 
-			@Override
-			public UIPanelAPI getTpParent() {
-				return Attachments.getScreenPanel();
-			}
-
-			@Override
-			public TooltipMakerAPI createAndAttachTp() {
-				final int tpWidth = 400;
-
-				final TooltipMakerAPI tp = ComponentFactory.createTooltip(tpWidth, false);
-
-				tp.addPara("Player credits available.", 0);
-
-				ComponentFactory.addTooltip(tp, 0f, false);
-				WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.TopLeft, 0);
-
-				return tp;
+			{
+				tooltip.builder = (tp, exp) -> {
+					tp.addPara("Player credits available.", 0);
+				};
+				tooltip.positioner = (tp, exp) -> {
+					WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+				};
 			}
 		};
         }
 
 		{ // colony creditLbl
-		colonyCreditLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
+		colonyCreditLblPanel = new TextPanel(getPanel(), 200, 25) {
 
 			@Override
 			public void createPanel() {
@@ -222,29 +205,19 @@ public class LtvIndustryListPanel extends CustomPanel<
 				add(creditLbl).inBL(0, 0);
 			}
 
-			@Override
-			public UIPanelAPI getTpParent() {
-				return Attachments.getScreenPanel();
-			}
-
-			@Override
-			public TooltipMakerAPI createAndAttachTp() {
-				final int tpWidth = 400;
-
-				final TooltipMakerAPI tp = ComponentFactory.createTooltip(tpWidth, false);
-
-				tp.addPara("Colony credits available.", 0);
-
-				ComponentFactory.addTooltip(tp, 0f, false);
-				WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.TopLeft, 0);
-
-				return tp;
+			{
+				tooltip.builder = (tp, exp) -> {
+					tp.addPara("Colony credits available.", 0);
+				};
+				tooltip.positioner = (tp, exp) -> {
+					WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+				};
 			}
 		};
         }
 
 		{ // maxIndLbl
-		maxIndLblPanel = new TextPanel(getPanel(), 200, 25, new BasePanelPlugin<>()) {
+		maxIndLblPanel = new TextPanel(getPanel(), 200, 25) {
 
 			@Override
 			public void createPanel() {
@@ -259,91 +232,81 @@ public class LtvIndustryListPanel extends CustomPanel<
 				add(maxIndLbl).inBL(0, 0);
 			}
 
-			@Override
-			public UIPanelAPI getTpParent() {
-				return Attachments.getScreenPanel();
-			}
+			{
+				tooltip.builder = (tp, exp) -> {
+					tp.addPara(
+						"Maximum number of industries, based on the size of a colony and other factors.", 0
+					);
+					tp.beginTable(
+						m_market.getFaction(), 20, new Object[]{"Colony size", 120, "Base industries", 120}
+					);
 
-			@Override
-			public TooltipMakerAPI createAndAttachTp() {
-				final int tpWidth = 400;
+					for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
+						tp.addRow(new Object[]{highlight, "" + i, highlight,
+						"" + PopulationAndInfrastructure.getMaxIndustries(i)});
+					}
 
-				final TooltipMakerAPI tp = ComponentFactory.createTooltip(tpWidth, false);
+					tp.addTable("", 0, 10);
+					tp.addPara(
+						"Structures such as spaceports or orbital stations do not count against this limit." + 
+						"Colonies that exceed this limit for any reason have their stability reduced by %s.", 20,
+						highlight, new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
+					);
+					tp.addPara("Industries on %s:", 10, m_market.getFaction().getBaseUIColor(),
+						new String[]{m_market.getName()}
+					);
 
-				tp.addPara(
-					"Maximum number of industries, based on the size of a colony and other factors.", 0
-				);
-				tp.beginTable(
-					m_market.getFaction(), 20, new Object[]{"Colony size", 120, "Base industries", 120}
-				);
+					final List<Industry> industries = WorkerRegistry.getVisibleIndustries(m_market);
+					Collections.sort(industries, getIndustryOrderComparator());
 
-				for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
-					tp.addRow(new Object[]{highlight, "" + i, highlight,
-					"" + PopulationAndInfrastructure.getMaxIndustries(i)});
-				}
+					final String indent = "    ";
+					boolean anyIndustryAdded = false;
+					int paragraphSpacing = 5;
 
-				tp.addTable("", 0, 10);
-				tp.addPara(
-					"Structures such as spaceports or orbital stations do not count against this limit." + 
-					"Colonies that exceed this limit for any reason have their stability reduced by %s.", 20,
-					highlight, new String[]{"" + Misc.OVER_MAX_INDUSTRIES_PENALTY}
-				);
-				tp.addPara("Industries on %s:", 10, m_market.getFaction().getBaseUIColor(),
-					new String[]{m_market.getName()}
-				);
-
-				final List<Industry> industries = WorkerRegistry.getVisibleIndustries(m_market);
-				Collections.sort(industries, getIndustryOrderComparator());
-
-				final String indent = "    ";
-				boolean anyIndustryAdded = false;
-				int paragraphSpacing = 5;
-
-				for (Industry industry : industries) {
-					if (industry.isIndustry()) {
-						tp.addPara(indent + industry.getCurrentName(), paragraphSpacing);
-						paragraphSpacing = 3;
-						anyIndustryAdded = true;
-					} else if (industry.isUpgrading()) {
-						String upgradeId = industry.getSpec().getUpgrade();
-						if (upgradeId != null) {
-							Industry upgradedIndustry = m_market.instantiateIndustry(upgradeId);
-							if (upgradedIndustry.isIndustry()) {
-								tp.addPara(
-									indent + industry.getCurrentName() + " (upgrading to " + 
-									upgradedIndustry.getCurrentName() + ")", paragraphSpacing
-								);
-								paragraphSpacing = 3;
-								anyIndustryAdded = true;
+					for (Industry industry : industries) {
+						if (industry.isIndustry()) {
+							tp.addPara(indent + industry.getCurrentName(), paragraphSpacing);
+							paragraphSpacing = 3;
+							anyIndustryAdded = true;
+						} else if (industry.isUpgrading()) {
+							String upgradeId = industry.getSpec().getUpgrade();
+							if (upgradeId != null) {
+								Industry upgradedIndustry = m_market.instantiateIndustry(upgradeId);
+								if (upgradedIndustry.isIndustry()) {
+									tp.addPara(
+										indent + industry.getCurrentName() + " (upgrading to " + 
+										upgradedIndustry.getCurrentName() + ")", paragraphSpacing
+									);
+									paragraphSpacing = 3;
+									anyIndustryAdded = true;
+								}
 							}
 						}
 					}
-				}
 
-				for (ConstructionQueueItem item : m_market.getConstructionQueue().getItems()) {
-					final IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
-					if (spec.hasTag("industry")) {
-						Industry ind = m_market.instantiateIndustry(item.id);
-						tp.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
-						paragraphSpacing = 3;
-						anyIndustryAdded = true;
+					for (ConstructionQueueItem item : m_market.getConstructionQueue().getItems()) {
+						final IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
+						if (spec.hasTag("industry")) {
+							Industry ind = m_market.instantiateIndustry(item.id);
+							tp.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
+							paragraphSpacing = 3;
+							anyIndustryAdded = true;
+						}
 					}
-				}
 
-				if (!anyIndustryAdded) {
-					tp.addPara(indent + "None", paragraphSpacing);
-				}
-
-				ComponentFactory.addTooltip(tp, 0f, false);
-				WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.TopLeft, 0);
-
-				return tp;
+					if (!anyIndustryAdded) {
+						tp.addPara(indent + "None", paragraphSpacing);
+					}
+				};
+				tooltip.positioner = (tp, exp) -> {
+					WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+				};
 			}
 		};
         }
 
 		final CallbackRunnable<Button> buildBtnRunnable = (btn) -> {
-			UIState.setState(State.DIALOG);
+			UIContext.setContext(Context.DIALOG);
 
 			final Object listener = new ListenerFactory.DialogDismissedListener() {
 				@Override
@@ -359,7 +322,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 				coreUI,
 				listener
 			);
-			dialog.show(0.3F, 0.2F);
+			dialog.show(0.3f, 0.2f);
 		};
 
 		final int buildBtnWidth = 350;
@@ -368,12 +331,12 @@ public class LtvIndustryListPanel extends CustomPanel<
 			"Add industry or structure...", Fonts.ORBITRON_20AABOLD,
 			buildBtnRunnable
 		);
-		buildButton.setCutStyle(CutStyle.TL_BR);
+		buildButton.cutStyle = CutStyle.TL_BR;
 		buildButton.setAlignment(Alignment.LMID);
 		buildButton.setLabelColor(base);
 		buildButton.setShortcut(Keyboard.KEY_A);
-		buildButton.getPlugin().setIgnoreUIState(false);
-		buildButton.getPlugin().setTargetUIState(State.NONE);
+		buildButton.context.ignore = false;
+		buildButton.context.target = Context.NONE;
 		
 		add(buildButton).inBL(0, BUTTON_SECTION_HEIGHT);
 		add(playerCreditLblPanel).inBL(buildBtnWidth + 40, BUTTON_SECTION_HEIGHT + 18);
@@ -381,37 +344,25 @@ public class LtvIndustryListPanel extends CustomPanel<
 		add(maxIndLblPanel).inBR(40, BUTTON_SECTION_HEIGHT);
 
 		if (!m_market.isPlayerOwned() && !DebugFlags.COLONY_DEBUG) {
-			buildButton.disabled = true;
+			buildButton.setEnabled(false);
 			playerCreditLblPanel.getPanel().setOpacity(0f);
 			colonyCreditLblPanel.getPanel().setOpacity(0f);
 			if (DebugFlags.HIDE_COLONY_CONTROLS) buildButton.getPanel().setOpacity(0f);
 		}
 	}
 
-	public final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, IndustryWidget widget) {
-
-		PendingTooltip<UIPanelAPI> wrapper = widget.m_tooltip;
-
-		wrapper.parentSupplier = () -> {
-			return Attachments.getScreenPanel();
-		};
-
-		wrapper.factory = () -> {
-			final TooltipMakerAPI tp = ComponentFactory.createTooltip(ind.getTooltipWidth(), false);
-
-			// ind.createTooltip(mode, tp, false);
+	public static final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, IndustryWidget widget) {
+		widget.industryIcon.tooltip.expandable = false;
+		widget.industryIcon.tooltip.builder = (tp, exp) -> {
 			IndustryTooltips.createIndustryTooltip(mode, tp, false, ind);
-
-			ComponentFactory.addTooltip(tp, 0f, false);
-			WrapUiUtils.anchorPanelWithBounds(tp, widget.getPanel(), AnchorType.RightTop, pad*2);
-
-			return tp;
 		};
 	}
 
-	public final void processInputImpl(List<InputEventAPI> events) {
-		boolean anyWidgetNotNormal = false;
+	@Override
+	public final void processInput(List<InputEventAPI> events) {
+		super.processInput(events);
 
+		boolean anyWidgetNotNormal = false;
 		for (Object widgetObj : widgets) {
 			if (widgetObj instanceof IndustryWidget widget) {
 				if (widget.getMode() != ConstructionMode.NORMAL) {
@@ -426,12 +377,11 @@ public class LtvIndustryListPanel extends CustomPanel<
 			boolean mouseOverWidget = events.stream()
 				.filter(InputEventAPI::isMouseMoveEvent)
 				.anyMatch(event -> widgets.stream()
-				.anyMatch(widget -> ((IndustryWidget) widget).getIndustryIcon().getPos()
-				.containsEvent(event)));
+				.anyMatch(widget -> ((IndustryWidget) widget).industryIcon.getPos()
+				.containsEvent(event))
+			);
 
-			if (mouseOverWidget) {
-				anyWidgetNotNormal = false;
-			}
+			if (mouseOverWidget) anyWidgetNotNormal = false;
 		}
 
 		if (anyWidgetNotNormal) {
@@ -458,7 +408,7 @@ public class LtvIndustryListPanel extends CustomPanel<
 	}
 
 	public final void dialogDismissed(Object... args) {
-		UIState.setState(State.NONE);
+		UIContext.setContext(Context.NONE);
 
 		if (((int) args[1]) != 0) return; // 0 means confirm
 		final IndustryPickerDialog buildDialog = (IndustryPickerDialog) args[0];
@@ -498,10 +448,6 @@ public class LtvIndustryListPanel extends CustomPanel<
 		} else {
 			return MarketInteractionMode.REMOTE;
 		}
-	}
-
-	public final List<Object> getWidgets() {
-		return widgets;
 	}
 
 	private static final Comparator<Industry> getIndustryOrderComparator() {

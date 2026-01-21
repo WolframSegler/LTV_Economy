@@ -5,7 +5,6 @@ import static wfg.wrap_ui.util.UIConstants.*;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -14,7 +13,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
@@ -34,14 +32,13 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIState;
-import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.UIContext;
+import wfg.wrap_ui.ui.UIContext.Context;
+import wfg.wrap_ui.ui.components.HoverGlowComp.GlowType;
 import wfg.wrap_ui.ui.dialogs.DialogPanel;
 import wfg.wrap_ui.ui.panels.BasePanel;
 import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
@@ -78,14 +75,14 @@ public class AssignWorkersDialog extends DialogPanel {
         reg.setData(previewData);
         initialFreeWorkerRatio = WorkerPoolCondition.getPoolCondition(market).getFreeWorkerRatio();
 
-        getHolo().setBackgroundAlpha(1, 1);
+        holo.setBackgroundAlpha(1, 1);
 
         createPanel();
     }
 
     @Override
     public void createPanel() {
-        UIState.setState(State.DIALOG);
+        UIContext.setContext(Context.DIALOG);
 
         final int sliderHeight = 32;
         final int sliderWidth = 380;
@@ -101,13 +98,8 @@ public class AssignWorkersDialog extends DialogPanel {
 
         inputOutputContainer = new BasePanel(
             innerPanel, (int) innerPanel.getPosition().getWidth(),
-            180, new BasePanelPlugin<>()
-        ) {
-            @Override
-            public float getBgAlpha() {
-                return 0f;
-            }
-        };
+            180
+        ) {{ bg.alpha = 0f;}};
 
         // Draw Production
         drawProductionAndConsumption(inputOutputContainer.getPanel());
@@ -117,54 +109,31 @@ public class AssignWorkersDialog extends DialogPanel {
 
         // Draw separator line
         final BasePanel separator = new BasePanel(
-            innerPanel, panelWidth, 1, new BasePanelPlugin<>()
-        ) {
-            @Override
-            public Color getBgColor() {
-                return new Color(100, 100, 100);
-            }
-        };
+            innerPanel, panelWidth, 1
+        ) {{ bg.color = new Color(100, 100, 100);}};
+        
         separator.getPos().inTL(0, sliderY - opad);
         innerPanel.addComponent(separator.getPanel());
 
         final SpritePanelWithTp help_button = new SpritePanelWithTp(innerPanel, 20 , 20,
             WARNING_BUTTON_PATH, null, null
-        ) {
-            {
-                getPlugin().setIgnoreUIState(true);
-            }
+        ) {{
+            context.ignore = true;
 
-            @Override
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override  
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(300f, false);
-
+            tooltip.builder = (tp, exp) -> {
                 tp.addPara(
                     "Adjust each output's slider to allocate a portion of the market's total workforce. " +
                     "The values represent the percentage of available workers assigned to that output.",
                     pad
                 );
+            };
+            tooltip.positioner = (tp, exp) -> {
+                WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.TopLeft, 0);
+            };
 
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.TopLeft, 0);
-
-                return tp;
-            }
-        
-            @Override 
-            public Glow getGlowType() {
-                return Glow.ADDITIVE;
-            }
-
-            @Override 
-            public Optional<SpriteAPI> getAdditiveSprite() {
-                return Optional.of(m_sprite);
-            }
-        };
+            glow.type = GlowType.ADDITIVE;
+            glow.additiveSprite = m_sprite;
+        }};
 
         innerPanel.addComponent(help_button.getPanel()).inTR(pad, sliderY + pad);
 
@@ -349,8 +318,8 @@ public class AssignWorkersDialog extends DialogPanel {
     }
 
     @Override
-    public void advanceImpl(float amount) {
-        super.advanceImpl(amount);
+    public void advance(float amount) {
+        super.advance(amount);
 
         boolean update = false;
 
@@ -387,7 +356,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         if (option == 1) reg.setData(data);
 
-        UIState.setState(State.NONE);
+        UIContext.setContext(Context.NONE);
         LtvIndustryListPanel.refreshPanel();
     }
 }

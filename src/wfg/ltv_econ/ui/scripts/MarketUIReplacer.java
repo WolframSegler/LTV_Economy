@@ -2,8 +2,6 @@ package wfg.ltv_econ.ui.scripts;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.awt.Color;
 
 import org.lwjgl.input.Keyboard;
@@ -21,7 +19,6 @@ import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
-import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
@@ -29,12 +26,10 @@ import wfg.wrap_ui.util.WrapUiUtils;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;
+import wfg.wrap_ui.ui.components.InteractionComp.ClickHandler;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.plugins.ButtonPlugin;
 
 import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
@@ -54,7 +49,6 @@ import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.PositionAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
@@ -71,7 +65,8 @@ public class MarketUIReplacer implements EveryFrameScript {
     public static MarketAPI marketAPI = null;
     public static Market market = null;
 
-    public static UUID incomeLblID;
+    public static Object stockpilesBtnPlugin;
+    public static Object incomeLblPlugin;
 
     @Override
     public void advance(float amount) {
@@ -156,7 +151,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
         for (Object child : managementChildren) {
-            if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof ButtonPlugin) {
+            if (child instanceof CustomPanelAPI cp && cp.getPlugin() == stockpilesBtnPlugin) {
                 return;
             }
         }
@@ -180,13 +175,15 @@ public class MarketUIReplacer implements EveryFrameScript {
         };
 
         final Button inventoryBtn = new Button(
-                managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Stockpiles",
-                Fonts.ORBITRON_12, stockpilesBtnRunnable);
+            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Stockpiles",
+            Fonts.ORBITRON_12, stockpilesBtnRunnable
+        );
         inventoryBtn.setLabelColor(base);
         inventoryBtn.bgColor = new Color(0, 0, 0, 255);
         inventoryBtn.bgDisabledColor = new Color(0, 0, 0, 255);
-        inventoryBtn.quickMode = true;
+        inventoryBtn.setQuickMode(true);
         inventoryBtn.setShortcut(Keyboard.KEY_G);
+        stockpilesBtnPlugin = ((CustomPanelAPI)inventoryBtn.getPanel()).getPlugin();
 
         managementPanel.addComponent(inventoryBtn.getPanel()).inBL(0, 0);
 
@@ -206,12 +203,13 @@ public class MarketUIReplacer implements EveryFrameScript {
         };
 
         final Button manageBtn = new Button(
-                managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Manage Workers",
-                Fonts.ORBITRON_12, manageWorkersBtnRunnable);
+            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Manage Workers",
+            Fonts.ORBITRON_12, manageWorkersBtnRunnable
+        );
         manageBtn.setLabelColor(base);
         manageBtn.bgColor = new Color(0, 0, 0, 255);
         manageBtn.bgDisabledColor = new Color(0, 0, 0, 255);
-        manageBtn.quickMode = true;
+        manageBtn.setQuickMode(true);
         manageBtn.setShortcut(Keyboard.KEY_W);
 
         managementPanel.addComponent(manageBtn.getPanel()).inBL(0, 0);
@@ -233,8 +231,8 @@ public class MarketUIReplacer implements EveryFrameScript {
             CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
         RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
         for (Object child : children) {
-            if (child instanceof CustomPanelAPI cp && cp.getPlugin() instanceof BasePanelPlugin bp) {
-                if (bp.UniqueID.equals(incomeLblID)) return;
+            if (child instanceof CustomPanelAPI cp && cp.getPlugin() == incomeLblPlugin) {
+                return;
             }
         }
         
@@ -254,66 +252,59 @@ public class MarketUIReplacer implements EveryFrameScript {
         final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
             public void createPanel() {
-                incomeLblID = getPlugin().UniqueID;
-
                 final long value = EconomyEngine.getInstance().info.getNetIncome(marketAPI, true);
                 final String txt = "Credits/month";
                 final String valueTxt = NumFormat.formatCredit(value);
                 final Color valueColor = value < 0 ? negative
-                        : marketAPI.getFaction().getBrightUIColor();
+                    : marketAPI.getFaction().getBrightUIColor();
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt,
                     marketAPI.getFaction().getBaseUIColor(), valueColor
                 );
             }
 
-            @Override
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            private TooltipMakerAPI m_tp;
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final int TP_WIDTH = 450;
-                m_tp = ComponentFactory.createTooltip(TP_WIDTH, false);
-
+            final float TP_WIDTH = 450f;
+            {
+            tooltip.width = TP_WIDTH;
+            tooltip.positioner = (tp, expanded) -> {
+                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.LeftTop, 50);
+            };
+            tooltip.builder = (tp, expanded) -> {
                 final FactionAPI faction = marketAPI.getFaction();
                 final Color base = faction.getBaseUIColor();
                 final Color dark = faction.getDarkUIColor();
                 final EconomyEngine engine = EconomyEngine.getInstance();
 
-                m_tp.addTitle("Monthly Income & Upkeep", base);
+                tp.addTitle("Monthly Income & Upkeep", base);
                 final long income = engine.info.getNetIncome(marketAPI, true);
 
                 final String incomeTxt = NumFormat.formatCreditAbs(income);
                 if (income >= 0) {
-                    m_tp.addPara("The net monthly income of this colony last month was %s.", opad, highlight, incomeTxt);
+                    tp.addPara("The net monthly income of this colony last month was %s.", opad, highlight, incomeTxt);
                 } else {
-                    m_tp.addPara("The net monthly upkeep for this colony last month was %s.", opad, negative, incomeTxt);
+                    tp.addPara("The net monthly upkeep for this colony last month was %s.", opad, negative, incomeTxt);
                 }
 
-                m_tp.addPara(
+                tp.addPara(
                     "Income multiplier: %s", opad, highlight,
                     Math.round(marketAPI.getIncomeMult().getModifiedValue() * 100f) + "%"
                 );
-                m_tp.addStatModGrid(
+                tp.addStatModGrid(
                     TP_WIDTH, 50f, opad, pad, marketAPI.getIncomeMult(), true, null
                 );
-                m_tp.setParaFontColor(gray);
-                m_tp.addPara(
+                tp.setParaFontColor(gray);
+                tp.addPara(
                     "This multiplier affects industry income & upkeep, "+ 
                     "but does not affect wages or trade (exports/imports).",
                     opad
                 );
-                m_tp.setParaFontColor(Color.WHITE);
+                tp.setParaFontColor(Color.WHITE);
 
-                m_tp.addPara(
+                tp.addPara(
                     "Upkeep multiplier: %s", opad, highlight,
                     Math.round(marketAPI.getUpkeepMult().getModifiedValue() * 100f) + "%"
                 );
-                m_tp.addStatModGrid(
+                tp.addStatModGrid(
                     TP_WIDTH, 50f, opad, pad, marketAPI.getUpkeepMult(), true, null
                 );
 
@@ -322,41 +313,41 @@ public class MarketUIReplacer implements EveryFrameScript {
 
                 final ArrayList<Industry> industries = new ArrayList<>(marketAPI.getIndustries());
 
-                m_tp.addSectionHeading("Income", base, dark, Alignment.MID, opad);
+                tp.addSectionHeading("Income", base, dark, Alignment.MID, opad);
 
-                m_tp.addPara("Local income: %s", opad, highlight, indIncome);
+                tp.addPara("Local income: %s", opad, highlight, indIncome);
                 industries.sort((i1, i2) ->
                     Integer.compare(
                         engine.info.getIndustryIncome(i2).getModifiedInt(),
                         engine.info.getIndustryIncome(i1).getModifiedInt()
                     )
                 );
-                m_tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
+                tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
 
                 int indCount = 0;
                 for (Industry ind : industries) {
                     int perIndIncome = engine.info.getIndustryIncome(ind).getModifiedInt();
                     if (perIndIncome > 0) {
-                        m_tp.addToGrid(0, indCount++, ind.getCurrentName(),
+                        tp.addToGrid(0, indCount++, ind.getCurrentName(),
                             NumFormat.formatCredit(perIndIncome), highlight
                         );
                     }
                 }
 
                 if (indCount > 0) {
-                    m_tp.addGrid(pad);
+                    tp.addGrid(pad);
                 } else {
-                    m_tp.cancelGrid();
+                    tp.cancelGrid();
                 }
 
                 final long exportIncome = engine.info.getExportIncome(marketAPI, true);
-                m_tp.addPara("Last Month's Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
+                tp.addPara("Last Month's Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
                 if (exportIncome > 0 && expanded) {
                     final int maxCommoditiesToDisplay = 10;
                     final float somethingWidth = 500f - 14f - 395f;
                     final float extraPad = ((int)(somethingWidth / 3f));
 
-                    m_tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
+                    tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
                     int exportedCount = 0;
                     final List<CommodityDomain> commodities = engine.getComDomains();
                     for (CommodityDomain com : commodities) {
@@ -383,19 +374,19 @@ public class MarketUIReplacer implements EveryFrameScript {
                             com.spec.getId(), marketAPI.getId()
                         );
 
-                        m_tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, highlight, exportMarketShare + "%", highlight, NumFormat.formatCredit(comExportIncome));
+                        tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, highlight, exportMarketShare + "%", highlight, NumFormat.formatCredit(comExportIncome));
                         comCount++;
                         if (comCount + 1 > maxCommoditiesToDisplay && exportedCount - comCount > 1) {
                             break;
                         }
                     }
 
-                    m_tp.addTable("No exports", exportedCount - comCount, opad);
+                    tp.addTable("No exports", exportedCount - comCount, opad);
                 }
 
-                m_tp.addSectionHeading("Upkeep", base, dark, Alignment.MID, opad);
+                tp.addSectionHeading("Upkeep", base, dark, Alignment.MID, opad);
                 if (expanded && engine.info.getIndustryUpkeep(marketAPI) > 0) {
-                    m_tp.addPara("Industry and structure upkeep: %s", opad, negative, indUpkeep);
+                    tp.addPara("Industry and structure upkeep: %s", opad, negative, indUpkeep);
 
                     industries.sort((i1, i2) ->
                         Integer.compare(
@@ -404,33 +395,33 @@ public class MarketUIReplacer implements EveryFrameScript {
                         )
                     );
 
-                    m_tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
+                    tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
                     indCount = 0;
 
                     for (Industry ind : industries) {
                         int perIndIncome = engine.info.getIndustryUpkeep(ind).getModifiedInt();
                         if (perIndIncome > 0) {
-                            m_tp.addToGrid(0, indCount++, ind.getCurrentName(),
+                            tp.addToGrid(0, indCount++, ind.getCurrentName(),
                                 NumFormat.formatCredit(perIndIncome), negative
                             );
                         }
                     }
 
                     if (indCount > 0) {
-                        m_tp.addGrid(pad);
+                        tp.addGrid(pad);
                     } else {
-                        m_tp.cancelGrid();
+                        tp.cancelGrid();
                     }
                 }
 
                 final long importExpense = engine.info.getImportExpense(marketAPI, true);
-                m_tp.addPara("Last Month's Imports: %s", opad, negative, NumFormat.formatCredit(importExpense));
+                tp.addPara("Last Month's Imports: %s", opad, negative, NumFormat.formatCredit(importExpense));
                 if (importExpense > 0 && expanded) {
                     final int maxCommoditiesToDisplay = 10;
                     final float somethingWidth = 500f - 14f - 395f;
                     final float extraPad = ((int)(somethingWidth / 3f));
 
-                    m_tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Expense", 100f + extraPad);
+                    tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Expense", 100f + extraPad);
                     int importedCount = 0;
                     final List<CommodityDomain> commodities = engine.getComDomains();
                     for (CommodityDomain com : commodities) {
@@ -457,72 +448,31 @@ public class MarketUIReplacer implements EveryFrameScript {
                             com.spec.getId(), marketAPI.getId()
                         );
 
-                        m_tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, negative, importMarketShare + "%", negative, NumFormat.formatCredit(comImportExpense));
+                        tp.addRow(Alignment.LMID, Misc.getTextColor(), " " + name, negative, importMarketShare + "%", negative, NumFormat.formatCredit(comImportExpense));
                         comCount++;
                         if (comCount + 1 > maxCommoditiesToDisplay && importedCount - comCount > 1) {
                             break;
                         }
                     }
 
-                    m_tp.addTable("No imports", importedCount - comCount, opad);
+                    tp.addTable("No imports", importedCount - comCount, opad);
                 }
 
                 final long monthlyWages = (long) (engine.info.getWagesForMarket(marketAPI)*MONTH);
                 if (monthlyWages > 0) {
-                    m_tp.addPara("Worker wages: %s", opad, negative,
+                    tp.addPara("Worker wages: %s", opad, negative,
                         NumFormat.formatCredit(monthlyWages)
                     );
                 }
 
                 final int incentive = (int) marketAPI.getImmigrationIncentivesCost();
                 if (incentive > 0 && marketAPI.isImmigrationIncentivesOn()) {
-                    m_tp.addPara("Hazard pay: %s", opad, negative, Misc.getDGSCredits(incentive));
+                    tp.addPara("Hazard pay: %s", opad, negative, Misc.getDGSCredits(incentive));
                 }
-
-                ComponentFactory.addTooltip(m_tp, 0f, false);
-                WrapUiUtils.anchorPanel(m_tp, getPanel(), AnchorType.LeftTop, 50);
-                return m_tp;
-            }
-            
-            private boolean expanded = false;
-
-            @Override
-            public boolean isExpanded() {
-                return expanded;
             };
-
-            @Override
-            public void setExpanded(boolean a) {
-                expanded = a;
-            };
-
-            @Override
-            public Optional<UIPanelAPI> getCodexParent() {
-                return Optional.ofNullable(getPanel());
-            }
-
-            private static final String notExpandedCodexF1 = "F1 more info";
-            private static final String ExpandedCodexF1 = "F1 hide";
-
-            @Override
-            public Optional<TooltipMakerAPI> createAndAttachCodex() {
-                TooltipMakerAPI codex;
-
-                if (!expanded) {
-                    final int codexW = 100;
-
-                    codex = TooltipUtils.createCustomCodex(this, notExpandedCodexF1, null, codexW);
-                } else {
-                    final int codexW = 70;
-
-                    codex = TooltipUtils.createCustomCodex(this, ExpandedCodexF1, null, codexW);  
-                }
-
-                WrapUiUtils.anchorPanel(codex, m_tp, AnchorType.BottomLeft, opad + pad);
-
-                return Optional.ofNullable(codex);
             }
         };
+        incomeLblPlugin = ((CustomPanelAPI)colonyCreditLabel.getPanel()).getPlugin();
 
         final PositionAPI posS = colonyCreditLabel.getPos();
         final PositionAPI posA = hazardBtn.getPosition();
@@ -620,25 +570,22 @@ public class MarketUIReplacer implements EveryFrameScript {
                 marketAPI
             );
 
-            final HasActionListener listener = new HasActionListener() {
-                @Override
-                public void onClicked(CustomPanel<?, ?> source, boolean isLeftClick) {
-                    if (!isLeftClick) return;
+            final ClickHandler<CommodityRowPanel> listener = (source, isLeftClick) -> {
+                if (!isLeftClick) return;
 
-                    CommodityRowPanel panel = ((CommodityRowPanel) source);
+                CommodityRowPanel panel = ((CommodityRowPanel) source);
 
-                    replacement.selectRow(panel);
+                replacement.selectRow(panel);
 
-                    if (UiUtils.canViewPrices()) {
-                        final ComDetailDialog dialogPanel = new ComDetailDialog(
-                            marketAPI, panel.getCommodity()
-                        );
-                        dialogPanel.show(0.3f, 0.3f);
-                    }
+                if (UiUtils.canViewPrices()) {
+                    final ComDetailDialog dialogPanel = new ComDetailDialog(
+                        marketAPI, panel.m_com
+                    );
+                    dialogPanel.show(0.3f, 0.3f);
                 }
             };
 
-            replacement.setActionListener(listener);
+            replacement.selectionListener = listener;
             replacement.createPanel();
 
             // Got the Y offset by looking at the getY() difference of replacement and

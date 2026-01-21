@@ -2,7 +2,6 @@ package wfg.ltv_econ.ui.panels;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
@@ -13,7 +12,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
 import com.fs.starfarer.api.ui.Alignment;
@@ -33,77 +31,76 @@ import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.ui.plugins.IndustryWidgetPlugin;
 import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
 import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIState;
-import wfg.wrap_ui.ui.UIState.State;
+import wfg.wrap_ui.ui.UIContext;
+import wfg.wrap_ui.ui.UIContext.Context;
+import wfg.wrap_ui.ui.components.AudioFeedbackComp;
+import wfg.wrap_ui.ui.components.BackgroundComp;
+import wfg.wrap_ui.ui.components.HoverGlowComp;
+import wfg.wrap_ui.ui.components.InteractionComp;
+import wfg.wrap_ui.ui.components.LayoutOffsetComp;
+import wfg.wrap_ui.ui.components.NativeComponents;
+import wfg.wrap_ui.ui.components.TooltipComp;
+import wfg.wrap_ui.ui.components.HoverGlowComp.GlowType;
 import wfg.wrap_ui.ui.panels.BasePanel;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Slider;
 import wfg.wrap_ui.ui.panels.SpritePanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasFader;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasHoverGlow;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasLayoutOffset;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.ui.systems.FaderSystem.Glow;
 import wfg.wrap_ui.util.NumFormat;
 import wfg.wrap_ui.util.WrapUiUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
-public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWidget>
-    implements HasBackground, HasFader, HasActionListener {
-
+public class IndustryWidget extends CustomPanel<IndustryWidget> implements
+    HasBackground, HasHoverGlow, HasLayoutOffset
+{
     public final static int PANEL_WIDTH = 190;
     public final static int TITLE_HEIGHT = 15 + pad;
     public final static int IMAGE_HEIGHT = 95;
     public final static int TOTAL_HEIGHT = TITLE_HEIGHT + IMAGE_HEIGHT;
     public final static int ICON_SIZE = 32;
 
+    public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
+    public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+    public final LayoutOffsetComp offset = comp().get(NativeComponents.LAYOUT_OFFSET);
+
     public final Color baseColor;
     public final Color darkColor;
     public final Color gridColor;
     public final Color brightColor;
 
-    private Industry m_industry;
-    private IndustryImagePanel industryIcon;
-    private boolean isListenerEnabled = true;
+    public final Industry m_industry;
+    public IndustryImagePanel industryIcon;
+    public LtvIndustryListPanel industryPanel;
+
     private boolean tradeInfoPanel;
-    private LtvIndustryListPanel IndustryPanel;
     private int constructionQueueIndex;
     private LabelAPI buildingTitleHeader;
     private LabelAPI constructionStatusText;
     private ConstructionMode constructionMode;
-    private Color BgColor = null;
     private final MarketAPI m_market;
     private final FactionAPI m_faction;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
-    /*
-     * Shared both by the Widget and IndustryImagePanel
-     */
-    private FaderUtil m_fader = null;
-    public PendingTooltip<UIPanelAPI> m_tooltip = null;
+    public IndustryWidget(UIPanelAPI parent, MarketAPI market, Industry ind,
+        LtvIndustryListPanel indPanel
+    ) { this(parent, market, ind, indPanel, -1); }
 
-    public IndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
-        MarketAPI market, Industry ind, LtvIndustryListPanel indPanel) {
-
-        this(parent, plugin, market, ind, indPanel, -1);
-    }
-
-    public IndustryWidget(UIPanelAPI parent, IndustryWidgetPlugin plugin,
-        MarketAPI market, Industry ind, LtvIndustryListPanel indPanel, int queue) {
-        super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT, plugin);
+    public IndustryWidget(UIPanelAPI parent, MarketAPI market, Industry ind,
+        LtvIndustryListPanel indPanel, int queue
+    ) { super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT);
 
         m_market = market;
         m_faction = market.getFaction();
 
         constructionMode = ConstructionMode.NORMAL;
         m_industry = ind;
-        IndustryPanel = indPanel;
+        industryPanel = indPanel;
         constructionQueueIndex = queue;
 
         baseColor = m_faction.getBaseUIColor();
@@ -111,58 +108,23 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
         gridColor = m_faction.getGridUIColor();
         brightColor = m_faction.getBrightUIColor();
 
-        BgColor = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
+        bg.color = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
+        bg.alpha = 1f;
 
-        m_fader = new FaderUtil(0.3f, 0.1f, 0.4f, true, false);
-        m_tooltip = new PendingTooltip<>();
+        glow.fader = new FaderUtil(0.3f, 0.1f, 0.4f, true, false);
+        glow.isFaderOwner = false;
+        glow.type = GlowType.UNDERLAY;
+        glow.color = m_faction.getBaseUIColor();
 
-        getPlugin().init(this);
         final int hOffset = m_industry.isStructure() ? TITLE_HEIGHT : 0;
-        getPlugin().setOffsets(-1, -1, 2, 2 - hOffset);
+        offset.setOffset(-1, -1, 2, 2 - hOffset);
 
         createPanel();
     }
 
-    public Color getBgColor() {
-        return BgColor;
-    }
-
-    public void setBgColor(Color color) {
-        BgColor = color;
-    }
-
-    public boolean isBgEnabled() {
-        return true;
-    }
-
-    public float getBgAlpha() {
-        return 1;
-    }
-
-    public FaderUtil getFader() {
-        return m_fader;
-    }
-
-    public boolean isFaderOwner() {
-        return false;
-    }
-
-    public Glow getGlowType() {
-        return Glow.UNDERLAY;
-    }
-
-    public Color getGlowColor() {
-        return m_faction.getBaseUIColor();
-    }
-
-    public boolean isListenerEnabled() {
-        return isListenerEnabled;
-    }
-
     public void createPanel() {
-        final BasePanel titlePanel = new BasePanel(
-            getPanel(), PANEL_WIDTH, TITLE_HEIGHT, new BasePanelPlugin<>()
-        ) {
+        final BasePanel titlePanel = new BasePanel(m_panel, PANEL_WIDTH, TITLE_HEIGHT) {
+
             @Override
             public void createPanel() {
                 buildingTitleHeader = Global.getSettings().createLabel(
@@ -180,9 +142,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
                 add(buildingTitleHeader).inLMid(pad);
             }
 
-            public boolean isBgEnabled() {
-                return false;
-            }
+            { bg.enabled = false; }
         };
         add(titlePanel).inTL(0, 0);
 
@@ -191,18 +151,133 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
             m_industry.getCurrentImage(),
             Color.WHITE, null
         );
-        industryIcon.setActionListener(this);
 
         if (!m_industry.isFunctional() || constructionQueueIndex >= 0) {
-            industryIcon.color = darkColor;
+            industryIcon.setColor(darkColor);
         }
 
         if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
-            industryIcon.color = Color.white;
-            isListenerEnabled = false;
+            industryIcon.setColor(Color.white);
+            industryIcon.interaction.enabled = false;
         }
         add(industryIcon).inBL(0, 0);
 
+        industryIcon.interaction.onClicked = (indIcon, isLeftClick) -> {
+            if (tradeInfoPanel) return;
+            IndustryWidget targetInd;
+
+            if (constructionQueueIndex >= 0) {
+                if (!isLeftClick) {
+                    for (Object widgetObj : industryPanel.widgets) {
+                        if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
+                            widget.setNormalMode();
+                        }
+                    }
+
+                    return;
+                }
+
+                if (constructionMode == ConstructionMode.NORMAL) {
+                    for (Object widgetObj : industryPanel.widgets) {
+                    if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
+                        if (widget == this) {
+                            widget.setRemoveMode();
+                        } else {
+                            widget.setSwapMode();
+                        }
+                    }
+                    }
+
+                } else if (constructionMode == ConstructionMode.SWAP) {
+                    targetInd = null;
+
+                    for (Object widgetObj : industryPanel.widgets) {
+                        if (widgetObj instanceof IndustryWidget widget &&
+                            widget.getQueueIndex() >= 0 &&
+                            widget.constructionMode == ConstructionMode.REMOVE
+                        ) {
+                            targetInd = widget;
+                            break;
+                        }
+                    }
+
+                    // Swap industries
+
+                    List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
+                    if (targetInd != null && targetInd.constructionQueueIndex >= 0 && targetInd.constructionQueueIndex < queueItems.size()
+                        && constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
+
+                        ConstructionQueueItem sourceItem = queueItems.get(constructionQueueIndex);
+                        ConstructionQueueItem targetItem = queueItems.get(targetInd.constructionQueueIndex);
+
+                        String tempID = sourceItem.id;
+                        int tempCost  = sourceItem.cost;
+
+                        sourceItem.id = targetItem.id;
+                        sourceItem.cost = targetItem.cost;
+                        targetItem.id = tempID;
+                        targetItem.cost = tempCost;
+
+                        industryPanel.createPanel();
+                    }
+                } else if (constructionMode == ConstructionMode.REMOVE) {
+                    List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
+                    if (constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
+
+                        final ConstructionQueueItem item = queueItems.get(constructionQueueIndex);
+                        m_market.getConstructionQueue().removeItem(item.id);
+
+                        int itemCost = item.cost;
+                        if (itemCost > 0) {
+                            Global.getSector().getPlayerFleet().getCargo().getCredits().add(itemCost);
+                            Misc.addCreditsMessage("Received %s", itemCost);
+                        }
+
+                        industryPanel.createPanel();
+                    }
+                }
+            } else {
+                for (Object widgetObj : industryPanel.widgets) {
+                    if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
+                        widget.setNormalMode();
+                    }
+                }
+
+                if (LtvIndustryListPanel.indOptCtor != null && industryPanel.dummyWidget != null) {
+                    final Object listener = new ListenerFactory.DialogDismissedListener() {
+                        @Override
+                        public void trigger(Object... args) {
+                            dialogDismissed();
+                        }
+                    }.getProxy();
+
+                    // c var17 = new c(
+                    //     this.øôöO00,
+                    //     this, var14,
+                    //     CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
+                    //     this
+                    // );
+                    final DialogCreatorUI dialog = (DialogCreatorUI) RolfLectionUtil.instantiateClass(
+                        LtvIndustryListPanel.indOptCtor,
+                        m_industry,
+                        industryPanel.dummyWidget,
+                        LtvIndustryListPanel.getMarketInteractionMode(m_market),
+                        Attachments.getCampaignScreenPanel(),
+                        listener
+                    );
+                    RolfLectionUtil.getMethodAndInvokeDirectly(
+                        "show", dialog, 0f, 0f);
+
+                    WrapUiUtils.anchorPanel(
+                        ((UIPanelAPI)dialog), industryIcon.getPanel(), AnchorType.MidTopLeft, 0
+                    );
+
+                }
+                tradeInfoPanel = true;
+
+                UIContext.setContext(Context.DIALOG);
+            }
+        };
 
         final WorkerIndustryData data = WorkerRegistry.getInstance().getData(m_industry);
         final LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
@@ -450,127 +525,9 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
    }
 
     @Override
-    public void onClicked(CustomPanel<?, ?> source, boolean isLeftClick) {
-        if (tradeInfoPanel) return;
-
-        IndustryWidget targetInd;
-
-        if (constructionQueueIndex >= 0) {
-
-            if (!isLeftClick) {
-                for (Object widgetObj : IndustryPanel.getWidgets()) {
-                    if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
-                        widget.setNormalMode();
-                    }
-                }
-
-                return;
-            }
-
-            if (constructionMode == ConstructionMode.NORMAL) {
-                for (Object widgetObj : IndustryPanel.getWidgets()) {
-                if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
-                    if (widget == this) {
-                        widget.setRemoveMode();
-                    } else {
-                        widget.setSwapMode();
-                    }
-                }
-                }
-
-            } else if (constructionMode == ConstructionMode.SWAP) {
-                targetInd = null;
-
-                for (Object widgetObj : IndustryPanel.getWidgets()) {
-                    if (widgetObj instanceof IndustryWidget widget &&
-                        widget.getQueueIndex() >= 0 &&
-                        widget.constructionMode == ConstructionMode.REMOVE
-                    ) {
-                        targetInd = widget;
-                        break;
-                    }
-                }
-
-                // Swap industries
-
-                List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
-                if (targetInd != null && targetInd.constructionQueueIndex >= 0 && targetInd.constructionQueueIndex < queueItems.size()
-                    && constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
-
-                    ConstructionQueueItem sourceItem = queueItems.get(constructionQueueIndex);
-                    ConstructionQueueItem targetItem = queueItems.get(targetInd.constructionQueueIndex);
-
-                    String tempID = sourceItem.id;
-                    int tempCost  = sourceItem.cost;
-
-                    sourceItem.id = targetItem.id;
-                    sourceItem.cost = targetItem.cost;
-                    targetItem.id = tempID;
-                    targetItem.cost = tempCost;
-
-                    IndustryPanel.createPanel();
-                }
-            } else if (constructionMode == ConstructionMode.REMOVE) {
-                List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
-                if (constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
-
-                    final ConstructionQueueItem item = queueItems.get(constructionQueueIndex);
-                    m_market.getConstructionQueue().removeItem(item.id);
-
-                    int itemCost = item.cost;
-                    if (itemCost > 0) {
-                        Global.getSector().getPlayerFleet().getCargo().getCredits().add(itemCost);
-                        Misc.addCreditsMessage("Received %s", itemCost);
-                    }
-
-                    IndustryPanel.createPanel();
-                }
-            }
-        } else {
-            for (Object widgetObj : IndustryPanel.getWidgets()) {
-                if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
-                    widget.setNormalMode();
-                }
-            }
-
-            if (LtvIndustryListPanel.indOptCtor != null && getIndustryPanel().dummyWidget != null) {
-                final Object listener = new ListenerFactory.DialogDismissedListener() {
-                    @Override
-                    public void trigger(Object... args) {
-                        dialogDismissed();
-                    }
-                }.getProxy();
-
-                // c var17 = new c(
-                //     this.øôöO00,
-                //     this, var14,
-                //     CampaignEngine.getInstance().getCampaignUI().getDialogParent(),
-                //     this
-                // );
-                final DialogCreatorUI dialog = (DialogCreatorUI) RolfLectionUtil.instantiateClass(
-                    LtvIndustryListPanel.indOptCtor,
-                    m_industry,
-                    getIndustryPanel().dummyWidget,
-                    LtvIndustryListPanel.getMarketInteractionMode(m_market),
-                    Attachments.getCampaignScreenPanel(),
-                    listener
-                );
-                RolfLectionUtil.getMethodAndInvokeDirectly(
-                    "show", dialog, 0f, 0f);
-
-                WrapUiUtils.anchorPanel(
-                    ((UIPanelAPI)dialog), industryIcon.getPanel(), AnchorType.MidTopLeft, 0
-                );
-
-            }
-            tradeInfoPanel = true;
-
-            UIState.setState(State.DIALOG);
-        }
-    }
-
-    public void renderImpl(float alphaMult) {
-        if (industryIcon.getFader().getBrightness() > 0) {
+    public void renderBelow(float alpha) {
+        super.renderBelow(alpha);
+        if (glow.fader.getBrightness() > 0f) {
             buildingTitleHeader.setHighlight(buildingTitleHeader.getText());
 
             if (constructionStatusText != null) {
@@ -595,21 +552,9 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
     public void dialogDismissed() {
         tradeInfoPanel = false;
         RolfLectionUtil.getMethodAndInvokeDirectly("dialogDismissed",
-            getIndustryPanel().dummyWidget, null, 0);
+            industryPanel.dummyWidget, null, 0);
 
-        UIState.setState(State.NONE);
-    }
-
-    public Industry getIndustry() {
-        return m_industry;
-    }
-
-    public IndustryImagePanel getIndustryIcon() {
-        return industryIcon;
-    }
-
-    public LtvIndustryListPanel getIndustryPanel() {
-        return IndustryPanel;
+        UIContext.setContext(Context.NONE);
     }
 
     public enum ConstructionMode {
@@ -618,64 +563,30 @@ public class IndustryWidget extends CustomPanel<IndustryWidgetPlugin, IndustryWi
         REMOVE,
     }
 
-    public class IndustryImagePanel extends SpritePanel<IndustryImagePanel> 
-        implements HasFader, AcceptsActionListener, HasTooltip, HasAudioFeedback {
-
-        HasActionListener m_listener = null;
+    public class IndustryImagePanel extends SpritePanel<IndustryImagePanel> implements
+        HasHoverGlow, HasInteraction, HasTooltip, HasAudioFeedback
+    {
+        public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
+        public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
+        public final HoverGlowComp ImgGlow = comp().get(NativeComponents.HOVER_GLOW);
+        public final InteractionComp<IndustryImagePanel> interaction = comp().get(
+            NativeComponents.INTERACTION
+        ); 
 
         public IndustryImagePanel(UIPanelAPI parent, int width, int height,
-            String spriteID, Color color, Color fillColor) {
+            String spriteID, Color color, Color fillColor
+        ) {
             super(parent, width, height, spriteID, color, fillColor);
-        }
 
-        @Override
-        public FaderUtil getFader() {
-            return m_fader;
-        }
+            final Color gColor = constructionMode == ConstructionMode.NORMAL ? Color.WHITE : Color.BLACK;
 
-        @Override
-        public Glow getGlowType() {
-            return Glow.ADDITIVE;
-        }
+            ImgGlow.fader = glow.fader;
+            ImgGlow.type = GlowType.ADDITIVE;
+            ImgGlow.additiveBrightness = 1f;
+            ImgGlow.additiveSprite = m_sprite;
+            ImgGlow.color = WrapUiUtils.adjustBrightness(gColor, 0.33f);
 
-        @Override
-        public float getAdditiveBrightness() {
-            return 1;
-        }
-
-        @Override
-        public Optional<SpriteAPI> getAdditiveSprite() {
-            return Optional.ofNullable(m_sprite);
-        }
-
-        @Override
-        public Color getGlowColor() {
-            Color gColor = constructionMode == ConstructionMode.NORMAL ? Color.WHITE : Color.BLACK; 
-            return WrapUiUtils.adjustBrightness(gColor, 0.33f);
-        }
-
-        @Override
-        public Optional<HasActionListener> getActionListener() {
-            return Optional.ofNullable(m_listener);
-        }
-
-        @Override
-        public void setActionListener(HasActionListener a) {
-            m_listener = a;
-        }
-
-        @Override
-        public UIPanelAPI getTpParent() {
-            return m_tooltip.parentSupplier.get();
-        }
-
-        @Override
-        public TooltipMakerAPI createAndAttachTp() {
-            return m_tooltip.factory.get();
-        }
-
-        public boolean isUseDisableSound() {
-            return (!DebugFlags.COLONY_DEBUG && !m_industry.getMarket().isPlayerOwned());
+            audio.useDisabledSound = (!DebugFlags.COLONY_DEBUG && !m_industry.getMarket().isPlayerOwned());
         }
     }
 }

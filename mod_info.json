@@ -2,7 +2,7 @@
 	"id":"wfg_ltv_econ",
 	"name":"LTV Economy",
 	"author":"WolframSegler",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"description":"A deep overhaul of Starsector's economic and colony systems.",
 	"gameVersion":"0.98a-RC8",
 	"utility": false,

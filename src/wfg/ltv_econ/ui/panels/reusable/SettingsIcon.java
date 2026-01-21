@@ -3,19 +3,23 @@ package wfg.ltv_econ.ui.panels.reusable;
 import static wfg.wrap_ui.util.UIConstants.*;
 
 import java.awt.Color;
-import java.util.Optional;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.wrap_ui.ui.panels.SpritePanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.AcceptsActionListener;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasActionListener;
+import wfg.wrap_ui.ui.components.AudioFeedbackComp;
+import wfg.wrap_ui.ui.components.InteractionComp;
+import wfg.wrap_ui.ui.components.NativeComponents;
 import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
+import wfg.wrap_ui.ui.panels.CustomPanel.HasInteraction;
 
 public class SettingsIcon extends SpritePanel<SettingsIcon> implements 
-    HasAudioFeedback, HasActionListener, AcceptsActionListener
+    HasAudioFeedback, HasInteraction
 {
+    public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
+    public final InteractionComp<SettingsIcon> interaction = comp().get(NativeComponents.INTERACTION);
+
     public static final String SETTINGS_ICON = Global.getSettings()
         .getSpriteName("ui", "settings");
 
@@ -24,6 +28,4 @@ public class SettingsIcon extends SpritePanel<SettingsIcon> implements
             color == null ? base : color, null
         );
     }
-
-    public final Optional<HasActionListener> getActionListener() { return Optional.of(this); }
 }

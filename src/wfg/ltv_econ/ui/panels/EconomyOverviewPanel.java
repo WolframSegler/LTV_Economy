@@ -13,13 +13,11 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
 import static wfg.wrap_ui.util.UIConstants.*;
 
-public class EconomyOverviewPanel extends CustomPanel<
-    BasePanelPlugin<EconomyOverviewPanel>, EconomyOverviewPanel>
-{
+public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> {
+
     public static final int MAIN_PANEL_W = 1250;
     public static final int MAIN_PANEL_H = 700;
     public static final int NAVBAR_W = 200;
@@ -38,9 +36,8 @@ public class EconomyOverviewPanel extends CustomPanel<
     private static Button firstButton = null;
 
     public EconomyOverviewPanel(UIPanelAPI parent) {
-        super(parent, MAIN_PANEL_W, MAIN_PANEL_H, new BasePanelPlugin<>());
+        super(parent, MAIN_PANEL_W, MAIN_PANEL_H);
 
-        getPlugin().init(this);
         createPanel();
     }
 
@@ -96,7 +93,7 @@ public class EconomyOverviewPanel extends CustomPanel<
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Global Commodity Flow",
             Fonts.ORBITRON_12, buttonRunnable
         );
-        button.setCutStyle(CutStyle.TL_BR);
+        button.cutStyle = CutStyle.TL_BR;
         button.bgAlpha = 1f;
         navButtons.add(button);
         firstButton = button;
@@ -111,7 +108,7 @@ public class EconomyOverviewPanel extends CustomPanel<
         button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Faction Administration", Fonts.ORBITRON_12, buttonRunnable
         );
-        button.setCutStyle(CutStyle.TL_BR);
+        button.cutStyle = CutStyle.TL_BR;
         button.bgAlpha = 1f;
         navButtons.add(button);
 
@@ -125,7 +122,7 @@ public class EconomyOverviewPanel extends CustomPanel<
         button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Settings", Fonts.ORBITRON_12, buttonRunnable
         );
-        button.setCutStyle(CutStyle.TL_BR);
+        button.cutStyle = CutStyle.TL_BR;
         button.bgAlpha = 1f;
         navButtons.add(button);
         
@@ -135,14 +132,14 @@ public class EconomyOverviewPanel extends CustomPanel<
         button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "PANEL BTN", Fonts.ORBITRON_12, buttonRunnable
         );
-        button.setCutStyle(CutStyle.TL_BR);
+        button.cutStyle = CutStyle.TL_BR;
         button.bgAlpha = 1f;
         navButtons.add(button);
     }
 
     private static final void clearPanelAndButtonState(Button caller) {
-        navButtons.forEach(b -> b.checked = false);
-        caller.checked = true;
+        navButtons.forEach(b -> b.setChecked(false));
+        caller.setChecked(true);
         RolfLectionUtil.invokeMethodDirectly(CustomPanel.clearChildrenMethod, contentPanel);
         RolfLectionUtil.invokeMethodDirectly(CustomPanel.clearChildrenMethod, optionsPanel);
     }

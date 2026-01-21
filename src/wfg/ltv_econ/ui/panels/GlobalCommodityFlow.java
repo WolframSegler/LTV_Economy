@@ -17,7 +17,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -29,26 +28,21 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.wrap_ui.ui.Attachments;
 import wfg.wrap_ui.ui.ComponentFactory;
+import wfg.wrap_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.wrap_ui.ui.components.TooltipComp.TooltipBuilder;
 import wfg.wrap_ui.ui.panels.CustomPanel;
 import wfg.wrap_ui.ui.panels.PieChart;
 import wfg.wrap_ui.ui.panels.SortableTable;
 import wfg.wrap_ui.ui.panels.SortableTable.RowPanel;
 import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
 import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip.PendingTooltip;
 import wfg.wrap_ui.ui.panels.PieChart.PieSlice;
 import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
-import wfg.wrap_ui.util.CallbackRunnable;
 import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
 import static wfg.wrap_ui.util.UIConstants.*;
 
-public class GlobalCommodityFlow extends
-    CustomPanel<BasePanelPlugin<GlobalCommodityFlow>, GlobalCommodityFlow>
-{
+public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
     public static final int ICON_SIZE = 135;
     public static final int LABEL_W = 150;
@@ -64,9 +58,8 @@ public class GlobalCommodityFlow extends
     public static CommoditySpecAPI selectedCom = Global.getSettings().getCommoditySpec(Commodities.SUPPLIES);
 
     public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height, new BasePanelPlugin<>());
+        super(parent, width, height);
 
-        getPlugin().init(this);
         createPanel();
     }
 
@@ -80,14 +73,13 @@ public class GlobalCommodityFlow extends
         clearChildren();
 
         final ComIconPanel comIcon = new ComIconPanel(
-            getPanel(), sector.getPlayerFaction(), ICON_SIZE, ICON_SIZE,
-            selectedCom.getIconName(), null, null
+            m_panel, ICON_SIZE, ICON_SIZE, null, null, selectedCom,
+            sector.getPlayerFaction()
         );
-        comIcon.setCommodity(selectedCom);
         add(comIcon).inTL((LABEL_W*2 - ICON_SIZE) / 2f, 0);
 
         { // Total global production
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.info.getGlobalProduction(comID);
@@ -98,24 +90,15 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "The combined daily output of %s across all colonies in the Sector. " +
-                    "Represents active industrial production, excluding existing stockpiles.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The combined daily output of %s across all colonies in the Sector. " +
+                        "Represents active industrial production, excluding existing stockpiles.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -129,31 +112,20 @@ public class GlobalCommodityFlow extends
                 final long value = engine.info.getGlobalDemand(comID);
                 final String txt = "Global demand";
                 String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) {
-                    valueTxt = "---";
-                }
+                if (value < 1) valueTxt = "---";
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "The combined daily demand of all colonies for %s. " +
-                    "Demand reflects how much the sector needs to maintain standard production, growth, and stability.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The combined daily demand of all colonies for %s. " +
+                        "Demand reflects how much the sector needs to maintain standard production, growth, and stability.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -172,24 +144,15 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "The amount of %s that the sector produced beyond what was demanded. " +
-                    "A higher surplus means that, even after all importing markets had their needs filled, some production still remained unused.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The amount of %s that the sector produced beyond what was demanded. " +
+                        "A higher surplus means that, even after all importing markets had their needs filled, some production still remained unused.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -208,25 +171,16 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "Global deficit represents the total amount of demand that remained unfulfilled on the previous day." +
-                    "This value does not track shortages in stockpiles and only measures demand that was not supplied on the previous day." +
-                    "A colony may have large reserves and still contribute to the global deficit if trade routes could not deliver enough units in time.",
-                    pad
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "Global deficit represents the total amount of demand that remained unfulfilled on the previous day." +
+                        "This value does not track shortages in stockpiles and only measures demand that was not supplied on the previous day." +
+                        "A colony may have large reserves and still contribute to the global deficit if trade routes could not deliver enough units in time.",
+                        pad
+                    );
+                };
             }
         };
 
@@ -246,23 +200,14 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "The total number of units of %s traded across the sector on the previous day, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The total number of units of %s traded across the sector on the previous day, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -281,23 +226,14 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "The total monetary value (in credits) of all %s trades across the entire sector on the previous day. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The total monetary value (in credits) of all %s trades across the entire sector on the previous day. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -315,23 +251,14 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "The average price of %s across all markets in the sector on the previous day, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The average price of %s across all markets in the sector on the previous day, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -357,27 +284,18 @@ public class GlobalCommodityFlow extends
                 );
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "Trade Volatility for the last %s days. " +
-                    "Indicates how much the daily export volume for %s fluctuates relative to its average.",
-                    pad,
-                    new Color[] {base, highlight},
-                    EconomyConfig.VOLATILITY_WINDOW + "",
-                    selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "Trade Volatility for the last %s days. " +
+                        "Indicates how much the daily export volume for %s fluctuates relative to its average.",
+                        pad,
+                        new Color[] {base, highlight},
+                        EconomyConfig.VOLATILITY_WINDOW + "",
+                        selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -395,25 +313,16 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "Shows the total amount of %s currently stored across all markets in the sector. " +
-                    "This value reflects available stock and does not account for daily production or consumption. " +
-                    "High stockpiles indicate abundance, while low stockpiles signal scarcity and potential trade opportunities.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "Shows the total amount of %s currently stored across all markets in the sector. " +
+                        "This value reflects available stock and does not account for daily production or consumption. " +
+                        "High stockpiles indicate abundance, while low stockpiles signal scarcity and potential trade opportunities.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -434,24 +343,15 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "Displays the total number of workers currently assigned to producing %s across all markets in the sector ."+
-                    "Workers are counted based on the output of industries producing this commodity, not the industry as a whole.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "Displays the total number of workers currently assigned to producing %s across all markets in the sector ."+
+                        "Workers are counted based on the output of industries producing this commodity, not the industry as a whole.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -470,23 +370,14 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "The total count of markets in the sector that exported %s on the previous day. Only markets that actually sent units to other markets are included, regardless of faction.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The total count of markets in the sector that exported %s on the previous day. Only markets that actually sent units to other markets are included, regardless of faction.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
@@ -505,40 +396,25 @@ public class GlobalCommodityFlow extends
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
 
-            public UIPanelAPI getTpParent() {
-                return Attachments.getScreenPanel();
-            }
-
-            @Override
-            public TooltipMakerAPI createAndAttachTp() {
-                final TooltipMakerAPI tp = ComponentFactory.createTooltip(460f, false);
-
-                tp.addPara(
-                    "The total count of markets in the sector that imported %s on the previous day. Only markets that actually received units from other markets are included, regardless of faction.",
-                    pad, highlight, selectedCom.getName()
-                );
-
-                ComponentFactory.addTooltip(tp, 0f, false);
-                WrapUiUtils.mouseCornerPos(tp, opad);
-
-                return tp;
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The total count of markets in the sector that imported %s on the previous day. Only markets that actually received units from other markets are included, regardless of faction.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
             }
         };
 
         add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H);
         }
 
-        final PendingTooltip<UIPanelAPI> tableTp = new PendingTooltip<>();
-        tableTp.parentSupplier = this::getPanel;
-        tableTp.factory = () -> {
-            final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
+        final TooltipBuilder tableTp = (tp, exp) -> {
             tp.addPara("Ctrl + Click to set course", pad, highlight, new String[]{
                 "Ctrl", "Click"
             });
-
-            return tp;
         };
-
         { // Top 5 producers
         final SortableTable table = new SortableTable(getParent(), TABLE_W, TABLE_H);
 
@@ -561,7 +437,7 @@ public class GlobalCommodityFlow extends
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
 
-            final CallbackRunnable<RowPanel> run = (row) -> {
+            final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
                 if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
                     return;
                 }
@@ -573,7 +449,7 @@ public class GlobalCommodityFlow extends
             };
 
             table.pushRow(
-                null, null, null, null, tableTp, run 
+                null, tableTp, run, null, null, null 
             );
         }
 
@@ -610,7 +486,7 @@ public class GlobalCommodityFlow extends
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
 
-            final CallbackRunnable<RowPanel> run = (row) -> {
+            final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
                 if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
                     return;
                 }
@@ -622,7 +498,7 @@ public class GlobalCommodityFlow extends
             };
 
             table.pushRow(
-                null, null, null, null, tableTp, run 
+                null, tableTp, run, null, null, null 
             );
         }
 
@@ -653,14 +529,11 @@ public class GlobalCommodityFlow extends
                 value
             ));
         }
-        final PendingTooltip<UIPanelAPI> pendingTp = new PendingTooltip<>();
 
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(360, pad);
 
-        pendingTp.parentSupplier = chart::getPanel;
-        pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
+        chart.tooltip.builder = (tp, exp) -> {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
             tp.addPara("Global Export Share by Faction", pad);
@@ -689,9 +562,7 @@ public class GlobalCommodityFlow extends
             }
 
             tp.addTable("", 0, opad);
-            return tp;
         };
-        chart.pendingTp = pendingTp;
 
         final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
@@ -715,14 +586,11 @@ public class GlobalCommodityFlow extends
                 value
             ));
         }
-        final PendingTooltip<UIPanelAPI> pendingTp = new PendingTooltip<>();
 
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(580, pad);
 
-        pendingTp.parentSupplier = chart::getPanel;
-        pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
+        chart.tooltip.builder = (tp, exp) -> {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
             tp.addPara("Global Import Share by Faction", pad);
@@ -751,9 +619,7 @@ public class GlobalCommodityFlow extends
             }
 
             tp.addTable("", 0, opad);
-            return tp;
         };
-        chart.pendingTp = pendingTp;
 
         final LabelAPI label = settings.createLabel("Import share", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
@@ -777,14 +643,10 @@ public class GlobalCommodityFlow extends
             1f - globalTradeShare
         ));
 
-        final PendingTooltip<UIPanelAPI> pendingTp = new PendingTooltip<>();
-
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(800, pad);
 
-        pendingTp.parentSupplier = chart::getPanel;
-        pendingTp.factory = () -> {
-            final TooltipMakerAPI tp = ComponentFactory.createTooltip(400f, false);
+        chart.tooltip.builder = (tp, exp) -> {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
             tp.addPara("Global vs In-Faction Trade Share", pad);
@@ -797,10 +659,7 @@ public class GlobalCommodityFlow extends
                 pad,
                 highlight, ((int)(globalTradeShare*100)) + "%", ((int)((1f-globalTradeShare)*100)) + "%"
             );
-
-            return tp;
         };
-        chart.pendingTp = pendingTp;
 
         final LabelAPI label = settings.createLabel("Trade Breakdown", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());

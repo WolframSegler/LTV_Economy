@@ -13,15 +13,12 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.wrap_ui.ui.ComponentFactory;
 import wfg.wrap_ui.ui.panels.Button;
 import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.plugins.BasePanelPlugin;
 import wfg.wrap_ui.util.CallbackRunnable;
 
-public class FactionAdministrationPanel extends
-    CustomPanel<BasePanelPlugin<FactionAdministrationPanel>, FactionAdministrationPanel>
-{
+public class FactionAdministrationPanel extends CustomPanel<FactionAdministrationPanel> {
+
     public FactionAdministrationPanel(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height, new BasePanelPlugin<>());
-        getPlugin().init(this);
+        super(parent, width, height);
 
         createPanel();
     }
@@ -58,8 +55,8 @@ public class FactionAdministrationPanel extends
         final int lblW = (int) financePoliciesLbl.getPosition().getHeight();
 
         final CallbackRunnable<Button> redistributeRun = (btn) -> {
-            btn.checked = !btn.checked;
-            factionSettings.redistributeCredits = btn.checked;
+            btn.setChecked(!btn.isChecked());
+            factionSettings.redistributeCredits = btn.isChecked();
         };
 
         final Button redistributeBtn = ComponentFactory.createCheckboxWithText(
@@ -67,7 +64,7 @@ public class FactionAdministrationPanel extends
             "Redistribute credits between markets",
             Fonts.DEFAULT_SMALL, redistributeRun, base, pad
         );
-        redistributeBtn.checked = factionSettings.redistributeCredits;
+        redistributeBtn.setChecked(factionSettings.redistributeCredits);
         add(redistributeBtn).inTL(opad + pad, SECTION_II + lblW + pad);
         }
     }
