@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static wfg.ltv_econ.constants.economyValues.*;
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 
@@ -28,29 +28,28 @@ import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
-import wfg.ltv_econ.util.UiUtils;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIContext;
-import wfg.wrap_ui.ui.UIContext.Context;
-import wfg.wrap_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.wrap_ui.ui.components.InteractionComp.ClickHandler;
-import wfg.wrap_ui.ui.dialogs.DialogPanel;
-import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.panels.ListenerProviderPanel;
-import wfg.wrap_ui.ui.panels.PieChart;
-import wfg.wrap_ui.ui.panels.PieChart.PieSlice;
-import wfg.wrap_ui.ui.panels.ScrollPanel;
-import wfg.wrap_ui.ui.panels.ScrollPanel.ScrollType;
-import wfg.wrap_ui.ui.panels.Slider;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
-import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.util.CallbackRunnable;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.UIContext;
+import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.dialogs.DialogPanel;
+import wfg.native_ui.ui.panels.Button;
+import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.ui.panels.ListenerProviderPanel;
+import wfg.native_ui.ui.panels.PieChart;
+import wfg.native_ui.ui.panels.PieChart.PieSlice;
+import wfg.native_ui.ui.panels.ScrollPanel;
+import wfg.native_ui.ui.panels.ScrollPanel.ScrollType;
+import wfg.native_ui.ui.panels.Slider;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.ui.panels.SpritePanelWithTp;
+import wfg.native_ui.ui.panels.TextPanel;
+import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class ManageWorkersDialog extends DialogPanel {
 
@@ -149,6 +148,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Controls the proportion of worker output the colony retains as profit." +
@@ -159,7 +159,7 @@ public class ManageWorkersDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 };
             }
         };
@@ -186,13 +186,14 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Total wages paid to workers this month.", pad
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 };
             }
         };
@@ -220,6 +221,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The average monthly income of workers in the colony. Each person spends 1" +
@@ -228,7 +230,7 @@ public class ManageWorkersDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 };
             }
         };
@@ -246,7 +248,7 @@ public class ManageWorkersDialog extends DialogPanel {
         exploitationSlider.maxValue = LaborConfig.MAX_RoSV;
         exploitationSlider.clampCurrToMax = true;
         exploitationSlider.roundBarValue = true;
-        exploitationSlider.setBarColor(UiUtils.lerpColor(
+        exploitationSlider.setBarColor(NativeUiUtils.lerpColor(
             positiveColor, negativeColor, mData.getRoSV()/(float)(LaborConfig.MAX_RoSV - 1)
         ));
         exploitationSlider.showValueOnly = true;
@@ -307,6 +309,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows how many workers are currently employed compared to the colony's total labor capacity.",
@@ -314,7 +317,7 @@ public class ManageWorkersDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.LeftTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.LeftTop, opad);
                 };
             }
         };
@@ -369,6 +372,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Overall health of the population. A higher value indicates better living conditions, food availability, and lower hazard exposure.", pad);
                 
@@ -378,7 +382,7 @@ public class ManageWorkersDialog extends DialogPanel {
                     tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.healthDelta, tpGridGetter);
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 };
             }
         };
@@ -409,6 +413,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and social cohesion.", opad);
 
@@ -418,7 +423,7 @@ public class ManageWorkersDialog extends DialogPanel {
                     tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.happinessDelta, tpGridGetter);
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 };
             }
         };
@@ -449,6 +454,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Degree of social cohesion within the population. High cohesion reduces conflict and increases stability.", opad);
 
@@ -458,7 +464,7 @@ public class ManageWorkersDialog extends DialogPanel {
                     tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.socialCohesionDelta, tpGridGetter);
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
                 };
             }
         };
@@ -489,6 +495,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The population's awareness of exploitation and social hierarchy. Higher values indicate a greater likelihood of collective action. " +
@@ -502,7 +509,7 @@ public class ManageWorkersDialog extends DialogPanel {
                     tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.classConsciousnessDelta, tpGridGetter);
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, 0);
+                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, 0);
                 };
             }
         };
@@ -619,6 +626,7 @@ public class ManageWorkersDialog extends DialogPanel {
                 glow.type = GlowType.ADDITIVE;
                 glow.additiveSprite = m_sprite;
 
+                tooltip.parent = ManageWorkersDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> policy.createTooltip(mData, tp);
 
                 createPanel();
@@ -674,11 +682,12 @@ public class ManageWorkersDialog extends DialogPanel {
             activateButton.setEnabled(false);
 
             activateButton.setShowTooltipWhileInactive(true);
+            activateButton.tooltip.parent = ManageWorkersDialog.this.m_panel;
             activateButton.tooltip.builder = (tp, exp) -> {
                 tp.addPara("Not enough market credits to activate this policy", pad);
             };
             activateButton.tooltip.positioner = (tp, exp) -> {
-                WrapUiUtils.anchorPanel(tp, activateButton.getPanel(), AnchorType.TopLeft, pad);
+                NativeUiUtils.anchorPanel(tp, activateButton.getPanel(), AnchorType.TopLeft, pad);
             };
         }
 
@@ -695,7 +704,7 @@ public class ManageWorkersDialog extends DialogPanel {
         final LabelAPI desc = settings.createLabel(policy.spec.description, Fonts.DEFAULT_SMALL);
         desc.autoSizeToWidth(PANEL_W/1.5f - 4*opad - posterW);
         cont.addComponent((UIComponentAPI)desc);
-        WrapUiUtils.anchorPanel((UIComponentAPI)desc, (UIComponentAPI)title, AnchorType.BottomLeft, pad*2);
+        NativeUiUtils.anchorPanel((UIComponentAPI)desc, (UIComponentAPI)title, AnchorType.BottomLeft, pad*2);
 
         final LabelAPI buttonSide = settings.createLabel(buttonSideTxt, Fonts.DEFAULT_SMALL);
         buttonSide.setHighlightColor(highlight);
@@ -748,7 +757,7 @@ public class ManageWorkersDialog extends DialogPanel {
         if (exploitationSlider.getProgressInterpolated() == sliderValue) return;
 
         sliderValue = exploitationSlider.getProgressInterpolated();
-        exploitationSlider.setBarColor(UiUtils.lerpColor(
+        exploitationSlider.setBarColor(NativeUiUtils.lerpColor(
             positiveColor, negativeColor, sliderValue/(float)(LaborConfig.MAX_RoSV - 1)
         ));
     }

@@ -1,7 +1,7 @@
 package wfg.ltv_econ.intel;
 
 import static wfg.ltv_econ.constants.economyValues.*;
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;

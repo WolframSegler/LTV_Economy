@@ -10,8 +10,8 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
-import wfg.wrap_ui.util.NumFormat;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.util.NumFormat;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 

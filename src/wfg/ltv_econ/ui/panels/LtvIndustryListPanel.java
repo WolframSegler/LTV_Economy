@@ -25,7 +25,6 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
-import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import rolflectionlib.util.ListenerFactory;
@@ -34,18 +33,18 @@ import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.ui.panels.IndustryWidget.ConstructionMode;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.wrap_ui.util.CallbackRunnable;
-import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIContext;
-import wfg.wrap_ui.ui.UIContext.Context;
-import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.UIContext;
+import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.panels.Button;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.TextPanel;
+import wfg.native_ui.ui.panels.Button.CutStyle;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 
@@ -111,7 +110,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			Industry ind = industries.get(index);
 
 			final IndustryWidget widget = new IndustryWidget(
-				wrappertp,
+				m_panel,
 				m_market,
 				ind,
 				this
@@ -134,7 +133,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			Industry ind = m_market.instantiateIndustry(queuedIndustries.get(index).id);
 
 			final IndustryWidget widget = new IndustryWidget(
-				wrappertp,
+				m_panel,
 				m_market,
 				ind,
 				this,
@@ -177,11 +176,12 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			}
 
 			{
+				tooltip.parent = LtvIndustryListPanel.this.m_panel;
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara("Player credits available.", 0);
 				};
 				tooltip.positioner = (tp, exp) -> {
-					WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+					NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
 				};
 			}
 		};
@@ -206,11 +206,12 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			}
 
 			{
+				tooltip.parent = LtvIndustryListPanel.this.m_panel;
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara("Colony credits available.", 0);
 				};
 				tooltip.positioner = (tp, exp) -> {
-					WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+					NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
 				};
 			}
 		};
@@ -233,6 +234,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			}
 
 			{
+				tooltip.parent = LtvIndustryListPanel.this.m_panel;
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara(
 						"Maximum number of industries, based on the size of a colony and other factors.", 0
@@ -299,7 +301,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 					}
 				};
 				tooltip.positioner = (tp, exp) -> {
-					WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+					NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
 				};
 			}
 		};
@@ -332,7 +334,6 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			buildBtnRunnable
 		);
 		buildButton.cutStyle = CutStyle.TL_BR;
-		buildButton.setAlignment(Alignment.LMID);
 		buildButton.setLabelColor(base);
 		buildButton.setShortcut(Keyboard.KEY_A);
 		buildButton.context.ignore = false;
@@ -352,7 +353,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 	}
 
 	public static final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, IndustryWidget widget) {
-		widget.industryIcon.tooltip.expandable = false;
+		widget.industryIcon.tooltip.parent = widget.getParent();
 		widget.industryIcon.tooltip.builder = (tp, exp) -> {
 			IndustryTooltips.createIndustryTooltip(mode, tp, false, ind);
 		};

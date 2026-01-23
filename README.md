@@ -80,8 +80,8 @@ They respond to wages, stability, exploitation, and policies.
 
 - Designed to be **data-driven and extensible**.
 - Clear separation between simulation logic and UI.
-- WrapUI is reusable and intended for other mods.
-- Compatible with most mods that do not deeply replace the economy.
+- WrapUI is reusable and intended for other mods as well.
+- Compatible with mods that do not deeply replace the economy.
 
 <br>
 

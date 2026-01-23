@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.panels;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import java.util.List;
 import java.awt.Color;
@@ -15,35 +15,39 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.dialogs.ConfirmEmbargoDialog;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.components.AudioFeedbackComp;
-import wfg.wrap_ui.ui.components.BackgroundComp;
-import wfg.wrap_ui.ui.components.HoverGlowComp;
-import wfg.wrap_ui.ui.components.InteractionComp;
-import wfg.wrap_ui.ui.components.NativeComponents;
-import wfg.wrap_ui.ui.components.OutlineComp;
-import wfg.wrap_ui.ui.components.OutlineComp.OutlineType;
-import wfg.wrap_ui.ui.components.TooltipComp;
-import wfg.wrap_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.components.AudioFeedbackComp;
+import wfg.native_ui.ui.components.BackgroundComp;
+import wfg.native_ui.ui.components.HoverGlowComp;
+import wfg.native_ui.ui.components.InteractionComp;
+import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.components.OutlineComp;
+import wfg.native_ui.ui.components.OutlineComp.OutlineType;
+import wfg.native_ui.ui.components.TooltipComp;
+import wfg.native_ui.ui.components.UIContextComp;
+import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.native_ui.ui.panels.CustomPanel.HasOutline;
+import wfg.native_ui.ui.panels.CustomPanel.HasUIContext;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
 
 public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> implements
-    HasOutline, HasBackground
+    HasOutline, HasBackground, HasUIContext
 {
     public static final String restrictedPath = Global.getSettings().getSpriteName("ui", "restricted");
     private static final int ROW_H = 32;
 
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
+    public final UIContextComp context = comp().get(NativeComponents.UI_CONTEXT);
 
     public FactionSelectionPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
         outline.type = OutlineType.TEX_THIN;
         outline.color = dark;
+        context.ignore = true;
 
         createPanel();
     }
@@ -68,7 +72,7 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
         ComponentFactory.addTooltip(container, getPos().getHeight(), true, m_panel).inTL(-pad, 0);
     }
 
-    public static class RowPanel extends CustomPanel<RowPanel> implements
+    public class RowPanel extends CustomPanel<RowPanel> implements
         HasInteraction, HasHoverGlow, HasAudioFeedback, HasBackground, HasTooltip
     {
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -91,6 +95,7 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
                 new ConfirmEmbargoDialog(faction, this, alreadyEmbargoed).show(0.3f, 0.3f);
             };
 
+            tooltip.parent = FactionSelectionPanel.this.m_parent;
             tooltip.builder = (tp, exp) -> {
                 if (alreadyEmbargoed) {
                     tp.addPara("Click to lift the embargo", pad);
@@ -100,10 +105,10 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
             };
 
             glow.type = GlowType.UNDERLAY;
+            glow.color = base;
 
             bg.color = Color.RED;
             bg.alpha = 0.15f;
-            bg.enabled = alreadyEmbargoed;
 
             createPanel();
         }
@@ -111,6 +116,8 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
         public void createPanel() {
             clearChildren();
             final int iconSize = 28;
+
+            bg.enabled = alreadyEmbargoed;
 
             final Base comIcon = new Base(m_panel, iconSize, iconSize, faction.getCrest(),
                 null, null

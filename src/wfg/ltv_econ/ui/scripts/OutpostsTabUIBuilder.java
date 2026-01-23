@@ -26,11 +26,11 @@ import com.fs.starfarer.campaign.ui.UITable;
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.plugins.MarketWrapper;
 import wfg.ltv_econ.ui.panels.EconomyOverviewPanel;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.util.CallbackRunnable;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.panels.Button;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.util.CallbackRunnable;
 
 public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<Button> {
     public static final int BUTTON_TAB_ID = 5;
@@ -135,6 +135,7 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         econButton.cutStyle = CutStyle.TL_TR;
         econButton.overrideCutSize = 6;
         econButton.setHighlightBrightness(0.3f);
+        econButton.tooltip.enabled = false;
 
         outpostsTab.addComponent(econButton.getPanel());
         econButton.getPos().rightOfTop(button5, 1);

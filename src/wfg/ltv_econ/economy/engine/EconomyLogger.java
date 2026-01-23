@@ -7,7 +7,7 @@ import com.fs.starfarer.api.Global;
 
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CommodityDomain;
-import wfg.wrap_ui.util.NumFormat;
+import wfg.native_ui.util.NumFormat;
 
 public class EconomyLogger {
     transient EconomyEngine engine;

@@ -10,19 +10,21 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
+import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.CountingMap;
@@ -31,10 +33,10 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.submarkets.OpenSubmarketPlugin;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class TooltipUtils {
 
@@ -57,15 +59,20 @@ public class TooltipUtils {
      * @param showBestSell Shows the best places to make a profit selling the commodity.
      * @param showBestBuy Shows the best places to buy the commodity at a discount.
      */
-    public static final void cargoComTooltip(TooltipMakerAPI tooltip, int pad, int opad, CommoditySpecAPI spec,
+    public static final void cargoComTooltip(TooltipMakerAPI tp, CommoditySpecAPI spec,
         int rowsPerTable, boolean showExplanation, boolean showBestSell, boolean showBestBuy
     ) {
+        if (!showExplanation && !showBestSell && !showBestBuy) {
+            throw new IllegalArgumentException("cargoComTooltip: nothing to display; all sections disabled");
+        }
+
         final int rowH = 20;
         final EconomyEngine engine = EconomyEngine.getInstance();
+        final int baseY = (int) tp.getHeightSoFar();
 
         if (!Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay()) {
             if (showExplanation) {
-                tooltip.addPara(
+                tp.addPara(
                     "Seeing remote price data for various colonies requires being within range of a functional comm relay.",
                     gray, pad
                 );
@@ -91,11 +98,11 @@ public class TooltipUtils {
 
             Collections.sort(marketList, createSellComparator(comID, econUnit));
             if (!marketList.isEmpty()) {
-                tooltip.addPara("Best places to sell:", pad);
-                final int relativeY = (int) tooltip.getPosition().getY() -
-                    (int) tooltip.getPrev().getPosition().getY();
+                tp.addPara("Best places to sell:", opad);
+                final PositionAPI prevPos = tp.getPrev().getPosition();
+                final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
 
-                tooltip.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[] {
+                tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[] {
                     "Price", 100, "Demand", 70, "Deficit", 70, "Location", 230,
                     "Star system", 140, "Dist (ly)", 80
                 });
@@ -104,74 +111,73 @@ public class TooltipUtils {
                 int rowCount = 0;
                 for (CommodityCell cell : marketList) {
                     final MarketAPI market = cell.market;
-                    if (countingMap.getCount(market.getFactionId()) < 3) {
-                        countingMap.add(market.getFactionId());
+                    if (countingMap.getCount(market.getFactionId()) >= 3) continue;
+                    countingMap.add(market.getFactionId());
 
-                        final float deficit = cell.getFlowDeficit();
-                        Color labelColor = highlight;
-                        Color deficitColor = gray;
-                        String quantityLabel = "---";
-                        if (deficit > 0) {
-                            quantityLabel = NumFormat.engNotation((long)deficit);
-                            deficitColor = negative;
-                        }
-
-                        String lessThanSymbol = "";
-                        long marketDemand = (long) cell.getStoredDeficit();
-                        marketDemand = (marketDemand / 100) * 100;
-                        if (marketDemand < 100) {
-                            marketDemand = 100;
-                            lessThanSymbol = "<";
-                            labelColor = gray;
-                        }
-
-                        final String factionName = market.getFaction().getDisplayName();
-                        String location = "In hyperspace";
-                        Color locationColor = gray;
-                        if (market.getStarSystem() != null) {
-                            final StarSystemAPI starSystem = market.getStarSystem();
-                            location = starSystem.getBaseName();
-                            final PlanetAPI star = starSystem.getStar();
-                            locationColor = star.getSpec().getIconColor();
-                            locationColor = Misc.setBrightness(locationColor, 235);
-                        }
-
-                        final float distanceToPlayer = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
-
-                        tooltip.addRow(new Object[] {
-                            highlight,
-                            Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, true, true)),
-                            labelColor,
-                            lessThanSymbol + NumFormat.engNotation(marketDemand),
-                            deficitColor,
-                            quantityLabel,
-                            Alignment.LMID,
-                            market.getFaction().getBaseUIColor(),
-                            market.getName() + " - " + factionName,
-                            locationColor,
-                            location,
-                            highlight,
-                            Misc.getRoundedValueMaxOneAfterDecimal(distanceToPlayer)
-                        });
-
-                        final Base arrowPanel = new Base(tooltip, 20, 20, TP_ARROW_PATH, null, null);
-
-                        final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
-                        final Vector2f targetLoc = market.getStarSystem().getLocation();
-
-                        arrowPanel.getSprite().setAngle(WrapUiUtils.rotateSprite(playerLoc, targetLoc));
-
-                        final int arrowY = relativeY + rowH * (2 + rowCount);
-                        tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
-
-                        ++rowCount;
-                        if (rowCount >= rowsPerTable) {
-                            break;
-                        }
+                    final float deficit = cell.getFlowDeficit();
+                    Color labelColor = highlight;
+                    Color deficitColor = gray;
+                    String quantityLabel = "---";
+                    if (deficit > 0) {
+                        quantityLabel = NumFormat.engNotation((long)deficit);
+                        deficitColor = negative;
                     }
+
+                    String lessThanSymbol = "";
+                    long marketDemand = (long) cell.getStoredDeficit();
+                    marketDemand = (marketDemand / 100) * 100;
+                    if (marketDemand < 100) {
+                        marketDemand = 100;
+                        lessThanSymbol = "<";
+                        labelColor = gray;
+                    }
+
+                    final String factionName = market.getFaction().getDisplayName();
+                    String location = "In hyperspace";
+                    Color locationColor = gray;
+                    if (market.getStarSystem() != null) {
+                        final StarSystemAPI starSystem = market.getStarSystem();
+                        location = starSystem.getBaseName();
+                        final PlanetAPI star = starSystem.getStar();
+                        locationColor = star.getSpec().getIconColor();
+                        locationColor = Misc.setBrightness(locationColor, 235);
+                    }
+
+                    final float distanceToPlayer = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
+
+                    tp.addRow(new Object[] {
+                        highlight,
+                        Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, true, true) / econUnit),
+                        labelColor,
+                        lessThanSymbol + NumFormat.engNotation(marketDemand),
+                        deficitColor,
+                        quantityLabel,
+                        Alignment.LMID,
+                        market.getFaction().getBaseUIColor(),
+                        market.getName() + " - " + factionName,
+                        locationColor,
+                        location,
+                        highlight,
+                        Misc.getRoundedValueMaxOneAfterDecimal(distanceToPlayer)
+                    });
+
+                    final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW_PATH, null, null);
+
+                    final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
+                    final Vector2f targetLoc = market.getStarSystem().getLocation();
+
+                    arrowPanel.getSprite().setAngle(NativeUiUtils.rotateSprite(playerLoc, targetLoc));
+
+                    final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
+                    tp.addCustom(arrowPanel.getPanel(), 0f).getPosition().inTL(610, arrowY);
+
+                    ++rowCount;
+                    if (rowCount >= rowsPerTable) break;
                 }
 
-                tooltip.addTable("", 0, opad);
+                tp.setHeightSoFar(relativeY);
+                NativeUiUtils.resetFlowLeft(tp, opad/2f);
+                tp.addTable("", 0, pad*2);
             }
         }
 
@@ -193,10 +199,10 @@ public class TooltipUtils {
             Collections.sort(marketList, createBuyComparator(comID, econUnit));
             if (!marketList.isEmpty()) {
 
-                tooltip.addPara("Best places to buy:", showBestSell ? opad * 2 : opad);
-                final int relativeY = (int) tooltip.getPosition().getY() -
-                    (int) tooltip.getPrev().getPosition().getY();
-                tooltip.beginTable(Global.getSector().getPlayerFaction(), 20, new java.lang.Object[] {
+                tp.addPara("Best places to buy:", opad);
+                final PositionAPI prevPos = tp.getPrev().getPosition();
+                final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
+                tp.beginTable(Global.getSector().getPlayerFaction(), 20, new java.lang.Object[] {
                     "Price", 100, "Available", 70, "Excess", 70, "Location", 230,
                     "Star system", 140, "Dist (ly)", 80 
                 });
@@ -205,85 +211,85 @@ public class TooltipUtils {
                 int rowCount = 0;
                 for (CommodityCell cell : marketList) {
                     final MarketAPI market = cell.market;
-                    if (countingMap.getCount(market.getFactionId()) < 3) {
-                        countingMap.add(market.getFactionId());
-                        long available = cell.getRoundedStored();
-                        available += market.getCommodityData(comID).getPlayerTradeNetQuantity();
-                        if (available < 0) available = 0;
+                    if (countingMap.getCount(market.getFactionId()) >= 3) continue;
+                    countingMap.add(market.getFactionId());
+                    long available = cell.getRoundedStored();
+                    available += market.getCommodityData(comID).getPlayerTradeNetQuantity();
+                    if (available < 0) available = 0;
 
-                        long excess = (long) cell.getStoredExcess();
-                        Color excessColor = gray;
-                        String excessStr = "---";
-                        if (excess > 0) {
-                            excessStr = NumFormat.engNotation(excess);
-                            excessColor = positive;
-                        }
-
-                        String availableStr = "";
-                        available = available / 100 * 100;
-                        if (available < 100) {
-                            available = 100;
-                            availableStr = "<";
-                        }
-
-                        final String factionName = market.getFaction().getDisplayName();
-                        String location = "In hyperspace";
-                        Color locationColor = gray;
-                        if (market.getStarSystem() != null) {
-                            final StarSystemAPI StarSystem = market.getStarSystem();
-                            location = StarSystem.getBaseName();
-                            final PlanetAPI star = StarSystem.getStar();
-                            locationColor = star.getSpec().getIconColor();
-                            locationColor = Misc.setBrightness(locationColor, 235);
-                        }
-
-                        final float distance = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
-
-                        tooltip.addRow(new java.lang.Object[] {
-                            highlight,
-                            Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, false, true)),
-                            highlight,
-                            availableStr + NumFormat.engNotation(available),
-                            excessColor,
-                            excessStr,
-                            Alignment.LMID,
-                            market.getFaction().getBaseUIColor(),
-                            market.getName() + " - " + factionName,
-                            locationColor,
-                            location,
-                            highlight,
-                            Misc.getRoundedValueMaxOneAfterDecimal(distance)
-                        });
-
-                        final Base arrowPanel = new Base(tooltip, 20, 20, TP_ARROW_PATH, null, null);
-
-                        final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
-                        final Vector2f targetLoc = market.getStarSystem().getLocation();
-
-                        arrowPanel.getSprite().setAngle(WrapUiUtils.rotateSprite(playerLoc, targetLoc));
-
-                        final int arrowY = relativeY + rowH * (2 + rowCount);
-                        tooltip.addComponent(arrowPanel.getPanel()).inTL(610, arrowY);
-
-                        rowCount++;
-                        if (rowCount >= rowsPerTable) {
-                            break;
-                        }
+                    long excess = (long) cell.getStoredExcess();
+                    Color excessColor = gray;
+                    String excessStr = "---";
+                    if (excess > 0) {
+                        excessStr = NumFormat.engNotation(excess);
+                        excessColor = positive;
                     }
+
+                    String availableStr = "";
+                    available = available / 100 * 100;
+                    if (available < 100) {
+                        available = 100;
+                        availableStr = "<";
+                    }
+
+                    final String factionName = market.getFaction().getDisplayName();
+                    String location = "In hyperspace";
+                    Color locationColor = gray;
+                    if (market.getStarSystem() != null) {
+                        final StarSystemAPI StarSystem = market.getStarSystem();
+                        location = StarSystem.getBaseName();
+                        final PlanetAPI star = StarSystem.getStar();
+                        locationColor = star.getSpec().getIconColor();
+                        locationColor = Misc.setBrightness(locationColor, 235);
+                    }
+
+                    final float distance = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
+
+                    tp.addRow(new java.lang.Object[] {
+                        highlight,
+                        Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, false, true) / econUnit),
+                        highlight,
+                        availableStr + NumFormat.engNotation(available),
+                        excessColor,
+                        excessStr,
+                        Alignment.LMID,
+                        market.getFaction().getBaseUIColor(),
+                        market.getName() + " - " + factionName,
+                        locationColor,
+                        location,
+                        highlight,
+                        Misc.getRoundedValueMaxOneAfterDecimal(distance)
+                    });
+
+                    final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW_PATH, null, null);
+
+                    final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
+                    final Vector2f targetLoc = market.getStarSystem().getLocation();
+
+                    arrowPanel.getSprite().setAngle(NativeUiUtils.rotateSprite(playerLoc, targetLoc));
+
+                    final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
+                    tp.addCustom(arrowPanel.getPanel(), 0f).getPosition().inTL(610, arrowY);
+                    NativeUiUtils.resetFlowLeft(tp, opad/2f);
+
+                    rowCount++;
+                    if (rowCount >= rowsPerTable) break;
                 }
 
-                tooltip.addTable("", 0, opad);
+                tp.setHeightSoFar(relativeY);
+                NativeUiUtils.resetFlowLeft(tp, opad/2f);
+                tp.addTable("", 0, pad*2);
             }
         }
 
         if (showExplanation) {
-            tooltip.addPara(
+            tp.addPara(
                 "All values approximate. Prices do not include tariffs, which can be avoided through black market trade.",
                 gray, opad);
 
             final Color txtColor = Misc.setAlpha(highlight, 155);
-            tooltip.addPara(
-                "*Per unit prices assume buying or selling a batch of %s" +
+            tp.addPara(
+                "*Per unit prices assume buying or selling a batch of %s " +
                 "units. Each unit bought costs more as the market's supply is reduced, and" +
                 "each unit sold brings in less as demand is fulfilled.",
                 opad, gray, txtColor, new String[]{"" + econUnit}
@@ -292,6 +298,7 @@ public class TooltipUtils {
     }
 
     public static final void createCommodityProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+        final SettingsAPI settings = Global.getSettings();
         tp.setParaFontDefault();
         final LabelAPI title = tp.addPara("Available: %s", pad, highlight,
             NumFormat.engNotation((long)cell.getFlowAvailable()));
@@ -307,25 +314,25 @@ public class TooltipUtils {
 
         for (Map.Entry<String, MutableStat> entry : cell.getFlowProdIndStats().entrySet()) {
             final MutableStat mutable = entry.getValue();
-            final Industry ind = cell.market.getIndustry(entry.getKey());
+            final IndustrySpecAPI ind = settings.getIndustrySpec(entry.getKey());
 
             if (mutable.getModifiedInt() > 0) {
-                tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getCurrentName()+")",
+                tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getName()+")",
                     "+" + NumFormat.engNotation((long)mutable.base));
             }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
                     "+" + NumFormat.formatMagnitudeAware(mod.value));
             }
             for (StatMod mod : mutable.getPercentMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
                     "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
             }
 
             if (mutable.base > 0) {
             for (StatMod mod : mutable.getMultMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
                     Strings.X + NumFormat.formatMagnitudeAware(mod.value),
                 mod.value < 1f ? negative:highlight
             );
@@ -386,6 +393,7 @@ public class TooltipUtils {
     }
 
     public static final void createCommodityDemandBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+        final SettingsAPI settings = Global.getSettings();
         final Color valueColor = cell.getFlowDeficit() > 0 ? negative : highlight;
         final int gridWidth = 430;
         final int valueWidth = 50;
@@ -399,25 +407,25 @@ public class TooltipUtils {
 
         for (Map.Entry<String, MutableStat> entry : cell.getFlowDemandIndStats().entrySet()) {
             final MutableStat mutable = entry.getValue();
-            final Industry ind = cell.market.getIndustry(entry.getKey());
+            final IndustrySpecAPI ind = settings.getIndustrySpec(entry.getKey());
 
             if (mutable.getModifiedInt() > 0) {
-                tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getCurrentName()+")",
+                tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getName()+")",
                     "+" + NumFormat.engNotation((long)mutable.base), valueColor);
             }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
-                tp.addToGrid(0, rowCount++, "Needed by " + ind.getCurrentName(),
+                tp.addToGrid(0, rowCount++, "Needed by " + ind.getName(),
                     "+" + NumFormat.formatMagnitudeAware(mod.value), valueColor);
             }
             for (StatMod mod : mutable.getPercentMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
                     "+" + NumFormat.formatMagnitudeAware(mod.value) + "%", valueColor);
             }
 
             if (mutable.base > 0) {
             for (StatMod mod : mutable.getMultMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getCurrentName()+")",
+                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
                     Strings.X + NumFormat.formatMagnitudeAware(mod.value), valueColor);
             }
             }
@@ -454,7 +462,7 @@ public class TooltipUtils {
 
     public static final void createCommodityStockpilesBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        tp.addPara("Stored: %s", pad, highlight, NumFormat.engNotation(cell.getRoundedStored()));
+        tp.addPara("Current Stockpiles: %s", pad, highlight, NumFormat.engNotation(cell.getRoundedStored()));
         final int gridWidth = 430;
         final int valueWidth = 50;
         int rowCount = 0;

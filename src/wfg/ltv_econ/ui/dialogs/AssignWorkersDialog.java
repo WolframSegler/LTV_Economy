@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.dialogs;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -30,18 +30,18 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIContext;
-import wfg.wrap_ui.ui.UIContext.Context;
-import wfg.wrap_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.wrap_ui.ui.dialogs.DialogPanel;
-import wfg.wrap_ui.ui.panels.BasePanel;
-import wfg.wrap_ui.ui.panels.Slider;
-import wfg.wrap_ui.ui.panels.SpritePanelWithTp;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.UIContext;
+import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.dialogs.DialogPanel;
+import wfg.native_ui.ui.panels.BasePanel;
+import wfg.native_ui.ui.panels.Slider;
+import wfg.native_ui.ui.panels.SpritePanelWithTp;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class AssignWorkersDialog extends DialogPanel {
 
@@ -120,6 +120,7 @@ public class AssignWorkersDialog extends DialogPanel {
         ) {{
             context.ignore = true;
 
+            tooltip.parent = AssignWorkersDialog.this.m_panel;
             tooltip.builder = (tp, exp) -> {
                 tp.addPara(
                     "Adjust each output's slider to allocate a portion of the market's total workforce. " +
@@ -128,7 +129,7 @@ public class AssignWorkersDialog extends DialogPanel {
                 );
             };
             tooltip.positioner = (tp, exp) -> {
-                WrapUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.TopLeft, 0);
+                NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.TopLeft, 0);
             };
 
             glow.type = GlowType.ADDITIVE;

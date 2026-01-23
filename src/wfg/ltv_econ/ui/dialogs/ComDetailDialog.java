@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.dialogs;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import org.lwjgl.input.Keyboard;
 
@@ -14,7 +14,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
-import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.ui.Fonts;
@@ -35,25 +34,25 @@ import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIContext;
-import wfg.wrap_ui.ui.UIContext.Context;
-import wfg.wrap_ui.ui.components.InteractionComp.ClickHandler;
-import wfg.wrap_ui.ui.components.OutlineComp.OutlineType;
-import wfg.wrap_ui.ui.components.TooltipComp.TooltipBuilder;
-import wfg.wrap_ui.ui.dialogs.DialogPanel;
-import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.panels.SortableTable;
-import wfg.wrap_ui.ui.panels.SortableTable.RowPanel;
-import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.util.CallbackRunnable;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.UIContext;
+import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.components.OutlineComp.OutlineType;
+import wfg.native_ui.ui.components.TooltipComp.TooltipBuilder;
+import wfg.native_ui.ui.dialogs.DialogPanel;
+import wfg.native_ui.ui.panels.Button;
+import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.ui.panels.SortableTable;
+import wfg.native_ui.ui.panels.SortableTable.RowPanel;
+import wfg.native_ui.ui.panels.SortableTable.cellAlg;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.ui.panels.TextPanel;
+import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class ComDetailDialog extends DialogPanel {
 
@@ -176,6 +175,7 @@ public class ComDetailDialog extends DialogPanel {
                 context.target = Context.DIALOG;
 
                 tooltip.width = getPos().getWidth() * 0.7f;
+                tooltip.parent = ComDetailDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
@@ -183,12 +183,12 @@ public class ComDetailDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, pad);
+                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, pad);
                 };
             }
         };
 
-        innerPanel.addComponent(footerPanel.getPanel()).inBL(pad, pad);
+        innerPanel.addComponent(footerPanel.getPanel()).inBL(opad, pad);
     }
 
     public void createSections() {
@@ -210,12 +210,6 @@ public class ComDetailDialog extends DialogPanel {
 
         createSection1(section1, tp);
         innerPanel.addComponent(section1).inTL(pad, pad);
-
-        // Update anchors
-        if (section2 == null || section3 == null) return;
-        
-        section2.getPosition().rightOfTop(section1, opad * 1.5f);
-        section3.getPosition().belowLeft(section1, opad);
     }
 
     public void updateSection2() {
@@ -227,12 +221,7 @@ public class ComDetailDialog extends DialogPanel {
         ComponentFactory.addTooltip(tp, SECT2_HEIGHT, false, section2).inTL(0, 0);
 
         createSection2(section2, tp);
-        innerPanel.addComponent(section2).rightOfTop(section1, opad * 1.5f);
-
-        // Update anchors
-        if (section4 == null) return;
-        
-        section4.getPosition().belowLeft(section2, opad);
+        innerPanel.addComponent(section2).inTR(pad, pad);
     }
 
     /**
@@ -245,7 +234,7 @@ public class ComDetailDialog extends DialogPanel {
         section3 = Global.getSettings().createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
 
         createSection3(section3, mode);
-        innerPanel.addComponent(section3).belowLeft(section1, opad);
+        innerPanel.addComponent(section3).inBL(pad, BUTTON_H + pad*2 + opad);
     }
 
     public void updateSection4() {
@@ -257,7 +246,7 @@ public class ComDetailDialog extends DialogPanel {
         ComponentFactory.addTooltip(tp, SECT4_HEIGHT, false, section4).inTL(0, 0);
 
         createSection4(section4);
-        innerPanel.addComponent(section4).belowLeft(section2, opad);
+        innerPanel.addComponent(section4).inBR(pad, BUTTON_H + pad*2 + opad);
     }
 
     private void createSection1(UIPanelAPI section, TooltipMakerAPI tooltip) {
@@ -313,6 +302,7 @@ public class ComDetailDialog extends DialogPanel {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
+                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         final int discount = (int)((1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
 
@@ -329,7 +319,7 @@ public class ComDetailDialog extends DialogPanel {
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
-                        WrapUiUtils.anchorPanel(
+                        NativeUiUtils.anchorPanel(
                             tp,
                             m_panel,
                             AnchorType.RightTop,
@@ -365,6 +355,7 @@ public class ComDetailDialog extends DialogPanel {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
+                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
                             "The total number of " + m_com.getName() + " being exported globally by all producing markets in the sector.\n\n" +
@@ -372,13 +363,13 @@ public class ComDetailDialog extends DialogPanel {
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
-                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
+                        NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
                     };
                 }
             };
 
             tooltip.addComponent(textPanel.getPanel()).inTL(
-                (SECT1_WIDTH / 3f) - textPanel.getPos().getWidth(), baseY
+                (SECT1_WIDTH - textPanel.getPos().getWidth()) / 2f, baseY
             );
         }
         { // Total faction exports
@@ -426,6 +417,7 @@ public class ComDetailDialog extends DialogPanel {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
+                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
                             "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currMarket.getFaction().getPersonNamePrefix() + " control.\n\n" +
@@ -435,7 +427,7 @@ public class ComDetailDialog extends DialogPanel {
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
-                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.LeftTop, opad);
+                        NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.LeftTop, opad);
                     };
                 }
             };
@@ -466,6 +458,7 @@ public class ComDetailDialog extends DialogPanel {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
+                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         final String marketOwner = m_market.getFaction().isPlayerFaction() ?
                             "your" : m_market.getFaction().getPersonNamePrefix(); 
@@ -476,7 +469,7 @@ public class ComDetailDialog extends DialogPanel {
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
-                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
+                        NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
                     };
                 }
             };
@@ -508,6 +501,7 @@ public class ComDetailDialog extends DialogPanel {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
+                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
                             "Total export market share for " + m_com.getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
@@ -515,7 +509,7 @@ public class ComDetailDialog extends DialogPanel {
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
-                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
+                        NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
                     };
                 }
             };
@@ -541,6 +535,7 @@ public class ComDetailDialog extends DialogPanel {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
+                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         String marketOwner = m_market.getFaction().isPlayerFaction() ?
                             "your" : m_market.getFaction().getPersonNamePrefix(); 
@@ -551,7 +546,7 @@ public class ComDetailDialog extends DialogPanel {
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
-                        WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
+                        NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
                     };
                 }
             };
@@ -750,7 +745,7 @@ public class ComDetailDialog extends DialogPanel {
             };
 
             table.pushRow(
-                market, tp, rowSelectedRunnable, CodexDataV2.getCommodityEntryId(comID),
+                market, tp, rowSelectedRunnable, null,
                 null, m_market.getFaction().getDarkUIColor()
             );
 
@@ -882,8 +877,6 @@ public class ComDetailDialog extends DialogPanel {
             tp.addPara(
                 "The same-faction export bonus does not increase market share or income from exports.", opad
             );
-    
-            tp.addSpacer(opad + pad);
         };
     }
 

@@ -9,10 +9,10 @@ import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.panels.FactionSelectionPanel.RowPanel;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.UIContext;
-import wfg.wrap_ui.ui.UIContext.Context;
-import wfg.wrap_ui.ui.dialogs.DialogPanel;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.UIContext;
+import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.dialogs.DialogPanel;
 
 public class ConfirmEmbargoDialog extends DialogPanel  {
 
@@ -33,6 +33,7 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
         this.caller = caller;
 
         backgroundDimAmount = 0f;
+        holo.setBackgroundAlpha(150, 175);
 
         UIContext.setContext(Context.DIALOG);
     }

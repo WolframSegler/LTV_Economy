@@ -14,28 +14,29 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
-import wfg.wrap_ui.ui.components.AudioFeedbackComp;
-import wfg.wrap_ui.ui.components.HoverGlowComp;
-import wfg.wrap_ui.ui.components.InteractionComp;
-import wfg.wrap_ui.ui.components.NativeComponents;
-import wfg.wrap_ui.ui.components.TooltipComp;
-import wfg.wrap_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasHoverGlow;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasInteraction;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasTooltip;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.native_ui.ui.components.AudioFeedbackComp;
+import wfg.native_ui.ui.components.HoverGlowComp;
+import wfg.native_ui.ui.components.InteractionComp;
+import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.components.TooltipComp;
+import wfg.native_ui.ui.components.UIContextComp;
+import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.CustomPanel.HasAudioFeedback;
+import wfg.native_ui.ui.panels.CustomPanel.HasHoverGlow;
+import wfg.native_ui.ui.panels.CustomPanel.HasInteraction;
+import wfg.native_ui.ui.panels.CustomPanel.HasTooltip;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 
 import java.awt.Color;
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
     HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction
@@ -47,6 +48,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
 
     public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
     public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+    public final UIContextComp context = comp().get(NativeComponents.UI_CONTEXT);
     public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
     public final InteractionComp<CommodityRowPanel> interaction = comp().get(NativeComponents.INTERACTION);
 
@@ -56,7 +58,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
     private final MarketAPI m_market;
 
     public CommodityRowPanel(UIPanelAPI parent, MarketAPI market, String comID,
-        int width, int height, boolean childrenIgnoreUIState
+        int width, int height, boolean ignoreUIContext
     ) {
         super(parent, width, height);
 
@@ -68,6 +70,8 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         glow.type = GlowType.UNDERLAY;
 
         tooltip.width = 500f;
+        tooltip.parent = parent;
+        tooltip.expandable = true;
         tooltip.builder = (tp, expanded) -> {
             final EconomyEngine engine = EconomyEngine.getInstance();
             final String comDesc = Global.getSettings().getDescription(comID, Type.RESOURCE).getText1();
@@ -156,21 +160,26 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             );
 
             } else {
-                tp.setParaFont(Fonts.ORBITRON_12);
-                tp.addSectionHeading("Legend", Alignment.MID, opad);
-                tp.setParaFontDefault();
+            tp.setParaFont(Fonts.ORBITRON_12);
+            tp.addSectionHeading("Legend", Alignment.MID, opad);
+            tp.setParaFontDefault();
 
-                final int legendIconSize = 26;
+            final int legendIconSize = 26;
 
-                final int y = (int)tp.getHeightSoFar() + opad + pad;
+            final int y = (int)tp.getHeightSoFar() + pad;
 
-                legendRowCreator(0, tp, y, legendIconSize, m_market); 
+            legendRowCreator(0, tp, y, legendIconSize, m_market); 
+            tp.addSpacer(pad);
             }
         };
         tooltip.positioner = (tp, expanded) -> {
-            WrapUiUtils.anchorPanel(tp, m_parent, AnchorType.LeftTop, opad);
+            NativeUiUtils.anchorPanel(tp, m_parent, AnchorType.LeftTop, opad);
         };
         tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
+        tooltip.expandTxt = "%s show legend";
+        tooltip.unexpandTxt = "%s hide";
+
+        context.ignore = ignoreUIContext;
 
         createPanel();
     }
@@ -214,7 +223,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
      * <br></br> MODE_0: shows everything.
      * <br></br> MODE_1: shows only the CommodityInfoBar relevant info.
      */
-    public static void legendRowCreator(int mode, TooltipMakerAPI tooltip, int y, int iconSize,
+    public static void legendRowCreator(int mode, TooltipMakerAPI tp, int y, int iconSize,
         MarketAPI market) {
 
         String iconPath;
@@ -222,69 +231,69 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
 
         if (mode == 0) {
             desc = "Proportion of stockpiles compared to the desired amount.";
-            legendRowHelper(tooltip, y, TooltipUtils.STOCKPILES_FULL_PATH, desc, iconSize, false, null);
+            legendRowHelper(tp, y, TooltipUtils.STOCKPILES_FULL_PATH, desc, iconSize, false, null);
             
             y += iconSize + pad;
 
             desc = "Excess local production that is exported.";
-            legendRowHelper(tooltip, y, EXPORTS_ICON_PATH, desc, iconSize, false, null);
+            legendRowHelper(tp, y, EXPORTS_ICON_PATH, desc, iconSize, false, null);
             
             y += iconSize + pad;
     
             iconPath = "";
             desc = "Smuggled or produced by an illegal enterprise. No income from exports.";
-            legendRowHelper(tooltip, y, iconPath, desc, iconSize, true, null);
+            legendRowHelper(tp, y, iconPath, desc, iconSize, true, null);
             
             y += iconSize + pad;
         }
 
         iconPath = "";
         desc = "Local production that could not be exported.";
-        legendRowHelper(tooltip, y, iconPath, desc, iconSize, false, UiUtils.COLOR_NOT_EXPORTED);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_NOT_EXPORTED);
         
         y += iconSize + pad;
 
         desc = "Local production that was exported.";
-        legendRowHelper(tooltip, y, iconPath, desc, iconSize, false, UiUtils.COLOR_EXPORT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_EXPORT);
         
         y += iconSize + pad;
 
         desc = "Production used for local demand.";
-        legendRowHelper(tooltip, y, iconPath, desc, iconSize, false, UiUtils.COLOR_LOCAL_PROD);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_LOCAL_PROD);
         
         y += iconSize + pad;
 
         desc = "Goods that were imported in-faction.";
-        legendRowHelper(tooltip, y, iconPath, desc, iconSize, false, UiUtils.COLOR_FACTION_IMPORT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_FACTION_IMPORT);
         
         y += iconSize + pad;
 
         desc = "Imported or available through one-time trade or events.";
-        legendRowHelper(tooltip, y, iconPath, desc, iconSize, false, UiUtils.COLOR_IMPORT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_IMPORT);
         
         y += iconSize + pad;
 
         desc = "Goods that must be imported regardless of local stockpiles or demand.";
-        legendRowHelper(tooltip, y, iconPath, desc, iconSize, false, UiUtils.COLOR_IMPORT_EXCLUSIVE);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_IMPORT_EXCLUSIVE);
         
         y += iconSize + pad;
 
         desc = "Excess imports beyond current demand stockpiled for future use.";
-        legendRowHelper(tooltip, y, iconPath, desc, iconSize, false, UiUtils.COLOR_OVER_IMPORT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_OVER_IMPORT);
         
         y += iconSize + pad;
 
         desc = "Deficit not covered by production or imports.";
-        legendRowHelper(tooltip, y, iconPath, desc, iconSize, false, UiUtils.COLOR_DEFICIT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_DEFICIT);
     
-        tooltip.setHeightSoFar(y + opad*2);
+        tp.setHeightSoFar(y + opad*2);
     }
 
-    private static void legendRowHelper(TooltipMakerAPI tooltip, int y, String iconPath, String desc,
-        int lgdIconSize, boolean drawRedBorder, Color drawFilledIcon
+    private static void legendRowHelper(TooltipMakerAPI tp, int y, String iconPath, String desc,
+        int lgdIconSize, boolean drawRedBorder, Color fillColor
     ) {
-        final Base iconPanel = new Base(tooltip, lgdIconSize, lgdIconSize,
-            iconPath, null, drawFilledIcon
+        final Base iconPanel = new Base(tp, lgdIconSize, lgdIconSize,
+            iconPath, null, fillColor
         );
         if (drawRedBorder) {
             iconPanel.outline.enabled = true;
@@ -292,10 +301,10 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             iconPanel.offset.setOffset(2, 2, -4, -4);
         }
             
-        tooltip.addComponent(iconPanel.getPanel()).setSize(lgdIconSize, lgdIconSize).inTL(pad + opad/2f, y);
+        tp.addCustom(iconPanel.getPanel(), 0f).getPosition().inTL(pad, y);
 
-		final LabelAPI lbl = tooltip.addPara(desc, pad);
+		final LabelAPI lbl = tp.addPara(desc, 0f);
 		final float textX = opad + lgdIconSize;
-		lbl.getPosition().inTL(textX, y);
+		lbl.getPosition().inTL(textX, y + ((lgdIconSize - lbl.computeTextHeight(desc)) / 2f));
     }
 }

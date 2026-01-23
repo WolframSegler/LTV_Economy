@@ -1,6 +1,6 @@
 package wfg.ltv_econ.intel.market.policies;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
@@ -11,7 +11,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.wrap_ui.util.NumFormat;
+import wfg.native_ui.util.NumFormat;
 
 public class OrganHarvestingPolicy extends MarketPolicy implements MarketImmigrationModifier {
     public static final float HEALTH_BUFF = 0.03f;

@@ -7,7 +7,7 @@ import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class ExtendedShiftsPolicy extends MarketPolicy {
 

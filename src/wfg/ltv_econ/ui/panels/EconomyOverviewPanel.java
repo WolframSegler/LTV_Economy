@@ -10,11 +10,11 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.util.CallbackRunnable;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.ui.panels.Button;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.util.CallbackRunnable;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> {
 

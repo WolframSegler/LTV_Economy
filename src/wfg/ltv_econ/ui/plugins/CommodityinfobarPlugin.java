@@ -13,8 +13,8 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.wrap_ui.util.RenderUtils;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.util.RenderUtils;
+import static wfg.native_ui.util.UIConstants.*;
 
 
 public class CommodityinfobarPlugin implements CustomUIPanelPlugin {

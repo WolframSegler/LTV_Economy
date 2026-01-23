@@ -4,7 +4,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.PlayerMarketData;

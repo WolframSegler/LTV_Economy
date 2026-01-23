@@ -14,21 +14,23 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.components.BackgroundComp;
-import wfg.wrap_ui.ui.components.LayoutOffsetComp;
-import wfg.wrap_ui.ui.components.NativeComponents;
-import wfg.wrap_ui.ui.components.OutlineComp;
-import wfg.wrap_ui.ui.components.InteractionComp.ClickHandler;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.components.BackgroundComp;
+import wfg.native_ui.ui.components.LayoutOffsetComp;
+import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.components.OutlineComp;
+import wfg.native_ui.ui.components.UIContextComp;
+import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.native_ui.ui.panels.CustomPanel.HasOutline;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements HasBackground, HasOutline {
 
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
+    public final UIContextComp context = comp().get(NativeComponents.UI_CONTEXT);
     public final LayoutOffsetComp offset = comp().get(NativeComponents.LAYOUT_OFFSET);
 
     public static final int STANDARD_WIDTH = 264;
@@ -60,6 +62,8 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
         m_market = market;
         m_headerTxt = headerTxt;
         this.rowsIgnoreUIState = rowsIgnoreUIState;
+
+        context.ignore = rowsIgnoreUIState;
 
         bg.alpha = 0.65f;
     }
@@ -95,7 +99,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
 
         for (CommoditySpecAPI com : commodities) {
             final CommodityRowPanel comRow = new CommodityRowPanel(
-                getPanel(), m_market, com.getId(), (int)(getPos().getWidth() - opad * 2), 
+                m_panel, m_market, com.getId(), (int)(getPos().getWidth() - opad * 2), 
                 rowHeight, rowsIgnoreUIState
             );
 

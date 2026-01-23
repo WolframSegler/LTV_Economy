@@ -9,12 +9,12 @@ import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.dialogs.AssignWorkersDialog;
-import wfg.wrap_ui.util.NumFormat;
+import wfg.native_ui.util.NumFormat;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 

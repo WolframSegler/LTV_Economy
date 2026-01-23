@@ -34,9 +34,9 @@ import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.wrap_ui.util.NumFormat;
+import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.economyValues.*;
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -280,24 +280,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return data;
     }
 
-    public void reportPlayerOpenedMarket() {
-        fakeAdvance();
-    }
-
-    public void reportPlayerColonizedPlanet(PlanetAPI planet) {
-        registerMarket(planet.getMarket());
-    }
-
-    public void reportPlayerAbandonedColony(MarketAPI market) {
-        removeMarket(market);
-    }
-
-    public void reportColonyDecivilized(MarketAPI market, boolean fullyDestroyed) {
-        removeMarket(market);
-    }
-
-    public void reportColonyAboutToBeDecivilized(MarketAPI a, boolean b) {}
-
     public final List<CommodityDomain> getComDomains() {
         return new ArrayList<>(m_comDomains.values());
     }
@@ -463,12 +445,44 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     /**
      * This method runs after {@link #reportEconomyTick}. Practically the same method but delayed.
      */
+    @Override
     public void reportEconomyMonthEnd() {}
 
+    @Override
+    public void reportPlayerOpenedMarket(MarketAPI market) {
+        fakeAdvance();
+        applyPopulationStabilityMods(market);
+    }
+
+    @Override
+    public void reportPlayerClosedMarket(MarketAPI market) {
+        applyPopulationStabilityMods(market);
+    }
+
+    @Override
+    public void reportPlayerColonizedPlanet(PlanetAPI planet) {
+        registerMarket(planet.getMarket());
+    }
+
+    @Override
+    public void reportPlayerAbandonedColony(MarketAPI market) {
+        removeMarket(market);
+    }
+
+    @Override
+    public void reportColonyDecivilized(MarketAPI market, boolean fullyDestroyed) {
+        removeMarket(market);
+    }
+
+    @Override
+    public void reportColonyAboutToBeDecivilized(MarketAPI a, boolean b) {}
+
+    @Override
     public void modifyRaidObjectives(MarketAPI market, SectorEntityToken entity,
         List<GroundRaidObjectivePlugin> objectives, RaidType type, int marineTokens, int priority
     ) {}
 	
+    @Override
 	public void reportRaidObjectivesAchieved(RaidResultData data, InteractionDialogAPI dialog,
         Map<String, MemoryAPI> memoryMap
     ) {
@@ -482,30 +496,37 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         }
     }
 
+    @Override
     public void reportFleetSpawned(CampaignFleetAPI fleet) {
 
     }
 
+    @Override
     public void reportBattleOccurred(CampaignFleetAPI primaryWinner, BattleAPI battle) {
 
     }
 
+    @Override
     public void reportBattleFinished(CampaignFleetAPI primaryWinner, BattleAPI battle) {
 
     }
 
+    @Override
     public void reportFleetDespawned(CampaignFleetAPI fleet, FleetDespawnReason reason, Object param) {
 
     }
 
+    @Override
     public void reportFleetJumped(CampaignFleetAPI fleet, SectorEntityToken from, JumpDestination to) {
 
     }
 
+    @Override
     public void reportFleetReachedEntity(CampaignFleetAPI fleet, SectorEntityToken entity) {
         
     }
     
+    @Override
     public void reportAboutToOpenCoreTab(CoreUITabId tabID, Object param) {
         if (tabID == CoreUITabId.CARGO) applyPopulationStabilityMods();
     }

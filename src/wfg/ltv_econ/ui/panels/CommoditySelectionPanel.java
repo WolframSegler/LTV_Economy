@@ -10,20 +10,20 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.components.AudioFeedbackComp;
-import wfg.wrap_ui.ui.components.BackgroundComp;
-import wfg.wrap_ui.ui.components.HoverGlowComp;
-import wfg.wrap_ui.ui.components.InteractionComp;
-import wfg.wrap_ui.ui.components.NativeComponents;
-import wfg.wrap_ui.ui.components.OutlineComp;
-import wfg.wrap_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.wrap_ui.ui.components.OutlineComp.OutlineType;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasOutline;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.components.AudioFeedbackComp;
+import wfg.native_ui.ui.components.BackgroundComp;
+import wfg.native_ui.ui.components.HoverGlowComp;
+import wfg.native_ui.ui.components.InteractionComp;
+import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.components.OutlineComp;
+import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.components.OutlineComp.OutlineType;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.native_ui.ui.panels.CustomPanel.HasOutline;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel> implements
     HasOutline, HasBackground

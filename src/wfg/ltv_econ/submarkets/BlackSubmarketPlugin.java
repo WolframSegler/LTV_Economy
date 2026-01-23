@@ -1,6 +1,6 @@
 package wfg.ltv_econ.submarkets;
 
-import static wfg.wrap_ui.util.UIConstants.negative;
+import static wfg.native_ui.util.UIConstants.negative;
 
 import java.util.Random;
 

@@ -1,18 +1,18 @@
 package wfg.ltv_econ.ui.panels.reusable;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.wrap_ui.ui.panels.SpritePanel;
-import wfg.wrap_ui.ui.components.AudioFeedbackComp;
-import wfg.wrap_ui.ui.components.InteractionComp;
-import wfg.wrap_ui.ui.components.NativeComponents;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasAudioFeedback;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasInteraction;
+import wfg.native_ui.ui.panels.SpritePanel;
+import wfg.native_ui.ui.components.AudioFeedbackComp;
+import wfg.native_ui.ui.components.InteractionComp;
+import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.panels.CustomPanel.HasAudioFeedback;
+import wfg.native_ui.ui.panels.CustomPanel.HasInteraction;
 
 public class SettingsIcon extends SpritePanel<SettingsIcon> implements 
     HasAudioFeedback, HasInteraction

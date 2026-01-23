@@ -5,7 +5,6 @@ import java.util.List;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.SpecialItemSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -31,30 +30,29 @@ import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.UIContext;
-import wfg.wrap_ui.ui.UIContext.Context;
-import wfg.wrap_ui.ui.components.AudioFeedbackComp;
-import wfg.wrap_ui.ui.components.BackgroundComp;
-import wfg.wrap_ui.ui.components.HoverGlowComp;
-import wfg.wrap_ui.ui.components.InteractionComp;
-import wfg.wrap_ui.ui.components.LayoutOffsetComp;
-import wfg.wrap_ui.ui.components.NativeComponents;
-import wfg.wrap_ui.ui.components.TooltipComp;
-import wfg.wrap_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.wrap_ui.ui.panels.BasePanel;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.Slider;
-import wfg.wrap_ui.ui.panels.SpritePanel;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasHoverGlow;
-import wfg.wrap_ui.ui.panels.CustomPanel.HasLayoutOffset;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.UIContext;
+import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.components.AudioFeedbackComp;
+import wfg.native_ui.ui.components.BackgroundComp;
+import wfg.native_ui.ui.components.HoverGlowComp;
+import wfg.native_ui.ui.components.InteractionComp;
+import wfg.native_ui.ui.components.LayoutOffsetComp;
+import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.components.TooltipComp;
+import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.Slider;
+import wfg.native_ui.ui.panels.SpritePanel;
+import wfg.native_ui.ui.panels.CustomPanel.HasBackground;
+import wfg.native_ui.ui.panels.CustomPanel.HasHoverGlow;
+import wfg.native_ui.ui.panels.CustomPanel.HasLayoutOffset;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+import static wfg.native_ui.util.UIConstants.*;
 
 public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     HasBackground, HasHoverGlow, HasLayoutOffset
@@ -71,8 +69,6 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
     public final Color baseColor;
     public final Color darkColor;
-    public final Color gridColor;
-    public final Color brightColor;
 
     public final Industry m_industry;
     public IndustryImagePanel industryIcon;
@@ -84,7 +80,6 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     private LabelAPI constructionStatusText;
     private ConstructionMode constructionMode;
     private final MarketAPI m_market;
-    private final FactionAPI m_faction;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
     public IndustryWidget(UIPanelAPI parent, MarketAPI market, Industry ind,
@@ -96,17 +91,14 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     ) { super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT);
 
         m_market = market;
-        m_faction = market.getFaction();
+        m_industry = ind;
 
         constructionMode = ConstructionMode.NORMAL;
-        m_industry = ind;
         industryPanel = indPanel;
         constructionQueueIndex = queue;
 
-        baseColor = m_faction.getBaseUIColor();
-        darkColor = m_faction.getDarkUIColor();
-        gridColor = m_faction.getGridUIColor();
-        brightColor = m_faction.getBrightUIColor();
+        baseColor = market.getFaction().getBaseUIColor();
+        darkColor = market.getFaction().getDarkUIColor();
 
         bg.color = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
         bg.alpha = 1f;
@@ -114,7 +106,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         glow.fader = new FaderUtil(0.3f, 0.1f, 0.4f, true, false);
         glow.isFaderOwner = false;
         glow.type = GlowType.UNDERLAY;
-        glow.color = m_faction.getBaseUIColor();
+        glow.color = baseColor;
 
         final int hOffset = m_industry.isStructure() ? TITLE_HEIGHT : 0;
         offset.setOffset(-1, -1, 2, 2 - hOffset);
@@ -123,28 +115,19 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     }
 
     public void createPanel() {
-        final BasePanel titlePanel = new BasePanel(m_panel, PANEL_WIDTH, TITLE_HEIGHT) {
+        buildingTitleHeader = Global.getSettings().createLabel(
+            m_industry.getCurrentName(), Fonts.DEFAULT_SMALL
+        );
+        buildingTitleHeader.setColor(
+            m_industry.isImproved() ? Misc.getStoryOptionColor() : baseColor
+        );
+        buildingTitleHeader.setHighlightColor(
+            NativeUiUtils.adjustBrightness(buildingTitleHeader.getColor(), 1.33f)
+        );
+        buildingTitleHeader.setAlignment(Alignment.LMID);
+        buildingTitleHeader.getPosition().setSize(PANEL_WIDTH + 50, TITLE_HEIGHT);
+        add(buildingTitleHeader).inTL(pad, 0f);
 
-            @Override
-            public void createPanel() {
-                buildingTitleHeader = Global.getSettings().createLabel(
-                    m_industry.getCurrentName(), Fonts.DEFAULT_SMALL
-                );
-                buildingTitleHeader.setColor(
-                    m_industry.isImproved() ? Misc.getStoryOptionColor() : baseColor
-                );
-                buildingTitleHeader.setHighlightColor(
-                    WrapUiUtils.adjustBrightness(buildingTitleHeader.getColor(), 1.33f)
-                );
-                buildingTitleHeader.setAlignment(Alignment.LMID);
-                buildingTitleHeader.autoSizeToWidth(PANEL_WIDTH + 50);
-
-                add(buildingTitleHeader).inLMid(pad);
-            }
-
-            { bg.enabled = false; }
-        };
-        add(titlePanel).inTL(0, 0);
 
         industryIcon = new IndustryImagePanel(
             m_panel, PANEL_WIDTH, IMAGE_HEIGHT,
@@ -268,7 +251,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                     RolfLectionUtil.getMethodAndInvokeDirectly(
                         "show", dialog, 0f, 0f);
 
-                    WrapUiUtils.anchorPanel(
+                    NativeUiUtils.anchorPanel(
                         ((UIPanelAPI)dialog), industryIcon.getPanel(), AnchorType.MidTopLeft, 0
                     );
 
@@ -283,7 +266,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         final LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(highlight);
         workerCountLabel.setHighlightColor(
-            WrapUiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
+            NativeUiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
         );
         if (data != null) {
             final String assignedStr = NumFormat.engNotation(data.getWorkersAssigned());
@@ -350,7 +333,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                 tp.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
                 constructionStatusText = tp.createLabel("Building", baseColor);
                 constructionStatusText.setHighlightColor(
-                    WrapUiUtils.adjustBrightness(constructionStatusText.getColor(), 1.33f)
+                    NativeUiUtils.adjustBrightness(constructionStatusText.getColor(), 1.33f)
                 );
 
                 constructionStatusText.autoSizeToWidth(PANEL_WIDTH);
@@ -397,7 +380,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         constructionStatusText = Global.getSettings().createLabel(txt, Fonts.INSIGNIA_VERY_LARGE);
         constructionStatusText.setColor(baseColor);
         constructionStatusText.setHighlightColor(
-            WrapUiUtils.adjustBrightness(constructionStatusText.getColor(), 1.33f)
+            NativeUiUtils.adjustBrightness(constructionStatusText.getColor(), 1.33f)
         );
         constructionStatusText.autoSizeToWidth(constructionStatusText.computeTextWidth(txt));
 
@@ -420,7 +403,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             );
             removeLabel.setColor(baseColor);
             removeLabel.setHighlightColor(
-                WrapUiUtils.adjustBrightness(removeLabel.getColor(), 1.33f)
+                NativeUiUtils.adjustBrightness(removeLabel.getColor(), 1.33f)
             );
 
             LabelAPI refundLabel = Global.getSettings().createLabel(
@@ -428,7 +411,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             );
             refundLabel.setColor(highlight);
             refundLabel.setHighlightColor(
-                WrapUiUtils.adjustBrightness(refundLabel.getColor(), 1.33f)
+                NativeUiUtils.adjustBrightness(refundLabel.getColor(), 1.33f)
             );
 
             LabelAPI refundLabelAppendix = Global.getSettings().createLabel(
@@ -436,7 +419,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             );
             refundLabelAppendix.setColor(baseColor);
             refundLabelAppendix.setHighlightColor(
-                WrapUiUtils.adjustBrightness(refundLabelAppendix.getColor(), 1.33f)
+                NativeUiUtils.adjustBrightness(refundLabelAppendix.getColor(), 1.33f)
             );
 
             labels.add(removeLabel);
@@ -458,7 +441,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         LabelAPI swapLabel = Global.getSettings().createLabel("Click to swap", Fonts.DEFAULT_SMALL);
         swapLabel.setColor(baseColor);
         swapLabel.setHighlightColor(
-            WrapUiUtils.adjustBrightness(swapLabel.getColor(), 1.33f)
+            NativeUiUtils.adjustBrightness(swapLabel.getColor(), 1.33f)
         );
         
         labels.add(swapLabel);
@@ -483,7 +466,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                 );
                 buildTimeLabel.setColor(highlight);
                 buildTimeLabel.setHighlightColor(
-                    WrapUiUtils.adjustBrightness(buildTimeLabel.getColor(), 1.33f)
+                    NativeUiUtils.adjustBrightness(buildTimeLabel.getColor(), 1.33f)
                 );
 
                 LabelAPI buildTimeAppendix = Global.getSettings().createLabel(
@@ -491,7 +474,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                 );
                 buildTimeAppendix.setColor(baseColor);
                 buildTimeAppendix.setHighlightColor(
-                    WrapUiUtils.adjustBrightness(buildTimeAppendix.getColor(), 1.33f)
+                    NativeUiUtils.adjustBrightness(buildTimeAppendix.getColor(), 1.33f)
                 );
                 
                 LabelAPI costLabel = Global.getSettings().createLabel(
@@ -499,7 +482,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                 );
                 costLabel.setColor(highlight);
                 costLabel.setHighlightColor(
-                    WrapUiUtils.adjustBrightness(costLabel.getColor(), 1.33f)
+                    NativeUiUtils.adjustBrightness(costLabel.getColor(), 1.33f)
                 );
 
                 labels.add(buildTimeLabel);
@@ -584,7 +567,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             ImgGlow.type = GlowType.ADDITIVE;
             ImgGlow.additiveBrightness = 1f;
             ImgGlow.additiveSprite = m_sprite;
-            ImgGlow.color = WrapUiUtils.adjustBrightness(gColor, 0.33f);
+            ImgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
 
             audio.useDisabledSound = (!DebugFlags.COLONY_DEBUG && !m_industry.getMarket().isPlayerOwned());
         }

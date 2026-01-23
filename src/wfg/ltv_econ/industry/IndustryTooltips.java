@@ -1,7 +1,6 @@
 package wfg.ltv_econ.industry;
 
 import java.awt.Color;
-import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,11 +35,13 @@ import com.fs.starfarer.api.util.Misc;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.CommodityCell;
+import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import static wfg.wrap_ui.util.UIConstants.*;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+
+import static wfg.native_ui.util.UIConstants.*;
 
 public class IndustryTooltips {
 
@@ -135,8 +136,8 @@ public class IndustryTooltips {
 			}
 		}
 
-		market.reapplyConditions();
-		ind.reapply();
+		// market.reapplyConditions();
+		// ind.reapply();
 
 		String type = "";
 		if (ind.isIndustry())
@@ -350,20 +351,19 @@ public class IndustryTooltips {
 			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
 				"addPostUpkeepSection", ind, tp, mode);
 
-			List<CommodityCell> supplyList = new ArrayList<>();
-			List<CommodityCell> demandList = new ArrayList<>();
+			ArrayList<CommoditySpecAPI> supplyList = new ArrayList<>();
+			ArrayList<CommoditySpecAPI> demandList = new ArrayList<>();
 
 			final EconomyEngine engine = EconomyEngine.getInstance();
 
 			for (CommoditySpecAPI spec : EconomyInfo.getEconCommodities()) {
-				final CommodityCell cell = engine.getComCell(spec.getId(), ind.getMarket().getId());
+				if (CompatLayer.convertIndSupplyStat(ind, spec.getId()).getModifiedInt() > 0) {
+					supplyList.add(spec);
+				}
 
-				if (cell.getProdIndStat(ind.getId()).getModifiedInt() > 0) {
-					supplyList.add(cell);
-				}
-				if (cell.getDemandIndStat(ind.getId()).getModifiedInt() > 0) {
-					demandList.add(cell);
-				}
+				if (CompatLayer.convertIndDemandStat(ind, spec.getId()).getModifiedInt() > 0) {
+					demandList.add(spec);
+        		}
 			}
 
 			final int iconSize = 32;
@@ -379,8 +379,8 @@ public class IndustryTooltips {
 				float sectionWidth = (ind.getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (CommodityCell cell : supplyList) {
-					final int pAmount = cell.getProdIndStat(ind.getId()).getModifiedInt();
+				for (CommoditySpecAPI spec : supplyList) {
+					final int amount = CompatLayer.convertIndSupplyStat(ind, spec.getId()).getModifiedInt();
 
 					// wrap to next line if needed
 					count++;
@@ -392,16 +392,16 @@ public class IndustryTooltips {
 					// draw icon
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
-					tp.addIcons(cell.spec, 1, IconRenderMode.NORMAL);
+					tp.addIcons(spec, 1, IconRenderMode.NORMAL);
 					tp.addIconGroup(0f);
 					final UIComponentAPI iconComp = tp.getPrev();
 
 					// Add extra padding for thinner icons
-					float actualIconWidth = iconSize * cell.spec.getIconWidthMult();
+					float actualIconWidth = iconSize * spec.getIconWidthMult();
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					String txt = Strings.X + NumFormat.engNotation(pAmount);
+					String txt = Strings.X + NumFormat.engNotation(amount);
 					LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
 					float textH = lbl.computeTextHeight(txt);
@@ -413,7 +413,7 @@ public class IndustryTooltips {
 					x += sectionWidth + 5f;
 				}
 				tp.setHeightSoFar(y + opad*1.5f);
-				WrapUiUtils.resetFlowLeft(tp, opad);
+				NativeUiUtils.resetFlowLeft(tp, opad/2f);
 			}
 
 			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
@@ -441,8 +441,9 @@ public class IndustryTooltips {
 				float sectionWidth = (ind.getTooltipWidth() / itemsPerRow) - opad;
 				int count = -1;
 
-				for (CommodityCell cell : demandList) {
-					final int dAmount = cell.getDemandIndStat(ind.getId()).getModifiedInt();
+				for (CommoditySpecAPI spec : demandList) {
+					final int amount = CompatLayer.convertIndDemandStat(ind, spec.getId()).getModifiedInt();
+					final CommodityCell cell = engine.getComCell(spec.getId(), ind.getMarket().getId());
 
 					// wrap to next line if needed
 					count++;
@@ -454,20 +455,20 @@ public class IndustryTooltips {
 					// draw icon
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
-					if (cell.getFlowAvailabilityRatio() < 0.99f) {
-						tp.addIcons(cell.spec, 1, IconRenderMode.DIM_RED);
+					if (cell.getFlowAvailabilityRatio() < 0.9f) {
+						tp.addIcons(spec, 1, IconRenderMode.DIM_RED);
 					} else {
-						tp.addIcons(cell.spec, 1, IconRenderMode.NORMAL);
+						tp.addIcons(spec, 1, IconRenderMode.NORMAL);
 					}
 					tp.addIconGroup(0f);
 					final UIComponentAPI iconComp = tp.getPrev();
 
 					// Add extra padding for thinner icons
-					final float actualIconWidth = iconSize * cell.spec.getIconWidthMult();
+					final float actualIconWidth = iconSize * spec.getIconWidthMult();
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					final String txt = Strings.X + NumFormat.engNotation(dAmount);
+					final String txt = Strings.X + NumFormat.engNotation(amount);
 					final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
 					final float textH = lbl.computeTextHeight(txt);
@@ -478,7 +479,7 @@ public class IndustryTooltips {
 					x += sectionWidth + 5f;
 				}
 				tp.setHeightSoFar(y + opad*1.5f);
-				WrapUiUtils.resetFlowLeft(tp, opad);
+				NativeUiUtils.resetFlowLeft(tp, opad/2f);
 			}
 
 			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
@@ -503,7 +504,7 @@ public class IndustryTooltips {
 		}
 		orgMarket.setRetainSuppressedConditionsSetWhenEmpty(null);
 		if (!needToAddIndustry) {
-			ind.reapply();
+			// ind.reapply();
 		}
 		orgMarket.reapplyConditions();
 	}

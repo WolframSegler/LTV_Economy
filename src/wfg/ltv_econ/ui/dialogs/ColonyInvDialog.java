@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.dialogs;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 
@@ -20,21 +20,21 @@ import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.UIContext;
-import wfg.wrap_ui.ui.UIContext.Context;
-import wfg.wrap_ui.ui.dialogs.DialogPanel;
-import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.Button.CutStyle;
-import wfg.wrap_ui.ui.panels.SortableTable.cellAlg;
-import wfg.wrap_ui.ui.panels.Slider;
-import wfg.wrap_ui.ui.panels.SortableTable;
-import wfg.wrap_ui.ui.panels.SpritePanel.Base;
-import wfg.wrap_ui.ui.panels.TextPanel;
-import wfg.wrap_ui.util.CallbackRunnable;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.UIContext;
+import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.dialogs.DialogPanel;
+import wfg.native_ui.ui.panels.Button;
+import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.ui.panels.SortableTable.cellAlg;
+import wfg.native_ui.ui.panels.Slider;
+import wfg.native_ui.ui.panels.SortableTable;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.ui.panels.TextPanel;
+import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class ColonyInvDialog extends DialogPanel {
 
@@ -91,6 +91,7 @@ public class ColonyInvDialog extends DialogPanel {
 
             {
                 context.ignore = true;
+                tooltip.parent = ColonyInvDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows the colony's current credit reserves. These funds cover operating costs, import purchases, and upkeep for industries and structures. " +
@@ -102,7 +103,7 @@ public class ColonyInvDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
                 };
             }
         };
@@ -125,6 +126,7 @@ public class ColonyInvDialog extends DialogPanel {
 
             {
                 context.ignore = true;
+                tooltip.parent = ColonyInvDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows your personal credits for transferring funds to or from the colony's reserves.",
@@ -132,7 +134,7 @@ public class ColonyInvDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
                 };
             }
         };
@@ -158,6 +160,7 @@ public class ColonyInvDialog extends DialogPanel {
                 context.ignore = true;
 
                 tooltip.enabled = data == null;
+                tooltip.parent = ColonyInvDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The ratio of monthly profits that get automatically transferred to the player",
@@ -175,7 +178,7 @@ public class ColonyInvDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    WrapUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
                 };
             }
         };

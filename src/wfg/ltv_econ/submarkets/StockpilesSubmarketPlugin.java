@@ -20,10 +20,10 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.wrap_ui.util.NumFormat;
+import wfg.native_ui.util.NumFormat;
 
-import static wfg.wrap_ui.util.UIConstants.highlight;
-import static wfg.wrap_ui.util.UIConstants.opad;
+import static wfg.native_ui.util.UIConstants.highlight;
+import static wfg.native_ui.util.UIConstants.opad;
 
 public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 

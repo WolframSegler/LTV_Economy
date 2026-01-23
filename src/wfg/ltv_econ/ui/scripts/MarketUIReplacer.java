@@ -20,16 +20,16 @@ import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.wrap_ui.util.CallbackRunnable;
-import wfg.wrap_ui.util.NumFormat;
-import wfg.wrap_ui.util.WrapUiUtils;
-import wfg.wrap_ui.util.WrapUiUtils.AnchorType;
-import wfg.wrap_ui.ui.Attachments;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.components.InteractionComp.ClickHandler;
-import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.ui.panels.TextPanel;
+import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.panels.Button;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panels.TextPanel;
 
 import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
@@ -52,10 +52,8 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.economyValues.*;
-
-// import com.fs.starfarer.campaign.ui.trade.class;
 
 public class MarketUIReplacer implements EveryFrameScript {
 
@@ -213,7 +211,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         manageBtn.setShortcut(Keyboard.KEY_W);
 
         managementPanel.addComponent(manageBtn.getPanel()).inBL(0, 0);
-        WrapUiUtils.anchorPanel(
+        NativeUiUtils.anchorPanel(
             manageBtn.getPanel(), inventoryBtn.getPanel(), AnchorType.TopMid, opad
         );
 
@@ -267,8 +265,9 @@ public class MarketUIReplacer implements EveryFrameScript {
             {
             tooltip.width = TP_WIDTH;
             tooltip.positioner = (tp, expanded) -> {
-                WrapUiUtils.anchorPanel(tp, getPanel(), AnchorType.LeftTop, 50);
+                NativeUiUtils.anchorPanel(tp, getPanel(), AnchorType.LeftTop, 50);
             };
+            tooltip.parent = m_panel;
             tooltip.builder = (tp, expanded) -> {
                 final FactionAPI faction = marketAPI.getFaction();
                 final Color base = faction.getBaseUIColor();
@@ -506,7 +505,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         );
 
         managementPanel.addComponent(replacement.getPanel());
-        WrapUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomLeft, 25);
+        NativeUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomLeft, 25);
 
         if (LtvIndustryListPanel.indOptCtor == null) {
             // Acquire the popup class from one of the widgets
@@ -592,7 +591,7 @@ public class MarketUIReplacer implements EveryFrameScript {
             // commodityPanel
             // Might automate the getY() difference later
             managementPanel.addComponent(replacement.getPanel());
-            WrapUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomRight, -43);
+            NativeUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomRight, -43);
 
             managementPanel.removeComponent(commodityPanel);
 

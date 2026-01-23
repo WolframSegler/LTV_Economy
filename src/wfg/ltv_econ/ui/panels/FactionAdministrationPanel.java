@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.panels;
 
-import static wfg.wrap_ui.util.UIConstants.*;
+import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -10,10 +10,10 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.wrap_ui.ui.ComponentFactory;
-import wfg.wrap_ui.ui.panels.Button;
-import wfg.wrap_ui.ui.panels.CustomPanel;
-import wfg.wrap_ui.util.CallbackRunnable;
+import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.panels.Button;
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.util.CallbackRunnable;
 
 public class FactionAdministrationPanel extends CustomPanel<FactionAdministrationPanel> {
 

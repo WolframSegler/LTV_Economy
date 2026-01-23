@@ -1,5 +1,7 @@
 v0.2.3-beta | SAVE COMPATIBLE
-- Modified UI code to fit the new WrapUI changes of composition
+- Modified UI code to fit the new WrapUI changes of composition.
+- Fixed crash where the tooltip was trying to access removed industries.
+- The Commodity tooltip now shows the correct best places to buy/sell tables.
 
 v0.2.2-beta | SAVE COMPATIBLE
 - Redistributing credits between faction markets should no longer create more credits than existing
