@@ -23,6 +23,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.WorkerRegistry;
@@ -148,15 +149,17 @@ public class AssignWorkersDialog extends DialogPanel {
         final SettingsAPI settings = Global.getSettings();
         
         int cumulativeYOffset = pad;
-        for (String comID : data.getRegisteredOutputs()) {
-            final CommoditySpecAPI spec = settings.getCommoditySpec(comID);
+        for (OutputConfig output : IndustryIOs.getIndConfig(industry).outputs.values()) {
+            if (!output.usesWorkers) continue;
+
+            final CommoditySpecAPI spec = settings.getCommoditySpec(output.comID);
             outputsTp.addImage(spec.getIconName(), iconSize, iconSize, pad);
             outputsTp.getPrev().getPosition().inTL(pad, cumulativeYOffset);
 
             final Slider outputSlider = new Slider(
                 innerPanel, null, 0, 100, sliderWidth, sliderHeight
             );
-            outputSliders.put(comID, outputSlider);
+            outputSliders.put(output.comID, outputSlider);
 
             // Configure the slider
             outputSlider.setHighlightOnMouseover(true);
@@ -171,15 +174,15 @@ public class AssignWorkersDialog extends DialogPanel {
             pool.recalculateWorkerPool();
 
             final float max = Math.max(0,
-                data.getAssignedRatioForOutput(comID) + pool.getFreeWorkerRatio()
+                data.getAssignedRatioForOutput(output.comID) + pool.getFreeWorkerRatio()
             );
             
             outputSlider.maxValue = Math.min(
                 max,
-                IndustryIOs.getIndConfig(industry).outputs.get(comID).workerAssignableLimit
+                IndustryIOs.getIndConfig(industry).outputs.get(output.comID).workerAssignableLimit
             ) * 100;
 
-            outputSlider.setProgress(data.getAssignedRatioForOutput(comID) * 100);
+            outputSlider.setProgress(data.getAssignedRatioForOutput(output.comID) * 100);
 
             outputsTp.addComponent(outputSlider.getPanel()).inTL(iconSize + pad*2, cumulativeYOffset);
             cumulativeYOffset += pad + sliderHeight;

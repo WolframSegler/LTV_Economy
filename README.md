@@ -12,14 +12,14 @@ This mod is designed to make the economy **interesting, legible, and consequenti
 ## Core Features
 
 ### Unit-based economy
-- Industries **consume and produce real commodity units**.
+- Industries **consume and produce cargo units**.
 - Trade moves actual units between markets; credits are derived from prices × quantities.
 - All flows (production, imports, exports, deficits, storage) are tracked explicitly.
 
-### CommodityStats
+### CommodityCell
 - Central system that tracks:
   - Production, demand, imports (faction/global), exports
-  - Deficits, over-imports, storage, stockpiles
+  - Deficits, over-imports, storage, stockpiles etc.
 - Provides consistent, debuggable economic behavior across all markets.
 
 ### Labor & wages
@@ -37,10 +37,10 @@ This mod is designed to make the economy **interesting, legible, and consequenti
 
 ## Trade & AI Behavior
 
-- Markets trade using a **pairing-score system** ti determine trade order.
+- Markets trade using a **pairing-score system** to determine trade order.
 - Non-player markets assign workers via a **two-stage solver**:
-  1. Compute global demand and required labor per output.
-  2. Distribute labor fairly across markets with capacity constraints.
+  1. Compute global demand and required workers per output.
+  2. Distribute workers fairly across markets with capacity constraints.
 
 <br>
 
@@ -66,7 +66,6 @@ They respond to wages, stability, exploitation, and policies.
   - Stability loss
   - Increased upkeep
   - Reduced immigration
-  - Reduced extractable player income
 
 ### Player income control
 - Colonies have a **Player Profit Ratio** (auto-transfer).
@@ -80,14 +79,14 @@ They respond to wages, stability, exploitation, and policies.
 
 - Designed to be **data-driven and extensible**.
 - Clear separation between simulation logic and UI.
-- WrapUI is reusable and intended for other mods as well.
+- NativeUI is reusable and intended for other mods as well.
 - Compatible with mods that do not deeply replace the economy.
 
 <br>
 
 ## Scope & Status
 
-- Over **8 months of development** and hundreds of hours of work.
+- Over **8 months of development** and hundreds of hours of work for the initial release.
 - Balance is intentionally conservative and will be refined through player feedback.
 
 <br>

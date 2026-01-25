@@ -18,7 +18,7 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
     public static final int HAND_WEAPONS_COST = 6;
 
     public static final float DEFENSE_MULT_BUFF = 2.5f;
-    public static final int DEFENSE_FLAT_BUFF = 300;
+    public static final int DEFENSE_FLAT_BUFF = 150;
 
     public void apply(PlayerMarketData data) {
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);

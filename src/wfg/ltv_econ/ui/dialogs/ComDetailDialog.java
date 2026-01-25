@@ -9,10 +9,12 @@ import java.awt.Color;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
@@ -38,9 +40,12 @@ import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.UIContext;
 import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.components.InputSnapshotComp;
+import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.components.OutlineComp.OutlineType;
 import wfg.native_ui.ui.components.TooltipComp.TooltipBuilder;
+import wfg.native_ui.ui.core.UIElementFlags.HasInputSnapshot;
 import wfg.native_ui.ui.dialogs.DialogPanel;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.Button.CutStyle;
@@ -54,10 +59,9 @@ import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class ComDetailDialog extends DialogPanel {
+public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
-    // PANEL_W = 1206; // Exact width using VisualVM. Includes pad.
-    // PANEL_H = 728; // Exact height using VisualVM. Includes pad.
+    protected final InputSnapshotComp input = comp().get(NativeComponents.INPUT_SNAPSHOT);
 
     public final int PANEL_W;
     public final int PANEL_H;
@@ -80,6 +84,7 @@ public class ComDetailDialog extends DialogPanel {
     public final static int iconSize = 24;
 
     private final MarketAPI m_market;
+    private final FactionSpecAPI m_faction;
 
     private CommoditySpecAPI m_com;
     public MarketAPI m_selectedMarket = null;
@@ -89,12 +94,15 @@ public class ComDetailDialog extends DialogPanel {
     public Button consumerButton = null;
     public LtvCommodityPanel section4ComPanel = null;
 
-    public ComDetailDialog(MarketAPI market, CommoditySpecAPI com) {
-        // Measured using very precise tools!! (my eyes)
-        this(market, com, 1166, 658 + 20);
+    /** market can be null */
+    public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com) {
+        this(market, faction, com, 1166, 658 + 20);
     }
 
-    public ComDetailDialog(MarketAPI market, CommoditySpecAPI com, int panelW, int panelH) {
+    /** market can be null */
+    public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com,
+        int panelW, int panelH
+    ) {
         super(Attachments.getScreenPanel(), panelW, panelH, null, null, "Dismiss");
 
         PANEL_W = panelW;
@@ -113,6 +121,7 @@ public class ComDetailDialog extends DialogPanel {
         SECT4_HEIGHT = (int) (PANEL_H * 0.72f - opad);
 
         m_market = market;
+        m_faction = faction;
         m_com = com;
 
         setConfirmShortcut();
@@ -150,7 +159,7 @@ public class ComDetailDialog extends DialogPanel {
                 m_checkbox.setShortcut(Keyboard.KEY_Q, false);
 
                 footer.setParaFont(Fonts.ORBITRON_12);
-                footer.setParaFontColor(m_market.getFaction().getBaseUIColor());
+                footer.setParaFontColor(m_faction.getBaseUIColor());
                 LabelAPI txt = footer.addPara("Only show colonies with excess stockpiles or shortages (%s)", 0f, highlight, "Q");
                 txt.setHighlightOnMouseover(true);
 
@@ -164,7 +173,7 @@ public class ComDetailDialog extends DialogPanel {
             public void advance(float delta) {
                 super.advance(delta);
 
-                if (inputSnapshot.hoveredLastFrame && inputSnapshot.LMBUpLastFrame) {
+                if (input.hoveredLastFrame && input.LMBUpLastFrame) {
                     if (m_checkbox != null) {
                         m_checkbox.setChecked(!m_checkbox.isChecked());
                     }
@@ -261,7 +270,7 @@ public class ComDetailDialog extends DialogPanel {
         final int iconSize = (int) (section.getPosition().getHeight() / 2.2f);
 
         final ComIconPanel iconLeft = new ComIconPanel(section, iconSize, iconSize,
-            null, null, m_com, m_market.getFaction()
+            null, null, m_com, m_faction
         );
 
         iconLeft.getPos().inTL(opad * 3,
@@ -269,7 +278,7 @@ public class ComDetailDialog extends DialogPanel {
         section.addComponent(iconLeft.getPanel());
 
         final ComIconPanel iconRight = new ComIconPanel(section, iconSize, iconSize,
-            null, null, m_com, m_market.getFaction()
+            null, null, m_com, m_faction
         );
 
         iconRight.getPos().inTL(SECT1_WIDTH - iconSize - opad * 3,
@@ -279,7 +288,7 @@ public class ComDetailDialog extends DialogPanel {
         // Text
         final String comID = m_com.getId();
         final int baseY = (int) (headerHeight + opad * 1.5f);
-        final Color baseColor = m_market.getFaction().getBaseUIColor();
+        final Color baseColor = m_faction.getBaseUIColor();
         { // Global market value
             final TextPanel textPanel = new TextPanel(section, 170, 0) {
                 @Override
@@ -374,26 +383,26 @@ public class ComDetailDialog extends DialogPanel {
         }
         { // Total faction exports
 
-            final MarketAPI currMarket;
+            final FactionSpecAPI currFaction;
 
-            if (m_selectedMarket != null) currMarket = m_selectedMarket;
-            else currMarket = m_market;
+            if (m_selectedMarket != null) currFaction = m_selectedMarket.getFaction().getFactionSpec();
+            else currFaction = m_faction;
 
             final TextPanel textPanel = new TextPanel(section, 210, 0) {
                 @Override
                 public void createPanel() {
-                    final String factionName = currMarket.getFaction().getDisplayName();
-                    final Color factionColor = currMarket.getFaction().getBaseUIColor();
+                    final String factionName = currFaction.getDisplayName();
+                    final Color factionColor = currFaction.getBaseUIColor();
 
                     final String txt = "Total " + factionName + " exports";
 
                     final String globalValue = NumFormat.engNotation(
                         engine.info.getFactionTotalGlobalExports(
-                            comID, currMarket.getFaction())
+                            comID, currFaction)
                     );
                     final String inFactionValue = NumFormat.engNotation(
                         engine.info.getTotalInFactionExports(
-                            comID, currMarket.getFaction())
+                            comID, currFaction)
                     );
 
                     final String valueTxt = globalValue + "  |  " + inFactionValue;
@@ -420,9 +429,9 @@ public class ComDetailDialog extends DialogPanel {
                     tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
-                            "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currMarket.getFaction().getPersonNamePrefix() + " control.\n\n" +
+                            "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currFaction.getPersonNamePrefix() + " control.\n\n" +
                             "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
-                            pad, new Color[] {currMarket.getFaction().getBaseUIColor(), UiUtils.inFactionColor},
+                            pad, new Color[] {currFaction.getBaseUIColor(), UiUtils.inFactionColor},
                             new String[] {"all consumers globally", "within the faction"}
                         );
                     };
@@ -441,11 +450,11 @@ public class ComDetailDialog extends DialogPanel {
             final TextPanel textPanel = new TextPanel(section, 250, 0) {
                 @Override
                 public void createPanel() {
-                    final String factionName = m_market.getFaction().getDisplayName();
+                    final String factionName = m_faction.getDisplayName();
                     final String txt = factionName + " market share";
 
                     final String valueTxt = (int)(engine.info.getFactionTotalExportMarketShare(
-                        comID, m_market.getFaction().getId()
+                        comID, m_faction.getId()
                     ) * 100) + "%";
 
                     ComponentFactory.addCaptionValueBlock(
@@ -460,8 +469,8 @@ public class ComDetailDialog extends DialogPanel {
                     tooltip.width = 460f;
                     tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
-                        final String marketOwner = m_market.getFaction().isPlayerFaction() ?
-                            "your" : m_market.getFaction().getPersonNamePrefix(); 
+                        final String marketOwner = m_faction.getId().equals(Factions.PLAYER) ?
+                            "your" : m_faction.getPersonNamePrefix(); 
 
                         tp.addPara(
                             "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
@@ -518,11 +527,11 @@ public class ComDetailDialog extends DialogPanel {
             final TextPanel textPanelRight = new TextPanel(section, 250, 0) {
                 @Override
                 public void createPanel() {
-                    final String factionName = m_market.getFaction().getDisplayName();
+                    final String factionName = m_faction.getDisplayName();
                     final String txt = factionName + " market share";
 
                     final String valueTxt = (int) (engine.info.getFactionTotalExportMarketShare(
-                        comID, m_market.getFaction().getId()
+                        comID, m_faction.getId()
                     ) * 100) + "%";
 
                     ComponentFactory.addCaptionValueBlock(
@@ -537,8 +546,8 @@ public class ComDetailDialog extends DialogPanel {
                     tooltip.width = 460f;
                     tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
-                        String marketOwner = m_market.getFaction().isPlayerFaction() ?
-                            "your" : m_market.getFaction().getPersonNamePrefix(); 
+                        String marketOwner = m_faction.getId().equals(Factions.PLAYER) ?
+                            "your" : m_faction.getPersonNamePrefix(); 
 
                         tp.addPara(
                             "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
@@ -561,6 +570,8 @@ public class ComDetailDialog extends DialogPanel {
     }
 
     private void createSection2(UIPanelAPI section, TooltipMakerAPI tooltip) {
+        if (m_market == null) return;
+
         final int mapHeight = (int) section.getPosition().getHeight() - 2 * opad;
 
         final StarSystemAPI starSystem = m_market.getStarSystem();
@@ -746,7 +757,7 @@ public class ComDetailDialog extends DialogPanel {
 
             table.pushRow(
                 market, tp, rowSelectedRunnable, null,
-                null, m_market.getFaction().getDarkUIColor()
+                null, m_faction.getDarkUIColor()
             );
 
             if (m_market == market) table.selectLastRow();
@@ -758,6 +769,8 @@ public class ComDetailDialog extends DialogPanel {
     }
 
     private void createSection4(UIPanelAPI section) {
+        if (m_market == null) return;
+
         section4ComPanel = new LtvCommodityPanel(
             section,
             (int) section.getPosition().getWidth(),
@@ -893,7 +906,7 @@ public class ComDetailDialog extends DialogPanel {
             final int y = (int) tp.getHeightSoFar() + pad + opad;
 
             CommodityRowPanel.legendRowCreator(
-                1, tp, y, 26, m_market
+                1, tp, y, 26
             );
         };
     }

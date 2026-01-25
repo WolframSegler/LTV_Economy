@@ -2,6 +2,8 @@ package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
 
+import java.awt.Color;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -69,9 +71,11 @@ public abstract class MarketPolicy {
 
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
         tp.setParaFontOrbitron();
+        tp.setParaFontColor(base);
         tp.addPara(spec.name, pad, base);
         
         tp.setParaFontDefault();
+        tp.setParaFontColor(Color.WHITE);
         tp.addPara(spec.description, pad);
 
         if (state == PolicyState.COOLDOWN) {

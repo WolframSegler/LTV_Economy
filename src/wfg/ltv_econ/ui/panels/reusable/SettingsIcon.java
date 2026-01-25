@@ -11,8 +11,8 @@ import wfg.native_ui.ui.panels.SpritePanel;
 import wfg.native_ui.ui.components.AudioFeedbackComp;
 import wfg.native_ui.ui.components.InteractionComp;
 import wfg.native_ui.ui.components.NativeComponents;
-import wfg.native_ui.ui.panels.CustomPanel.HasAudioFeedback;
-import wfg.native_ui.ui.panels.CustomPanel.HasInteraction;
+import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
+import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 
 public class SettingsIcon extends SpritePanel<SettingsIcon> implements 
     HasAudioFeedback, HasInteraction

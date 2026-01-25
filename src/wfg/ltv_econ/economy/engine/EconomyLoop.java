@@ -323,13 +323,13 @@ public class EconomyLoop {
 
             final int n = markets.size();
             long totalCredits = 0l;
-            long totalWeight = 0l;
-            long[] weights = new long[n];
+            double totalWeight = 0l;
+            double[] weights = new double[n];
             long[] credits = new long[n];
 
             for (int i = 0; i < n; i++) {
                 MarketAPI m = markets.get(i);
-                final long w = (long) Math.pow(10, m.getSize() - 3);
+                final double w = Math.pow(10, m.getSize() - 3);
                 weights[i] = w;
                 totalWeight += w;
 

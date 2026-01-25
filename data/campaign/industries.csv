@@ -1,2 +1,2 @@
 id,name,cost mult,build time,income,upkeep,downgrade,upgrade,tags,data,image,plugin,desc,order,disruptDanger
-manufacturing,Manufacturing Plant,50,90,,10,,,"industry, industrial",,graphics/icons/industry/manufacturing.png,wfg.ltv_econ.industry.Manufacturing,"Transforms metals and machinery into standardized components and subassemblies, providing the essential parts required for advanced industry and consumer production.",1300,MEDIUM
+manufacturing,Manufacturing Plant,50,90,,10,,,"industry, manufacturing",,graphics/icons/industry/manufacturing.png,wfg.ltv_econ.industry.Manufacturing,"Transforms metals and machinery into standardized components and subassemblies, providing the essential parts required for advanced industry and consumer production.",1300,MEDIUM

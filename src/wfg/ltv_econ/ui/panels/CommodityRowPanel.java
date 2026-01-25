@@ -24,11 +24,11 @@ import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.UIContextComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
+import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
+import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.CustomPanel.HasAudioFeedback;
-import wfg.native_ui.ui.panels.CustomPanel.HasHoverGlow;
-import wfg.native_ui.ui.panels.CustomPanel.HasInteraction;
-import wfg.native_ui.ui.panels.CustomPanel.HasTooltip;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -168,7 +168,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
 
             final int y = (int)tp.getHeightSoFar() + pad;
 
-            legendRowCreator(0, tp, y, legendIconSize, m_market); 
+            legendRowCreator(0, tp, y, legendIconSize); 
             tp.addSpacer(pad);
             }
         };
@@ -223,8 +223,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
      * <br></br> MODE_0: shows everything.
      * <br></br> MODE_1: shows only the CommodityInfoBar relevant info.
      */
-    public static void legendRowCreator(int mode, TooltipMakerAPI tp, int y, int iconSize,
-        MarketAPI market) {
+    public static void legendRowCreator(int mode, TooltipMakerAPI tp, int y, int iconSize) {
 
         String iconPath;
         String desc;

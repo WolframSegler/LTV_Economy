@@ -15,7 +15,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.plugins.MarketWrapper;
 import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
-import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
+import wfg.ltv_econ.ui.dialogs.ManagePopulationDialog;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
@@ -196,7 +196,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         if (!EconomyEngine.getInstance().isPlayerMarket(marketAPI.getId())) return;
 
         final CallbackRunnable<Button> manageWorkersBtnRunnable = (btn) -> {
-            final ManageWorkersDialog dialogPanel = new ManageWorkersDialog(marketAPI);
+            final ManagePopulationDialog dialogPanel = new ManagePopulationDialog(marketAPI);
             dialogPanel.show(0.3f, 0.3f);
         };
 
@@ -263,6 +263,9 @@ public class MarketUIReplacer implements EveryFrameScript {
 
             final float TP_WIDTH = 450f;
             {
+            tooltip.expandable = true;
+            tooltip.expandTxt = "%s Show details";
+            tooltip.unexpandTxt = "%s Hide";
             tooltip.width = TP_WIDTH;
             tooltip.positioner = (tp, expanded) -> {
                 NativeUiUtils.anchorPanel(tp, getPanel(), AnchorType.LeftTop, 50);
@@ -578,7 +581,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
                 if (UiUtils.canViewPrices()) {
                     final ComDetailDialog dialogPanel = new ComDetailDialog(
-                        marketAPI, panel.m_com
+                        marketAPI, marketAPI.getFaction().getFactionSpec(), panel.m_com
                     );
                     dialogPanel.show(0.3f, 0.3f);
                 }

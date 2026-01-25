@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -69,7 +69,7 @@ public class EconomyInfo {
         return (int) (((float) engine.getComCell(comID, marketID).globalImports / (float) total) * 100);
     }
 
-    public final double getTotalInFactionExports(String comID, FactionAPI faction) {
+    public final double getTotalInFactionExports(String comID, FactionSpecAPI faction) {
         double TotalFactionExports = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
@@ -110,7 +110,7 @@ public class EconomyInfo {
         return (float) (totalGlobalImports / total);
     }
 
-    public final double getFactionTotalGlobalExports(String comID, FactionAPI faction) {
+    public final double getFactionTotalGlobalExports(String comID, FactionSpecAPI faction) {
         double totalGlobalExports = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {

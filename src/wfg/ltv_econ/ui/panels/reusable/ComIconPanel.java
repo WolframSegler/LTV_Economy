@@ -3,7 +3,7 @@ package wfg.ltv_econ.ui.panels.reusable;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -16,9 +16,9 @@ import wfg.native_ui.ui.components.HoverGlowComp;
 import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.panels.SpritePanel;
-import wfg.native_ui.ui.panels.CustomPanel.HasHoverGlow;
-import wfg.native_ui.ui.panels.CustomPanel.HasTooltip;
 
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -28,11 +28,11 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements
     public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
     public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
 
-    public FactionAPI m_faction;
+    public FactionSpecAPI m_faction;
     protected CommoditySpecAPI m_com;
 
     public ComIconPanel(UIPanelAPI parent, int width, int height, Color color,
-        Color fillColor, CommoditySpecAPI spec,FactionAPI faction
+        Color fillColor, CommoditySpecAPI spec,FactionSpecAPI faction
     ) {
         super(parent, width, height, spec.getIconName(), color, fillColor);
         m_faction = faction;

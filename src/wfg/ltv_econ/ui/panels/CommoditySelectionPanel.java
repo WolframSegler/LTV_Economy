@@ -2,14 +2,19 @@ package wfg.ltv_econ.ui.panels;
 
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
+import wfg.ltv_econ.util.UiUtils;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.AudioFeedbackComp;
 import wfg.native_ui.ui.components.BackgroundComp;
@@ -17,11 +22,16 @@ import wfg.native_ui.ui.components.HoverGlowComp;
 import wfg.native_ui.ui.components.InteractionComp;
 import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.OutlineComp;
+import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.components.OutlineComp.OutlineType;
+import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
+import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
+import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
+import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
+import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.native_ui.ui.panels.CustomPanel.HasOutline;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -64,11 +74,12 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
     }
 
     public static class RowPanel extends CustomPanel<RowPanel> 
-        implements HasInteraction, HasHoverGlow, HasAudioFeedback
+        implements HasInteraction, HasHoverGlow, HasAudioFeedback, HasTooltip
     {
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
         public final InteractionComp<RowPanel> interaction = comp().get(NativeComponents.INTERACTION);
+        public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
 
         private final CommoditySpecAPI spec;
 
@@ -82,6 +93,26 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
             interaction.onClicked = (source, isLeftClick) -> {
                 GlobalCommodityFlow.selectedCom = spec;
                 contentPanel.createPanel();
+
+                if (UiUtils.canViewPrices() && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) ||
+                    Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)
+                )) {
+                    final ComDetailDialog dialogPanel = new ComDetailDialog(
+                        null, Global.getSettings().getFactionSpec(Factions.PLAYER), com
+                    );
+                    dialogPanel.show(0.3f, 0.3f);
+                }
+            };
+
+            tooltip.builder = (tp, exp) -> {
+                if (UiUtils.canViewPrices()) {
+                    tp.addPara("Ctrl + Click to view global market info", pad, highlight, new String[]{
+                        "Ctrl", "Click"
+                    });
+                } else {
+                    final String text = "Must be in range of a comm relay to view global market info";
+                    tp.addPara(text, opad, negative, text);
+                }
             };
 
             createPanel();

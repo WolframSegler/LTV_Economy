@@ -21,9 +21,9 @@ import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.OutlineComp;
 import wfg.native_ui.ui.components.UIContextComp;
 import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
+import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.native_ui.ui.panels.CustomPanel.HasOutline;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements HasBackground, HasOutline {

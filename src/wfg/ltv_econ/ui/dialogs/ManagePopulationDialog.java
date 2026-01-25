@@ -51,7 +51,7 @@ import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class ManageWorkersDialog extends DialogPanel {
+public class ManagePopulationDialog extends DialogPanel {
 
     public static final int PANEL_W = 950;
     public static final int PANEL_H = 680;
@@ -78,7 +78,7 @@ public class ManageWorkersDialog extends DialogPanel {
     private MarketPolicy selectedPolicy = null;
     private UIPanelAPI selectedPolicyCont = null;
     
-    public ManageWorkersDialog(MarketAPI market) {
+    public ManagePopulationDialog(MarketAPI market) {
         super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
         setConfirmShortcut();
 
@@ -148,7 +148,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Controls the proportion of worker output the colony retains as profit." +
@@ -186,7 +186,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Total wages paid to workers this month.", pad
@@ -221,7 +221,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The average monthly income of workers in the colony. Each person spends 1" +
@@ -309,7 +309,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows how many workers are currently employed compared to the colony's total labor capacity.",
@@ -372,7 +372,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Overall health of the population. A higher value indicates better living conditions, food availability, and lower hazard exposure.", pad);
                 
@@ -413,7 +413,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and social cohesion.", opad);
 
@@ -454,7 +454,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Degree of social cohesion within the population. High cohesion reduces conflict and increases stability.", opad);
 
@@ -495,7 +495,7 @@ public class ManageWorkersDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The population's awareness of exploitation and social hierarchy. Higher values indicate a greater likelihood of collective action. " +
@@ -626,7 +626,7 @@ public class ManageWorkersDialog extends DialogPanel {
                 glow.type = GlowType.ADDITIVE;
                 glow.additiveSprite = m_sprite;
 
-                tooltip.parent = ManageWorkersDialog.this.m_panel;
+                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> policy.createTooltip(mData, tp);
 
                 createPanel();
@@ -682,7 +682,7 @@ public class ManageWorkersDialog extends DialogPanel {
             activateButton.setEnabled(false);
 
             activateButton.setShowTooltipWhileInactive(true);
-            activateButton.tooltip.parent = ManageWorkersDialog.this.m_panel;
+            activateButton.tooltip.parent = ManagePopulationDialog.this.m_panel;
             activateButton.tooltip.builder = (tp, exp) -> {
                 tp.addPara("Not enough market credits to activate this policy", pad);
             };

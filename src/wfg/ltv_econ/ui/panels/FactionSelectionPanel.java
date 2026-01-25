@@ -23,13 +23,17 @@ import wfg.native_ui.ui.components.InteractionComp;
 import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.OutlineComp;
 import wfg.native_ui.ui.components.OutlineComp.OutlineType;
+import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
+import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
+import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
+import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
+import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
+import wfg.native_ui.ui.core.UIElementFlags.HasUIContext;
 import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.UIContextComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.native_ui.ui.panels.CustomPanel.HasOutline;
-import wfg.native_ui.ui.panels.CustomPanel.HasUIContext;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 
 public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> implements

@@ -1,3 +1,15 @@
+v0.2.4-beta | SAVE COMPATIBLE
+- Fixed colony income tooltip not being expandable for more info
+- Fixed policies list not being scrollable
+- Fixed policy cooldown icon not showing
+- Fixed industry build / upgrade state not having a darker image.
+- Fixed critical bug in colony income redistribution
+- Tuned down the policy Bulwark of Orichalcum
+- Fixed a bug causing upgradable industries with new outputs from being visible.
+- Manufacturing no longer interferes with luddic majority buff
+- Added a switch button to Colonies tab that switches to colony population statistics table
+- Ctrl + Clicking the Commodity Selection Panel under the Economy section inside the command tab will open the global market info panel.
+
 v0.2.3-beta | SAVE COMPATIBLE
 - Modified UI code to fit the new WrapUI changes of composition.
 - Fixed crash where the tooltip was trying to access removed industries.

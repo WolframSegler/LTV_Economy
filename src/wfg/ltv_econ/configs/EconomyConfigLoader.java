@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
 
-import wfg.ltv_econ.ui.dialogs.ManageWorkersDialog;
+import wfg.ltv_econ.ui.dialogs.ManagePopulationDialog;
 
 public class EconomyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";
@@ -140,7 +140,7 @@ public class EconomyConfigLoader {
         public static float EXPORT_THRESHOLD_FACTOR;
 
         /**
-         * Determines the visibility of policies under the {@link ManageWorkersDialog} dialog.
+         * Determines the visibility of policies under the {@link ManagePopulationDialog} dialog.
          */
         public static boolean SHOW_MARKET_POLICIES;
 

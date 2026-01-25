@@ -74,7 +74,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
         final ComIconPanel comIcon = new ComIconPanel(
             m_panel, ICON_SIZE, ICON_SIZE, null, null, selectedCom,
-            sector.getPlayerFaction()
+            sector.getPlayerFaction().getFactionSpec()
         );
         add(comIcon).inTL((LABEL_W*2 - ICON_SIZE) / 2f, 0);
 

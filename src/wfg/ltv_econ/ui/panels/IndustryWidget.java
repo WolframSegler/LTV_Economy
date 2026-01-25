@@ -43,12 +43,15 @@ import wfg.native_ui.ui.components.LayoutOffsetComp;
 import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
+import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
+import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
+import wfg.native_ui.ui.core.UIElementFlags.HasLayoutOffset;
+import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.Slider;
 import wfg.native_ui.ui.panels.SpritePanel;
-import wfg.native_ui.ui.panels.CustomPanel.HasBackground;
-import wfg.native_ui.ui.panels.CustomPanel.HasHoverGlow;
-import wfg.native_ui.ui.panels.CustomPanel.HasLayoutOffset;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
@@ -93,7 +96,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         m_market = market;
         m_industry = ind;
 
-        constructionMode = ConstructionMode.NORMAL;
+        setMode(ConstructionMode.NORMAL);
         industryPanel = indPanel;
         constructionQueueIndex = queue;
 
@@ -136,11 +139,11 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         );
 
         if (!m_industry.isFunctional() || constructionQueueIndex >= 0) {
-            industryIcon.setColor(darkColor);
+            industryIcon.texColor = darkColor;
         }
 
         if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
-            industryIcon.setColor(Color.white);
+            industryIcon.texColor = Color.white;
             industryIcon.interaction.enabled = false;
         }
         add(industryIcon).inBL(0, 0);
@@ -386,7 +389,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
         add(constructionStatusText).inMid().setYAlignOffset(-TITLE_HEIGHT / 2f);
 
-        constructionMode = ConstructionMode.NORMAL;
+        setMode(ConstructionMode.NORMAL);
         addCostTimeLabels();
     }
 
@@ -431,7 +434,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             add(removeLabel).aboveMid((UIComponentAPI)constructionStatusText, 0);
             add(refundLabel).belowMid((UIComponentAPI)constructionStatusText, 0).setXAlignOffset(-offset);
             add(refundLabelAppendix).rightOfBottom((UIComponentAPI)refundLabel, 0);
-            constructionMode = ConstructionMode.REMOVE;
+            setMode(ConstructionMode.REMOVE);
             addCostTimeLabels();
         }
     }
@@ -446,7 +449,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         
         labels.add(swapLabel);
         add(swapLabel).aboveMid((UIComponentAPI)constructionStatusText, 0);
-        constructionMode = ConstructionMode.SWAP;
+        setMode(ConstructionMode.SWAP);
         addCostTimeLabels();
     }
 
@@ -503,9 +506,18 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         return constructionQueueIndex;
     }
 
+    protected void setMode(ConstructionMode mode) {
+        constructionMode = mode;
+
+        if (industryIcon != null) {
+            final Color gColor = mode == ConstructionMode.NORMAL ? Color.WHITE : Color.BLACK;
+            industryIcon.ImgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
+        }
+    }
+
     public ConstructionMode getMode() {
-      return constructionMode;
-   }
+        return constructionMode;
+    }
 
     @Override
     public void renderBelow(float alpha) {

@@ -368,8 +368,6 @@ public class ColonyInvDialog extends DialogPanel {
         innerPanel.addComponent(table.getPanel()).inTL(10, tableStartY);
 
         table.sortRows(2);
-
-        table.createPanel();
     }
 
     @Override

@@ -1,5 +1,7 @@
 package wfg.ltv_econ.ui.scripts;
 
+import static wfg.native_ui.util.UIConstants.opad;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
@@ -25,6 +28,7 @@ import com.fs.starfarer.campaign.ui.UITable;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.plugins.MarketWrapper;
+import wfg.ltv_econ.ui.panels.ColonyPopulationTable;
 import wfg.ltv_econ.ui.panels.EconomyOverviewPanel;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.panels.Button;
@@ -38,14 +42,9 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
     public static final int BUTTON_HEIGHT = 18;
     public static final int BUTTON_WIDTH = 130;
 
-    public static final Object outpostRowMarketWrapperField;
-    public static final Class<?> outpostRowMarketWrapperClass;
-    public static final Object wrapperMarketField;
-    static {
-        outpostRowMarketWrapperField = findMarketHolder();
-        outpostRowMarketWrapperClass = RolfLectionUtil.getFieldType(outpostRowMarketWrapperField);
-        wrapperMarketField = findMarketField(outpostRowMarketWrapperField);
-    }
+    public static final Object outpostRowMarketWrapperField = findMarketHolder();
+    public static final Class<?> outpostRowMarketWrapperClass = RolfLectionUtil.getFieldType(outpostRowMarketWrapperField);
+    public static final Object wrapperMarketField = findMarketField(outpostRowMarketWrapperField);
     
     private boolean UiInjected = false;
 
@@ -77,6 +76,7 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         if (!UiInjected) {
             addEconomyButton();
             updateColoniesPanel();
+            addShowPopStatsButton();
             UiInjected = true;
         }
 
@@ -142,6 +142,47 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
 
         overviewPanel = new EconomyOverviewPanel(outpostsTab);
         outpostsTab.addComponent(overviewPanel.getPanel()).inTL(0, 20);
+    }
+
+    private final void addShowPopStatsButton() {
+        final OutpostListPanel panel = (OutpostListPanel) RolfLectionUtil.getMethodAndInvokeDirectly(
+            "getColoniesPanel", outpostsTab);
+
+        final UITable table = (UITable) RolfLectionUtil.getAllVariables(panel).stream()
+            .filter(e -> e instanceof UITable).findFirst().get();
+        final ButtonAPI anchor = (ButtonAPI) RolfLectionUtil.getAllVariables(panel).stream()
+            .filter(e -> e instanceof ButtonAPI).map(e -> (ButtonAPI) e)
+            .filter(e -> e.getText() != null && e.getText().contains("Manage administrators"))
+            .findFirst().get();
+
+        final ColonyPopulationTable popTable = new ColonyPopulationTable(panel, (int)table.getHeight());
+        panel.addComponent(popTable.getPanel()).inTL(0f, opad);
+        popTable.getPanel().setOpacity(0f);
+
+        final String inactiveTxt = "       Population metrics";
+        final String activeTxt = "       Owned colonies";
+        final CallbackRunnable<Button> run = (btn) ->  {
+            if (table.getOpacity() > 0f) {
+                table.setOpacity(0f);
+                popTable.getPanel().setOpacity(1f);
+                btn.setText(activeTxt);
+            } else {
+                table.setOpacity(1f);
+                popTable.getPanel().setOpacity(0f);
+                btn.setText(inactiveTxt);
+            }
+        };
+
+        // size values copied from internal code
+        final Button showPopButton = new Button(panel, 280, 24, inactiveTxt,
+            Fonts.ORBITRON_12, run
+        );
+        showPopButton.setShortcut(Keyboard.KEY_Q);
+        showPopButton.cutStyle = CutStyle.TL_BR;
+        showPopButton.setAlignment(Alignment.LMID);
+        showPopButton.setQuickMode(true);
+
+        panel.addComponent(showPopButton.getPanel()).belowMid(anchor, opad);
     }
 
     @SuppressWarnings("unchecked")
