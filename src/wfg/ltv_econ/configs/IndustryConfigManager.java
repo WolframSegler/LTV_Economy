@@ -95,7 +95,7 @@ public class IndustryConfigManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
+    public static final Map<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
         final JSONObject root = getConfig(dynamicConfig);
         final Map<String, IndustryConfig> result = new HashMap<>();
 
@@ -231,7 +231,7 @@ public class IndustryConfigManager {
         return result;
     }
 
-    public static JSONObject serializeIndustryConfigs(Map<String, IndustryConfig> configs) {
+    public static final JSONObject serializeIndustryConfigs(Map<String, IndustryConfig> configs) {
         JSONObject root = new JSONObject();
 
         try {

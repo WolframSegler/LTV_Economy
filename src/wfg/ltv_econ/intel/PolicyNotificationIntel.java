@@ -14,6 +14,8 @@ import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 
 public class PolicyNotificationIntel extends BaseIntelPlugin {
 
+    private static final String ICON = Global.getSettings().getSpriteName("icons", "policy_icon");
+
     private final PlayerMarketData data;
     private final MarketPolicy policy;
     private final boolean available;
@@ -33,12 +35,7 @@ public class PolicyNotificationIntel extends BaseIntelPlugin {
             ? "Policy Available - " + data.market.getName()
             : "Policy Finished - " + data.market.getName();
     }
-
-    @Override
-    protected String getName() {
-        return getSmallDescriptionTitle();
-    }
-
+    
     @Override
     public SectorEntityToken getMapLocation(SectorMapAPI map) {
 		return data.market.getPrimaryEntity();
@@ -57,23 +54,9 @@ public class PolicyNotificationIntel extends BaseIntelPlugin {
         );
     }
 
-    @Override
-    public String getIcon() {
-        return Global.getSettings().getSpriteName("icons", "policy_icon");
-    }
-
-    @Override
-    public boolean isImportant() {
-        return false;
-    }
-
-    @Override
-    public IntelSortTier getSortTier() {
-        return IntelSortTier.TIER_3;
-    }
-
-    @Override
-    public boolean isEnding() {
-        return true;
-    }
+    public String getIcon() { return ICON;}
+    public boolean isImportant() { return false;}
+    public IntelSortTier getSortTier() { return IntelSortTier.TIER_3;}
+    protected String getName() { return getSmallDescriptionTitle();}
+    public boolean isEnding() { return true;}
 }

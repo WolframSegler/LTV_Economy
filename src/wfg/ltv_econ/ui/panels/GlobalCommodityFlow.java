@@ -428,7 +428,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
             });
         };
         { // Top 5 producers
-        final SortableTable table = new SortableTable(getParent(), TABLE_W, TABLE_H);
+        final SortableTable table = new SortableTable(m_panel, TABLE_W, TABLE_H);
 
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
@@ -441,11 +441,11 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         for (CommodityCell cell : producers) {
 
             final String iconPath = cell.market.getFaction().getCrest();
-            final Base iconPanel = new Base(table.getPanel(), 28, 28, iconPath, null, null);
+            final Base iconPanel = new Base(table.getPanel(), 24, 24, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
             final long value = (long) cell.getProduction(true);
 
-            table.addCell(iconPanel, cellAlg.LEFT, null, null);
+            table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
 
@@ -490,11 +490,11 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         for (CommodityCell cell : consumers) {
 
             final String iconPath = cell.market.getFaction().getCrest();
-            final Base iconPanel = new Base(table.getPanel(), 28, 28, iconPath, null, null);
+            final Base iconPanel = new Base(table.getPanel(), 24, 24, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
             final long value = (long) cell.getBaseDemand(true);
 
-            table.addCell(iconPanel, cellAlg.LEFT, null, null);
+            table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
 

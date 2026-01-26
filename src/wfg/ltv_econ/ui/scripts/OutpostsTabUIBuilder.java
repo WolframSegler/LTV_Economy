@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.scripts;
 
-import static wfg.native_ui.util.UIConstants.opad;
+import static wfg.native_ui.util.UIConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,12 +155,12 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
             .filter(e -> e.getText() != null && e.getText().contains("Manage administrators"))
             .findFirst().get();
 
-        final ColonyPopulationTable popTable = new ColonyPopulationTable(panel, (int)table.getHeight());
-        panel.addComponent(popTable.getPanel()).inTL(0f, opad);
+        final ColonyPopulationTable popTable = new ColonyPopulationTable(panel, (int)table.getHeight() + 2);
+        panel.addComponent(popTable.getPanel()).inTL(1, opad + 1);
         popTable.getPanel().setOpacity(0f);
 
-        final String inactiveTxt = "       Population metrics";
-        final String activeTxt = "       Owned colonies";
+        final String inactiveTxt = "      Population metrics";
+        final String activeTxt = "      Owned colonies";
         final CallbackRunnable<Button> run = (btn) ->  {
             if (table.getOpacity() > 0f) {
                 table.setOpacity(0f);

@@ -10,9 +10,11 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.PlanetInfoParams;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.ui.dialogs.ManagePopulationDialog;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.BackgroundComp;
 import wfg.native_ui.ui.components.NativeComponents;
@@ -20,8 +22,9 @@ import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.SortableTable;
 import wfg.native_ui.ui.panels.SortableTable.cellAlg;
+import wfg.native_ui.ui.panels.SpritePanel.Base;
 public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> implements HasBackground {
-    public static final int PANEL_W = 815;
+    public static final int PANEL_W = 935;
 
     protected final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
@@ -35,8 +38,8 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
 
     public void createPanel() {
         final SettingsAPI settings = Global.getSettings();
-        final int rowH = 65;
-        final int nameW = 167;
+        final int rowH = 68;
+        final int nameW = 170;
         
         clearChildren();
         final SortableTable table = new SortableTable(m_panel, (int) pos.getWidth(),
@@ -45,12 +48,26 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
 
         table.addHeaders(
             "Name", nameW + pad, "Colony name.\nSorts colonies by date established.", false, false, -1,
-            "Size", 80, "Colony size.", false, false, -1,
-            "Health", 140, "Overall health of the colony's population.", false, false, -1,
-            "Happiness", 140, "Overall happiness and morale of the colony's population.", false, false, -1,
-            "Cohesion", 140, "Degree of social cohesion within the colony's population.", false, false, -1,
-            "Consciousness", 140, "The colony population's awareness of exploitation and social hierarchy.", false, false, -1
+            "Size", 50, "Colony size.", false, false, -1,
+
+            "Health Icon", 30, null, true, false, 1,
+            "Health", 70, "Overall health of the colony's population.", true, true, 1,
+            
+            "Happiness Icon", 30, null, true, false, 2,
+            "Happiness", 70, "Overall happiness and morale of the colony's population.", true, true, 2,
+
+            "Cohesion Icon", 30, null, true, false, 3,
+            "Cohesion", 70, "Degree of social cohesion within the colony's population.", true, true, 3,
+
+            "Consciousness Icon", 30, null, true, false, 4,
+            "Conscious..", 70, "The colony population's awareness of exploitation and social hierarchy.", true, true, 4
         );
+
+        final PlanetInfoParams params = new PlanetInfoParams();
+        params.showName = true;
+        params.showConditions = false;
+        params.showHazardRating = false;
+        params.scaleEvenWhenShowingName = true;
 
         for (PlayerMarketData data : EconomyEngine.getInstance().getPlayerMarketData().values()) {
             final UIPanelAPI namePanel = settings.createCustom(nameW, rowH, null);
@@ -58,7 +75,7 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
             final SectorEntityToken entity = data.market.getPrimaryEntity();
 
             if (entity instanceof PlanetAPI) {
-                nameTp.showPlanetInfo(data.market.getPlanetEntity(), nameW, rowH, true, 0f);
+                nameTp.showPlanetInfo(data.market.getPlanetEntity(), nameW, rowH, params, 0f);
             } else {
                 nameTp.addImage(entity.getCustomEntitySpec().getIconName(), nameW, rowH, 0f);
                 final LabelAPI lbl = nameTp.addPara(data.market.getName(), 0f);
@@ -67,12 +84,22 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
             }
             ComponentFactory.addTooltip(nameTp, rowH, false, namePanel);
 
+            final int iconS = rowH/3;
+            final Base health = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.HEALTH_ICON, null, null);
+            final Base happiness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SMILING_ICON, null, null);
+            final Base cohesion = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOCIETY_ICON, null, null);
+            final Base consciousness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOLIDARITY_ICON, null, null);
+
             table.addCell(namePanel, cellAlg.LEFT, data.market.getDaysInExistence(), null);
             table.addCell(data.market.getSize(), cellAlg.MID, null, null);
-            table.addCell((int) data.getHealth(), cellAlg.MID, null, null);
-            table.addCell((int) data.getHappiness(), cellAlg.MID, null, null);
-            table.addCell((int) data.getSocialCohesion(), cellAlg.MID, null, null);
-            table.addCell((int) data.getClassConsciousness(), cellAlg.MID, null, null);
+            table.addCell(health, cellAlg.RIGHTPAD, null, null);
+            table.addCell((int) data.getHealth(), cellAlg.LEFTOPAD, null, null);
+            table.addCell(happiness, cellAlg.RIGHTPAD, null, null);
+            table.addCell((int) data.getHappiness(), cellAlg.LEFTOPAD, null, null);
+            table.addCell(cohesion, cellAlg.RIGHTPAD, null, null);
+            table.addCell((int) data.getSocialCohesion(), cellAlg.LEFTOPAD, null, null);
+            table.addCell(consciousness, cellAlg.RIGHTPAD, null, null);
+            table.addCell((int) data.getClassConsciousness(), cellAlg.LEFTOPAD, null, null);
 
             table.pushRow(null, null, null, null, null, null);
         }

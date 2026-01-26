@@ -100,7 +100,8 @@ Due to the intrusive nature of the mod, anything that modifies the Colony Info P
 
 ## For Other Modders
 
-If you want your mod's industries to be compatible, you can add an <code>industry_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder. The documentation file <code>data/config/ltvEcon/industry_config_doc.md</code> provides the necessary information.
+- If you want your mod's industries to be compatible, you can add an <code>industry_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder. The documentation file <code>data/config/ltvEcon/industry_config_doc.md</code> provides the necessary information.
+- If you want your mod to add market policies, you can add a <code>policy_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder.
 
 <br><br>
 

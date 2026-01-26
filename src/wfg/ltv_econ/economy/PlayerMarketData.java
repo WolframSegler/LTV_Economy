@@ -12,10 +12,13 @@ import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 
 import rolflectionlib.util.RolfLectionUtil;
+import wfg.ltv_econ.configs.EventConfigLoader.EventConfig;
+import wfg.ltv_econ.configs.EventConfigLoader.EventSpec;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 
 public class PlayerMarketData {
@@ -46,6 +49,7 @@ public class PlayerMarketData {
     private float popClassConsciousness = 0f;
 
     private final ArrayList<MarketPolicy> policies = new ArrayList<>();
+    private ArrayList<MarketEvent> events = new ArrayList<>();
 
     public PlayerMarketData(String marketID) {
         this.marketID = marketID;
@@ -60,6 +64,15 @@ public class PlayerMarketData {
                 policy.spec = spec;
                 policy.id = spec.id;
             }
+
+            for (EventSpec spec : EventConfig.map.values()) {
+                final MarketEvent event = (MarketEvent) RolfLectionUtil.instantiateClass(
+                    RolfLectionUtil.getConstructor(spec.marketEventClass, null)
+                );
+                events.add(event);
+                event.spec = spec;
+                event.id = spec.id;
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to assign policies to "+marketID+". ", e);
         }
@@ -67,6 +80,8 @@ public class PlayerMarketData {
 
     public Object readResolve() {
         market = Global.getSector().getEconomy().getMarket(marketID);
+
+        if (events == null) events = new ArrayList<>();
 
         return this;
     }
@@ -82,13 +97,8 @@ public class PlayerMarketData {
     public final void setHappiness(float happiness) { popHappiness = clamp(happiness); }
     public final void setSocialCohesion(float cohesion) { popSocialCohesion = clamp(cohesion); }
     public final void setClassConsciousness(float consciousness) { popClassConsciousness = clamp(consciousness); }
-    public final ArrayList<MarketPolicy> getPolicies() { return new ArrayList<>(policies); }
-    public final void addPolicy(MarketPolicy policy) { policies.add(policy); }
-    public final void removePolicy(MarketPolicy policy) { policies.remove(policy); }
-    public final MarketPolicy getPolicy(String policyID) {
-        for (MarketPolicy policy : policies) if (policy.id.equals(policyID)) return policy;
-        return null;
-    }
+    public final ArrayList<MarketPolicy> getPolicies() { return policies; }
+    public final ArrayList<MarketEvent> getEvents() { return events; }
 
     /**
      * Advances the statistics concerning the Market by one day.
@@ -97,11 +107,17 @@ public class PlayerMarketData {
         for (MarketPolicy policy : policies) {
             if (policy.isActive()) policy.preAdvance(this);
         }
+        for (MarketEvent event : events) {
+            event.preAdvance(this);
+        }
 
         advanceMarket(days);
 
         for (MarketPolicy policy : policies) {
             if (policy.isActive())  policy.postAdvance(this);
+        }
+        for (MarketEvent event : events) {
+            event.postAdvance(this);
         }
 
         for (MarketPolicy policy : policies) {

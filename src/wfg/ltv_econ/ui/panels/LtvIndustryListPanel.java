@@ -429,9 +429,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 
 		Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
 			String.format("Spent %s", Misc.getDGSCredits(buildCost)),
-			Misc.getTooltipTitleAndLightHighlightColor(),
-			Misc.getDGSCredits(buildCost),
-			highlight
+			glowHighlight, Misc.getDGSCredits(buildCost), highlight
 		);
 
 		createPanel();

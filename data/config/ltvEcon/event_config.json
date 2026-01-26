@@ -1,0 +1,12 @@
+{
+  "events": [
+    {
+			"id": "",
+			"name": "",
+			"class": "wfg.ltv_econ.intel.market.events._",
+			"iconPath": "graphics/events/_.png",
+			"description": "",
+			"tags": ["", ""]
+    }
+  ]
+}

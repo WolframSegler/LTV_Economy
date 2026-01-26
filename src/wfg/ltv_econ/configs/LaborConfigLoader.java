@@ -10,7 +10,7 @@ public class LaborConfigLoader {
 
     private static JSONObject config;
 
-    private static void load() {
+    private static final void load() {
         try {
             config = Global.getSettings().getMergedJSON(CONFIG_PATH);
         } catch (Exception ex) {
@@ -18,14 +18,12 @@ public class LaborConfigLoader {
         }
     }
 
-    public static JSONObject getConfig() {
-        if (config == null) {
-            load();
-        }
+    public static final JSONObject getConfig() {
+        if (config == null) load();
         return config;
     }
 
-    public static void loadConfig() {
+    public static final void loadConfig() {
         final JSONObject root = getConfig();
 
         try {

@@ -322,18 +322,11 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                             +
                             "The value shown here includes the demand at your colonies, " +
                             "since they must import goods as well. In-faction imports have a %s discount.",
-                            pad,
-                            highlight,
-                            discount + "%"
+                            pad, highlight, discount + "%"
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
-                        NativeUiUtils.anchorPanel(
-                            tp,
-                            m_panel,
-                            AnchorType.RightTop,
-                            opad
-                        );
+                        NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
                     };
                 }
             };
@@ -763,7 +756,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             if (m_market == market) table.selectLastRow();
         }
 
-        section.addComponent(table.getPanel()).inTL(0,0);
+        section.addComponent(table.getPanel()).inTL(pad, 0f);
 
         table.sortRows(6);
     }
