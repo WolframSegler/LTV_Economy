@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.awt.Color;
 
-import org.lwjgl.input.Keyboard;
-
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
@@ -13,21 +11,20 @@ import com.fs.starfarer.api.Global;
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.plugins.MarketWrapper;
-import wfg.ltv_econ.ui.dialogs.ColonyInvDialog;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
-import wfg.ltv_econ.ui.dialogs.ManagePopulationDialog;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
+import wfg.ltv_econ.ui.panels.buttons.ColonyStockpilesButton;
+import wfg.ltv_econ.ui.panels.buttons.ManagePopButton;
+import wfg.ltv_econ.ui.panels.buttons.MarketEventsButton;
 import wfg.ltv_econ.util.UiUtils;
-import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
-import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.TextPanel;
 
@@ -47,7 +44,6 @@ import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -63,7 +59,6 @@ public class MarketUIReplacer implements EveryFrameScript {
     public static MarketAPI marketAPI = null;
     public static Market market = null;
 
-    public static Object stockpilesBtnPlugin;
     public static Object incomeLblPlugin;
 
     @Override
@@ -129,31 +124,20 @@ public class MarketUIReplacer implements EveryFrameScript {
         }
         if (anchorChild == null) return;
 
-        // Replace the "Use stockpiles during shortages" button
-        replaceUseStockpilesBtnAddManageWorkersBtn(managementPanel, managementChildren, anchorChild);
+        addManagementButtons(managementPanel, managementChildren, anchorChild);
 
-        // Replaces the Colony effective income label
         replaceMarketCreditsLabel(managementPanel, managementChildren, anchorChild);
 
-        // Replace the Panel which holds the widgets
         replaceIndustryListPanel(managementPanel, managementChildren, anchorChild);
 
-        // Replace the Commodity Panel which shows the total imports and exports
         replaceCommodityPanel(managementPanel, managementChildren, anchorChild);
 
-        // Replace the market instance of the masterTab
         replaceMarketInstanceForPriceControl(masterTab);
     }
 
-    private static final void replaceUseStockpilesBtnAddManageWorkersBtn(
+    private static final void addManagementButtons(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
-        for (Object child : managementChildren) {
-            if (child instanceof CustomPanelAPI cp && cp.getPlugin() == stockpilesBtnPlugin) {
-                return;
-            }
-        }
-
         if (!RolfLectionUtil.hasMethodOfName("getShipping", colonyInfoPanel)) return;
         final ShippingPanel shipPanel = (ShippingPanel) RolfLectionUtil.invokeMethod(
             "getShipping", colonyInfoPanel);
@@ -161,62 +145,34 @@ public class MarketUIReplacer implements EveryFrameScript {
         final ButtonAPI useStockpilesBtn = (ButtonAPI) RolfLectionUtil.invokeMethod(
             "getUseStockpiles", shipPanel);
 
-        useStockpilesBtn.setOpacity(0);
+        if (!useStockpilesBtn.isEnabled()) return;
+        useStockpilesBtn.setOpacity(0f);
         useStockpilesBtn.setEnabled(false);
+
         if (!marketAPI.isPlayerOwned() &&
             (!DebugFlags.COLONY_DEBUG || DebugFlags.HIDE_COLONY_CONTROLS)
         ) return;
 
-        final CallbackRunnable<Button> stockpilesBtnRunnable = (btn) -> {
-            final ColonyInvDialog dialogPanel = new ColonyInvDialog(marketAPI);
-            dialogPanel.show(0.2f, 0.2f);
-        };
+        final int panelWidth = LtvCommodityPanel.STANDARD_WIDTH;
+        final int buttonWidth = (int) (panelWidth / 3f - 4f);
+        final int buttonHeight = (int) (buttonWidth / 1.63f);
 
-        final Button inventoryBtn = new Button(
-            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Colony Stockpiles",
-            Fonts.ORBITRON_12, stockpilesBtnRunnable
-        );
-        inventoryBtn.setLabelColor(base);
-        inventoryBtn.bgColor = new Color(0, 0, 0, 255);
-        inventoryBtn.bgDisabledColor = new Color(0, 0, 0, 255);
-        inventoryBtn.setQuickMode(true);
-        inventoryBtn.setShortcut(Keyboard.KEY_G);
-        stockpilesBtnPlugin = ((CustomPanelAPI)inventoryBtn.getPanel()).getPlugin();
+        final MarketEventsButton eventsBtn = new MarketEventsButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
+        final ColonyStockpilesButton stockpilesBtn = new ColonyStockpilesButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
+        final ManagePopButton popBtn = new ManagePopButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
 
-        managementPanel.addComponent(inventoryBtn.getPanel()).inBL(0, 0);
+        final int gap = (panelWidth - buttonWidth * 3) / 2;
 
-        final int xOffset = (int) (useStockpilesBtn.getPosition().getX() - inventoryBtn.getPos().getX());
-        final int yOffset = (int) (useStockpilesBtn.getPosition().getY() - inventoryBtn.getPos().getY());
+        colonyInfoPanel.addComponent(eventsBtn.getPanel());
+        colonyInfoPanel.addComponent(stockpilesBtn.getPanel());
+        colonyInfoPanel.addComponent(popBtn.getPanel());
 
-        inventoryBtn.getPos().inBL(xOffset, yOffset);
+        NativeUiUtils.anchorPanel(popBtn.getPanel(), colonyInfoPanel, AnchorType.BottomRight, -100);
+        NativeUiUtils.anchorPanel(stockpilesBtn.getPanel(), popBtn.getPanel(), AnchorType.LeftBottom, gap);
+        NativeUiUtils.anchorPanel(eventsBtn.getPanel(), stockpilesBtn.getPanel(), AnchorType.LeftBottom, gap);
 
         if (Global.getSettings().isDevMode()) {
-            Global.getLogger(MarketUIReplacer.class).info("Replaced UseStockpilesButton");
-        }
-        if (!EconomyEngine.getInstance().isPlayerMarket(marketAPI.getId())) return;
-
-        final CallbackRunnable<Button> manageWorkersBtnRunnable = (btn) -> {
-            final ManagePopulationDialog dialogPanel = new ManagePopulationDialog(marketAPI);
-            dialogPanel.show(0.3f, 0.3f);
-        };
-
-        final Button manageBtn = new Button(
-            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, 20, "Manage Workers",
-            Fonts.ORBITRON_12, manageWorkersBtnRunnable
-        );
-        manageBtn.setLabelColor(base);
-        manageBtn.bgColor = new Color(0, 0, 0, 255);
-        manageBtn.bgDisabledColor = new Color(0, 0, 0, 255);
-        manageBtn.setQuickMode(true);
-        manageBtn.setShortcut(Keyboard.KEY_W);
-
-        managementPanel.addComponent(manageBtn.getPanel()).inBL(0, 0);
-        NativeUiUtils.anchorPanel(
-            manageBtn.getPanel(), inventoryBtn.getPanel(), AnchorType.TopMid, opad
-        );
-
-        if (Global.getSettings().isDevMode()) {
-            Global.getLogger(MarketUIReplacer.class).info("Added manageWorkersButton");
+            Global.getLogger(MarketUIReplacer.class).info("Added Market Buttons");
         }
     }
 
@@ -561,46 +517,38 @@ public class MarketUIReplacer implements EveryFrameScript {
         }
         if (commodityPanel == null) return;
 
-        try {
-            final int width = (int) commodityPanel.getPosition().getWidth();
-            final int height = (int) commodityPanel.getPosition().getHeight();
+        final int width = (int) commodityPanel.getPosition().getWidth();
+        final int height = (int) commodityPanel.getPosition().getHeight();
 
-            final LtvCommodityPanel replacement = new LtvCommodityPanel(
-                managementPanel,
-                width,
-                height,
-                marketAPI
-            );
+        final LtvCommodityPanel replacement = new LtvCommodityPanel(
+            managementPanel, width, height, marketAPI
+        );
 
-            final ClickHandler<CommodityRowPanel> listener = (source, isLeftClick) -> {
-                if (!isLeftClick) return;
+        final ClickHandler<CommodityRowPanel> listener = (source, isLeftClick) -> {
+            if (!isLeftClick) return;
 
-                CommodityRowPanel panel = ((CommodityRowPanel) source);
+            CommodityRowPanel panel = ((CommodityRowPanel) source);
 
-                replacement.selectRow(panel);
+            replacement.selectRow(panel);
 
-                if (UiUtils.canViewPrices()) {
-                    final ComDetailDialog dialogPanel = new ComDetailDialog(
-                        marketAPI, marketAPI.getFaction().getFactionSpec(), panel.m_com
-                    );
-                    dialogPanel.show(0.3f, 0.3f);
-                }
-            };
+            if (UiUtils.canViewPrices()) {
+                final ComDetailDialog dialogPanel = new ComDetailDialog(
+                    marketAPI, marketAPI.getFaction().getFactionSpec(), panel.m_com
+                );
+                dialogPanel.show(0.3f, 0.3f);
+            }
+        };
 
-            replacement.selectionListener = listener;
-            replacement.createPanel();
+        replacement.selectionListener = listener;
+        replacement.createPanel();
 
-            // Got the Y offset by looking at the getY() difference of replacement and
-            // commodityPanel
-            // Might automate the getY() difference later
-            managementPanel.addComponent(replacement.getPanel());
-            NativeUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomRight, -43);
+        // Got the Y offset by looking at the getY() difference of replacement and
+        // commodityPanel
+        // Might automate the getY() difference later
+        managementPanel.addComponent(replacement.getPanel());
+        NativeUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomRight, -43);
 
-            managementPanel.removeComponent(commodityPanel);
-
-        } catch (Exception e) {
-            Global.getLogger(MarketUIReplacer.class).error("Failed to replace CommodityPanel", e);
-        }
+        managementPanel.removeComponent(commodityPanel);
 
         if (Global.getSettings().isDevMode()) {
             Global.getLogger(MarketUIReplacer.class).info("Replaced CommodityPanel");

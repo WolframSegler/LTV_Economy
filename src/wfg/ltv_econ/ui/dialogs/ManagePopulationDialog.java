@@ -3,6 +3,8 @@ package wfg.ltv_econ.ui.dialogs;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
+
 import static wfg.ltv_econ.constants.economyValues.*;
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -80,7 +82,7 @@ public class ManagePopulationDialog extends DialogPanel {
     
     public ManagePopulationDialog(MarketAPI market) {
         super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
-        setConfirmShortcut();
+        getButton(0).setShortcut(Keyboard.KEY_3);
 
         m_market = market;
 

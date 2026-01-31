@@ -360,6 +360,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         if (option == 1) reg.setData(data);
 
+        market.reapplyConditions();
         UIContext.setContext(Context.NONE);
         LtvIndustryListPanel.refreshPanel();
     }

@@ -144,6 +144,8 @@ rolfosian - for RolflectionLib-SS
 
 Pallet by Cherry from <a href="https://thenounproject.com/browse/icons/term/pallet/" target="_blank" title="Pallet Icons">Noun Project</a> (CC BY 3.0)
 
+behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons/term/behaviour/" target="_blank" title="behaviour Icons">Noun Project</a> (CC BY 3.0)
+
 <br>
 
 ## AI Generated Assets

@@ -4,6 +4,8 @@ import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 
+import org.lwjgl.input.Keyboard;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -45,7 +47,7 @@ public class ColonyInvDialog extends DialogPanel {
 
     public ColonyInvDialog(MarketAPI market) {
         super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
-        setConfirmShortcut();
+        getButton(0).setShortcut(Keyboard.KEY_2);
 
         m_market = market;
 

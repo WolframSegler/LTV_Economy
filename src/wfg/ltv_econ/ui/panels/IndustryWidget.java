@@ -39,7 +39,6 @@ import wfg.native_ui.ui.components.AudioFeedbackComp;
 import wfg.native_ui.ui.components.BackgroundComp;
 import wfg.native_ui.ui.components.HoverGlowComp;
 import wfg.native_ui.ui.components.InteractionComp;
-import wfg.native_ui.ui.components.LayoutOffsetComp;
 import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
@@ -47,7 +46,6 @@ import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
-import wfg.native_ui.ui.core.UIElementFlags.HasLayoutOffset;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.Slider;
@@ -58,7 +56,7 @@ import wfg.native_ui.util.NativeUiUtils;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class IndustryWidget extends CustomPanel<IndustryWidget> implements
-    HasBackground, HasHoverGlow, HasLayoutOffset
+    HasBackground, HasHoverGlow
 {
     public final static int PANEL_WIDTH = 190;
     public final static int TITLE_HEIGHT = 15 + pad;
@@ -68,7 +66,6 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
     public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
-    public final LayoutOffsetComp offset = comp().get(NativeComponents.LAYOUT_OFFSET);
 
     public final Color baseColor;
     public final Color darkColor;
@@ -103,16 +100,17 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         baseColor = market.getFaction().getBaseUIColor();
         darkColor = market.getFaction().getDarkUIColor();
 
+        final int hOffset = m_industry.isStructure() ? TITLE_HEIGHT : 0;
+
+        bg.offset.setOffset(-1, -1, 2, 2 - hOffset);
         bg.color = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
         bg.alpha = 1f;
 
+        glow.offset.setOffset(-1, -1, 2, 2 - hOffset);
         glow.fader = new FaderUtil(0.3f, 0.1f, 0.4f, true, false);
         glow.isFaderOwner = false;
         glow.type = GlowType.UNDERLAY;
-        glow.color = baseColor;
-
-        final int hOffset = m_industry.isStructure() ? TITLE_HEIGHT : 0;
-        offset.setOffset(-1, -1, 2, 2 - hOffset);
+        glow.color = baseColor;        
 
         createPanel();
     }

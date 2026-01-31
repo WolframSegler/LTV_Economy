@@ -211,7 +211,6 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         if (m_cell.globalExports > 0) {
             final Base iconPanel = new Base(m_panel, rowHeight - 4, rowHeight - 4,
                 EXPORTS_ICON_PATH, null, null);
-            iconPanel.offset.setOffset(-1, -1, 2, 2);
 
             add(iconPanel).inRMid(pad);
         }
@@ -297,7 +296,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         if (drawRedBorder) {
             iconPanel.outline.enabled = true;
             iconPanel.outline.color = Color.RED;
-            iconPanel.offset.setOffset(2, 2, -4, -4);
+            iconPanel.outline.offset.setOffset(2, 2, -4, -4);
         }
             
         tp.addCustom(iconPanel.getPanel(), 0f).getPosition().inTL(pad, y);

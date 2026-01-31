@@ -5,9 +5,9 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
-import com.fs.starfarer.api.impl.campaign.econ.impl.PopulationAndInfrastructure;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
+import com.fs.starfarer.api.util.Misc;
 import com.thoughtworks.xstream.XStream;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
@@ -97,15 +97,10 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
                     break;
                 }
             }
-
             if (!hasRequiredIndustry) continue;
-
-            if (PopulationAndInfrastructure.getMaxIndustries(market.getSize()) >
-                market.getIndustries().size()
-            ) continue;
+            if (Misc.getNumIndustries(market) >= Misc.getMaxIndustries(market)) continue;
 
             market.addIndustry("manufacturing");
-            market.reapplyIndustries();
         }
     }
 

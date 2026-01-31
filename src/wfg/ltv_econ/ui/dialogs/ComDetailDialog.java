@@ -705,7 +705,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             );
             iconPanel.outline.enabled = cell.getFlowDeficit() > 0;
             iconPanel.outline.color = Color.RED;
-            iconPanel.offset.setOffset(-1, -1, 2, 2);
+            iconPanel.outline.offset.setOffset(-1, -1, 2, 2);
 
             final String factionName = market.getFaction().getDisplayName();
 

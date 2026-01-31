@@ -1,12 +1,12 @@
 {
   "events": [
     {
-			"id": "",
-			"name": "",
-			"class": "wfg.ltv_econ.intel.market.events._",
-			"iconPath": "graphics/events/_.png",
-			"description": "",
-			"tags": ["", ""]
+      "id": "localized_gang_skirmishes",
+      "name": "Localized Gang Skirmishes",
+      "class": "wfg.ltv_econ.intel.market.events.LocalizedGangSkirmishesEvent",
+      "iconPath": "graphics/events/gang_violence.png",
+      "description": "Rival factions clash in the streets, disrupting industry, spreading fear, and reducing migration as citizens avoid dangerous areas.",
+      "tags": ["cohesion_sensitive", "violence", "negative"]
     }
   ]
 }

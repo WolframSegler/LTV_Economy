@@ -99,6 +99,14 @@ public class PlayerMarketData {
     public final void setClassConsciousness(float consciousness) { popClassConsciousness = clamp(consciousness); }
     public final ArrayList<MarketPolicy> getPolicies() { return policies; }
     public final ArrayList<MarketEvent> getEvents() { return events; }
+    public final MarketPolicy getPolicy(String policyID) {
+        for (MarketPolicy policy : policies) if (policy.id.equals(policyID)) return policy;
+        return null;
+    }
+    public final MarketEvent getEvent(String eventID) {
+        for (MarketEvent event : events) if (event.id.equals(eventID)) return event;
+        return null;
+    }
 
     /**
      * Advances the statistics concerning the Market by one day.

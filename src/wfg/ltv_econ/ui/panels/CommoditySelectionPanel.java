@@ -73,7 +73,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
         ComponentFactory.addTooltip(container, pos.getHeight(), true, m_panel).inTL(-pad, 0);
     }
 
-    public static class RowPanel extends CustomPanel<RowPanel> 
+    public class RowPanel extends CustomPanel<RowPanel> 
         implements HasInteraction, HasHoverGlow, HasAudioFeedback, HasTooltip
     {
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
@@ -104,6 +104,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
                 }
             };
 
+            tooltip.parent = CommoditySelectionPanel.this.m_panel;
             tooltip.builder = (tp, exp) -> {
                 if (UiUtils.canViewPrices()) {
                     tp.addPara("Ctrl + Click to view global market info", pad, highlight, new String[]{
@@ -111,7 +112,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
                     });
                 } else {
                     final String text = "Must be in range of a comm relay to view global market info";
-                    tp.addPara(text, opad, negative, text);
+                    tp.addPara(text, pad, negative, text);
                 }
             };
 
@@ -122,7 +123,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
             final int iconSize = 28;
 
             final Base comIcon = new Base(
-                getPanel(), iconSize, iconSize, spec.getIconName(),
+                m_panel, iconSize, iconSize, spec.getIconName(),
                 null, null
             );
             RowPanel.this.add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);

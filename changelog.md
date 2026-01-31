@@ -9,7 +9,9 @@ v0.2.4-beta | SAVE COMPATIBLE
 - Manufacturing no longer interferes with luddic majority buff
 - Added a switch button to Colonies tab that switches to colony population statistics table
 - Ctrl + Clicking the Commodity Selection Panel under the Economy section inside the command tab will open the global market info panel.
-- Added the infrastructure for colony events 
+- Added the infrastructure for colony events
+- Fixed check for manufacturing industry to markets.
+- Made light industry more labor intensive
 
 v0.2.3-beta | SAVE COMPATIBLE
 - Modified UI code to fit the new WrapUI changes of composition.

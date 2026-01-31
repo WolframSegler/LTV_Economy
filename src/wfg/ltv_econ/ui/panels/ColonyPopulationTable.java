@@ -48,19 +48,19 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
 
         table.addHeaders(
             "Name", nameW + pad, "Colony name.\nSorts colonies by date established.", false, false, -1,
-            "Size", 50, "Colony size.", false, false, -1,
+            "Size", 70, "Colony size.", false, false, -1,
 
             "Health Icon", 30, null, true, false, 1,
-            "Health", 70, "Overall health of the colony's population.", true, true, 1,
+            "Health", 90, "Overall health of the colony's population.", true, true, 1,
             
             "Happiness Icon", 30, null, true, false, 2,
-            "Happiness", 70, "Overall happiness and morale of the colony's population.", true, true, 2,
+            "Happiness", 90, "Overall happiness and morale of the colony's population.", true, true, 2,
 
             "Cohesion Icon", 30, null, true, false, 3,
-            "Cohesion", 70, "Degree of social cohesion within the colony's population.", true, true, 3,
+            "Cohesion", 90, "Degree of social cohesion within the colony's population.", true, true, 3,
 
             "Consciousness Icon", 30, null, true, false, 4,
-            "Conscious..", 70, "The colony population's awareness of exploitation and social hierarchy.", true, true, 4
+            "Conscious..", 90, "The colony population's awareness of exploitation and social hierarchy.", true, true, 4
         );
 
         final PlanetInfoParams params = new PlanetInfoParams();
@@ -92,14 +92,14 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
 
             table.addCell(namePanel, cellAlg.LEFT, data.market.getDaysInExistence(), null);
             table.addCell(data.market.getSize(), cellAlg.MID, null, null);
-            table.addCell(health, cellAlg.RIGHTPAD, null, null);
-            table.addCell((int) data.getHealth(), cellAlg.LEFTOPAD, null, null);
-            table.addCell(happiness, cellAlg.RIGHTPAD, null, null);
-            table.addCell((int) data.getHappiness(), cellAlg.LEFTOPAD, null, null);
-            table.addCell(cohesion, cellAlg.RIGHTPAD, null, null);
-            table.addCell((int) data.getSocialCohesion(), cellAlg.LEFTOPAD, null, null);
-            table.addCell(consciousness, cellAlg.RIGHTPAD, null, null);
-            table.addCell((int) data.getClassConsciousness(), cellAlg.LEFTOPAD, null, null);
+            table.addCell(health, cellAlg.LEFTOPAD, null, null);
+            table.addCell((int) data.getHealth(), cellAlg.MID, null, null);
+            table.addCell(happiness, cellAlg.LEFTOPAD, null, null);
+            table.addCell((int) data.getHappiness(), cellAlg.MID, null, null);
+            table.addCell(cohesion, cellAlg.LEFTOPAD, null, null);
+            table.addCell((int) data.getSocialCohesion(), cellAlg.MID, null, null);
+            table.addCell(consciousness, cellAlg.LEFTOPAD, null, null);
+            table.addCell((int) data.getClassConsciousness(), cellAlg.MID, null, null);
 
             table.pushRow(null, null, null, null, null, null);
         }

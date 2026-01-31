@@ -117,6 +117,9 @@ public class IndustryConfigManager {
                 case "industry":
                     occTag = OCCTag.INDUSTRY;
                     break;
+                case "consumer":
+                    occTag = OCCTag.CONSUMER;
+                    break;
                 case "manufacture":
                     occTag = OCCTag.MANUFACTURE;
                     break;

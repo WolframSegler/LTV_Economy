@@ -36,6 +36,7 @@ public class LaborConfigLoader {
             LaborConfig.dynamicWorkerCapPerOutput = (float) root.getDouble("dynamicWorkerCapPerOutput");
             LaborConfig.RoVC_average = (float) root.getDouble("RoVC_average");
             LaborConfig.RoVC_industry = (float) root.getDouble("RoVC_industry");
+            LaborConfig.RoVC_consumer = (float) root.getDouble("RoVC_consumer");
             LaborConfig.RoVC_manufacture = (float) root.getDouble("RoVC_manufacture");
             LaborConfig.RoVC_service = (float) root.getDouble("RoVC_service");
             LaborConfig.RoVC_agriculture = (float) root.getDouble("RoVC_agriculture");
@@ -64,6 +65,7 @@ public class LaborConfigLoader {
 
         public static float RoVC_average;
         public static float RoVC_industry;
+        public static float RoVC_consumer;
         public static float RoVC_manufacture;
         public static float RoVC_service;
         public static float RoVC_agriculture;
@@ -79,6 +81,8 @@ public class LaborConfigLoader {
             switch (tag) {
             case INDUSTRY:
                 return RoVC_industry;
+            case CONSUMER:
+                return RoVC_consumer;
             case MANUFACTURE:
                 return RoVC_manufacture;
             case SERVICE:
@@ -101,6 +105,8 @@ public class LaborConfigLoader {
             switch (tag) {
             case INDUSTRY:
                 return 1f - RoVC_industry;
+            case CONSUMER:
+                return 1f - RoVC_consumer;
             case MANUFACTURE:
                 return 1f - RoVC_manufacture;
             case SERVICE:
@@ -123,6 +129,7 @@ public class LaborConfigLoader {
     public static enum OCCTag {
         AVERAGE,
         INDUSTRY,
+        CONSUMER,
         MANUFACTURE,
         SERVICE,
         AGRICULTURE,

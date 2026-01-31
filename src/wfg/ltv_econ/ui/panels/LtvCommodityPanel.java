@@ -16,7 +16,6 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.BackgroundComp;
-import wfg.native_ui.ui.components.LayoutOffsetComp;
 import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.OutlineComp;
 import wfg.native_ui.ui.components.UIContextComp;
@@ -31,7 +30,6 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
     public final UIContextComp context = comp().get(NativeComponents.UI_CONTEXT);
-    public final LayoutOffsetComp offset = comp().get(NativeComponents.LAYOUT_OFFSET);
 
     public static final int STANDARD_WIDTH = 264;
     public String m_headerTxt;
@@ -88,7 +86,8 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
         final int headerHeight = (int) headerTp.getPrev().getPosition().getHeight();
         headerTp.setHeightSoFar(headerHeight);
         ComponentFactory.addTooltip(headerTp, headerHeight, false, m_panel).inTL(0, 0);
-        offset.setOffset(1, 1, -2, -headerHeight - 2);
+        bg.offset.setOffset(1, 1, -2, -headerHeight - 2);
+        outline.offset.setOffset(1, 1, -2, -headerHeight - 2);
 
         final TooltipMakerAPI rowTp = ComponentFactory.createTooltip(
             getPos().getWidth(), true

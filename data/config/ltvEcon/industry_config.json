@@ -57,7 +57,7 @@
 		}
 	},
 	"lightindustry": {
-		"occTag": "industry",
+		"occTag": "consumer",
 		"workerAssignable": true,
 		"outputList": {
 			"domestic_goods": {
@@ -68,7 +68,7 @@
 					"light_machinery": 0.05
 				},
 				"usesWorkers": true,
-				"workerAssignableLimit": 0.6
+				"workerAssignableLimit": 0.7
 			},
 			"luxury_goods": {
 				"CCMoneyDist": {
@@ -78,7 +78,7 @@
 					"light_machinery": 0.2
 				},
 				"usesWorkers": true,
-				"workerAssignableLimit": 0.5,
+				"workerAssignableLimit": 0.6,
 				"checkLegality": true
 			},
 			"drugs": {
@@ -89,7 +89,7 @@
 					"abstract": 0.1
 				},
 				"usesWorkers": true,
-				"workerAssignableLimit": 0.4,
+				"workerAssignableLimit": 0.5,
 				"checkLegality": true
 			}
 		}
