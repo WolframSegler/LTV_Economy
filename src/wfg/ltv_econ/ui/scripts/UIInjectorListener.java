@@ -21,7 +21,7 @@ public class UIInjectorListener implements CoreUITabListener, CommodityTooltipMo
         sector.removeTransientScriptsOfClass(MarketUIReplacer.class);
         sector.removeTransientScriptsOfClass(OutpostsTabUIBuilder.class);
         }
-        
+
         switch (tabID) {
         case CARGO:
             sector.addTransientScript(new MarketUIReplacer());

@@ -23,13 +23,13 @@ public class UiHierarchyTree implements EveryFrameScript {
     private final JTree tree = new JTree(treeModel);
     private final JFrame frame = new JFrame("LTV UI Hierarchy");
 
-    public  UiHierarchyTree() {
+    public UiHierarchyTree() {
         frame.add(new JScrollPane(tree));
         frame.setSize(400, 400);
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setVisible(true);
 
-        JButton refreshButton = new JButton("Refresh Tree");
+        final JButton refreshButton = new JButton("Refresh Tree");
         refreshButton.addActionListener(e -> updateTree());
 
         frame.add(refreshButton, BorderLayout.NORTH);
@@ -53,6 +53,8 @@ public class UiHierarchyTree implements EveryFrameScript {
         final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, masterTab);
         if (listChildren == null) return;
+
+        root.setUserObject("[ROOT] - " + masterTab.getClass().getName());
 
         for (Object child : listChildren) {
             if (child instanceof UIPanelAPI panel) {

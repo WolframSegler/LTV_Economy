@@ -21,9 +21,11 @@ public class MarketEventsButton extends Button {
     public MarketEventsButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
         super(parent, width, height, null, null, null);
 
-        dock = new MarketEventsDialog(market);
+        final boolean isPlayerOwned = market.isPlayerOwned();
+        if (isPlayerOwned) dock = new MarketEventsDialog(market);
 
         onClicked = (btn) -> {
+            if (!isPlayerOwned) return;
             if (dock.isOpen()) dock.close();
             else dock.open(true);
         };

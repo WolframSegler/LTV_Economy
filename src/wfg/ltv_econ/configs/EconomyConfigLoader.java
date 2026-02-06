@@ -32,41 +32,42 @@ public class EconomyConfigLoader {
         final JSONObject root = getConfig();
 
         try {
-            EconomyConfig.MULTI_THREADING = root.getBoolean("MULTI_THREADING");
-            EconomyConfig.STARTING_CREDITS_FOR_MARKET = root.getInt("STARTING_CREDITS_FOR_MARKET");
-            EconomyConfig.CONCENTRATION_COST = root.getDouble("CONCENTRATION_COST");
-            EconomyConfig.IDEAL_SPREAD_TOLERANCE = root.getDouble("IDEAL_SPREAD_TOLERANCE");
-            EconomyConfig.MARKET_MODIFIER_SCALER = root.getDouble("MARKET_MODIFIER_SCALER");
-            EconomyConfig.PRODUCTION_BUFFER = 1f + root.getDouble("PRODUCTION_BUFFER");
-            EconomyConfig.DAYS_TO_COVER = root.getInt("DAYS_TO_COVER");
-            EconomyConfig.DAYS_TO_COVER_PER_IMPORT = root.getInt("DAYS_TO_COVER_PER_IMPORT");
-            EconomyConfig.FACTION_EXCHANGE_MULT = (float) root.getDouble("FACTION_EXCHANGE_MULT");
-            EconomyConfig.VOLATILITY_WINDOW = root.getInt("VOLATILITY_WINDOW");
-            EconomyConfig.WORKER_ASSIGN_INTERVAL = root.getInt("WORKER_ASSIGN_INTERVAL");
-            EconomyConfig.EXPORT_THRESHOLD_FACTOR = (float) root.getDouble("EXPORT_THRESHOLD_FACTOR");
-            EconomyConfig.SHOW_MARKET_POLICIES = root.getBoolean("SHOW_MARKET_POLICIES");
-            EconomyConfig.EMBARGO_REP_DROP = (float) root.getDouble("EMBARGO_REP_DROP");
+        EconomyConfig.MULTI_THREADING = root.getBoolean("MULTI_THREADING");
+        EconomyConfig.STARTING_CREDITS_FOR_MARKET = root.getInt("STARTING_CREDITS_FOR_MARKET");
+        EconomyConfig.CONCENTRATION_COST = root.getDouble("CONCENTRATION_COST");
+        EconomyConfig.ECON_DEFICIT_COST = root.getDouble("ECON_DEFICIT_COST");
+        EconomyConfig.PRODUCTION_BUFFER = 1f + root.getDouble("PRODUCTION_BUFFER");
+        EconomyConfig.DAYS_TO_COVER = root.getInt("DAYS_TO_COVER");
+        EconomyConfig.DAYS_TO_COVER_PER_IMPORT = root.getInt("DAYS_TO_COVER_PER_IMPORT");
+        EconomyConfig.FACTION_EXCHANGE_MULT = (float) root.getDouble("FACTION_EXCHANGE_MULT");
+        EconomyConfig.VOLATILITY_WINDOW = root.getInt("VOLATILITY_WINDOW");
+        EconomyConfig.WORKER_ASSIGN_INTERVAL = root.getInt("WORKER_ASSIGN_INTERVAL");
+        EconomyConfig.EXPORT_THRESHOLD_FACTOR = (float) root.getDouble("EXPORT_THRESHOLD_FACTOR");
+        EconomyConfig.SHOW_MARKET_POLICIES = root.getBoolean("SHOW_MARKET_POLICIES");
+        EconomyConfig.EMBARGO_REP_DROP = (float) root.getDouble("EMBARGO_REP_DROP");
+        EconomyConfig.ECON_ALLOCATION_PASSES = root.getInt("ECON_ALLOCATION_PASSES");
+        EconomyConfig.MIN_WORKER_FRACTION = (float) root.getDouble("MIN_WORKER_FRACTION");
 
-            final JSONArray arr = root.getJSONArray("DEBT_DEBUFF_TIERS");
-            EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>();
-            for (int i = 0; i < arr.length(); i++) {
-                final JSONObject o = arr.getJSONObject(i);
-                EconomyConfig.DEBT_DEBUFF_TIERS.add(
-                    new DebtDebuffTier(
-                        (long) o.getDouble("threshold"),
-                        o.getInt("stabilityPenalty"),
-                        o.getInt("upkeepMultiplierPercent"),
-                        o.getInt("immigrationModifier")
-                    )
-                );
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to load economy configuration from " + CONFIG_PATH + ": "
-                + e.getMessage(), e
+        final JSONArray arr = root.getJSONArray("DEBT_DEBUFF_TIERS");
+        EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>();
+        for (int i = 0; i < arr.length(); i++) {
+            final JSONObject o = arr.getJSONObject(i);
+            EconomyConfig.DEBT_DEBUFF_TIERS.add(
+                new DebtDebuffTier(
+                    (long) o.getDouble("threshold"),
+                    o.getInt("stabilityPenalty"),
+                    o.getInt("upkeepMultiplierPercent"),
+                    o.getInt("immigrationModifier")
+                )
             );
         }
+
+        } catch (Exception e) {
+        throw new RuntimeException(
+            "Failed to load economy configuration from " + CONFIG_PATH + ": "
+            + e.getMessage(), e
+        );
+    }
     }
 
     public static class EconomyConfig {
@@ -87,14 +88,9 @@ public class EconomyConfigLoader {
         public static double CONCENTRATION_COST;
 
         /**
-         * The range of allowed deviance from the ideal spread the simplex solver can have.
+         * Cost of covering a deficit with slack for the linear solver.
          */
-        public static double IDEAL_SPREAD_TOLERANCE;
-
-        /**
-         * Multiplier for Output scalers when determining worker distribution.
-         */
-        public static double MARKET_MODIFIER_SCALER;
+        public static double ECON_DEFICIT_COST;
 
         /**
          * Applied to the demand vector of worker-independent industries
@@ -146,6 +142,16 @@ public class EconomyConfigLoader {
          * The drop in reputation when an embargo is imposed.
          */
         public static float EMBARGO_REP_DROP;
+
+        /**
+         * Iteration count for the worker allocation solver.
+         */
+        public static int ECON_ALLOCATION_PASSES;
+
+        /**
+         * Ratio of ideal workers that will be assigned unconditionally.
+         */
+        public static float MIN_WORKER_FRACTION;
 
         static {
             EconomyConfigLoader.loadConfig();

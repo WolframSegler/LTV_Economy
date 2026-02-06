@@ -52,9 +52,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
     }
 
     public final void setWorkerPool(long workers) {
-        if (workers < 0) {
-            return;
-        }
+        if (workers < 0) return;
         workerPool = workers;
     }
 

@@ -46,8 +46,7 @@ import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class AssignWorkersDialog extends DialogPanel {
 
-    public static final String WARNING_BUTTON_PATH = Global.getSettings()
-        .getSpriteName("ui", "warning_button");
+    public static final String WARNING_BUTTON_PATH = Global.getSettings().getSpriteName("ui", "warning_button");
     public static final int panelWidth = 540;
     public static final int panelHeight = 400;
 
@@ -76,7 +75,7 @@ public class AssignWorkersDialog extends DialogPanel {
         reg.setData(previewData);
         initialFreeWorkerRatio = WorkerPoolCondition.getPoolCondition(market).getFreeWorkerRatio();
 
-        holo.setBackgroundAlpha(1, 1);
+        holo.borderAlpha = 0.8f;
 
         createPanel();
     }

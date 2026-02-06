@@ -126,7 +126,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         setConfirmShortcut();
 
-        holo.setBackgroundAlpha(1, 1);
         backgroundDimAmount = 0f;
 
         createPanel();

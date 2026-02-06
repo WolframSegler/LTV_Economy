@@ -179,7 +179,7 @@ public class EconomyLoop {
 
         final List<List<Integer>> outputsPerMarket = new ArrayList<>();
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
-        markets.removeIf(m -> m.isPlayerOwned());
+        markets.removeIf(MarketAPI::isPlayerOwned);
 
         for (int i = 0; i < markets.size(); i++) {
             final List<Integer> outputIndexes = new ArrayList<>();
@@ -204,10 +204,8 @@ public class EconomyLoop {
             outputsPerMarket.add(outputIndexes);
         }
 
-        final double[] workerVector = WorkforcePlanner.calculateGlobalWorkerTargets(A.reducedMatrix, d);
-
-        final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.allocateWorkersToMarkets(
-            workerVector, markets, industryOutputPairs, outputsPerMarket, A
+        final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.computeWorkerAllocations(
+            A, d, markets, industryOutputPairs, outputsPerMarket, commodities
         );
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
@@ -257,10 +255,8 @@ public class EconomyLoop {
 
             final Industry ind = cell.market.getIndustry(industryID);
 
-            Map<String, Float> inputWeights;
             float sum = 0f;
-
-            inputWeights = IndustryIOs.getRealInputs(ind, cell.comID, true);
+            final Map<String, Float> inputWeights = IndustryIOs.getRealInputs(ind, cell.comID, true);
             if (inputWeights.isEmpty()) continue;
             for (float value : inputWeights.values()) {
                 sum += value;
@@ -270,7 +266,7 @@ public class EconomyLoop {
 
             float industryDeficit = 0f;
             for (Map.Entry<String, Float> inputEntry : inputWeights.entrySet()) {
-                String inputID = inputEntry.getKey();
+                final String inputID = inputEntry.getKey();
                 if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
                 
                 final CommodityCell inputCell = engine.getComCell(inputID, cell.market.getId());

@@ -35,6 +35,8 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
         backgroundDimAmount = 0f;
         holo.setBackgroundAlpha(150, 175);
 
+        holo.borderAlpha = 0.85f;
+
         UIContext.setContext(Context.DIALOG);
     }
 

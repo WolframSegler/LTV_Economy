@@ -416,8 +416,9 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 		final Object selectedObj = RolfLectionUtil.getMethodAndInvokeDirectly(
 			"getSelected", buildDialog);
 		if (selectedObj == null) return;
+		final Industry selectedIndustry = (Industry) RolfLectionUtil.getMethodAndInvokeDirectly(
+			"getIndustry", selectedObj);
 
-		Industry selectedIndustry = buildDialog.getSelected().getIndustry();
 		final int buildCost = (int) selectedIndustry.getBuildCost();
 
 		Misc.getCurrentlyBeingConstructed(m_market);
@@ -435,7 +436,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 		createPanel();
 	}
 
-	public static MarketInteractionMode getMarketInteractionMode(MarketAPI market) {
+	public static final MarketInteractionMode getMarketInteractionMode(MarketAPI market) {
 		final InteractionDialogAPI dialog = Global.getSector().getCampaignUI().getCurrentInteractionDialog();
 		if (dialog == null) {
 			return MarketInteractionMode.REMOTE;

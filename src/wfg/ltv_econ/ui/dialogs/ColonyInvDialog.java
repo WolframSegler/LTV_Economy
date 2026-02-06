@@ -51,7 +51,6 @@ public class ColonyInvDialog extends DialogPanel {
 
         m_market = market;
 
-        holo.setBackgroundAlpha(1, 1);
         backgroundDimAmount = 0.2f;
 
         createPanel();

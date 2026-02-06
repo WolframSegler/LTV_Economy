@@ -210,6 +210,10 @@ public class WorkerRegistry {
             return "["+marketID+KEY+indID+outputRatioSum+"]";
         }
 
+        public String toStringWithOutputs() {
+            return "["+marketID+KEY+indID+"] -> "+outputRatios;
+        }
+
         public final float getWorkerAssignedRatio(boolean resetCache) {
             if (resetCache) recalculateOutputRatioSum();
             return outputRatioSum;

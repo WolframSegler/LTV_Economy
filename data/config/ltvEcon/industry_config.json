@@ -5,8 +5,8 @@
 		"outputList": {
 			"heavy_machinery": {
 				"CCMoneyDist": {
-					"metals": 0.1,
-					"components_subassembly": 0.25,
+					"metals": 0.05,
+					"components_subassembly": 0.3,
 					"components_structural": 0.3,
 					"components_precision": 0.35
 				},
@@ -16,9 +16,9 @@
 			"light_machinery": {
 				"CCMoneyDist": {
 					"metals": 0.1,
-					"components_light": 0.4,
+					"components_light": 0.45,
 					"components_subassembly": 0.2,
-					"components_precision": 0.3
+					"components_precision": 0.25
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.4
@@ -26,10 +26,10 @@
 			"supplies": {
 				"CCMoneyDist": {
 					"metals": 0.05,
-					"components_subassembly": 0.25,
+					"components_subassembly": 0.2,
 					"components_structural": 0.1,
 					"components_light": 0.4,
-					"components_precision": 0.2
+					"components_precision": 0.25
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.4
@@ -37,19 +37,21 @@
 			"hand_weapons": {
 				"CCMoneyDist": {
 					"metals": 0.05,
-					"components_subassembly": 0.3,
+					"components_subassembly": 0.2,
 					"components_structural": 0.25,
-					"components_precision": 0.4
+					"components_precision": 0.5
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.3
 			},
 			"ships": {
 				"CCMoneyDist": {
-					"components_subassembly": 0.3,
-					"components_structural": 0.5,
+					"metals": 0.1,
+					"rare_metals": 0.1,
+					"components_subassembly": 0.2,
+					"components_structural": 0.45,
 					"components_light": 0.05,
-					"components_precision": 0.15
+					"components_precision": 0.1
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.5
@@ -62,9 +64,9 @@
 		"outputList": {
 			"domestic_goods": {
 				"CCMoneyDist": {
-					"organics": 0.05,
+					"organics": 0.1,
 					"components_subassembly": 0.25,
-					"components_light": 0.65,
+					"components_light": 0.6,
 					"light_machinery": 0.05
 				},
 				"usesWorkers": true,
@@ -72,10 +74,10 @@
 			},
 			"luxury_goods": {
 				"CCMoneyDist": {
-					"organics": 0.05,
+					"organics": 0.1,
 					"components_subassembly": 0.3,
 					"components_light": 0.45,
-					"light_machinery": 0.2
+					"light_machinery": 0.15
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.6,
@@ -83,13 +85,13 @@
 			},
 			"drugs": {
 				"CCMoneyDist": {
-					"organics": 0.1,
-					"components_light": 0.4,
-					"light_machinery": 0.4,
+					"organics": 0.2,
+					"components_light": 0.5,
+					"light_machinery": 0.2,
 					"abstract": 0.1
 				},
 				"usesWorkers": true,
-				"workerAssignableLimit": 0.5,
+				"workerAssignableLimit": 0.6,
 				"checkLegality": true
 			}
 		}
@@ -120,8 +122,8 @@
 			"components_subassembly": {
 				"CCMoneyDist": {
 					"metals": 0.45,
-					"rare_metals": 0.3,
-					"heavy_machinery": 0.1,
+					"rare_metals": 0.35,
+					"heavy_machinery": 0.05,
 					"light_machinery": 0.05
 				},
 				"usesWorkers": true,
@@ -199,8 +201,8 @@
 		"outputList": {
 			"ore": {
 				"CCMoneyDist": {
-					"heavy_machinery": 0.4,
-					"drugs": 0.1,
+					"heavy_machinery": 0.45,
+					"drugs": 0.05,
 					"abstract": 0.5
 				},
 				"usesWorkers": true,
@@ -208,8 +210,8 @@
 			},
 			"rare_ore": {
 				"CCMoneyDist": {
-					"heavy_machinery": 0.4,
-					"drugs": 0.1,
+					"heavy_machinery": 0.47,
+					"drugs": 0.03,
 					"abstract": 0.5
 				},
 				"usesWorkers": true,
@@ -217,8 +219,8 @@
 			},
 			"organics": {
 				"CCMoneyDist": {
-					"heavy_machinery": 0.4,
-					"drugs": 0.1,
+					"heavy_machinery": 0.45,
+					"drugs": 0.05,
 					"abstract": 0.5
 				},
 				"usesWorkers": true,
@@ -226,12 +228,12 @@
 			},
 			"volatiles": {
 				"CCMoneyDist": {
-					"heavy_machinery": 0.4,
-					"drugs": 0.1,
+					"heavy_machinery": 0.45,
+					"drugs": 0.05,
 					"abstract": 0.5
 				},
 				"usesWorkers": true,
-				"workerAssignableLimit": 0.3
+				"workerAssignableLimit": 0.35
 			}
 		}
 	},
@@ -302,16 +304,16 @@
 		"outputList": {
 			"metals": {
 				"CCMoneyDist": {
-					"ore": 0.95,
-					"heavy_machinery": 0.05
+					"ore": 0.97,
+					"heavy_machinery": 0.03
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.6
 			},
 			"rare_metals": {
 				"CCMoneyDist": {
-					"rare_ore": 0.9,
-					"heavy_machinery": 0.1
+					"rare_ore": 0.93,
+					"heavy_machinery": 0.07
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.5

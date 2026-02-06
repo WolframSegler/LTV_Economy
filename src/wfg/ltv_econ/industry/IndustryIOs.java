@@ -100,7 +100,7 @@ public class IndustryIOs {
             final Map<String, OutputConfig> outputs = entry.getValue().outputs;
 
             for (Map.Entry<String, OutputConfig> outputEntry : outputs.entrySet()) {
-                Map<String, Float> inputMap = inputOuterMap.computeIfAbsent(
+                final Map<String, Float> inputMap = inputOuterMap.computeIfAbsent(
                     outputEntry.getKey(), k -> new HashMap<>()
                 );
                 
@@ -125,7 +125,7 @@ public class IndustryIOs {
 
                     boolean hasAbstractInput = false;
                     for (Map.Entry<String, Float> inputEntry : output.CCMoneyDist.entrySet()) {
-                        String inputID = inputEntry.getKey();
+                        final String inputID = inputEntry.getKey();
                         if (inputID.equals(ABSTRACT_COM)) {
                             hasAbstractInput = true;
                             continue;
@@ -143,8 +143,8 @@ public class IndustryIOs {
                         for (float weight : inputMap.values()) {
                             realUnits += weight;
                         }
-                        float abs_weight = output.CCMoneyDist.get(ABSTRACT_COM);
-                        float value = abs_weight * realUnits / (totalWeight - abs_weight);
+                        final float abs_weight = output.CCMoneyDist.get(ABSTRACT_COM);
+                        final float value = abs_weight * realUnits / (totalWeight - abs_weight);
                         inputMap.put(ABSTRACT_COM, value);
                     }
                 } else if (output.InputsPerUnitOutput != null && !output.InputsPerUnitOutput.isEmpty()) {
@@ -152,7 +152,7 @@ public class IndustryIOs {
                         final String inputID = demandEntry.getKey();
                         if (inputID.equals(ABSTRACT_COM)) continue;
 
-                        float qty = demandEntry.getValue() * base;
+                        final float qty = demandEntry.getValue() * base;
                         inputMap.put(inputID, qty);
                     }
                 }

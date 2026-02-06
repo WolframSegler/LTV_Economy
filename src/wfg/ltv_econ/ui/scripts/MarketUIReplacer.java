@@ -5,7 +5,6 @@ import java.util.List;
 import java.awt.Color;
 
 import com.fs.starfarer.api.EveryFrameScript;
-import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 
 import wfg.ltv_econ.economy.CommodityDomain;
@@ -34,8 +33,6 @@ import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
 
 import rolflectionlib.util.RolfLectionUtil;
 
-import com.fs.starfarer.api.campaign.CampaignUIAPI;
-import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -53,6 +50,11 @@ import static wfg.ltv_econ.constants.economyValues.*;
 
 public class MarketUIReplacer implements EveryFrameScript {
 
+    private static final Class<?> knownClass1 = IndustryListPanel.class;
+    private static final Class<?> knownClass2 = LtvIndustryListPanel.class;
+    private static final Class<?> knownClass3 = CommodityPanel.class;
+    private static final Class<?> knownClass4 = LtvCommodityPanel.class;
+
     public static Object marketAPIField = null;
     public static Object marketField = null;
 
@@ -63,23 +65,15 @@ public class MarketUIReplacer implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (Global.getCurrentState() != GameState.CAMPAIGN) return;
-        final CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
-        if (!campaignUI.isShowingDialog()) return;
-
         final UIPanelAPI masterTab = Attachments.getCurrentTab();
-        if (masterTab == null || campaignUI.getCurrentCoreTab() != CoreUITabId.CARGO) return;
+        if (masterTab == null) return;
 
-        final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, masterTab);
-        final UIPanelAPI outpostPanel = listChildren.stream()
-            .filter(c -> RolfLectionUtil.hasMethodOfName("getOutpostPanelParams", c))
-            .map(child -> (UIPanelAPI) child)
-            .findFirst().orElse(null);
-        if (outpostPanel == null) return;
+        final UIPanelAPI tradePanel = (UIPanelAPI) RolfLectionUtil.getMethodAndInvokeDirectly(
+            "getTradePanel", masterTab);
+        if (tradePanel == null) return;
 
         final List<?> outpostChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, outpostPanel);
+            CustomPanel.getChildrenNonCopyMethod, tradePanel);
         final UIPanelAPI overviewPanel = outpostChildren.stream()
             .filter(c -> RolfLectionUtil.hasMethodOfName("showOverview", c))
             .map(child -> (UIPanelAPI) child)
@@ -104,11 +98,6 @@ public class MarketUIReplacer implements EveryFrameScript {
 
         final List<?> managementChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, managementPanel);
-
-        final Class<?> knownClass1 = IndustryListPanel.class;
-        final Class<?> knownClass2 = LtvIndustryListPanel.class;
-        final Class<?> knownClass3 = CommodityPanel.class;
-        final Class<?> knownClass4 = LtvCommodityPanel.class;
 
         UIPanelAPI anchorChild = null;
 
@@ -456,11 +445,8 @@ public class MarketUIReplacer implements EveryFrameScript {
         final int height = (int) industryPanel.getPosition().getHeight();
 
         final LtvIndustryListPanel replacement = new LtvIndustryListPanel(
-            managementPanel,
-            width,
-            height,
-            marketAPI,
-            industryPanel
+            managementPanel, width, height,
+            marketAPI, industryPanel
         );
 
         managementPanel.addComponent(replacement.getPanel());
@@ -470,11 +456,14 @@ public class MarketUIReplacer implements EveryFrameScript {
             // Acquire the popup class from one of the widgets
             final List<?> widgets = (List<?>) RolfLectionUtil.getMethodAndInvokeDirectly(
                 "getWidgets", industryPanel);
+
+            if (!widgets.isEmpty()) {
             final Object widget0 = widgets.get(0);
 
             // Attach the popup;
-            RolfLectionUtil.getMethodAndInvokeDirectly(
-                "actionPerformed", widget0, null, null);
+            RolfLectionUtil.getMethodAndInvokeDirectly("actionPerformed", widget0,
+                null, null
+            );
 
             // Now the popup class is a child of:
             final UIPanelAPI dialogParent = Attachments.getCampaignScreenPanel();
@@ -482,9 +471,9 @@ public class MarketUIReplacer implements EveryFrameScript {
                 CustomPanel.getChildrenNonCopyMethod, dialogParent);
 
             final UIPanelAPI indOps = children.stream()
-                    .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
-                    .map(child -> (UIPanelAPI) child)
-                    .findFirst().orElse(null);
+                .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
+                .map(child -> (UIPanelAPI) child)
+                .findFirst().orElse(null);
 
             final Object indOpsPanelConstr = RolfLectionUtil.getConstructor(indOps.getClass(),
                 RolfLectionUtil.getConstructorParamTypesSingleConstructor(indOps.getClass())
@@ -494,7 +483,9 @@ public class MarketUIReplacer implements EveryFrameScript {
 
             // Dismiss the indOpsPanel after getting its constructor
             RolfLectionUtil.getMethodAndInvokeDirectly(
-                "dismiss", indOps, 0);
+                "dismiss", indOps, 0
+            );
+            }
         }
 
         // No need for the old panel
