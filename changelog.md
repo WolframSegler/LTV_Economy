@@ -1,6 +1,6 @@
 v0.2.5-beta | SAVE COMPATIBLE
 - Changed some dialog background transparency
-- Modified the worker assignment solver. The workers should now be distributed more efficiently, reducing deficits.
+- Overhauled the worker assigner. The workers should now be distributed more efficiently, reducing deficits.
 - Misc. bug fixes
 
 v0.2.4-beta | SAVE COMPATIBLE
