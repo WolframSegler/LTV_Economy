@@ -1,0 +1,34 @@
+fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
+labor_warningHeader,Warning,Text,The changes apply only if no save has been loaded yet. Otherwise a restart is required.,,,,,Labor
+labor_proHeader,Worker Configuration,Header,Worker Configuration,,,,,Labor
+labor_RoSV,The Default Ratio of Surplus Value,Int,4,,Defines the split between worker wages and surplus output. Higher values mean lower wages. Used by NPC markets.,1,10,Labor
+labor_maxRoSV,The Maximum Ratio of Surplus Value,Int,10,,The maximum value for player owned colonies.,1,20,Labor
+labor_lpvMonth,The Monthly Value of Labor Power,Int,8,,The value in credits produced by a single worker per month.,1,100,Labor
+labor_RoVCHeader,Ratio of Variable Capital,Header,Ratio of Variable Capital,,,,,Labor
+labor_RoVC_average,Default RoCV,Double,0.13,,Used by industries without a specified RoCV entry.,0.0,1.0,Labor
+labor_RoVC_industry,RoCV Heavy Industries,Double,0.04,,Used by heavy industry and refining.,0.0,1.0,Labor
+labor_RoVC_consumer,RoCV Light Industry,Double,0.2,,,0.0,1.0,Labor
+labor_RoVC_manufacture,RoCV Manufacturing,Double,0.35,,,0.0,1.0,Labor
+labor_RoVC_service,RoCV Service Sector,Double,0.4,,,0.0,1.0,Labor
+labor_RoVC_agriculture,RoCV Agriculture,Double,0.15,,,0.0,1.0,Labor
+labor_RoVC_mechanized,RoCV Mechanized Industries,Double,0.1,,Used by mining and fuel production.,0.0,1.0,Labor
+labor_RoVC_manual,RoCV Manual Professions,Double,0.5,,,0.0,1.0,Labor
+labor_RoVC_space,RoCV Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
+,,,,,,,,
+economy_warningHeader,Warning,Text,The changes apply only if no save has been loaded yet. Otherwise a restart is required.,,,,,Economy
+economy_generalHeader,General Settings,Header,General Settings,,,,,Economy
+economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread,,,Economy
+economy_startingCredits,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
+economy_solverHeader,Worker Allocation Settings,Header,Worker Allocation Settings,,,,,Economy
+economy_concentrationCost,Concentration Penalty,Double,4,,Higher values result in a more even spread of workers.,0,500,Economy
+economy_deficitCost,Deficit Penalty,Double,2000,,Higher values encourage more demand fulfillment.,0,10000,Economy
+economy_minWorkerFraction,Minimum Worker Fraction,Double,0.1,,The minimum fraction of the fair share of workers for each output to be enforced,0,1,Economy
+economy_prodBuffer,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Economy
+economy_allocPasses,Allocation Refinement Passes,Int,3,,Higher values improve allocation stability at the cost of performance.,1,100,Economy
+economy_assignInterval,Worker Assignment Interval,Int,15,,"Workers of NPC markets will be re-allocated every x days.",1,360,Economy
+economy_tradeHeader,Trade Settings,Header,Trade Settings,,,,,Economy
+economy_daysToCover,Stockpile Coverage Days,Int,30,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Economy
+economy_toCoverPerImport,Import Smoothing Window,Int,2,,Limits how many days of demand can be satisfied per import cycle to reduce volatility.,1,360,Economy
+economy_exportThreshold,Export Threshold Factor,Double,1.5,,Multiplier for excess stock required before a market begins exporting.,1,2,Economy
+economy_factionExchangeMult,Faction Price Multiplier,Double,0.3,,Adjusts prices for goods traded between markets of the same faction. Set to 0 for free in-faction trade.,0,1,Economy
+economy_embargoRepDrop,Embargo Reputation Penalty,Double,0.4,,The relationship hit for imposing an embargo. 1 means 100 relation points.,0,1,Economy

@@ -30,6 +30,7 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.plugins.MarketWrapper;
 import wfg.ltv_econ.ui.panels.ColonyPopulationTable;
 import wfg.ltv_econ.ui.panels.EconomyOverviewPanel;
+import wfg.ltv_econ.ui.panels.FactionResourcesTable;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
@@ -148,41 +149,81 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         final OutpostListPanel panel = (OutpostListPanel) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getColoniesPanel", outpostsTab);
 
-        final UITable table = (UITable) RolfLectionUtil.getAllVariables(panel).stream()
+        final UITable marketTable = (UITable) RolfLectionUtil.getAllVariables(panel).stream()
             .filter(e -> e instanceof UITable).findFirst().get();
         final ButtonAPI anchor = (ButtonAPI) RolfLectionUtil.getAllVariables(panel).stream()
             .filter(e -> e instanceof ButtonAPI).map(e -> (ButtonAPI) e)
             .filter(e -> e.getText() != null && e.getText().contains("Manage administrators"))
             .findFirst().get();
 
-        final ColonyPopulationTable popTable = new ColonyPopulationTable(panel, (int)table.getHeight() + 2);
+        final int tableH = (int)marketTable.getHeight() + 2;
+        final ColonyPopulationTable popTable = new ColonyPopulationTable(panel, tableH);
+        final FactionResourcesTable facTable = new FactionResourcesTable(panel, tableH);
         panel.addComponent(popTable.getPanel()).inTL(1, opad + 1);
+        panel.addComponent(facTable.getPanel()).inTL(1, opad + 1);
         popTable.getPanel().setOpacity(0f);
+        facTable.getPanel().setOpacity(0f);
 
-        final String inactiveTxt = "      Population metrics";
-        final String activeTxt = "      Owned colonies";
-        final CallbackRunnable<Button> run = (btn) ->  {
-            if (table.getOpacity() > 0f) {
-                table.setOpacity(0f);
-                popTable.getPanel().setOpacity(1f);
-                btn.setText(activeTxt);
-            } else {
-                table.setOpacity(1f);
-                popTable.getPanel().setOpacity(0f);
-                btn.setText(inactiveTxt);
-            }
-        };
+        final String coloniesTxt = "      Owned colonies";
+        final String populationTxt = "      Population metrics";
+        final String factionTxt = "      Faction resources";
 
         // size values copied from internal code
-        final Button showPopButton = new Button(panel, 280, 24, inactiveTxt,
-            Fonts.ORBITRON_12, run
+        final Button showColoniesButton = new Button(panel, 280, 24, coloniesTxt,
+            Fonts.ORBITRON_12, null
         );
-        showPopButton.setShortcut(Keyboard.KEY_Q);
-        showPopButton.cutStyle = CutStyle.TL_BR;
-        showPopButton.setAlignment(Alignment.LMID);
-        showPopButton.setQuickMode(true);
+        final Button showPopButton = new Button(panel, 280, 24, populationTxt,
+            Fonts.ORBITRON_12, null
+        );
+        final Button showFacButton = new Button(panel, 280, 24, factionTxt,
+            Fonts.ORBITRON_12, null
+        );
+        final Runnable resetState = () -> {
+            marketTable.setOpacity(0f);
+            popTable.getPanel().setOpacity(0f);
+            facTable.getPanel().setOpacity(0f);
 
-        panel.addComponent(showPopButton.getPanel()).belowMid(anchor, opad);
+            showColoniesButton.setChecked(false);
+            showPopButton.setChecked(false);
+            showFacButton.setChecked(false);
+        };
+        final CallbackRunnable<Button> coloniesRun = (btn) ->  {
+            resetState.run();
+            marketTable.setOpacity(1f);
+            showColoniesButton.setChecked(true);
+        };
+        final CallbackRunnable<Button> populationRun = (btn) ->  {
+            resetState.run();
+            popTable.getPanel().setOpacity(1f);
+            showPopButton.setChecked(true);
+        };
+        final CallbackRunnable<Button> factionRun = (btn) ->  {
+            resetState.run();
+            facTable.getPanel().setOpacity(1f);
+            showFacButton.setChecked(true);
+        };
+
+        showColoniesButton.onClicked = coloniesRun;
+        showPopButton.onClicked = populationRun;
+        showFacButton.onClicked = factionRun;
+        showColoniesButton.cutStyle = CutStyle.TL_BR;
+        showPopButton.cutStyle = CutStyle.TL_BR;
+        showFacButton.cutStyle = CutStyle.TL_BR;
+        showColoniesButton.overrideCutSize = 8;
+        showPopButton.overrideCutSize = 8;
+        showFacButton.overrideCutSize = 8;
+        showColoniesButton.setAlignment(Alignment.LMID);
+        showPopButton.setAlignment(Alignment.LMID);
+        showFacButton.setAlignment(Alignment.LMID);
+        showColoniesButton.setShortcut(Keyboard.KEY_Q);
+        showPopButton.setShortcut(Keyboard.KEY_A);
+        showFacButton.setShortcut(Keyboard.KEY_S);
+
+        panel.addComponent(showColoniesButton.getPanel()).belowMid(anchor, opad);
+        panel.addComponent(showPopButton.getPanel()).belowMid(showColoniesButton.getPanel(), opad);
+        panel.addComponent(showFacButton.getPanel()).belowMid(showPopButton.getPanel(), opad);
+
+        showColoniesButton.setChecked(true);
     }
 
     @SuppressWarnings("unchecked")

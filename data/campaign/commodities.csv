@@ -1,6 +1,6 @@
 name,id,demand class,base price,export value,price variability,utility,origin,tags,stack size,cargo space,icon,sound id,sound id drop,order,economyTier,econUnitOrigUnused,econUnit,baseRaidDanger,eU * base value,iconWidthMult,plugin,desc
-Light Machinery,light_machinery,light_machinery,90,300,3,1,,,1500,1,graphics/icons/cargo/light_machinery_1.png,ui_cargo_machinery,ui_cargo_machinery_drop,6,3,,400,MEDIUM,36000,1,,,
+Light Machinery,light_machinery,light_machinery,80,300,3,1,,,1500,1,graphics/icons/cargo/light_machinery_1.png,ui_cargo_machinery,ui_cargo_machinery_drop,6,3,,400,MEDIUM,36000,1,,,
 Structural Components,components_structural,components_structural,60,200,3,1,,structural,2000,1,graphics/icons/cargo/components_structural_1.png,ui_cargo_supplies,ui_cargo_supplies_drop,7,3,,750,MEDIUM,45000,1,,,
-Precision Components,components_precision,components_precision,120,350,3,1,,expensive,1000,1,graphics/icons/cargo/components_precision_1.png,ui_cargo_supplies,ui_cargo_supplies_drop,8,3,,400,HIGH,48000,1,,,
+Precision Components,components_precision,components_precision,130,350,3,1,,expensive,1000,1,graphics/icons/cargo/components_precision_1.png,ui_cargo_supplies,ui_cargo_supplies_drop,8,3,,400,HIGH,48000,1,,,
 Subassembly Parts,components_subassembly,components_subassembly,90,250,3,1,,subassembly,1500,1,graphics/icons/cargo/components_subassembly_1.png,ui_cargo_supplies,ui_cargo_supplies_drop,9,3,,600,MEDIUM,54000,1,,,
 Light Components,components_light,components_light,45,150,3,1,,,2500,1,graphics/icons/cargo/components_light_2.png,ui_cargo_supplies,ui_cargo_supplies_drop,10,3,,900,,40500,1,,,

@@ -8,7 +8,6 @@ import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.util.Misc;
-import com.thoughtworks.xstream.XStream;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.CommodityDomain;
@@ -59,14 +58,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     public void afterGameSave() {
         WorkerRegistry.loadInstance(false);
         EconomyEngineSerializer.loadInstance(false);
-    }
-
-    @Override
-    public void configureXStream(XStream x) {
-        x.aliasPackage(
-            "wfg.ltv_econ.economy.policies",
-            "wfg.ltv_econ.intel.market.policies"
-        );
     }
 
     private static final void registerBarEvents() {

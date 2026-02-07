@@ -95,6 +95,7 @@ They respond to wages, stability, exploitation, and policies.
 
 Due to the intrusive nature of the mod, anything that modifies the Colony Info Panel are likely to cause problems. Here are mods that are definitely incompatible:
 - <a href="https://fractalsoftworks.com/forum/index.php?topic=20986.0">Grand.Colonies</a>
+- <a href="https://fractalsoftworks.com/forum/index.php?topic=28273.0">Astral Ascension</a>
 
 <br>
 
@@ -106,9 +107,8 @@ Due to the intrusive nature of the mod, anything that modifies the Colony Info P
 <br><br>
 
 ## Roadmap
-- Add more policies
+- Add more policies and events
 - Add more market events as a consequence of the population
-- LunaLib support
 
 <br><br>
 
@@ -151,6 +151,7 @@ behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons
 ## AI Generated Assets
 
 <ul>
+    <li>graphics/events/gang_violence.png</li>
     <li>graphics/policies/extended_shifts.png</li>
     <li>graphics/policies/luddic_prophet_festival.png</li>
     <li>graphics/policies/bulwark_of_orichalcum.png</li>

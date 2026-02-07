@@ -49,7 +49,7 @@ public class PlayerMarketData {
     private float popClassConsciousness = 0f;
 
     private final ArrayList<MarketPolicy> policies = new ArrayList<>();
-    private ArrayList<MarketEvent> events = new ArrayList<>();
+    private final ArrayList<MarketEvent> events = new ArrayList<>();
 
     public PlayerMarketData(String marketID) {
         this.marketID = marketID;
@@ -80,8 +80,6 @@ public class PlayerMarketData {
 
     public Object readResolve() {
         market = Global.getSector().getEconomy().getMarket(marketID);
-
-        if (events == null) events = new ArrayList<>();
 
         return this;
     }

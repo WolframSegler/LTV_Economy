@@ -306,7 +306,7 @@ public class CommodityCell {
     }
 
     public static final float MAX_SUBMARKET_STOCK_MULT = 40f;
-    public static final float INHERENT_DEMAND = 20;
+    public static final float INHERENT_DEMAND = 30;
     public float getUnitPrice(PriceType type, int amount, double stored) {
         final int n = Math.abs(amount);
         final int signedAmount = type == PriceType.MARKET_SELLING ? -n : n;

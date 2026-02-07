@@ -1,12 +1,15 @@
 package wfg.ltv_econ.ui.panels;
 
-import static wfg.native_ui.util.UIConstants.pad;
+import static wfg.native_ui.util.UIConstants.*;
+
+import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -23,6 +26,7 @@ import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.SortableTable;
 import wfg.native_ui.ui.panels.SortableTable.cellAlg;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.util.NumFormat;
 public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> implements HasBackground {
     public static final int PANEL_W = 935;
 
@@ -37,6 +41,7 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
     }
 
     public void createPanel() {
+        final EconomyEngine engine = EconomyEngine.getInstance();
         final SettingsAPI settings = Global.getSettings();
         final int rowH = 68;
         final int nameW = 170;
@@ -60,48 +65,60 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
             "Cohesion", 90, "Degree of social cohesion within the colony's population.", true, true, 3,
 
             "Consciousness Icon", 30, null, true, false, 4,
-            "Conscious..", 90, "The colony population's awareness of exploitation and social hierarchy.", true, true, 4
+            "Conscious..", 90, "The colony population's awareness of exploitation and social hierarchy.", true, true, 4,
+
+            "Reserves", 100, "Credit reserves of the colony", false, false, -1
         );
 
-        final PlanetInfoParams params = new PlanetInfoParams();
-        params.showName = true;
-        params.showConditions = false;
-        params.showHazardRating = false;
-        params.scaleEvenWhenShowingName = true;
+        if (engine.getPlayerMarketData().size() > 0) {
+            final PlanetInfoParams params = new PlanetInfoParams();
+            params.showName = true;
+            params.showConditions = false;
+            params.showHazardRating = false;
+            params.scaleEvenWhenShowingName = true;
+    
+            for (PlayerMarketData data : engine.getPlayerMarketData().values()) {
+                final UIPanelAPI namePanel = settings.createCustom(nameW, rowH, null);
+                final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(nameW, false);
+                final SectorEntityToken entity = data.market.getPrimaryEntity();
+    
+                if (entity instanceof PlanetAPI) {
+                    nameTp.showPlanetInfo(data.market.getPlanetEntity(), nameW, rowH, params, 0f);
+                } else {
+                    nameTp.addImage(entity.getCustomEntitySpec().getIconName(), nameW, rowH, 0f);
+                    final LabelAPI lbl = nameTp.addPara(data.market.getName(), 0f);
+                    lbl.autoSizeToWidth(nameW).inBL(0f, pad);
+                    lbl.setAlignment(Alignment.MID);
+                }
+                ComponentFactory.addTooltip(nameTp, rowH, false, namePanel);
+    
+                final int iconS = rowH/3;
+                final Base health = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.HEALTH_ICON, null, null);
+                final Base happiness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SMILING_ICON, null, null);
+                final Base cohesion = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOCIETY_ICON, null, null);
+                final Base consciousness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOLIDARITY_ICON, null, null);
+                final long credits = engine.getCredits(data.marketID);
+    
+                final Color creditColor = credits < 0l ? negative : highlight;
 
-        for (PlayerMarketData data : EconomyEngine.getInstance().getPlayerMarketData().values()) {
-            final UIPanelAPI namePanel = settings.createCustom(nameW, rowH, null);
-            final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(nameW, false);
-            final SectorEntityToken entity = data.market.getPrimaryEntity();
-
-            if (entity instanceof PlanetAPI) {
-                nameTp.showPlanetInfo(data.market.getPlanetEntity(), nameW, rowH, params, 0f);
-            } else {
-                nameTp.addImage(entity.getCustomEntitySpec().getIconName(), nameW, rowH, 0f);
-                final LabelAPI lbl = nameTp.addPara(data.market.getName(), 0f);
-                lbl.autoSizeToWidth(nameW).inBL(0f, pad);
-                lbl.setAlignment(Alignment.MID);
+                table.addCell(namePanel, cellAlg.LEFT, data.market.getDaysInExistence(), null);
+                table.addCell(data.market.getSize(), cellAlg.MID, null, null);
+                table.addCell(health, cellAlg.LEFTOPAD, null, null);
+                table.addCell((int) data.getHealth(), cellAlg.MID, null, null);
+                table.addCell(happiness, cellAlg.LEFTOPAD, null, null);
+                table.addCell((int) data.getHappiness(), cellAlg.MID, null, null);
+                table.addCell(cohesion, cellAlg.LEFTOPAD, null, null);
+                table.addCell((int) data.getSocialCohesion(), cellAlg.MID, null, null);
+                table.addCell(consciousness, cellAlg.LEFTOPAD, null, null);
+                table.addCell((int) data.getClassConsciousness(), cellAlg.MID, null, null);
+                table.addCell(NumFormat.formatCredit(credits), cellAlg.MID, credits, creditColor);
+    
+                table.pushRow(null, null, null, null, null, null);
             }
-            ComponentFactory.addTooltip(nameTp, rowH, false, namePanel);
-
-            final int iconS = rowH/3;
-            final Base health = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.HEALTH_ICON, null, null);
-            final Base happiness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SMILING_ICON, null, null);
-            final Base cohesion = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOCIETY_ICON, null, null);
-            final Base consciousness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOLIDARITY_ICON, null, null);
-
-            table.addCell(namePanel, cellAlg.LEFT, data.market.getDaysInExistence(), null);
-            table.addCell(data.market.getSize(), cellAlg.MID, null, null);
-            table.addCell(health, cellAlg.LEFTOPAD, null, null);
-            table.addCell((int) data.getHealth(), cellAlg.MID, null, null);
-            table.addCell(happiness, cellAlg.LEFTOPAD, null, null);
-            table.addCell((int) data.getHappiness(), cellAlg.MID, null, null);
-            table.addCell(cohesion, cellAlg.LEFTOPAD, null, null);
-            table.addCell((int) data.getSocialCohesion(), cellAlg.MID, null, null);
-            table.addCell(consciousness, cellAlg.LEFTOPAD, null, null);
-            table.addCell((int) data.getClassConsciousness(), cellAlg.MID, null, null);
-
-            table.pushRow(null, null, null, null, null, null);
+        } else {
+            final LabelAPI lbl = Global.getSettings().createLabel("No colonies", Fonts.DEFAULT_SMALL);
+            lbl.setColor(base);
+            table.add(lbl).inMid();
         }
 
         table.outline.enabled = true;

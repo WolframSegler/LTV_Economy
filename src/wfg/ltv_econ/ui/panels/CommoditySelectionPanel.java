@@ -65,12 +65,12 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
             final RowPanel row = new RowPanel(
                 container, width - opad, ROW_H, spec
             );
-            container.addCustom(row.getPanel(), 0).getPosition().inTL(pad, yCoord);
+            container.addCustom(row.getPanel(), 0).getPosition().inTL(0f, yCoord);
 
             yCoord += ROW_H + pad;
         }
         container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, pos.getHeight(), true, m_panel).inTL(-pad, 0);
+        ComponentFactory.addTooltip(container, pos.getHeight(), true, m_panel).inTL(0f, 0f);
     }
 
     public class RowPanel extends CustomPanel<RowPanel> 

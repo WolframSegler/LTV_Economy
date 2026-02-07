@@ -109,6 +109,10 @@ public class CommodityDomain {
         return m_comCells;
     }
 
+    public final Collection<IncomeLedger> getAllLedgers() {
+        return incomeLedgers.values();
+    }
+
     public final ArrayList<CommodityCell> getSortedByProduction(int listSize) {
         return m_comCells.values()
             .stream()

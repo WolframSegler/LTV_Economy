@@ -73,39 +73,104 @@ public class EconomyInfo {
         double TotalFactionExports = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
-            if (!cell.market.getFaction().getId().equals(faction.getId())) {
-                continue;
+            if (cell.market.getFaction().getId().equals(faction.getId())) {
+                TotalFactionExports += cell.inFactionExports;
             }
-            TotalFactionExports += cell.inFactionExports;
         }
 
         return TotalFactionExports;
     }
 
-    public final float getFactionTotalExportMarketShare(String comID, String factionID) {
+    public final float getFactionTotalExportShare(String comID, String factionID) {
         final double total = getTotalGlobalExports(comID);
         if (total == 0) return 0;
         double totalGlobalExports = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
-            if (!cell.market.getFaction().getId().equals(factionID)) {
-                continue;
+            if (cell.market.getFaction().getId().equals(factionID)) {
+                totalGlobalExports += cell.globalExports;
             }
-            totalGlobalExports += cell.globalExports;
         }
         return (float) totalGlobalExports / (float) total;
     }
 
-    public final float getFactionTotalImportMarketShare(String comID, String factionID) {
+    public final long getPlayerFactionCreditFlow(String comID) {
+        long netCreditFlow = 0;
+
+        for (IncomeLedger ledger : engine.m_comDomains.get(comID).getAllLedgers()) {
+            netCreditFlow += ledger.lastMonthExportIncome - ledger.lastMonthImportExpense;
+        }
+        return netCreditFlow;
+    }
+
+    public final double getTotalFactionStockpiles(String comID, String factionID) {
+        double totalStockpiles = 0;
+
+        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+            if (cell.market.getFaction().getId().equals(factionID)) {
+                totalStockpiles += cell.getStored();
+            }
+        }
+        return totalStockpiles;
+    }
+
+    public final float getTotalFactionDemand(String comID, String factionID) {
+        float totalDemand = 0;
+
+        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+            if (cell.market.getFaction().getId().equals(factionID)) {
+                totalDemand += cell.getBaseDemand(true);
+            }
+        }
+        return totalDemand;
+    }
+
+    public final float getTotalFactionProd(String comID, String factionID) {
+        float totalDemand = 0;
+
+        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+            if (cell.market.getFaction().getId().equals(factionID)) {
+                totalDemand += cell.getProduction(true);
+            }
+        }
+        return totalDemand;
+    }
+
+    public final double getTotalFactionBalance(String comID, String factionID) {
+        double balance = 0;
+
+        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+            if (cell.market.getFaction().getId().equals(factionID)) {
+                balance += cell.getFlowRealBalance();
+            }
+        }
+        return balance;
+    }
+
+    public final float getFactionImportSufficiency(String comID, String factionID) {
+        float totalImports = 0;
+        float inFactionImports = 0;
+
+        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+            if (cell.market.getFaction().getId().equals(factionID)) {
+                totalImports += cell.getTotalImports(false);
+                inFactionImports += cell.inFactionImports;
+            }
+        }
+
+        if (totalImports == 0f) return 1f;
+        return Math.min(1f, inFactionImports / totalImports);
+    }
+
+    public final float getFactionTotalImportShare(String comID, String factionID) {
         final double total = getTotalGlobalImports(comID);
         if (total == 0) return 0;
         double totalGlobalImports = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
-            if (!cell.market.getFaction().getId().equals(factionID)) {
-                continue;
+            if (cell.market.getFaction().getId().equals(factionID)) {
+                totalGlobalImports += cell.globalImports;
             }
-            totalGlobalImports += cell.globalImports;
         }
         return (float) (totalGlobalImports / total);
     }
@@ -114,11 +179,9 @@ public class EconomyInfo {
         double totalGlobalExports = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
-            if (!cell.market.getFaction().getId().equals(faction.getId())) {
-                continue;
+            if (cell.market.getFaction().getId().equals(faction.getId())) {
+                totalGlobalExports += cell.globalExports;
             }
-
-            totalGlobalExports += cell.globalExports;
         }
 
         return totalGlobalExports;

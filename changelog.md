@@ -1,3 +1,10 @@
+v0.2.6-beta | NOT SAVE COMPATIBLE
+- Added LunaLib settings support
+- Added a table to the command tab colonies section to show faction controlled resources.
+- UI fixes
+- Fixed best places to sell & buy list.
+- Fixed exotic goods having strange prices.
+
 v0.2.5-beta | SAVE COMPATIBLE
 - Changed some dialog background transparency
 - Overhauled the worker assigner. The workers should now be distributed more efficiently, reducing deficits.

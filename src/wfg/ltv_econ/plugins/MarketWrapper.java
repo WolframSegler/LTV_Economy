@@ -87,7 +87,7 @@ public class MarketWrapper extends Market {
         if (quantity <= 0) return 0f;
 
         final CommoditySpecAPI spec = ((CommodityOnMarketAPI)com).getCommodity();
-        if (spec.isNonEcon()) {
+        if (spec.isNonEcon() || spec.isExotic()) {
             return original.getDemandPriceAssumingStockpileUtility(com, stockpiles, quantity, isPlayer);
         }
         if (spec.getPriceVariability() == PriceVariability.V0) {
@@ -126,7 +126,7 @@ public class MarketWrapper extends Market {
         if (quantity <= 0) return 0f;
 
         final CommoditySpecAPI spec = ((CommodityOnMarketAPI)com).getCommodity();
-        if (spec.isNonEcon()) {
+        if (spec.isNonEcon() || spec.isExotic()) {
             return original.getDemandPriceAssumingStockpileUtility(com, stockpiles, quantity, isPlayer);
         }
         if (spec.getPriceVariability() == PriceVariability.V0) {

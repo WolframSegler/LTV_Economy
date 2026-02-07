@@ -32,7 +32,6 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.submarkets.OpenSubmarketPlugin;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
@@ -84,21 +83,17 @@ public class TooltipUtils {
         final String comID = spec.getId();
         final int econUnit = (int) spec.getEconUnit();
 
-        if (showBestSell) {
-            final ArrayList<CommodityCell> marketList = new ArrayList<>();
-            for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
-                if (!cell.market.isHidden() && cell.market.getEconGroup() == null &&
-                    cell.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
-                ) {
-                    if (1f - cell.getFlowAvailabilityRatio() > 0 && cell.getFlowDeficit() > econUnit) {
-                        marketList.add(cell);
-                    }
-                }
-            }
+        final ArrayList<CommodityCell> marketList = new ArrayList<>();
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
+            if (!cell.market.isHidden() && cell.market.getEconGroup() == null &&
+                cell.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
+            ) { marketList.add(cell); }
+        }
 
-            Collections.sort(marketList, createSellComparator(comID, econUnit));
+        if (showBestSell) {
+            Collections.sort(marketList, createSellComparator(econUnit));
             if (!marketList.isEmpty()) {
-                tp.addPara("Best places to sell:", opad);
+                tp.addPara("Best places to sell:", pad);
                 final PositionAPI prevPos = tp.getPrev().getPosition();
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
 
@@ -177,26 +172,12 @@ public class TooltipUtils {
 
                 tp.setHeightSoFar(relativeY);
                 NativeUiUtils.resetFlowLeft(tp, opad/2f);
-                tp.addTable("", 0, pad*2);
+                tp.addTable("", 0, pad);
             }
         }
 
         if (showBestBuy) {
-            final ArrayList<CommodityCell> marketList = new ArrayList<>();
-            for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
-                if (!cell.market.isHidden() && cell.market.getEconGroup() == null &&
-                    cell.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
-                ) {
-                    final int stockpileLimit = (int) OpenSubmarketPlugin.getBaseStockpileLimit(
-                        cell.comID, cell.marketID
-                    );
-                    if (stockpileLimit > 0 && stockpileLimit >= econUnit) {
-                        marketList.add(cell);
-                    }
-                }
-            }
-
-            Collections.sort(marketList, createBuyComparator(comID, econUnit));
+            Collections.sort(marketList, createBuyComparator(econUnit));
             if (!marketList.isEmpty()) {
 
                 tp.addPara("Best places to buy:", opad);
@@ -278,7 +259,7 @@ public class TooltipUtils {
 
                 tp.setHeightSoFar(relativeY);
                 NativeUiUtils.resetFlowLeft(tp, opad/2f);
-                tp.addTable("", 0, pad*2);
+                tp.addTable("", 0, pad);
             }
         }
 
@@ -528,7 +509,7 @@ public class TooltipUtils {
         return UiUtils.COLOR_NOT_EXPORTED;
     }
 
-    private static final Comparator<CommodityCell> createSellComparator(String comID, int econUnit) {
+    private static final Comparator<CommodityCell> createSellComparator(int econUnit) {
         return (s1, s2) -> {
             int price1 = (int) s1.computeVanillaPrice(econUnit, true, true);
             int price2 = (int) s2.computeVanillaPrice(econUnit, true, true);
@@ -536,7 +517,7 @@ public class TooltipUtils {
         };
     }
 
-    private static final Comparator<CommodityCell> createBuyComparator(String comID, int econUnit) {
+    private static final Comparator<CommodityCell> createBuyComparator(int econUnit) {
         return (s1, s2) -> {
             int price1 = (int) s1.computeVanillaPrice(econUnit, false, true);
             int price2 = (int) s2.computeVanillaPrice(econUnit, false, true);

@@ -445,7 +445,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String factionName = m_faction.getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int)(engine.info.getFactionTotalExportMarketShare(
+                    final String valueTxt = (int)(engine.info.getFactionTotalExportShare(
                         comID, m_faction.getId()
                     ) * 100) + "%";
 
@@ -487,7 +487,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String factionName = m_selectedMarket.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int) (engine.info.getFactionTotalExportMarketShare(
+                    final String valueTxt = (int) (engine.info.getFactionTotalExportShare(
                         comID, m_selectedMarket.getFactionId()
                     ) * 100) + "%";
 
@@ -522,7 +522,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String factionName = m_faction.getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int) (engine.info.getFactionTotalExportMarketShare(
+                    final String valueTxt = (int) (engine.info.getFactionTotalExportShare(
                         comID, m_faction.getId()
                     ) * 100) + "%";
 
@@ -675,7 +675,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
             "Quantity", (int)(0.05 * SECT3_WIDTH), quantityTooltip, true, true, 2,
             "", (int)(0.1 * SECT3_WIDTH), null, true, false, 2,
-            "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. In-faction accessibility is higher.", false, false, -1,
+            "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. Influences trade order", false, false, -1,
             marketHeader, (int)(0.15 * SECT3_WIDTH), marketTpDesc, false, false, -1,
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
         );

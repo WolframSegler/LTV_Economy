@@ -252,7 +252,8 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
             public void createPanel() {
                 final int value = (int) engine.info.getGlobalAveragePrice(comID, 0);
                 final String txt = "Global average price";
-                final String valueTxt = NumFormat.formatCredit(value);
+                final String valueTxt = selectedCom.isExotic() ? "Localized"
+                    : NumFormat.formatCredit(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -530,7 +531,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
         for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
             final FactionSpecAPI faction = iter.next();
-            final float value = engine.info.getFactionTotalExportMarketShare(comID, faction.getId());
+            final float value = engine.info.getFactionTotalExportShare(comID, faction.getId());
             if (value < 0.001f) {
                 iter.remove();
                 continue;
@@ -570,7 +571,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),
                     highlight,
-                    (int) (engine.info.getFactionTotalExportMarketShare(comID, faction.getId()) * 100) + "%"
+                    (int) (engine.info.getFactionTotalExportShare(comID, faction.getId()) * 100) + "%"
                 });
             }
 
@@ -588,7 +589,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
         for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
             final FactionSpecAPI faction = iter.next();
-            final float value = engine.info.getFactionTotalImportMarketShare(comID, faction.getId());
+            final float value = engine.info.getFactionTotalImportShare(comID, faction.getId());
             if (value < 0.001f) {
                 iter.remove();
                 continue;
@@ -628,7 +629,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),
                     highlight,
-                    (int) (engine.info.getFactionTotalImportMarketShare(comID, faction.getId()) * 100) + "%"
+                    (int) (engine.info.getFactionTotalImportShare(comID, faction.getId()) * 100) + "%"
                 });
             }
 

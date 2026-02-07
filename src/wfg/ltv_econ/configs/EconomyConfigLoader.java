@@ -9,6 +9,9 @@ import org.json.JSONObject;
 import com.fs.starfarer.api.Global;
 
 import wfg.ltv_econ.ui.dialogs.ManagePopulationDialog;
+import static wfg.ltv_econ.constants.Mods.*;
+
+import lunalib.lunaSettings.LunaSettings;
 
 public class EconomyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";
@@ -60,6 +63,22 @@ public class EconomyConfigLoader {
                     o.getInt("immigrationModifier")
                 )
             );
+        }
+
+        if (Global.getSettings().getModManager().isModEnabled(LUNA_LIB)) {
+            EconomyConfig.MULTI_THREADING = LunaSettings.getBoolean(LTV_ECON, "economy_multiThreading");
+            EconomyConfig.STARTING_CREDITS_FOR_MARKET = LunaSettings.getInt(LTV_ECON, "economy_startingCredits");
+            EconomyConfig.CONCENTRATION_COST = LunaSettings.getDouble(LTV_ECON, "economy_concentrationCost");
+            EconomyConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "economy_deficitCost");
+            EconomyConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_prodBuffer");
+            EconomyConfig.DAYS_TO_COVER = LunaSettings.getInt(LTV_ECON, "economy_daysToCover");
+            EconomyConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "economy_toCoverPerImport");
+            EconomyConfig.FACTION_EXCHANGE_MULT = LunaSettings.getDouble(LTV_ECON, "economy_factionExchangeMult").floatValue();
+            EconomyConfig.WORKER_ASSIGN_INTERVAL = LunaSettings.getInt(LTV_ECON, "economy_assignInterval");
+            EconomyConfig.EXPORT_THRESHOLD_FACTOR = LunaSettings.getDouble(LTV_ECON, "economy_exportThreshold").floatValue();
+            EconomyConfig.EMBARGO_REP_DROP = LunaSettings.getDouble(LTV_ECON, "economy_embargoRepDrop").floatValue();
+            EconomyConfig.ECON_ALLOCATION_PASSES = LunaSettings.getInt(LTV_ECON, "economy_allocPasses");
+            EconomyConfig.MIN_WORKER_FRACTION = LunaSettings.getDouble(LTV_ECON, "economy_minWorkerFraction").floatValue();
         }
 
         } catch (Exception e) {
