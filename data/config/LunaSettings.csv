@@ -20,8 +20,8 @@ economy_generalHeader,General Settings,Header,General Settings,,,,,Economy
 economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread,,,Economy
 economy_startingCredits,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
 economy_solverHeader,Worker Allocation Settings,Header,Worker Allocation Settings,,,,,Economy
-economy_concentrationCost,Concentration Penalty,Double,4,,Higher values result in a more even spread of workers.,0,500,Economy
-economy_deficitCost,Deficit Penalty,Double,2000,,Higher values encourage more demand fulfillment.,0,10000,Economy
+economy_concentrationCost,Concentration Penalty,Double,20,,Higher values result in a more even spread of workers.,0,500,Economy
+economy_deficitCost,Deficit Penalty,Double,4000,,Higher values encourage more demand fulfillment.,0,10000,Economy
 economy_minWorkerFraction,Minimum Worker Fraction,Double,0.1,,The minimum fraction of the fair share of workers for each output to be enforced,0,1,Economy
 economy_prodBuffer,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Economy
 economy_allocPasses,Allocation Refinement Passes,Int,3,,Higher values improve allocation stability at the cost of performance.,1,100,Economy

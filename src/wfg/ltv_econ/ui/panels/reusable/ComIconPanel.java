@@ -46,7 +46,6 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements
         tooltip.width = 720f;
         tooltip.expandable = true;
         tooltip.codexID = CodexDataV2.getCommodityEntryId(spec.getId());
-        tooltip.parent = m_parent;
         tooltip.builder = (tooltip, expanded) -> {
             if (m_com == null) return;
 

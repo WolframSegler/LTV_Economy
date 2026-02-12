@@ -104,7 +104,6 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
                 }
             };
 
-            tooltip.parent = CommoditySelectionPanel.this.m_panel;
             tooltip.builder = (tp, exp) -> {
                 if (UiUtils.canViewPrices()) {
                     tp.addPara("Ctrl + Click to view global market info", pad, highlight, new String[]{

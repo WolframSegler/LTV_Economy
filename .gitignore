@@ -20,8 +20,7 @@
 *.rar
 
 # Custom
-/src/com/
-/src/com_core/
+/api/
 /jars/
 /ProjectFiles/Diagrams
 

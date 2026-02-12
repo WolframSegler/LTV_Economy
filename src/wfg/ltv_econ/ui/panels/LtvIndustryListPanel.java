@@ -176,7 +176,6 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			}
 
 			{
-				tooltip.parent = LtvIndustryListPanel.this.m_panel;
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara("Player credits available.", 0);
 				};
@@ -206,7 +205,6 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			}
 
 			{
-				tooltip.parent = LtvIndustryListPanel.this.m_panel;
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara("Colony credits available.", 0);
 				};
@@ -234,7 +232,6 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			}
 
 			{
-				tooltip.parent = LtvIndustryListPanel.this.m_panel;
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara(
 						"Maximum number of industries, based on the size of a colony and other factors.", 0
@@ -353,7 +350,6 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 	}
 
 	public static final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, IndustryWidget widget) {
-		widget.industryIcon.tooltip.parent = widget.getParent();
 		widget.industryIcon.tooltip.builder = (tp, exp) -> {
 			IndustryTooltips.createIndustryTooltip(mode, tp, false, ind);
 		};

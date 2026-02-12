@@ -236,7 +236,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             dom.removeMarket(marketID);
         }
 
-        if (market.isPlayerOwned()) m_playerMarketData.remove(marketID);
+        m_playerMarketData.remove(marketID);
         m_marketCredits.remove(marketID);
         WorkerRegistry.getInstance().remove(marketID);
     }
@@ -486,6 +486,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 	public void reportRaidObjectivesAchieved(RaidResultData data, InteractionDialogAPI dialog,
         Map<String, MemoryAPI> memoryMap
     ) {
+        // TODO integrate raids better
         if (!data.market.isInEconomy()) return;
         for (GroundRaidObjectivePlugin objective : data.objectives) {
             if (objective instanceof CommodityGroundRaidObjectivePluginImpl obj) {
@@ -503,7 +504,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     @Override
     public void reportBattleOccurred(CampaignFleetAPI primaryWinner, BattleAPI battle) {
-
+        // TODO integrate cargo raids better
     }
 
     @Override
@@ -538,6 +539,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final void applyPopulationStabilityMods(MarketAPI market) {
+        // TODO Call this using industry post apply hook after update
         final String marketID = market.getId();
         final String popID = "ind_" + Industries.POPULATION + "_";
         final CommodityCell domCell = getComCell(Commodities.DOMESTIC_GOODS, marketID);

@@ -99,7 +99,6 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
                 new ConfirmEmbargoDialog(faction, this, alreadyEmbargoed).show(0.3f, 0.3f);
             };
 
-            tooltip.parent = FactionSelectionPanel.this.m_parent;
             tooltip.builder = (tp, exp) -> {
                 if (alreadyEmbargoed) {
                     tp.addPara("Click to lift the embargo", pad);

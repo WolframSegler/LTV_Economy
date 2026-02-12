@@ -151,6 +151,7 @@ behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons
 ## AI Generated Assets
 
 <ul>
+    <li>graphics/events/miasma.png</li>
     <li>graphics/events/gang_violence.png</li>
     <li>graphics/policies/extended_shifts.png</li>
     <li>graphics/policies/luddic_prophet_festival.png</li>
@@ -164,6 +165,7 @@ behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons
     <li>graphics/policies/public_health_education.png</li>
     <li>graphics/policies/bres_vitalis.png</li>
     <li>graphics/policies/convergence_festival.png</li>
+    <li>graphics/policies/substance_control_act.png</li>
     <li>graphics/icons/markets/wfg_labor.png</li>
     <li>graphics/icons/intel/policy_icon.png</li>
     <li>graphics/icons/industry/manufacturing.png</li>

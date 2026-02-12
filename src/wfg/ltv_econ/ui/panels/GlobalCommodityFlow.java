@@ -43,6 +43,7 @@ import wfg.native_ui.util.NumFormat;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
+    private static final SettingsAPI settings = Global.getSettings();
 
     public static final int ICON_SIZE = 135;
     public static final int LABEL_W = 150;
@@ -55,7 +56,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
     public static final int LEFT_WALL = 320;
     public static final int Right_WALL = 720;
 
-    public static CommoditySpecAPI selectedCom = Global.getSettings().getCommoditySpec(Commodities.SUPPLIES);
+    public static CommoditySpecAPI selectedCom = settings.getCommoditySpec(Commodities.SUPPLIES);
 
     public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
@@ -64,7 +65,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
     }
 
     public void createPanel() {
-        final SettingsAPI settings = Global.getSettings();
         final SectorAPI sector = Global.getSector();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final String comID = selectedCom.getId();
@@ -92,7 +92,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The combined daily output of %s across all colonies in the Sector. " +
@@ -120,7 +119,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The combined daily demand of all colonies for %s. " +
@@ -148,7 +146,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The amount of %s that the sector produced beyond what was demanded. " +
@@ -176,11 +173,10 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
-                        "Global deficit represents the total amount of demand that remained unfulfilled on the previous day." +
-                        "This value does not track shortages in stockpiles and only measures demand that was not supplied on the previous day." +
+                        "Global deficit represents the total amount of demand that remained unfulfilled on the previous day. " +
+                        "This value does not track shortages in stockpiles and only measures demand that was not supplied on the previous day. " +
                         "A colony may have large reserves and still contribute to the global deficit if trade routes could not deliver enough units in time.",
                         pad
                     );
@@ -206,7 +202,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total number of units of %s traded across the sector on the previous day, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
@@ -233,7 +228,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total monetary value (in credits) of all %s trades across the entire sector on the previous day. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
@@ -260,7 +254,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The average price of %s across all markets in the sector on the previous day, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
@@ -294,7 +287,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Trade Volatility for the last %s days. " +
@@ -324,7 +316,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows the total amount of %s currently stored across all markets in the sector. " +
@@ -355,7 +346,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Displays the total number of workers currently assigned to producing %s across all markets in the sector ."+
@@ -383,7 +373,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total count of markets in the sector that exported %s on the previous day. Only markets that actually sent units to other markets are included, regardless of faction.",
@@ -410,7 +399,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
             {
                 tooltip.width = 460f;
-                tooltip.parent = GlobalCommodityFlow.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total count of markets in the sector that imported %s on the previous day. Only markets that actually received units from other markets are included, regardless of faction.",
@@ -546,7 +534,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(360, pad);
 
-        chart.tooltip.parent = GlobalCommodityFlow.this.m_panel;
         chart.tooltip.builder = (tp, exp) -> {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
@@ -604,7 +591,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(580, pad);
 
-        chart.tooltip.parent = GlobalCommodityFlow.this.m_panel;
         chart.tooltip.builder = (tp, exp) -> {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
@@ -661,7 +647,6 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
         add(chart).inBL(800, pad);
 
-        chart.tooltip.parent = GlobalCommodityFlow.this.m_panel;
         chart.tooltip.builder = (tp, exp) -> {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);

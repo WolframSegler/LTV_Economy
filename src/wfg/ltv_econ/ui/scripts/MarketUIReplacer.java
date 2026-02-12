@@ -215,7 +215,6 @@ public class MarketUIReplacer implements EveryFrameScript {
             tooltip.positioner = (tp, expanded) -> {
                 NativeUiUtils.anchorPanel(tp, getPanel(), AnchorType.LeftTop, 50);
             };
-            tooltip.parent = m_panel;
             tooltip.builder = (tp, expanded) -> {
                 final FactionAPI faction = marketAPI.getFaction();
                 final Color base = faction.getBaseUIColor();

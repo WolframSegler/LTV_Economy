@@ -52,6 +52,7 @@ public class ColonyInvDialog extends DialogPanel {
         m_market = market;
 
         backgroundDimAmount = 0.2f;
+        holo.borderAlpha = 0.8f;
 
         createPanel();
     }
@@ -92,7 +93,6 @@ public class ColonyInvDialog extends DialogPanel {
 
             {
                 context.ignore = true;
-                tooltip.parent = ColonyInvDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows the colony's current credit reserves. These funds cover operating costs, import purchases, and upkeep for industries and structures. " +
@@ -127,7 +127,6 @@ public class ColonyInvDialog extends DialogPanel {
 
             {
                 context.ignore = true;
-                tooltip.parent = ColonyInvDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows your personal credits for transferring funds to or from the colony's reserves.",
@@ -161,7 +160,6 @@ public class ColonyInvDialog extends DialogPanel {
                 context.ignore = true;
 
                 tooltip.enabled = data == null;
-                tooltip.parent = ColonyInvDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The ratio of monthly profits that get automatically transferred to the player",

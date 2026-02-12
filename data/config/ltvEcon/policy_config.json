@@ -119,6 +119,16 @@
       "durationDays": 30,
       "cooldownDays": 360,
       "description": "A monumental civic celebration featuring mass performances, public assemblies, and sector-wide broadcasts. The Convergence Festival brings the population together through shared spectacle and coordinated participation. The scale of the festivities requires significant logistical support."
+    },
+    {
+      "id": "substance_control_act",
+      "name": "Substance Control Act",
+      "class": "wfg.ltv_econ.intel.market.policies.SubstanceControlPolicy",
+      "posterPath": "graphics/policies/substance_control_act.png",
+      "cost": 17000,
+      "durationDays": 480,
+      "cooldownDays": 480,
+      "description": "A regulatory framework restricting the distribution, and consumption of controlled substances within the colony. Enhanced enforcement and compliance measures aim to reduce substance abuse, improve public health, and reinforce social order."
     }
   ]
 }

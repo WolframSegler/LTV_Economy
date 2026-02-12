@@ -7,7 +7,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.ltv_econ.economy.PlayerMarketData;
 
 public class WellnessCompliancePolicy extends MarketPolicy {
-    public static final float HEALTH_BUFF = 0.07f;
+    public static final float HEALTH_BUFF = 0.06f;
     public static final float HAPPINESS_DEBUFF = -0.1f;
     public static final float COHESION_DEBUFF = -0.09f;
     public static final float CLASS_DEBUFF = -0.008f;

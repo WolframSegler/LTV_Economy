@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -54,6 +55,8 @@ import wfg.ltv_econ.economy.engine.EconomyInfo;
  * </ol>
  */
 public class IndustryIOs {
+    private static final SettingsAPI settings = Global.getSettings();
+
     /**
      * Map(industryID, Map(outputID, baseOutput))
      */
@@ -115,7 +118,7 @@ public class IndustryIOs {
                 if (output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty() &&
                     !output.isAbstract
                 ) {
-                    final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(output.comID);
+                    final CommoditySpecAPI spec = settings.getCommoditySpec(output.comID);
                     final float Vcc = spec.getBasePrice() * LaborConfig.getRoCC(entry.getValue().occTag);
                     
                     float totalWeight = 0;
@@ -133,7 +136,7 @@ public class IndustryIOs {
 
                         final float weight = inputEntry.getValue() / totalWeight;
                         final float inputValue = Vcc * weight;
-                        final float unitPrice = Global.getSettings().getCommoditySpec(inputID).getBasePrice();
+                        final float unitPrice = settings.getCommoditySpec(inputID).getBasePrice();
                         final float qty = inputValue * base / unitPrice;
 
                         inputMap.put(inputID, qty);
@@ -198,7 +201,7 @@ public class IndustryIOs {
     }
 
     private static final void buildBaseIdMapping() {
-        for (IndustrySpecAPI spec : Global.getSettings().getAllIndustrySpecs()) {
+        for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
             IndToBaseInd.put(spec.getId(), getBaseIndustryIDSpec(spec));
         }
     }
@@ -210,7 +213,7 @@ public class IndustryIOs {
             String downgradeId = currentInd.getDowngrade();
             if (downgradeId == null || downgradeId.equals(currentInd.getId())) break;
 
-            currentInd = Global.getSettings().getIndustrySpec(downgradeId);
+            currentInd = settings.getIndustrySpec(downgradeId);
         }
 
         return currentInd.getId();

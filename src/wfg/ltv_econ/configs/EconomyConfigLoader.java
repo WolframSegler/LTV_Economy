@@ -50,6 +50,7 @@ public class EconomyConfigLoader {
         EconomyConfig.EMBARGO_REP_DROP = (float) root.getDouble("EMBARGO_REP_DROP");
         EconomyConfig.ECON_ALLOCATION_PASSES = root.getInt("ECON_ALLOCATION_PASSES");
         EconomyConfig.MIN_WORKER_FRACTION = (float) root.getDouble("MIN_WORKER_FRACTION");
+        EconomyConfig.PRODUCTION_HOLD_FACTOR = (float) root.getDouble("PRODUCTION_HOLD_FACTOR");
 
         final JSONArray arr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>();
@@ -171,6 +172,11 @@ public class EconomyConfigLoader {
          * Ratio of ideal workers that will be assigned unconditionally.
          */
         public static float MIN_WORKER_FRACTION;
+
+        /** 
+         * Multiplier controlling daily production retained in local stockpiles before exporting.
+         */
+        public static float PRODUCTION_HOLD_FACTOR;
 
         static {
             EconomyConfigLoader.loadConfig();

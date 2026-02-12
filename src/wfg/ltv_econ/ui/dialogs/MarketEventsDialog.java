@@ -30,12 +30,13 @@ import wfg.native_ui.ui.panels.DockPanel;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 
 public class MarketEventsDialog extends DockPanel {
+    private static final SettingsAPI settings = Global.getSettings();
     private static final int ROW_H = 48;
     private final PlayerMarketData data;
 
     public MarketEventsDialog(final MarketAPI market) {
         super(Attachments.getCoreUI(), 500,
-            (int) Global.getSettings().getScreenHeight() - 200,
+            (int) settings.getScreenHeight() - 200,
             DockDirection.LEFT
         );
         data = EconomyEngine.getInstance().getPlayerMarketData(market.getId());
@@ -50,7 +51,7 @@ public class MarketEventsDialog extends DockPanel {
     public void createPanel() {
         final int width = (int) (pos.getWidth() - opad*2);
 
-        final LabelAPI title = Global.getSettings().createLabel("Current Events", Fonts.INSIGNIA_LARGE);
+        final LabelAPI title = settings.createLabel("Current Events", Fonts.INSIGNIA_LARGE);
         add(title).inTL(opad, opad*2);
 
         final TooltipMakerAPI eventsList = ComponentFactory.createTooltip(width, true);
@@ -101,7 +102,6 @@ public class MarketEventsDialog extends DockPanel {
 
         public void createPanel() {
             final int iconSize = ROW_H - 4;
-            final SettingsAPI settings = Global.getSettings();
 
             try {
                 settings.loadTexture(event.spec.iconPath);

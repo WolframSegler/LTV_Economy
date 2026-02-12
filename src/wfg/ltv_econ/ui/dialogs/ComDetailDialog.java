@@ -60,6 +60,7 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
+    private static final SettingsAPI settings = Global.getSettings();
 
     protected final InputSnapshotComp input = comp().get(NativeComponents.INPUT_SNAPSHOT);
 
@@ -183,7 +184,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 context.target = Context.DIALOG;
 
                 tooltip.width = getPos().getWidth() * 0.7f;
-                tooltip.parent = ComDetailDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
@@ -211,7 +211,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     public void updateSection1() {
         innerPanel.removeComponent(section1);
 
-        section1 = Global.getSettings().createCustom(SECT1_WIDTH, SECT1_HEIGHT, null);
+        section1 = settings.createCustom(SECT1_WIDTH, SECT1_HEIGHT, null);
 
         final TooltipMakerAPI tp = ComponentFactory.createTooltip(SECT1_WIDTH, false);
         ComponentFactory.addTooltip(tp, SECT1_HEIGHT, false, section1).inTL(0, 0);
@@ -223,7 +223,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     public void updateSection2() {
         innerPanel.removeComponent(section2);
 
-        section2 = Global.getSettings().createCustom(SECT2_WIDTH, SECT2_HEIGHT, null);
+        section2 = settings.createCustom(SECT2_WIDTH, SECT2_HEIGHT, null);
 
         final TooltipMakerAPI tp = ComponentFactory.createTooltip(SECT2_WIDTH, false);
         ComponentFactory.addTooltip(tp, SECT2_HEIGHT, false, section2).inTL(0, 0);
@@ -239,7 +239,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     public void updateSection3(int mode) {
         innerPanel.removeComponent(section3);
 
-        section3 = Global.getSettings().createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
+        section3 = settings.createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
 
         createSection3(section3, mode);
         innerPanel.addComponent(section3).inBL(pad, BUTTON_H + pad*2 + opad);
@@ -248,7 +248,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     public void updateSection4() {
         innerPanel.removeComponent(section4);
 
-        section4 = Global.getSettings().createCustom(SECT4_WIDTH, SECT4_HEIGHT, null);
+        section4 = settings.createCustom(SECT4_WIDTH, SECT4_HEIGHT, null);
 
         final TooltipMakerAPI tp = ComponentFactory.createTooltip(SECT4_WIDTH, false);
         ComponentFactory.addTooltip(tp, SECT4_HEIGHT, false, section4).inTL(0, 0);
@@ -260,7 +260,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     private void createSection1(UIPanelAPI section, TooltipMakerAPI tooltip) {
         if (m_com == null) return;
         final EconomyEngine engine = EconomyEngine.getInstance();
-        final SettingsAPI settings = Global.getSettings();
 
         tooltip.addSectionHeading(m_com.getName(), Alignment.MID, pad);
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
@@ -310,7 +309,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
-                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         final int discount = (int)((1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
 
@@ -356,7 +354,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
-                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
                             "The total number of " + m_com.getName() + " being exported globally by all producing markets in the sector.\n\n" +
@@ -418,7 +415,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
-                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
                             "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currFaction.getPersonNamePrefix() + " control.\n\n" +
@@ -459,7 +455,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
-                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         final String marketOwner = m_faction.getId().equals(Factions.PLAYER) ?
                             "your" : m_faction.getPersonNamePrefix(); 
@@ -502,7 +497,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
-                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
                             "Total export market share for " + m_com.getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
@@ -536,7 +530,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     context.target = Context.DIALOG;
 
                     tooltip.width = 460f;
-                    tooltip.parent = ComDetailDialog.this.m_panel;
                     tooltip.builder = (tp, exp) -> {
                         String marketOwner = m_faction.getId().equals(Factions.PLAYER) ?
                             "your" : m_faction.getPersonNamePrefix(); 

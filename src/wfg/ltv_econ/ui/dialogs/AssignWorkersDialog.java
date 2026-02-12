@@ -45,8 +45,9 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class AssignWorkersDialog extends DialogPanel {
+    private static final SettingsAPI settings = Global.getSettings();
 
-    public static final String WARNING_BUTTON_PATH = Global.getSettings().getSpriteName("ui", "warning_button");
+    public static final String WARNING_BUTTON_PATH = settings.getSpriteName("ui", "warning_button");
     public static final int panelWidth = 540;
     public static final int panelHeight = 400;
 
@@ -91,7 +92,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         // Draw Titel
         final String txt = "Assign workers to " + industry.getCurrentName();
-        final LabelAPI lbl = Global.getSettings().createLabel(txt, Fonts.ORBITRON_20AA);
+        final LabelAPI lbl = settings.createLabel(txt, Fonts.ORBITRON_20AA);
 
         final float textX = (panelWidth - lbl.computeTextWidth(txt)) / 2;
         innerPanel.addComponent((UIComponentAPI)lbl).inTL(textX, pad*2);
@@ -119,8 +120,6 @@ public class AssignWorkersDialog extends DialogPanel {
             WARNING_BUTTON_PATH, null, null
         ) {{
             context.ignore = true;
-
-            tooltip.parent = AssignWorkersDialog.this.m_panel;
             tooltip.builder = (tp, exp) -> {
                 tp.addPara(
                     "Adjust each output's slider to allocate a portion of the market's total workforce. " +
@@ -138,14 +137,12 @@ public class AssignWorkersDialog extends DialogPanel {
 
         innerPanel.addComponent(help_button.getPanel()).inTR(pad, sliderY + pad);
 
-        final UIPanelAPI outputsPanel = Global.getSettings().createCustom(
+        final UIPanelAPI outputsPanel = settings.createCustom(
             panelWidth,
             panelHeight - (sliderY + pad * 2),
             null
         );
         final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(panelWidth, true);
-
-        final SettingsAPI settings = Global.getSettings();
         
         int cumulativeYOffset = pad;
         for (OutputConfig output : IndustryIOs.getIndConfig(industry).outputs.values()) {
@@ -196,8 +193,6 @@ public class AssignWorkersDialog extends DialogPanel {
         final float iconSize = 32f;
         final int itemsPerRow = 2;
         final float sectionWidth = ((panelWidth / 2) / itemsPerRow) - opad;
-
-        final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
 
         final FactionAPI faction = market.getFaction();

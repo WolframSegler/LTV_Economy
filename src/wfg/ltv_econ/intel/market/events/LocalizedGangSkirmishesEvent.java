@@ -44,7 +44,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketI
 
         data.market.addTransientImmigrationModifier(this);
 
-        data.happinessDelta.modifyFlat(spec.id, HAPPINESS_DEBUFF, spec.name);
+        data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
 
         if (Math.random() < 0.5) {
             final List<Industry> candidates = WorkerRegistry.getVisibleIndustries(data.market).stream()
@@ -59,7 +59,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketI
 
     @Override
     public void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
-        incoming.getWeight().modifyFlat(spec.id, GROWTH_DEBUFF, spec.name);
+        incoming.getWeight().modifyFlat(id, GROWTH_DEBUFF, spec.name);
     }
 
     @Override

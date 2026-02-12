@@ -16,7 +16,7 @@ import wfg.native_ui.util.NumFormat;
 public class OrganHarvestingPolicy extends MarketPolicy implements MarketImmigrationModifier {
     public static final float HEALTH_BUFF = 0.03f;
     public static final float HAPPINESS_DEBUFF = -0.03f;
-    public static final float CLASS_BUFF = 0.002f;
+    public static final float CLASS_BUFF = 0.003f;
 
     public static final int POP_GROWTH_DEBUFF = -15;
     public static final int HARVESTED_ORGANS_BUFF = 10;

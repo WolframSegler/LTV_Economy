@@ -1,0 +1,4 @@
+IMPORTANT
+- The mod LTV_Economy needs WrapUI to function properly. Please add both of these to your mods folder
+- Certain aspects of the mod can be modified under LTV_Economy/data/config/ltvEcon/
+- The first game might freeze freeze for a while as the mod generates dynamic configs for any industries without an industry_config.json entry. This one-time operation should not happen again unless a mod with new industries gets added/removed or the file dynamic_industry_config.json.data under saves/common/ gets deleted.

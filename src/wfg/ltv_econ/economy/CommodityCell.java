@@ -155,7 +155,10 @@ public class CommodityCell {
         return getFlowProductionSurplus() - getTotalExports();
     }
     public final double getStoredRemainingExportable() {
-        return Math.max(0, stored + getFlowRemainingExportable() - getPreferredStockpile() * EconomyConfig.EXPORT_THRESHOLD_FACTOR);
+        return Math.max(0.0, stored + getFlowRemainingExportable()
+            - getProduction(true) * EconomyConfig.PRODUCTION_HOLD_FACTOR
+            - getPreferredStockpile() * EconomyConfig.EXPORT_THRESHOLD_FACTOR
+        );
     }
     public final float getFlowCanNotExport() {
         return Math.max(0, getFlowRemainingExportable());
@@ -274,7 +277,7 @@ public class CommodityCell {
 
         for (StatMod mod : market.getCommodityData(comID).getAvailableStat().getFlatMods().values()) {
             if (!mod.source.contains(ShippingDisruption.COMMODITY_LOSS_PREFIX)) continue;
-
+            // TODO Integrate cargo raids better
             importEffectiveness = 1f + 0.4f*mod.value; // Can be -1 or -2.
             break;
         }
@@ -301,43 +304,54 @@ public class CommodityCell {
         addStoredAmount(getFlowRealBalance());
     }
 
-    public float getUnitPrice(PriceType type, int amount) {
-        return getUnitPrice(type, amount, stored);
+    public final float getUnitPrice(PriceType type, int amount) {
+        return getUnitPrice(type, amount, stored, spec.getBasePrice(), getPreferredStockpile());
     }
+    private static final float INHERENT_DEMAND = 4f;
+    private static final float SHIFT_FRACTION = 0.001f;
+    private static final float epsilon = 1e-3f;
+    private static final double scarcityExpBuy = 0.85;
+    private static final double scarcityExpNeutral = 1.0;
+    private static final double scarcityExpSell = 1.15;
+    public static final float getUnitPrice(PriceType type, int amount, double stored, float basePrice,
+        float preferred
+    ) {
+        final boolean buying = (type == PriceType.MARKET_BUYING);
 
-    public static final float MAX_SUBMARKET_STOCK_MULT = 40f;
-    public static final float INHERENT_DEMAND = 30;
-    public float getUnitPrice(PriceType type, int amount, double stored) {
-        final int n = Math.abs(amount);
-        final int signedAmount = type == PriceType.MARKET_SELLING ? -n : n;
-
-        final float basePrice = spec.getBasePrice();
-        final float demand = Math.max(getPreferredStockpile(), INHERENT_DEMAND);
-        final double storedAfter = stored + signedAmount;
-
-        final double SHIFT = demand * MAX_SUBMARKET_STOCK_MULT;
-        final float buyExp  = 0.25f * MAX_SUBMARKET_STOCK_MULT;
-        final float sellExp = 0.5f * MAX_SUBMARKET_STOCK_MULT;
-        final float neutralExp = (buyExp + sellExp) / 2f;
-        final float exp = switch (type) {
-            case MARKET_BUYING -> buyExp;
-            case MARKET_SELLING -> sellExp;
-            default -> neutralExp;
+        final int n  = Math.abs(amount);
+        final int sn = buying ? n : -n;
+        final float d = Math.max(preferred, INHERENT_DEMAND);
+        final double s = Math.max(stored, INHERENT_DEMAND);
+        final float shift = SHIFT_FRACTION * d;
+        final double exp = switch (type) {
+            case MARKET_BUYING -> scarcityExpBuy;
+            case MARKET_SELLING -> scarcityExpSell;
+            case NEUTRAL -> scarcityExpNeutral;
         };
 
-        final float avgMultiplier = n == 0 ?
-            (float) Math.pow(demand / Math.max(SHIFT + stored, 1), exp) :
-            (float)((Math.pow(demand, exp) / (1.0 - exp)) *
-            (Math.pow(Math.max(SHIFT + storedAfter,1), 1.0 - exp) -
-            Math.pow(SHIFT + stored, 1.0 - exp))
-        ) / signedAmount;
+        final double s0 = s + shift;
+        final double s1 = Math.max(s + sn + shift, epsilon);
+        final double a = Math.min(s0, s1);
+        final double b = Math.max(s0, s1);
+        final double delta = b - a;
+        final float sd = d + shift;
 
-        final float equilibrium = (float) Math.pow(demand / (SHIFT + demand), exp);
-        final float scarcityNorm = avgMultiplier / equilibrium;
+        final float avgMult;
+        if (n <= 0) {
+            avgMult = (float) Math.pow(sd / s0, exp);
+        } else {
+            final double I;
+            if (exp == 1.0) {
+                I = sd * Math.log(b / a);
+            } else {
+                final double prefactor = Math.pow(sd, exp) / (1.0 - exp);
+                I = prefactor * (Math.pow(b, 1.0 - exp) - Math.pow(a, 1.0 - exp));
+            }
+            avgMult = (float) (I / delta);
+        }
 
-        final float priceMult = Math.max(0.25f, Math.min(4f, scarcityNorm));
-
-        return Math.max(basePrice * priceMult, 1f);
+        final float priceMult = Math.max(0.1f, Math.min(4f, avgMult));
+        return Math.max(1f, basePrice * priceMult);
     }
 
     public float computeVanillaPrice(int amount, boolean isSellingToMarket, boolean isPlayer) {
@@ -347,7 +361,8 @@ public class CommodityCell {
 
         final PriceType type = isSellingToMarket ? PriceType.MARKET_BUYING : PriceType.MARKET_SELLING;
         final float unitPrice = getUnitPrice(
-            type, amount, stored + market.getCommodityData(comID).getTradeModPlus().getModifiedInt()
+            type, amount, stored + market.getCommodityData(comID).getTradeModPlus().getModifiedInt(),
+            spec.getBasePrice(), getPreferredStockpile()
         );
 
         final StatBonus priceMod;

@@ -83,24 +83,10 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		return 0f;
 	}
 
-	@Override
-	public boolean isParticipatesInEconomy() {
-		return false;
-	}
-
-	@Override
-	public boolean isHidden() {
-		return !market.isPlayerOwned();
-	}
-
-	public float getTariff() {
-		return 0f;
-	}
-
-	@Override
-	public boolean isFreeTransfer() {
-		return true;
-	}
+	public boolean isParticipatesInEconomy() { return false; }
+	public boolean isHidden() { return !market.isPlayerOwned(); }
+	public float getTariff() { return 0f; }
+	public boolean isFreeTransfer() { return true;}
 
 	protected transient CargoAPI preTransactionCargoCopy = null;
 
@@ -143,31 +129,11 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		}
 	}
 
-	@Override
-	public String getBuyVerb() {
-		return "Take";
-	}
-
-	@Override
-	public String getSellVerb() {
-		return "Give";
-	}
-
-	public String getTotalTextOverride() {
-		return "Transfer";
-	}
-
-	public String getTotalValueOverride() {
-		return "";
-	}
-
-	public boolean isTooltipExpandable() {
-		return false;
-	}
-
-	public float getTooltipWidth() {
-		return 500f;
-	}
+	public String getBuyVerb() { return "Take"; }
+	public String getSellVerb() { return "Give"; }
+	public String getTotalTextOverride() { return "Transfer"; }
+	public String getTotalValueOverride() { return ""; }
+	public float getTooltipWidth() { return 500f;}
 
 	protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
 		tooltip.addSectionHeading("Player Interaction", market.getFaction().getBaseUIColor(),

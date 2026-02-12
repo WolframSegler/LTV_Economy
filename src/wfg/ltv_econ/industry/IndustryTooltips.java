@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -44,6 +45,7 @@ import wfg.native_ui.util.NativeUiUtils;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class IndustryTooltips {
+	private static final SettingsAPI settings = Global.getSettings();
 
 	private static final Map<String, Object> hasPostDemandSectionMethodCache = new HashMap<>();
 	private static final Class<?>[] hasPostDemandSectionparamTypes = new Class<?>[]{
@@ -288,9 +290,9 @@ public class IndustryTooltips {
 				}
 			} else if (mode == IndustryTooltipMode.DOWNGRADE) {
 				if (ind.getSpec().getUpgrade() != null) {
-					float refundFraction = Global.getSettings().getFloat("industryRefundFraction");
+					float refundFraction = settings.getFloat("industryRefundFraction");
 
-					IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(ind.getSpec().getUpgrade());
+					IndustrySpecAPI spec = settings.getIndustrySpec(ind.getSpec().getUpgrade());
 					int cost = (int) (spec.getCost() * refundFraction);
 					String refundStr = Misc.getDGSCredits(cost);
 
@@ -569,7 +571,7 @@ public class IndustryTooltips {
 			pre = "Alpha-level AI core. ";
 		}
 		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
-			CommoditySpecAPI coreSpec = Global.getSettings().getCommoditySpec(ind.getAICoreId());
+			CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
 			TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
 			text.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. " +
 					"Increases production by %s. All modifiers are multiplicative", 0f, highlight,
@@ -595,7 +597,7 @@ public class IndustryTooltips {
 			pre = "Beta-level AI core. ";
 		}
 		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
-			CommoditySpecAPI coreSpec = Global.getSettings().getCommoditySpec(ind.getAICoreId());
+			CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
 			TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
 			text.addPara(pre + "Reduces demand by %s.Reduces upkeep cost by %s. All modifiers are multiplicative", opad,
 					highlight,
@@ -619,7 +621,7 @@ public class IndustryTooltips {
 			pre = "Gamma-level AI core. ";
 		}
 		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
-			CommoditySpecAPI coreSpec = Global.getSettings().getCommoditySpec(ind.getAICoreId());
+			CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
 			TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
 
 			text.addPara(pre + "Reduces demand by %s. All modifiers are multiplicative", opad, highlight,

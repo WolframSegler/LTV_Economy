@@ -61,19 +61,15 @@ public class ManagePopulationDialog extends DialogPanel {
 
     public static boolean showPolicies = true;
 
-    public static final String WORKER_ICON = Global.getSettings()
-        .getSpriteName("ui", "three_workers");
-    public static final String HEALTH_ICON = Global.getSettings()
-        .getSpriteName("ui", "health");
-    public static final String SMILING_ICON = Global.getSettings()
-        .getSpriteName("ui", "smiling_face");
-    public static final String SOCIETY_ICON = Global.getSettings()
-        .getSpriteName("ui", "society");
-    public static final String SOLIDARITY_ICON = Global.getSettings()
-        .getSpriteName("ui", "solidarity_colored");
-    private final MarketAPI m_market;
+    public static final SettingsAPI settings = Global.getSettings();
+    public static final String WORKER_ICON = settings.getSpriteName("ui", "three_workers");
+    public static final String HEALTH_ICON = settings.getSpriteName("ui", "health");
+    public static final String SMILING_ICON = settings.getSpriteName("ui", "smiling_face");
+    public static final String SOCIETY_ICON = settings.getSpriteName("ui", "society");
+    public static final String SOLIDARITY_ICON = settings.getSpriteName("ui", "solidarity_colored");
     private static final Color negativeColor = new Color(210, 115, 90);
     private static final Color positiveColor = new Color(90, 150, 110);
+    private final MarketAPI m_market;
 
     public Slider exploitationSlider = null;
 
@@ -86,7 +82,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         m_market = market;
 
-        holo.setBackgroundAlpha(1, 1);
+        holo.borderAlpha = 0.8f;
         backgroundDimAmount = 0.2f;
 
         createPanel();
@@ -95,7 +91,6 @@ public class ManagePopulationDialog extends DialogPanel {
     @Override
     public void createPanel() {
         UIContext.setContext(Context.DIALOG);
-        final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerMarketData mData = engine.getPlayerMarketData(m_market.getId());
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
@@ -150,7 +145,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Controls the proportion of worker output the colony retains as profit." +
@@ -188,7 +182,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Total wages paid to workers this month.", pad
@@ -223,7 +216,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The average monthly income of workers in the colony. Each person spends 1" +
@@ -311,7 +303,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows how many workers are currently employed compared to the colony's total labor capacity.",
@@ -374,7 +365,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Overall health of the population. A higher value indicates better living conditions, food availability, and lower hazard exposure.", pad);
                 
@@ -415,7 +405,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and social cohesion.", opad);
 
@@ -456,7 +445,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Degree of social cohesion within the population. High cohesion reduces conflict and increases stability.", opad);
 
@@ -497,7 +485,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The population's awareness of exploitation and social hierarchy. Higher values indicate a greater likelihood of collective action. " +
@@ -584,8 +571,6 @@ public class ManagePopulationDialog extends DialogPanel {
     private final PositionAPI buildPoster(UIPanelAPI cont, MarketPolicy policy,
         PlayerMarketData mData, ClickHandler<ListenerProviderPanel> listener, int width, int height
     ) {
-        final SettingsAPI settings = Global.getSettings();
-        
         try {
             settings.loadTexture(policy.spec.posterPath);
         } catch (Exception e) {
@@ -601,40 +586,39 @@ public class ManagePopulationDialog extends DialogPanel {
         ) {
             @Override
             public void createPanel() {
-                if (!policy.isOnCooldown()) return;
-
-                final float cooledRatio = (float) policy.cooldownDaysRemaining/policy.spec.cooldownDays;
-                final ArrayList<PieSlice> data = new ArrayList<>(
-                    List.of(
-                        new PieSlice(null, gray, cooledRatio),
-                        new PieSlice(null, Color.ORANGE, 1f - cooledRatio)
-                    )
-                );
-                final int clockD = 30;
-                final PieChart cooldownClock = new PieChart(
-                    getPanel(), clockD, clockD, data
-                );
-
-                add(cooldownClock).inBL(
-                    (width - clockD) / 2f,
-                    (height - clockD) / 2f
-                );
+                if (policy.isOnCooldown()) {
+                    final float cooledRatio = (float) policy.cooldownDaysRemaining/policy.spec.cooldownDays;
+                    final ArrayList<PieSlice> data = new ArrayList<>(
+                        List.of(
+                            new PieSlice(null, gray, cooledRatio),
+                            new PieSlice(null, Color.ORANGE, 1f - cooledRatio)
+                        )
+                    );
+                    final int clockD = 30;
+                    final PieChart cooldownClock = new PieChart(
+                        m_panel, clockD, clockD, data
+                    );
+    
+                    add(cooldownClock).inBL(
+                        (width - clockD) / 2f,
+                        (height - clockD) / 2f
+                    );
+                }
             }
 
             {
                 context.target = Context.DIALOG;
                 outline.color = Color.ORANGE;
+                outline.enabled = policy.isActive();
 
                 glow.type = GlowType.ADDITIVE;
                 glow.additiveSprite = m_sprite;
 
-                tooltip.parent = ManagePopulationDialog.this.m_panel;
                 tooltip.builder = (tp, exp) -> policy.createTooltip(mData, tp);
 
                 createPanel();
             }
         };
-        poster.outline.enabled = policy.isActive();
 
         posterWrap.add(poster).inBL(0, 0);
         return cont.addComponent(posterWrap.getPanel());
@@ -643,7 +627,6 @@ public class ManagePopulationDialog extends DialogPanel {
     private final void buildSelectedPosterMenu(UIPanelAPI cont,
         MarketPolicy policy, PlayerMarketData mData, CallbackRunnable<Button> activateRun
     ) {
-        final SettingsAPI settings = Global.getSettings();
         final int posterW = 163;
         final int buttonW = 140;
         final int buttonH = 30;
@@ -684,7 +667,6 @@ public class ManagePopulationDialog extends DialogPanel {
             activateButton.setEnabled(false);
 
             activateButton.setShowTooltipWhileInactive(true);
-            activateButton.tooltip.parent = ManagePopulationDialog.this.m_panel;
             activateButton.tooltip.builder = (tp, exp) -> {
                 tp.addPara("Not enough market credits to activate this policy", pad);
             };

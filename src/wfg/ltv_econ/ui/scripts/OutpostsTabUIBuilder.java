@@ -77,7 +77,7 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         if (!UiInjected) {
             addEconomyButton();
             updateColoniesPanel();
-            addShowPopStatsButton();
+            addColonyInfoButtons();
             UiInjected = true;
         }
 
@@ -145,7 +145,7 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         outpostsTab.addComponent(overviewPanel.getPanel()).inTL(0, 20);
     }
 
-    private final void addShowPopStatsButton() {
+    private final void addColonyInfoButtons() {
         final OutpostListPanel panel = (OutpostListPanel) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getColoniesPanel", outpostsTab);
 

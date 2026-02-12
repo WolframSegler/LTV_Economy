@@ -39,16 +39,13 @@ import static wfg.native_ui.util.UIConstants.*;
 
 public class TooltipUtils {
 
-    public final static String TP_ARROW_PATH = Global.getSettings()
-        .getSpriteName("ui", "cargoTooltipArrow");
-    public final static String STOCKPILES_FULL_PATH = Global.getSettings()
-        .getSpriteName("icons", "stockpiles_full");
-    public final static String STOCKPILES_MEDIUM_PATH = Global.getSettings()
-        .getSpriteName("icons", "stockpiles_medium");
-    public final static String STOCKPILES_LOW_PATH = Global.getSettings()
-        .getSpriteName("icons", "stockpiles_low");
-    public final static String STOCKPILES_EMPTY_PATH = Global.getSettings()
-        .getSpriteName("icons", "stockpiles_empty");
+    public static final SettingsAPI settings = Global.getSettings();
+    public static final String TP_ARROW_PATH = settings.getSpriteName("ui", "cargoTooltipArrow");
+    public static final String STOCKPILES_FULL_PATH = settings.getSpriteName("icons", "stockpiles_full");
+    public static final String STOCKPILES_MEDIUM_PATH = settings.getSpriteName("icons", "stockpiles_medium");
+    public static final String STOCKPILES_LOW_PATH = settings.getSpriteName("icons", "stockpiles_low");
+    public static final String STOCKPILES_EMPTY_PATH = settings.getSpriteName("icons", "stockpiles_empty");
+    public static final String STOCKPILES_NO_DEMAND_PATH = settings.getSpriteName("icons", "stockpiles_no_demand");
 
     /**
      * Literally copied this from com.fs.starfarer.ui.impl.CargoTooltipFactory.
@@ -279,7 +276,6 @@ public class TooltipUtils {
     }
 
     public static final void createCommodityProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
-        final SettingsAPI settings = Global.getSettings();
         tp.setParaFontDefault();
         final LabelAPI title = tp.addPara("Available: %s", pad, highlight,
             NumFormat.engNotation((long)cell.getFlowAvailable()));
@@ -374,7 +370,6 @@ public class TooltipUtils {
     }
 
     public static final void createCommodityDemandBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
-        final SettingsAPI settings = Global.getSettings();
         final Color valueColor = cell.getFlowDeficit() > 0 ? negative : highlight;
         final int gridWidth = 430;
         final int valueWidth = 50;
@@ -471,20 +466,25 @@ public class TooltipUtils {
         final UIPanelAPI parent, final FactionSpecAPI faction, final boolean addRatioColors
     ) {
         final Color color = getStockpileColor(ratio, faction, addRatioColors);
-        return getStockpilesIcon(ratio, size, parent, color, null, false);
+        return getStockpilesIcon(ratio, size, parent, color, null, false, false);
     }
 
-    public static final Base getStockpilesIcon(final float ratio, final int size,
+    public static final Base getStockpilesIcon(final CommodityCell cell, final int size,
         final UIPanelAPI parent, final Color iconColor
     ) {
-        return getStockpilesIcon(ratio, size, parent, iconColor, null, false);
+        return getStockpilesIcon(cell.getDesiredAvailabilityRatio(), size, parent, iconColor,
+            null, false, cell.getBaseDemand(true) < 0.1f
+        );
     }
 
     public static final Base getStockpilesIcon(final float ratio, final int size,
-        final UIPanelAPI parent, final Color iconColor, final Color bgColor, final boolean drawBorder
+        final UIPanelAPI parent, final Color iconColor, final Color bgColor, final boolean drawBorder,
+        final boolean useNoDemandIcon
     ) {
         final String iconPath;
-        if (ratio <= 0.25f) {
+        if (useNoDemandIcon) {
+            iconPath = STOCKPILES_NO_DEMAND_PATH;
+        } else if (ratio <= 0.25f) {
             iconPath = STOCKPILES_EMPTY_PATH;
         } else if (ratio <= 0.5f) {
             iconPath = STOCKPILES_LOW_PATH;

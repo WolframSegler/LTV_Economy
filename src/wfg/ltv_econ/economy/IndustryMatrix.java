@@ -18,6 +18,7 @@ import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class IndustryMatrix {
+    private static final SettingsAPI settings = Global.getSettings();
     private static double[][] STATIC_MATRIX;
     private static List<String> STATIC_WORKER_COMMODITIES;
     private static List<String> STATIC_INDUSTRY_OUTPUT_PAIRS;
@@ -53,7 +54,6 @@ public class IndustryMatrix {
     private static final void buildMatrix() {
         final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
         final Map<String, Map<String, Map<String, Float>>> baseInputs = IndustryIOs.getBaseInputsMap();
-        final SettingsAPI settings = Global.getSettings();
 
         final List<String> commodities = getWorkerRelatedCommodityIDs();
 
@@ -119,7 +119,6 @@ public class IndustryMatrix {
     }
 
     private static final void buildWorkerRelatedCommodityIDs() {
-        final SettingsAPI settings = Global.getSettings();
         final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
 
         STATIC_WORKER_COMMODITIES = EconomyInfo.getEconCommodityIDs();

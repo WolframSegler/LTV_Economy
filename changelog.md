@@ -1,3 +1,10 @@
+v0.2.7-beta | SAVE COMPATIBLE
+- Added a new policy reducing drugs demand
+- Rebalanced the policies a bit
+- Added a new event
+- Fixed the price function
+- Added a new stockpile icon to indicate no demand
+
 v0.2.6-beta | NOT SAVE COMPATIBLE
 - Added LunaLib settings support
 - Added a table to the command tab colonies section to show faction controlled resources.

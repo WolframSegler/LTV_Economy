@@ -1,6 +1,7 @@
 package wfg.ltv_econ.ui.panels;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -41,7 +42,8 @@ import static wfg.native_ui.util.UIConstants.*;
 public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
     HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction
 {
-    private static final String EXPORTS_ICON_PATH = Global.getSettings().getSpriteName(
+    private static final SettingsAPI settings = Global.getSettings();
+    private static final String EXPORTS_ICON_PATH = settings.getSpriteName(
         "commodity_markers", "exports");
 
     private static final int iconSize = 26;
@@ -63,18 +65,17 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         super(parent, width, height);
 
         m_cell = EconomyEngine.getInstance().getComCell(comID, market.getId());
-        m_com = Global.getSettings().getCommoditySpec(comID);
+        m_com = settings.getCommoditySpec(comID);
         m_market = market;
 
         glow.color = base;
         glow.type = GlowType.UNDERLAY;
 
         tooltip.width = 500f;
-        tooltip.parent = parent;
         tooltip.expandable = true;
         tooltip.builder = (tp, expanded) -> {
             final EconomyEngine engine = EconomyEngine.getInstance();
-            final String comDesc = Global.getSettings().getDescription(comID, Type.RESOURCE).getText1();
+            final String comDesc = settings.getDescription(comID, Type.RESOURCE).getText1();
 
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.addPara(m_com.getName(), m_market.getFaction().getBaseUIColor(), pad);
@@ -192,7 +193,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             null, null);
         add(comIcon).inBL(2f, 0f);
 
-        final LabelAPI amountLbl = Global.getSettings().createLabel(NumFormat.engNotation(
+        final LabelAPI amountLbl = settings.createLabel(NumFormat.engNotation(
             (int)m_cell.getFlowAvailable()) + Strings.X, Fonts.INSIGNIA_LARGE
         );
         amountLbl.autoSizeToWidth(textWidth);
@@ -200,7 +201,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         amountLbl.setColor(m_market.getFaction().getBaseUIColor());
         add(amountLbl).inBL(pad*2 + rowHeight, (rowHeight - textHeight) / 2f);
 
-        final Base stockIcon = TooltipUtils.getStockpilesIcon(m_cell.getDesiredAvailabilityRatio(),
+        final Base stockIcon = TooltipUtils.getStockpilesIcon(m_cell,
             iconSize, m_panel, base
         );
         add(stockIcon).inBL(pad*3 + rowHeight + textWidth, (rowHeight - iconSize) / 2f);

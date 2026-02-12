@@ -116,7 +116,7 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
                 table.pushRow(null, null, null, null, null, null);
             }
         } else {
-            final LabelAPI lbl = Global.getSettings().createLabel("No colonies", Fonts.DEFAULT_SMALL);
+            final LabelAPI lbl = settings.createLabel("No colonies", Fonts.DEFAULT_SMALL);
             lbl.setColor(base);
             table.add(lbl).inMid();
         }

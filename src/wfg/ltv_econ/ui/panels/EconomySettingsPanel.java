@@ -64,7 +64,6 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             add(button).inTL(opad, SECTION_I + lblH + pad*2);
 
             button.tooltip.width = 400f;
-            button.tooltip.parent = m_panel;
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Synchronizes EconomyEngine markets with vanilla Economy markets. ", pad);
             };
@@ -81,7 +80,6 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             );
             add(button).inTL(opad, SECTION_I + pad*4 + lblH + BUTTON_H);
 
-            button.tooltip.parent = m_panel;
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Recreates the production matrix, and recalculates worker assignments", pad);
             };
@@ -100,7 +98,6 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             );
             add(button).inTL(opad, SECTION_I + pad*6 + lblH + BUTTON_H*2);
 
-            button.tooltip.parent = m_panel;
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs all the information about the CommodityCell for each cell", pad);
             };
@@ -116,7 +113,6 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             );
             add(button).inTL(opad, SECTION_I + pad*8 + lblH + BUTTON_H*3);
 
-            button.tooltip.parent = m_panel;
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs all the information about the Economy", pad);
             };
@@ -130,7 +126,6 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
                 "Log Player Market Data", Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
-            button.tooltip.parent = m_panel;
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs all player market data's", pad);
             };
@@ -145,7 +140,6 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             );
             add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
 
-            button.tooltip.parent = m_panel;
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs the maps used by IndustryIOs to manage industry inputs and outputs", pad);
             };

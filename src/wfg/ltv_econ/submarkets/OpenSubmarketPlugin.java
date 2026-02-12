@@ -156,7 +156,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 	public static float getBaseStockpileLimit(CommodityOnMarketAPI com, String marketID) {
 		if (!EconomyEngine.isInitialized()) {
-			return (int) OpenMarketPlugin.getBaseStockpileLimit(com);
+			return OpenMarketPlugin.getBaseStockpileLimit(com);
 		}
 		return getBaseStockpileLimit(com.getId(), marketID);
 	}
@@ -166,7 +166,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
             comID, marketID
         );
 
-		final float base = Math.max(cell.getFlowAvailable(), cell.getBaseDemand(true));
+		final float base = Math.max(1f,Math.max(cell.getFlowAvailable(), cell.getBaseDemand(true)));
 
 		final float impRatio = cell.getTotalImports(true) / base;
 		final float prodRatio = cell.getProduction(true) / base;
@@ -188,8 +188,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 		if (scale < STOCKPILE_SCALE_MIN) scale = STOCKPILE_SCALE_MIN;
 		if (scale > STOCKPILE_SCALE_MAX) scale = STOCKPILE_SCALE_MAX;
 
-		final float finalLimit = Math.max(0f, baseLinear * scale);
-		return (int) Math.min(finalLimit, cell.getStored() * CommodityCell.MAX_SUBMARKET_STOCK_MULT);
+		return (int) Math.max(0f, baseLinear * scale);
 	}
 	
     @Override
