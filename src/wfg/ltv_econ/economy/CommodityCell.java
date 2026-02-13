@@ -307,6 +307,7 @@ public class CommodityCell {
     public final float getUnitPrice(PriceType type, int amount) {
         return getUnitPrice(type, amount, stored, spec.getBasePrice(), getPreferredStockpile());
     }
+    
     private static final float INHERENT_DEMAND = 4f;
     private static final float SHIFT_FRACTION = 0.001f;
     private static final float epsilon = 1e-3f;

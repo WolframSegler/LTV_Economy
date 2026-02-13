@@ -11,7 +11,7 @@
     "RoVC_consumer": 0.2,
     "RoVC_manufacture": 0.35,
     "RoVC_service": 0.4,
-    "RoVC_agriculture": 0.15,
+    "RoVC_agriculture": 0.25,
     "RoVC_mechanized": 0.1,
     "RoVC_manual": 0.5,
     "RoVC_space": 0.3,

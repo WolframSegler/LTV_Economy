@@ -36,7 +36,7 @@ public class PlayerMarketData {
     public final StatBonus classConsciousnessDelta = new StatBonus();
 
     public static final float BASELINE_VALUE = 50f;
-    public static final float RoSV_Equalibrium = 1.5f;
+    public static final float RoSV_Equalibrium = 1.3f;
     public static final String healthID = "health";
     public static final String happinessID = "happiness";
     public static final String socialCohesionID = "cohesion";

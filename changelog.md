@@ -4,6 +4,7 @@ v0.2.7-beta | SAVE COMPATIBLE
 - Added a new event
 - Fixed the price function
 - Added a new stockpile icon to indicate no demand
+- Farming is now more labor intensive
 
 v0.2.6-beta | NOT SAVE COMPATIBLE
 - Added LunaLib settings support

@@ -10,7 +10,7 @@ labor_RoVC_industry,RoCV Heavy Industries,Double,0.04,,Used by heavy industry an
 labor_RoVC_consumer,RoCV Light Industry,Double,0.2,,,0.0,1.0,Labor
 labor_RoVC_manufacture,RoCV Manufacturing,Double,0.35,,,0.0,1.0,Labor
 labor_RoVC_service,RoCV Service Sector,Double,0.4,,,0.0,1.0,Labor
-labor_RoVC_agriculture,RoCV Agriculture,Double,0.15,,,0.0,1.0,Labor
+labor_RoVC_agriculture,RoCV Agriculture,Double,0.25,,,0.0,1.0,Labor
 labor_RoVC_mechanized,RoCV Mechanized Industries,Double,0.1,,Used by mining and fuel production.,0.0,1.0,Labor
 labor_RoVC_manual,RoCV Manual Professions,Double,0.5,,,0.0,1.0,Labor
 labor_RoVC_space,RoCV Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
@@ -20,7 +20,7 @@ economy_generalHeader,General Settings,Header,General Settings,,,,,Economy
 economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread,,,Economy
 economy_startingCredits,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
 economy_solverHeader,Worker Allocation Settings,Header,Worker Allocation Settings,,,,,Economy
-economy_concentrationCost,Concentration Penalty,Double,20,,Higher values result in a more even spread of workers.,0,500,Economy
+economy_concentrationCost,Concentration Penalty,Double,22,,Higher values result in a more even spread of workers.,0,500,Economy
 economy_deficitCost,Deficit Penalty,Double,4000,,Higher values encourage more demand fulfillment.,0,10000,Economy
 economy_minWorkerFraction,Minimum Worker Fraction,Double,0.1,,The minimum fraction of the fair share of workers for each output to be enforced,0,1,Economy
 economy_prodBuffer,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Economy
