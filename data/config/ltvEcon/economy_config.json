@@ -2,6 +2,7 @@
     "MULTI_THREADING": true,
 
     "STARTING_CREDITS_FOR_MARKET": 50000,
+    "OPEN_MARKET_TO_STOCKPILES_RATIO": 0.4,
 
     "DEBT_DEBUFF_TIERS": [
         {
@@ -35,13 +36,25 @@
             "immigrationModifier": -25
         }
     ],
+
+    "MANUFACTURING_EXCLUSION_LIST": [
+        "epiphany",
+        "arcadia_station",
+        "cruor",
+        "gilead",
+        "tartessus",
+        "station_kapteyn",
+        "chalcedon",
+        "sphinx",
+        "qaras"
+    ],
     
-    "CONCENTRATION_COST": 22,
-    "ECON_DEFICIT_COST": 4000,
+    "CONCENTRATION_COST": 35,
+    "ECON_DEFICIT_COST": 5000,
     "WORKER_ASSIGN_INTERVAL": 15,
     "PRODUCTION_BUFFER": 0.05,
     "ECON_ALLOCATION_PASSES": 3,
-    "MIN_WORKER_FRACTION": 0.1,
+    "MIN_WORKER_FRACTION": 0.3,
 
     "DAYS_TO_COVER": 30,
     "DAYS_TO_COVER_PER_IMPORT": 2,

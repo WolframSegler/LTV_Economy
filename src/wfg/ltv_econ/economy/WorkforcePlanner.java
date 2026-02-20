@@ -35,7 +35,6 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 
 public class WorkforcePlanner {
-
     private static final Logger logger = Global.getLogger(WorkforcePlanner.class);
 
     public static final double WORKER_COST = 1;
@@ -205,7 +204,7 @@ public class WorkforcePlanner {
         // Market capacities
         for (int m = 0; m < numMarkets; m++) {
             final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(markets.get(m));
-            baseCapacities[m] = (pool != null) ? pool.getWorkerPool() : 0;
+            baseCapacities[m] = (pool != null) ? pool.getWorkerPool() : 0l;
         }
 
         // Weight sums per output (only over markets that can produce it)
@@ -258,7 +257,7 @@ public class WorkforcePlanner {
         final Function<Integer,Integer> idxTotalW = o -> idxTotalWorkersStart + o;
         final BiFunction<Integer, Integer, Integer> idxW = (m, o) -> m * numOutputs + o;
 
-        // 2) OBJECTIVE: minimize SLACK_COST * sum(slack[c]) + WORKER_COST * sum(w)
+        // 2) OBJECTIVE: minimize DEFICIT_COST * sum(slack[c]) + WORKER_COST * sum(w) + CONCENTRATION_COST * sum(spread)
         final double[] objective = new double[nVars];
 
         for (int o = 0; o < numOutputs; o++) {
@@ -305,6 +304,7 @@ public class WorkforcePlanner {
             }
         }
 
+        // TODO fix fair spread causing deficits even though there are enough workers to go around.
         // 5) Spreading assignments across markets
         for (int o = 0; o < numOutputs; o++) {
             if (weightSum[o] <= 0) continue;
@@ -318,7 +318,7 @@ public class WorkforcePlanner {
                 final double[] coeffs = new double[nVars];
                 coeffs[idxW.apply(m, o)] = 1.0;
                 coeffs[idxSpread.apply(o)] = 1.0;
-                coeffs[idxTotalW.apply(o)] = -proportion;                
+                coeffs[idxTotalW.apply(o)] = -proportion;    
                 const_constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, tokenRatio));
             }
         }
@@ -437,8 +437,8 @@ public class WorkforcePlanner {
             }
 
             final SimplexSolver solver = new SimplexSolver();
-            PointValuePair solution = solver.optimize(
-                new MaxIter(10000), f,
+            final PointValuePair solution = solver.optimize(
+                new MaxIter(100000), f,
                 new LinearConstraintSet(constraints),
                 GoalType.MINIMIZE,
                 new NonNegativeConstraint(true),

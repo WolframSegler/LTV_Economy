@@ -51,11 +51,12 @@ public class EconomyConfigLoader {
         EconomyConfig.ECON_ALLOCATION_PASSES = root.getInt("ECON_ALLOCATION_PASSES");
         EconomyConfig.MIN_WORKER_FRACTION = (float) root.getDouble("MIN_WORKER_FRACTION");
         EconomyConfig.PRODUCTION_HOLD_FACTOR = (float) root.getDouble("PRODUCTION_HOLD_FACTOR");
+        EconomyConfig.OPEN_MARKET_TO_STOCKPILES_RATIO = (float) root.getDouble("OPEN_MARKET_TO_STOCKPILES_RATIO");
 
-        final JSONArray arr = root.getJSONArray("DEBT_DEBUFF_TIERS");
-        EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>();
-        for (int i = 0; i < arr.length(); i++) {
-            final JSONObject o = arr.getJSONObject(i);
+        final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
+        EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
+        for (int i = 0; i < debtArr.length(); i++) {
+            final JSONObject o = debtArr.getJSONObject(i);
             EconomyConfig.DEBT_DEBUFF_TIERS.add(
                 new DebtDebuffTier(
                     (long) o.getDouble("threshold"),
@@ -64,6 +65,12 @@ public class EconomyConfigLoader {
                     o.getInt("immigrationModifier")
                 )
             );
+        }
+
+        final JSONArray exclusionArr = root.getJSONArray("MANUFACTURING_EXCLUSION_LIST");
+        EconomyConfig.MANUFACTURING_EXCLUSION_LIST = new ArrayList<>(exclusionArr.length());
+        for (int i = 0; i < exclusionArr.length(); i++) {
+            EconomyConfig.MANUFACTURING_EXCLUSION_LIST.add(exclusionArr.getString(i));
         }
 
         if (Global.getSettings().getModManager().isModEnabled(LUNA_LIB)) {
@@ -148,6 +155,11 @@ public class EconomyConfigLoader {
         public static List<DebtDebuffTier> DEBT_DEBUFF_TIERS;
 
         /**
+         * 
+         */
+        public static List<String> MANUFACTURING_EXCLUSION_LIST;
+
+        /**
          * Multiplier applied to preferredStockpiles to determine the minimum stock level
          * a market must exceed before it is allowed to export this commodity.
          */
@@ -177,6 +189,11 @@ public class EconomyConfigLoader {
          * Multiplier controlling daily production retained in local stockpiles before exporting.
          */
         public static float PRODUCTION_HOLD_FACTOR;
+
+        /**
+         * The ratio of goods sold to the open market that finds its way to the market stockpiles
+         */
+        public static float OPEN_MARKET_TO_STOCKPILES_RATIO;
 
         static {
             EconomyConfigLoader.loadConfig();

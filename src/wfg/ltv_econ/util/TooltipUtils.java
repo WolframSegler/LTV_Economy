@@ -95,7 +95,7 @@ public class TooltipUtils {
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
 
                 tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[] {
-                    "Price", 100, "Demand", 70, "Deficit", 70, "Location", 230,
+                    "Price", 100, "Desired", 70, "Deficit", 70, "Location", 230,
                     "Star system", 140, "Dist (ly)", 80
                 });
                 countingMap.clear();
@@ -106,23 +106,15 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) >= 3) continue;
                     countingMap.add(market.getFactionId());
 
-                    final float deficit = cell.getFlowDeficit();
-                    Color labelColor = highlight;
-                    Color deficitColor = gray;
-                    String quantityLabel = "---";
-                    if (deficit > 0) {
-                        quantityLabel = NumFormat.engNotation((long)deficit);
-                        deficitColor = negative;
-                    }
+                    final int desired = (int) ((cell.getPreferredStockpile() / 100f) * 100f);
+                    final boolean lowDemand = desired < 100;
+                    final String lessThanSymbol = lowDemand ? "<" : "";
+                    final Color labelColor = lowDemand ? gray : highlight;
 
-                    String lessThanSymbol = "";
-                    long marketDemand = (long) cell.getStoredDeficit();
-                    marketDemand = (marketDemand / 100) * 100;
-                    if (marketDemand < 100) {
-                        marketDemand = 100;
-                        lessThanSymbol = "<";
-                        labelColor = gray;
-                    }
+                    final double deficit = cell.getStoredDeficit();
+                    final boolean deficitPresent = deficit > 10.0;
+                    final Color deficitColor = deficitPresent ? negative : gray;
+                    final String quantityLabel = deficitPresent ? NumFormat.engNotation(deficit) : "---";
 
                     final String factionName = market.getFaction().getDisplayName();
                     String location = "In hyperspace";
@@ -130,18 +122,17 @@ public class TooltipUtils {
                     if (market.getStarSystem() != null) {
                         final StarSystemAPI starSystem = market.getStarSystem();
                         location = starSystem.getBaseName();
-                        final PlanetAPI star = starSystem.getStar();
-                        locationColor = star.getSpec().getIconColor();
+                        locationColor = starSystem.getStar().getSpec().getIconColor();
                         locationColor = Misc.setBrightness(locationColor, 235);
                     }
 
                     final float distanceToPlayer = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
 
-                    tp.addRow(new Object[] {
+                    tp.addRow(
                         highlight,
                         Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, true, true) / econUnit),
                         labelColor,
-                        lessThanSymbol + NumFormat.engNotation(marketDemand),
+                        lessThanSymbol + NumFormat.engNotation(desired),
                         deficitColor,
                         quantityLabel,
                         Alignment.LMID,
@@ -151,7 +142,7 @@ public class TooltipUtils {
                         location,
                         highlight,
                         Misc.getRoundedValueMaxOneAfterDecimal(distanceToPlayer)
-                    });
+                    );
 
                     final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW_PATH, null, null);
 
@@ -181,7 +172,7 @@ public class TooltipUtils {
                 final PositionAPI prevPos = tp.getPrev().getPosition();
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
                 tp.beginTable(Global.getSector().getPlayerFaction(), 20, new java.lang.Object[] {
-                    "Price", 100, "Available", 70, "Excess", 70, "Location", 230,
+                    "Price", 100, "Stored", 70, "Excess", 70, "Location", 230,
                     "Star system", 140, "Dist (ly)", 80 
                 });
                 countingMap.clear();
@@ -191,24 +182,14 @@ public class TooltipUtils {
                     final MarketAPI market = cell.market;
                     if (countingMap.getCount(market.getFactionId()) >= 3) continue;
                     countingMap.add(market.getFactionId());
-                    long available = cell.getRoundedStored();
-                    available += market.getCommodityData(comID).getPlayerTradeNetQuantity();
-                    if (available < 0) available = 0;
 
-                    long excess = (long) cell.getStoredExcess();
-                    Color excessColor = gray;
-                    String excessStr = "---";
-                    if (excess > 0) {
-                        excessStr = NumFormat.engNotation(excess);
-                        excessColor = positive;
-                    }
+                    final long available = Math.max(0l, cell.getRoundedStored() +
+                        market.getCommodityData(comID).getPlayerTradeNetQuantity());
+                    final long availableValue = Math.max((available / 100) * 100, 100l);
+                    final String availableStr = available < 100l ? "<" : "";
 
-                    String availableStr = "";
-                    available = available / 100 * 100;
-                    if (available < 100) {
-                        available = 100;
-                        availableStr = "<";
-                    }
+                    final long excess = (long) cell.getStoredExcess();
+                    final boolean hasExcess = excess > 10l;
 
                     final String factionName = market.getFaction().getDisplayName();
                     String location = "In hyperspace";
@@ -223,13 +204,13 @@ public class TooltipUtils {
 
                     final float distance = Misc.getDistanceToPlayerLY(market.getPrimaryEntity());
 
-                    tp.addRow(new java.lang.Object[] {
+                    tp.addRow(
                         highlight,
                         Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, false, true) / econUnit),
                         highlight,
-                        availableStr + NumFormat.engNotation(available),
-                        excessColor,
-                        excessStr,
+                        availableStr + NumFormat.engNotation(availableValue),
+                        hasExcess ? positive : gray,
+                        hasExcess ? NumFormat.engNotation(excess) : "---",
                         Alignment.LMID,
                         market.getFaction().getBaseUIColor(),
                         market.getName() + " - " + factionName,
@@ -237,7 +218,7 @@ public class TooltipUtils {
                         location,
                         highlight,
                         Misc.getRoundedValueMaxOneAfterDecimal(distance)
-                    });
+                    );
 
                     final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW_PATH, null, null);
 

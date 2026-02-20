@@ -10,6 +10,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.WorkerRegistry;
@@ -77,19 +78,20 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             if (market.getSize() < 4 || market.isPlayerOwned()) continue;
             if (market.getPlanetEntity() == null || market.getPlanetEntity().isGasGiant()) continue;
 
+            if (EconomyConfig.MANUFACTURING_EXCLUSION_LIST.contains(market.getId())) continue;
+
             boolean hasRequiredIndustry = false;
             for (Industry ind : market.getIndustries()) {
                 if (ind.getId().equals(Industries.HEAVYINDUSTRY) ||
                     ind.getId().equals(Industries.LIGHTINDUSTRY) ||
-                    ind.getId().equals(Industries.ORBITALWORKS) ||
-                    ind.getId().equals(Industries.REFINING)
+                    ind.getId().equals(Industries.ORBITALWORKS)
                 ) {
                     hasRequiredIndustry = true;
                     break;
                 }
             }
             if (!hasRequiredIndustry) continue;
-            if (Misc.getNumIndustries(market) >= Misc.getMaxIndustries(market)) continue;
+            if (Misc.getNumIndustries(market) >= Misc.getMaxIndustries(market) - 1) continue;
 
             market.addIndustry("manufacturing");
         }

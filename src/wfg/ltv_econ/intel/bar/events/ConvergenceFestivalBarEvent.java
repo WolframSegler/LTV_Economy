@@ -115,6 +115,8 @@ public class ConvergenceFestivalBarEvent extends BaseBarEventWithPerson {
                 "You tell him quietly: \"Choosing to join the events is voluntary, but once in, you must fulfill your duty. Otherwise, the whole festival would crumble.\""
             );
 
+            // TODO add custom audio here while muffling the bar chatter audio
+
             final CustomRepImpact impact = new CoreReputationPlugin.CustomRepImpact();
             impact.delta = -RepRewards.HIGH;
 

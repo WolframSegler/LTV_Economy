@@ -8,6 +8,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -21,9 +22,11 @@ import wfg.ltv_econ.ui.dialogs.ManagePopulationDialog;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.BackgroundComp;
 import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.SortableTable;
+import wfg.native_ui.ui.panels.SortableTable.RowPanel;
 import wfg.native_ui.ui.panels.SortableTable.cellAlg;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
@@ -80,13 +83,14 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
             for (PlayerMarketData data : engine.getPlayerMarketData().values()) {
                 final UIPanelAPI namePanel = settings.createCustom(nameW, rowH, null);
                 final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(nameW, false);
-                final SectorEntityToken entity = data.market.getPrimaryEntity();
+                final MarketAPI market = data.market;
+                final SectorEntityToken entity = market.getPrimaryEntity();
     
                 if (entity instanceof PlanetAPI) {
-                    nameTp.showPlanetInfo(data.market.getPlanetEntity(), nameW, rowH, params, 0f);
+                    nameTp.showPlanetInfo(market.getPlanetEntity(), nameW, rowH, params, 0f);
                 } else {
                     nameTp.addImage(entity.getCustomEntitySpec().getIconName(), nameW, rowH, 0f);
-                    final LabelAPI lbl = nameTp.addPara(data.market.getName(), 0f);
+                    final LabelAPI lbl = nameTp.addPara(market.getName(), 0f);
                     lbl.autoSizeToWidth(nameW).inBL(0f, pad);
                     lbl.setAlignment(Alignment.MID);
                 }
@@ -101,8 +105,8 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
     
                 final Color creditColor = credits < 0l ? negative : highlight;
 
-                table.addCell(namePanel, cellAlg.LEFT, data.market.getDaysInExistence(), null);
-                table.addCell(data.market.getSize(), cellAlg.MID, null, null);
+                table.addCell(namePanel, cellAlg.LEFT, market.getDaysInExistence(), null);
+                table.addCell(market.getSize(), cellAlg.MID, null, null);
                 table.addCell(health, cellAlg.LEFTOPAD, null, null);
                 table.addCell((int) data.getHealth(), cellAlg.MID, null, null);
                 table.addCell(happiness, cellAlg.LEFTOPAD, null, null);
@@ -112,8 +116,13 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
                 table.addCell(consciousness, cellAlg.LEFTOPAD, null, null);
                 table.addCell((int) data.getClassConsciousness(), cellAlg.MID, null, null);
                 table.addCell(NumFormat.formatCredit(credits), cellAlg.MID, credits, creditColor);
+
+                final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
+                    final ManagePopulationDialog dialogPanel = new ManagePopulationDialog(market);
+                    dialogPanel.show(0.3f, 0.3f);
+                };
     
-                table.pushRow(null, null, null, null, null, null);
+                table.pushRow(null, null, run, null, null, null);
             }
         } else {
             final LabelAPI lbl = settings.createLabel("No colonies", Fonts.DEFAULT_SMALL);

@@ -195,7 +195,7 @@ public class EconomyLoop {
 
                 for (String outputID : IndustryIOs.getIndConfig(ind).outputs.keySet()) {
                     if (!CompatLayer.hasRelevantCondition(outputID, market)) continue;
-                    if (!IndustryIOs.isOutputValidForMarket(config.outputs.get(outputID), ind, outputID)) continue;
+                    if (!IndustryIOs.isOutputValidForMarket(config.outputs.get(outputID), config, ind)) continue;
 
                     final int idx = indOutputPairToColumn.getOrDefault(indID + KEY + outputID, -1);
                     if (idx != -1) outputIndexes.add(idx);

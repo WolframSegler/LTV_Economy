@@ -4,6 +4,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -101,7 +102,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     @Override
     public boolean showIcon() {
-        return true;
+        return market.isPlayerOwned() || DebugFlags.COLONY_DEBUG;
     }
 
     public static final float getWorkerRatio(int size) {

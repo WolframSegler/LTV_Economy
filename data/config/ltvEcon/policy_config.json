@@ -98,7 +98,7 @@
       "cost": 3e4,
       "durationDays": 60,
       "cooldownDays": 360,
-      "description": "The colony administration, in consultation with Tri-Tachyon advisors, has developed a new beverage: Bres Vitalis. Marketed as a revitalizing tonic, it subtly incorporates additives that lift morale and stimulate productivity, while leaving health effects largely unnoticed and avoiding scrutiny from factions or rival interests."
+      "description": "The colony administration, in consultation with Tri-Tachyon advisors, has developed a new beverage: Bres Vitalis. Marketed as a revitalizing tonic, it incorporates additives that lift morale and stimulate productivity, while leaving health effects largely unnoticed and avoiding scrutiny from other factions."
     },
     {
       "id": "wellness_compliance_directive",

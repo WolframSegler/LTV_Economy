@@ -5,7 +5,9 @@ import static wfg.native_ui.util.UIConstants.negative;
 import java.util.Random;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CampaignUIAPI.CoreUITradeMode;
+import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CoreUIAPI;
 import com.fs.starfarer.api.campaign.FactionAPI.ShipPickMode;
 import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
@@ -18,6 +20,7 @@ import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
 import com.fs.starfarer.api.util.Highlights;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
@@ -194,11 +197,23 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
     @Override
     public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
 		super.reportPlayerMarketTransaction(transaction);
-        if (getTariff() <= 0f) return;
+		final SettingsAPI settings = Global.getSettings();
+		final EconomyEngine engine = EconomyEngine.getInstance();
+		final String marketID = market.getId();
 
-        final float tariffValue = transaction.getCreditValue() * getTariff();
+        if (getTariff() > 0f) {
+			final float tariffValue = transaction.getCreditValue() * getTariff();
+			engine.addCredits(marketID, (int) Math.abs(tariffValue));
+		}
 
-        EconomyEngine.getInstance().addCredits(market.getId(), (int) Math.abs(tariffValue));
+		if (!market.isPlayerOwned()) {
+			for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
+				if (settings.getCommoditySpec(stack.getCommodityId()).isNonEcon()) continue;
+	
+				final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
+				cell.addStoredAmount(stack.getSize() * EconomyConfig.OPEN_MARKET_TO_STOCKPILES_RATIO);
+			}
+		}
     }
 
 	@Override

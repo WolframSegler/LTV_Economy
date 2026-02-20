@@ -8,30 +8,23 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
-import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
-import com.fs.starfarer.api.characters.MarketConditionSpecAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
-import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
-import com.fs.starfarer.campaign.econ.Market;
-import com.fs.starfarer.campaign.econ.MarketCondition;
 
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.util.ConfigUtils;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -50,7 +44,7 @@ public class IndustryConfigManager {
     public static final String CONFIG_NAME = "industry_config.json";
     public static final String DYNAMIC_CONFIG_PATH = "./saves/common/dynamic_industry_config.json";
     public static final String DYNAMIC_CONFIG_NAME = "dynamic_industry_config.json";
-    public static final int TEST_MARKET_SIZE = 6;
+    public static final float dynamicIndMarketScaleBase = 6f;
 
     private static JSONObject config;
     private static JSONObject dynamic_config;
@@ -152,7 +146,7 @@ public class IndustryConfigManager {
                     "workerAssignableLimit", LaborConfig.defaultWorkerCapPerOutput
                 );
                 final float marketScaleBase = (float) outputData.optDouble(
-                    "marketScaleBase", 10
+                    "marketScaleBase", 10.0
                 );
 
                 final boolean scaleWSize = outputData.optBoolean("scaleWithMarketSize", false);
@@ -349,6 +343,7 @@ public class IndustryConfigManager {
                 + "workerAssignable: " + workerAssignable + " ,\n"
                 + "occTag: " + occTag.toString() + " ,\n"
                 + "ignoreLocalStockpiles: " + ignoreLocalStockpiles + " ,\n"
+                + "dynamicConfig: " + dynamic + " ,\n"
                 + outputs.toString()
                 + '}';
         }
@@ -372,6 +367,9 @@ public class IndustryConfigManager {
         public final boolean isAbstract; // Abstract outputs have no output, only inputs.
         public final boolean checkLegality;
         public final boolean activeDuringBuilding; // will be inactive during normal operations.
+
+        private static final BooleanSupplier dynamicOutputActiveDefault = () -> true;
+        public BooleanSupplier dynamicOutputActive = dynamicOutputActiveDefault;
 
         public OutputConfig(
             String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
@@ -436,6 +434,7 @@ public class IndustryConfigManager {
                 "isAbstract=" + isAbstract + " ,\n" +
                 "checkLegality=" + checkLegality + " ,\n" +
                 "activeDuringBuilding=" + activeDuringBuilding + " ,\n" +
+                "dynamicOutputActive=" + dynamicOutputActive.getAsBoolean() + " ,\n" +
                 '}';
         }
     }
@@ -489,27 +488,13 @@ public class IndustryConfigManager {
 
         dynamic_config.clear();
 
-        final String factionID = "ltv_test";
-        final String marketID1 = "ltv_dynamic_ind_test_market1";
-        final String marketID2 = "ltv_dynamic_ind_test_market2";
-        final String testEntity = "ltv_dynamic_entity";
-        final String abstractOutput = "atLeastOneOutputForAbstractInputs";
+        final String abstractOutput = "outputForAbstractInputs";
         final SectorAPI sector = Global.getSector();
-        final MarketAPI testMarket1 = new Market(marketID1, marketID1, TEST_MARKET_SIZE, null);
-        final MarketAPI testMarket2 = new Market(marketID2, marketID2, TEST_MARKET_SIZE - 1, null);
-        final StarSystemAPI testStarSystem = sector.createStarSystem(testEntity);
-        final SectorEntityToken testPlanet = testStarSystem.addPlanet(
-            testEntity, testStarSystem.getCenter(), testEntity, "frozen", 0f, 1f, 1f, 1f
-        );
-        testMarket1.setFactionId(factionID);
-        testMarket2.setFactionId(factionID);
-        testMarket1.setPrimaryEntity(testPlanet);
-        testMarket2.setPrimaryEntity(testPlanet);
-        final FactionAPI testFaction = sector.getFaction(factionID);
+        final FactionAPI testFaction = sector.getFaction(ConfigUtils.TEST_FACTION_ID);
+        final MarketAPI testMarket1 = ConfigUtils.getTestMarket1();
+        final MarketAPI testMarket2 = ConfigUtils.getTestMarket2();
 
         final Set<String> scaleWithMarketSize = new HashSet<>(8);
-        final Map<String, Map<String, Float>> inputCache = new HashMap<>();
-        final List<String> emptyList = new ArrayList<>();
 
         // Make every commodity illegal to observe industry behaviour
         for (CommoditySpecAPI spec : settings.getAllCommoditySpecs()) {
@@ -532,259 +517,129 @@ public class IndustryConfigManager {
 
             if (ind1 == null || ind2 == null) {
                 for (Industry ind : testMarket1.getIndustries()) {
-                    if (ind.getSpec().getId().equals(indID)) ind1 = ind;
+                    if (ind.getSpec().getId().equals(indID)) {
+                        ind1 = ind; break;
+                    }
                 }
                 for (Industry ind : testMarket2.getIndustries()) {
-                    if (ind.getSpec().getId().equals(indID)) ind2 = ind;
+                    if (ind.getSpec().getId().equals(indID)) {
+                        ind2 = ind; break;
+                    }
                 }
             }
             
-            final List<String> outputs = new ArrayList<>(6);
-            final Set<String> illegalOutputs = new HashSet<>(6);
-
-            for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
-                outputs.add(mutable.getCommodityId());
-            }
-
-            testMarket1.setFreePort(true);
-            testMarket2.setFreePort(true);
-            ind1.apply();
-            ind2.apply();
-
-            for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
-                illegalOutputs.add(mutable.getCommodityId());
-            }
-            illegalOutputs.removeAll(outputs);
-
-            scaleWithMarketSize.clear();
-            for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
-                String comID = mutable.getCommodityId();
-                boolean scaleWithSize = Math.abs(ind1.getSupply(comID).getQuantity().getModifiedValue() -
-                    ind2.getSupply(comID).getQuantity().getModifiedValue()
-                ) > 0.01f;
-
-                if (scaleWithSize) scaleWithMarketSize.add(comID);
-            }
-
-            final boolean hasNoRealOutputs = outputs.isEmpty() && illegalOutputs.isEmpty();
-            final boolean usesWorkers = EconomyInfo.isWorkerAssignable(ind1) && !hasNoRealOutputs;
-            if (hasNoRealOutputs) {
-                outputs.add(abstractOutput);
-
-                Optional<MutableCommodityQuantity> firstDemand = ind1.getAllDemand().stream().findFirst();
-                if (firstDemand.isPresent()) {
-                    String comID = firstDemand.get().getCommodityId();
-                    boolean scaleWithSize = Math.abs(
-                        ind1.getDemand(comID).getQuantity().getModifiedValue() -
-                        ind2.getDemand(comID).getQuantity().getModifiedValue()
-                    ) > 0.01f;
-                    if (scaleWithSize) scaleWithMarketSize.add(abstractOutput);
-                }
-            }
-
-            // In vanilla, each output uses each input
-            final Map<String, Float> inputs = new HashMap<>(6);
-            populateInputs(ind1, inputs, scaleWithMarketSize);
-            inputCache.put(indID, new HashMap<>(inputs));
-
-            final Map<String, Float> CCMoneyDist = usesWorkers ?
-                inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, i -> 1f)) : null;
-
-            final Map<String, Float> InputsPerUnitOutput = !usesWorkers ?
-                inputs.entrySet().stream().collect(
-                    Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)
-                ) : null;
-
-            final Consumer<String> addOutput = (outputID) -> {
-                final boolean isIllegal = illegalOutputs.contains(outputID);
-                final boolean isAbstract = settings.getCommoditySpec(outputID) == null;
-
-                OutputConfig optCom = new OutputConfig(
-                        outputID,
-                        1,
-                        CCMoneyDist,
-                        scaleWithMarketSize.contains(outputID),
-                        usesWorkers,
-                        isAbstract,
-                        isIllegal,
-                        emptyList,
-                        emptyList,
-                        InputsPerUnitOutput,
-                        LaborConfig.dynamicWorkerCapPerOutput,
-                        8.5f,
-                        -1,
-                        false
-                );
-                configOutputs.put(outputID, optCom);
-            };
-
-            outputs.forEach(addOutput);
-            illegalOutputs.forEach(addOutput);
-
-            final IndustryConfig config = new IndustryConfig(
-                usesWorkers, configOutputs, OCCTag.AVERAGE, false
-            );
-            config.dynamic = true;
-
-            dynamic_config.put(indID, config);
-        }
-
-        final List<String> conds = settings.getAllMarketConditionSpecs()
-            .stream().map(MarketConditionSpecAPI::getId).collect(Collectors.toList());
-
-        final Map<String, IndustryConfig> new_dynamic_config = new HashMap<>();
-        for (Map.Entry<String, IndustryConfig> e : dynamic_config.entrySet()) {
-            new_dynamic_config.put(e.getKey(), new IndustryConfig(e.getValue()));
-        }
-
-        // applyAndTestCombo variables for reuse
-        final Set<String> appearingOutputs = new HashSet<>();
-        final Set<String> disappearingOutputs = new HashSet<>();
-
-        // Prime loop with inert condition
-        testMarket1.addCondition(Conditions.INDUSTRIAL_POLITY);
-        testMarket2.addCondition(Conditions.INDUSTRIAL_POLITY);
-
-        final Consumer<List<String>> applyAndTestCombo = condCombo -> {
-            final List<MarketConditionAPI> market1Conds = testMarket1.getConditions();
-            final List<MarketConditionAPI> market2Conds = testMarket2.getConditions();
-
-            for (int i = market1Conds.size() - 1; i >= 0; i--) {
-                MarketConditionAPI cond = market1Conds.get(i);
-                testMarket1.removeCondition(cond.getId());
-                testMarket2.removeCondition(cond.getId());
-            }
-
-            for (String condID : condCombo) {
-                market1Conds.add(new MarketCondition(condID, testMarket1));
-                market2Conds.add(new MarketCondition(condID, testMarket2));
-            }
-            
-            testMarket1.reapplyIndustries();
-            testMarket2.reapplyIndustries();
-
-            for (Map.Entry<String, IndustryConfig> entry : dynamic_config.entrySet()) {
-                final String indID = entry.getKey();
-                final IndustryConfig config = entry.getValue();
-                Industry ind1 = testMarket1.getIndustry(indID);
-                Industry ind2 = testMarket2.getIndustry(indID);
-
-                if (ind1 == null || ind2 == null) {
-                    for (Industry ind : testMarket1.getIndustries()) {
-                        if (ind.getSpec().getId().equals(indID)) ind1 = ind;
-                    }
-                    for (Industry ind : testMarket2.getIndustries()) {
-                        if (ind.getSpec().getId().equals(indID)) ind2 = ind;
-                    }
-                }
-
-                final Set<String> currentOutputs = new HashSet<>();
-                final Set<String> baselineOutputs = new HashSet<>(config.outputs.keySet());
-                final Map<String, OutputConfig> new_outputs = new_dynamic_config.get(indID).outputs;
-
+            if (ind1 != null && ind2 != null) {
+                final List<String> outputs = new ArrayList<>(6);
+                final Set<String> illegalOutputs = new HashSet<>(6);
+    
                 for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
-                    currentOutputs.add(mutable.getCommodityId());
+                    outputs.add(mutable.getCommodityId());
                 }
-                
+    
+                testMarket1.setFreePort(true);
+                testMarket2.setFreePort(true);
+                ind1.apply();
+                ind2.apply();
+    
+                for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
+                    illegalOutputs.add(mutable.getCommodityId());
+                }
+                illegalOutputs.removeAll(outputs);
+    
                 scaleWithMarketSize.clear();
-                for (String comID : appearingOutputs) {
-                    boolean scaleWithSize = Math.abs(ind1.getSupply(comID).getQuantity().getModifiedValue() -
+                for (MutableCommodityQuantity mutable : ind1.getAllSupply()) {
+                    final String comID = mutable.getCommodityId();
+                    final boolean scaleWithSize = Math.abs(
+                        ind1.getSupply(comID).getQuantity().getModifiedValue() -
                         ind2.getSupply(comID).getQuantity().getModifiedValue()
                     ) > 0.01f;
-
+    
                     if (scaleWithSize) scaleWithMarketSize.add(comID);
                 }
-
-                final Map<String, Float> inputs;
-                if (inputCache.containsKey(indID)) {
-                    inputs = inputCache.get(indID);
-                } else {
-                    inputs = new HashMap<>(6);
-                    populateInputs(ind1, inputs, scaleWithMarketSize);
-                    inputCache.put(indID, inputs);
-                }
-
-                final Map<String, Float> CCMoneyDist = config.workerAssignable ? new HashMap<>() : null;
-                if (config.workerAssignable) {
-                    for (Map.Entry<String, Float> dist : inputs.entrySet()) {
-                        CCMoneyDist.put(dist.getKey(), 1f);
-                    }
-                }
-
-                final Map<String, Float> InputsPerUnitOutput = !config.workerAssignable ? new HashMap<>() : null;
-                if (!config.workerAssignable) {
-                    for (Map.Entry<String, Float> dist : inputs.entrySet()) {
-                        InputsPerUnitOutput.put(dist.getKey(), dist.getValue());
-                    }
-                }
-
-                appearingOutputs.clear();
-                disappearingOutputs.clear();
-
-                baselineOutputs.remove(abstractOutput);
-
-                appearingOutputs.addAll(currentOutputs);
-                appearingOutputs.removeAll(baselineOutputs);
-
-                disappearingOutputs.addAll(baselineOutputs);
-                disappearingOutputs.removeAll(currentOutputs);
-
-                if (!appearingOutputs.isEmpty()) new_outputs.remove(abstractOutput);
-
-                for (String newOutput : appearingOutputs) {
-                    final boolean isAbstract = settings.getCommoditySpec(newOutput) == null;
-                    final OutputConfig optCom = new OutputConfig(
-                        newOutput,
-                        1,
-                        CCMoneyDist,
-                        scaleWithMarketSize.contains(newOutput),
-                        config.workerAssignable && !isAbstract,
-                        isAbstract,
-                        false,
-                        emptyList,
-                        condCombo,
-                        InputsPerUnitOutput,
-                        LaborConfig.dynamicWorkerCapPerOutput,
-                        8f,
-                        -1,
-                        false
-                    );
-                    new_outputs.put(newOutput, optCom);
-                }
-
-                for (String missingOutput : disappearingOutputs) {
-                    final OutputConfig outputCom = new_outputs.get(missingOutput);
-                    if (outputCom.ifMarketCondsAllFalse == null || outputCom.ifMarketCondsAllFalse.isEmpty()) {
-                        outputCom.ifMarketCondsAllFalse = condCombo;
-                    }
-                }
-            }
-        };
-
-        // Test single conditions
-        for (int i = 0; i < conds.size(); i++) {
-            applyAndTestCombo.accept(Collections.singletonList(conds.get(i)));
-        }
-
-        // Test pairs
-        for (int i = 0; i < conds.size(); i++) {
-            for (int j = i + 1; j < conds.size(); j++) {
-                applyAndTestCombo.accept(Arrays.asList(conds.get(i), conds.get(j)));
-            }
-        }
-
-        // Test triplets
-        // for (int i = 0; i < conds.size(); i++) {
-        //     for (int j = i + 1; j < conds.size(); j++) {
-        //         for (int k = j + 1; k < conds.size(); k++) {
-        //             applyAndTestCombo.accept(Arrays.asList(conds.get(i), conds.get(j), conds.get(k)));
-        //         }
-        //     }
-        // }
     
-        ind_config.putAll(new_dynamic_config);
+                final boolean hasNoRealOutputs = outputs.isEmpty() && illegalOutputs.isEmpty();
+                final boolean usesWorkers = EconomyInfo.isWorkerAssignable(ind1) && !hasNoRealOutputs;
+                if (hasNoRealOutputs) {
+                    outputs.add(abstractOutput);
+    
+                    final Optional<MutableCommodityQuantity> firstDemand = ind1.getAllDemand()
+                        .stream().findFirst();
+                    if (firstDemand.isPresent()) {
+                        final String comID = firstDemand.get().getCommodityId();
+                        final boolean scaleWithSize = Math.abs(
+                            ind1.getDemand(comID).getQuantity().getModifiedValue() -
+                            ind2.getDemand(comID).getQuantity().getModifiedValue()
+                        ) > 0.01f;
+                        if (scaleWithSize) scaleWithMarketSize.add(abstractOutput);
+                    }
+                }
+    
+                // In vanilla, each output uses each input
+                final Map<String, Float> inputs = new HashMap<>(6);
+                populateInputs(ind1, inputs, !scaleWithMarketSize.isEmpty());
+    
+                final Map<String, Float> CCMoneyDist = usesWorkers ?
+                    inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, i -> 1f)) : null;
+    
+                final Map<String, Float> InputsPerUnitOutput = !usesWorkers ?
+                    inputs.entrySet().stream().collect(
+                        Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)
+                    ) : null;
+    
+                final Consumer<String> addOutput = (outputID) -> {
+                    final boolean isIllegal = illegalOutputs.contains(outputID);
+                    final boolean isAbstract = settings.getCommoditySpec(outputID) == null;
+    
+                    final OutputConfig optCom = new OutputConfig(
+                        outputID, 1, CCMoneyDist,
+                        scaleWithMarketSize.contains(outputID),
+                        usesWorkers, isAbstract, isIllegal,
+                        Collections.emptyList(), Collections.emptyList(),
+                        InputsPerUnitOutput, LaborConfig.dynamicWorkerCapPerOutput,
+                        dynamicIndMarketScaleBase, -1, false
+                    );
+                    configOutputs.put(outputID, optCom);
+                };
+    
+                outputs.forEach(addOutput);
+                illegalOutputs.forEach(addOutput);
+    
+                final IndustryConfig config = new IndustryConfig(
+                    usesWorkers, configOutputs, OCCTag.AVERAGE, false
+                );
+                config.dynamic = true;
+    
+                dynamic_config.put(indID, config);
 
-        final JSONObject json = IndustryConfigManager.serializeIndustryConfigs(new_dynamic_config);
+            } else {
+                final IndustryConfig config = new IndustryConfig(
+                    false, configOutputs, OCCTag.AVERAGE, false
+                );
+                config.dynamic = true;
+    
+                dynamic_config.put(indID, config);
+            }
+        
+            final Iterator<Industry> indRemoveIterator1 = testMarket1.getIndustries().iterator();
+            while (indRemoveIterator1.hasNext()) {
+                final Industry industry = indRemoveIterator1.next();
+                // industry.notifyBeingRemoved(null, false);
+                industry.unapply();
+                indRemoveIterator1.remove();
+            }
+
+            final Iterator<Industry> indRemoveIterator2 = testMarket2.getIndustries().iterator();
+            while (indRemoveIterator2.hasNext()) {
+                final Industry industry = indRemoveIterator2.next();
+                // industry.notifyBeingRemoved(null, false);
+                industry.unapply();
+                indRemoveIterator2.remove();
+            }
+        }
+    
+        ind_config.putAll(dynamic_config);
+
+        final JSONObject json = IndustryConfigManager.serializeIndustryConfigs(dynamic_config);
 
         try {
             settings.writeJSONToCommon(
@@ -798,17 +653,13 @@ public class IndustryConfigManager {
                 + IndustryConfigManager.DYNAMIC_CONFIG_NAME, e
             );
         }
-    
-        // CLEANUP
-        testStarSystem.removeEntity(testPlanet);
-        sector.removeStarSystem(testStarSystem);
     }
 
-    private static final void populateInputs(
-        Industry ind, Map<String, Float> inputs, Set<String> scaleWithMarketSize
+    public static final void populateInputs(
+        final Industry ind, final Map<String, Float> inputs, final boolean scaleWithMarketSize
     ) {
         ind.getAllDemand().forEach(mutable -> {
-            MutableStat base = mutable.getQuantity();
+            final MutableStat base = mutable.getQuantity();
             StatMod baseMod = null;
             float cumulativeBase = 0f;
 
@@ -820,18 +671,24 @@ public class IndustryConfigManager {
                     if (!mod.source.equals(CompatLayer.DEMAND_RED_MOD) && 
                         !mod.source.endsWith(CompatLayer.MARKET_COND_MOD_SUFFIX) &&
                         mod.value >= 0
-                    ) {
-                        cumulativeBase += mod.value;
-                    }
+                    ) { cumulativeBase += mod.value; }
                 }
             }
 
-            float value = (baseMod != null ? baseMod.value : cumulativeBase);
-            if (!scaleWithMarketSize.isEmpty()) {
-                value = value - (TEST_MARKET_SIZE - 3);
+            // Since vanilla values are discrete integers
+            final int vanillaValue = Math.round(baseMod != null ? baseMod.value : cumulativeBase);
+            final double expBase = 2;
+
+            float value = vanillaValue;
+            if (scaleWithMarketSize) {
+                value = value - (ConfigUtils.TEST_MARKET_SIZE - 3);
+                final float zeroCount = Math.max(0f, value) - 1f;
                 if (value <= 1f) {
                     value = (float) Math.pow(10f, -1f * (1f - value)); 
                 }
+                value = value * (float) Math.max(1f, Math.pow(expBase, zeroCount));
+            } else {
+                value *= Math.pow(expBase, Math.max(0, vanillaValue - 1));
             }
             inputs.put(mutable.getCommodityId(), value);
         });

@@ -247,7 +247,7 @@
 					"abstract": 0.1
 				},
 				"usesWorkers": true,
-				"workerAssignableLimit": 0.1
+				"workerAssignableLimit": 0.15
 			}
 		}
 	},

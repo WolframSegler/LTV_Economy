@@ -92,7 +92,7 @@ public class ManagePopulationDialog extends DialogPanel {
     public void createPanel() {
         UIContext.setContext(Context.DIALOG);
         final EconomyEngine engine = EconomyEngine.getInstance();
-        final PlayerMarketData mData = engine.getPlayerMarketData(m_market.getId());
+        final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
 
         final int SECT_I_H = 30;
@@ -126,7 +126,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel RoSVLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Rate of Exploitation";
-                final String valueTxt = ((int)mData.getRoSV())+"";
+                final String valueTxt = ((int)data.getRoSV())+"";
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -196,7 +196,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel avgWageLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Average Wage";
-                final float value = LaborConfig.LPV_month / mData.getRoSV();
+                final float value = LaborConfig.LPV_month / data.getRoSV();
                 final String valueTxt = String.format("%.2f%s", value, Strings.C);
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
@@ -238,18 +238,18 @@ public class ManagePopulationDialog extends DialogPanel {
         );
         exploitationSlider.setHighlightOnMouseover(true);
         exploitationSlider.setUserAdjustable(true);
-        exploitationSlider.setProgress(mData.getRoSV());
+        exploitationSlider.setProgress(data.getRoSV());
         exploitationSlider.maxValue = LaborConfig.MAX_RoSV;
         exploitationSlider.clampCurrToMax = true;
         exploitationSlider.roundBarValue = true;
         exploitationSlider.setBarColor(NativeUiUtils.lerpColor(
-            positiveColor, negativeColor, mData.getRoSV()/(float)(LaborConfig.MAX_RoSV - 1)
+            positiveColor, negativeColor, data.getRoSV()/(float)(LaborConfig.MAX_RoSV - 1)
         ));
         exploitationSlider.showValueOnly = true;
         innerPanel.addComponent(exploitationSlider.getPanel()).inTL(opad*2 + LABEL_W, opad*3 + SECT_I_H);
 
         final CallbackRunnable<Button> exploitationRunnable = (btn) -> {
-            mData.setRoSV(exploitationSlider.getProgress());
+            data.setRoSV(exploitationSlider.getProgress());
 
             RoSVLabel.label2.setText(
                 String.format("%d", Math.round(exploitationSlider.getProgress()))
@@ -260,7 +260,7 @@ public class ManagePopulationDialog extends DialogPanel {
             );
 
             avgWageLabel.label2.setText(
-                String.format("%.2f%s", LaborConfig.LPV_month / mData.getRoSV(), Strings.C)
+                String.format("%.2f%s", LaborConfig.LPV_month / data.getRoSV(), Strings.C)
             );
         };
 
@@ -342,7 +342,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel healthLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Health";
-                final String valueTxt = String.format("%.0f", mData.getHealth());
+                final String valueTxt = String.format("%.0f", data.getHealth());
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -368,10 +368,10 @@ public class ManagePopulationDialog extends DialogPanel {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Overall health of the population. A higher value indicates better living conditions, food availability, and lower hazard exposure.", pad);
                 
-                    final float value = mData.healthDelta
-                        .computeEffective(mData.getHealth()) - mData.getHealth();
+                    final float value = data.healthDelta
+                        .computeEffective(data.getHealth()) - data.getHealth();
                     tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
-                    tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.healthDelta, tpGridGetter);
+                    tp.addStatModGrid(gridWidth, valueWidth, pad, pad, data.healthDelta, tpGridGetter);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -382,7 +382,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel happinessLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Happiness";
-                final String valueTxt = String.format("%.0f", mData.getHappiness());
+                final String valueTxt = String.format("%.0f", data.getHappiness());
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -408,10 +408,10 @@ public class ManagePopulationDialog extends DialogPanel {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Overall happiness and morale of the population. Influenced by health, wages, stability, and social cohesion.", opad);
 
-                    final float value = mData.happinessDelta
-                        .computeEffective(mData.getHappiness()) - mData.getHappiness();
+                    final float value = data.happinessDelta
+                        .computeEffective(data.getHappiness()) - data.getHappiness();
                     tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
-                    tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.happinessDelta, tpGridGetter);
+                    tp.addStatModGrid(gridWidth, valueWidth, pad, pad, data.happinessDelta, tpGridGetter);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -422,7 +422,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel cohesionLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Cohesion";
-                final String valueTxt = String.format("%.0f", mData.getSocialCohesion());
+                final String valueTxt = String.format("%.0f", data.getSocialCohesion());
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -448,10 +448,10 @@ public class ManagePopulationDialog extends DialogPanel {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara("Degree of social cohesion within the population. High cohesion reduces conflict and increases stability.", opad);
 
-                    final float value = mData.socialCohesionDelta.computeEffective(
-                        mData.getSocialCohesion()) - mData.getSocialCohesion();
+                    final float value = data.socialCohesionDelta.computeEffective(
+                        data.getSocialCohesion()) - data.getSocialCohesion();
                     tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
-                    tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.socialCohesionDelta, tpGridGetter);
+                    tp.addStatModGrid(gridWidth, valueWidth, pad, pad, data.socialCohesionDelta, tpGridGetter);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -462,7 +462,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel consciousnessLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void createPanel() {
                 final String txt = "Class Consc.";
-                final String valueTxt = String.format("%.0f", mData.getClassConsciousness());
+                final String valueTxt = String.format("%.0f", data.getClassConsciousness());
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -492,10 +492,10 @@ public class ManagePopulationDialog extends DialogPanel {
                         , opad
                     );
 
-                    final float value = mData.classConsciousnessDelta.computeEffective(
-                        mData.getClassConsciousness()) - mData.getClassConsciousness();
+                    final float value = data.classConsciousnessDelta.computeEffective(
+                        data.getClassConsciousness()) - data.getClassConsciousness();
                     tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
-                    tp.addStatModGrid(gridWidth, valueWidth, pad, pad, mData.classConsciousnessDelta, tpGridGetter);
+                    tp.addStatModGrid(gridWidth, valueWidth, pad, pad, data.classConsciousnessDelta, tpGridGetter);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, 0);
@@ -521,8 +521,8 @@ public class ManagePopulationDialog extends DialogPanel {
         innerPanel.addComponent(policyContainer.getPanel()).inTL(opad/2f, SECT_III_H + subtitleH + pad*2);
 
         int posterCount = 0;
-        for (MarketPolicy policy : mData.getPolicies()) {
-            if (!policy.isEnabled(mData)) continue;
+        for (MarketPolicy policy : data.getPolicies()) {
+            if (!policy.isEnabled(data)) continue;
 
             final int posterIndex = posterCount;
             final ClickHandler<ListenerProviderPanel> listener = (source, isLeftClick) -> {
@@ -538,8 +538,8 @@ public class ManagePopulationDialog extends DialogPanel {
                 );
 
                 final CallbackRunnable<Button> activateRun = (btn) -> {
-                    policy.activate(mData);
-                    buildPoster(policyContainer.getContentPanel(), policy, mData,
+                    policy.activate(data);
+                    buildPoster(policyContainer.getContentPanel(), policy, data,
                         source.interaction.onClicked, policyWidth, policyHeight
                     ).inBL(pad + posterIndex*(policyWidth + pad), opad/2f);
 
@@ -552,13 +552,13 @@ public class ManagePopulationDialog extends DialogPanel {
                     );
 
                     source.getParent().removeComponent(source.getPanel());
-                    buildSelectedPosterMenu(selectedPolicyCont, policy, mData, this);
+                    buildSelectedPosterMenu(selectedPolicyCont, policy, data, this);
                 };
 
-                buildSelectedPosterMenu(selectedPolicyCont, policy, mData, activateRun);
+                buildSelectedPosterMenu(selectedPolicyCont, policy, data, activateRun);
             };
 
-            buildPoster(policyContainer.getContentPanel(), policy, mData, listener,  
+            buildPoster(policyContainer.getContentPanel(), policy, data, listener,  
                 policyWidth, policyHeight
             ).inBL(pad + posterCount*(policyWidth + pad), opad/2f);
 
@@ -588,7 +588,7 @@ public class ManagePopulationDialog extends DialogPanel {
             public void createPanel() {
                 if (policy.isOnCooldown()) {
                     final float cooledRatio = (float) policy.cooldownDaysRemaining/policy.spec.cooldownDays;
-                    final ArrayList<PieSlice> data = new ArrayList<>(
+                    final ArrayList<PieSlice> pieData = new ArrayList<>(
                         List.of(
                             new PieSlice(null, gray, cooledRatio),
                             new PieSlice(null, Color.ORANGE, 1f - cooledRatio)
@@ -596,7 +596,7 @@ public class ManagePopulationDialog extends DialogPanel {
                     );
                     final int clockD = 30;
                     final PieChart cooldownClock = new PieChart(
-                        m_panel, clockD, clockD, data
+                        m_panel, clockD, clockD, pieData
                     );
     
                     add(cooldownClock).inBL(

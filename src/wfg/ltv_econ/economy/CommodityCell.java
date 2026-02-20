@@ -243,6 +243,16 @@ public class CommodityCell {
         demandBaseMutables.clear();
 
         for (Industry industry : getVisibleIndustries()) {
+            if (industry.getSupply(comID).getQuantity().getModifiedValue() > 0.01f &&
+                !IndustryIOs.hasOutput(industry, comID)
+            ) {
+                IndustryIOs.createAndRegisterDynamicOutput(industry, comID, true);
+            }
+        }
+
+        // TODO also register conditionally appearing inputs
+
+        for (Industry industry : getVisibleIndustries()) {
             if (IndustryIOs.hasOutput(industry, comID)) {
                 if (!IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles) {
                     final MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);
@@ -278,7 +288,7 @@ public class CommodityCell {
         for (StatMod mod : market.getCommodityData(comID).getAvailableStat().getFlatMods().values()) {
             if (!mod.source.contains(ShippingDisruption.COMMODITY_LOSS_PREFIX)) continue;
             // TODO Integrate cargo raids better
-            importEffectiveness = 1f + 0.4f*mod.value; // Can be -1 or -2.
+            importEffectiveness = 1f + 0.3f*mod.value; // Can be -1 or -2.
             break;
         }
     }
