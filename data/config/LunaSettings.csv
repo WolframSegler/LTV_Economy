@@ -32,3 +32,4 @@ economy_toCoverPerImport,Import Smoothing Window,Int,2,,Limits how many days of 
 economy_exportThreshold,Export Threshold Factor,Double,1.5,,Multiplier for excess stock required before a market begins exporting.,1,2,Economy
 economy_factionExchangeMult,Faction Price Multiplier,Double,0.3,,Adjusts prices for goods traded between markets of the same faction. Set to 0 for free in-faction trade.,0,1,Economy
 economy_embargoRepDrop,Embargo Reputation Penalty,Double,0.4,,The relationship hit for imposing an embargo. 1 means 100 relation points.,0,1,Economy
+economy_minTradeRelation,Minimum Trade Relationship,Double,-0.9,,Minimum relationship between factions for trade to occur. Factions below this threshold will not trade.,-1,0,Economy

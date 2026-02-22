@@ -250,7 +250,13 @@ public class CommodityCell {
             }
         }
 
-        // TODO also register conditionally appearing inputs
+        for (Industry industry : getVisibleIndustries()) {
+            if (industry.getDemand(comID).getQuantity().getModifiedValue() > 0.01f &&
+                !IndustryIOs.hasInput(industry, comID)
+            ) {
+                IndustryIOs.createAndRegisterDynamicInput(industry, comID, true);
+            }
+        }
 
         for (Industry industry : getVisibleIndustries()) {
             if (IndustryIOs.hasOutput(industry, comID)) {

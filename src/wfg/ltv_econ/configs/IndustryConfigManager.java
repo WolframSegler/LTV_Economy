@@ -370,6 +370,7 @@ public class IndustryConfigManager {
 
         private static final BooleanSupplier dynamicOutputActiveDefault = () -> true;
         public BooleanSupplier dynamicOutputActive = dynamicOutputActiveDefault;
+        public boolean dynamic = false;
 
         public OutputConfig(
             String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
@@ -655,42 +656,45 @@ public class IndustryConfigManager {
         }
     }
 
-    public static final void populateInputs(
-        final Industry ind, final Map<String, Float> inputs, final boolean scaleWithMarketSize
+    public static final void populateInputs(final Industry ind, final Map<String, Float> inputs,
+        boolean scaleWithMarketSize
     ) {
         ind.getAllDemand().forEach(mutable -> {
-            final MutableStat base = mutable.getQuantity();
-            StatMod baseMod = null;
-            float cumulativeBase = 0f;
-
-            for (StatMod mod : base.getFlatMods().values()) {
-                if (mod.source.endsWith(CompatLayer.BASE_MOD_SUFFIX) && mod.value > 0) {
-                    baseMod = baseMod == null ? mod : baseMod;
-    
-                } else {
-                    if (!mod.source.equals(CompatLayer.DEMAND_RED_MOD) && 
-                        !mod.source.endsWith(CompatLayer.MARKET_COND_MOD_SUFFIX) &&
-                        mod.value >= 0
-                    ) { cumulativeBase += mod.value; }
-                }
-            }
-
-            // Since vanilla values are discrete integers
-            final int vanillaValue = Math.round(baseMod != null ? baseMod.value : cumulativeBase);
-            final double expBase = 2;
-
-            float value = vanillaValue;
-            if (scaleWithMarketSize) {
-                value = value - (ConfigUtils.TEST_MARKET_SIZE - 3);
-                final float zeroCount = Math.max(0f, value) - 1f;
-                if (value <= 1f) {
-                    value = (float) Math.pow(10f, -1f * (1f - value)); 
-                }
-                value = value * (float) Math.max(1f, Math.pow(expBase, zeroCount));
-            } else {
-                value *= Math.pow(expBase, Math.max(0, vanillaValue - 1));
-            }
-            inputs.put(mutable.getCommodityId(), value);
+            inputs.put(mutable.getCommodityId(), populateInput(mutable.getQuantity(), scaleWithMarketSize));
         });
+    }
+
+    public static final float populateInput(final MutableStat base, boolean scaleWithMarketSize) {
+        StatMod baseMod = null;
+        float cumulativeBase = 0f;
+
+        for (StatMod mod : base.getFlatMods().values()) {
+            if (mod.source.endsWith(CompatLayer.BASE_MOD_SUFFIX) && mod.value > 0) {
+                baseMod = baseMod == null ? mod : baseMod;
+
+            } else {
+                if (!mod.source.equals(CompatLayer.DEMAND_RED_MOD) && 
+                    !mod.source.endsWith(CompatLayer.MARKET_COND_MOD_SUFFIX) &&
+                    mod.value >= 0
+                ) { cumulativeBase += mod.value; }
+            }
+        }
+
+        // Since vanilla values are discrete integers
+        final int vanillaValue = Math.round(baseMod != null ? baseMod.value : cumulativeBase);
+        final double expBase = 2;
+
+        float value = vanillaValue;
+        if (scaleWithMarketSize) {
+            value = value - (ConfigUtils.TEST_MARKET_SIZE - 3);
+            final float zeroCount = Math.max(0f, value) - 1f;
+            if (value <= 1f) {
+                value = (float) Math.pow(10f, -1f * (1f - value)); 
+            }
+            value = value * (float) Math.max(1f, Math.pow(expBase, zeroCount));
+        } else {
+            value *= Math.pow(expBase, Math.max(0, vanillaValue - 1));
+        }
+        return value;
     }
 }

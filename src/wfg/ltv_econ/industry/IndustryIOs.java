@@ -15,6 +15,7 @@ import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.campaign.econ.Market;
@@ -83,6 +84,7 @@ public class IndustryIOs {
     private static final Map<String, String> IndToBaseInd = new HashMap<>();
 
     public static final String ABSTRACT_COM = "abstract";
+    public static final String DYNAMIC_OUTPUT = "output_for_input::";
 
     private IndustryIOs() {}
     static {
@@ -177,6 +179,9 @@ public class IndustryIOs {
     }
 
     private static final void buildInputOutputToIndustries() {
+        outputToInd.clear();
+        inputToInd.clear();
+
         for (Map.Entry<String, IndustryConfig> e : IndustryConfigManager.ind_config.entrySet()) {
             String indID = e.getKey();
             IndustryConfig cfg = e.getValue();
@@ -218,33 +223,30 @@ public class IndustryIOs {
      *             <li>{@code 0} – success</li>
      *             <li>{@code 1} – industry is {@code null}</li>
      *             <li>{@code 2} – industry does not have a config</li>
-     *             <li>{@code 3} – industry config is not dynamic</li>
-     *             <li>{@code 4} – output entry already exists</li>
-     *             <li>{@code 5} – output is abstract</li>
-     *             <li>{@code 6} – industry supply list does not have output</li>
+     *             <li>{@code 3} – output entry already exists</li>
+     *             <li>{@code 4} – output is abstract</li>
+     *             <li>{@code 5} – industry supply list does not have output</li>
      *         </ul>
      */
-    public static final int createAndRegisterDynamicOutput(final Industry ind, final String outputID,
+    public static final int createAndRegisterDynamicOutput(final Industry ind, String outputID,
         boolean indHasSupply
     ) {
         if (ind == null) return 1;
         final IndustryConfig cfg = getIndConfig(ind);
         if (cfg == null) return 2;
-        if (!cfg.dynamic) return 3;
-        if (cfg.outputs.containsKey(outputID)) return 4;
-        if (Global.getSettings().getCommoditySpec(outputID) == null) return 5;
-
-        final List<String> outputs = ind.getAllSupply().stream().map(m -> m.getCommodityId()).toList();
-        if (indHasSupply && !outputs.contains(outputID)) return 6;
+        if (cfg.outputs.containsKey(outputID)) return 3;
+        if (Global.getSettings().getCommoditySpec(outputID) == null) return 4;
+        final MutableStat output = ind.getSupply(outputID).getQuantity();
+        if (indHasSupply && output.getModifiedValue() < 0.01f) return 5;
 
         final boolean scaleWithSize;
         if (indHasSupply) {
             final MarketAPI market = ind.getMarket();
-            final float value_org = ind.getSupply(outputID).getQuantity().getModifiedValue();
+            final float value_org = output.getModifiedValue();
 
             RolfLectionUtil.setPrivateVariable(MARKET_SIZE_FIELD, market, market.getSize() + 1);
             ind.reapply();
-            final float value_new = ind.getSupply(outputID).getQuantity().getModifiedValue();
+            final float value_new = output.getModifiedValue();
             RolfLectionUtil.setPrivateVariable(MARKET_SIZE_FIELD, market, market.getSize() - 1);
             ind.reapply();
 
@@ -266,32 +268,101 @@ public class IndustryIOs {
                     Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)
                 ) : null;
 
-        final OutputConfig output = new OutputConfig(
+        final OutputConfig outputConfig = new OutputConfig(
             outputID, 1, CCMoneyDist,
             scaleWithSize, useWorkers, false, false,
             Collections.emptyList(), Collections.emptyList(),
             InputsPerUnitOutput, LaborConfig.dynamicWorkerCapPerOutput,
             IndustryConfigManager.dynamicIndMarketScaleBase, -1, false
         );
-        output.dynamicOutputActive = () -> {
-            return ind.getSupply(outputID).getQuantity().getModifiedValue() > 0.01f;
+        outputConfig.dynamic = true;
+        outputConfig.dynamicOutputActive = () -> {
+            return output.getModifiedValue() > 0.01f;
         };
 
-        cfg.outputs.put(outputID, output);
+        cfg.outputs.put(outputID, outputConfig);
 
-        final Map<String, Float> outputMap = baseOutputs.get(ind.getId());
-        final Map<String, Map<String, Float>> inputOuterMap = baseInputs.get(ind.getId());
-        fillOutputMaps(cfg.occTag, output, outputMap, inputOuterMap);
+        final String indID = getBaseIndIDifNoConfig(ind.getSpec());
+        final Map<String, Float> outputMap = baseOutputs.get(indID);
+        final Map<String, Map<String, Float>> inputOuterMap = baseInputs.get(indID);
+        fillOutputMaps(cfg.occTag, outputConfig, outputMap, inputOuterMap);
+
+        buildInputToOutput();
+        buildInputOutputToIndustries();
 
         return 0;
     }
 
-    public static final boolean isOutputValidForMarket(final OutputConfig output,
-        final IndustryConfig indcfg, final Industry ind
+    /**
+     * @return <ul>
+     *             <li>{@code 0} – success</li>
+     *             <li>{@code 1} – industry is {@code null}</li>
+     *             <li>{@code 2} – industry does not have a config</li>
+     *             <li>{@code 3} – input entry already exists</li>
+     *             <li>{@code 4} – input is abstract</li>
+     *             <li>{@code 5} – industry demand list does not have input</li>
+     *         </ul>
+     */
+    public static final int createAndRegisterDynamicInput(final Industry ind, String inputID,
+        boolean indHasDemand
     ) {
+        if (ind == null) return 1;
+        final IndustryConfig cfg = getIndConfig(ind);
+        if (cfg == null) return 2;
+        if (hasInput(ind, inputID)) return 3;
+        if (Global.getSettings().getCommoditySpec(inputID) == null) return 4;
+        final MutableStat input = ind.getDemand(inputID).getQuantity();
+        if (indHasDemand && input.getModifiedValue() < 0.01f) return 5;
+
+        final boolean scaleWithSize;
+        if (indHasDemand) {
+            final MarketAPI market = ind.getMarket();
+            final float value_org = input.getModifiedValue();
+
+            RolfLectionUtil.setPrivateVariable(MARKET_SIZE_FIELD, market, market.getSize() + 1);
+            ind.reapply();
+            final float value_new = input.getModifiedValue();
+            RolfLectionUtil.setPrivateVariable(MARKET_SIZE_FIELD, market, market.getSize() - 1);
+            ind.reapply();
+
+            scaleWithSize = Math.abs(value_new - value_org) > 0.01f;
+        } else {
+            scaleWithSize = false;
+        }
+
+        final String outputID = DYNAMIC_OUTPUT + inputID;
+        final OutputConfig output = new OutputConfig(
+            outputID, 1, null,
+            scaleWithSize, false, true, false,
+            Collections.emptyList(), Collections.emptyList(),
+            new HashMap<>(), LaborConfig.dynamicWorkerCapPerOutput,
+            IndustryConfigManager.dynamicIndMarketScaleBase, -1, false
+        );
+        output.dynamic = true;
+        output.dynamicOutputActive = () -> {
+            return input.getModifiedValue() > 0.01f;
+        };
+
+        cfg.outputs.put(outputID, output);
+
+        final float inputValue = IndustryConfigManager.populateInput(input, scaleWithSize);
+        output.InputsPerUnitOutput.put(inputID, inputValue);
+
+        final String indID = getBaseIndIDifNoConfig(ind.getSpec());
+        final Map<String, Float> outputMap = baseOutputs.get(indID);
+        final Map<String, Map<String, Float>> inputOuterMap = baseInputs.get(indID);
+        fillOutputMaps(cfg.occTag, output, outputMap, inputOuterMap);
+
+        buildInputToOutput();
+        buildInputOutputToIndustries();
+
+        return 0;
+    }
+
+    public static final boolean isOutputValidForMarket(final OutputConfig output, Industry ind) {
         final MarketAPI market = ind.getMarket();
         if (output.checkLegality && market.isIllegal(output.comID)) return false;
-        if (indcfg.dynamic && !output.dynamicOutputActive.getAsBoolean()) return false;
+        if (output.dynamic && !output.dynamicOutputActive.getAsBoolean()) return false;
 
         if (output == null || ind.isDisrupted() ||
             (ind.isFunctional() && output.activeDuringBuilding)
@@ -346,7 +417,7 @@ public class IndustryIOs {
         final float value = getBaseOutput(ind.getSpec(), outputID);
         if (value == 0) return 0f;
 
-        if (!isOutputValidForMarket(output, cfg, ind)) return 0f;
+        if (!isOutputValidForMarket(output, ind)) return 0f;
 
         final float scale = calculateScale(output, ind);
 
@@ -365,7 +436,7 @@ public class IndustryIOs {
         final float value = getBaseInput(ind.getSpec(), outputID, inputID);
         if (value == 0f) return 0f;
 
-        if (!isOutputValidForMarket(output, cfg, ind)) return 0f;
+        if (!isOutputValidForMarket(output, ind)) return 0f;
 
         final float scale = calculateScale(output, ind);
 
@@ -385,7 +456,7 @@ public class IndustryIOs {
 
             for (Map.Entry<String, Float> entry : inputMap.getValue().entrySet()) {
                 if (entry.getKey().equals(inputID)) {
-                    if (!isOutputValidForMarket(output, cfg, ind)) continue;
+                    if (!isOutputValidForMarket(output, ind)) continue;
 
                     final float scale = calculateScale(output, ind);
 
@@ -522,12 +593,12 @@ public class IndustryIOs {
     }
 
     public static final boolean hasOutput(Industry ind, String comID) {
-        String indID = getBaseIndIDifNoConfig(ind.getSpec());
-        return outputToInd.getOrDefault(comID, Collections.emptySet()).contains(indID);
+        final String id = getBaseIndIDifNoConfig(ind.getSpec());
+        return outputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }
 
     public static final boolean hasInput(Industry ind, String comID) {
-        String id = getBaseIndIDifNoConfig(ind.getSpec());
+        final String id = getBaseIndIDifNoConfig(ind.getSpec());
         return inputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }
 

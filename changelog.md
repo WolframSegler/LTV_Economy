@@ -5,6 +5,7 @@ v0.2.8-beta | SAVE COMPATIBLE
 - Updated the conditions for the manufacturing industry
 - A list was added to the economy config for excluding markets from the manufacturing industry check.
 - Fixed the worker distributor, again.
+- Added a configurable minimum faction relationship threshold below which markets will not trade (LunaLib setting).
 
 v0.2.7-beta | SAVE COMPATIBLE
 - Added a new policy reducing drugs demand

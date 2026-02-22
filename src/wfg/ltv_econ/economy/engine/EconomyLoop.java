@@ -38,7 +38,7 @@ public class EconomyLoop {
     transient EconomyEngine engine;
     private int cyclesSinceWorkerAssign = 0;
 
-    public EconomyLoop(EconomyEngine engine) { this.engine = engine; }
+    public EconomyLoop(EconomyEngine engine) { this.engine = engine; }    
 
     /**
      * Advances the economy by one cycle.
@@ -109,13 +109,15 @@ public class EconomyLoop {
     final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
         refreshMarkets();
 
+        discoverInputsOutputs();
+
         engine.m_comDomains.values().forEach(CommodityDomain::reset);
 
         if (!fakeAdvance || forceWorkerAssignment) {
             if (cyclesSinceWorkerAssign >= EconomyConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment) {
 
                 WorkerRegistry.getInstance().resetWorkersAssigned(false);
-                engine.m_comDomains.values().forEach(CommodityDomain::update);
+                engine.m_comDomains.values().parallelStream().forEach(CommodityDomain::update);
                 assignWorkers();
 
                 cyclesSinceWorkerAssign = 0;
@@ -124,7 +126,7 @@ public class EconomyLoop {
             }
         }
 
-        engine.m_comDomains.values().forEach(CommodityDomain::update);
+        engine.m_comDomains.values().parallelStream().forEach(CommodityDomain::update);
         
         weightedOutputDeficitMods();
 
@@ -153,6 +155,29 @@ public class EconomyLoop {
 
         for (String marketID : registeredMarkets) {
             if (!economyMarketIDs.contains(marketID)) engine.removeMarket(marketID);
+        }
+    }
+
+    public final void discoverInputsOutputs() {
+        // TODO maybe replace with the industry apply hooks after the update
+        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
+            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
+                for (var supply : ind.getAllSupply()) {
+                    if (supply.getQuantity().getModifiedValue() > 0.01f) {
+                        if (!IndustryIOs.hasOutput(ind, supply.getCommodityId())) {
+                            IndustryIOs.createAndRegisterDynamicOutput(ind, supply.getCommodityId(), true);
+                        }
+                    }
+                }
+
+                for (var demand : ind.getAllDemand()) {
+                    if (demand.getQuantity().getModifiedValue() > 0.01f) {
+                        if (!IndustryIOs.hasInput(ind, demand.getCommodityId())) {
+                            IndustryIOs.createAndRegisterDynamicInput(ind, demand.getCommodityId(), true);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -195,7 +220,7 @@ public class EconomyLoop {
 
                 for (String outputID : IndustryIOs.getIndConfig(ind).outputs.keySet()) {
                     if (!CompatLayer.hasRelevantCondition(outputID, market)) continue;
-                    if (!IndustryIOs.isOutputValidForMarket(config.outputs.get(outputID), config, ind)) continue;
+                    if (!IndustryIOs.isOutputValidForMarket(config.outputs.get(outputID), ind)) continue;
 
                     final int idx = indOutputPairToColumn.getOrDefault(indID + KEY + outputID, -1);
                     if (idx != -1) outputIndexes.add(idx);

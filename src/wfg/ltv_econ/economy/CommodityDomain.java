@@ -62,17 +62,17 @@ public class CommodityDomain {
     }
 
     public final void advance() {
-        m_comCells.values().parallelStream().forEach(CommodityCell::advance);
+        m_comCells.values().forEach(CommodityCell::advance);
 
         recordDailyVolume();
     }
 
     public final void reset() {
-        m_comCells.values().parallelStream().forEach(CommodityCell::reset);
+        m_comCells.values().forEach(CommodityCell::reset);
     }
 
     public final void update() {
-        m_comCells.values().parallelStream().forEach(CommodityCell::update);
+        m_comCells.values().forEach(CommodityCell::update);
     }
 
     public void endMonth() {
@@ -218,12 +218,18 @@ public class CommodityDomain {
             final CommodityCell expCell = getCell(expImp.one);
             final CommodityCell impCell = getCell(expImp.two);
 
-            if (expCell.market.isPlayerOwned()^impCell.market.isPlayerOwned()) {
-                final String tradingFactionID = expCell.market.isPlayerOwned() ?
-                    impCell.market.getFaction().getId() : expCell.market.getFaction().getId();
-
-                if (engine.playerFactionSettings.embargoedFactions.contains(tradingFactionID)) {
-                    continue;
+            { // ABORT CONDITIONS
+                if (expCell.market.getFaction().getRelationship(impCell.market.getFactionId()) <
+                    EconomyConfig.MIN_RELATION_TO_TRADE
+                ) { continue;}
+    
+                if (expCell.market.isPlayerOwned()^impCell.market.isPlayerOwned()) {
+                    final String tradingFactionID = expCell.market.isPlayerOwned() ?
+                        impCell.market.getFaction().getId() : expCell.market.getFaction().getId();
+    
+                    if (engine.playerFactionSettings.embargoedFactions.contains(tradingFactionID)) {
+                        continue;
+                    }
                 }
             }
 

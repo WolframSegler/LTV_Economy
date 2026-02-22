@@ -65,7 +65,7 @@ public class WorkerRegistry {
     }
 
     public static final List<Industry> getVisibleIndustries(MarketAPI market) {
-        List<Industry> industries = new ArrayList<>(market.getIndustries());
+        final List<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);
         return industries;
     }

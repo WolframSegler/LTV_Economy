@@ -182,6 +182,13 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/jars/libs/commons-numbers-core-1.2.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>local</groupId>
+      <artifactId>clp-lp-solver-lib</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/jars/libs/clp.jar</systemPath>
+    </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>

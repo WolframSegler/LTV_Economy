@@ -462,4 +462,6 @@ public class WorkforcePlanner {
             markets, industryOutputPairs
         );
     }
+
+
 }
