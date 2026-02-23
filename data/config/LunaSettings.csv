@@ -24,7 +24,7 @@ economy_concentrationCost,Concentration Penalty,Double,35,,Higher values result 
 economy_deficitCost,Deficit Penalty,Double,5000,,Higher values encourage more demand fulfillment.,0,100000,Economy
 economy_minWorkerFraction,Minimum Worker Fraction,Double,0.3,,The minimum fraction of the fair share of workers for each output to be enforced,0,1,Economy
 economy_prodBuffer,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Economy
-economy_allocPasses,Allocation Refinement Passes,Int,3,,Higher values improve allocation stability at the cost of performance.,1,100,Economy
+economy_allocPasses,Allocation Refinement Passes,Int,3,,Higher values improve allocation stability at the cost of performance. Values beyond 6 have almost no noticable effects.,1,100,Economy
 economy_assignInterval,Worker Assignment Interval,Int,15,,"Workers of NPC markets will be re-allocated every x days.",1,360,Economy
 economy_tradeHeader,Trade Settings,Header,Trade Settings,,,,,Economy
 economy_daysToCover,Stockpile Coverage Days,Int,30,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Economy

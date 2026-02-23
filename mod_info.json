@@ -12,8 +12,7 @@
 		"jars/libs/commons-math4-legacy-4.0-beta1.jar",
 		"jars/libs/commons-math4-legacy-exception-4.0-beta1.jar",
 		"jars/libs/commons-math4-legacy-core-4.0-beta1.jar",
-		"jars/libs/commons-numbers-core-1.2.jar",
-		"jars/libs/clp.jar"
+		"jars/libs/commons-numbers-core-1.2.jar"
     ],
 	"modPlugin": "wfg.ltv_econ.plugins.LtvEconomyModPlugin",
 	"dependencies": [

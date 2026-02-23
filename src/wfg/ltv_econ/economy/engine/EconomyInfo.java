@@ -158,7 +158,7 @@ public class EconomyInfo {
             }
         }
 
-        if (totalImports == 0f) return 1f;
+        if (totalImports == 0f) return 0f;
         return Math.min(1f, inFactionImports / totalImports);
     }
 

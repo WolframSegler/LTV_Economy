@@ -1,12 +1,12 @@
-package wfg.ltv_econ.economy;
+package wfg.ltv_econ.economy.planning;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.apache.commons.math4.legacy.optim.MaxIter;
@@ -28,21 +28,21 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
-import wfg.ltv_econ.industry.IndustryGrouper;
+import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
 
-public class WorkforcePlanner {
-    private static final Logger logger = Global.getLogger(WorkforcePlanner.class);
+public class WorkforceAllocator {
+    private static final Logger logger = Global.getLogger(WorkforceAllocator.class);
 
     public static final double WORKER_COST = 1;
 
     /**
      * For reduced / grouped matrixes
      */
-    public static final void logInputMatrix(GroupedMatrix grouped, List<String> coms) {
+    public static final void logInputMatrix(IndustryMatrixGrouped grouped, List<String> coms) {
         logInputMatrix(grouped.reducedMatrix, grouped.groupNames, coms);
     }
 
@@ -138,203 +138,129 @@ public class WorkforcePlanner {
         logger.info(sb.toString());
     }
 
-    public static final void logOutputsPerMarketCSV(
-        List<List<Integer>> outputsPerMarket,
-        List<MarketAPI> markets,
-        List<String> industryOutputPairs
-    ) {
-        final StringBuilder sb = new StringBuilder();
-
-        sb.append("Output/Market");
-        for (MarketAPI market : markets) sb.append(",").append(market.getName());
-        sb.append("\n");
-
-        for (int o = 0; o < industryOutputPairs.size(); o++) {
-            sb.append(industryOutputPairs.get(o));
-
-            for (int m = 0; m < markets.size(); m++) {
-                final boolean exists = outputsPerMarket.get(m).contains(o);
-
-                sb.append(",");
-                sb.append(exists ? "O" : "X");
-            }
-            sb.append("\n");
-        }
-
-        logger.info(sb.toString());
-    }
-
     /**
      * Computes optimal worker assignments across markets for all outputs, 
      * satisfying commodity demands while respecting market capacities, per-output limits,
      * fair spread and shortage adjustments.
      * 
-     * @param groupedMatrix Matrix of size (commodities x reduced_outputs) and grouping data
-     * @param demand Vector of size (commodities)
      * @param markets List of markets to distribute to
      * @param industryOutputPairs industryID::outputID
-     * @param outputsPerMarket List of markets containing list of indexes for industryOutputPairs
      * @return Map of MarketAPI to float[] arrays representing worker assignments per output
      */
-    public static Map<MarketAPI, float[]> computeWorkerAllocations(
-        final GroupedMatrix groupedMatrix, final double[] demand,
-        List<MarketAPI> markets, List<String> industryOutputPairs,
-        List<List<Integer>> outputsPerMarket, List<String> commodities
+    public static Map<MarketAPI, float[]> computeWorkerAllocations(List<MarketAPI> markets,
+        List<String> industryOutputPairs
     ) {
-        final Pair<List<String>, List<List<Integer>>> groupedData =
-            IndustryGrouper.applyGroupingToMarketData(
-                markets, industryOutputPairs,
-                outputsPerMarket, groupedMatrix.memberToGroup
-            );
+        // DATA COLLECTION
+        final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
+        final IndustryMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
+        final double[] demand = PlanningData.getGlobalDemandVector();
+
+        final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
+            markets, industryOutputPairs,
+            PlanningData.getOutputsPerMarket(markets), groupedMatrix.memberToGroup
+        );
         final double[][] A = groupedMatrix.reducedMatrix;
         final List<String> groupedOutputPairs = groupedData.one;
-        outputsPerMarket = groupedData.two;
+        final List<BitSet> outputsPerMarket = groupedData.two;
+        final DenseModel denseData = DenseModel.createDenseData(markets, groupedOutputPairs, outputsPerMarket);
 
-        final int numMarkets = markets.size();
-        final int numOutputs = groupedOutputPairs.size();
         final int numCommodities = A.length;
+        final int numOutputs = groupedOutputPairs.size();
+        final int numMarkets = markets.size();
+        final int denseSize = denseData.denseSize;
 
-        final long[] baseCapacities = new long[numMarkets];
-        final long[] weightSum = new long[numOutputs];
-        final Industry[][] industryCache = new Industry[numMarkets][numOutputs];
-        final float[][] outputMods = new float[numMarkets][numOutputs];
         final Map<String, Integer> commodityIndex = new HashMap<>(numCommodities);
-
-        // 1) PRE-COMPUTES
-        // Market capacities
-        for (int m = 0; m < numMarkets; m++) {
-            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(markets.get(m));
-            baseCapacities[m] = (pool != null) ? pool.getWorkerPool() : 0l;
-        }
-
-        // Weight sums per output (only over markets that can produce it)
-        for (int o = 0; o < numOutputs; o++) {
-            long s = 0l;
-            for (int m = 0; m < numMarkets; m++) {
-                if (!outputsPerMarket.get(m).contains(o)) continue;
-                s += baseCapacities[m];
-            }
-            weightSum[o] = s;
-        }
-
-        // Industry instances per output per market and ind modifiers
-        for (int o = 0; o < numOutputs; o++) {
-            final String pair = groupedOutputPairs.get(o);
-            final String indGroupID = pair.split(EconomyLoop.KEY)[0];
-            final String outputID = pair.split(EconomyLoop.KEY)[1];
-
-            for (int m = 0; m < numMarkets; m++) {
-                if (!outputsPerMarket.get(m).contains(o)) continue;
-
-                final MarketAPI market = markets.get(m);
-                final Industry ind;
-                if (groupedMatrix.groupToMembers.get(pair) == null) {
-                    ind = IndustryIOs.getRealIndustryFromBaseID(market, indGroupID);
-                } else {
-                    final List<String> baseIDs = groupedMatrix.groupToMembers.get(pair).stream()
-                        .map(p -> p.split(EconomyLoop.KEY)[0])
-                        .toList();
-
-                    ind = IndustryIOs.getRealIndustryFromBaseID(market, baseIDs);
-                }
-
-                industryCache[m][o] = ind;
-                if (ind != null) outputMods[m][o] = CompatLayer.getModifiersMult(ind, outputID, false);
-            }
-        }
-        // Reverse lookup map for commodities
         for (int c = 0; c < numCommodities; c++) {
             commodityIndex.put(commodities.get(c), c);
         }
 
         // INDEXES
-        final int idxSStart = numMarkets * numOutputs;
-        final int idxSpreadStart = idxSStart + numCommodities;
-        final int idxTotalWorkersStart = idxSpreadStart + numOutputs;
-        final int nVars = idxTotalWorkersStart + numOutputs;
-        final Function<Integer, Integer> idxS = c -> idxSStart + c;
-        final Function<Integer,Integer> idxSpread = o -> idxSpreadStart + o;
-        final Function<Integer,Integer> idxTotalW = o -> idxTotalWorkersStart + o;
-        final BiFunction<Integer, Integer, Integer> idxW = (m, o) -> m * numOutputs + o;
+        final int idxSStr = denseSize;
+        final int idxSpreadStr = idxSStr + numCommodities;
+        final int idxTotalWStr = idxSpreadStr + numOutputs;
+        final int nVars = idxTotalWStr + numOutputs;
+        final Function<Integer, Integer> idxS = c -> idxSStr + c;
+        final Function<Integer,Integer> idxSpread = o -> idxSpreadStr + o;
+        final Function<Integer,Integer> idxTotalW = o -> idxTotalWStr + o;
 
-        // 2) OBJECTIVE: minimize DEFICIT_COST * sum(slack[c]) + WORKER_COST * sum(w) + CONCENTRATION_COST * sum(spread)
+        // 1) OBJECTIVE: minimize DEFICIT_COST * sum(slack[c]) + WORKER_COST * sum(w) + CONCENTRATION_COST * sum(spread)
         final double[] objective = new double[nVars];
 
-        for (int o = 0; o < numOutputs; o++) {
-            for (int m = 0; m < numMarkets; m++) {
-                if (!outputsPerMarket.get(m).contains(o)) continue;
-                objective[idxW.apply(m, o)] = WORKER_COST;
-            }
-        }
-        for (int o = 0; o < numOutputs; o++) objective[idxTotalW.apply(o)] = 0.0; // total workers per o
-        for (int c = 0; c < numCommodities; c++) objective[idxS.apply(c)] = EconomyConfig.ECON_DEFICIT_COST;
-        for (int o = 0; o < numOutputs; o++) {
-            objective[idxSpread.apply(o)] = EconomyConfig.CONCENTRATION_COST;
-        }
+        Arrays.fill(objective, 0, denseSize, WORKER_COST);
+        Arrays.fill(objective, idxSStr, idxSStr + numCommodities, EconomyConfig.ECON_DEFICIT_COST);
+        Arrays.fill(objective, idxTotalWStr, idxTotalWStr + numOutputs, 0.0);
+        Arrays.fill(objective, idxSpreadStr, idxSpreadStr + numOutputs, EconomyConfig.CONCENTRATION_COST);
 
         final LinearObjectiveFunction f = new LinearObjectiveFunction(objective, 0.0);
         final List<LinearConstraint> const_constraints = new ArrayList<>();
 
-        // 3) Market capacity constraints: sum_o w[m,o] <= baseCapacities[m]
-        for (int m = 0; m < numMarkets; m++) {
-            final double[] coeffs = new double[nVars];
-            for (int o = 0; o < numOutputs; o++) {
-                if (!outputsPerMarket.get(m).contains(o)) continue;
-                coeffs[idxW.apply(m, o)] = 1.0;
-            }
-            const_constraints.add(new LinearConstraint(coeffs, Relationship.LEQ, baseCapacities[m]));
+        // 2) Market capacity constraints: sum_o w[m,o] <= baseCapacities[m]
+        final double[] marketCapCoeffs = new double[nVars];
+        for (int m = 0; m < denseData.marketStart.length - 1; m++) {
+            Arrays.fill(marketCapCoeffs, 0.0);
+            final int start = denseData.marketStart[m];
+            final int end = denseData.marketStart[m + 1];
+
+            for (int i = start; i < end; i++) marketCapCoeffs[i] = 1.0;
+
+            const_constraints.add(
+                new LinearConstraint(marketCapCoeffs, Relationship.LEQ, denseData.denseMarketCap[start])
+            );
         }
 
-        // 4) Per-(market,output) worker caps: w[m,o] <= limit * baseCapacity[m]
-        final double[] workerLimitCoeffs = new double[nVars]; // allocate once
-        for (int o = 0; o < numOutputs; o++) {
-            final String outputID = groupedOutputPairs.get(o).split(EconomyLoop.KEY)[1];
+        // 3) Per-(market,output) worker caps: w[m,o] <= limit * baseCapacity[m]
+        final double[] workerLimitCoeffs = new double[nVars]; // reused buffer
+        for (int i = 0; i < denseData.denseSize; i++) {
+            Arrays.fill(workerLimitCoeffs, 0.0);
+            workerLimitCoeffs[i] = 1.0;
 
-            for (int m = 0; m < numMarkets; m++) {
-                if (!outputsPerMarket.get(m).contains(o)) continue;
+            final Industry ind = denseData.denseIndustry[i];
 
-                final float limit = IndustryIOs.getIndConfig(industryCache[m][o])
-                    .outputs.get(outputID).workerAssignableLimit;
-                final double rhs = limit * baseCapacities[m];
+            final float limit = IndustryIOs.getIndConfig(ind)
+                .outputs.get(denseData.denseOutputID[i]).workerAssignableLimit;
 
-                Arrays.fill(workerLimitCoeffs, 0.0); // reset array
-                workerLimitCoeffs[idxW.apply(m, o)] = 1.0;
+            final double rhs = limit * denseData.denseMarketCap[i];
 
-                const_constraints.add(new LinearConstraint(workerLimitCoeffs, Relationship.LEQ, rhs));
-            }
+            const_constraints.add(
+                new LinearConstraint(workerLimitCoeffs, Relationship.LEQ, rhs)
+            );
         }
 
         // TODO fix fair spread causing deficits even though there are enough workers to go around.
-        // 5) Spreading assignments across markets
-        for (int o = 0; o < numOutputs; o++) {
-            if (weightSum[o] <= 0) continue;
+        // 4) Spreading assignments across markets
+        for (int i = 0; i < denseData.denseSize; i++) {
+            final long weightSum = denseData.denseWeightSum[i];
+            if (weightSum <= 0) continue;
 
-            for (int m = 0; m < numMarkets; m++) {
-                if (!outputsPerMarket.get(m).contains(o)) continue;
+            final long marketCap = denseData.denseMarketCap[i];
 
-                final double proportion = baseCapacities[m] / (double) weightSum[o];
-                final double tokenRatio = proportion * EconomyConfig.MIN_WORKER_FRACTION;
+            final double proportion = marketCap / (double) weightSum;
+            final double tokenRatio = proportion * EconomyConfig.MIN_WORKER_FRACTION;
 
-                final double[] coeffs = new double[nVars];
-                coeffs[idxW.apply(m, o)] = 1.0;
-                coeffs[idxSpread.apply(o)] = 1.0;
-                coeffs[idxTotalW.apply(o)] = -proportion;    
-                const_constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, tokenRatio));
-            }
+            final int o = denseData.denseOutputIndex[i];
+
+            final double[] coeffs = new double[nVars];
+            coeffs[i] = 1.0; // w_i
+            coeffs[idxSpread.apply(o)] = 1.0; // spread_o
+            coeffs[idxTotalW.apply(o)] = -proportion;
+
+            const_constraints.add(
+                new LinearConstraint(coeffs, Relationship.GEQ, tokenRatio)
+            );
         }
 
-        // 6) Set totalW tracking var to total workers assigned
+        // 5) Set totalW tracking var to total workers assigned
         for (int o = 0; o < numOutputs; o++) {
             final double[] coeffs = new double[nVars];
-            
-            for (int m = 0; m < numMarkets; m++) {
-                if (!outputsPerMarket.get(m).contains(o)) continue;
-                coeffs[idxW.apply(m,o)] = 1.0;
+
+            for (int i = 0; i < denseData.denseSize; i++) {
+                if (denseData.denseOutputIndex[i] == o) coeffs[i] = 1.0;
             }
 
-            // subtract the tracker variable
             coeffs[idxTotalW.apply(o)] = -1.0;
-            const_constraints.add(new LinearConstraint(coeffs, Relationship.EQ, 0.0));
+            const_constraints.add(
+                new LinearConstraint(coeffs, Relationship.EQ, 0.0)
+            );
         }
 
         double[] vars = null;
@@ -342,34 +268,28 @@ public class WorkforcePlanner {
         final double[] comAvailability = new double[numCommodities];
         final double[] shortage_mult = new double[numOutputs];
 
-        for (int i = 0; i < EconomyConfig.ECON_ALLOCATION_PASSES; i++) {
+        for (int pass = 0; pass < EconomyConfig.ECON_ALLOCATION_PASSES; pass++) {
             final List<LinearConstraint> constraints = new ArrayList<>();
             constraints.addAll(const_constraints);
             Arrays.fill(netCommodity, 0.0);
             Arrays.fill(comAvailability, 0.0);
             Arrays.fill(shortage_mult, 1.0);
 
-            if (i != 0) {
-                for (int c = 0; c < numCommodities; c++) {
-                    for (int o = 0; o < numOutputs; o++) {
+            if (pass != 0 && vars != null) {
+                for (int i = 0; i < denseSize; i++) {
+                    final double w = vars[i];
+                    if (w == 0.0) continue;
+
+                    final int o = denseData.denseOutputIndex[i];
+                    for (int c = 0; c < numCommodities; c++) {
                         final double base = A[c][o];
                         if (base == 0.0) continue;
-    
-                        for (int m = 0; m < numMarkets; m++) {
-                            if (!outputsPerMarket.get(m).contains(o)) continue;
-    
-                            final double w = vars[idxW.apply(m, o)];
-                            if (w == 0.0) continue;
-    
-                            final double mod = base > 0.0 ? outputMods[m][o] :
-                                CompatLayer.getModifiersMult(
-                                    industryCache[m][o],
-                                    commodities.get(c),
-                                    true
-                                );
-    
-                            netCommodity[c] += base * mod * w;
-                        }
+
+                        final double mod = (base > 0.0)
+                            ? denseData.denseOutputMod[i]
+                            : CompatLayer.getModifiersMult(denseData.denseIndustry[i], commodities.get(c), true);
+
+                        netCommodity[c] += base * mod * w;
                     }
                 }
     
@@ -378,13 +298,12 @@ public class WorkforcePlanner {
                     else comAvailability[c] = Math.min(1.0, netCommodity[c] / demand[c]);
                 }
     
+                final Map<String, Map<String, Map<String, Float>>> byIndustry =
+                    IndustryIOs.getBaseInputsMap();
                 for (int o = 0; o < numOutputs; o++) {
                     final String pair = groupedOutputPairs.get(o);
                     final String industryID = pair.split(EconomyLoop.KEY)[0];
                     final String outputID = pair.split(EconomyLoop.KEY)[1];
-    
-                    final Map<String, Map<String, Map<String, Float>>> byIndustry =
-                        IndustryIOs.getBaseInputsMap();
     
                     final Map<String, Map<String, Float>> byOutput =
                         byIndustry.get(industryID);
@@ -417,18 +336,18 @@ public class WorkforcePlanner {
                 }
             }
 
-            // 7) PRIMARY: Commodity production constraints:
-            // For each commodity c: sum_{o,m} A[c][o] * mod[m,o] * w[m,o] + slack[c] >= demand[c] * buffer
-            final double[] quotaCoeffs = new double[nVars]; // allocate once
+            // 6) PRIMARY: Commodity production constraints:
+            final double[] quotaCoeffs = new double[nVars];
             for (int c = 0; c < numCommodities; c++) {
                 Arrays.fill(quotaCoeffs, 0.0);
 
-                for (int o = 0; o < numOutputs; o++) {
-                    for (int m = 0; m < numMarkets; m++) {
-                        if (!outputsPerMarket.get(m).contains(o)) continue;
-                        
-                        quotaCoeffs[idxW.apply(m, o)] += A[c][o] * outputMods[m][o] * shortage_mult[o];
-                    }
+                for (int i = 0; i < denseSize; i++) {
+                    final int o = denseData.denseOutputIndex[i];
+                    final double base = A[c][o];
+                    if (base == 0.0) continue;
+
+                    final double coeff = base * denseData.denseOutputMod[i] * shortage_mult[o];
+                    quotaCoeffs[i] += coeff;
                 }
 
                 quotaCoeffs[idxS.apply(c)] = 1.0; // slack for commodity
@@ -447,12 +366,21 @@ public class WorkforcePlanner {
             vars = solution.getPoint();
         }
 
-        // 8) Extract assignments w[m,o] into map for grouped outputs
+        // 7) Extract assignments w[m,o] into map for grouped outputs
+        final double[] denseWorkerVars = new double[denseSize];
+        System.arraycopy(vars, 0, denseWorkerVars, 0, denseSize);
+
+        // expand into full sparse w[m,o] layout
+        final double[] fullWorkers = DenseModel.expandDenseSolution(
+            denseWorkerVars, outputsPerMarket, numOutputs
+        );
         final Map<MarketAPI, float[]> groupedAssignments = new HashMap<>();
+
         for (int m = 0; m < numMarkets; m++) {
             final float[] arr = new float[numOutputs];
+            final int base = m * numOutputs;
             for (int o = 0; o < numOutputs; o++) {
-                arr[o] = (float) vars[idxW.apply(m, o)];
+                arr[o] = (float) fullWorkers[base + o];
             }
             groupedAssignments.put(markets.get(m), arr);
         }
@@ -462,6 +390,4 @@ public class WorkforcePlanner {
             markets, industryOutputPairs
         );
     }
-
-
 }

@@ -13,8 +13,8 @@ import org.apache.log4j.Logger;
 
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
@@ -73,7 +73,12 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             final CallbackRunnable<Button> run = (btn) -> {
                 IndustryMatrix.invalidate();
                 
+                final long startTime = System.nanoTime();
                 EconomyEngine.getInstance().fakeAdvanceWithAssignWorkers();
+                final long endTime = System.nanoTime();
+                Global.getLogger(getClass()).info("Solver elapsed time: " +
+                    ((endTime - startTime) / 1_000_000) + " ms"
+                );
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 "Recalculate Worker Assignments", Fonts.DEFAULT_SMALL, run

@@ -1,7 +1,6 @@
 package wfg.ltv_econ.economy.engine;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,17 +18,13 @@ import com.fs.starfarer.api.combat.MutableStat;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.DebtDebuffTier;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
-import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CommodityDomain;
-import wfg.ltv_econ.economy.CompatLayer;
-import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.WorkforcePlanner;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
-import wfg.ltv_econ.industry.IndustryGrouper;
-import wfg.ltv_econ.industry.IndustryGrouper.GroupedMatrix;
+import wfg.ltv_econ.economy.planning.IndustryMatrix;
+import wfg.ltv_econ.economy.planning.WorkforceAllocator;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class EconomyLoop {
@@ -183,54 +178,12 @@ public class EconomyLoop {
 
     public final void assignWorkers() {
         final WorkerRegistry reg = WorkerRegistry.getInstance();
-
-        final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
         final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
-        final var indOutputPairToColumn = IndustryMatrix.getIndOutputPairToColumnMap();
-        final GroupedMatrix A = IndustryGrouper.getStaticGrouping();
-
-        Map<String, Integer> commodityToRow = new HashMap<>();
-        for (int i = 0; i < commodities.size(); i++) {
-            commodityToRow.put(commodities.get(i), i);
-        }
-
-        final double[] d = new double[commodities.size()];
-        for (String commodityID : commodities) {
-            Integer row = commodityToRow.get(commodityID);
-            if (row != null) {
-                d[row] = engine.info.getGlobalDemand(commodityID);
-            }
-        }
-
-        final List<List<Integer>> outputsPerMarket = new ArrayList<>();
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         markets.removeIf(MarketAPI::isPlayerOwned);
 
-        for (int i = 0; i < markets.size(); i++) {
-            final List<Integer> outputIndexes = new ArrayList<>();
-            final MarketAPI market = markets.get(i);
-
-            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
-                if (!ind.isFunctional()) continue;
-
-                final IndustryConfig config = IndustryIOs.getIndConfig(ind);
-                if (!config.workerAssignable) continue;
-
-                final String indID = IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec());
-
-                for (String outputID : IndustryIOs.getIndConfig(ind).outputs.keySet()) {
-                    if (!CompatLayer.hasRelevantCondition(outputID, market)) continue;
-                    if (!IndustryIOs.isOutputValidForMarket(config.outputs.get(outputID), ind)) continue;
-
-                    final int idx = indOutputPairToColumn.getOrDefault(indID + KEY + outputID, -1);
-                    if (idx != -1) outputIndexes.add(idx);
-                }
-            }
-            outputsPerMarket.add(outputIndexes);
-        }
-
-        final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforcePlanner.computeWorkerAllocations(
-            A, d, markets, industryOutputPairs, outputsPerMarket, commodities
+        final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforceAllocator.computeWorkerAllocations(
+            markets, industryOutputPairs
         );
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
@@ -241,7 +194,7 @@ public class EconomyLoop {
             final long totalWorkers = cond.getWorkerPool();
 
             for (int i = 0; i < industryOutputPairs.size(); i++) {
-                if (assignments[i] == 0) continue;
+                if (assignments[i] == 0f) continue;
 
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(KEY), 2);
 

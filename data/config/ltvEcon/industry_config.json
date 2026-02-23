@@ -805,6 +805,7 @@
 	},
 	"cryosanctum": {
 		"occTag": "service",
+		"workerAssignable": true,
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
@@ -814,12 +815,13 @@
 				"isAbstract": true
 			},
 			"organs": {
-				"baseProd": 0.3,
+				"baseProd": 1,
 				"CCMoneyDist": {
-					"abstract": 0.95,
-					"supplies": 0.05
+					"abstract": 0.9,
+					"supplies": 0.1
 				},
-				"scaleWithMarketSize": true
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.2
 			}
 		}
 	},

@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy;
+package wfg.ltv_econ.economy.planning;
 
 import java.util.ArrayList;
 import java.util.HashMap;

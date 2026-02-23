@@ -1,26 +1,25 @@
-package wfg.ltv_econ.industry;
+package wfg.ltv_econ.economy.planning;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
-import wfg.ltv_econ.economy.IndustryMatrix;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
+import wfg.ltv_econ.industry.IndustryIOs;
 
 public final class IndustryGrouper {
 
-    private static GroupedMatrix STATIC_GROUPING;
+    private static IndustryMatrixGrouped STATIC_GROUPING;
 
-    public static synchronized GroupedMatrix getStaticGrouping() {
+    public static synchronized IndustryMatrixGrouped getStaticGrouping() {
         if (STATIC_GROUPING == null) {
             double[][] A = IndustryMatrix.getMatrix();
             List<String> pairs = IndustryMatrix.getIndustryOutputPairs();
@@ -38,7 +37,7 @@ public final class IndustryGrouper {
      * Industries with differing outputs or inputs are never grouped,
      * even if their matrix columns are close.
      */
-    public static GroupedMatrix groupSimilarIndustries(
+    public static IndustryMatrixGrouped groupSimilarIndustries(
         double[][] A,
         List<String> industryOutputPairs,
         double similarityTolerance
@@ -100,7 +99,7 @@ public final class IndustryGrouper {
             }
         }
 
-        return new GroupedMatrix(reduced, groupNames, groupToMembers, memberToGroup);
+        return new IndustryMatrixGrouped(reduced, groupNames, groupToMembers, memberToGroup);
     }
 
     private static boolean haveSameCommodityPattern(double[][] A, int colJ, int colK) {
@@ -122,10 +121,10 @@ public final class IndustryGrouper {
         return Math.sqrt(sumSq);
     }
 
-    public static final Pair<List<String>, List<List<Integer>>> applyGroupingToMarketData(
+    public static final Pair<List<String>, List<BitSet>> applyGroupingToMarketData(
         List<MarketAPI> markets,
         List<String> pairs,
-        List<List<Integer>> outputsPerMarket,
+        List<BitSet> outputsPerMarket,
         Map<String, String> memberToGroup
     ) {
         final List<String> groupedPairs = new ArrayList<>();
@@ -140,17 +139,20 @@ public final class IndustryGrouper {
             }
         }
 
-        // Step 2: rewrite outputsPerMarket using new indices
-        final List<List<Integer>> newOutputsPerMarket = new ArrayList<>();
-        for (List<Integer> oldList : outputsPerMarket) {
-            Set<Integer> newSet = new HashSet<>();
-            for (int idx : oldList) {
-                String oldPair = pairs.get(idx);
-                String group = memberToGroup.getOrDefault(oldPair, oldPair);
-                Integer newIdx = groupIndex.get(group);
-                if (newIdx != null) newSet.add(newIdx);
+        // Step 2: remap bitsets
+        final List<BitSet> newOutputsPerMarket = new ArrayList<>(outputsPerMarket.size());
+        for (BitSet oldBits : outputsPerMarket) {
+            final BitSet newBits = new BitSet(groupedPairs.size());
+
+            // iterate only over set bits (this is why BitSet is used)
+            for (int idx = oldBits.nextSetBit(0); idx >= 0; idx = oldBits.nextSetBit(idx + 1)) {
+                final String oldPair = pairs.get(idx);
+                final String group = memberToGroup.getOrDefault(oldPair, oldPair);
+                final int newIdx = groupIndex.get(group);
+                newBits.set(newIdx);
             }
-            newOutputsPerMarket.add(new ArrayList<>(newSet));
+
+            newOutputsPerMarket.add(newBits);
         }
 
         return new Pair<>(groupedPairs, newOutputsPerMarket);
@@ -158,7 +160,7 @@ public final class IndustryGrouper {
 
     public static Map<MarketAPI, float[]> expandGroupedAssignments(
         Map<MarketAPI, float[]> groupedAssignments,
-        GroupedMatrix group,
+        IndustryMatrixGrouped group,
         List<MarketAPI> markets,
         List<String> industryOutputPairs
     ) {
@@ -204,13 +206,13 @@ public final class IndustryGrouper {
         return expanded;
     }
 
-    public static class GroupedMatrix {
+    public static class IndustryMatrixGrouped {
         public final double[][] reducedMatrix;
         public final List<String> groupNames;
         public final Map<String, List<String>> groupToMembers;
         public final Map<String, String> memberToGroup;
 
-        public GroupedMatrix(
+        public IndustryMatrixGrouped(
             double[][] reducedMatrix,
             List<String> groupNames,
             Map<String, List<String>> groupToMembers,

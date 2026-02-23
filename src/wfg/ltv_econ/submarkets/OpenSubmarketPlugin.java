@@ -208,7 +208,8 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 		if (!market.isPlayerOwned()) {
 			for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
-				if (settings.getCommoditySpec(stack.getCommodityId()).isNonEcon()) continue;
+				final var spec = settings.getCommoditySpec(stack.getCommodityId());
+				if (spec == null || spec.isNonEcon()) continue;
 	
 				final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
 				cell.addStoredAmount(stack.getSize() * EconomyConfig.OPEN_MARKET_TO_STOCKPILES_RATIO);
