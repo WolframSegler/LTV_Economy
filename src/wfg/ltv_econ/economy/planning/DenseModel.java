@@ -1,7 +1,9 @@
 package wfg.ltv_econ.economy.planning;
 
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -16,44 +18,53 @@ public class DenseModel {
     public final int denseSize;
     public final long[] denseMarketCap;
     public final long[] denseWeightSum;
-    public final Industry[] denseIndustry;
     public final double[] denseOutputMod;
-    public final int[] marketStart; 
-    public final String[] denseOutputID;
+    public final int[] outputToComIndex;
+    public final int[] marketStart;
     public final int[] denseOutputIndex;
+    public final float[] denseWorkerLimitFrac;
+    public final float[] denseProdPerWorker;
+    public final Map<String, Integer> commodityIndex;
 
     private DenseModel(int denseSize, long[] denseMarketCap, long[] denseWeightSum,
-        Industry[] denseIndustry, double[] denseOutputMod, int[] marketStart, String[] denseOutputID,
-        int[]  denseOutputIndex
+        double[] denseOutputMod, int[] marketStart, int[] denseOutputIndex, float[] denseProdPerWorker,
+        float[] denseWorkerLimitFrac, int[] outputToComIndex, Map<String, Integer> commodityIndex
     ) {
         this.denseSize = denseSize;
         this.denseMarketCap = denseMarketCap;
         this.denseWeightSum = denseWeightSum;
-        this.denseIndustry = denseIndustry;
         this.denseOutputMod = denseOutputMod;
         this.marketStart = marketStart;
-        this.denseOutputID = denseOutputID;
         this.denseOutputIndex = denseOutputIndex;
+        this.denseWorkerLimitFrac = denseWorkerLimitFrac;
+        this.outputToComIndex = outputToComIndex;
+        this.commodityIndex = commodityIndex;
+        this.denseProdPerWorker = denseProdPerWorker;
     }
 
     public static final DenseModel createDenseData(final List<MarketAPI> markets,
         final List<String> groupedOutputPairs, final List<BitSet> outputsPerMarket
     ) {
-        final IndustryMatrixGrouped A = IndustryGrouper.getStaticGrouping();
+        final IndustryMatrixGrouped MatrixData = IndustryGrouper.getStaticGrouping();
+        final double[][] A = MatrixData.reducedMatrix;
+        final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
 
         final int numMarkets = markets.size();
         final int numOutputs = groupedOutputPairs.size();
+        final int numCommodities = commodities.size();
 
         int denseCount = 0;
         for (BitSet bits : outputsPerMarket) denseCount += bits.cardinality();
 
         final long[] denseMarketCap = new long[denseCount];
         final long[] denseWeightSum = new long[denseCount];
-        final Industry[] denseIndustry = new Industry[denseCount];
         final double[] denseOutputMod = new double[denseCount];
         final int[] marketStart = new int[numMarkets + 1];
-        final String[] denseOutputID = new String[denseCount];
         final int[] denseOutputIndex = new int[denseCount];
+        final int[] outputToComIndex = new int[denseCount];
+        final float[] denseWorkerLimitFrac = new float[denseCount];
+        final float[] denseProdPerWorker = new float[denseCount];
+        final Map<String, Integer> commodityIndex = new HashMap<>(numCommodities);
 
         final long[] baseCapacities = new long[numMarkets];
         final long[] weightSum = new long[numOutputs];
@@ -72,6 +83,10 @@ public class DenseModel {
             weightSum[o] = s;
         }
 
+        for (int c = 0; c < numCommodities; c++) {
+            commodityIndex.put(commodities.get(c), c);
+        }
+
         int denseIdx = 0;
         for (int m = 0; m < numMarkets; m++) {
             marketStart[m] = denseIdx;
@@ -87,28 +102,33 @@ public class DenseModel {
                 final String indGroupID = split[0];
                 final String outputID = split[1];
 
-                denseOutputID[denseIdx] = outputID;
-
                 final Industry ind;
-                if (A.groupToMembers.get(pair) == null) {
+                if (MatrixData.groupToMembers.get(pair) == null) {
                     ind = IndustryIOs.getRealIndustryFromBaseID(markets.get(m), indGroupID);
                 } else {
-                    final List<String> baseIDs = A.groupToMembers.get(pair).stream()
+                    final List<String> baseIDs = MatrixData.groupToMembers.get(pair).stream()
                         .map(p -> p.split(EconomyLoop.KEY)[0]).toList();
                     ind = IndustryIOs.getRealIndustryFromBaseID(markets.get(m), baseIDs);
                 }
 
-                denseIndustry[denseIdx] = ind;
+                final float limitFrac = ind == null ? 0f :
+                    IndustryIOs.getIndConfig(ind).outputs.get(outputID).workerAssignableLimit;
+                denseWorkerLimitFrac[denseIdx] = limitFrac;
+
                 denseOutputMod[denseIdx] = (ind == null) ? 1.0 :
                     CompatLayer.getModifiersMult(ind, outputID, false);
+
+                final Integer c = commodityIndex.get(outputID);
+                outputToComIndex[denseIdx] = c != null ? c : -1;
+                denseProdPerWorker[denseIdx] = (float) (denseOutputMod[denseIdx] * (c != null ? A[c][o] : 1f));
 
                 denseIdx++;
             }
         }
         marketStart[numMarkets] = denseIdx;
 
-        return new DenseModel(denseCount, denseMarketCap, denseWeightSum, denseIndustry,
-            denseOutputMod, marketStart, denseOutputID, denseOutputIndex
+        return new DenseModel(denseCount, denseMarketCap, denseWeightSum, denseOutputMod, marketStart,
+            denseOutputIndex, denseProdPerWorker, denseWorkerLimitFrac, outputToComIndex, commodityIndex
         );
     }
 

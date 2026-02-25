@@ -206,12 +206,14 @@ public class AssignWorkersDialog extends DialogPanel {
 
         if (!importing) {
             for (String comID : IndustryIOs.getRealOutputs(industry, false).keySet()) {
-                supplyList.put(comID, CompatLayer.convertIndSupplyStat(industry, comID));
+                final var stat = CompatLayer.convertIndSupplyStat(industry, comID);
+                if (stat.getModifiedValue() > 0f) supplyList.put(comID, stat);
             }
         }
 
         for (String comID : IndustryIOs.getRealInputs(industry, false)) {
-            demandList.put(comID, CompatLayer.convertIndDemandStat(industry, comID));
+            final var stat = CompatLayer.convertIndDemandStat(industry, comID);
+            if (stat.getModifiedValue() > 0f) demandList.put(comID, stat);
         }
 
         TooltipMakerAPI tp = ComponentFactory.createTooltip((panelWidth / 2) - opad, false);
@@ -239,19 +241,19 @@ public class AssignWorkersDialog extends DialogPanel {
             tp.setIconSpacingMedium();
             tp.addIcons(com, 1, IconRenderMode.NORMAL);
             tp.addIconGroup(0f);
-            UIComponentAPI iconComp = tp.getPrev();
+            final UIComponentAPI iconComp = tp.getPrev();
 
             // Add extra padding for thinner icons
-            float actualIconWidth = iconSize * com.getIconWidthMult();
+            final float actualIconWidth = iconSize * com.getIconWidthMult();
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
-            String txt = Strings.X + NumFormat.engNotation(pAmount);
-            LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
+            final String txt = Strings.X + NumFormat.engNotation(pAmount);
+            final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
-            float textH = lbl.computeTextHeight(txt);
-            float textX = x + iconSize + pad;
-            float textY = y + (iconSize - textH) * 0.5f;
+            final float textH = lbl.computeTextHeight(txt);
+            final float textX = x + iconSize + pad;
+            final float textY = y + (iconSize - textH) * 0.5f;
             lbl.getPosition().inTL(textX, textY);
 
             // advance X
@@ -283,7 +285,7 @@ public class AssignWorkersDialog extends DialogPanel {
             // draw icon
             tp.beginIconGroup();
             tp.setIconSpacingMedium();
-            IconRenderMode renderMode = availability < 0.9f && !importing ?
+            final IconRenderMode renderMode = availability < 0.9f && !importing ?
                 IconRenderMode.DIM_RED : IconRenderMode.NORMAL;
             tp.addIcons(cell.spec, 1, renderMode);
             tp.addIconGroup(0f);

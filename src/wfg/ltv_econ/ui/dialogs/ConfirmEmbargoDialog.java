@@ -23,7 +23,7 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
     public ConfirmEmbargoDialog(FactionSpecAPI faction, RowPanel caller, boolean alreadyEmbargoed) {
         super(Attachments.getScreenPanel(),
             null,
-            alreadyEmbargoed ? "Lift the embargo on "+faction.getDisplayName()+"? Colonies may resume trading with the faction." : "Impose an embargo on "+faction.getDisplayName()+"? Colonies cannot trade with this faction while embargo is active. This will negatively impact relations.",
+            alreadyEmbargoed ? "Lift the embargo on "+faction.getDisplayName()+"? Colonies may resume trade." : "Impose an embargo on "+faction.getDisplayName()+"? Colonies cannot trade with this faction while the embargo is active. This will negatively impact relations.",
             alreadyEmbargoed ? "Lift" : "Impose",
             "Cancel"
         );
