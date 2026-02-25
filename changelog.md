@@ -1,6 +1,6 @@
 v0.2.8-beta | SAVE COMPATIBLE
 - Fixed best places to buy / sell again
-- Fixed dynamic config generator again. Please delete the old config file under /saves/common/dynamic_industry_config.json
+- Fixed dynamic config generator again.
 - A portion of the goods sold to the open market makes their way to the colony stockpiles for npc markets
 - Updated the conditions for the manufacturing industry
 - A list was added to the economy config for excluding markets from the manufacturing industry check.
