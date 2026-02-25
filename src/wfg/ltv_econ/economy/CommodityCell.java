@@ -376,6 +376,12 @@ public class CommodityCell {
 
         final Market mkt = (Market) market;
 
+        if (spec.isExotic()) {
+            return mkt.getDemandPriceAssumingStockpileUtility(
+                mkt.getCommodityData(comID), 0.0, amount, isPlayer
+            );
+        }
+
         final PriceType type = isSellingToMarket ? PriceType.MARKET_BUYING : PriceType.MARKET_SELLING;
         final float unitPrice = getUnitPrice(
             type, amount, stored + market.getCommodityData(comID).getTradeModPlus().getModifiedInt(),

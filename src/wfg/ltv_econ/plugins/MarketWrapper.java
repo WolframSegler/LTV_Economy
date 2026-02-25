@@ -87,7 +87,7 @@ public class MarketWrapper extends Market {
         if (quantity <= 0) return 0f;
 
         final CommoditySpecAPI spec = ((CommodityOnMarketAPI)com).getCommodity();
-        if (spec.isNonEcon() || spec.isExotic()) {
+        if (spec.isNonEcon()) {
             return original.getDemandPriceAssumingStockpileUtility(com, stockpiles, quantity, isPlayer);
         }
         if (spec.getPriceVariability() == PriceVariability.V0) {
