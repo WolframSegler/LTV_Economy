@@ -17,13 +17,15 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ConfigUtils;
 
 import java.util.List;
+
+import static wfg.ltv_econ.constants.Mods.LTV_ECON;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +39,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class IndustryConfigManager {
+    private static final SettingsAPI settings = Global.getSettings();
 
     public static final String BASE_MAINTENANCE_ID = "maintenance_base";
 
@@ -58,7 +61,6 @@ public class IndustryConfigManager {
     }
 
     private static final void load() {
-        final SettingsAPI settings = Global.getSettings();
         try {
             config = settings.getMergedJSON(CONFIG_PATH);
         } catch (Exception ex) {
@@ -88,54 +90,38 @@ public class IndustryConfigManager {
         return dynamicConfig ? dynamic_config : config;
     }
 
+    public static final String getDynamicConfigVersion() {
+        final JSONObject root = getConfig(true);
+        try {
+            final String key = "modVersion";
+            return root.has(key) ? root.getString(key) : "";
+        } catch (Exception e) {
+            throw new RuntimeException(
+                "Failed to retrieve industry configuration version from " + DYNAMIC_CONFIG_PATH, e
+            );
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static final Map<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
         final JSONObject root = getConfig(dynamicConfig);
         final Map<String, IndustryConfig> result = new HashMap<>();
 
-        try {
-        for (Iterator<String> itIndustry = root.keys(); itIndustry.hasNext();) {
-            final String industryId = itIndustry.next();
-            final JSONObject industryJson = root.getJSONObject(industryId);
+        try { if (root.has("industryList")) {
 
-            final boolean workerAssignable = industryJson.optBoolean("workerAssignable", false);
-            final boolean ignoreLocalStockpiles = industryJson.optBoolean("ignoreLocalStockpiles", false);
+        final JSONArray industries = root.getJSONArray("industryList");
+        for (int indIdx = 0; indIdx < industries.length(); indIdx++) {
+            final JSONObject indJson = industries.getJSONObject(indIdx);
 
-            final String occTagStr = industryJson.optString("occTag", null);
-            OCCTag occTag = OCCTag.AVERAGE;
+            final String indID = indJson.getString("industryId");
+            final boolean workerAssignable = indJson.optBoolean("workerAssignable", false);
+            final boolean ignoreLocalStockpiles = indJson.optBoolean("ignoreLocalStockpiles", false);
+            final String occTag = indJson.optString("occTag", LaborConfigLoader.AVERAGE_OCC_TAG);
 
-            if (occTagStr != null) {
-                switch (occTagStr) {
-                case "average":
-                    break;
-                case "industry":
-                    occTag = OCCTag.INDUSTRY;
-                    break;
-                case "consumer":
-                    occTag = OCCTag.CONSUMER;
-                    break;
-                case "manufacture":
-                    occTag = OCCTag.MANUFACTURE;
-                    break;
-                case "service":
-                    occTag = OCCTag.SERVICE;
-                    break;
-                case "agriculture":
-                    occTag = OCCTag.AGRICULTURE;
-                    break;
-                case "manual":
-                    occTag = OCCTag.MANUAL;
-                    break;
-                case "space":
-                    occTag = OCCTag.SPACE;
-                    break;
-                }
-            }
-
-            final JSONObject outputList = industryJson.getJSONObject("outputList");
+            final JSONObject outputList = indJson.getJSONObject("outputList");
             final Map<String, OutputConfig> commodityMap = new HashMap<>();
 
-            Iterator<String> outputIds = outputList.keys();
+            final Iterator<String> outputIds = outputList.keys();
             while (outputIds.hasNext()) {
                 final String outputId = outputIds.next();
                 final JSONObject outputData = outputList.getJSONObject(outputId);
@@ -216,12 +202,13 @@ public class IndustryConfigManager {
             IndustryConfig indConfig = new IndustryConfig(
                 workerAssignable, commodityMap, occTag, ignoreLocalStockpiles
             );
-            result.put(industryId, indConfig);
+            result.put(indID, indConfig);
         }
-        } catch (Exception e) {
+        
+        }} catch (Exception e) {
             throw new RuntimeException(
-                "Failed to load industry configuration from 'data/config/': "
-                + e.getMessage(), e
+                "Failed to load industry configuration from " +
+                (dynamicConfig ? DYNAMIC_CONFIG_PATH : CONFIG_PATH), e
             );
         }
 
@@ -229,71 +216,73 @@ public class IndustryConfigManager {
     }
 
     public static final JSONObject serializeIndustryConfigs(Map<String, IndustryConfig> configs) {
-        JSONObject root = new JSONObject();
+        final JSONObject root = new JSONObject();
 
         try {
-            for (Map.Entry<String, IndustryConfig> entry : configs.entrySet()) {
-                String industryId = entry.getKey();
-                IndustryConfig ind = entry.getValue();
+        root.put("modVersion", settings.getModManager().getModSpec(LTV_ECON).getVersion());
 
-                JSONObject indJson = new JSONObject();
-                indJson.put("workerAssignable", ind.workerAssignable);
-                indJson.put("ignoreLocalStockpiles", ind.ignoreLocalStockpiles);
+        final List<JSONObject> industries = new ArrayList<>();
+        for (Map.Entry<String, IndustryConfig> entry : configs.entrySet()) {
+            final String indID = entry.getKey();
+            final IndustryConfig ind = entry.getValue();
 
-                if (ind.occTag != null) {
-                    indJson.put("occTag", ind.occTag.name().toLowerCase());
+            final JSONObject indJson = new JSONObject();
+            indJson.put("industryId", indID);
+            indJson.put("workerAssignable", ind.workerAssignable);
+            indJson.put("ignoreLocalStockpiles", ind.ignoreLocalStockpiles);
+            indJson.put("occTag", ind.occTag);
+
+            final JSONObject outputMap = new JSONObject();
+            for (Map.Entry<String, OutputConfig> outputEntry : ind.outputs.entrySet()) {
+                final String outputId = outputEntry.getKey();
+                final OutputConfig opt = outputEntry.getValue();
+
+                final JSONObject optJson = new JSONObject();
+                optJson.put("baseProd", opt.baseProd);
+                optJson.put("target", opt.target);
+                optJson.put("workerAssignableLimit", opt.workerAssignableLimit);
+                optJson.put("marketScaleBase", opt.marketScaleBase);
+
+                if (opt.CCMoneyDist != null && !opt.CCMoneyDist.isEmpty()) {
+                    JSONObject ccJson = new JSONObject();
+                    for (Map.Entry<String, Float> e : opt.CCMoneyDist.entrySet()) {
+                        ccJson.put(e.getKey(), e.getValue());
+                    }
+                    optJson.put("CCMoneyDist", ccJson);
                 }
 
-                JSONObject outputList = new JSONObject();
-                for (Map.Entry<String, OutputConfig> outputEntry : ind.outputs.entrySet()) {
-                    String outputId = outputEntry.getKey();
-                    OutputConfig opt = outputEntry.getValue();
-
-                    JSONObject optJson = new JSONObject();
-                    optJson.put("baseProd", opt.baseProd);
-                    optJson.put("target", opt.target);
-                    optJson.put("workerAssignableLimit", opt.workerAssignableLimit);
-                    optJson.put("marketScaleBase", opt.marketScaleBase);
-
-                    if (opt.CCMoneyDist != null && !opt.CCMoneyDist.isEmpty()) {
-                        JSONObject ccJson = new JSONObject();
-                        for (Map.Entry<String, Float> e : opt.CCMoneyDist.entrySet()) {
-                            ccJson.put(e.getKey(), e.getValue());
-                        }
-                        optJson.put("CCMoneyDist", ccJson);
+                if (opt.InputsPerUnitOutput != null && !opt.InputsPerUnitOutput.isEmpty()) {
+                    JSONObject inputsJson = new JSONObject();
+                    for (Map.Entry<String, Float> e : opt.InputsPerUnitOutput.entrySet()) {
+                        inputsJson.put(e.getKey(), e.getValue());
                     }
-
-                    if (opt.InputsPerUnitOutput != null && !opt.InputsPerUnitOutput.isEmpty()) {
-                        JSONObject inputsJson = new JSONObject();
-                        for (Map.Entry<String, Float> e : opt.InputsPerUnitOutput.entrySet()) {
-                            inputsJson.put(e.getKey(), e.getValue());
-                        }
-                        optJson.put("InputsPerUnitOutput", inputsJson);
-                    }
-
-                    if (opt.ifMarketCondsAllFalse != null && !opt.ifMarketCondsAllFalse.isEmpty()) {
-                        optJson.put("ifMarketCondsAllFalse", new JSONArray(opt.ifMarketCondsAllFalse));
-                    }
-
-                    if (opt.ifMarketCondsAllTrue != null && !opt.ifMarketCondsAllTrue.isEmpty()) {
-                        optJson.put("ifMarketCondsAllTrue", new JSONArray(opt.ifMarketCondsAllTrue));
-                    }
-
-                    optJson.put("scaleWithMarketSize", opt.scaleWithMarketSize);
-                    optJson.put("usesWorkers", opt.usesWorkers);
-                    optJson.put("isAbstract", opt.isAbstract);
-                    optJson.put("checkLegality", opt.checkLegality);
-                    optJson.put("activeDuringBuilding", opt.activeDuringBuilding);
-
-                    outputList.put(outputId, optJson);
+                    optJson.put("InputsPerUnitOutput", inputsJson);
                 }
 
-                indJson.put("outputList", outputList);
-                root.put(industryId, indJson);
+                if (opt.ifMarketCondsAllFalse != null && !opt.ifMarketCondsAllFalse.isEmpty()) {
+                    optJson.put("ifMarketCondsAllFalse", new JSONArray(opt.ifMarketCondsAllFalse));
+                }
+
+                if (opt.ifMarketCondsAllTrue != null && !opt.ifMarketCondsAllTrue.isEmpty()) {
+                    optJson.put("ifMarketCondsAllTrue", new JSONArray(opt.ifMarketCondsAllTrue));
+                }
+
+                optJson.put("scaleWithMarketSize", opt.scaleWithMarketSize);
+                optJson.put("usesWorkers", opt.usesWorkers);
+                optJson.put("isAbstract", opt.isAbstract);
+                optJson.put("checkLegality", opt.checkLegality);
+                optJson.put("activeDuringBuilding", opt.activeDuringBuilding);
+
+                outputMap.put(outputId, optJson);
             }
+            indJson.put("outputList", outputMap);
+
+            industries.add(indJson);
+        }
+        root.put("industryList", industries);
         } catch (JSONException e) {
             Global.getLogger(IndustryConfigManager.class)
-                .error("Failed to serialize industry configs to JSON: " + e.getMessage(), e);
+                .error("Failed to serialize industry configs to JSON", e);
         }
 
         return root;
@@ -302,12 +291,12 @@ public class IndustryConfigManager {
     public static class IndustryConfig {
         public final boolean workerAssignable;
         public final boolean ignoreLocalStockpiles;
-        public final OCCTag occTag;
+        public final String occTag;
         public final Map<String, OutputConfig> outputs;
 
         public boolean dynamic = false;
 
-        public IndustryConfig(boolean workerAssignable, Map<String, OutputConfig> outputs, OCCTag occTag,
+        public IndustryConfig(boolean workerAssignable, Map<String, OutputConfig> outputs, String occTag,
             boolean ignoreLocalStockpiles
         ) {
             this.workerAssignable = workerAssignable;
@@ -341,7 +330,7 @@ public class IndustryConfigManager {
         public final String toString() {
             return '{' + " ,\n"
                 + "workerAssignable: " + workerAssignable + " ,\n"
-                + "occTag: " + occTag.toString() + " ,\n"
+                + "occTag: " + occTag + " ,\n"
                 + "ignoreLocalStockpiles: " + ignoreLocalStockpiles + " ,\n"
                 + "dynamicConfig: " + dynamic + " ,\n"
                 + outputs.toString()
@@ -450,13 +439,14 @@ public class IndustryConfigManager {
      * </p>
      */
     private static final void validateOrRebuildDynamicConfigs() {
-        final SettingsAPI settings = Global.getSettings();
         final Map<String, IndustryConfig> dynamic_config =
             IndustryConfigManager.loadAsMap(true);
         final Set<String> validIndustryIds = settings.getAllIndustrySpecs().stream()
             .map(IndustrySpecAPI::getId).collect(Collectors.toSet());
 
         boolean allIndustriesHaveConfig = true;
+        final boolean current = settings.getModManager().getModSpec(LTV_ECON).getVersion()
+            .equals(getDynamicConfigVersion());
 
         // 1) Check that every existing spec has a config
         for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
@@ -482,7 +472,7 @@ public class IndustryConfigManager {
             }
         }
 
-        if (allIndustriesHaveConfig) {
+        if (allIndustriesHaveConfig && current) {
             ind_config.putAll(dynamic_config);
             return;
         }
@@ -606,7 +596,7 @@ public class IndustryConfigManager {
                 illegalOutputs.forEach(addOutput);
     
                 final IndustryConfig config = new IndustryConfig(
-                    usesWorkers, configOutputs, OCCTag.AVERAGE, false
+                    usesWorkers, configOutputs, LaborConfigLoader.AVERAGE_OCC_TAG, false
                 );
                 config.dynamic = true;
     
@@ -614,7 +604,7 @@ public class IndustryConfigManager {
 
             } else {
                 final IndustryConfig config = new IndustryConfig(
-                    false, configOutputs, OCCTag.AVERAGE, false
+                    false, configOutputs, LaborConfigLoader.AVERAGE_OCC_TAG, false
                 );
                 config.dynamic = true;
     

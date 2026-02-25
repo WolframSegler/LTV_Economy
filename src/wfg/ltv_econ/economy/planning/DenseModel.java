@@ -19,16 +19,14 @@ public class DenseModel {
     public final long[] denseMarketCap;
     public final long[] denseWeightSum;
     public final double[] denseOutputMod;
-    public final int[] outputToComIndex;
     public final int[] marketStart;
     public final int[] denseOutputIndex;
     public final float[] denseWorkerLimitFrac;
-    public final float[] denseProdPerWorker;
     public final Map<String, Integer> commodityIndex;
 
     private DenseModel(int denseSize, long[] denseMarketCap, long[] denseWeightSum,
-        double[] denseOutputMod, int[] marketStart, int[] denseOutputIndex, float[] denseProdPerWorker,
-        float[] denseWorkerLimitFrac, int[] outputToComIndex, Map<String, Integer> commodityIndex
+        double[] denseOutputMod, int[] marketStart, int[] denseOutputIndex,
+        float[] denseWorkerLimitFrac, Map<String, Integer> commodityIndex
     ) {
         this.denseSize = denseSize;
         this.denseMarketCap = denseMarketCap;
@@ -37,16 +35,13 @@ public class DenseModel {
         this.marketStart = marketStart;
         this.denseOutputIndex = denseOutputIndex;
         this.denseWorkerLimitFrac = denseWorkerLimitFrac;
-        this.outputToComIndex = outputToComIndex;
         this.commodityIndex = commodityIndex;
-        this.denseProdPerWorker = denseProdPerWorker;
     }
 
     public static final DenseModel createDenseData(final List<MarketAPI> markets,
         final List<String> groupedOutputPairs, final List<BitSet> outputsPerMarket
     ) {
         final IndustryMatrixGrouped MatrixData = IndustryGrouper.getStaticGrouping();
-        final double[][] A = MatrixData.reducedMatrix;
         final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
 
         final int numMarkets = markets.size();
@@ -61,9 +56,7 @@ public class DenseModel {
         final double[] denseOutputMod = new double[denseCount];
         final int[] marketStart = new int[numMarkets + 1];
         final int[] denseOutputIndex = new int[denseCount];
-        final int[] outputToComIndex = new int[denseCount];
         final float[] denseWorkerLimitFrac = new float[denseCount];
-        final float[] denseProdPerWorker = new float[denseCount];
         final Map<String, Integer> commodityIndex = new HashMap<>(numCommodities);
 
         final long[] baseCapacities = new long[numMarkets];
@@ -118,17 +111,13 @@ public class DenseModel {
                 denseOutputMod[denseIdx] = (ind == null) ? 1.0 :
                     CompatLayer.getModifiersMult(ind, outputID, false);
 
-                final Integer c = commodityIndex.get(outputID);
-                outputToComIndex[denseIdx] = c != null ? c : -1;
-                denseProdPerWorker[denseIdx] = (float) (denseOutputMod[denseIdx] * (c != null ? A[c][o] : 1f));
-
                 denseIdx++;
             }
         }
         marketStart[numMarkets] = denseIdx;
 
         return new DenseModel(denseCount, denseMarketCap, denseWeightSum, denseOutputMod, marketStart,
-            denseOutputIndex, denseProdPerWorker, denseWorkerLimitFrac, outputToComIndex, commodityIndex
+            denseOutputIndex, denseWorkerLimitFrac, commodityIndex
         );
     }
 

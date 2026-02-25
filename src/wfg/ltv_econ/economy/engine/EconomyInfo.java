@@ -16,7 +16,6 @@ import com.fs.starfarer.api.combat.MutableStat;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.CommodityDomain;
@@ -158,7 +157,7 @@ public class EconomyInfo {
             }
         }
 
-        if (totalImports == 0f) return 0f;
+        if (totalImports == 0f) return 1f;
         return Math.min(1f, inFactionImports / totalImports);
     }
 
@@ -435,7 +434,7 @@ public class EconomyInfo {
         }
     }
 
-    public static final float getWorkersPerUnit(String comID, OCCTag tag) {
+    public static final float getWorkersPerUnit(String comID, String tag) {
         final float Pout = Global.getSettings().getCommoditySpec(comID).getBasePrice();
         final float LPV_day = LaborConfig.LPV_day;
         final float RoVC = LaborConfig.getRoVC(tag);

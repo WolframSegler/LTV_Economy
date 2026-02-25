@@ -2,8 +2,12 @@ Documentation of `industry_config.json` Fields
 
 ---
 
+### Config-level fields
+* `modVersion`: Used by the dynamic config generator to determine staleness. 
+
 ### Industry-level fields
 
+* `industryId`: The id of the industry this config is meant for. If the upgraded versions of the industry have no config, they will default to the base industry config.
 * `occTag`: Determines the OCC category for the industry, used to look up the labor share (RoVC).
 * `workerAssignable`: Boolean indicating if the industry can assign workers to outputs. Default value is false.
 * `ignoreLocalStockpiles`: Boolean. If true, this output’s demand cannot be satisfied from local production or stockpiles and is used to force imports from external markets even if the commodity exists locally. Because production occurs before imports, the inputs can only be supplied through the stockpiles, leaving industries marked with this flag unable to produce. Default value is false.

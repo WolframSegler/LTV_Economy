@@ -8,6 +8,8 @@ v0.2.8-beta | SAVE COMPATIBLE
 - Fixed the worker distributor, again.
 - Optimized the worker distributor to be three times faster.
 - Added an option to modify the measurement for the fair share.
+- WrapUI is no longer packaged with the release.
+- Changed the industry configs to include meta data.
 
 v0.2.7-beta | SAVE COMPATIBLE
 - Added a new policy reducing drugs demand

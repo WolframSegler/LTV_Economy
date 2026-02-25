@@ -6,15 +6,44 @@
     "defaultWorkerCapPerOutput": 0.6,
     "dynamicWorkerCapPerOutput": 0.8,
 
-    "RoVC_average": 0.13,
-    "RoVC_industry": 0.04,
-    "RoVC_consumer": 0.2,
-    "RoVC_manufacture": 0.35,
-    "RoVC_service": 0.4,
-    "RoVC_agriculture": 0.23,
-    "RoVC_mechanized": 0.1,
-    "RoVC_manual": 0.5,
-    "RoVC_space": 0.3,
+    "RoVC_list": [
+        {
+            "type": "average",
+            "value": 0.13
+        },
+        {
+            "type": "industry",
+            "value": 0.04
+        },
+        {
+            "type": "consumer",
+            "value": 0.2
+        },
+        {
+            "type": "service",
+            "value": 0.4
+        },
+        {
+            "type": "manufacture",
+            "value": 0.35
+        },
+        {
+            "type": "agriculture",
+            "value": 0.23
+        },
+        {
+            "type": "mechanized",
+            "value": 0.1
+        },
+        {
+            "type": "manual",
+            "value": 0.5
+        },
+        {
+            "type": "space",
+            "value": 0.3
+        }
+    ],
 
     "inspiration": "https://mpra.ub.uni-muenchen.de/55894/1/"
 }

@@ -1,5 +1,8 @@
 {
-	"heavyindustry": {
+	"modVersion": "0.0.0",
+	"industryList": [
+	{
+		"industryId": "heavyindustry",
 		"workerAssignable": true,
 		"occTag": "industry",
 		"outputList": {
@@ -58,7 +61,8 @@
 			}
 		}
 	},
-	"lightindustry": {
+	{
+		"industryId": "lightindustry",
 		"occTag": "consumer",
 		"workerAssignable": true,
 		"outputList": {
@@ -96,7 +100,8 @@
 			}
 		}
 	},
-	"manufacturing": {
+	{
+		"industryId": "manufacturing",
 		"occTag": "manufacture",
 		"workerAssignable": true,
 		"outputList": {
@@ -140,7 +145,8 @@
 			}
 		}
 	},
-	"population": {
+	{
+		"industryId": "population",
 		"occTag": "service",
 		"workerAssignable": false,
 		"outputList": {
@@ -195,7 +201,8 @@
 			}
 		}
 	},
-	"mining": {
+	{
+		"industryId": "mining",
 		"occTag": "mechanized",
 		"workerAssignable": true,
 		"outputList": {
@@ -237,7 +244,8 @@
 			}
 		}
 	},
-	"farming": {
+	{
+		"industryId": "farming",
 		"occTag": "agriculture",
 		"workerAssignable": true,
 		"outputList": {
@@ -251,7 +259,8 @@
 			}
 		}
 	},
-	"aquaculture": {
+	{
+		"industryId": "aquaculture",
 		"occTag": "agriculture",
 		"workerAssignable": true,
 		"outputList": {
@@ -277,7 +286,8 @@
 			}
 		}
 	},
-	"techmining": {
+	{
+		"industryId": "techmining",
 		"occTag": "manual",
 		"workerAssignable": true,
 		"outputList": {
@@ -298,7 +308,8 @@
 			}
 		}
 	},
-	"refining": {
+	{
+		"industryId": "refining",
 		"occTag": "industry",
 		"workerAssignable": true,
 		"outputList": {
@@ -320,7 +331,8 @@
 			}
 		}
 	},
-	"spaceport": {
+	{
+		"industryId": "spaceport",
 		"occTag": "space",
 		"workerAssignable": false,
 		"outputList": {
@@ -355,7 +367,8 @@
 			}
 		}
 	},
-	"fuelprod": {
+	{
+		"industryId": "fuelprod",
 		"occTag": "mechanized",
 		"workerAssignable": true,
 		"outputList": {
@@ -369,7 +382,8 @@
 			}
 		}
 	},
-	"commerce": {
+	{
+		"industryId": "commerce",
 		"occTag": "service",
 		"outputList": {
 			"maintenance": {
@@ -382,7 +396,8 @@
 			}
 		}
 	},
-	"station_base": {
+	{
+		"industryId": "station_base",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -396,7 +411,8 @@
 			}
 		}
 	},
-	"orbitalstation": {
+	{
+		"industryId": "orbitalstation",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -410,7 +426,8 @@
 			}
 		}
 	},
-	"orbitalstation_mid": {
+	{
+		"industryId": "orbitalstation_mid",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -424,7 +441,8 @@
 			}
 		}
 	},
-	"orbitalstation_high": {
+	{
+		"industryId": "orbitalstation_high",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -438,7 +456,8 @@
 			}
 		}
 	},
-	"battlestation": {
+	{
+		"industryId": "battlestation",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -452,7 +471,8 @@
 			}
 		}
 	},
-	"battlestation_mid": {
+	{
+		"industryId": "battlestation_mid",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -466,7 +486,8 @@
 			}
 		}
 	},
-	"battlestation_high": {
+	{
+		"industryId": "battlestation_high",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -480,7 +501,8 @@
 			}
 		}
 	},
-	"starfortress": {
+	{
+		"industryId": "starfortress",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -494,7 +516,8 @@
 			}
 		}
 	},
-	"starfortress_mid": {
+	{
+		"industryId": "starfortress_mid",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -508,7 +531,8 @@
 			}
 		}
 	},
-	"starfortress_high": {
+	{
+		"industryId": "starfortress_high",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -522,7 +546,8 @@
 			}
 		}
 	},
-	"grounddefenses": {
+	{
+		"industryId": "grounddefenses",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -547,7 +572,8 @@
 			}
 		}
 	},
-	"heavybatteries": {
+	{
+		"industryId": "heavybatteries",
 		"occTag": "space",
 		"outputList": {
 			"operation": {
@@ -572,7 +598,8 @@
 			}
 		}
 	},
-	"patrolhq": {
+	{
+		"industryId": "patrolhq",
 		"occTag": "space",
 		"workerAssignable": true,
 		"outputList": {
@@ -608,7 +635,8 @@
 			}
 		}
 	},
-	"militarybase": {
+	{
+		"industryId": "militarybase",
 		"occTag": "space",
 		"workerAssignable": true,
 		"outputList": {
@@ -655,7 +683,8 @@
 			}
 		}
 	},
-	"highcommand": {
+	{
+		"industryId": "highcommand",
 		"occTag": "space",
 		"workerAssignable": true,
 		"outputList": {
@@ -702,7 +731,8 @@
 			}
 		}
 	},
-	"lionsguard": {
+	{
+		"industryId": "lionsguard",
 		"occTag": "space",
 		"workerAssignable": true,
 		"outputList": {
@@ -737,7 +767,8 @@
 			}
 		}
 	},
-	"planetaryshield": {
+	{
+		"industryId": "planetaryshield",
 		"occTag": "industry",
 		"outputList": {
 			"operation": {
@@ -751,7 +782,8 @@
 			}
 		}
 	},
-	"waystation": {
+	{
+		"industryId": "waystation",
 		"occTag": "service",
 		"workerAssignable": true,
 		"ignoreLocalStockpiles": true,
@@ -803,7 +835,8 @@
 			}
 		}
 	},
-	"cryosanctum": {
+	{
+		"industryId": "cryosanctum",
 		"occTag": "service",
 		"workerAssignable": true,
 		"outputList": {
@@ -825,7 +858,8 @@
 			}
 		}
 	},
-	"cryorevival": {
+	{
+		"industryId": "cryorevival",
 		"occTag": "service",
 		"outputList": {
 			"operation": {
@@ -836,4 +870,5 @@
 			}
 		}
 	}
+	]
 }

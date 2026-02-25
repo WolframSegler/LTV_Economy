@@ -25,7 +25,6 @@ import wfg.ltv_econ.configs.IndustryConfigManager;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.configs.LaborConfigLoader.OCCTag;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
@@ -109,7 +108,7 @@ public class IndustryIOs {
         }
     }
 
-    private static final void fillOutputMaps(OCCTag occTag, OutputConfig output,
+    private static final void fillOutputMaps(String occTag, OutputConfig output,
         Map<String, Float> outputMap, Map<String, Map<String, Float>> inputOuterMap
     ) {
         final String outputID = output.comID;

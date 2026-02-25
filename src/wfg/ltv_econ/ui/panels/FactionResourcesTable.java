@@ -71,7 +71,7 @@ public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> im
                 final int exportShare = (int) (info.getFactionTotalExportShare(comID, Factions.PLAYER) * 100);
                 final long credits = info.getPlayerFactionCreditFlow(comID);
                 final double balance = info.getTotalFactionBalance(comID, Factions.PLAYER);
-                final int autarky = (int) (info.getFactionImportSufficiency(comID, Factions.PLAYER) * 100);
+                final int autarky = (int) ((Math.min(1f, demand == 0f ? 1f: prod/demand)) * 100);
     
                 final Color demandColor = demand > prod ? negative : base;
                 final Color creditsColor = credits < 0 ? negative : highlight;

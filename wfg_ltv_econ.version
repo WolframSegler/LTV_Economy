@@ -2,8 +2,7 @@
 	"masterVersionFile":"https://raw.githubusercontent.com/WolframSegler/LTV_Economy/main/wfg_ltv_econ.version",
 	"modName":"LTV Economy",
 	"modThreadId":34632,
-	"modVersion":
-	{
+	"modVersion": {
 		"major":0,
 		"minor":2,
 		"patch":8

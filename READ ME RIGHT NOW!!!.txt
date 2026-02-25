@@ -1,4 +1,3 @@
 IMPORTANT
-- The mod LTV_Economy needs WrapUI to function properly. Please add both of these to your mods folder
-- Certain aspects of the mod can be modified under LTV_Economy/data/config/ltvEcon/
-- The dynamic configs generated for industries under saves/common/dynamic_industry_config.json.data might be outdated, in which case it should be deleted so a fresh one can be created. Note that adding a new mod that adds industries will re-create the config.
+- The mod LTV_Economy needs WrapUI to function properly. If not already installed: https://github.com/WolframSegler/WrapUI/releases/latest/download/WrapUI.zip
+- Certain aspects of the mod can be modified under LTV_Economy/data/config/ltvEcon/ or LunaLib settings
