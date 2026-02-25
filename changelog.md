@@ -1,3 +1,6 @@
+v0.2.9-beta | SAVE COMPATIBLE
+- Fixed a crash resulting from a market with no outputs
+
 v0.2.8-beta | SAVE COMPATIBLE
 - Fixed best places to buy / sell again
 - Fixed dynamic config generator again.

@@ -186,10 +186,11 @@ public class WorkforceAllocator {
         { // 2) Market capacity constraints: sum_o w[m,o] <= baseCapacities[m]
             final double[] coeffs = new double[nVars];
             for (int m = 0; m < denseData.marketStart.length - 1; m++) {
-                Arrays.fill(coeffs, 0.0);
                 final int start = denseData.marketStart[m];
                 final int end = denseData.marketStart[m + 1];
+                if (start == end) continue;
     
+                Arrays.fill(coeffs, 0.0);
                 for (int i = start; i < end; i++) coeffs[i] = 1.0;
     
                 const_constraints.add(
