@@ -1,14 +1,12 @@
 package wfg.ltv_econ.economy.engine;
 
-import static wfg.ltv_econ.constants.economyValues.*;
+import static wfg.ltv_econ.constants.EconomyConstants.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
-import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
@@ -440,19 +438,6 @@ public class EconomyInfo {
         final float RoVC = LaborConfig.getRoVC(tag);
 
         return (Pout * RoVC) / LPV_day;
-    }
-
-    public static final List<CommoditySpecAPI> getEconCommodities() {
-        return Global.getSettings().getAllCommoditySpecs().stream()
-            .filter(spec -> !spec.isNonEcon())
-            .collect(Collectors.toList());
-    }
-
-    public static final List<String> getEconCommodityIDs() {
-        return Global.getSettings().getAllCommoditySpecs().stream()
-            .filter(spec -> !spec.isNonEcon())
-            .map(CommoditySpecAPI::getId)
-            .collect(Collectors.toList());
     }
 
     public static final List<MarketAPI> getMarketsCopy() {

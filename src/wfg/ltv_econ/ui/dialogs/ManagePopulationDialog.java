@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
-import static wfg.ltv_econ.constants.economyValues.*;
+import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;

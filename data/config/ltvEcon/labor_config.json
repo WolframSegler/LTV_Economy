@@ -45,5 +45,7 @@
         }
     ],
 
+    "NPC_WORKER_POOL_VISIBLE": false,
+
     "inspiration": "https://mpra.ub.uni-muenchen.de/55894/1/"
 }

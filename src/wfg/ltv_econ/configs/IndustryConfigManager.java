@@ -17,6 +17,7 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -135,8 +136,8 @@ public class IndustryConfigManager {
                     "marketScaleBase", 10.0
                 );
 
+                final boolean isAbstract = !EconomyConstants.econCommodityIDs.contains(outputId);
                 final boolean scaleWSize = outputData.optBoolean("scaleWithMarketSize", false);
-                final boolean isAbstract = outputData.optBoolean("isAbstract", false);
                 final boolean useWorkers = outputData.optBoolean("usesWorkers", false);
                 final boolean checkLegality = outputData.optBoolean("checkLegality", false);
                 final boolean activeBuilding = outputData.optBoolean("activeDuringBuilding", false);
@@ -269,7 +270,6 @@ public class IndustryConfigManager {
 
                 optJson.put("scaleWithMarketSize", opt.scaleWithMarketSize);
                 optJson.put("usesWorkers", opt.usesWorkers);
-                optJson.put("isAbstract", opt.isAbstract);
                 optJson.put("checkLegality", opt.checkLegality);
                 optJson.put("activeDuringBuilding", opt.activeDuringBuilding);
 
@@ -579,7 +579,7 @@ public class IndustryConfigManager {
     
                 final Consumer<String> addOutput = (outputID) -> {
                     final boolean isIllegal = illegalOutputs.contains(outputID);
-                    final boolean isAbstract = settings.getCommoditySpec(outputID) == null;
+                    final boolean isAbstract = !EconomyConstants.econCommodityIDs.contains(outputID);
     
                     final OutputConfig optCom = new OutputConfig(
                         outputID, 1, CCMoneyDist,

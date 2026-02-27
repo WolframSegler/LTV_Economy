@@ -1,7 +1,5 @@
 package wfg.ltv_econ.ui.panels;
 
-import java.util.List;
-
 import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.Global;
@@ -12,7 +10,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.native_ui.ui.ComponentFactory;
@@ -58,10 +56,9 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
     public void createPanel() {
         final int width = (int) pos.getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
-        final List<CommoditySpecAPI> commodities = EconomyInfo.getEconCommodities();
 
         float yCoord = pad;
-        for (CommoditySpecAPI spec : commodities) {
+        for (CommoditySpecAPI spec : EconomyConstants.econCommoditySpecs) {
             final RowPanel row = new RowPanel(
                 container, width - opad, ROW_H, spec
             );

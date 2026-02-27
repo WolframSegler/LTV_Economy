@@ -28,6 +28,7 @@ import com.fs.starfarer.api.campaign.econ.MonthlyReport;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.SubmarketsID;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CommodityDomain;
@@ -35,7 +36,7 @@ import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.native_ui.util.NumFormat;
-import static wfg.ltv_econ.constants.economyValues.*;
+import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
@@ -143,7 +144,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         instance = this;
 
-        for (String comID : EconomyInfo.getEconCommodityIDs()) {
+        for (String comID : EconomyConstants.econCommodityIDs) {
             m_comDomains.put(comID, new CommodityDomain(comID));
         }
 
@@ -329,9 +330,8 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
     @Override
     public void reportEconomyTick(int iterIndex) {
-        for (CommodityDomain dom : m_comDomains.values()) {
-            dom.endMonth();
-        }
+        m_comDomains.values().forEach(CommodityDomain::endMonth);
+        m_playerMarketData.values().forEach(PlayerMarketData::endMonth);
         
         final MonthlyReport report = SharedData.getData().getCurrentReport();
         final FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
@@ -389,7 +389,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                     );
                 }
             };
-            for (CommoditySpecAPI com : EconomyInfo.getEconCommodities()) {
+            for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {
                 final FDNode eNode = report.getNode(exportNode, com.getId());
                 final String comID = com.getId();
                 eNode.name = com.getName();

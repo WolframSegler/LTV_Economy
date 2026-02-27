@@ -1,5 +1,9 @@
 v0.2.9-beta | SAVE COMPATIBLE
 - Fixed a crash resulting from a market with no outputs
+- Fixed industries producing/demanding while under construction
+- Added a monthly credits withdrawal limit to player colonies (LunaLib setting).
+- Added an option to show the worker pool condition in npc colonies (LunaLib setting).
+- Improved the worker allocation algorithm to make factions as self-sustainable as possible.
 
 v0.2.8-beta | SAVE COMPATIBLE
 - Fixed best places to buy / sell again

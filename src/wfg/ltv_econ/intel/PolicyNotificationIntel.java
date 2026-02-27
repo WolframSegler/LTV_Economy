@@ -1,6 +1,6 @@
 package wfg.ltv_econ.intel;
 
-import static wfg.ltv_econ.constants.economyValues.*;
+import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;

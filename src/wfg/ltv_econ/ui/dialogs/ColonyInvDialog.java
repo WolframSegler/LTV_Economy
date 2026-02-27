@@ -17,10 +17,10 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.UIContext;
@@ -63,6 +63,7 @@ public class ColonyInvDialog extends DialogPanel {
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
+        final boolean hasData = data != null;
 
         final int sliderH = 32;
         final int sliderW = 300;
@@ -201,9 +202,8 @@ public class ColonyInvDialog extends DialogPanel {
         labelH = profitLabel.computeTextHeight(profitLabel.getText());
         innerPanel.addComponent((UIComponentAPI)profitLabel).inTL(400, 90 + (sliderH - labelH) / 2f);
 
-        
         final Slider withdrawSlider = new Slider(
-            innerPanel, "", 0f, colonyCredits, sliderW, sliderH
+            innerPanel, "", 0f, hasData ? data.getWithdrawLimit() : colonyCredits, sliderW, sliderH
         );
         withdrawSlider.setHighlightOnMouseover(true);
         withdrawSlider.setUserAdjustable(true);
@@ -235,30 +235,30 @@ public class ColonyInvDialog extends DialogPanel {
         }
 
         final Runnable refreshUI = () -> {
-            final float colonyCred = playerCredits.get();
-            final long playerCred = engine.getCredits(m_market.getId());
+            final long colonyCred = engine.getCredits(m_market.getId());
+            final float playerCred = playerCredits.get();
             final int profitRatio = data != null ? (int) (data.playerProfitRatio * 100) : 0;
             final LabelAPI colonyLbl = colonyCreditPanel.label1;
             final LabelAPI playerLbl = playerCreditPanel.label1;
             final LabelAPI profitLbl = playerProfitPanel.label1;
 
             depositSlider.setProgress(0);
-            depositSlider.maxRange = colonyCred;
+            depositSlider.maxRange = playerCred;
             withdrawSlider.setProgress(0);
-            withdrawSlider.maxRange = playerCred;
+            withdrawSlider.maxRange = hasData ? data.getWithdrawLimit() : colonyCred;
             profitSlider.setProgress(profitRatio);
 
             colonyLbl.setText(
-                "Colony Balance: " + NumFormat.formatCredit(playerCred)
+                "Colony Balance: " + NumFormat.formatCredit(colonyCred)
             );
-            colonyLbl.setHighlight(NumFormat.formatCredit(playerCred));
+            colonyLbl.setHighlight(NumFormat.formatCredit(colonyCred));
             colonyLbl.autoSizeToWidth(colonyLbl.computeTextWidth(colonyLbl.getText()));
             colonyCreditPanel.getPos().setSize(colonyLbl.getPosition().getWidth(), sliderH);
 
             playerLbl.setText(
-                "Your Balance: " + NumFormat.formatCredit((long) colonyCred)
+                "Your Balance: " + NumFormat.formatCredit((long) playerCred)
             );
-            playerLbl.setHighlight(NumFormat.formatCredit((long) colonyCred));
+            playerLbl.setHighlight(NumFormat.formatCredit((long) playerCred));
             playerLbl.autoSizeToWidth(playerLbl.computeTextWidth(playerLbl.getText()));
             playerCreditPanel.getPos().setSize(playerLbl.getPosition().getWidth(), sliderH);
 
@@ -271,6 +271,7 @@ public class ColonyInvDialog extends DialogPanel {
         final CallbackRunnable<Button> withdrawRunnable = (btn) -> {
             engine.addCredits(m_market.getId(), (int) -withdrawSlider.getProgress());
             playerCredits.add((int) withdrawSlider.getProgress());
+            data.withdrewCreditsThisMonth = true;
             refreshUI.run();
         };
         final CallbackRunnable<Button> depositRunnable = (btn) -> {
@@ -326,7 +327,7 @@ public class ColonyInvDialog extends DialogPanel {
             "Real Balance", 120, RealBalanceTpTxt, false, false, -1
         );
 
-        for (CommoditySpecAPI com : EconomyInfo.getEconCommodities()) {
+        for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {
 
             final CommodityCell cell = engine.getComCell(com.getId(), m_market.getId());
 

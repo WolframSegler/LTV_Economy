@@ -363,13 +363,13 @@ public class IndustryIOs {
         if (output.checkLegality && market.isIllegal(output.comID)) return false;
         if (output.dynamic && !output.dynamicOutputActive.getAsBoolean()) return false;
 
-        if (output == null || ind.isDisrupted() ||
-            (ind.isFunctional() && output.activeDuringBuilding)
-        ) return false;
+        if (output == null || ind.isDisrupted()) return false;
+        final boolean buildingOnly = ind.isBuilding() && !ind.isUpgrading();
 
-        if (output.activeDuringBuilding && !ind.isBuilding() &&
+        if (buildingOnly && !output.activeDuringBuilding &&
             !ind.getId().contains(Industries.POPULATION)
         ) return false;
+        if (!buildingOnly && output.activeDuringBuilding) return false;
 
         for (String cond : output.ifMarketCondsAllFalse) {
             if (market.hasCondition(cond)) return false;

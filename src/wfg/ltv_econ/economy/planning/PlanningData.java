@@ -15,6 +15,7 @@ import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class PlanningData {
+
     public static final List<BitSet> getOutputsPerMarket(final List<MarketAPI> markets) {
         final var indOutputPairToColumn = IndustryMatrix.getIndOutputPairToColumnMap();
         final int numOutputs = indOutputPairToColumn.size();
@@ -54,6 +55,18 @@ public class PlanningData {
         for (int i = 0; i < commodities.size(); i++) {
             String commodityID = commodities.get(i);
             d[i] = EconomyEngine.getInstance().info.getGlobalDemand(commodityID);
+        }
+
+        return d;
+    }
+
+    public static final double[] getFactionDemandVector(final String factionID) {
+        final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
+
+        final double[] d = new double[commodities.size()];
+        for (int i = 0; i < commodities.size(); i++) {
+            final String comID = commodities.get(i);
+            d[i] = EconomyEngine.getInstance().info.getTotalFactionDemand(comID, factionID);
         }
 
         return d;

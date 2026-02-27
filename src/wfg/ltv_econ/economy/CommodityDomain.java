@@ -456,8 +456,8 @@ public class CommodityDomain {
     }
 
     private static final float sizeFactor(MarketAPI exporter) {
-        int size = exporter.getSize();
-        int maxSize = 10;
+        final int size = exporter.getSize();
+        final int maxSize = 10;
         return (float) Math.sqrt(size / (float) maxSize);
     }
 

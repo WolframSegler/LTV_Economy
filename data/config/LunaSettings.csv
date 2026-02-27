@@ -1,5 +1,7 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
 labor_warningHeader,Warning,Text,The changes apply only if no save has been loaded yet. Otherwise a restart is required.,,,,,Labor
+labor_generalHeader,General Settings,Header,General Settings,,,,,Labor
+labor_workerPoolVisible,Show NPC Worker Pool,Boolean,false,,Should the worker pool condition of NPC markets be visible,,,Labor
 labor_proHeader,Worker Configuration,Header,Worker Configuration,,,,,Labor
 labor_RoSV,The Default Ratio of Surplus Value,Int,4,,Defines the split between worker wages and surplus output. Higher values mean lower wages. Used by NPC markets.,1,10,Labor
 labor_maxRoSV,The Maximum Ratio of Surplus Value,Int,10,,The maximum value for player owned colonies.,1,20,Labor
@@ -19,8 +21,10 @@ economy_warningHeader,Warning,Text,The changes apply only if no save has been lo
 economy_generalHeader,General Settings,Header,General Settings,,,,,Economy
 economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread,,,Economy
 economy_startingCredits,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
+economy_withdrawalLimit,Monthly Withdrawal Limit,Int,100000,,Sets the maximum amount of credits you can withdraw from your colonies per month.,0,1000000000,Economy
 economy_solverHeader,Worker Allocation Settings,Header,Worker Allocation Settings,,,,,Economy
 economy_deficitCost,Deficit Penalty,Double,5000,,Higher values encourage more demand fulfillment.,0,100000,Economy
+economy_selfSufficiencyStrength,Autarky Reward Strength,Double,1,,A value of zero completely ignores autarky. Accuracy increases with higher allocation refinement passes.,0,1,Economy
 economy_minWorkerFraction,Minimum Worker Fraction,Double,0.3,,Minimum fraction of each output's fair share of workers. Setting a high value may cause production deficits.,0,1,Economy
 economy_prodBuffer,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Economy
 economy_allocPasses,Allocation Refinement Passes,Int,3,,Higher values improve allocation stability at the cost of performance. Values beyond 6 have almost no noticable effects.,1,100,Economy

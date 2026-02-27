@@ -37,6 +37,7 @@ public class EconomyConfigLoader {
         try {
         EconomyConfig.MULTI_THREADING = root.getBoolean("MULTI_THREADING");
         EconomyConfig.STARTING_CREDITS_FOR_MARKET = root.getInt("STARTING_CREDITS_FOR_MARKET");
+        EconomyConfig.SELF_SUFFICIENCY_REWARD_STRENGTH = root.getDouble("SELF_SUFFICIENCY_REWARD_STRENGTH");
         EconomyConfig.ECON_DEFICIT_COST = root.getDouble("ECON_DEFICIT_COST");
         EconomyConfig.PRODUCTION_BUFFER = 1f + root.getDouble("PRODUCTION_BUFFER");
         EconomyConfig.DAYS_TO_COVER = root.getInt("DAYS_TO_COVER");
@@ -53,6 +54,7 @@ public class EconomyConfigLoader {
         EconomyConfig.PRODUCTION_HOLD_FACTOR = (float) root.getDouble("PRODUCTION_HOLD_FACTOR");
         EconomyConfig.OPEN_MARKET_TO_STOCKPILES_RATIO = (float) root.getDouble("OPEN_MARKET_TO_STOCKPILES_RATIO");
         EconomyConfig.USE_PRODUCTION_FAIRNESS = root.getBoolean("USE_PRODUCTION_FAIRNESS");
+        EconomyConfig.CREDIT_WITHDRAWAL_LIMIT = root.getInt("CREDIT_WITHDRAWAL_LIMIT");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
@@ -77,7 +79,9 @@ public class EconomyConfigLoader {
         if (Global.getSettings().getModManager().isModEnabled(LUNA_LIB)) {
             EconomyConfig.MULTI_THREADING = LunaSettings.getBoolean(LTV_ECON, "economy_multiThreading");
             EconomyConfig.STARTING_CREDITS_FOR_MARKET = LunaSettings.getInt(LTV_ECON, "economy_startingCredits");
+            EconomyConfig.CREDIT_WITHDRAWAL_LIMIT = LunaSettings.getInt(LTV_ECON, "economy_withdrawalLimit");
             EconomyConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "economy_deficitCost");
+            EconomyConfig.SELF_SUFFICIENCY_REWARD_STRENGTH = LunaSettings.getDouble(LTV_ECON, "economy_selfSufficiencyStrength");
             EconomyConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_prodBuffer");
             EconomyConfig.DAYS_TO_COVER = LunaSettings.getInt(LTV_ECON, "economy_daysToCover");
             EconomyConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "economy_toCoverPerImport");
@@ -119,6 +123,11 @@ public class EconomyConfigLoader {
         public static double ECON_DEFICIT_COST;
 
         /**
+         * The reward strength for a faction meeting its own demand. 0 means self-sufficiency is ignored.
+         */
+        public static double SELF_SUFFICIENCY_REWARD_STRENGTH;
+
+        /**
          * Applied to the demand vector of worker-independent industries.
          */
         public static double PRODUCTION_BUFFER;
@@ -137,7 +146,6 @@ public class EconomyConfigLoader {
          * Multiplicative discount applied to trade between markets of the same faction.
          */
         public static float FACTION_EXCHANGE_MULT;
-
 
         /**
          * The minimum faction relationship required to trade.
@@ -160,7 +168,7 @@ public class EconomyConfigLoader {
         public static List<DebtDebuffTier> DEBT_DEBUFF_TIERS;
 
         /**
-         * 
+         * List of markets who will not get the manufacturing industry.
          */
         public static List<String> MANUFACTURING_EXCLUSION_LIST;
 
@@ -204,6 +212,11 @@ public class EconomyConfigLoader {
          * Determines the use of worker productivity when calculating fair share of workers.
          */
         public static boolean USE_PRODUCTION_FAIRNESS;
+
+        /**
+         * Monthly credits withdraw limit for player colonies.
+         */
+        public static int CREDIT_WITHDRAWAL_LIMIT;
 
         static {
             EconomyConfigLoader.loadConfig();

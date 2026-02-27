@@ -12,6 +12,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.native_ui.ui.components.BackgroundComp;
@@ -57,7 +58,7 @@ public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> im
         );
 
         if (engine.getPlayerMarketData().size() > 0) {
-            for (CommoditySpecAPI com : EconomyInfo.getEconCommodities()) {
+            for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {
                 final String comID = com.getId();
                 final Base icon = new Base(
                     m_panel, 26, 26, com.getIconName(), null, null

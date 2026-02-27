@@ -13,7 +13,7 @@ import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
-import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
 
@@ -121,14 +121,14 @@ public class IndustryMatrix {
     private static final void buildWorkerRelatedCommodityIDs() {
         final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
 
-        STATIC_WORKER_COMMODITIES = EconomyInfo.getEconCommodityIDs();
+        STATIC_WORKER_COMMODITIES = new ArrayList<>(EconomyConstants.econCommodityIDs);
 
         Iterator<String> it = STATIC_WORKER_COMMODITIES.iterator();
         while (it.hasNext()) {
             final String com = it.next();
             boolean remove = true;
-            for (Map.Entry<String, Map<String, Float>> entry : baseOutputs.entrySet()) {
-                final IndustrySpecAPI spec = settings.getIndustrySpec(entry.getKey());
+            for (String key : baseOutputs.keySet()) {
+                final IndustrySpecAPI spec = settings.getIndustrySpec(key);
                 final IndustryConfig cfg = IndustryIOs.getIndConfig(spec);
 
                 if (!cfg.workerAssignable || !cfg.outputs.containsKey(com) ||

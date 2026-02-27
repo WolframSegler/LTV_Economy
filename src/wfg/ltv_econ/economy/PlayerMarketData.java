@@ -12,6 +12,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 
 import rolflectionlib.util.RolfLectionUtil;
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.configs.EventConfigLoader.EventConfig;
 import wfg.ltv_econ.configs.EventConfigLoader.EventSpec;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
@@ -105,10 +106,12 @@ public class PlayerMarketData {
         for (MarketEvent event : events) if (event.id.equals(eventID)) return event;
         return null;
     }
+    public final long getWithdrawLimit() {
+        return withdrewCreditsThisMonth ? 0l : Math.min(EconomyEngine.getInstance().getCredits(marketID),
+            EconomyConfig.CREDIT_WITHDRAWAL_LIMIT
+        );
+    }
 
-    /**
-     * Advances the statistics concerning the Market by one day.
-     */
     public void advance(int days) {
         for (MarketPolicy policy : policies) {
             if (policy.isActive()) policy.preAdvance(this);
@@ -132,6 +135,13 @@ public class PlayerMarketData {
     }
     public final void advance() {
         advance(1);
+    }
+
+
+    public boolean withdrewCreditsThisMonth = false;
+
+    public final void endMonth() {
+        withdrewCreditsThisMonth = false;
     }
 
     /**

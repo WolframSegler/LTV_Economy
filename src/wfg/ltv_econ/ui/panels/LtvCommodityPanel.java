@@ -12,8 +12,8 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.BackgroundComp;
 import wfg.native_ui.ui.components.NativeComponents;
@@ -72,7 +72,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
 
     public void createPanel() {
         // Select relevant commodities
-        final List<CommoditySpecAPI> commodities = EconomyInfo.getEconCommodities();
+        final List<CommoditySpecAPI> commodities = new ArrayList<>(EconomyConstants.econCommoditySpecs);
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
             return EconomyEngine.getInstance().getComCell(com.getId(), m_market.getId()).getFlowEconomicFootprint() <= 0;

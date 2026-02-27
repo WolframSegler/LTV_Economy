@@ -9,6 +9,7 @@ import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
+import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.native_ui.util.NumFormat;
@@ -102,7 +103,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     @Override
     public boolean showIcon() {
-        return market.isPlayerOwned() || DebugFlags.COLONY_DEBUG;
+        return DebugFlags.COLONY_DEBUG || LaborConfig.NPC_WORKER_POOL_VISIBLE || market.isPlayerOwned();
     }
 
     public static final float getWorkerRatio(int size) {

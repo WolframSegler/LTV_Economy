@@ -46,7 +46,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.economyValues.*;
+import static wfg.ltv_econ.constants.EconomyConstants.*;
 
 public class MarketUIReplacer implements EveryFrameScript {
 

@@ -1,5 +1,5 @@
 package wfg.ltv_econ.configs;
-import static wfg.ltv_econ.constants.economyValues.MONTH;
+import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +44,7 @@ public class LaborConfigLoader {
         LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
         LaborConfig.defaultWorkerCapPerOutput = (float) root.getDouble("defaultWorkerCapPerOutput");
         LaborConfig.dynamicWorkerCapPerOutput = (float) root.getDouble("dynamicWorkerCapPerOutput");
+        LaborConfig.NPC_WORKER_POOL_VISIBLE = root.getBoolean("NPC_WORKER_POOL_VISIBLE");
 
         final JSONArray RoVCList = root.getJSONArray("RoVC_list");
         for (int i = 0; i < RoVCList.length(); i++) {
@@ -61,6 +62,8 @@ public class LaborConfigLoader {
             LaborConfig.LPV_month = LunaSettings.getInt(LTV_ECON, "labor_lpvMonth");
             LaborConfig.LPV_day = LaborConfig.LPV_month / (float) MONTH;
             LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
+
+            LaborConfig.NPC_WORKER_POOL_VISIBLE = LunaSettings.getBoolean(LTV_ECON, "labor_workerPoolVisible");
 
             final float avgValue = LunaSettings.getDouble(LTV_ECON, "labor_RoVC_average").floatValue();
             LaborConfig.RoVC_average = avgValue;
@@ -83,6 +86,8 @@ public class LaborConfigLoader {
     }
 
     public static class LaborConfig {
+
+        public static boolean NPC_WORKER_POOL_VISIBLE;
 
         public static float avg_wage;
         public static int RoSV;

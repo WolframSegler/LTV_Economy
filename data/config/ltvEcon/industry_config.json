@@ -159,15 +159,13 @@
 					"drugs": 0.025,
 					"organs": 0.0128755
 				},
-				"scaleWithMarketSize": true,
-				"isAbstract": true
+				"scaleWithMarketSize": true
 			},
 			"peopleNonHabitable": {
 				"InputsPerUnitOutput": {
 					"organics": 0.1667
 				},
 				"scaleWithMarketSize": true,
-				"isAbstract": true,
 				"ifMarketCondsAllFalse": [
 					"habitable"
 				]
@@ -343,8 +341,7 @@
 					"supplies": 0.03
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 9,
-				"isAbstract": true
+				"marketScaleBase": 9
 			},
 			"maintenance": {
 				"InputsPerUnitOutput": {
@@ -353,8 +350,7 @@
 					"supplies": 1
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 2,
-				"isAbstract": true
+				"marketScaleBase": 2
 			},
 			"crew": {
 				"baseProd": 0.01,
@@ -391,8 +387,7 @@
 					"supplies": 0.13
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -406,8 +401,7 @@
 					"crew": 4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -421,8 +415,7 @@
 					"crew": 4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -436,8 +429,7 @@
 					"crew": 4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -451,8 +443,7 @@
 					"crew": 4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -466,8 +457,7 @@
 					"crew": 7
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -481,8 +471,7 @@
 					"crew": 7
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -496,8 +485,7 @@
 					"crew": 7
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -511,8 +499,7 @@
 					"crew": 10.4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -526,8 +513,7 @@
 					"crew": 10.4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -541,8 +527,7 @@
 					"crew": 10.4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 3,
-				"isAbstract": true
+				"marketScaleBase": 3
 			}
 		}
 	},
@@ -557,8 +542,7 @@
 					"hand_weapons": 0.02
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 7,
-				"isAbstract": true
+				"marketScaleBase": 7
 			},
 			"maintenance": {
 				"InputsPerUnitOutput": {
@@ -567,8 +551,7 @@
 					"hand_weapons": 0.7
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 2,
-				"isAbstract": true
+				"marketScaleBase": 2
 			}
 		}
 	},
@@ -583,8 +566,7 @@
 					"hand_weapons": 0.015
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 7,
-				"isAbstract": true
+				"marketScaleBase": 7
 			},
 			"maintenance": {
 				"InputsPerUnitOutput": {
@@ -593,8 +575,7 @@
 					"hand_weapons": 1.5
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 2,
-				"isAbstract": true
+				"marketScaleBase": 2
 			}
 		}
 	},
@@ -610,8 +591,7 @@
 					"ships": 0.2
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 8,
-				"isAbstract": true
+				"marketScaleBase": 8
 			},
 			"maintenance": {
 				"InputsPerUnitOutput": {
@@ -620,8 +600,7 @@
 					"ships": 3
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 2,
-				"isAbstract": true
+				"marketScaleBase": 2
 			},
 			"crew": {
 				"baseProd": 1,
@@ -647,8 +626,7 @@
 					"ships": 0.4
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 8,
-				"isAbstract": true
+				"marketScaleBase": 8
 			},
 			"maintenance": {
 				"InputsPerUnitOutput": {
@@ -657,8 +635,7 @@
 					"ships": 5
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 2,
-				"isAbstract": true
+				"marketScaleBase": 2
 			},
 			"crew": {
 				"baseProd": 1,
@@ -695,8 +672,7 @@
 					"ships": 0.56
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 8,
-				"isAbstract": true
+				"marketScaleBase": 8
 			},
 			"maintenance": {
 				"InputsPerUnitOutput": {
@@ -705,8 +681,7 @@
 					"ships": 5
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 2,
-				"isAbstract": true
+				"marketScaleBase": 2
 			},
 			"crew": {
 				"baseProd": 1.1,
@@ -741,8 +716,7 @@
 					"supplies": 1800,
 					"fuel": 3700,
 					"ships": 2250
-				},
-				"isAbstract": true
+				}
 			},
 			"crew": {
 				"baseProd": 2,
@@ -777,8 +751,7 @@
 					"fuel": 220
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 2,
-				"isAbstract": true
+				"marketScaleBase": 2
 			}
 		}
 	},
@@ -844,8 +817,7 @@
 				"InputsPerUnitOutput": {
 					"supplies": 34,
 					"organics": 80
-				},
-				"isAbstract": true
+				}
 			},
 			"organs": {
 				"baseProd": 1,
@@ -865,8 +837,7 @@
 			"operation": {
 				"InputsPerUnitOutput": {
 					"organics": 130
-				},
-				"isAbstract": true
+				}
 			}
 		}
 	}
