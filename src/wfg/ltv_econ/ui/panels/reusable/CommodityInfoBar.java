@@ -12,8 +12,8 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.util.UiUtils;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.util.RenderUtils;
 
@@ -49,14 +49,14 @@ public class CommodityInfoBar extends CustomPanel<CommodityInfoBar> {
         final float deficitRatio = cell.getFlowDeficit() / footprint;
 
         barMap = new LinkedHashMap<>(8) {{
-            put(UiUtils.COLOR_LOCAL_PROD, demandMetLocalRatio);
-            put(UiUtils.COLOR_EXPORT, exportedRatio);
-            put(UiUtils.COLOR_NOT_EXPORTED, notExportedRatio);
-            put(UiUtils.COLOR_FACTION_IMPORT, inFactionImportRatio);
-            put(UiUtils.COLOR_IMPORT, globalImportRatio);
-            put(UiUtils.COLOR_OVER_IMPORT, overImportRatio);
-            put(UiUtils.COLOR_IMPORT_EXCLUSIVE, importExclusiveRatio);
-            put(UiUtils.COLOR_DEFICIT, deficitRatio);
+            put(UIColors.COLOR_LOCAL_PROD, demandMetLocalRatio);
+            put(UIColors.COLOR_EXPORT, exportedRatio);
+            put(UIColors.COLOR_NOT_EXPORTED, notExportedRatio);
+            put(UIColors.COLOR_FACTION_IMPORT, inFactionImportRatio);
+            put(UIColors.COLOR_IMPORT, globalImportRatio);
+            put(UIColors.COLOR_OVER_IMPORT, overImportRatio);
+            put(UIColors.COLOR_IMPORT_EXCLUSIVE, importExclusiveRatio);
+            put(UIColors.COLOR_DEFICIT, deficitRatio);
         }};
 
         for (Map.Entry<Color, Float> barPiece : barMap.entrySet()) {

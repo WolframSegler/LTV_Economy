@@ -12,7 +12,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.ui.dialogs.ComDetailDialog;
-import wfg.ltv_econ.util.UiUtils;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.AudioFeedbackComp;
 import wfg.native_ui.ui.components.BackgroundComp;
@@ -91,7 +91,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
                 GlobalCommodityFlow.selectedCom = spec;
                 contentPanel.createPanel();
 
-                if (UiUtils.canViewPrices() && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) ||
+                if (UIUtils.canViewPrices() && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) ||
                     Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)
                 )) {
                     final ComDetailDialog dialogPanel = new ComDetailDialog(
@@ -102,7 +102,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
             };
 
             tooltip.builder = (tp, exp) -> {
-                if (UiUtils.canViewPrices()) {
+                if (UIUtils.canViewPrices()) {
                     tp.addPara("Ctrl + Click to view global market info", pad, highlight, new String[]{
                         "Ctrl", "Click"
                     });

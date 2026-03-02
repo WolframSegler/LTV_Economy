@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
@@ -25,52 +24,34 @@ public class EconomyInfo {
 
     EconomyInfo(EconomyEngine engine) { this.engine = engine; }
 
-    public final double getTotalGlobalExports(String comID) {
-        double total = 0;
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) 
-        total += cell.globalExports;
-
-        return total;
-    }
-
-    public final double getTotalFactionExports(String comID) {
-        double total = 0;
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells())
+    public final double getInFactionExports(String comID) {
+        double total = 0.0;
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
         total += cell.inFactionExports;
 
         return total;
     }
 
     public final int getExportMarketShare(String comID, String marketID) {
-        final double total = getTotalGlobalExports(comID);
-        if (total == 0)
-            return 0;
+        final double total = getGlobalExports(comID);
+        if (total == 0.0) return 0;
 
-        return (int) (((float) engine.getComCell(comID, marketID).globalExports / (float) total) * 100);
-    }
-
-    public final double getTotalGlobalImports(String comID) {
-        double totalGlobalImports = 0;
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
-            totalGlobalImports += cell.globalImports;
-        }
-
-        return totalGlobalImports;
+        return (int) ((engine.getComCell(comID, marketID).globalExports / total) * 100);
     }
 
     public final int getImportMarketShare(String comID, String marketID) {
-        final double total = getTotalGlobalImports(comID);
+        final double total = getGlobalImports(comID);
         if (total == 0)
             return 0;
 
         return (int) (((float) engine.getComCell(comID, marketID).globalImports / (float) total) * 100);
     }
 
-    public final double getTotalInFactionExports(String comID, FactionSpecAPI faction) {
+    public final double getFactionInFactionExports(String comID, String factionID) {
         double TotalFactionExports = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
-            if (cell.market.getFaction().getId().equals(faction.getId())) {
+            if (cell.market.getFaction().getId().equals(factionID)) {
                 TotalFactionExports += cell.inFactionExports;
             }
         }
@@ -78,17 +59,52 @@ public class EconomyInfo {
         return TotalFactionExports;
     }
 
-    public final float getFactionTotalExportShare(String comID, String factionID) {
-        final double total = getTotalGlobalExports(comID);
-        if (total == 0) return 0;
-        double totalGlobalExports = 0;
+    public final float getFactionImportShare(String comID, String factionID) {
+        final double total = getGlobalImports(comID);
+        if (total == 0.0) return 0f;
+        final double imports = getFactionGlobalImports(comID, factionID);
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
-            if (cell.market.getFaction().getId().equals(factionID)) {
-                totalGlobalExports += cell.globalExports;
-            }
-        }
-        return (float) totalGlobalExports / (float) total;
+        return (float) (imports / total);
+    }
+
+    public final float getFactionExportShare(String comID, String factionID) {
+        final double total = getGlobalExports(comID);
+        if (total == 0) return 0;
+        final double exports = getFactionGlobalExports(comID, factionID);
+
+        return (float) (exports / total);
+    }
+
+    public final float getFactionImportShareWithInformal(String comID, String factionID) {
+        final double total = getGlobalImports(comID) + engine.getComDomain(comID).getInformalNode().imports;
+        if (total == 0.0) return 0f;
+        final double imports = getFactionGlobalImports(comID, factionID);
+
+        return (float) (imports / total);
+    }
+
+    public final float getFactionExportShareWithInformal(String comID, String factionID) {
+        final double total = getGlobalExports(comID) + engine.getComDomain(comID).getInformalNode().exports;
+        if (total == 0) return 0;
+        final double exports = getFactionGlobalExports(comID, factionID);
+        
+        return (float) (exports / total);
+    }
+
+    public final float getInformalImportShare(String comID) {
+        final double total = getGlobalImports(comID) + engine.getComDomain(comID).getInformalNode().imports;
+        if (total == 0.0) return 0f;
+        final double imports = engine.getComDomain(comID).getInformalNode().imports;
+
+        return (float) (imports / total);
+    }
+
+    public final float getInformalExportShare(String comID) {
+        final double total = getGlobalExports(comID) + engine.getComDomain(comID).getInformalNode().exports;
+        if (total == 0) return 0;
+        final double exports = engine.getComDomain(comID).getInformalNode().exports;
+        
+        return (float) (exports / total);
     }
 
     public final long getPlayerFactionCreditFlow(String comID) {
@@ -100,7 +116,7 @@ public class EconomyInfo {
         return netCreditFlow;
     }
 
-    public final double getTotalFactionStockpiles(String comID, String factionID) {
+    public final double getFactionComStockpiles(String comID, String factionID) {
         double totalStockpiles = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
@@ -111,7 +127,7 @@ public class EconomyInfo {
         return totalStockpiles;
     }
 
-    public final float getTotalFactionDemand(String comID, String factionID) {
+    public final float getFactionComDemand(String comID, String factionID) {
         float totalDemand = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
@@ -122,7 +138,7 @@ public class EconomyInfo {
         return totalDemand;
     }
 
-    public final float getTotalFactionProd(String comID, String factionID) {
+    public final float getFactionComProd(String comID, String factionID) {
         float totalDemand = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
@@ -133,7 +149,7 @@ public class EconomyInfo {
         return totalDemand;
     }
 
-    public final double getTotalFactionBalance(String comID, String factionID) {
+    public final double getFactionComBalance(String comID, String factionID) {
         double balance = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
@@ -159,24 +175,23 @@ public class EconomyInfo {
         return Math.min(1f, inFactionImports / totalImports);
     }
 
-    public final float getFactionTotalImportShare(String comID, String factionID) {
-        final double total = getTotalGlobalImports(comID);
-        if (total == 0) return 0;
-        double totalGlobalImports = 0;
+    public final double getFactionGlobalImports(String comID, String factionID) {
+        double totalGlobalImports = 0.0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
                 totalGlobalImports += cell.globalImports;
             }
         }
-        return (float) (totalGlobalImports / total);
+
+        return totalGlobalImports;
     }
 
-    public final double getFactionTotalGlobalExports(String comID, FactionSpecAPI faction) {
+    public final double getFactionGlobalExports(String comID, String factionID) {
         double totalGlobalExports = 0;
 
         for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
-            if (cell.market.getFaction().getId().equals(faction.getId())) {
+            if (cell.market.getFaction().getId().equals(factionID)) {
                 totalGlobalExports += cell.globalExports;
             }
         }
@@ -262,6 +277,38 @@ public class EconomyInfo {
 
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
         total += cell.getFlowDeficit();
+
+        return total;
+    }
+
+    public final double getGlobalImports(String comID) {
+        double total = 0.0;
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
+        total += cell.globalImports;
+
+        return total;
+    }
+
+    public final double getGlobalExports(String comID) {
+        double total = 0.0;
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
+        total += cell.globalExports;
+
+        return total;
+    }
+
+    public final double getGlobalInformalImports(String comID) {
+        double total = 0.0;
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
+        total += cell.informalImports;
+
+        return total;
+    }
+
+    public final double getGlobalInformalExports(String comID) {
+        double total = 0.0;
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
+        total += cell.informalExports;
 
         return total;
     }

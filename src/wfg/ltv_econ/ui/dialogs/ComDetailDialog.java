@@ -28,6 +28,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
@@ -36,7 +37,7 @@ import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
 import wfg.ltv_econ.ui.panels.reusable.CommodityInfoBar;
 import wfg.ltv_econ.util.TooltipUtils;
-import wfg.ltv_econ.util.UiUtils;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.UIContext;
@@ -340,7 +341,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String txt = "Total global exports";
 
                     final String valueTxt = NumFormat.engNotation(
-                        engine.info.getTotalGlobalExports(comID)
+                        engine.info.getGlobalExports(comID)
                     );
 
                     ComponentFactory.addCaptionValueBlock(
@@ -387,12 +388,12 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String txt = "Total " + factionName + " exports";
 
                     final String globalValue = NumFormat.engNotation(
-                        engine.info.getFactionTotalGlobalExports(
-                            comID, currFaction)
+                        engine.info.getFactionGlobalExports(
+                            comID, currFaction.getId())
                     );
                     final String inFactionValue = NumFormat.engNotation(
-                        engine.info.getTotalInFactionExports(
-                            comID, currFaction)
+                        engine.info.getFactionInFactionExports(
+                            comID, currFaction.getId())
                     );
 
                     final String valueTxt = globalValue + "  |  " + inFactionValue;
@@ -404,7 +405,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                     lbl2.setColor(base);
                     lbl2.setHighlight(globalValue, inFactionValue);
-                    lbl2.setHighlightColors(factionColor, UiUtils.inFactionColor);
+                    lbl2.setHighlightColors(factionColor, UIColors.IN_FACTION_COLOR);
                     lbl2.setHighlightOnMouseover(true);
 
                     ComponentFactory.layoutCaptionValueLabels(
@@ -420,7 +421,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                         tp.addPara(
                             "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currFaction.getPersonNamePrefix() + " control.\n\n" +
                             "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
-                            pad, new Color[] {currFaction.getBaseUIColor(), UiUtils.inFactionColor},
+                            pad, new Color[] {currFaction.getBaseUIColor(), UIColors.IN_FACTION_COLOR},
                             new String[] {"all consumers globally", "within the faction"}
                         );
                     };
@@ -442,7 +443,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String factionName = m_faction.getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int)(engine.info.getFactionTotalExportShare(
+                    final String valueTxt = (int)(engine.info.getFactionExportShare(
                         comID, m_faction.getId()
                     ) * 100) + "%";
 
@@ -483,7 +484,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String factionName = m_selectedMarket.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int) (engine.info.getFactionTotalExportShare(
+                    final String valueTxt = (int) (engine.info.getFactionExportShare(
                         comID, m_selectedMarket.getFactionId()
                     ) * 100) + "%";
 
@@ -517,7 +518,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String factionName = m_faction.getDisplayName();
                     final String txt = factionName + " market share";
 
-                    final String valueTxt = (int) (engine.info.getFactionTotalExportShare(
+                    final String valueTxt = (int) (engine.info.getFactionExportShare(
                         comID, m_faction.getId()
                     ) * 100) + "%";
 
@@ -774,7 +775,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
             section4ComPanel.selectRow(source);
 
-            if (UiUtils.canViewPrices()) {
+            if (UIUtils.canViewPrices()) {
                 updateSection1();
                 
                 final int mode = producerButton.isChecked() ? 0 : 1;

@@ -30,6 +30,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -265,10 +266,6 @@ public class TooltipUtils {
         final int valueWidth = 50;
         int rowCount = 0;
 
-        tp.addPara(
-            "Values reflect the current day. Stockpiles are ignored for display purposes",
-            gray, pad
-        );
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
         for (Map.Entry<String, MutableStat> entry : cell.getFlowProdIndStats().entrySet()) {
@@ -486,7 +483,7 @@ public class TooltipUtils {
             tp.addPara("No local production to export for today.", opad);
         } else if (exportIncomeLastMonth < 1l && exportIncomeThisMonth < 1l) {
             tp.addPara(
-                marketName + " exported %s units of " + comName + " and accounted for %s of the global market share. Income from exports are not tracked for non-player colonies.",
+                marketName + " exported %s units of " + comName + " and accounted for %s of the global market share. Export income is not tracked for non-player colonies.",
                 opad, highlight,
                 NumFormat.engNotation(cell.getTotalExports()),
                 engine.info.getExportMarketShare(cell.comID, cell.marketID) + "%"
@@ -518,7 +515,7 @@ public class TooltipUtils {
             tp.addPara("No local demand.", opad);
         } else if (exportIncomeLastMonth < 1l && exportIncomeThisMonth < 1l) {
             tp.addPara(
-                marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. Expenses from imports are not tracked for non-player colonies.",
+                marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. Import expenses are not tracked for non-player colonies.",
                 opad, highlight,
                 NumFormat.engNotation(cell.getTotalImports(false)),
                 engine.info.getImportMarketShare(cell.comID, cell.marketID) + "%"
@@ -567,10 +564,10 @@ public class TooltipUtils {
         final boolean addRatioColors
     ) {
         if (!addRatioColors) return faction.getBaseUIColor();
-        if (ratio <= 0.25f) return UiUtils.COLOR_DEFICIT;
-        if (ratio <= 0.5f) return UiUtils.COLOR_IMPORT;
-        if (ratio <= 0.75f) return UiUtils.COLOR_LOCAL_PROD;
-        return UiUtils.COLOR_NOT_EXPORTED;
+        if (ratio <= 0.25f) return UIColors.COLOR_DEFICIT;
+        if (ratio <= 0.5f) return UIColors.COLOR_IMPORT;
+        if (ratio <= 0.75f) return UIColors.COLOR_LOCAL_PROD;
+        return UIColors.COLOR_NOT_EXPORTED;
     }
 
     private static final Comparator<CommodityCell> createSellComparator(int econUnit) {

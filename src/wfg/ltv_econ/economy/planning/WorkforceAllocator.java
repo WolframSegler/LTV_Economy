@@ -36,7 +36,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
 public class WorkforceAllocator {
     private static final Logger logger = Global.getLogger(WorkforceAllocator.class);
 
-    public static final double WORKER_COST = 0.1;
+    public static final double WORKER_COST = 1.0;
 
     /**
      * For reduced / grouped matrixes

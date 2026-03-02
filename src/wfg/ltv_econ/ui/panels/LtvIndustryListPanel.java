@@ -32,7 +32,7 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.ui.panels.IndustryWidget.ConstructionMode;
-import wfg.ltv_econ.util.UiUtils;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
@@ -164,7 +164,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 
 			@Override
 			public void createPanel() {
-				LabelAPI creditLbl = UiUtils.createPlayerCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
+				LabelAPI creditLbl = UIUtils.createPlayerCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
 				creditLbl.setHighlightOnMouseover(true);
 
 				getPos().setSize(
@@ -191,7 +191,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 
 			@Override
 			public void createPanel() {
-				LabelAPI creditLbl = UiUtils.createColonyCreditsLabel(
+				LabelAPI creditLbl = UIUtils.createColonyCreditsLabel(
 					Fonts.INSIGNIA_LARGE, 25, m_market.getId()
 				);
 				creditLbl.setHighlightOnMouseover(true);
@@ -220,7 +220,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 
 			@Override
 			public void createPanel() {
-				LabelAPI maxIndLbl = UiUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
+				LabelAPI maxIndLbl = UIUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
 				maxIndLbl.setHighlightOnMouseover(true);
 
 				getPos().setSize(

@@ -2,8 +2,6 @@ package wfg.ltv_econ.intel.market.events;
 
 import static wfg.native_ui.util.UIConstants.*;
 
-import java.awt.Color;
-
 import wfg.ltv_econ.economy.PlayerMarketData;
 
 public class MiasmaInTheStreetsEvent extends MarketEvent {
@@ -51,11 +49,9 @@ public class MiasmaInTheStreetsEvent extends MarketEvent {
     @Override
     public void createTooltip(PlayerMarketData data, com.fs.starfarer.api.ui.TooltipMakerAPI tp) {
         tp.setParaFontOrbitron();
-        tp.setParaFontColor(negative);
-        tp.addPara(spec.name, pad);
+        tp.addPara(spec.name, negative, pad);
 
         tp.setParaFontDefault();
-        tp.setParaFontColor(Color.WHITE);
         tp.addPara(spec.description, pad);
 
         final int cols = 2;

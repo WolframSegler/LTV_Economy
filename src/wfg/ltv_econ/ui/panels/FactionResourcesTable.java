@@ -64,14 +64,14 @@ public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> im
                     m_panel, 26, 26, com.getIconName(), null, null
                 );
     
-                final double stored = info.getTotalFactionStockpiles(comID, Factions.PLAYER);
-                final float demand = info.getTotalFactionDemand(comID, Factions.PLAYER);
-                final float prod = info.getTotalFactionProd(comID, Factions.PLAYER);
+                final double stored = info.getFactionComStockpiles(comID, Factions.PLAYER);
+                final float demand = info.getFactionComDemand(comID, Factions.PLAYER);
+                final float prod = info.getFactionComProd(comID, Factions.PLAYER);
                 if (prod == 0f && demand == 0f) continue;
     
-                final int exportShare = (int) (info.getFactionTotalExportShare(comID, Factions.PLAYER) * 100);
+                final int exportShare = (int) (info.getFactionExportShare(comID, Factions.PLAYER) * 100);
                 final long credits = info.getPlayerFactionCreditFlow(comID);
-                final double balance = info.getTotalFactionBalance(comID, Factions.PLAYER);
+                final double balance = info.getFactionComBalance(comID, Factions.PLAYER);
                 final int autarky = (int) ((Math.min(1f, demand == 0f ? 1f: prod/demand)) * 100);
     
                 final Color demandColor = demand > prod ? negative : base;

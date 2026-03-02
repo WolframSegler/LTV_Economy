@@ -17,7 +17,7 @@ import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
 import wfg.ltv_econ.ui.panels.buttons.ColonyStockpilesButton;
 import wfg.ltv_econ.ui.panels.buttons.ManagePopButton;
 import wfg.ltv_econ.ui.panels.buttons.MarketEventsButton;
-import wfg.ltv_econ.util.UiUtils;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
@@ -521,7 +521,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
             replacement.selectRow(panel);
 
-            if (UiUtils.canViewPrices()) {
+            if (UIUtils.canViewPrices()) {
                 final ComDetailDialog dialogPanel = new ComDetailDialog(
                     marketAPI, marketAPI.getFaction().getFactionSpec(), panel.m_com
                 );

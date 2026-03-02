@@ -12,9 +12,10 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.panels.reusable.CommodityInfoBar;
+import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.util.TooltipUtils;
-import wfg.ltv_econ.util.UiUtils;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
@@ -82,7 +83,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             tp.setParaFontDefault();
             tp.addPara(comDesc, opad);
 
-            if (UiUtils.canViewPrices()) {
+            if (UIUtils.canViewPrices()) {
                 final String text = "Click to view global market info";
                 tp.addPara(text, opad, positive, text);
             } else {
@@ -124,7 +125,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             }
         };
         tooltip.positioner = (tp, expanded) -> {
-            NativeUiUtils.anchorPanel(tp, m_parent, AnchorType.LeftTop, opad);
+            NativeUiUtils.anchorPanel(tp, m_parent, AnchorType.LeftTop, pad*4);
         };
         tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
         tooltip.expandTxt = "%s show legend";
@@ -185,7 +186,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             
             y += iconSize + pad;
 
-            desc = "Excess local production that is exported.";
+            desc = "Excess production that is exported.";
             legendRowHelper(tp, y, EXPORTS_ICON_PATH, desc, iconSize, false, null);
             
             y += iconSize + pad;
@@ -199,42 +200,42 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
 
         iconPath = "";
         desc = "Local production that could not be exported.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_NOT_EXPORTED);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COLOR_NOT_EXPORTED);
         
         y += iconSize + pad;
 
-        desc = "Local production that was exported.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_EXPORT);
+        desc = "Exported local production.";
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COLOR_EXPORT);
         
         y += iconSize + pad;
 
         desc = "Production used for local demand.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_LOCAL_PROD);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COLOR_LOCAL_PROD);
         
         y += iconSize + pad;
 
         desc = "Goods that were imported in-faction.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_FACTION_IMPORT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COLOR_FACTION_IMPORT);
         
         y += iconSize + pad;
 
         desc = "Imported or available through one-time trade or events.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_IMPORT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COLOR_IMPORT);
         
         y += iconSize + pad;
 
-        desc = "Goods that must be imported regardless of local stockpiles or demand.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_IMPORT_EXCLUSIVE);
+        desc = "Forced imports independent of local stockpiles or demand.";
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COLOR_IMPORT_EXCLUSIVE);
         
         y += iconSize + pad;
 
         desc = "Excess imports beyond current demand stockpiled for future use.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_OVER_IMPORT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COLOR_OVER_IMPORT);
         
         y += iconSize + pad;
 
         desc = "Deficit not covered by production or imports.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UiUtils.COLOR_DEFICIT);
+        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COLOR_DEFICIT);
     
         tp.setHeightSoFar(y + opad*2);
     }

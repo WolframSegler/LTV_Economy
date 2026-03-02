@@ -13,7 +13,6 @@ import wfg.ltv_econ.util.Arithmetic;
 
 import static wfg.native_ui.util.UIConstants.*;
 
-import java.awt.Color;
 import java.util.List;
 
 public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketImmigrationModifier {
@@ -85,11 +84,9 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketI
     @Override
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
         tp.setParaFontOrbitron();
-        tp.setParaFontColor(negative);
-        tp.addPara(spec.name, pad);
+        tp.addPara(spec.name, negative, pad);
 
         tp.setParaFontDefault();
-        tp.setParaFontColor(Color.WHITE);
         tp.addPara(spec.description, pad);
 
         final int cols = 2;

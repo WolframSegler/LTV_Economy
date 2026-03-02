@@ -206,6 +206,10 @@ public class CommodityDomain {
         return exporters;
     }
 
+    public final InformalExchangeNode getInformalNode() {
+        return informalNode;
+    }
+
     private final void formalTrade(boolean fakeAdvance, final EconomyEngine engine) {
         final List<CommodityCell> importers = getImporters();
         final List<CommodityCell> exporters = getExporters();
@@ -268,7 +272,7 @@ public class CommodityDomain {
             final float price = pricePerUnit * amountToSend;
 
             if(sameFaction) {
-                expCell.informalExports += amountToSend;
+                expCell.inFactionExports += amountToSend;
                 impCell.inFactionImports += amountToSend;
 
                 final int credits = (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT);

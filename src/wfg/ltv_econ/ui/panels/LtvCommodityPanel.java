@@ -79,7 +79,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
         });
 
         final TooltipMakerAPI headerTp = ComponentFactory.createTooltip(
-            getPos().getWidth(), false
+            pos.getWidth(), false
         );
         headerTp.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
@@ -90,7 +90,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
         outline.offset.setOffset(1, 1, -2, -headerHeight - 2);
 
         final TooltipMakerAPI rowTp = ComponentFactory.createTooltip(
-            getPos().getWidth(), true
+            pos.getWidth(), true
         );
         
         final int rowHeight = 28;
@@ -98,7 +98,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
 
         for (CommoditySpecAPI com : commodities) {
             final CommodityRowPanel comRow = new CommodityRowPanel(
-                m_panel, m_market, com.getId(), (int)(getPos().getWidth() - opad * 2), 
+                m_panel, m_market, com.getId(), (int)(pos.getWidth() - opad * 2), 
                 rowHeight, rowsIgnoreUIState
             );
 
@@ -111,7 +111,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
             commodityRows.add(comRow);
         }
         rowTp.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(rowTp, getPos().getHeight() - headerHeight, true, m_panel)
+        ComponentFactory.addTooltip(rowTp, pos.getHeight() - headerHeight, true, m_panel)
             .inTL(0, headerHeight);
     }
 

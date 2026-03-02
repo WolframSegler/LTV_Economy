@@ -6,7 +6,6 @@ import java.util.List;
 import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -21,13 +20,13 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
-import wfg.ltv_econ.util.UiUtils;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.components.TooltipComp.TooltipBuilder;
@@ -44,6 +43,8 @@ import static wfg.native_ui.util.UIConstants.*;
 
 public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
     private static final SettingsAPI settings = Global.getSettings();
+    private static final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
+    private static final float PIE_CHART_THRESHOLD = 0.001f;
 
     public static final int ICON_SIZE = 135;
     public static final int LABEL_W = 150;
@@ -82,7 +83,8 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
-                final long value = engine.info.getGlobalProduction(comID);
+                final long value = engine.info.getGlobalProduction(comID)
+                    + (long) dom.getInformalNode().prod;
                 final String txt = "Global production";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) valueTxt = "---";
@@ -94,8 +96,8 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
-                        "The combined daily output of %s across all colonies in the Sector. " +
-                        "Represents active industrial production, excluding existing stockpiles.",
+                        "The combined daily output of %s across all colonies and the informals in the Sector. " +
+                        "Represents active industrial and informal production, excluding existing stockpiles.",
                         pad, highlight, selectedCom.getName()
                     );
                 };
@@ -106,7 +108,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Total global demand
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.info.getGlobalDemand(comID);
@@ -133,7 +135,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Total global surplus
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.info.getGlobalSurplus(comID);
@@ -160,7 +162,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Total global deficit
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.info.getGlobalDeficit(comID);
@@ -189,7 +191,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
 
         final int largeLabelShift = 30;
         { // Total trade volume (units)
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W + largeLabelShift, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W + largeLabelShift, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.info.getGlobalTradeVolume(comID);
@@ -215,7 +217,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Total trade value (credits)
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W + largeLabelShift, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W + largeLabelShift, LABEL_H) {
 
             public void createPanel() {
                 final long value = dom.getTradeCreditActivity();
@@ -241,7 +243,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Average sector price
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final int value = (int) engine.info.getGlobalAveragePrice(comID, 0);
@@ -267,7 +269,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Trade volatility (month-over-month volume change)
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final float value = dom.getTradeVolatility();
@@ -304,7 +306,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Global stockpiles
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = engine.info.getGlobalStockpiles(comID);
@@ -331,7 +333,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Worker allocation (total workers producing it)
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 long value = 0;
@@ -360,13 +362,12 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Number of exporting markets
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = dom.getExporters().size();
                 final String txt = "Global Exporters";
-                String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) valueTxt = "---";
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -386,13 +387,12 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Number of importing markets
-        final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W, LABEL_H) {
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void createPanel() {
                 final long value = dom.getImporters().size();
                 final String txt = "Global Importers";
-                String valueTxt = NumFormat.engNotation(value);
-                if (value < 1) valueTxt = "---";
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -409,6 +409,31 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         };
 
         add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H);
+        }
+
+        { // Informal production
+        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+
+            public void createPanel() {
+                final float value = dom.getInformalNode().prod;
+                final String txt = "Informal Production";
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
+
+                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+            }
+
+            {
+                tooltip.width = 460f;
+                tooltip.builder = (tp, exp) -> {
+                    tp.addPara(
+                        "The amount of %s produced by the informal sector on the previous day.",
+                        pad, highlight, selectedCom.getName()
+                    );
+                };
+            }
+        };
+
+        add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H*2);
         }
 
         final TooltipBuilder tableTp = (tp, exp) -> {
@@ -516,22 +541,28 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
       
         { // Global export share per faction (percent)
         final ArrayList<PieSlice> data = new ArrayList<>(); 
-        final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
-        for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
-            final FactionSpecAPI faction = iter.next();
-            final float value = engine.info.getFactionTotalExportShare(comID, faction.getId());
-            if (value < 0.001f) {
-                iter.remove();
-                continue;
-            }
+        final float informalShare = engine.info.getInformalExportShare(comID);
+
+        for (FactionSpecAPI faction : factionList) {
+            final float share = engine.info.getFactionExportShareWithInformal(comID, faction.getId());
+            if (share < PIE_CHART_THRESHOLD) continue;
+
             data.add(new PieSlice(
                 null,
                 faction.getBaseUIColor(),
-                value
+                share
             ));
         }
 
-        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        if (informalShare >= PIE_CHART_THRESHOLD) {
+            data.add(new PieSlice(
+                null,
+                UIColors.INFORMAL_SECTOR,
+                informalShare
+            ));
+        }
+
+        final PieChart chart = new PieChart(m_panel, PIECHART_W, PIECHART_H, data);
         add(chart).inBL(360, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
@@ -541,7 +572,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
             tp.setParaFontDefault();
             tp.setParaFontColor(Misc.getTextColor());
             tp.addPara(
-                "Shows the percentage of total exports controlled by each faction. " +
+                "Shows the percentage of total exports controlled by factions and informals. " +
                 "Percentages do not include in-faction trade." +
                 "Values are based on the previous day.",
                 pad
@@ -554,11 +585,21 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
             );
 
             for (FactionSpecAPI faction : factionList) {
+                final float share = engine.info.getFactionExportShareWithInformal(comID, faction.getId());
+                if (share < PIE_CHART_THRESHOLD) continue;
+
                 tp.addRow(new Object[] {
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),
-                    highlight,
-                    (int) (engine.info.getFactionTotalExportShare(comID, faction.getId()) * 100) + "%"
+                    highlight, (int) (share * 100) + "%"
+                });
+            }
+
+            if (informalShare >= PIE_CHART_THRESHOLD) {
+                tp.addRow(new Object[] {
+                    UIColors.INFORMAL_SECTOR,
+                    "Informal Sector",
+                    highlight, (int) (informalShare * 100) + "%"
                 });
             }
 
@@ -572,23 +613,30 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         }
 
         { // Global import share per faction (percent)
-        final ArrayList<PieSlice> data = new ArrayList<>(); 
-        final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
-        for (Iterator<FactionSpecAPI> iter = factionList.iterator(); iter.hasNext();) {
-            final FactionSpecAPI faction = iter.next();
-            final float value = engine.info.getFactionTotalImportShare(comID, faction.getId());
-            if (value < 0.001f) {
-                iter.remove();
-                continue;
-            }
+        final ArrayList<PieSlice> data = new ArrayList<>();
+        final float informalShare = engine.info.getInformalImportShare(comID);
+
+        for (FactionSpecAPI faction : factionList) {
+            final float share = engine.info.getFactionImportShareWithInformal(comID, faction.getId());
+
+            if (share < PIE_CHART_THRESHOLD) continue;
+
             data.add(new PieSlice(
                 null,
                 faction.getBaseUIColor(),
-                value
+                share
             ));
         }
 
-        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        if (informalShare >= PIE_CHART_THRESHOLD) {
+            data.add(new PieSlice(
+                null,
+                UIColors.INFORMAL_SECTOR,
+                informalShare
+            ));
+        }
+
+        final PieChart chart = new PieChart(m_panel, PIECHART_W, PIECHART_H, data);
         add(chart).inBL(580, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
@@ -598,7 +646,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
             tp.setParaFontDefault();
             tp.setParaFontColor(Misc.getTextColor());
             tp.addPara(
-                "Shows the percentage of total imports made by each faction. " +
+                "Shows the percentage of total imports made by factions and informals. " +
                 "Percentages do not include in-faction trade." +
                 "Values are based on the previous day.",
                 pad
@@ -611,11 +659,21 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
             );
 
             for (FactionSpecAPI faction : factionList) {
+                final float share = engine.info.getFactionImportShareWithInformal(comID, faction.getId());
+                if (share < PIE_CHART_THRESHOLD) continue;
+
                 tp.addRow(new Object[] {
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),
-                    highlight,
-                    (int) (engine.info.getFactionTotalImportShare(comID, faction.getId()) * 100) + "%"
+                    highlight, (int) (share * 100) + "%"
+                });
+            }
+
+            if (informalShare >= PIE_CHART_THRESHOLD) {
+                tp.addRow(new Object[] {
+                    UIColors.INFORMAL_SECTOR,
+                    "Informal Sector",
+                    highlight, (int) (informalShare * 100) + "%"
                 });
             }
 
@@ -628,23 +686,33 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         add(label).inBL(580 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
         }
 
-        { // In-faction vs out-of-faction trade share
+        { // Trade breakdown (percent)
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final double total = engine.info.getTotalGlobalExports(comID) + engine.info.getTotalFactionExports(comID);
-        final float globalTradeShare = (float) (engine.info.getTotalGlobalExports(comID) / total);
+        final double globalExports = engine.info.getGlobalExports(comID);
+        final double inFactionExports = engine.info.getInFactionExports(comID);
+        final double informalExports = dom.getInformalNode().exports;
+        final double total = globalExports + inFactionExports + informalExports;
+        final float globalTradeShare = (float) (globalExports / total);
+        final float inFactionTradeShare = (float) (inFactionExports / total);
+        final float informalTradeShare = (float) (informalExports / total);
             
         data.add(new PieSlice(
             null,
-            UiUtils.COLOR_IMPORT,
+            UIColors.COLOR_IMPORT,
             globalTradeShare
         ));
         data.add(new PieSlice(
             null,
-            UiUtils.inFactionColor,
-            1f - globalTradeShare
+            UIColors.IN_FACTION_COLOR,
+            inFactionTradeShare
+        ));
+        data.add(new PieSlice(
+            null,
+            UIColors.INFORMAL_SECTOR,
+            informalTradeShare
         ));
 
-        final PieChart chart = new PieChart(getPanel(), PIECHART_W, PIECHART_H, data);
+        final PieChart chart = new PieChart(m_panel, PIECHART_W, PIECHART_H, data);
         add(chart).inBL(800, pad);
 
         chart.tooltip.builder = (tp, exp) -> {

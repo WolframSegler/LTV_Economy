@@ -2,8 +2,6 @@ package wfg.ltv_econ.intel.market.events;
 
 import static wfg.native_ui.util.UIConstants.*;
 
-import java.awt.Color;
-
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.configs.EventConfigLoader.EventConfig;
@@ -28,11 +26,9 @@ public abstract class MarketEvent {
 
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
         tp.setParaFontOrbitron();
-        tp.setParaFontColor(base);
-        tp.addPara(spec.name, pad);
+        tp.addPara(spec.name, base, pad);
         
         tp.setParaFontDefault();
-        tp.setParaFontColor(Color.WHITE);
         tp.addPara(spec.description, pad);
     }
 }

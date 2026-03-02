@@ -66,7 +66,7 @@ public class PlanningData {
         final double[] d = new double[commodities.size()];
         for (int i = 0; i < commodities.size(); i++) {
             final String comID = commodities.get(i);
-            d[i] = EconomyEngine.getInstance().info.getTotalFactionDemand(comID, factionID);
+            d[i] = EconomyEngine.getInstance().info.getFactionComDemand(comID, factionID);
         }
 
         return d;
