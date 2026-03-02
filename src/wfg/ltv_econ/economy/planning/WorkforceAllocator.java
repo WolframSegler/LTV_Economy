@@ -340,7 +340,7 @@ public class WorkforceAllocator {
                 for (int f = 0; f < F; f++) {
                     for (int c = 0; c < C; c++) {
                         final double newDemand = baselineDemandFC[f][c] + producedDemandAdd[f][c];
-                        final double beta = 0.0;
+                        final double beta = 0.4;
                         demandFC[f][c] = (1.0 - beta) * demandFC[f][c] + beta * newDemand;
                     }
                 }
