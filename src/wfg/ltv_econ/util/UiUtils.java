@@ -3,25 +3,19 @@ package wfg.ltv_econ.util;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
-import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.ui.plugins.CommodityinfobarPlugin;
 
 public class UiUtils {
 
     public static final Color inFactionColor = new Color(35, 70, 130, 255);
-
     public static final Color COLOR_DEFICIT = new Color(140, 15, 15);
     public static final Color COLOR_OVER_IMPORT = new Color(180, 90, 180);
     public static final Color COLOR_IMPORT_EXCLUSIVE = new Color(0, 180, 200);
@@ -30,51 +24,6 @@ public class UiUtils {
     public static final Color COLOR_LOCAL_PROD = new Color(122, 200, 122);
     public static final Color COLOR_EXPORT = new Color(63,  175, 63);
     public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
-
-    public static final UIPanelAPI CommodityInfoBar(int barHeight, int barWidth, CommodityCell cell) {
-        if (cell.getFlowEconomicFootprint() <= 0) {
-            throw new IllegalStateException(
-                "CommodityInfoBar cannot display info: economic footprint is zero for " 
-                + cell.comID
-            );
-        }
-
-        final float footprint = cell.getFlowEconomicFootprint();
-
-        float demandMetLocalRatio = (float)cell.getFlowDeficitMetLocally() / footprint;
-        float inFactionImportRatio = (float)cell.getFlowDeficitMetViaFactionTrade() / footprint;
-        float globalImportRatio = (float)cell.getFlowDeficitMetViaGlobalTrade() / footprint;
-        float overImportRatio = (float)cell.getFlowOverImports() / footprint;
-        float importExclusiveRatio = (float)cell.getImportExclusiveDemand() / footprint;
-        float exportedRatio = (float)cell.getTotalExports() / footprint;
-        float notExportedRatio = (float)cell.getFlowCanNotExport() / footprint;
-        float deficitRatio = (float)cell.getFlowDeficit() / footprint;
-
-        final Map<Color, Float> barMap = new LinkedHashMap<>(8) {{
-            put(COLOR_LOCAL_PROD, demandMetLocalRatio);
-            put(COLOR_EXPORT, exportedRatio);
-            put(COLOR_NOT_EXPORTED, notExportedRatio);
-            put(COLOR_FACTION_IMPORT, inFactionImportRatio);
-            put(COLOR_IMPORT, globalImportRatio);
-            put(COLOR_OVER_IMPORT, overImportRatio);
-            put(COLOR_IMPORT_EXCLUSIVE, importExclusiveRatio);
-            put(COLOR_DEFICIT, deficitRatio);
-        }};
-
-        for (Map.Entry<Color, Float> barPiece : barMap.entrySet()) {
-            if (barPiece.getValue() < 0) {
-                barPiece.setValue(0f);
-            }
-        }
-
-        final CommodityinfobarPlugin plugin = new CommodityinfobarPlugin();
-        UIPanelAPI infoBar = Global.getSettings().createCustom(
-            barWidth, barHeight, plugin
-        );
-        plugin.init(infoBar, true, barMap);
-
-        return infoBar;
-    }
 
     /**
      * I copied and cleaned this from the obfuscated code.

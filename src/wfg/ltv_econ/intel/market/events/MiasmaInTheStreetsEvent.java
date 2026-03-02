@@ -26,8 +26,8 @@ public class MiasmaInTheStreetsEvent extends MarketEvent {
         activeDaysRemaining = BASE_DURATION;
         cooldownDaysRemaining = BASE_COOLDOWN + BASE_DURATION;
 
-        data.happinessDelta.modifyFlat(spec.id, HAPPINESS_DEBUFF, spec.name);
-        data.healthDelta.modifyFlat(spec.id, HEALTH_DEBUFF, spec.name);
+        data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
+        data.healthDelta.modifyFlat(id, HEALTH_DEBUFF, spec.name);
     }
 
     @Override

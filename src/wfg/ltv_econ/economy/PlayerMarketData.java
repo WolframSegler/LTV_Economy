@@ -21,6 +21,7 @@ import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
+import wfg.ltv_econ.util.Arithmetic;
 
 public class PlayerMarketData {
     public final String marketID;
@@ -309,11 +310,7 @@ public class PlayerMarketData {
     }
 
     private static final float clamp(float value) {
-        return clamp(value, 0f, 100f);
-    }
-
-    private static final float clamp(float value, float min, float max) {
-        return value < min ? min : (value > max ? max : value);
+        return Arithmetic.clamp(value, 0f, 100f);
     }
 
     @Override

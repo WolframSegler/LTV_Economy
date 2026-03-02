@@ -34,6 +34,7 @@ import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.ui.panels.LtvCommodityPanel;
 import wfg.ltv_econ.ui.panels.CommodityRowPanel;
 import wfg.ltv_econ.ui.panels.reusable.ComIconPanel;
+import wfg.ltv_econ.ui.panels.reusable.CommodityInfoBar;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
 import wfg.native_ui.ui.Attachments;
@@ -292,7 +293,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 @Override
                 public void createPanel() {
                     final long value = engine.getComDomain(comID)
-                        .getMarketActivity();
+                        .getTradeCreditActivity();
                     final String txt = "Global market value";
                     String valueTxt = NumFormat.formatCredit(value);
                     if (value < 1) valueTxt = "---";
@@ -704,7 +705,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final float quantityValue = mode == 0 ? cell.globalExports : cell.globalImports;
             final String quantityTxt = NumFormat.engNotation((long) quantityValue);
 
-            final UIPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 75, cell);
+            final UIPanelAPI infoBar = new CommodityInfoBar(null, 75, iconSize,
+                true, cell).getPanel();
 
             final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
 
@@ -816,9 +818,9 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             tp.addSectionHeading(m_com.getName() + " production & availability",
             baseColor, darkColor, Alignment.MID, opad);
                 
-            TooltipUtils.createCommodityProductionBreakdown(tp, cell);
+            TooltipUtils.createComProductionBreakdown(tp, cell);
     
-            TooltipUtils.createCommodityDemandBreakdown(tp, cell);
+            TooltipUtils.createComDemandBreakdown(tp, cell);
     
             final float econUnit = m_com.getEconUnit();
             final int sellPrice = (int) (cell.computeVanillaPrice((int)econUnit, true, true) / econUnit);

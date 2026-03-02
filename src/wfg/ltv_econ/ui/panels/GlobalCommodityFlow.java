@@ -218,7 +218,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         final TextPanel textPanel = new TextPanel(getPanel(), LABEL_W + largeLabelShift, LABEL_H) {
 
             public void createPanel() {
-                final long value = dom.getMarketActivity();
+                final long value = dom.getTradeCreditActivity();
                 final String txt = "Sector-wide trade value";
                 String valueTxt = NumFormat.formatCredit(value);
                 if (value < 1) valueTxt = "---";

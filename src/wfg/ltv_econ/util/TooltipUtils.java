@@ -31,6 +31,7 @@ import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.CommodityCell;
+import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
@@ -256,7 +257,7 @@ public class TooltipUtils {
         }
     }
 
-    public static final void createCommodityProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+    public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
         final LabelAPI title = tp.addPara("Available: %s", pad, highlight,
             NumFormat.engNotation((long)cell.getFlowAvailable()));
@@ -319,24 +320,6 @@ public class TooltipUtils {
             }
         }
 
-        // Import mods
-        if (cell.inFactionImports > 0) {
-            tp.addToGrid(0, rowCount++, "In-faction imports", "+" + NumFormat.engNotation(
-                (long) cell.inFactionImports), cell.inFactionImports < 0 ? negative : highlight);
-        }
-
-        if (cell.globalImports > 0) {
-            tp.addToGrid(0, rowCount++, "Global imports", "+" + NumFormat.engNotation(
-                (long) cell.globalImports), cell.globalImports < 0 ? negative : highlight);
-        }
-
-        if (cell.importEffectiveness < 1f) {
-            final float value = ((int) (cell.importEffectiveness * 100f)) / 100f;
-
-            tp.setGridValueColor(negative);
-            tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value);
-        }
-
         if (cell.getFlowDeficit() >= 1) {
             tp.addToGrid(0, rowCount++, "Post-trade shortage", "" + NumFormat.engNotation(
                 (long)-cell.getFlowDeficit()), negative);
@@ -350,7 +333,7 @@ public class TooltipUtils {
         tp.addGrid(0);
     }
 
-    public static final void createCommodityDemandBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+    public static final void createComDemandBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         final Color valueColor = cell.getFlowDeficit() > 0 ? negative : highlight;
         final int gridWidth = 430;
         final int valueWidth = 50;
@@ -358,7 +341,8 @@ public class TooltipUtils {
         
         tp.setParaFontDefault();
         final LabelAPI title = tp.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation((long)cell.getBaseDemand(true)));
+            NumFormat.engNotation(cell.getBaseDemand(true))
+        );
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
@@ -417,7 +401,7 @@ public class TooltipUtils {
         tp.addGrid(0);
     }
 
-    public static final void createCommodityStockpilesBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+    public static final void createComStockpilesChangeBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
         tp.addPara("Current Stockpiles: %s", pad, highlight, NumFormat.engNotation(cell.getRoundedStored()));
         final int gridWidth = 430;
@@ -427,20 +411,119 @@ public class TooltipUtils {
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
         tp.addToGrid(0, rowCount++, "Desired Stockpiles",
-            NumFormat.engNotation(cell.getPreferredStockpile()));
-        tp.addToGrid(0, rowCount++, "Today's Imports",
-            NumFormat.engNotation(cell.getTotalImports(true)));
-        tp.addToGrid(0, rowCount++, "Today's Exports",
-            NumFormat.engNotation(cell.getTotalExports()));
-        if (cell.getFlowRealBalance() < 0f) {
-            tp.addToGrid(0, rowCount++, "Last Change",
-                NumFormat.engNotation(cell.getFlowRealBalance()), negative);
-        } else {
-            tp.addToGrid(0, rowCount++, "Last Change",
-                NumFormat.engNotation(cell.getFlowRealBalance()));
+            NumFormat.engNotation(cell.getPreferredStockpile())
+        );
+        tp.addToGrid(0, rowCount++, "Latest Change", NumFormat.engNotation(cell.getFlowRealBalance()),
+            cell.getFlowRealBalance() < 0f ? negative : highlight
+        );
+
+        { // Exports
+            if (cell.inFactionExports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest in-faction exports", "+" +
+                    NumFormat.engNotation(cell.inFactionExports)
+                );
+            }
+            if (cell.globalExports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest global exports", "+" +
+                    NumFormat.engNotation(cell.globalExports)
+                );
+            }
+            if (cell.informalExports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest informal market exports", "+" +
+                    NumFormat.engNotation(cell.informalExports)
+                );
+            }
+        }
+
+        { // Imports
+            if (cell.inFactionImports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest in-faction imports", "+" +
+                    NumFormat.engNotation(cell.inFactionImports)
+                );
+            }
+            if (cell.globalImports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest global imports", "+" +
+                    NumFormat.engNotation(cell.globalImports)
+                );
+            }
+            if (cell.informalImports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest informal market imports", "+" +
+                    NumFormat.engNotation(cell.informalImports)
+                );
+            }
+            if (cell.importEffectiveness < 1f && cell.getTotalImports(false) > 0f) {
+                final float value = ((int) (cell.importEffectiveness * 100f)) / 100f;
+
+                tp.setGridValueColor(negative);
+                tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value);
+            }
         }
 
         tp.addGrid(0);
+    }
+
+    public static final void createComTradeLedgerSection(TooltipMakerAPI tp, CommodityCell cell) {
+        final EconomyEngine engine = EconomyEngine.getInstance();
+        final CommodityDomain dom = engine.getComDomain(cell.comID);
+        final String marketName = cell.market.getName();
+        final String comName = cell.spec.getName();
+        
+        final long exportIncomeLastMonth = dom.hasLedger(cell.marketID) ?
+            dom.getLedger(cell.marketID).lastMonthExportIncome : 0l;
+        final long exportIncomeThisMonth = dom.hasLedger(cell.marketID) ?
+            dom.getLedger(cell.marketID).monthlyExportIncome : 0l;
+
+        if (exportIncomeLastMonth > 1l || exportIncomeThisMonth > 1l) {
+            tp.addPara(
+                marketName + " profitably exported %s units of " + comName + " and accounted for %s of the global market share. They generated %s last month and %s so far this month.",
+                opad, highlight,
+                NumFormat.engNotation(cell.getTotalExports()),
+                engine.info.getExportMarketShare(cell.comID, cell.marketID) + "%",
+                NumFormat.formatCredit(exportIncomeLastMonth),
+                NumFormat.formatCredit(exportIncomeThisMonth)
+            );
+        } else if (cell.getTotalExports() < 1f) {
+            tp.addPara("No local production to export for today.", opad);
+        } else if (exportIncomeLastMonth < 1l && exportIncomeThisMonth < 1l) {
+            tp.addPara(
+                marketName + " exported %s units of " + comName + " and accounted for %s of the global market share. Income from exports are not tracked for non-player colonies.",
+                opad, highlight,
+                NumFormat.engNotation(cell.getTotalExports()),
+                engine.info.getExportMarketShare(cell.comID, cell.marketID) + "%"
+            );
+        }
+
+        if (cell.getFlowCanNotExport() > 0f) {
+            tp.addPara(
+                "Exports are reduced by %s due to insufficient importers.",
+                pad, negative, NumFormat.engNotation((int)cell.getFlowCanNotExport())
+            );
+        }
+
+        final long importExpenseLastMonth = dom.hasLedger(cell.marketID) ?
+            dom.getLedger(cell.marketID).lastMonthImportExpense : 0l;
+        final long importExpenseThisMonth = dom.hasLedger(cell.marketID) ?
+            dom.getLedger(cell.marketID).monthlyImportExpense : 0l;
+
+        if (importExpenseLastMonth > 1l || importExpenseThisMonth > 1l) {
+            tp.addPara(
+                marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. They expended %s last month and %s so far this month.",
+                opad, highlight,
+                NumFormat.engNotation(cell.getTotalImports(false)),
+                engine.info.getImportMarketShare(cell.comID, cell.marketID) + "%",
+                NumFormat.formatCredit(importExpenseLastMonth),
+                NumFormat.formatCredit(importExpenseThisMonth)
+            );
+        } else if (cell.getTotalImports(false) < 1f) {
+            tp.addPara("No local demand.", opad);
+        } else if (exportIncomeLastMonth < 1l && exportIncomeThisMonth < 1l) {
+            tp.addPara(
+                marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. Expenses from imports are not tracked for non-player colonies.",
+                opad, highlight,
+                NumFormat.engNotation(cell.getTotalImports(false)),
+                engine.info.getImportMarketShare(cell.comID, cell.marketID) + "%"
+            );
+        }
     }
 
     public static final Base getStockpilesIcon(final float ratio, final int size,

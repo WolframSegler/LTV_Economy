@@ -54,24 +54,24 @@ public class CommodityCell {
     public transient MarketAPI market;
     public transient CommoditySpecAPI spec;
 
-    // Storage
-    private double stored = 0;
-
+    private double stored = 0.0;
     private MutableStat localProd = new MutableStat(0f);
     private MutableStat baseDemand = new MutableStat(0f);
-
     private transient Map<String, MutableStat> localProdMutables = new HashMap<>();
     private transient Map<String, MutableStat> demandBaseMutables = new HashMap<>();
 
-    // Import
-    public transient float inFactionImports = 0;
-    public transient float globalImports = 0;
+    public transient float inFactionImports = 0f;
+    public transient float globalImports = 0f;
     public transient float importEffectiveness = 1f;
-    private transient float importExclusiveDemand = 0;
+    private transient float importExclusiveDemand = 0f;
 
-    // Export
-    public transient float inFactionExports = 0;
-    public transient float globalExports = 0;
+    public transient float inFactionExports = 0f;
+    public transient float globalExports = 0f;
+
+    // NON-STATE OWNED
+    private StatBonus informalImportMods = new StatBonus();
+    public transient float informalImports = 0f;
+    public transient float informalExports = 0f;
 
     public final Map<String, MutableStat> getFlowProdIndStats() {
         return localProdMutables;
@@ -118,13 +118,19 @@ public class CommodityCell {
         return importExclusiveDemand;
     }
     public final float getFlowDeficitMetViaTrade() {
-        return getFlowDeficitMetViaFactionTrade() + getFlowDeficitMetViaGlobalTrade();
+        return getFlowDeficitMetViaFactionTrade() + getFlowDeficitMetViaGlobalTrade() +
+            getFlowDeficitMetViaInformalTrade();
     }
     public final float getFlowDeficitMetViaFactionTrade() {
         return Math.min(inFactionImports, getFlowDeficitPreTrade());
     }
     public final float getFlowDeficitMetViaGlobalTrade() {
         return Math.min(globalImports, getFlowDeficitPreTrade() - getFlowDeficitMetViaFactionTrade());
+    }
+    public final float getFlowDeficitMetViaInformalTrade() {
+        return Math.min(informalImports, getFlowDeficitPreTrade()
+            - getFlowDeficitMetViaFactionTrade() - getFlowDeficitMetViaGlobalTrade()
+        );
     }
     public final float getFlowOverImports() {
         return Math.max(0, getTotalImports(false) - importExclusiveDemand - getFlowDeficitMetViaTrade());
@@ -133,11 +139,11 @@ public class CommodityCell {
         return getBaseDemand(true) - getFlowDeficitMet();
     }
     public final float getTotalImports(boolean modified) {
-        if (modified) return (inFactionImports + globalImports) * importEffectiveness;
-        return inFactionImports + globalImports;
+        final float base = inFactionImports + globalImports + informalImports;
+        return modified ? base * importEffectiveness : base;
     }
     public final float getTotalExports() {
-        return inFactionExports + globalExports;
+        return inFactionExports + globalExports + informalExports;
     }
     public final float getFlowAvailable() {
         return getProduction(true) + getTotalImports(true);
@@ -197,21 +203,8 @@ public class CommodityCell {
     public final long getRoundedStored() {
         return (long) stored;
     }
-
-    public final void addInFactionImport(float a) {
-        inFactionImports += a;
-    }
-
-    public final void addGlobalImport(float a) {
-        globalImports += a;
-    }
-
-    public final void addInFactionExport(float a) {
-        inFactionExports += a;
-    }
-
-    public final void addGlobalExport(float a) {
-        globalExports += a;
+    public final StatBonus getInformalImportMods() {
+        return informalImportMods;
     }
 
     public final void addStoredAmount(double a) {
@@ -232,6 +225,9 @@ public class CommodityCell {
         localProdMutables = new HashMap<>();
         demandBaseMutables = new HashMap<>();
 
+        // TODO Remove when save incompatible update drops
+        if (informalImportMods == null) informalImportMods = new StatBonus();
+
         return this;
     }
 
@@ -248,9 +244,7 @@ public class CommodityCell {
             ) {
                 IndustryIOs.createAndRegisterDynamicOutput(industry, comID, true);
             }
-        }
 
-        for (Industry industry : getVisibleIndustries()) {
             if (industry.getDemand(comID).getQuantity().getModifiedValue() > 0.01f &&
                 !IndustryIOs.hasInput(industry, comID)
             ) {
@@ -300,13 +294,15 @@ public class CommodityCell {
     }
 
     public final void reset() {
-        inFactionImports = 0;
-        globalImports = 0;
+        inFactionImports = 0f;
+        globalImports = 0f;
+        informalImports = 0f;
 
-        inFactionExports = 0;
-        globalExports = 0;
+        inFactionExports = 0f;
+        globalExports = 0f;
+        informalExports = 0f;
 
-        importExclusiveDemand = 0;
+        importExclusiveDemand = 0f;
         importEffectiveness = 1f;
 
         localProdMutables.clear();
@@ -456,7 +452,9 @@ public class CommodityCell {
         sb.append("[Demand]\n");
         sb.append(" demandMetTotal: ").append(getFlowDeficitMet()).append("\n");
         sb.append(" demandMetLocally: ").append(getFlowDeficitMetLocally()).append("\n");
-        sb.append(" demandMetViaTrade: ").append(getFlowDeficitMetViaTrade()).append("\n");
+        sb.append(" demandMetViaFactionTrade: ").append(getFlowDeficitMetViaFactionTrade()).append("\n");
+        sb.append(" demandMetViaGlobalTrade: ").append(getFlowDeficitMetViaGlobalTrade()).append("\n");
+        sb.append(" demandMetViaInformalTrade: ").append(getFlowDeficitMetViaInformalTrade()).append("\n");
         sb.append(" deficitPreTrade: ").append(getFlowDeficitPreTrade()).append("\n");
         sb.append(" finalDeficit: ").append(getFlowDeficit()).append("\n");
         sb.append(" availabilityRatio: ").append(getFlowAvailabilityRatio()).append("\n\n");
@@ -467,6 +465,7 @@ public class CommodityCell {
         sb.append(" totalImports (effective): ").append(getTotalImports(true)).append("\n");
         sb.append(" inFactionImports: ").append(inFactionImports).append("\n");
         sb.append(" globalImports: ").append(globalImports).append("\n");
+        sb.append(" informalImports: ").append(informalImports).append("\n");
         sb.append(" importEffectiveness: ").append(importEffectiveness).append("\n");
         sb.append(" importExclusiveDemand: ").append(importExclusiveDemand).append("\n");
         sb.append(" overImports: ").append(getFlowOverImports()).append("\n\n");
@@ -476,6 +475,7 @@ public class CommodityCell {
         sb.append(" totalExports: ").append(getTotalExports()).append("\n");
         sb.append(" inFactionExports: ").append(inFactionExports).append("\n");
         sb.append(" globalExports: ").append(globalExports).append("\n");
+        sb.append(" informalExports: ").append(informalExports).append("\n");
         sb.append(" remainingExportable: ").append(getFlowRemainingExportable()).append("\n");
         sb.append(" canNotExport: ").append(getFlowCanNotExport()).append("\n\n");
 

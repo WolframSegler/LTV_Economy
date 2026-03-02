@@ -3,7 +3,9 @@ v0.2.9-beta | SAVE COMPATIBLE
 - Fixed industries producing/demanding while under construction
 - Added a monthly credits withdrawal limit to player colonies (LunaLib setting).
 - Added an option to show the worker pool condition in npc colonies (LunaLib setting).
-- Improved the worker allocation algorithm to make factions as self-sustainable as possible.
+- Improved the worker allocation algorithm to reward making factions self-sustainable.
+- Added an informal sector to each commodity, simulating non-state actors. They respond dynamically to surpluses and deficits, representing independent merchants, contractors, producers, and smugglers.
+- Re-organized the commodity info tooltip to group relevant information together. 
 
 v0.2.8-beta | SAVE COMPATIBLE
 - Fixed best places to buy / sell again

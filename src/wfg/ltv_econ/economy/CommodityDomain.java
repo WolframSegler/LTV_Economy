@@ -17,6 +17,7 @@ import wfg.ltv_econ.configs.TradeWeights;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.util.Arithmetic;
 
 public class CommodityDomain {
 
@@ -26,20 +27,22 @@ public class CommodityDomain {
 
     private final Map<String, CommodityCell> m_comCells = new HashMap<>();
     private final Map<String, IncomeLedger> incomeLedgers = new HashMap<>();
+    private InformalExchangeNode informalNode;
 
-    private transient long marketActivity;
+    private transient long tradeCreditActivity = 0l;
     private transient int currentIndex = 0;
     private transient boolean filled = false;
     private float[] lastNDaysVolume = new float[EconomyConfig.VOLATILITY_WINDOW];
 
     public CommodityDomain(String comID) {
         this.comID = comID;
+        informalNode = new InformalExchangeNode(comID);
     
         readResolve();
     }
 
     public Object readResolve() {
-        marketActivity = 0;
+        tradeCreditActivity = 0l;
 
         final float[] newArray = new float[EconomyConfig.VOLATILITY_WINDOW];
 
@@ -58,6 +61,9 @@ public class CommodityDomain {
 
         spec = Global.getSettings().getCommoditySpec(comID);
 
+        // TODO remove after save incompatible update
+        if (informalNode == null) informalNode = new InformalExchangeNode(comID);
+
         return this;
     }
 
@@ -69,6 +75,8 @@ public class CommodityDomain {
 
     public final void reset() {
         m_comCells.values().forEach(CommodityCell::reset);
+
+        tradeCreditActivity = 0l;
     }
 
     public final void update() {
@@ -114,24 +122,20 @@ public class CommodityDomain {
     }
 
     public final ArrayList<CommodityCell> getSortedByProduction(int listSize) {
-        return m_comCells.values()
-            .stream()
+        return m_comCells.values().stream()
             .filter(cell -> cell.getProduction(true) > 0)
             .sorted((a, b) -> Float.compare(
                 b.getProduction(true), a.getProduction(true)
-            ))
-            .limit(listSize)
+            )).limit(listSize)
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public final ArrayList<CommodityCell> getSortedByDemand(int listSize) {
-        return m_comCells.values()
-            .stream()
+        return m_comCells.values().stream()
             .filter(cell -> cell.getBaseDemand(true) > 0)
             .sorted((a, b) -> Float.compare(
                 b.getBaseDemand(true), a.getBaseDemand(true)
-            ))
-            .limit(listSize)
+            )).limit(listSize)
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -143,24 +147,11 @@ public class CommodityDomain {
         return incomeLedgers.containsKey(marketID);
     }
 
-    public static final Pair<String, String> getPairFromIndex(int index, List<MarketAPI> exporters,     
-        List<MarketAPI> importers) {
-
-        final int numImporters = importers.size();
-        final int exporterIndex = index / numImporters;
-        final int importerIndex = index % numImporters;
-
-        final String exporter = exporters.get(exporterIndex).getId();
-        final String importer = importers.get(importerIndex).getId();
-
-        return new Pair<>(exporter, importer);
-    }
-
     /**
      * @return The total credits spent on imports in the last trade cycle.
      */
-    public long getMarketActivity() {
-        return marketActivity;
+    public long getTradeCreditActivity() {
+        return tradeCreditActivity;
     }
 
     public float getTradeVolatility() {
@@ -186,13 +177,43 @@ public class CommodityDomain {
     public final void trade(boolean fakeAdvance) {
         final EconomyEngine engine = EconomyEngine.getInstance();
 
-        List<MarketAPI> importers = getImporters();
-        List<MarketAPI> exporters = getExporters();
+        formalTrade(fakeAdvance, engine);
+
+        informalNode.updateBeforeTrade();
+        informalTrade(fakeAdvance, engine);
+    }
+
+    public final List<CommodityCell> getImporters() {
+        List <CommodityCell> importers = new ArrayList<>(32);
+
+        for (CommodityCell cell : m_comCells.values()) {
+
+            if (computeImportAmount(cell) > 0) {
+                importers.add(cell);
+            }
+        }
+
+        return importers;
+    }
+
+    public final List<CommodityCell> getExporters() {
+        List <CommodityCell> exporters = new ArrayList<>(32);
+
+        for (CommodityCell cell : m_comCells.values()) {
+            if (cell.getStoredRemainingExportable() > 0) exporters.add(cell);
+        }
+
+        return exporters;
+    }
+
+    private final void formalTrade(boolean fakeAdvance, final EconomyEngine engine) {
+        final List<CommodityCell> importers = getImporters();
+        final List<CommodityCell> exporters = getExporters();
 
         final int pairCount = importers.size() * exporters.size();
 
-        int[] pairScores = new int[pairCount];
-        int[] indices = new int[pairCount];
+        final int[] pairScores = new int[pairCount];
+        final int[] indices = new int[pairCount];
 
         for (int expInd = 0; expInd < exporters.size(); expInd++) {
             for (int impInd = 0; impInd < importers.size(); impInd++) {
@@ -202,21 +223,18 @@ public class CommodityDomain {
             }
         }
 
-        for (int i = 0; i < indices.length; i++) {
-            indices[i] = i;
-        }
-
+        for (int i = 0; i < indices.length; i++) indices[i] = i;
         radixSortIndices(indices, pairScores);
 
-        marketActivity = 0;
+        tradeCreditActivity = 0l;
 
         for (int i = 0; i < indices.length; i++) {
-            Pair<String, String> expImp = getPairFromIndex(
+            Pair<CommodityCell, CommodityCell> expImp = getPairFromIndex(
                 indices[i], exporters, importers
             );
 
-            final CommodityCell expCell = getCell(expImp.one);
-            final CommodityCell impCell = getCell(expImp.two);
+            final CommodityCell expCell = expImp.one;
+            final CommodityCell impCell = expImp.two;
 
             { // ABORT CONDITIONS
                 if (expCell.market.getFaction().getRelationship(impCell.market.getFactionId()) <
@@ -250,56 +268,99 @@ public class CommodityDomain {
             final float price = pricePerUnit * amountToSend;
 
             if(sameFaction) {
-                expCell.addInFactionExport(amountToSend);
-                impCell.addInFactionImport(amountToSend);
+                expCell.informalExports += amountToSend;
+                impCell.inFactionImports += amountToSend;
 
                 final int credits = (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT);
-                marketActivity += credits;
+                tradeCreditActivity += credits;
 
                 if (fakeAdvance) continue;
                 engine.addCredits(expCell.marketID, credits);
                 engine.addCredits(impCell.marketID, -credits);
 
-                if (engine.isPlayerMarket(expCell.marketID)) getLedger(expCell.marketID).recordExport(credits);
-                if (engine.isPlayerMarket(impCell.marketID)) getLedger(impCell.marketID).recordImport(credits);
+                if (hasLedger(expCell.marketID)) getLedger(expCell.marketID).recordExport(credits);
+                if (hasLedger(impCell.marketID)) getLedger(impCell.marketID).recordImport(credits);
                 
             } else {
-                expCell.addGlobalExport(amountToSend);
-                impCell.addGlobalImport(amountToSend);
+                expCell.globalExports += amountToSend;
+                impCell.globalImports += amountToSend;
 
-                marketActivity += price;
+                tradeCreditActivity += price;
                 
                 if (fakeAdvance) continue;
                 engine.addCredits(expCell.marketID, (int) price);
                 engine.addCredits(impCell.marketID, (int) -price);
 
-                if (engine.isPlayerMarket(expCell.marketID)) getLedger(expCell.marketID).recordExport((int) price);
-                if (engine.isPlayerMarket(impCell.marketID)) getLedger(impCell.marketID).recordImport((int) price);
+                if (hasLedger(expCell.marketID)) getLedger(expCell.marketID).recordExport((int) price);
+                if (hasLedger(impCell.marketID)) getLedger(impCell.marketID).recordImport((int) price);
             }
         }
     }
 
-    public final List<MarketAPI> getImporters() {
-        List <MarketAPI> importers = new ArrayList<>(50);
+    private final void informalTrade(boolean fakeAdvance, final EconomyEngine engine) {
+        final List<CommodityCell> exporters = getExporters();
+        final List<CommodityCell> importers = getImporters();
 
-        for (CommodityCell cell : m_comCells.values()) {
+        final float sumImportable;
+        final float sumExportable;
+        {
+            float demand = 0f;
+            float excess = 0f;
+            for (CommodityCell cell : exporters) excess += cell.getStoredRemainingExportable();
+            for (CommodityCell cell : importers) demand += CommodityDomain.computeImportAmount(cell);
 
-            if (computeImportAmount(cell) > 0) {
-                importers.add(cell.market);
-            }
+            sumImportable = demand;
+            sumExportable = excess;
         }
 
-        return importers;
+        if (sumExportable < 1f) return;
+        for (CommodityCell exporter : exporters) {
+            final double exportable = exporter.getStoredRemainingExportable();
+            final float share = (float) (exportable / sumExportable);
+            final float amount = Math.min((float) exportable, share * informalNode.imports);
+            final int price = (int) (exporter.getUnitPrice(PriceType.MARKET_SELLING, (int)amount)
+                * informalNode.priceMultImporting * amount * (1f + exporter.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementImporting)
+            );
+
+            exporter.informalExports += amount;
+            tradeCreditActivity += price;
+            
+            if (fakeAdvance) continue;
+            final String marketID = exporter.marketID;
+            engine.addCredits(marketID, price);
+
+            if (hasLedger(marketID)) getLedger(marketID).recordExport(price);
+        }
+
+        if (sumImportable < 1f) return;
+        for (CommodityCell importer : importers) {
+            final double importable = computeImportAmount(importer);
+            final float share = (float) (importable / sumImportable);
+            final float amount = Math.min((float) importable, importer.getInformalImportMods()
+                .computeEffective(share * informalNode.exports));
+            final int price = (int) (importer.getUnitPrice(PriceType.MARKET_BUYING, (int)amount)
+                * informalNode.priceMultExporting * amount * (1f + importer.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementExporting)
+            );
+
+            importer.informalImports += amount;
+            tradeCreditActivity += price;
+            
+            if (fakeAdvance) continue;
+            final String marketID = importer.marketID;
+            engine.addCredits(marketID, -price);
+
+            if (hasLedger(marketID)) getLedger(marketID).recordImport(price);
+        }
     }
 
-    public final List<MarketAPI> getExporters() {
-        List <MarketAPI> exporters = new ArrayList<>(50);
+    private static final Pair<CommodityCell, CommodityCell> getPairFromIndex(int index, List<CommodityCell> exporters,     
+        List<CommodityCell> importers
+    ) {
+        final int numImporters = importers.size();
+        final int exporterIndex = index / numImporters;
+        final int importerIndex = index % numImporters;
 
-        for (CommodityCell cell : m_comCells.values()) {
-            if (cell.getStoredRemainingExportable() > 0) exporters.add(cell.market);
-        }
-
-        return exporters;
+        return new Pair<>(exporters.get(exporterIndex), importers.get(importerIndex));
     }
 
     /**
@@ -343,27 +404,29 @@ public class CommodityDomain {
         }
     }
 
-    private final int computePairScore(MarketAPI exporter, MarketAPI importer) {
+    private final int computePairScore(CommodityCell exporter, CommodityCell importer) {
+        final MarketAPI expMarket = exporter.market;
+        final MarketAPI impMarket = importer.market;
 
         int score = 0;
 
-        if (importer.getFaction().equals(exporter.getFaction())) {
+        if (impMarket.getFaction().equals(expMarket.getFaction())) {
             score += TradeWeights.IN_FACTION;
         }
 
-        score += relationFactor(exporter, importer) * TradeWeights.POLITICAL;
+        score += relationFactor(expMarket, impMarket) * TradeWeights.POLITICAL;
 
-        // if (hasTradeAgreement(exporter, importers)) {
+        // if (hasTradeAgreement(expMarket, impMarket)) {
         //     score += TradeWeights.TRADE_AGREEMENTS;
         // }
 
-        score += accessibilityFactor(exporter, importer) * TradeWeights.ACCESSIBILITY;
+        score += accessibilityFactor(expMarket, impMarket) * TradeWeights.ACCESSIBILITY;
 
-        score += distanceFactor(exporter, importer) * TradeWeights.DISTANCE;
+        score += distanceFactor(expMarket, impMarket) * TradeWeights.DISTANCE;
 
-        score += sizeFactor(importer) * TradeWeights.MARKET_SIZE;
+        score += sizeFactor(impMarket) * TradeWeights.MARKET_SIZE;
 
-        score += priceFactor(comID, importer) * TradeWeights.LOCAL_PRICE;
+        score += priceFactor(importer) * TradeWeights.LOCAL_PRICE;
 
         return score;
     }
@@ -420,26 +483,15 @@ public class CommodityDomain {
     * This can be revisited later if the goal is to simulate more "realistic" trade
     * dynamics beyond simple supply/demand ratio.
     */
-    private static final float priceFactor(String comID, MarketAPI importer) {
-        final CommodityCell cell = EconomyEngine.getInstance().getComCell(comID, importer.getId());
+    private static final float priceFactor(CommodityCell importer) {
 
-        final float price = cell.getUnitPrice(PriceType.MARKET_BUYING, 1);
-        final float base = cell.spec.getBasePrice();
+        final float price = importer.getUnitPrice(PriceType.MARKET_BUYING, 1);
+        final float base = importer.spec.getBasePrice();
 
         final float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
+        final float scaled = diff >= 0 ? (float) Math.sqrt(diff) : (float) -Math.sqrt(-diff);
 
-        float scaled;
-        if (diff >= 0) {
-            scaled = (float) Math.sqrt(diff);
-        } else {
-            scaled = -(float) Math.sqrt(-diff);
-        }
-
-        // Scale to desired range [-1,1] and clamp
-        if (scaled > 1f) scaled = 1f;
-        if (scaled < -1f) scaled = -1f;
-
-        return (scaled + 1f) / 2f; // [0,1]
+        return (Arithmetic.clamp(scaled, -1f, 1f) + 1f) / 2f; // [0,1]
     }
 
     private static final float distanceFactor(MarketAPI exporter, MarketAPI importer) {
@@ -461,16 +513,16 @@ public class CommodityDomain {
         return (float) Math.sqrt(size / (float) maxSize);
     }
 
-    private static final float computeImportAmount(CommodityCell cell) {
+    static final float computeImportAmount(CommodityCell cell) {
         final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * cell.getBaseDemand(true);
         final float rawTarget = cell.getPreferredStockpile();
-        final int target = (int) Math.max(Math.min(rawTarget - cell.getStored(), cap), 0);
+        final int target = (int) Math.max(Math.min(rawTarget - cell.getStored(), cap), 0.0);
         final float exclusive = cell.getImportExclusiveDemand();
 
-        return Math.max(target + exclusive - cell.getTotalImports(false), 0);
+        return Math.max(target + exclusive - cell.getTotalImports(false), 0f);
     }
 
-    private void recordDailyVolume() {
+    private final void recordDailyVolume() {
         long total = 0;
         for (CommodityCell cell : m_comCells.values()) total += cell.getTotalExports();
         lastNDaysVolume[currentIndex] = total;

@@ -13,6 +13,7 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.util.Arithmetic;
 
 /**
  * The registry always uses IndustryIOs.getBaseIndustryID() internally to manage industry IDs
@@ -254,15 +255,9 @@ public class WorkerRegistry {
             if (!outputRatios.containsKey(comID)) outputRatios.put(comID, 0f);
 
             final float oldRatio = outputRatios.get(comID);
-            float diff = ratio - oldRatio;
-
-            // compute allowed adjustment based on total sum
             final float maxAllowedDiff = 1f - outputRatioSum;
             final float minAllowedDiff = -oldRatio;
-
-            // clamp the diff to the allowed range
-            if (diff > maxAllowedDiff) diff = maxAllowedDiff;
-            if (diff < minAllowedDiff) diff = minAllowedDiff;
+            final float diff = Arithmetic.clamp(ratio - oldRatio, minAllowedDiff, maxAllowedDiff);
 
             // apply adjusted ratio
             final float newRatio = oldRatio + diff;

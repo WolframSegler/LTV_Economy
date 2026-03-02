@@ -10,8 +10,8 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.ui.panels.reusable.CommodityInfoBar;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UiUtils;
@@ -74,7 +74,6 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         tooltip.width = 500f;
         tooltip.expandable = true;
         tooltip.builder = (tp, expanded) -> {
-            final EconomyEngine engine = EconomyEngine.getInstance();
             final String comDesc = settings.getDescription(comID, Type.RESOURCE).getText1();
 
             tp.setParaFont(Fonts.ORBITRON_12);
@@ -93,69 +92,20 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             if (!expanded) {
 
             tp.setParaFont(Fonts.ORBITRON_12);
-            tp.addSectionHeading("Stockpiles", Alignment.MID, opad);
-
-            TooltipUtils.createCommodityStockpilesBreakdown(tp, m_cell);
+            tp.addSectionHeading("Stockpiles and Trade Flows", Alignment.MID, opad);
+            TooltipUtils.createComStockpilesChangeBreakdown(tp, m_cell);
 
             tp.setParaFont(Fonts.ORBITRON_12);
-            tp.addSectionHeading("Production, imports and demand", Alignment.MID, opad);
-
-            // Production
-            TooltipUtils.createCommodityProductionBreakdown(tp, m_cell);
+            tp.addSectionHeading("Production and Demand", Alignment.MID, opad);
+            TooltipUtils.createComProductionBreakdown(tp, m_cell);
             
-            tp.addPara("All production sources contribute to the commodity's availability. Imports and smuggling add to supply to help meet demand.", gray, pad);
-
-            // Demand
+            tp.addPara("All production sources contribute to the commodity's availability. Formal and informal imports add to supply to help meet demand.", gray, pad);
             tp.setParaFont(Fonts.ORBITRON_12);
-            TooltipUtils.createCommodityDemandBreakdown(tp, m_cell);
+            TooltipUtils.createComDemandBreakdown(tp, m_cell);
 
-            // Divider
-            tp.addSectionHeading("Exports", Alignment.MID, opad);
-
-            // Export stats
-            final CommodityDomain dom = engine.getComDomain(comID);
+            tp.addSectionHeading("Trade Ledger", Alignment.MID, opad);
+            TooltipUtils.createComTradeLedgerSection(tp, m_cell);
             
-            final long exportIncomeLastMonth = dom.hasLedger(m_cell.marketID) ?
-                dom.getLedger(m_cell.marketID).lastMonthExportIncome : 0;
-            final long exportIncomeThisMonth = dom.hasLedger(m_cell.marketID) ?
-                dom.getLedger(m_cell.marketID).monthlyExportIncome : 0;
-            final boolean isIllegal = m_market.isIllegal(comID);
-            final String commodityName = m_com.getName();
-
-            if (exportIncomeLastMonth > 1 || exportIncomeThisMonth > 1) {
-                tp.addPara(
-                    m_market.getName() + " is profitably exporting %s units of " + commodityName + " and controls %s of the global market share. They generated %s last month and %s so far this month.",
-                    opad, highlight,
-                    NumFormat.engNotation((long) m_cell.getTotalExports()),
-                    engine.info.getExportMarketShare(comID, m_cell.marketID) + "%",
-                    NumFormat.formatCredit(exportIncomeLastMonth),
-                    NumFormat.formatCredit(exportIncomeThisMonth)
-                );
-            } else if (m_cell.getTotalExports() < 1) {
-                tp.addPara("No recent local production to export.", opad);
-            } else if (isIllegal) {
-                tp.addPara(
-                m_market.getName() + " controls %s of the export market share for " + commodityName + ".This trade brings in no income due to being underground.",
-                opad, highlight,
-                engine.info.getExportMarketShare(comID, m_cell.marketID) + "%"
-            );
-            } else if (exportIncomeLastMonth < 1 && exportIncomeThisMonth < 1) {
-                tp.addPara(
-                    m_market.getName() + " is exporting %s units of " + commodityName + " and controls %s of the global market share. Income from exports are not tracked for non-player colonies.",
-                    opad, highlight,
-                    NumFormat.engNotation((long) m_cell.getTotalExports()),
-                    engine.info.getExportMarketShare(comID, m_cell.marketID) + "%"
-                );
-            }
-
-            if (m_cell.getFlowCanNotExport() > 0) {
-                tp.addPara(
-                    "Exports are reduced by %s due to insufficient importers.",
-                    pad, negative, NumFormat.engNotation((int)m_cell.getFlowCanNotExport())
-                );
-            }
-
-            // Bottom tip
             tp.addPara(
                 "Markets with higher production and accessibility are prioritized for exports and imports.", gray, opad
             );
@@ -206,7 +156,8 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         );
         add(stockIcon).inBL(pad*3 + rowHeight + textWidth, (rowHeight - iconSize) / 2f);
 
-        final UIPanelAPI infoBar = UiUtils.CommodityInfoBar(iconSize, 85, m_cell);
+        final UIPanelAPI infoBar = new CommodityInfoBar(null, 85, iconSize,
+            true, m_cell).getPanel();
         add(infoBar).inBL(pad*4 + rowHeight + textWidth + iconSize, (rowHeight - iconSize) / 2f);
 
         if (m_cell.globalExports > 0) {

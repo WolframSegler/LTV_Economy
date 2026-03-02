@@ -9,6 +9,7 @@ import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.intel.market.events.LocalizedGangSkirmishesEvent;
+import wfg.ltv_econ.util.Arithmetic;
 
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -38,7 +39,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketI
 
         active = true;
 
-        final float durationMult = 0.7f + (25f - clamp(cohesion, 0f, 25f)) / 25f * 0.6f;
+        final float durationMult = 0.7f + (25f - Arithmetic.clamp(cohesion, 0f, 25f)) / 25f * 0.6f;
         activeDaysRemaining = Math.round(BASE_DUR * durationMult); // base 7 days
         cooldownDaysRemaining = BASE_COOLDOWN + BASE_DUR;
 
@@ -99,9 +100,5 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketI
         tp.addGrid(0);
 
         tp.addPara("Active for %s more days", opad, negative, Integer.toString(activeDaysRemaining));
-    }
-
-    private static final float clamp(float value, float min, float max) {
-        return value < min ? min : (value > max ? max : value);
     }
 }
