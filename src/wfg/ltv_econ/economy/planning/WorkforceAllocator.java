@@ -362,30 +362,33 @@ public class WorkforceAllocator {
                 final int c = denseData.columnComIdx[i];
 
                 final double strength = EconomyConfig.SELF_SUFFICIENCY_REWARD_STRENGTH;
-                final double value = WORKER_COST * (1f - strength + strength * Math.max(1f - rhoFC[f][c], 0.01f));
+                final double antiDemandShare = Math.max(1f - rhoFC[f][c], 0.01f);
+
+                final double value = WORKER_COST * (1f - strength + strength * antiDemandShare);
                 objFunc.getCoefficients().setEntry(i, value);
             }
 
-            // 6) PRIMARY: Commodity production constraints:
-            final double[] coeffs = new double[nVars];
-            for (int c = 0; c < C; c++) {
-                Arrays.fill(coeffs, 0.0);
-
-                for (int i = 0; i < N; i++) {
-                    final int o = denseData.columnOutputIndex[i];
-                    final double base = A[c][o];
-                    if (base == 0.0) continue;
-
-                    final double coeff = base * denseData.columnOutputMod[i] * shortage_mult[o];
-                    coeffs[i] += coeff;
+            { // 6) PRIMARY: Commodity production constraints:
+                final double[] coeffs = new double[nVars];
+                for (int c = 0; c < C; c++) {
+                    Arrays.fill(coeffs, 0.0);
+    
+                    for (int i = 0; i < N; i++) {
+                        final int o = denseData.columnOutputIndex[i];
+                        final double base = A[c][o];
+                        if (base == 0.0) continue;
+    
+                        final double coeff = base * denseData.columnOutputMod[i] * shortage_mult[o];
+                        coeffs[i] += coeff;
+                    }
+    
+                    coeffs[idxS.apply(c)] = 1.0; // slack
+                    final double target = demand[c] * EconomyConfig.PRODUCTION_BUFFER;
+                    constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, target));
                 }
-
-                coeffs[idxS.apply(c)] = 1.0; // slack
-                final double target = demand[c] * EconomyConfig.PRODUCTION_BUFFER;
-                constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, target));
             }
 
-            final SimplexSolver solver = new SimplexSolver();
+            final SimplexSolver solver = new SimplexSolver(1e-4, 30, 1e-6);
             final PointValuePair solution = solver.optimize(
                 new MaxIter(100000), objFunc,
                 new LinearConstraintSet(constraints),

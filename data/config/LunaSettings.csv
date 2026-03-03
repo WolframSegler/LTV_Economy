@@ -22,6 +22,7 @@ economy_generalHeader,General Settings,Header,General Settings,,,,,Economy
 economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread,,,Economy
 economy_startingCredits,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
 economy_withdrawalLimit,Monthly Withdrawal Limit,Int,100000,,Sets the maximum amount of credits you can withdraw from your colonies per month.,0,1000000000,Economy
+economy_autoTransferLimit,Profit Transfer Limit,Double,0.5,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy
 economy_solverHeader,Worker Allocation Settings,Header,Worker Allocation Settings,,,,,Economy
 economy_deficitCost,Deficit Penalty,Double,5000,,Higher values encourage more demand fulfillment.,0,100000,Economy
 economy_selfSufficiencyStrength,Autarky Reward Strength,Double,1,,A value of zero completely ignores autarky. Accuracy increases with higher allocation refinement passes.,0,1,Economy

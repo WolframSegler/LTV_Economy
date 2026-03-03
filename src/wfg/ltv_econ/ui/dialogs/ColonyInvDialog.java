@@ -17,6 +17,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
+import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.PlayerMarketData;
@@ -222,8 +223,8 @@ public class ColonyInvDialog extends DialogPanel {
         depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgressInterpolated());
         innerPanel.addComponent(depositSlider.getPanel()).inTL(500, 50);
 
-        final Slider profitSlider = new Slider(
-            innerPanel, "", 0f, 100f, sliderW, sliderH
+        final Slider profitSlider = new Slider(innerPanel, "", 0f,
+            100f * EconomyConfig.AUTO_TRANSFER_PROFIT_LIMIT, sliderW, sliderH
         );
         if (data != null) {
             profitSlider.setHighlightOnMouseover(true);

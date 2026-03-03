@@ -55,6 +55,7 @@ public class EconomyConfigLoader {
         EconomyConfig.OPEN_MARKET_TO_STOCKPILES_RATIO = (float) root.getDouble("OPEN_MARKET_TO_STOCKPILES_RATIO");
         EconomyConfig.USE_PRODUCTION_FAIRNESS = root.getBoolean("USE_PRODUCTION_FAIRNESS");
         EconomyConfig.CREDIT_WITHDRAWAL_LIMIT = root.getInt("CREDIT_WITHDRAWAL_LIMIT");
+        EconomyConfig.AUTO_TRANSFER_PROFIT_LIMIT = (float) root.getDouble("AUTO_TRANSFER_PROFIT_LIMIT");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
@@ -80,6 +81,7 @@ public class EconomyConfigLoader {
             EconomyConfig.MULTI_THREADING = LunaSettings.getBoolean(LTV_ECON, "economy_multiThreading");
             EconomyConfig.STARTING_CREDITS_FOR_MARKET = LunaSettings.getInt(LTV_ECON, "economy_startingCredits");
             EconomyConfig.CREDIT_WITHDRAWAL_LIMIT = LunaSettings.getInt(LTV_ECON, "economy_withdrawalLimit");
+            EconomyConfig.AUTO_TRANSFER_PROFIT_LIMIT = LunaSettings.getDouble(LTV_ECON, "economy_autoTransferLimit").floatValue();
             EconomyConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "economy_deficitCost");
             EconomyConfig.SELF_SUFFICIENCY_REWARD_STRENGTH = LunaSettings.getDouble(LTV_ECON, "economy_selfSufficiencyStrength");
             EconomyConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_prodBuffer");
@@ -217,6 +219,11 @@ public class EconomyConfigLoader {
          * Monthly credits withdraw limit for player colonies.
          */
         public static int CREDIT_WITHDRAWAL_LIMIT;
+
+        /**
+         * Limit to the ratio of profits from colonies that can go to the player.
+         */
+        public static float AUTO_TRANSFER_PROFIT_LIMIT;
 
         static {
             EconomyConfigLoader.loadConfig();
