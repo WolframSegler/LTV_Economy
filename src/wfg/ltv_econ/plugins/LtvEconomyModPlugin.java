@@ -11,13 +11,14 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
-import wfg.ltv_econ.economy.CommodityDomain;
-import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyEngineSerializer;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
+import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
 import wfg.ltv_econ.ui.scripts.UIInjectorListener;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {

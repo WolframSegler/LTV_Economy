@@ -3,9 +3,10 @@ package wfg.ltv_econ.economy;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
+import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 
-import wfg.ltv_econ.economy.CommodityCell.PriceType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CommodityPriceFuncTest {
 

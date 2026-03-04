@@ -8,10 +8,10 @@ import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
 
-import wfg.ltv_econ.ui.dialogs.ManagePopulationDialog;
 import static wfg.ltv_econ.constants.Mods.*;
 
 import lunalib.lunaSettings.LunaSettings;
+import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
 
 public class EconomyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";

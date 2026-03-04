@@ -27,10 +27,10 @@ import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.UITable;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.plugins.MarketWrapper;
-import wfg.ltv_econ.ui.panels.ColonyPopulationTable;
-import wfg.ltv_econ.ui.panels.EconomyOverviewPanel;
-import wfg.ltv_econ.ui.panels.FactionResourcesTable;
+import wfg.ltv_econ.ui.economyTab.EconomyOverviewPanel;
+import wfg.ltv_econ.ui.outpostsTab.ColonyPopulationTable;
+import wfg.ltv_econ.ui.outpostsTab.FactionResourcesTable;
+import wfg.ltv_econ.wrappers.MarketWrapper;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;

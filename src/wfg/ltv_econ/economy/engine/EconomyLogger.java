@@ -5,8 +5,8 @@ import java.util.Map;
 
 import com.fs.starfarer.api.Global;
 
-import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.CommodityDomain;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.native_ui.util.NumFormat;
 
 public class EconomyLogger {

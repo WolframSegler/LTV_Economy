@@ -6,8 +6,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class SubstanceControlPolicy extends MarketPolicy {

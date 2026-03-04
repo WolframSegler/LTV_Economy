@@ -13,10 +13,10 @@ import com.fs.starfarer.api.combat.MutableStat;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.CommodityCell.PriceType;
-import wfg.ltv_econ.economy.CommodityDomain;
-import wfg.ltv_econ.economy.IncomeLedger;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
+import wfg.ltv_econ.economy.commodity.IncomeLedger;
+import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class EconomyInfo {

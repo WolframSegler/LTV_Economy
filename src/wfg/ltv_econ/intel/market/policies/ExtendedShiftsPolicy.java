@@ -3,8 +3,8 @@ package wfg.ltv_econ.intel.market.policies;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 import static wfg.native_ui.util.UIConstants.*;

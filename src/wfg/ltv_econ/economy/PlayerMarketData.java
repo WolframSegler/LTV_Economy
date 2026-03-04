@@ -18,6 +18,8 @@ import wfg.ltv_econ.configs.EventConfigLoader.EventSpec;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;

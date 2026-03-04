@@ -31,8 +31,8 @@ import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.constants.UIColors;
-import wfg.ltv_econ.economy.CommodityCell;
-import wfg.ltv_econ.economy.CommodityDomain;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;

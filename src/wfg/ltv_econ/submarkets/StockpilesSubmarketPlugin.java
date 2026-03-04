@@ -14,7 +14,7 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.constants.EconomyConstants;
-import wfg.ltv_econ.economy.CommodityCell;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.util.NumFormat;
 

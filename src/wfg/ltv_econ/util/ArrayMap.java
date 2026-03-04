@@ -968,12 +968,11 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     private transient Collection<V> valuesView;
 
     @Override
-    @SuppressWarnings("unchecked")
     public Set<Map.Entry<K, V>> entrySet() {
         if (entrySetView == null) {
         entrySetView = new AbstractSet<>() {
             @Override
-            public Iterator<Map.Entry<K, V>> iterator() {
+            public final Iterator<Map.Entry<K, V>> iterator() {
                 return new Iterator<>() {
                     int index = 0;
                     int expectedSize = mSize;
@@ -981,12 +980,12 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                     final MapEntry entry = new MapEntry();
 
                     @Override
-                    public boolean hasNext() {
+                    public final boolean hasNext() {
                         return index < mSize;
                     }
 
                     @Override
-                    public Map.Entry<K, V> next() {
+                    public final Map.Entry<K, V> next() {
                         if (expectedSize != mSize) throw new ConcurrentModificationException();
                         if (index >= mSize) throw new NoSuchElementException();
                         entry.index = index++;
@@ -995,57 +994,23 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                     }
 
                     @Override
-                    public void remove() {
+                    public final void remove() {
                         if (!canRemove) throw new IllegalStateException();
                         if (expectedSize != mSize) throw new ConcurrentModificationException();
                         ArrayMap.this.removeAt(--index);
                         expectedSize = mSize;
                         canRemove = false;
                     }
-
-                    final class MapEntry implements Map.Entry<K, V> {
-                        int index;
-
-                        @Override
-                        public K getKey() {
-                            return (K) mArray[index << 1];
-                        }
-
-                        @Override
-                        public V getValue() {
-                            return (V) mArray[(index << 1) + 1];
-                        }
-
-                        @Override
-                        public V setValue(V value) {
-                            V old = (V) mArray[(index << 1) + 1];
-                            mArray[(index << 1) + 1] = value;
-                            return old;
-                        }
-
-                        @Override
-                        public boolean equals(Object o) {
-                            if (!(o instanceof Map.Entry)) return false;
-                            Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
-                            return Objects.equals(getKey(), e.getKey()) &&
-                                Objects.equals(getValue(), e.getValue());
-                        }
-
-                        @Override
-                        public int hashCode() {
-                            return Objects.hashCode(getKey()) ^ Objects.hashCode(getValue());
-                        }
-                    }
                 };
             }
 
             @Override
-            public int size() {
+            public final int size() {
                 return mSize;
             }
 
             @Override
-            public boolean contains(Object o) {
+            public final boolean contains(Object o) {
                 if (!(o instanceof Map.Entry)) return false;
                 final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
                 final int i = indexOfKey(e.getKey());
@@ -1053,7 +1018,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             }
 
             @Override
-            public void clear() {
+            public final void clear() {
                 ArrayMap.this.clear();
             }
         };
@@ -1073,18 +1038,18 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                     int expectedSize = mSize;
 
                     @Override
-                    public boolean hasNext() {
+                    public final boolean hasNext() {
                         return index < expectedSize;
                     }
 
                     @Override
-                    public K next() {
+                    public final K next() {
                         if (expectedSize != mSize) throw new ConcurrentModificationException();
                         return (K) mArray[index++ << 1];
                     }
 
                     @Override
-                    public void remove() {
+                    public final void remove() {
                         if (index == 0) throw new IllegalStateException();
                         if (expectedSize != mSize) throw new ConcurrentModificationException();
                         ArrayMap.this.removeAt(--index);
@@ -1094,17 +1059,17 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             }
 
             @Override
-            public int size() {
+            public final int size() {
                 return mSize;
             }
 
             @Override
-            public boolean contains(Object o) {
+            public final boolean contains(Object o) {
                 return ArrayMap.this.containsKey(o);
             }
 
             @Override
-            public void clear() {
+            public final void clear() {
                 ArrayMap.this.clear();
             }
         };
@@ -1124,13 +1089,13 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                     boolean canRemove = false;
 
                     @Override
-                    public boolean hasNext() {
+                    public final boolean hasNext() {
                         return index < mSize;
                     }
 
                     @SuppressWarnings("unchecked")
                     @Override
-                    public V next() {
+                    public final V next() {
                         if (expectedSize != mSize) throw new ConcurrentModificationException();
                         if (index >= mSize) throw new NoSuchElementException();
                         canRemove = true;
@@ -1138,7 +1103,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                     }
 
                     @Override
-                    public void remove() {
+                    public final void remove() {
                         if (!canRemove) throw new IllegalStateException();
                         if (expectedSize != mSize) throw new ConcurrentModificationException();
                         ArrayMap.this.removeAt(--index);
@@ -1149,21 +1114,56 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             }
 
             @Override
-            public int size() {
+            public final int size() {
                 return mSize;
             }
 
             @Override
-            public boolean contains(Object o) {
+            public final boolean contains(Object o) {
                 return ArrayMap.this.containsValue(o);
             }
 
             @Override
-            public void clear() {
+            public final void clear() {
                 ArrayMap.this.clear();
             }
         };
         }
         return valuesView;
+    }
+
+    @SuppressWarnings("unchecked")
+    final class MapEntry implements Map.Entry<K, V> {
+        int index;
+
+        @Override
+        public final K getKey() {
+            return (K) mArray[index << 1];
+        }
+
+        @Override
+        public final V getValue() {
+            return (V) mArray[(index << 1) + 1];
+        }
+
+        @Override
+        public final V setValue(V value) {
+            final V old = (V) mArray[(index << 1) + 1];
+            mArray[(index << 1) + 1] = value;
+            return old;
+        }
+
+        @Override
+        public final boolean equals(Object o) {
+            if (!(o instanceof Map.Entry)) return false;
+            final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+            return Objects.equals(getKey(), e.getKey()) &&
+                Objects.equals(getValue(), e.getValue());
+        }
+
+        @Override
+        public final int hashCode() {
+            return Objects.hashCode(getKey()) ^ Objects.hashCode(getValue());
+        }
     }
 }
