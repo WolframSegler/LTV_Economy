@@ -21,13 +21,13 @@ import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
 public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
+    private static final SettingsAPI settings = Global.getSettings();
+    private static final Logger logger = Global.getLogger(EconomySettingsPanel.class); 
 
     public static final int LABEL_W = 150;
     public static final int LABEL_H = 50;
     public static final int BUTTON_W = 250;
     public static final int BUTTON_H = 25;
-
-    public static final Logger logger = Global.getLogger(EconomySettingsPanel.class); 
 
     public EconomySettingsPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
@@ -36,7 +36,6 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
     }
 
     public void createPanel() {
-        final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
 
         final int SECTION_I = opad;
@@ -70,23 +69,47 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
         }
         
         { // RECALCULATE WORKER ASSIGNMENTS
+            final String btnText = "Re-Allocate Workers ";
             final CallbackRunnable<Button> run = (btn) -> {
-                IndustryMatrix.invalidate();
-                
                 final long startTime = System.nanoTime();
-                EconomyEngine.getInstance().fakeAdvanceWithAssignWorkers();
+
+                IndustryMatrix.invalidate();
+                engine.fakeAdvanceWithAssignWorkers();
+
                 final long endTime = System.nanoTime();
-                Global.getLogger(getClass()).info("Solver elapsed time: " +
-                    ((endTime - startTime) / 1_000_000) + " ms"
-                );
+                final String time = ((endTime - startTime) / 1_000_000) + " ms";
+                logger.info("Elapsed time: " + time);
+                btn.setText(btnText + " - " + time);
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                "Recalculate Worker Assignments", Fonts.DEFAULT_SMALL, run
+                btnText, Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*4 + lblH + BUTTON_H);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Recreates the production matrix, and recalculates worker assignments", pad);
+                tp.addPara("Recreates the production matrix, and recalculates worker assignments. Also does a fake advance.", pad);
+            };
+        }
+
+        { // FAKE ADVANCE
+            final String btnText = "Fake Advance ";
+            final CallbackRunnable<Button> run = (btn) -> {                
+                final long startTime = System.nanoTime();
+                
+                engine.fakeAdvance();
+
+                final long endTime = System.nanoTime();
+                final String time = ((endTime - startTime) / 1_000_000) + " ms";
+                logger.info("Elapsed time: " + time);
+                btn.setText(btnText + " - " + time);
+            };
+            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+                btnText, Fonts.DEFAULT_SMALL, run
+            );
+            add(button).inTL(opad, SECTION_I + pad*6 + lblH + BUTTON_H*2);
+
+            button.tooltip.builder = (tp, expanded) -> {
+                tp.addPara("Advances the economy by one tick without worker assignments or updating any values.", pad);
             };
         }
 
@@ -101,7 +124,7 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 "Log All Commodity Cells", Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*6 + lblH + BUTTON_H*2);
+            add(button).inTL(opad, SECTION_I + pad*8 + lblH + BUTTON_H*3);
 
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs all the information about the CommodityCell for each cell", pad);
@@ -116,7 +139,7 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 "Log Economy Information", Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*8 + lblH + BUTTON_H*3);
+            add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
 
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs all the information about the Economy", pad);
@@ -130,7 +153,7 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 "Log Player Market Data", Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
+            add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs all player market data's", pad);
             };
@@ -143,7 +166,7 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 "Log Industry IO Maps", Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
+            add(button).inTL(opad, SECTION_I + pad*14 + lblH + BUTTON_H*6);
 
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs the maps used by IndustryIOs to manage industry inputs and outputs", pad);

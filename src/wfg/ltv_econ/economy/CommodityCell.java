@@ -1,7 +1,6 @@
 package wfg.ltv_econ.economy;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +16,7 @@ import com.fs.starfarer.campaign.econ.Market;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.util.ArrayMap;
 
 /**
  * <h3>Naming Convention: <code>Flow</code> vs. <code>Stored</code></h3>
@@ -57,8 +57,8 @@ public class CommodityCell {
     private double stored = 0.0;
     private MutableStat localProd = new MutableStat(0f);
     private MutableStat baseDemand = new MutableStat(0f);
-    private transient Map<String, MutableStat> localProdMutables = new HashMap<>();
-    private transient Map<String, MutableStat> demandBaseMutables = new HashMap<>();
+    private transient Map<String, MutableStat> localProdMutables = new ArrayMap<>();
+    private transient Map<String, MutableStat> demandBaseMutables = new ArrayMap<>();
 
     public transient float inFactionImports = 0f;
     public transient float globalImports = 0f;
@@ -222,8 +222,8 @@ public class CommodityCell {
         market = Global.getSector().getEconomy().getMarket(marketID);
         spec = Global.getSettings().getCommoditySpec(comID);
 
-        localProdMutables = new HashMap<>();
-        demandBaseMutables = new HashMap<>();
+        localProdMutables = new ArrayMap<>();
+        demandBaseMutables = new ArrayMap<>();
 
         // TODO Remove when save incompatible update drops
         if (informalImportMods == null) informalImportMods = new StatBonus();

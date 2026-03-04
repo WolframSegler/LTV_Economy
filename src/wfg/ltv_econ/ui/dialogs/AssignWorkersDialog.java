@@ -3,7 +3,6 @@ package wfg.ltv_econ.ui.dialogs;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
@@ -31,6 +30,7 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.panels.LtvIndustryListPanel;
+import wfg.ltv_econ.util.ArrayMap;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.UIContext;
@@ -71,7 +71,7 @@ public class AssignWorkersDialog extends DialogPanel {
         market = ind.getMarket();
         data = reg.getData(ind);
         previewData = new WorkerIndustryData(data);
-        outputSliders = new HashMap<>();
+        outputSliders = new ArrayMap<>();
 
         reg.setData(previewData);
         initialFreeWorkerRatio = WorkerPoolCondition.getPoolCondition(market).getFreeWorkerRatio();
@@ -199,8 +199,8 @@ public class AssignWorkersDialog extends DialogPanel {
         final Color color = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
 
-        final Map<String, MutableStat> supplyList = new HashMap<>();
-        final Map<String, MutableStat> demandList = new HashMap<>();
+        final Map<String, MutableStat> supplyList = new ArrayMap<>();
+        final Map<String, MutableStat> demandList = new ArrayMap<>();
 
         final boolean importing = IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles;
 

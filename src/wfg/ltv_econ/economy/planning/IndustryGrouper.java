@@ -2,7 +2,6 @@ package wfg.ltv_econ.economy.planning;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import com.fs.starfarer.api.util.Pair;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.util.ArrayMap;
 
 public final class IndustryGrouper {
 
@@ -47,7 +47,7 @@ public final class IndustryGrouper {
 
         final boolean[] grouped = new boolean[columns];
         final Map<String, List<String>> groupToMembers = new LinkedHashMap<>();
-        final Map<String, String> memberToGroup = new HashMap<>();
+        final Map<String, String> memberToGroup = new ArrayMap<>();
 
         final List<String> groupNames = new ArrayList<>();
         final List<double[]> groupedColumns = new ArrayList<>();
@@ -128,7 +128,7 @@ public final class IndustryGrouper {
         Map<String, String> memberToGroup
     ) {
         final List<String> groupedPairs = new ArrayList<>();
-        final Map<String, Integer> groupIndex = new HashMap<>();
+        final Map<String, Integer> groupIndex = new ArrayMap<>();
 
         // Step 1: create new grouped list
         for (String pair : pairs) {
@@ -164,7 +164,7 @@ public final class IndustryGrouper {
         List<MarketAPI> markets,
         List<String> industryOutputPairs
     ) {
-        final Map<MarketAPI, float[]> expanded = new HashMap<>();
+        final Map<MarketAPI, float[]> expanded = new ArrayMap<>();
 
         for (MarketAPI market : markets) {
             final float[] groupedArray = groupedAssignments.get(market);

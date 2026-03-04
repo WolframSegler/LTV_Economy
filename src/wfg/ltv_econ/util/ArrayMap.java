@@ -15,13 +15,14 @@
  */
 package wfg.ltv_econ.util;
 
-import java.util.ArrayList;
+import java.util.AbstractCollection;
+import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -78,24 +79,18 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     /**
      * Special hash array value that indicates the container is immutable.
      */
-    static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
+    private static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
 
     /**
-     * @hide Special immutable empty ArrayMap.
-     */
-    @SuppressWarnings("rawtypes")
-    public static final ArrayMap EMPTY = new ArrayMap<>(-1);
-
-    /**
-     * Caches of small array objects to avoid spamming garbage.  The cache
+     * Caches of small array objects to avoid spamming garbage. The cache
      * Object[] variable is a pointer to a linked list of array objects.
      * The first entry in the array is a pointer to the next array in the
      * list; the second entry is a pointer to the int[] hash code array for it.
      */
-    static Object[] mBaseCache;
-    static int mBaseCacheSize;
-    static Object[] mTwiceBaseCache;
-    static int mTwiceBaseCacheSize;
+    private static Object[] mBaseCache;
+    private static int mBaseCacheSize;
+    private static Object[] mTwiceBaseCache;
+    private static int mTwiceBaseCacheSize;
 
     /**
      * Separate locks for each cache since each can be accessed independently of the other without
@@ -127,27 +122,23 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     }
 
     int indexOf(Object key, int hash) {
-        final int N = mSize;
-        // Important fast case: if nothing is in here, nothing to look for.
-        if (N == 0) {
-            return ~0;
-        }
-        int index = binarySearchHashes(mHashes, N, hash);
-        // If the hash code wasn't found, then we have no entry for this key.
+        if (mSize == 0) return ~0;
+        
+        final int index = binarySearchHashes(mHashes, mSize, hash);
         if (index < 0) return index;
         
-        // If the key at the returned index matches, that's what we want.
         if (key.equals(mArray[index<<1])) return index;
         
         // Search for a matching key after the index.
         int end;
-        for (end = index + 1; end < N && mHashes[end] == hash; end++) {
+        for (end = index + 1; end < mSize && mHashes[end] == hash; end++) {
             if (key.equals(mArray[end << 1])) return end;
         }
         // Search for a matching key before the index.
         for (int i = index - 1; i >= 0 && mHashes[i] == hash; i--) {
             if (key.equals(mArray[i << 1])) return i;
         }
+
         // Key not found -- return negative value indicating where a
         // new entry for this key should go. We use the end of the
         // hash chain to reduce the number of array entries that will
@@ -156,12 +147,9 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     }
 
     int indexOfNull() {
-        final int N = mSize;
-        // Important fast case: if nothing is in here, nothing to look for.
-        if (N == 0) {
-            return ~0;
-        }
-        int index = binarySearchHashes(mHashes, N, 0);
+        if (mSize == 0)  return ~0;
+        
+        final int index = binarySearchHashes(mHashes, mSize, 0);
         // If the hash code wasn't found, then we have no entry for this key.
         if (index < 0) {
             return index;
@@ -172,7 +160,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         }
         // Search for a matching key after the index.
         int end;
-        for (end = index + 1; end < N && mHashes[end] == 0; end++) {
+        for (end = index + 1; end < mSize && mHashes[end] == 0; end++) {
             if (null == mArray[end << 1]) return end;
         }
         // Search for a matching key before the index.
@@ -299,10 +287,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         mSize = 0;
     }
 
-    /**
-     * Create a new ArrayMap with the mappings from the given ArrayMap.
-     */
-    public ArrayMap(ArrayMap<K, V> map) {
+    public <KK extends K, VV extends V> ArrayMap(Map<KK, VV> map) {
         this();
         if (map != null) {
             putAll(map);
@@ -317,14 +302,15 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         if (mSize > 0) {
             final int[] ohashes = mHashes;
             final Object[] oarray = mArray;
-            final int osize = mSize;
+            final int oldSize = mSize;
             mHashes = EMPTY_INT_ARRAY;
             mArray = EMPTY_OBJECT_ARRAY;
             mSize = 0;
-            freeArrays(ohashes, oarray, osize);
-        }
-        if (CONCURRENT_MODIFICATION_EXCEPTIONS && mSize > 0) {
-            throw new ConcurrentModificationException();
+            freeArrays(ohashes, oarray, oldSize);
+
+            if (CONCURRENT_MODIFICATION_EXCEPTIONS && mSize > 0) {
+                throw new ConcurrentModificationException();
+            }
         }
     }
 
@@ -382,8 +368,11 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * @return Returns the index of the key if it exists, else a negative integer.
      */
     public int indexOfKey(Object key) {
-        return key == null ? indexOfNull()
-                : indexOf(key, mIdentityHashCode ? System.identityHashCode(key) : key.hashCode());
+        return key == null ? indexOfNull() : indexOf(key, getHash(key));
+    }
+
+    protected final int getHash(final Object key) {
+        return mIdentityHashCode ? System.identityHashCode(key) : key.hashCode();
     }
 
     /**
@@ -522,7 +511,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             hash = 0;
             index = indexOfNull();
         } else {
-            hash = mIdentityHashCode ? System.identityHashCode(key) : key.hashCode();
+            hash = getHash(key);
             index = indexOf(key, hash);
         }
         if (index >= 0) {
@@ -570,8 +559,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public void append(K key, V value) {
         int index = mSize;
-        final int hash = key == null ? 0
-                : (mIdentityHashCode ? System.identityHashCode(key) : key.hashCode());
+        final int hash = key == null ? 0 : (getHash(key));
         if (index >= mHashes.length) {
             throw new IllegalStateException("Array is full");
         }
@@ -588,8 +576,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
     /**
      * The use of the {@link #append} function can result in invalid array maps, in particular
-     * an array map where the same key appears multiple times.  This function verifies that
-     * the array map is valid, throwing IllegalArgumentException if a problem is found.  The
+     * an array map where the same key appears multiple times. This function verifies that
+     * the array map is valid, throwing IllegalArgumentException if a problem is found. The
      * main use for this method is validating an array map after unpacking from an IPC, to
      * protect against malicious callers.
      * @hide
@@ -609,7 +597,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                 basei = i;
                 continue;
             }
-            // We are in a run of entries with the same hash code.  Go backwards through
+            // We are in a run of entries with the same hash code. Go backwards through
             // the array to see if any keys are the same.
             final Object cur = mArray[i<<1];
             for (int j=i-1; j>=basei; j--) {
@@ -745,9 +733,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+        if (this == object) return true;
+        
         if (object instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) object;
             if (size() != map.size()) {
@@ -755,9 +742,9 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             }
             try {
                 for (int i=0; i<mSize; i++) {
-                    K key = keyAt(i);
-                    V mine = valueAt(i);
-                    Object theirs = map.get(key);
+                    final K key = keyAt(i);
+                    final V mine = valueAt(i);
+                    final Object theirs = map.get(key);
                     if (mine == null) {
                         if (theirs != null || !map.containsKey(key)) {
                             return false;
@@ -976,89 +963,207 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         return removedAny;
     }
 
-    /**
-     * Return a {@link java.util.Set} for iterating over and interacting with all mappings
-     * in the array map.
-     *
-     * <p><b>Note:</b> this is a very inefficient way to access the array contents, it
-     * requires generating a number of temporary objects and allocates additional state
-     * information associated with the container that will remain for the life of the container.</p>
-     *
-     * <p><b>Note:</b></p> the semantics of this
-     * Set are subtly different than that of a {@link java.util.HashMap}: most important,
-     * the {@link java.util.Map.Entry Map.Entry} object returned by its iterator is a single
-     * object that exists for the entire iterator, so you can <b>not</b> hold on to it
-     * after calling {@link java.util.Iterator#next() Iterator.next}.</p>
-     */
+    private transient Set<Map.Entry<K, V>> entrySetView;
+    private transient Set<K> keySetView;
+    private transient Collection<V> valuesView;
+
     @Override
     @SuppressWarnings("unchecked")
     public Set<Map.Entry<K, V>> entrySet() {
-        Set<Map.Entry<K, V>> set = new HashSet<>(mSize);
-        for (int i = 0; i < mSize; i++) {
-            final int index = i;
-            set.add(new Map.Entry<>() {
-                @Override
-                public final K getKey() { return (K) mArray[index << 1]; }
+        if (entrySetView == null) {
+        entrySetView = new AbstractSet<>() {
+            @Override
+            public Iterator<Map.Entry<K, V>> iterator() {
+                return new Iterator<>() {
+                    int index = 0;
+                    int expectedSize = mSize;
+                    boolean canRemove = false;
+                    final MapEntry entry = new MapEntry();
 
-                @Override
-                public final V getValue() { return (V) mArray[(index << 1) + 1]; }
+                    @Override
+                    public boolean hasNext() {
+                        return index < mSize;
+                    }
 
-                @Override
-                public final V setValue(V value) {
-                    V old = (V) mArray[(index << 1) + 1];
-                    mArray[(index << 1) + 1] = value;
-                    return old;
-                }
+                    @Override
+                    public Map.Entry<K, V> next() {
+                        if (expectedSize != mSize) throw new ConcurrentModificationException();
+                        if (index >= mSize) throw new NoSuchElementException();
+                        entry.index = index++;
+                        canRemove = true;
+                        return entry;
+                    }
 
-                @Override
-                public final boolean equals(Object o) {
-                    if (!(o instanceof Map.Entry)) return false;
-                    final var e = (Map.Entry<?, ?>) o;
-                    return Objects.equals(getKey(), e.getKey()) && Objects.equals(getValue(), e.getValue());
-                }
+                    @Override
+                    public void remove() {
+                        if (!canRemove) throw new IllegalStateException();
+                        if (expectedSize != mSize) throw new ConcurrentModificationException();
+                        ArrayMap.this.removeAt(--index);
+                        expectedSize = mSize;
+                        canRemove = false;
+                    }
 
-                @Override
-                public final int hashCode() {
-                    return Objects.hashCode(getKey()) ^ Objects.hashCode(getValue());
-                }
-            });
+                    final class MapEntry implements Map.Entry<K, V> {
+                        int index;
+
+                        @Override
+                        public K getKey() {
+                            return (K) mArray[index << 1];
+                        }
+
+                        @Override
+                        public V getValue() {
+                            return (V) mArray[(index << 1) + 1];
+                        }
+
+                        @Override
+                        public V setValue(V value) {
+                            V old = (V) mArray[(index << 1) + 1];
+                            mArray[(index << 1) + 1] = value;
+                            return old;
+                        }
+
+                        @Override
+                        public boolean equals(Object o) {
+                            if (!(o instanceof Map.Entry)) return false;
+                            Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+                            return Objects.equals(getKey(), e.getKey()) &&
+                                Objects.equals(getValue(), e.getValue());
+                        }
+
+                        @Override
+                        public int hashCode() {
+                            return Objects.hashCode(getKey()) ^ Objects.hashCode(getValue());
+                        }
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return mSize;
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                if (!(o instanceof Map.Entry)) return false;
+                final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+                final int i = indexOfKey(e.getKey());
+                return i >= 0 && Objects.equals(mArray[(i << 1) + 1], e.getValue());
+            }
+
+            @Override
+            public void clear() {
+                ArrayMap.this.clear();
+            }
+        };
         }
-        return set;
+        return entrySetView;
     }
 
-    /**
-     * Return a {@link java.util.Set} for iterating over and interacting with all keys
-     * in the array map.
-     *
-     * <p><b>Note:</b> this is a fairly inefficient way to access the array contents, it
-     * requires generating a number of temporary objects and allocates additional state
-     * information associated with the container that will remain for the life of the container.</p>
-     */
     @Override
     @SuppressWarnings("unchecked")
     public Set<K> keySet() {
-        final Set<K> set = new HashSet<>(mSize);
-        for (int i = 0; i < mSize; i++) {
-            set.add((K) mArray[i << 1]);
+        if (keySetView == null) {
+        keySetView = new AbstractSet<>() {
+            @Override
+            public Iterator<K> iterator() {
+                return new Iterator<>() {
+                    int index = 0;
+                    int expectedSize = mSize;
+
+                    @Override
+                    public boolean hasNext() {
+                        return index < expectedSize;
+                    }
+
+                    @Override
+                    public K next() {
+                        if (expectedSize != mSize) throw new ConcurrentModificationException();
+                        return (K) mArray[index++ << 1];
+                    }
+
+                    @Override
+                    public void remove() {
+                        if (index == 0) throw new IllegalStateException();
+                        if (expectedSize != mSize) throw new ConcurrentModificationException();
+                        ArrayMap.this.removeAt(--index);
+                        expectedSize = mSize;
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return mSize;
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                return ArrayMap.this.containsKey(o);
+            }
+
+            @Override
+            public void clear() {
+                ArrayMap.this.clear();
+            }
+        };
         }
-        return set;
+        return keySetView;
     }
 
-    /**
-     * Return a {@link java.util.Collection} for iterating over and interacting with all values
-     * in the array map.
-     *
-     * <p><b>Note:</b> this is a fairly inefficient way to access the array contents, it
-     * requires generating a number of temporary objects and allocates additional state
-     * information associated with the container that will remain for the life of the container.</p>
-     */
     @Override
-    @SuppressWarnings("unchecked")
     public Collection<V> values() {
-        final List<V> list = new ArrayList<>(mSize);
-        for (int i = 0; i < mSize; i++) {
-            list.add((V) mArray[(i << 1) + 1]);
+        if (valuesView == null) {
+        valuesView = new AbstractCollection<>() {
+            @Override
+            public Iterator<V> iterator() {
+                return new Iterator<>() {
+                    int index = 0;
+                    int expectedSize = mSize;
+                    boolean canRemove = false;
+
+                    @Override
+                    public boolean hasNext() {
+                        return index < mSize;
+                    }
+
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public V next() {
+                        if (expectedSize != mSize) throw new ConcurrentModificationException();
+                        if (index >= mSize) throw new NoSuchElementException();
+                        canRemove = true;
+                        return (V) mArray[(index++ << 1) + 1];
+                    }
+
+                    @Override
+                    public void remove() {
+                        if (!canRemove) throw new IllegalStateException();
+                        if (expectedSize != mSize) throw new ConcurrentModificationException();
+                        ArrayMap.this.removeAt(--index);
+                        expectedSize = mSize;
+                        canRemove = false;
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return mSize;
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                return ArrayMap.this.containsValue(o);
+            }
+
+            @Override
+            public void clear() {
+                ArrayMap.this.clear();
+            }
+        };
         }
-        return list;
+        return valuesView;
     }
 }

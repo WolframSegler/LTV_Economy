@@ -351,7 +351,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 
 	public static final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, IndustryWidget widget) {
 		widget.industryIcon.tooltip.builder = (tp, exp) -> {
-			IndustryTooltips.createIndustryTooltip(mode, tp, false, ind);
+			IndustryTooltips.createIndustryTooltip(mode, tp, exp, ind);
 		};
 	}
 

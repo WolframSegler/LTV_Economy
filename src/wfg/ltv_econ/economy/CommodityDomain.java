@@ -2,7 +2,6 @@ package wfg.ltv_econ.economy;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,15 +17,16 @@ import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.util.Arithmetic;
+import wfg.ltv_econ.util.ArrayMap;
 
 public class CommodityDomain {
 
     private final String comID;
     public transient CommoditySpecAPI spec;
 
-
-    private final Map<String, CommodityCell> m_comCells = new HashMap<>();
-    private final Map<String, IncomeLedger> incomeLedgers = new HashMap<>();
+    // TODO switch static type to ArrayMap in a future incompatible update
+    private final Map<String, CommodityCell> m_comCells = new ArrayMap<>();
+    private final Map<String, IncomeLedger> incomeLedgers = new ArrayMap<>();
     private InformalExchangeNode informalNode;
 
     private transient long tradeCreditActivity = 0l;

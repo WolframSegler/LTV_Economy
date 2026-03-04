@@ -1,3 +1,7 @@
+v0.2.10-beta | SAVE COMPATIBLE
+- Added the industry tooltip to the income report as well.
+- Switched internal data structures for performance.
+
 v0.2.9-beta | SAVE COMPATIBLE
 - Fixed a crash resulting from a market with no outputs
 - Fixed industries producing/demanding while under construction

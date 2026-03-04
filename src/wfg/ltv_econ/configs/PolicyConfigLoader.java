@@ -1,8 +1,8 @@
 package wfg.ltv_econ.configs;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,6 +11,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
+import wfg.ltv_econ.util.ArrayMap;
 
 public class PolicyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/policy_config.json";
@@ -69,7 +70,7 @@ public class PolicyConfigLoader {
     }
 
     public static class PolicyConfig {
-        public static final HashMap<String, PolicySpec> map = new HashMap<>(16);
+        public static final Map<String, PolicySpec> map = new ArrayMap<>(16);
         public static final List<PolicySpec> getPoliciesCopy() {
             return new ArrayList<>(map.values());
         }

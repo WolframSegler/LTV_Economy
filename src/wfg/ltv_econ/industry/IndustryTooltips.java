@@ -3,7 +3,6 @@ package wfg.ltv_econ.industry;
 import java.awt.Color;
 import java.util.Map;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -39,6 +38,7 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CommodityCell;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 
@@ -47,11 +47,11 @@ import static wfg.native_ui.util.UIConstants.*;
 public class IndustryTooltips {
 	private static final SettingsAPI settings = Global.getSettings();
 
-	private static final Map<String, Object> hasPostDemandSectionMethodCache = new HashMap<>();
+	private static final Map<String, Object> hasPostDemandSectionMethodCache = new ArrayMap<>();
 	private static final Class<?>[] hasPostDemandSectionparamTypes = new Class<?>[]{
 		boolean.class,IndustryTooltipMode.class};
 
-	private static final Map<String, Object> addNonAICoreInstalledItemsMethodCache = new HashMap<>();
+	private static final Map<String, Object> addNonAICoreInstalledItemsMethodCache = new ArrayMap<>();
 	private static final Class<?>[] addNonAICoreInstalledItemsparamTypes = new Class<?>[]{
 		IndustryTooltipMode.class, TooltipMakerAPI.class, boolean.class};
 

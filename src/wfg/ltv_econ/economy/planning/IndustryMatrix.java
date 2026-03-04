@@ -1,7 +1,6 @@
 package wfg.ltv_econ.economy.planning;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -16,6 +15,7 @@ import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.util.ArrayMap;
 
 public class IndustryMatrix {
     private static final SettingsAPI settings = Global.getSettings();
@@ -110,7 +110,7 @@ public class IndustryMatrix {
             }
         }
 
-        INDUSTRY_OUTPUT_PAIR_TO_COLUMN = new HashMap<>();
+        INDUSTRY_OUTPUT_PAIR_TO_COLUMN = new ArrayMap<>();
         for (int i = 0; i < STATIC_INDUSTRY_OUTPUT_PAIRS.size(); i++) {
             INDUSTRY_OUTPUT_PAIR_TO_COLUMN.put(STATIC_INDUSTRY_OUTPUT_PAIRS.get(i), i);
         }

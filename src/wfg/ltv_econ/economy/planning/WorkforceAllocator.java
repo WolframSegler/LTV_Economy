@@ -3,7 +3,6 @@ package wfg.ltv_econ.economy.planning;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.apache.commons.math4.legacy.optim.linear.LinearObjectiveFunction;
 import org.apache.commons.math4.legacy.optim.linear.NonNegativeConstraint;
 import org.apache.commons.math4.legacy.optim.linear.PivotSelectionRule;
 import org.apache.commons.math4.legacy.optim.linear.Relationship;
-import org.apache.commons.math4.legacy.optim.linear.SimplexSolver;
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 import org.apache.log4j.Logger;
 
@@ -31,7 +29,10 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
+import wfg.ltv_econ.economy.planning.optim.CustomSimplexSolver;
+import wfg.ltv_econ.economy.planning.optim.SimplexTableau;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.util.ArrayMap;
 
 public class WorkforceAllocator {
     private static final Logger logger = Global.getLogger(WorkforceAllocator.class);
@@ -255,6 +256,7 @@ public class WorkforceAllocator {
         }
 
         double[] vars = null;
+        SimplexTableau previousTableau = null;
         final double[] netCommodity = new double[C];
         final double[] comAvailability = new double[C];
         final double[] shortage_mult = new double[O];
@@ -388,18 +390,21 @@ public class WorkforceAllocator {
                 }
             }
 
-            final SimplexSolver solver = new SimplexSolver(1e-4, 30, 1e-6);
+            final CustomSimplexSolver solver = new CustomSimplexSolver(
+                1e-4, 30, 1e-6, previousTableau
+            );
             final PointValuePair solution = solver.optimize(
-                new MaxIter(100000), objFunc,
+                new MaxIter(50000), objFunc,
                 new LinearConstraintSet(constraints),
                 GoalType.MINIMIZE,
                 new NonNegativeConstraint(true),
                 PivotSelectionRule.DANTZIG
             );
             vars = solution.getPoint();
+            previousTableau = solver.getPrevTableau();
         }
 
-        final Map<MarketAPI, float[]> groupedAssignments = new HashMap<>();
+        final Map<MarketAPI, float[]> groupedAssignments = new ArrayMap<>();
         { // 7) Extract assignments w[m,o] into map for grouped outputs
             final double[] denseWorkerVars = new double[N];
             System.arraycopy(vars, 0, denseWorkerVars, 0, N);

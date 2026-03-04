@@ -30,6 +30,7 @@ import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.util.ArrayMap;
 
 /**
  * <h3>IndustryIOs</h3>
@@ -74,13 +75,13 @@ public class IndustryIOs {
     /**
      * Map(inputID, List(outputID))
      */
-    private static final Map<String, List<String>> inputToOutput = new HashMap<>();
+    private static final Map<String, List<String>> inputToOutput = new ArrayMap<>();
 
     // Map<commodityID, Set<industryID>>
-    private static final Map<String, Set<String>> inputToInd = new HashMap<>();
-    private static final Map<String, Set<String>> outputToInd = new HashMap<>();
+    private static final Map<String, Set<String>> inputToInd = new ArrayMap<>();
+    private static final Map<String, Set<String>> outputToInd = new ArrayMap<>();
 
-    private static final Map<String, String> IndToBaseInd = new HashMap<>();
+    private static final Map<String, String> IndToBaseInd = new ArrayMap<>();
 
     public static final String ABSTRACT_COM = "abstract";
     public static final String DYNAMIC_OUTPUT = "output_for_input::";
@@ -98,8 +99,8 @@ public class IndustryIOs {
 
     private static final void ConfigInputOutputMaps() {
         for (Map.Entry<String, IndustryConfig> entry : IndustryConfigManager.ind_config.entrySet()) {
-            final Map<String, Float> outputMap = baseOutputs.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
-            final Map<String, Map<String, Float>> inputOuterMap = baseInputs.computeIfAbsent(entry.getKey(), k -> new HashMap<>());
+            final Map<String, Float> outputMap = baseOutputs.computeIfAbsent(entry.getKey(), k -> new ArrayMap<>());
+            final Map<String, Map<String, Float>> inputOuterMap = baseInputs.computeIfAbsent(entry.getKey(), k -> new ArrayMap<>());
             final Map<String, OutputConfig> outputs = entry.getValue().outputs;
 
             for (Map.Entry<String, OutputConfig> outputEntry : outputs.entrySet()) {
@@ -112,7 +113,7 @@ public class IndustryIOs {
         Map<String, Float> outputMap, Map<String, Map<String, Float>> inputOuterMap
     ) {
         final String outputID = output.comID;
-        final Map<String, Float> inputMap = inputOuterMap.computeIfAbsent(outputID, k -> new HashMap<>());
+        final Map<String, Float> inputMap = inputOuterMap.computeIfAbsent(outputID, k -> new ArrayMap<>());
 
         float base = output.baseProd;
 
@@ -256,7 +257,7 @@ public class IndustryIOs {
 
         final boolean useWorkers = cfg.workerAssignable;
 
-        final Map<String, Float> inputs = new HashMap<>(6);
+        final Map<String, Float> inputs = new ArrayMap<>(4);
             IndustryConfigManager.populateInputs(ind, inputs, scaleWithSize);
 
             final Map<String, Float> CCMoneyDist = useWorkers ?
@@ -334,7 +335,7 @@ public class IndustryIOs {
             outputID, 1, null,
             scaleWithSize, false, true, false,
             Collections.emptyList(), Collections.emptyList(),
-            new HashMap<>(), LaborConfig.dynamicWorkerCapPerOutput,
+            new ArrayMap<>(), LaborConfig.dynamicWorkerCapPerOutput,
             IndustryConfigManager.dynamicIndMarketScaleBase, -1, false
         );
         output.dynamic = true;
@@ -472,7 +473,7 @@ public class IndustryIOs {
     public static final Map<String, Float> getRealOutputs(Industry ind, boolean includeAbstract) {
         final Map<String, Float> outputs = getBaseOutputs(ind.getSpec());
 
-        Map<String, Float> scaledOutputs = new HashMap<>();
+        Map<String, Float> scaledOutputs = new ArrayMap<>();
         for (String output : outputs.keySet()) {
             float value = getRealOutput(ind, output);
             if (includeAbstract || value > 0) scaledOutputs.put(output, value);
@@ -487,7 +488,7 @@ public class IndustryIOs {
     public static final Map<String, Float> getRealInputs(Industry ind, String outputID, boolean includeAbstract) {
         final Map<String, Map<String, Float>> outputs = getBaseInputs(ind.getSpec());
 
-        Map<String, Float> scaledInputs = new HashMap<>();
+        Map<String, Float> scaledInputs = new ArrayMap<>();
         for (String output : outputs.get(outputID).keySet()) {
             float value = getRealInput(ind, outputID, output);
             if (includeAbstract || value > 0) scaledInputs.put(output, value);
@@ -571,7 +572,7 @@ public class IndustryIOs {
     }
 
     public static final Map<String, List<String>> getInputToOutput() {
-        Map<String, List<String>> immutableMap = new HashMap<>();
+        Map<String, List<String>> immutableMap = new ArrayMap<>();
         for (Map.Entry<String, List<String>> entry : inputToOutput.entrySet()) {
             immutableMap.put(entry.getKey(), Collections.unmodifiableList(entry.getValue()));
         }

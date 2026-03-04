@@ -2,7 +2,6 @@ package wfg.ltv_econ.economy.planning;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +15,7 @@ import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.util.ArrayMap;
 
 public class DenseModel {
     public final int columnSize;
@@ -70,7 +70,7 @@ public class DenseModel {
         final int[] columnFaction = new int[denseCount];
         final int[] columnComIdx = new int[denseCount];
         final boolean[] columnIsOutputAbstract = new boolean[denseCount];
-        final Map<String, Integer> commodityIndex = new HashMap<>(numCommodities);
+        final Map<String, Integer> commodityIndex = new ArrayMap<>(numCommodities);
 
         final long[] baseCapacities = new long[numMarkets];
         final long[] weightSum = new long[numOutputs];

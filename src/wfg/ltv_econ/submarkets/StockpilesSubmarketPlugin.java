@@ -1,8 +1,5 @@
 package wfg.ltv_econ.submarkets;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CoreUIAPI;
@@ -11,7 +8,6 @@ import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
-import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.submarkets.BaseSubmarketPlugin;
 import com.fs.starfarer.api.ui.Alignment;
@@ -26,8 +22,6 @@ import static wfg.native_ui.util.UIConstants.highlight;
 import static wfg.native_ui.util.UIConstants.opad;
 
 public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
-
-	protected Map<String, MutableStat> stockpilingBonus = new HashMap<String, MutableStat>();
 
 	public StockpilesSubmarketPlugin() {}
 

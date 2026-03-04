@@ -21,6 +21,7 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.util.ArrayMap;
 import wfg.ltv_econ.util.ConfigUtils;
 
 import java.util.List;
@@ -120,7 +121,7 @@ public class IndustryConfigManager {
             final String occTag = indJson.optString("occTag", LaborConfigLoader.AVERAGE_OCC_TAG);
 
             final JSONObject outputList = indJson.getJSONObject("outputList");
-            final Map<String, OutputConfig> commodityMap = new HashMap<>();
+            final Map<String, OutputConfig> commodityMap = new ArrayMap<>();
 
             final Iterator<String> outputIds = outputList.keys();
             while (outputIds.hasNext()) {
@@ -158,7 +159,7 @@ public class IndustryConfigManager {
                     }
                 }
 
-                final Map<String, Float> ConsumptionMap = new HashMap<>();
+                final Map<String, Float> ConsumptionMap = new ArrayMap<>();
                 if (outputData.has("InputsPerUnitOutput")) {
                     JSONObject consumption = outputData.getJSONObject("InputsPerUnitOutput");
                     Iterator<String> inputIds = consumption.keys();
@@ -169,7 +170,7 @@ public class IndustryConfigManager {
                     }
                 }
 
-                final Map<String, Float> CCMoneyDist = new HashMap<>();
+                final Map<String, Float> CCMoneyDist = new ArrayMap<>();
                 if (outputData.has("CCMoneyDist")) {
                     JSONObject consumption = outputData.getJSONObject("CCMoneyDist");
                     Iterator<String> inputIds = consumption.keys();
@@ -316,13 +317,13 @@ public class IndustryConfigManager {
 
             // Deep copy outputs map
             if (config.outputs != null) {
-                Map<String, OutputConfig> copy = new HashMap<>();
+                Map<String, OutputConfig> copy = new ArrayMap<>();
                 for (Map.Entry<String, OutputConfig> e : config.outputs.entrySet()) {
                     copy.put(e.getKey(), new OutputConfig(e.getValue()));
                 }
                 this.outputs = copy;
             } else {
-                this.outputs = new HashMap<>();
+                this.outputs = new ArrayMap<>();
             }
         }
 
@@ -391,8 +392,8 @@ public class IndustryConfigManager {
             this.baseProd = other.baseProd;
             this.target = other.target;
 
-            this.CCMoneyDist = (other.CCMoneyDist == null) ? null : new HashMap<>(other.CCMoneyDist);
-            this.InputsPerUnitOutput = (other.InputsPerUnitOutput == null) ? null : new HashMap<>(other.InputsPerUnitOutput);
+            this.CCMoneyDist = (other.CCMoneyDist == null) ? null : new ArrayMap<>(other.CCMoneyDist);
+            this.InputsPerUnitOutput = (other.InputsPerUnitOutput == null) ? null : new ArrayMap<>(other.InputsPerUnitOutput);
 
             this.ifMarketCondsAllFalse = (other.ifMarketCondsAllFalse == null)
                 ? null : new ArrayList<>(other.ifMarketCondsAllFalse);
@@ -498,7 +499,7 @@ public class IndustryConfigManager {
             if (IndustryIOs.getIndConfig(indSpec) != null) continue;
 
             final String indID = indSpec.getId();
-            final Map<String, OutputConfig> configOutputs = new HashMap<>();
+            final Map<String, OutputConfig> configOutputs = new ArrayMap<>();
             
             testMarket1.addIndustry(indID);
             testMarket2.addIndustry(indID);
@@ -566,7 +567,7 @@ public class IndustryConfigManager {
                 }
     
                 // In vanilla, each output uses each input
-                final Map<String, Float> inputs = new HashMap<>(6);
+                final Map<String, Float> inputs = new ArrayMap<>(4);
                 populateInputs(ind1, inputs, !scaleWithMarketSize.isEmpty());
     
                 final Map<String, Float> CCMoneyDist = usesWorkers ?

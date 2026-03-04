@@ -2,7 +2,6 @@ package wfg.ltv_econ.economy.engine;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +24,7 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport;
+import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
@@ -35,6 +35,8 @@ import wfg.ltv_econ.economy.CommodityDomain;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.industry.IndustryTooltips;
+import wfg.ltv_econ.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.UIConstants.*;
@@ -117,10 +119,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public transient EconomyLogger logger;
     transient EconomyLoop loop;
     
+    // TODO switch static type to ArrayMap in a future incompatible update
     final Set<String> m_registeredMarkets = new HashSet<>();
-    final Map<String, CommodityDomain> m_comDomains = new HashMap<>();
-    final Map<String, PlayerMarketData> m_playerMarketData = new HashMap<>();
-    final Map<String, Long> m_marketCredits = new HashMap<>();
+    final Map<String, CommodityDomain> m_comDomains = new ArrayMap<>();
+    final Map<String, PlayerMarketData> m_playerMarketData = new ArrayMap<>();
+    final Map<String, Long> m_marketCredits = new ArrayMap<>();
 
     private transient ExecutorService mainLoopExecutor;
 
@@ -189,13 +192,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         midDayApplied = false;
 
         if (EconomyConfig.MULTI_THREADING) {
-            mainLoopExecutor.submit(() -> {
-                try {
-                    realAdvance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            mainLoopExecutor.submit(() -> realAdvance());
         } else {
             realAdvance();
         }
@@ -364,6 +361,21 @@ public class EconomyEngine extends BaseCampaignEventListener implements
                 iNode.upkeep += info.getIndustryUpkeep(ind).getModifiedInt() * r;
                 iNode.custom = ind;
                 iNode.mapEntity = market.getPrimaryEntity();
+                iNode.tooltipCreator = new TooltipCreator() {
+                    public boolean isTooltipExpandable(Object params) {
+                        return ind == null ? false : ind.isTooltipExpandable();
+                    }
+
+                    public float getTooltipWidth(Object params) {
+                        return ind == null ? 400f : ind.getTooltipWidth();
+                    }
+
+                    public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
+                        if (ind != null) {
+                            IndustryTooltips.createIndustryTooltip(IndustryTooltipMode.NORMAL, tp, expanded, ind);
+                        }
+                    }
+                };
             }
 
             // Exports

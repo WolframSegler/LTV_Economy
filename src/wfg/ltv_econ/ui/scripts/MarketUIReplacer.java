@@ -474,11 +474,9 @@ public class MarketUIReplacer implements EveryFrameScript {
                 .map(child -> (UIPanelAPI) child)
                 .findFirst().orElse(null);
 
-            final Object indOpsPanelConstr = RolfLectionUtil.getConstructor(indOps.getClass(),
+            LtvIndustryListPanel.indOptCtor = RolfLectionUtil.getConstructor(indOps.getClass(),
                 RolfLectionUtil.getConstructorParamTypesSingleConstructor(indOps.getClass())
             );
-
-            LtvIndustryListPanel.indOptCtor = indOpsPanelConstr;
 
             // Dismiss the indOpsPanel after getting its constructor
             RolfLectionUtil.getMethodAndInvokeDirectly(
