@@ -2,6 +2,7 @@ package wfg.ltv_econ.economy.engine;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,6 @@ import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.industry.IndustryTooltips;
-import wfg.ltv_econ.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.UIConstants.*;
@@ -119,11 +119,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public transient EconomyLogger logger;
     transient EconomyLoop loop;
     
-    // TODO switch static type to ArrayMap in a future incompatible update
+    // TODO switch static and actual type to ArrayMap in a future incompatible update
     final Set<String> m_registeredMarkets = new HashSet<>();
-    final Map<String, CommodityDomain> m_comDomains = new ArrayMap<>();
-    final Map<String, PlayerMarketData> m_playerMarketData = new ArrayMap<>();
-    final Map<String, Long> m_marketCredits = new ArrayMap<>();
+    final Map<String, CommodityDomain> m_comDomains = new HashMap<>();
+    final Map<String, PlayerMarketData> m_playerMarketData = new HashMap<>();
+    final Map<String, Long> m_marketCredits = new HashMap<>();
 
     private transient ExecutorService mainLoopExecutor;
 

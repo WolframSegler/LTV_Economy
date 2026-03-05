@@ -25,6 +25,10 @@
       "events_button": "graphics/icons/buttons/events.png",
       "management_button": "graphics/icons/buttons/management.png",
       "stockpiles_button": "graphics/icons/buttons/stockpiles.png"
+    },
+    "map": {
+      "star": "graphics/map/star.png",
+      "star_underlay": "graphics/map/star_underlay.png"
     }
   }
 }
