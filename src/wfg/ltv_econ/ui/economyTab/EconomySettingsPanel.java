@@ -16,11 +16,12 @@ import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
+public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> implements UIBuildableAPI {
     private static final SettingsAPI settings = Global.getSettings();
     private static final Logger logger = Global.getLogger(EconomySettingsPanel.class); 
 
@@ -32,10 +33,10 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> {
     public EconomySettingsPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         final EconomyEngine engine = EconomyEngine.getInstance();
 
         final int SECTION_I = opad;

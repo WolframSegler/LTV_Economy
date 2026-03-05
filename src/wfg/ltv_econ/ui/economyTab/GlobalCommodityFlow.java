@@ -13,7 +13,6 @@ import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
-import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -30,6 +29,7 @@ import wfg.ltv_econ.ui.reusable.ComIconPanel;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.components.TooltipComp.TooltipBuilder;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.PieChart;
 import wfg.native_ui.ui.panels.SortableTable;
@@ -41,7 +41,7 @@ import wfg.native_ui.ui.panels.TextPanel;
 import wfg.native_ui.util.NumFormat;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
+public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implements UIBuildableAPI {
     private static final SettingsAPI settings = Global.getSettings();
     private static final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
     private static final float PIE_CHART_THRESHOLD = 0.001f;
@@ -57,24 +57,23 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
     public static final int LEFT_WALL = 320;
     public static final int Right_WALL = 720;
 
-    public static CommoditySpecAPI selectedCom = settings.getCommoditySpec(Commodities.SUPPLIES);
-
     public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         final SectorAPI sector = Global.getSector();
         final EconomyEngine engine = EconomyEngine.getInstance();
-        final String comID = selectedCom.getId();
+        final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
+        final String comID = com.getId();
         final CommodityDomain dom = engine.getComDomain(comID);
 
         clearChildren();
 
         final ComIconPanel comIcon = new ComIconPanel(
-            m_panel, ICON_SIZE, ICON_SIZE, null, null, selectedCom,
+            m_panel, ICON_SIZE, ICON_SIZE, null, null, com,
             sector.getPlayerFaction().getFactionSpec()
         );
         add(comIcon).inTL((LABEL_W*2 - ICON_SIZE) / 2f, 0);
@@ -82,7 +81,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Total global production
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = engine.info.getGlobalProduction(comID)
                     + (long) dom.getInformalNode().prod;
                 final String txt = "Global production";
@@ -98,7 +97,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                     tp.addPara(
                         "The combined daily output of %s across all colonies and the informals in the Sector. " +
                         "Represents active industrial and informal production, excluding existing stockpiles.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -110,7 +109,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Total global demand
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = engine.info.getGlobalDemand(comID);
                 final String txt = "Global demand";
                 String valueTxt = NumFormat.engNotation(value);
@@ -125,7 +124,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                     tp.addPara(
                         "The combined daily demand of all colonies for %s. " +
                         "Demand reflects how much the sector needs to maintain standard production, growth, and stability.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -137,7 +136,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Total global surplus
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = engine.info.getGlobalSurplus(comID);
                 final String txt = "Global surplus";
                 String valueTxt = NumFormat.engNotation(value);
@@ -152,7 +151,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                     tp.addPara(
                         "The amount of %s that the sector produced beyond what was demanded. " +
                         "A higher surplus means that, even after all importing markets had their needs filled, some production still remained unused.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -164,7 +163,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Total global deficit
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = engine.info.getGlobalDeficit(comID);
                 final String txt = "Global deficit";
                 String valueTxt = NumFormat.engNotation(value);
@@ -193,7 +192,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Total trade volume (units)
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W + largeLabelShift, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = engine.info.getGlobalTradeVolume(comID);
                 final String txt = "Sector-wide trade volume";
                 String valueTxt = NumFormat.engNotation(value);
@@ -207,7 +206,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total number of units of %s traded across the sector on the previous day, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -219,7 +218,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Total trade value (credits)
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W + largeLabelShift, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = dom.getTradeCreditActivity();
                 final String txt = "Sector-wide trade value";
                 String valueTxt = NumFormat.formatCredit(value);
@@ -233,7 +232,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total monetary value (in credits) of all %s trades across the entire sector on the previous day. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -245,10 +244,10 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Average sector price
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final int value = (int) engine.info.getGlobalAveragePrice(comID, 0);
                 final String txt = "Global average price";
-                final String valueTxt = selectedCom.isExotic() ? "Localized"
+                final String valueTxt = com.isExotic() ? "Localized"
                     : NumFormat.formatCredit(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -259,7 +258,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The average price of %s across all markets in the sector on the previous day, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -271,7 +270,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Trade volatility (month-over-month volume change)
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final float value = dom.getTradeVolatility();
                 final String txt = "Trade volatility";
                 final String valueTxt = (int) (value * 100f) + "%";
@@ -296,7 +295,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                         pad,
                         new Color[] {base, highlight},
                         EconomyConfig.VOLATILITY_WINDOW + "",
-                        selectedCom.getName()
+                        com.getName()
                     );
                 };
             }
@@ -308,7 +307,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Global stockpiles
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = engine.info.getGlobalStockpiles(comID);
                 final String valueTxt = NumFormat.engNotation(value);
                 final String txt = "Global stockpiles";
@@ -323,7 +322,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                         "Shows the total amount of %s currently stored across all markets in the sector. " +
                         "This value reflects available stock and does not account for daily production or consumption. " +
                         "High stockpiles indicate abundance, while low stockpiles signal scarcity and potential trade opportunities.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -335,7 +334,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Worker allocation (total workers producing it)
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 long value = 0;
                 for (WorkerIndustryData data : WorkerRegistry.getInstance().getRegistry()) {
                     value += data.getAssignedForOutput(comID);
@@ -352,7 +351,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                     tp.addPara(
                         "Displays the total number of workers currently assigned to producing %s across all markets in the sector ."+
                         "Workers are counted based on the output of industries producing this commodity, not the industry as a whole.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -364,7 +363,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Number of exporting markets
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = dom.getExporters().size();
                 final String txt = "Global Exporters";
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
@@ -377,7 +376,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total count of markets in the sector that exported %s on the previous day. Only markets that actually sent units to other markets are included, regardless of faction.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -389,7 +388,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Number of importing markets
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final long value = dom.getImporters().size();
                 final String txt = "Global Importers";
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
@@ -402,7 +401,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total count of markets in the sector that imported %s on the previous day. Only markets that actually received units from other markets are included, regardless of faction.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -414,7 +413,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         { // Informal production
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
-            public void createPanel() {
+            public void buildUI() {
                 final float value = dom.getInformalNode().prod;
                 final String txt = "Informal Production";
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
@@ -427,7 +426,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The amount of %s produced by the informal sector on the previous day.",
-                        pad, highlight, selectedCom.getName()
+                        pad, highlight, com.getName()
                     );
                 };
             }
@@ -447,7 +446,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
             "Colony", 100, "Colony name", true, true, 1,
-            "Production", 100, "Daily units of " + selectedCom.getName() + " produced", false, false, -1
+            "Production", 100, "Daily units of " + com.getName() + " produced", false, false, -1
         );
 
         final ArrayList<CommodityCell> producers = dom.getSortedByProduction(5);
@@ -482,7 +481,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         table.showSortIcon = false;
         table.sortingEnabled = false;
         add(table).inBL(opad*2, TABLE_H + LABEL_H / 2f);
-        table.createPanel();
+        table.buildUI();
 
         final LabelAPI label = settings.createLabel("Top 5 producers", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
@@ -496,7 +495,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
             "Colony", 100, "Colony name", true, true, 1,
-            "Demand", 100, "Daily units of " + selectedCom.getName() + " demanded", false, false, -1
+            "Demand", 100, "Daily units of " + com.getName() + " demanded", false, false, -1
         );
 
         final ArrayList<CommodityCell> consumers = dom.getSortedByDemand(5);
@@ -531,7 +530,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> {
         table.showSortIcon = false;
         table.sortingEnabled = false;
         add(table).inBL(opad*2, 0);
-        table.createPanel();
+        table.buildUI();
 
         final LabelAPI label = settings.createLabel("Top 5 consumers", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());

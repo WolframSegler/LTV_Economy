@@ -42,6 +42,7 @@ import wfg.native_ui.ui.components.InteractionComp;
 import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
@@ -56,7 +57,7 @@ import wfg.native_ui.util.NativeUiUtils;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class IndustryWidget extends CustomPanel<IndustryWidget> implements
-    HasBackground, HasHoverGlow
+    HasBackground, HasHoverGlow, UIBuildableAPI
 {
     public final static int PANEL_WIDTH = 190;
     public final static int TITLE_HEIGHT = 15 + pad;
@@ -112,10 +113,10 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         glow.type = GlowType.UNDERLAY;
         glow.color = baseColor;        
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         buildingTitleHeader = Global.getSettings().createLabel(
             m_industry.getCurrentName(), Fonts.DEFAULT_SMALL
         );
@@ -202,7 +203,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                         targetItem.id = tempID;
                         targetItem.cost = tempCost;
 
-                        industryPanel.createPanel();
+                        industryPanel.buildUI();
                     }
                 } else if (constructionMode == ConstructionMode.REMOVE) {
                     List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
@@ -217,7 +218,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                             Misc.addCreditsMessage("Received %s", itemCost);
                         }
 
-                        industryPanel.createPanel();
+                        industryPanel.buildUI();
                     }
                 }
             } else {

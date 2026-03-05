@@ -22,6 +22,7 @@ import wfg.native_ui.ui.components.InteractionComp;
 import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.OutlineComp;
 import wfg.native_ui.ui.components.OutlineComp.OutlineType;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
@@ -36,7 +37,7 @@ import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 
 public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> implements
-    HasOutline, HasBackground, HasUIContext
+    HasOutline, HasBackground, HasUIContext, UIBuildableAPI
 {
     public static final String restrictedPath = Global.getSettings().getSpriteName("ui", "restricted");
     private static final int ROW_H = 32;
@@ -52,10 +53,10 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
         outline.color = dark;
         context.ignore = true;
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         final int width = (int) pos.getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
         final List<FactionSpecAPI> factions = Global.getSettings().getAllFactionSpecs();
@@ -75,7 +76,7 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
         ComponentFactory.addTooltip(container, getPos().getHeight(), true, m_panel).inTL(0f, 0f);
     }
 
-    public class RowPanel extends CustomPanel<RowPanel> implements
+    public class RowPanel extends CustomPanel<RowPanel> implements UIBuildableAPI,
         HasInteraction, HasHoverGlow, HasAudioFeedback, HasBackground, HasTooltip
     {
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -112,10 +113,10 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
             bg.color = Color.RED;
             bg.alpha = 0.15f;
 
-            createPanel();
+            buildUI();
         }
 
-        public void createPanel() {
+        public void buildUI() {
             clearChildren();
             final int iconSize = 28;
 

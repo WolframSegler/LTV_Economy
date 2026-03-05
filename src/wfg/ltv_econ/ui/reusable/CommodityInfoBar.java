@@ -63,7 +63,6 @@ public class CommodityInfoBar extends CustomPanel<CommodityInfoBar> {
             if (barPiece.getValue() < 0f) barPiece.setValue(0f);
         }
     }
-    public void createPanel() {}
 
     @Override
     public void render(float alpha) {

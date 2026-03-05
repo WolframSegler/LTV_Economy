@@ -55,11 +55,11 @@ public class ColonyInvDialog extends DialogPanel {
         backgroundDimAmount = 0.2f;
         holo.borderAlpha = 0.8f;
 
-        createPanel();
+        buildUI();
     }
 
     @Override
-    public void createPanel() {
+    public void buildUI() {
         UIContext.setContext(Context.DIALOG);
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
@@ -80,7 +80,7 @@ public class ColonyInvDialog extends DialogPanel {
 
         final TextPanel colonyCreditPanel = new TextPanel(innerPanel, 200, 1) {
             @Override  
-            public void createPanel() {
+            public void buildUI() {
                 final String credits = NumFormat.formatCredit(colonyCredits);
 
                 label1 = settings.createLabel(
@@ -114,7 +114,7 @@ public class ColonyInvDialog extends DialogPanel {
 
         final TextPanel playerCreditPanel = new TextPanel(innerPanel, 200, 1) {
             @Override  
-            public void createPanel() {
+            public void buildUI() {
                 final String credits = NumFormat.formatCredit((long) playerCredits.get());
 
                 label1 = settings.createLabel(
@@ -144,7 +144,7 @@ public class ColonyInvDialog extends DialogPanel {
 
         final TextPanel playerProfitPanel = new TextPanel(innerPanel, 200, 1) {
             @Override  
-            public void createPanel() {
+            public void buildUI() {
                 if (data == null) return;
                 final String ratio = Math.round(data.playerProfitRatio * 100) + "%";
 

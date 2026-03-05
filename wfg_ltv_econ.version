@@ -5,7 +5,7 @@
 	"modVersion": {
 		"major":0,
 		"minor":2,
-		"patch":9
+		"patch":10
 	},
 	"starsectorVersion":"0.98a-RC8",
 	"directDownloadURL":"https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV-Economy.zip",

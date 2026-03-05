@@ -73,7 +73,6 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements
             }
         };
     }
-    public void createPanel() {}
 
     public void setCommodity(CommoditySpecAPI spec) {
         m_com = spec;

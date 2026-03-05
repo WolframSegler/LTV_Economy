@@ -194,7 +194,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
         final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
-            public void createPanel() {
+            public void buildUI() {
                 final long value = EconomyEngine.getInstance().info.getNetIncome(marketAPI, true);
                 final String txt = "Credits/month";
                 final String valueTxt = NumFormat.formatCredit(value);
@@ -528,7 +528,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         };
 
         replacement.selectionListener = listener;
-        replacement.createPanel();
+        replacement.buildUI();
 
         // Got the Y offset by looking at the getY() difference of replacement and
         // commodityPanel

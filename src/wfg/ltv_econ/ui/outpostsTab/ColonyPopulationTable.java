@@ -40,10 +40,10 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
 
         bg.alpha = 1f;
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         final EconomyEngine engine = EconomyEngine.getInstance();
         final SettingsAPI settings = Global.getSettings();
         final int rowH = 68;

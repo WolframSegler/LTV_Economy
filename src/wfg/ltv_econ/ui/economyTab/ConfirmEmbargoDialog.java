@@ -64,6 +64,6 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
         }
 
         caller.alreadyEmbargoed = !alreadyEmbargoed;
-        caller.createPanel();
+        caller.buildUI();
     }
 }

@@ -44,11 +44,11 @@ public class MarketEventsDialog extends DockPanel {
         offsetY = 100f;
         bgAlpha = 0.9f;
 
-        createPanel();
+        buildUI();
     }
 
     @Override
-    public void createPanel() {
+    public void buildUI() {
         final int width = (int) (pos.getWidth() - opad*2);
 
         final LabelAPI title = settings.createLabel("Current Events", Fonts.INSIGNIA_LARGE);
@@ -97,10 +97,10 @@ public class MarketEventsDialog extends DockPanel {
                 event.createTooltip(data, tp);
             };
 
-            createPanel();
+            buildUI();
         }
 
-        public void createPanel() {
+        public void buildUI() {
             final int iconSize = ROW_H - 4;
 
             try {

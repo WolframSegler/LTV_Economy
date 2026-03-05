@@ -10,13 +10,15 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import rolflectionlib.util.RolfLectionUtil;
+import wfg.ltv_econ.ui.economyTab.tradeFlowMap.CommodityTradeFlowMap;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.Button.CutStyle;
 import wfg.native_ui.util.CallbackRunnable;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> {
+public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> implements UIBuildableAPI {
 
     public static final int MAIN_PANEL_W = 1250;
     public static final int MAIN_PANEL_H = 700;
@@ -38,10 +40,10 @@ public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> {
     public EconomyOverviewPanel(UIPanelAPI parent) {
         super(parent, MAIN_PANEL_W, MAIN_PANEL_H);
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         final SettingsAPI settings = Global.getSettings();
         title = settings.createLabel("Economy Overview", Fonts.INSIGNIA_LARGE);
         final float titleH = title.computeTextHeight(title.getText());
@@ -114,6 +116,25 @@ public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> {
 
         buttonRunnable = (btn) -> {
             clearPanelAndButtonState(btn);
+            final CommodityTradeFlowMap content = new CommodityTradeFlowMap(
+                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+            );
+            contentPanel.addComponent(content.getPanel()).inBL(0, 0);
+
+            final CommoditySelectionPanel options = new CommoditySelectionPanel(
+                optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
+            );
+            optionsPanel.addComponent(options.getPanel()).inBL(0, 0);
+        };
+        button = new Button(
+            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Trade Routes", Fonts.ORBITRON_12, buttonRunnable
+        );
+        button.cutStyle = CutStyle.TL_BR;
+        button.bgAlpha = 1f;
+        navButtons.add(button);
+
+        buttonRunnable = (btn) -> {
+            clearPanelAndButtonState(btn);
             final EconomySettingsPanel content = new EconomySettingsPanel(
                 contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
             );
@@ -121,16 +142,6 @@ public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> {
         };
         button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Settings", Fonts.ORBITRON_12, buttonRunnable
-        );
-        button.cutStyle = CutStyle.TL_BR;
-        button.bgAlpha = 1f;
-        navButtons.add(button);
-        
-        buttonRunnable = (btn) -> {
-            clearPanelAndButtonState(btn);
-        };
-        button = new Button(
-            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "PANEL BTN", Fonts.ORBITRON_12, buttonRunnable
         );
         button.cutStyle = CutStyle.TL_BR;
         button.bgAlpha = 1f;

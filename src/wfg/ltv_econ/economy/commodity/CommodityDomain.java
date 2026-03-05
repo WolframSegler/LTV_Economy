@@ -61,6 +61,7 @@ public class CommodityDomain {
         filled = oldLength >= newArray.length;
 
         spec = Global.getSettings().getCommoditySpec(comID);
+        tradeFlows = new ArrayList<>();
 
         // TODO remove after save incompatible update
         if (informalNode == null) informalNode = new InformalExchangeNode(comID);

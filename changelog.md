@@ -1,4 +1,5 @@
 v0.2.10-beta | SAVE COMPATIBLE
+- Uses WrapUI v0.3.2 for this update.
 - Added the industry tooltip to the income report as well.
 - Switched internal data structures for performance.
 

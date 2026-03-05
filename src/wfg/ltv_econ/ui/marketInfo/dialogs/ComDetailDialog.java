@@ -131,11 +131,11 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         backgroundDimAmount = 0f;
 
-        createPanel();
+        buildUI();
     }
 
     @Override
-    public void createPanel() {
+    public void buildUI() {
         UIContext.setContext(Context.DIALOG);
 
         createSections();
@@ -145,7 +145,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         footerPanel = new TextPanel(innerPanel, 400, footerH) {
             @Override
-            public void createPanel() {
+            public void buildUI() {
                 final TooltipMakerAPI footer = ComponentFactory.createTooltip(PANEL_W, false);
                 footer.setActionListenerDelegate(
                     new ActionListenerDelegate() {
@@ -292,7 +292,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         { // Global market value
             final TextPanel textPanel = new TextPanel(section, 170, 0) {
                 @Override
-                public void createPanel() {
+                public void buildUI() {
                     final long value = engine.getComDomain(comID)
                         .getTradeCreditActivity();
                     final String txt = "Global market value";
@@ -337,7 +337,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         { // Total global exports
             final TextPanel textPanel = new TextPanel(section, 170, 0) {
                 @Override
-                public void createPanel() {
+                public void buildUI() {
                     final String txt = "Total global exports";
 
                     final String valueTxt = NumFormat.engNotation(
@@ -381,7 +381,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
             final TextPanel textPanel = new TextPanel(section, 210, 0) {
                 @Override
-                public void createPanel() {
+                public void buildUI() {
                     final String factionName = currFaction.getDisplayName();
                     final Color factionColor = currFaction.getBaseUIColor();
 
@@ -439,7 +439,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
             final TextPanel textPanel = new TextPanel(section, 250, 0) {
                 @Override
-                public void createPanel() {
+                public void buildUI() {
                     final String factionName = m_faction.getDisplayName();
                     final String txt = factionName + " market share";
 
@@ -480,7 +480,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         else { // Faction market share
             final TextPanel textPanelLeft = new TextPanel(section, 250, 0) {
                 @Override
-                public void createPanel() {
+                public void buildUI() {
                     final String factionName = m_selectedMarket.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
@@ -514,7 +514,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
             final TextPanel textPanelRight = new TextPanel(section, 250, 0) {
                 @Override
-                public void createPanel() {
+                public void buildUI() {
                     final String factionName = m_faction.getDisplayName();
                     final String txt = factionName + " market share";
 
@@ -783,7 +783,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 updateSection3(mode);
             } 
         };
-        section4ComPanel.createPanel();
+        section4ComPanel.buildUI();
 
         section.addComponent(section4ComPanel.getPanel());
     }

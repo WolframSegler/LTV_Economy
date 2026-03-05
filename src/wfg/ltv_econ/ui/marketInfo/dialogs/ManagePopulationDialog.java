@@ -85,11 +85,11 @@ public class ManagePopulationDialog extends DialogPanel {
         holo.borderAlpha = 0.8f;
         backgroundDimAmount = 0.2f;
 
-        createPanel();
+        buildUI();
     }
 
     @Override
-    public void createPanel() {
+    public void buildUI() {
         UIContext.setContext(Context.DIALOG);
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
@@ -124,7 +124,7 @@ public class ManagePopulationDialog extends DialogPanel {
         innerPanel.addComponent((UIComponentAPI)subtitle).inTL(opad, SECT_I_H);
 
         final TextPanel RoSVLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
-            public void createPanel() {
+            public void buildUI() {
                 final String txt = "Rate of Exploitation";
                 final String valueTxt = ((int)data.getRoSV())+"";
 
@@ -161,7 +161,7 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final TextPanel wagesLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
-            public void createPanel() {
+            public void buildUI() {
                 final String txt = "Monthly Wages";
                 final String valueTxt = NumFormat.formatCredit((int)(engine.info.getWagesForMarket(m_market)*MONTH));
 
@@ -194,7 +194,7 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final TextPanel avgWageLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
-            public void createPanel() {
+            public void buildUI() {
                 final String txt = "Average Wage";
                 final float value = LaborConfig.LPV_month / data.getRoSV();
                 final String valueTxt = String.format("%.2f%s", value, Strings.C);
@@ -273,7 +273,7 @@ public class ManagePopulationDialog extends DialogPanel {
         innerPanel.addComponent(exploitationBtn.getPanel()).inTL(opad*3 + LABEL_W + sliderW, opad*3 + SECT_I_H);
 
         final TextPanel workerAmount = new TextPanel(innerPanel, LABEL_W+100, LABEL_H) {
-            public void createPanel() {
+            public void buildUI() {
                 final String txt = "Workforce: Employed / Total";
                 final long value2 = cond.getWorkerPool();
                 final long value1 = (long) (value2*((double)(1f - cond.getFreeWorkerRatio())));
@@ -340,7 +340,7 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final TextPanel healthLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
-            public void createPanel() {
+            public void buildUI() {
                 final String txt = "Health";
                 final String valueTxt = String.format("%.0f", data.getHealth());
 
@@ -380,7 +380,7 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final TextPanel happinessLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
-            public void createPanel() {
+            public void buildUI() {
                 final String txt = "Happiness";
                 final String valueTxt = String.format("%.0f", data.getHappiness());
 
@@ -420,7 +420,7 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final TextPanel cohesionLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
-            public void createPanel() {
+            public void buildUI() {
                 final String txt = "Cohesion";
                 final String valueTxt = String.format("%.0f", data.getSocialCohesion());
 
@@ -460,7 +460,7 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final TextPanel consciousnessLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
-            public void createPanel() {
+            public void buildUI() {
                 final String txt = "Class Consc.";
                 final String valueTxt = String.format("%.0f", data.getClassConsciousness());
 
@@ -584,8 +584,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final SpritePanelWithTp poster = new SpritePanelWithTp(posterWrap.getPanel(), width, height,
             policy.spec.posterPath, policy.isOnCooldown() ? Color.GRAY : null, null
         ) {
-            @Override
-            public void createPanel() {
+            public void buildUI() {
                 if (policy.isOnCooldown()) {
                     final float cooledRatio = (float) policy.cooldownDaysRemaining/policy.spec.cooldownDays;
                     final ArrayList<PieSlice> pieData = new ArrayList<>(
@@ -616,7 +615,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
                 tooltip.builder = (tp, exp) -> policy.createTooltip(mData, tp);
 
-                createPanel();
+                buildUI();
             }
         };
 

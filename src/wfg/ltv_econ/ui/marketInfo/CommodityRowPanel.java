@@ -26,6 +26,7 @@ import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.UIContextComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
@@ -41,7 +42,7 @@ import java.awt.Color;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
-    HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction
+    HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction, UIBuildableAPI
 {
     private static final SettingsAPI settings = Global.getSettings();
     private static final String EXPORTS_ICON_PATH = settings.getSpriteName(
@@ -133,10 +134,10 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
 
         context.ignore = ignoreUIContext;
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         final int textWidth = 65;
         final int rowHeight = (int) getPos().getHeight();
 

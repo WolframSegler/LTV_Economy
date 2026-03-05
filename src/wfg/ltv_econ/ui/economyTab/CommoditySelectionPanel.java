@@ -3,7 +3,9 @@ package wfg.ltv_econ.ui.economyTab;
 import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -23,6 +25,7 @@ import wfg.native_ui.ui.components.OutlineComp;
 import wfg.native_ui.ui.components.TooltipComp;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.components.OutlineComp.OutlineType;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
@@ -34,26 +37,29 @@ import wfg.native_ui.ui.panels.SpritePanel.Base;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel> implements
-    HasOutline, HasBackground
+    HasOutline, HasBackground, UIBuildableAPI
 {
+    private static final SettingsAPI settings = Global.getSettings();
     private static final int ROW_H = 32;
-    private static GlobalCommodityFlow contentPanel = null;
+    private static UIBuildableAPI targetPanel = null;
+
+    public static CommoditySpecAPI selectedCom = settings.getCommoditySpec(Commodities.SUPPLIES);
 
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
-    public CommoditySelectionPanel(UIPanelAPI parent, int width, int height, GlobalCommodityFlow content) {
+    public CommoditySelectionPanel(UIPanelAPI parent, int width, int height, UIBuildableAPI content) {
         super(parent, width, height);
 
-        contentPanel = content;
+        targetPanel = content;
 
         outline.type = OutlineType.TEX_THIN;
         outline.color = dark;
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         final int width = (int) pos.getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
 
@@ -88,14 +94,14 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
             glow.type = GlowType.UNDERLAY;
 
             interaction.onClicked = (source, isLeftClick) -> {
-                GlobalCommodityFlow.selectedCom = spec;
-                contentPanel.createPanel();
+                selectedCom = spec;
+                targetPanel.buildUI();
 
                 if (UIUtils.canViewPrices() && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) ||
                     Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)
                 )) {
                     final ComDetailDialog dialogPanel = new ComDetailDialog(
-                        null, Global.getSettings().getFactionSpec(Factions.PLAYER), com
+                        null, settings.getFactionSpec(Factions.PLAYER), com
                     );
                     dialogPanel.show(0.3f, 0.3f);
                 }
@@ -112,10 +118,10 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
                 }
             };
 
-            createPanel();
+            buildUI();
         }
 
-        public void createPanel() {
+        public void buildUI() {
             final int iconSize = 28;
 
             final Base comIcon = new Base(
@@ -124,7 +130,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
             );
             RowPanel.this.add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
 
-            final LabelAPI comNameLabel = Global.getSettings().createLabel(spec.getName(), Fonts.ORBITRON_12);
+            final LabelAPI comNameLabel = settings.createLabel(spec.getName(), Fonts.ORBITRON_12);
             comNameLabel.setColor(base);
             final float labelW = comNameLabel.computeTextHeight(spec.getName());
             RowPanel.this.add(comNameLabel).inBL(iconSize + opad, (ROW_H - labelW) / 2f);

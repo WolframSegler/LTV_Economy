@@ -40,13 +40,14 @@ import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.UIContext;
 import wfg.native_ui.ui.UIContext.Context;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.ui.panels.TextPanel;
 import wfg.native_ui.ui.panels.Button.CutStyle;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
+public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> implements UIBuildableAPI {
 
 	public static final int BUTTON_SECTION_HEIGHT = 45;
 
@@ -77,17 +78,17 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			dummyWidget.setOpacity(0);
 		} else { dummyWidget = null; }
 
-		createPanel();
+		buildUI();
 
 		instance = this;
    	}
 
 	public static final void refreshPanel() {
 		if (instance == null) return;
-		instance.createPanel();
+		instance.buildUI();
 	}
 
-	public void createPanel() {
+	public void buildUI() {
 		clearChildren();
 		widgets.clear();
 
@@ -163,7 +164,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 		playerCreditLblPanel = new TextPanel(m_panel, 200, 25) {
 
 			@Override
-			public void createPanel() {
+			public void buildUI() {
 				LabelAPI creditLbl = UIUtils.createPlayerCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
 				creditLbl.setHighlightOnMouseover(true);
 
@@ -190,7 +191,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 		colonyCreditLblPanel = new TextPanel(getPanel(), 200, 25) {
 
 			@Override
-			public void createPanel() {
+			public void buildUI() {
 				LabelAPI creditLbl = UIUtils.createColonyCreditsLabel(
 					Fonts.INSIGNIA_LARGE, 25, m_market.getId()
 				);
@@ -219,7 +220,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 		maxIndLblPanel = new TextPanel(getPanel(), 200, 25) {
 
 			@Override
-			public void createPanel() {
+			public void buildUI() {
 				LabelAPI maxIndLbl = UIUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
 				maxIndLbl.setHighlightOnMouseover(true);
 
@@ -429,7 +430,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> {
 			glowHighlight, Misc.getDGSCredits(buildCost), highlight
 		);
 
-		createPanel();
+		buildUI();
 	}
 
 	public static final MarketInteractionMode getMarketInteractionMode(MarketAPI market) {

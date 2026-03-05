@@ -11,19 +11,20 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public class FactionAdministrationPanel extends CustomPanel<FactionAdministrationPanel> {
+public class FactionAdministrationPanel extends CustomPanel<FactionAdministrationPanel> implements UIBuildableAPI {
 
     public FactionAdministrationPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
-        createPanel();
+        buildUI();
     }
 
-    public void createPanel() {
+    public void buildUI() {
         final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.getInstance();
         final PlayerFactionSettings factionSettings = engine.playerFactionSettings;

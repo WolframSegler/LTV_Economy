@@ -20,13 +20,15 @@ import wfg.native_ui.ui.components.NativeComponents;
 import wfg.native_ui.ui.components.OutlineComp;
 import wfg.native_ui.ui.components.UIContextComp;
 import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.panels.CustomPanel;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements HasBackground, HasOutline {
-
+public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements HasBackground, HasOutline,
+    UIBuildableAPI
+{
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
     public final UIContextComp context = comp().get(NativeComponents.UI_CONTEXT);
@@ -70,7 +72,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
         return Comparator.comparingDouble(com -> com.getOrder());
     }
 
-    public void createPanel() {
+    public void buildUI() {
         // Select relevant commodities
         final List<CommoditySpecAPI> commodities = new ArrayList<>(EconomyConstants.econCommoditySpecs);
         Collections.sort(commodities, getCommodityOrderComparator());

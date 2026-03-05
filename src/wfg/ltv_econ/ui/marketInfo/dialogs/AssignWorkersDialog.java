@@ -78,11 +78,11 @@ public class AssignWorkersDialog extends DialogPanel {
 
         holo.borderAlpha = 0.8f;
 
-        createPanel();
+        buildUI();
     }
 
     @Override
-    public void createPanel() {
+    public void buildUI() {
         UIContext.setContext(Context.DIALOG);
 
         final int sliderHeight = 32;
