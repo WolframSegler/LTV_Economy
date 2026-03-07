@@ -6,10 +6,9 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 
 import wfg.ltv_econ.util.ArrayMap;
 
-public class FlowPathData {
+public class SystemData {
     public final ArrayMap<Color, Float> colorWeights = new ArrayMap<>();
-    public StarSystemAPI source;
-    public StarSystemAPI destination;
-    public float pathWidth;
-    public float nodeSize;
+    public boolean isSource = false;
+    public StarSystemAPI system = null;
+    public float nodeSize = 0f;
 }

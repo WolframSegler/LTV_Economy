@@ -3,9 +3,10 @@ package wfg.ltv_econ.ui.economyTab.tradeFlowMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
-import static wfg.native_ui.util.UIConstants.grid;
+import static wfg.native_ui.util.UIConstants.dark;
 
 import java.awt.Color;
 
@@ -23,6 +24,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.economy.commodity.CommodityTradeFlow;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
+import wfg.ltv_econ.util.Arithmetic;
 import wfg.ltv_econ.util.ArrayMap;
 import wfg.native_ui.ui.components.BackgroundComp;
 import wfg.native_ui.ui.components.NativeComponents;
@@ -33,31 +35,39 @@ import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.RenderUtils;
 
-public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> implements
+public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     HasOutline, HasBackground, UIBuildableAPI
 {
     private static final SettingsAPI settings = Global.getSettings();
-    // private static final SpriteAPI NODE_SPRITE = settings.getSprite("planets", "default_sun_halo");
+    private static final Random random = new Random();
+
     private static final SpriteAPI NODE_SPRITE = settings.getSprite("map", "star");
     private static final SpriteAPI NODE_OVERLAY = settings.getSprite("backgrounds", "star1");
     private static final SpriteAPI NODE_UNDERLAY = settings.getSprite("map", "star_underlay");
-    private static final Color NODE_UNDERLAY_COLOR = new Color(32, 12, 64);
+    private static final SpriteAPI SHIP_ARROW = settings.getSprite("map", "ship_arrow");
+    private static final SpriteAPI BG_1 = settings.getSprite("map", "bg1");
+    private static final SpriteAPI BG_2 = settings.getSprite("map", "bg2");
+    private static final Color NODE_UNDERLAY_COLOR = new Color(38, 12, 64);
+
     private static final float BOUNDS_PAD = 100f;
-    private static final float ZOOM_MAX = 5f;
+    private static final float ZOOM_MAX = 4f;
     private static final float ZOOM_MIN = 0.25f;
     private static final float ZOOM_SENSITIVITY = 0.001f;
 
-    private static final float BASE_NODE_RADIUS = 20f;
+    private static final float BASE_NODE_RADIUS = 28f;
     private static final float NODE_RADIUS_SCALE = 0.8f;
 
     private static final float BASE_FLOW_PATH_W = 4f;
-    private static final float FLOW_PATH_SCALE = 0.5f;
-    private static final float PATH_GAP_MULT = 0.6f;
+    private static final float FLOW_PATH_SCALE = 0.6f;
+    private static final float PATH_GAP_MULT = 0.4f;
 
     private final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
-    private final Set<StarSystemAPI> systems = new HashSet<>();
-    private final List<FlowPathData> flowData = new ArrayList<>();
+    private final int bg_enum = random.nextInt(2);
+
+    private final Set<StarSystemAPI> systems = new HashSet<>(24);
+    private final List<SystemData> systemData = new ArrayList<>(24);
+    private final List<PathData> flowData = new ArrayList<>(32);
 
     private Vector2f lastMouse = null;
     private float panOffsetX = 0f;
@@ -71,7 +81,7 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
 
     private float time = 0f;
 
-    public CommodityTradeFlowMap(UIPanelAPI parent, int width, int height) {
+    public ComTradeFlowMap(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
         bg.alpha = 1f;
@@ -83,6 +93,7 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
     public void buildUI() {
         { // Clear data
             systems.clear();
+            systemData.clear();
             flowData.clear();
             panOffsetX = 0f;
             panOffsetY = 0f;
@@ -92,9 +103,45 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
         { // Create render data
             final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
             final var tradeFlows = EconomyEngine.getInstance().getComDomain(com.getId()).getTradeFlows();
+
+            for (CommodityTradeFlow flow : tradeFlows) {
+                if (flow.exporter.isHidden() || flow.importer.isHidden()) continue;
+                systems.add(flow.exporter.getStarSystem());
+                systems.add(flow.importer.getStarSystem());
+            }
+
+            for (StarSystemAPI system : systems) {
+                final SystemData data = new SystemData();
+                data.system = system;
+
+                float totalAmount = 0f;
+                final List<CommodityTradeFlow> relevantFlows = new ArrayList<>(4);
+                for (CommodityTradeFlow flow : tradeFlows) {
+                    if (flow.exporter.isHidden() || flow.importer.isHidden()) continue;
+                    if (flow.exporter.getStarSystem().equals(system)) {
+                        data.isSource = true;
+                        totalAmount += flow.amount;
+                        relevantFlows.add(flow);
+                    }
+                }
+
+                data.nodeSize = calculateNodeSize(totalAmount);
+
+                for (CommodityTradeFlow flow : relevantFlows) {
+                    final float weight = flow.amount / totalAmount;
+                    final Color c = flow.exporter.getFaction().getBrightUIColor();
+                    final Float prev = data.colorWeights.get(c);
+                    data.colorWeights.put(c, (prev == null ? 0f : prev) + weight);
+                }
+
+                systemData.add(data);
+            }
             
             final ArrayMap<SystemPair, List<CommodityTradeFlow>> uniqueFlows = new ArrayMap<>();
             for (CommodityTradeFlow flow : tradeFlows) {
+                if (flow.exporter.getStarSystem().equals(flow.importer.getStarSystem())) continue;
+                if (flow.exporter.isHidden() || flow.importer.isHidden()) continue;
+
                 final SystemPair pair = new SystemPair(
                     flow.exporter.getStarSystem(), flow.importer.getStarSystem()
                 );
@@ -105,27 +152,30 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
             }
 
             for (List<CommodityTradeFlow> flows : uniqueFlows.values()) {
-                final FlowPathData pathData = new FlowPathData();
+                final PathData pathData = new PathData();
+                
+                float totalAmount = 0f;
+                for (CommodityTradeFlow flow : flows) {
+                    totalAmount += flow.amount;
+                    final Color c = flow.exporter.getFaction().getBrightUIColor();
+                    final Float prev = pathData.colorWeights.get(c);
+                    pathData.colorWeights.put(c, (prev == null ? 0f : prev) + flow.amount);
+                }
+
+                for (Color c : pathData.colorWeights.keySet()) {
+                    pathData.colorWeights.put(c, pathData.colorWeights.get(c) / totalAmount);
+                }
+
                 final CommodityTradeFlow first = flows.get(0);
                 pathData.source = first.exporter.getStarSystem();
                 pathData.destination = first.importer.getStarSystem();
-
-                systems.add(pathData.source);
-                systems.add(pathData.destination);
-
-                float totalAmount = 0f;
-                for (CommodityTradeFlow flow : flows) totalAmount += flow.amount;
-
                 pathData.pathWidth = calculatePathWidth(totalAmount);
                 pathData.nodeSize = calculateNodeSize(totalAmount);
 
-                for (CommodityTradeFlow flow : flows) {
-                    final float weight = flow.amount / totalAmount;
-                    final Color c = flow.exporter.getFaction().getBrightUIColor();
-                    final Float prev = pathData.colorWeights.get(c);
-                    pathData.colorWeights.put(c, (prev == null ? 0f : prev) + weight);
-                }
-
+                final float len = Arithmetic.dist(pathData.source.getLocation(), pathData.destination.getLocation());
+                pathData.travelDuration = len * 0.001f;
+                pathData.pauseDuration = 8f + pathData.travelDuration / 2f;
+                pathData.pulseOffset = random.nextFloat() * pathData.travelDuration;
                 flowData.add(pathData);
             }
         }
@@ -158,13 +208,16 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
     public void render(float alpha) {
         super.render(alpha);
 
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+        renderBg(alpha);
         renderGrid(alpha);
         renderPaths(alpha);
         renderNodes(alpha);
 
+        GL11.glDisable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
@@ -213,14 +266,36 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
         time += amount;
     }
 
+    private final void renderBg(float alpha) {
+        final SpriteAPI bg = switch (bg_enum) {
+            default -> BG_1;
+            case 1 -> BG_2;
+        };
+
+        final float panelW = pos.getWidth();
+        final float panelH = pos.getHeight();
+        final float imgW = bg.getWidth();
+        final float imgH = bg.getHeight();
+
+        final float scale = Math.max(panelW / imgW, panelH / imgH);
+
+        final float drawW = imgW * scale;
+        final float drawH = imgH * scale;
+
+        final float x = (panelW - drawW) / 2f + pos.getX();
+        final float y = (panelH - drawH) / 2f + pos.getY();
+
+        bg.setSize(drawW, drawH);
+        bg.setAlphaMult(alpha * 0.2f);
+        bg.renderAtCenter(x + drawW / 2f, y + drawH / 2f);
+    }
+
     private final void renderGrid(float alpha) {
         final float GRID_WORLD = 6000f;
         final int MAJOR_EVERY = 3;
-        final float MINOR_LINE_WIDTH = 1f;
-        final float MAJOR_LINE_WIDTH = 1.8f;
 
-        final Color minorColor = grid;
-        final Color majorColor = NativeUiUtils.adjustBrightness(grid, 1.3f);
+        final Color minorColor = dark;
+        final Color majorColor = NativeUiUtils.adjustBrightness(dark, 1.2f);
 
         final float panelX = pos.getX();
         final float panelY = pos.getY();
@@ -241,8 +316,8 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
         final int endYI = (int)Math.ceil( visibleMaxY / GRID_WORLD);
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glLineWidth(1f);
 
         // vertical lines
         for (int xi = startXI; xi <= endXI; xi++) {
@@ -261,7 +336,7 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
 
             final boolean isMajor = Math.floorMod(xi, MAJOR_EVERY) == 0;
             RenderUtils.setGlColor(isMajor ? majorColor : minorColor, alpha);
-            GL11.glLineWidth(isMajor ? MAJOR_LINE_WIDTH : MINOR_LINE_WIDTH);
+            
 
             GL11.glBegin(GL11.GL_LINES);
             GL11.glVertex2f(sx0, sy0);
@@ -286,47 +361,11 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
 
             final boolean isMajor = Math.floorMod(yi, MAJOR_EVERY) == 0;
             RenderUtils.setGlColor(isMajor ? majorColor : minorColor, alpha);
-            GL11.glLineWidth(isMajor ? MAJOR_LINE_WIDTH : MINOR_LINE_WIDTH);
 
             GL11.glBegin(GL11.GL_LINES);
             GL11.glVertex2f(sx0, sy0);
             GL11.glVertex2f(sx1, sy1);
             GL11.glEnd();
-        }
-
-        GL11.glLineWidth(1f);
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-    }
-
-    private final void renderNodes(float alpha) {
-        final float glow = 0.5f + 0.5f * (float)Math.sin(time * 4f);
-        final float overlaySizeMult = 1f + (float)Math.sin(time * 4f) * 0.4f;
-
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-        // Destinations
-        for (FlowPathData data : flowData) {
-            final Vector2f sysPos = project(data.destination.getLocation());
-
-            drawNodeSprite(alpha, data, sysPos, Color.WHITE, glow, overlaySizeMult);
-        }
-
-        // Sources
-        for (FlowPathData data : flowData) {
-            final Vector2f sysPos = project(data.source.getLocation());
-            Color mixed = data.colorWeights.keyAt(0);
-            float accumulated = data.colorWeights.valueAt(0);
-
-            for (int i = 1; i < data.colorWeights.size(); i++) {
-                final Color key = data.colorWeights.keyAt(i);
-                final float value = data.colorWeights.valueAt(i);
-                final float t = value / (1f - accumulated); 
-                mixed = NativeUiUtils.lerpColor(mixed, key, t);
-                accumulated += value;
-            }
-
-            drawNodeSprite(alpha, data, sysPos, mixed, glow, overlaySizeMult);
         }
     }
 
@@ -336,8 +375,9 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
         GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
 
-        for (FlowPathData data : flowData) {
+        for (PathData data : flowData) {
             final Vector2f aLocal = project(data.source.getLocation());
             final Vector2f bLocal = project(data.destination.getLocation());
 
@@ -349,7 +389,7 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
 
             final float dx = destX - srcX;
             final float dy = destY - srcY;
-            final float len = (float)Math.sqrt(dx*dx + dy*dy);
+            final float len = Arithmetic.dist(srcX, srcY, destX, destY);
             if (len == 0f) continue;
 
             final float gap = data.nodeSize * PATH_GAP_MULT;
@@ -371,21 +411,103 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
             }
 
             // outer halo
-            RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 1.8f, mixed, true,
-                0.25f * alpha, 0.25f * alpha, 0.25f * alpha);
+            RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 1.7f, mixed, true,
+                0.3f * alpha, 0.2f * alpha, 0.3f * alpha);
 
             // inner core (bright, constant)
-            RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 0.7f, mixed, true,
+            RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 0.5f, mixed, true,
                 alpha, alpha, alpha);
 
             // thin white specular (center)
-            RenderUtils.drawGradientSprite(ax, ay, bx, by, Math.max(1f, data.pathWidth * 0.13f),
-                Color.WHITE, true, 0.9f * alpha, 0.9f * alpha, 0.9f * alpha);
+            RenderUtils.drawGradientSprite(ax, ay, bx, by, Math.max(1f, data.pathWidth * 0.05f),
+                Color.WHITE, true, 0.8f * alpha, 0.5f * alpha, 0.8f * alpha);
+
+            final float totalPeriod = data.travelDuration + data.pauseDuration;
+            if (totalPeriod > 0f) {
+
+                final float localT = (time + data.pulseOffset) % totalPeriod;
+                if (localT <= data.travelDuration) {
+                    final float travelFrac = localT / data.travelDuration;
+
+                    float arrowAlpha = alpha;
+                    if (travelFrac < 0.03f) {
+                        arrowAlpha *= travelFrac / 0.05f;
+                    } else if (travelFrac > 0.97f) {
+                        arrowAlpha *= (1f - travelFrac) / 0.05f;
+                    }
+
+                    final float cx = ax + (bx - ax) * travelFrac;
+                    final float cy = ay + (by - ay) * travelFrac;
+
+                    final float arrowSize = data.pathWidth * 2.5f;
+                    SHIP_ARROW.setAngle(NativeUiUtils.rotateSprite(aLocal, bLocal));
+                    SHIP_ARROW.setSize(arrowSize, arrowSize);
+                    SHIP_ARROW.setAlphaMult(arrowAlpha);
+                    SHIP_ARROW.renderAtCenter(cx, cy);
+                }
+            }
         }
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
+        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_DONT_CARE);
+    }
+
+    private final void renderNodes(float alpha) {
+        final float freq = 0.7f;
+        final float glow = 0.5f + 0.5f * (float)Math.sin(time * freq);
+        final float overlaySizeMult = 1f + (float)Math.sin(time * freq) * 0.3f;
+
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        for (SystemData data : systemData) {
+            final Vector2f sysPos = project(data.system.getLocation());
+            final float nodeSize = data.nodeSize;
+
+            final float x = pos.getX() + sysPos.x;
+            final float y = pos.getY() + sysPos.y;
+
+            if (x < pos.getX() - nodeSize * 2f ||
+                x > pos.getX() + pos.getWidth() + nodeSize * 2f ||
+                y < pos.getY() - nodeSize * 2f ||
+                y > pos.getY() + pos.getHeight() + nodeSize * 2f)
+            { continue; }
+
+            final Color color;
+            if (data.isSource && !data.colorWeights.isEmpty()) {
+                Color mixed = data.colorWeights.keyAt(0);
+                float accumulated = data.colorWeights.valueAt(0);
+
+                for (int i = 1; i < data.colorWeights.size(); i++) {
+                    final Color key = data.colorWeights.keyAt(i);
+                    final float value = data.colorWeights.valueAt(i);
+                    final float t = value / (1f - accumulated); 
+                    mixed = NativeUiUtils.lerpColor(mixed, key, t);
+                    accumulated += value;
+                }
+                color = mixed;
+            } else {
+                color = Color.WHITE;
+            }
+
+            NODE_UNDERLAY.setSize(nodeSize * 1.2f, nodeSize * 1.2f);
+            NODE_UNDERLAY.setColor(NODE_UNDERLAY_COLOR);
+            NODE_UNDERLAY.setAlphaMult(alpha * 0.5f);
+            NODE_UNDERLAY.renderAtCenter(x, y);
+
+            NODE_SPRITE.setSize(nodeSize, nodeSize);
+            NODE_SPRITE.setColor(color);
+            NODE_SPRITE.setAlphaMult(alpha * 0.5f);
+            NODE_SPRITE.renderAtCenter(x, y);
+
+            final float overlaySize = overlaySizeMult * nodeSize;
+            NODE_OVERLAY.setSize(overlaySize, overlaySize);
+            NODE_OVERLAY.setColor(color);
+            NODE_OVERLAY.setAlphaMult(alpha * 0.5f * glow);
+            NODE_OVERLAY.renderAtCenter(x, y);
+        }
     }
 
     private final Vector2f project(Vector2f starCoord) {
@@ -429,38 +551,12 @@ public class CommodityTradeFlowMap extends CustomPanel<CommodityTradeFlowMap> im
         return new Vector2f(worldX, worldY);
     }
 
-    private final void drawNodeSprite(float alpha, FlowPathData data, Vector2f sysPos, Color color,
-        float glow, float overlaySizeMult
-    ) {
-        final float nodeSize = data.nodeSize;
-
-        if (sysPos.x < -nodeSize * 2f || sysPos.x > pos.getWidth() + nodeSize * 2f ||
-            sysPos.y < -nodeSize * 2f || sysPos.y > pos.getHeight() + nodeSize * 2f
-        ) { return; }
-
-        NODE_UNDERLAY.setSize(nodeSize * 1.2f, nodeSize * 1.2f);
-        NODE_UNDERLAY.setColor(NODE_UNDERLAY_COLOR);
-        NODE_UNDERLAY.setAlphaMult(alpha * 0.7f);
-        NODE_UNDERLAY.renderAtCenter(pos.getX() + sysPos.x, pos.getY() + sysPos.y);
-
-        NODE_SPRITE.setSize(nodeSize, nodeSize);
-        NODE_SPRITE.setColor(color);
-        NODE_SPRITE.setAlphaMult(alpha * 0.5f);
-        NODE_SPRITE.renderAtCenter(pos.getX() + sysPos.x, pos.getY() + sysPos.y);
-
-        final float overlaySize = overlaySizeMult * nodeSize;
-        NODE_OVERLAY.setSize(overlaySize, overlaySize);
-        NODE_OVERLAY.setColor(color);
-        NODE_OVERLAY.setAlphaMult(alpha * 0.5f * glow);
-        NODE_OVERLAY.renderAtCenter(pos.getX() + sysPos.x, pos.getY() + sysPos.y);
-    }
-
     private final float calculatePathWidth(float amount) {
-        return (BASE_FLOW_PATH_W + (float) Math.log10(amount) * FLOW_PATH_SCALE) * visualZoom();
+        return (BASE_FLOW_PATH_W + (float) Math.log10(1f + amount) * FLOW_PATH_SCALE) * visualZoom();
     }
 
     private final float calculateNodeSize(float amount) {
-        return (BASE_NODE_RADIUS + (float) Math.log10(amount) * NODE_RADIUS_SCALE) * visualZoom();
+        return (BASE_NODE_RADIUS + (float) Math.log10(1f + amount) * NODE_RADIUS_SCALE) * visualZoom();
     }
 
     private final float visualZoom() {

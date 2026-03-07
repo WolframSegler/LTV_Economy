@@ -10,7 +10,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.ui.economyTab.tradeFlowMap.CommodityTradeFlowMap;
+import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
@@ -116,7 +116,7 @@ public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> impl
 
         buttonRunnable = (btn) -> {
             clearPanelAndButtonState(btn);
-            final CommodityTradeFlowMap content = new CommodityTradeFlowMap(
+            final ComTradeFlowMap content = new ComTradeFlowMap(
                 contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
             );
             contentPanel.addComponent(content.getPanel()).inBL(0, 0);
