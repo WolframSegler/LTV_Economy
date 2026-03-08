@@ -11,6 +11,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
+import wfg.ltv_econ.ui.economyTab.tradeFlowMap.TradeFlowOptions;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;
@@ -119,12 +120,12 @@ public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> impl
             final ComTradeFlowMap content = new ComTradeFlowMap(
                 contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
             );
-            contentPanel.addComponent(content.getPanel()).inBL(0, 0);
+            contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
 
-            final CommoditySelectionPanel options = new CommoditySelectionPanel(
+            final TradeFlowOptions options = new TradeFlowOptions(
                 optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
             );
-            optionsPanel.addComponent(options.getPanel()).inBL(0, 0);
+            optionsPanel.addComponent(options.getPanel()).inBL(0f, 0f);
         };
         button = new Button(
             getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Trade Routes", Fonts.ORBITRON_12, buttonRunnable

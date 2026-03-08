@@ -30,7 +30,7 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 
 /**
  * <h3>IndustryIOs</h3>

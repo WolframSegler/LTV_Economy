@@ -32,7 +32,7 @@ import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
 import wfg.ltv_econ.economy.planning.optim.CustomSimplexSolver;
 import wfg.ltv_econ.economy.planning.optim.SimplexTableau;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 
 public class WorkforceAllocator {
     private static final Logger logger = Global.getLogger(WorkforceAllocator.class);

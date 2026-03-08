@@ -63,7 +63,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
         m_headerTxt = headerTxt;
         this.rowsIgnoreUIState = rowsIgnoreUIState;
 
-        context.ignore = rowsIgnoreUIState;
+        context.ignore = true;
 
         bg.alpha = 0.65f;
     }

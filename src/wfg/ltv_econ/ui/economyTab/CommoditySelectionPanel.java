@@ -66,9 +66,9 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
         float yCoord = pad;
         for (CommoditySpecAPI spec : EconomyConstants.econCommoditySpecs) {
             final RowPanel row = new RowPanel(
-                container, width - opad, ROW_H, spec
+                container, width - pad*2, ROW_H, spec
             );
-            container.addCustom(row.getPanel(), 0).getPosition().inTL(0f, yCoord);
+            container.addCustom(row.getPanel(), 0).getPosition().inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }

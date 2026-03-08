@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import static wfg.native_ui.util.UIConstants.dark;
+import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 
@@ -25,9 +25,7 @@ import wfg.ltv_econ.economy.commodity.CommodityTradeFlow;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.util.Arithmetic;
-import wfg.ltv_econ.util.ArrayMap;
-import wfg.native_ui.ui.components.BackgroundComp;
-import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
@@ -61,9 +59,18 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     private static final float FLOW_PATH_SCALE = 0.6f;
     private static final float PATH_GAP_MULT = 0.4f;
 
-    private final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
+    private static final float COM_ICON_SIZE = 48f;
 
-    private final int bg_enum = random.nextInt(2);
+    private static final Set<String> exporterFactionBlacklist = new HashSet<>(12);
+    private static final Set<String> importerFactionBlacklist = new HashSet<>(12);
+    private static int directionMode = 0;
+    private static float minTradeAmount = 0f;
+
+    private final SpriteAPI bgImg = switch (random.nextInt(2)) {
+        default -> BG_1;
+        case 1 -> BG_2;
+    };
+    private SpriteAPI comSprite;
 
     private final Set<StarSystemAPI> systems = new HashSet<>(24);
     private final List<SystemData> systemData = new ArrayList<>(24);
@@ -84,8 +91,6 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     public ComTradeFlowMap(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
-        bg.alpha = 1f;
-
         buildUI();
     }
 
@@ -100,16 +105,24 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             zoom = 1f;
         }
 
+        final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
+
         { // Create render data
-            final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
-            final var tradeFlows = EconomyEngine.getInstance().getComDomain(com.getId()).getTradeFlows();
+            final List<CommodityTradeFlow> tradeFlows = new ArrayList<>(
+                EconomyEngine.getInstance().getComDomain(com.getId()).getTradeFlows()
+            );
+            tradeFlows.removeIf(t -> t.exporter.isHidden() ||
+                t.importer.isHidden() ||
+                exporterFactionBlacklist.contains(t.exporter.getFactionId()) ||
+                importerFactionBlacklist.contains(t.importer.getFactionId())
+            );
 
             for (CommodityTradeFlow flow : tradeFlows) {
-                if (flow.exporter.isHidden() || flow.importer.isHidden()) continue;
                 systems.add(flow.exporter.getStarSystem());
                 systems.add(flow.importer.getStarSystem());
             }
 
+            final List<StarSystemAPI> systemsToRemove = new ArrayList<>(systems.size());
             for (StarSystemAPI system : systems) {
                 final SystemData data = new SystemData();
                 data.system = system;
@@ -117,12 +130,19 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 float totalAmount = 0f;
                 final List<CommodityTradeFlow> relevantFlows = new ArrayList<>(4);
                 for (CommodityTradeFlow flow : tradeFlows) {
-                    if (flow.exporter.isHidden() || flow.importer.isHidden()) continue;
                     if (flow.exporter.getStarSystem().equals(system)) {
                         data.isSource = true;
                         totalAmount += flow.amount;
                         relevantFlows.add(flow);
                     }
+                }
+
+                if (totalAmount < minTradeAmount ||
+                    directionMode == 1 && !data.isSource ||
+                    directionMode == 2 && data.isSource && totalAmount <= 0f
+                ) {
+                    systemsToRemove.add(system);
+                    continue;
                 }
 
                 data.nodeSize = calculateNodeSize(totalAmount);
@@ -136,11 +156,11 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
                 systemData.add(data);
             }
+            systems.removeAll(systemsToRemove);
             
             final ArrayMap<SystemPair, List<CommodityTradeFlow>> uniqueFlows = new ArrayMap<>();
             for (CommodityTradeFlow flow : tradeFlows) {
                 if (flow.exporter.getStarSystem().equals(flow.importer.getStarSystem())) continue;
-                if (flow.exporter.isHidden() || flow.importer.isHidden()) continue;
 
                 final SystemPair pair = new SystemPair(
                     flow.exporter.getStarSystem(), flow.importer.getStarSystem()
@@ -152,7 +172,12 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             }
 
             for (List<CommodityTradeFlow> flows : uniqueFlows.values()) {
+                final CommodityTradeFlow first = flows.get(0);
                 final PathData pathData = new PathData();
+                final StarSystemAPI source = first.exporter.getStarSystem();
+                final StarSystemAPI dest = first.importer.getStarSystem();
+
+                if (!systems.contains(source) || !systems.contains(dest)) continue;
                 
                 float totalAmount = 0f;
                 for (CommodityTradeFlow flow : flows) {
@@ -162,22 +187,28 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                     pathData.colorWeights.put(c, (prev == null ? 0f : prev) + flow.amount);
                 }
 
+                if (totalAmount < minTradeAmount) continue;
+
                 for (Color c : pathData.colorWeights.keySet()) {
                     pathData.colorWeights.put(c, pathData.colorWeights.get(c) / totalAmount);
                 }
 
-                final CommodityTradeFlow first = flows.get(0);
-                pathData.source = first.exporter.getStarSystem();
-                pathData.destination = first.importer.getStarSystem();
+                pathData.source = source;
+                pathData.destination = dest;
                 pathData.pathWidth = calculatePathWidth(totalAmount);
                 pathData.nodeSize = calculateNodeSize(totalAmount);
 
-                final float len = Arithmetic.dist(pathData.source.getLocation(), pathData.destination.getLocation());
-                pathData.travelDuration = len * 0.001f;
-                pathData.pauseDuration = 8f + pathData.travelDuration / 2f;
+                final float len = Arithmetic.dist(source.getLocation(), dest.getLocation());
+                pathData.travelDuration = len * 0.002f;
+                pathData.pauseDuration = 10f + pathData.travelDuration;
                 pathData.pulseOffset = random.nextFloat() * pathData.travelDuration;
                 flowData.add(pathData);
             }
+        }
+
+        { // Find commodity data
+            comSprite = settings.getSprite(com.getIconName());
+            comSprite.setSize(COM_ICON_SIZE, COM_ICON_SIZE);
         }
 
         { // Calculate sector bounds
@@ -200,8 +231,15 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     public void renderBelow(float alpha) {
         super.renderBelow(alpha);
 
+        final float x = pos.getX();
+        final float y = pos.getY();
+        final float w = pos.getWidth();
+        final float h = pos.getHeight();
+
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor((int) pos.getX(), (int) pos.getY(), (int) pos.getWidth(), (int) pos.getHeight());
+        GL11.glScissor((int) x, (int) y, (int) w, (int) h);
+
+        RenderUtils.drawQuad(x, y, w, h, Color.BLACK, alpha, false);
     }
 
     @Override
@@ -216,6 +254,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         renderGrid(alpha);
         renderPaths(alpha);
         renderNodes(alpha);
+        renderIcon(alpha);
 
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
@@ -267,15 +306,10 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     }
 
     private final void renderBg(float alpha) {
-        final SpriteAPI bg = switch (bg_enum) {
-            default -> BG_1;
-            case 1 -> BG_2;
-        };
-
         final float panelW = pos.getWidth();
         final float panelH = pos.getHeight();
-        final float imgW = bg.getWidth();
-        final float imgH = bg.getHeight();
+        final float imgW = bgImg.getWidth();
+        final float imgH = bgImg.getHeight();
 
         final float scale = Math.max(panelW / imgW, panelH / imgH);
 
@@ -285,9 +319,9 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         final float x = (panelW - drawW) / 2f + pos.getX();
         final float y = (panelH - drawH) / 2f + pos.getY();
 
-        bg.setSize(drawW, drawH);
-        bg.setAlphaMult(alpha * 0.2f);
-        bg.renderAtCenter(x + drawW / 2f, y + drawH / 2f);
+        bgImg.setSize(drawW, drawH);
+        bgImg.setAlphaMult(alpha * 0.2f);
+        bgImg.renderAtCenter(x + drawW / 2f, y + drawH / 2f);
     }
 
     private final void renderGrid(float alpha) {
@@ -508,6 +542,10 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             NODE_OVERLAY.setAlphaMult(alpha * 0.5f * glow);
             NODE_OVERLAY.renderAtCenter(x, y);
         }
+    }
+
+    private final void renderIcon(float alpha) {
+        comSprite.render(pos.getX() + opad, pos.getY() + pos.getHeight() - opad - COM_ICON_SIZE);
     }
 
     private final Vector2f project(Vector2f starCoord) {

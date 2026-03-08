@@ -11,7 +11,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 
 import wfg.ltv_econ.intel.market.events.MarketEvent;
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 
 public class EventConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/event_config.json";

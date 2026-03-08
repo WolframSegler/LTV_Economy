@@ -17,7 +17,7 @@ import com.fs.starfarer.campaign.econ.Market;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 
 /**
  * <h3>Naming Convention: <code>Flow</code> vs. <code>Stored</code></h3>

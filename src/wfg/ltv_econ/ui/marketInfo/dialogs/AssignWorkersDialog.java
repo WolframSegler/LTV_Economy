@@ -30,7 +30,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.UIContext;

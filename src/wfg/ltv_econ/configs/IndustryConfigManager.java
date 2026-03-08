@@ -21,7 +21,7 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 import wfg.ltv_econ.util.ConfigUtils;
 
 import java.util.List;

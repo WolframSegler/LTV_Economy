@@ -13,7 +13,7 @@ import com.fs.starfarer.api.util.Pair;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 
 public final class IndustryGrouper {
 

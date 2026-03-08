@@ -66,9 +66,9 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
         float yCoord = pad;
         for (FactionSpecAPI faction : factions) {
             final RowPanel row = new RowPanel(
-                container, width - opad, ROW_H, faction
+                container, width - pad*2, ROW_H, faction
             );
-            container.addCustom(row.getPanel(), 0).getPosition().inTL(0, yCoord);
+            container.addCustom(row.getPanel(), 0).getPosition().inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }

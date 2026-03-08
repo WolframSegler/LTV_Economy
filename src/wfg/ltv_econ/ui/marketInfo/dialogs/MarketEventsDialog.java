@@ -13,6 +13,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
+import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.AudioFeedbackComp;
@@ -37,7 +38,7 @@ public class MarketEventsDialog extends DockPanel {
     public MarketEventsDialog(final MarketAPI market) {
         super(Attachments.getCoreUI(), 500,
             (int) settings.getScreenHeight() - 200,
-            DockDirection.LEFT
+            Side.LEFT
         );
         data = EconomyEngine.getInstance().getPlayerMarketData(market.getId());
 

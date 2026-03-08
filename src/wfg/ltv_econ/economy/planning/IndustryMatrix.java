@@ -15,7 +15,7 @@ import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 
 public class IndustryMatrix {
     private static final SettingsAPI settings = Global.getSettings();

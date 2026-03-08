@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 
-import wfg.ltv_econ.util.ArrayMap;
+import wfg.native_ui.util.ArrayMap;
 
 public class SystemData {
     public final ArrayMap<Color, Float> colorWeights = new ArrayMap<>();
