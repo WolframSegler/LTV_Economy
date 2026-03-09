@@ -2,6 +2,7 @@ v0.2.10-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.3.2 for this update.
 - Added the industry tooltip to the income report as well.
 - Switched internal data structures for performance.
+- Added a trade routes map to display trade routes visually.
 
 v0.2.9-beta | SAVE COMPATIBLE
 - Fixed a crash resulting from a market with no outputs

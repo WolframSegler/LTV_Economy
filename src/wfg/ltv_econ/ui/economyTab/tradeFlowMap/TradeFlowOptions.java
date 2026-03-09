@@ -2,6 +2,8 @@ package wfg.ltv_econ.ui.economyTab.tradeFlowMap;
 
 import static wfg.native_ui.util.UIConstants.opad;
 
+import org.lwjgl.input.Keyboard;
+
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
@@ -35,6 +37,7 @@ public class TradeFlowOptions extends CustomPanel<TradeFlowOptions> {
         filterBtn.cutStyle = CutStyle.TL_TR;
         filterBtn.bgAlpha = 1f;
         filterBtn.setQuickMode(true);
+        filterBtn.setShortcut(Keyboard.KEY_Q);
         add(filterBtn).inTL(0f, 0f);
     }
 }

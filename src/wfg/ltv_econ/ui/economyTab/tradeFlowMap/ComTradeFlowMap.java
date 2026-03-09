@@ -60,6 +60,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     private static final float PATH_GAP_MULT = 0.4f;
 
     private static final float COM_ICON_SIZE = 48f;
+    private static final float COLOR_CHANGE_DUR = 6f;
 
     public static final Set<String> exporterFactionBlacklist = new HashSet<>(12);
     public static final Set<String> importerFactionBlacklist = new HashSet<>(12);
@@ -151,8 +152,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 for (CommodityTradeFlow flow : relevantFlows) {
                     final float weight = flow.amount / totalAmount;
                     final Color c = flow.exporter.getFaction().getBrightUIColor();
-                    final Float prev = data.colorWeights.get(c);
-                    data.colorWeights.put(c, (prev == null ? 0f : prev) + weight);
+                    data.addColorWeight(c, weight);
                 }
 
                 systemData.add(data);
@@ -184,14 +184,14 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 for (CommodityTradeFlow flow : flows) {
                     totalAmount += flow.amount;
                     final Color c = flow.exporter.getFaction().getBrightUIColor();
-                    final Float prev = pathData.colorWeights.get(c);
-                    pathData.colorWeights.put(c, (prev == null ? 0f : prev) + flow.amount);
+                    pathData.addColorWeight(c, flow.amount);
                 }
 
                 if (totalAmount < minTradeAmount) continue;
 
-                for (Color c : pathData.colorWeights.keySet()) {
-                    pathData.colorWeights.put(c, pathData.colorWeights.get(c) / totalAmount);
+                for (int i = 0; i < pathData.getColorWeights().size(); i++) {
+                    final float w = pathData.getColorWeights().valueAt(i) / totalAmount;
+                    pathData.getColorWeights().setValueAt(i, w);
                 }
 
                 pathData.source = source;
@@ -435,22 +435,14 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             final float bx = destX - dx / len * gap;
             final float by = destY - dy / len * gap;
 
-            Color mixed = data.colorWeights.keyAt(0);
-            float accumulated = data.colorWeights.valueAt(0);
-            for (int c = 1; c < data.colorWeights.size(); c++) {
-                final Color key = data.colorWeights.keyAt(c);
-                final float value = data.colorWeights.valueAt(c);
-                final float tt = value / (1f - accumulated);
-                mixed = NativeUiUtils.lerpColor(mixed, key, tt);
-                accumulated += value;
-            }
+            final Color color = getWeightedCycleColor(data.getColorWeights(), data.getWeightSum(), time);
 
             // outer halo
-            RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 1.7f, mixed, true,
+            RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 1.7f, color, true,
                 0.3f * alpha, 0.2f * alpha, 0.3f * alpha);
 
             // inner core (bright, constant)
-            RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 0.5f, mixed, true,
+            RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 0.5f, color, true,
                 alpha, alpha, alpha);
 
             // thin white specular (center)
@@ -510,22 +502,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 y > pos.getY() + pos.getHeight() + nodeSize * 2f)
             { continue; }
 
-            final Color color;
-            if (data.isSource && !data.colorWeights.isEmpty()) {
-                Color mixed = data.colorWeights.keyAt(0);
-                float accumulated = data.colorWeights.valueAt(0);
-
-                for (int i = 1; i < data.colorWeights.size(); i++) {
-                    final Color key = data.colorWeights.keyAt(i);
-                    final float value = data.colorWeights.valueAt(i);
-                    final float t = value / (1f - accumulated); 
-                    mixed = NativeUiUtils.lerpColor(mixed, key, t);
-                    accumulated += value;
-                }
-                color = mixed;
-            } else {
-                color = Color.WHITE;
-            }
+            final Color color = getWeightedCycleColor(data.getColorWeights(), data.getWeightSum(), time);
 
             NODE_UNDERLAY.setSize(nodeSize * 1.2f, nodeSize * 1.2f);
             NODE_UNDERLAY.setColor(NODE_UNDERLAY_COLOR);
@@ -600,6 +577,39 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
     private final float visualZoom() {
         return (float) Math.pow(zoom, 0.6f);
+    }
+
+    public static Color getWeightedCycleColor(final ArrayMap<Color, Float> weights, float totalWeight, float time) {
+        final int count = weights.size();
+        if (count == 0) return Color.WHITE;
+        if (count == 1) return weights.keyAt(0);
+
+        float totalCycle = 0f;
+        for (int i = 0; i < count; i++) {
+            totalCycle += COLOR_CHANGE_DUR * weights.valueAt(i) / totalWeight;
+        }
+
+        final float tCycle = time % totalCycle;
+
+        float accumulated = 0f;
+        int idx = 0;
+        for (int i = 0; i < count; i++) {
+            float segDur = COLOR_CHANGE_DUR * weights.valueAt(i) / totalWeight;
+            if (tCycle < accumulated + segDur) {
+                idx = i;
+                break;
+            }
+            accumulated += segDur;
+        }
+
+        final int nextIdx = (idx + 1) % count;
+        final float segDur = COLOR_CHANGE_DUR * weights.valueAt(idx) / totalWeight;
+        final float localT = (tCycle - accumulated) / segDur;
+
+        final Color c0 = weights.keyAt(idx);
+        final Color c1 = weights.keyAt(nextIdx);
+
+        return NativeUiUtils.lerpColor(c0, c1, localT);
     }
 
     private static record SystemPair(StarSystemAPI source, StarSystemAPI dest) {}
