@@ -61,10 +61,10 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
     private static final float COM_ICON_SIZE = 48f;
 
-    private static final Set<String> exporterFactionBlacklist = new HashSet<>(12);
-    private static final Set<String> importerFactionBlacklist = new HashSet<>(12);
-    private static int directionMode = 0;
-    private static float minTradeAmount = 0f;
+    public static final Set<String> exporterFactionBlacklist = new HashSet<>(12);
+    public static final Set<String> importerFactionBlacklist = new HashSet<>(12);
+    public static int directionMode = 0;
+    public static float minTradeAmount = 0f;
 
     private final SpriteAPI bgImg = switch (random.nextInt(2)) {
         default -> BG_1;
@@ -97,6 +97,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     @Override
     public void buildUI() {
         { // Clear data
+            clearChildren();
             systems.clear();
             systemData.clear();
             flowData.clear();
@@ -135,12 +136,12 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                         totalAmount += flow.amount;
                         relevantFlows.add(flow);
                     }
+                    if (flow.importer.getStarSystem().equals(system)) {
+                        data.isDest = true;
+                    }
                 }
 
-                if (totalAmount < minTradeAmount ||
-                    directionMode == 1 && !data.isSource ||
-                    directionMode == 2 && data.isSource && totalAmount <= 0f
-                ) {
+                if (directionMode == 1 && !data.isSource || directionMode == 2 && !data.isDest) {
                     systemsToRemove.add(system);
                     continue;
                 }

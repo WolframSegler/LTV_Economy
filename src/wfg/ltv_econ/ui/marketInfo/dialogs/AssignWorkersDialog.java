@@ -159,7 +159,6 @@ public class AssignWorkersDialog extends DialogPanel {
 
             // Configure the slider
             outputSlider.setHighlightOnMouseover(true);
-            outputSlider.setUserAdjustable(true);
             outputSlider.setBarColor(new Color(20, 125, 200));
             outputSlider.showValueOnly = true;
             outputSlider.roundBarValue = true;

@@ -1,13 +1,12 @@
 package wfg.ltv_econ.ui.economyTab;
 
+import static wfg.ltv_econ.constants.EconomyConstants.visibleFactions;
 import static wfg.native_ui.util.UIConstants.*;
 
-import java.util.List;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
-import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -59,12 +58,9 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
     public void buildUI() {
         final int width = (int) pos.getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
-        final List<FactionSpecAPI> factions = Global.getSettings().getAllFactionSpecs();
-        factions.removeIf(f -> f.getId().equals(Factions.PLAYER));
-        factions.removeIf(f -> !f.isShowInIntelTab());
 
         float yCoord = pad;
-        for (FactionSpecAPI faction : factions) {
+        for (FactionSpecAPI faction : visibleFactions) {
             final RowPanel row = new RowPanel(
                 container, width - pad*2, ROW_H, faction
             );

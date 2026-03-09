@@ -237,7 +237,6 @@ public class ManagePopulationDialog extends DialogPanel {
             innerPanel, "", 1, LaborConfig.MAX_RoSV, sliderW, sliderH
         );
         exploitationSlider.setHighlightOnMouseover(true);
-        exploitationSlider.setUserAdjustable(true);
         exploitationSlider.setProgress(data.getRoSV());
         exploitationSlider.maxValue = LaborConfig.MAX_RoSV;
         exploitationSlider.clampCurrToMax = true;

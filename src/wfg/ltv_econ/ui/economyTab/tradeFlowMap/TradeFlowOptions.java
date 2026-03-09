@@ -2,7 +2,6 @@ package wfg.ltv_econ.ui.economyTab.tradeFlowMap;
 
 import static wfg.native_ui.util.UIConstants.opad;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
@@ -19,7 +18,7 @@ public class TradeFlowOptions extends CustomPanel<TradeFlowOptions> {
         super(parent, width, height);
 
         final FiltersDialog filtersDock = new FiltersDialog(400,
-           (int) Global.getSettings().getScreenHeight() - 200
+           430, content
         );
 
         final CommoditySelectionPanel options = new CommoditySelectionPanel(
