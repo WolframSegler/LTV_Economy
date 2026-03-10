@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.economyTab.tradeFlowMap;
 
 import java.awt.Color;
 
+import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 
 import wfg.native_ui.util.ArrayMap;
@@ -10,6 +11,7 @@ public class PathData {
     private final ArrayMap<Color, Float> colorWeights = new ArrayMap<>();
     private float totalColorWeight = 0f;
 
+    public final ArrayMap<FactionSpecAPI, Float> factionAmounts = new ArrayMap<>();
     public StarSystemAPI source;
     public StarSystemAPI destination;
     public float pathWidth;

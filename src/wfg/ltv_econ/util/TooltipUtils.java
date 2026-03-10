@@ -96,7 +96,7 @@ public class TooltipUtils {
                 final PositionAPI prevPos = tp.getPrev().getPosition();
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
 
-                tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new java.lang.Object[] {
+                tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new Object[] {
                     "Price", 100, "Desired", 70, "Deficit", 70, "Location", 230,
                     "Star system", 140, "Dist (ly)", 80
                 });
@@ -173,7 +173,7 @@ public class TooltipUtils {
                 tp.addPara("Best places to buy:", opad);
                 final PositionAPI prevPos = tp.getPrev().getPosition();
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
-                tp.beginTable(Global.getSector().getPlayerFaction(), 20, new java.lang.Object[] {
+                tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
                     "Price", 100, "Stored", 70, "Excess", 70, "Location", 230,
                     "Star system", 140, "Dist (ly)", 80 
                 });
@@ -268,7 +268,7 @@ public class TooltipUtils {
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowProdIndStats().entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getFlowProdIndStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
             final IndustrySpecAPI ind = settings.getIndustrySpec(entry.getKey());
 
@@ -343,7 +343,7 @@ public class TooltipUtils {
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowDemandIndStats().entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getFlowDemandIndStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
             final IndustrySpecAPI ind = settings.getIndustrySpec(entry.getKey());
 

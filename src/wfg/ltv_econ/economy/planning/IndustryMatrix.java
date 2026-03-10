@@ -52,8 +52,8 @@ public class IndustryMatrix {
     }
 
     private static final void buildMatrix() {
-        final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
-        final Map<String, Map<String, Map<String, Float>>> baseInputs = IndustryIOs.getBaseInputsMap();
+        final Map<String, ArrayMap<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
+        final Map<String, ArrayMap<String, ArrayMap<String, Float>>> baseInputs = IndustryIOs.getBaseInputsMap();
 
         final List<String> commodities = getWorkerRelatedCommodityIDs();
 
@@ -86,17 +86,17 @@ public class IndustryMatrix {
 
         int colIndex = 0;
         for (String indID : industries) {
-            final Map<String, Float> outputs = baseOutputs.get(indID);
-            final Map<String, Map<String, Float>> inputs = baseInputs.get(indID);
+            final ArrayMap<String, Float> outputs = baseOutputs.get(indID);
+            final Map<String, ArrayMap<String, Float>> inputs = baseInputs.get(indID);
             if (outputs == null) continue;
 
-            for (Map.Entry<String, Float> out : outputs.entrySet()) {
+            for (Map.Entry<String, Float> out : outputs.singleEntrySet()) {
                 final String outputID = out.getKey();
                 STATIC_INDUSTRY_OUTPUT_PAIRS.add(indID + EconomyLoop.KEY + outputID);
 
                 // Inputs
                 if (inputs != null && inputs.containsKey(outputID)) {
-                    for (Map.Entry<String, Float> in : inputs.get(outputID).entrySet()) {
+                    for (Map.Entry<String, Float> in : inputs.get(outputID).singleEntrySet()) {
                         int row = commodities.indexOf(in.getKey());
                         if (row >= 0) A[row][colIndex] -= in.getValue();
                     }
@@ -119,7 +119,7 @@ public class IndustryMatrix {
     }
 
     private static final void buildWorkerRelatedCommodityIDs() {
-        final Map<String, Map<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
+        final Map<String, ArrayMap<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
 
         STATIC_WORKER_COMMODITIES = new ArrayList<>(EconomyConstants.econCommodityIDs);
 

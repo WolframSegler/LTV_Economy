@@ -56,7 +56,7 @@ public class AssignWorkersDialog extends DialogPanel {
     public final MarketAPI market;
     public final WorkerIndustryData data;
     public final WorkerIndustryData previewData;
-    public final Map<String, Slider> outputSliders;
+    public final ArrayMap<String, Slider> outputSliders;
 
     public BasePanel inputOutputContainer;
 
@@ -198,8 +198,8 @@ public class AssignWorkersDialog extends DialogPanel {
         final Color color = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
 
-        final Map<String, MutableStat> supplyList = new ArrayMap<>();
-        final Map<String, MutableStat> demandList = new ArrayMap<>();
+        final ArrayMap<String, MutableStat> supplyList = new ArrayMap<>();
+        final ArrayMap<String, MutableStat> demandList = new ArrayMap<>();
 
         final boolean importing = IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles;
 
@@ -224,7 +224,7 @@ public class AssignWorkersDialog extends DialogPanel {
         float y = startY;
         int count = -1;
 
-        for (Map.Entry<String, MutableStat> entry : supplyList.entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : supplyList.singleEntrySet()) {
             final CommoditySpecAPI com = settings.getCommoditySpec(entry.getKey());
             final long pAmount = entry.getValue().getModifiedInt();
 
@@ -269,7 +269,7 @@ public class AssignWorkersDialog extends DialogPanel {
         y = startY;
         count = -1;
 
-        for (Map.Entry<String, MutableStat> entry : demandList.entrySet()) {
+        for (Map.Entry<String, MutableStat> entry : demandList.singleEntrySet()) {
             final CommodityCell cell = engine.getComCell(entry.getKey(), market.getId());
             final long dAmount = entry.getValue().getModifiedInt();
 
@@ -322,7 +322,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         boolean update = false;
 
-        for (Map.Entry<String, Slider> entry : outputSliders.entrySet()) {
+        for (Map.Entry<String, Slider> entry : outputSliders.singleEntrySet()) {
             final String comID = entry.getKey();
             final Slider slider = entry.getValue();
 

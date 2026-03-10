@@ -13,7 +13,6 @@
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
     "search.useIgnoreFiles": false,
-    "java.errors.incompleteClasspath.severity": "ignore",
     "java.referencesCodeLens.enabled": false,
     "editor.fontFamily": "Cascadia Code, Fira Code, monospace",
     "editor.fontLigatures": true,

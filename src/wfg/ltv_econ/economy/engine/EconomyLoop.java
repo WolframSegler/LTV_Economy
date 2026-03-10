@@ -26,6 +26,7 @@ import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.economy.planning.WorkforceAllocator;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.native_ui.util.ArrayMap;
 
 public class EconomyLoop {
     public static final String KEY = "::";
@@ -182,11 +183,11 @@ public class EconomyLoop {
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         markets.removeIf(MarketAPI::isPlayerOwned);
 
-        final Map<MarketAPI, float[]> assignedWorkersPerMarket = WorkforceAllocator.computeWorkerAllocations(
+        final ArrayMap<MarketAPI, float[]> assignedWorkersPerMarket = WorkforceAllocator.computeWorkerAllocations(
             markets, industryOutputPairs
         );
 
-        for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
+        for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.singleEntrySet()) {
             final MarketAPI market = entry.getKey();
             final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
 
@@ -222,7 +223,7 @@ public class EconomyLoop {
         final float totalMarketOutput = cell.getProduction(false);
         final float invMarketOutput = 1f / totalMarketOutput;
 
-        for (Map.Entry<String, MutableStat> industryEntry : cell.getFlowProdIndStats().entrySet()) {
+        for (Map.Entry<String, MutableStat> industryEntry : cell.getFlowProdIndStats().singleEntrySet()) {
             final String industryID = industryEntry.getKey();
             final MutableStat industryStat = industryEntry.getValue();
 
@@ -234,7 +235,7 @@ public class EconomyLoop {
             final Industry ind = cell.market.getIndustry(industryID);
 
             float sum = 0f;
-            final Map<String, Float> inputWeights = IndustryIOs.getRealInputs(ind, cell.comID, true);
+            final ArrayMap<String, Float> inputWeights = IndustryIOs.getRealInputs(ind, cell.comID, true);
             if (inputWeights.isEmpty()) continue;
             for (float value : inputWeights.values()) {
                 sum += value;
@@ -243,7 +244,7 @@ public class EconomyLoop {
             if (sum <= 0f) continue;
 
             float industryDeficit = 0f;
-            for (Map.Entry<String, Float> inputEntry : inputWeights.entrySet()) {
+            for (Map.Entry<String, Float> inputEntry : inputWeights.singleEntrySet()) {
                 final String inputID = inputEntry.getKey();
                 if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
                 

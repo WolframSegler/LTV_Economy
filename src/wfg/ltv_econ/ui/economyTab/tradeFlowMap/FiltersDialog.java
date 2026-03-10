@@ -37,6 +37,8 @@ public class FiltersDialog extends DockPanel {
     public FiltersDialog(int width, int height, UIBuildableAPI content) {
         super(width, height, Side.RIGHT);
 
+        removeWhenClosed = true;
+
         this.content = content;
 
         buildUI();

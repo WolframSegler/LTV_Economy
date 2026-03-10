@@ -147,7 +147,7 @@ public class WorkforceAllocator {
      * @param industryOutputPairs industryID::outputID
      * @return Map of MarketAPI to float[] arrays representing worker assignments per output
      */
-    public static Map<MarketAPI, float[]> computeWorkerAllocations(List<MarketAPI> markets,
+    public static ArrayMap<MarketAPI, float[]> computeWorkerAllocations(List<MarketAPI> markets,
         List<String> industryOutputPairs
     ) {
         // DATA COLLECTION
@@ -310,11 +310,10 @@ public class WorkforceAllocator {
                     final String industryID = pair.split(EconomyLoop.KEY)[0];
                     final String outputID = pair.split(EconomyLoop.KEY)[1];
     
-                    final Map<String, Map<String, Float>> byOutput = byIndustry.get(industryID);
+                    final Map<String, ArrayMap<String, Float>> byOutput = byIndustry.get(industryID);
                     if (byOutput == null) continue;
     
-                    final Map<String, Float> inputs =
-                        byOutput.get(outputID);
+                    final ArrayMap<String, Float> inputs = byOutput.get(outputID);
                     if (inputs == null || inputs.isEmpty()) continue;
     
                     double deficitWeightSum = 0.0;
@@ -323,7 +322,7 @@ public class WorkforceAllocator {
     
                     double deficit = 0.0;
     
-                    for (Map.Entry<String, Float> e : inputs.entrySet()) {
+                    for (Map.Entry<String, Float> e : inputs.singleEntrySet()) {
                         final String inputID = e.getKey();
                         if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
     

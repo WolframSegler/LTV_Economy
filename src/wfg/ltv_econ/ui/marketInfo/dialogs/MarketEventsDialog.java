@@ -44,6 +44,7 @@ public class MarketEventsDialog extends DockPanel {
 
         offsetY = 100f;
         bgAlpha = 0.9f;
+        removeWhenClosed = true;
 
         buildUI();
     }

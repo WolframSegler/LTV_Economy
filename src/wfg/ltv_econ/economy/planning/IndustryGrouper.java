@@ -158,13 +158,13 @@ public final class IndustryGrouper {
         return new Pair<>(groupedPairs, newOutputsPerMarket);
     }
 
-    public static Map<MarketAPI, float[]> expandGroupedAssignments(
+    public static ArrayMap<MarketAPI, float[]> expandGroupedAssignments(
         Map<MarketAPI, float[]> groupedAssignments,
         IndustryMatrixGrouped group,
         List<MarketAPI> markets,
         List<String> industryOutputPairs
     ) {
-        final Map<MarketAPI, float[]> expanded = new ArrayMap<>();
+        final ArrayMap<MarketAPI, float[]> expanded = new ArrayMap<>();
 
         for (MarketAPI market : markets) {
             final float[] groupedArray = groupedAssignments.get(market);

@@ -16,12 +16,10 @@ import wfg.native_ui.util.CallbackRunnable;
 public class TradeFlowOptions extends CustomPanel<TradeFlowOptions> {
     private static final int FILTERS_BTN_H = 32;
 
+    private FiltersDialog filtersDock;
+
     public TradeFlowOptions(UIPanelAPI parent, int width, int height, UIBuildableAPI content) {
         super(parent, width, height);
-
-        final FiltersDialog filtersDock = new FiltersDialog(400,
-           430, content
-        );
 
         final CommoditySelectionPanel options = new CommoditySelectionPanel(
             m_panel, (int) pos.getWidth(), (int) pos.getHeight() - FILTERS_BTN_H - opad, content
@@ -29,8 +27,9 @@ public class TradeFlowOptions extends CustomPanel<TradeFlowOptions> {
         add(options.getPanel()).inBL(0, 0);
 
         final CallbackRunnable<Button> run = (btn) -> {
+            if (filtersDock == null) createFiltersDialog(content);
             if (filtersDock.isOpen()) filtersDock.close();
-            else filtersDock.open();
+            else filtersDock.open(true);
         };
 
         final Button filterBtn = new Button(m_panel, width, FILTERS_BTN_H, "Filters", null, run);
@@ -39,5 +38,12 @@ public class TradeFlowOptions extends CustomPanel<TradeFlowOptions> {
         filterBtn.setQuickMode(true);
         filterBtn.setShortcut(Keyboard.KEY_Q);
         add(filterBtn).inTL(0f, 0f);
+    }
+
+    private final void createFiltersDialog(UIBuildableAPI content) {
+        filtersDock = new FiltersDialog(400, 430, content);
+        filtersDock.onRemoved = (dock) -> {
+            filtersDock = null;
+        };
     }
 }

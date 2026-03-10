@@ -30,12 +30,12 @@ import static wfg.ltv_econ.constants.Mods.LTV_ECON;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -54,7 +54,7 @@ public class IndustryConfigManager {
     private static JSONObject config;
     private static JSONObject dynamic_config;
 
-    public static Map<String, IndustryConfig> ind_config;
+    public static ArrayMap<String, IndustryConfig> ind_config;
 
     static {
         ind_config = IndustryConfigManager.loadAsMap(false);
@@ -105,9 +105,9 @@ public class IndustryConfigManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static final Map<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
+    public static final ArrayMap<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
         final JSONObject root = getConfig(dynamicConfig);
-        final Map<String, IndustryConfig> result = new HashMap<>();
+        final ArrayMap<String, IndustryConfig> result = new ArrayMap<>();
 
         try { if (root.has("industryList")) {
 
@@ -121,7 +121,7 @@ public class IndustryConfigManager {
             final String occTag = indJson.optString("occTag", LaborConfigLoader.AVERAGE_OCC_TAG);
 
             final JSONObject outputList = indJson.getJSONObject("outputList");
-            final Map<String, OutputConfig> commodityMap = new ArrayMap<>();
+            final ArrayMap<String, OutputConfig> commodityMap = new ArrayMap<>();
 
             final Iterator<String> outputIds = outputList.keys();
             while (outputIds.hasNext()) {
@@ -159,7 +159,7 @@ public class IndustryConfigManager {
                     }
                 }
 
-                final Map<String, Float> ConsumptionMap = new ArrayMap<>();
+                final ArrayMap<String, Float> ConsumptionMap = new ArrayMap<>();
                 if (outputData.has("InputsPerUnitOutput")) {
                     JSONObject consumption = outputData.getJSONObject("InputsPerUnitOutput");
                     Iterator<String> inputIds = consumption.keys();
@@ -170,7 +170,7 @@ public class IndustryConfigManager {
                     }
                 }
 
-                final Map<String, Float> CCMoneyDist = new ArrayMap<>();
+                final ArrayMap<String, Float> CCMoneyDist = new ArrayMap<>();
                 if (outputData.has("CCMoneyDist")) {
                     JSONObject consumption = outputData.getJSONObject("CCMoneyDist");
                     Iterator<String> inputIds = consumption.keys();
@@ -217,14 +217,14 @@ public class IndustryConfigManager {
         return result;
     }
 
-    public static final JSONObject serializeIndustryConfigs(Map<String, IndustryConfig> configs) {
+    public static final JSONObject serializeIndustryConfigs(ArrayMap<String, IndustryConfig> configs) {
         final JSONObject root = new JSONObject();
 
         try {
         root.put("modVersion", settings.getModManager().getModSpec(LTV_ECON).getVersion());
 
         final List<JSONObject> industries = new ArrayList<>();
-        for (Map.Entry<String, IndustryConfig> entry : configs.entrySet()) {
+        for (Entry<String, IndustryConfig> entry : configs.singleEntrySet()) {
             final String indID = entry.getKey();
             final IndustryConfig ind = entry.getValue();
 
@@ -235,7 +235,7 @@ public class IndustryConfigManager {
             indJson.put("occTag", ind.occTag);
 
             final JSONObject outputMap = new JSONObject();
-            for (Map.Entry<String, OutputConfig> outputEntry : ind.outputs.entrySet()) {
+            for (Entry<String, OutputConfig> outputEntry : ind.outputs.singleEntrySet()) {
                 final String outputId = outputEntry.getKey();
                 final OutputConfig opt = outputEntry.getValue();
 
@@ -247,7 +247,7 @@ public class IndustryConfigManager {
 
                 if (opt.CCMoneyDist != null && !opt.CCMoneyDist.isEmpty()) {
                     JSONObject ccJson = new JSONObject();
-                    for (Map.Entry<String, Float> e : opt.CCMoneyDist.entrySet()) {
+                    for (Entry<String, Float> e : opt.CCMoneyDist.singleEntrySet()) {
                         ccJson.put(e.getKey(), e.getValue());
                     }
                     optJson.put("CCMoneyDist", ccJson);
@@ -255,7 +255,7 @@ public class IndustryConfigManager {
 
                 if (opt.InputsPerUnitOutput != null && !opt.InputsPerUnitOutput.isEmpty()) {
                     JSONObject inputsJson = new JSONObject();
-                    for (Map.Entry<String, Float> e : opt.InputsPerUnitOutput.entrySet()) {
+                    for (Entry<String, Float> e : opt.InputsPerUnitOutput.singleEntrySet()) {
                         inputsJson.put(e.getKey(), e.getValue());
                     }
                     optJson.put("InputsPerUnitOutput", inputsJson);
@@ -293,11 +293,11 @@ public class IndustryConfigManager {
         public final boolean workerAssignable;
         public final boolean ignoreLocalStockpiles;
         public final String occTag;
-        public final Map<String, OutputConfig> outputs;
+        public final ArrayMap<String, OutputConfig> outputs;
 
         public boolean dynamic = false;
 
-        public IndustryConfig(boolean workerAssignable, Map<String, OutputConfig> outputs, String occTag,
+        public IndustryConfig(boolean workerAssignable, ArrayMap<String, OutputConfig> outputs, String occTag,
             boolean ignoreLocalStockpiles
         ) {
             this.workerAssignable = workerAssignable;
@@ -317,8 +317,8 @@ public class IndustryConfigManager {
 
             // Deep copy outputs map
             if (config.outputs != null) {
-                Map<String, OutputConfig> copy = new ArrayMap<>();
-                for (Map.Entry<String, OutputConfig> e : config.outputs.entrySet()) {
+                ArrayMap<String, OutputConfig> copy = new ArrayMap<>();
+                for (Entry<String, OutputConfig> e : config.outputs.singleEntrySet()) {
                     copy.put(e.getKey(), new OutputConfig(e.getValue()));
                 }
                 this.outputs = copy;
@@ -346,8 +346,8 @@ public class IndustryConfigManager {
         public final float workerAssignableLimit;
         public final float marketScaleBase;
 
-        public final Map<String, Float> CCMoneyDist; // Determines the share of money spent on each input.
-        public final Map<String, Float> InputsPerUnitOutput;
+        public final ArrayMap<String, Float> CCMoneyDist; // Determines the share of money spent on each input.
+        public final ArrayMap<String, Float> InputsPerUnitOutput;
 
         public List<String> ifMarketCondsAllFalse;
         public List<String> ifMarketCondsAllTrue;
@@ -363,9 +363,9 @@ public class IndustryConfigManager {
         public boolean dynamic = false;
 
         public OutputConfig(
-            String comID, float baseProd, Map<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
+            String comID, float baseProd, ArrayMap<String, Float> CCMoneyDist, boolean scaleWithMarketSize,
             boolean usesWorkers, boolean isAbstract, boolean checkLegality, List<String> ifMarketCondsAllFalse,
-            List<String> ifMarketCondsAllTrue, Map<String, Float> InputsPerUnitOutput, float workerAssignableLimit,
+            List<String> ifMarketCondsAllTrue, ArrayMap<String, Float> InputsPerUnitOutput, float workerAssignableLimit,
             float marketScaleBase, long target, boolean activeDuringBuilding
         ) {
             this.comID = comID;
@@ -440,7 +440,7 @@ public class IndustryConfigManager {
      * </p>
      */
     private static final void validateOrRebuildDynamicConfigs() {
-        final Map<String, IndustryConfig> dynamic_config =
+        final ArrayMap<String, IndustryConfig> dynamic_config =
             IndustryConfigManager.loadAsMap(true);
         final Set<String> validIndustryIds = settings.getAllIndustrySpecs().stream()
             .map(IndustrySpecAPI::getId).collect(Collectors.toSet());
@@ -499,7 +499,7 @@ public class IndustryConfigManager {
             if (IndustryIOs.getIndConfig(indSpec) != null) continue;
 
             final String indID = indSpec.getId();
-            final Map<String, OutputConfig> configOutputs = new ArrayMap<>();
+            final ArrayMap<String, OutputConfig> configOutputs = new ArrayMap<>();
             
             testMarket1.addIndustry(indID);
             testMarket2.addIndustry(indID);
@@ -567,16 +567,24 @@ public class IndustryConfigManager {
                 }
     
                 // In vanilla, each output uses each input
-                final Map<String, Float> inputs = new ArrayMap<>(4);
+                final ArrayMap<String, Float> inputs = new ArrayMap<>(4);
                 populateInputs(ind1, inputs, !scaleWithMarketSize.isEmpty());
-    
-                final Map<String, Float> CCMoneyDist = usesWorkers ?
-                    inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, i -> 1f)) : null;
-    
-                final Map<String, Float> InputsPerUnitOutput = !usesWorkers ?
-                    inputs.entrySet().stream().collect(
-                        Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)
-                    ) : null;
+
+                final ArrayMap<String, Float> CCMoneyDist;
+                if (usesWorkers) {
+                    CCMoneyDist = new ArrayMap<>();
+                    for (Entry<String, ?> entry : inputs.singleEntrySet()) {
+                        CCMoneyDist.put(entry.getKey(), 1f);
+                    }
+                } else { CCMoneyDist = null; }
+
+                final ArrayMap<String, Float> InputsPerUnitOutput;
+                if (!usesWorkers) {
+                    InputsPerUnitOutput = new ArrayMap<>();
+                    for (Entry<String, Float> entry : inputs.singleEntrySet()) {
+                        InputsPerUnitOutput.put(entry.getKey(), entry.getValue());
+                    }
+                } else { InputsPerUnitOutput = null; }
     
                 final Consumer<String> addOutput = (outputID) -> {
                     final boolean isIllegal = illegalOutputs.contains(outputID);

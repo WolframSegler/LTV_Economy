@@ -22,6 +22,7 @@ public class WorkerRegistry {
     public static final String WorkerRegSerialID = "ltv_econ_worker_registry";
     public static final String KEY = "::";
 
+    // TODO switch to ArrayMap after incompatible update
     private final Map<String, WorkerIndustryData> registry = new HashMap<>();
 
     private static WorkerRegistry instance;

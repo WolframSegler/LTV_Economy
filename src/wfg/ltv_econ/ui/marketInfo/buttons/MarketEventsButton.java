@@ -22,10 +22,10 @@ public class MarketEventsButton extends Button {
         super(parent, width, height, null, null, null);
 
         final boolean isPlayerOwned = market.isPlayerOwned();
-        if (isPlayerOwned) dock = new MarketEventsDialog(market);
 
         onClicked = (btn) -> {
             if (!isPlayerOwned) return;
+            if (dock == null) createDock(market);
             if (dock.isOpen()) dock.close();
             else dock.open(true);
         };
@@ -44,5 +44,12 @@ public class MarketEventsButton extends Button {
         add(icon).inBL(0f, 0f);
         glow.type = GlowType.ADDITIVE;
         glow.additiveSprite = icon.getSprite();
+    }
+
+    private final void createDock(MarketAPI market) {
+        dock = new MarketEventsDialog(market);
+        dock.onRemoved = (dock) -> {
+            dock = null;
+        };
     }
 }

@@ -2,7 +2,6 @@ package wfg.ltv_econ.economy.commodity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -58,8 +57,8 @@ public class CommodityCell {
     private double stored = 0.0;
     private MutableStat localProd = new MutableStat(0f);
     private MutableStat baseDemand = new MutableStat(0f);
-    private transient Map<String, MutableStat> localProdMutables = new ArrayMap<>();
-    private transient Map<String, MutableStat> demandBaseMutables = new ArrayMap<>();
+    private transient ArrayMap<String, MutableStat> localProdMutables = new ArrayMap<>();
+    private transient ArrayMap<String, MutableStat> demandBaseMutables = new ArrayMap<>();
 
     public transient float inFactionImports = 0f;
     public transient float globalImports = 0f;
@@ -74,10 +73,10 @@ public class CommodityCell {
     public transient float informalImports = 0f;
     public transient float informalExports = 0f;
 
-    public final Map<String, MutableStat> getFlowProdIndStats() {
+    public final ArrayMap<String, MutableStat> getFlowProdIndStats() {
         return localProdMutables;
     }
-    public final Map<String, MutableStat> getFlowDemandIndStats() {
+    public final ArrayMap<String, MutableStat> getFlowDemandIndStats() {
         return demandBaseMutables;
     }
     public final MutableStat getProdIndStat(String industryID) {

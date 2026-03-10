@@ -10,31 +10,42 @@ import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.campaign.FactionSpecAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityTradeFlow;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
+import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.components.TooltipComp;
+import wfg.native_ui.ui.components.TooltipComp.TooltipBuilder;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
+import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.systems.NativeSystems;
+import wfg.native_ui.ui.systems.TooltipSystem;
 import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.RenderUtils;
 
 public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
-    HasOutline, HasBackground, UIBuildableAPI
+    HasOutline, UIBuildableAPI, HasTooltip
 {
     private static final SettingsAPI settings = Global.getSettings();
     private static final Random random = new Random();
@@ -60,12 +71,17 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     private static final float PATH_GAP_MULT = 0.4f;
 
     private static final float COM_ICON_SIZE = 48f;
-    private static final float COLOR_CHANGE_DUR = 6f;
+    private static final float COLOR_CHANGE_DUR = 7.5f;
 
     public static final Set<String> exporterFactionBlacklist = new HashSet<>(12);
     public static final Set<String> importerFactionBlacklist = new HashSet<>(12);
     public static int directionMode = 0;
     public static float minTradeAmount = 0f;
+
+    private final TooltipComp toolitp = comp().get(NativeComponents.TOOLTIP);
+    private final TooltipSystem tooltipSys = system().get(NativeSystems.TOOLTIP);
+    private boolean tooltipAdded = false;
+    private Object hoveredElement = null;
 
     private final SpriteAPI bgImg = switch (random.nextInt(2)) {
         default -> BG_1;
@@ -88,9 +104,13 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     private float sectorMaxYCoord = 0f;
 
     private float time = 0f;
+    private boolean hoverRegistered = false;
 
     public ComTradeFlowMap(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
+
+        toolitp.width = 220f;
+        toolitp.bgAlpha = 0.85f;
 
         buildUI();
     }
@@ -105,6 +125,11 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             panOffsetX = 0f;
             panOffsetY = 0f;
             zoom = 1f;
+
+            sectorMinXCoord = Float.POSITIVE_INFINITY;
+            sectorMaxXCoord = Float.NEGATIVE_INFINITY;
+            sectorMinYCoord = Float.POSITIVE_INFINITY;
+            sectorMaxYCoord = Float.NEGATIVE_INFINITY;
         }
 
         final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
@@ -174,7 +199,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
             for (List<CommodityTradeFlow> flows : uniqueFlows.values()) {
                 final CommodityTradeFlow first = flows.get(0);
-                final PathData pathData = new PathData();
+                final PathData data = new PathData();
                 final StarSystemAPI source = first.exporter.getStarSystem();
                 final StarSystemAPI dest = first.importer.getStarSystem();
 
@@ -182,28 +207,34 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 
                 float totalAmount = 0f;
                 for (CommodityTradeFlow flow : flows) {
-                    totalAmount += flow.amount;
-                    final Color c = flow.exporter.getFaction().getBrightUIColor();
-                    pathData.addColorWeight(c, flow.amount);
+                    final FactionSpecAPI faction = flow.exporter.getFaction().getFactionSpec();
+                    final float amount = flow.amount;
+
+                    totalAmount += amount;
+                    final Color c = faction.getBrightUIColor();
+                    data.addColorWeight(c, amount);
+
+                    final Float current = data.factionAmounts.get(faction);
+                    data.factionAmounts.put(faction, current == null ? amount : current + amount);
                 }
 
                 if (totalAmount < minTradeAmount) continue;
 
-                for (int i = 0; i < pathData.getColorWeights().size(); i++) {
-                    final float w = pathData.getColorWeights().valueAt(i) / totalAmount;
-                    pathData.getColorWeights().setValueAt(i, w);
+                for (int i = 0; i < data.getColorWeights().size(); i++) {
+                    final float w = data.getColorWeights().valueAt(i) / totalAmount;
+                    data.getColorWeights().setValueAt(i, w);
                 }
 
-                pathData.source = source;
-                pathData.destination = dest;
-                pathData.pathWidth = calculatePathWidth(totalAmount);
-                pathData.nodeSize = calculateNodeSize(totalAmount);
+                data.source = source;
+                data.destination = dest;
+                data.pathWidth = calculatePathWidth(totalAmount);
+                data.nodeSize = calculateNodeSize(totalAmount);
 
                 final float len = Arithmetic.dist(source.getLocation(), dest.getLocation());
-                pathData.travelDuration = len * 0.002f;
-                pathData.pauseDuration = 10f + pathData.travelDuration;
-                pathData.pulseOffset = random.nextFloat() * pathData.travelDuration;
-                flowData.add(pathData);
+                data.travelDuration = len * 0.002f;
+                data.pauseDuration = 10f + data.travelDuration;
+                data.pulseOffset = random.nextFloat() * data.travelDuration;
+                flowData.add(data);
             }
         }
 
@@ -213,11 +244,6 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         }
 
         { // Calculate sector bounds
-            sectorMinXCoord = Float.POSITIVE_INFINITY;
-            sectorMaxXCoord = Float.NEGATIVE_INFINITY;
-            sectorMinYCoord = Float.POSITIVE_INFINITY;
-            sectorMaxYCoord = Float.NEGATIVE_INFINITY;
-    
             for (StarSystemAPI system : systems) {
                 final Vector2f loc = system.getLocation();
                 if (loc.x < sectorMinXCoord) sectorMinXCoord = loc.x;
@@ -251,6 +277,10 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+        tooltipAdded = false;
+        hoverRegistered = false;
+        toolitp.builder = null;
+
         renderBg(alpha);
         renderGrid(alpha);
         renderPaths(alpha);
@@ -263,6 +293,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
     @Override
     public void processInput(List<InputEventAPI> events) {
+        super.processInput(events);
         for (InputEventAPI event : events) {
             if (event.isMouseScrollEvent()) {
                 // Zoom
@@ -303,6 +334,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
     @Override
     public void advance(float amount) {
+        super.advance(amount);
         time += amount;
     }
 
@@ -412,6 +444,9 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
 
+        final int mx = Mouse.getX();
+        final int my = Mouse.getY();
+
         for (PathData data : flowData) {
             final Vector2f aLocal = project(data.source.getLocation());
             final Vector2f bLocal = project(data.destination.getLocation());
@@ -422,24 +457,43 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             final float destX = pos.getX() + bLocal.x;
             final float destY = pos.getY() + bLocal.y;
 
-            final float dx = destX - srcX;
-            final float dy = destY - srcY;
+            final float diffX = destX - srcX;
+            final float diffY = destY - srcY;
             final float len = Arithmetic.dist(srcX, srcY, destX, destY);
             if (len == 0f) continue;
 
             final float gap = data.nodeSize * PATH_GAP_MULT;
 
             // move endpoints toward each other
-            final float ax = srcX + dx / len * gap;
-            final float ay = srcY + dy / len * gap;
-            final float bx = destX - dx / len * gap;
-            final float by = destY - dy / len * gap;
+            final float ax = srcX + diffX / len * gap;
+            final float ay = srcY + diffY / len * gap;
+            final float bx = destX - diffX / len * gap;
+            final float by = destY - diffY / len * gap;
 
-            final Color color = getWeightedCycleColor(data.getColorWeights(), data.getWeightSum(), time);
+            final boolean isHovering;
+            {
+                final float dx = bx - ax;
+                final float dy = by - ay;
+                final float len2 = dx*dx + dy*dy;
+                if (len2 == 0f) {
+                    isHovering = false;
+                } else {
+                    final float hw = data.pathWidth * 0.6f;
+                    final float t = Arithmetic.clamp(((mx - ax) * dx + (my - ay) * dy) / len2, 0f, 1f);
+                    final float cx = ax + t * dx;
+                    final float cy = ay + t * dy;
+                    isHovering = Arithmetic.dist(mx, my, cx, cy) <= hw && !hoverRegistered;
+                    if (isHovering) hoverRegistered = true;
+                }
+            }
+
+            final Color baseColor = getWeightedCycleColor(data.getColorWeights(), data.getWeightSum());
+            final Color color = isHovering ? NativeUiUtils.adjustBrightness(baseColor, 1.7f) : baseColor;
 
             // outer halo
+            final float haloAlpha = alpha * (isHovering ? 0.7f : 0.3f);
             RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 1.7f, color, true,
-                0.3f * alpha, 0.2f * alpha, 0.3f * alpha);
+                haloAlpha, haloAlpha * 0.7f, haloAlpha);
 
             // inner core (bright, constant)
             RenderUtils.drawGradientSprite(ax, ay, bx, by, data.pathWidth * 0.5f, color, true,
@@ -458,20 +512,24 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
                     float arrowAlpha = alpha;
                     if (travelFrac < 0.03f) {
-                        arrowAlpha *= travelFrac / 0.05f;
+                        arrowAlpha *= travelFrac / 0.03f;
                     } else if (travelFrac > 0.97f) {
-                        arrowAlpha *= (1f - travelFrac) / 0.05f;
+                        arrowAlpha *= (1f - travelFrac) / 0.03f;
                     }
 
                     final float cx = ax + (bx - ax) * travelFrac;
                     final float cy = ay + (by - ay) * travelFrac;
 
-                    final float arrowSize = data.pathWidth * 2.5f;
+                    final float arrowSize = data.pathWidth * 2.5f * (0.4f + 0.6f*arrowAlpha);
                     SHIP_ARROW.setAngle(NativeUiUtils.rotateSprite(aLocal, bLocal));
                     SHIP_ARROW.setSize(arrowSize, arrowSize);
                     SHIP_ARROW.setAlphaMult(arrowAlpha);
                     SHIP_ARROW.renderAtCenter(cx, cy);
                 }
+            }
+        
+            if (isHovering && !tooltipAdded) {
+                updateTpState(data);
             }
         }
 
@@ -482,12 +540,15 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     }
 
     private final void renderNodes(float alpha) {
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
         final float freq = 0.7f;
         final float glow = 0.5f + 0.5f * (float)Math.sin(time * freq);
         final float overlaySizeMult = 1f + (float)Math.sin(time * freq) * 0.3f;
 
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        final int mx = Mouse.getX();
+        final int my = Mouse.getY();
 
         for (SystemData data : systemData) {
             final Vector2f sysPos = project(data.system.getLocation());
@@ -502,7 +563,11 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 y > pos.getY() + pos.getHeight() + nodeSize * 2f)
             { continue; }
 
-            final Color color = getWeightedCycleColor(data.getColorWeights(), data.getWeightSum(), time);
+            final boolean isHovering = mx >= x - nodeSize/2 && mx <= x + nodeSize/2 &&
+                my >= y - nodeSize/2 && my <= y + nodeSize/2 && !hoverRegistered;
+            if (isHovering) hoverRegistered = true;
+
+            final Color color = getWeightedCycleColor(data.getColorWeights(), data.getWeightSum());
 
             NODE_UNDERLAY.setSize(nodeSize * 1.2f, nodeSize * 1.2f);
             NODE_UNDERLAY.setColor(NODE_UNDERLAY_COLOR);
@@ -514,11 +579,15 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             NODE_SPRITE.setAlphaMult(alpha * 0.5f);
             NODE_SPRITE.renderAtCenter(x, y);
 
-            final float overlaySize = overlaySizeMult * nodeSize;
+            final float overlaySize = overlaySizeMult * nodeSize * (isHovering ? 1.5f : 1f);
             NODE_OVERLAY.setSize(overlaySize, overlaySize);
-            NODE_OVERLAY.setColor(color);
-            NODE_OVERLAY.setAlphaMult(alpha * 0.5f * glow);
+            NODE_OVERLAY.setColor(isHovering ? NativeUiUtils.adjustBrightness(color, 1.5f) : color);
+            NODE_OVERLAY.setAlphaMult(alpha * 0.5f * (isHovering ? 2f : glow));
             NODE_OVERLAY.renderAtCenter(x, y);
+        
+            if (isHovering && !tooltipAdded) {
+                updateTpState(data);
+            }
         }
     }
 
@@ -579,37 +648,140 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         return (float) Math.pow(zoom, 0.6f);
     }
 
-    public static Color getWeightedCycleColor(final ArrayMap<Color, Float> weights, float totalWeight, float time) {
+    public final Color getWeightedCycleColor(final ArrayMap<Color, Float> weights, float totalWeight) {
         final int count = weights.size();
         if (count == 0) return Color.WHITE;
         if (count == 1) return weights.keyAt(0);
 
-        float totalCycle = 0f;
+        final float minTime = 0.1f;
+        final float transitionFrac = 0.15f;
+
+        final float[] segDur = new float[count];
+        float totalSeg = 0f;
         for (int i = 0; i < count; i++) {
-            totalCycle += COLOR_CHANGE_DUR * weights.valueAt(i) / totalWeight;
+            segDur[i] = COLOR_CHANGE_DUR * weights.valueAt(i) / totalWeight;
+            totalSeg += segDur[i];
         }
 
-        final float tCycle = time % totalCycle;
+        float extraTime = 0f;
+        for (int i = 0; i < count; i++) {
+            if (segDur[i] < minTime) {
+                extraTime += minTime - segDur[i];
+                segDur[i] = minTime;
+            }
+        }
 
+        final float overTime = (float) (totalSeg + extraTime - COLOR_CHANGE_DUR);
+        if (overTime > 0f) {
+            float totalLarge = 0f;
+            for (int i = 0; i < count; i++) {
+                if (segDur[i] > minTime) totalLarge += segDur[i] - minTime;
+            }
+            if (totalLarge > 0f) {
+                for (int i = 0; i < count; i++) {
+                    if (segDur[i] > minTime) {
+                        segDur[i] -= ((segDur[i] - minTime) / totalLarge) * overTime;
+                    }
+                }
+            }
+        }
+
+        final float tCycle = time % COLOR_CHANGE_DUR;
         float accumulated = 0f;
         int idx = 0;
         for (int i = 0; i < count; i++) {
-            float segDur = COLOR_CHANGE_DUR * weights.valueAt(i) / totalWeight;
-            if (tCycle < accumulated + segDur) {
+            if (tCycle < accumulated + segDur[i]) {
                 idx = i;
                 break;
             }
-            accumulated += segDur;
+            accumulated += segDur[i];
         }
 
         final int nextIdx = (idx + 1) % count;
-        final float segDur = COLOR_CHANGE_DUR * weights.valueAt(idx) / totalWeight;
-        final float localT = (tCycle - accumulated) / segDur;
+        final float localT = Arithmetic.clamp((tCycle - accumulated) / segDur[idx], 0f, 1f);
 
-        final Color c0 = weights.keyAt(idx);
-        final Color c1 = weights.keyAt(nextIdx);
+        if (localT < 1f - transitionFrac) {
+            return weights.keyAt(idx);
+        } else {
+            final float blendT = (localT - (1f - transitionFrac)) / transitionFrac;
+            return NativeUiUtils.lerpColor(weights.keyAt(idx), weights.keyAt(nextIdx), blendT);
+        }
+    }
 
-        return NativeUiUtils.lerpColor(c0, c1, localT);
+    private static final TooltipBuilder createPathTp(PathData data) {
+        return (tp, expanded) -> {
+            final var entries = new ArrayList<>(data.factionAmounts.entrySet());
+            entries.sort((a, b) -> Float.compare(b.getValue(), a.getValue()));
+
+            tp.addPara("Trade Route", base, 0f);
+
+            tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
+                "Faction", 140, "Volume", 70
+            });
+            for (var entry : entries) {
+                final FactionSpecAPI faction = entry.getKey();
+                tp.addRow(
+                    faction.getBaseUIColor(),
+                    faction.getDisplayName(),
+                    highlight,
+                    entry.getValue() < 1f ? "<1" : NumFormat.engNotation(entry.getValue())
+                );
+            }
+            tp.addTable("", 0, opad);
+            tp.addSpacer(pad);
+        };
+    }
+
+    private static final TooltipBuilder createNodeTp(SystemData data) {
+        final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
+        final EconomyEngine engine = EconomyEngine.getInstance();
+
+        return (tp, expanded) -> {
+            final List<CommodityCell> cells = new ArrayList<>();
+            for (SectorEntityToken entity : data.system.getAllEntities()) {
+                final MarketAPI market = entity.getMarket();
+                if (market != null && market.isInEconomy() && !market.isHidden()) {
+                    final CommodityCell cell = engine.getComCell(com.getId(), market.getId());
+                    if (cell != null && !cells.contains(cell)) cells.add(cell);
+                }
+            }
+            cells.sort((a, b) -> Float.compare(
+                b.getTotalExports() - b.getTotalImports(false),
+                a.getTotalExports() - a.getTotalImports(false)
+            ));
+
+            tp.addPara(data.system.getName(), base, 0f);
+
+            tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
+                "Colony", 140, "Net Trade", 70
+            });
+            for (CommodityCell cell : cells) {
+                final float net = cell.getTotalExports() - cell.getTotalImports(false);
+                if (Math.abs(net) < 0.01f) continue;
+
+                tp.addRow(
+                    cell.market.getFaction().getBaseUIColor(),
+                    cell.market.getName(),
+                    net < 0f ? negative : highlight,
+                    NumFormat.engNotation(net)
+                );
+            }
+            tp.addTable("", 0, opad);
+            tp.addSpacer(pad);
+        };
+    }
+
+    private final void updateTpState(Object dataObj) {
+        tooltipAdded = true;
+        if (hoveredElement == null || hoveredElement != dataObj) {
+            tooltipSys.hideTooltip(toolitp);
+            hoveredElement = dataObj;
+        }
+        if (dataObj instanceof PathData data) {
+            toolitp.builder = createPathTp(data);
+        }else if (dataObj instanceof SystemData data) {
+            toolitp.builder = createNodeTp(data);
+        }
     }
 
     private static record SystemPair(StarSystemAPI source, StarSystemAPI dest) {}
