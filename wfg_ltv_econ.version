@@ -8,6 +8,6 @@
 		"patch":10
 	},
 	"starsectorVersion":"0.98a-RC8",
-	"directDownloadURL":"https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV-Economy.zip",
+	"directDownloadURL":"https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV_Economy.zip",
 	"changelogURL":"https://raw.githubusercontent.com/WolframSegler/LTV_Economy/main/changelog.md"
 }

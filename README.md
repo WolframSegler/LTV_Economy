@@ -1,124 +1,54 @@
 # LTV-Economy
 
-A deep overhaul of Starsector’s economic and colony systems.  
-LTV-Economy replaces abstract income with a unit-based simulation where production, trade, labor, and policy decisions all interact in concrete, traceable ways.
+Before the fleets meet, before the first blow lands, another battle's finished by unseen hands.
+In mines. In factories. Across a thousand worlds and strands.
 
-This mod is designed to make the economy **interesting, legible, and consequential** without turning it into a spreadsheet nightmare.
+A deep overhaul of Starsector's economy and colony systems.
+LTV-Economy replaces abstract production values with a **unit-based simulation** where production and trade correspond to actual cargo units. The mod deepens economic simulation by introducing **workers** as a production factor. Player-enacted policies and market events build on top of this framework.
 
-[![Download](https://img.shields.io/badge/Download-Latest%20Release-brightgreen)](https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV-Economy.zip)
-
-<br>
-
-## Core Features
-
-### Unit-based economy
-- Industries **consume and produce cargo units**.
-- Trade moves actual units between markets; credits are derived from prices × quantities.
-- All flows (production, imports, exports, deficits, storage) are tracked explicitly.
-
-### CommodityCell
-- Central system that tracks:
-  - Production, demand, imports (faction/global), exports
-  - Deficits, over-imports, storage, stockpiles etc.
-- Provides consistent, debuggable economic behavior across all markets.
-
-### Labor & wages
-- Workers are assigned to **outputs**, not just industries.
-- Production scales with assigned labor.
-- Workers are paid wages, which are real upkeep costs.
-- Vanilla modifiers are translated into LTV-relevant values.
-
-### Industry IO system
-- Every industry has explicit inputs and outputs.
-- Missing IO definitions are generated dynamically.
-- New **Manufacturing** industry acts as a labor-heavy intermediary between raw extraction and heavy/light industry.
+[![Download](https://img.shields.io/badge/Download-Latest%20Release-brightgreen)](https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV_Economy.zip)
 
 <br>
 
-## Trade & AI Behavior
 
-- Markets trade using a **pairing-score system** to determine trade order.
-- Non-player markets assign workers via a **two-stage solver**:
-  1. Compute global demand and required workers per output.
-  2. Distribute workers fairly across markets with capacity constraints.
+## Forum Page
+Content details related to the mod can be found on [the fractalsoftworks forums](https://fractalsoftworks.com/forum/index.php?topic=34632.0).
 
-<br>
-
-## Population Simulation
-
-Introduces a population model with four tracked values:
-- **Health**
-- **Happiness**
-- **Social Cohesion**
-- **Class Consciousness**
-
-These values currently influence colony behavior indirectly and will gain stronger gameplay effects in future updates.  
-They respond to wages, stability, exploitation, and policies.
-
-<br>
-
-## Credits, Debt & Policy
-
-### Market credits & debt
-- Markets can go into **debt**.
-- Debt does *not* hard-stop trade, preventing economic soft-locks.
-- Debt applies tiered penalties:
-  - Stability loss
-  - Increased upkeep
-  - Reduced immigration
-
-### Player income control
-- Colonies have a **Player Profit Ratio** (auto-transfer).
-- Only real surplus can be extracted; in-debt colonies cannot lend money.
-
-<br>
-
-<br>
 
 ## Modding & Compatibility
 
 - Designed to be **data-driven and extensible**.
-- Clear separation between simulation logic and UI.
 - NativeUI is reusable and intended for other mods as well.
 - Compatible with mods that do not deeply replace the economy.
 
-<br>
 
-## Scope & Status
-
-- Over **8 months of development** and hundreds of hours of work for the initial release.
-- Balance is intentionally conservative and will be refined through player feedback.
-
-<br>
-
-## Compatibility
+## Incompatible Mods
 
 Due to the intrusive nature of the mod, anything that modifies the Colony Info Panel are likely to cause problems. Here are mods that are definitely incompatible:
 - <a href="https://fractalsoftworks.com/forum/index.php?topic=20986.0">Grand.Colonies</a>
 - <a href="https://fractalsoftworks.com/forum/index.php?topic=28273.0">Astral Ascension</a>
+- <a href="https://fractalsoftworks.com/forum/index.php?topic=26307.0">Ashes of The Domain</a>
 
-<br>
 
 ## For Other Modders
 
 - If you want your mod's industries to be compatible, you can add an <code>industry_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder. The documentation file <code>data/config/ltvEcon/industry_config_doc.md</code> provides the necessary information.
 - If you want your mod to add market policies, you can add a <code>policy_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder.
+- If you want your mod to add market events, you can add an <code>events_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder.
 
-<br><br>
 
 ## Roadmap
 - Add more policies and events
 - Add more market events as a consequence of the population
 
-<br><br>
 
 ## Credits
 
-Lukas04 - for providing ReflectionUtils and providing the correct hirearchy for accessing certain classes under LtvMarketReplacer.
+Lukas04 -  for providing the access pattern to UI Panels inside the colony detail screen.
 
 SirHartley - for helping with IndustryOptionProvider
 
-rolfosian - for RolflectionLib-SS
+rolfosian - for providing the [reflection library](https://github.com/rolfosian/RolflectionLib-SS)
 
 <br>
 

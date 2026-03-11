@@ -69,13 +69,6 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  *     <li>Synchronization with the Starsector campaign economy</li>
  * </ul>
  *
- * <h3>Overview</h3>
- * Each {@link MarketAPI} in the sector is represented internally by:
- * <ul>
- *     <li>A credit balance (per-market budget)</li>
- *     <li>A set of active commodities ({@link CommodityDomain})</li>
- *     <li>Dynamic production and demand statistics ({@link CommodityCell})</li>
- * </ul>
  * The engine runs continuously as a listener to the campaign economy. It replaces
  * vanilla credit flows with its own localized financial model, while remaining compatible
  * with other game systems and mods.
@@ -84,28 +77,9 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  * <ul>
  *     <li>Maintain lists of all registered and player-owned markets.</li>
  *     <li>Track and update per-market credit balances.</li>
- *     <li>Run the economic update loop (production → demand → trade → post-processing).</li>
+ *     <li>Run the economic update loop.</li>
  *     <li>Handle market lifecycle events such as colonization, decivilization, and abandonment.</li>
  * </ul>
- *
- * <h3>Internal Structure</h3>
- * <ul>
- *     <li>{@code m_registeredMarkets} – All markets currently part of the simulation.</li>
- *     <li>{@code m_playerMarketData} – Subset of markets owned by the player with unique data attached.</li>
- *     <li>{@code m_marketCredits} – Per-market credit reserves.</li>
- *     <li>{@code m_comDomains} – Mapping of commodity IDs to {@link CommodityDomain} containers.</li>
- *     <li>{@code mainLoopExecutor} – A single-thread executor that runs the simulation asynchronously. Can be toggled.</li>
- * </ul>
- *
- * <h3>Main Loop</h3>
- * The {@link #realAdvance()} method executes the economic simulation for one tick:
- * <ol>
- *     <li>Refreshes the list of active markets.</li>
- *     <li>Resets and recalculates commodity production/demand via {@link CommodityDomain}.</li>
- *     <li>Assigns workers using a solver-based optimization step.</li>
- *     <li>Executes trade and adjusts credit balances accordingly.</li>
- *     <li>Advances all commodities to persist state.</li>
- * </ol>
  *
  * @author Wolfram Segler
  */

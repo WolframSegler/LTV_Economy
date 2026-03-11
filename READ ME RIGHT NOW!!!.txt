@@ -1,3 +1,0 @@
-IMPORTANT
-- The mod LTV_Economy needs WrapUI to function properly. If not already installed: https://github.com/WolframSegler/WrapUI/releases/latest/download/WrapUI.zip
-- Certain aspects of the mod can be modified under LTV_Economy/data/config/ltvEcon/ or LunaLib settings

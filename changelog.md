@@ -2,7 +2,10 @@ v0.2.10-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.3.2 for this update.
 - Added the industry tooltip to the income report as well.
 - Switched internal data structures for performance.
-- Added a trade routes map to display trade routes visually.
+- Added a trade routes map to display trade visually.
+    - Makes finding systems that produce a good trivial.
+    - The flow of trade and exact amounts between systems are now visible.
+    - Filters make finding strategic targets easier (sabotaging Kazeron is now easier than ever!)
 
 v0.2.9-beta | SAVE COMPATIBLE
 - Fixed a crash resulting from a market with no outputs
