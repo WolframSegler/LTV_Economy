@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.util.Misc;
+import com.thoughtworks.xstream.XStream;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
@@ -22,6 +23,15 @@ import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
 import wfg.ltv_econ.ui.scripts.UIInjectorListener;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
+
+    @Override
+    public void configureXStream(XStream x) {
+        // TODO remove after incompatible save
+        x.alias("wfg.ltv_econ.economy.CommodityDomain", wfg.ltv_econ.economy.commodity.CommodityDomain.class);
+        x.alias("wfg.ltv_econ.economy.CommodityCell", wfg.ltv_econ.economy.commodity.CommodityCell.class);
+        x.alias("wfg.ltv_econ.economy.IncomeLedger", wfg.ltv_econ.economy.commodity.IncomeLedger.class);
+    }
+
     @Override
     public void onApplicationLoad() throws Exception {}
 
