@@ -3,7 +3,7 @@
 Before the fleets meet, before the first blow lands, another battle's finished by unseen hands.
 In mines. In factories. Across a thousand worlds and strands.
 
-A deep overhaul of Starsector's economy and colony systems.
+A deep overhaul of Starsector's economy and additional colony systems.
 LTV-Economy replaces abstract production values with a **unit-based simulation** where production and trade correspond to actual cargo units. The mod deepens economic simulation by introducing **workers** as a production factor. Player-enacted policies and market events build on top of this framework.
 
 [![Download](https://img.shields.io/badge/Download-Latest%20Release-brightgreen)](https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV_Economy.zip)
