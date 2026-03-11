@@ -70,8 +70,11 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     private static final float FLOW_PATH_SCALE = 0.6f;
     private static final float PATH_GAP_MULT = 0.4f;
 
+    private static final float COLOR_CHANGE_DUR = 15f;
+    private static final float COLOR_TRANSITION_FRAC = 0.15f;
+    private static final float MIN_COLOR_DUR = 0.1f;
+
     private static final float COM_ICON_SIZE = 48f;
-    private static final float COLOR_CHANGE_DUR = 7.5f;
 
     public static final Set<String> exporterFactionBlacklist = new HashSet<>(12);
     public static final Set<String> importerFactionBlacklist = new HashSet<>(12);
@@ -88,6 +91,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         case 1 -> BG_2;
     };
     private SpriteAPI comSprite;
+    private BloomEffect bloom;
 
     private final Set<StarSystemAPI> systems = new HashSet<>(24);
     private final List<SystemData> systemData = new ArrayList<>(24);
@@ -130,6 +134,8 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             sectorMaxXCoord = Float.NEGATIVE_INFINITY;
             sectorMinYCoord = Float.POSITIVE_INFINITY;
             sectorMaxYCoord = Float.NEGATIVE_INFINITY;
+
+            if (bloom != null)  bloom.cleanup();
         }
 
         final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
@@ -155,12 +161,13 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 data.system = system;
 
                 float totalAmount = 0f;
-                final List<CommodityTradeFlow> relevantFlows = new ArrayList<>(4);
                 for (CommodityTradeFlow flow : tradeFlows) {
                     if (flow.exporter.getStarSystem().equals(system)) {
                         data.isSource = true;
                         totalAmount += flow.amount;
-                        relevantFlows.add(flow);
+
+                        final Color c = flow.exporter.getFaction().getBrightUIColor();
+                        data.addColorWeight(c, flow.amount);
                     }
                     if (flow.importer.getStarSystem().equals(system)) {
                         data.isDest = true;
@@ -173,12 +180,6 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 }
 
                 data.nodeSize = calculateNodeSize(totalAmount);
-
-                for (CommodityTradeFlow flow : relevantFlows) {
-                    final float weight = flow.amount / totalAmount;
-                    final Color c = flow.exporter.getFaction().getBrightUIColor();
-                    data.addColorWeight(c, weight);
-                }
 
                 systemData.add(data);
             }
@@ -209,21 +210,16 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 for (CommodityTradeFlow flow : flows) {
                     final FactionSpecAPI faction = flow.exporter.getFaction().getFactionSpec();
                     final float amount = flow.amount;
-
-                    totalAmount += amount;
-                    final Color c = faction.getBrightUIColor();
-                    data.addColorWeight(c, amount);
+                    totalAmount += amount;  
 
                     final Float current = data.factionAmounts.get(faction);
                     data.factionAmounts.put(faction, current == null ? amount : current + amount);
+
+                    final Color c = faction.getBrightUIColor();
+                    data.addColorWeight(c, amount);
                 }
 
                 if (totalAmount < minTradeAmount) continue;
-
-                for (int i = 0; i < data.getColorWeights().size(); i++) {
-                    final float w = data.getColorWeights().valueAt(i) / totalAmount;
-                    data.getColorWeights().setValueAt(i, w);
-                }
 
                 data.source = source;
                 data.destination = dest;
@@ -251,6 +247,10 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 if (loc.y < sectorMinYCoord) sectorMinYCoord = loc.y;
                 if (loc.y > sectorMaxYCoord) sectorMaxYCoord = loc.y;
             }
+        }
+    
+        { // Bloom
+            bloom = new BloomEffect();
         }
     }
 
@@ -281,11 +281,21 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         hoverRegistered = false;
         toolitp.builder = null;
 
-        renderBg(alpha);
-        renderGrid(alpha);
-        renderPaths(alpha);
-        renderNodes(alpha);
-        renderIcon(alpha);
+        // TODO add a bloom pass to the map.
+        { // Render Calls
+            // if (!bloom.isInitialized()) bloom.init(pos);
+            // bloom.beginSceneCapture();
+
+            renderBg(alpha);
+            renderGrid(alpha);
+            renderPaths(alpha);
+            renderNodes(alpha);
+            renderIcon(alpha);
+
+            // bloom.endSceneCapture();
+            
+            // bloom.render();
+        }
 
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
@@ -653,9 +663,6 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         if (count == 0) return Color.WHITE;
         if (count == 1) return weights.keyAt(0);
 
-        final float minTime = 0.1f;
-        final float transitionFrac = 0.15f;
-
         final float[] segDur = new float[count];
         float totalSeg = 0f;
         for (int i = 0; i < count; i++) {
@@ -665,9 +672,9 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
         float extraTime = 0f;
         for (int i = 0; i < count; i++) {
-            if (segDur[i] < minTime) {
-                extraTime += minTime - segDur[i];
-                segDur[i] = minTime;
+            if (segDur[i] < MIN_COLOR_DUR) {
+                extraTime += MIN_COLOR_DUR - segDur[i];
+                segDur[i] = MIN_COLOR_DUR;
             }
         }
 
@@ -675,12 +682,12 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         if (overTime > 0f) {
             float totalLarge = 0f;
             for (int i = 0; i < count; i++) {
-                if (segDur[i] > minTime) totalLarge += segDur[i] - minTime;
+                if (segDur[i] > MIN_COLOR_DUR) totalLarge += segDur[i] - MIN_COLOR_DUR;
             }
             if (totalLarge > 0f) {
                 for (int i = 0; i < count; i++) {
-                    if (segDur[i] > minTime) {
-                        segDur[i] -= ((segDur[i] - minTime) / totalLarge) * overTime;
+                    if (segDur[i] > MIN_COLOR_DUR) {
+                        segDur[i] -= ((segDur[i] - MIN_COLOR_DUR) / totalLarge) * overTime;
                     }
                 }
             }
@@ -700,10 +707,10 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         final int nextIdx = (idx + 1) % count;
         final float localT = Arithmetic.clamp((tCycle - accumulated) / segDur[idx], 0f, 1f);
 
-        if (localT < 1f - transitionFrac) {
+        if (localT < 1f - COLOR_TRANSITION_FRAC) {
             return weights.keyAt(idx);
         } else {
-            final float blendT = (localT - (1f - transitionFrac)) / transitionFrac;
+            final float blendT = (localT - (1f - COLOR_TRANSITION_FRAC)) / COLOR_TRANSITION_FRAC;
             return NativeUiUtils.lerpColor(weights.keyAt(idx), weights.keyAt(nextIdx), blendT);
         }
     }
