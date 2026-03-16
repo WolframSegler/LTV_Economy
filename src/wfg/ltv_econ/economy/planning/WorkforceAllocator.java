@@ -153,6 +153,7 @@ public class WorkforceAllocator {
         // DATA COLLECTION
         final IndustryMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
         final double[] demand = PlanningData.getGlobalDemandVector();
+        final double[][] marketDemand = PlanningData.getMarketDemandVectorsFromMarkets(markets);
 
         final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
             markets, industryOutputPairs, PlanningData.getOutputsPerMarket(markets),
@@ -163,8 +164,9 @@ public class WorkforceAllocator {
         final List<BitSet> outputsPerMarket = groupedData.two;
         final DenseModel denseData = DenseModel.createDenseData(markets, groupedOutputPairs, outputsPerMarket);
 
-        final int N = denseData.columnSize;
-        final int C = A.length;
+        final int T = 2; // Tiers per output
+        final int N = denseData.columnSize * T; // Unique outputs for each market
+        final int C = A.length; // Commodities length
         final int O = groupedOutputPairs.size();
         final int M = markets.size();
         final int F = EconomyConstants.factionIDs.size();
@@ -179,7 +181,13 @@ public class WorkforceAllocator {
         // 1) OBJECTIVE: minimize DEFICIT_COST * sum(slack[c]) + WORKER_COST * sum(w)
         final double[] objective = new double[nVars];
 
-        Arrays.fill(objective, 0, N, WORKER_COST);
+        for (int i = 0; i < N; i++) {
+            objective[i] = WORKER_COST * switch (i % T) {
+                default -> EconomyConfig.LOCAL_WORKER_COST_MULT;
+                case 0 -> EconomyConfig.LOCAL_WORKER_COST_MULT;
+                case 1 -> 1f;
+            };
+        }
         Arrays.fill(objective, idxSStr, idxTotalWStr, EconomyConfig.ECON_DEFICIT_COST);
         Arrays.fill(objective, idxTotalWStr, nVars, 0.0);
 
@@ -194,7 +202,7 @@ public class WorkforceAllocator {
                 if (start == end) continue;
     
                 Arrays.fill(coeffs, 0.0);
-                for (int i = start; i < end; i++) coeffs[i] = 1.0;
+                for (int i = start*T; i < end*T; i++) coeffs[i] = 1.0;
     
                 const_constraints.add(
                     new LinearConstraint(coeffs, Relationship.LEQ, denseData.columnMarketCap[start])
@@ -203,12 +211,15 @@ public class WorkforceAllocator {
         }
 
         { // 3) Per-(market,output) worker caps: w[m,o] <= limit * baseCapacity[m]
-            final double[] coeffs = new double[nVars]; // reused buffer
-            for (int i = 0; i < N; i++) {
+            final double[] coeffs = new double[nVars];
+            for (int i = 0; i < N; i+=T) {
                 Arrays.fill(coeffs, 0.0);
                 coeffs[i] = 1.0;
+                coeffs[i + 1] = 1.0;
 
-                final double rhs = denseData.columnWorkerLimitFrac[i] * denseData.columnMarketCap[i];
+                final int orgIdx = i/T;
+                final double rhs = denseData.columnWorkerLimitFrac[orgIdx] * 
+                    denseData.columnMarketCap[orgIdx];
 
                 const_constraints.add(
                     new LinearConstraint(coeffs, Relationship.LEQ, rhs)
@@ -222,7 +233,7 @@ public class WorkforceAllocator {
                 Arrays.fill(coeffs, 0.0);
 
                 for (int i = 0; i < N; i++) {
-                    if (denseData.columnOutputIndex[i] == o) coeffs[i] = 1.0;
+                    if (denseData.columnOutputIndex[i/T] == o) coeffs[i] = 1.0;
                 }
 
                 coeffs[idxTotalW.apply(o)] = -1.0;
@@ -234,21 +245,22 @@ public class WorkforceAllocator {
 
         { // 5) Fair share hard floor
             final double[] coeffs = new double[nVars];
-            for (int i = 0; i < N; i++) {
-                final long weightSum = denseData.columnWeightSum[i];
+            for (int i = 0; i < N; i+=T) {
+                final int idx = i/T;
+                final long weightSum = denseData.columnWeightSum[idx];
                 if (weightSum <= 0) continue;
 
-                final long marketCap = denseData.columnMarketCap[i];
+                final long marketCap = denseData.columnMarketCap[idx];
                 final double proportion = marketCap / (double) weightSum;
 
-                final int o = denseData.columnOutputIndex[i];
+                final int o = denseData.columnOutputIndex[idx];
                 final double floorMultiplier = EconomyConfig.USE_PRODUCTION_FAIRNESS ?
-                    EconomyConfig.MIN_WORKER_FRACTION / denseData.columnOutputMod[i]:
+                    EconomyConfig.MIN_WORKER_FRACTION / denseData.columnOutputMod[idx]:
                     EconomyConfig.MIN_WORKER_FRACTION;
 
                 Arrays.fill(coeffs, 0.0);
                 coeffs[i] = 1.0;
-                coeffs[idxTotalW.apply(o)] = -proportion;
+                coeffs[i + 1] = 1.0;
                 coeffs[idxTotalW.apply(o)] = -proportion * floorMultiplier;
 
                 const_constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, 0.0));
@@ -267,7 +279,7 @@ public class WorkforceAllocator {
 
         for (int f = 0; f < F; f++) {
             final String factionID = EconomyConstants.factionIDs.get(f);
-            baselineDemandFC[f] = PlanningData.getFactionDemandVector(factionID); // copy or clone
+            baselineDemandFC[f] = PlanningData.getFactionDemandVector(factionID);
         }
 
         for (int pass = 0; pass < EconomyConfig.ECON_ALLOCATION_PASSES; pass++) {
@@ -282,20 +294,23 @@ public class WorkforceAllocator {
             if (pass != 0 && vars != null) {
                 final double[][] producedDemandAdd = new double[F][C];
 
-                for (int i = 0; i < N; i++) {
-                    final double w = vars[i];
-                    if (w == 0.0) continue;
+                for (int i = 0; i < N; i+=T) {
+                    final int orgIdx = i/T;
+                    final double wLocal = vars[orgIdx];
+                    final double wExport = vars[orgIdx + 1];
+                    final double wTotal = wLocal + wExport;
+                    if (wTotal == 0.0) continue;
 
-                    final int o = denseData.columnOutputIndex[i];
-                    final double mod = denseData.columnOutputMod[i];
-                    final int f = denseData.columnFaction[i];
-                    final double effectiveW = mod * w;
+                    final int o = denseData.columnOutputIndex[orgIdx];
+                    final double mod = denseData.columnOutputMod[orgIdx];
+                    final int f = denseData.columnFaction[orgIdx];
+                    final double wEff = mod * wTotal;
 
                     for (int c = 0; c < C; c++) {
                         final double base = A[c][o];
                         if (base == 0.0) continue;
-                        netCommodity[c] += base * effectiveW;
-                        producedDemandAdd[f][c] = base * effectiveW;
+                        netCommodity[c] += base * wEff;
+                        producedDemandAdd[f][c] += base * wEff;
                     }
                 }
     
@@ -333,9 +348,7 @@ public class WorkforceAllocator {
                         deficit += weightNorm * (1.0 - availability);
                     }
     
-                    if (deficit > 0.0) {
-                        shortage_mult[o] = Math.max(1.0 - deficit, 0.01);
-                    }
+                    shortage_mult[o] = Math.max(1.0 - deficit, 0.01);
                 }
             
                 for (int f = 0; f < F; f++) {
@@ -357,16 +370,20 @@ public class WorkforceAllocator {
                 }
             }
 
-            for (int i = 0; i < N; i++) {
-                if (denseData.columnIsOutputAbstract[i]) continue;
-                final int f = denseData.columnFaction[i];
-                final int c = denseData.columnComIdx[i];
+            for (int i = 0; i < N; i+=T) {
+                final int orgIdx = i/T;
+                if (denseData.columnIsOutputAbstract[orgIdx]) continue;
+                final int f = denseData.columnFaction[orgIdx];
+                final int c = denseData.columnComIdx[orgIdx];
 
                 final double strength = EconomyConfig.SELF_SUFFICIENCY_REWARD_STRENGTH;
                 final double antiDemandShare = Math.max(1f - rhoFC[f][c], 0.01f);
+                final double factor = 1.0 - strength + strength * antiDemandShare;
 
-                final double value = WORKER_COST * (1f - strength + strength * antiDemandShare);
-                objFunc.getCoefficients().setEntry(i, value);
+                final double baseLocal = WORKER_COST * EconomyConfig.LOCAL_WORKER_COST_MULT;
+                final double baseExport = WORKER_COST;
+                objFunc.getCoefficients().setEntry(i, baseLocal * factor);
+                objFunc.getCoefficients().setEntry(i + 1, baseExport * factor);
             }
 
             { // 6) PRIMARY: Commodity production constraints:
@@ -374,13 +391,15 @@ public class WorkforceAllocator {
                 for (int c = 0; c < C; c++) {
                     Arrays.fill(coeffs, 0.0);
     
-                    for (int i = 0; i < N; i++) {
-                        final int o = denseData.columnOutputIndex[i];
+                    for (int i = 0; i < N; i+=T) {
+                        final int orgIdx = i/T;
+                        final int o = denseData.columnOutputIndex[orgIdx];
                         final double base = A[c][o];
                         if (base == 0.0) continue;
     
-                        final double coeff = base * denseData.columnOutputMod[i] * shortage_mult[o];
+                        final double coeff = base * denseData.columnOutputMod[orgIdx] * shortage_mult[o];
                         coeffs[i] += coeff;
+                        coeffs[i + 1] += coeff;
                     }
     
                     coeffs[idxS.apply(c)] = 1.0; // slack
@@ -388,6 +407,33 @@ public class WorkforceAllocator {
                     constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, target));
                 }
             }
+
+            { // 7) Local production ceiling: local output of commodity c in market m ≤ marketDemand[m][c]
+            final double[] coeffs = new double[nVars];
+            for (int m = 0; m < denseData.marketStart.length - 1; m++) {
+                final int start = denseData.marketStart[m];
+                final int end = denseData.marketStart[m + 1];
+                if (start == end) continue;
+
+                for (int c = 0; c < C; c++) {
+                    final double ceiling = marketDemand[m][c] * EconomyConfig.LOCAL_PROD_BUFFER;
+                    if (ceiling <= 0.0) continue;
+
+                    Arrays.fill(coeffs, 0.0);
+
+                    // Sum over all original variables in this market
+                    for (int orgIdx = start; orgIdx < end; orgIdx++) {
+                        final int o = denseData.columnOutputIndex[orgIdx];
+                        final double base = A[c][o];
+                        if (base == 0.0) continue;
+
+                        coeffs[orgIdx * T] += base * denseData.columnOutputMod[orgIdx] * shortage_mult[o];
+                    }
+
+                    constraints.add(new LinearConstraint(coeffs, Relationship.LEQ, ceiling));
+                }
+            }
+        }
 
             final CustomSimplexSolver solver = new CustomSimplexSolver(
                 1e-4, 30, 1e-6, previousTableau
@@ -404,9 +450,11 @@ public class WorkforceAllocator {
         }
 
         final Map<MarketAPI, float[]> groupedAssignments = new ArrayMap<>();
-        { // 7) Extract assignments w[m,o] into map for grouped outputs
-            final double[] denseWorkerVars = new double[N];
-            System.arraycopy(vars, 0, denseWorkerVars, 0, N);
+        { // 8) Extract assignments w[m,o] into map for grouped outputs
+            final double[] denseWorkerVars = new double[N / T];
+            for (int i = 0; i < N; i+=T) {
+                denseWorkerVars[i/T] = vars[i] + vars[i+1];
+            }
 
             final double[] fullWorkers = DenseModel.expandDenseSolution(
                 denseWorkerVars, outputsPerMarket, O

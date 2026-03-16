@@ -1,6 +1,7 @@
 v0.2.11-beta | SAVE COMPATIBLE
 - Added employment rate to population table.
 - Some UI fixes inside the trade map.
+- The worker allocator now tries to satisfy local demand with local production first. Added two LunaLib settings to tune its effectiveness.
 
 v0.2.10-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.3.2 for this update.

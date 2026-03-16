@@ -71,4 +71,32 @@ public class PlanningData {
 
         return d;
     }
+
+    public static final double[] getMarketDemandVector(final String marketID) {
+        final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
+
+        final double[] d = new double[commodities.size()];
+        for (int i = 0; i < commodities.size(); i++) {
+            final String comID = commodities.get(i);
+            d[i] = EconomyEngine.getInstance().getComCell(comID, marketID).getBaseDemand(true);
+        }
+
+        return d;
+    }
+
+    public static final double[][] getMarketDemandVectorsFromMarkets(final List<MarketAPI> markets) {
+        return getMarketDemandVectors(markets.stream().map(m -> m.getId()).toList());
+    }
+
+    public static final double[][] getMarketDemandVectors(final List<String> marketIDs) {
+        final int M = marketIDs.size();
+        final int C = IndustryMatrix.getWorkerRelatedCommodityIDs().size();
+        final double[][] marketDemands = new double[M][C];
+
+        for (int m = 0; m < M; m++) {
+            marketDemands[m] = getMarketDemandVector(marketIDs.get(m));
+        }
+
+        return marketDemands;
+    }
 }
