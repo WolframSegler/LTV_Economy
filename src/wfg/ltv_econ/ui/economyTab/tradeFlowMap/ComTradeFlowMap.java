@@ -726,12 +726,15 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 "Faction", 140, "Volume", 70
             });
             for (var entry : entries) {
+                final float value = entry.getValue();
+                if (Math.abs(value) < 0.01f) continue;
+
                 final FactionSpecAPI faction = entry.getKey();
                 tp.addRow(
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),
                     highlight,
-                    entry.getValue() < 1f ? "<1" : NumFormat.engNotation(entry.getValue())
+                    value < 1f ? "<1" : NumFormat.engNotation(value)
                 );
             }
             tp.addTable("", 0, opad);
@@ -770,7 +773,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                     cell.market.getFaction().getBaseUIColor(),
                     cell.market.getName(),
                     net < 0f ? negative : highlight,
-                    NumFormat.engNotation(net)
+                    net < 1f ? "<1" : NumFormat.engNotation(net)
                 );
             }
             tp.addTable("", 0, opad);

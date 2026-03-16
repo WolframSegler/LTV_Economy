@@ -1,6 +1,8 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.UIColors.GRAY;
+import static wfg.ltv_econ.constants.UIColors.SLIDER_COLOR;
 
 import java.awt.Color;
 import java.util.Map;
@@ -111,7 +113,7 @@ public class AssignWorkersDialog extends DialogPanel {
         // Draw separator line
         final BasePanel separator = new BasePanel(
             innerPanel, panelWidth, 1
-        ) {{ bg.color = new Color(100, 100, 100);}};
+        ) {{ bg.color = GRAY;}};
         
         separator.getPos().inTL(0, sliderY - opad);
         innerPanel.addComponent(separator.getPanel());
@@ -159,7 +161,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
             // Configure the slider
             outputSlider.setHighlightOnMouseover(true);
-            outputSlider.setBarColor(new Color(20, 125, 200));
+            outputSlider.setBarColor(SLIDER_COLOR);
             outputSlider.showValueOnly = true;
             outputSlider.roundBarValue = true;
             outputSlider.clampCurrToMax = true;

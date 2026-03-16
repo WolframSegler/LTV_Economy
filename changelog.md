@@ -1,3 +1,7 @@
+v0.2.11-beta | SAVE COMPATIBLE
+- Added employment rate to population table.
+- Some UI fixes inside the trade map.
+
 v0.2.10-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.3.2 for this update.
 - Added the industry tooltip to the income report as well.

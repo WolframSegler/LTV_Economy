@@ -13,4 +13,8 @@ public class UIColors {
     public static final Color COLOR_EXPORT = new Color(63,  175, 63);
     public static final Color COLOR_NOT_EXPORTED = new Color(100, 140, 180);
     public static final Color INFORMAL_SECTOR = new Color(150, 110, 70, 255);
+
+    public static final Color SLIDER_COLOR = new Color(20, 125, 200);
+
+    public static final Color GRAY = new Color(100, 100, 100);
 }

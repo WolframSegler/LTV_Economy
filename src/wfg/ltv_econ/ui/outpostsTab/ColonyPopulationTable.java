@@ -16,6 +16,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.PlanetInfoParams;
 
+import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
@@ -68,9 +69,10 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
             "Cohesion", 90, "Degree of social cohesion within the colony's population.", true, true, 3,
 
             "Consciousness Icon", 30, null, true, false, 4,
-            "Conscious..", 90, "The colony population's awareness of exploitation and social hierarchy.", true, true, 4,
+            "Conscious..", 90, "Colony population's awareness of exploitation and social hierarchy.", true, true, 4,
 
-            "Reserves", 100, "Credit reserves of the colony", false, false, -1
+            "Reserves", 100, "Credit reserves of the colony", false, false, -1,
+            "Employment", 112, "Fraction of the workers assigned to an output.", false, false, -1
         );
 
         if (engine.getPlayerMarketData().size() > 0) {
@@ -102,7 +104,9 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
                 final Base cohesion = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOCIETY_ICON, null, null);
                 final Base consciousness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOLIDARITY_ICON, null, null);
                 final long credits = engine.getCredits(data.marketID);
-    
+                final var cond = WorkerPoolCondition.getPoolCondition(market);
+                final int employment = Math.round(100f - cond.getFreeWorkerRatio()*100f);
+
                 final Color creditColor = credits < 0l ? negative : highlight;
 
                 table.addCell(namePanel, cellAlg.LEFT, market.getDaysInExistence(), null);
@@ -116,6 +120,7 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
                 table.addCell(consciousness, cellAlg.LEFTOPAD, null, null);
                 table.addCell((int) data.getClassConsciousness(), cellAlg.MID, null, null);
                 table.addCell(NumFormat.formatCredit(credits), cellAlg.MID, credits, creditColor);
+                table.addCell(employment + "%", cellAlg.MID, employment, null);
 
                 final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
                     final ManagePopulationDialog dialogPanel = new ManagePopulationDialog(market);

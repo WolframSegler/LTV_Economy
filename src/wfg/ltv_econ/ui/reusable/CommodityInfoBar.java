@@ -18,7 +18,9 @@ import wfg.native_ui.ui.panels.CustomPanel;
 import wfg.native_ui.util.RenderUtils;
 
 public class CommodityInfoBar extends CustomPanel<CommodityInfoBar> {
-    private static final String GLOW_BG = Global.getSettings().getSpriteName("ui", "glow_bg");
+    private static final Color TRANSPARENT_BLACK = new Color(0, 0, 0, 100);
+    private static final Color TRANSPARENT_WHITE = new Color(255, 255, 255, 20);
+    private static final SpriteAPI GLOW_BG = Global.getSettings().getSprite("ui", "glow_bg");
 
     private final Map<Color, Float> barMap;
     private boolean hasOutline = false;
@@ -74,7 +76,7 @@ public class CommodityInfoBar extends CustomPanel<CommodityInfoBar> {
         if (hasOutline) {
             RenderUtils.drawFramedBorder(
                 x + 1, y + 1, w - 2, h - 2,
-                1, new Color(0, 0, 0, 100), alpha
+                1, TRANSPARENT_BLACK, alpha
             );
         }
 
@@ -87,21 +89,19 @@ public class CommodityInfoBar extends CustomPanel<CommodityInfoBar> {
             RenderUtils.drawQuad(offsetX, y, (w - sideBarGap)*mapEntry.getValue(), h, mapEntry.getKey(), alpha, false);
             offsetX += (w - sideBarGap)*mapEntry.getValue();
         }
-
-        SpriteAPI glowBg = Global.getSettings().getSprite(GLOW_BG);
         
-        glowBg.setAdditiveBlend();
-        glowBg.setColor(new Color(255, 255, 255, 20));
-        glowBg.setSize(w - sideBarGap, h);
-        glowBg.render(x + sideBarGap, y);
+        GLOW_BG.setAdditiveBlend();
+        GLOW_BG.setColor(TRANSPARENT_WHITE);
+        GLOW_BG.setSize(w - sideBarGap, h);
+        GLOW_BG.render(x + sideBarGap, y);
 
         drawGlassLayer(x, y, w, h, alpha);
     }
 
     private static final void drawGlassLayer(float x, float y, float w, float h, float alpha) {
-        Color topLight     = new Color(255, 255, 255, (int)(80 * alpha));
+        Color topLight = new Color(255, 255, 255, (int)(80 * alpha));
         Color centerHighlight = new Color(255, 255, 255, (int)(20 * alpha));
-        Color bottomShadow  = new Color(0, 0, 0, (int)(90 * alpha));
+        Color bottomShadow = new Color(0, 0, 0, (int)(90 * alpha));
 
         final float topY = y + h * 0.97f;
         final float midTop = y + h * 0.82f;
