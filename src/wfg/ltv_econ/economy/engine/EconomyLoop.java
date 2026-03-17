@@ -140,17 +140,47 @@ public class EconomyLoop {
     }
 
     public final void refreshMarkets() {
-        final Set<String> economyMarketIDs = EconomyInfo.getMarketsCopy().stream()
+        final List<MarketAPI> econMarkets = EconomyInfo.getMarketsCopy();
+        final Set<String> econMarketIDs = econMarkets.stream()
             .map(MarketAPI::getId)
             .collect(Collectors.toSet());
         final Set<String> registeredMarkets = new HashSet<>(engine.m_registeredMarkets);
 
-        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
+        for (MarketAPI market : econMarkets) {
             if (!registeredMarkets.contains(market.getId())) engine.registerMarket(market);
         }
 
         for (String marketID : registeredMarkets) {
-            if (!economyMarketIDs.contains(marketID)) engine.removeMarket(marketID);
+            if (!econMarketIDs.contains(marketID)) engine.removeMarket(marketID);
+        }
+    }
+
+    public final void refreshMarketsHard() {
+        final List<MarketAPI> econMarkets = EconomyInfo.getMarketsCopy();
+        final Set<String> econMarketIDs = econMarkets.stream()
+            .map(MarketAPI::getId)
+            .collect(Collectors.toSet());
+        final Set<String> registeredMarkets = new HashSet<>(engine.m_registeredMarkets);
+
+        for (MarketAPI market : econMarkets) {
+            if (!registeredMarkets.contains(market.getId())) engine.registerMarket(market);
+        }
+
+        for (String marketID : registeredMarkets) {
+            if (!econMarketIDs.contains(marketID)) engine.removeMarket(marketID);
+        }
+
+        for (MarketAPI market : econMarkets) {
+            if (!market.isPlayerOwned()) continue;
+
+            final String marketID = market.getId();
+            if (!engine.m_playerMarketData.containsKey(marketID)) {
+                engine.addPlayerMarketData(marketID);
+            }
+            for (CommodityDomain dom : engine.getComDomains()) {
+                if (dom.getCell(marketID) == null) dom.addMarket(marketID);
+                if (!dom.hasLedger(marketID)) dom.addLedger(marketID);
+            }
         }
     }
 

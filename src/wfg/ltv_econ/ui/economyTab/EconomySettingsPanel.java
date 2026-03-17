@@ -2,7 +2,6 @@ package wfg.ltv_econ.ui.economyTab;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -49,14 +48,7 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> impl
 
         { // REFRESH MARKETS
             final CallbackRunnable<Button> run = (btn) -> {
-                engine.refreshMarkets();
-                
-                for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-                    final String marketID = market.getId();
-                    if (market.isPlayerOwned() && !engine.isPlayerMarket(marketID)) {
-                        engine.addPlayerMarketData(marketID);
-                    }
-                }
+                engine.refreshMarketsHard();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 "Refresh Markets", Fonts.DEFAULT_SMALL, run
@@ -65,7 +57,7 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> impl
 
             button.tooltip.width = 400f;
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Synchronizes EconomyEngine markets with vanilla Economy markets. ", pad);
+                tp.addPara("Synchronizes EconomyEngine markets with vanilla Economy markets. Does extra checks to make sure no data is missing.", pad);
             };
         }
         

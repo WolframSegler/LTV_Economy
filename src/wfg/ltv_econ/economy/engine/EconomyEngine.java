@@ -229,6 +229,10 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         loop.refreshMarkets();
     }
 
+    public final void refreshMarketsHard() {
+        loop.refreshMarketsHard();
+    }
+
     public Set<String> getRegisteredMarkets() {
         return Collections.unmodifiableSet(m_registeredMarkets);
     }
@@ -238,7 +242,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final boolean isPlayerMarket(String marketID) {
-        return m_playerMarketData.keySet().contains(marketID);
+        return m_playerMarketData.containsKey(marketID);
     }
 
     public final PlayerMarketData getPlayerMarketData(String marketID) {

@@ -452,7 +452,7 @@ public class TooltipUtils {
                 final float value = ((int) (cell.importEffectiveness * 100f)) / 100f;
 
                 tp.setGridValueColor(negative);
-                tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value);
+                tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value, negative);
             }
         }
 

@@ -96,7 +96,7 @@ public class CommodityDomain {
         m_comCells.putIfAbsent(marketID, new CommodityCell(comID, marketID));
 
         if (EconomyEngine.getInstance().isPlayerMarket(marketID)) {
-            incomeLedgers.put(marketID, new IncomeLedger());
+            incomeLedgers.putIfAbsent(marketID, new IncomeLedger());
         }
     }
 
@@ -148,6 +148,12 @@ public class CommodityDomain {
 
     public final boolean hasLedger(String marketID) {
         return incomeLedgers.containsKey(marketID);
+    }
+
+    public final IncomeLedger addLedger(String marketID) {
+        final IncomeLedger ledger = new IncomeLedger();
+        incomeLedgers.put(marketID, ledger);
+        return ledger;
     }
 
     /**

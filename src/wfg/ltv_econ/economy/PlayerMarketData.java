@@ -19,7 +19,6 @@ import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
-import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
@@ -274,19 +273,16 @@ public class PlayerMarketData {
 
         if (baseValue != 0) {
             market.getStability().modifyFlat(happinessID, baseValue, desc);
-            for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-                for (Industry ind : dom.getCell(marketID).getVisibleIndustries()) {
-                    ind.getSupplyBonus().modifyMult(
-                        happinessID, 1f + baseValue * 0.2f, desc
-                    );
-                }
+
+            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
+                ind.getSupplyBonus().modifyMult(
+                    happinessID, 1f + baseValue * 0.2f, desc
+                );
             }
         } else {
             market.getStability().unmodifyFlat(happinessID);
-            for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-                for (Industry ind : dom.getCell(marketID).getVisibleIndustries()) {
-                    ind.getSupplyBonus().unmodifyMult(happinessID);
-                }
+            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
+                ind.getSupplyBonus().unmodifyMult(happinessID);
             }
         }
     }

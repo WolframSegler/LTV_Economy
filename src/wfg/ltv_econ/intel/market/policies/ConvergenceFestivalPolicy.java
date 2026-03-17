@@ -7,8 +7,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import static wfg.native_ui.util.UIConstants.*;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
-import wfg.ltv_econ.economy.commodity.CommodityDomain;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.WorkerRegistry;
 
 public class ConvergenceFestivalPolicy extends MarketPolicy {
     public static final float HAPPINESS_BUFF = 0.67f;
@@ -22,12 +21,10 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         data.socialCohesionDelta.modifyFlat(id, COHESION_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
 
-        for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-            for (Industry ind : dom.getCell(data.marketID).getVisibleIndustries()) {
-                ind.getSupplyBonus().modifyMult(
-                    id, PRODUCTION_DEBUFF, spec.name
-                );
-            }
+        for (Industry ind : WorkerRegistry.getVisibleIndustries(data.market)) {
+            ind.getSupplyBonus().modifyMult(
+                id, PRODUCTION_DEBUFF, spec.name
+            );
         }
     }
 
@@ -36,10 +33,8 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
 
-        for (CommodityDomain dom : EconomyEngine.getInstance().getComDomains()) {
-            for (Industry ind : dom.getCell(data.marketID).getVisibleIndustries()) {
-                ind.getSupplyBonus().unmodifyMult(id);
-            }
+        for (Industry ind : WorkerRegistry.getVisibleIndustries(data.market)) {
+            ind.getSupplyBonus().unmodifyMult(id);
         }
     }
 

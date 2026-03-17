@@ -239,6 +239,7 @@ public class CommodityCell {
         demandBaseMutables.clear();
 
         for (Industry industry : getVisibleIndustries()) {
+            // Register IOs
             if (industry.getSupply(comID).getQuantity().getModifiedValue() > 0.01f &&
                 !IndustryIOs.hasOutput(industry, comID)
             ) {
@@ -250,9 +251,8 @@ public class CommodityCell {
             ) {
                 IndustryIOs.createAndRegisterDynamicInput(industry, comID, true);
             }
-        }
 
-        for (Industry industry : getVisibleIndustries()) {
+            // Retrieve IOs
             if (IndustryIOs.hasOutput(industry, comID)) {
                 if (!IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles) {
                     final MutableStat supplyStat = CompatLayer.convertIndSupplyStat(industry, comID);

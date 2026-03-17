@@ -773,7 +773,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                     cell.market.getFaction().getBaseUIColor(),
                     cell.market.getName(),
                     net < 0f ? negative : highlight,
-                    net < 1f ? "<1" : NumFormat.engNotation(net)
+                    Math.abs(net) < 1f ? "<1" : NumFormat.engNotation(net)
                 );
             }
             tp.addTable("", 0, opad);

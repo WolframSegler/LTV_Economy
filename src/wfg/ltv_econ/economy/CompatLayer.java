@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
@@ -81,42 +82,42 @@ public final class CompatLayer {
         return hasRelevantCondition ? value : 0f;
     }
     
-    public static final MutableStat getModifiers(
+    public static final StatBonus getModifiers(
         Industry ind, String comID, MutableStat base, MutableStat bonus
     ) {
-        final MutableStat modifierStat = new MutableStat(1f);
+        final StatBonus statBonus = new StatBonus();
 
         final String installedItemID = ind.getSpecialItem() != null ? ind.getSpecialItem().getId() : null;
 
         if (installedItemID != null) {
             for (StatMod mod : base.getFlatMods().values()) {
                 if (mod.source.contains(installedItemID)) {
-                    float converted = industryModConverter((int) mod.value);
-                    modifierStat.modifyMult(mod.source + EconomyLoop.KEY + ind.getId(), converted, mod.desc);
+                    final float converted = industryModConverter((int) mod.value);
+                    statBonus.modifyMult(mod.source + EconomyLoop.KEY + ind.getId(), converted, mod.desc);
                 }
             }
         }
 
-        applyResourceDepositMods(ind, modifierStat, comID);
+        applyResourceDepositMods(ind, statBonus, comID);
 
-        if (bonus == null) return modifierStat;
+        if (bonus == null) return statBonus;
         int bonusID = 0;
 
         for (StatMod mod : bonus.getPercentMods().values()) {
-            modifierStat.modifyPercent(bonusID++ + EconomyLoop.KEY + ind.getId(), mod.value, mod.desc);
+            statBonus.modifyPercent(bonusID++ + EconomyLoop.KEY + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getMultMods().values()) {
-            modifierStat.modifyMult(bonusID++ + EconomyLoop.KEY + ind.getId(), mod.value, mod.desc);
+            statBonus.modifyMult(bonusID++ + EconomyLoop.KEY + ind.getId(), mod.value, mod.desc);
         }
 
         for (StatMod mod : bonus.getFlatMods().values()) {
             float converted = industryModConverter((int) mod.value);
 
-            modifierStat.modifyMult(bonusID++ + EconomyLoop.KEY + ind.getId(), converted, mod.desc);
+            statBonus.modifyMult(bonusID++ + EconomyLoop.KEY + ind.getId(), converted, mod.desc);
         }
 
-        return modifierStat;
+        return statBonus;
     }
 
     public static final float getModifiersMult(
@@ -127,7 +128,7 @@ public final class CompatLayer {
         final MutableStat base = isDemand ?
             ind.getDemand(comID).getQuantity() : ind.getSupply(comID).getQuantity();
 
-        return getModifiers(ind, comID, base, bonus).getModifiedValue();
+        return getModifiers(ind, comID, base, bonus).computeEffective(1f);
     }
 
     /*
@@ -205,7 +206,7 @@ public final class CompatLayer {
         }
     }
 
-    public static final void applyResourceDepositMods(Industry ind, MutableStat dest, String comID) {
+    public static final void applyResourceDepositMods(Industry ind, StatBonus dest, String comID) {
         for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
             final String commodityId = ResourceDepositsCondition.COMMODITY.get(cond.getId());
             if (commodityId == null || !commodityId.equals(comID)) continue;
