@@ -234,7 +234,6 @@ public class WorkerRegistry {
         public final long getAssignedForOutput(String comID) {
             if (!outputRatios.containsKey(comID)) return 0;
 
-
             final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
 
             return (long) (pool.getWorkerPool() * outputRatios.get(comID));

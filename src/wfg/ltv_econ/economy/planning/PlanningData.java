@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -72,6 +73,18 @@ public class PlanningData {
         return d;
     }
 
+    public static final double[][] getFactionDemandVectors() {
+        final int F = EconomyConstants.factionIDs.size();
+        final int C = IndustryMatrix.getWorkerRelatedCommodityIDs().size();
+
+        final double[][] d = new double[F][C];
+        for (int f = 0; f < F; f++) {
+            d[f] = getFactionDemandVector(EconomyConstants.factionIDs.get(f));
+        }
+
+        return d;
+    }
+
     public static final double[] getMarketDemandVector(final String marketID) {
         final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
 
@@ -91,12 +104,12 @@ public class PlanningData {
     public static final double[][] getMarketDemandVectors(final List<String> marketIDs) {
         final int M = marketIDs.size();
         final int C = IndustryMatrix.getWorkerRelatedCommodityIDs().size();
-        final double[][] marketDemands = new double[M][C];
+        final double[][] d = new double[M][C];
 
         for (int m = 0; m < M; m++) {
-            marketDemands[m] = getMarketDemandVector(marketIDs.get(m));
+            d[m] = getMarketDemandVector(marketIDs.get(m));
         }
 
-        return marketDemands;
+        return d;
     }
 }

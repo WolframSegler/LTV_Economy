@@ -37,11 +37,12 @@ public class EconomyConfigLoader {
         try {
         EconomyConfig.MULTI_THREADING = root.getBoolean("MULTI_THREADING");
         EconomyConfig.STARTING_CREDITS_FOR_MARKET = root.getInt("STARTING_CREDITS_FOR_MARKET");
-        EconomyConfig.SELF_SUFFICIENCY_REWARD_STRENGTH = root.getDouble("SELF_SUFFICIENCY_REWARD_STRENGTH");
         EconomyConfig.LOCAL_WORKER_COST_MULT = root.getDouble("LOCAL_WORKER_COST_MULT");
+        EconomyConfig.FACTION_WORKER_COST_MULT = root.getDouble("FACTION_WORKER_COST_MULT");
         EconomyConfig.ECON_DEFICIT_COST = root.getDouble("ECON_DEFICIT_COST");
-        EconomyConfig.PRODUCTION_BUFFER = 1f + root.getDouble("PRODUCTION_BUFFER");
         EconomyConfig.LOCAL_PROD_BUFFER = 1f + root.getDouble("LOCAL_PROD_BUFFER");
+        EconomyConfig.FACTION_PROD_BUFFER = 1f + root.getDouble("FACTION_PROD_BUFFER");
+        EconomyConfig.PRODUCTION_BUFFER = 1f + root.getDouble("PRODUCTION_BUFFER");
         EconomyConfig.DAYS_TO_COVER = root.getInt("DAYS_TO_COVER");
         EconomyConfig.DAYS_TO_COVER_PER_IMPORT = root.getInt("DAYS_TO_COVER_PER_IMPORT");
         EconomyConfig.FACTION_EXCHANGE_MULT = (float) root.getDouble("FACTION_EXCHANGE_MULT");
@@ -85,10 +86,11 @@ public class EconomyConfigLoader {
             EconomyConfig.CREDIT_WITHDRAWAL_LIMIT = LunaSettings.getInt(LTV_ECON, "economy_withdrawalLimit");
             EconomyConfig.AUTO_TRANSFER_PROFIT_LIMIT = LunaSettings.getDouble(LTV_ECON, "economy_autoTransferLimit").floatValue();
             EconomyConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "economy_deficitCost");
-            EconomyConfig.SELF_SUFFICIENCY_REWARD_STRENGTH = LunaSettings.getDouble(LTV_ECON, "economy_selfSufficiencyStrength");
             EconomyConfig.LOCAL_WORKER_COST_MULT = LunaSettings.getDouble(LTV_ECON, "economy_localWorkerCost");
-            EconomyConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_prodBuffer");
+            EconomyConfig.FACTION_WORKER_COST_MULT = LunaSettings.getDouble(LTV_ECON, "economy_factionWorkerCost");
             EconomyConfig.LOCAL_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_localProdBuffer");
+            EconomyConfig.FACTION_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_factionProdBuffer");
+            EconomyConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_prodBuffer");
             EconomyConfig.DAYS_TO_COVER = LunaSettings.getInt(LTV_ECON, "economy_daysToCover");
             EconomyConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "economy_toCoverPerImport");
             EconomyConfig.FACTION_EXCHANGE_MULT = LunaSettings.getDouble(LTV_ECON, "economy_factionExchangeMult").floatValue();
@@ -129,24 +131,29 @@ public class EconomyConfigLoader {
         public static double ECON_DEFICIT_COST;
 
         /**
-         * The reward strength for a faction meeting its own demand. 0 means self-sufficiency is ignored.
-         */
-        public static double SELF_SUFFICIENCY_REWARD_STRENGTH;
-
-        /**
          * The cost multiplier for workers used to satisfy local demand.
          */
         public static double LOCAL_WORKER_COST_MULT;
 
         /**
-         * Applied to the demand vector of worker-independent industries.
+         * The cost multiplier for workers used to satisfy Faction demand.
          */
-        public static double PRODUCTION_BUFFER;
+        public static double FACTION_WORKER_COST_MULT;
 
         /**
          * Applied to the ceiling of local production coefficient.
          */
         public static double LOCAL_PROD_BUFFER;
+
+        /**
+         * Applied to the ceiling of faction production coefficient.
+         */
+        public static double FACTION_PROD_BUFFER;
+
+        /**
+         * Applied to the demand vector of worker-independent industries.
+         */
+        public static double PRODUCTION_BUFFER;
 
         /**
          * each market aims to have <code>x</code> days worth of stockpiles.

@@ -1,7 +1,7 @@
 v0.2.11-beta | SAVE COMPATIBLE
 - Added employment rate to population table.
 - Some UI fixes inside the trade map.
-- The worker allocator now tries to satisfy local demand with local production first. Added two LunaLib settings to tune its effectiveness.
+- The worker allocator now tries to satisfy local demand first, then faction demand second, and global demand at last. Added four LunaLib settings to tune its effectiveness. Factions try to be as self-sufficient as possible now.
 - Fixed happiness prod modifiers.
 
 v0.2.10-beta | SAVE COMPATIBLE
