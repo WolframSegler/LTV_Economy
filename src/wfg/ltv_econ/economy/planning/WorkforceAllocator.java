@@ -30,7 +30,6 @@ import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
 import wfg.ltv_econ.economy.planning.optim.CustomSimplexSolver;
-import wfg.ltv_econ.economy.planning.optim.SimplexTableau;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
@@ -127,9 +126,9 @@ public class WorkforceAllocator {
             }
 
             if (used > pool + 1e-3f)
-                sb.append("   ⚠ Overcapacity!\n");
+                sb.append("⚠ Overcapacity!\n");
             else if (used < 0)
-                sb.append("   ⚠ Negative assignment!\n");
+                sb.append("⚠ Negative assignment!\n");
 
             sb.append("\n");
         }
@@ -179,15 +178,15 @@ public class WorkforceAllocator {
         final Function<Integer, Integer> idxSlack = c -> idxSlackStr + c;
         final Function<Integer,Integer> idxTotalW = o -> idxTotalWStr + o;
 
-        // 1) OBJECTIVE: minimize DEFICIT_COST * sum(slack[c]) + WORKER_COST * sum(w)
+        // 1) OBJECTIVE: minimize sum(slack[c]) + sum(w)
         final double[] objective = new double[nVars];
 
         for (int i = 0; i < N; i++) {
             objective[i] = WORKER_COST * switch (i % T) {
                 case 0 -> EconomyConfig.LOCAL_WORKER_COST_MULT;
                 case 1 -> EconomyConfig.FACTION_WORKER_COST_MULT;
-                case 2 -> 1f;
-                default -> 1f;
+                case 2 -> 1.0;
+                default -> 1.0;
             };
         }
         Arrays.fill(objective, idxSlackStr, idxTotalWStr, EconomyConfig.ECON_DEFICIT_COST);
@@ -212,7 +211,7 @@ public class WorkforceAllocator {
             }
         }
 
-        { // 3) Per-(market,output) worker caps: w[m,o] <= limit * baseCapacity[m]
+        { // 3) Industry worker caps: w[m,o] <= limit * baseCapacity[m]
             final double[] coeffs = new double[nVars];
             for (int i = 0; i < N; i+=T) {
                 Arrays.fill(coeffs, 0.0);
@@ -244,7 +243,7 @@ public class WorkforceAllocator {
             }
         }
 
-        { // 5) Fair share hard floor
+        { // 5) Fair share floor.
             final double[] coeffs = new double[nVars];
             for (int i = 0; i < N; i+=T) {
                 final int idx = i/T;
@@ -253,22 +252,19 @@ public class WorkforceAllocator {
 
                 final long marketCap = denseData.columnMarketCap[idx];
                 final double proportion = marketCap / (double) weightSum;
-
                 final int o = denseData.columnOutputIndex[idx];
                 final double floorMultiplier = EconomyConfig.USE_PRODUCTION_FAIRNESS ?
-                    EconomyConfig.MIN_WORKER_FRACTION / denseData.columnOutputMod[idx]:
+                    EconomyConfig.MIN_WORKER_FRACTION / denseData.columnOutputMod[idx] :
                     EconomyConfig.MIN_WORKER_FRACTION;
 
                 Arrays.fill(coeffs, 0.0);
                 for (int z = 0; z < T; z++) coeffs[i + z] = 1.0;
                 coeffs[idxTotalW.apply(o)] = -proportion * floorMultiplier;
-
                 const_constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, 0.0));
             }
         }
 
         double[] vars = null;
-        SimplexTableau previousTableau = null;
         final double[] netCommodity = new double[C];
         final double[] comAvailability = new double[C];
         final double[] shortage_mult = new double[O];
@@ -412,7 +408,7 @@ public class WorkforceAllocator {
             }
 
             final CustomSimplexSolver solver = new CustomSimplexSolver(
-                1e-2, 30, 1e-4, previousTableau
+                1e-2, 30, 1e-4
             );
             final PointValuePair solution = solver.optimize(
                 new MaxIter(50000), objFunc,
@@ -422,7 +418,6 @@ public class WorkforceAllocator {
                 PivotSelectionRule.DANTZIG
             );
             vars = solution.getPoint();
-            previousTableau = solver.getPrevTableau();
         }
 
         final Map<MarketAPI, float[]> groupedAssignments = new ArrayMap<>();

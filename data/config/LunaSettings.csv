@@ -25,8 +25,8 @@ economy_withdrawalLimit,Monthly Withdrawal Limit,Int,100000,,Sets the maximum am
 economy_autoTransferLimit,Profit Transfer Limit,Double,0.5,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy
 economy_solverHeader,Worker Allocation Settings,Header,Worker Allocation Settings,,,,,Economy
 economy_deficitCost,Deficit Penalty,Double,5000,,Higher values encourage more demand fulfillment.,0,100000,Economy
-economy_localWorkerCost,Local Worker Cost Mult,Double,0.05,,Multiplier for the cost of workers assigned to meet local demand. A value of 1 stops prioritizing production for local demand. Heavy on performance when allocation passes are high.,0.01,1,Economy
-economy_factionWorkerCost,Faction Worker Cost Mult,Double,0.1,,Multiplier for the cost of workers assigned to meet faction demand. A value of 1 disables it. Should ideally be higher than Local Worker Cost Mult.,0.01,1,Economy
+economy_localWorkerCost,Local Worker Cost Mult,Double,0.1,,Multiplier for the cost of workers assigned to meet local demand. A value of 1 stops prioritizing production for local demand. Heavy on performance when allocation passes are high.,0.01,1,Economy
+economy_factionWorkerCost,Faction Worker Cost Mult,Double,0.15,,Multiplier for the cost of workers assigned to meet faction demand. A value of 1 disables it. Should ideally be higher than Local Worker Cost Mult.,0.01,1,Economy
 economy_minWorkerFraction,Minimum Worker Fraction,Double,0.3,,Minimum fraction of each output's fair share of workers. Setting a high value may cause production deficits.,0,1,Economy
 economy_localProdBuffer,Local Production Buffer,Double,0.1,,Allocation is prioritized to meet local demand by a factor of 1 + x.,0,3,Economy
 economy_factionProdBuffer,Faction Production Buffer,Double,0.1,,Allocation is prioritized to meet faction demand by a factor of 1 + x.,0,3,Economy
