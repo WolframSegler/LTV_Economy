@@ -103,14 +103,15 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             for (Industry ind : market.getIndustries()) {
                 if (ind.getId().equals(Industries.HEAVYINDUSTRY) ||
                     ind.getId().equals(Industries.LIGHTINDUSTRY) ||
-                    ind.getId().equals(Industries.ORBITALWORKS)
+                    ind.getId().equals(Industries.ORBITALWORKS) ||
+                    ind.getId().equals(Industries.REFINING)
                 ) {
                     hasRequiredIndustry = true;
                     break;
                 }
             }
             if (!hasRequiredIndustry) continue;
-            if (Misc.getNumIndustries(market) >= Misc.getMaxIndustries(market) - 1) continue;
+            if (Misc.getNumIndustries(market) >= Misc.getMaxIndustries(market)) continue;
 
             market.addIndustry("manufacturing");
         }

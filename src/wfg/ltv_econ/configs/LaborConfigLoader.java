@@ -47,6 +47,7 @@ public class LaborConfigLoader {
         LaborConfig.defaultWorkerCapPerOutput = (float) root.getDouble("defaultWorkerCapPerOutput");
         LaborConfig.dynamicWorkerCapPerOutput = (float) root.getDouble("dynamicWorkerCapPerOutput");
         LaborConfig.NPC_WORKER_POOL_VISIBLE = root.getBoolean("NPC_WORKER_POOL_VISIBLE");
+        LaborConfig.GROWTH_EFFECT_WORKER_POOL = root.getBoolean("GROWTH_EFFECT_WORKER_POOL");
 
         final JSONArray RoVCList = root.getJSONArray("RoVC_list");
         for (int i = 0; i < RoVCList.length(); i++) {
@@ -77,6 +78,7 @@ public class LaborConfigLoader {
         LaborConfig.avg_wage = LaborConfig.LPV_month / LaborConfig.RoSV;
 
         LaborConfig.NPC_WORKER_POOL_VISIBLE = LunaSettings.getBoolean(LTV_ECON, "labor_workerPoolVisible");
+        LaborConfig.GROWTH_EFFECT_WORKER_POOL = LunaSettings.getBoolean(LTV_ECON, "labor_growthIncreasesPool");
 
         final float avgValue = LunaSettings.getDouble(LTV_ECON, "labor_RoVC_average").floatValue();
         LaborConfig.RoVC_average = avgValue;
@@ -94,6 +96,7 @@ public class LaborConfigLoader {
     public static class LaborConfig {
 
         public static boolean NPC_WORKER_POOL_VISIBLE;
+        public static boolean GROWTH_EFFECT_WORKER_POOL;
 
         public static float avg_wage;
         public static int RoSV;

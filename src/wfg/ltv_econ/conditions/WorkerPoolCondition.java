@@ -8,10 +8,12 @@ import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.NumFormat;
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -28,9 +30,15 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
     }
 
     public final void recalculateWorkerPool() {
-        setWorkerPool((long)(
-            getWorkerRatio(market.getSize()) * Math.pow(10, market.getSize())
-        ));
+        final int size = market.getSize();
+        final double base = getWorkerRatio(size) * Math.pow(10, size);
+        if (LaborConfig.GROWTH_EFFECT_WORKER_POOL) {
+            final float t = Misc.getMarketSizeProgress(market);
+            final double dest = getWorkerRatio(size+1) * Math.pow(10, size+1);
+            workerPool = (long) Arithmetic.lerp(base, dest, t);
+        } else {
+            workerPool = (long) base;
+        }
 
         float totalAssigned = 0;
         final WorkerRegistry reg = WorkerRegistry.getInstance();
@@ -117,7 +125,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
             case 8: return 0.26f;
             case 9: return 0.15f;
             case 10: return 0.08f;
-            default: return 0.05f;
+            default: return 1f/(2f * size);
         }
     }
 

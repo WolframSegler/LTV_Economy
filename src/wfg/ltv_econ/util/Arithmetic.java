@@ -38,4 +38,18 @@ public final class Arithmetic {
         final float dy = y2 - y1;
         return (float) Math.sqrt(dx * dx + dy * dy);
     }
+
+    public static final float lerp(final float x, final float y, float t) {
+        return x + (y - x) * t;
+    }
+    public static final int lerp(final int x, final int y, float t) {
+        return Math.round(x + (y - x) * t);
+    }
+    public static final double lerp(final double x, final double y, float t) {
+        return x + (y - x) * t;
+    }
+    public static final long lerp(final long x, final long y, double t) {
+        return Math.round(x + (y - x) * t);
+    }
+
 }

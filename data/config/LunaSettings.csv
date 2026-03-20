@@ -1,7 +1,8 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
-labor_generalHeader,General Settings,Header,General Settings,,,,,Labor
+labor_workerPoolHeader,Worker Pool,Header,Worker Pool,,,,,Labor
 labor_workerPoolVisible,Show NPC Worker Pool,Boolean,false,,Should the worker pool condition of NPC markets be visible,,,Labor
-labor_proHeader,Worker Configuration,Header,Worker Configuration,,,,,Labor
+labor_growthIncreasesPool,Growth Effect Worker Pool,Boolean,false,,The worker pool grows with the population growth progress.,,,Labor
+labor_workerConfigHeader,Worker Configuration,Header,Worker Configuration,,,,,Labor
 labor_RoSV,The Default Ratio of Surplus Value,Int,4,,Defines the split between worker wages and surplus output. Higher values mean lower wages. Used by NPC markets.,1,10,Labor
 labor_maxRoSV,The Maximum Ratio of Surplus Value,Int,10,,The maximum value for player owned colonies.,1,20,Labor
 labor_lpvMonth,The Monthly Value of Labor Power,Int,8,,The value in credits produced by a single worker per month.,1,100,Labor

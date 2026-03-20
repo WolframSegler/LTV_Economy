@@ -1,6 +1,7 @@
 v0.2.12-beta | SAVE COMPATIBLE
 - The effects of saving LunaLib Settings now takes effect immideatly. No restart required.
-
+- Added a setting to toggle worker pool growth with population growth progress.
+- Relaxed the eligibility conditions for manufacturing.
 
 v0.2.11-beta | SAVE COMPATIBLE
 - Added employment rate to population table.
