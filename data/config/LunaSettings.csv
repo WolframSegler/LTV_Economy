@@ -1,5 +1,4 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
-labor_warningHeader,Warning,Text,The changes apply only if no save has been loaded yet. Otherwise a restart is required.,,,,,Labor
 labor_generalHeader,General Settings,Header,General Settings,,,,,Labor
 labor_workerPoolVisible,Show NPC Worker Pool,Boolean,false,,Should the worker pool condition of NPC markets be visible,,,Labor
 labor_proHeader,Worker Configuration,Header,Worker Configuration,,,,,Labor
@@ -16,10 +15,10 @@ labor_RoVC_agriculture,RoCV Agriculture,Double,0.23,,,0.0,1.0,Labor
 labor_RoVC_mechanized,RoCV Mechanized Industries,Double,0.1,,Used by mining and fuel production.,0.0,1.0,Labor
 labor_RoVC_manual,RoCV Manual Professions,Double,0.5,,,0.0,1.0,Labor
 labor_RoVC_space,RoCV Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
-,,,,,,,,
-economy_warningHeader,Warning,Text,The changes apply only if no save has been loaded yet. Otherwise a restart is required.,,,,,Economy
+,,,,,,,,loaded yet. Otherwise a restart is required.,,,,,Economy
 economy_generalHeader,General Settings,Header,General Settings,,,,,Economy
-economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread,,,Economy
+economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread.,,,Economy
+economy_assignOnLoad,Assign Workers On Load,Boolean,false,,Re-allocates the workers after loading a save. Includes quick-saves as well.,,,Economy
 economy_startingCredits,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
 economy_withdrawalLimit,Monthly Withdrawal Limit,Int,100000,,Sets the maximum amount of credits you can withdraw from your colonies per month.,0,1000000000,Economy
 economy_autoTransferLimit,Profit Transfer Limit,Double,0.5,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy

@@ -88,6 +88,12 @@ public class IndustryIOs {
 
     private IndustryIOs() {}
     static {
+        reload();
+    }
+
+    public static final void reload() {
+        clearMaps();
+        
         buildBaseIdMapping();
 
         ConfigInputOutputMaps();
@@ -95,6 +101,14 @@ public class IndustryIOs {
         buildInputToOutput();
 
         buildInputOutputToIndustries();
+    }
+
+    private static final void clearMaps() {
+        baseOutputs.clear();
+        baseInputs.clear();
+        inputToOutput.clear();
+        inputToInd.clear();
+        IndToBaseInd.clear();
     }
 
     private static final void ConfigInputOutputMaps() {

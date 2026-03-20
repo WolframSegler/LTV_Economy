@@ -1,5 +1,7 @@
 package wfg.ltv_econ.plugins;
 
+import static wfg.ltv_econ.constants.Mods.LUNA_LIB;
+
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -10,7 +12,9 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.util.Misc;
 import com.thoughtworks.xstream.XStream;
 
+import lunalib.lunaSettings.LunaSettings;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.configs.ConfigLunaSettingsListener;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -33,7 +37,11 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     }
 
     @Override
-    public void onApplicationLoad() throws Exception {}
+    public void onApplicationLoad() throws Exception {
+        if (Global.getSettings().getModManager().isModEnabled(LUNA_LIB)) {
+            LunaSettings.addSettingsListener(new ConfigLunaSettingsListener());
+        }
+    }
 
     @Override
     public void onNewGame() {
@@ -48,7 +56,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void onGameLoad(boolean newGame) {
         WorkerRegistry.loadInstance(false);
-        EconomyEngineSerializer.loadInstance(false);
+        EconomyEngineSerializer.loadInstance(false, newGame);
 
         final ListenerManagerAPI listenerManager = Global.getSector().getListenerManager();
 
@@ -69,7 +77,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void afterGameSave() {
         WorkerRegistry.loadInstance(false);
-        EconomyEngineSerializer.loadInstance(false);
+        EconomyEngineSerializer.loadInstance(false, false);
     }
 
     private static final void registerBarEvents() {

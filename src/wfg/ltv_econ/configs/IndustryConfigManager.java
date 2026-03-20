@@ -57,6 +57,10 @@ public class IndustryConfigManager {
     public static ArrayMap<String, IndustryConfig> ind_config;
 
     static {
+        reload();
+    }
+
+    public static final void reload() {
         ind_config = IndustryConfigManager.loadAsMap(false);
 
         validateOrRebuildDynamicConfigs();
@@ -105,7 +109,7 @@ public class IndustryConfigManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static final ArrayMap<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
+    private static final ArrayMap<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
         final JSONObject root = getConfig(dynamicConfig);
         final ArrayMap<String, IndustryConfig> result = new ArrayMap<>();
 
@@ -217,7 +221,7 @@ public class IndustryConfigManager {
         return result;
     }
 
-    public static final JSONObject serializeIndustryConfigs(ArrayMap<String, IndustryConfig> configs) {
+    private static final JSONObject serializeIndustryConfigs(ArrayMap<String, IndustryConfig> configs) {
         final JSONObject root = new JSONObject();
 
         try {

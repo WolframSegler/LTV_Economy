@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 
 import static wfg.ltv_econ.constants.Mods.*;
 
@@ -14,13 +15,14 @@ import lunalib.lunaSettings.LunaSettings;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
 
 public class EconomyConfigLoader {
+    private static final SettingsAPI settings = Global.getSettings();
     private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";
 
     private static JSONObject config;
 
     private static final void load() {
         try {
-            config = Global.getSettings().getMergedJSON(CONFIG_PATH);
+            config = settings.getMergedJSON(CONFIG_PATH);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load economy config: " + CONFIG_PATH, ex);
         }
@@ -36,6 +38,7 @@ public class EconomyConfigLoader {
 
         try {
         EconomyConfig.MULTI_THREADING = root.getBoolean("MULTI_THREADING");
+        EconomyConfig.ASSIGN_WORKERS_ON_LOAD = root.getBoolean("ASSIGN_WORKERS_ON_LOAD");
         EconomyConfig.STARTING_CREDITS_FOR_MARKET = root.getInt("STARTING_CREDITS_FOR_MARKET");
         EconomyConfig.LOCAL_WORKER_COST_MULT = root.getDouble("LOCAL_WORKER_COST_MULT");
         EconomyConfig.FACTION_WORKER_COST_MULT = root.getDouble("FACTION_WORKER_COST_MULT");
@@ -80,29 +83,8 @@ public class EconomyConfigLoader {
             EconomyConfig.MANUFACTURING_EXCLUSION_LIST.add(exclusionArr.getString(i));
         }
 
-        if (Global.getSettings().getModManager().isModEnabled(LUNA_LIB)) {
-            EconomyConfig.MULTI_THREADING = LunaSettings.getBoolean(LTV_ECON, "economy_multiThreading");
-            EconomyConfig.STARTING_CREDITS_FOR_MARKET = LunaSettings.getInt(LTV_ECON, "economy_startingCredits");
-            EconomyConfig.CREDIT_WITHDRAWAL_LIMIT = LunaSettings.getInt(LTV_ECON, "economy_withdrawalLimit");
-            EconomyConfig.AUTO_TRANSFER_PROFIT_LIMIT = LunaSettings.getDouble(LTV_ECON, "economy_autoTransferLimit").floatValue();
-            EconomyConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "economy_deficitCost");
-            EconomyConfig.LOCAL_WORKER_COST_MULT = LunaSettings.getDouble(LTV_ECON, "economy_localWorkerCost");
-            EconomyConfig.FACTION_WORKER_COST_MULT = LunaSettings.getDouble(LTV_ECON, "economy_factionWorkerCost");
-            EconomyConfig.LOCAL_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_localProdBuffer");
-            EconomyConfig.FACTION_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_factionProdBuffer");
-            EconomyConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_prodBuffer");
-            EconomyConfig.DAYS_TO_COVER = LunaSettings.getInt(LTV_ECON, "economy_daysToCover");
-            EconomyConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "economy_toCoverPerImport");
-            EconomyConfig.FACTION_EXCHANGE_MULT = LunaSettings.getDouble(LTV_ECON, "economy_factionExchangeMult").floatValue();
-            EconomyConfig.WORKER_ASSIGN_INTERVAL = LunaSettings.getInt(LTV_ECON, "economy_assignInterval");
-            EconomyConfig.EXPORT_THRESHOLD_FACTOR = LunaSettings.getDouble(LTV_ECON, "economy_exportThreshold").floatValue();
-            EconomyConfig.EMBARGO_REP_DROP = LunaSettings.getDouble(LTV_ECON, "economy_embargoRepDrop").floatValue();
-            EconomyConfig.MIN_RELATION_TO_TRADE = LunaSettings.getDouble(LTV_ECON,"economy_minTradeRelation").floatValue();
-            EconomyConfig.ECON_ALLOCATION_PASSES = LunaSettings.getInt(LTV_ECON, "economy_allocPasses");
-            EconomyConfig.MIN_WORKER_FRACTION = LunaSettings.getDouble(LTV_ECON, "economy_minWorkerFraction").floatValue();
-
-            final String fairness = LunaSettings.getString(LTV_ECON, "economy_prodFairness");
-            EconomyConfig.USE_PRODUCTION_FAIRNESS = fairness.equals("Commodities Produced");
+        if (settings.getModManager().isModEnabled(LUNA_LIB)) {
+            loadFromLunaSettings();
         }
 
         } catch (Exception e) {
@@ -113,12 +95,43 @@ public class EconomyConfigLoader {
     }
     }
 
+    public static final void loadFromLunaSettings() {
+        EconomyConfig.MULTI_THREADING = LunaSettings.getBoolean(LTV_ECON, "economy_multiThreading");
+        EconomyConfig.ASSIGN_WORKERS_ON_LOAD = LunaSettings.getBoolean(LTV_ECON, "economy_assignOnLoad");
+        EconomyConfig.STARTING_CREDITS_FOR_MARKET = LunaSettings.getInt(LTV_ECON, "economy_startingCredits");
+        EconomyConfig.CREDIT_WITHDRAWAL_LIMIT = LunaSettings.getInt(LTV_ECON, "economy_withdrawalLimit");
+        EconomyConfig.AUTO_TRANSFER_PROFIT_LIMIT = LunaSettings.getDouble(LTV_ECON, "economy_autoTransferLimit").floatValue();
+        EconomyConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "economy_deficitCost");
+        EconomyConfig.LOCAL_WORKER_COST_MULT = LunaSettings.getDouble(LTV_ECON, "economy_localWorkerCost");
+        EconomyConfig.FACTION_WORKER_COST_MULT = LunaSettings.getDouble(LTV_ECON, "economy_factionWorkerCost");
+        EconomyConfig.LOCAL_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_localProdBuffer");
+        EconomyConfig.FACTION_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_factionProdBuffer");
+        EconomyConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_prodBuffer");
+        EconomyConfig.DAYS_TO_COVER = LunaSettings.getInt(LTV_ECON, "economy_daysToCover");
+        EconomyConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "economy_toCoverPerImport");
+        EconomyConfig.FACTION_EXCHANGE_MULT = LunaSettings.getDouble(LTV_ECON, "economy_factionExchangeMult").floatValue();
+        EconomyConfig.WORKER_ASSIGN_INTERVAL = LunaSettings.getInt(LTV_ECON, "economy_assignInterval");
+        EconomyConfig.EXPORT_THRESHOLD_FACTOR = LunaSettings.getDouble(LTV_ECON, "economy_exportThreshold").floatValue();
+        EconomyConfig.EMBARGO_REP_DROP = LunaSettings.getDouble(LTV_ECON, "economy_embargoRepDrop").floatValue();
+        EconomyConfig.MIN_RELATION_TO_TRADE = LunaSettings.getDouble(LTV_ECON,"economy_minTradeRelation").floatValue();
+        EconomyConfig.ECON_ALLOCATION_PASSES = LunaSettings.getInt(LTV_ECON, "economy_allocPasses");
+        EconomyConfig.MIN_WORKER_FRACTION = LunaSettings.getDouble(LTV_ECON, "economy_minWorkerFraction").floatValue();
+
+        final String fairness = LunaSettings.getString(LTV_ECON, "economy_prodFairness");
+        EconomyConfig.USE_PRODUCTION_FAIRNESS = fairness.equals("Commodities Produced");
+    }
+
     public static class EconomyConfig {
 
         /**
-         * Multi Threading used for the main loop. The matrix calculations are expensive.
+         * Multi Threading used for the main loop. The simplex solver expensive.
          */
         public static boolean MULTI_THREADING;
+
+        /**
+         * Should the workers be assigned again after a game load.
+         */
+        public static boolean ASSIGN_WORKERS_ON_LOAD;
 
         /**
          * The amount of credits each market begins with after creation.
@@ -249,6 +262,8 @@ public class EconomyConfigLoader {
         static {
             EconomyConfigLoader.loadConfig();
         }
+
+        private EconomyConfig() {};
     }
 
     public static record DebtDebuffTier(
@@ -257,4 +272,6 @@ public class EconomyConfigLoader {
         int upkeepMultiplierPercent,
         int immigrationModifier
     ) {}
+
+    private EconomyConfigLoader() {};
 }

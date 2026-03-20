@@ -1,3 +1,7 @@
+v0.2.12-beta | SAVE COMPATIBLE
+- The effects of saving LunaLib Settings now takes effect immideatly. No restart required.
+
+
 v0.2.11-beta | SAVE COMPATIBLE
 - Added employment rate to population table.
 - Some UI fixes inside the trade map.

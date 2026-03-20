@@ -481,10 +481,9 @@ public class EconomyInfo {
 
     public static final float getWorkersPerUnit(String comID, String tag) {
         final float Pout = Global.getSettings().getCommoditySpec(comID).getBasePrice();
-        final float LPV_day = LaborConfig.LPV_day;
         final float RoVC = LaborConfig.getRoVC(tag);
 
-        return (Pout * RoVC) / LPV_day;
+        return (Pout * RoVC) / LaborConfig.LPV_day;
     }
 
     public static final List<MarketAPI> getMarketsCopy() {

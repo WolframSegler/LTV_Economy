@@ -108,7 +108,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public static EconomyEngine getInstance() {
-        if (instance == null) return EconomyEngineSerializer.loadInstance(false);
+        if (instance == null) return EconomyEngineSerializer.loadInstance(false, false);
         return instance;
     }
 

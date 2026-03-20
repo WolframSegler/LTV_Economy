@@ -45,20 +45,7 @@ public class CommodityDomain {
     public Object readResolve() {
         tradeCreditActivity = 0l;
 
-        final float[] newArray = new float[EconomyConfig.VOLATILITY_WINDOW];
-
-        int oldLength = 0;
-        if (lastNDaysVolume != null) {
-            oldLength = lastNDaysVolume.length;
-            System.arraycopy(lastNDaysVolume, 0, newArray, 0,
-                Math.min(oldLength, newArray.length)
-            );
-        }
-
-        lastNDaysVolume = newArray;
-
-        currentIndex = Math.min(currentIndex, lastNDaysVolume.length - 1);
-        filled = oldLength >= newArray.length;
+        resizeVolatilityWindowArray();
 
         spec = Global.getSettings().getCommoditySpec(comID);
         tradeFlows = new ArrayList<>();
@@ -164,12 +151,16 @@ public class CommodityDomain {
     }
 
     public float getTradeVolatility() {
-        int length = filled ? EconomyConfig.VOLATILITY_WINDOW : currentIndex;
+        if (lastNDaysVolume.length != EconomyConfig.VOLATILITY_WINDOW) {
+            resizeVolatilityWindowArray();
+        }
+        
+        final int length = filled ? EconomyConfig.VOLATILITY_WINDOW : currentIndex;
         if (length == 0) return 0f;
 
         float sum = 0f;
         for (int i = 0; i < length; i++) sum += lastNDaysVolume[i];
-        float mean = sum / length;
+        final float mean = sum / length;
 
         if (mean == 0f) return 0f;
 
@@ -535,10 +526,31 @@ public class CommodityDomain {
     }
 
     private final void recordDailyVolume() {
+        if (lastNDaysVolume.length != EconomyConfig.VOLATILITY_WINDOW) {
+            resizeVolatilityWindowArray();
+        }
+
         long total = 0;
         for (CommodityCell cell : m_comCells.values()) total += cell.getTotalExports();
         lastNDaysVolume[currentIndex] = total;
         currentIndex = (currentIndex + 1) % EconomyConfig.VOLATILITY_WINDOW;
         if (currentIndex == 0) filled = true;
+    }
+
+    private final void resizeVolatilityWindowArray() {
+        final float[] newArray = new float[EconomyConfig.VOLATILITY_WINDOW];
+
+        int oldLength = 0;
+        if (lastNDaysVolume != null) {
+            oldLength = lastNDaysVolume.length;
+            System.arraycopy(lastNDaysVolume, 0, newArray, 0,
+                Math.min(oldLength, newArray.length)
+            );
+        }
+
+        lastNDaysVolume = newArray;
+
+        currentIndex = Math.min(currentIndex, lastNDaysVolume.length - 1);
+        filled = oldLength >= newArray.length;
     }
 }
