@@ -1,9 +1,10 @@
 package wfg.ltv_econ.plugins;
 
-import static wfg.ltv_econ.constants.Mods.LUNA_LIB;
+import static wfg.ltv_econ.constants.Mods.*;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.ModManagerAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
@@ -38,9 +39,34 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onApplicationLoad() throws Exception {
-        if (Global.getSettings().getModManager().isModEnabled(LUNA_LIB)) {
+        final ModManagerAPI manager = Global.getSettings().getModManager();
+        if (manager.isModEnabled(LUNA_LIB)) {
             LunaSettings.addSettingsListener(new ConfigLunaSettingsListener());
         }
+
+        // TODO find a way to attach a panel to the title screen. 
+        // boolean showWarnings = false;
+        // final StringBuilder txt = new StringBuilder("Warning!");
+        // if (manager.isModEnabled(GRAND_COL)) {
+        //     showWarnings = true;
+        //     txt.append("\nLTV-Economy already has a scroll bar for industries."+
+        //         " Using Grand.Colonies will break the game."
+        //     );
+        // }
+
+        // if (manager.isModEnabled(ASTRAL_ASCENT)) {
+        //     showWarnings = true;
+        //     txt.append("\nAstral Ascension is not supported by LTV-Economy."+
+        //         " Use at your own risk."
+        //     );
+        // }
+
+        // if (showWarnings) {
+            // final DialogPanel warningPanel = new DialogPanel(
+            //     Attachments.getScreenPanel(), null, txt.toString(), "Close"
+            // );
+            // warningPanel.show(0.3f, 0.3f);
+        // }
     }
 
     @Override
