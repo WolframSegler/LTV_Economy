@@ -1,4 +1,7 @@
 {
+  "plugins": {
+    "TitleScreenWarning": "wfg.ltv_econ.plugins.TitleScreenWarningPlugin"
+  },
   "graphics": {
     "ui": {
       "cargoTooltipArrow": "graphics/ui/cargoTooltipArrow.png",

@@ -4,6 +4,7 @@ v0.2.12-beta | SAVE COMPATIBLE
 - Relaxed the eligibility conditions for manufacturing.
 - Nanoforges can now be installed on Manufacturing.
 - Manufacturing can now be improved.
+- A warning dialog is shown when incompatible mods are active.
 
 v0.2.11-beta | SAVE COMPATIBLE
 - Added employment rate to population table.
