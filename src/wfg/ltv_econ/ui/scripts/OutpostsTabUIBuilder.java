@@ -30,7 +30,7 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.economyTab.EconomyOverviewPanel;
 import wfg.ltv_econ.ui.outpostsTab.ColonyPopulationTable;
 import wfg.ltv_econ.ui.outpostsTab.FactionResourcesTable;
-import wfg.ltv_econ.wrappers.MarketWrapper;
+import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.CustomPanel;

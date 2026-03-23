@@ -1,4 +1,4 @@
-package wfg.ltv_econ.wrappers;
+package wfg.ltv_econ.util.wrappers;
 
 import java.util.Collection;
 import java.util.Collections;

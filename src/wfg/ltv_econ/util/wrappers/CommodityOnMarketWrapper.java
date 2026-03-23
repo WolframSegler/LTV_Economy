@@ -1,4 +1,4 @@
-package wfg.ltv_econ.wrappers;
+package wfg.ltv_econ.util.wrappers;
 
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStatWithTempMods;

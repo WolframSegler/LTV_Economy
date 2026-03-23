@@ -17,7 +17,7 @@ import wfg.ltv_econ.ui.marketInfo.buttons.ManagePopButton;
 import wfg.ltv_econ.ui.marketInfo.buttons.MarketEventsButton;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ComDetailDialog;
 import wfg.ltv_econ.util.UIUtils;
-import wfg.ltv_econ.wrappers.MarketWrapper;
+import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;

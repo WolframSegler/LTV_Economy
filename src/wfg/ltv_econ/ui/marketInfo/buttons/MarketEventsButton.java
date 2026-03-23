@@ -8,6 +8,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.MarketEventsDialog;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.panels.Button;
@@ -21,10 +22,10 @@ public class MarketEventsButton extends Button {
     public MarketEventsButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
         super(parent, width, height, null, null, null);
 
-        final boolean isPlayerOwned = market.isPlayerOwned();
+        final boolean hasData = EconomyEngine.getInstance().isPlayerMarket(market.getId());
 
         onClicked = (btn) -> {
-            if (!isPlayerOwned) return;
+            if (!hasData) return;
             if (dock == null) createDock(market);
             if (dock.isOpen()) dock.close();
             else dock.open(true);

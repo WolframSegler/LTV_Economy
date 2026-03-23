@@ -8,6 +8,7 @@ import com.fs.starfarer.api.ModManagerAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
+import com.fs.starfarer.api.impl.campaign.fleets.EconomyFleetRouteManager;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.util.Misc;
@@ -22,6 +23,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyEngineSerializer;
+import wfg.ltv_econ.economy.fleet.LtvEconFleetRouteManager;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
@@ -46,13 +48,15 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     }
 
     @Override
-    public void onNewGame() {
+    public void onNewGameAfterEconomyLoad() {
         WorkerPoolCondition.initialize();
+        addManufacturingToMarkets();
     }
 
     @Override
-    public void onNewGameAfterEconomyLoad() {
-        addManufacturingToMarkets();
+    public void onNewGameAfterProcGen() {
+        // Global.getSector().removeScriptsOfClass(EconomyFleetRouteManager.class);
+        // Global.getSector().addScript(new LtvEconFleetRouteManager());
     }
 
     @Override
