@@ -23,7 +23,7 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
     public void apply(PlayerMarketData data) {
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
 
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         engine.getComCell(Commodities.SUPPLIES, data.marketID)
             .getDemandStat().modifyFlat(id, MARINES_COST, spec.name);
         engine.getComCell(Commodities.SHIPS, data.marketID)
@@ -38,7 +38,7 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
     public void unapply(PlayerMarketData data) {
         data.happinessDelta.unmodifyFlat(id);
 
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         engine.getComCell(Commodities.SUPPLIES, data.marketID)
             .getDemandStat().unmodifyFlat(id);
         engine.getComCell(Commodities.SHIPS, data.marketID)

@@ -62,7 +62,7 @@ public class ColonyInvDialog extends DialogPanel {
     public void buildUI() {
         UIContext.setContext(Context.DIALOG);
         final SettingsAPI settings = Global.getSettings();
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
         final boolean hasData = data != null;
 

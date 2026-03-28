@@ -41,7 +41,7 @@ public class ManagePopButton extends Button {
         glow.type = GlowType.ADDITIVE;
         glow.additiveSprite = icon.getSprite();
 
-        if (!EconomyEngine.getInstance().isPlayerMarket(market.getId())) setEnabled(false);
+        if (!EconomyEngine.instance().isPlayerMarket(market.getId())) setEnabled(false);
         setShowTooltipWhileInactive(true);
     }
 }

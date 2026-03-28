@@ -91,7 +91,7 @@ public class ManagePopulationDialog extends DialogPanel {
     @Override
     public void buildUI() {
         UIContext.setContext(Context.DIALOG);
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
 
@@ -659,7 +659,7 @@ public class ManagePopulationDialog extends DialogPanel {
         activateButton.setQuickMode(true);
         activateButton.cutStyle = CutStyle.TL_BR;
         activateButton.bgAlpha = 1f;
-        final long marketCredits = EconomyEngine.getInstance().getCredits(m_market.getId());
+        final long marketCredits = EconomyEngine.instance().getCredits(m_market.getId());
         final boolean hasSufficientCredits = Math.max(0, marketCredits) >= policy.spec.cost;
         if ((!policy.isAvailable() || !hasSufficientCredits) && !DebugFlags.COLONY_DEBUG) {
             activateButton.setEnabled(false);

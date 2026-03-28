@@ -7,7 +7,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel.RowPanel;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.UIContext;
@@ -47,7 +47,7 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
 
         if (option == 1) return;
 
-        final PlayerFactionSettings settings = EconomyEngine.getInstance().playerFactionSettings;
+        final PlayerFactionSettings settings = LtvEconSaveData.instance().playerFactionSettings;
         if (alreadyEmbargoed) {
             settings.embargoedFactions.remove(factionID);
         } else {

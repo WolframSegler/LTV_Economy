@@ -195,7 +195,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         final TextPanel colonyCreditLabel = new TextPanel(colonyInfoPanel, 150, 50) {
             @Override
             public void buildUI() {
-                final long value = EconomyEngine.getInstance().info.getNetIncome(marketAPI, true);
+                final long value = EconomyEngine.instance().info.getNetIncome(marketAPI, true);
                 final String txt = "Credits/month";
                 final String valueTxt = NumFormat.formatCredit(value);
                 final Color valueColor = value < 0 ? negative
@@ -219,7 +219,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                 final FactionAPI faction = marketAPI.getFaction();
                 final Color base = faction.getBaseUIColor();
                 final Color dark = faction.getDarkUIColor();
-                final EconomyEngine engine = EconomyEngine.getInstance();
+                final EconomyEngine engine = EconomyEngine.instance();
 
                 tp.addTitle("Monthly Income & Upkeep", base);
                 final long income = engine.info.getNetIncome(marketAPI, true);

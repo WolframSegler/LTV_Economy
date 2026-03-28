@@ -26,7 +26,7 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.commodity.CommodityCell;
-import wfg.ltv_econ.economy.commodity.CommodityTradeFlow;
+import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.util.Arithmetic;
@@ -141,8 +141,8 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
 
         { // Create render data
-            final List<CommodityTradeFlow> tradeFlows = new ArrayList<>(
-                EconomyEngine.getInstance().getComDomain(com.getId()).getTradeFlows()
+            final List<ComTradeFlow> tradeFlows = new ArrayList<>(
+                EconomyEngine.instance().getComDomain(com.getId()).getTradeFlows()
             );
             tradeFlows.removeIf(t -> t.exporter.isHidden() ||
                 t.importer.isHidden() ||
@@ -150,7 +150,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 importerFactionBlacklist.contains(t.importer.getFactionId())
             );
 
-            for (CommodityTradeFlow flow : tradeFlows) {
+            for (ComTradeFlow flow : tradeFlows) {
                 systems.add(flow.exporter.getStarSystem());
                 systems.add(flow.importer.getStarSystem());
             }
@@ -161,7 +161,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 data.system = system;
 
                 float totalAmount = 0f;
-                for (CommodityTradeFlow flow : tradeFlows) {
+                for (ComTradeFlow flow : tradeFlows) {
                     if (flow.exporter.getStarSystem().equals(system)) {
                         data.isSource = true;
                         totalAmount += flow.amount;
@@ -185,21 +185,21 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             }
             systems.removeAll(systemsToRemove);
             
-            final ArrayMap<SystemPair, List<CommodityTradeFlow>> uniqueFlows = new ArrayMap<>();
-            for (CommodityTradeFlow flow : tradeFlows) {
+            final ArrayMap<SystemPair, List<ComTradeFlow>> uniqueFlows = new ArrayMap<>();
+            for (ComTradeFlow flow : tradeFlows) {
                 if (flow.exporter.getStarSystem().equals(flow.importer.getStarSystem())) continue;
 
                 final SystemPair pair = new SystemPair(
                     flow.exporter.getStarSystem(), flow.importer.getStarSystem()
                 );
-                final List<CommodityTradeFlow> list = uniqueFlows.computeIfAbsent(
+                final List<ComTradeFlow> list = uniqueFlows.computeIfAbsent(
                     pair, k -> new ArrayList<>()
                 );
                 list.add(flow);
             }
 
-            for (List<CommodityTradeFlow> flows : uniqueFlows.values()) {
-                final CommodityTradeFlow first = flows.get(0);
+            for (List<ComTradeFlow> flows : uniqueFlows.values()) {
+                final ComTradeFlow first = flows.get(0);
                 final PathData data = new PathData();
                 final StarSystemAPI source = first.exporter.getStarSystem();
                 final StarSystemAPI dest = first.importer.getStarSystem();
@@ -207,7 +207,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 if (!systems.contains(source) || !systems.contains(dest)) continue;
                 
                 float totalAmount = 0f;
-                for (CommodityTradeFlow flow : flows) {
+                for (ComTradeFlow flow : flows) {
                     final FactionSpecAPI faction = flow.exporter.getFaction().getFactionSpec();
                     final float amount = flow.amount;
                     totalAmount += amount;  
@@ -744,7 +744,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
 
     private static final TooltipBuilder createNodeTp(SystemData data) {
         final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
 
         return (tp, expanded) -> {
             final List<CommodityCell> cells = new ArrayList<>();
@@ -756,8 +756,8 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 }
             }
             cells.sort((a, b) -> Float.compare(
-                b.getTotalExports() - b.getTotalImports(false),
-                a.getTotalExports() - a.getTotalImports(false)
+                b.getTotalExports() - b.getTotalImports(),
+                a.getTotalExports() - a.getTotalImports()
             ));
 
             tp.addPara(data.system.getName(), base, 0f);
@@ -766,7 +766,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 "Colony", 140, "Net Trade", 70
             });
             for (CommodityCell cell : cells) {
-                final float net = cell.getTotalExports() - cell.getTotalImports(false);
+                final float net = cell.getTotalExports() - cell.getTotalImports();
                 if (Math.abs(net) < 0.01f) continue;
 
                 tp.addRow(

@@ -9,7 +9,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.PlayerFactionSettings;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panels.Button;
@@ -26,8 +26,7 @@ public class FactionAdministrationPanel extends CustomPanel<FactionAdministratio
 
     public void buildUI() {
         final SettingsAPI settings = Global.getSettings();
-        final EconomyEngine engine = EconomyEngine.getInstance();
-        final PlayerFactionSettings factionSettings = engine.playerFactionSettings;
+        final PlayerFactionSettings factionSettings = LtvEconSaveData.instance().playerFactionSettings;
 
         final int SECTION_I = opad;
         final int SECTION_II = SECTION_I + 420;

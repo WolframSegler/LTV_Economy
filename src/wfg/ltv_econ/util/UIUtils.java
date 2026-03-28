@@ -37,7 +37,7 @@ public class UIUtils {
     }
 
     public static final LabelAPI createColonyCreditsLabel(String font, int height, String marketID) {
-        final long credits = EconomyEngine.getInstance().getCredits(marketID);
+        final long credits = EconomyEngine.instance().getCredits(marketID);
 
         final LabelAPI label = Global.getSettings().createLabel(
             "Colony Credits: " + String.format("%,d", credits), font

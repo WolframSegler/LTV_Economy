@@ -23,6 +23,7 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 
 public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	
@@ -54,7 +55,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 			addFighters(fighters, fighters + 2, 0, market.getFactionId());
 			
 
-            final EconomyEngine engine = EconomyEngine.getInstance(); 
+            final EconomyEngine engine = EconomyEngine.instance(); 
             final CommodityCell shipsCell = engine.getComCell(Commodities.SHIPS, market.getId());
             final CommodityCell fuelCell  = engine.getComCell(Commodities.FUEL,  market.getId());
 
@@ -158,20 +159,20 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	private static final float STOCKPILE_SCALE_MAX = 4f;
 
 	public static float getBaseStockpileLimit(CommodityOnMarketAPI com, String marketID) {
-		if (!EconomyEngine.isInitialized()) {
+		if (!LtvEconSaveData.isInitialized()) {
 			return OpenMarketPlugin.getBaseStockpileLimit(com);
 		}
 		return getBaseStockpileLimit(com.getId(), marketID);
 	}
 	
 	public static float getBaseStockpileLimit(String comID, String marketID) {
-        final CommodityCell cell = EconomyEngine.getInstance().getComCell(
+        final CommodityCell cell = EconomyEngine.instance().getComCell(
             comID, marketID
         );
 
 		final float base = Math.max(1f,Math.max(cell.getFlowAvailable(), cell.getBaseDemand(true)));
 
-		final float impRatio = cell.getTotalImports(true) / base;
+		final float impRatio = cell.getTotalImports() / base;
 		final float prodRatio = cell.getProduction(true) / base;
 		final float extraRatio = cell.getFlowCanNotExport() / base;
 		final float defRatio = cell.getFlowDeficit() / base;
@@ -198,7 +199,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
     public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
 		super.reportPlayerMarketTransaction(transaction);
 		final SettingsAPI settings = Global.getSettings();
-		final EconomyEngine engine = EconomyEngine.getInstance();
+		final EconomyEngine engine = EconomyEngine.instance();
 		final String marketID = market.getId();
 
         if (getTariff() > 0f) {

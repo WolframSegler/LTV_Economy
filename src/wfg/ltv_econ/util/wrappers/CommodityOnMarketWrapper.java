@@ -24,14 +24,14 @@ public class CommodityOnMarketWrapper extends CommodityOnMarket {
 
     // MODIFIED FUNCTIONS
     public int getDeficitQuantity() {
-        final CommodityCell cell = EconomyEngine.getInstance().getComCell(getId(), getMarket().getId());
+        final CommodityCell cell = EconomyEngine.instance().getComCell(getId(), getMarket().getId());
         if (cell == null) return org.getDeficitQuantity();
 
         return (int) cell.getStoredDeficit();
     }
 
     public int getExcessQuantity() {
-        final CommodityCell cell = EconomyEngine.getInstance().getComCell(getId(), getMarket().getId());
+        final CommodityCell cell = EconomyEngine.instance().getComCell(getId(), getMarket().getId());
         if (cell == null) return org.getExcessQuantity();
 
         return (int) cell.getStoredExcess();

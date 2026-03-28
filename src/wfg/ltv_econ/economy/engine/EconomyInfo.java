@@ -50,7 +50,7 @@ public class EconomyInfo {
     public final double getFactionInFactionExports(String comID, String factionID) {
         double TotalFactionExports = 0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
                 TotalFactionExports += cell.inFactionExports;
             }
@@ -110,7 +110,7 @@ public class EconomyInfo {
     public final long getPlayerFactionCreditFlow(String comID) {
         long netCreditFlow = 0;
 
-        for (IncomeLedger ledger : engine.m_comDomains.get(comID).getAllLedgers()) {
+        for (IncomeLedger ledger : engine.comDomains.get(comID).getAllLedgers()) {
             netCreditFlow += ledger.lastMonthExportIncome - ledger.lastMonthImportExpense;
         }
         return netCreditFlow;
@@ -119,7 +119,7 @@ public class EconomyInfo {
     public final double getFactionComStockpiles(String comID, String factionID) {
         double totalStockpiles = 0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
                 totalStockpiles += cell.getStored();
             }
@@ -130,7 +130,7 @@ public class EconomyInfo {
     public final float getFactionComDemand(String comID, String factionID) {
         float totalDemand = 0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
                 totalDemand += cell.getBaseDemand(true);
             }
@@ -141,7 +141,7 @@ public class EconomyInfo {
     public final float getFactionComProd(String comID, String factionID) {
         float totalDemand = 0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
                 totalDemand += cell.getProduction(true);
             }
@@ -152,7 +152,7 @@ public class EconomyInfo {
     public final double getFactionComBalance(String comID, String factionID) {
         double balance = 0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
                 balance += cell.getFlowRealBalance();
             }
@@ -164,9 +164,9 @@ public class EconomyInfo {
         float totalImports = 0;
         float inFactionImports = 0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
-                totalImports += cell.getTotalImports(false);
+                totalImports += cell.getTotalImports();
                 inFactionImports += cell.inFactionImports;
             }
         }
@@ -178,7 +178,7 @@ public class EconomyInfo {
     public final double getFactionGlobalImports(String comID, String factionID) {
         double totalGlobalImports = 0.0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
                 totalGlobalImports += cell.globalImports;
             }
@@ -190,7 +190,7 @@ public class EconomyInfo {
     public final double getFactionGlobalExports(String comID, String factionID) {
         double totalGlobalExports = 0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells()) {
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
                 totalGlobalExports += cell.globalExports;
             }
@@ -204,7 +204,7 @@ public class EconomyInfo {
      */
     public final double getMarketActivity(MarketAPI market) {
         double totalActivity = 0;
-        for (CommodityDomain dom : engine.m_comDomains.values()) {
+        for (CommodityDomain dom : engine.comDomains.values()) {
             if (!engine.getRegisteredMarkets().contains(market.getId())) {
                 engine.registerMarket(market);
             }
@@ -236,7 +236,7 @@ public class EconomyInfo {
 
         float ratio = 0f;
 
-        for (CommodityDomain dom : engine.m_comDomains.values()) {
+        for (CommodityDomain dom : engine.comDomains.values()) {
             final CommodityCell cell = dom.getCell(market.getId());
 
             ratio += Math.abs(cell.globalImports - cell.getFlowAvailable()) / activity;
@@ -335,7 +335,7 @@ public class EconomyInfo {
     public final long getGlobalStockpiles(String comID) {
         double total = 0;
 
-        for (CommodityCell cell : engine.m_comDomains.get(comID).getAllCells())
+        for (CommodityCell cell : engine.comDomains.get(comID).getAllCells())
         total += cell.getStored();
 
         return (long) total;
@@ -377,8 +377,8 @@ public class EconomyInfo {
      */
     public final long getExportIncome(MarketAPI market, boolean lastMonth) {
         long exportIncome = 0;
-        if (engine.m_playerMarketData.keySet().contains(market.getId())) {
-            for (CommodityDomain dom : engine.m_comDomains.values()) {
+        if (engine.playerMarketData.keySet().contains(market.getId())) {
+            for (CommodityDomain dom : engine.comDomains.values()) {
                 final IncomeLedger ledger = dom.getLedger(market.getId());
                 exportIncome += lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
             }
@@ -388,9 +388,9 @@ public class EconomyInfo {
     }
 
     public final long getExportIncome(MarketAPI market, String comID, boolean lastMonth) {
-        if (engine.m_playerMarketData.keySet().contains(market.getId())) {
+        if (engine.playerMarketData.keySet().contains(market.getId())) {
 
-            final IncomeLedger ledger = engine.m_comDomains.get(comID).getLedger(market.getId());
+            final IncomeLedger ledger = engine.comDomains.get(comID).getLedger(market.getId());
             return lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
         }
         return 0;
@@ -401,8 +401,8 @@ public class EconomyInfo {
      */
     public final long getImportExpense(MarketAPI market, boolean lastMonth) {
         long importCost = 0;
-        if (engine.m_playerMarketData.keySet().contains(market.getId())) {
-            for (CommodityDomain dom : engine.m_comDomains.values()) {
+        if (engine.playerMarketData.keySet().contains(market.getId())) {
+            for (CommodityDomain dom : engine.comDomains.values()) {
                 final IncomeLedger ledger = dom.getLedger(market.getId());
                 importCost += lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
             }
@@ -412,8 +412,8 @@ public class EconomyInfo {
     }
 
     public final long getImportExpense(MarketAPI market, String comID, boolean lastMonth) {
-        if (engine.m_playerMarketData.keySet().contains(market.getId())) {
-            final IncomeLedger ledger = engine.m_comDomains.get(comID).getLedger(market.getId());
+        if (engine.playerMarketData.keySet().contains(market.getId())) {
+            final IncomeLedger ledger = engine.comDomains.get(comID).getLedger(market.getId());
             return lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
         }
         return 0;
@@ -428,7 +428,7 @@ public class EconomyInfo {
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
         final float wage = cond.getWorkerPool() * (1f - cond.getFreeWorkerRatio()) *
             (LaborConfig.LPV_day / (engine.isPlayerMarket(marketID) ?
-            engine.m_playerMarketData.get(marketID).getRoSV() : LaborConfig.RoSV)
+            engine.playerMarketData.get(marketID).getRoSV() : LaborConfig.RoSV)
         );
 
         return wage * market.getUpkeepMult().getModifiedValue();

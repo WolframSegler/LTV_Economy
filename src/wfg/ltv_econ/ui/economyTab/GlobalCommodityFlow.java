@@ -65,7 +65,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
 
     public void buildUI() {
         final SectorAPI sector = Global.getSector();
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
         final String comID = com.getId();
         final CommodityDomain dom = engine.getComDomain(comID);
@@ -193,7 +193,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W + largeLabelShift, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalTradeVolume(comID);
+                final float value = dom.getTradeVolumeHistory();
                 final String txt = "Sector-wide trade volume";
                 String valueTxt = NumFormat.engNotation(value);
                 if (value < 1) valueTxt = "---";
@@ -205,8 +205,8 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
-                        "The total number of units of %s traded across the sector on the previous day, including both in-faction and out-of-faction transactions. This represents all actual movement of goods between markets, regardless of prices or stockpiles.",
-                        pad, highlight, com.getName()
+                        "Total units of %s traded across the sector for the last %s days, including both in-faction and global cargo.",
+                        pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconomyConfig.HISTORY_LENGTH)
                     );
                 };
             }
@@ -219,7 +219,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W + largeLabelShift, LABEL_H) {
 
             public void buildUI() {
-                final long value = dom.getTradeCreditActivity();
+                final long value = dom.getCreditActivityHistory();
                 final String txt = "Sector-wide trade value";
                 String valueTxt = NumFormat.formatCredit(value);
                 if (value < 1) valueTxt = "---";
@@ -231,8 +231,8 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
-                        "The total monetary value (in credits) of all %s trades across the entire sector on the previous day. This includes both in-faction and out-of-faction trade, calculated using the prices at which commodities were exchanged.",
-                        pad, highlight, com.getName()
+                        "The total monetary value (in credits) of all %s trades across the entire sector for the last %s days. This includes both in-faction and global trade, calculated using the prices at which commodities were exchanged.",
+                        pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconomyConfig.HISTORY_LENGTH)
                     );
                 };
             }
@@ -294,7 +294,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                         "Indicates how much the daily export volume for %s fluctuates relative to its average.",
                         pad,
                         new Color[] {base, highlight},
-                        EconomyConfig.VOLATILITY_WINDOW + "",
+                        Integer.toString(EconomyConfig.HISTORY_LENGTH),
                         com.getName()
                     );
                 };
@@ -336,7 +336,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
 
             public void buildUI() {
                 long value = 0;
-                for (WorkerIndustryData data : WorkerRegistry.getInstance().getRegistry()) {
+                for (WorkerIndustryData data : WorkerRegistry.instance().getRegistry()) {
                     value += data.getAssignedForOutput(comID);
                 }
                 final String txt = "Worker allocation";

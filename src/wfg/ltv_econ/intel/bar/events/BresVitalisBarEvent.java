@@ -33,7 +33,7 @@ public class BresVitalisBarEvent extends BaseBarEvent {
 
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
-        final PlayerMarketData data = EconomyEngine.getInstance().getPlayerMarketData(market.getId());
+        final PlayerMarketData data = EconomyEngine.instance().getPlayerMarketData(market.getId());
         if (data == null || !data.getPolicy("bres_vitalis").isActive()) return false;
         return rand.nextFloat() < 0.15f || DebugFlags.BAR_DEBUG;
     }

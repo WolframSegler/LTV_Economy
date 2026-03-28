@@ -40,7 +40,7 @@ public class MarketEventsDialog extends DockPanel {
             (int) settings.getScreenHeight() - 200,
             Side.LEFT
         );
-        data = EconomyEngine.getInstance().getPlayerMarketData(market.getId());
+        data = EconomyEngine.instance().getPlayerMarketData(market.getId());
 
         offsetY = 100f;
         bgAlpha = 0.9f;

@@ -99,7 +99,7 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
     public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
 		super.reportPlayerMarketTransaction(transaction);
 
-        EconomyEngine.getInstance().addCredits(market.getId(), (int) -transaction.getCreditValue());
+        EconomyEngine.instance().addCredits(market.getId(), (int) -transaction.getCreditValue());
     }
 
 	@Override

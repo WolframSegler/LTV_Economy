@@ -26,7 +26,7 @@ public class SubstanceControlPolicy extends MarketPolicy {
     private CommodityCell cell;
 
     public void apply(PlayerMarketData data) {
-        cell = EconomyEngine.getInstance().getComCell(Commodities.DRUGS, data.marketID);
+        cell = EconomyEngine.instance().getComCell(Commodities.DRUGS, data.marketID);
         cell.getDemandStat().modifyMult(id, DRUGS_MULT_P1, spec.name);
         data.healthDelta.modifyFlat(id, HEALTH_BUFF_P1, spec.name);
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF_P1, spec.name);

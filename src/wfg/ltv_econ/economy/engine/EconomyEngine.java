@@ -1,8 +1,8 @@
 package wfg.ltv_econ.economy.engine;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,12 +31,15 @@ import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.SubmarketsID;
-import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
+import wfg.ltv_econ.economy.fleet.FactionShipInventory;
+import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.industry.IndustryTooltips;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.UIConstants.*;
@@ -84,45 +87,37 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  * @author Wolfram Segler
  */
 public class EconomyEngine extends BaseCampaignEventListener implements
-    EveryFrameScript, PlayerColonizationListener, ColonyDecivListener, GroundRaidObjectivesListener,
+    Serializable ,EveryFrameScript, PlayerColonizationListener, ColonyDecivListener, GroundRaidObjectivesListener,
     CoreUITabListener
 {
-    private static EconomyEngine instance;
-
     public transient EconomyInfo info;
     public transient EconomyLogger logger;
     transient EconomyLoop loop;
-    
-    // TODO switch static and actual type to ArrayMap in a future incompatible update
-    final Set<String> m_registeredMarkets = new HashSet<>();
-    final Map<String, CommodityDomain> m_comDomains = new HashMap<>();
-    final Map<String, PlayerMarketData> m_playerMarketData = new HashMap<>();
-    final Map<String, Long> m_marketCredits = new HashMap<>();
-
     private transient ExecutorService mainLoopExecutor;
+    
+    final Set<String> registeredMarkets = new HashSet<>();
+    final ArrayMap<String, CommodityDomain> comDomains = new ArrayMap<>();
+    final ArrayMap<String, PlayerMarketData> playerMarketData = new ArrayMap<>();
+    final ArrayMap<String, Long> marketCredits = new ArrayMap<>();
+    final ArrayMap<String, FactionShipInventory> factionShipInventories = new ArrayMap<>();
+    final List<TradeMission> activeMissions = new ArrayList<>();
+    final List<TradeMission> pastMissions = new ArrayList<>();
 
-    public final PlayerFactionSettings playerFactionSettings = new PlayerFactionSettings(); 
+    protected int dayKeyTracker = -1;
+    protected int cyclesSinceTrade = 0;
+    protected int cyclesSinceWorkerAssign = 0;
+    protected int lastTradeCycle = EconomyConfig.TRADE_INTERVAL;
+    protected boolean midDayApplied = false;
 
-    public static void setInstance(EconomyEngine a) {
-        instance = a;
+    public static EconomyEngine instance() {
+        return LtvEconSaveData.instance().economyEngine;
     }
 
-    public static EconomyEngine getInstance() {
-        if (instance == null) return EconomyEngineSerializer.loadInstance(false, false);
-        return instance;
-    }
-
-    public static boolean isInitialized() {
-        return instance != null;
-    }
-
-    EconomyEngine() {
+    public EconomyEngine() {
         super(false);
 
-        instance = this;
-
         for (String comID : EconomyConstants.econCommodityIDs) {
-            m_comDomains.put(comID, new CommodityDomain(comID));
+            comDomains.put(comID, new CommodityDomain(comID));
         }
 
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) registerMarket(market);
@@ -143,9 +138,6 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 
         return this;
     }
-
-    protected int dayKeyTracker = -1;
-    protected boolean midDayApplied = false;
 
     public boolean isDone() { return false;}
     public boolean runWhilePaused() { return false;}
@@ -187,42 +179,42 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     public final void registerMarket(MarketAPI market) {
         // Order here is very important
         final String marketID = market.getId();
-        WorkerRegistry.getInstance().register(market);
-        if (!m_registeredMarkets.add(marketID)) return;
+        WorkerRegistry.instance().register(market);
+        if (!registeredMarkets.add(marketID)) return;
 
-        m_marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
+        marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) {
-            m_playerMarketData.put(marketID, new PlayerMarketData(marketID));
+            playerMarketData.put(marketID, new PlayerMarketData(marketID));
             market.addSubmarket(SubmarketsID.STOCKPILES);
             market.removeSubmarket(Submarkets.LOCAL_RESOURCES);
         }
 
-        m_comDomains.values().forEach(c -> c.addMarket(marketID));
+        comDomains.values().forEach(c -> c.addMarket(marketID));
     }
 
     public final void removeMarket(MarketAPI market) {
         final String marketID = market.getId();
-        if (!m_registeredMarkets.remove(marketID)) return;
+        if (!registeredMarkets.remove(marketID)) return;
 
-        for (CommodityDomain dom : m_comDomains.values()) {
+        for (CommodityDomain dom : comDomains.values()) {
             dom.removeMarket(marketID);
         }
 
-        m_playerMarketData.remove(marketID);
-        m_marketCredits.remove(marketID);
-        WorkerRegistry.getInstance().remove(marketID);
+        playerMarketData.remove(marketID);
+        marketCredits.remove(marketID);
+        WorkerRegistry.instance().remove(marketID);
     }
 
     public final void removeMarket(String marketID) {
-        if (!m_registeredMarkets.remove(marketID)) return;
+        if (!registeredMarkets.remove(marketID)) return;
 
-        for (CommodityDomain dom : m_comDomains.values()) {
+        for (CommodityDomain dom : comDomains.values()) {
             dom.removeMarket(marketID);
         }
 
-        m_playerMarketData.remove(marketID);
-        m_marketCredits.remove(marketID);
-        WorkerRegistry.getInstance().remove(marketID);
+        playerMarketData.remove(marketID);
+        marketCredits.remove(marketID);
+        WorkerRegistry.instance().remove(marketID);
     }
 
     public final void refreshMarkets() {
@@ -234,54 +226,52 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public Set<String> getRegisteredMarkets() {
-        return Collections.unmodifiableSet(m_registeredMarkets);
+        return Collections.unmodifiableSet(registeredMarkets);
     }
 
     public Map<String, PlayerMarketData> getPlayerMarketData() {
-        return Collections.unmodifiableMap(m_playerMarketData);
+        return Collections.unmodifiableMap(playerMarketData);
     }
 
     public final boolean isPlayerMarket(String marketID) {
-        return m_playerMarketData.containsKey(marketID);
+        return playerMarketData.containsKey(marketID);
     }
 
     public final PlayerMarketData getPlayerMarketData(String marketID) {
-        return m_playerMarketData.get(marketID);
+        return playerMarketData.get(marketID);
     }
 
     public final PlayerMarketData addPlayerMarketData(String marketID) {
-        if (m_playerMarketData.containsKey(marketID)) return m_playerMarketData.get(marketID);
+        if (playerMarketData.containsKey(marketID)) return playerMarketData.get(marketID);
         final PlayerMarketData data = new PlayerMarketData(marketID);
-        m_playerMarketData.put(marketID, data);
+        playerMarketData.put(marketID, data);
         return data;
     }
 
     public final List<CommodityDomain> getComDomains() {
-        return new ArrayList<>(m_comDomains.values());
+        return new ArrayList<>(comDomains.values());
     }
 
     public final CommodityDomain getComDomain(String comID) {
-        return m_comDomains.get(comID);
+        return comDomains.get(comID);
     }
 
     public final boolean hasCommodity(String comID) {
-        return m_comDomains.containsKey(comID);
+        return comDomains.containsKey(comID);
     }
 
     public final CommodityCell getComCell(String comID, String marketID) {
-        final CommodityDomain dom = m_comDomains.get(comID);
+        final CommodityDomain dom = comDomains.get(comID);
 
         if (dom == null) {
-            throw new RuntimeException("Referencing a non-econ or missing commodity: " + comID);
+            throw new IllegalArgumentException("Referencing a non-econ or missing commodity: " + comID);
         }
 
-        final CommodityCell cell = dom.getCell(marketID);
-        if (cell == null) return new CommodityCell(comID, marketID);
-        return cell;
+        return dom.getCell(marketID);
     }
 
     public final void addCredits(String marketID, long amount) {
-        long current = m_marketCredits.getOrDefault(marketID, 0l);
+        long current = marketCredits.getOrDefault(marketID, 0l);
 
         if (amount > 0 && current > Long.MAX_VALUE - amount) {
             current = Long.MAX_VALUE;
@@ -293,20 +283,24 @@ public class EconomyEngine extends BaseCampaignEventListener implements
             current += amount;
         }
 
-        m_marketCredits.put(marketID, current);
+        marketCredits.put(marketID, current);
     }
 
     /**
      * Returns 0 if no market is registered
      */
     public final long getCredits(String marketID) {
-        return m_marketCredits.getOrDefault(marketID, 0l);
+        return marketCredits.getOrDefault(marketID, 0l);
+    }
+
+    public final FactionShipInventory getFactionShipInventory(String factionID) {
+        return factionShipInventories.computeIfAbsent(factionID, k -> new FactionShipInventory(factionID));
     }
 
     @Override
     public void reportEconomyTick(int iterIndex) {
-        m_comDomains.values().forEach(CommodityDomain::endMonth);
-        m_playerMarketData.values().forEach(PlayerMarketData::endMonth);
+        comDomains.values().forEach(CommodityDomain::endMonth);
+        playerMarketData.values().forEach(PlayerMarketData::endMonth);
         
         final MonthlyReport report = SharedData.getData().getCurrentReport();
         final FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
@@ -314,7 +308,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
 		marketsNode.custom = MonthlyReport.OUTPOSTS;
 		marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
 
-        for (PlayerMarketData data : m_playerMarketData.values()) {
+        for (PlayerMarketData data : playerMarketData.values()) {
             final MarketAPI market = data.market;
             final long netIncome = info.getNetIncome(market, true);
             final float r = data.getEffectiveProfitRatio();
@@ -480,7 +474,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         if (!data.market.isInEconomy()) return;
         for (GroundRaidObjectivePlugin objective : data.objectives) {
             if (objective instanceof CommodityGroundRaidObjectivePluginImpl obj) {
-                if (!m_comDomains.containsKey(objective.getId())) continue;
+                if (!comDomains.containsKey(objective.getId())) continue;
                 final CommodityCell cell = getComCell(obj.getId(), data.market.getId());
                 cell.addStoredAmount(-obj.getQuantityLooted());
             }

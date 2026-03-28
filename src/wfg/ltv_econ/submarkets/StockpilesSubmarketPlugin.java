@@ -85,7 +85,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 	protected transient CargoAPI preTransactionCargoCopy = null;
 
 	public void updateCargoPrePlayerInteraction() {
-		final EconomyEngine engine = EconomyEngine.getInstance();
+		final EconomyEngine engine = EconomyEngine.instance();
 		final String marketId = market.getId();
 
 		getCargo().clear();
@@ -109,7 +109,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
 	@Override
 	public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
-		final EconomyEngine engine = EconomyEngine.getInstance();
+		final EconomyEngine engine = EconomyEngine.instance();
 		final String marketID = market.getId();
 
 		for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {

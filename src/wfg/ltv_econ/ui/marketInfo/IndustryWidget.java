@@ -264,7 +264,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             }
         };
 
-        final WorkerIndustryData data = WorkerRegistry.getInstance().getData(m_industry);
+        final WorkerIndustryData data = WorkerRegistry.instance().getData(m_industry);
         final LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(highlight);
         workerCountLabel.setHighlightColor(
@@ -285,7 +285,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         tp.beginIconGroup();
         tp.setIconSpacingMedium();
 
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
 
         if (m_industry.isFunctional() && !m_industry.isBuilding()) {
         for (String comID : IndustryIOs.getRealInputs(m_industry, false)) {

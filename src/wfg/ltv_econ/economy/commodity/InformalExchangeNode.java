@@ -40,7 +40,7 @@ public class InformalExchangeNode {
     private static final float marketReach = 0.25f;
 
     public final void updateBeforeTrade() {
-        final var cells = EconomyEngine.getInstance().getComDomain(comID).getAllCells();
+        final var cells = EconomyEngine.instance().getComDomain(comID).getAllCells();
 
         final float totalDemand;
         final float totalExcess;
@@ -48,7 +48,7 @@ public class InformalExchangeNode {
             float demand = 0f;
             float excess = 0f;
             for (CommodityCell cell : cells) {
-                demand += CommodityDomain.computeImportAmount(cell);
+                demand += cell.computeImportAmount();
                 excess += cell.getStoredRemainingExportable();
             }
             totalDemand = demand;

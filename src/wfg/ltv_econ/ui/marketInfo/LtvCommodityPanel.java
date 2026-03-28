@@ -77,7 +77,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
         final List<CommoditySpecAPI> commodities = new ArrayList<>(EconomyConstants.econCommoditySpecs);
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
-            return EconomyEngine.getInstance().getComCell(com.getId(), m_market.getId()).getFlowEconomicFootprint() <= 0;
+            return EconomyEngine.instance().getComCell(com.getId(), m_market.getId()).getFlowEconomicFootprint() <= 0;
         });
 
         final TooltipMakerAPI headerTp = ComponentFactory.createTooltip(

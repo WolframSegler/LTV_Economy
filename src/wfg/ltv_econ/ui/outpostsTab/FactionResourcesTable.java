@@ -36,7 +36,7 @@ public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> im
     }
 
     public void buildUI() {
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         final EconomyInfo info = engine.info;
         final int rowH = 30;
         

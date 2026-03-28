@@ -29,7 +29,7 @@ public class OrganHarvestingPolicy extends MarketPolicy implements MarketImmigra
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
 
         market.addTransientImmigrationModifier(this);
-        EconomyEngine.getInstance().getComCell(Commodities.ORGANS, data.marketID)
+        EconomyEngine.instance().getComCell(Commodities.ORGANS, data.marketID)
             .getProductionStat().modifyFlat(id, HARVESTED_ORGANS_BUFF, spec.name);
     }
 
@@ -40,7 +40,7 @@ public class OrganHarvestingPolicy extends MarketPolicy implements MarketImmigra
         data.classConsciousnessDelta.unmodifyFlat(id);
 
         market.removeTransientImmigrationModifier(this);
-        EconomyEngine.getInstance().getComCell(Commodities.ORGANS, data.marketID)
+        EconomyEngine.instance().getComCell(Commodities.ORGANS, data.marketID)
             .getProductionStat().unmodifyFlat(id);
     }
 
@@ -50,7 +50,7 @@ public class OrganHarvestingPolicy extends MarketPolicy implements MarketImmigra
 	}
 
     public void postAdvance(PlayerMarketData data) {
-        EconomyEngine.getInstance().addCredits(data.marketID, ASSET_SEIZURE_CREDITS_BUFF);
+        EconomyEngine.instance().addCredits(data.marketID, ASSET_SEIZURE_CREDITS_BUFF);
     }
 
     @Override

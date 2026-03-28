@@ -202,7 +202,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     }
 
     public void createSections() {
-        EconomyEngine.getInstance().fakeAdvance();
+        EconomyEngine.instance().fakeAdvance();
 
         updateSection1();
         updateSection2();
@@ -261,7 +261,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
     private void createSection1(UIPanelAPI section, TooltipMakerAPI tooltip) {
         if (m_com == null) return;
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
 
         tooltip.addSectionHeading(m_com.getName(), Alignment.MID, pad);
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
@@ -294,7 +294,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 @Override
                 public void buildUI() {
                     final long value = engine.getComDomain(comID)
-                        .getTradeCreditActivity();
+                        .getCreditActivityHistory();
                     final String txt = "Global market value";
                     String valueTxt = NumFormat.formatCredit(value);
                     if (value < 1) valueTxt = "---";
@@ -315,13 +315,14 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                         final int discount = (int)((1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
 
                         tp.addPara(
-                            "Total credits spent sector-wide for the import of " +
-                            m_com.getName() + ". " +
+                            "Sector-wide spendings for the import of " +
+                            m_com.getName() + " in the last %s days. " +
                             "Colonies with higher accessibility, faction relations and a shorter distance will have priority when exporting.\n\n"
                             +
                             "The value shown here includes the demand at your colonies, " +
                             "since they must import goods as well. In-faction imports have a %s discount.",
-                            pad, highlight, discount + "%"
+                            pad, new Color[] {base, highlight},
+                            Integer.toString(EconomyConfig.HISTORY_LENGTH), discount + "%"
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
@@ -675,7 +676,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
         );
 
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
 
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
 
@@ -791,7 +792,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     private TooltipBuilder createSection3RowsTooltip(MarketAPI market, String marketName, Color baseColor) {
         return (tp, exp) -> {
             final FactionAPI faction = market.getFaction();
-            final CommodityCell cell = EconomyEngine.getInstance().getComCell(
+            final CommodityCell cell = EconomyEngine.instance().getComCell(
                 m_com.getId(), market.getId()
             );
     

@@ -1,7 +1,7 @@
 package wfg.ltv_econ.economy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,50 +13,23 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.ArrayMap;
 
 /**
  * The registry always uses IndustryIOs.getBaseIndustryID() internally to manage industry IDs
  */
-public class WorkerRegistry {
+public class WorkerRegistry implements Serializable {
     public static final String WorkerRegSerialID = "ltv_econ_worker_registry";
     public static final String KEY = "::";
 
-    // TODO switch to ArrayMap after incompatible update
-    private final Map<String, WorkerIndustryData> registry = new HashMap<>();
+    private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>();
 
-    private static WorkerRegistry instance;
+    public WorkerRegistry() {}
 
-    private WorkerRegistry() {}
-
-    public static final WorkerRegistry loadInstance(boolean forceRefresh) {
-        WorkerRegistry workerRegistry = (WorkerRegistry) Global.getSector()
-            .getPersistentData().get(WorkerRegSerialID);
-
-        if (workerRegistry != null && !forceRefresh) {
-            instance = workerRegistry;
-        } else {
-            instance = new WorkerRegistry();
-            if (Global.getSettings().isDevMode()) {
-                Global.getLogger(WorkerRegistry.class).info("Worker Registery constructed");
-            }
-        }
-
-        return instance;
-    }
-
-    public static final void saveInstance() {
-        Global.getSector().getPersistentData().put(WorkerRegSerialID, instance);
-        instance = null;
-    }
-
-    public static final void setInstance(WorkerRegistry a) {
-        instance = a;
-    }
-
-    public static final WorkerRegistry getInstance() {
-        if (instance == null) loadInstance(false);
-        return instance;
+    public static final WorkerRegistry instance() {
+        return LtvEconSaveData.instance().workerRegistry;
     }
 
     public final void resetWorkersAssigned(boolean resetPlayerIndustries) {
@@ -174,13 +147,13 @@ public class WorkerRegistry {
         public transient MarketAPI market;
         public transient Industry ind;
         
-        private final Map<String, Float> outputRatios;
+        private final ArrayMap<String, Float> outputRatios;
         private float outputRatioSum = 0;
 
         public WorkerIndustryData(String marketID, Industry industry) {
             this.marketID = marketID;
             this.indID = IndustryIOs.getBaseIndustryID(industry);
-            this.outputRatios = new HashMap<>();
+            this.outputRatios = new ArrayMap<>();
 
             readResolve();
         }
@@ -199,7 +172,7 @@ public class WorkerRegistry {
             this.marketID = other.marketID;
             this.indID = other.indID;
 
-            this.outputRatios = new HashMap<>(other.outputRatios);
+            this.outputRatios = new ArrayMap<>(other.outputRatios);
 
             this.outputRatioSum = other.outputRatioSum;
 

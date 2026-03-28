@@ -12,7 +12,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.AudioFeedbackComp;
 import wfg.native_ui.ui.components.BackgroundComp;
@@ -88,7 +88,7 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
             super(parent, width, height);
 
             this.faction = faction;
-            alreadyEmbargoed = EconomyEngine.getInstance().playerFactionSettings
+            alreadyEmbargoed = LtvEconSaveData.instance().playerFactionSettings
                 .embargoedFactions.contains(faction.getId());
 
             interaction.onClicked = (row, isLeftClick) -> {

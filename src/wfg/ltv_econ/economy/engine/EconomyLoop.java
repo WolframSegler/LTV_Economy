@@ -2,9 +2,11 @@ package wfg.ltv_econ.economy.engine;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.DebtDebuffTier;
@@ -21,120 +24,65 @@ import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
+import wfg.ltv_econ.economy.commodity.TradeCargo;
+import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
+import wfg.ltv_econ.economy.fleet.FactionShipInventory;
+import wfg.ltv_econ.economy.fleet.ShipTypeData;
+import wfg.ltv_econ.economy.fleet.TradeMission;
+import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.economy.planning.WorkforceAllocator;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
 
 public class EconomyLoop {
     public static final String KEY = "::";
 
     transient EconomyEngine engine;
-    private int cyclesSinceWorkerAssign = 0;
 
     public EconomyLoop(EconomyEngine engine) { this.engine = engine; }    
 
-    /**
-     * Advances the economy by one cycle.
-     * <p>
-     * This method is the central loop for processing all markets, industries, and commodities
-     * within the EconomyEngine. It handles production, labor assignment, input deficit adjustments,
-     * trade, and stockpile updates. Each step occurs in a specific order to preserve the integrity
-     * of the simulation and ensure worker assignment is based on actual unmet demand from
-     * worker-independent industries.
-     * </p>
-     * <p><b>Cycle steps:</b></p>
-     * <ol>
-     *   <li>
-     *     <b>refreshMarkets()</b> - Synchronizes the EconomyEngine's market list with the game's
-     *     official Economy. Adds new markets and removes non-existent ones.
-     *   </li>
-     *   <li>
-     *     <b>CommodityDomain.reset()</b> - Resets per-commodity values such as imports, exports, and
-     *     stockpile usage from the previous cycle. Ensures a clean slate for updates.
-     *   </li>
-     *   <li>
-     *     <b>Worker-independent industry update</b> - Updates commodities produced by industries that
-     *     do not depend on workers. Worker-dependent industries are implicity ignored after
-     *     {@link #resetWorkersAssigned} is executed, as they have no demand.
-     *   </li>
-     *   <li>
-     *     <b>assignWorkers()</b> - Assigns workers to worker-dependent industries using a
-     *     matrix-based solver. This step uses only the demand from worker-independent industries,
-     *     ensuring optimal allocation without iterative guesswork. Runs only if
-     *     <code>fakeAdvance == false</code>.
-     *   </li>
-     *   <li>
-     *     <b>CommodityDomain.update()</b> - Updates all commodities to account for the newly assigned workers,
-     *     converting production into LTV-based stats, calculating base demand, and updating local production.
-     *   </li>
-     *   <li>
-     *     <b>weightedOutputDeficitMods()</b> - Adjusts local production based on input deficits.
-     *     Only considers stockpiles available at the start of this cycle. This throttling
-     *     ensures industries cannot consume unavailable inputs.
-     *   </li>
-     *   <li>
-     *     <b>CommodityDomain.trade()</b> - Handles exports of surplus commodities and imports to
-     *     fill storage for the next cycle. Trade occurs after production so industries
-     *     always consume existing stockpiles. Imports feed storage for future production.
-     *   </li>
-     *   <li>
-     *     <b>CommodityDomain.advance(fakeAdvance)</b> - Updates stockpiles after production and trade.
-     *     If <code>fakeAdvance</code> is true, this step does nothing. Stockpiles now include produced and
-     *     newly imported goods ready for the next cycle.
-     *   </li>
-     *   <li>
-     *     <b>playerMarketData.advance(fakeAdvance)</b> - Updates population statistics of player markets.
-     *     If <code>fakeAdvance</code> is true, this step does nothing.
-     *   </li>
-     * </ol>
-     *
-     * <p><b>Important notes:</b></p>
-     * <ul>
-     *   <li>Worker assignment must occur after worker-independent production is updated but before
-     *       worker-dependent industries are updated, to ensure demand reflects actual unmet needs.</li>
-     *   <li>If <code>fakeAdvance</code> is true, worker assignments and stockpile updates are skipped,
-     *       allowing simulation previews without advancing the economy.</li>
-     * </ul>
-     *
-     * @param fakeAdvance If true, simulates a tick without modifying worker assignments or
-     *                    stockpiles (useful for interfaces or previews).
-     */
     final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
+        final boolean allocWorkers = engine.cyclesSinceWorkerAssign >= EconomyConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment;
         refreshMarkets();
 
         discoverInputsOutputs();
 
-        engine.m_comDomains.values().forEach(CommodityDomain::reset);
+        engine.comDomains.values().forEach(CommodityDomain::reset);
 
         if (!fakeAdvance || forceWorkerAssignment) {
-            if (cyclesSinceWorkerAssign >= EconomyConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment) {
-
-                WorkerRegistry.getInstance().resetWorkersAssigned(false);
-                engine.m_comDomains.values().parallelStream().forEach(CommodityDomain::update);
+            if (allocWorkers) {
+                WorkerRegistry.instance().resetWorkersAssigned(false);
+                engine.comDomains.values().parallelStream().forEach(CommodityDomain::update);
                 assignWorkers();
 
-                cyclesSinceWorkerAssign = 0;
+                engine.cyclesSinceWorkerAssign = 0;
             } else {
-                cyclesSinceWorkerAssign++;
+                engine.cyclesSinceWorkerAssign++;
             }
         }
 
-        engine.m_comDomains.values().parallelStream().forEach(CommodityDomain::update);
+        engine.comDomains.values().parallelStream().forEach(CommodityDomain::update);
         
         weightedOutputDeficitMods();
 
-        if (!fakeAdvance) engine.m_playerMarketData.values().forEach(PlayerMarketData::advance);
+        if (!fakeAdvance) {
+            engine.playerMarketData.values().forEach(PlayerMarketData::advance);
 
-        engine.m_comDomains.values().parallelStream().forEach(dom -> dom.trade(fakeAdvance));
+            handleTrade();
+        }
+
+        engine.comDomains.values().parallelStream().forEach(d -> d.informalTrade(fakeAdvance));
 
         if (!fakeAdvance) {
-            engine.m_comDomains.values().forEach(CommodityDomain::advance);
+            engine.comDomains.values().forEach(CommodityDomain::advance);
 
             applyWages();
-            redistributeFactionCredits(engine.playerFactionSettings.redistributeCredits);
+            redistributeFactionCredits(LtvEconSaveData.instance().playerFactionSettings.redistributeCredits);
             applyDebtEffects();
         }
     }
@@ -144,7 +92,7 @@ public class EconomyLoop {
         final Set<String> econMarketIDs = econMarkets.stream()
             .map(MarketAPI::getId)
             .collect(Collectors.toSet());
-        final Set<String> registeredMarkets = new HashSet<>(engine.m_registeredMarkets);
+        final Set<String> registeredMarkets = new HashSet<>(engine.registeredMarkets);
 
         for (MarketAPI market : econMarkets) {
             if (!registeredMarkets.contains(market.getId())) engine.registerMarket(market);
@@ -160,7 +108,7 @@ public class EconomyLoop {
         final Set<String> econMarketIDs = econMarkets.stream()
             .map(MarketAPI::getId)
             .collect(Collectors.toSet());
-        final Set<String> registeredMarkets = new HashSet<>(engine.m_registeredMarkets);
+        final Set<String> registeredMarkets = new HashSet<>(engine.registeredMarkets);
 
         for (MarketAPI market : econMarkets) {
             if (!registeredMarkets.contains(market.getId())) engine.registerMarket(market);
@@ -174,7 +122,7 @@ public class EconomyLoop {
             if (!market.isPlayerOwned()) continue;
 
             final String marketID = market.getId();
-            if (!engine.m_playerMarketData.containsKey(marketID)) {
+            if (!engine.playerMarketData.containsKey(marketID)) {
                 engine.addPlayerMarketData(marketID);
             }
             for (CommodityDomain dom : engine.getComDomains()) {
@@ -184,7 +132,7 @@ public class EconomyLoop {
         }
     }
 
-    public final void discoverInputsOutputs() {
+    private final void discoverInputsOutputs() {
         // TODO maybe replace with the industry apply hooks after the update
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
@@ -208,7 +156,7 @@ public class EconomyLoop {
     }
 
     public final void assignWorkers() {
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        final WorkerRegistry reg = WorkerRegistry.instance();
         final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         markets.removeIf(MarketAPI::isPlayerOwned);
@@ -241,8 +189,8 @@ public class EconomyLoop {
         }
     }
 
-    public final void weightedOutputDeficitMods() {
-        engine.m_comDomains.values().stream()
+    private final void weightedOutputDeficitMods() {
+        engine.comDomains.values().stream()
             .flatMap(dom -> dom.getCellsMap().values().stream())
             .parallel()
             .forEach(this::computeComDeficits);
@@ -295,11 +243,149 @@ public class EconomyLoop {
         } else cell.getProductionStat().unmodifyMult("deficits");
     }
 
-    public final void applyWages() {
+    private final void handleTrade() {
+        advanceMissions();
+
+        if (engine.cyclesSinceTrade >= engine.lastTradeCycle) {
+            engine.cyclesSinceTrade = 0;
+            engine.lastTradeCycle = EconomyConfig.TRADE_INTERVAL;
+            dispatchTrade();
+        } else {
+            engine.cyclesSinceTrade++;
+        }
+    }
+
+    private final void dispatchTrade() {
+        engine.comDomains.values().forEach(CommodityDomain::createFormalTradeFlows);
+
+        final ArrayMap<String, TradeMission> missions = new ArrayMap<>();
+        for (CommodityDomain dom : engine.comDomains.values()) {
+            for (ComTradeFlow flow : dom.getTradeFlows()) {
+                final TradeMission mission = missions.computeIfAbsent(
+                    flow.exporter.getId() + KEY + flow.importer.getId(),
+                    m -> new TradeMission(flow.exporter, flow.importer, flow.inFaction)
+                );
+
+                final TradeCargo cargo = new TradeCargo(dom.comID, flow.amount, flow.unitPrice);
+                mission.cargo.add(cargo);
+                mission.totalAmount += flow.amount;
+            }
+        }
+
+        final int totalMissions = missions.size();
+        for (int i = 0; i < totalMissions; i++) {
+
+            final TradeMission mission = missions.valueAt(i);
+            mission.departureDay = (i * EconomyConfig.TRADE_INTERVAL) / totalMissions;
+
+            final FactionShipInventory inv = engine.getFactionShipInventory(
+                mission.sourceMarket.getFaction().getId()
+            );
+            if (inv.getIdleCargoCapacity() >= mission.totalAmount) {
+                allocShipsAndFuelToTradeMission(inv, mission);
+            } else {
+                // TODO handle independent fleet assignment.
+            }
+            engine.activeMissions.add(mission);
+        }
+    }
+
+    private final void advanceMissions() {
+        final Iterator<TradeMission> it = engine.activeMissions.iterator();
+        while (it.hasNext()) {
+            final TradeMission m = it.next();
+
+            switch (m.status) {
+            case SCHEDULED:
+                if (engine.cyclesSinceTrade == m.departureDay) {
+                    m.status = MissionStatus.IN_TRANSIT;
+                }
+                break;
+
+            case IN_TRANSIT:
+                m.travelTimeRemaining--;
+                if (m.travelTimeRemaining < 1) {
+                    m.status = MissionStatus.DELIVERED;
+                }
+                break;
+            
+            case DELIVERED:
+                for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
+                    entry.getKey().freeShip(entry.getValue());
+                }
+                engine.pastMissions.add(m);
+                it.remove();
+
+                for (TradeCargo cargo : m.cargo) {
+                    final CommodityCell cell = engine.getComCell(cargo.comID, m.destMarket.getId());
+                    if (m.inFaction) {
+                        cell.inFactionImports += cargo.amount;
+                    } else {
+                        cell.globalImports += cargo.amount;
+                    }
+                }
+
+                break;
+
+            case LOST:
+                for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
+                    entry.getKey().registerShipLoss(entry.getValue());
+                }
+                engine.pastMissions.add(m);
+                it.remove();
+                break;
+            }
+        }
+    }
+
+    private final void allocShipsAndFuelToTradeMission(final FactionShipInventory inv,
+        final TradeMission mission
+    ) {
+        final List<ShipTypeData> sorted = inv.getShips().values().stream()
+            .filter(d -> d.getIdle() > 0 && d.spec.getCargo() > 0f)
+            .sorted((a, b) -> Float.compare(b.spec.getCargo(), a.spec.getCargo()))
+            .collect(Collectors.toList());
+
+        // TODO improve to use fuel tankers for fuel and smaller ships first for small shipments
+        float required = mission.totalAmount;
+        for (ShipTypeData data : sorted) {
+            final int available = data.getIdle();
+            final float cap = data.spec.getCargo();
+            final int needed = (int) Math.ceil(required / cap);
+            final int take = Math.min(available, needed);
+            if (take > 0) {
+                mission.allocatedShips.put(data, take);
+                inv.useShips(data.hullID, take);
+                required -= take * cap;
+                if (required <= 0f) break;
+            }
+        }
+
+        // TODO expand to handle escort assignments based on trade route risk.
+
+        float fuelCost = 0f;
+        for (Entry<ShipTypeData, Integer> e : mission.allocatedShips.entrySet()) {
+            fuelCost += e.getKey().spec.getFuelPerLY() * e.getValue() * mission.dist;
+        }
+        mission.fuelCost = fuelCost;
+
+        final String marketID = mission.sourceMarket.getId();
+        final CommodityCell cell = engine.getComCell(Commodities.FUEL, marketID);
+        if (cell.getStored() < fuelCost) {
+            engine.addCredits(marketID, (long) -(EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT *
+                cell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost))
+            );
+        } else {
+            mission.usedFuelFromStockpiles = true;
+            cell.addStoredAmount(-fuelCost); // TODO create demand for this
+        }
+    }
+
+    private final void applyWages() {
         final EconomyAPI econ = Global.getSector().getEconomy(); 
         final List<String> toRemove = new ArrayList<>(4);
 
-        for (String marketID : engine.m_registeredMarkets) {
+        for (String marketID : engine.registeredMarkets) {
             if (econ.getMarket(marketID) == null) {
                 toRemove.add(marketID);
             } else {
@@ -312,7 +398,7 @@ public class EconomyLoop {
         }
     }
 
-    public void redistributeFactionCredits(boolean includePlayerFaction) {
+    private final void redistributeFactionCredits(boolean includePlayerFaction) {
         final double REDISTRIBUTION_STRENGTH = 0.2;
         final int DAYS_AFTER_REDISTRIBUTION = 30;
 
@@ -354,7 +440,7 @@ public class EconomyLoop {
         }
     }
 
-    public final void applyDebtEffects() {
+    private final void applyDebtEffects() {
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             final long credits = engine.getCredits(market.getId());
             DebtDebuffTier appliedTier = null;

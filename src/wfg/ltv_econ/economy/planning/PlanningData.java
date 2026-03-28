@@ -55,7 +55,7 @@ public class PlanningData {
         final double[] d = new double[commodities.size()];
         for (int i = 0; i < commodities.size(); i++) {
             String commodityID = commodities.get(i);
-            d[i] = EconomyEngine.getInstance().info.getGlobalDemand(commodityID);
+            d[i] = EconomyEngine.instance().info.getGlobalDemand(commodityID);
         }
 
         return d;
@@ -67,7 +67,7 @@ public class PlanningData {
         final double[] d = new double[commodities.size()];
         for (int i = 0; i < commodities.size(); i++) {
             final String comID = commodities.get(i);
-            d[i] = EconomyEngine.getInstance().info.getFactionComDemand(comID, factionID);
+            d[i] = EconomyEngine.instance().info.getFactionComDemand(comID, factionID);
         }
 
         return d;
@@ -91,7 +91,7 @@ public class PlanningData {
         final double[] d = new double[commodities.size()];
         for (int i = 0; i < commodities.size(); i++) {
             final String comID = commodities.get(i);
-            d[i] = EconomyEngine.getInstance().getComCell(comID, marketID).getBaseDemand(true);
+            d[i] = EconomyEngine.instance().getComCell(comID, marketID).getBaseDemand(true);
         }
 
         return d;

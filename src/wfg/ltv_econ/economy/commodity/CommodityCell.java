@@ -1,5 +1,6 @@
 package wfg.ltv_econ.economy.commodity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +10,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.StatBonus;
-import com.fs.starfarer.api.impl.campaign.econ.ShippingDisruption;
-import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.campaign.econ.Market;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
@@ -44,7 +43,7 @@ import wfg.native_ui.util.ArrayMap;
  * <p>This convention ensures that the meaning of each getter is always clear and
  * prevents subtle logic errors when computing balances or updating stored amounts.</p>
  */
-public class CommodityCell {
+public class CommodityCell implements Serializable {
 
     public static final String WORKER_MOD_ID = "worker_assigned";
 
@@ -55,18 +54,17 @@ public class CommodityCell {
     public transient CommoditySpecAPI spec;
 
     private double stored = 0.0;
+
     private MutableStat localProd = new MutableStat(0f);
     private MutableStat baseDemand = new MutableStat(0f);
     private transient ArrayMap<String, MutableStat> localProdMutables = new ArrayMap<>();
     private transient ArrayMap<String, MutableStat> demandBaseMutables = new ArrayMap<>();
 
-    public transient float inFactionImports = 0f;
-    public transient float globalImports = 0f;
-    public transient float importEffectiveness = 1f;
-    private transient float importExclusiveDemand = 0f;
-
-    public transient float inFactionExports = 0f;
-    public transient float globalExports = 0f;
+    public float inFactionImports = 0f;
+    public float globalImports = 0f;
+    private float importExclusiveDemand = 0f;
+    public float inFactionExports = 0f;
+    public float globalExports = 0f;
 
     // NON-STATE OWNED
     private StatBonus informalImportMods = new StatBonus();
@@ -133,20 +131,19 @@ public class CommodityCell {
         );
     }
     public final float getFlowOverImports() {
-        return Math.max(0, getTotalImports(false) - importExclusiveDemand - getFlowDeficitMetViaTrade());
+        return Math.max(0, getTotalImports() - importExclusiveDemand - getFlowDeficitMetViaTrade());
     }
     public final float getFlowDeficit() {
         return getBaseDemand(true) - getFlowDeficitMet();
     }
-    public final float getTotalImports(boolean modified) {
-        final float base = inFactionImports + globalImports + informalImports;
-        return modified ? base * importEffectiveness : base;
+    public final float getTotalImports() {
+        return inFactionImports + globalImports + informalImports;
     }
     public final float getTotalExports() {
         return inFactionExports + globalExports + informalExports;
     }
     public final float getFlowAvailable() {
-        return getProduction(true) + getTotalImports(true);
+        return getProduction(true) + getTotalImports();
     }
     public final double getStoredAvailable() {
         return stored + getFlowAvailable();
@@ -170,13 +167,13 @@ public class CommodityCell {
         return Math.max(0, getFlowRemainingExportable());
     }
     public final float getFlowEconomicFootprint() {
-        return getFlowDeficitMet() + getFlowDeficit() + getImportExclusiveDemand() + getFlowOverImports() +
+        return getFlowDeficitMet() + getFlowDeficit() + importExclusiveDemand + getFlowOverImports() +
             getTotalExports() + getFlowCanNotExport();
     }
     public final double getStoredEconomicFootprint() {
         return getStoredAvailabilityRatio() * getPreferredStockpile() +
             getStoredRemainingExportable() +
-            getImportExclusiveDemand() +
+            importExclusiveDemand +
             getTotalExports();
     }
     public final float getFlowRealBalance() {
@@ -208,7 +205,7 @@ public class CommodityCell {
     }
 
     public final void addStoredAmount(double a) {
-        stored = Math.max(0, stored + a);
+        stored = Math.max(0.0, stored + a);
     }
 
     public CommodityCell(String comID, String marketID) {
@@ -225,16 +222,12 @@ public class CommodityCell {
         localProdMutables = new ArrayMap<>();
         demandBaseMutables = new ArrayMap<>();
 
-        // TODO Remove when save incompatible update drops
-        if (informalImportMods == null) informalImportMods = new StatBonus();
-
         return this;
     }
 
     public final void update() {
         // RESET UPDATE SPECIFIC FLAGS
-        importExclusiveDemand = 0;
-        importEffectiveness = 1f;
+        importExclusiveDemand = 0f;
         localProdMutables.clear();
         demandBaseMutables.clear();
 
@@ -284,13 +277,6 @@ public class CommodityCell {
 
         localProd.setBaseValue(localProdBase);
         baseDemand.setBaseValue(baseDemandBase);
-
-        for (StatMod mod : market.getCommodityData(comID).getAvailableStat().getFlatMods().values()) {
-            if (!mod.source.contains(ShippingDisruption.COMMODITY_LOSS_PREFIX)) continue;
-            // TODO Integrate cargo raids better
-            importEffectiveness = 1f + 0.3f*mod.value; // Can be -1 or -2.
-            break;
-        }
     }
 
     public final void reset() {
@@ -303,7 +289,6 @@ public class CommodityCell {
         informalExports = 0f;
 
         importExclusiveDemand = 0f;
-        importEffectiveness = 1f;
 
         localProdMutables.clear();
         demandBaseMutables.clear();
@@ -321,7 +306,7 @@ public class CommodityCell {
     }
     
     private static final float INHERENT_DEMAND = 4f;
-    private static final float SHIFT_FRACTION = 0.001f;
+    private static final float SHIFT_FRACTION = 0.002f;
     private static final float epsilon = 1e-3f;
     private static final double scarcityExpBuy = 0.85;
     private static final double scarcityExpNeutral = 1.0;
@@ -367,7 +352,7 @@ public class CommodityCell {
         return Math.max(1f, basePrice * priceMult);
     }
 
-    public float computeVanillaPrice(int amount, boolean isSellingToMarket, boolean isPlayer) {
+    public final float computeVanillaPrice(int amount, boolean isSellingToMarket, boolean isPlayer) {
         if (amount < 1) return 0f;
 
         final Market mkt = (Market) market;
@@ -399,20 +384,15 @@ public class CommodityCell {
         return (float)Math.floor(Math.max(totalPrice, amount));
     }
 
-    public static final List<MarketAPI> getFactionMarkets(String factionId) {
-        List<MarketAPI> result = new ArrayList<>();
+    public final float computeImportAmount() {
+        final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * getBaseDemand(true);
+        final float target = Math.max((float) Math.min(getPreferredStockpile() - getStored(), cap), 0f);
 
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (market.getFactionId().equals(factionId) && market.isPlanetConditionMarketOnly() == false) {
-                result.add(market);
-            }
-        }
-
-        return result;
+        return Math.max(target + importExclusiveDemand - getTotalImports(), 0f);
     }
 
     public final List<Industry> getVisibleIndustries() {
-        List<Industry> industries = new ArrayList<>(market.getIndustries());
+        final List<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);
         return industries;
     }
@@ -461,12 +441,10 @@ public class CommodityCell {
 
         // ===== IMPORTS =====
         sb.append("[Imports]\n");
-        sb.append(" totalImports (raw): ").append(getTotalImports(false)).append("\n");
-        sb.append(" totalImports (effective): ").append(getTotalImports(true)).append("\n");
+        sb.append(" totalImports").append(getTotalImports()).append("\n");
         sb.append(" inFactionImports: ").append(inFactionImports).append("\n");
         sb.append(" globalImports: ").append(globalImports).append("\n");
         sb.append(" informalImports: ").append(informalImports).append("\n");
-        sb.append(" importEffectiveness: ").append(importEffectiveness).append("\n");
         sb.append(" importExclusiveDemand: ").append(importExclusiveDemand).append("\n");
         sb.append(" overImports: ").append(getFlowOverImports()).append("\n\n");
 

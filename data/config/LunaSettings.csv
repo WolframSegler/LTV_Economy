@@ -16,7 +16,7 @@ labor_RoVC_agriculture,RoCV Agriculture,Double,0.23,,,0.0,1.0,Labor
 labor_RoVC_mechanized,RoCV Mechanized Industries,Double,0.1,,Used by mining and fuel production.,0.0,1.0,Labor
 labor_RoVC_manual,RoCV Manual Professions,Double,0.5,,,0.0,1.0,Labor
 labor_RoVC_space,RoCV Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
-,,,,,,,,loaded yet. Otherwise a restart is required.,,,,,Economy
+,,,,,,,,
 economy_generalHeader,General Settings,Header,General Settings,,,,,Economy
 economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread.,,,Economy
 economy_assignOnLoad,Assign Workers On Load,Boolean,false,,Re-allocates the workers after loading a save. Includes quick-saves as well.,,,Economy
@@ -35,9 +35,16 @@ economy_allocPasses,Allocation Refinement Passes,Int,3,,Higher values improve al
 economy_assignInterval,Worker Assignment Interval,Int,15,,"Workers of NPC markets will be re-allocated every x days.",1,360,Economy
 economy_prodFairness,Fairness Metric,Radio,Commodities Produced,"Commodities Produced, Workers Assigned","Determines the measurement for the fair share.",,,Economy
 economy_tradeHeader,Trade Settings,Header,Trade Settings,,,,,Economy
-economy_daysToCover,Stockpile Coverage Days,Int,30,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Economy
-economy_toCoverPerImport,Import Smoothing Window,Int,2,,Limits how many days of demand can be satisfied per import cycle to reduce volatility.,1,360,Economy
+economy_tradeInterval,Trade Interval,Int,15,,Markets will trade goods every x days.,7,30,Economy
+economy_daysToCover,Stockpile Coverage Days,Int,45,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Economy
+economy_perImportDaysCover,Trade Coverage Limit,Int,21,,Limits how many days of demand can be satisfied per trade run to reduce volatility. Values lower than Trade Interval will cause constant deficits.,1,360,Economy
 economy_exportThreshold,Export Threshold Factor,Double,1.5,,Multiplier for excess stock required before a market begins exporting.,1,2,Economy
 economy_factionExchangeMult,Faction Price Multiplier,Double,0.3,,Adjusts prices for goods traded between markets of the same faction. Set to 0 for free in-faction trade.,0,1,Economy
 economy_embargoRepDrop,Embargo Reputation Penalty,Double,0.4,,The relationship hit for imposing an embargo. 1 means 100 relation points.,0,1,Economy
 economy_minTradeRelation,Minimum Trade Relationship,Double,-0.9,,Minimum relationship between factions for trade to occur. Factions below this threshold will not trade.,-1,0,Economy
+,,,,,,,,
+fleet_idleShipMaintenanceMult,Idle Ships Maintenance Mult,Double,0.3,,Multiplier to maintenance supply cost for idle ships inside the faction inventory. A value of 1 disables the discount.,0,1,Fleet
+fleet_crewWages,Crew Monthly Wages,Double,10,,Monthly wages per crew member operating the faction inventory ships.,1,100,Fleet
+fleet_idleCrewWagesMult,Idle Crew Wage Mult,Double,0.5,,Wage multiplier for idle crew operating the faction inventory ships.,0,1,Fleet
+fleet_travelSpeedLyDay,Trade Fleet Travel Speed,Int,14,,The speed in light-years at which trade fleets travel in hyperspace. Used by the simulation.,1,20,Fleet
+fleet_forcedFuelCostMult,Forced Fuel Cost Mult, Double,3,,Cost multiplier for fuel purchases made to initiate trade when no fuel is stockpiled.,1,10,Fleet

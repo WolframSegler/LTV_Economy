@@ -49,7 +49,6 @@ public class EconomyConfigLoader {
         EconomyConfig.DAYS_TO_COVER = root.getInt("DAYS_TO_COVER");
         EconomyConfig.DAYS_TO_COVER_PER_IMPORT = root.getInt("DAYS_TO_COVER_PER_IMPORT");
         EconomyConfig.FACTION_EXCHANGE_MULT = (float) root.getDouble("FACTION_EXCHANGE_MULT");
-        EconomyConfig.VOLATILITY_WINDOW = root.getInt("VOLATILITY_WINDOW");
         EconomyConfig.WORKER_ASSIGN_INTERVAL = root.getInt("WORKER_ASSIGN_INTERVAL");
         EconomyConfig.EXPORT_THRESHOLD_FACTOR = (float) root.getDouble("EXPORT_THRESHOLD_FACTOR");
         EconomyConfig.SHOW_MARKET_POLICIES = root.getBoolean("SHOW_MARKET_POLICIES");
@@ -62,6 +61,13 @@ public class EconomyConfigLoader {
         EconomyConfig.USE_PRODUCTION_FAIRNESS = root.getBoolean("USE_PRODUCTION_FAIRNESS");
         EconomyConfig.CREDIT_WITHDRAWAL_LIMIT = root.getInt("CREDIT_WITHDRAWAL_LIMIT");
         EconomyConfig.AUTO_TRANSFER_PROFIT_LIMIT = (float) root.getDouble("AUTO_TRANSFER_PROFIT_LIMIT");
+        EconomyConfig.IDLE_SHIP_MAINTENANCE_MULT = (float) root.getDouble("IDLE_SHIP_MAINTENANCE_MULT");
+        EconomyConfig.CREW_WAGE_PER_MONTH = (float) root.getDouble("CREW_WAGE_PER_MONTH");
+        EconomyConfig.IDLE_CREW_WAGE_MULT = (float) root.getDouble("IDLE_CREW_WAGE_MULT");
+        EconomyConfig.TRADE_INTERVAL = root.getInt("TRADE_INTERVAL");
+        EconomyConfig.HISTORY_LENGTH = root.getInt("HISTORY_LENGTH");
+        EconomyConfig.TRAVEL_SPEED_LY_DAY = root.getInt("TRAVEL_SPEED_LY_DAY");
+        EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT = (float) root.getDouble("FORCED_FUEL_IMPORT_COST_MULT");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
@@ -108,7 +114,7 @@ public class EconomyConfigLoader {
         EconomyConfig.FACTION_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_factionProdBuffer");
         EconomyConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "economy_prodBuffer");
         EconomyConfig.DAYS_TO_COVER = LunaSettings.getInt(LTV_ECON, "economy_daysToCover");
-        EconomyConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "economy_toCoverPerImport");
+        EconomyConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "economy_perImportDaysCover");
         EconomyConfig.FACTION_EXCHANGE_MULT = LunaSettings.getDouble(LTV_ECON, "economy_factionExchangeMult").floatValue();
         EconomyConfig.WORKER_ASSIGN_INTERVAL = LunaSettings.getInt(LTV_ECON, "economy_assignInterval");
         EconomyConfig.EXPORT_THRESHOLD_FACTOR = LunaSettings.getDouble(LTV_ECON, "economy_exportThreshold").floatValue();
@@ -116,6 +122,12 @@ public class EconomyConfigLoader {
         EconomyConfig.MIN_RELATION_TO_TRADE = LunaSettings.getDouble(LTV_ECON,"economy_minTradeRelation").floatValue();
         EconomyConfig.ECON_ALLOCATION_PASSES = LunaSettings.getInt(LTV_ECON, "economy_allocPasses");
         EconomyConfig.MIN_WORKER_FRACTION = LunaSettings.getDouble(LTV_ECON, "economy_minWorkerFraction").floatValue();
+        EconomyConfig.IDLE_SHIP_MAINTENANCE_MULT = LunaSettings.getDouble(LTV_ECON, "fleet_idleShipMaintenanceMult").floatValue();
+        EconomyConfig.CREW_WAGE_PER_MONTH = LunaSettings.getDouble(LTV_ECON, "fleet_crewWages").floatValue();
+        EconomyConfig.IDLE_CREW_WAGE_MULT = LunaSettings.getDouble(LTV_ECON, "fleet_idleCrewWagesMult").floatValue();
+        EconomyConfig.TRADE_INTERVAL = LunaSettings.getInt(LTV_ECON, "economy_tradeInterval");
+        EconomyConfig.TRAVEL_SPEED_LY_DAY = LunaSettings.getInt(LTV_ECON, "fleet_travelSpeedLyDay");
+        EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT = LunaSettings.getDouble(LTV_ECON, "fleet_forcedFuelCostMult").floatValue();
 
         final String fairness = LunaSettings.getString(LTV_ECON, "economy_prodFairness");
         EconomyConfig.USE_PRODUCTION_FAIRNESS = fairness.equals("Commodities Produced");
@@ -189,14 +201,19 @@ public class EconomyConfigLoader {
         public static float MIN_RELATION_TO_TRADE;
 
         /**
-         * The <code>x</code> amount of days which will be used calculate the volatility of a commodity.
-         */
-        public static int VOLATILITY_WINDOW;
-
-        /**
          * The method {@link #assignWorkers()} will be called once every <code>x</code> days.
          */
         public static int WORKER_ASSIGN_INTERVAL;
+
+        /**
+         * The trade methods will be called once every <code>x</code> days.S
+         */
+        public static int TRADE_INTERVAL;
+
+        /**
+         * The length of arrays that store commodity history.
+         */
+        public static int HISTORY_LENGTH;
 
         /**
          * Debt debuffs by tiers for markets.
@@ -258,6 +275,31 @@ public class EconomyConfigLoader {
          * Limit to the ratio of profits from colonies that can go to the player.
          */
         public static float AUTO_TRANSFER_PROFIT_LIMIT;
+
+        /**
+         * Multiplier to maintenance of faction inventory ships. 
+         */
+        public static float IDLE_SHIP_MAINTENANCE_MULT;
+
+        /**
+         * Monthly wages for faction inventory ships crew.
+         */
+        public static float CREW_WAGE_PER_MONTH;
+
+        /**
+         * Multiplier for faction inventory ships crews wages.
+         */
+        public static float IDLE_CREW_WAGE_MULT;
+
+        /**
+         * Trade fleets travel speed.
+         */
+        public static int TRAVEL_SPEED_LY_DAY;
+
+        /**
+         * The cost multiplier for importing fuel when the stockpiles are empty.
+         */
+        public static float FORCED_FUEL_IMPORT_COST_MULT;
 
         static {
             EconomyConfigLoader.loadConfig();

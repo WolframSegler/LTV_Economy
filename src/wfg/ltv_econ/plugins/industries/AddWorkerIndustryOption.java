@@ -52,7 +52,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
 
         tooltip.addPara("Assign idle workers to increase this industry's output.", 0f);
 
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        final WorkerRegistry reg = WorkerRegistry.instance();
         if (reg.getData(opt.ind) == null) {
             reg.register(opt.ind);
         }
@@ -65,7 +65,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
             highlight,
             base
         },
-        NumFormat.engNotation(WorkerRegistry.getInstance().getData(industry).getWorkersAssigned()),
+        NumFormat.engNotation(WorkerRegistry.instance().getData(industry).getWorkersAssigned()),
         industry.getCurrentName()
         );
     }
@@ -79,7 +79,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
     public void optionSelected(IndustryOptionData opt, DialogCreatorUI ui) {
         if (opt.id != PluginID) return;
         
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        final WorkerRegistry reg = WorkerRegistry.instance();
         if (reg.getData(opt.ind) == null) {
             reg.register(opt.ind);
         }

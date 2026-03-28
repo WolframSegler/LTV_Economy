@@ -356,7 +356,7 @@ public class IndustryTooltips {
 			ArrayList<CommoditySpecAPI> supplyList = new ArrayList<>();
 			ArrayList<CommoditySpecAPI> demandList = new ArrayList<>();
 
-			final EconomyEngine engine = EconomyEngine.getInstance();
+			final EconomyEngine engine = EconomyEngine.instance();
 
 			for (CommoditySpecAPI spec : EconomyConstants.econCommoditySpecs) {
 				if (CompatLayer.convertIndSupplyStat(ind, spec.getId()).getModifiedInt() > 0) {

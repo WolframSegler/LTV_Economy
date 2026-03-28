@@ -68,7 +68,7 @@ public class AssignWorkersDialog extends DialogPanel {
         super(Attachments.getScreenPanel(), panelWidth, panelHeight, null, null, "Confirm", "Cancel");
         setConfirmShortcut();
 
-        reg = WorkerRegistry.getInstance();
+        reg = WorkerRegistry.instance();
         industry = ind;
         market = ind.getMarket();
         data = reg.getData(ind);
@@ -194,7 +194,7 @@ public class AssignWorkersDialog extends DialogPanel {
         final float iconSize = 32f;
         final int itemsPerRow = 2;
         final float sectionWidth = ((panelWidth / 2) / itemsPerRow) - opad;
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
 
         final FactionAPI faction = market.getFaction();
         final Color color = faction.getBaseUIColor();

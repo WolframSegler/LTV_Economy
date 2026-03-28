@@ -1,7 +1,6 @@
 package wfg.ltv_econ.configs;
 import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static wfg.ltv_econ.constants.Mods.*;
@@ -13,6 +12,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 
 import lunalib.lunaSettings.LunaSettings;
+import wfg.native_ui.util.ArrayMap;
 
 public class LaborConfigLoader {
     private static final SettingsAPI settings = Global.getSettings();
@@ -108,7 +108,7 @@ public class LaborConfigLoader {
         public static float dynamicWorkerCapPerOutput;
 
         public static float RoVC_average;
-        public static final Map<String, Float> RoVC_map = new HashMap<>();
+        public static final Map<String, Float> RoVC_map = new ArrayMap<>();
 
         static {
             LaborConfigLoader.loadConfig();

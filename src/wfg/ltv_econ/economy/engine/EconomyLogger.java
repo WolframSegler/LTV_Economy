@@ -17,7 +17,7 @@ public class EconomyLogger {
     public final void logEconomySnapshot() {
         Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT START ----");
 
-        for (Map.Entry<String, CommodityDomain> dom : engine.m_comDomains.entrySet()) {
+        for (Map.Entry<String, CommodityDomain> dom : engine.comDomains.entrySet()) {
             long potencialProd = 0;
             long realProd = 0;
             long potencialDemand = 0;
@@ -72,7 +72,7 @@ public class EconomyLogger {
 
         csv.append("Commodity,PotencialProd,RealProd,PotencialDemand,RealDemand,Available,AvailabilityRatio,Deficit,GlobalStockpile,TotalExports,InFactionExports,GlobalExports\n");
 
-        for (Map.Entry<String, CommodityDomain> entry : engine.m_comDomains.entrySet()) {
+        for (Map.Entry<String, CommodityDomain> entry : engine.comDomains.entrySet()) {
             final String comID = entry.getKey();
             final CommodityDomain dom = entry.getValue();
 
@@ -127,7 +127,7 @@ public class EconomyLogger {
         final StringBuilder sb = new StringBuilder();
         sb.append("\n=== Market Credits Snapshot ===\n");
 
-        engine.m_marketCredits.entrySet().stream()
+        engine.marketCredits.entrySet().stream()
         .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
         .forEach(entry -> sb.append(entry.getKey())
             .append(": ")

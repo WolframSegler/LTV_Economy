@@ -1,3 +1,10 @@
+v0.3.0-beta | Sailing the High Seas | NOT SAVE COMPATIBLE
+- It is recommended to reset the LunaLib settings for this update. Defaults have been modified.
+- Added a ship inventory per faction. Currently only active for the player.
+- Added new LunaLib settings to modify said ship inventory.
+- Trade now occurs in periods of 15 days configurable through LunaLib. They are no longer continuous 
+- Trade now happens in discrete units: TradeMissions. New missions are dispatched at the start of each trade interval and colonies allocate resources to export to each other. A tradeMissions with a destination is created and a launch date is assigned. The travel time increases with the distance.
+
 v0.2.12-beta | SAVE COMPATIBLE
 - The effects of saving LunaLib Settings now takes effect immideatly. No restart required.
 - Added a setting to toggle worker pool growth with population growth progress.

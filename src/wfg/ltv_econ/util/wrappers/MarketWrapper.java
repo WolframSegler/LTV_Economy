@@ -94,7 +94,7 @@ public class MarketWrapper extends Market {
             return spec.getBasePrice() * (float) quantity;
         }
 
-        final CommodityCell cell = EconomyEngine.getInstance().getComCell(
+        final CommodityCell cell = EconomyEngine.instance().getComCell(
             com.getId(), com.getMarket().getId()
         );
 
@@ -133,7 +133,7 @@ public class MarketWrapper extends Market {
             return spec.getBasePrice() * (float) quantity;
         }
 
-        final CommodityCell cell = EconomyEngine.getInstance().getComCell(
+        final CommodityCell cell = EconomyEngine.instance().getComCell(
             com.getId(), com.getMarket().getId()
         );
 
@@ -143,15 +143,15 @@ public class MarketWrapper extends Market {
     }
 
     public float getExportIncome(boolean var1) {
-        return EconomyEngine.getInstance().info.getExportIncome(original, true);
+        return EconomyEngine.instance().info.getExportIncome(original, true);
     }
 
     public float getNetIncome() {
-        return EconomyEngine.getInstance().info.getNetIncome(this, true);
+        return EconomyEngine.instance().info.getNetIncome(this, true);
     }
 
     public float getGrossIncome() {
-        return EconomyEngine.getInstance().info.getGrossIncome(this, true);
+        return EconomyEngine.instance().info.getGrossIncome(this, true);
     }
 
 

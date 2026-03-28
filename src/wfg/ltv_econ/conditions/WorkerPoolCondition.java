@@ -41,7 +41,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         }
 
         float totalAssigned = 0;
-        final WorkerRegistry reg = WorkerRegistry.getInstance();
+        final WorkerRegistry reg = WorkerRegistry.instance();
         if (reg == null) return;
 
         for (Industry ind : market.getIndustries()) {

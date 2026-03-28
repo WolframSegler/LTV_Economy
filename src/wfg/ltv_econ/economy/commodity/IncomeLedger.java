@@ -1,6 +1,8 @@
 package wfg.ltv_econ.economy.commodity;
 
-public class IncomeLedger {
+import java.io.Serializable;
+
+public class IncomeLedger implements Serializable {
     public long monthlyExportIncome = 0;
     public long monthlyImportExpense = 0;
 

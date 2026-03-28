@@ -4,11 +4,10 @@ import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 
 import lunalib.lunaSettings.LunaSettingsListener;
-import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.engine.EconomyEngineSerializer;
 import wfg.ltv_econ.economy.planning.IndustryGrouper;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 
 public class ConfigLunaSettingsListener implements LunaSettingsListener {
     @Override
@@ -23,13 +22,10 @@ public class ConfigLunaSettingsListener implements LunaSettingsListener {
         IndustryGrouper.invalidate();
         IndustryMatrix.invalidate();
 
-        // REFRESH THE ENGINE
+        // REFRESH THE DATA
         if (Global.getSettings().getCurrentState() == GameState.CAMPAIGN) {
-            EconomyEngineSerializer.saveInstance();
-            WorkerRegistry.saveInstance();
-
-            WorkerRegistry.loadInstance(false);
-            EconomyEngineSerializer.loadInstance(false, false);
+            LtvEconSaveData.saveInstance();
+            LtvEconSaveData.loadInstance(false, false);
         }
     }
 }

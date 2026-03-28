@@ -1,5 +1,6 @@
 package wfg.ltv_econ.economy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.ltv_econ.util.Arithmetic;
 
-public class PlayerMarketData {
+public class PlayerMarketData implements Serializable {
     public final String marketID;
     public transient MarketAPI market;
 
@@ -109,7 +110,7 @@ public class PlayerMarketData {
         return null;
     }
     public final long getWithdrawLimit() {
-        return withdrewCreditsThisMonth ? 0l : Math.min(EconomyEngine.getInstance().getCredits(marketID),
+        return withdrewCreditsThisMonth ? 0l : Math.min(EconomyEngine.instance().getCredits(marketID),
             EconomyConfig.CREDIT_WITHDRAWAL_LIMIT
         );
     }
@@ -150,7 +151,7 @@ public class PlayerMarketData {
      * Assumes end-of-month
      */
     public final float getEffectiveProfitRatio() {
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         final double net = engine.info.getNetIncome(market, true);
         if (net <= 0) return 0f;
 
@@ -179,7 +180,7 @@ public class PlayerMarketData {
     }
 
     private final void updateHealthDelta() {
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         final CommodityCell foodCell = engine.getComCell(Commodities.FOOD, market.getId());
         final CommodityCell organicsCell = engine.getComCell(Commodities.ORGANICS, market.getId());
         final float fulfillmentRatio = market.hasCondition(Conditions.HABITABLE) ?

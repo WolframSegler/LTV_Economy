@@ -66,7 +66,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
     ) {
         super(parent, width, height);
 
-        m_cell = EconomyEngine.getInstance().getComCell(comID, market.getId());
+        m_cell = EconomyEngine.instance().getComCell(comID, market.getId());
         m_com = settings.getCommoditySpec(comID);
         m_market = market;
 

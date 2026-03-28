@@ -65,7 +65,7 @@ public class TooltipUtils {
         }
 
         final int rowH = 20;
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         final int baseY = (int) tp.getHeightSoFar();
 
         if (!Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay()) {
@@ -448,11 +448,12 @@ public class TooltipUtils {
                     NumFormat.engNotation(cell.informalImports)
                 );
             }
-            if (cell.importEffectiveness < 1f && cell.getTotalImports(false) > 0f) {
-                final float value = ((int) (cell.importEffectiveness * 100f)) / 100f;
+            if (cell.getTotalImports() > 0f) {
+                // TODO modify UI later
+                // final float value = ((int) (cell.importEffectiveness * 100f)) / 100f;
 
-                tp.setGridValueColor(negative);
-                tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value, negative);
+                // tp.setGridValueColor(negative);
+                // tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value, negative);
             }
         }
 
@@ -460,7 +461,7 @@ public class TooltipUtils {
     }
 
     public static final void createComTradeLedgerSection(TooltipMakerAPI tp, CommodityCell cell) {
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
         final CommodityDomain dom = engine.getComDomain(cell.comID);
         final String marketName = cell.market.getName();
         final String comName = cell.spec.getName();
@@ -506,18 +507,18 @@ public class TooltipUtils {
             tp.addPara(
                 marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. They expended %s last month and %s so far this month.",
                 opad, highlight,
-                NumFormat.engNotation(cell.getTotalImports(false)),
+                NumFormat.engNotation(cell.getTotalImports()),
                 engine.info.getImportMarketShare(cell.comID, cell.marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)
             );
-        } else if (cell.getTotalImports(false) < 1f) {
+        } else if (cell.getTotalImports() < 1f) {
             tp.addPara("No local demand.", opad);
         } else if (exportIncomeLastMonth < 1l && exportIncomeThisMonth < 1l) {
             tp.addPara(
                 marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. Import expenses are not tracked for non-player colonies.",
                 opad, highlight,
-                NumFormat.engNotation(cell.getTotalImports(false)),
+                NumFormat.engNotation(cell.getTotalImports()),
                 engine.info.getImportMarketShare(cell.comID, cell.marketID) + "%"
             );
         }

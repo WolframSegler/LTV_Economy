@@ -36,7 +36,7 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> impl
     }
 
     public void buildUI() {
-        final EconomyEngine engine = EconomyEngine.getInstance();
+        final EconomyEngine engine = EconomyEngine.instance();
 
         final int SECTION_I = opad;
 

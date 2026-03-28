@@ -411,14 +411,14 @@ public class IndustryIOs {
     public static final float calculateScale(OutputConfig output, Industry ind) {
         final MarketAPI market = ind.getMarket();
         if (!output.isAbstract) {
-            final CommodityCell cell = EconomyEngine.getInstance().getComCell(output.comID, market.getId()); 
+            final CommodityCell cell = EconomyEngine.instance().getComCell(output.comID, market.getId()); 
             if (cell != null && output.target > 0 && output.target < cell.getStored()) return 0f;
         }
 
         float scale = 1f;
 
         if (output.usesWorkers && !output.isAbstract) {
-            final WorkerIndustryData data = WorkerRegistry.getInstance().getData(ind);
+            final WorkerIndustryData data = WorkerRegistry.instance().getData(ind);
             if (data != null) {
                 scale *= data.getAssignedForOutput(output.comID);
             }

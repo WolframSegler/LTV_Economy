@@ -22,7 +22,7 @@ public class MarketEventsButton extends Button {
     public MarketEventsButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
         super(parent, width, height, null, null, null);
 
-        final boolean hasData = EconomyEngine.getInstance().isPlayerMarket(market.getId());
+        final boolean hasData = EconomyEngine.instance().isPlayerMarket(market.getId());
 
         onClicked = (btn) -> {
             if (!hasData) return;
