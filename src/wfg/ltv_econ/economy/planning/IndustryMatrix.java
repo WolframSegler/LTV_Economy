@@ -18,6 +18,8 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
 public class IndustryMatrix {
+    private IndustryMatrix() {}
+    
     private static final SettingsAPI settings = Global.getSettings();
     private static double[][] STATIC_MATRIX;
     private static List<String> STATIC_WORKER_COMMODITIES;

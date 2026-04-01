@@ -34,11 +34,6 @@ Due to the intrusive nature of the mod, anything that modifies the Colony Info P
 - If you want your mod to add market events, you can add an <code>events_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder.
 
 
-## Roadmap
-- Add more policies and events
-- Add more market events as a consequence of the population
-
-
 ## Credits
 
 Lukas04 -  for providing the access pattern to UI Panels inside the colony detail screen.

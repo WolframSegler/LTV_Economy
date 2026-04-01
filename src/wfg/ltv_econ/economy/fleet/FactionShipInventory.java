@@ -62,6 +62,54 @@ public class FactionShipInventory implements Serializable {
         return total;
     }
 
+    public final float getTotalFuelCapacity() {
+        float total = 0f;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getOwned() * data.spec.getFuel();
+        }
+        return total;
+    }
+
+    public final float getIdleFuelCapacity() {
+        float total = 0f;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getIdle() * data.spec.getFuel();
+        }
+        return total;
+    }
+
+    public final float getTotalCrewCapacity() {
+        float total = 0f;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getOwned() * data.getCrewCapacityPerShip();
+        }
+        return total;
+    }
+
+    public final float getIdleCrewCapacity() {
+        float total = 0f;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getIdle() * data.getCrewCapacityPerShip();
+        }
+        return total;
+    }
+
+    public final float getTotalCombatPower() {
+        float total = 0f;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getOwned() * data.getCombatPower();
+        }
+        return total;
+    }
+
+    public final float getIdleCombatPower() {
+        float total = 0f;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getIdle() * data.getCombatPower();
+        }
+        return total;
+    }
+
     public final float getTotalFleetPoints() {
         float total = 0f;
         for (ShipTypeData data : ships.values()) {

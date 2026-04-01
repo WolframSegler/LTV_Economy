@@ -240,7 +240,7 @@ public class PlayerMarketData implements Serializable {
     }
 
     private final void updateClassConsciousnessDelta() {
-        classConsciousnessDelta.modifyFlat("base", -0.005f, "Base change");
+        classConsciousnessDelta.modifyFlat("base", -0.003f, "Base change");
 
         classConsciousnessDelta.modifyFlat("wage", 0.02f * (RoSV - RoSV_Equalibrium) / RoSV, "Wages");
 
@@ -257,12 +257,12 @@ public class PlayerMarketData implements Serializable {
         final int baseValue = (int) ((popHealth + 5f - BASELINE_VALUE) / 10f);
 
         if (baseValue != 0) {
-            market.getIncoming().getWeight().modifyFlat(healthID, baseValue * 2f, desc);
+            market.getPopulation().getWeight().modifyFlat(healthID, baseValue * 2f, desc);
             market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).modifyMult(
                 healthID, 1f + baseValue * 0.05f, desc
             );
         } else {
-            market.getIncoming().getWeight().unmodifyFlat(healthID);
+            market.getPopulation().getWeight().unmodifyFlat(healthID);
             market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyMult(healthID);
         }
     }

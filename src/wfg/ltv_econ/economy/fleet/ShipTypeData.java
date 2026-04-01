@@ -10,6 +10,15 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 
 public class ShipTypeData implements Serializable {
+    private static final String FRIGATES = "Frigates";
+	private static final String DESTROYERS = "Destroyers";
+	private static final String CRUISERS = "Cruisers";
+	private static final String CAPITALS = "Capitals";
+	private static final String COMBAT_SHIPS = "Warships";
+	private static final String PHASE_SHIPS = "Phase ships";
+	private static final String CARRIERS = "Carriers";
+	private static final String CIVILIAN = "Civilian";
+    
     public final String hullID;
     public transient ShipHullSpecAPI spec;
 
@@ -80,7 +89,33 @@ public class ShipTypeData implements Serializable {
         return idle * getCrewPerShip();
     }
 
+    public final int getCrewCapacityPerShip() {
+        return (int) spec.getMaxCrew() - getCrewPerShip();
+    }
+
     public final float getMonthlyCrewWages() {
         return (idle * EconomyConfig.IDLE_CREW_WAGE_MULT + inUse) * getCrewPerShip() * EconomyConfig.CREW_WAGE_PER_MONTH;
+    }
+
+    public final float getCombatPower() {
+        final float mult = getCombatMult(spec.getDesignation())
+            + spec.getFighterBays() * 0.1f;
+        return spec.getFleetPoints() * mult;
+    }
+
+    private static final float getCombatMult(String designation) {
+        if (designation == null) return 0f;
+
+        return switch (designation) {
+            case CIVILIAN -> 0.1f;
+            case COMBAT_SHIPS -> 1f;
+            case FRIGATES -> 0.7f;
+            case DESTROYERS -> 1.2f;
+            case CRUISERS -> 1f;
+            case CAPITALS -> 1.1f;
+            case PHASE_SHIPS -> 0.5f;
+            case CARRIERS -> 0.3f;
+            default -> 0.5f;
+        };
     }
 }

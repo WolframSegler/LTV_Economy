@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
@@ -17,6 +16,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
+import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.DebtDebuffTier;
@@ -27,9 +27,9 @@ import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
-import wfg.ltv_econ.economy.commodity.TradeCargo;
 import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
+import wfg.ltv_econ.economy.fleet.ShipAllocator;
 import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
@@ -175,7 +175,7 @@ public class EconomyLoop {
             for (int i = 0; i < industryOutputPairs.size(); i++) {
                 if (assignments[i] == 0f) continue;
 
-                final String[] indAndOutputID = industryOutputPairs.get(i).split(Pattern.quote(KEY), 2);
+                final String[] indAndOutputID = industryOutputPairs.get(i).split(KEY);
 
                 final float ratio = (assignments[i] / totalWorkers);
                 final String baseInd = IndustryIOs.getBaseIndustryID(indAndOutputID[0]);
@@ -266,9 +266,14 @@ public class EconomyLoop {
                     m -> new TradeMission(flow.exporter, flow.importer, flow.inFaction)
                 );
 
-                final TradeCargo cargo = new TradeCargo(dom.comID, flow.amount, flow.unitPrice);
-                mission.cargo.add(cargo);
-                mission.totalAmount += flow.amount;
+                mission.cargo.add(flow);
+                if (flow.comID.equals(Commodities.CREW) || flow.comID.equals(Commodities.MARINES)) {
+                    mission.crewAmount += flow.amount;
+                } else if (flow.comID.equals(Commodities.FUEL)) {
+                    mission.fuelAmount += flow.amount;
+                } else {
+                    mission.cargoAmount += flow.amount;
+                }
             }
         }
 
@@ -277,14 +282,21 @@ public class EconomyLoop {
 
             final TradeMission mission = missions.valueAt(i);
             mission.departureDay = (i * EconomyConfig.TRADE_INTERVAL) / totalMissions;
+            mission.combatPowerTarget = ShipAllocator.getRequiredCombatPower(mission);
 
             final FactionShipInventory inv = engine.getFactionShipInventory(
                 mission.sourceMarket.getFaction().getId()
             );
-            if (inv.getIdleCargoCapacity() >= mission.totalAmount) {
+            if (inv.getIdleCargoCapacity() >= mission.cargoAmount &&
+                inv.getIdleFuelCapacity() >= mission.fuelAmount &&
+                inv.getIdleCrewCapacity() >= mission.crewAmount &&
+                inv.getIdleCombatPower() >= mission.combatPowerTarget
+            ) {
                 allocShipsAndFuelToTradeMission(inv, mission);
+                mission.usedFactionFleet = true;
             } else {
-                // TODO handle independent fleet assignment.
+                allocIndependentFleetToTradeMission(mission);
+                mission.usedFactionFleet = false;
             }
             engine.activeMissions.add(mission);
         }
@@ -316,7 +328,7 @@ public class EconomyLoop {
                 engine.pastMissions.add(m);
                 it.remove();
 
-                for (TradeCargo cargo : m.cargo) {
+                for (ComTradeFlow cargo : m.cargo) {
                     final CommodityCell cell = engine.getComCell(cargo.comID, m.destMarket.getId());
                     if (m.inFaction) {
                         cell.inFactionImports += cargo.amount;
@@ -338,47 +350,48 @@ public class EconomyLoop {
         }
     }
 
-    private final void allocShipsAndFuelToTradeMission(final FactionShipInventory inv,
-        final TradeMission mission
-    ) {
-        final List<ShipTypeData> sorted = inv.getShips().values().stream()
-            .filter(d -> d.getIdle() > 0 && d.spec.getCargo() > 0f)
-            .sorted((a, b) -> Float.compare(b.spec.getCargo(), a.spec.getCargo()))
-            .collect(Collectors.toList());
-
-        // TODO improve to use fuel tankers for fuel and smaller ships first for small shipments
-        float required = mission.totalAmount;
-        for (ShipTypeData data : sorted) {
-            final int available = data.getIdle();
-            final float cap = data.spec.getCargo();
-            final int needed = (int) Math.ceil(required / cap);
-            final int take = Math.min(available, needed);
-            if (take > 0) {
-                mission.allocatedShips.put(data, take);
-                inv.useShips(data.hullID, take);
-                required -= take * cap;
-                if (required <= 0f) break;
-            }
-        }
-
-        // TODO expand to handle escort assignments based on trade route risk.
+    private final void allocShipsAndFuelToTradeMission(final FactionShipInventory inv, final TradeMission mission) {
+        ShipAllocator.allocateShipsForTrade(inv, mission);
 
         float fuelCost = 0f;
-        for (Entry<ShipTypeData, Integer> e : mission.allocatedShips.entrySet()) {
-            fuelCost += e.getKey().spec.getFuelPerLY() * e.getValue() * mission.dist;
+        for (Entry<ShipTypeData, Integer> entry : mission.allocatedShips.singleEntrySet()) {
+            fuelCost += entry.getKey().spec.getFuelPerLY() * entry.getValue() * mission.dist;
         }
         mission.fuelCost = fuelCost;
 
         final String marketID = mission.sourceMarket.getId();
-        final CommodityCell cell = engine.getComCell(Commodities.FUEL, marketID);
-        if (cell.getStored() < fuelCost) {
-            engine.addCredits(marketID, (long) -(EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT *
-                cell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost))
-            );
-        } else {
+        final CommodityCell fuelCell = engine.getComCell(Commodities.FUEL, marketID);
+        if (fuelCell.getStored() >= fuelCost) {
             mission.usedFuelFromStockpiles = true;
-            cell.addStoredAmount(-fuelCost); // TODO create demand for this
+            fuelCell.addStoredAmount(-fuelCost); // TODO create demand for this
+            
+        } else {
+            final double unitPrice = fuelCell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost);
+            final double cost = fuelCost * unitPrice * EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT;
+            engine.addCredits(marketID, -(long) cost);
         }
+    }
+
+    private final void allocIndependentFleetToTradeMission(final TradeMission mission) {
+        final float totalTonnage = mission.cargoAmount + mission.fuelAmount + mission.crewAmount;
+        if (totalTonnage <= 0f) return;
+
+        float totalValue = 0f;
+        for (ComTradeFlow flow : mission.cargo) {
+            totalValue += flow.amount * flow.unitPrice;
+        }
+
+        final float perTonFee = EconomyConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE * totalTonnage;
+        final float valueFee = EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT * totalValue;
+        final float hazardPay = EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
+            + EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
+
+        mission.credits.modifyFlat("base_fee", EconomyConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, "Independent hauler base fee");
+        mission.credits.modifyFlat("per_ton_fee", perTonFee, "Per-ton transport fee");
+        mission.credits.modifyFlat("value_fee", valueFee, "Percentage of cargo value (" + Strings.X + EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT + ")");
+        mission.credits.modifyFlat("hazard_pay", hazardPay, "Hazard pay (base + multiplier for required escort strength)");
+
+        engine.addCredits(mission.sourceMarket.getId(), -(long) mission.credits.computeEffective(0f));
     }
 
     private final void applyWages() {
@@ -455,7 +468,7 @@ public class EconomyLoop {
             if (appliedTier == null) {
                 market.getStability().unmodify(src);
                 market.getUpkeepMult().unmodify(src);
-                market.getIncoming().getWeight().unmodify(src);
+                market.getPopulation().getWeight().unmodify(src);
             } else {
                 market.getStability().modifyFlat(
                     src,
@@ -467,7 +480,7 @@ public class EconomyLoop {
                     appliedTier.upkeepMultiplierPercent(),
                     "inefficiencies caused by market debt"
                 );
-                market.getIncoming().getWeight().modifyFlat(
+                market.getPopulation().getWeight().modifyFlat(
                     src,
                     appliedTier.immigrationModifier(),
                     "Unattractiveness caused by market debt"

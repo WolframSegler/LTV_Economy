@@ -16,6 +16,7 @@ import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class PlanningData {
+    private PlanningData() {}
 
     public static final List<BitSet> getOutputsPerMarket(final List<MarketAPI> markets) {
         final var indOutputPairToColumn = IndustryMatrix.getIndOutputPairToColumnMap();

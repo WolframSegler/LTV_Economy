@@ -2,8 +2,6 @@ package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
 
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
@@ -13,7 +11,7 @@ import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.util.NumFormat;
 
-public class OrganHarvestingPolicy extends MarketPolicy implements MarketImmigrationModifier {
+public class OrganHarvestingPolicy extends MarketPolicy {
     public static final float HEALTH_BUFF = 0.03f;
     public static final float HAPPINESS_DEBUFF = -0.03f;
     public static final float CLASS_BUFF = 0.003f;
@@ -23,31 +21,28 @@ public class OrganHarvestingPolicy extends MarketPolicy implements MarketImmigra
     public static final int ASSET_SEIZURE_CREDITS_BUFF = 100;
 
     public void apply(PlayerMarketData data) {     
-        final MarketAPI market = data.market;   
+        final PopulationComposition pop = data.market.getPopulation();
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
         data.healthDelta.modifyFlat(id, HEALTH_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
-
-        market.addTransientImmigrationModifier(this);
+        
+		pop.add(Factions.POOR, POP_GROWTH_DEBUFF);
+		pop.getWeight().modifyFlat(id, POP_GROWTH_DEBUFF, spec.name);
         EconomyEngine.instance().getComCell(Commodities.ORGANS, data.marketID)
             .getProductionStat().modifyFlat(id, HARVESTED_ORGANS_BUFF, spec.name);
     }
 
     public void unapply(PlayerMarketData data) {
-        final MarketAPI market = data.market;   
+        final PopulationComposition pop = data.market.getPopulation();
         data.happinessDelta.unmodifyFlat(id);
         data.healthDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
 
-        market.removeTransientImmigrationModifier(this);
+        pop.add(Factions.POOR, 0f);
+		pop.getWeight().unmodifyFlat(id);
         EconomyEngine.instance().getComCell(Commodities.ORGANS, data.marketID)
             .getProductionStat().unmodifyFlat(id);
     }
-
-    public void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
-		incoming.add(Factions.POOR, POP_GROWTH_DEBUFF);
-		incoming.getWeight().modifyFlat(id, POP_GROWTH_DEBUFF, spec.name);
-	}
 
     public void postAdvance(PlayerMarketData data) {
         EconomyEngine.instance().addCredits(data.marketID, ASSET_SEIZURE_CREDITS_BUFF);

@@ -68,6 +68,11 @@ public class EconomyConfigLoader {
         EconomyConfig.HISTORY_LENGTH = root.getInt("HISTORY_LENGTH");
         EconomyConfig.TRAVEL_SPEED_LY_DAY = root.getInt("TRAVEL_SPEED_LY_DAY");
         EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT = (float) root.getDouble("FORCED_FUEL_IMPORT_COST_MULT");
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_BASE_FEE");
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_PER_TON_FEE");
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_PERCENT_CUT");
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_HAZARD_BASE");
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_HAZARD_MULT");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
@@ -128,6 +133,11 @@ public class EconomyConfigLoader {
         EconomyConfig.TRADE_INTERVAL = LunaSettings.getInt(LTV_ECON, "economy_tradeInterval");
         EconomyConfig.TRAVEL_SPEED_LY_DAY = LunaSettings.getInt(LTV_ECON, "fleet_travelSpeedLyDay");
         EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT = LunaSettings.getDouble(LTV_ECON, "fleet_forcedFuelCostMult").floatValue();
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE = LunaSettings.getDouble(LTV_ECON, "fleet_independentBaseFee").floatValue();
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE = LunaSettings.getDouble(LTV_ECON, "fleet_independentPerTonFee").floatValue();
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT = LunaSettings.getDouble(LTV_ECON, "fleet_independentPercentCut").floatValue();
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE = LunaSettings.getDouble(LTV_ECON, "fleet_independentHazardBase").floatValue();
+        EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT = LunaSettings.getDouble(LTV_ECON, "fleet_independentHazardMult").floatValue();
 
         final String fairness = LunaSettings.getString(LTV_ECON, "economy_prodFairness");
         EconomyConfig.USE_PRODUCTION_FAIRNESS = fairness.equals("Commodities Produced");
@@ -300,6 +310,12 @@ public class EconomyConfigLoader {
          * The cost multiplier for importing fuel when the stockpiles are empty.
          */
         public static float FORCED_FUEL_IMPORT_COST_MULT;
+
+        public static float INDEPENDENT_TRADE_FLEET_BASE_FEE;
+        public static float INDEPENDENT_TRADE_FLEET_PER_TON_FEE;
+        public static float INDEPENDENT_TRADE_FLEET_PERCENT_CUT;
+        public static float INDEPENDENT_TRADE_FLEET_HAZARD_BASE;
+        public static float INDEPENDENT_TRADE_FLEET_HAZARD_MULT;
 
         static {
             EconomyConfigLoader.loadConfig();

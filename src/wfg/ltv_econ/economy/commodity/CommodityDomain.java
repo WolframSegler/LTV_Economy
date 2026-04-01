@@ -279,7 +279,7 @@ public class CommodityDomain implements Serializable {
             tradeCreditActivity += credits;
             tradeVolume += amountToSend;
 
-            tradeFlows.add(new ComTradeFlow(
+            tradeFlows.add(new ComTradeFlow(comID,
                 expCell.market, impCell.market, amountToSend, credits, sameFaction
             ));
 

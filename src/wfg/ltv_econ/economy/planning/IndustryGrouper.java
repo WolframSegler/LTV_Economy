@@ -16,7 +16,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
 public final class IndustryGrouper {
-
+    private IndustryGrouper() {}
     private static IndustryMatrixGrouped STATIC_GROUPING;
 
     public static synchronized IndustryMatrixGrouped getStaticGrouping() {

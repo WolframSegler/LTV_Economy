@@ -34,6 +34,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
 public class WorkforceAllocator {
+    private WorkforceAllocator() {}
     private static final Logger logger = Global.getLogger(WorkforceAllocator.class);
 
     public static final double WORKER_COST = 1.0;

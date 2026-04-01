@@ -2,14 +2,11 @@ package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
 
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
-import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 
-public class UrbanRenewalPolicy extends MarketPolicy implements MarketImmigrationModifier {
+public class UrbanRenewalPolicy extends MarketPolicy {
     public static final float HEALTH_BUFF = 0.4f;
     public static final float HAPPINESS_BUFF = 0.15f;
     public static final float CLASS_DEBUFF = -0.002f;
@@ -21,7 +18,7 @@ public class UrbanRenewalPolicy extends MarketPolicy implements MarketImmigratio
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
 
-        data.market.addTransientImmigrationModifier(this);
+        data.market.getPopulation().getWeight().modifyFlat(id, POP_GROWTH_BUFF, spec.name);
     }
 
     public void unapply(PlayerMarketData data) {
@@ -29,12 +26,8 @@ public class UrbanRenewalPolicy extends MarketPolicy implements MarketImmigratio
         data.happinessDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
 
-        data.market.removeTransientImmigrationModifier(this);
+        data.market.getPopulation().getWeight().unmodifyFlat(id);
     }
-
-    public void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
-		incoming.getWeight().modifyFlat(id, POP_GROWTH_BUFF, spec.name);
-	}
 
     @Override
     public boolean isEnabled(PlayerMarketData data) {

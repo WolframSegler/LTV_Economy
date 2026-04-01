@@ -1,10 +1,7 @@
 package wfg.ltv_econ.intel.market.events;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
-import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.WorkerRegistry;
@@ -15,7 +12,7 @@ import static wfg.native_ui.util.UIConstants.*;
 
 import java.util.List;
 
-public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketImmigrationModifier {
+public class LocalizedGangSkirmishesEvent extends MarketEvent {
     public static final int BASE_DUR = 7;
     public static final int BASE_COOLDOWN = 30;
     public static final int DISRUPTION_DUR = 21;
@@ -42,7 +39,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketI
         activeDaysRemaining = Math.round(BASE_DUR * durationMult); // base 7 days
         cooldownDaysRemaining = BASE_COOLDOWN + BASE_DUR;
 
-        data.market.addTransientImmigrationModifier(this);
+        data.market.getPopulation().getWeight().modifyFlat(id, GROWTH_DEBUFF, spec.name);
 
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
 
@@ -58,11 +55,6 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketI
     }
 
     @Override
-    public void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
-        incoming.getWeight().modifyFlat(id, GROWTH_DEBUFF, spec.name);
-    }
-
-    @Override
         public void postAdvance(PlayerMarketData data) {
         if (active) {
             activeDaysRemaining--;
@@ -75,7 +67,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent implements MarketI
     private final void deactivate(PlayerMarketData data) {
         if (!active) return;
 
-        data.market.removeTransientImmigrationModifier(this);
+        data.market.getPopulation().getWeight().unmodifyFlat(id);
         data.happinessDelta.unmodifyFlat(id);
 
         active = false;
