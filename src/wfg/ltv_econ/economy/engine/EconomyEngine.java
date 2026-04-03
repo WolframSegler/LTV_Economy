@@ -20,6 +20,7 @@ import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.PlanetAPI;
+import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -37,8 +38,10 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.TradeMission;
+import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.EconomyConstants.*;
@@ -58,7 +61,9 @@ import com.fs.starfarer.api.impl.campaign.shared.SharedData;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
+import com.fs.starfarer.api.campaign.listeners.ColonyInteractionListener;
 import com.fs.starfarer.api.campaign.listeners.CoreUITabListener;
+import com.fs.starfarer.api.campaign.listeners.EconomyTickListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
 
 /**
@@ -86,9 +91,8 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  *
  * @author Wolfram Segler
  */
-public class EconomyEngine extends BaseCampaignEventListener implements
-    Serializable ,EveryFrameScript, PlayerColonizationListener, ColonyDecivListener, GroundRaidObjectivesListener,
-    CoreUITabListener
+public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColonizationListener, ColonyDecivListener,
+    GroundRaidObjectivesListener, CoreUITabListener, EconomyTickListener, ColonyInteractionListener
 {
     public transient EconomyInfo info;
     public transient EconomyLogger logger;
@@ -193,16 +197,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final void removeMarket(MarketAPI market) {
-        final String marketID = market.getId();
-        if (!registeredMarkets.remove(marketID)) return;
-
-        for (CommodityDomain dom : comDomains.values()) {
-            dom.removeMarket(marketID);
-        }
-
-        playerMarketData.remove(marketID);
-        marketCredits.remove(marketID);
-        WorkerRegistry.instance().remove(marketID);
+        removeMarket(market.getId());
     }
 
     public final void removeMarket(String marketID) {
@@ -215,6 +210,12 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         playerMarketData.remove(marketID);
         marketCredits.remove(marketID);
         WorkerRegistry.instance().remove(marketID);
+        for (TradeMission m : activeMissions) {
+            if (m.src.getId().equals(marketID) || m.dest.getId().equals(marketID)) {
+                m.status = MissionStatus.CANCELLED;
+            }
+        }
+        pastMissions.removeIf(m -> m.src.getId().equals(marketID) || m.dest.getId().equals(marketID));
     }
 
     public final void refreshMarkets() {
@@ -242,10 +243,7 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final PlayerMarketData addPlayerMarketData(String marketID) {
-        if (playerMarketData.containsKey(marketID)) return playerMarketData.get(marketID);
-        final PlayerMarketData data = new PlayerMarketData(marketID);
-        playerMarketData.put(marketID, data);
-        return data;
+        return playerMarketData.computeIfAbsent(marketID, m -> new PlayerMarketData(marketID));
     }
 
     public final List<CommodityDomain> getComDomains() {
@@ -271,24 +269,11 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     }
 
     public final void addCredits(String marketID, long amount) {
-        long current = marketCredits.getOrDefault(marketID, 0l);
-
-        if (amount > 0 && current > Long.MAX_VALUE - amount) {
-            current = Long.MAX_VALUE;
-
-        } else if (amount < 0 && current < Long.MIN_VALUE - amount) {
-            current = Long.MIN_VALUE;
-
-        } else {
-            current += amount;
-        }
-
-        marketCredits.put(marketID, current);
+        final long current = marketCredits.getOrDefault(marketID, 0l);
+        final long newValue = Arithmetic.clamp(current + amount, Long.MIN_VALUE, Long.MAX_VALUE);
+        marketCredits.put(marketID, newValue);
     }
 
-    /**
-     * Returns 0 if no market is registered
-     */
     public final long getCredits(String marketID) {
         return marketCredits.getOrDefault(marketID, 0l);
     }
@@ -297,7 +282,20 @@ public class EconomyEngine extends BaseCampaignEventListener implements
         return factionShipInventories.computeIfAbsent(factionID, k -> new FactionShipInventory(factionID));
     }
 
-    @Override
+    public final List<TradeMission> getActiveMissions() {
+        return Collections.unmodifiableList(activeMissions);
+    }
+
+    public final List<TradeMission> getPastMissions() {
+        return Collections.unmodifiableList(pastMissions);
+    }
+
+    public final int getCyclesSinceTrade() {
+        return cyclesSinceTrade;
+    }
+
+    // LISTENERS
+
     public void reportEconomyTick(int iterIndex) {
         comDomains.values().forEach(CommodityDomain::endMonth);
         playerMarketData.values().forEach(PlayerMarketData::endMonth);
@@ -429,36 +427,33 @@ public class EconomyEngine extends BaseCampaignEventListener implements
     /**
      * This method runs after {@link #reportEconomyTick}. Practically the same method but delayed.
      */
-    @Override
     public void reportEconomyMonthEnd() {}
 
-    @Override
     public void reportPlayerOpenedMarket(MarketAPI market) {
         fakeAdvance();
         applyPopulationStabilityMods(market);
     }
 
-    @Override
     public void reportPlayerClosedMarket(MarketAPI market) {
         applyPopulationStabilityMods(market);
     }
 
-    @Override
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
         registerMarket(planet.getMarket());
     }
 
-    @Override
+    public void reportPlayerOpenedMarketAndCargoUpdated(MarketAPI market) {};
+
+    public void reportPlayerMarketTransaction(PlayerMarketTransaction trs) {};
+
     public void reportPlayerAbandonedColony(MarketAPI market) {
         removeMarket(market);
     }
 
-    @Override
     public void reportColonyDecivilized(MarketAPI market, boolean fullyDestroyed) {
         removeMarket(market);
     }
 
-    @Override
     public void reportColonyAboutToBeDecivilized(MarketAPI a, boolean b) {}
 
     @Override

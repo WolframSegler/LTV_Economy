@@ -252,6 +252,8 @@ public class CommodityDomain implements Serializable {
                         continue;
                     }
                 }
+
+                if (!expCell.market.hasSpaceport() || !impCell.market.hasSpaceport()) continue;
             }
 
             final double exportableRemaining = expCell.getStoredRemainingExportable();

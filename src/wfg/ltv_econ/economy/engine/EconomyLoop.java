@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
@@ -16,6 +18,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
@@ -40,6 +43,7 @@ import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
 
 public class EconomyLoop {
+    private static final Logger log = Global.getLogger(EconomyLoop.class);
     public static final String KEY = "::";
 
     transient EconomyEngine engine;
@@ -281,11 +285,11 @@ public class EconomyLoop {
         for (int i = 0; i < totalMissions; i++) {
 
             final TradeMission mission = missions.valueAt(i);
-            mission.departureDay = (i * EconomyConfig.TRADE_INTERVAL) / totalMissions;
+            mission.startOffset = (i * EconomyConfig.TRADE_INTERVAL) / totalMissions;
             mission.combatPowerTarget = ShipAllocator.getRequiredCombatPower(mission);
 
             final FactionShipInventory inv = engine.getFactionShipInventory(
-                mission.sourceMarket.getFaction().getId()
+                mission.src.getFaction().getId()
             );
             if (inv.getIdleCargoCapacity() >= mission.cargoAmount &&
                 inv.getIdleFuelCapacity() >= mission.fuelAmount &&
@@ -300,6 +304,8 @@ public class EconomyLoop {
             }
             engine.activeMissions.add(mission);
         }
+
+        log.info("Dispatched " + totalMissions + " new trade missions and added them to the queue");
     }
 
     private final void advanceMissions() {
@@ -309,34 +315,64 @@ public class EconomyLoop {
 
             switch (m.status) {
             case SCHEDULED:
-                if (engine.cyclesSinceTrade == m.departureDay) {
+                if (engine.cyclesSinceTrade == m.startOffset) {
+                    m.status = MissionStatus.IN_SRC_ORBIT_LOADING;
+                }
+                break;
+
+            case IN_SRC_ORBIT_LOADING:
+                m.durRemaining--;
+                if (m.totalDur - m.durRemaining >= (int) Math.ceil(m.transferDur)) {
                     m.status = MissionStatus.IN_TRANSIT;
                 }
                 break;
 
             case IN_TRANSIT:
-                m.travelTimeRemaining--;
-                if (m.travelTimeRemaining < 1) {
+                m.durRemaining--;
+                if (m.durRemaining < (int) Math.ceil(m.transferDur)) {
+                    m.status = MissionStatus.IN_DST_ORBIT_UNLOADING;
+                }
+                break;
+
+            case IN_DST_ORBIT_UNLOADING:
+                m.durRemaining--;
+                if (m.durRemaining < 1) {
                     m.status = MissionStatus.DELIVERED;
                 }
                 break;
             
             case DELIVERED:
+                if (!m.spawnedFleetFinishedJob) break;
+
                 for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
                     entry.getKey().freeShip(entry.getValue());
                 }
-                engine.pastMissions.add(m);
-                it.remove();
-
+                
                 for (ComTradeFlow cargo : m.cargo) {
-                    final CommodityCell cell = engine.getComCell(cargo.comID, m.destMarket.getId());
+                    final CommodityCell cell = engine.getComCell(cargo.comID, m.dest.getId());
+                    if (cell == null) continue;
+
                     if (m.inFaction) {
                         cell.inFactionImports += cargo.amount;
                     } else {
                         cell.globalImports += cargo.amount;
                     }
                 }
+                engine.pastMissions.add(m);
+                it.remove();
+                break;
 
+            case CANCELLED:
+                for (ComTradeFlow cargo : m.cargo) {
+                    final CommodityCell cell = engine.getComCell(cargo.comID, m.src.getId());
+                    if (cell == null) continue;
+                    cell.inFactionImports += cargo.amount;
+                }
+                for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
+                    entry.getKey().freeShip(entry.getValue());
+                }
+                engine.pastMissions.add(m);
+                it.remove();
                 break;
 
             case LOST:
@@ -359,29 +395,32 @@ public class EconomyLoop {
         }
         mission.fuelCost = fuelCost;
 
-        final String marketID = mission.sourceMarket.getId();
+        final String marketID = mission.src.getId();
         final CommodityCell fuelCell = engine.getComCell(Commodities.FUEL, marketID);
         if (fuelCell.getStored() >= fuelCost) {
             mission.usedFuelFromStockpiles = true;
             fuelCell.addStoredAmount(-fuelCost); // TODO create demand for this
             
         } else {
-            final double unitPrice = fuelCell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost);
-            final double cost = fuelCost * unitPrice * EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT;
-            engine.addCredits(marketID, -(long) cost);
+            final float unitPrice = fuelCell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost);
+            final float cost = fuelCost * unitPrice * EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT;
+            mission.credits.modifyFlat("fuel_fee", cost,
+                "Fuel premium (" + Strings.X + EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT + ")"
+            );
+
+            engine.addCredits(marketID, -(long) mission.credits.computeEffective(0f));
         }
     }
 
     private final void allocIndependentFleetToTradeMission(final TradeMission mission) {
-        final float totalTonnage = mission.cargoAmount + mission.fuelAmount + mission.crewAmount;
-        if (totalTonnage <= 0f) return;
+        ShipAllocator.allocateShipsForTrade(Global.getSector().getFaction(Factions.INDEPENDENT), mission);
 
         float totalValue = 0f;
         for (ComTradeFlow flow : mission.cargo) {
             totalValue += flow.amount * flow.unitPrice;
         }
 
-        final float perTonFee = EconomyConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE * totalTonnage;
+        final float perTonFee = EconomyConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE * mission.getTotalAmount();
         final float valueFee = EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT * totalValue;
         final float hazardPay = EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
             + EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
@@ -391,7 +430,7 @@ public class EconomyLoop {
         mission.credits.modifyFlat("value_fee", valueFee, "Percentage of cargo value (" + Strings.X + EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT + ")");
         mission.credits.modifyFlat("hazard_pay", hazardPay, "Hazard pay (base + multiplier for required escort strength)");
 
-        engine.addCredits(mission.sourceMarket.getId(), -(long) mission.credits.computeEffective(0f));
+        engine.addCredits(mission.src.getId(), -(long) mission.credits.computeEffective(0f));
     }
 
     private final void applyWages() {

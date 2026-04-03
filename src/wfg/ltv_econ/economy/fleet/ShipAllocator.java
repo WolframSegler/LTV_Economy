@@ -1,7 +1,10 @@
 package wfg.ltv_econ.economy.fleet;
 
+import static wfg.ltv_econ.economy.fleet.ShipTypeData.*;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.FactionDoctrineAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
@@ -19,7 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.math4.legacy.optim.MaxIter;
 
@@ -29,8 +31,6 @@ public class ShipAllocator {
     
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
     private static final String DOCT_PREF_KEY = "|";
-
-    private static final Random rand = new Random();
 
     // Doctrine preferences
     private static final float DOCTRINE_KNOWN_SHIP_MULT = 0.7f;
@@ -203,19 +203,19 @@ public class ShipAllocator {
     }
 
     public static final float getRequiredCombatPower(TradeMission mission) {
-        final float totalShipment = mission.cargoAmount + mission.fuelAmount + mission.crewAmount;
+        final float totalShipment = mission.getTotalAmount();
         if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is 0");
 
-        final StarSystemAPI srcSys = mission.sourceMarket.getStarSystem();
-        final StarSystemAPI dstSys = mission.destMarket.getStarSystem();
+        final StarSystemAPI srcSys = mission.src.getStarSystem();
+        final StarSystemAPI dstSys = mission.dest.getStarSystem();
         
         int dangerOrdinal = 0;
         if (srcSys != null) {
-            final LocationDanger d = WarSimScript.getDangerFor(mission.sourceMarket.getFaction().getId(), srcSys);
+            final LocationDanger d = WarSimScript.getDangerFor(mission.src.getFaction().getId(), srcSys);
             dangerOrdinal = Math.max(dangerOrdinal, d.ordinal());
         }
         if (dstSys != null) {
-            final LocationDanger d = WarSimScript.getDangerFor(mission.destMarket.getFaction().getId(), dstSys);
+            final LocationDanger d = WarSimScript.getDangerFor(mission.dest.getFaction().getId(), dstSys);
             dangerOrdinal = Math.max(dangerOrdinal, d.ordinal());
         }
 
@@ -227,16 +227,30 @@ public class ShipAllocator {
     /**
      * Allocate ships to meet given targets. Updates the tracking values inside the mission.
      * 
+     * @param faction used for doctrine preferences
+     * @param mission the mission to be updated.
+     */
+    public static final void allocateShipsForTrade(
+        FactionAPI faction, TradeMission mission
+    ) {
+        allocateShipsForTrade(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
+            faction, mission.allocatedShips
+        );
+    }
+
+    /**
+     * Allocate ships to meet given targets. Populates the allocation map.
+     * 
      * @param targetCargo cargo capacity (tons)
      * @param targetFuel fuel capacity (tons)
      * @param targetCrew crew (persons)
      * @param targetCombat combat power
      * @param faction used for doctrine preferences
-     * @param mission the mission to be updated.
+     * @param allocation the allocation to be populated.
      */
     public static final void allocateShipsForTrade(
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
-        FactionAPI faction, TradeMission mission
+        FactionAPI faction, ArrayMap<ShipTypeData, Integer> allocation
     ) {
         final double totalShipment = targetCargo + targetFuel + targetCrew;
         if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is 0");
@@ -267,7 +281,7 @@ public class ShipAllocator {
 
             final ShipTypeData data = candidates.get(i);
             data.useShip(count);
-            mission.allocatedShips.put(data, count);
+            allocation.put(data, count);
         }
     }
 
@@ -278,14 +292,16 @@ public class ShipAllocator {
 
         double mult = 1.0;
 
-        if (faction.getKnownShips().contains(data.hullID)) {
+        final FactionDoctrineAPI doctrine = faction.getDoctrine();
+        if (faction.knowsShip(data.hullID)) {
             mult *= DOCTRINE_KNOWN_SHIP_MULT;
         }
 
-        final int doctrineSizeWeight = faction.getDoctrine().getShipSize(); // [1, 5]
         final int shipSizeWeight = hullSizeToWeight(data.spec.getHullSize());
-        final int diff = Math.abs(doctrineSizeWeight - shipSizeWeight);
+        final int diff = Math.abs(doctrine.getShipSize() - shipSizeWeight); // [1, 5]
         mult *= getSizeMatchMultiplier(diff);
+        mult *= getHullSizePreferenceMult(doctrine, data.spec.getDesignation());
+        mult *= faction.isShipPriority(data.hullID) ? 1.3 : 1.0;
 
         if (!faction.getId().equals(Factions.PLAYER)) DOCTRINE_PREF_CACHE.put(key, mult);
         return mult;
@@ -308,6 +324,20 @@ public class ShipAllocator {
             case 2: return DOCTRINE_SIZE_FAR_MULT;
             default: return DOCTRINE_SIZE_VERY_FAR_MULT;
         }
+    }
+
+    private static final double getHullSizePreferenceMult(FactionDoctrineAPI doctrine, String designation) {
+        if (designation == null) return 1.0;
+
+        return 1.0 / switch (designation) {
+            case CIVILIAN -> 1.0 + doctrine.getCombatFreighterProbability();
+            case FRIGATES -> 1.0 + doctrine.getNumShips() * 0.2; // [1, 5]
+            case DESTROYERS -> 1.0 + doctrine.getNumShips() * 0.1; // [1, 5]
+            case CAPITALS -> 1.0 + doctrine.getWarships() * 0.2; // [1, 5]
+            case PHASE_SHIPS -> 1.0 + doctrine.getPhaseShips() * 0.2; // [1, 5]
+            case CARRIERS -> 1.0 + doctrine.getCarriers() * 0.2; // [1, 5]
+            default -> 1.0;
+        };
     }
 
     private static final List<LinearConstraint> buildTargetConstraintsWithInv(int N, List<ShipTypeData> candidates,
@@ -359,7 +389,7 @@ public class ShipAllocator {
                 + crewWeight * data.getCrewCapacityPerShip();
 
             final double baseCost = 1.0 / (1.0 + effCapacity * data.getCombatPower());
-            final double randFactor = 0.7 + rand.nextDouble() * 0.6;
+            final double randFactor = 0.7 + Math.random() * 0.6;
             final double doctrineFactor = getDoctrinePreference(faction, data);
 
             objective[i] = baseCost * randFactor * doctrineFactor;

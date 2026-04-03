@@ -1,10 +1,17 @@
-v0.3.0-beta | Sailing the High Seas | NOT SAVE COMPATIBLE
-- It is recommended to reset the LunaLib settings for this update. Defaults have been modified.
-- Added a ship inventory per faction. Currently used for trade fleets only. Factions that cannot use their own ships for trading must pay independent fleets for transportation.
-- Added new LunaLib settings to modify said ship inventory.
-- Trade now occurs in periods of 15 days configurable through LunaLib. They are no longer continuous 
-- Trade now happens in discrete units: TradeMissions. New missions are dispatched at the start of each trade interval and colonies allocate resources to export to each other. A tradeMissions with a destination is created and a launch date is assigned. The travel time increases with the distance.
-- Fixed bugs regarding event and policy effects on population growth not working.
+v0.3.0-beta | Sliver of Silver Passage | NOT SAVE COMPATIBLE
+- It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
+- Added a ship inventory for each faction. Currently only used for trade fleets. If a faction cannot use its own ships for trading, it must hire independent haulers at a cost.
+    - Player‑owned fleets require sufficient idle cargo, fuel, crew, and escort ships from the faction inventory; otherwise independent haulers are used.
+    - Independent hauler fees include a base fee, a per‑ton charge, a percentage of cargo value, and hazard pay based on route danger.
+    - Fuel shortages can be covered by paying a premium if no stockpiled fuel is available at the source colony.
+    - Replaced the old trade fleet manager to use ship inventory and mission data. Trade fleets on the map now correspond to concrete trade missions. Raiding them disrupts the mission.
+    - Trade fleets based on trade missions appear on the campaign map, carrying a scaled representation of the cargo and mothballed ships.
+- Added new LunaLib settings to configure the ship inventory and independent hauler costs.
+- Trade is now processed in intervals (default 15 days, adjustable in LunaLib) instead of continuously every day.
+- Trade is handled as discrete "Trade Missions". At the start of each interval, colonies allocate goods to export to other markets. A mission is created with a scheduled departure and a travel time based on distance.
+
+- Fixed bugs where event and policy effects on population growth were not working correctly.
+- Colonies without a spaceport can no longer participate in inter‑colony trade.
 
 v0.2.12-beta | SAVE COMPATIBLE
 - The effects of saving LunaLib Settings now takes effect immideatly. No restart required.

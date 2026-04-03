@@ -1,7 +1,6 @@
 package wfg.ltv_econ.intel.bar.events;
 
 import java.util.Map;
-import java.util.Random;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
@@ -33,8 +32,6 @@ public class ConvergenceFestivalBarEvent extends BaseBarEventWithPerson {
         LEAVE
     }
 
-    private static final Random rand = new Random();
-
     public ConvergenceFestivalBarEvent() { super(); }
 
     @Override
@@ -47,14 +44,14 @@ public class ConvergenceFestivalBarEvent extends BaseBarEventWithPerson {
         final PlayerMarketData data = EconomyEngine.instance().getPlayerMarketData(market.getId());
         if (data == null || !data.getPolicy("convergence_festival").isActive()) return false;
 
-        return rand.nextFloat() < 0.5f || DebugFlags.BAR_DEBUG;
+        return Math.random() < 0.5f || DebugFlags.BAR_DEBUG;
     }
 
     @Override
     public void addPromptAndOption(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
         dialog.getTextPanel().addPara("The bar is decorated with colorful banners and holographic displays celebrating The Convergence Festival. Patrons cheer and participate in the festive mood.");
 
-        if (rand.nextFloat() < 0.2f || DebugFlags.BAR_DEBUG) {
+        if (Math.random() < 0.2f || DebugFlags.BAR_DEBUG) {
             regen(dialog.getInteractionTarget().getMarket());
 
             dialog.getTextPanel().addPara("Your eyes lock onto a festival performer among the crowd. He looks tense and exhausted, glancing nervously at the crowd from his booth.");

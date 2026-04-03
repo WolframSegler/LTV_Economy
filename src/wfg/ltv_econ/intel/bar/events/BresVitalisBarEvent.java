@@ -1,7 +1,6 @@
 package wfg.ltv_econ.intel.bar.events;
 
 import java.util.Map;
-import java.util.Random;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
@@ -29,13 +28,11 @@ public class BresVitalisBarEvent extends BaseBarEvent {
         LEAVE
     }
 
-    private static final Random rand = new Random();
-
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
         final PlayerMarketData data = EconomyEngine.instance().getPlayerMarketData(market.getId());
         if (data == null || !data.getPolicy("bres_vitalis").isActive()) return false;
-        return rand.nextFloat() < 0.15f || DebugFlags.BAR_DEBUG;
+        return Math.random() < 0.15f || DebugFlags.BAR_DEBUG;
     }
 
     @Override

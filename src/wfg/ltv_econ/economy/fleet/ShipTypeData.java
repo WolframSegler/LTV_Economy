@@ -10,14 +10,14 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 
 public class ShipTypeData implements Serializable {
-    private static final String FRIGATES = "Frigates";
-	private static final String DESTROYERS = "Destroyers";
-	private static final String CRUISERS = "Cruisers";
-	private static final String CAPITALS = "Capitals";
-	private static final String COMBAT_SHIPS = "Warships";
-	private static final String PHASE_SHIPS = "Phase ships";
-	private static final String CARRIERS = "Carriers";
-	private static final String CIVILIAN = "Civilian";
+    public static final String FRIGATES = "Frigates";
+	public static final String DESTROYERS = "Destroyers";
+	public static final String CRUISERS = "Cruisers";
+	public static final String CAPITALS = "Capitals";
+	public static final String COMBAT_SHIPS = "Warships";
+	public static final String PHASE_SHIPS = "Phase ships";
+	public static final String CARRIERS = "Carriers";
+	public static final String CIVILIAN = "Civilian";
     
     public final String hullID;
     public transient ShipHullSpecAPI spec;
@@ -101,6 +101,14 @@ public class ShipTypeData implements Serializable {
         final float mult = getCombatMult(spec.getDesignation())
             + spec.getFighterBays() * 0.1f;
         return spec.getFleetPoints() * mult;
+    }
+
+    public static final int getCrewPerShip(ShipHullSpecAPI spec) {
+        return (int) spec.getMinCrew();
+    }
+
+    public static final int getCrewCapacityPerShip(ShipHullSpecAPI spec) {
+        return (int) spec.getMaxCrew() - getCrewPerShip(spec);
     }
 
     private static final float getCombatMult(String designation) {

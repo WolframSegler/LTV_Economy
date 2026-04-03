@@ -16,6 +16,7 @@ import org.apache.commons.math4.legacy.optim.linear.LinearObjectiveFunction;
 import org.apache.commons.math4.legacy.optim.linear.NonNegativeConstraint;
 import org.apache.commons.math4.legacy.optim.linear.PivotSelectionRule;
 import org.apache.commons.math4.legacy.optim.linear.Relationship;
+import org.apache.commons.math4.legacy.optim.linear.SimplexSolver;
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 import org.apache.log4j.Logger;
 
@@ -29,7 +30,6 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
-import wfg.ltv_econ.economy.planning.optim.CustomSimplexSolver;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
@@ -408,7 +408,7 @@ public class WorkforceAllocator {
             }
             }
 
-            final CustomSimplexSolver solver = new CustomSimplexSolver(
+            final SimplexSolver solver = new SimplexSolver(
                 1e-2, 30, 1e-4
             );
             final PointValuePair solution = solver.optimize(
