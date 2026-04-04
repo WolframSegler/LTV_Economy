@@ -2,6 +2,7 @@ package wfg.ltv_econ.economy.commodity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
@@ -350,7 +351,7 @@ public class CommodityCell implements Serializable {
     }
 
     public final float computeVanillaPrice(int amount, boolean isSellingToMarket, boolean isPlayer) {
-        if (amount < 1) return 0f;
+        if (amount < 1 || market == null) return 0f;
 
         final Market mkt = (Market) market;
 
@@ -389,6 +390,7 @@ public class CommodityCell implements Serializable {
     }
 
     public final List<Industry> getVisibleIndustries() {
+        if (market == null) return Collections.emptyList();
         final List<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);
         return industries;

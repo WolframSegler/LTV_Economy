@@ -10,6 +10,7 @@ v0.3.0-beta | Sliver of Silver Passage | NOT SAVE COMPATIBLE
 - Trade is now processed in intervals (default 15 days, adjustable in LunaLib) instead of continuously every day.
 - Trade is handled as discrete "Trade Missions". At the start of each interval, colonies allocate goods to export to other markets. A mission is created with a scheduled departure and a travel time based on distance.
 - Raiding a colony now uses LTV stockpiles and shows a stockpile bar. The amount of loot you get depends on the colony's economic situation.
+- Saturation and tactical bombardments now reduce colony stockpiles and negatively affect health and happiness. The player will be notified when this happens.
 
 - Fixed bugs where event and policy effects on population growth were not working correctly.
 - Colonies without a spaceport can no longer participate in inter‑colony trade.

@@ -25,7 +25,6 @@ public class PolicyNotificationIntel extends BaseIntelPlugin {
         this.policy = policy;
         this.available = available;
 
-        important = false;
         endingTimeRemaining = (float) MONTH;
     }
 

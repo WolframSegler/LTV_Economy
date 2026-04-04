@@ -404,7 +404,7 @@ public class EconomyLoop {
         final CommodityCell fuelCell = engine.getComCell(Commodities.FUEL, marketID);
         if (fuelCell.getStored() >= fuelCost) {
             mission.usedFuelFromStockpiles = true;
-            fuelCell.addStoredAmount(-fuelCost); // TODO create demand for this
+            fuelCell.addStoredAmount(-fuelCost);
             
         } else {
             final float unitPrice = fuelCell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost);

@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignClockAPI;
+import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
@@ -38,6 +39,7 @@ import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.economy.raids.CommodityCellGroundRaidObjective;
 import wfg.ltv_econ.economy.raids.LtvShipWeaponsGroundRaidObjective;
 import wfg.ltv_econ.industry.IndustryTooltips;
+import wfg.ltv_econ.intel.PlayerMarketBombardedIntel;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
@@ -54,11 +56,13 @@ import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidType;
+import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.TempData;
 import com.fs.starfarer.api.impl.campaign.shared.SharedData;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 import com.fs.starfarer.api.campaign.listeners.ColonyInteractionListener;
+import com.fs.starfarer.api.campaign.listeners.ColonyPlayerHostileActListener;
 import com.fs.starfarer.api.campaign.listeners.CoreUITabListener;
 import com.fs.starfarer.api.campaign.listeners.EconomyTickListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
@@ -89,7 +93,7 @@ import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
  * @author Wolfram Segler
  */
 public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColonizationListener, ColonyDecivListener,
-    GroundRaidObjectivesListener, CoreUITabListener, EconomyTickListener, ColonyInteractionListener
+    GroundRaidObjectivesListener, CoreUITabListener, EconomyTickListener, ColonyInteractionListener, ColonyPlayerHostileActListener
 {
     public transient EconomyInfo info;
     public transient EconomyLogger logger;
@@ -503,12 +507,49 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         if (weapons.getQuantity(1) > 0) objectives.add(weapons);
     }
 	
-	public void reportRaidObjectivesAchieved(RaidResultData data, InteractionDialogAPI dialog,
-        Map<String, MemoryAPI> memoryMap
-    ) {}
+	public void reportRaidObjectivesAchieved(RaidResultData data, InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {}
     
     public void reportAboutToOpenCoreTab(CoreUITabId tabID, Object param) {
         if (tabID == CoreUITabId.CARGO) applyPopulationStabilityMods();
+    }
+
+    public void reportRaidForValuablesFinishedBeforeCargoShown(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, CargoAPI cargo) {}
+	public void reportRaidToDisruptFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, Industry industry) {}
+	
+	public final void reportTacticalBombardmentFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData) {
+        applyBombardmentStockpileReduction(market, false);
+    }
+
+	public final void reportSaturationBombardmentFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData) {
+        applyBombardmentStockpileReduction(market, true);
+    }
+
+    private final void applyBombardmentStockpileReduction(MarketAPI market, boolean isSaturation) {
+        if (market == null) return;
+        final String marketID = market.getId();
+        
+        float reduction = isSaturation ? 0.7f : 0.3f;
+        reduction += (float) Math.random() * 0.2f - 0.1f;
+        reduction = Arithmetic.clamp(reduction, 0.1f, 0.95f);
+        
+        for (CommodityDomain dom : comDomains.values()) {
+            final CommodityCell cell = dom.getCell(marketID);
+            if (cell == null) continue;
+
+            cell.addStoredAmount(-reduction * cell.getStored());
+        }
+
+        if (isPlayerMarket(marketID)) {
+            final PlayerMarketData data = getPlayerMarketData(marketID);
+            final float penalty = isSaturation ? PlayerMarketData.BASELINE_VALUE : PlayerMarketData.BASELINE_VALUE / 4f;
+            data.setHealth(data.getHealth() - penalty);
+            data.setHappiness(data.getHappiness() - penalty);
+
+            Global.getSector().getIntelManager().addIntel(
+                new PlayerMarketBombardedIntel(data, reduction, penalty, isSaturation),
+                false
+            );
+        }
     }
 
     private final void applyPopulationStabilityMods() {
