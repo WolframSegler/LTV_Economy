@@ -457,7 +457,7 @@ public class IndustryTooltips {
 					// draw icon
 					tp.beginIconGroup();
 					tp.setIconSpacingMedium();
-					if (cell.getFlowAvailabilityRatio() < 0.9f) {
+					if (cell.getStoredAvailabilityRatio() < 0.9f) {
 						tp.addIcons(spec, 1, IconRenderMode.DIM_RED);
 					} else {
 						tp.addIcons(spec, 1, IconRenderMode.NORMAL);

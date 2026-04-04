@@ -56,19 +56,19 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
     public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
     public final InteractionComp<CommodityRowPanel> interaction = comp().get(NativeComponents.INTERACTION);
 
-    public final CommoditySpecAPI m_com;
+    public final CommoditySpecAPI com;
 
-    private final CommodityCell m_cell;
-    private final MarketAPI m_market;
+    private final CommodityCell cell;
+    private final MarketAPI market;
 
     public CommodityRowPanel(UIPanelAPI parent, MarketAPI market, String comID,
         int width, int height, boolean ignoreUIContext
     ) {
         super(parent, width, height);
 
-        m_cell = EconomyEngine.instance().getComCell(comID, market.getId());
-        m_com = settings.getCommoditySpec(comID);
-        m_market = market;
+        cell = EconomyEngine.instance().getComCell(comID, market.getId());
+        com = settings.getCommoditySpec(comID);
+        this.market = market;
 
         glow.color = base;
         glow.type = GlowType.UNDERLAY;
@@ -80,7 +80,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             final String comDesc = settings.getDescription(comID, Type.RESOURCE).getText1();
 
             tp.setParaFont(Fonts.ORBITRON_12);
-            tp.addPara(m_com.getName(), m_market.getFaction().getBaseUIColor(), pad);
+            tp.addPara(com.getName(), market.getFaction().getBaseUIColor(), pad);
 
             tp.setParaFontDefault();
             tp.addPara(comDesc, opad);
@@ -96,18 +96,18 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
             if (!expanded) {
                 tp.setParaFont(Fonts.ORBITRON_12);
                 tp.addSectionHeading("Stockpiles and Trade Flows", Alignment.MID, opad);
-                TooltipUtils.createComStockpilesChangeBreakdown(tp, m_cell);
+                TooltipUtils.createComStockpilesChangeBreakdown(tp, cell);
 
                 tp.setParaFont(Fonts.ORBITRON_12);
                 tp.addSectionHeading("Production and Demand", Alignment.MID, opad);
-                TooltipUtils.createComProductionBreakdown(tp, m_cell);
+                TooltipUtils.createComProductionBreakdown(tp, cell);
                 
                 tp.addPara("All production sources contribute to the commodity's availability. Formal and informal imports add to supply to help meet demand.", gray, pad);
                 tp.setParaFont(Fonts.ORBITRON_12);
-                TooltipUtils.createComDemandBreakdown(tp, m_cell);
+                TooltipUtils.createComDemandBreakdown(tp, cell);
 
                 tp.addSectionHeading("Trade Ledger", Alignment.MID, opad);
-                TooltipUtils.createComTradeLedgerSection(tp, m_cell);
+                TooltipUtils.createComTradeLedgerSection(tp, cell);
                 
                 tp.addPara(
                     "Markets with higher production and accessibility are prioritized for exports and imports.", gray, opad
@@ -142,28 +142,29 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         final int textWidth = 65;
         final int rowHeight = (int) getPos().getHeight();
 
-        final Base comIcon = new Base(m_panel, rowHeight, rowHeight, m_cell.spec.getIconName(),
+        final Base comIcon = new Base(m_panel, rowHeight, rowHeight, cell.spec.getIconName(),
             null, null);
         add(comIcon).inBL(2f, 0f);
 
+        // TODO maybe change the comodity row to display another value other than inflow
         final LabelAPI amountLbl = settings.createLabel(NumFormat.engNotation(
-            (int)m_cell.getFlowAvailable()) + Strings.X, Fonts.INSIGNIA_LARGE
+            (int)cell.getInflowQuantum()) + Strings.X, Fonts.INSIGNIA_LARGE
         );
         amountLbl.autoSizeToWidth(textWidth);
         final float textHeight = amountLbl.computeTextHeight(amountLbl.getText());
-        amountLbl.setColor(m_market.getFaction().getBaseUIColor());
+        amountLbl.setColor(market.getFaction().getBaseUIColor());
         add(amountLbl).inBL(pad*2 + rowHeight, (rowHeight - textHeight) / 2f);
 
-        final Base stockIcon = TooltipUtils.getStockpilesIcon(m_cell,
+        final Base stockIcon = TooltipUtils.getStockpilesIcon(cell,
             iconSize, m_panel, base
         );
         add(stockIcon).inBL(pad*3 + rowHeight + textWidth, (rowHeight - iconSize) / 2f);
 
         final UIPanelAPI infoBar = new CommodityInfoBar(null, 85, iconSize,
-            true, m_cell).getPanel();
+            true, cell).getPanel();
         add(infoBar).inBL(pad*4 + rowHeight + textWidth + iconSize, (rowHeight - iconSize) / 2f);
 
-        if (m_cell.globalExports > 0) {
+        if (cell.globalExports > 0) {
             final Base iconPanel = new Base(m_panel, rowHeight - 4, rowHeight - 4,
                 EXPORTS_ICON_PATH, null, null);
 
@@ -223,11 +224,6 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
 
         desc = "Imported or available through one-time trade or events.";
         legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_IMPORT);
-        
-        y += iconSize + pad;
-
-        desc = "Forced imports independent of local stockpiles or demand.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_IMPORT_EXCLUSIVE);
         
         y += iconSize + pad;
 

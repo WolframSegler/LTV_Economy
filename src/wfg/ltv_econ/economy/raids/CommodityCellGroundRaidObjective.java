@@ -162,7 +162,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		Industry best = null;
 		float bestScore = 0;
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowProdIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getFlowProductionIndStats().singleEntrySet()) {
             final Industry ind = market.getIndustry(entry.getKey());
             if (ind == null) continue;
 
@@ -174,7 +174,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 			}
         }
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowDemandIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getFlowConsumptionIndStats().singleEntrySet()) {
             final Industry ind = market.getIndustry(entry.getKey());
             if (ind == null) continue;
 
@@ -195,7 +195,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
         final double marineQuantity = maxQuantity * marines / MarketCMD.MAX_MARINE_TOKENS;
         final double deficitMult = 1.0 / (2.0 - cell.getStoredAvailabilityRatio());
         final double excessMult = Math.min(3.0, (cell.getStoredExcess() + stored) / stored);
-        final double prodMult = Arithmetic.clamp(cell.getProduction(true) / (1.0 + cell.getBaseDemand(true)), 1.0, 2.0);
+        final double prodMult = Arithmetic.clamp(cell.getProduction(true) / (1.0 + cell.getTargetQuantum(true)), 1.0, 2.0);
 
         final double value = marineQuantity * EconomyConfig.RAID_BASE_EFF * deficitMult * excessMult * prodMult * mult;
         return (float) Math.min(maxQuantity, value);
@@ -204,7 +204,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 	protected static final RaidDangerLevel getDangerLevel(CommoditySpecAPI spec, CommodityCell cell, Industry source) {
 		RaidDangerLevel danger = cell.spec.getBaseDanger();
 
-        if (cell.getStoredAvailabilityRatio() < 0.7f) {
+        if (cell.getDesiredAvailabilityRatio() < 0.7f) {
             danger = danger.next();
         }
         if (cell.getStoredExcess() > 0.0) {

@@ -127,12 +127,12 @@ public class EconomyInfo {
         return totalStockpiles;
     }
 
-    public final float getFactionComDemand(String comID, String factionID) {
+    public final float getFactionTargetQuantum(String comID, String factionID) {
         float totalDemand = 0;
 
         for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
-                totalDemand += cell.getBaseDemand(true);
+                totalDemand += cell.getTargetQuantum(true);
             }
         }
         return totalDemand;
@@ -154,7 +154,7 @@ public class EconomyInfo {
 
         for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
-                balance += cell.getFlowRealBalance();
+                balance += cell.getQuantumRealBalance();
             }
         }
         return balance;
@@ -199,23 +199,6 @@ public class EconomyInfo {
         return totalGlobalExports;
     }
 
-    /**
-     * Returns the sum of all the available commodity counts of a market
-     */
-    public final double getMarketActivity(MarketAPI market) {
-        double totalActivity = 0;
-        for (CommodityDomain dom : engine.comDomains.values()) {
-            if (!engine.getRegisteredMarkets().contains(market.getId())) {
-                engine.registerMarket(market);
-            }
-            final CommodityCell cell = dom.getCell(market.getId());
-
-            totalActivity += cell.getFlowAvailable();
-        }
-
-        return totalActivity;
-    }
-
     public static final long getGlobalWorkerCount(boolean includePlayerMarkets) {
         long total = 0;
         for (MarketAPI market : getMarketsCopy()) {
@@ -226,30 +209,11 @@ public class EconomyInfo {
         return total;
     }
 
-    /**
-     * Includes over-imports.
-     */
-    public final float getGlobalTradeRatio(MarketAPI market) {
-        if (!market.isInEconomy()) return 0f;
-
-        final double activity = getMarketActivity(market);
-
-        float ratio = 0f;
-
-        for (CommodityDomain dom : engine.comDomains.values()) {
-            final CommodityCell cell = dom.getCell(market.getId());
-
-            ratio += Math.abs(cell.globalImports - cell.getFlowAvailable()) / activity;
-        }
-
-        return ratio;
-    }
-
     public final long getGlobalDemand(String comID) {
         long total = 0;
 
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
-        total += cell.getBaseDemand(true);
+        total += cell.getTargetQuantum(true);
 
         return total;
     }
@@ -267,7 +231,7 @@ public class EconomyInfo {
         long total = 0;
 
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
-        total += cell.getFlowCanNotExport();
+        total += cell.getSurplusAfterTargetQuantum();
 
         return total;
     }
@@ -276,7 +240,7 @@ public class EconomyInfo {
         long total = 0;
 
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
-        total += cell.getFlowDeficit();
+        total += cell.getTargetQuantumUnmet();
 
         return total;
     }

@@ -27,7 +27,7 @@ public class SubstanceControlPolicy extends MarketPolicy {
 
     public void apply(PlayerMarketData data) {
         cell = EconomyEngine.instance().getComCell(Commodities.DRUGS, data.marketID);
-        cell.getDemandStat().modifyMult(id, DRUGS_MULT_P1, spec.name);
+        cell.getConsumptionStat().modifyMult(id, DRUGS_MULT_P1, spec.name);
         data.healthDelta.modifyFlat(id, HEALTH_BUFF_P1, spec.name);
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF_P1, spec.name);
         data.socialCohesionDelta.modifyFlat(id, COHESION_BUFF_P1, spec.name);
@@ -37,7 +37,7 @@ public class SubstanceControlPolicy extends MarketPolicy {
     public void preAdvance(PlayerMarketData data) {
         if (activeDaysRemaining > 180 || phase2) return;
 
-        cell.getDemandStat().modifyMult(id, DRUGS_MULT_P2, spec.name);
+        cell.getConsumptionStat().modifyMult(id, DRUGS_MULT_P2, spec.name);
         data.healthDelta.modifyFlat(id, HEALTH_BUFF_P2, spec.name);
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF_P2, spec.name);
         data.socialCohesionDelta.modifyFlat(id, COHESION_DEBUFF_P2, spec.name);
@@ -46,7 +46,7 @@ public class SubstanceControlPolicy extends MarketPolicy {
     }
 
     public void unapply(PlayerMarketData data) {
-        cell.getDemandStat().unmodifyMult(id);
+        cell.getConsumptionStat().unmodifyMult(id);
         data.healthDelta.unmodifyFlat(id);
         data.happinessDelta.unmodifyFlat(id);
         data.socialCohesionDelta.unmodifyFlat(id);

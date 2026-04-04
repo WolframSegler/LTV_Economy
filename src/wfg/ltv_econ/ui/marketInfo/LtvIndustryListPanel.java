@@ -351,7 +351,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 	}
 
 	public static final void addWidgetTooltip(IndustryTooltipMode mode, Industry ind, IndustryWidget widget) {
-		widget.industryIcon.tooltip.builder = (tp, exp) -> {
+		widget.indIcon.tooltip.builder = (tp, exp) -> {
 			IndustryTooltips.createIndustryTooltip(mode, tp, exp, ind);
 		};
 	}
@@ -375,7 +375,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 			boolean mouseOverWidget = events.stream()
 				.filter(InputEventAPI::isMouseMoveEvent)
 				.anyMatch(event -> widgets.stream()
-				.anyMatch(widget -> ((IndustryWidget) widget).industryIcon.getPos()
+				.anyMatch(widget -> ((IndustryWidget) widget).indIcon.getPos()
 				.containsEvent(event))
 			);
 

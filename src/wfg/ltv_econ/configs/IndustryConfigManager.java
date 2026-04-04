@@ -121,7 +121,7 @@ public class IndustryConfigManager {
 
             final String indID = indJson.getString("industryId");
             final boolean workerAssignable = indJson.optBoolean("workerAssignable", false);
-            final boolean ignoreLocalStockpiles = indJson.optBoolean("ignoreLocalStockpiles", false);
+            final boolean demandOnly = indJson.optBoolean("demandOnly", false);
             final String occTag = indJson.optString("occTag", LaborConfigLoader.AVERAGE_OCC_TAG);
 
             final JSONObject outputList = indJson.getJSONObject("outputList");
@@ -206,7 +206,7 @@ public class IndustryConfigManager {
             }
             
             IndustryConfig indConfig = new IndustryConfig(
-                workerAssignable, commodityMap, occTag, ignoreLocalStockpiles
+                workerAssignable, commodityMap, occTag, demandOnly
             );
             result.put(indID, indConfig);
         }
@@ -235,7 +235,7 @@ public class IndustryConfigManager {
             final JSONObject indJson = new JSONObject();
             indJson.put("industryId", indID);
             indJson.put("workerAssignable", ind.workerAssignable);
-            indJson.put("ignoreLocalStockpiles", ind.ignoreLocalStockpiles);
+            indJson.put("demandOnly", ind.demandOnly);
             indJson.put("occTag", ind.occTag);
 
             final JSONObject outputMap = new JSONObject();
@@ -295,17 +295,17 @@ public class IndustryConfigManager {
 
     public static class IndustryConfig {
         public final boolean workerAssignable;
-        public final boolean ignoreLocalStockpiles;
+        public final boolean demandOnly;
         public final String occTag;
         public final ArrayMap<String, OutputConfig> outputs;
 
         public boolean dynamic = false;
 
         public IndustryConfig(boolean workerAssignable, ArrayMap<String, OutputConfig> outputs, String occTag,
-            boolean ignoreLocalStockpiles
+            boolean demandOnly
         ) {
             this.workerAssignable = workerAssignable;
-            this.ignoreLocalStockpiles = ignoreLocalStockpiles;
+            this.demandOnly = demandOnly;
             this.outputs = outputs;
             this.occTag = occTag;
         }
@@ -315,7 +315,7 @@ public class IndustryConfigManager {
          */
         public IndustryConfig(IndustryConfig config) {
             this.workerAssignable = config.workerAssignable;
-            this.ignoreLocalStockpiles = config.ignoreLocalStockpiles;
+            this.demandOnly = config.demandOnly;
             this.occTag = config.occTag;
             this.dynamic = config.dynamic;
 
@@ -336,7 +336,7 @@ public class IndustryConfigManager {
             return '{' + " ,\n"
                 + "workerAssignable: " + workerAssignable + " ,\n"
                 + "occTag: " + occTag + " ,\n"
-                + "ignoreLocalStockpiles: " + ignoreLocalStockpiles + " ,\n"
+                + "demandOnly: " + demandOnly + " ,\n"
                 + "dynamicConfig: " + dynamic + " ,\n"
                 + outputs.toString()
                 + '}';

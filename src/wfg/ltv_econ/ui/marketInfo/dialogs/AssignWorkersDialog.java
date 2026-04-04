@@ -203,7 +203,7 @@ public class AssignWorkersDialog extends DialogPanel {
         final ArrayMap<String, MutableStat> supplyList = new ArrayMap<>();
         final ArrayMap<String, MutableStat> demandList = new ArrayMap<>();
 
-        final boolean importing = IndustryIOs.getIndConfig(industry).ignoreLocalStockpiles;
+        final boolean importing = IndustryIOs.getIndConfig(industry).demandOnly;
 
         if (!importing) {
             for (String comID : IndustryIOs.getRealOutputs(industry, false).keySet()) {

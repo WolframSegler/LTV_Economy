@@ -71,16 +71,16 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     public final Color baseColor;
     public final Color darkColor;
 
-    public final Industry m_industry;
-    public IndustryImagePanel industryIcon;
-    public LtvIndustryListPanel industryPanel;
+    public final Industry ind;
+    public IndustryImagePanel indIcon;
+    public LtvIndustryListPanel indPanel;
 
     private boolean tradeInfoPanel;
     private int constructionQueueIndex;
     private LabelAPI buildingTitleHeader;
     private LabelAPI constructionStatusText;
     private ConstructionMode constructionMode;
-    private final MarketAPI m_market;
+    private final MarketAPI market;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
     public IndustryWidget(UIPanelAPI parent, MarketAPI market, Industry ind,
@@ -91,20 +91,20 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         LtvIndustryListPanel indPanel, int queue
     ) { super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT);
 
-        m_market = market;
-        m_industry = ind;
+        this.market = market;
+        this.ind = ind;
 
         setMode(ConstructionMode.NORMAL);
-        industryPanel = indPanel;
+        this.indPanel = indPanel;
         constructionQueueIndex = queue;
 
         baseColor = market.getFaction().getBaseUIColor();
         darkColor = market.getFaction().getDarkUIColor();
 
-        final int hOffset = m_industry.isStructure() ? TITLE_HEIGHT : 0;
+        final int hOffset = ind.isStructure() ? TITLE_HEIGHT : 0;
 
         bg.offset.setOffset(-1, -1, 2, 2 - hOffset);
-        bg.color = m_industry.isImproved() ? Misc.getStoryDarkColor() : darkColor;
+        bg.color = ind.isImproved() ? Misc.getStoryDarkColor() : darkColor;
         bg.alpha = 1f;
 
         glow.offset.setOffset(-1, -1, 2, 2 - hOffset);
@@ -118,10 +118,10 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
     public void buildUI() {
         buildingTitleHeader = Global.getSettings().createLabel(
-            m_industry.getCurrentName(), Fonts.DEFAULT_SMALL
+            ind.getCurrentName(), Fonts.DEFAULT_SMALL
         );
         buildingTitleHeader.setColor(
-            m_industry.isImproved() ? Misc.getStoryOptionColor() : baseColor
+            ind.isImproved() ? Misc.getStoryOptionColor() : baseColor
         );
         buildingTitleHeader.setHighlightColor(
             NativeUiUtils.adjustBrightness(buildingTitleHeader.getColor(), 1.33f)
@@ -131,29 +131,29 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         add(buildingTitleHeader).inTL(pad, 0f);
 
 
-        industryIcon = new IndustryImagePanel(
+        indIcon = new IndustryImagePanel(
             m_panel, PANEL_WIDTH, IMAGE_HEIGHT,
-            m_industry.getCurrentImage(),
+            ind.getCurrentImage(),
             Color.WHITE, null
         );
 
-        if (!m_industry.isFunctional() || constructionQueueIndex >= 0) {
-            industryIcon.texColor = darkColor;
+        if (!ind.isFunctional() || constructionQueueIndex >= 0) {
+            indIcon.texColor = darkColor;
         }
 
-        if (!DebugFlags.COLONY_DEBUG && !m_market.isPlayerOwned()) {
-            industryIcon.texColor = Color.white;
-            industryIcon.interaction.enabled = false;
+        if (!DebugFlags.COLONY_DEBUG && !market.isPlayerOwned()) {
+            indIcon.texColor = Color.white;
+            indIcon.interaction.enabled = false;
         }
-        add(industryIcon).inBL(0, 0);
+        add(indIcon).inBL(0, 0);
 
-        industryIcon.interaction.onClicked = (indIcon, isLeftClick) -> {
+        indIcon.interaction.onClicked = (indIcon, isLeftClick) -> {
             if (tradeInfoPanel) return;
             IndustryWidget targetInd;
 
             if (constructionQueueIndex >= 0) {
                 if (!isLeftClick) {
-                    for (Object widgetObj : industryPanel.widgets) {
+                    for (Object widgetObj : indPanel.widgets) {
                         if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                             widget.setNormalMode();
                         }
@@ -163,7 +163,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                 }
 
                 if (constructionMode == ConstructionMode.NORMAL) {
-                    for (Object widgetObj : industryPanel.widgets) {
+                    for (Object widgetObj : indPanel.widgets) {
                     if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                         if (widget == this) {
                             widget.setRemoveMode();
@@ -176,7 +176,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                 } else if (constructionMode == ConstructionMode.SWAP) {
                     targetInd = null;
 
-                    for (Object widgetObj : industryPanel.widgets) {
+                    for (Object widgetObj : indPanel.widgets) {
                         if (widgetObj instanceof IndustryWidget widget &&
                             widget.getQueueIndex() >= 0 &&
                             widget.constructionMode == ConstructionMode.REMOVE
@@ -188,7 +188,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
                     // Swap industries
 
-                    List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
+                    List<ConstructionQueueItem> queueItems = market.getConstructionQueue().getItems();
                     if (targetInd != null && targetInd.constructionQueueIndex >= 0 && targetInd.constructionQueueIndex < queueItems.size()
                         && constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
 
@@ -203,14 +203,14 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                         targetItem.id = tempID;
                         targetItem.cost = tempCost;
 
-                        industryPanel.buildUI();
+                        indPanel.buildUI();
                     }
                 } else if (constructionMode == ConstructionMode.REMOVE) {
-                    List<ConstructionQueueItem> queueItems = m_market.getConstructionQueue().getItems();
+                    List<ConstructionQueueItem> queueItems = market.getConstructionQueue().getItems();
                     if (constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
 
                         final ConstructionQueueItem item = queueItems.get(constructionQueueIndex);
-                        m_market.getConstructionQueue().removeItem(item.id);
+                        market.getConstructionQueue().removeItem(item.id);
 
                         int itemCost = item.cost;
                         if (itemCost > 0) {
@@ -218,17 +218,17 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                             Misc.addCreditsMessage("Received %s", itemCost);
                         }
 
-                        industryPanel.buildUI();
+                        indPanel.buildUI();
                     }
                 }
             } else {
-                for (Object widgetObj : industryPanel.widgets) {
+                for (Object widgetObj : indPanel.widgets) {
                     if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                         widget.setNormalMode();
                     }
                 }
 
-                if (LtvIndustryListPanel.indOptCtor != null && industryPanel.dummyWidget != null) {
+                if (LtvIndustryListPanel.indOptCtor != null && indPanel.dummyWidget != null) {
                     final Object listener = new ListenerFactory.DialogDismissedListener() {
                         @Override
                         public void trigger(Object... args) {
@@ -244,9 +244,9 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                     // );
                     final DialogCreatorUI dialog = (DialogCreatorUI) RolfLectionUtil.instantiateClass(
                         LtvIndustryListPanel.indOptCtor,
-                        m_industry,
-                        industryPanel.dummyWidget,
-                        LtvIndustryListPanel.getMarketInteractionMode(m_market),
+                        ind,
+                        indPanel.dummyWidget,
+                        LtvIndustryListPanel.getMarketInteractionMode(market),
                         Attachments.getCampaignScreenPanel(),
                         listener
                     );
@@ -254,7 +254,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                         "show", dialog, 0f, 0f);
 
                     NativeUiUtils.anchorPanel(
-                        ((UIPanelAPI)dialog), industryIcon.getPanel(), AnchorType.MidTopLeft, 0
+                        ((UIPanelAPI)dialog), indIcon.getPanel(), AnchorType.MidTopLeft, 0
                     );
 
                 }
@@ -264,7 +264,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             }
         };
 
-        final WorkerIndustryData data = WorkerRegistry.instance().getData(m_industry);
+        final WorkerIndustryData data = WorkerRegistry.instance().getData(ind);
         final LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(highlight);
         workerCountLabel.setHighlightColor(
@@ -287,9 +287,9 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
         final EconomyEngine engine = EconomyEngine.instance();
 
-        if (m_industry.isFunctional() && !m_industry.isBuilding()) {
-        for (String comID : IndustryIOs.getRealInputs(m_industry, false)) {
-            final CommodityCell cell = engine.getComCell(comID, m_market.getId());
+        if (ind.isFunctional() && !ind.isBuilding()) {
+        for (String comID : IndustryIOs.getRealInputs(ind, false)) {
+            final CommodityCell cell = engine.getComCell(comID, market.getId());
             if (cell == null || cell.getStoredAvailabilityRatio() > 0.9f) continue;
 
             tp.addIcons(cell.spec, 1, IconRenderMode.RED);
@@ -303,7 +303,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         tp.setIconSpacingWide();
 
         int totalW = 0;
-        for (SpecialItemData item : m_industry.getVisibleInstalledItems()) {
+        for (SpecialItemData item : ind.getVisibleInstalledItems()) {
 
             final SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(item.getId());
 
@@ -316,9 +316,9 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             totalW += itemPanel.getPos().getWidth() + pad*2;
         }
 
-        if (m_industry.getAICoreId() != null) {
+        if (ind.getAICoreId() != null) {
 
-            final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(m_industry.getAICoreId());
+            final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(ind.getAICoreId());
 
             final Base aiCorePanel = new Base(m_panel, 28, 28, spec.getIconName(), Color.WHITE, null);
             aiCorePanel.drawTextureHalo = true;
@@ -328,9 +328,9 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         }
 
         
-        final boolean isIndNotFunctional = m_industry.isBuilding() || m_industry.isDisrupted();
+        final boolean isIndNotFunctional = ind.isBuilding() || ind.isDisrupted();
         if (isIndNotFunctional) {
-            if (m_industry.isBuilding() && !m_industry.isUpgrading() && !m_industry.isDisrupted()) {
+            if (ind.isBuilding() && !ind.isUpgrading() && !ind.isDisrupted()) {
 
                 tp.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
                 constructionStatusText = tp.createLabel("Building", baseColor);
@@ -351,8 +351,8 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             slider.label.getPosition().setYAlignOffset(1);
             slider.setBarColor(Misc.interpolateColor(baseColor, darkColor, 0.5f));
             slider.labelColor = baseColor;
-            slider.setProgress(m_industry.getBuildOrUpgradeProgress() * 100);
-            slider.labelText = m_industry.getBuildOrUpgradeProgressText();
+            slider.setProgress(ind.getBuildOrUpgradeProgress() * 100);
+            slider.labelText = ind.getBuildOrUpgradeProgressText();
             slider.showLabelOnly = true;
             
             tp.addComponent(slider.getPanel()).inBL(0, -sliderHeight - 2);
@@ -374,7 +374,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     public void setNormalMode() {
         clearLabels();
         String txt = "Queued";
-        if (Misc.getCurrentlyBeingConstructed(m_market) == null && constructionQueueIndex == 0) {
+        if (Misc.getCurrentlyBeingConstructed(market) == null && constructionQueueIndex == 0) {
             txt = "Building";
         }
 
@@ -394,8 +394,8 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
     public void setRemoveMode() {
         ConstructionQueueItem queueItem = null;
-        if (m_market.getConstructionQueue().getItems().size() > constructionQueueIndex && constructionQueueIndex >= 0) {
-            queueItem = m_market.getConstructionQueue().getItems().get(constructionQueueIndex);
+        if (market.getConstructionQueue().getItems().size() > constructionQueueIndex && constructionQueueIndex >= 0) {
+            queueItem = market.getConstructionQueue().getItems().get(constructionQueueIndex);
         }
 
         if (queueItem != null) {
@@ -453,11 +453,11 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     }
 
     protected void addCostTimeLabels() {
-        if (m_market.getConstructionQueue().getItems().size() > constructionQueueIndex && constructionQueueIndex >= 0) {
-            final ConstructionQueueItem queueItem = (ConstructionQueueItem) m_market
+        if (market.getConstructionQueue().getItems().size() > constructionQueueIndex && constructionQueueIndex >= 0) {
+            final ConstructionQueueItem queueItem = (ConstructionQueueItem) market
                 .getConstructionQueue().getItems().get(constructionQueueIndex);
             if (queueItem != null) {
-                final int buildTime = (int) m_industry.getSpec().getBuildTime();
+                final int buildTime = (int) ind.getSpec().getBuildTime();
                 String buildText = "days";
                 if (buildTime == 1) {
                     buildText = "day";
@@ -508,9 +508,9 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     protected void setMode(ConstructionMode mode) {
         constructionMode = mode;
 
-        if (industryIcon != null) {
+        if (indIcon != null) {
             final Color gColor = mode == ConstructionMode.NORMAL ? Color.WHITE : Color.BLACK;
-            industryIcon.ImgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
+            indIcon.ImgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
         }
     }
 
@@ -546,7 +546,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     public void dialogDismissed() {
         tradeInfoPanel = false;
         RolfLectionUtil.getMethodAndInvokeDirectly("dialogDismissed",
-            industryPanel.dummyWidget, null, 0);
+            indPanel.dummyWidget, null, 0);
 
         UIContext.setContext(Context.NONE);
     }
@@ -580,7 +580,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             ImgGlow.additiveSprite = m_sprite;
             ImgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
 
-            audio.useDisabledSound = (!DebugFlags.COLONY_DEBUG && !m_industry.getMarket().isPlayerOwned());
+            audio.useDisabledSound = (!DebugFlags.COLONY_DEBUG && !ind.getMarket().isPlayerOwned());
         }
     }
 }

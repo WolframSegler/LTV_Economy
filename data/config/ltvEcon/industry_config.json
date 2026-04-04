@@ -759,7 +759,7 @@
 		"industryId": "waystation",
 		"occTag": "service",
 		"workerAssignable": true,
-		"ignoreLocalStockpiles": true,
+		"demandOnly": true,
 		"outputList": {
 			"supplies": {
 				"baseProd": 25,

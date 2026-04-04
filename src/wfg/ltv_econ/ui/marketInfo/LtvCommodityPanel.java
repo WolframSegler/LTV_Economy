@@ -120,7 +120,7 @@ public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements
     public void selectRow(String comID) {
         final CommodityOnMarketAPI com = m_market.getCommodityData(comID);
         for (CommodityRowPanel row : commodityRows) {
-            row.glow.persistent = row.m_com == com;
+            row.glow.persistent = row.com == com;
         }
     }
 

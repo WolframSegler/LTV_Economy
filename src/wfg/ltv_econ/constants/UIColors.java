@@ -8,7 +8,6 @@ public class UIColors {
 
     public static final Color COM_DEFICIT = new Color(140, 15, 15);
     public static final Color COM_OVER_IMPORT = new Color(180, 90, 180);
-    public static final Color COM_IMPORT_EXCLUSIVE = new Color(0, 180, 200);
     public static final Color COM_IMPORT = new Color(200, 140, 60);
     public static final Color COM_FACTION_IMPORT = new Color(240, 240, 100);
     public static final Color COM_LOCAL_PROD = new Color(122, 200, 122);

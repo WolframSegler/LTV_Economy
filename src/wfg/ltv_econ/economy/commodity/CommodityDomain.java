@@ -115,11 +115,11 @@ public class CommodityDomain implements Serializable {
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public final ArrayList<CommodityCell> getSortedByDemand(int listSize) {
+    public final ArrayList<CommodityCell> getSortedByTargetQuantum(int listSize) {
         return comCells.values().stream()
-            .filter(cell -> cell.getBaseDemand(true) > 0)
+            .filter(cell -> cell.getTargetQuantum(true) > 0f)
             .sorted((a, b) -> Float.compare(
-                b.getBaseDemand(true), a.getBaseDemand(true)
+                b.getTargetQuantum(true), a.getTargetQuantum(true)
             )).limit(listSize)
             .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -139,23 +139,20 @@ public class CommodityDomain implements Serializable {
     }
 
     public final List<CommodityCell> getImporters() {
-        List <CommodityCell> importers = new ArrayList<>(32);
+        final List <CommodityCell> importers = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
-
-            if (cell.computeImportAmount() > 0f) {
-                importers.add(cell);
-            }
+            if (cell.computeImportAmount() > 0f) importers.add(cell);
         }
 
         return importers;
     }
 
     public final List<CommodityCell> getExporters() {
-        List <CommodityCell> exporters = new ArrayList<>(32);
+        final List <CommodityCell> exporters = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
-            if (cell.getStoredRemainingExportable() > 0) exporters.add(cell);
+            if (cell.computeExportAmount() > 0f) exporters.add(cell);
         }
 
         return exporters;
@@ -256,7 +253,7 @@ public class CommodityDomain implements Serializable {
                 if (!expCell.market.hasSpaceport() || !impCell.market.hasSpaceport()) continue;
             }
 
-            final double exportableRemaining = expCell.getStoredRemainingExportable();
+            final double exportableRemaining = expCell.computeExportAmount();
             final float deficitRemaining = impCell.computeImportAmount();
 
             if (exportableRemaining < 0.01f || deficitRemaining < 0.01f) continue;
@@ -267,7 +264,7 @@ public class CommodityDomain implements Serializable {
             // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
             final float exporterPrice = expCell.getUnitPrice(PriceType.MARKET_SELLING, (int)amountToSend);
             final float importerPrice = impCell.getUnitPrice(PriceType.MARKET_BUYING, (int)amountToSend);
-            final float weight = Math.min(1f, (float)impCell.getFlowDeficitPreTrade() / amountToSend);
+            final float weight = Math.min(1f, (float)impCell.getTargetQuantumPreTrade() / amountToSend);
             final float unitPrice = exporterPrice * (1f - weight) + importerPrice * weight;
             final float price = unitPrice * amountToSend;
 
@@ -308,7 +305,7 @@ public class CommodityDomain implements Serializable {
         {
             float demand = 0f;
             float excess = 0f;
-            for (CommodityCell cell : exporters) excess += cell.getStoredRemainingExportable();
+            for (CommodityCell cell : exporters) excess += cell.computeExportAmount();
             for (CommodityCell cell : importers) demand += cell.computeImportAmount();
 
             sumImportable = demand;
@@ -320,7 +317,7 @@ public class CommodityDomain implements Serializable {
 
         if (sumExportable < 1f) return;
         for (CommodityCell exporter : exporters) {
-            final double exportable = exporter.getStoredRemainingExportable();
+            final double exportable = exporter.computeExportAmount();
             final float share = (float) (exportable / sumExportable);
             final float amount = Math.min((float) exportable, share * informalNode.imports);
             final int price = (int) (exporter.getUnitPrice(PriceType.MARKET_SELLING, (int)amount)

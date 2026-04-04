@@ -1,7 +1,8 @@
 package wfg.ltv_econ.economy.engine;
 
-import java.util.Collection;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 import com.fs.starfarer.api.Global;
 
@@ -10,117 +11,91 @@ import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.native_ui.util.NumFormat;
 
 public class EconomyLogger {
+    private static final Logger log = Global.getLogger(EconomyEngine.class);
     transient EconomyEngine engine;
 
     EconomyLogger(EconomyEngine engine) { this.engine = engine; }
     
     public final void logEconomySnapshot() {
-        Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT START ----");
+        final StringBuilder sb = new StringBuilder();
+        sb.append("---- ECONOMY SNAPSHOT START ----\n");
 
         for (Map.Entry<String, CommodityDomain> dom : engine.comDomains.entrySet()) {
-            long potencialProd = 0;
-            long realProd = 0;
-            long potencialDemand = 0;
-            long realDemand = 0;
-            long available = 0;
-            double availabilityRatio = 0f;
-            long deficit = 0;
-            long globalStockpile = 0;
+            long totalProduction = 0;
+            long totalConsumption = 0;
+            long totalTargetQuantum = 0;
+            long totalImports = 0;
             long totalExports = 0;
-            long inFactionExports = 0;
-            long globalExports = 0;
+            long totalStockpile = 0;
+            long totalTargetStockpile = 0;
+            long totalStoredDeficit = 0;
+            long totalStoredExcess = 0;
 
             for (CommodityCell cell : dom.getValue().getAllCells()) {
-                potencialProd += cell.getProduction(false);
-                realProd += cell.getProduction(true);
-                potencialDemand += cell.getBaseDemand(true);
-                realDemand += cell.getDemand();
-                available += cell.getFlowAvailable();
-                availabilityRatio += cell.getFlowAvailabilityRatio();
-                deficit += cell.getFlowDeficit();
-                globalStockpile += cell.getStored();
+                totalProduction += cell.getProduction(true);
+                totalConsumption += cell.getConsumption(true);
+                totalTargetQuantum += cell.getTargetQuantum(true);
+                totalImports += cell.getTotalImports();
                 totalExports += cell.getTotalExports();
-                inFactionExports += cell.inFactionExports;
-                globalExports += cell.globalExports;
+                totalStockpile += cell.getStored();
+                totalTargetStockpile += cell.getTargetStockpiles();
+                totalStoredDeficit += cell.getStoredDeficit();
+                totalStoredExcess += cell.computeExportAmount();
             }
 
-            availabilityRatio /= (float) dom.getValue().getAllCells().size();
-
-            Global.getLogger(getClass()).info("\n"+
-                "Commodity: " + dom.getKey() + "\n"+
-                "potencialProd: " + NumFormat.engNotation(potencialProd) + "\n"+
-                "realProd: " + NumFormat.engNotation(realProd) + "\n"+
-                "potencialDemand: " + NumFormat.engNotation(potencialDemand) + "\n"+
-                "realDemand: " + NumFormat.engNotation(realDemand) + "\n"+
-                "available: " + NumFormat.engNotation(available) + "\n"+
-                "availabilityRatio: " + availabilityRatio + "\n"+
-                "deficit: " + NumFormat.engNotation(deficit) + "\n"+
-                "globalStockpile: " + NumFormat.engNotation(globalStockpile) + "\n"+
-                "totalExports: " + NumFormat.engNotation(totalExports) + "\n"+
-                "inFactionExports: " + NumFormat.engNotation(inFactionExports) + "\n"+
-                "globalExports: " + NumFormat.engNotation(globalExports) + "\n"+
-
-                "---------------------------------------"
-            );
+            sb.append("\nCommodity: ").append(dom.getKey()).append("\n")
+            .append("production (daily): ").append(NumFormat.engNotation(totalProduction)).append("\n")
+            .append("consumption (daily): ").append(NumFormat.engNotation(totalConsumption)).append("\n")
+            .append("targetQuantum (daily): ").append(NumFormat.engNotation(totalTargetQuantum)).append("\n")
+            .append("imports (daily): ").append(NumFormat.engNotation(totalImports)).append("\n")
+            .append("exports (daily): ").append(NumFormat.engNotation(totalExports)).append("\n")
+            .append("stockpile: ").append(NumFormat.engNotation(totalStockpile)).append("\n")
+            .append("targetStockpile: ").append(NumFormat.engNotation(totalTargetStockpile)).append("\n")
+            .append("storedDeficit: ").append(NumFormat.engNotation(totalStoredDeficit)).append("\n")
+            .append("storedExcess (exportable): ").append(NumFormat.engNotation(totalStoredExcess)).append("\n")
+            .append("---------------------------------------\n");
         }
-        
-        Global.getLogger(getClass()).info("---- ECONOMY SNAPSHOT END ----");
+
+        sb.append("---- ECONOMY SNAPSHOT END ----");
+        log.info(sb.toString());
     }
 
     public final void logEconomySnapshotAsCSV() {
-        StringBuilder csv = new StringBuilder(2048);
-
-        csv.append("Commodity,PotencialProd,RealProd,PotencialDemand,RealDemand,Available,AvailabilityRatio,Deficit,GlobalStockpile,TotalExports,InFactionExports,GlobalExports\n");
+        final StringBuilder csv = new StringBuilder(2048);
+        csv.append("Commodity,Production(real),Consumption(real),TargetQuantum,Imports,Exports,Stockpile,TargetStockpile,StoredDeficit,StoredExcess\n");
 
         for (Map.Entry<String, CommodityDomain> entry : engine.comDomains.entrySet()) {
             final String comID = entry.getKey();
             final CommodityDomain dom = entry.getValue();
 
-            long potencialProd = 0;
-            long realProd = 0;
-            long potencialDemand = 0;
-            long realDemand = 0;
-            long available = 0;
-            double availabilityRatio = 0f;
-            long deficit = 0;
-            long globalStockpile = 0;
+            long totalProduction = 0;
+            long totalConsumption = 0;
+            long totalTargetQuantum = 0;
+            long totalImports = 0;
             long totalExports = 0;
-            long inFactionExports = 0;
-            long globalExports = 0;
+            long totalStockpile = 0;
+            long totalTargetStockpile = 0;
+            long totalStoredDeficit = 0;
+            long totalStoredExcess = 0;
 
-            final Collection<CommodityCell> allCells = dom.getAllCells();
-            for (CommodityCell cell : allCells) {
-                potencialProd += cell.getProduction(false);
-                realProd += cell.getProduction(true);
-                potencialDemand += cell.getBaseDemand(true);
-                realDemand += cell.getDemand();
-                available += cell.getFlowAvailable();
-                availabilityRatio += cell.getFlowAvailabilityRatio();
-                deficit += cell.getFlowDeficit();
-                globalStockpile += cell.getStored();
+            for (CommodityCell cell : dom.getAllCells()) {
+                totalProduction += cell.getProduction(true);
+                totalConsumption += cell.getConsumption(true);
+                totalTargetQuantum += cell.getTargetQuantum(true);
+                totalImports += cell.getTotalImports();
                 totalExports += cell.getTotalExports();
-                inFactionExports += cell.inFactionExports;
-                globalExports += cell.globalExports;
+                totalStockpile += cell.getStored();
+                totalTargetStockpile += cell.getTargetStockpiles();
+                totalStoredDeficit += cell.getStoredDeficit();
+                totalStoredExcess += cell.computeExportAmount();
             }
 
-            availabilityRatio /= (double) allCells.size();
-
-            csv.append(String.format("%s,%d,%d,%d,%d,%d,%.4f,%d,%d,%d,%d,%d\n",
-                comID,
-                potencialProd,
-                realProd,
-                potencialDemand,
-                realDemand,
-                available,
-                availabilityRatio,
-                deficit,
-                globalStockpile,
-                totalExports,
-                inFactionExports,
-                globalExports
-            ));
+            csv.append(String.format("%s,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+                comID, totalProduction, totalConsumption, totalTargetQuantum,
+                totalImports, totalExports, totalStockpile,
+                totalTargetStockpile, totalStoredDeficit, totalStoredExcess));
         }
-        Global.getLogger(getClass()).info(csv.toString());
+        log.info(csv.toString());
     }
 
     public final void logCreditsSnapshot() {
@@ -135,6 +110,6 @@ public class EconomyLogger {
             .append(" credits\n"));
 
         sb.append("=== End Snapshot ===");
-        Global.getLogger(EconomyEngine.class).info(sb.toString());
+        log.info(sb.toString());
     }
 }

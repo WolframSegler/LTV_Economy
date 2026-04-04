@@ -320,7 +320,7 @@ public class ColonyInvDialog extends DialogPanel {
             "", 40, null, true, false, 1,
             "Commodity", 160, "Commodity.", true, true, 1,
             "Stored", 100, "Amount in Colony stockpile.", false, false, -1,
-            "Demand", 100, "Total demand by colony.", false, false, -1,
+            "Consumed", 100, "Total demand by colony.", false, false, -1,
             "Base Prod", 140, BaseProdTpTxt, false, false, -1,
             "Real Prod", 140, RealProdTpTxt, false, false, -1,
             "Base Balance", 130, BaseBalanceTpTxt, false, false, -1,
@@ -336,12 +336,11 @@ public class ColonyInvDialog extends DialogPanel {
             );
             
             final long stored = cell.getRoundedStored();
-            final int demand = (int) cell.getBaseDemand(true);
+            final int demand = (int) cell.getConsumption(true);
             final int baseProd = (int) cell.getProduction(false);
             final int modifiedProd = (int) cell.getProduction(true);
-            final int baseBalance = (int) (cell.getProduction(true) -
-                cell.getDemand());
-            final int realBalance = (int) cell.getFlowRealBalance();
+            final int baseBalance = (int) (cell.getProduction(true) - cell.getConsumption(true));
+            final int realBalance = (int) cell.getQuantumRealBalance();
 
             Color baseBlcColor = baseBalance < 0 ? 
                 negative : baseBalance > 0 ?

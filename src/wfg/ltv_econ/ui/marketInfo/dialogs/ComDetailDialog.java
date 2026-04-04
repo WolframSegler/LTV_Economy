@@ -678,6 +678,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         final EconomyEngine engine = EconomyEngine.instance();
 
+        // TODO maybe change in the future to use stored values instead of flow values
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
 
             if (market.isHidden()) continue;
@@ -685,12 +686,12 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final String marketID = market.getId();
             final CommodityCell cell = engine.getComCell(comID, marketID);
 
-            if (cell.globalExports < 1 && mode == 0 ||
-                cell.getBaseDemand(true) + cell.getImportExclusiveDemand() < 1 && mode == 1
+            if (cell.globalExports < 1f && mode == 0 ||
+                cell.getTargetQuantum(true) < 1f && mode == 1
             ) continue;
 
             if (footerPanel != null && footerPanel.m_checkbox.isChecked() &&
-                !(cell.getFlowCanNotExport() > 0 || cell.getFlowDeficit() > 0)) {
+                !(cell.getSurplusAfterTargetQuantum() > 0f || cell.getTargetQuantumUnmet() > 0f)) {
                 continue;
             }
 
@@ -698,7 +699,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final Base iconPanel = new Base(section, iconSize, iconSize,
                 iconPath, null, null
             );
-            iconPanel.outline.enabled = cell.getFlowDeficit() > 0;
+            iconPanel.outline.enabled = cell.getTargetQuantumUnmet() > 0;
             iconPanel.outline.color = Color.RED;
             iconPanel.outline.offset.setOffset(-1, -1, 2, 2);
 
@@ -772,7 +773,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         section4ComPanel.selectionListener = (source, isLeftClick) -> {
             if (!isLeftClick) return;
 
-            m_com = source.m_com;
+            m_com = source.com;
 
             section4ComPanel.selectRow(source);
 
@@ -829,12 +830,12 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final int buyPrice = (int) (cell.computeVanillaPrice((int)econUnit, false, true) / econUnit);
     
             if (!m_com.isMeta()) {
-                if (cell.getFlowCanNotExport() > 0) {
+                if (cell.getStoredExcess() > 0f) {
                     tp.addPara("Excess stockpiles: %s units.", opad, positive, 
-                    highlight, NumFormat.engNotation((long) cell.getFlowCanNotExport()));
-                } else if (cell.getFlowDeficit() > 0) {
+                    highlight, NumFormat.engNotation(cell.getStoredExcess()));
+                } else if (cell.getStoredDeficit() > 0f) {
                     tp.addPara("Local deficit: %s units.", opad, negative, 
-                    highlight, NumFormat.engNotation((long) cell.getFlowDeficit()));
+                    highlight, NumFormat.engNotation(cell.getStoredDeficit()));
                 }
     
                 tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{

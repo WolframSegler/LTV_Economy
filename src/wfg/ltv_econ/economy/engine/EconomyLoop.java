@@ -205,7 +205,7 @@ public class EconomyLoop {
         final float totalMarketOutput = cell.getProduction(false);
         final float invMarketOutput = 1f / totalMarketOutput;
 
-        for (Map.Entry<String, MutableStat> industryEntry : cell.getFlowProdIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> industryEntry : cell.getFlowProductionIndStats().singleEntrySet()) {
             final String industryID = industryEntry.getKey();
             final MutableStat industryStat = industryEntry.getValue();
 

@@ -495,17 +495,17 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
             "Colony", 100, "Colony name", true, true, 1,
-            "Demand", 100, "Daily units of " + com.getName() + " demanded", false, false, -1
+            "Demand", 100, "Daily units of " + com.getName() + " consumed", false, false, -1
         );
 
-        final ArrayList<CommodityCell> consumers = dom.getSortedByDemand(5);
+        final ArrayList<CommodityCell> consumers = dom.getSortedByTargetQuantum(5);
 
         for (CommodityCell cell : consumers) {
 
             final String iconPath = cell.market.getFaction().getCrest();
             final Base iconPanel = new Base(table.getPanel(), 24, 24, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
-            final long value = (long) cell.getBaseDemand(true);
+            final long value = (long) cell.getConsumption(true);
 
             table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);

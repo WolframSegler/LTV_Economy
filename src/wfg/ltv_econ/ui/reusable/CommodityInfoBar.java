@@ -21,15 +21,14 @@ public class CommodityInfoBar extends GenericInfoBar<CommodityInfoBar> {
             );
         }
 
-        final float demandMetLocalRatio = cell.getFlowDeficitMetLocally() / footprint;
-        final float inFactionImportRatio = cell.getFlowDeficitMetViaFactionTrade() / footprint;
-        final float globalImportRatio = (cell.getFlowDeficitMetViaGlobalTrade() +
-            cell.getFlowDeficitMetViaInformalTrade()) / footprint;
-        final float overImportRatio = cell.getFlowOverImports() / footprint;
-        final float importExclusiveRatio = cell.getImportExclusiveDemand() / footprint;
+        final float demandMetLocalRatio = cell.getTargetQuantumMetLocally() / footprint;
+        final float inFactionImportRatio = cell.getTargetQuantumMetViaFactionTrade() / footprint;
+        final float globalImportRatio = (cell.getTargetQuantumMetViaGlobalTrade() +
+            cell.getTargetQuantumMetViaInformalTrade()) / footprint;
+        final float overImportRatio = (cell.getTotalImports() - cell.getTargetQuantumMetViaTrade()) / footprint;
         final float exportedRatio = cell.getTotalExports() / footprint;
-        final float notExportedRatio = cell.getFlowCanNotExport() / footprint;
-        final float deficitRatio = cell.getFlowDeficit() / footprint;
+        final float notExportedRatio = cell.getSurplusAfterTargetQuantum() / footprint;
+        final float deficitRatio = cell.getTargetQuantumUnmet() / footprint;
 
         barMap.put(UIColors.COM_LOCAL_PROD, demandMetLocalRatio);
         barMap.put(UIColors.COM_EXPORT, exportedRatio);
@@ -37,7 +36,6 @@ public class CommodityInfoBar extends GenericInfoBar<CommodityInfoBar> {
         barMap.put(UIColors.COM_FACTION_IMPORT, inFactionImportRatio);
         barMap.put(UIColors.COM_IMPORT, globalImportRatio);
         barMap.put(UIColors.COM_OVER_IMPORT, overImportRatio);
-        barMap.put(UIColors.COM_IMPORT_EXCLUSIVE, importExclusiveRatio);
         barMap.put(UIColors.COM_DEFICIT, deficitRatio);
     }
 }

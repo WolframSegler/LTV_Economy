@@ -110,6 +110,8 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     private float time = 0f;
     private boolean hoverRegistered = false;
 
+    // TODO modify the map to use trade missions instead of daily flows
+
     public ComTradeFlowMap(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 

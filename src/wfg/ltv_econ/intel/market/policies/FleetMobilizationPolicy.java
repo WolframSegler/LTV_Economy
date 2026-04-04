@@ -26,9 +26,9 @@ public class FleetMobilizationPolicy extends MarketPolicy {
 
         final EconomyEngine engine = EconomyEngine.instance();
         engine.getComCell(Commodities.SUPPLIES, data.marketID)
-            .getDemandStat().modifyFlat(id, SUPPLIES_COST, spec.name);
+            .getConsumptionStat().modifyFlat(id, SUPPLIES_COST, spec.name);
         engine.getComCell(Commodities.SHIPS, data.marketID)
-            .getDemandStat().modifyFlat(id, SHIPS_COST, spec.name);
+            .getConsumptionStat().modifyFlat(id, SHIPS_COST, spec.name);
 
         final MarketAPI market = data.market;
         market.getStats().getDynamic().getMod(Stats.PATROL_NUM_LIGHT_MOD)
@@ -44,9 +44,9 @@ public class FleetMobilizationPolicy extends MarketPolicy {
 
         final EconomyEngine engine = EconomyEngine.instance();
         engine.getComCell(Commodities.SUPPLIES, data.marketID)
-            .getDemandStat().unmodifyFlat(id);
+            .getConsumptionStat().unmodifyFlat(id);
         engine.getComCell(Commodities.SHIPS, data.marketID)
-            .getDemandStat().unmodifyFlat(id);
+            .getConsumptionStat().unmodifyFlat(id);
 
         final MarketAPI market = data.market;
         market.getStats().getDynamic().getMod(Stats.PATROL_NUM_LIGHT_MOD).unmodify(id);

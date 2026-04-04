@@ -61,8 +61,8 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 			getCargo().getMothballedShips().clear();
 
-            final float shipProd = (float) Math.log10(Math.max(1f, shipsCell.getFlowAvailable()));
-            final float fuelProd = (float) Math.log10(Math.max(1f, fuelCell.getFlowAvailable()));
+            final float shipProd = (float) Math.log10(Math.max(1f, shipsCell.getInflowQuantum()));
+            final float fuelProd = (float) Math.log10(Math.max(1f, fuelCell.getInflowQuantum()));
 
             final float combatShips = Math.min(10f + 5f * shipProd, 70);
             final float freighters  = Math.min(10f + 10f * shipProd, 40f);
@@ -170,12 +170,12 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
             comID, marketID
         );
 
-		final float base = Math.max(1f,Math.max(cell.getFlowAvailable(), cell.getBaseDemand(true)));
+		final float base = Math.max(1f,Math.max(cell.getInflowQuantum(), cell.getTargetQuantum(true)));
 
 		final float impRatio = cell.getTotalImports() / base;
 		final float prodRatio = cell.getProduction(true) / base;
-		final float extraRatio = cell.getFlowCanNotExport() / base;
-		final float defRatio = cell.getFlowDeficit() / base;
+		final float extraRatio = cell.getSurplusAfterTargetQuantum() / base;
+		final float defRatio = cell.getTargetQuantumUnmet() / base;
 
 		final float mult = 1f
 			+ impRatio  * ECON_UNIT_MULT_IMPORTS

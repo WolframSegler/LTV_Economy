@@ -108,10 +108,10 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) >= 3) continue;
                     countingMap.add(market.getFactionId());
 
-                    final int desired = (int) ((cell.getPreferredStockpile() / 100f) * 100f);
-                    final boolean lowDemand = desired < 100;
-                    final String lessThanSymbol = lowDemand ? "<" : "";
-                    final Color labelColor = lowDemand ? gray : highlight;
+                    final int target = (int) ((cell.getTargetStockpiles() / 100f) * 100f);
+                    final boolean lowTarget = target < 100;
+                    final String lessThanSymbol = lowTarget ? "<" : "";
+                    final Color labelColor = lowTarget ? gray : highlight;
 
                     final double deficit = cell.getStoredDeficit();
                     final boolean deficitPresent = deficit > 10.0;
@@ -134,7 +134,7 @@ public class TooltipUtils {
                         highlight,
                         Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, true, true) / econUnit),
                         labelColor,
-                        lessThanSymbol + NumFormat.engNotation(desired),
+                        lessThanSymbol + NumFormat.engNotation(target),
                         deficitColor,
                         quantityLabel,
                         Alignment.LMID,
@@ -260,14 +260,14 @@ public class TooltipUtils {
 
     public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Total Production: %s", pad, highlight, NumFormat.engNotation(cell.getFlowAvailable()));
+        final LabelAPI title = tp.addPara("Total production: %s", pad, highlight, NumFormat.engNotation(cell.getProduction(true)));
         final int gridWidth = 430;
         final int valueWidth = 50;
         int rowCount = 0;
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowProdIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getFlowProductionIndStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
             final IndustrySpecAPI ind = settings.getIndustrySpec(entry.getKey());
 
@@ -295,7 +295,7 @@ public class TooltipUtils {
         }
 
         if (cell.getProduction(false) > 0) {
-            final MutableStat mutable = cell.getProductionStat();
+            final ArrayMutableStat mutable = cell.getProductionStat();
 
             if (mutable.getModifiedInt() > 0) {
                 for (StatMod mod : mutable.getPercentMods().values()) {
@@ -317,9 +317,9 @@ public class TooltipUtils {
             }
         }
 
-        if (cell.getFlowDeficit() >= 1) {
+        if (cell.getTargetQuantumUnmet() >= 1) {
             tp.addToGrid(0, rowCount++, "Post-trade flow deficit", NumFormat.engNotation(
-                -cell.getFlowDeficit()), negative);
+                -cell.getTargetQuantumUnmet()), negative);
         }
 
         if (rowCount < 0) {
@@ -331,19 +331,19 @@ public class TooltipUtils {
     }
 
     public static final void createComDemandBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
-        final Color valueColor = cell.getFlowDeficit() > 0 ? negative : highlight;
+        final Color valueColor = cell.getTargetQuantumUnmet() > 0 ? negative : highlight;
         final int gridWidth = 430;
         final int valueWidth = 50;
         int rowCount = 0;
         
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Total demand: %s", opad, valueColor,
-            NumFormat.engNotation(cell.getBaseDemand(true))
+        final LabelAPI title = tp.addPara("Total consumption: %s", opad, valueColor,
+            NumFormat.engNotation(cell.getConsumption(true))
         );
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowDemandIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getFlowConsumptionIndStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
             final IndustrySpecAPI ind = settings.getIndustrySpec(entry.getKey());
 
@@ -368,8 +368,8 @@ public class TooltipUtils {
             }
         }
 
-        if (cell.getBaseDemand(false) > 0) {
-            final MutableStat mutable = cell.getDemandStat();
+        if (cell.getConsumption(false) > 0f) {
+            final ArrayMutableStat mutable = cell.getConsumptionStat();
             if (mutable.getModifiedInt() > 0) {
                 for (StatMod mod : mutable.getPercentMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc,
@@ -407,10 +407,10 @@ public class TooltipUtils {
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
         tp.addToGrid(0, rowCount++, "Desired Stockpiles",
-            NumFormat.engNotation(cell.getPreferredStockpile())
+            NumFormat.engNotation(cell.getTargetStockpiles())
         );
-        tp.addToGrid(0, rowCount++, "Latest Change", NumFormat.engNotation(cell.getFlowRealBalance()),
-            cell.getFlowRealBalance() < 0f ? negative : highlight
+        tp.addToGrid(0, rowCount++, "Latest Change", NumFormat.engNotation(cell.getQuantumRealBalance()),
+            cell.getQuantumRealBalance() < 0f ? negative : highlight
         );
 
         { // Exports
@@ -452,6 +452,7 @@ public class TooltipUtils {
         tp.addGrid(0);
     }
 
+    // TODO modify this section to make it clear trade and exhange happens on certain intervals
     public static final void createComTradeLedgerSection(TooltipMakerAPI tp, CommodityCell cell) {
         final EconomyEngine engine = EconomyEngine.instance();
         final CommodityDomain dom = engine.getComDomain(cell.comID);
@@ -483,10 +484,10 @@ public class TooltipUtils {
             );
         }
 
-        if (cell.getFlowCanNotExport() > 0f) {
+        if (cell.getSurplusAfterTargetQuantum() > 0f) {
             tp.addPara(
-                "Exports are reduced by %s due to insufficient importers.",
-                pad, negative, NumFormat.engNotation((int)cell.getFlowCanNotExport())
+                "Exports are reduced by %s due to insufficient importers for today.",
+                pad, negative, NumFormat.engNotation(cell.getSurplusAfterTargetQuantum())
             );
         }
 
@@ -505,7 +506,7 @@ public class TooltipUtils {
                 NumFormat.formatCredit(importExpenseThisMonth)
             );
         } else if (cell.getTotalImports() < 1f) {
-            tp.addPara("No local demand.", opad);
+            tp.addPara("No local demand or stockpiles full.", opad);
         } else if (exportIncomeLastMonth < 1l && exportIncomeThisMonth < 1l) {
             tp.addPara(
                 marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. Import expenses are not tracked for non-player colonies.",
@@ -527,7 +528,7 @@ public class TooltipUtils {
         final UIPanelAPI parent, final Color iconColor
     ) {
         return getStockpilesIcon(cell.getDesiredAvailabilityRatio(), size, parent, iconColor,
-            null, false, cell.getBaseDemand(true) < 0.1f
+            null, false, cell.getTargetQuantum(true) < 0.1f
         );
     }
 

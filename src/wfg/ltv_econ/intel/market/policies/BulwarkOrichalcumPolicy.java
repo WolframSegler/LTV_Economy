@@ -25,9 +25,9 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
 
         final EconomyEngine engine = EconomyEngine.instance();
         engine.getComCell(Commodities.SUPPLIES, data.marketID)
-            .getDemandStat().modifyFlat(id, MARINES_COST, spec.name);
+            .getConsumptionStat().modifyFlat(id, MARINES_COST, spec.name);
         engine.getComCell(Commodities.SHIPS, data.marketID)
-            .getDemandStat().modifyFlat(id, HAND_WEAPONS_COST, spec.name);
+            .getConsumptionStat().modifyFlat(id, HAND_WEAPONS_COST, spec.name);
 
         data.market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).modifyFlat(
             id, DEFENSE_FLAT_BUFF, spec.name);
@@ -40,9 +40,9 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
 
         final EconomyEngine engine = EconomyEngine.instance();
         engine.getComCell(Commodities.SUPPLIES, data.marketID)
-            .getDemandStat().unmodifyFlat(id);
+            .getConsumptionStat().unmodifyFlat(id);
         engine.getComCell(Commodities.SHIPS, data.marketID)
-            .getDemandStat().unmodifyFlat(id);
+            .getConsumptionStat().unmodifyFlat(id);
 
         data.market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyFlat(id);
         data.market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyMult(id);

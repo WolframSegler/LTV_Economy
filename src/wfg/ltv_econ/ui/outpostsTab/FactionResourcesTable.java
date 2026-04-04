@@ -65,7 +65,7 @@ public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> im
                 );
     
                 final double stored = info.getFactionComStockpiles(comID, Factions.PLAYER);
-                final float demand = info.getFactionComDemand(comID, Factions.PLAYER);
+                final float demand = info.getFactionTargetQuantum(comID, Factions.PLAYER);
                 final float prod = info.getFactionComProd(comID, Factions.PLAYER);
                 if (prod == 0f && demand == 0f) continue;
     

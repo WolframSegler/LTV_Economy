@@ -52,7 +52,7 @@ public final class CompatLayer {
     }
 
     public static final MutableStat convertIndSupplyStat(Industry ind, String outputID) {
-        if (IndustryIOs.getIndConfig(ind).ignoreLocalStockpiles) return new MutableStat(0f);
+        if (IndustryIOs.getIndConfig(ind).demandOnly) return new MutableStat(0f);
         
         final MutableStat src = ind.getSupply(outputID).getQuantity();
         final MutableStat supplyBonus = ind.getSupplyBonus();

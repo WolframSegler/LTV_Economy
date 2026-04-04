@@ -95,10 +95,8 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 			final String comID = spec.getId();
 
 			final CommodityCell cell = engine.getComCell(comID, marketId);
-			final long stored = cell.getRoundedStored();
-			final float limit = getStockpileLimit(null);
 
-			final float displayAmount = Math.min(limit, stored);
+			final float displayAmount = Math.min(cell.getRoundedStored(), getStockpileLimit(null));
 			if (displayAmount > 1f) {
 				cargo.addCommodity(comID, displayAmount);
 			}

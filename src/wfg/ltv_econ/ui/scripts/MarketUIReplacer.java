@@ -521,7 +521,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
             if (UIUtils.canViewPrices()) {
                 final ComDetailDialog dialogPanel = new ComDetailDialog(
-                    marketAPI, marketAPI.getFaction().getFactionSpec(), panel.m_com
+                    marketAPI, marketAPI.getFaction().getFactionSpec(), panel.com
                 );
                 dialogPanel.show(0.3f, 0.3f);
             }
