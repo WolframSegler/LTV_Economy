@@ -260,8 +260,7 @@ public class TooltipUtils {
 
     public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Available: %s", pad, highlight,
-            NumFormat.engNotation((long)cell.getFlowAvailable()));
+        final LabelAPI title = tp.addPara("Total Production: %s", pad, highlight, NumFormat.engNotation(cell.getFlowAvailable()));
         final int gridWidth = 430;
         final int valueWidth = 50;
         int rowCount = 0;
@@ -274,52 +273,53 @@ public class TooltipUtils {
 
             if (mutable.getModifiedInt() > 0) {
                 tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getName()+")",
-                    "+" + NumFormat.engNotation((long)mutable.base));
+                    "+" + NumFormat.engNotation(mutable.base));
+
+                for (StatMod mod : mutable.getPercentMods().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
+                        "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
+                }
+
+                for (StatMod mod : mutable.getMultMods().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
+                            Strings.X + NumFormat.formatMagnitudeAware(mod.value),
+                        mod.value < 1f ? negative:highlight
+                    );
+                }
             }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
                 tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
                     "+" + NumFormat.formatMagnitudeAware(mod.value));
-            }
-            for (StatMod mod : mutable.getPercentMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
-                    "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
-            }
-
-            if (mutable.base > 0) {
-            for (StatMod mod : mutable.getMultMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
-                    Strings.X + NumFormat.formatMagnitudeAware(mod.value),
-                mod.value < 1f ? negative:highlight
-            );
-            }
             }
         }
 
         if (cell.getProduction(false) > 0) {
             final MutableStat mutable = cell.getProductionStat();
 
+            if (mutable.getModifiedInt() > 0) {
+                for (StatMod mod : mutable.getPercentMods().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc,
+                        "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
+                }
+
+                for (StatMod mod : mutable.getMultMods().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc,
+                        Strings.X + NumFormat.formatMagnitudeAware(mod.value),
+                        mod.value < 1f ? negative:highlight
+                    );
+                }
+            }
+            
             for (StatMod mod : mutable.getFlatMods().values()) {
                 tp.addToGrid(0, rowCount++, mod.desc,
                     "+" + NumFormat.formatMagnitudeAware(mod.value));
             }
-            for (StatMod mod : mutable.getPercentMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc,
-                    "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
-            }
-            if (mutable.base > 0) {
-            for (StatMod mod : mutable.getMultMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc,
-                    Strings.X + NumFormat.formatMagnitudeAware(mod.value),
-                    mod.value < 1f ? negative:highlight
-                );
-            }
-            }
         }
 
         if (cell.getFlowDeficit() >= 1) {
-            tp.addToGrid(0, rowCount++, "Post-trade shortage", "" + NumFormat.engNotation(
-                (long)-cell.getFlowDeficit()), negative);
+            tp.addToGrid(0, rowCount++, "Post-trade flow deficit", NumFormat.engNotation(
+                -cell.getFlowDeficit()), negative);
         }
 
         if (rowCount < 0) {
@@ -349,44 +349,43 @@ public class TooltipUtils {
 
             if (mutable.getModifiedInt() > 0) {
                 tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getName()+")",
-                    "+" + NumFormat.engNotation((long)mutable.base), valueColor);
+                    "+" + NumFormat.engNotation(mutable.base), valueColor);
+
+                 for (StatMod mod : mutable.getPercentMods().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
+                        "+" + NumFormat.formatMagnitudeAware(mod.value) + "%", valueColor);
+                }
+
+                for (StatMod mod : mutable.getMultMods().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
+                        Strings.X + NumFormat.formatMagnitudeAware(mod.value), valueColor);
+                }
             }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
                 tp.addToGrid(0, rowCount++, "Needed by " + ind.getName(),
                     "+" + NumFormat.formatMagnitudeAware(mod.value), valueColor);
             }
-            for (StatMod mod : mutable.getPercentMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
-                    "+" + NumFormat.formatMagnitudeAware(mod.value) + "%", valueColor);
-            }
-
-            if (mutable.base > 0) {
-            for (StatMod mod : mutable.getMultMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
-                    Strings.X + NumFormat.formatMagnitudeAware(mod.value), valueColor);
-            }
-            }
         }
 
         if (cell.getBaseDemand(false) > 0) {
             final MutableStat mutable = cell.getDemandStat();
+            if (mutable.getModifiedInt() > 0) {
+                for (StatMod mod : mutable.getPercentMods().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc,
+                        "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
+                }
+                for (StatMod mod : mutable.getMultMods().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc,
+                        Strings.X + NumFormat.formatMagnitudeAware(mod.value),
+                        mod.value < 1f ? negative:highlight
+                    );
+                }
+            }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
                 tp.addToGrid(0, rowCount++, mod.desc,
                     "+" + NumFormat.formatMagnitudeAware(mod.value));
-            }
-            for (StatMod mod : mutable.getPercentMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc,
-                    "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
-            }
-            if (mutable.base > 0) {
-            for (StatMod mod : mutable.getMultMods().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc,
-                    Strings.X + NumFormat.formatMagnitudeAware(mod.value),
-                    mod.value < 1f ? negative:highlight
-                );
-            }
             }
         }
 
@@ -447,13 +446,6 @@ public class TooltipUtils {
                 tp.addToGrid(0, rowCount++, "Latest informal market imports", "+" +
                     NumFormat.engNotation(cell.informalImports)
                 );
-            }
-            if (cell.getTotalImports() > 0f) {
-                // TODO modify UI later
-                // final float value = ((int) (cell.importEffectiveness * 100f)) / 100f;
-
-                // tp.setGridValueColor(negative);
-                // tp.addToGrid(0, rowCount++, "Shipping losses", Strings.X + value, negative);
             }
         }
 
@@ -565,10 +557,10 @@ public class TooltipUtils {
         final boolean addRatioColors
     ) {
         if (!addRatioColors) return faction.getBaseUIColor();
-        if (ratio <= 0.25f) return UIColors.COLOR_DEFICIT;
-        if (ratio <= 0.5f) return UIColors.COLOR_IMPORT;
-        if (ratio <= 0.75f) return UIColors.COLOR_LOCAL_PROD;
-        return UIColors.COLOR_NOT_EXPORTED;
+        if (ratio <= 0.25f) return UIColors.COM_DEFICIT;
+        if (ratio <= 0.5f) return UIColors.COM_IMPORT;
+        if (ratio <= 0.75f) return UIColors.COM_LOCAL_PROD;
+        return UIColors.COM_NOT_EXPORTED;
     }
 
     private static final Comparator<CommodityCell> createSellComparator(int econUnit) {

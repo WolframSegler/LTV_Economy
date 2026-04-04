@@ -406,7 +406,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final LabelAPI lbl2 = settings.createLabel(valueTxt, Fonts.INSIGNIA_VERY_LARGE);
                     lbl2.setColor(base);
                     lbl2.setHighlight(globalValue, inFactionValue);
-                    lbl2.setHighlightColors(factionColor, UIColors.IN_FACTION_COLOR);
+                    lbl2.setHighlightColors(factionColor, UIColors.IN_FACTION);
                     lbl2.setHighlightOnMouseover(true);
 
                     ComponentFactory.layoutCaptionValueLabels(
@@ -422,7 +422,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                         tp.addPara(
                             "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currFaction.getPersonNamePrefix() + " control.\n\n" +
                             "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
-                            pad, new Color[] {currFaction.getBaseUIColor(), UIColors.IN_FACTION_COLOR},
+                            pad, new Color[] {currFaction.getBaseUIColor(), UIColors.IN_FACTION},
                             new String[] {"all consumers globally", "within the faction"}
                         );
                     };

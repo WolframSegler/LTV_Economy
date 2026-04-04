@@ -1,0 +1,105 @@
+package wfg.ltv_econ.ui.reusable;
+
+import static wfg.native_ui.util.UIConstants.dark;
+
+import java.awt.Color;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.lwjgl.opengl.GL11;
+
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
+
+import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.util.RenderUtils;
+
+public class GenericInfoBar<PanelType extends GenericInfoBar<PanelType>> extends CustomPanel<PanelType> {
+    protected static final Color TRANSPARENT_BLACK = new Color(0, 0, 0, 100);
+    protected static final Color TRANSPARENT_WHITE = new Color(255, 255, 255, 20);
+    protected static final SpriteAPI GLOW_BG = Global.getSettings().getSprite("ui", "glow_bg");
+
+    protected final Map<Color, Float> barMap = new LinkedHashMap<>(8);
+    protected boolean hasOutline;
+
+    public GenericInfoBar(UIPanelAPI parent, int width, int height, boolean hasOutline) {
+        super(parent, width, height);
+
+        this.hasOutline = hasOutline;
+    }
+
+    @Override
+    public void render(float alpha) {
+        final float x = pos.getX();
+        final float y = pos.getY();
+        final float w = pos.getWidth();
+        final float h = pos.getHeight();
+
+        if (hasOutline) {
+            RenderUtils.drawFramedBorder(
+                x + 1, y + 1, w - 2, h - 2,
+                1, TRANSPARENT_BLACK, alpha
+            );
+        }
+
+        RenderUtils.drawQuad(x, y, 2, h, dark, alpha, false);
+        final int sideBarGap = 4;
+
+        float offsetX = x + sideBarGap;
+
+        for (Map.Entry<Color, Float> mapEntry : barMap.entrySet()) {
+            RenderUtils.drawQuad(offsetX, y, (w - sideBarGap)*mapEntry.getValue(), h, mapEntry.getKey(), alpha, false);
+            offsetX += (w - sideBarGap)*mapEntry.getValue();
+        }
+        
+        GLOW_BG.setAdditiveBlend();
+        GLOW_BG.setColor(TRANSPARENT_WHITE);
+        GLOW_BG.setSize(w - sideBarGap, h);
+        GLOW_BG.render(x + sideBarGap, y);
+
+        drawGlassLayer(x, y, w, h, alpha);
+    }
+
+    private static final void drawGlassLayer(float x, float y, float w, float h, float alpha) {
+        Color topLight = new Color(255, 255, 255, (int)(80 * alpha));
+        Color centerHighlight = new Color(255, 255, 255, (int)(20 * alpha));
+        Color bottomShadow = new Color(0, 0, 0, (int)(90 * alpha));
+
+        final float topY = y + h * 0.97f;
+        final float midTop = y + h * 0.82f;
+        final float midBottom = y + h * 0.18f;
+        final float botY = y + h * 0.03f;
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBegin(GL11.GL_QUADS);
+
+        // TOP
+        RenderUtils.setGlColor(topLight, alpha);
+
+        GL11.glVertex2f(x, midTop);
+        GL11.glVertex2f(x + w, midTop);
+        GL11.glVertex2f(x + w, topY);
+        GL11.glVertex2f(x, topY);
+
+        // MIDDLE
+        RenderUtils.setGlColor(centerHighlight, alpha);
+
+        GL11.glVertex2f(x, midBottom);
+        GL11.glVertex2f(x + w, midBottom);
+        GL11.glVertex2f(x + w, midTop);
+        GL11.glVertex2f(x, midTop);
+
+        // BOTTOM
+        RenderUtils.setGlColor(bottomShadow, alpha);
+
+        GL11.glVertex2f(x, botY);
+        GL11.glVertex2f(x + w, botY);
+        GL11.glVertex2f(x + w, midBottom);
+        GL11.glVertex2f(x, midBottom);
+
+        GL11.glEnd();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+    }
+}

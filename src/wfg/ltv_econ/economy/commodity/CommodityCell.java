@@ -171,10 +171,7 @@ public class CommodityCell implements Serializable {
             getTotalExports() + getFlowCanNotExport();
     }
     public final double getStoredEconomicFootprint() {
-        return getStoredAvailabilityRatio() * getPreferredStockpile() +
-            getStoredRemainingExportable() +
-            importExclusiveDemand +
-            getTotalExports();
+        return Math.max(stored, getPreferredStockpile());
     }
     public final float getFlowRealBalance() {
         return getFlowAvailable() - getDemand() - getTotalExports();
@@ -468,8 +465,7 @@ public class CommodityCell implements Serializable {
         sb.append(" storedRounded: ").append(getRoundedStored()).append("\n");
         sb.append(" storedAvailabilityRatio: ").append(getStoredAvailabilityRatio()).append("\n");
         sb.append(" storedAvailable (flow + storage): ").append(getStoredAvailable()).append("\n");
-        sb.append(" storedRemainingExportable: ").append(getStoredRemainingExportable()).append("\n");
-        sb.append(" storedEconomicFootprint: ").append(getStoredEconomicFootprint()).append("\n\n");
+        sb.append(" storedRemainingExportable: ").append(getStoredRemainingExportable()).append("\n\n");
 
         // ===== CONSISTENCY =====
         sb.append("[Consistency]\n");

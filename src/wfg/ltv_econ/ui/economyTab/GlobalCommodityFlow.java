@@ -697,12 +697,12 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             
         data.add(new PieSlice(
             null,
-            UIColors.COLOR_IMPORT,
+            UIColors.COM_IMPORT,
             globalTradeShare
         ));
         data.add(new PieSlice(
             null,
-            UIColors.IN_FACTION_COLOR,
+            UIColors.IN_FACTION,
             inFactionTradeShare
         ));
         data.add(new PieSlice(

@@ -12,13 +12,9 @@ import java.util.concurrent.Executors;
 
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
-import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignClockAPI;
-import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
-import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -39,6 +35,8 @@ import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
+import wfg.ltv_econ.economy.raids.CommodityCellGroundRaidObjective;
+import wfg.ltv_econ.economy.raids.LtvShipWeaponsGroundRaidObjective;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.util.Arithmetic;
@@ -50,7 +48,6 @@ import static wfg.native_ui.util.UIConstants.*;
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
-import com.fs.starfarer.api.impl.campaign.graid.CommodityGroundRaidObjectivePluginImpl;
 import com.fs.starfarer.api.impl.campaign.graid.GroundRaidObjectivePlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
@@ -118,8 +115,6 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     public EconomyEngine() {
-        super(false);
-
         for (String comID : EconomyConstants.econCommodityIDs) {
             comDomains.put(comID, new CommodityDomain(comID));
         }
@@ -294,6 +289,40 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return cyclesSinceTrade;
     }
 
+    public final void applyPopulationStabilityMods(MarketAPI market) {
+        // TODO Call this using industry post apply hook after update
+        final String marketID = market.getId();
+        final String popID = "ind_" + Industries.POPULATION + "_";
+        final CommodityCell domCell = getComCell(Commodities.DOMESTIC_GOODS, marketID);
+        final CommodityCell luxCell = getComCell(Commodities.LUXURY_GOODS, marketID);
+        final CommodityCell foodCell = getComCell(Commodities.FOOD, marketID);
+        final CommodityCell orgCell = getComCell(Commodities.ORGANICS, marketID);
+        
+        if (domCell.getStoredAvailabilityRatio() > 0.9) { // 90% or more
+            market.getStability().modifyFlat(popID + 0, 1, "Domestic goods demand met");
+        } else market.getStability().unmodifyFlat(popID + 0);
+
+        final int luxuryThreshold = 3;
+        if (luxCell.getStoredAvailabilityRatio() > 0.9 && market.getSize() > luxuryThreshold) {
+            market.getStability().modifyFlat(popID + 1, 1, "Luxury goods demand met");
+        } else market.getStability().unmodifyFlat(popID + 1);
+
+        final boolean useOrganicsValues = foodCell.getStoredAvailabilityRatio() >
+            orgCell.getStoredAvailabilityRatio() && !market.hasCondition(Conditions.HABITABLE);
+        
+        final String com = useOrganicsValues ? Commodities.FOOD : Commodities.ORGANICS;
+        final float ratio = useOrganicsValues ? orgCell.getStoredAvailabilityRatio() :
+           foodCell.getStoredAvailabilityRatio();
+
+        if (ratio < 0.9) { // less than 90%
+            final int stabilityPenalty = 
+                ratio < 0.1 ? -3 :
+                ratio < 0.4 ? -2 :
+                ratio < 0.7 ? -1 : 0;
+            market.getStability().modifyFlat(popID + 2, stabilityPenalty, BaseIndustry.getDeficitText(com));
+        } else market.getStability().unmodifyFlat(popID + 2);
+    }
+
     // LISTENERS
 
     public void reportEconomyTick(int iterIndex) {
@@ -456,57 +485,28 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public void reportColonyAboutToBeDecivilized(MarketAPI a, boolean b) {}
 
-    @Override
     public void modifyRaidObjectives(MarketAPI market, SectorEntityToken entity,
         List<GroundRaidObjectivePlugin> objectives, RaidType type, int marineTokens, int priority
-    ) {}
+    ) {
+        if (priority != 1 || type != RaidType.VALUABLE || market == null) return;
+		final List<CommodityCell> raidValuables = computeRaidValuables(market);
+
+        objectives.removeIf(o -> comDomains.containsKey(o.getId()));
+
+        for (CommodityCell cell : raidValuables) {
+            final CommodityCellGroundRaidObjective curr = new CommodityCellGroundRaidObjective(cell);
+            if (curr.getQuantity(1) <= 0) continue;
+            objectives.add(curr);
+        }
+        
+        final LtvShipWeaponsGroundRaidObjective weapons = new LtvShipWeaponsGroundRaidObjective(market);
+        if (weapons.getQuantity(1) > 0) objectives.add(weapons);
+    }
 	
-    @Override
 	public void reportRaidObjectivesAchieved(RaidResultData data, InteractionDialogAPI dialog,
         Map<String, MemoryAPI> memoryMap
-    ) {
-        // TODO integrate raids better
-        if (!data.market.isInEconomy()) return;
-        for (GroundRaidObjectivePlugin objective : data.objectives) {
-            if (objective instanceof CommodityGroundRaidObjectivePluginImpl obj) {
-                if (!comDomains.containsKey(objective.getId())) continue;
-                final CommodityCell cell = getComCell(obj.getId(), data.market.getId());
-                cell.addStoredAmount(-obj.getQuantityLooted());
-            }
-        }
-    }
-
-    @Override
-    public void reportFleetSpawned(CampaignFleetAPI fleet) {
-
-    }
-
-    @Override
-    public void reportBattleOccurred(CampaignFleetAPI primaryWinner, BattleAPI battle) {
-        // TODO integrate cargo raids better
-    }
-
-    @Override
-    public void reportBattleFinished(CampaignFleetAPI primaryWinner, BattleAPI battle) {
-
-    }
-
-    @Override
-    public void reportFleetDespawned(CampaignFleetAPI fleet, FleetDespawnReason reason, Object param) {
-
-    }
-
-    @Override
-    public void reportFleetJumped(CampaignFleetAPI fleet, SectorEntityToken from, JumpDestination to) {
-
-    }
-
-    @Override
-    public void reportFleetReachedEntity(CampaignFleetAPI fleet, SectorEntityToken entity) {
-        
-    }
+    ) {}
     
-    @Override
     public void reportAboutToOpenCoreTab(CoreUITabId tabID, Object param) {
         if (tabID == CoreUITabId.CARGO) applyPopulationStabilityMods();
     }
@@ -516,38 +516,15 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             applyPopulationStabilityMods(market);
         }
     }
+    
+    private final List<CommodityCell> computeRaidValuables(MarketAPI market) {
+		final List<CommodityCell> result = new ArrayList<>();
+        for (CommodityDomain dom : comDomains.values()) {
+            if (dom.spec.isPersonnel() || dom.spec.isMeta()) continue;
+            final CommodityCell cell = dom.getCell(market.getId());
 
-    public final void applyPopulationStabilityMods(MarketAPI market) {
-        // TODO Call this using industry post apply hook after update
-        final String marketID = market.getId();
-        final String popID = "ind_" + Industries.POPULATION + "_";
-        final CommodityCell domCell = getComCell(Commodities.DOMESTIC_GOODS, marketID);
-        final CommodityCell luxCell = getComCell(Commodities.LUXURY_GOODS, marketID);
-        final CommodityCell foodCell = getComCell(Commodities.FOOD, marketID);
-        final CommodityCell orgCell = getComCell(Commodities.ORGANICS, marketID);
-        
-        if (domCell.getStoredAvailabilityRatio() > 0.9) { // 90% or more
-            market.getStability().modifyFlat(popID + 0, 1, "Domestic goods demand met");
-        } else market.getStability().unmodifyFlat(popID + 0);
-
-        final int luxuryThreshold = 3;
-        if (luxCell.getStoredAvailabilityRatio() > 0.9 && market.getSize() > luxuryThreshold) {
-            market.getStability().modifyFlat(popID + 1, 1, "Luxury goods demand met");
-        } else market.getStability().unmodifyFlat(popID + 1);
-
-        final boolean useOrganicsValues = foodCell.getStoredAvailabilityRatio() >
-            orgCell.getStoredAvailabilityRatio() && !market.hasCondition(Conditions.HABITABLE);
-        
-        final String com = useOrganicsValues ? Commodities.FOOD : Commodities.ORGANICS;
-        final float ratio = useOrganicsValues ? orgCell.getStoredAvailabilityRatio() :
-           foodCell.getStoredAvailabilityRatio();
-
-        if (ratio < 0.9) { // less than 90%
-            final int stabilityPenalty = 
-                ratio < 0.1 ? -3 :
-                ratio < 0.4 ? -2 :
-                ratio < 0.7 ? -1 : 0;
-            market.getStability().modifyFlat(popID + 2, stabilityPenalty, BaseIndustry.getDeficitText(com));
-        } else market.getStability().unmodifyFlat(popID + 2);
-    }
+            if (cell != null && cell.getStored() > 1.0) result.add(cell);
+        }
+		return result;
+	}
 }

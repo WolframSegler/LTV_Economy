@@ -73,6 +73,7 @@ public class EconomyConfigLoader {
         EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_PERCENT_CUT");
         EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_HAZARD_BASE");
         EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_HAZARD_MULT");
+        EconomyConfig.RAID_STOCKPILES_ACCESS_RATIO = root.getDouble("RAID_STOCKPILES_ACCESS_RATIO");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
@@ -138,6 +139,8 @@ public class EconomyConfigLoader {
         EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT = LunaSettings.getDouble(LTV_ECON, "fleet_independentPercentCut").floatValue();
         EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE = LunaSettings.getDouble(LTV_ECON, "fleet_independentHazardBase").floatValue();
         EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT = LunaSettings.getDouble(LTV_ECON, "fleet_independentHazardMult").floatValue();
+        EconomyConfig.RAID_STOCKPILES_ACCESS_RATIO = LunaSettings.getDouble(LTV_ECON, "raids_raidStockpileAccessRatio");
+        EconomyConfig.RAID_BASE_EFF = LunaSettings.getDouble(LTV_ECON, "raids_raidBaseEff");
 
         final String fairness = LunaSettings.getString(LTV_ECON, "economy_prodFairness");
         EconomyConfig.USE_PRODUCTION_FAIRNESS = fairness.equals("Commodities Produced");
@@ -316,6 +319,12 @@ public class EconomyConfigLoader {
         public static float INDEPENDENT_TRADE_FLEET_PERCENT_CUT;
         public static float INDEPENDENT_TRADE_FLEET_HAZARD_BASE;
         public static float INDEPENDENT_TRADE_FLEET_HAZARD_MULT;
+
+        /**
+         * The maximum fraction of a colony's stockpile that can be looted in a single raid.
+         */
+        public static double RAID_STOCKPILES_ACCESS_RATIO;
+        public static double RAID_BASE_EFF;
 
         static {
             EconomyConfigLoader.loadConfig();

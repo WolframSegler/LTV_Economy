@@ -309,9 +309,9 @@ public class EconomyLoop {
     }
 
     private final void advanceMissions() {
-        final Iterator<TradeMission> it = engine.activeMissions.iterator();
-        while (it.hasNext()) {
-            final TradeMission m = it.next();
+        final Iterator<TradeMission> activeIt = engine.activeMissions.iterator();
+        while (activeIt.hasNext()) {
+            final TradeMission m = activeIt.next();
 
             switch (m.status) {
             case SCHEDULED:
@@ -358,8 +358,7 @@ public class EconomyLoop {
                         cell.globalImports += cargo.amount;
                     }
                 }
-                engine.pastMissions.add(m);
-                it.remove();
+                putMissionToPast(activeIt, m);
                 break;
 
             case CANCELLED:
@@ -371,18 +370,24 @@ public class EconomyLoop {
                 for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
                     entry.getKey().freeShip(entry.getValue());
                 }
-                engine.pastMissions.add(m);
-                it.remove();
+                putMissionToPast(activeIt, m);
                 break;
 
             case LOST:
                 for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
                     entry.getKey().registerShipLoss(entry.getValue());
                 }
-                engine.pastMissions.add(m);
-                it.remove();
+                putMissionToPast(activeIt, m);
                 break;
             }
+        }
+    
+        final Iterator<TradeMission> pastIt = engine.pastMissions.iterator();
+        while (pastIt.hasNext()) {
+            final TradeMission m = pastIt.next();
+
+            m.durRemaining--;
+            if (m.durRemaining < 0) pastIt.remove();
         }
     }
 
@@ -526,5 +531,12 @@ public class EconomyLoop {
                 );
             }
         }
+    }
+
+    private final void putMissionToPast(Iterator<TradeMission> it, TradeMission mission) {
+        engine.pastMissions.add(mission);
+        it.remove();
+
+        mission.durRemaining = EconomyConfig.HISTORY_LENGTH;
     }
 }
