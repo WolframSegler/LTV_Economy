@@ -163,7 +163,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel wagesLabel = new TextPanel(innerPanel, LABEL_W, LABEL_H) {
             public void buildUI() {
                 final String txt = "Monthly Wages";
-                final String valueTxt = NumFormat.formatCredit((int)(engine.info.getWagesForMarket(m_market)*MONTH));
+                final String valueTxt = NumFormat.formatCredit((int)(engine.info.getDailyWages(m_market)*MONTH));
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -255,7 +255,7 @@ public class ManagePopulationDialog extends DialogPanel {
             );
 
             wagesLabel.label2.setText(
-                NumFormat.formatCredit((int)(engine.info.getWagesForMarket(m_market)*30))
+                NumFormat.formatCredit((int)(engine.info.getDailyWages(m_market)*30))
             );
 
             avgWageLabel.label2.setText(

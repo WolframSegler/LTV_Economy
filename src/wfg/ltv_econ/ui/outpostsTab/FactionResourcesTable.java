@@ -70,7 +70,7 @@ public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> im
                 if (prod == 0f && demand == 0f) continue;
     
                 final int exportShare = (int) (info.getFactionExportShare(comID, Factions.PLAYER) * 100);
-                final long credits = info.getPlayerFactionCreditFlow(comID);
+                final long credits = info.getFactionNetComSpending(comID, Factions.PLAYER);
                 final double balance = info.getFactionComBalance(comID, Factions.PLAYER);
                 final int autarky = (int) ((Math.min(1f, demand == 0f ? 1f: prod/demand)) * 100);
     

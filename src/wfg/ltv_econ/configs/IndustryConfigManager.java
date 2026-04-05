@@ -43,8 +43,6 @@ import java.util.stream.Collectors;
 public class IndustryConfigManager {
     private static final SettingsAPI settings = Global.getSettings();
 
-    public static final String BASE_MAINTENANCE_ID = "maintenance_base";
-
     public static final String CONFIG_PATH = "./data/config/ltvEcon/industry_config.json";
     public static final String CONFIG_NAME = "industry_config.json";
     public static final String DYNAMIC_CONFIG_PATH = "./saves/common/dynamic_industry_config.json";

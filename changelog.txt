@@ -11,9 +11,12 @@ v0.3.0-beta | Sliver of Silver Passage | NOT SAVE COMPATIBLE
 - Trade is handled as discrete "Trade Missions". At the start of each interval, colonies allocate goods to export to other markets. A mission is created with a scheduled departure and a travel time based on distance.
 - Raiding a colony now uses LTV stockpiles and shows a stockpile bar. The amount of loot you get depends on the colony's economic situation.
 - Saturation and tactical bombardments now reduce colony stockpiles and negatively affect health and happiness. The player will be notified when this happens.
+- Separated daily consumption from stockpile targets. Colonies now track production, consumption, and desired daily inflow (targetQuantum), resulting in more realistic import/export behavior.
+- New Financial Ledger System: Every market now has a comprehensive ledger tracking all income and expenses, including trade, fleet maintenance, crew wages, ship production, policy costs, and player market transactions. Trade flows are now clearly recorded per commodity, and all costs are settled at month‑end.
 
 - Fixed bugs where event and policy effects on population growth were not working correctly.
 - Colonies without a spaceport can no longer participate in inter‑colony trade.
+- Switched internal data structures for performance.
 
 v0.2.12-beta | SAVE COMPATIBLE
 - The effects of saving LunaLib Settings now takes effect immideatly. No restart required.

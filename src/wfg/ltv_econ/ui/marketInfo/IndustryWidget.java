@@ -25,10 +25,10 @@ import com.fs.starfarer.api.util.Misc;
 
 import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;

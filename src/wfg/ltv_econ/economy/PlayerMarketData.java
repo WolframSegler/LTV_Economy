@@ -21,6 +21,8 @@ import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.ltv_econ.util.Arithmetic;
@@ -151,14 +153,13 @@ public class PlayerMarketData implements Serializable {
      * Assumes end-of-month
      */
     public final float getEffectiveProfitRatio() {
-        final EconomyEngine engine = EconomyEngine.instance();
-        final double net = engine.info.getNetIncome(market, true);
-        if (net <= 0) return 0f;
+        final long net = MarketFinanceRegistry.instance().getLedger(marketID).getNetLastMonth();
+        if (net <= 0l) return 0f;
 
-        final double endCredits = engine.getCredits(marketID) + net;
-        if (endCredits <= 0) return 0f;
+        final long endCredits = EconomyEngine.instance().getCredits(marketID);
+        if (endCredits <= 0l) return 0f;
 
-        return (float) Math.min(playerProfitRatio, endCredits / net);
+        return (float) Math.min(playerProfitRatio, endCredits / (double) net);
     }
 
     // PRIVATE METHODS

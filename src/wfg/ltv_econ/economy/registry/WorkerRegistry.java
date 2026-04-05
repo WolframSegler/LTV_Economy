@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy;
+package wfg.ltv_econ.economy.registry;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -21,12 +21,9 @@ import wfg.native_ui.util.ArrayMap;
  * The registry always uses IndustryIOs.getBaseIndustryID() internally to manage industry IDs
  */
 public class WorkerRegistry implements Serializable {
-    public static final String WorkerRegSerialID = "ltv_econ_worker_registry";
     public static final String KEY = "::";
 
     private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>();
-
-    public WorkerRegistry() {}
 
     public static final WorkerRegistry instance() {
         return LtvEconSaveData.instance().workerRegistry;

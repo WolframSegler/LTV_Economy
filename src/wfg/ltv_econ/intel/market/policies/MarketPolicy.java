@@ -1,5 +1,7 @@
 package wfg.ltv_econ.intel.market.policies;
 
+import static wfg.ltv_econ.constants.strings.Income.POLICY_COST_KEY;
+import static wfg.ltv_econ.constants.strings.Income.getDesc;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
@@ -12,6 +14,7 @@ import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.intel.PolicyNotificationIntel;
 
 /**
@@ -109,7 +112,7 @@ public abstract class MarketPolicy {
             !DebugFlags.COLONY_DEBUG
         ) return;
 
-        EconomyEngine.instance().addCredits(data.marketID, -spec.cost);
+        MarketFinanceRegistry.instance().getLedger(data.marketID).add(POLICY_COST_KEY, -spec.cost, getDesc(POLICY_COST_KEY));
         activeDaysRemaining = durationDays;
         state = PolicyState.ACTIVE;
         apply(data);

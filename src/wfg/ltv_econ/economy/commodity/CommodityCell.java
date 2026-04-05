@@ -26,10 +26,8 @@ import wfg.native_ui.util.ArrayMap;
  */
 public class CommodityCell implements Serializable {
     private static final String DEMAND_ONLY_KEY = "dok";
-    private static final String CONSUMPTION_DEMAND_KEY = "cdk";
 
     private static final String DEMAND_ONLY_DESC = "Demand without consumption";
-    private static final String CONSUMPTION_DEMAND_DESC = "Demand created by industry consumption";
 
     public final String comID;
     public final String marketID;
@@ -233,7 +231,7 @@ public class CommodityCell implements Serializable {
                 final MutableStat demandStat = CompatLayer.convertIndDemandStat(ind, comID);
                 
                 if (IndustryIOs.getIndConfig(ind).demandOnly) {
-                    targetQuantum.modifyBase(DEMAND_ONLY_KEY + " " + indID, demandStat.getModifiedValue(),
+                    targetQuantum.modifyBase(DEMAND_ONLY_KEY + "_" + indID, demandStat.getModifiedValue(),
                         DEMAND_ONLY_DESC + " - " + ind.getCurrentName()
                     );
                 } else {
@@ -243,7 +241,7 @@ public class CommodityCell implements Serializable {
             }
         }
 
-        targetQuantum.modifyBase(CONSUMPTION_DEMAND_KEY, consumption.getModifiedValue(), CONSUMPTION_DEMAND_DESC);
+        targetQuantum.applyMods(consumption);
     }
 
     public final void reset() {

@@ -7,7 +7,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import static wfg.native_ui.util.UIConstants.*;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
-import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
 
 public class ConvergenceFestivalPolicy extends MarketPolicy {
     public static final float HAPPINESS_BUFF = 0.67f;

@@ -10,9 +10,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
-import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class PlanningData {
@@ -92,7 +92,7 @@ public class PlanningData {
         final double[] d = new double[commodities.size()];
         for (int i = 0; i < commodities.size(); i++) {
             final String comID = commodities.get(i);
-            d[i] = EconomyEngine.instance().getComCell(comID, marketID).getDemand(true);
+            d[i] = EconomyEngine.instance().getComCell(comID, marketID).getTargetQuantum(true);
         }
 
         return d;

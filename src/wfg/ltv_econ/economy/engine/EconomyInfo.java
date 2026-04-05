@@ -1,22 +1,22 @@
 package wfg.ltv_econ.economy.engine;
 
-import static wfg.ltv_econ.constants.EconomyConstants.*;
+import static wfg.ltv_econ.constants.strings.Income.*;
 
 import java.util.Collection;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
-import wfg.ltv_econ.economy.commodity.CommodityDomain;
-import wfg.ltv_econ.economy.commodity.IncomeLedger;
 import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 public class EconomyInfo {
@@ -107,11 +107,16 @@ public class EconomyInfo {
         return (float) (exports / total);
     }
 
-    public final long getPlayerFactionCreditFlow(String comID) {
-        long netCreditFlow = 0;
+    public final long getFactionNetComSpending(String comID, String factionID) {
+        final EconomyAPI econ = Global.getSector().getEconomy();
+        long netCreditFlow = 0l;
+        
+        for (MarketLedger ledger : MarketFinanceRegistry.instance().getRegistry()) {
+            final MarketAPI market = econ.getMarket(ledger.marketID);
+            if (!market.getFactionId().equals(factionID)) continue;
 
-        for (IncomeLedger ledger : engine.comDomains.get(comID).getAllLedgers()) {
-            netCreditFlow += ledger.lastMonthExportIncome - ledger.lastMonthImportExpense;
+            netCreditFlow += ledger.getLastMonth(TRADE_EXPORT_KEY + comID);
+            netCreditFlow += ledger.getLastMonth(TRADE_IMPORT_KEY + comID);
         }
         return netCreditFlow;
     }
@@ -305,88 +310,58 @@ public class EconomyInfo {
         return (long) total;
     }
 
-    /**
-     * Works properly only for player colonies.
-     *
-     * <p>{@code getIncomeMult()} does not affect trade income. It represents
-     * administrative efficiency and applies only to abstract income and upkeep.</p>
-     */
-    public final long getNetIncome(MarketAPI market, boolean lastMonth) {
-        final long exportIncome = getExportIncome(market, lastMonth);
-        final long importCost = getImportExpense(market, lastMonth);
-        final int wageCost = (int) getWagesForMarket(market)*MONTH;
-        final int indIncome = getIndustryIncome(market);
-        final int indUpkeep = getIndustryUpkeep(market);
-        final int hazardPay = market.isImmigrationIncentivesOn() ?
-            (int) market.getImmigrationIncentivesCost() : 0;
-
-        return exportIncome + indIncome - hazardPay - importCost - wageCost - indUpkeep;
-    }
-
-    /**
-     * Works properly only for player colonies.
-     *
-     * <p>{@code getIncomeMult()} does not affect trade income. It represents
-     * administrative efficiency and applies only to abstract income and upkeep.</p>
-     */
-    public final long getGrossIncome(MarketAPI market, boolean lastMonth) {
-        final long exportIncome = getExportIncome(market, lastMonth);
-        final int indIncome = getIndustryIncome(market);
-
-        return exportIncome + indIncome;
-    }
-
-    /*
-     * Works properly only for player colonies. 
-     */
     public final long getExportIncome(MarketAPI market, boolean lastMonth) {
+        return getExportIncome(market.getId(), lastMonth);
+    }
+
+    public final long getExportIncome(String marketID, boolean lastMonth) {
+        final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
+
         long exportIncome = 0;
-        if (engine.playerMarketData.keySet().contains(market.getId())) {
-            for (CommodityDomain dom : engine.comDomains.values()) {
-                final IncomeLedger ledger = dom.getLedger(market.getId());
-                exportIncome += lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
-            }
+        for (String comID : engine.comDomains.keySet()) {
+            final String key = TRADE_EXPORT_KEY + comID;
+            exportIncome += lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key);
         }
 
         return exportIncome;
     }
 
     public final long getExportIncome(MarketAPI market, String comID, boolean lastMonth) {
-        if (engine.playerMarketData.keySet().contains(market.getId())) {
-
-            final IncomeLedger ledger = engine.comDomains.get(comID).getLedger(market.getId());
-            return lastMonth ? ledger.lastMonthExportIncome : ledger.monthlyExportIncome;
-        }
-        return 0;
+        return getExportIncome(market.getId(), comID, lastMonth);
     }
 
-    /*
-     * Works properly only for player colonies. 
-     */
-    public final long getImportExpense(MarketAPI market, boolean lastMonth) {
-        long importCost = 0;
-        if (engine.playerMarketData.keySet().contains(market.getId())) {
-            for (CommodityDomain dom : engine.comDomains.values()) {
-                final IncomeLedger ledger = dom.getLedger(market.getId());
-                importCost += lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
-            }
-        }
+    public final long getExportIncome(String marketID, String comID, boolean lastMonth) {
+        final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
+        final String key = TRADE_EXPORT_KEY + comID;
+        return lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key);
+    }
 
+    public final long getImportExpense(MarketAPI market, boolean lastMonth) {
+        return getImportExpense(market.getId(), lastMonth);
+    }
+
+    public final long getImportExpense(String marketID, boolean lastMonth) {
+        final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
+
+        long importCost = 0;
+        for (String comID : engine.comDomains.keySet()) {
+            final String key = TRADE_IMPORT_KEY + comID;
+            importCost -= lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key);
+        }
         return importCost;
     }
 
     public final long getImportExpense(MarketAPI market, String comID, boolean lastMonth) {
-        if (engine.playerMarketData.keySet().contains(market.getId())) {
-            final IncomeLedger ledger = engine.comDomains.get(comID).getLedger(market.getId());
-            return lastMonth ? ledger.lastMonthImportExpense : ledger.monthlyImportExpense;
-        }
-        return 0;
+        return getImportExpense(market.getId(), comID, lastMonth);
     }
 
-    /**
-     * Per day value
-     */
-    public final float getWagesForMarket(final MarketAPI market) {
+    public final long getImportExpense(String marketID, String comID, boolean lastMonth) {
+        final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
+        final String key = TRADE_IMPORT_KEY + comID;
+        return -(lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key));
+    }
+
+    public final float getDailyWages(final MarketAPI market) {
         final String marketID = market.getId();
 
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
@@ -434,13 +409,12 @@ public class EconomyInfo {
         return upkeep;
     }
 
+    public static final boolean isWorkerAssignableByDefault(Industry ind) {
+        return ind.isIndustry() && !ind.isStructure();
+    }
+
     public static final boolean isWorkerAssignable(Industry ind) {
-        final IndustryConfig config = IndustryIOs.getIndConfig(ind);
-        if (config != null) {
-            return config.workerAssignable;
-        } else {
-            return ind.isIndustry() && !ind.isStructure();
-        }
+        return IndustryIOs.getIndConfig(ind).workerAssignable;
     }
 
     public static final float getWorkersPerUnit(String comID, String tag) {

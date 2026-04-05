@@ -7,8 +7,9 @@ import com.fs.starfarer.api.campaign.SectorAPI;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
-import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
 
 public class LtvEconSaveData implements Serializable {
     private static final String LtvEconSaveDataSerialID = "ltv_econ_save_data_id"; 
@@ -16,6 +17,7 @@ public class LtvEconSaveData implements Serializable {
 
     // SERIALIZABLE DATA
     public WorkerRegistry workerRegistry = new WorkerRegistry();
+    public MarketFinanceRegistry financeRegistry = new MarketFinanceRegistry();
     public EconomyEngine economyEngine = new EconomyEngine();
     public PlayerFactionSettings playerFactionSettings = new PlayerFactionSettings();
 

@@ -29,7 +29,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
 import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.economy.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.ui.marketInfo.IndustryWidget.ConstructionMode;
 import wfg.ltv_econ.util.UIUtils;

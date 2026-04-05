@@ -50,6 +50,7 @@ import com.fs.starfarer.rpg.Person;
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 
 public class MarketWrapper extends Market {
     public final Market original;
@@ -147,13 +148,12 @@ public class MarketWrapper extends Market {
     }
 
     public float getNetIncome() {
-        return EconomyEngine.instance().info.getNetIncome(this, true);
+        return MarketFinanceRegistry.instance().getLedger(original).getNetLastMonth();
     }
 
     public float getGrossIncome() {
-        return EconomyEngine.instance().info.getGrossIncome(this, true);
+        return MarketFinanceRegistry.instance().getLedger(original).getNetLastMonth();
     }
-
 
     public CommodityOnMarket getCommodityData(String var1) {
         return new CommodityOnMarketWrapper(original.getCommodityData(var1));

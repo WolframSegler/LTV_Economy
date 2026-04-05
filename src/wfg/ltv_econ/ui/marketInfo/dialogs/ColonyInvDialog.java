@@ -22,6 +22,7 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.UIContext;
@@ -169,12 +170,10 @@ public class ColonyInvDialog extends DialogPanel {
                     );
 
                     tp.addPara(
-                        "You would receive %s from this colony this month. "+
-                        "Note: some values are current so far, others are full-month estimates.",
-                        pad,
-                        highlight,
-                        NumFormat.formatCredit((long) (engine.info.getNetIncome(
-                            m_market, false)*data.playerProfitRatio
+                        "You would receive %s from this colony so far this month.",
+                        pad, highlight,
+                        NumFormat.formatCredit((long) Math.max(0f, data.playerProfitRatio *
+                            MarketFinanceRegistry.instance().getLedger(m_market).getNetCurrentMonth()
                         ))
                     );
                 };

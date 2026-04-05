@@ -1,5 +1,7 @@
 package wfg.ltv_econ.submarkets;
 
+import static wfg.ltv_econ.constants.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
+import static wfg.ltv_econ.constants.strings.Income.getDesc;
 import static wfg.native_ui.util.UIConstants.negative;
 
 import java.util.Random;
@@ -23,6 +25,7 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 
 public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
@@ -202,19 +205,22 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 		final EconomyEngine engine = EconomyEngine.instance();
 		final String marketID = market.getId();
 
+		if (!market.isPlayerOwned()) return;
+
         if (getTariff() > 0f) {
 			final float tariffValue = transaction.getCreditValue() * getTariff();
-			engine.addCredits(marketID, (int) Math.abs(tariffValue));
+
+			MarketFinanceRegistry.instance().getLedger(market.getId()).add(
+				PLAYER_MARKET_TRANSACTION_KEY, Math.abs(tariffValue), getDesc(PLAYER_MARKET_TRANSACTION_KEY)
+			);
 		}
 
-		if (!market.isPlayerOwned()) {
-			for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
-				final var spec = settings.getCommoditySpec(stack.getCommodityId());
-				if (spec == null || spec.isNonEcon()) continue;
-	
-				final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
-				cell.addStoredAmount(stack.getSize() * EconomyConfig.OPEN_MARKET_TO_STOCKPILES_RATIO);
-			}
+		for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
+			final var spec = settings.getCommoditySpec(stack.getCommodityId());
+			if (spec == null || spec.isNonEcon()) continue;
+
+			final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
+			cell.addStoredAmount(stack.getSize() * EconomyConfig.OPEN_MARKET_TO_STOCKPILES_RATIO);
 		}
     }
 

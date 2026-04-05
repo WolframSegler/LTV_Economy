@@ -30,7 +30,6 @@ import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.SubmarketsID;
 import wfg.ltv_econ.economy.PlayerMarketData;
-import wfg.ltv_econ.economy.WorkerRegistry;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
@@ -38,6 +37,9 @@ import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.economy.raids.CommodityCellGroundRaidObjective;
 import wfg.ltv_econ.economy.raids.LtvShipWeaponsGroundRaidObjective;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.intel.PlayerMarketBombardedIntel;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -45,6 +47,7 @@ import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.EconomyConstants.*;
+import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
@@ -183,6 +186,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         // Order here is very important
         final String marketID = market.getId();
         WorkerRegistry.instance().register(market);
+        MarketFinanceRegistry.instance().register(market);
         if (!registeredMarkets.add(marketID)) return;
 
         marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
@@ -208,6 +212,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
         playerMarketData.remove(marketID);
         marketCredits.remove(marketID);
+        MarketFinanceRegistry.instance().remove(marketID);
         WorkerRegistry.instance().remove(marketID);
         for (TradeMission m : activeMissions) {
             if (m.src.getId().equals(marketID) || m.dest.getId().equals(marketID)) {
@@ -265,6 +270,10 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         }
 
         return dom.getCell(marketID);
+    }
+
+    public final void addCredits(String marketID, double amount) {
+        addCredits(marketID, (long) amount);
     }
 
     public final void addCredits(String marketID, long amount) {
@@ -327,13 +336,29 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         } else market.getStability().unmodifyFlat(popID + 2);
     }
 
-    // LISTENERS
+    private final void endMonth() {
+        final MarketFinanceRegistry reg = MarketFinanceRegistry.instance();
+
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            if (!registeredMarkets.contains(market.getId())) continue;
+
+            final MarketLedger ledger = reg.getLedger(market.getId());
+            ledger.add(INDUSTRY_INCOME_KEY, info.getIndustryIncome(market), getDesc(INDUSTRY_INCOME_KEY));
+            ledger.add(INDUSTRY_UPKEEP_KEY, -info.getIndustryUpkeep(market), getDesc(INDUSTRY_UPKEEP_KEY));
+        }
+    }
+
+    // LISTENERS ------------------------------------------------------------------------------------
 
     public void reportEconomyTick(int iterIndex) {
-        comDomains.values().forEach(CommodityDomain::endMonth);
-        playerMarketData.values().forEach(PlayerMarketData::endMonth);
-        
+        final MarketFinanceRegistry financeReg = MarketFinanceRegistry.instance();
         final MonthlyReport report = SharedData.getData().getCurrentReport();
+
+        endMonth();
+        playerMarketData.values().forEach(PlayerMarketData::endMonth);
+        factionShipInventories.values().forEach(FactionShipInventory::endMonth);
+        financeReg.endMonth();
+        
         final FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
 		marketsNode.name = "Colonies";
 		marketsNode.custom = MonthlyReport.OUTPOSTS;
@@ -341,7 +366,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
         for (PlayerMarketData data : playerMarketData.values()) {
             final MarketAPI market = data.market;
-            final long netIncome = info.getNetIncome(market, true);
+            final long netIncome = financeReg.getLedger(market).getNetLastMonth();
             final float r = data.getEffectiveProfitRatio();
             final float playerIncome = Math.max(netIncome, 0) * r;
             addCredits(data.marketID, (long) -playerIncome);
@@ -419,7 +444,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             wageNode.name = "Wages";
             wageNode.mapEntity = market.getPrimaryEntity();
             wageNode.icon = Global.getSettings().getSpriteName("income_report", "generic_expense");
-            wageNode.upkeep = info.getWagesForMarket(market) * MONTH * r;
+            wageNode.upkeep = info.getDailyWages(market) * MONTH * r;
             wageNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}
 

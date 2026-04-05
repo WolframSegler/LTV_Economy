@@ -25,11 +25,11 @@ import wfg.ltv_econ.configs.IndustryConfigManager;
 import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.native_ui.util.ArrayMap;
 
 /**

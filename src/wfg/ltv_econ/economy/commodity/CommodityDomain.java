@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.commodity;
 
+import static wfg.ltv_econ.constants.strings.Income.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +19,7 @@ import wfg.ltv_econ.configs.TradeWeights;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
@@ -28,7 +30,6 @@ public class CommodityDomain implements Serializable {
     public transient CommoditySpecAPI spec;
 
     private final ArrayMap<String, CommodityCell> comCells = new ArrayMap<>();
-    private final ArrayMap<String, IncomeLedger> incomeLedgers = new ArrayMap<>();
     private final List<ComTradeFlow> tradeFlows = new ArrayList<>();
     private InformalExchangeNode informalNode;
 
@@ -68,26 +69,12 @@ public class CommodityDomain implements Serializable {
         comCells.values().forEach(CommodityCell::update);
     }
 
-    public void endMonth() {
-        for (IncomeLedger ledger : incomeLedgers.values()) {
-            ledger.endMonth();
-        }
-    }
-
     public final void addMarket(String marketID) {
         comCells.putIfAbsent(marketID, new CommodityCell(comID, marketID));
-
-        if (EconomyEngine.instance().isPlayerMarket(marketID)) {
-            incomeLedgers.putIfAbsent(marketID, new IncomeLedger());
-        }
     }
 
     public final void removeMarket(String marketID) {
         comCells.remove(marketID);
-
-        if (EconomyEngine.instance().isPlayerMarket(marketID)) {
-            incomeLedgers.remove(marketID);
-        }
     }
 
     public final CommodityCell getCell(String marketID) {
@@ -100,10 +87,6 @@ public class CommodityDomain implements Serializable {
 
     public final Map<String, CommodityCell> getCellsMap() {
         return comCells;
-    }
-
-    public final Collection<IncomeLedger> getAllLedgers() {
-        return incomeLedgers.values();
     }
 
     public final ArrayList<CommodityCell> getSortedByProduction(int listSize) {
@@ -122,20 +105,6 @@ public class CommodityDomain implements Serializable {
                 b.getTargetQuantum(true), a.getTargetQuantum(true)
             )).limit(listSize)
             .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    public final IncomeLedger getLedger(String marketID) {
-        return incomeLedgers.get(marketID);
-    }
-
-    public final boolean hasLedger(String marketID) {
-        return incomeLedgers.containsKey(marketID);
-    }
-
-    public final IncomeLedger addLedger(String marketID) {
-        final IncomeLedger ledger = new IncomeLedger();
-        incomeLedgers.put(marketID, ledger);
-        return ledger;
     }
 
     public final List<CommodityCell> getImporters() {
@@ -202,7 +171,7 @@ public class CommodityDomain implements Serializable {
     }
 
     public final void createFormalTradeFlows() {
-        final EconomyEngine engine = EconomyEngine.instance();
+        final MarketFinanceRegistry registry = MarketFinanceRegistry.instance();
         final PlayerFactionSettings facSettings = LtvEconSaveData.instance().playerFactionSettings;
         final List<CommodityCell> importers = getImporters();
         final List<CommodityCell> exporters = getExporters();
@@ -282,11 +251,8 @@ public class CommodityDomain implements Serializable {
                 expCell.market, impCell.market, amountToSend, credits, sameFaction
             ));
 
-            engine.addCredits(expCell.marketID, credits);
-            engine.addCredits(impCell.marketID, -credits);
-
-            if (hasLedger(expCell.marketID)) getLedger(expCell.marketID).recordExport(credits);
-            if (hasLedger(impCell.marketID)) getLedger(impCell.marketID).recordImport(credits);
+            registry.getLedger(expCell.marketID).add(TRADE_EXPORT_KEY + comID, credits, getDesc(TRADE_EXPORT_KEY) + spec.getName());
+            registry.getLedger(impCell.marketID).add(TRADE_IMPORT_KEY + comID, -credits, getDesc(TRADE_IMPORT_KEY) + spec.getName());
         }
 
         tradeVolumeHistory[historyIndex] += tradeVolume;
@@ -296,7 +262,7 @@ public class CommodityDomain implements Serializable {
     public final void informalTrade(boolean fakeAdvance) {
         informalNode.updateBeforeTrade();
 
-        final EconomyEngine engine = EconomyEngine.instance();
+        final MarketFinanceRegistry registry = MarketFinanceRegistry.instance();
         final List<CommodityCell> exporters = getExporters();
         final List<CommodityCell> importers = getImporters();
 
@@ -329,10 +295,7 @@ public class CommodityDomain implements Serializable {
             tradeCreditActivity += price;
             
             if (fakeAdvance) continue;
-            final String marketID = exporter.marketID;
-            engine.addCredits(marketID, price);
-
-            if (hasLedger(marketID)) getLedger(marketID).recordExport(price);
+            registry.getLedger(exporter.marketID).add(TRADE_EXPORT_KEY + comID, price, getDesc(TRADE_EXPORT_KEY) + spec.getName());
         }
 
         if (sumImportable < 1f) return;
@@ -349,10 +312,7 @@ public class CommodityDomain implements Serializable {
             tradeCreditActivity += price;
             
             if (fakeAdvance) continue;
-            final String marketID = importer.marketID;
-            engine.addCredits(marketID, -price);
-
-            if (hasLedger(marketID)) getLedger(marketID).recordImport(price);
+            registry.getLedger(importer.marketID).add(TRADE_IMPORT_KEY + comID, -price, getDesc(TRADE_IMPORT_KEY) + spec.getName());
         }
 
         tradeVolumeHistory[historyIndex] += tradeVolume;

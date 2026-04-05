@@ -20,11 +20,11 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.constants.UIColors;
-import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.ui.reusable.ComIconPanel;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.components.InteractionComp.ClickHandler;

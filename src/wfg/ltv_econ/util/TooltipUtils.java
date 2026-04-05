@@ -32,11 +32,14 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
-import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
+
+import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class TooltipUtils {
@@ -454,34 +457,26 @@ public class TooltipUtils {
 
     // TODO modify this section to make it clear trade and exhange happens on certain intervals
     public static final void createComTradeLedgerSection(TooltipMakerAPI tp, CommodityCell cell) {
-        final EconomyEngine engine = EconomyEngine.instance();
-        final CommodityDomain dom = engine.getComDomain(cell.comID);
-        final String marketName = cell.market.getName();
+        final String comID = cell.comID;
+        final String marketID = cell.marketID;
         final String comName = cell.spec.getName();
-        
-        final long exportIncomeLastMonth = dom.hasLedger(cell.marketID) ?
-            dom.getLedger(cell.marketID).lastMonthExportIncome : 0l;
-        final long exportIncomeThisMonth = dom.hasLedger(cell.marketID) ?
-            dom.getLedger(cell.marketID).monthlyExportIncome : 0l;
+        final String marketName = cell.market.getName();
+        final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
+
+        final long exportIncomeLastMonth = ledger.getLastMonth(TRADE_EXPORT_KEY + comID);
+        final long exportIncomeThisMonth = ledger.getCurrentMonth(TRADE_EXPORT_KEY + comID);
 
         if (exportIncomeLastMonth > 1l || exportIncomeThisMonth > 1l) {
             tp.addPara(
                 marketName + " profitably exported %s units of " + comName + " and accounted for %s of the global market share. They generated %s last month and %s so far this month.",
                 opad, highlight,
                 NumFormat.engNotation(cell.getTotalExports()),
-                engine.info.getExportMarketShare(cell.comID, cell.marketID) + "%",
+                EconomyEngine.instance().info.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
             );
         } else if (cell.getTotalExports() < 1f) {
             tp.addPara("No local production to export for today.", opad);
-        } else if (exportIncomeLastMonth < 1l && exportIncomeThisMonth < 1l) {
-            tp.addPara(
-                marketName + " exported %s units of " + comName + " and accounted for %s of the global market share. Export income is not tracked for non-player colonies.",
-                opad, highlight,
-                NumFormat.engNotation(cell.getTotalExports()),
-                engine.info.getExportMarketShare(cell.comID, cell.marketID) + "%"
-            );
         }
 
         if (cell.getSurplusAfterTargetQuantum() > 0f) {
@@ -491,29 +486,20 @@ public class TooltipUtils {
             );
         }
 
-        final long importExpenseLastMonth = dom.hasLedger(cell.marketID) ?
-            dom.getLedger(cell.marketID).lastMonthImportExpense : 0l;
-        final long importExpenseThisMonth = dom.hasLedger(cell.marketID) ?
-            dom.getLedger(cell.marketID).monthlyImportExpense : 0l;
+        final long importExpenseLastMonth = ledger.getLastMonth(TRADE_IMPORT_KEY + comID);
+        final long importExpenseThisMonth = ledger.getCurrentMonth(TRADE_IMPORT_KEY + comID);
 
         if (importExpenseLastMonth > 1l || importExpenseThisMonth > 1l) {
             tp.addPara(
                 marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. They expended %s last month and %s so far this month.",
                 opad, highlight,
                 NumFormat.engNotation(cell.getTotalImports()),
-                engine.info.getImportMarketShare(cell.comID, cell.marketID) + "%",
+                EconomyEngine.instance().info.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)
             );
         } else if (cell.getTotalImports() < 1f) {
             tp.addPara("No local demand or stockpiles full.", opad);
-        } else if (exportIncomeLastMonth < 1l && exportIncomeThisMonth < 1l) {
-            tp.addPara(
-                marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. Import expenses are not tracked for non-player colonies.",
-                opad, highlight,
-                NumFormat.engNotation(cell.getTotalImports()),
-                engine.info.getImportMarketShare(cell.comID, cell.marketID) + "%"
-            );
         }
     }
 

@@ -9,6 +9,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.native_ui.util.NumFormat;
 
 public class OrganHarvestingPolicy extends MarketPolicy {
@@ -45,7 +46,7 @@ public class OrganHarvestingPolicy extends MarketPolicy {
     }
 
     public void postAdvance(PlayerMarketData data) {
-        EconomyEngine.instance().addCredits(data.marketID, ASSET_SEIZURE_CREDITS_BUFF);
+        MarketFinanceRegistry.instance().getLedger(data.marketID).add(id, ASSET_SEIZURE_CREDITS_BUFF, spec.id);
     }
 
     @Override

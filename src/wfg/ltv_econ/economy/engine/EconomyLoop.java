@@ -19,14 +19,11 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
-import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.configs.EconomyConfigLoader.DebtDebuffTier;
 import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
 import wfg.ltv_econ.economy.PlayerMarketData;
-import wfg.ltv_econ.economy.WorkerRegistry;
-import wfg.ltv_econ.economy.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -38,9 +35,13 @@ import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.economy.planning.WorkforceAllocator;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
+import static wfg.ltv_econ.constants.strings.Income.*;
 
 public class EconomyLoop {
     private static final Logger log = Global.getLogger(EconomyLoop.class);
@@ -50,6 +51,7 @@ public class EconomyLoop {
 
     public EconomyLoop(EconomyEngine engine) { this.engine = engine; }    
 
+    /** Not order agnostic */
     final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
         final boolean allocWorkers = engine.cyclesSinceWorkerAssign >= EconomyConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment;
         refreshMarkets();
@@ -57,6 +59,7 @@ public class EconomyLoop {
         discoverInputsOutputs();
 
         engine.comDomains.values().forEach(CommodityDomain::reset);
+        engine.factionShipInventories.values().forEach(FactionShipInventory::update);
 
         if (!fakeAdvance || forceWorkerAssignment) {
             if (allocWorkers) {
@@ -84,6 +87,7 @@ public class EconomyLoop {
 
         if (!fakeAdvance) {
             engine.comDomains.values().forEach(CommodityDomain::advance);
+            engine.factionShipInventories.values().forEach(FactionShipInventory::advance);
 
             applyWages();
             redistributeFactionCredits(LtvEconSaveData.instance().playerFactionSettings.redistributeCredits);
@@ -131,7 +135,6 @@ public class EconomyLoop {
             }
             for (CommodityDomain dom : engine.getComDomains()) {
                 if (dom.getCell(marketID) == null) dom.addMarket(marketID);
-                if (!dom.hasLedger(marketID)) dom.addLedger(marketID);
             }
         }
     }
@@ -409,11 +412,12 @@ public class EconomyLoop {
         } else {
             final float unitPrice = fuelCell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost);
             final float cost = fuelCost * unitPrice * EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT;
-            mission.credits.modifyFlat("fuel_fee", cost,
-                "Fuel premium (" + Strings.X + EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT + ")"
-            );
+            final String key = TRADE_FUEL_PREMIUM_KEY;
+            mission.credits.modifyFlat(key, cost, getDesc(key));
 
-            engine.addCredits(marketID, -(long) mission.credits.computeEffective(0f));
+            MarketFinanceRegistry.instance().getLedger(marketID).add(
+                TRADE_FLEET_SHIPMENT_KEY, -mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
+            );
         }
     }
 
@@ -430,15 +434,18 @@ public class EconomyLoop {
         final float hazardPay = EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
             + EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
 
-        mission.credits.modifyFlat("base_fee", EconomyConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, "Independent hauler base fee");
-        mission.credits.modifyFlat("per_ton_fee", perTonFee, "Per-ton transport fee");
-        mission.credits.modifyFlat("value_fee", valueFee, "Percentage of cargo value (" + Strings.X + EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT + ")");
-        mission.credits.modifyFlat("hazard_pay", hazardPay, "Hazard pay (base + multiplier for required escort strength)");
+        mission.credits.modifyFlat(INDEPENDENT_BASE_FEE_KEY, EconomyConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, getDesc(INDEPENDENT_BASE_FEE_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_PER_TON_KEY, perTonFee, getDesc(INDEPENDENT_PER_TON_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_VALUE_PERCENT_KEY, valueFee, getDesc(INDEPENDENT_VALUE_PERCENT_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_HAZARD_PAY_KEY, hazardPay, getDesc(INDEPENDENT_HAZARD_PAY_KEY));
 
-        engine.addCredits(mission.src.getId(), -(long) mission.credits.computeEffective(0f));
+        MarketFinanceRegistry.instance().getLedger(mission.src.getId()).add(
+            TRADE_FLEET_SHIPMENT_KEY, -mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
+        );
     }
 
     private final void applyWages() {
+        final MarketFinanceRegistry registry = MarketFinanceRegistry.instance();
         final EconomyAPI econ = Global.getSector().getEconomy(); 
         final List<String> toRemove = new ArrayList<>(4);
 
@@ -446,7 +453,8 @@ public class EconomyLoop {
             if (econ.getMarket(marketID) == null) {
                 toRemove.add(marketID);
             } else {
-                engine.addCredits(marketID, (int) -engine.info.getWagesForMarket(econ.getMarket(marketID)));
+                final float wageCost = engine.info.getDailyWages(econ.getMarket(marketID));
+                registry.getLedger(marketID).add(WORKER_WAGES_KEY, -wageCost, getDesc(WORKER_WAGES_KEY));
             }
         }
 
