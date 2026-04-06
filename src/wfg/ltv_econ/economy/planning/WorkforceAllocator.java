@@ -25,7 +25,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
@@ -421,7 +421,7 @@ public class WorkforceAllocator {
             vars = solution.getPoint();
         }
 
-        final Map<MarketAPI, float[]> groupedAssignments = new ArrayMap<>();
+        final Map<MarketAPI, float[]> groupedAssignments = new ArrayMap<>(M);
         { // 9) Extract assignments w[m,o] into map for grouped outputs
             final double[] denseWorkerVars = new double[N / T];
             for (int i = 0; i < N; i+=T) {

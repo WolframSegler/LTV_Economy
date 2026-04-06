@@ -10,9 +10,9 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
+import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
-import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
 public final class IndustryGrouper {
@@ -47,7 +47,7 @@ public final class IndustryGrouper {
 
         final boolean[] grouped = new boolean[columns];
         final Map<String, List<String>> groupToMembers = new LinkedHashMap<>();
-        final Map<String, String> memberToGroup = new ArrayMap<>();
+        final Map<String, String> memberToGroup = new ArrayMap<>(columns);
 
         final List<String> groupNames = new ArrayList<>();
         final List<double[]> groupedColumns = new ArrayList<>();
@@ -128,7 +128,7 @@ public final class IndustryGrouper {
         Map<String, String> memberToGroup
     ) {
         final List<String> groupedPairs = new ArrayList<>();
-        final Map<String, Integer> groupIndex = new ArrayMap<>();
+        final Map<String, Integer> groupIndex = new ArrayMap<>(pairs.size());
 
         // Step 1: create new grouped list
         for (String pair : pairs) {
@@ -164,7 +164,7 @@ public final class IndustryGrouper {
         List<MarketAPI> markets,
         List<String> industryOutputPairs
     ) {
-        final ArrayMap<MarketAPI, float[]> expanded = new ArrayMap<>();
+        final ArrayMap<MarketAPI, float[]> expanded = new ArrayMap<>(markets.size());
 
         for (MarketAPI market : markets) {
             final float[] groupedArray = groupedAssignments.get(market);
@@ -179,7 +179,7 @@ public final class IndustryGrouper {
                 final List<String> valid = new ArrayList<>(3);
                 for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
                     for (String pair : originals) {
-                        if (IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec()).equals(
+                        if (IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec()).equals(
                             pair.split(EconomyLoop.KEY)[0]
                         )) valid.add(pair);
                     }

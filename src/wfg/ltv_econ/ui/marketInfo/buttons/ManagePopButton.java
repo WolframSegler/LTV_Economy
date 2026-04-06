@@ -26,6 +26,7 @@ public class ManagePopButton extends Button {
         setQuickMode(true);
         setShortcut(Keyboard.KEY_3);
         setAppendShortcutToText(false);
+        setShowTooltipWhileInactive(true);
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;
 
@@ -42,6 +43,5 @@ public class ManagePopButton extends Button {
         glow.additiveSprite = icon.getSprite();
 
         if (!EconomyEngine.instance().isPlayerMarket(market.getId())) setEnabled(false);
-        setShowTooltipWhileInactive(true);
     }
 }

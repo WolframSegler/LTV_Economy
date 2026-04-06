@@ -22,6 +22,7 @@ import wfg.ltv_econ.ui.marketInfo.dialogs.ComDetailDialog;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
@@ -209,7 +210,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                 );
             }
 
-            final float TP_WIDTH = 450f;
+            final float TP_WIDTH = 500f;
             {
             tooltip.expandable = true;
             tooltip.expandTxt = "%s Show details";
@@ -226,6 +227,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                 final FactionAPI faction = marketAPI.getFaction();
                 final Color base = faction.getBaseUIColor();
                 final Color dark = faction.getDarkUIColor();
+                final float rowH = 20f;
 
                 tp.addTitle("Monthly Income & Upkeep", base);
                 final long income = ledger.getNetLastMonth();
@@ -237,69 +239,75 @@ public class MarketUIReplacer implements EveryFrameScript {
                     tp.addPara("The net monthly upkeep for this colony last month was %s.", opad, negative, incomeTxt);
                 }
 
-                tp.addPara(
-                    "Income multiplier: %s", opad, highlight,
-                    Math.round(marketAPI.getIncomeMult().getModifiedValue() * 100f) + "%"
-                );
-                tp.addStatModGrid(
-                    TP_WIDTH, 50f, opad, pad, marketAPI.getIncomeMult(), true, null
-                );
-                tp.setParaFontColor(gray);
-                tp.addPara(
-                    "This multiplier affects industry income & upkeep, "+ 
-                    "but does not affect wages or trade (exports/imports).",
-                    opad
-                );
-                tp.setParaFontColor(Color.WHITE);
-
-                tp.addPara(
-                    "Upkeep multiplier: %s", opad, highlight,
-                    Math.round(marketAPI.getUpkeepMult().getModifiedValue() * 100f) + "%"
-                );
-                tp.addStatModGrid(
-                    TP_WIDTH, 50f, opad, pad, marketAPI.getUpkeepMult(), true, null
-                );
-
-                final String indIncome = NumFormat.formatCredit(ledger.getLastMonth(INDUSTRY_INCOME_KEY));
-                final String indUpkeep = NumFormat.formatCredit(ledger.getLastMonth(INDUSTRY_UPKEEP_KEY));
-
                 final ArrayList<Industry> industries = new ArrayList<>(marketAPI.getIndustries());
-
-                tp.addSectionHeading("Income", base, dark, Alignment.MID, opad);
-
-                tp.addPara("Local income: %s", opad, highlight, indIncome);
-                industries.sort((i1, i2) ->
-                    Integer.compare(
-                        info.getIndustryIncome(i2).getModifiedInt(),
-                        info.getIndustryIncome(i1).getModifiedInt()
-                    )
-                );
-                tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
-
-                int indCount = 0;
+                final ArrayMap<String, Long> indIncomeMap = new ArrayMap<>(industries.size());
+                final ArrayMap<String, Long> indUpkeepMap = new ArrayMap<>(industries.size());
+                long totalIndustryIncome = 0;
+                long totalIndustryUpkeep = 0;
                 for (Industry ind : industries) {
-                    int perIndIncome = info.getIndustryIncome(ind).getModifiedInt();
-                    if (perIndIncome > 0) {
-                        tp.addToGrid(0, indCount++, ind.getCurrentName(),
-                            NumFormat.formatCredit(perIndIncome), highlight
+                    final String incKey = INDUSTRY_INCOME_KEY + ind.getId();
+                    final long inc = ledger.getLastMonth(incKey);
+                    totalIndustryIncome += inc;
+                    indIncomeMap.put(ind.getId(), inc);
+                    
+                    final String upKey = INDUSTRY_UPKEEP_KEY + ind.getId();
+                    final long up = ledger.getLastMonth(upKey);
+                    totalIndustryUpkeep += up;
+                    indUpkeepMap.put(ind.getId(), up);
+                }
+                final String indIncome = NumFormat.formatCredit(totalIndustryIncome);
+                final String indUpkeep = NumFormat.formatCredit(-totalIndustryUpkeep);
+                industries.sort((i1, i2) -> Long.compare(
+                    indIncomeMap.getOrDefault(i2.getId(), 0l),
+                    indIncomeMap.getOrDefault(i1.getId(), 0l)
+                ));
+
+                tp.addSectionHeading("Industries & Structures", base, dark, Alignment.MID, opad);
+
+                tp.addPara("Income: %s", pad, highlight, indIncome);
+                tp.addPara("Upkeep: %s", pad, negative, indUpkeep);
+
+                if (expanded) {
+                    tp.addPara("Income multiplier: %s", opad, highlight,
+                        Math.round(marketAPI.getIncomeMult().getModifiedValue() * 100f) + "%"
+                    );
+                    tp.addStatModGrid(TP_WIDTH, 50f, opad, pad, marketAPI.getIncomeMult(), true, null);
+
+                    tp.addPara("Upkeep multiplier: %s", opad, highlight,
+                        Math.round(marketAPI.getUpkeepMult().getModifiedValue() * 100f) + "%"
+                    );
+                    tp.addStatModGrid(
+                        TP_WIDTH, 50f, opad, pad, marketAPI.getUpkeepMult(), true, null
+                    );
+
+                    tp.addPara("These modifiers affects industry income & upkeep only.", gray, opad);
+
+                    tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new Object[] {
+                        "Industry", 250, "Income", 115, "Upkeep", 115
+                    });
+    
+                    for (Industry ind : industries) {
+                        tp.addRow(
+                            Alignment.LMID, Color.WHITE,
+                            ind.getCurrentName(),
+                            Alignment.MID, highlight,
+                            Misc.getDGSCredits(indIncomeMap.get(ind.getId())),
+                            Alignment.MID, negative,
+                            Misc.getDGSCredits(-indUpkeepMap.get(ind.getId()))
                         );
                     }
+                    tp.addTable("", 0, pad);
                 }
 
-                if (indCount > 0) {
-                    tp.addGrid(pad);
-                } else {
-                    tp.cancelGrid();
-                }
+                tp.addSectionHeading("Imports & Exports", base, dark, Alignment.MID, opad);
 
                 final int maxCommoditiesToDisplay = 8;
-                final float somethingWidth = 500f - 14f - 395f;
-                final float extraPad = ((int)(somethingWidth / 3f));
+                final float extraPad = 30f;
 
                 final long exportIncome = info.getExportIncome(marketAPI, true);
                 tp.addPara("Last Month's Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
                 if (exportIncome > 0l && expanded) {
-                    tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
+                    tp.beginTable(faction, rowH, "Commodity", 200f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
                     int exportedCount = 0;
                     for (CommodityDomain com : domains) {
                         if (ledger.getLastMonth(TRADE_EXPORT_KEY + com.comID) > 0l) {
@@ -333,40 +341,10 @@ public class MarketUIReplacer implements EveryFrameScript {
                     tp.addTable("No exports", exportedCount - comCount, opad);
                 }
 
-                tp.addSectionHeading("Upkeep", base, dark, Alignment.MID, opad);
-                if (expanded && info.getIndustryUpkeep(marketAPI) > 0) {
-                    tp.addPara("Industry and structure upkeep: %s", opad, negative, indUpkeep);
-
-                    industries.sort((i1, i2) ->
-                        Integer.compare(
-                            info.getIndustryUpkeep(i2).getModifiedInt(),
-                            info.getIndustryUpkeep(i1).getModifiedInt()
-                        )
-                    );
-
-                    tp.beginGridFlipped(TP_WIDTH, 1, 65f, opad);
-                    indCount = 0;
-
-                    for (Industry ind : industries) {
-                        int perIndIncome = info.getIndustryUpkeep(ind).getModifiedInt();
-                        if (perIndIncome > 0) {
-                            tp.addToGrid(0, indCount++, ind.getCurrentName(),
-                                NumFormat.formatCredit(perIndIncome), negative
-                            );
-                        }
-                    }
-
-                    if (indCount > 0) {
-                        tp.addGrid(pad);
-                    } else {
-                        tp.cancelGrid();
-                    }
-                }
-
                 final long importExpense = info.getImportExpense(marketAPI, true);
                 tp.addPara("Last Month's Imports: %s", opad, negative, NumFormat.formatCredit(importExpense));
                 if (importExpense > 0 && expanded) {
-                    tp.beginTable(faction, 20f, "Commodity", 150f + extraPad, "Market share", 100f + extraPad, "Expense", 100f + extraPad);
+                    tp.beginTable(faction, rowH, "Commodity", 200f + extraPad, "Market share", 100f + extraPad, "Expense", 100f + extraPad);
                     int importedCount = 0;
                     for (CommodityDomain com : domains) {
                         if (ledger.getLastMonth(TRADE_IMPORT_KEY + com.comID) < 0l) {

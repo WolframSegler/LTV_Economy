@@ -6,6 +6,7 @@ import static wfg.ltv_econ.constants.UIColors.SLIDER_BASE;
 
 import java.awt.Color;
 import java.util.Map;
+import java.util.Set;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -24,7 +25,8 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -73,7 +75,7 @@ public class AssignWorkersDialog extends DialogPanel {
         market = ind.getMarket();
         data = reg.getData(ind);
         previewData = new WorkerIndustryData(data);
-        outputSliders = new ArrayMap<>();
+        outputSliders = new ArrayMap<>(IndustryConfigManager.getIndConfig(industry).outputs.size());
 
         reg.setData(previewData);
         initialFreeWorkerRatio = WorkerPoolCondition.getPoolCondition(market).getFreeWorkerRatio();
@@ -147,7 +149,7 @@ public class AssignWorkersDialog extends DialogPanel {
         final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(panelWidth, true);
         
         int cumulativeYOffset = pad;
-        for (OutputConfig output : IndustryIOs.getIndConfig(industry).outputs.values()) {
+        for (OutputConfig output : IndustryConfigManager.getIndConfig(industry).outputs.values()) {
             if (!output.usesWorkers) continue;
 
             final CommoditySpecAPI spec = settings.getCommoditySpec(output.comID);
@@ -176,7 +178,7 @@ public class AssignWorkersDialog extends DialogPanel {
             
             outputSlider.maxValue = Math.min(
                 max,
-                IndustryIOs.getIndConfig(industry).outputs.get(output.comID).workerAssignableLimit
+                IndustryConfigManager.getIndConfig(industry).outputs.get(output.comID).workerAssignableLimit
             ) * 100;
 
             outputSlider.setProgress(data.getAssignedRatioForOutput(output.comID) * 100);
@@ -200,19 +202,22 @@ public class AssignWorkersDialog extends DialogPanel {
         final Color color = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
 
-        final ArrayMap<String, MutableStat> supplyList = new ArrayMap<>();
-        final ArrayMap<String, MutableStat> demandList = new ArrayMap<>();
+        final Map<String, Float> outputs = IndustryIOs.getRealOutputs(industry, false);
+        final Set<String> inputs = IndustryIOs.getRealInputs(industry, false);
 
-        final boolean importing = IndustryIOs.getIndConfig(industry).demandOnly;
+        final ArrayMap<String, MutableStat> supplyList = new ArrayMap<>(outputs.size());
+        final ArrayMap<String, MutableStat> demandList = new ArrayMap<>(inputs.size());
+
+        final boolean importing = IndustryConfigManager.getIndConfig(industry).demandOnly;
 
         if (!importing) {
-            for (String comID : IndustryIOs.getRealOutputs(industry, false).keySet()) {
+            for (String comID : outputs.keySet()) {
                 final var stat = CompatLayer.convertIndSupplyStat(industry, comID);
                 if (stat.getModifiedValue() > 0f) supplyList.put(comID, stat);
             }
         }
 
-        for (String comID : IndustryIOs.getRealInputs(industry, false)) {
+        for (String comID : inputs) {
             final var stat = CompatLayer.convertIndDemandStat(industry, comID);
             if (stat.getModifiedValue() > 0f) demandList.put(comID, stat);
         }
@@ -341,7 +346,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
             slider.maxValue = Math.min(
                 max,
-                IndustryIOs.getIndConfig(industry).outputs.get(comID).workerAssignableLimit
+                IndustryConfigManager.getIndConfig(industry).outputs.get(comID).workerAssignableLimit
             ) * 100;
         }
 

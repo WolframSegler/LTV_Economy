@@ -12,12 +12,12 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
-import wfg.ltv_econ.industry.IndustryIOs;
 
 public class EconomyInfo {
     transient EconomyEngine engine;
@@ -414,7 +414,7 @@ public class EconomyInfo {
     }
 
     public static final boolean isWorkerAssignable(Industry ind) {
-        return IndustryIOs.getIndConfig(ind).workerAssignable;
+        return IndustryConfigManager.getIndConfig(ind).workerAssignable;
     }
 
     public static final float getWorkersPerUnit(String comID, String tag) {
@@ -426,5 +426,9 @@ public class EconomyInfo {
 
     public static final List<MarketAPI> getMarketsCopy() {
         return Global.getSector().getEconomy().getMarketsCopy();
+    }
+
+    public static final int getMarketsCount() {
+        return Global.getSector().getEconomy().getNumMarkets();
     }
 }

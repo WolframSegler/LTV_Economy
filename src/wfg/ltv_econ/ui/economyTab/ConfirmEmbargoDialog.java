@@ -5,7 +5,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel.RowPanel;

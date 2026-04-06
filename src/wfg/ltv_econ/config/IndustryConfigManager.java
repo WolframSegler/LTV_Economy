@@ -1,8 +1,4 @@
-package wfg.ltv_econ.configs;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+package wfg.ltv_econ.config;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -16,11 +12,11 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
-import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.config.loader.IndustryConfigLoader;
+import wfg.ltv_econ.config.loader.LaborConfigLoader;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 import wfg.ltv_econ.util.ConfigUtils;
 
@@ -43,252 +39,22 @@ import java.util.stream.Collectors;
 public class IndustryConfigManager {
     private static final SettingsAPI settings = Global.getSettings();
 
-    public static final String CONFIG_PATH = "./data/config/ltvEcon/industry_config.json";
-    public static final String CONFIG_NAME = "industry_config.json";
-    public static final String DYNAMIC_CONFIG_PATH = "./saves/common/dynamic_industry_config.json";
-    public static final String DYNAMIC_CONFIG_NAME = "dynamic_industry_config.json";
-    public static final float dynamicIndMarketScaleBase = 6f;
+    private static final ArrayMap<String, String> IndToBaseInd = new ArrayMap<>(EconomyConstants.industryIDs.size());
 
-    private static JSONObject config;
-    private static JSONObject dynamic_config;
+    public static final float dynamicIndMarketScaleBase = 6f;
 
     public static ArrayMap<String, IndustryConfig> ind_config;
 
     static {
+        buildBaseIdMapping();
+
         reload();
     }
 
     public static final void reload() {
-        ind_config = IndustryConfigManager.loadAsMap(false);
+        ind_config = IndustryConfigLoader.loadAsMap(false);
 
         validateOrRebuildDynamicConfigs();
-    }
-
-    private static final void load() {
-        try {
-            config = settings.getMergedJSON(CONFIG_PATH);
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to load industry config: " + CONFIG_PATH, ex);
-        }
-
-        try {
-            dynamic_config = settings.readJSONFromCommon(DYNAMIC_CONFIG_NAME, false);
-
-            if (dynamic_config == null || dynamic_config.length() < 1) {
-                Global.getLogger(IndustryConfigManager.class).info(
-                    "Dynamic industry config missing or empty. Creating new JSONObject."
-                );
-                dynamic_config = new JSONObject();
-            }
-        } catch (Exception ex) {
-            Global.getLogger(IndustryConfigManager.class).warn(
-                "Failed to read dynamic industry config, creating new JSONObject: " +
-                DYNAMIC_CONFIG_PATH + ".data"
-            );
-            dynamic_config = new JSONObject();
-        }
-    }
-
-    public static final JSONObject getConfig(boolean dynamicConfig) {
-        if (config == null || dynamic_config == null) load();
-        return dynamicConfig ? dynamic_config : config;
-    }
-
-    public static final String getDynamicConfigVersion() {
-        final JSONObject root = getConfig(true);
-        try {
-            final String key = "modVersion";
-            return root.has(key) ? root.getString(key) : "";
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to retrieve industry configuration version from " + DYNAMIC_CONFIG_PATH, e
-            );
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static final ArrayMap<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
-        final JSONObject root = getConfig(dynamicConfig);
-        final ArrayMap<String, IndustryConfig> result = new ArrayMap<>();
-
-        try { if (root.has("industryList")) {
-
-        final JSONArray industries = root.getJSONArray("industryList");
-        for (int indIdx = 0; indIdx < industries.length(); indIdx++) {
-            final JSONObject indJson = industries.getJSONObject(indIdx);
-
-            final String indID = indJson.getString("industryId");
-            final boolean workerAssignable = indJson.optBoolean("workerAssignable", false);
-            final boolean demandOnly = indJson.optBoolean("demandOnly", false);
-            final String occTag = indJson.optString("occTag", LaborConfigLoader.AVERAGE_OCC_TAG);
-
-            final JSONObject outputList = indJson.getJSONObject("outputList");
-            final ArrayMap<String, OutputConfig> commodityMap = new ArrayMap<>();
-
-            final Iterator<String> outputIds = outputList.keys();
-            while (outputIds.hasNext()) {
-                final String outputId = outputIds.next();
-                final JSONObject outputData = outputList.getJSONObject(outputId);
-
-                final float baseProd = (float) outputData.optDouble("baseProd", 1);
-                final long target = outputData.optLong("target", -1);
-                final float workerAssignableLimit = (float) outputData.optDouble(
-                    "workerAssignableLimit", LaborConfig.defaultWorkerCapPerOutput
-                );
-                final float marketScaleBase = (float) outputData.optDouble(
-                    "marketScaleBase", 10.0
-                );
-
-                final boolean isAbstract = !EconomyConstants.econCommodityIDs.contains(outputId);
-                final boolean scaleWSize = outputData.optBoolean("scaleWithMarketSize", false);
-                final boolean useWorkers = outputData.optBoolean("usesWorkers", false);
-                final boolean checkLegality = outputData.optBoolean("checkLegality", false);
-                final boolean activeBuilding = outputData.optBoolean("activeDuringBuilding", false);
-
-                final List<String> marketCondsAllFalse = new ArrayList<>();
-                if (outputData.has("ifMarketCondsAllFalse")) {
-                    JSONArray conds = outputData.getJSONArray("ifMarketCondsAllFalse");
-                    for (int i = 0; i < conds.length(); i++) {
-                        marketCondsAllFalse.add(conds.getString(i));
-                    }
-                }
-
-                final List<String> marketCondsAllTrue = new ArrayList<>();
-                if (outputData.has("ifMarketCondsAllTrue")) {
-                    JSONArray conds = outputData.getJSONArray("ifMarketCondsAllTrue");
-                    for (int i = 0; i < conds.length(); i++) {
-                        marketCondsAllTrue.add(conds.getString(i));
-                    }
-                }
-
-                final ArrayMap<String, Float> ConsumptionMap = new ArrayMap<>();
-                if (outputData.has("InputsPerUnitOutput")) {
-                    JSONObject consumption = outputData.getJSONObject("InputsPerUnitOutput");
-                    Iterator<String> inputIds = consumption.keys();
-                    while (inputIds.hasNext()) {
-                        String inputId = inputIds.next();
-                        float weight = (float) consumption.getDouble(inputId);
-                        ConsumptionMap.put(inputId, weight);
-                    }
-                }
-
-                final ArrayMap<String, Float> CCMoneyDist = new ArrayMap<>();
-                if (outputData.has("CCMoneyDist")) {
-                    JSONObject consumption = outputData.getJSONObject("CCMoneyDist");
-                    Iterator<String> inputIds = consumption.keys();
-                    while (inputIds.hasNext()) {
-                        String inputId = inputIds.next();
-                        float alloc = (float) consumption.getDouble(inputId);
-                        CCMoneyDist.put(inputId, alloc);
-                    }
-                }
-
-                final OutputConfig opt = new OutputConfig(
-                    outputId,
-                    baseProd,
-                    CCMoneyDist,
-                    scaleWSize,
-                    useWorkers,
-                    isAbstract,
-                    checkLegality,
-                    marketCondsAllFalse,
-                    marketCondsAllTrue,
-                    ConsumptionMap,
-                    workerAssignableLimit,
-                    marketScaleBase,
-                    target,
-                    activeBuilding
-                );
-
-                commodityMap.put(outputId, opt);
-            }
-            
-            IndustryConfig indConfig = new IndustryConfig(
-                workerAssignable, commodityMap, occTag, demandOnly
-            );
-            result.put(indID, indConfig);
-        }
-        
-        }} catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to load industry configuration from " +
-                (dynamicConfig ? DYNAMIC_CONFIG_PATH : CONFIG_PATH), e
-            );
-        }
-
-        return result;
-    }
-
-    private static final JSONObject serializeIndustryConfigs(ArrayMap<String, IndustryConfig> configs) {
-        final JSONObject root = new JSONObject();
-
-        try {
-        root.put("modVersion", settings.getModManager().getModSpec(LTV_ECON).getVersion());
-
-        final List<JSONObject> industries = new ArrayList<>();
-        for (Entry<String, IndustryConfig> entry : configs.singleEntrySet()) {
-            final String indID = entry.getKey();
-            final IndustryConfig ind = entry.getValue();
-
-            final JSONObject indJson = new JSONObject();
-            indJson.put("industryId", indID);
-            indJson.put("workerAssignable", ind.workerAssignable);
-            indJson.put("demandOnly", ind.demandOnly);
-            indJson.put("occTag", ind.occTag);
-
-            final JSONObject outputMap = new JSONObject();
-            for (Entry<String, OutputConfig> outputEntry : ind.outputs.singleEntrySet()) {
-                final String outputId = outputEntry.getKey();
-                final OutputConfig opt = outputEntry.getValue();
-
-                final JSONObject optJson = new JSONObject();
-                optJson.put("baseProd", opt.baseProd);
-                optJson.put("target", opt.target);
-                optJson.put("workerAssignableLimit", opt.workerAssignableLimit);
-                optJson.put("marketScaleBase", opt.marketScaleBase);
-
-                if (opt.CCMoneyDist != null && !opt.CCMoneyDist.isEmpty()) {
-                    JSONObject ccJson = new JSONObject();
-                    for (Entry<String, Float> e : opt.CCMoneyDist.singleEntrySet()) {
-                        ccJson.put(e.getKey(), e.getValue());
-                    }
-                    optJson.put("CCMoneyDist", ccJson);
-                }
-
-                if (opt.InputsPerUnitOutput != null && !opt.InputsPerUnitOutput.isEmpty()) {
-                    JSONObject inputsJson = new JSONObject();
-                    for (Entry<String, Float> e : opt.InputsPerUnitOutput.singleEntrySet()) {
-                        inputsJson.put(e.getKey(), e.getValue());
-                    }
-                    optJson.put("InputsPerUnitOutput", inputsJson);
-                }
-
-                if (opt.ifMarketCondsAllFalse != null && !opt.ifMarketCondsAllFalse.isEmpty()) {
-                    optJson.put("ifMarketCondsAllFalse", new JSONArray(opt.ifMarketCondsAllFalse));
-                }
-
-                if (opt.ifMarketCondsAllTrue != null && !opt.ifMarketCondsAllTrue.isEmpty()) {
-                    optJson.put("ifMarketCondsAllTrue", new JSONArray(opt.ifMarketCondsAllTrue));
-                }
-
-                optJson.put("scaleWithMarketSize", opt.scaleWithMarketSize);
-                optJson.put("usesWorkers", opt.usesWorkers);
-                optJson.put("checkLegality", opt.checkLegality);
-                optJson.put("activeDuringBuilding", opt.activeDuringBuilding);
-
-                outputMap.put(outputId, optJson);
-            }
-            indJson.put("outputList", outputMap);
-
-            industries.add(indJson);
-        }
-        root.put("industryList", industries);
-        } catch (JSONException e) {
-            Global.getLogger(IndustryConfigManager.class)
-                .error("Failed to serialize industry configs to JSON", e);
-        }
-
-        return root;
     }
 
     public static class IndustryConfig {
@@ -319,13 +85,13 @@ public class IndustryConfigManager {
 
             // Deep copy outputs map
             if (config.outputs != null) {
-                ArrayMap<String, OutputConfig> copy = new ArrayMap<>();
+                ArrayMap<String, OutputConfig> copy = new ArrayMap<>(config.outputs.size());
                 for (Entry<String, OutputConfig> e : config.outputs.singleEntrySet()) {
                     copy.put(e.getKey(), new OutputConfig(e.getValue()));
                 }
                 this.outputs = copy;
             } else {
-                this.outputs = new ArrayMap<>();
+                this.outputs = new ArrayMap<>(4);
             }
         }
 
@@ -432,6 +198,107 @@ public class IndustryConfigManager {
         }
     }
 
+    public static final void populateInputs(final Industry ind, final Map<String, Float> inputs,
+        boolean scaleWithMarketSize
+    ) {
+        ind.getAllDemand().forEach(mutable -> {
+            inputs.put(mutable.getCommodityId(), populateInput(mutable.getQuantity(), scaleWithMarketSize));
+        });
+    }
+
+    public static final float populateInput(final MutableStat base, boolean scaleWithMarketSize) {
+        StatMod baseMod = null;
+        float cumulativeBase = 0f;
+
+        for (StatMod mod : base.getFlatMods().values()) {
+            if (mod.source.endsWith(CompatLayer.BASE_MOD_SUFFIX) && mod.value > 0) {
+                baseMod = baseMod == null ? mod : baseMod;
+
+            } else {
+                if (!mod.source.equals(CompatLayer.DEMAND_RED_MOD) && 
+                    !mod.source.endsWith(CompatLayer.MARKET_COND_MOD_SUFFIX) &&
+                    mod.value >= 0
+                ) { cumulativeBase += mod.value; }
+            }
+        }
+
+        // Since vanilla values are discrete integers
+        final int vanillaValue = Math.round(baseMod != null ? baseMod.value : cumulativeBase);
+        final double expBase = 2;
+
+        float value = vanillaValue;
+        if (scaleWithMarketSize) {
+            value = value - (ConfigUtils.TEST_MARKET_SIZE - 3);
+            final float zeroCount = Math.max(0f, value) - 1f;
+            if (value <= 1f) {
+                value = (float) Math.pow(10f, -1f * (1f - value)); 
+            }
+            value = value * (float) Math.max(1f, Math.pow(expBase, zeroCount));
+        } else {
+            value *= Math.pow(expBase, Math.max(0, vanillaValue - 1));
+        }
+        return value;
+    }
+
+    public static final String getBaseIndustryIDSpec(IndustrySpecAPI ind) {
+        IndustrySpecAPI currentInd = ind;
+
+        while (true) {
+            String downgradeId = currentInd.getDowngrade();
+            if (downgradeId == null || downgradeId.equals(currentInd.getId())) break;
+
+            currentInd = settings.getIndustrySpec(downgradeId);
+        }
+
+        return currentInd.getId();
+    }
+
+    public static final boolean hasConfig(Industry ind) {
+        return hasConfig(ind.getSpec());
+    }
+
+    public static final boolean hasConfig(IndustrySpecAPI ind) {
+        return IndustryConfigManager.ind_config.containsKey(ind.getId()) 
+            || IndustryConfigManager.ind_config.containsKey(getBaseIndustryID(ind.getId()));
+    }
+
+    public static final String getBaseIndustryID(String id) {
+        return IndToBaseInd.get(id);
+    }
+
+    public static final String getBaseIndustryID(IndustrySpecAPI ind) {
+        return getBaseIndustryID(ind.getId());
+    }
+
+    public static final String getBaseIndustryID(Industry ind) {
+        return getBaseIndustryID(ind.getId());
+    }
+
+    public static final String getBaseIndIDifNoConfig(IndustrySpecAPI ind) {
+        if (IndustryConfigManager.ind_config.containsKey(ind.getId())) {
+            return ind.getId();
+        }
+        return getBaseIndustryID(ind.getId());
+    }
+
+    public static final IndustryConfig getIndConfig(Industry ind) {
+        return getIndConfig(ind.getSpec());
+    }
+
+    public static final IndustryConfig getIndConfig(IndustrySpecAPI ind) {
+        final IndustryConfig indConfig = IndustryConfigManager.ind_config.get(ind.getId());
+
+        return indConfig != null ? indConfig :
+            IndustryConfigManager.ind_config.get(getBaseIndustryID(ind.getId()));
+    }
+
+    private static final void buildBaseIdMapping() {
+        IndToBaseInd.clear();
+        for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
+            IndToBaseInd.put(spec.getId(), IndustryConfigManager.getBaseIndustryIDSpec(spec));
+        }
+    }
+
     /**
      * Scans all known industry configurations, generates dynamic configurations
      * for those lacking one, merges them into the main configuration map, and writes
@@ -442,23 +309,21 @@ public class IndustryConfigManager {
      * </p>
      */
     private static final void validateOrRebuildDynamicConfigs() {
-        final ArrayMap<String, IndustryConfig> dynamic_config =
-            IndustryConfigManager.loadAsMap(true);
+        final ArrayMap<String, IndustryConfig> dynamic_config = IndustryConfigLoader.loadAsMap(true);
         final Set<String> validIndustryIds = settings.getAllIndustrySpecs().stream()
             .map(IndustrySpecAPI::getId).collect(Collectors.toSet());
 
         boolean allIndustriesHaveConfig = true;
         final boolean current = settings.getModManager().getModSpec(LTV_ECON).getVersion()
-            .equals(getDynamicConfigVersion());
+            .equals(IndustryConfigLoader.getDynamicConfigVersion());
 
         // 1) Check that every existing spec has a config
         for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
-            String id = spec.getId();
-            String baseId = IndustryIOs.getBaseIndustryID(spec);
+            final String baseId = getBaseIndustryIDSpec(spec);
 
-            if (!(dynamic_config.containsKey(id) ||
+            if (!(dynamic_config.containsKey(spec.getId()) ||
                 (baseId != null && dynamic_config.containsKey(baseId))) &&
-                !IndustryIOs.hasConfig(spec)
+                !hasConfig(spec)
             ) {
                 allIndustriesHaveConfig = false;
                 break;
@@ -498,10 +363,10 @@ public class IndustryConfigManager {
         }
 
         for (IndustrySpecAPI indSpec : settings.getAllIndustrySpecs()) { 
-            if (IndustryIOs.getIndConfig(indSpec) != null) continue;
+            if (getIndConfig(indSpec) != null) continue;
 
             final String indID = indSpec.getId();
-            final ArrayMap<String, OutputConfig> configOutputs = new ArrayMap<>();
+            final ArrayMap<String, OutputConfig> configOutputs = new ArrayMap<>(4);
             
             testMarket1.addIndustry(indID);
             testMarket2.addIndustry(indID);
@@ -552,7 +417,7 @@ public class IndustryConfigManager {
                 }
     
                 final boolean hasNoRealOutputs = outputs.isEmpty() && illegalOutputs.isEmpty();
-                final boolean usesWorkers = EconomyInfo.isWorkerAssignable(ind1) && !hasNoRealOutputs;
+                final boolean usesWorkers = EconomyInfo.isWorkerAssignableByDefault(ind1) && !hasNoRealOutputs;
                 if (hasNoRealOutputs) {
                     outputs.add(abstractOutput);
     
@@ -574,7 +439,7 @@ public class IndustryConfigManager {
 
                 final ArrayMap<String, Float> CCMoneyDist;
                 if (usesWorkers) {
-                    CCMoneyDist = new ArrayMap<>();
+                    CCMoneyDist = new ArrayMap<>(inputs.size());
                     for (Entry<String, ?> entry : inputs.singleEntrySet()) {
                         CCMoneyDist.put(entry.getKey(), 1f);
                     }
@@ -582,7 +447,7 @@ public class IndustryConfigManager {
 
                 final ArrayMap<String, Float> InputsPerUnitOutput;
                 if (!usesWorkers) {
-                    InputsPerUnitOutput = new ArrayMap<>();
+                    InputsPerUnitOutput = new ArrayMap<>(inputs.size());
                     for (Entry<String, Float> entry : inputs.singleEntrySet()) {
                         InputsPerUnitOutput.put(entry.getKey(), entry.getValue());
                     }
@@ -641,61 +506,6 @@ public class IndustryConfigManager {
     
         ind_config.putAll(dynamic_config);
 
-        final JSONObject json = IndustryConfigManager.serializeIndustryConfigs(dynamic_config);
-
-        try {
-            settings.writeJSONToCommon(
-                IndustryConfigManager.DYNAMIC_CONFIG_NAME,
-                json,
-                false
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to write dynamic industry configuration to common JSON file '"
-                + IndustryConfigManager.DYNAMIC_CONFIG_NAME, e
-            );
-        }
-    }
-
-    public static final void populateInputs(final Industry ind, final Map<String, Float> inputs,
-        boolean scaleWithMarketSize
-    ) {
-        ind.getAllDemand().forEach(mutable -> {
-            inputs.put(mutable.getCommodityId(), populateInput(mutable.getQuantity(), scaleWithMarketSize));
-        });
-    }
-
-    public static final float populateInput(final MutableStat base, boolean scaleWithMarketSize) {
-        StatMod baseMod = null;
-        float cumulativeBase = 0f;
-
-        for (StatMod mod : base.getFlatMods().values()) {
-            if (mod.source.endsWith(CompatLayer.BASE_MOD_SUFFIX) && mod.value > 0) {
-                baseMod = baseMod == null ? mod : baseMod;
-
-            } else {
-                if (!mod.source.equals(CompatLayer.DEMAND_RED_MOD) && 
-                    !mod.source.endsWith(CompatLayer.MARKET_COND_MOD_SUFFIX) &&
-                    mod.value >= 0
-                ) { cumulativeBase += mod.value; }
-            }
-        }
-
-        // Since vanilla values are discrete integers
-        final int vanillaValue = Math.round(baseMod != null ? baseMod.value : cumulativeBase);
-        final double expBase = 2;
-
-        float value = vanillaValue;
-        if (scaleWithMarketSize) {
-            value = value - (ConfigUtils.TEST_MARKET_SIZE - 3);
-            final float zeroCount = Math.max(0f, value) - 1f;
-            if (value <= 1f) {
-                value = (float) Math.pow(10f, -1f * (1f - value)); 
-            }
-            value = value * (float) Math.max(1f, Math.pow(expBase, zeroCount));
-        } else {
-            value *= Math.pow(expBase, Math.max(0, vanillaValue - 1));
-        }
-        return value;
+        IndustryConfigLoader.serializeAndWriteToCommon(dynamic_config);
     }
 }

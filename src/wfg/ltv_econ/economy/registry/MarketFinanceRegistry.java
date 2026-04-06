@@ -9,11 +9,12 @@ import java.util.Map;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
 
 public class MarketFinanceRegistry implements Serializable {
-    private final ArrayMap<String, MarketLedger> registry = new ArrayMap<>();
+    private final ArrayMap<String, MarketLedger> registry = new ArrayMap<>(EconomyInfo.getMarketsCount());
 
     public static final MarketFinanceRegistry instance() {
         return LtvEconSaveData.instance().financeRegistry;
@@ -72,10 +73,10 @@ public class MarketFinanceRegistry implements Serializable {
     }
 
     public static class MarketLedger implements Serializable {
-        private final ArrayMap<String, Long> currentMonth = new ArrayMap<>();
-        private final ArrayMap<String, Long> lastMonth = new ArrayMap<>();
-        private final ArrayMap<String, String> currentMonthDesc = new ArrayMap<>();
-        private final ArrayMap<String, String> lastMonthDesc = new ArrayMap<>();
+        private final ArrayMap<String, Long> currentMonth = new ArrayMap<>(8);
+        private final ArrayMap<String, Long> lastMonth = new ArrayMap<>(8);
+        private final ArrayMap<String, String> currentMonthDesc = new ArrayMap<>(8);
+        private final ArrayMap<String, String> lastMonthDesc = new ArrayMap<>(8);
         public final String marketID;
 
         public MarketLedger(String marketID) {

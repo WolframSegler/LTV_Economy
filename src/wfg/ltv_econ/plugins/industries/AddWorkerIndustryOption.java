@@ -6,8 +6,8 @@ import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.campaign.listeners.IndustryOptionProvider;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 
+import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
-import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.dialogs.AssignWorkersDialog;
 import wfg.native_ui.util.NumFormat;
 
@@ -29,7 +29,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
         ) return false;
         if (!DebugFlags.COLONY_DEBUG && !ind.getMarket().isPlayerOwned()) return false;
 
-        return IndustryIOs.getIndConfig(ind).workerAssignable;
+        return IndustryConfigManager.getIndConfig(ind).workerAssignable;
     }
 
     @Override

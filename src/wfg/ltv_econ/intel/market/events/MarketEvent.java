@@ -4,8 +4,8 @@ import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.configs.EventConfigLoader.EventConfig;
-import wfg.ltv_econ.configs.EventConfigLoader.EventSpec;
+import wfg.ltv_econ.config.EventConfig;
+import wfg.ltv_econ.config.EventConfig.EventSpec;
 import wfg.ltv_econ.economy.PlayerMarketData;
 
 public abstract class MarketEvent {

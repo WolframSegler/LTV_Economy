@@ -320,11 +320,6 @@ public class TooltipUtils {
             }
         }
 
-        if (cell.getTargetQuantumUnmet() >= 1) {
-            tp.addToGrid(0, rowCount++, "Post-trade flow deficit", NumFormat.engNotation(
-                -cell.getTargetQuantumUnmet()), negative);
-        }
-
         if (rowCount < 0) {
             title.setText("Not available.");
             title.setHighlight("");

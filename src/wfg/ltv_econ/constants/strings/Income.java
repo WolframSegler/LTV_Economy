@@ -2,7 +2,7 @@ package wfg.ltv_econ.constants.strings;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
 
 public class Income {
     public static final String FACTION_CREW_WAGES_KEY = "faction_fleet_crew_wages";
@@ -45,7 +45,7 @@ public class Income {
     public static final String TRADE_IMPORT_KEY = "trade_import_";
     public static final String TRADE_IMPORT_DESC = "Import cost for ";
 
-    public static final String INDUSTRY_INCOME_KEY = "industry_income";
+    public static final String INDUSTRY_INCOME_KEY = "industry_income_";
     public static final String INDUSTRY_INCOME_DESC = "Industry income";
     public static final String INDUSTRY_UPKEEP_KEY = "industry_upkeep";
     public static final String INDUSTRY_UPKEEP_DESC = "Industry upkeep";

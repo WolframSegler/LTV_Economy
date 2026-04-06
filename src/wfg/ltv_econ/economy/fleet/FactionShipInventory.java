@@ -25,7 +25,7 @@ public class FactionShipInventory implements Serializable {
     private static final String DAILY_SUPPLIES_DEMAND_KEY = "dsdk";
     private static final String DAILY_SUPPLIES_DEMAND_DESC = "Maintenance of faction ships";
 
-    private final ArrayMap<String, ShipTypeData> ships = new ArrayMap<>();
+    private final ArrayMap<String, ShipTypeData> ships = new ArrayMap<>(4);
     final List<ShipProductionOrder> activeQueue = new ArrayList<>();
     final List<PlannedOrder> plannedOrders = new ArrayList<>();
 
@@ -253,6 +253,8 @@ public class FactionShipInventory implements Serializable {
 
     public final void advance() {
         advanceProduction(1);
+
+        ShipProductionManager.planOrders(this);
 
         ShipProductionManager.tryStartPlannedOrders(this, capitalID);
     }

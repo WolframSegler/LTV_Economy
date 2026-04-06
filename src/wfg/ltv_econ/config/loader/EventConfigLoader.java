@@ -1,8 +1,4 @@
-package wfg.ltv_econ.configs;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+package wfg.ltv_econ.config.loader;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,8 +6,9 @@ import org.json.JSONObject;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 
+import wfg.ltv_econ.config.EventConfig;
+import wfg.ltv_econ.config.EventConfig.EventSpec;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
-import wfg.native_ui.util.ArrayMap;
 
 public class EventConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/event_config.json";
@@ -69,25 +66,5 @@ public class EventConfigLoader {
                 + e.getMessage(), e
             );
         }
-    }
-
-    public static class EventConfig {
-        public static final Map<String, EventSpec> map = new ArrayMap<>(16);
-        public static final List<EventSpec> getEventsCopy() {
-            return new ArrayList<>(map.values());
-        }
-
-        static {
-            EventConfigLoader.loadConfig();
-        }
-    }
-
-    public static class EventSpec {
-        public String id;
-        public String name;
-        public Class<? extends MarketEvent> marketEventClass; 
-        public String iconPath;
-        public String description;
-        public final List<String> tags = new ArrayList<>();
     }
 }

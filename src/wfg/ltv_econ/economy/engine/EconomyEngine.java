@@ -26,7 +26,7 @@ import com.fs.starfarer.api.campaign.econ.MonthlyReport;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.SubmarketsID;
 import wfg.ltv_econ.economy.PlayerMarketData;
@@ -104,10 +104,10 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     private transient ExecutorService mainLoopExecutor;
     
     final Set<String> registeredMarkets = new HashSet<>();
-    final ArrayMap<String, CommodityDomain> comDomains = new ArrayMap<>();
+    final ArrayMap<String, CommodityDomain> comDomains = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
     final ArrayMap<String, PlayerMarketData> playerMarketData = new ArrayMap<>();
-    final ArrayMap<String, Long> marketCredits = new ArrayMap<>();
-    final ArrayMap<String, FactionShipInventory> factionShipInventories = new ArrayMap<>();
+    final ArrayMap<String, Long> marketCredits = new ArrayMap<>(EconomyInfo.getMarketsCount());
+    final ArrayMap<String, FactionShipInventory> factionShipInventories = new ArrayMap<>(EconomyConstants.visibleFactionIDs.size());
     final List<TradeMission> activeMissions = new ArrayList<>();
     final List<TradeMission> pastMissions = new ArrayList<>();
 
@@ -304,6 +304,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public final void applyPopulationStabilityMods(MarketAPI market) {
         // TODO Call this using industry post apply hook after update
+        if (!registeredMarkets.contains(market.getId())) return;
         final String marketID = market.getId();
         final String popID = "ind_" + Industries.POPULATION + "_";
         final CommodityCell domCell = getComCell(Commodities.DOMESTIC_GOODS, marketID);
@@ -341,10 +342,19 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
             if (!registeredMarkets.contains(market.getId())) continue;
-
             final MarketLedger ledger = reg.getLedger(market.getId());
-            ledger.add(INDUSTRY_INCOME_KEY, info.getIndustryIncome(market), getDesc(INDUSTRY_INCOME_KEY));
-            ledger.add(INDUSTRY_UPKEEP_KEY, -info.getIndustryUpkeep(market), getDesc(INDUSTRY_UPKEEP_KEY));
+
+            for (Industry ind : market.getIndustries()) {
+                final int indIncome = info.getIndustryIncome(ind).getModifiedInt();
+                if (indIncome != 0) {
+                    ledger.add(INDUSTRY_INCOME_KEY + ind.getId(), indIncome, ind.getCurrentName() + " income");
+                }
+
+                final int indUpkeep = info.getIndustryUpkeep(ind).getModifiedInt();
+                if (indUpkeep != 0) {
+                    ledger.add(INDUSTRY_UPKEEP_KEY + ind.getId(), -indUpkeep, ind.getCurrentName() + " upkeep");
+                }
+            }
         }
     }
 

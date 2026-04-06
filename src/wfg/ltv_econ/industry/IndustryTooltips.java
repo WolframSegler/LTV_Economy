@@ -47,11 +47,11 @@ import static wfg.native_ui.util.UIConstants.*;
 public class IndustryTooltips {
 	private static final SettingsAPI settings = Global.getSettings();
 
-	private static final Map<String, Object> hasPostDemandSectionMethodCache = new ArrayMap<>();
+	private static final Map<String, Object> hasPostDemandSectionMethodCache = new ArrayMap<>(12);
 	private static final Class<?>[] hasPostDemandSectionparamTypes = new Class<?>[]{
 		boolean.class,IndustryTooltipMode.class};
 
-	private static final Map<String, Object> addNonAICoreInstalledItemsMethodCache = new ArrayMap<>();
+	private static final Map<String, Object> addNonAICoreInstalledItemsMethodCache = new ArrayMap<>(12);
 	private static final Class<?>[] addNonAICoreInstalledItemsparamTypes = new Class<?>[]{
 		IndustryTooltipMode.class, TooltipMakerAPI.class, boolean.class};
 

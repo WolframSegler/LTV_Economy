@@ -7,7 +7,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import wfg.native_ui.util.ArrayMap;
 
 public class SystemData {
-    private final ArrayMap<Color, Float> colorWeights = new ArrayMap<>();
+    private final ArrayMap<Color, Float> colorWeights = new ArrayMap<>(2);
     private float totalColorWeight = 0f;
 
     public boolean isSource = false;

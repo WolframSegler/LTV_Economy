@@ -8,13 +8,13 @@ import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.StatBonus;
 
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 public class TradeMission implements Serializable {
-    public final ArrayMap<ShipTypeData, Integer> allocatedShips = new ArrayMap<>();
+    public final ArrayMap<ShipTypeData, Integer> allocatedShips = new ArrayMap<>(8);
     public final List<ComTradeFlow> cargo = new ArrayList<>();
     public final StatBonus credits = new StatBonus();
     public final boolean inFaction;

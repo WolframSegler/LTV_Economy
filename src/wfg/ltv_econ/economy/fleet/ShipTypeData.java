@@ -7,7 +7,7 @@ import java.io.Serializable;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
 
 public class ShipTypeData implements Serializable {
     public static final String FRIGATES = "Frigates";

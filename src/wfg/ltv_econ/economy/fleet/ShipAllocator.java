@@ -108,7 +108,7 @@ public class ShipAllocator {
         
         final double[] x = simplexSolveWithInv(objective, constraints);
         
-        final ArrayMap<ShipTypeData, Integer> idleCopy = new ArrayMap<>();
+        final ArrayMap<ShipTypeData, Integer> idleCopy = new ArrayMap<>(candidates.size());
         for (ShipTypeData data : candidates) {
             idleCopy.put(data, data.getIdle());
         }
@@ -233,7 +233,7 @@ public class ShipAllocator {
     public static final void allocateShipsForTrade(
         FactionAPI faction, TradeMission mission
     ) {
-        allocateShipsForTrade(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
+        allocateShipsForTarget(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
             faction, mission.allocatedShips
         );
     }
@@ -248,7 +248,7 @@ public class ShipAllocator {
      * @param faction used for doctrine preferences
      * @param allocation the allocation to be populated.
      */
-    public static final void allocateShipsForTrade(
+    public static final void allocateShipsForTarget(
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
         FactionAPI faction, ArrayMap<ShipTypeData, Integer> allocation
     ) {

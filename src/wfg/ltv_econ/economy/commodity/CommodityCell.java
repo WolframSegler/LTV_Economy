@@ -13,7 +13,8 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.campaign.econ.Market;
 
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
@@ -26,8 +27,8 @@ import wfg.native_ui.util.ArrayMap;
  */
 public class CommodityCell implements Serializable {
     private static final String DEMAND_ONLY_KEY = "dok";
-
     private static final String DEMAND_ONLY_DESC = "Demand without consumption";
+    private static final int IND_ARRAY_AVG_SIZE = 6;
 
     public final String comID;
     public final String marketID;
@@ -41,8 +42,8 @@ public class CommodityCell implements Serializable {
     private final ArrayMutableStat consumption = new ArrayMutableStat(0f);
     private final ArrayMutableStat targetQuantum = new ArrayMutableStat(0f);
     private final StatBonus informalImportMods = new StatBonus();
-    private transient ArrayMap<String, MutableStat> productionMutables = new ArrayMap<>();
-    private transient ArrayMap<String, MutableStat> consumptionMutables = new ArrayMap<>();
+    private transient ArrayMap<String, MutableStat> productionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
+    private transient ArrayMap<String, MutableStat> consumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
     
     public transient float inFactionImports = 0f;
     public transient float inFactionExports = 0f;
@@ -189,8 +190,8 @@ public class CommodityCell implements Serializable {
         market = Global.getSector().getEconomy().getMarket(marketID);
         spec = Global.getSettings().getCommoditySpec(comID);
 
-        productionMutables = new ArrayMap<>();
-        consumptionMutables = new ArrayMap<>();
+        productionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
+        consumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
 
         return this;
     }
@@ -220,7 +221,7 @@ public class CommodityCell implements Serializable {
 
             // Retrieve IOs
             if (IndustryIOs.hasOutput(ind, comID)) {
-                if (!IndustryIOs.getIndConfig(ind).demandOnly) {
+                if (!IndustryConfigManager.getIndConfig(ind).demandOnly) {
                     final MutableStat supplyStat = CompatLayer.convertIndSupplyStat(ind, comID);
                     productionMutables.put(indID, supplyStat);
                     production.modifyBase(indID, supplyStat.getModifiedValue());
@@ -230,7 +231,7 @@ public class CommodityCell implements Serializable {
             if (IndustryIOs.hasInput(ind, comID)) {
                 final MutableStat demandStat = CompatLayer.convertIndDemandStat(ind, comID);
                 
-                if (IndustryIOs.getIndConfig(ind).demandOnly) {
+                if (IndustryConfigManager.getIndConfig(ind).demandOnly) {
                     targetQuantum.modifyBase(DEMAND_ONLY_KEY + "_" + indID, demandStat.getModifiedValue(),
                         DEMAND_ONLY_DESC + " - " + ind.getCurrentName()
                     );

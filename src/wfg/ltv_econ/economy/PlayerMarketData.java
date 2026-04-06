@@ -13,12 +13,12 @@ import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
-import wfg.ltv_econ.configs.EventConfigLoader.EventConfig;
-import wfg.ltv_econ.configs.EventConfigLoader.EventSpec;
-import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
-import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
-import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
+import wfg.ltv_econ.config.LaborConfig;
+import wfg.ltv_econ.config.PolicyConfigLoader.PolicyConfig;
+import wfg.ltv_econ.config.PolicyConfigLoader.PolicySpec;
+import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EventConfig;
+import wfg.ltv_econ.config.EventConfig.EventSpec;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -150,7 +150,8 @@ public class PlayerMarketData implements Serializable {
     }
 
     /**
-     * Assumes end-of-month
+     * Assumes end
+     -of-month
      */
     public final float getEffectiveProfitRatio() {
         final long net = MarketFinanceRegistry.instance().getLedger(marketID).getNetLastMonth();

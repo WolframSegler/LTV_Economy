@@ -11,7 +11,8 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
-import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -63,9 +64,9 @@ public class IndustryMatrix {
         {
             Set<String> industrySet = new LinkedHashSet<>();
             for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
-                if (IndustryIOs.hasConfig(spec)) {
-                    if (IndustryIOs.getIndConfig(spec).workerAssignable) {
-                        industrySet.add(IndustryIOs.getBaseIndIDifNoConfig(spec));
+                if (IndustryConfigManager.hasConfig(spec)) {
+                    if (IndustryConfigManager.getIndConfig(spec).workerAssignable) {
+                        industrySet.add(IndustryConfigManager.getBaseIndIDifNoConfig(spec));
                     }
                 }
             }
@@ -112,8 +113,9 @@ public class IndustryMatrix {
             }
         }
 
-        INDUSTRY_OUTPUT_PAIR_TO_COLUMN = new ArrayMap<>();
-        for (int i = 0; i < STATIC_INDUSTRY_OUTPUT_PAIRS.size(); i++) {
+        final int size = STATIC_INDUSTRY_OUTPUT_PAIRS.size();
+        INDUSTRY_OUTPUT_PAIR_TO_COLUMN = new ArrayMap<>(size);
+        for (int i = 0; i < size; i++) {
             INDUSTRY_OUTPUT_PAIR_TO_COLUMN.put(STATIC_INDUSTRY_OUTPUT_PAIRS.get(i), i);
         }
 
@@ -131,7 +133,7 @@ public class IndustryMatrix {
             boolean remove = true;
             for (String key : baseOutputs.keySet()) {
                 final IndustrySpecAPI spec = settings.getIndustrySpec(key);
-                final IndustryConfig cfg = IndustryIOs.getIndConfig(spec);
+                final IndustryConfig cfg = IndustryConfigManager.getIndConfig(spec);
 
                 if (!cfg.workerAssignable || !cfg.outputs.containsKey(com) ||
                     !cfg.outputs.get(com).usesWorkers

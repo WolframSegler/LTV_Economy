@@ -9,7 +9,8 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
@@ -139,7 +140,7 @@ public class DenseModel {
                 final Industry ind = (indKey instanceof String s)
                     ? IndustryIOs.getRealIndustryFromBaseID(market, s)
                     : IndustryIOs.getRealIndustryFromBaseID(market, (List<String>) indKey);
-                final OutputConfig output = IndustryIOs.getIndConfig(ind).outputs.get(outputID);
+                final OutputConfig output = IndustryConfigManager.getIndConfig(ind).outputs.get(outputID);
 
                 columnWorkerLimitFrac[denseIdx] = output.workerAssignableLimit;
                 columnIsOutputAbstract[denseIdx] = output.isAbstract || columnComIdx[denseIdx] == -1;

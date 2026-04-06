@@ -12,7 +12,8 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
@@ -23,7 +24,7 @@ import wfg.native_ui.util.ArrayMap;
 public class WorkerRegistry implements Serializable {
     public static final String KEY = "::";
 
-    private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>();
+    private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>(EconomyInfo.getMarketsCount());
 
     public static final WorkerRegistry instance() {
         return LtvEconSaveData.instance().workerRegistry;
@@ -43,9 +44,9 @@ public class WorkerRegistry implements Serializable {
     }
 
     public final void register(Industry ind) {
-        if (!IndustryIOs.getIndConfig(ind).workerAssignable) return;
+        if (!IndustryConfigManager.getIndConfig(ind).workerAssignable) return;
 
-        final String key = makeKey(ind.getMarket().getId(), IndustryIOs.getBaseIndustryID(ind));
+        final String key = makeKey(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
         registry.putIfAbsent(key, new WorkerIndustryData(ind.getMarket().getId(), ind));
     }
 
@@ -58,7 +59,7 @@ public class WorkerRegistry implements Serializable {
     }
 
     public final void remove(String marketID, IndustrySpecAPI ind) {
-        registry.remove(makeKey(marketID, IndustryIOs.getBaseIndustryID(ind)));
+        registry.remove(makeKey(marketID, IndustryConfigManager.getBaseIndustryID(ind)));
     }
 
     public final void remove(String marketID) {
@@ -107,11 +108,11 @@ public class WorkerRegistry implements Serializable {
     }
 
     public final WorkerIndustryData getData(String marketID, IndustrySpecAPI ind) {
-        return getData(marketID, IndustryIOs.getBaseIndustryID(ind));
+        return getData(marketID, IndustryConfigManager.getBaseIndustryID(ind));
     }
 
     public final WorkerIndustryData getData(Industry ind) {
-        return getData(ind.getMarket().getId(), IndustryIOs.getBaseIndustryID(ind));
+        return getData(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
     }
 
     public final void setData(WorkerIndustryData data) {
@@ -149,8 +150,8 @@ public class WorkerRegistry implements Serializable {
 
         public WorkerIndustryData(String marketID, Industry industry) {
             this.marketID = marketID;
-            this.indID = IndustryIOs.getBaseIndustryID(industry);
-            this.outputRatios = new ArrayMap<>();
+            this.indID = IndustryConfigManager.getBaseIndustryID(industry);
+            this.outputRatios = new ArrayMap<>(2);
 
             readResolve();
         }

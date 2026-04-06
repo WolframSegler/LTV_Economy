@@ -11,7 +11,8 @@ import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
-import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
 
@@ -52,7 +53,7 @@ public final class CompatLayer {
     }
 
     public static final MutableStat convertIndSupplyStat(Industry ind, String outputID) {
-        if (IndustryIOs.getIndConfig(ind).demandOnly) return new MutableStat(0f);
+        if (IndustryConfigManager.getIndConfig(ind).demandOnly) return new MutableStat(0f);
         
         final MutableStat src = ind.getSupply(outputID).getQuantity();
         final MutableStat supplyBonus = ind.getSupplyBonus();
@@ -250,7 +251,7 @@ public final class CompatLayer {
         final float totalInput = IndustryIOs.getRealSumInput(ind, inputID);
         float nonAbstractInput = 0f;
 
-        final Map<String, OutputConfig> outputs = IndustryIOs.getIndConfig(ind).outputs;
+        final Map<String, OutputConfig> outputs = IndustryConfigManager.getIndConfig(ind).outputs;
 
         for (String outputID : IndustryIOs.getRealOutputs(ind, true).keySet()) {
             OutputConfig output = outputs.get(outputID);

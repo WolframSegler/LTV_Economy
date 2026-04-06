@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorAPI;
 
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -16,12 +16,18 @@ public class LtvEconSaveData implements Serializable {
     private static LtvEconSaveData instance;
 
     // SERIALIZABLE DATA
-    public WorkerRegistry workerRegistry = new WorkerRegistry();
-    public MarketFinanceRegistry financeRegistry = new MarketFinanceRegistry();
-    public EconomyEngine economyEngine = new EconomyEngine();
-    public PlayerFactionSettings playerFactionSettings = new PlayerFactionSettings();
+    public PlayerFactionSettings playerFactionSettings;
+    public WorkerRegistry workerRegistry;
+    public MarketFinanceRegistry financeRegistry;
+    public EconomyEngine economyEngine;
 
-    private LtvEconSaveData() {}
+    private LtvEconSaveData() {
+        instance = this;
+        playerFactionSettings = new PlayerFactionSettings();
+        workerRegistry = new WorkerRegistry();
+        financeRegistry = new MarketFinanceRegistry();
+        economyEngine = new EconomyEngine();
+    }
 
     public static final LtvEconSaveData loadInstance(boolean forceRefresh,
         boolean newGame

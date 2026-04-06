@@ -34,5 +34,5 @@ public class EconomyConstants {
     );
     public static final List<String> industryIDs = Collections.unmodifiableList(
         settings.getAllIndustrySpecs().stream().map(i -> i.getId()).toList()
-    ); 
+    );
 }

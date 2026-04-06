@@ -10,8 +10,8 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.configs.PolicyConfigLoader.PolicyConfig;
-import wfg.ltv_econ.configs.PolicyConfigLoader.PolicySpec;
+import wfg.ltv_econ.config.PolicyConfigLoader.PolicyConfig;
+import wfg.ltv_econ.config.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;

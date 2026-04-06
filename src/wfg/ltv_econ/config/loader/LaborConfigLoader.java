@@ -1,7 +1,5 @@
-package wfg.ltv_econ.configs;
+package wfg.ltv_econ.config.loader;
 import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
-
-import java.util.Map;
 
 import static wfg.ltv_econ.constants.Mods.*;
 
@@ -12,7 +10,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 
 import lunalib.lunaSettings.LunaSettings;
-import wfg.native_ui.util.ArrayMap;
+import wfg.ltv_econ.config.LaborConfig;
 
 public class LaborConfigLoader {
     private static final SettingsAPI settings = Global.getSettings();
@@ -22,6 +20,7 @@ public class LaborConfigLoader {
 
     public static final String AVERAGE_OCC_TAG = "average"; 
 
+    private LaborConfigLoader() {};
     private static final void load() {
         try {
             config = settings.getMergedJSON(CONFIG_PATH);
@@ -92,38 +91,4 @@ public class LaborConfigLoader {
         LaborConfig.RoVC_map.put("manual", LunaSettings.getDouble(LTV_ECON, "labor_RoVC_manual").floatValue());
         LaborConfig.RoVC_map.put("space", LunaSettings.getDouble(LTV_ECON, "labor_RoVC_space").floatValue());
     }
-
-    public static class LaborConfig {
-
-        public static boolean NPC_WORKER_POOL_VISIBLE;
-        public static boolean GROWTH_EFFECT_WORKER_POOL;
-
-        public static float avg_wage;
-        public static int RoSV;
-        public static int MAX_RoSV;
-        public static int LPV_month;
-        public static float LPV_day;
-
-        public static float defaultWorkerCapPerOutput;
-        public static float dynamicWorkerCapPerOutput;
-
-        public static float RoVC_average;
-        public static final Map<String, Float> RoVC_map = new ArrayMap<>();
-
-        static {
-            LaborConfigLoader.loadConfig();
-        }
-
-        public static final float getRoVC(final String tag) {
-            return RoVC_map.getOrDefault(tag, RoVC_average);
-        }
-
-        public static final float getRoCC(final String tag) {
-            return 1f - RoVC_map.getOrDefault(tag, RoVC_average);
-        }
-
-        private LaborConfig() {};
-    }
-
-    private LaborConfigLoader() {};
 }

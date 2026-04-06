@@ -2,6 +2,8 @@ package wfg.ltv_econ.ui.economyTab;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -13,6 +15,7 @@ import org.apache.log4j.Logger;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.ui.core.UIBuildableAPI;
@@ -163,6 +166,30 @@ public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> impl
 
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Logs the maps used by IndustryIOs to manage industry inputs and outputs", pad);
+            };
+        }
+
+        { // SHIP ALLOCATION
+            final String btnText = "Allocate Ships ";
+            final CallbackRunnable<Button> run = (btn) -> {                
+                final long startTime = System.nanoTime();
+                
+                ShipProductionManager.planOrders(engine.getFactionShipInventory(Factions.HEGEMONY));
+
+                final long endTime = System.nanoTime();
+                final String time = ((endTime - startTime) / 1_000_000) + " ms";
+                logger.info("Elapsed time: " + time);
+                btn.setText(btnText + " - " + time);
+            };
+            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+                btnText, Fonts.DEFAULT_SMALL, run
+            );
+            add(button).inTL(opad, SECTION_I + pad*16 + lblH + BUTTON_H*7);
+
+            button.setEnabled(DebugFlags.COLONY_DEBUG);
+
+            button.tooltip.builder = (tp, expanded) -> {
+                tp.addPara("Plans and allocates ship orders for Hegemony's FactionShipInventory", pad);
             };
         }
         }

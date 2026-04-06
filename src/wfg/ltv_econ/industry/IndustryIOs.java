@@ -21,10 +21,11 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.campaign.econ.Market;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.configs.IndustryConfigManager;
-import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
-import wfg.ltv_econ.configs.IndustryConfigManager.OutputConfig;
-import wfg.ltv_econ.configs.LaborConfigLoader.LaborConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
+import wfg.ltv_econ.config.LaborConfig;
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
@@ -65,23 +66,21 @@ public class IndustryIOs {
     /**
      * Map(industryID, Map(outputID, baseOutput))
      */
-    private static final Map<String, ArrayMap<String, Float>> baseOutputs = new HashMap<>(); 
+    private static final Map<String, ArrayMap<String, Float>> baseOutputs = new HashMap<>(IndustryConfigManager.ind_config.size()); 
 
     /**
      * <code>Map(industryID, Map(outputID, Map(inputID, baseInput)))</code>
      */
-    private static final Map<String, ArrayMap<String, ArrayMap<String, Float>>> baseInputs = new HashMap<>();
+    private static final Map<String, ArrayMap<String, ArrayMap<String, Float>>> baseInputs = new HashMap<>(IndustryConfigManager.ind_config.size());
 
     /**
      * Map(inputID, List(outputID))
      */
-    private static final ArrayMap<String, List<String>> inputToOutput = new ArrayMap<>();
+    private static final ArrayMap<String, List<String>> inputToOutput = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
 
     // Map<commodityID, Set<industryID>>
-    private static final ArrayMap<String, Set<String>> inputToInd = new ArrayMap<>();
-    private static final ArrayMap<String, Set<String>> outputToInd = new ArrayMap<>();
-
-    private static final ArrayMap<String, String> IndToBaseInd = new ArrayMap<>();
+    private static final ArrayMap<String, Set<String>> inputToInd = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
+    private static final ArrayMap<String, Set<String>> outputToInd = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
 
     public static final String ABSTRACT_COM = "abstract";
     public static final String DYNAMIC_OUTPUT = "output_for_input::";
@@ -93,8 +92,6 @@ public class IndustryIOs {
 
     public static final void reload() {
         clearMaps();
-        
-        buildBaseIdMapping();
 
         ConfigInputOutputMaps();
 
@@ -108,14 +105,13 @@ public class IndustryIOs {
         baseInputs.clear();
         inputToOutput.clear();
         inputToInd.clear();
-        IndToBaseInd.clear();
     }
 
     private static final void ConfigInputOutputMaps() {
         for (Map.Entry<String, IndustryConfig> entry : IndustryConfigManager.ind_config.singleEntrySet()) {
-            final ArrayMap<String, Float> outputMap = baseOutputs.computeIfAbsent(entry.getKey(), k -> new ArrayMap<>());
-            final ArrayMap<String, ArrayMap<String, Float>> inputOuterMap = baseInputs.computeIfAbsent(entry.getKey(), k -> new ArrayMap<>());
             final ArrayMap<String, OutputConfig> outputs = entry.getValue().outputs;
+            final var outputMap = baseOutputs.computeIfAbsent(entry.getKey(), k -> new ArrayMap<>(outputs.size()));
+            final var inputOuterMap = baseInputs.computeIfAbsent(entry.getKey(), k -> new ArrayMap<>(outputs.size()));
 
             for (OutputConfig config : outputs.values()) {
                 fillOutputMaps(entry.getValue().occTag, config, outputMap, inputOuterMap);
@@ -126,16 +122,15 @@ public class IndustryIOs {
     private static final void fillOutputMaps(String occTag, OutputConfig output,
         ArrayMap<String, Float> outputMap, ArrayMap<String, ArrayMap<String, Float>> inputOuterMap
     ) {
+        final boolean useCCMoneyDist = output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty() && !output.isAbstract;
+        final int inputCount = useCCMoneyDist ? output.CCMoneyDist.size() : output.InputsPerUnitOutput.size();
         final String outputID = output.comID;
-        final Map<String, Float> inputMap = inputOuterMap.computeIfAbsent(outputID, k -> new ArrayMap<>());
+        final Map<String, Float> inputMap = inputOuterMap.computeIfAbsent(outputID, k -> new ArrayMap<>(inputCount));
 
-        float base = output.baseProd;
+        final float base = (!output.usesWorkers || output.isAbstract) ? output.baseProd :
+            output.baseProd / EconomyInfo.getWorkersPerUnit(outputID, occTag);
 
-        if (output.usesWorkers && !output.isAbstract) {
-            base /= EconomyInfo.getWorkersPerUnit(outputID, occTag);
-        }
-
-        if (output.CCMoneyDist != null && !output.CCMoneyDist.isEmpty() && !output.isAbstract) {
+        if (useCCMoneyDist) {
             final CommoditySpecAPI spec = settings.getCommoditySpec(outputID);
             final float Vcc = spec.getBasePrice() * LaborConfig.getRoCC(occTag);
 
@@ -164,7 +159,7 @@ public class IndustryIOs {
                 inputMap.put(ABSTRACT_COM, value);
             }
 
-        } else if (output.InputsPerUnitOutput != null && !output.InputsPerUnitOutput.isEmpty()) {
+        } else {
             for (Map.Entry<String, Float> demandEntry : output.InputsPerUnitOutput.singleEntrySet()) {
                 final String inputID = demandEntry.getKey();
                 if (inputID.equals(ABSTRACT_COM)) continue;
@@ -212,24 +207,7 @@ public class IndustryIOs {
         }
     }
 
-    private static final void buildBaseIdMapping() {
-        for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
-            IndToBaseInd.put(spec.getId(), getBaseIndustryIDSpec(spec));
-        }
-    }
-
-    private static final String getBaseIndustryIDSpec(IndustrySpecAPI ind) {
-        IndustrySpecAPI currentInd = ind;
-
-        while (true) {
-            String downgradeId = currentInd.getDowngrade();
-            if (downgradeId == null || downgradeId.equals(currentInd.getId())) break;
-
-            currentInd = settings.getIndustrySpec(downgradeId);
-        }
-
-        return currentInd.getId();
-    }
+    
 
     /**
      * @return <ul>
@@ -245,7 +223,7 @@ public class IndustryIOs {
         boolean indHasSupply
     ) {
         if (ind == null) return 1;
-        final IndustryConfig cfg = getIndConfig(ind);
+        final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         if (cfg == null) return 2;
         if (cfg.outputs.containsKey(outputID)) return 3;
         if (Global.getSettings().getCommoditySpec(outputID) == null) return 4;
@@ -275,7 +253,7 @@ public class IndustryIOs {
 
             final ArrayMap<String, Float> CCMoneyDist;
             if (useWorkers) {
-                CCMoneyDist = new ArrayMap<>();
+                CCMoneyDist = new ArrayMap<>(inputs.size());
                 for (Map.Entry<String, ?> entry : inputs.singleEntrySet()) {
                     CCMoneyDist.put(entry.getKey(), 1f);
                 }
@@ -285,7 +263,7 @@ public class IndustryIOs {
 
             final ArrayMap<String, Float> InputsPerUnitOutput;
             if (!useWorkers) {
-                InputsPerUnitOutput = new ArrayMap<>();
+                InputsPerUnitOutput = new ArrayMap<>(inputs.size());
                 for (Map.Entry<String, Float> entry : inputs.singleEntrySet()) {
                     InputsPerUnitOutput.put(entry.getKey(), entry.getValue());
                 }
@@ -307,7 +285,7 @@ public class IndustryIOs {
 
         cfg.outputs.put(outputID, outputConfig);
 
-        final String indID = getBaseIndIDifNoConfig(ind.getSpec());
+        final String indID = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
         final ArrayMap<String, Float> outputMap = baseOutputs.get(indID);
         final ArrayMap<String, ArrayMap<String, Float>> inputOuterMap = baseInputs.get(indID);
         fillOutputMaps(cfg.occTag, outputConfig, outputMap, inputOuterMap);
@@ -332,7 +310,7 @@ public class IndustryIOs {
         boolean indHasDemand
     ) {
         if (ind == null) return 1;
-        final IndustryConfig cfg = getIndConfig(ind);
+        final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         if (cfg == null) return 2;
         if (hasInput(ind, inputID)) return 3;
         if (Global.getSettings().getCommoditySpec(inputID) == null) return 4;
@@ -356,11 +334,15 @@ public class IndustryIOs {
         }
 
         final String outputID = DYNAMIC_OUTPUT + inputID;
+        final float inputValue = IndustryConfigManager.populateInput(input, scaleWithSize);
+        final ArrayMap<String, Float> InputsPerUnitOutput = new ArrayMap<>(1);
+        InputsPerUnitOutput.put(inputID, inputValue);
+
         final OutputConfig output = new OutputConfig(
             outputID, 1, null,
             scaleWithSize, false, true, false,
             Collections.emptyList(), Collections.emptyList(),
-            new ArrayMap<>(), LaborConfig.dynamicWorkerCapPerOutput,
+            InputsPerUnitOutput, LaborConfig.dynamicWorkerCapPerOutput,
             IndustryConfigManager.dynamicIndMarketScaleBase, -1, false
         );
         output.dynamic = true;
@@ -370,10 +352,7 @@ public class IndustryIOs {
 
         cfg.outputs.put(outputID, output);
 
-        final float inputValue = IndustryConfigManager.populateInput(input, scaleWithSize);
-        output.InputsPerUnitOutput.put(inputID, inputValue);
-
-        final String indID = getBaseIndIDifNoConfig(ind.getSpec());
+        final String indID = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
         final ArrayMap<String, Float> outputMap = baseOutputs.get(indID);
         final ArrayMap<String, ArrayMap<String, Float>> inputOuterMap = baseInputs.get(indID);
         fillOutputMaps(cfg.occTag, output, outputMap, inputOuterMap);
@@ -435,7 +414,7 @@ public class IndustryIOs {
      * or if legality prevents the output from being produced.
      */
     public static final float getRealOutput(Industry ind, String outputID) {
-        final IndustryConfig cfg = getIndConfig(ind);
+        final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         final OutputConfig output = cfg.outputs.get(outputID);
 
         if (output == null || output.isAbstract) return 0f;
@@ -455,7 +434,7 @@ public class IndustryIOs {
      * or if legality prevents the output from being produced.
      */
     public static final float getRealInput(Industry ind, String outputID, String inputID) {
-        final IndustryConfig cfg = getIndConfig(ind);
+        final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         final OutputConfig output = cfg.outputs.get(outputID);
 
         final float value = getBaseInput(ind.getSpec(), outputID, inputID);
@@ -473,7 +452,7 @@ public class IndustryIOs {
      */
     public static final float getRealSumInput(Industry ind, String inputID) {
         final Map<String, ArrayMap<String, Float>> indMap = getBaseInputs(ind.getSpec());
-        final IndustryConfig cfg = getIndConfig(ind);
+        final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
 
         float total = 0f;
         for (Map.Entry<String, ArrayMap<String,Float>> inputMap : indMap.entrySet()) {
@@ -498,7 +477,7 @@ public class IndustryIOs {
     public static final Map<String, Float> getRealOutputs(Industry ind, boolean includeAbstract) {
         final Map<String, Float> outputs = getBaseOutputs(ind.getSpec());
 
-        Map<String, Float> scaledOutputs = new ArrayMap<>();
+        Map<String, Float> scaledOutputs = new ArrayMap<>(outputs.size());
         for (String output : outputs.keySet()) {
             float value = getRealOutput(ind, output);
             if (includeAbstract || value > 0) scaledOutputs.put(output, value);
@@ -513,8 +492,9 @@ public class IndustryIOs {
     public static final ArrayMap<String, Float> getRealInputs(Industry ind, String outputID, boolean includeAbstract) {
         final Map<String, ArrayMap<String, Float>> outputs = getBaseInputs(ind.getSpec());
 
-        ArrayMap<String, Float> scaledInputs = new ArrayMap<>();
-        for (String output : outputs.get(outputID).keySet()) {
+        final ArrayMap<String, Float> inputs = outputs.get(outputID);
+        ArrayMap<String, Float> scaledInputs = new ArrayMap<>(inputs.size());
+        for (String output : inputs.keySet()) {
             float value = getRealInput(ind, outputID, output);
             if (includeAbstract || value > 0) scaledInputs.put(output, value);
         }
@@ -528,7 +508,7 @@ public class IndustryIOs {
     public static final Set<String> getRealInputs(Industry ind, boolean includeAbstract) {
         if (ind == null || ind.getId() == null) return Collections.emptySet();
 
-        final String indID = getBaseIndIDifNoConfig(ind.getSpec());
+        final String indID = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
 
         final ArrayMap<String, ArrayMap<String, Float>> outputs = baseInputs.get(indID);
         if (outputs == null) return Collections.emptySet();
@@ -549,7 +529,7 @@ public class IndustryIOs {
      * Ignores market conditions, scaling, and legality.
      */
     public static final float getBaseOutput(IndustrySpecAPI ind, String outputID) {
-        final Map<String, Float> indMap = baseOutputs.get(getBaseIndIDifNoConfig(ind));
+        final Map<String, Float> indMap = baseOutputs.get(IndustryConfigManager.getBaseIndIDifNoConfig(ind));
         if (indMap == null) return 0f;
         return indMap.getOrDefault(outputID, 0f);
     }
@@ -559,7 +539,7 @@ public class IndustryIOs {
      * Ignores market context.
      */
     public static final float getBaseInput(IndustrySpecAPI ind, String outputID, String inputID) {
-        final ArrayMap<String, ArrayMap<String, Float>> indMap = baseInputs.get(getBaseIndIDifNoConfig(ind));
+        final ArrayMap<String, ArrayMap<String, Float>> indMap = baseInputs.get(IndustryConfigManager.getBaseIndIDifNoConfig(ind));
         if (indMap == null) return 0f;
         final ArrayMap<String, Float> inputMap = indMap.get(outputID);
         if (inputMap == null) return 0f;
@@ -570,7 +550,7 @@ public class IndustryIOs {
      * Get total pre-calculated demand for a specific input across all outputs.
      */
     public static final float getBaseSumInput(IndustrySpecAPI ind, String inputID) {
-        final ArrayMap<String, ArrayMap<String, Float>> indMap = baseInputs.get(getBaseIndIDifNoConfig(ind));
+        final ArrayMap<String, ArrayMap<String, Float>> indMap = baseInputs.get(IndustryConfigManager.getBaseIndIDifNoConfig(ind));
         if (indMap == null) return 0f;
 
         float total = 0f;
@@ -584,7 +564,7 @@ public class IndustryIOs {
      * Get the map of pre-calculated outputs for an industry.
      */
     public static final Map<String, Float> getBaseOutputs(IndustrySpecAPI ind) {
-        final ArrayMap<String, Float> map = baseOutputs.get(getBaseIndIDifNoConfig(ind));
+        final ArrayMap<String, Float> map = baseOutputs.get(IndustryConfigManager.getBaseIndIDifNoConfig(ind));
         return (map != null) ? Collections.unmodifiableMap(map) : Collections.emptyMap();
     }
 
@@ -592,69 +572,26 @@ public class IndustryIOs {
      * Get the map of pre-calculated inputs for an industry.
      */
     public static final Map<String, ArrayMap<String, Float>> getBaseInputs(IndustrySpecAPI ind) {
-        final ArrayMap<String, ArrayMap<String, Float>> map = baseInputs.get(getBaseIndIDifNoConfig(ind));
+        final ArrayMap<String, ArrayMap<String, Float>> map = baseInputs.get(IndustryConfigManager.getBaseIndIDifNoConfig(ind));
         return (map != null) ? Collections.unmodifiableMap(map) : Collections.emptyMap();
     }
 
     public static final Map<String, List<String>> getInputToOutput() {
-        Map<String, List<String>> immutableMap = new ArrayMap<>();
+        Map<String, List<String>> immutableMap = new ArrayMap<>(inputToOutput.size());
         for (Map.Entry<String, List<String>> entry : inputToOutput.singleEntrySet()) {
             immutableMap.put(entry.getKey(), Collections.unmodifiableList(entry.getValue()));
         }
 
         return Collections.unmodifiableMap(immutableMap);
     }
-
-    /**
-     * Checks whether a precomputed configuration exists for the given industry.
-     */
-    public static final boolean hasConfig(Industry ind) {
-        return hasConfig(ind.getSpec());
-    }
-
-    public static final boolean hasConfig(IndustrySpecAPI ind) {
-        return IndustryConfigManager.ind_config.containsKey(ind.getId()) 
-            || IndustryConfigManager.ind_config.containsKey(getBaseIndustryID(ind.getId()));
-    }
-
     public static final boolean hasOutput(Industry ind, String comID) {
-        final String id = getBaseIndIDifNoConfig(ind.getSpec());
+        final String id = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
         return outputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }
 
     public static final boolean hasInput(Industry ind, String comID) {
-        final String id = getBaseIndIDifNoConfig(ind.getSpec());
+        final String id = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
         return inputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
-    }
-
-    public static final IndustryConfig getIndConfig(Industry ind) {
-        return getIndConfig(ind.getSpec());
-    }
-
-    public static final IndustryConfig getIndConfig(IndustrySpecAPI ind) {
-        final IndustryConfig indConfig = IndustryConfigManager.ind_config.get(ind.getId());
-
-        return indConfig != null ? indConfig :
-            IndustryConfigManager.ind_config.get(getBaseIndustryID(ind.getId()));
-    }
-
-    public static String getBaseIndustryID(String id) {
-        return IndToBaseInd.get(id);
-    }
-
-    public static String getBaseIndustryID(IndustrySpecAPI ind) {
-        return getBaseIndustryID(ind.getId());
-    }
-
-    public static String getBaseIndustryID(Industry ind) {
-        return getBaseIndustryID(ind.getId());
-    }
-
-    public static final String getBaseIndIDifNoConfig(IndustrySpecAPI ind) {
-        if (IndustryConfigManager.ind_config.containsKey(ind.getId())) {
-            return ind.getId();
-        }
-        return getBaseIndustryID(ind.getId());
     }
 
     /**
@@ -679,7 +616,7 @@ public class IndustryIOs {
      */
     public static Industry getRealIndustryFromBaseID(MarketAPI market, List<String> baseIDList) {
         for (Industry ind : market.getIndustries()) {
-            final String realBaseID = IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec());
+            final String realBaseID = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
             for (String baseID : baseIDList) {
                 if (realBaseID.equals(baseID)) return ind;
             }
@@ -723,9 +660,7 @@ public class IndustryIOs {
             "--------------------------" + "\n" +
             "outputsToInd" + "\n" +
             outputToInd.toString() + "\n" +
-            "--------------------------" + "\n" +
-            "IndToBaseInd" + "\n" +
-            IndToBaseInd.toString()
+            "--------------------------"
         );
     }
 }

@@ -1,9 +1,10 @@
-package wfg.ltv_econ.configs;
+package wfg.ltv_econ.config.loader;
 
 import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 
 import lunalib.lunaSettings.LunaSettingsListener;
+import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.planning.IndustryGrouper;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;

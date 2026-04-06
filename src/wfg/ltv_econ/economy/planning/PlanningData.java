@@ -7,7 +7,8 @@ import java.util.List;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
-import wfg.ltv_econ.configs.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -30,10 +31,10 @@ public class PlanningData {
             for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
                 if (!ind.isFunctional()) continue;
 
-                final IndustryConfig config = IndustryIOs.getIndConfig(ind);
+                final IndustryConfig config = IndustryConfigManager.getIndConfig(ind);
                 if (!config.workerAssignable) continue;
 
-                final String indID = IndustryIOs.getBaseIndIDifNoConfig(ind.getSpec());
+                final String indID = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
 
                 for (String outputID : config.outputs.keySet()) {
                     if (!CompatLayer.hasRelevantCondition(outputID, market)) continue;

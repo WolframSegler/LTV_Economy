@@ -21,8 +21,9 @@ import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.configs.EconomyConfigLoader.DebtDebuffTier;
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.EconomyConfig.DebtDebuffTier;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -185,7 +186,7 @@ public class EconomyLoop {
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(KEY);
 
                 final float ratio = (assignments[i] / totalWorkers);
-                final String baseInd = IndustryIOs.getBaseIndustryID(indAndOutputID[0]);
+                final String baseInd = IndustryConfigManager.getBaseIndustryID(indAndOutputID[0]);
                 WorkerIndustryData data = reg.getData(market.getId(), baseInd);
                 if (data == null) {
                     reg.register(market);
@@ -265,7 +266,7 @@ public class EconomyLoop {
     private final void dispatchTrade() {
         engine.comDomains.values().forEach(CommodityDomain::createFormalTradeFlows);
 
-        final ArrayMap<String, TradeMission> missions = new ArrayMap<>();
+        final ArrayMap<String, TradeMission> missions = new ArrayMap<>(32);
         for (CommodityDomain dom : engine.comDomains.values()) {
             for (ComTradeFlow flow : dom.getTradeFlows()) {
                 final TradeMission mission = missions.computeIfAbsent(

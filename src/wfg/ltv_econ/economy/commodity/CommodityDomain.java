@@ -15,10 +15,12 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
-import wfg.ltv_econ.configs.TradeWeights;
-import wfg.ltv_econ.configs.EconomyConfigLoader.EconomyConfig;
+import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.constants.EconomyConstants;
+import wfg.ltv_econ.constants.TradeWeights;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.util.Arithmetic;
@@ -29,8 +31,8 @@ public class CommodityDomain implements Serializable {
     public final String comID;
     public transient CommoditySpecAPI spec;
 
-    private final ArrayMap<String, CommodityCell> comCells = new ArrayMap<>();
-    private final List<ComTradeFlow> tradeFlows = new ArrayList<>();
+    private final ArrayMap<String, CommodityCell> comCells = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
+    private final List<ComTradeFlow> tradeFlows = new ArrayList<>(EconomyInfo.getMarketsCount());
     private InformalExchangeNode informalNode;
 
     private float[] tradeVolumeHistory = new float[EconomyConfig.HISTORY_LENGTH];

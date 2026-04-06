@@ -187,7 +187,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             }
             systems.removeAll(systemsToRemove);
             
-            final ArrayMap<SystemPair, List<ComTradeFlow>> uniqueFlows = new ArrayMap<>();
+            final ArrayMap<SystemPair, List<ComTradeFlow>> uniqueFlows = new ArrayMap<>(tradeFlows.size() / 2);
             for (ComTradeFlow flow : tradeFlows) {
                 if (flow.exporter.getStarSystem().equals(flow.importer.getStarSystem())) continue;
 

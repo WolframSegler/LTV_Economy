@@ -34,8 +34,8 @@ public class FiltersDialog extends DockPanel {
     private Slider minAmountSlider;
     private float minAmountSliderValueCache = ComTradeFlowMap.minTradeAmount;
 
-    public FiltersDialog(int width, int height, UIBuildableAPI content) {
-        super(width, height, Side.RIGHT);
+    public FiltersDialog(UIBuildableAPI content) {
+        super(400, 430, Side.RIGHT);
 
         removeWhenClosed = true;
 

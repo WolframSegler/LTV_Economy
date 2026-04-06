@@ -88,6 +88,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	protected void addRouteFleetIfPossible() {
 		final TradeMission mission = pickTradeMission();
+		if (mission == null) return;
 		final MarketAPI src = mission.src;
 		final MarketAPI dest = mission.dest;
 

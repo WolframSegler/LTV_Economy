@@ -1,4 +1,4 @@
-package wfg.ltv_econ.configs;
+package wfg.ltv_econ.config;
 
 import java.util.ArrayList;
 import java.util.List;

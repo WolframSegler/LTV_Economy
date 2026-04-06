@@ -10,29 +10,19 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.MarketEventsDialog;
+import wfg.ltv_econ.ui.reusable.DockButton;
 import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.panels.Button;
 import wfg.native_ui.ui.panels.SpritePanel.Base;
 
-public class MarketEventsButton extends Button {
+public class MarketEventsButton extends DockButton<MarketEventsDialog> {
     private static final String ICON = Global.getSettings().getSpriteName("icons", "events_button");
 
-    private static MarketEventsDialog dock;
-
     public MarketEventsButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
-        super(parent, width, height, null, null, null);
+        super(parent, width, height, null, null, () -> new MarketEventsDialog(market));
 
-        final boolean hasData = EconomyEngine.instance().isPlayerMarket(market.getId());
-
-        onClicked = (btn) -> {
-            if (!hasData) return;
-            if (dock == null) createDock(market);
-            if (dock.isOpen()) dock.close();
-            else dock.open(true);
-        };
-        setQuickMode(true);
         setShortcut(Keyboard.KEY_1);
         setAppendShortcutToText(false);
+        setShowTooltipWhileInactive(true);
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;
 
@@ -45,12 +35,7 @@ public class MarketEventsButton extends Button {
         add(icon).inBL(0f, 0f);
         glow.type = GlowType.ADDITIVE;
         glow.additiveSprite = icon.getSprite();
-    }
 
-    private final void createDock(MarketAPI market) {
-        dock = new MarketEventsDialog(market);
-        dock.onRemoved = (dock) -> {
-            dock = null;
-        };
+        if (!EconomyEngine.instance().isPlayerMarket(market.getId())) setEnabled(false);
     }
 }
