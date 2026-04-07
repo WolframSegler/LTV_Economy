@@ -12,7 +12,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.panels.DockPanel;
+import wfg.native_ui.ui.container.DockPanel;
 
 public class IncomeBreakdownDialog extends DockPanel {
     private static final SettingsAPI settings = Global.getSettings();

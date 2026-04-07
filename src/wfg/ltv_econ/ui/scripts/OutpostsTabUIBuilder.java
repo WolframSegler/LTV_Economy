@@ -32,9 +32,9 @@ import wfg.ltv_econ.ui.outpostsTab.ColonyPopulationTable;
 import wfg.ltv_econ.ui.outpostsTab.FactionResourcesTable;
 import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.ui.Attachments;
-import wfg.native_ui.ui.panels.Button;
-import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.util.CallbackRunnable;
 
 public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<Button> {
@@ -132,7 +132,7 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         econButton = new Button(
             outpostsTab, BUTTON_WIDTH + 25, BUTTON_HEIGHT, "Economy", Fonts.ORBITRON_12, this
         );
-        econButton.setShortcut(Keyboard.KEY_6);
+        econButton.setShortcutAndAppendToText(Keyboard.KEY_6);
         econButton.cutStyle = CutStyle.TL_TR;
         econButton.overrideCutSize = 6;
         econButton.setHighlightBrightness(0.3f);
@@ -215,9 +215,9 @@ public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<
         showColoniesButton.setAlignment(Alignment.LMID);
         showPopButton.setAlignment(Alignment.LMID);
         showFacButton.setAlignment(Alignment.LMID);
-        showColoniesButton.setShortcut(Keyboard.KEY_Q);
-        showPopButton.setShortcut(Keyboard.KEY_A);
-        showFacButton.setShortcut(Keyboard.KEY_S);
+        showColoniesButton.setShortcutAndAppendToText(Keyboard.KEY_Q);
+        showPopButton.setShortcutAndAppendToText(Keyboard.KEY_A);
+        showFacButton.setShortcutAndAppendToText(Keyboard.KEY_S);
 
         panel.addComponent(showColoniesButton.getPanel()).belowMid(anchor, opad);
         panel.addComponent(showPopButton.getPanel()).belowMid(showColoniesButton.getPanel(), opad);

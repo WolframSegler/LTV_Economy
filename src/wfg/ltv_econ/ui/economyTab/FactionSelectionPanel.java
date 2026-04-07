@@ -14,13 +14,13 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.components.AudioFeedbackComp;
-import wfg.native_ui.ui.components.BackgroundComp;
-import wfg.native_ui.ui.components.HoverGlowComp;
-import wfg.native_ui.ui.components.InteractionComp;
-import wfg.native_ui.ui.components.NativeComponents;
-import wfg.native_ui.ui.components.OutlineComp;
-import wfg.native_ui.ui.components.OutlineComp.OutlineType;
+import wfg.native_ui.ui.component.AudioFeedbackComp;
+import wfg.native_ui.ui.component.BackgroundComp;
+import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.InteractionComp;
+import wfg.native_ui.ui.component.NativeComponents;
+import wfg.native_ui.ui.component.OutlineComp;
+import wfg.native_ui.ui.component.OutlineComp.OutlineType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
@@ -29,11 +29,11 @@ import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.core.UIElementFlags.HasUIContext;
-import wfg.native_ui.ui.components.TooltipComp;
-import wfg.native_ui.ui.components.UIContextComp;
-import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.ui.component.TooltipComp;
+import wfg.native_ui.ui.component.UIContextComp;
+import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.visual.SpritePanel.Base;
 
 public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> implements
     HasOutline, HasBackground, HasUIContext, UIBuildableAPI

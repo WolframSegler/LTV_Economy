@@ -15,7 +15,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.native_ui.ui.Attachments;
-import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panel.CustomPanel;
 
 public class UiHierarchyTree implements EveryFrameScript {
     private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");

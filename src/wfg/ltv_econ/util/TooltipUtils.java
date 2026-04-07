@@ -35,7 +35,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
-import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 
@@ -270,7 +270,7 @@ public class TooltipUtils {
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowProductionIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getIndProductionStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
             final IndustrySpecAPI ind = settings.getIndustrySpec(entry.getKey());
 
@@ -341,7 +341,7 @@ public class TooltipUtils {
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowConsumptionIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getIndConsumptionStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
             final IndustrySpecAPI ind = settings.getIndustrySpec(entry.getKey());
 

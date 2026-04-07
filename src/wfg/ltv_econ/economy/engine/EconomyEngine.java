@@ -63,6 +63,7 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.TempData;
 import com.fs.starfarer.api.impl.campaign.shared.SharedData;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator;
+import com.fs.starfarer.campaign.econ.Economy;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
 import com.fs.starfarer.api.campaign.listeners.ColonyInteractionListener;
 import com.fs.starfarer.api.campaign.listeners.ColonyPlayerHostileActListener;
@@ -112,8 +113,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     final List<TradeMission> pastMissions = new ArrayList<>();
 
     protected int dayKeyTracker = -1;
-    protected int cyclesSinceTrade = 0;
-    protected int cyclesSinceWorkerAssign = 0;
+    protected int cyclesSinceWorkerAssign = EconomyConfig.WORKER_ASSIGN_INTERVAL;
+    protected int cyclesSinceTrade = EconomyConfig.TRADE_INTERVAL;
     protected int lastTradeCycle = EconomyConfig.TRADE_INTERVAL;
     protected boolean midDayApplied = false;
 
@@ -337,30 +338,11 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         } else market.getStability().unmodifyFlat(popID + 2);
     }
 
-    private final void endMonth() {
-        final MarketFinanceRegistry reg = MarketFinanceRegistry.instance();
-
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            if (!registeredMarkets.contains(market.getId())) continue;
-            final MarketLedger ledger = reg.getLedger(market.getId());
-
-            for (Industry ind : market.getIndustries()) {
-                final int indIncome = info.getIndustryIncome(ind).getModifiedInt();
-                if (indIncome != 0) {
-                    ledger.add(INDUSTRY_INCOME_KEY + ind.getId(), indIncome, ind.getCurrentName() + " income");
-                }
-
-                final int indUpkeep = info.getIndustryUpkeep(ind).getModifiedInt();
-                if (indUpkeep != 0) {
-                    ledger.add(INDUSTRY_UPKEEP_KEY + ind.getId(), -indUpkeep, ind.getCurrentName() + " upkeep");
-                }
-            }
-        }
-    }
-
     // LISTENERS ------------------------------------------------------------------------------------
 
     public void reportEconomyTick(int iterIndex) {
+        if (Economy.NUM_ITER_PER_MONTH - 1 != iterIndex) return; // isEndOfMonth
+
         final MarketFinanceRegistry financeReg = MarketFinanceRegistry.instance();
         final MonthlyReport report = SharedData.getData().getCurrentReport();
 
@@ -493,7 +475,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     /**
-     * This method runs after {@link #reportEconomyTick}. Practically the same method but delayed.
+     * This method runs after {@link #reportEconomyTick} and unlike it, only runs once a month.
      */
     public void reportEconomyMonthEnd() {}
 
@@ -559,6 +541,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         applyBombardmentStockpileReduction(market, true);
     }
 
+    // PRIVATES ------------------------------------------------------------------------------------
+
     private final void applyBombardmentStockpileReduction(MarketAPI market, boolean isSaturation) {
         if (market == null) return;
         final String marketID = market.getId();
@@ -603,4 +587,25 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         }
 		return result;
 	}
+
+    private final void endMonth() {
+        final MarketFinanceRegistry reg = MarketFinanceRegistry.instance();
+
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            if (!registeredMarkets.contains(market.getId())) continue;
+            final MarketLedger ledger = reg.getLedger(market.getId());
+
+            for (Industry ind : market.getIndustries()) {
+                final int indIncome = info.getIndustryIncome(ind).getModifiedInt();
+                if (indIncome != 0) {
+                    ledger.add(INDUSTRY_INCOME_KEY + ind.getId(), indIncome, ind.getCurrentName() + " income");
+                }
+
+                final int indUpkeep = info.getIndustryUpkeep(ind).getModifiedInt();
+                if (indUpkeep != 0) {
+                    ledger.add(INDUSTRY_UPKEEP_KEY + ind.getId(), -indUpkeep, ind.getCurrentName() + " upkeep");
+                }
+            }
+        }
+    }
 }

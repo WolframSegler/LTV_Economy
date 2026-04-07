@@ -9,11 +9,12 @@ import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.native_ui.util.ArrayMap;
 
 public class EventConfig {
+    public static final Map<String, EventSpec> map = new ArrayMap<>(16);
+
     static {
         EventConfigLoader.loadConfig();
     }
-
-    public static final Map<String, EventSpec> map = new ArrayMap<>(16);
+    
     public static final List<EventSpec> getEventsCopy() {
         return new ArrayList<>(map.values());
     }

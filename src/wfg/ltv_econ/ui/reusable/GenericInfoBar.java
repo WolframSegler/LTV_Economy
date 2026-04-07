@@ -12,7 +12,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.RenderUtils;
 
 public class GenericInfoBar<PanelType extends GenericInfoBar<PanelType>> extends CustomPanel<PanelType> {

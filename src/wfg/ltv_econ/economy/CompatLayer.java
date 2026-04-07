@@ -46,9 +46,8 @@ public final class CompatLayer {
     public static final MutableStat convertIndDemandStat(Industry ind, String inputID) {
         final MutableStat src = ind.getDemand(inputID).getQuantity();
         final MutableStat dest = new MutableStat(0f);
-        final MutableStat modifier = getDemandReductionMutable(ind, inputID);
 
-        copyMods(ind, src, modifier, dest, inputID, true);
+        copyMods(ind, src, dest, inputID, true);
         return dest;
     }
 
@@ -56,21 +55,20 @@ public final class CompatLayer {
         if (IndustryConfigManager.getIndConfig(ind).demandOnly) return new MutableStat(0f);
         
         final MutableStat src = ind.getSupply(outputID).getQuantity();
-        final MutableStat supplyBonus = ind.getSupplyBonus();
         final MutableStat dest = new MutableStat(0f);
 
-        copyMods(ind, src, supplyBonus, dest, outputID, false);
+        copyMods(ind, src, dest, outputID, false);
         return dest;
     }
 
-    private static final void copyMods(Industry ind, MutableStat base, MutableStat bonus, MutableStat dest,
+    private static final void copyMods(Industry ind, MutableStat base, MutableStat dest,
         String comID, boolean isDemand) {
 
         float value = getBaseValue(ind, comID, isDemand);
         dest.setBaseValue(value);
         if (value == 0) return;
 
-        dest.applyMods(getModifiers(ind, comID, base, bonus));
+        dest.applyMods(getModifiers(ind, comID, base, isDemand ? getDemandReductionMutable(ind, comID) : ind.getSupplyBonus()));
     }
 
     /**
@@ -130,6 +128,20 @@ public final class CompatLayer {
             ind.getDemand(comID).getQuantity() : ind.getSupply(comID).getQuantity();
 
         return getModifiers(ind, comID, base, bonus).computeEffective(1f);
+    }
+
+    public static final boolean hasRelevantCondition(String comID, MarketAPI market) {
+        boolean hasRelevantCondition = true;
+        if (ResourceDepositsCondition.COMMODITY.containsValue(comID)) {
+            hasRelevantCondition = false;
+            for (MarketConditionAPI cond : market.getConditions()) {
+                String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
+                if (comID.equals(condComID)) {
+                    return true;
+                }
+            }
+        }
+        return hasRelevantCondition;
     }
 
     /*
@@ -207,7 +219,7 @@ public final class CompatLayer {
         }
     }
 
-    public static final void applyResourceDepositMods(Industry ind, StatBonus dest, String comID) {
+    private static final void applyResourceDepositMods(Industry ind, StatBonus dest, String comID) {
         for (MarketConditionAPI cond : ind.getMarket().getConditions()) {
             final String commodityId = ResourceDepositsCondition.COMMODITY.get(cond.getId());
             if (commodityId == null || !commodityId.equals(comID)) continue;
@@ -221,20 +233,6 @@ public final class CompatLayer {
             final float converted = marketConditionModConverter(mod);
             dest.modifyMult(cond.getId() + EconomyLoop.KEY + ind.getId(), converted, cond.getName());
         }
-    }
-
-    public static final boolean hasRelevantCondition(String comID, MarketAPI market) {
-        boolean hasRelevantCondition = true;
-        if (ResourceDepositsCondition.COMMODITY.containsValue(comID)) {
-            hasRelevantCondition = false;
-            for (MarketConditionAPI cond : market.getConditions()) {
-                String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
-                if (comID.equals(condComID)) {
-                    return true;
-                }
-            }
-        }
-        return hasRelevantCondition;
     }
 
     private static final MutableStat getDemandReductionMutable(Industry ind, String inputID) {

@@ -12,7 +12,7 @@ import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel.RowPanel;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.UIContext;
 import wfg.native_ui.ui.UIContext.Context;
-import wfg.native_ui.ui.dialogs.DialogPanel;
+import wfg.native_ui.ui.dialog.DialogPanel;
 
 public class ConfirmEmbargoDialog extends DialogPanel  {
 

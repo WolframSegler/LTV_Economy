@@ -162,7 +162,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		Industry best = null;
 		float bestScore = 0;
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowProductionIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getIndProductionStats().singleEntrySet()) {
             final Industry ind = market.getIndustry(entry.getKey());
             if (ind == null) continue;
 
@@ -174,7 +174,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 			}
         }
 
-        for (Map.Entry<String, MutableStat> entry : cell.getFlowConsumptionIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> entry : cell.getIndConsumptionStats().singleEntrySet()) {
             final Industry ind = market.getIndustry(entry.getKey());
             if (ind == null) continue;
 

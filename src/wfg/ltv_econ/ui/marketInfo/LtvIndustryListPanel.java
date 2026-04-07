@@ -41,10 +41,10 @@ import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.UIContext;
 import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panels.Button;
-import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.TextPanel;
-import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.visual.TextPanel;
+import wfg.native_ui.ui.functional.Button.CutStyle;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> implements UIBuildableAPI {
@@ -333,7 +333,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 		);
 		buildButton.cutStyle = CutStyle.TL_BR;
 		buildButton.setLabelColor(base);
-		buildButton.setShortcut(Keyboard.KEY_A);
+		buildButton.setShortcutAndAppendToText(Keyboard.KEY_A);
 		buildButton.context.ignore = false;
 		buildButton.context.target = Context.NONE;
 		

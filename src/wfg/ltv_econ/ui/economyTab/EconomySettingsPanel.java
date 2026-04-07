@@ -19,8 +19,8 @@ import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panels.Button;
-import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
 public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> implements UIBuildableAPI {

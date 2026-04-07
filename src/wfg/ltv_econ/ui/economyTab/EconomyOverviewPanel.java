@@ -13,9 +13,9 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.TradeFlowOptions;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panels.Button;
-import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.util.CallbackRunnable;
 import static wfg.native_ui.util.UIConstants.*;
 

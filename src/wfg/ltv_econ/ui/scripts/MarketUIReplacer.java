@@ -27,9 +27,9 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
-import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.TextPanel;
+import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.visual.TextPanel;
 
 import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
@@ -264,8 +264,8 @@ public class MarketUIReplacer implements EveryFrameScript {
 
                 tp.addSectionHeading("Industries & Structures", base, dark, Alignment.MID, opad);
 
-                tp.addPara("Income: %s", pad, highlight, indIncome);
-                tp.addPara("Upkeep: %s", pad, negative, indUpkeep);
+                tp.addPara("Income: %s", opad, highlight, indIncome);
+                tp.addPara("Upkeep: %s", opad, negative, indUpkeep);
 
                 if (expanded) {
                     tp.addPara("Income multiplier: %s", opad, highlight,

@@ -12,13 +12,13 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.util.TooltipUtils;
-import wfg.native_ui.ui.components.HoverGlowComp;
-import wfg.native_ui.ui.components.NativeComponents;
-import wfg.native_ui.ui.components.TooltipComp;
-import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.NativeComponents;
+import wfg.native_ui.ui.component.TooltipComp;
+import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.panels.SpritePanel;
+import wfg.native_ui.ui.visual.SpritePanel;
 
 import static wfg.native_ui.util.UIConstants.*;
 

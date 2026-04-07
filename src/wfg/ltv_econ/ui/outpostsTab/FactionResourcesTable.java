@@ -15,13 +15,13 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.native_ui.ui.components.BackgroundComp;
-import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.component.BackgroundComp;
+import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
-import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.SortableTable;
-import wfg.native_ui.ui.panels.SortableTable.cellAlg;
-import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.table.SortableTable;
+import wfg.native_ui.ui.table.SortableTable.cellAlg;
+import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
 
 public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> implements HasBackground {

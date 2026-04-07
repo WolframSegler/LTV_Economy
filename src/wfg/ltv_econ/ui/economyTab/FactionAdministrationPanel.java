@@ -12,8 +12,8 @@ import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panels.Button;
-import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
 public class FactionAdministrationPanel extends CustomPanel<FactionAdministrationPanel> implements UIBuildableAPI {

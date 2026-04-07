@@ -9,7 +9,7 @@ import com.fs.starfarer.api.combat.BaseEveryFrameCombatPlugin;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
 
 import wfg.native_ui.ui.Attachments;
-import wfg.native_ui.ui.dialogs.DialogPanel;
+import wfg.native_ui.ui.dialog.DialogPanel;
 
 public class TitleScreenWarningPlugin extends BaseEveryFrameCombatPlugin {
     private static boolean shown = false;

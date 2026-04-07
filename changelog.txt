@@ -1,4 +1,5 @@
 v0.3.0-beta | Sliver of Silver Passage | NOT SAVE COMPATIBLE
+- Switched to WrapUI v0.4.0 for this update.
 - It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
 - Added a ship inventory for each faction. Currently only used for trade fleets. If a faction cannot use its own ships for trading, it must hire independent haulers at a cost.
     - Player‑owned fleets require sufficient idle cargo, fuel, crew, and escort ships from the faction inventory; otherwise independent haulers are used.

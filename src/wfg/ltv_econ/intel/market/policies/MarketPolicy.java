@@ -17,9 +17,6 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.intel.PolicyNotificationIntel;
 
-/**
- * Subclasses can use {@link #apply(PlayerMarketData data)} as a sort of constructor.
- */
 public abstract class MarketPolicy {
     public enum PolicyState { ACTIVE, COOLDOWN, AVAILABLE }
     
@@ -33,6 +30,7 @@ public abstract class MarketPolicy {
     public boolean notifyWhenFinished = false;
     public boolean repeatAfterCooldown = false;
 
+    /** Can be called multiple times */
     public abstract void apply(PlayerMarketData data);
     public abstract void unapply(PlayerMarketData data);
     public void preAdvance(PlayerMarketData data) {};

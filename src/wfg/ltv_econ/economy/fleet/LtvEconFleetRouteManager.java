@@ -40,7 +40,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.intel.events.PiracyRespiteScript;
-import com.fs.starfarer.api.impl.campaign.intel.misc.TradeFleetDepartureIntel;
 import com.fs.starfarer.api.impl.campaign.rulecmd.KantaCMD;
 import com.fs.starfarer.api.impl.campaign.shared.SharedData;
 import com.fs.starfarer.api.util.Misc;
@@ -170,7 +169,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		route.setDelay(delay);
 
 		if (!Factions.PLAYER.equals(route.getFactionId())) {
-			new TradeFleetDepartureIntel(route);
+			// TODO maybe create a custom TradeFleetIntel that does not rely on CustomData
+			// new TradeFleetDepartureIntel(route);
 		}
 	}
 

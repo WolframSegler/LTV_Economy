@@ -15,15 +15,15 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.components.BackgroundComp;
-import wfg.native_ui.ui.components.NativeComponents;
-import wfg.native_ui.ui.components.OutlineComp;
-import wfg.native_ui.ui.components.UIContextComp;
-import wfg.native_ui.ui.components.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.component.BackgroundComp;
+import wfg.native_ui.ui.component.NativeComponents;
+import wfg.native_ui.ui.component.OutlineComp;
+import wfg.native_ui.ui.component.UIContextComp;
+import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
-import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panel.CustomPanel;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements HasBackground, HasOutline,

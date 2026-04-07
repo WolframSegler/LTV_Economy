@@ -7,10 +7,10 @@ import org.lwjgl.input.Keyboard;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
-import wfg.ltv_econ.ui.reusable.DockButton;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panels.CustomPanel;
-import wfg.native_ui.ui.panels.Button.CutStyle;
+import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.functional.DockButton;
+import wfg.native_ui.ui.functional.Button.CutStyle;
 
 public class TradeFlowOptions extends CustomPanel<TradeFlowOptions> {
     private static final int FILTERS_BTN_H = 32;
@@ -28,7 +28,7 @@ public class TradeFlowOptions extends CustomPanel<TradeFlowOptions> {
         );
         filterBtn.cutStyle = CutStyle.TL_TR;
         filterBtn.bgAlpha = 1f;
-        filterBtn.setShortcut(Keyboard.KEY_Q);
+        filterBtn.setShortcutAndAppendToText(Keyboard.KEY_Q);
         add(filterBtn).inTL(0f, 0f);
     }
 }

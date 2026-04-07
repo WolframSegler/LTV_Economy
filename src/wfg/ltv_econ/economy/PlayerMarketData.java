@@ -117,7 +117,7 @@ public class PlayerMarketData implements Serializable {
         );
     }
 
-    public void advance(int days) {
+    public final void advance(int days) {
         for (MarketPolicy policy : policies) {
             if (policy.isActive()) policy.preAdvance(this);
         }
@@ -142,7 +142,6 @@ public class PlayerMarketData implements Serializable {
         advance(1);
     }
 
-
     public boolean withdrewCreditsThisMonth = false;
 
     public final void endMonth() {
@@ -150,8 +149,7 @@ public class PlayerMarketData implements Serializable {
     }
 
     /**
-     * Assumes end
-     -of-month
+     * Assumes end-of-month
      */
     public final float getEffectiveProfitRatio() {
         final long net = MarketFinanceRegistry.instance().getLedger(marketID).getNetLastMonth();
@@ -163,7 +161,15 @@ public class PlayerMarketData implements Serializable {
         return (float) Math.min(playerProfitRatio, endCredits / (double) net);
     }
 
+    public final void apply() {
+        // TODO modify later to use reportIndustryApplied method in the future
+        for (MarketPolicy policy : policies) {
+            if (policy.isActive()) policy.apply(this);
+        }
+    }
+
     // PRIVATE METHODS
+
     private final void advanceMarket(int days) {
         updateHealthDelta();
         updateHappinessDelta();

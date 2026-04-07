@@ -10,9 +10,9 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.MarketEventsDialog;
-import wfg.ltv_econ.ui.reusable.DockButton;
-import wfg.native_ui.ui.components.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.panels.SpritePanel.Base;
+import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.functional.DockButton;
+import wfg.native_ui.ui.visual.SpritePanel.Base;
 
 public class MarketEventsButton extends DockButton<MarketEventsDialog> {
     private static final String ICON = Global.getSettings().getSpriteName("icons", "events_button");

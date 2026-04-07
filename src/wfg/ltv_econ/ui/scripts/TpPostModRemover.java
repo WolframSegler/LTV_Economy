@@ -13,7 +13,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.native_ui.ui.panels.CustomPanel;
+import wfg.native_ui.ui.panel.CustomPanel;
 
 public class TpPostModRemover implements EveryFrameScript {
     private boolean isDone = false;

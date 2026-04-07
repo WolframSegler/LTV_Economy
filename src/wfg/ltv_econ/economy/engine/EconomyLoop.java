@@ -78,6 +78,8 @@ public class EconomyLoop {
         
         weightedOutputDeficitMods();
 
+        engine.playerMarketData.values().forEach(PlayerMarketData::apply);
+
         if (!fakeAdvance) {
             engine.playerMarketData.values().forEach(PlayerMarketData::advance);
 
@@ -209,7 +211,7 @@ public class EconomyLoop {
         final float totalMarketOutput = cell.getProduction(false);
         final float invMarketOutput = 1f / totalMarketOutput;
 
-        for (Map.Entry<String, MutableStat> industryEntry : cell.getFlowProductionIndStats().singleEntrySet()) {
+        for (Map.Entry<String, MutableStat> industryEntry : cell.getIndProductionStats().singleEntrySet()) {
             final String industryID = industryEntry.getKey();
             final MutableStat industryStat = industryEntry.getValue();
 

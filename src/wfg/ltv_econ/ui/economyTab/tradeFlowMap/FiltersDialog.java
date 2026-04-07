@@ -13,18 +13,18 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.components.NativeComponents;
-import wfg.native_ui.ui.components.TooltipComp;
+import wfg.native_ui.ui.component.NativeComponents;
+import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panels.Button;
-import wfg.native_ui.ui.panels.CheckboxButton;
-import wfg.native_ui.ui.panels.DockPanel;
-import wfg.native_ui.ui.panels.RadioPanel;
-import wfg.native_ui.ui.panels.Slider;
-import wfg.native_ui.ui.panels.Button.CutStyle;
-import wfg.native_ui.ui.systems.NativeSystems;
-import wfg.native_ui.ui.systems.TooltipSystem;
-import wfg.native_ui.ui.panels.RadioPanel.LayoutMode;
+import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.functional.CheckboxButton;
+import wfg.native_ui.ui.container.DockPanel;
+import wfg.native_ui.ui.widget.RadioPanel;
+import wfg.native_ui.ui.widget.Slider;
+import wfg.native_ui.ui.functional.Button.CutStyle;
+import wfg.native_ui.ui.system.NativeSystems;
+import wfg.native_ui.ui.system.TooltipSystem;
+import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 
 public class FiltersDialog extends DockPanel {
     private static final SettingsAPI settings = Global.getSettings();

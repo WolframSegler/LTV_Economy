@@ -13,7 +13,6 @@ import com.fs.starfarer.api.impl.campaign.fleets.EconomyFleetRouteManager;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.util.Misc;
-import com.thoughtworks.xstream.XStream;
 
 import lunalib.lunaSettings.LunaSettings;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
@@ -26,16 +25,10 @@ import wfg.ltv_econ.economy.fleet.LtvEconFleetRouteManager;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
-import wfg.ltv_econ.serializable.LenientIntArrayConverter;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.scripts.UIInjectorListener;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
-
-    @Override
-    public void configureXStream(XStream x) {
-        x.registerConverter(new LenientIntArrayConverter(), XStream.PRIORITY_VERY_HIGH);
-    }
 
     @Override
     public void onApplicationLoad() throws Exception {

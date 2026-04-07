@@ -52,10 +52,10 @@ public class CommodityCell implements Serializable {
     public transient float informalImports = 0f;
     public transient float informalExports = 0f;
 
-    public final ArrayMap<String, MutableStat> getFlowProductionIndStats() {
+    public final ArrayMap<String, MutableStat> getIndProductionStats() {
         return productionMutables;
     }
-    public final ArrayMap<String, MutableStat> getFlowConsumptionIndStats() {
+    public final ArrayMap<String, MutableStat> getIndConsumptionStats() {
         return consumptionMutables;
     }
     public final MutableStat getIndProdStat(String industryID) {

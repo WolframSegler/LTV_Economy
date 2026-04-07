@@ -7,10 +7,10 @@ import java.awt.Color;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.native_ui.ui.panels.SpritePanel;
-import wfg.native_ui.ui.components.AudioFeedbackComp;
-import wfg.native_ui.ui.components.InteractionComp;
-import wfg.native_ui.ui.components.NativeComponents;
+import wfg.native_ui.ui.visual.SpritePanel;
+import wfg.native_ui.ui.component.AudioFeedbackComp;
+import wfg.native_ui.ui.component.InteractionComp;
+import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 
