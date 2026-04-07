@@ -119,7 +119,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 
 			wrappertp.addComponent(widget.getPanel()).inTL(
 				i * (IndustryWidget.PANEL_WIDTH + opad) + pad,
-				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + pad*5)
+				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + hpad*3)
 			);
 
 			addWidgetTooltip(IndustryTooltipMode.NORMAL, ind, widget);
@@ -143,14 +143,14 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 
 			wrappertp.addComponent(widget.getPanel()).inTL(
 				i * (IndustryWidget.PANEL_WIDTH + opad) + pad,
-				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + pad*5)
+				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + hpad*3)
 			);
 
 			addWidgetTooltip(IndustryTooltipMode.QUEUED, ind, widget);
 
 			widgets.add(widget);
 		}
-		wrappertp.setHeightSoFar(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + opad*1.5f);
+		wrappertp.setHeightSoFar(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + hpad*3);
 
 		ComponentFactory.addTooltip(wrappertp, getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
 			true, m_panel
@@ -261,12 +261,12 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 
 					final String indent = "    ";
 					boolean anyIndustryAdded = false;
-					int paragraphSpacing = 5;
+					int paragraphSpacing = hpad;
 
 					for (Industry industry : industries) {
 						if (industry.isIndustry()) {
 							tp.addPara(indent + industry.getCurrentName(), paragraphSpacing);
-							paragraphSpacing = 3;
+							paragraphSpacing = pad;
 							anyIndustryAdded = true;
 						} else if (industry.isUpgrading()) {
 							String upgradeId = industry.getSpec().getUpgrade();
@@ -277,7 +277,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 										indent + industry.getCurrentName() + " (upgrading to " + 
 										upgradedIndustry.getCurrentName() + ")", paragraphSpacing
 									);
-									paragraphSpacing = 3;
+									paragraphSpacing = pad;
 									anyIndustryAdded = true;
 								}
 							}

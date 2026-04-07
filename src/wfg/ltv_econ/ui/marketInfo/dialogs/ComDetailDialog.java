@@ -287,7 +287,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         // Text
         final String comID = m_com.getId();
-        final int baseY = (int) (headerHeight + opad * 1.5f);
+        final int baseY = (int) (headerHeight + hpad*3);
         final Color baseColor = m_faction.getBaseUIColor();
         { // Global market value
             final TextPanel textPanel = new TextPanel(section, 170, 0) {

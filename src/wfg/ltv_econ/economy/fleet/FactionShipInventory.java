@@ -32,7 +32,6 @@ public class FactionShipInventory implements Serializable {
     public final String factionID;
     String capitalID;
     transient EconomyAPI econ;
-    transient EconomyEngine engine;
 
     public FactionShipInventory(String factionID) {
         this.factionID = factionID;
@@ -44,7 +43,6 @@ public class FactionShipInventory implements Serializable {
         ships.entrySet().removeIf(entry -> entry.getValue().spec == null); // Remove invalids
 
         econ = Global.getSector().getEconomy();
-        engine = EconomyEngine.instance();
 
         return this;
     }
@@ -245,7 +243,7 @@ public class FactionShipInventory implements Serializable {
 
     public final void update() {
         final String capitalID = getCapital().getId();
-        final CommodityCell suppliesCell = engine.getComCell(Commodities.SUPPLIES, capitalID);
+        final CommodityCell suppliesCell = EconomyEngine.instance().getComCell(Commodities.SUPPLIES, capitalID);
 
         suppliesCell.getConsumptionStat().modifyFlat(DAILY_SUPPLIES_DEMAND_KEY, getTotalDailyMaintenance(), DAILY_SUPPLIES_DEMAND_DESC);
         suppliesCell.getTargetQuantumStat().modifyFlat(DAILY_SUPPLIES_DEMAND_KEY, getTotalDailyMaintenance(), DAILY_SUPPLIES_DEMAND_DESC);
@@ -287,7 +285,7 @@ public class FactionShipInventory implements Serializable {
         final MarketAPI oldCapital = econ.getMarket(capitalID);
 
         if (oldCapital != null) {
-            final CommodityCell suppliesCell = engine.getComCell(Commodities.SUPPLIES, capitalID);
+            final CommodityCell suppliesCell = EconomyEngine.instance().getComCell(Commodities.SUPPLIES, capitalID);
             suppliesCell.getConsumptionStat().unmodifyFlat(DAILY_SUPPLIES_DEMAND_KEY);
             suppliesCell.getTargetQuantumStat().unmodifyFlat(DAILY_SUPPLIES_DEMAND_KEY);
         }

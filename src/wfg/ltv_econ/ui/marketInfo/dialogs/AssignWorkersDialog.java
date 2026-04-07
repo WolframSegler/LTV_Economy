@@ -1,7 +1,6 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.UIColors.GRAY;
 import static wfg.ltv_econ.constants.UIColors.SLIDER_BASE;
 
 import java.awt.Color;
@@ -115,7 +114,7 @@ public class AssignWorkersDialog extends DialogPanel {
         // Draw separator line
         final BasePanel separator = new BasePanel(
             innerPanel, panelWidth, 1
-        ) {{ bg.color = GRAY;}};
+        ) {{ bg.color = gray;}};
         
         separator.getPos().inTL(0, sliderY - opad);
         innerPanel.addComponent(separator.getPanel());
@@ -239,7 +238,7 @@ public class AssignWorkersDialog extends DialogPanel {
             count++;
             if (count % itemsPerRow == 0 && count != 0) {
                 x = opad;
-                y += iconSize + 5f; // line height + padding between rows
+                y += iconSize + hpad;
             }
 
             // draw icon
@@ -263,10 +262,10 @@ public class AssignWorkersDialog extends DialogPanel {
             lbl.getPosition().inTL(textX, textY);
 
             // advance X
-            x += sectionWidth + 5f;
+            x += sectionWidth + hpad;
         }
         tp.setHeightSoFar(y);
-        ComponentFactory.addTooltip(tp, panelHeight, false, panel).inTL(opad / 2, 0);
+        ComponentFactory.addTooltip(tp, panelHeight, false, panel).inTL(hpad, 0);
 
         tp = ComponentFactory.createTooltip((panelWidth / 2) - opad, false);
         tp.addSectionHeading(importing ? "Import" : "Demand", color, dark, Alignment.MID, opad);
@@ -284,7 +283,7 @@ public class AssignWorkersDialog extends DialogPanel {
             count++;
             if (count % itemsPerRow == 0 && count != 0) {
                 x = opad;
-                y += iconSize + 5f; // line height + padding between rows
+                y += iconSize + hpad;
             }
             final float availability = cell.getStoredAvailabilityRatio();
 
@@ -311,10 +310,10 @@ public class AssignWorkersDialog extends DialogPanel {
             lbl.getPosition().inTL(textX, textY);
 
             // advance X
-            x += sectionWidth + 5f;
+            x += sectionWidth + hpad;
         }
         tp.setHeightSoFar(y);
-        ComponentFactory.addTooltip(tp, panelHeight, false, panel).inTR(opad / 2, 0);
+        ComponentFactory.addTooltip(tp, panelHeight, false, panel).inTR(hpad, 0);
 
     }
 

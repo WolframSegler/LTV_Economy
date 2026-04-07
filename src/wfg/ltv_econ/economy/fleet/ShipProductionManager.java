@@ -44,7 +44,7 @@ public class ShipProductionManager {
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
         final List<PlannedOrder> plannedOrders = inv.plannedOrders;
         final List<ShipProductionOrder> activeQueue = inv.activeQueue;
-        final List<TradeMission> missions = inv.engine.getActiveMissions();
+        final List<TradeMission> missions = EconomyEngine.instance().getActiveMissions();
 
         float deficitCargo = computeDesiredCargo(missions, faction) - inv.getTotalCargoCapacity();
         float deficitFuel = computeDesiredFuel(missions, faction) - inv.getTotalFuelCapacity();
@@ -89,7 +89,7 @@ public class ShipProductionManager {
 
     public static final void tryStartPlannedOrders(FactionShipInventory inv, String capitalID) {
         final MarketFinanceRegistry register = MarketFinanceRegistry.instance();
-        final EconomyEngine engine = inv.engine;
+        final EconomyEngine engine = EconomyEngine.instance();
         final Iterator<PlannedOrder> it = inv.plannedOrders.iterator();
 
         while (it.hasNext()) {

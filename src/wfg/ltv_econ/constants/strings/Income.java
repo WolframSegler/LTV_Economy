@@ -33,8 +33,8 @@ public class Income {
     public static final String COLONY_HAZARD_PAY_KEY = "hazard_pay";
     public static final String COLONY_HAZARD_PAY_DESC = "Hazard pay";
 
-    public static final String POLICY_COST_KEY = "policy_cost";
-    public static final String POLICY_COST_DESC = "Policy cost";
+    public static final String POLICY_COST_KEY = "policy_cost_";
+    public static final String POLICY_COST_DESC = "Policy cost for ";
 
     public static final String PLAYER_MARKET_TRANSACTION_KEY = "player_market";
     public static final String PLAYER_MARKET_TRANSACTION_DESC = "Player market transactions (buy/sell)";

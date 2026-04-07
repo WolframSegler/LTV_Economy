@@ -16,7 +16,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.constants.UIColors;
@@ -569,7 +568,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             tp.setParaFontColor(base);
             tp.addPara("Global Export Share by Faction", pad);
             tp.setParaFontDefault();
-            tp.setParaFontColor(Misc.getTextColor());
+            tp.setParaFontColor(text_color);
             tp.addPara(
                 "Shows the percentage of total exports controlled by factions and informals. " +
                 "Percentages do not include in-faction trade." +
@@ -643,7 +642,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             tp.setParaFontColor(base);
             tp.addPara("Global Import Share by Faction", pad);
             tp.setParaFontDefault();
-            tp.setParaFontColor(Misc.getTextColor());
+            tp.setParaFontColor(text_color);
             tp.addPara(
                 "Shows the percentage of total imports made by factions and informals. " +
                 "Percentages do not include in-faction trade." +
@@ -719,7 +718,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             tp.setParaFontColor(base);
             tp.addPara("Global vs In-Faction Trade Share", pad);
             tp.setParaFontDefault();
-            tp.setParaFontColor(Misc.getTextColor());
+            tp.setParaFontColor(text_color);
             tp.addPara(
                 "Shows the proportion of this commodity's total exports that are traded outside the producing faction (%s)" +
                 " versus exports consumed within the same faction (%s). " +

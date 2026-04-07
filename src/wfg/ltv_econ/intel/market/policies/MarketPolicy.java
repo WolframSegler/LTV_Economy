@@ -4,7 +4,8 @@ import static wfg.ltv_econ.constants.strings.Income.POLICY_COST_KEY;
 import static wfg.ltv_econ.constants.strings.Income.getDesc;
 import static wfg.native_ui.util.UIConstants.*;
 
-import java.awt.Color;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
@@ -71,13 +72,9 @@ public abstract class MarketPolicy {
     }
 
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
-        tp.setParaFontOrbitron();
-        tp.setParaFontColor(base);
-        tp.addPara(spec.name, pad, base);
+        tp.addTitle(spec.name, base);
         
-        tp.setParaFontDefault();
-        tp.setParaFontColor(Color.WHITE);
-        tp.addPara(spec.description, pad);
+        tp.addPara(spec.description, text_color, pad);
 
         if (state == PolicyState.COOLDOWN) {
             tp.addPara(String.format(
@@ -110,7 +107,9 @@ public abstract class MarketPolicy {
             !DebugFlags.COLONY_DEBUG
         ) return;
 
-        MarketFinanceRegistry.instance().getLedger(data.marketID).add(POLICY_COST_KEY, -spec.cost, getDesc(POLICY_COST_KEY));
+        MarketFinanceRegistry.instance().getLedger(data.marketID).add(
+            POLICY_COST_KEY + id, -spec.cost, getDesc(POLICY_COST_KEY) + spec.name
+        );
         activeDaysRemaining = durationDays;
         state = PolicyState.ACTIVE;
         apply(data);
@@ -126,5 +125,13 @@ public abstract class MarketPolicy {
         cooldownDaysRemaining = cooldownDays;
         state = PolicyState.COOLDOWN;
         unapply(data);
+    }
+
+    public static final List<String> getPolicyLedgerKeys(final PlayerMarketData data) {
+        final List<String> keys = new ArrayList<>(4);
+        for (MarketPolicy policy : data.getPolicies()) {
+            keys.add(POLICY_COST_KEY + policy.spec.id);
+        }
+        return keys;
     }
 }

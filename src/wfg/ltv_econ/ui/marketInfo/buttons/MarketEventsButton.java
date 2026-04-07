@@ -20,7 +20,7 @@ public class MarketEventsButton extends DockButton<MarketEventsDialog> {
     public MarketEventsButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
         super(parent, width, height, null, null, () -> new MarketEventsDialog(market));
 
-        setShortcut(Keyboard.KEY_1);
+        setShortcut(Keyboard.KEY_2);
         setAppendShortcutToText(false);
         setShowTooltipWhileInactive(true);
         bgAlpha = 0f;

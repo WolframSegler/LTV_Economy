@@ -107,7 +107,7 @@ public class ColonyInvDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, hpad);
                 };
             }
         };
@@ -137,7 +137,7 @@ public class ColonyInvDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, hpad);
                 };
             }
         };
@@ -178,7 +178,7 @@ public class ColonyInvDialog extends DialogPanel {
                     );
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, 5);
+                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, hpad);
                 };
             }
         };
@@ -343,11 +343,11 @@ public class ColonyInvDialog extends DialogPanel {
 
             Color baseBlcColor = baseBalance < 0 ? 
                 negative : baseBalance > 0 ?
-                positive : Misc.getTextColor();
+                positive : text_color;
 
             Color realBlcColor = realBalance < 0 ? 
                 negative : realBalance > 0 ?
-                positive : Misc.getTextColor();
+                positive : text_color;
 
             table.addCell(comIcon, cellAlg.MID, null, null);
             table.addCell(com.getName(), cellAlg.LEFT, com.getName(), base);

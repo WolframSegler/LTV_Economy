@@ -25,9 +25,9 @@ public class CommodityInfoBar extends GenericInfoBar<CommodityInfoBar> {
         final float inFactionImportRatio = cell.getTargetQuantumMetViaFactionTrade() / footprint;
         final float globalImportRatio = (cell.getTargetQuantumMetViaGlobalTrade() +
             cell.getTargetQuantumMetViaInformalTrade()) / footprint;
-        final float overImportRatio = (cell.getTotalImports() - cell.getTargetQuantumMetViaTrade()) / footprint;
+        final float overImportRatio = cell.getOverImports() / footprint;
         final float exportedRatio = cell.getTotalExports() / footprint;
-        final float notExportedRatio = cell.getSurplusAfterTargetQuantum() / footprint;
+        final float notExportedRatio = cell.getRemainingExportableAfterTargetQuantum() / footprint;
         final float deficitRatio = cell.getTargetQuantumUnmet() / footprint;
 
         barMap.put(UIColors.COM_LOCAL_PROD, demandMetLocalRatio);

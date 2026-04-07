@@ -38,6 +38,7 @@ import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.util.CallbackRunnable;
 
 public class OutpostsTabUIBuilder implements EveryFrameScript, CallbackRunnable<Button> {
+    // TODO make this id dynamic
     public static final int BUTTON_TAB_ID = 5;
 
     public static final int BUTTON_HEIGHT = 18;

@@ -517,7 +517,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         final ScrollPanel policyContainer = new ScrollPanel(innerPanel, PANEL_W - opad, policyHeight + opad);
         policyContainer.scrollType = ScrollType.HORIZONTAL;
-        innerPanel.addComponent(policyContainer.getPanel()).inTL(opad/2f, SECT_III_H + subtitleH + pad*2);
+        innerPanel.addComponent(policyContainer.getPanel()).inTL(hpad, SECT_III_H + subtitleH + pad*2);
 
         int posterCount = 0;
         for (MarketPolicy policy : data.getPolicies()) {
@@ -540,7 +540,7 @@ public class ManagePopulationDialog extends DialogPanel {
                     policy.activate(data);
                     buildPoster(policyContainer.getContentPanel(), policy, data,
                         source.interaction.onClicked, policyWidth, policyHeight
-                    ).inBL(pad + posterIndex*(policyWidth + pad), opad/2f);
+                    ).inBL(pad + posterIndex*(policyWidth + pad), hpad);
 
                     innerPanel.removeComponent(selectedPolicyCont);
                     selectedPolicyCont = settings.createCustom(
@@ -559,7 +559,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             buildPoster(policyContainer.getContentPanel(), policy, data, listener,  
                 policyWidth, policyHeight
-            ).inBL(pad + posterCount*(policyWidth + pad), opad/2f);
+            ).inBL(pad + posterCount*(policyWidth + pad), hpad);
 
             posterCount++;
         }
@@ -581,7 +581,7 @@ public class ManagePopulationDialog extends DialogPanel {
         ) {{ interaction.onClicked = listener;}};
 
         final SpritePanelWithTp poster = new SpritePanelWithTp(posterWrap.getPanel(), width, height,
-            policy.spec.posterPath, policy.isOnCooldown() ? Color.GRAY : null, null
+            policy.spec.posterPath, policy.isOnCooldown() ? gray : null, null
         ) {
             public void buildUI() {
                 if (policy.isOnCooldown()) {

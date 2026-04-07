@@ -19,6 +19,4 @@ public class UIColors {
     public static final Color STOCKPILES_EXCESS = new Color(110, 160, 110);
 
     public static final Color SLIDER_BASE = new Color(20, 125, 200);
-
-    public static final Color GRAY = new Color(100, 100, 100);
 }

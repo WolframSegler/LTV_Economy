@@ -96,7 +96,7 @@ public class FiltersDialog extends DockPanel {
         add(exportersLbl).inTL(opad, SECT_II_H + opad);
 
         final LabelAPI importersLbl = settings.createLabel("Importers", Fonts.INSIGNIA_LARGE);
-        final float halfW = (pos.getWidth() - opad*3f) * 0.5f;
+        final float halfW = (pos.getWidth() - opad*3) * 0.5f;
         add(importersLbl).inTL(opad + halfW + opad, SECT_II_H + opad);
 
         final TooltipMakerAPI exportersContainer = ComponentFactory.createTooltip((int)halfW, true);

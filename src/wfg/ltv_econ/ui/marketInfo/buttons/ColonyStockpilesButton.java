@@ -24,7 +24,7 @@ public class ColonyStockpilesButton extends Button {
             dialogPanel.show(0.3f, 0.3f);
         };
         setQuickMode(true);
-        setShortcut(Keyboard.KEY_2);
+        setShortcut(Keyboard.KEY_3);
         setAppendShortcutToText(false);
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;

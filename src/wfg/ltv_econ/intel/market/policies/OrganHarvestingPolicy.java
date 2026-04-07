@@ -46,7 +46,7 @@ public class OrganHarvestingPolicy extends MarketPolicy {
     }
 
     public void postAdvance(PlayerMarketData data) {
-        MarketFinanceRegistry.instance().getLedger(data.marketID).add(id, ASSET_SEIZURE_CREDITS_BUFF, spec.id);
+        MarketFinanceRegistry.instance().getLedger(data.marketID).add(id, ASSET_SEIZURE_CREDITS_BUFF, spec.name);
     }
 
     @Override

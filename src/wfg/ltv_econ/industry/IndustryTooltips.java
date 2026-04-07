@@ -388,7 +388,7 @@ public class IndustryTooltips {
 					count++;
 					if (count % itemsPerRow == 0 && count != 0) {
 						x = opad;
-						y += iconSize + 5f; // line height + padding between rows
+						y += iconSize + hpad;
 					}
 
 					// draw icon
@@ -412,10 +412,10 @@ public class IndustryTooltips {
 					lbl.getPosition().inTL(textX, textY);
 
 					// advance X
-					x += sectionWidth + 5f;
+					x += sectionWidth + hpad;
 				}
 				tp.setHeightSoFar(y + opad*1.5f);
-				NativeUiUtils.resetFlowLeft(tp, opad/2f);
+				NativeUiUtils.resetFlowLeft(tp, hpad);
 			}
 
 			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
@@ -451,7 +451,7 @@ public class IndustryTooltips {
 					count++;
 					if (count % itemsPerRow == 0 && count != 0) {
 						x = opad;
-						y += iconSize + 5f; // line height + padding between rows
+						y += iconSize + hpad;
 					}
 
 					// draw icon
@@ -478,10 +478,10 @@ public class IndustryTooltips {
 					final float textY = y + (iconSize - textH) * 0.5f;
 					lbl.getPosition().inTL(textX, textY);
 
-					x += sectionWidth + 5f;
+					x += sectionWidth + hpad;
 				}
 				tp.setHeightSoFar(y + opad*1.5f);
-				NativeUiUtils.resetFlowLeft(tp, opad/2f);
+				NativeUiUtils.resetFlowLeft(tp, hpad);
 			}
 
 			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(

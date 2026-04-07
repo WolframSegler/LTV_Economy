@@ -36,7 +36,7 @@ public class MarketEventsDialog extends DockPanel {
     private final PlayerMarketData data;
 
     public MarketEventsDialog(final MarketAPI market) {
-        super(Attachments.getCoreUI(), 500,
+        super(Attachments.getCoreUI(), 400,
             (int) settings.getScreenHeight() - 200,
             Side.LEFT
         );

@@ -130,7 +130,10 @@ public class CommodityCell implements Serializable {
         return Math.max(0f, getProduction(true) - getTargetQuantum(true));
     }
     public final float getRemainingExportableAfterTargetQuantum() {
-        return Math.max(0, getSurplusAfterTargetQuantum() - getTotalExports());
+        return Math.max(0f, getSurplusAfterTargetQuantum() - getTotalExports());
+    }
+    public final float getOverImports() {
+        return Math.max(0f, getTotalImports() - getTargetQuantumMetViaTrade());
     }
     public final double computeExportAmount() {
         return Math.max(0.0, stored + getRemainingExportableAfterTargetQuantum()
@@ -146,7 +149,7 @@ public class CommodityCell implements Serializable {
     }
     public final float getFlowEconomicFootprint() {
         return getTargetQuantumMetLocally() + getTargetQuantumMetViaTrade() + getTargetQuantumUnmet()
-            + getTotalExports() + getRemainingExportableAfterTargetQuantum();
+            + getOverImports() + getTotalExports() + getRemainingExportableAfterTargetQuantum();
     }
     public final double getStoredEconomicFootprint() {
         return Math.max(stored, getTargetStockpiles());

@@ -164,7 +164,7 @@ public class TooltipUtils {
                 }
 
                 tp.setHeightSoFar(relativeY);
-                NativeUiUtils.resetFlowLeft(tp, opad/2f);
+                NativeUiUtils.resetFlowLeft(tp, hpad);
                 tp.addTable("", 0, pad);
             }
         }
@@ -234,14 +234,14 @@ public class TooltipUtils {
 
                     final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
                     tp.addCustom(arrowPanel.getPanel(), 0f).getPosition().inTL(610, arrowY);
-                    NativeUiUtils.resetFlowLeft(tp, opad/2f);
+                    NativeUiUtils.resetFlowLeft(tp, hpad);
 
                     rowCount++;
                     if (rowCount >= rowsPerTable) break;
                 }
 
                 tp.setHeightSoFar(relativeY);
-                NativeUiUtils.resetFlowLeft(tp, opad/2f);
+                NativeUiUtils.resetFlowLeft(tp, hpad);
                 tp.addTable("", 0, pad);
             }
         }
@@ -268,7 +268,7 @@ public class TooltipUtils {
         final int valueWidth = 50;
         int rowCount = 0;
 
-        tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
+        tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
 
         for (Map.Entry<String, MutableStat> entry : cell.getIndProductionStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
@@ -339,7 +339,7 @@ public class TooltipUtils {
             NumFormat.engNotation(cell.getConsumption(true))
         );
 
-        tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
+        tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
 
         for (Map.Entry<String, MutableStat> entry : cell.getIndConsumptionStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
@@ -402,7 +402,7 @@ public class TooltipUtils {
         final int valueWidth = 50;
         int rowCount = 0;
 
-        tp.beginGridFlipped(gridWidth, 2, valueWidth, 5);
+        tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
 
         tp.addToGrid(0, rowCount++, "Desired Stockpiles",
             NumFormat.engNotation(cell.getTargetStockpiles())

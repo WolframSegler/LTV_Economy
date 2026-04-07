@@ -24,7 +24,7 @@ public class ManagePopButton extends Button {
             dialogPanel.show(0.3f, 0.3f);
         };
         setQuickMode(true);
-        setShortcut(Keyboard.KEY_3);
+        setShortcut(Keyboard.KEY_4);
         setAppendShortcutToText(false);
         setShowTooltipWhileInactive(true);
         bgAlpha = 0f;
