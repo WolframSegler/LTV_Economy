@@ -78,7 +78,7 @@ public class ManagePopulationDialog extends DialogPanel {
     
     public ManagePopulationDialog(MarketAPI market) {
         super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
-        getButton(0).setShortcut(Keyboard.KEY_3);
+        getButton(0).setShortcutAndAppendToText(Keyboard.KEY_4);
 
         m_market = market;
 

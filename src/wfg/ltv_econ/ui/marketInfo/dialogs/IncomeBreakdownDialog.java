@@ -5,6 +5,7 @@ import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
@@ -41,6 +42,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
     private final MarketAPI market;
     private boolean lastMonth = true;
+    private float scrollLen = 0f;
 
     public IncomeBreakdownDialog(final MarketAPI market) {
         super(Attachments.getCoreUI(), WIDTH,
@@ -62,22 +64,26 @@ public class IncomeBreakdownDialog extends DockPanel {
         final LabelAPI title = settings.createLabel("Income Breakdown", Fonts.INSIGNIA_LARGE);
         add(title).inTL(opad, opad * 2);
 
+        final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(I_WIDTH, true);
+
         final RadioPanel monthSwitch = new RadioPanel(m_panel, 110, 18, LayoutMode.HORIZONTAL)
             .addOption("Prev.", lastMonth)
             .addOption("Curr.", !lastMonth);
         monthSwitch.optionSelected = code -> {
             lastMonth = code == 0;
+            scrollLen = scrollPanel.getExternalScroller().getYOffset();
             buildUI();
         };
         monthSwitch.buildUI();
         add(monthSwitch).inTR(opad*2, opad*2);
 
-        final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(I_WIDTH, true);
-
         incomeBreakdownUI(scrollPanel);
 
         final int offset = opad * 2 + 30;
-        ComponentFactory.addTooltip(scrollPanel, pos.getHeight() - offset - opad, true, m_panel).inTL(pad, offset);
+        final float scrollPanelH = pos.getHeight() - offset - opad;
+        ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, m_panel).inTL(pad, offset);
+
+        scrollPanel.getExternalScroller().setYOffset(Math.min(scrollLen, scrollPanel.getHeightSoFar() - scrollPanelH));
     }
 
     public final void incomeBreakdownUI(final TooltipMakerAPI tp) {
@@ -85,7 +91,7 @@ public class IncomeBreakdownDialog extends DockPanel {
         final EconomyEngine engine = EconomyEngine.instance();
         final PlayerMarketData data = engine.getPlayerMarketData(market.getId());
         final List<CommodityDomain> domains = engine.getComDomains();
-        final List<String> policyKeys = MarketPolicy.getPolicyLedgerKeys(data);
+        final List<String> policyKeys = data != null ? MarketPolicy.getPolicyLedgerKeys(data) : Collections.emptyList();
         final FactionAPI faction = market.getFaction();
         final Color base = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
@@ -150,7 +156,7 @@ public class IncomeBreakdownDialog extends DockPanel {
         tp.addTitle(lastMonth ? "Previous Month" : "Current Month", base);
         tp.addSpacer(opad);
 
-        tp.addPara("Net income: %s", opad, netIncome > 0l ? highlight : negative, NumFormat.formatCreditAbs(netIncome));
+        tp.addPara("Net income: %s", opad, netIncome > 0l ? highlight : negative, NumFormat.formatCredit(netIncome));
         tp.addPara("Gross income: %s", opad, highlight, NumFormat.formatCreditAbs(grossIncome));
         tp.addPara("Gross expense: %s", opad, negative, NumFormat.formatCreditAbs(grossExpense));
 
@@ -246,7 +252,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         tp.addPara(getDesc(COLONY_HAZARD_PAY_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(incentive));
 
-        tp.addPara(getDesc(WORKER_WAGES_KEY) + ": %s", opad, negative, NumFormat.formatCredit(monthlyWages));
+        tp.addPara(getDesc(WORKER_WAGES_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(monthlyWages));
 
         tp.addPara(getDesc(FACTION_CREW_WAGES_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(factionShipsCrewWages));
         

@@ -49,7 +49,7 @@ public class ColonyInvDialog extends DialogPanel {
 
     public ColonyInvDialog(MarketAPI market) {
         super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
-        getButton(0).setShortcut(Keyboard.KEY_2);
+        getButton(0).setShortcutAndAppendToText(Keyboard.KEY_3);
 
         m_market = market;
 
