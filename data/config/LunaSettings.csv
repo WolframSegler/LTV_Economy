@@ -54,5 +54,5 @@ fleet_independentPercentCut,Independent Hauler Percentage Cut,Double,0.1,,Percen
 fleet_independentHazardBase,Independent Hauler Hazard Base,Double,500.0,,Base hazard pay in credits added for dangerous routes.,0,100000,Fleet
 fleet_independentHazardMult,Independent Hauler Hazard Multiplier,Double,8.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
 ,,,,,,,,
-raids_raidStockpileAccessRatio,Raid Stockpile Access Ratio,Double,0.7,,The maximum fraction of a colony's stockpile that can be looted in a single raid.,0,1,Raids
+raids_raidStockpileAccessRatio,Raid Stockpile Access Ratio,Double,0.15,,The maximum fraction of a colony's stockpile that can be looted in a single raid.,0,1,Raids
 raids_raidBaseEff,Raid Base Effectiveness,Double,0.4,,Base multiplier for loot quantity from raids (applies before other modifiers).,0,1,Raids

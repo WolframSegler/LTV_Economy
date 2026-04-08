@@ -144,6 +144,15 @@ public final class CompatLayer {
         return hasRelevantCondition;
     }
 
+    /**
+     * The official mapping from cargo units to economy units.
+     */
+    public static final int cargoUnitToEconUnit(double amount) {
+        if (amount <= 1.0) return 0;
+
+        return Math.max(0, (int) Math.floor(Math.log10(amount)));
+    }
+
     /*
      * Converts vanilla flat mods to LTV mult mods.
      */

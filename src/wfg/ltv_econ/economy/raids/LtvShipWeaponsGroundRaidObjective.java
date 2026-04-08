@@ -30,7 +30,6 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.ui.reusable.StockpileInfoBar;
 import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.NumFormat;
 
@@ -39,6 +38,8 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
 
     public final CargoAPI looted = Global.getFactory().createCargo(true);
     public final CommodityCell cell;
+
+	private UIPanelAPI iconPanel = null;
 
     public LtvShipWeaponsGroundRaidObjective(MarketAPI market) {
         super(market, Commodities.SHIPS);
@@ -233,11 +234,9 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
     }
 
     @Override
-    public final void addIcons(IconGroupAPI iconGroup) {
-        final UIPanelAPI panel = (UIPanelAPI) iconGroup;
-        final StockpileInfoBar infoBar = new StockpileInfoBar(panel, 100, 32, true, cell);
-        panel.addComponent(infoBar.getPanel());
-    }
+	public final void addIcons(IconGroupAPI iconGroup) {
+		iconPanel = (UIPanelAPI) iconGroup;
+	}
 
     public final int getProjectedCreditsValue() {
         return (int) getQuantity(getMarinesAssigned());
@@ -289,6 +288,8 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
 
     @Override
     public final String getCommodityIdForDeficitIcons() {
+		CommodityCellGroundRaidObjective.addInfoBar(iconPanel, cell);
+
         return cell.comID;
     }
 

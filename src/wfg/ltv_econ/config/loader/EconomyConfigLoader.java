@@ -75,6 +75,7 @@ public class EconomyConfigLoader {
         EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_HAZARD_BASE");
         EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT = (float) root.getDouble("INDEPENDENT_TRADE_FLEET_HAZARD_MULT");
         EconomyConfig.RAID_STOCKPILES_ACCESS_RATIO = root.getDouble("RAID_STOCKPILES_ACCESS_RATIO");
+        EconomyConfig.RAID_BASE_EFF = root.getDouble("RAID_BASE_EFF");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconomyConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());

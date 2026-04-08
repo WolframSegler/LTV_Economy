@@ -2,6 +2,7 @@ package wfg.ltv_econ.economy.raids;
 
 import static wfg.native_ui.util.UIConstants.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -19,22 +20,29 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.RaidDangerLevel;
 import com.fs.starfarer.api.loading.Description;
 import com.fs.starfarer.api.loading.Description.Type;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.IconGroupAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
 import wfg.ltv_econ.ui.reusable.StockpileInfoBar;
 import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.NumFormat;
 
 public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePluginImpl {
     public final CommodityCell cell;
 	public int deficitActuallyCaused;
+
+	private UIPanelAPI iconPanel = null;
 	
 	public CommodityCellGroundRaidObjective(CommodityCell cell) {
 		super(cell.market, cell.comID);
@@ -51,7 +59,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
         quantityLooted = (int) Math.max(1.0, Math.floor(getQuantity(marinesAssigned, lootMult)));
 		
 		loot.addCommodity(id, quantityLooted);
-		cell.addStoredAmount( -quantityLooted);
+		cell.addStoredAmount(-quantityLooted);
 		
 		xpGained = (int) (quantityLooted * cell.spec.getBasePrice() * XP_GAIN_VALUE_MULT);
 		return xpGained;
@@ -59,7 +67,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
     @Override
 	public final int getDeficitCaused() {
-		return (int) getQuantity(getMarinesAssigned());
+		return CompatLayer.cargoUnitToEconUnit(getQuantity(getMarinesAssigned()));
 	}
 
     @Override
@@ -113,16 +121,15 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		return getDangerLevel(cell.spec, cell, source);
 	}
 
-    // TODO test visual layout correctness
     @Override
 	public final void addIcons(IconGroupAPI iconGroup) {
-		final UIPanelAPI panel = (UIPanelAPI) iconGroup;
-        final StockpileInfoBar infoBar = new StockpileInfoBar(panel, 100, 32, true, cell);
-        panel.addComponent(infoBar.getPanel());
+		iconPanel = (UIPanelAPI) iconGroup;
 	}
 
     @Override
 	public final String getCommodityIdForDeficitIcons() {
+		addInfoBar(iconPanel, cell);
+
 		return cell.comID;
 	}
 
@@ -154,6 +161,23 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
     @Override
 	public final float getQuantitySortValue() {
 		return QUANTITY_SORT_TIER_0 + getQuantity(1);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected static final void addInfoBar(final UIPanelAPI panel, final CommodityCell cell) {
+		if (panel == null) return;
+		final List<UIComponentAPI> children = (List<UIComponentAPI>)
+			RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, panel
+		);
+		for (UIComponentAPI child : children) {
+			if (child instanceof CustomPanelAPI custom) {
+				if (custom.getPlugin() instanceof StockpileInfoBar) return;
+			}
+		}
+
+		final int h = 24;
+		final StockpileInfoBar infoBar = new StockpileInfoBar(panel, 130, h, true, cell);
+        panel.addComponent(infoBar.getPanel()).inBL(opad + pad, -h/2);
 	}
 
     protected static final Industry computeCommoditySource(CommodityCell cell) {
@@ -222,7 +246,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
         String desc;
 
         desc = "Reserved stockpiles for local demand.";
-        CommodityRowPanel.legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.STOCKPILES_PREFERRED);
+        CommodityRowPanel.legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.STOCKPILES_TARGET);
         
         y += iconSize + pad;
 
@@ -236,7 +260,6 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
         
         y += iconSize + pad;
     
-        // TODO make sure the offset is correct
-        tp.setHeightSoFar(y + opad*2);
+        tp.setHeightSoFar(y);
 	}
 }

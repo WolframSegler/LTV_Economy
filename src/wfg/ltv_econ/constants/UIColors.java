@@ -15,7 +15,7 @@ public class UIColors {
     public static final Color COM_NOT_EXPORTED = new Color(100, 140, 180);
 
     public static final Color STOCKPILES_DEFICIT = new Color(160, 110, 110);
-    public static final Color STOCKPILES_PREFERRED = new Color(110, 120, 140);
+    public static final Color STOCKPILES_TARGET = new Color(110, 120, 140);
     public static final Color STOCKPILES_EXCESS = new Color(110, 160, 110);
 
     public static final Color SLIDER_BASE = new Color(20, 125, 200);
