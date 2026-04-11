@@ -533,7 +533,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                     final float cy = ay + (by - ay) * travelFrac;
 
                     final float arrowSize = data.pathWidth * 2.5f * (0.4f + 0.6f*arrowAlpha);
-                    SHIP_ARROW.setAngle(NativeUiUtils.rotateSprite(aLocal, bLocal));
+                    NativeUiUtils.rotateSprite(aLocal, bLocal, SHIP_ARROW);
                     SHIP_ARROW.setSize(arrowSize, arrowSize);
                     SHIP_ARROW.setAlphaMult(arrowAlpha);
                     SHIP_ARROW.renderAtCenter(cx, cy);

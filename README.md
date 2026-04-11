@@ -68,6 +68,8 @@ Pallet by Cherry from <a href="https://thenounproject.com/browse/icons/term/pall
 
 behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons/term/behaviour/" target="_blank" title="behaviour Icons">Noun Project</a> (CC BY 3.0)
 
+<a href="https://www.flaticon.com/free-icons/next" title="next icons">Next icons created by Roundicons - Flaticon</a>
+
 <br>
 
 ## AI Generated Assets

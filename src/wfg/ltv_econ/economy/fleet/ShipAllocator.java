@@ -42,12 +42,12 @@ public class ShipAllocator {
     private static final float COMBAT_POWER_BASE_PER_100_TONS = 1.0f;
     private static final float MIN_COMBAT_POWER = 10f;
     private static final float[] COMBAT_POWER_DANGER_MULT = {
-        0.0f,   // NONE
-        0.5f,   // MINIMAL
-        1.0f,   // LOW
-        1.5f,   // MEDIUM
-        2.0f,   // HIGH
-        3.0f    // EXTREME
+        0.0f, // NONE
+        0.5f, // MINIMAL
+        1.0f, // LOW
+        1.5f, // MEDIUM
+        2.0f, // HIGH
+        3.0f  // EXTREME
     };
 
     /**
@@ -68,7 +68,7 @@ public class ShipAllocator {
      *
      * @param targetCargo cargo capacity (tons)
      * @param targetFuel fuel capacity (tons)
-     * @param targetCrew crew (persons)
+     * @param targetCrew crew transport capacity
      * @param targetCombat combat power
      * @param inventory the faction's ship inventory
      * @param allocation the map to be filled with allocations
@@ -90,12 +90,12 @@ public class ShipAllocator {
 
         final int N = candidates.size();
 
-        final double[] objective = buildObjectiveWithInv(
-            N, candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat
+        final double[] objective = buildTargetObjective(
+            candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat
         );
         final ArrayList<LinearConstraint> constraints = new ArrayList<>(N + 4);
 
-        constraints.addAll(buildTargetConstraintsWithInv(N, candidates, targetCargo, targetFuel, targetCrew, targetCombat));
+        constraints.addAll(buildTargetConstraints(candidates, targetCargo, targetFuel, targetCrew, targetCombat));
 
         { // Upper Bound by Idle Constraint 
             final double[] coeffs = new double[N];
@@ -106,7 +106,7 @@ public class ShipAllocator {
             }
         }
         
-        final double[] x = simplexSolveWithInv(objective, constraints);
+        final double[] x = getTargetSolution(objective, constraints);
         
         final ArrayMap<ShipTypeData, Integer> idleCopy = new ArrayMap<>(candidates.size());
         for (ShipTypeData data : candidates) {
@@ -230,7 +230,7 @@ public class ShipAllocator {
      * @param faction used for doctrine preferences
      * @param mission the mission to be updated.
      */
-    public static final void allocateShipsForTrade(
+    public static final void allocateShipsForTarget(
         FactionAPI faction, TradeMission mission
     ) {
         allocateShipsForTarget(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
@@ -243,14 +243,14 @@ public class ShipAllocator {
      * 
      * @param targetCargo cargo capacity (tons)
      * @param targetFuel fuel capacity (tons)
-     * @param targetCrew crew (persons)
+     * @param targetCrew crew transport capacity
      * @param targetCombat combat power
      * @param faction used for doctrine preferences
      * @param allocation the allocation to be populated.
      */
     public static final void allocateShipsForTarget(
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
-        FactionAPI faction, ArrayMap<ShipTypeData, Integer> allocation
+        FactionAPI faction, Map<ShipTypeData, Integer> allocation
     ) {
         final double totalShipment = targetCargo + targetFuel + targetCrew;
         if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is 0");
@@ -264,18 +264,16 @@ public class ShipAllocator {
         }
         if (candidates.isEmpty()) return;
 
-        final int N = candidates.size();
-
-        final double[] objective = buildObjectiveWithInv(
-            N, candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat
+        final double[] objective = buildTargetObjective(
+            candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat
         );
-        final List<LinearConstraint> constraints = buildTargetConstraintsWithInv(
-            N, candidates, targetCargo, targetFuel, targetCrew, targetCombat
+        final List<LinearConstraint> constraints = buildTargetConstraints(
+            candidates, targetCargo, targetFuel, targetCrew, targetCombat
         );
 
-        final double[] x = simplexSolveWithInv(objective, constraints);
+        final double[] x = getTargetSolution(objective, constraints);
 
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < candidates.size(); i++) {
             final int count = (int) Math.ceil(x[i]);
             if (count < 1) continue;
 
@@ -301,7 +299,7 @@ public class ShipAllocator {
         final int diff = Math.abs(doctrine.getShipSize() - shipSizeWeight); // [1, 5]
         mult *= getSizeMatchMultiplier(diff);
         mult *= getHullSizePreferenceMult(doctrine, data.spec.getDesignation());
-        mult *= faction.isShipPriority(data.hullID) ? 1.3 : 1.0;
+        mult *= faction.isShipPriority(data.hullID) ? 0.7 : 1.0;
 
         if (!faction.getId().equals(Factions.PLAYER)) DOCTRINE_PREF_CACHE.put(key, mult);
         return mult;
@@ -340,9 +338,10 @@ public class ShipAllocator {
         };
     }
 
-    private static final List<LinearConstraint> buildTargetConstraintsWithInv(int N, List<ShipTypeData> candidates,
+    private static final List<LinearConstraint> buildTargetConstraints(List<ShipTypeData> candidates,
         double targetCargo, double targetFuel, double targetCrew, double targetCombat
     ) {
+        final int N = candidates.size();
         final List<LinearConstraint> constraints = new ArrayList<>(4);
         { // Cargo Capacity Constraint
             final double[] coeffs = new double[N];
@@ -371,9 +370,10 @@ public class ShipAllocator {
         return constraints;
     }
 
-    private static final double[] buildObjectiveWithInv(int N, List<ShipTypeData> candidates, FactionAPI faction,
+    private static final double[] buildTargetObjective(List<ShipTypeData> candidates, FactionAPI faction,
         double targetCargo, double targetFuel, double targetCrew, double targetCombat
     ) {
+        final int N = candidates.size();
         final double totalShipment = targetCargo + targetFuel + targetCrew;
         final double cargoWeight = targetCargo / totalShipment;
         final double fuelWeight = targetFuel / totalShipment;
@@ -398,11 +398,10 @@ public class ShipAllocator {
         return objective;
     }
 
-    private static final double[] simplexSolveWithInv(final double[] objective, final List<LinearConstraint> constraints) {
+    private static final double[] getTargetSolution(final double[] objective, final List<LinearConstraint> constraints) {
         final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0);
-        final SimplexSolver solver = new SimplexSolver(
-            eps, 30, 1e-4
-        );
+        final SimplexSolver solver = new SimplexSolver(eps, 30, 1e-4);
+
         return solver.optimize(
             new MaxIter(1000), objFunc,
             new LinearConstraintSet(constraints),

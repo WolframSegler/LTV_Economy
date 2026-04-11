@@ -154,7 +154,7 @@ public class TooltipUtils {
                     final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                     final Vector2f targetLoc = market.getStarSystem().getLocation();
 
-                    arrowPanel.getSprite().setAngle(NativeUiUtils.rotateSprite(playerLoc, targetLoc));
+                    NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
 
                     final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
                     tp.addCustom(arrowPanel.getPanel(), 0f).getPosition().inTL(610, arrowY);
@@ -230,7 +230,7 @@ public class TooltipUtils {
                     final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
                     final Vector2f targetLoc = market.getStarSystem().getLocation();
 
-                    arrowPanel.getSprite().setAngle(NativeUiUtils.rotateSprite(playerLoc, targetLoc));
+                    NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
 
                     final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
                     tp.addCustom(arrowPanel.getPanel(), 0f).getPosition().inTL(610, arrowY);

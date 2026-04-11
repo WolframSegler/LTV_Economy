@@ -15,7 +15,8 @@
       "solidarity_colored": "graphics/ui/solidarity_colored.png",
       "solidarity_empty": "graphics/ui/solidarity_empty.png",
       "restricted": "graphics/ui/restricted.png",
-      "settings": "graphics/ui/settings_cog.png"
+      "settings": "graphics/ui/settings_cog.png",
+      "arrow": "arrow1.png"
     },
     "icons": {
       "policy_icon": "graphics/icons/intel/policy_icon.png",
@@ -28,7 +29,10 @@
       "stockpiles_no_demand": "graphics/icons/industry/stockpiles_no_demand.png",
       "events_button": "graphics/icons/buttons/events.png",
       "management_button": "graphics/icons/buttons/management.png",
-      "stockpiles_button": "graphics/icons/buttons/stockpiles.png"
+      "stockpiles_button": "graphics/icons/buttons/stockpiles.png",
+      "smuggling": "graphics/icons/intel/smuggling.png",
+      "ship_outline": "graphics/icons/intel/freighter_outline.png",
+      "cargo_crates": "graphics/icons/industry/cargo_crates.png"
     },
     "map": {
       "star": "graphics/map/star.png",

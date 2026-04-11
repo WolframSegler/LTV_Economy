@@ -37,7 +37,8 @@ public class ShipProductionManager {
     private static final float TRADE_COMBAT_SAFETY_MULT = 1.2f;
     private static final float MIN_COMBAT_POWER = 100f;
 
-    private static final float SHIP_PROD_COST_MULT = 0.35f;
+    private static final float SHIP_PROD_CREDIT_COST_MULT = 0.35f;
+    private static final float SHIP_PROD_SHIPS_COST_MULT = 1.4f;
     private static final CommoditySpecAPI shipSpec = Global.getSettings().getCommoditySpec(Commodities.SHIPS);
 
     public static final void planOrders(FactionShipInventory inv) {
@@ -119,10 +120,10 @@ public class ShipProductionManager {
     public static final PlannedOrder getProductionCost(ShipHullSpecAPI spec) {
         final ArrayMap<String, Float> commodities = new ArrayMap<>(1);
         final int days = getBaseDays(spec);
-        final long credits = (long) (spec.getBaseValue() * SHIP_PROD_COST_MULT);
-        final float shipCost = spec.getBaseValue() / shipSpec.getBasePrice();
+        final long credits = (long) (spec.getBaseValue() * SHIP_PROD_CREDIT_COST_MULT);
+        final float shipsCost = (spec.getBaseValue() / shipSpec.getBasePrice()) * SHIP_PROD_SHIPS_COST_MULT;
         
-        commodities.put(Commodities.SHIPS, shipCost);
+        commodities.put(Commodities.SHIPS, shipsCost);
 
         return new PlannedOrder(spec.getHullId(), credits, commodities, days);
     }
@@ -185,7 +186,7 @@ public class ShipProductionManager {
         return Math.max(desiredCombat, MIN_COMBAT_POWER);
     }
 
-    private static float computeAvgRel(FactionAPI faction) {
+    private static final float computeAvgRel(FactionAPI faction) {
         float total = 0f;
         int count = 0;
         for (FactionAPI other : Global.getSector().getAllFactions()) {

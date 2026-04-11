@@ -425,7 +425,7 @@ public class EconomyLoop {
     }
 
     private final void allocIndependentFleetToTradeMission(final TradeMission mission) {
-        ShipAllocator.allocateShipsForTrade(Global.getSector().getFaction(Factions.INDEPENDENT), mission);
+        ShipAllocator.allocateShipsForTarget(Global.getSector().getFaction(Factions.INDEPENDENT), mission);
 
         float totalValue = 0f;
         for (ComTradeFlow flow : mission.cargo) {

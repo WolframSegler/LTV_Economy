@@ -1,5 +1,6 @@
 package wfg.ltv_econ.economy.fleet;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +21,7 @@ public class TradeMission implements Serializable {
     public final boolean inFaction;
     public final float dist;
 
-    /** nullable */
     public final MarketAPI src;
-    /** nullable */
     public final MarketAPI dest;
 
     public final float transferDur;
@@ -73,12 +72,42 @@ public class TradeMission implements Serializable {
 
     /** Order matters for the ordinal */
     public enum MissionStatus {
-        SCHEDULED,
-        IN_SRC_ORBIT_LOADING,
-        IN_TRANSIT,
-        IN_DST_ORBIT_UNLOADING,
-        DELIVERED,
-        CANCELLED,
-        LOST
+        SCHEDULED("Scheduled"),
+        IN_SRC_ORBIT_LOADING("Loading at Source"),
+        IN_TRANSIT("In Transit"),
+        IN_DST_ORBIT_UNLOADING("Unloading at Destination"),
+        DELIVERED("Delivered"),
+        CANCELLED("Cancelled"),
+        LOST("Lost");
+        
+        private final String displayText;
+        
+        MissionStatus(String displayText) {
+            this.displayText = displayText;
+        }
+        
+        public String getDisplayText() {
+            return displayText;
+        }
+        
+        // TODO adjust the colors
+        public Color getDisplayColor() {
+            switch (this) {
+                case SCHEDULED: return Color.CYAN;
+                case IN_TRANSIT: return Color.YELLOW;
+                case DELIVERED: return Color.GREEN;
+                case CANCELLED: return Color.ORANGE;
+                case LOST: return Color.RED;
+                default: return Color.WHITE;
+            }
+        }
+        
+        public final boolean isActive() {
+            return this != DELIVERED && this != CANCELLED && this != LOST;
+        }
+        
+        public final boolean isTerminal() {
+            return this == DELIVERED || this == CANCELLED || this == LOST;
+        }
     }
 }
