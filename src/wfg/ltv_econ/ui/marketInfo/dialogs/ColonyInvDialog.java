@@ -116,7 +116,7 @@ public class ColonyInvDialog extends DialogPanel {
         final TextPanel playerCreditPanel = new TextPanel(innerPanel, 200, 1) {
             @Override  
             public void buildUI() {
-                final String credits = NumFormat.formatCredit((long) playerCredits.get());
+                final String credits = NumFormat.formatCredit(playerCredits.get());
 
                 label1 = settings.createLabel(
                     "Your Balance: " + credits, Fonts.ORBITRON_16
@@ -172,7 +172,7 @@ public class ColonyInvDialog extends DialogPanel {
                     tp.addPara(
                         "You would receive %s from this colony so far this month.",
                         pad, highlight,
-                        NumFormat.formatCredit((long) Math.max(0f, data.playerProfitRatio *
+                        NumFormat.formatCredit(Math.max(0f, data.playerProfitRatio *
                             MarketFinanceRegistry.instance().getLedger(m_market).getNetCurrentMonth()
                         ))
                     );
@@ -253,9 +253,9 @@ public class ColonyInvDialog extends DialogPanel {
             colonyCreditPanel.getPos().setSize(colonyLbl.getPosition().getWidth(), sliderH);
 
             playerLbl.setText(
-                "Your Balance: " + NumFormat.formatCredit((long) playerCred)
+                "Your Balance: " + NumFormat.formatCredit(playerCred)
             );
-            playerLbl.setHighlight(NumFormat.formatCredit((long) playerCred));
+            playerLbl.setHighlight(NumFormat.formatCredit(playerCred));
             playerLbl.autoSizeToWidth(playerLbl.computeTextWidth(playerLbl.getText()));
             playerCreditPanel.getPos().setSize(playerLbl.getPosition().getWidth(), sliderH);
 

@@ -706,7 +706,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final String factionName = market.getFaction().getDisplayName();
 
             final float quantityValue = mode == 0 ? cell.globalExports : cell.globalImports;
-            final String quantityTxt = NumFormat.engNotation((long) quantityValue);
+            final String quantityTxt = NumFormat.engNotation(quantityValue);
 
             final UIPanelAPI infoBar = new CommodityInfoBar(null, 75, iconSize,
                 true, cell).getPanel();

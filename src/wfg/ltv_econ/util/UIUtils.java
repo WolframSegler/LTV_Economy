@@ -20,9 +20,10 @@ public class UIUtils {
      */
     public static final LabelAPI createPlayerCreditsLabel(String font, int height) {
         final MutableValue credits = Global.getSector().getPlayerFleet().getCargo().getCredits();
+        final String valueStr = Misc.getWithDGS(credits.get()) + Strings.C;
 
         final LabelAPI label = Global.getSettings().createLabel(
-            "Player Credits: " + Misc.getWithDGS(credits.get()) + Strings.C, font
+            "Player Credits: " + valueStr, font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
         
@@ -33,15 +34,16 @@ public class UIUtils {
         }
 
         label.setHighlightColor(highlight);
-        label.highlightLast(Misc.getWithDGS(credits.get()));
+        label.highlightLast(valueStr);
         return label;
     }
 
     public static final LabelAPI createColonyCreditsLabel(String font, int height, String marketID) {
         final long credits = EconomyEngine.instance().getCredits(marketID);
+        final String valueStr = Misc.getWithDGS(credits) + Strings.C;
 
         final LabelAPI label = Global.getSettings().createLabel(
-            "Colony Credits: " + String.format("%,d", credits) + Strings.C, font
+            "Colony Credits: " + valueStr, font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
         
@@ -50,7 +52,7 @@ public class UIUtils {
         if (height > 0) label.getPosition().setSize(label.getPosition().getWidth(), height);
 
         label.setHighlightColor(credits < 0 ? negative : highlight);
-        label.highlightLast(String.format("%,d", credits));
+        label.highlightLast(valueStr);
         return label;
     }
 

@@ -59,12 +59,12 @@ public class TradeMissionsDialog extends DockPanel {
 
             final boolean isSrcMarket = market != null && market == m.src;
             final TradeMissionWidget row = new TradeMissionWidget(
-                scrollPanel, I_WIDTH - opad, ROW_H - opad, m, isSrcMarket
+                scrollPanel, I_WIDTH - opad, ROW_H - opad, m, isSrcMarket, this
             );
 
             scrollPanel.addCustom(row.getPanel(), 0).getPosition().inTL(hpad, yCoord);
 
-            yCoord += ROW_H + hpad;
+            yCoord += ROW_H + pad;
         }
 
         yCoord += 100;
@@ -74,12 +74,12 @@ public class TradeMissionsDialog extends DockPanel {
 
             final boolean isSrcMarket = market != null && market == m.src;
             final TradeMissionWidget row = new TradeMissionWidget(
-                scrollPanel, I_WIDTH - opad, ROW_H - opad, m, isSrcMarket
+                scrollPanel, I_WIDTH - opad, ROW_H - opad, m, isSrcMarket, this
             );
 
             scrollPanel.addCustom(row.getPanel(), 0).getPosition().inTL(hpad, yCoord);
 
-            yCoord += ROW_H + hpad;
+            yCoord += ROW_H + pad;
         }
 
         final int offset = opad * 2 + 30;

@@ -190,7 +190,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         MarketFinanceRegistry.instance().register(market);
         if (!registeredMarkets.add(marketID)) return;
 
-        marketCredits.put(marketID, (long) EconomyConfig.STARTING_CREDITS_FOR_MARKET);
+        addCredits(marketID, EconomyConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) {
             playerMarketData.put(marketID, new PlayerMarketData(marketID));
             market.addSubmarket(SubmarketsID.STOCKPILES);
@@ -361,7 +361,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             final long netIncome = financeReg.getLedger(market).getNetLastMonth();
             final float r = data.getEffectiveProfitRatio();
             final float playerIncome = Math.max(netIncome, 0) * r;
-            addCredits(data.marketID, (long) -playerIncome);
+            addCredits(data.marketID, -playerIncome);
             
             final FDNode mNode = report.getNode(marketsNode, market.getId());
             mNode.name = market.getName() + " (" + market.getSize() + ")";
@@ -462,7 +462,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
                 public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
                     tp.addPara(
                         "The ratio of monthly profits that get automatically transferred to you: %s.",
-                        pad, highlight, NumFormat.formatCredit((long) playerIncome)
+                        pad, highlight, NumFormat.formatCredit(playerIncome)
                     );
                     tp.addPara(
                         "The effective value can be below the chosen value if the colony is in debt.", 

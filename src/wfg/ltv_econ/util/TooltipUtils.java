@@ -192,8 +192,8 @@ public class TooltipUtils {
                     final long availableValue = Math.max((available / 100) * 100, 100l);
                     final String availableStr = available < 100l ? "<" : "";
 
-                    final long excess = (long) cell.getStoredExcess();
-                    final boolean hasExcess = excess > 10l;
+                    final double excess = cell.getStoredExcess();
+                    final boolean hasExcess = excess > 10.0;
 
                     final String factionName = market.getFaction().getDisplayName();
                     String location = "In hyperspace";

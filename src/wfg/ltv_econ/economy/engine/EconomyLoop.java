@@ -419,7 +419,7 @@ public class EconomyLoop {
             final float unitPrice = fuelCell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost);
             final float cost = fuelCost * unitPrice * EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT;
             final String key = TRADE_FUEL_PREMIUM_KEY;
-            mission.credits.modifyFlat(key, cost, getDesc(key));
+            mission.credits.modifyFlat(key, -cost, getDesc(key));
 
             MarketFinanceRegistry.instance().getLedger(marketID).add(
                 TRADE_FLEET_SHIPMENT_KEY, -mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
@@ -446,13 +446,13 @@ public class EconomyLoop {
         final float hazardPay = EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
             + EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
 
-        mission.credits.modifyFlat(INDEPENDENT_BASE_FEE_KEY, EconomyConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, getDesc(INDEPENDENT_BASE_FEE_KEY));
-        mission.credits.modifyFlat(INDEPENDENT_PER_TON_KEY, perTonFee, getDesc(INDEPENDENT_PER_TON_KEY));
-        mission.credits.modifyFlat(INDEPENDENT_VALUE_PERCENT_KEY, valueFee, getDesc(INDEPENDENT_VALUE_PERCENT_KEY));
-        mission.credits.modifyFlat(INDEPENDENT_HAZARD_PAY_KEY, hazardPay, getDesc(INDEPENDENT_HAZARD_PAY_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_BASE_FEE_KEY, -EconomyConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, getDesc(INDEPENDENT_BASE_FEE_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_PER_TON_KEY, -perTonFee, getDesc(INDEPENDENT_PER_TON_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_VALUE_PERCENT_KEY, -valueFee, getDesc(INDEPENDENT_VALUE_PERCENT_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_HAZARD_PAY_KEY, -hazardPay, getDesc(INDEPENDENT_HAZARD_PAY_KEY));
 
         MarketFinanceRegistry.instance().getLedger(mission.src.getId()).add(
-            TRADE_FLEET_SHIPMENT_KEY, -mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
+            TRADE_FLEET_SHIPMENT_KEY, mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
         );
     }
 

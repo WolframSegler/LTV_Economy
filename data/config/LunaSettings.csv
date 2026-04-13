@@ -50,9 +50,9 @@ fleet_travelSpeedLyDay,Trade Fleet Travel Speed,Int,14,,The speed in light-years
 fleet_forcedFuelCostMult,Forced Fuel Cost Mult,Double,3,,Cost multiplier for fuel purchases made to initiate trade when no fuel is stockpiled.,1,10,Fleet
 fleet_independentBaseFee,Independent Hauler Base Fee,Double,1000.0,,Base fee in credits per trade mission when using independent haulers.,0,100000,Fleet
 fleet_independentPerTonFee,Independent Hauler Per-Ton Fee,Double,1.5,,Fee per ton of cargo (including fuel and crew) transported.,0,1000,Fleet
-fleet_independentPercentCut,Independent Hauler Percentage Cut,Double,0.1,,Percentage of the total cargo value taken as fee.,0,1,Fleet
+fleet_independentPercentCut,Independent Hauler Percentage Cut,Double,0.05,,Percentage of the total cargo value taken as fee.,0,1,Fleet
 fleet_independentHazardBase,Independent Hauler Hazard Base,Double,500.0,,Base hazard pay in credits added for dangerous routes.,0,100000,Fleet
-fleet_independentHazardMult,Independent Hauler Hazard Multiplier,Double,8.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
+fleet_independentHazardMult,Independent Hauler Hazard Multiplier,Double,4.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
 ,,,,,,,,
 raids_raidStockpileAccessRatio,Raid Stockpile Access Ratio,Double,0.15,,The maximum fraction of a colony's stockpile that can be looted in a single raid.,0,1,Raids
 raids_raidBaseEff,Raid Base Effectiveness,Double,0.4,,Base multiplier for loot quantity from raids (applies before other modifiers).,0,1,Raids
