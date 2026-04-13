@@ -269,7 +269,7 @@ public class CommodityCell implements Serializable {
         addStoredAmount(getQuantumRealBalance());
     }
 
-    public final float getUnitPrice(PriceType type, int amount) {
+    public final float getUnitPrice(PriceType type, long amount) {
         return getUnitPrice(type, amount, stored, spec.getBasePrice(), getTargetStockpiles());
     }
     
@@ -279,13 +279,13 @@ public class CommodityCell implements Serializable {
     private static final double scarcityExpBuy = 0.85;
     private static final double scarcityExpNeutral = 1.0;
     private static final double scarcityExpSell = 1.15;
-    public static final float getUnitPrice(PriceType type, int amount, double stored, float basePrice,
+    public static final float getUnitPrice(PriceType type, long amount, double stored, float basePrice,
         float preferred
     ) {
         final boolean buying = (type == PriceType.MARKET_BUYING);
 
-        final int n  = Math.abs(amount);
-        final int sn = buying ? n : -n;
+        final long n = Math.abs(amount);
+        final long sn = buying ? n : -n;
         final float d = Math.max(preferred, INHERENT_DEMAND);
         final double s = Math.max(stored, INHERENT_DEMAND);
         final float shift = SHIFT_FRACTION * d;
@@ -320,7 +320,7 @@ public class CommodityCell implements Serializable {
         return Math.max(1f, basePrice * priceMult);
     }
 
-    public final float computeVanillaPrice(int amount, boolean isSellingToMarket, boolean isPlayer) {
+    public final float computeVanillaPrice(long amount, boolean isSellingToMarket, boolean isPlayer) {
         if (amount < 1 || market == null) return 0f;
 
         final Market mkt = (Market) market;

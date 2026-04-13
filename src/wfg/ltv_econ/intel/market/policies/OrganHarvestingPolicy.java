@@ -12,6 +12,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.native_ui.util.NumFormat;
 
+// TODO fix population affect bug. Fix organs influx not actually happening bug.
 public class OrganHarvestingPolicy extends MarketPolicy {
     public static final float HEALTH_BUFF = 0.03f;
     public static final float HAPPINESS_DEBUFF = -0.03f;

@@ -58,7 +58,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
 
     @Override
     protected String getTravelActionText(RouteSegment segment) {
-        return "delivering " + getCargoList(segment) + " dest " + getMission().dest.getName();
+        return "delivering " + getCargoList(segment) + " to " + getMission().dest.getName();
     }
 
     @Override
@@ -164,7 +164,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         if (cargo.isEmpty()) return "";
         final List<ComTradeFlow> sorted = new ArrayList<>(cargo);
 
-        sorted.sort((a, b) -> Float.compare(b.amount, a.amount));
+        sorted.sort((a, b) -> Double.compare(b.amount, a.amount));
         List<String> strings = new ArrayList<>();
         for (ComTradeFlow flow : sorted) {
             final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(flow.comID);
@@ -203,7 +203,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         float ships = 0f;
         for (ComTradeFlow flow : mission.cargo) {
             final String cid = flow.comID;
-            final float amount = flow.amount * mission.spawnedFleetCargoCapRatio;
+            final double amount = flow.amount * mission.spawnedFleetCargoCapRatio;
 
             if (cid.equals(Commodities.FUEL) || cid.equals(Commodities.CREW) || cid.equals(Commodities.MARINES)) continue;
             if (cid.equals(Commodities.SHIPS)) {
@@ -211,7 +211,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
                 continue;
             }
 
-            cargo.addCommodity(cid, amount);
+            cargo.addCommodity(cid, (float) amount);
         }
 
         syncMothballedShips(ships, mission.src);

@@ -6,6 +6,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 
+// TODO fix population affect bug.
 public class UrbanRenewalPolicy extends MarketPolicy {
     public static final float HEALTH_BUFF = 0.4f;
     public static final float HAPPINESS_BUFF = 0.15f;

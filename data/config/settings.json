@@ -16,7 +16,7 @@
       "solidarity_empty": "graphics/ui/solidarity_empty.png",
       "restricted": "graphics/ui/restricted.png",
       "settings": "graphics/ui/settings_cog.png",
-      "arrow": "arrow1.png"
+      "arrow": "graphics/ui/arrow1.png"
     },
     "icons": {
       "policy_icon": "graphics/icons/intel/policy_icon.png",

@@ -303,7 +303,7 @@ public class ArrayMutableStat implements Serializable {
 	
 	public final int getModifiedInt() {
 		if (needsRecompute) recompute();
-		return (int) Math.round(modified);
+		return Math.round(modified);
 	}
 	
 	public final float getBaseValue() {

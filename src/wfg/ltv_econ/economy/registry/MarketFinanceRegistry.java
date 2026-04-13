@@ -83,20 +83,20 @@ public class MarketFinanceRegistry implements Serializable {
             this.marketID = marketID;
         }
 
-        public final void add(String key, double amount, String desc) {
+        public final synchronized void add(String key, double amount, String desc) {
             add(key, (long) amount, desc);
         }
 
-        public final void add(String key, long amount, String desc) {
+        public final synchronized void add(String key, long amount, String desc) {
             currentMonth.merge(key, amount, Long::sum);
             currentMonthDesc.putIfAbsent(key, desc);
         }
         
-        public final void replace(String key, double amount, String desc) {
+        public final synchronized void replace(String key, double amount, String desc) {
             replace(key, (long) amount, desc);
         }
 
-        public final void replace(String key, long amount, String desc) {
+        public final synchronized void replace(String key, long amount, String desc) {
             currentMonth.put(key, amount);
             currentMonthDesc.put(key, desc);
         }
@@ -118,16 +118,14 @@ public class MarketFinanceRegistry implements Serializable {
         }
 
         public final String getDesc(String key) {
-            final String desc = currentMonthDesc.get(key);
-            if (desc == null) {
-                return lastMonthDesc.getOrDefault(key, "");
-            }
-            return desc;
+            return currentMonthDesc.getOrDefault(key, "");
         }
 
         public final long getNetLastMonth() {
             long total = 0l;
-            for (long v : lastMonth.values()) total += v;
+            for (Long v : lastMonth.values()) {
+                total += v;
+            }
             return total;
         }
 
@@ -179,7 +177,7 @@ public class MarketFinanceRegistry implements Serializable {
             return Collections.unmodifiableMap(lastMonth);
         }
 
-        public final void endMonth() {
+        public final synchronized void endMonth() {
             lastMonth.clear();
             lastMonthDesc.clear();
             lastMonth.putAll(currentMonth);

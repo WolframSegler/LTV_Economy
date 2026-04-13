@@ -27,6 +27,8 @@ import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 public class CommodityDomain implements Serializable {
+    // TODO make this a config entry
+    private static final float MIN_TRADE_AMOUNT = 5f;
 
     public final String comID;
     public transient CommoditySpecAPI spec;
@@ -225,19 +227,19 @@ public class CommodityDomain implements Serializable {
             }
 
             final double exportableRemaining = expCell.computeExportAmount();
-            final float deficitRemaining = impCell.computeImportAmount();
+            final double deficitRemaining = impCell.computeImportAmount();
 
-            if (exportableRemaining < 0.01f || deficitRemaining < 0.01f) continue;
+            if (exportableRemaining < MIN_TRADE_AMOUNT || deficitRemaining < MIN_TRADE_AMOUNT) continue;
 
             final boolean sameFaction = expCell.market.getFaction().equals(impCell.market.getFaction());
-            final float amountToSend = (float) Math.min(exportableRemaining, deficitRemaining);
+            final double amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
             // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
-            final float exporterPrice = expCell.getUnitPrice(PriceType.MARKET_SELLING, (int)amountToSend);
-            final float importerPrice = impCell.getUnitPrice(PriceType.MARKET_BUYING, (int)amountToSend);
-            final float weight = Math.min(1f, (float)impCell.getTargetQuantumPreTrade() / amountToSend);
-            final float unitPrice = exporterPrice * (1f - weight) + importerPrice * weight;
-            final float price = unitPrice * amountToSend;
+            final double exporterPrice = expCell.getUnitPrice(PriceType.MARKET_SELLING, (long)amountToSend);
+            final double importerPrice = impCell.getUnitPrice(PriceType.MARKET_BUYING, (long)amountToSend);
+            final double weight = Math.min(1.0, impCell.getTargetQuantumPreTrade() / amountToSend);
+            final double unitPrice = exporterPrice * (1f - weight) + importerPrice * weight;
+            final double price = unitPrice * amountToSend;
 
             if(sameFaction) {
                 expCell.inFactionExports += amountToSend;
@@ -245,7 +247,7 @@ public class CommodityDomain implements Serializable {
                 expCell.globalExports += amountToSend;
             }
 
-            final int credits = sameFaction ? (int) (price * EconomyConfig.FACTION_EXCHANGE_MULT) : (int) price;
+            final long credits = (long) (sameFaction ? price * EconomyConfig.FACTION_EXCHANGE_MULT : price);
             tradeCreditActivity += credits;
             tradeVolume += amountToSend;
 

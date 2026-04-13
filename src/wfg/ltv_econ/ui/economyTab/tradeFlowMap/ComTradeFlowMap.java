@@ -211,10 +211,10 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 float totalAmount = 0f;
                 for (ComTradeFlow flow : flows) {
                     final FactionSpecAPI faction = flow.exporter.getFaction().getFactionSpec();
-                    final float amount = flow.amount;
+                    final double amount = flow.amount;
                     totalAmount += amount;  
 
-                    final Float current = data.factionAmounts.get(faction);
+                    final Double current = data.factionAmounts.get(faction);
                     data.factionAmounts.put(faction, current == null ? amount : current + amount);
 
                     final Color c = faction.getBrightUIColor();
@@ -660,7 +660,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         return (float) Math.pow(zoom, 0.6f);
     }
 
-    public final Color getWeightedCycleColor(final ArrayMap<Color, Float> weights, float totalWeight) {
+    public final Color getWeightedCycleColor(final ArrayMap<Color, Double> weights, double totalWeight) {
         final int count = weights.size();
         if (count == 0) return Color.WHITE;
         if (count == 1) return weights.keyAt(0);
@@ -668,7 +668,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
         final float[] segDur = new float[count];
         float totalSeg = 0f;
         for (int i = 0; i < count; i++) {
-            segDur[i] = COLOR_CHANGE_DUR * weights.valueAt(i) / totalWeight;
+            segDur[i] = (float) (COLOR_CHANGE_DUR * weights.valueAt(i) / totalWeight);
             totalSeg += segDur[i];
         }
 
@@ -720,7 +720,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     private static final TooltipBuilder createPathTp(PathData data) {
         return (tp, expanded) -> {
             final var entries = new ArrayList<>(data.factionAmounts.entrySet());
-            entries.sort((a, b) -> Float.compare(b.getValue(), a.getValue()));
+            entries.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
             tp.addPara("Trade Route", base, 0f);
 
@@ -728,7 +728,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 "Faction", 140, "Volume", 70
             });
             for (var entry : entries) {
-                final float value = entry.getValue();
+                final double value = entry.getValue();
                 if (Math.abs(value) < 0.01f) continue;
 
                 final FactionSpecAPI faction = entry.getKey();

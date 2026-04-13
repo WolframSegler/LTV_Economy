@@ -3,6 +3,7 @@ package wfg.ltv_econ.economy.commodity;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 
+import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.util.Arithmetic;
 
@@ -40,17 +41,20 @@ public class InformalExchangeNode {
     private static final float marketReach = 0.25f;
 
     public final void updateBeforeTrade() {
+        final EconomyEngine engine = EconomyEngine.instance();
+        final float informalFraction = 0.03f / EconomyConfig.TRADE_INTERVAL; // TODO turn into a config entry
+
         final float totalDemand;
         final float totalExcess;
         { // calculate demand & excess
             float demand = 0f;
             float excess = 0f;
-            for (CommodityCell cell : EconomyEngine.instance().getComDomain(comID).getAllCells()) {
+            for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
                 demand += cell.computeImportAmount();
                 excess += cell.computeExportAmount();
             }
-            totalDemand = demand;
-            totalExcess = excess;
+            totalDemand = demand * informalFraction;
+            totalExcess = excess * informalFraction;
         }
 
         final float imbalance = totalDemand - totalExcess;

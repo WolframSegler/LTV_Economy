@@ -19,6 +19,7 @@ import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,27 +28,23 @@ import org.apache.commons.math4.legacy.optim.MaxIter;
 
 public class ShipAllocator {
     private ShipAllocator() {}
-    private static final double eps = 1e-2;
-    
+    private static final double eps = 1e-3;
+    private static final SimplexSolver SOLVER = new SimplexSolver(eps, 30, 1e-4);
+
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
     private static final String DOCT_PREF_KEY = "|";
 
-    // Doctrine preferences
-    private static final float DOCTRINE_KNOWN_SHIP_MULT = 0.7f;
-    private static final float DOCTRINE_SIZE_EXACT_MULT = 0.8f;
-    private static final float DOCTRINE_SIZE_CLOSE_MULT = 0.9f;
-    private static final float DOCTRINE_SIZE_FAR_MULT = 1.0f;
-    private static final float DOCTRINE_SIZE_VERY_FAR_MULT = 1.1f;
-
-    private static final float COMBAT_POWER_BASE_PER_100_TONS = 1.0f;
-    private static final float MIN_COMBAT_POWER = 10f;
+    private static final double DIVERSITY_PENALTY = 0.2;
+    private static final double REF_SHIPMENT = 500.0;
+    private static final float COMBAT_POWER_BASE_PER_100_TONS = 2.0f;
+    private static final float MIN_COMBAT_POWER = 15f;
     private static final float[] COMBAT_POWER_DANGER_MULT = {
-        0.0f, // NONE
-        0.5f, // MINIMAL
-        1.0f, // LOW
-        1.5f, // MEDIUM
-        2.0f, // HIGH
-        3.0f  // EXTREME
+        0.2f, // NONE
+        0.8f, // MINIMAL
+        1.5f, // LOW
+        2.2f, // MEDIUM
+        3.2f, // HIGH
+        5.0f  // EXTREME
     };
 
     /**
@@ -80,7 +77,7 @@ public class ShipAllocator {
         FactionShipInventory inventory, ArrayMap<ShipTypeData, Integer> allocation, FactionAPI faction
     ) {
         final double totalShipment = targetCargo + targetFuel + targetCrew;
-        if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is 0");
+        if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is: " + totalShipment);
 
         final ArrayList<ShipTypeData> candidates = new ArrayList<>();
         for (ShipTypeData data : inventory.getShips().values()) {
@@ -204,20 +201,22 @@ public class ShipAllocator {
 
     public static final float getRequiredCombatPower(TradeMission mission) {
         final float totalShipment = mission.getTotalAmount();
-        if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is 0");
+        if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is: " + totalShipment);
 
         final StarSystemAPI srcSys = mission.src.getStarSystem();
         final StarSystemAPI dstSys = mission.dest.getStarSystem();
         
         int dangerOrdinal = 0;
-        if (srcSys != null) {
-            final LocationDanger d = WarSimScript.getDangerFor(mission.src.getFaction().getId(), srcSys);
-            dangerOrdinal = Math.max(dangerOrdinal, d.ordinal());
-        }
-        if (dstSys != null) {
-            final LocationDanger d = WarSimScript.getDangerFor(mission.dest.getFaction().getId(), dstSys);
-            dangerOrdinal = Math.max(dangerOrdinal, d.ordinal());
-        }
+        try {
+            if (srcSys != null) {
+                final LocationDanger d = WarSimScript.getDangerFor(mission.src.getFaction().getId(), srcSys);
+                dangerOrdinal = Math.max(dangerOrdinal, d.ordinal());
+            }
+            if (dstSys != null) {
+                final LocationDanger d = WarSimScript.getDangerFor(mission.dest.getFaction().getId(), dstSys);
+                dangerOrdinal = Math.max(dangerOrdinal, d.ordinal());
+            }
+        } catch (ConcurrentModificationException e) {}
 
         final float dangerMult = COMBAT_POWER_DANGER_MULT[dangerOrdinal];
         final float required = (totalShipment / 100f) * COMBAT_POWER_BASE_PER_100_TONS * dangerMult;
@@ -248,15 +247,14 @@ public class ShipAllocator {
      * @param faction used for doctrine preferences
      * @param allocation the allocation to be populated.
      */
-    public static final void allocateShipsForTarget(
+    public static void allocateShipsForTarget(
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
         FactionAPI faction, Map<ShipTypeData, Integer> allocation
     ) {
-        final double totalShipment = targetCargo + targetFuel + targetCrew;
-        if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is 0");
+        final double totalTarget = targetCargo + targetFuel + targetCrew + targetCombat;
+        if (totalTarget <= 0) return;
 
         final List<ShipTypeData> candidates = new ArrayList<>();
-        
         for (String hullId : faction.getKnownShips()) {
             final ShipTypeData dummy = new ShipTypeData(hullId);
             dummy.addShip(1023);
@@ -264,18 +262,82 @@ public class ShipAllocator {
         }
         if (candidates.isEmpty()) return;
 
-        final double[] objective = buildTargetObjective(
-            candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat
-        );
-        final List<LinearConstraint> constraints = buildTargetConstraints(
-            candidates, targetCargo, targetFuel, targetCrew, targetCombat
-        );
+        final int N = candidates.size();
+        final double[] weight = buildTargetObjective(candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat);
+        final double[] cargoCap = new double[N];
+        final double[] fuelCap = new double[N];
+        final double[] crewCap = new double[N];
+        final double[] combatCap = new double[N];
 
-        final double[] x = getTargetSolution(objective, constraints);
+        for (int i = 0; i < N; i++) {
+            final ShipTypeData data = candidates.get(i);
+            cargoCap[i] = data.spec.getCargo();
+            fuelCap[i] = data.spec.getFuel();
+            crewCap[i] = data.getCrewCapacityPerShip();
+            combatCap[i] = data.getCombatPower();
+        }
 
-        for (int i = 0; i < candidates.size(); i++) {
-            final int count = (int) Math.ceil(x[i]);
-            if (count < 1) continue;
+        final int[] counts = new int[N];
+        double remCargo = targetCargo;
+        double remFuel = targetFuel;
+        double remCrew = targetCrew;
+        double remCombat = targetCombat;
+
+        while ((remCargo > eps || remFuel > eps || remCrew > eps || remCombat > eps)) {
+            final double combatNeed = (targetCombat > eps) ? remCombat / targetCombat : 0.0;
+            final double cargoNeed = (targetCargo > eps) ? remCargo / targetCargo : 0.0;
+            final double fuelNeed = (targetFuel > eps) ? remFuel / targetFuel : 0.0;
+            final double crewNeed = (targetCrew > eps) ? remCrew / targetCrew : 0.0;
+
+            double totalWeight = 0.0;
+            double[] weights = new double[N];
+
+            for (int i = 0; i < N; i++) {
+                boolean useful = false;
+                if (remCargo > 0.0 && cargoCap[i] > 0.0) useful = true;
+                if (remFuel > 0.0 && fuelCap[i] > 0.0) useful = true;
+                if (remCrew > 0.0 && crewCap[i] > 0.0) useful = true;
+                if (remCombat > 0.0 && combatCap[i] > 0.0) useful = true;
+                if (!useful) continue;
+
+                final double cargoContrib = (targetCargo > 0) ? Math.min(1.0, cargoCap[i] / targetCargo) : 0.0;
+                final double fuelContrib = (targetFuel > 0) ? Math.min(1.0, fuelCap[i] / targetFuel) : 0.0;
+                final double crewContrib = (targetCrew > 0) ? Math.min(1.0, crewCap[i] / targetCrew) : 0.0;
+                final double combatContrib = (targetCombat > 0) ? Math.min(1.0, combatCap[i] / targetCombat) : 0.0;
+
+                final double utility = cargoContrib * cargoNeed
+                    + fuelContrib * fuelNeed
+                    + crewContrib * crewNeed
+                    + combatContrib * combatNeed;
+
+                final double w = weight[i] * Math.pow(utility, 2.0) / (1.0 + DIVERSITY_PENALTY * counts[i]);
+
+                weights[i] = w;
+                totalWeight += w;
+            }
+
+            final double r = Math.random() * totalWeight;
+            int picked = -1;
+            double accum = 0;
+            for (int i = 0; i < N; i++) {
+                accum += weights[i];
+                if (r <= accum) {
+                    picked = i;
+                    break;
+                }
+            }
+
+            counts[picked]++;
+
+            remCargo = Math.max(0.0, remCargo - cargoCap[picked]);
+            remFuel = Math.max(0.0, remFuel - fuelCap[picked]);
+            remCrew = Math.max(0.0, remCrew - crewCap[picked]);
+            remCombat= Math.max(0.0, remCombat- combatCap[picked]);
+        }
+
+        for (int i = 0; i < N; i++) {
+            final int count = counts[i];
+            if (count <= 0) continue;
 
             final ShipTypeData data = candidates.get(i);
             data.useShip(count);
@@ -292,14 +354,14 @@ public class ShipAllocator {
 
         final FactionDoctrineAPI doctrine = faction.getDoctrine();
         if (faction.knowsShip(data.hullID)) {
-            mult *= DOCTRINE_KNOWN_SHIP_MULT;
+            mult *= 0.7;
         }
 
         final int shipSizeWeight = hullSizeToWeight(data.spec.getHullSize());
         final int diff = Math.abs(doctrine.getShipSize() - shipSizeWeight); // [1, 5]
         mult *= getSizeMatchMultiplier(diff);
         mult *= getHullSizePreferenceMult(doctrine, data.spec.getDesignation());
-        mult *= faction.isShipPriority(data.hullID) ? 0.7 : 1.0;
+        mult *= faction.isShipPriority(data.hullID) ? 0.5 : 1.0;
 
         if (!faction.getId().equals(Factions.PLAYER)) DOCTRINE_PREF_CACHE.put(key, mult);
         return mult;
@@ -317,10 +379,10 @@ public class ShipAllocator {
 
     private static final double getSizeMatchMultiplier(int diff) {
         switch (diff) {
-            case 0: return DOCTRINE_SIZE_EXACT_MULT;
-            case 1: return DOCTRINE_SIZE_CLOSE_MULT;
-            case 2: return DOCTRINE_SIZE_FAR_MULT;
-            default: return DOCTRINE_SIZE_VERY_FAR_MULT;
+            case 0: return 0.6;
+            case 1: return 0.8;
+            case 2: return 1.0;
+            default: return 1.2;
         }
     }
 
@@ -329,11 +391,11 @@ public class ShipAllocator {
 
         return 1.0 / switch (designation) {
             case CIVILIAN -> 1.0 + doctrine.getCombatFreighterProbability();
-            case FRIGATES -> 1.0 + doctrine.getNumShips() * 0.2; // [1, 5]
-            case DESTROYERS -> 1.0 + doctrine.getNumShips() * 0.1; // [1, 5]
-            case CAPITALS -> 1.0 + doctrine.getWarships() * 0.2; // [1, 5]
-            case PHASE_SHIPS -> 1.0 + doctrine.getPhaseShips() * 0.2; // [1, 5]
-            case CARRIERS -> 1.0 + doctrine.getCarriers() * 0.2; // [1, 5]
+            case FRIGATES -> 1.0 + doctrine.getNumShips() * 0.3; // [1, 5]
+            case DESTROYERS -> 1.0 + doctrine.getNumShips() * 0.5; // [1, 5]
+            case CAPITALS -> 1.0 + doctrine.getWarships() * 0.3; // [1, 5]
+            case PHASE_SHIPS -> 1.0 + doctrine.getPhaseShips() * 0.3; // [1, 5]
+            case CARRIERS -> 1.0 + doctrine.getCarriers() * 0.3; // [1, 5]
             default -> 1.0;
         };
     }
@@ -375,34 +437,43 @@ public class ShipAllocator {
     ) {
         final int N = candidates.size();
         final double totalShipment = targetCargo + targetFuel + targetCrew;
+        final double totalTarget = totalShipment + targetCombat;
+
+        final double transportWeight = totalShipment / totalTarget;
+        final double combatWeight = targetCombat / totalTarget;
         final double cargoWeight = targetCargo / totalShipment;
         final double fuelWeight = targetFuel / totalShipment;
         final double crewWeight = targetCrew / totalShipment;
 
-        final double[] objective = new double[N];
+        final double[] coeffs = new double[N];
         for (int i = 0; i < N; i++) {
             final ShipTypeData data = candidates.get(i);
             final ShipHullSpecAPI spec = data.spec;
+            
+            final double transportScore = 1.0
+                + crewWeight * (data.getCrewCapacityPerShip() / REF_SHIPMENT)
+                + cargoWeight * (spec.getCargo() / REF_SHIPMENT)
+                + fuelWeight * (spec.getFuel() / REF_SHIPMENT);
 
-            final double effCapacity = cargoWeight * spec.getCargo()
-                + fuelWeight * spec.getFuel()
-                + crewWeight * data.getCrewCapacityPerShip();
-
-            final double baseCost = 1.0 / (1.0 + effCapacity * data.getCombatPower());
-            final double randFactor = 0.7 + Math.random() * 0.6;
+            final double combatScore = data.getCombatPower() / targetCombat;
+            
+            final double combinedScore = Math.pow(transportScore, transportWeight)
+                * Math.pow(combatScore, combatWeight);
+            
+            final double baseCost = 1.0 / (1.0 + combinedScore * data.spec.getFleetPoints());
             final double doctrineFactor = getDoctrinePreference(faction, data);
-
-            objective[i] = baseCost * randFactor * doctrineFactor;
+            final double randFactor = 0.7 + 0.6 * Math.random();
+            
+            coeffs[i] = baseCost * doctrineFactor * randFactor;
         }
 
-        return objective;
+        return coeffs;
     }
 
     private static final double[] getTargetSolution(final double[] objective, final List<LinearConstraint> constraints) {
         final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0);
-        final SimplexSolver solver = new SimplexSolver(eps, 30, 1e-4);
 
-        return solver.optimize(
+        return SOLVER.optimize(
             new MaxIter(1000), objFunc,
             new LinearConstraintSet(constraints),
             GoalType.MINIMIZE,

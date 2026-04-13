@@ -8,10 +8,10 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import wfg.native_ui.util.ArrayMap;
 
 public class PathData {
-    private final ArrayMap<Color, Float> colorWeights = new ArrayMap<>(2);
-    private float totalColorWeight = 0f;
+    private final ArrayMap<Color, Double> colorWeights = new ArrayMap<>(2);
+    private double totalColorWeight = 0f;
 
-    public final ArrayMap<FactionSpecAPI, Float> factionAmounts = new ArrayMap<>(2);
+    public final ArrayMap<FactionSpecAPI, Double> factionAmounts = new ArrayMap<>(2);
     public StarSystemAPI source;
     public StarSystemAPI destination;
     public float pathWidth;
@@ -20,8 +20,8 @@ public class PathData {
     public float pauseDuration;
     public float pulseOffset;
 
-    public final void addColorWeight(Color color, float weight) {
-        final Float prev = colorWeights.get(color);
+    public final void addColorWeight(Color color, double weight) {
+        final Double prev = colorWeights.get(color);
         if (prev == null) {
             colorWeights.put(color, weight);
         } else {
@@ -31,11 +31,11 @@ public class PathData {
         totalColorWeight += weight;
     }
 
-    public final ArrayMap<Color, Float> getColorWeights() {
+    public final ArrayMap<Color, Double> getColorWeights() {
         return colorWeights;
     }
 
-    public final float getWeightSum() {
+    public final double getWeightSum() {
         return totalColorWeight;
     }
 

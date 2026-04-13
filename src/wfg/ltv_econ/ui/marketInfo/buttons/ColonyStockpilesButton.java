@@ -8,22 +8,29 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.ui.fleet.TradeMissionsDialog;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ColonyInvDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.util.CallbackRunnable;
 
-public class ColonyStockpilesButton extends Button {
+public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
     private static final String ICON = Global.getSettings().getSpriteName("icons", "stockpiles_button");
 
     public ColonyStockpilesButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
-        super(parent, width, height, null, null, null);
+        super(parent, width, height, null, null, () -> new TradeMissionsDialog(market, true));
 
+        final CallbackRunnable<Button> dockRun = onClicked;
         onClicked = (btn) -> {
-            final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);
-            dialogPanel.show(0.3f, 0.3f);
+            if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
+                dockRun.run(btn);
+            } else {
+                final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);
+                dialogPanel.show(0.3f, 0.3f);
+            }
         };
-        setQuickMode(true);
         setShortcut(Keyboard.KEY_3);
         setAppendShortcutToText(false);
         bgAlpha = 0f;
@@ -33,6 +40,10 @@ public class ColonyStockpilesButton extends Button {
         tooltip.builder = (tp, expanded) -> {
             tp.addPara("Colony stockpiles and credits [%s]", pad,
                 highlight, Keyboard.getKeyName(interaction.shortcut)
+            );
+
+            tp.addPara("Trade Missions [%s + %s]", pad,
+                highlight, "Ctrl", Keyboard.getKeyName(interaction.shortcut)
             );
         };
 

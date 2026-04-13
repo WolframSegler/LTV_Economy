@@ -23,6 +23,7 @@ import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
+import com.fs.starfarer.api.fleet.RepairTrackerAPI;
 import com.fs.starfarer.api.impl.campaign.command.WarSimScript;
 import com.fs.starfarer.api.impl.campaign.command.WarSimScript.LocationDanger;
 import com.fs.starfarer.api.impl.campaign.econ.ShippingDisruption;
@@ -321,8 +322,10 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 				}
 
 				final FleetMemberAPI member = settings.createFleetMember(FleetMemberType.SHIP, variant);
+				final RepairTrackerAPI repair = member.getRepairTracker();
 				member.setShipName(fData.pickShipName(member, random));
 				fData.addFleetMember(member);
+				repair.setCR(Math.max(repair.getMaxCR(), 0.5f));
 			}
 
 			final FleetParamsV3 officerParams = new FleetParamsV3();

@@ -165,7 +165,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         midDayApplied = false;
 
         if (EconomyConfig.MULTI_THREADING) {
-            mainLoopExecutor.submit(() -> realAdvance());
+            mainLoopExecutor.execute(this::realAdvance);
         } else {
             realAdvance();
         }
@@ -352,9 +352,9 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         financeReg.endMonth();
         
         final FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
-		marketsNode.name = "Colonies";
-		marketsNode.custom = MonthlyReport.OUTPOSTS;
-		marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
+        marketsNode.name = "Colonies";
+        marketsNode.custom = MonthlyReport.OUTPOSTS;
+        marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
 
         for (PlayerMarketData data : playerMarketData.values()) {
             final MarketAPI market = data.market;

@@ -341,11 +341,11 @@ public class ColonyInvDialog extends DialogPanel {
             final int baseBalance = (int) (cell.getProduction(true) - cell.getConsumption(true));
             final int realBalance = (int) cell.getQuantumRealBalance();
 
-            Color baseBlcColor = baseBalance < 0 ? 
+            final Color baseBlcColor = baseBalance < 0 ? 
                 negative : baseBalance > 0 ?
                 positive : text_color;
 
-            Color realBlcColor = realBalance < 0 ? 
+            final Color realBlcColor = realBalance < 0 ? 
                 negative : realBalance > 0 ?
                 positive : text_color;
 

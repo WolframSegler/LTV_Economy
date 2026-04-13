@@ -90,7 +90,7 @@ public class ShipTypeData implements Serializable {
     }
 
     public final int getCrewCapacityPerShip() {
-        return (int) spec.getMaxCrew() - getCrewPerShip();
+        return (int) Math.max(0f, spec.getMaxCrew() - getCrewPerShip());
     }
 
     public final float getMonthlyCrewWages() {
@@ -99,7 +99,7 @@ public class ShipTypeData implements Serializable {
 
     public final float getCombatPower() {
         final float mult = getCombatMult(spec.getDesignation())
-            + spec.getFighterBays() * 0.1f;
+            + spec.getFighterBays() * 0.04f;
         return spec.getFleetPoints() * mult;
     }
 
@@ -115,7 +115,7 @@ public class ShipTypeData implements Serializable {
         if (designation == null) return 0f;
 
         return switch (designation) {
-            case CIVILIAN -> 0.1f;
+            case CIVILIAN -> 0.08f;
             case COMBAT_SHIPS -> 1f;
             case FRIGATES -> 0.7f;
             case DESTROYERS -> 1.2f;

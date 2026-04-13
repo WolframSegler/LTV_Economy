@@ -43,8 +43,7 @@ import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class TooltipUtils {
-
-    public static final SettingsAPI settings = Global.getSettings();
+    private static final SettingsAPI settings = Global.getSettings();
     public static final String TP_ARROW_PATH = settings.getSpriteName("ui", "cargoTooltipArrow");
     public static final String STOCKPILES_FULL_PATH = settings.getSpriteName("icons", "stockpiles_full");
     public static final String STOCKPILES_MEDIUM_PATH = settings.getSpriteName("icons", "stockpiles_medium");

@@ -37,6 +37,7 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
     private static final SpriteAPI FUEL = settings.getSprite(settings.getCommoditySpec(Commodities.FUEL).getIconName());
     private static final SpriteAPI CREW = settings.getSprite(settings.getCommoditySpec(Commodities.CREW).getIconName());
     private static final SpriteAPI COMBAT = settings.getSprite("ui", "icon_kinetic");
+    private static final int MAX_DISPLAYED_SHIPS = 10; // TODO add to config
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
     private final BorderRenderer border = new BorderRenderer("ui_border1", true);
@@ -48,7 +49,7 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
         super(parent, w, h);
 
         border.setSize(w + opad, h + opad);
-        border.centerColor = new Color(20, 25, 35, 220);
+        border.centerColor = new Color(30, 45, 40, 220);
 
         this.mission = mission;
         this.isSrcMarket = isSrcMarket;
@@ -64,12 +65,12 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
             final int arrivalTime = mission.durRemaining - (int) mission.transferDur;
 
             final String statusStr = switch(mission.status) {
-                case SCHEDULED -> "The mission is scheduled to begin preparations in " + beginTime + (beginTime < 2 ? "Day." : "Days.");
-                case IN_SRC_ORBIT_LOADING -> "The shipments are currently being loaded into the fleet.";
-                case IN_TRANSIT -> "The shipment is in-transit and is projected to arrive to its destination in " + arrivalTime + (arrivalTime < 2 ? "Day." : "Days.");
-                case IN_DST_ORBIT_UNLOADING -> "The fleet is orbiting " + mission.dest.getName() + " and unloading its shipment";
-                case DELIVERED -> "The ship has been delivered.";
-                case CANCELLED -> "The shipment was cancelled";
+                case SCHEDULED -> "The mission is scheduled to begin preparations in " + beginTime + (beginTime < 2 ? " Day." : " Days.");
+                case IN_SRC_ORBIT_LOADING -> "The shipment is currently being loaded into the fleet.";
+                case IN_TRANSIT -> "The shipment is in-transit and is projected to arrive to its destination in " + arrivalTime + (arrivalTime < 2 ? " Day." : " Days.");
+                case IN_DST_ORBIT_UNLOADING -> "The fleet is orbiting " + mission.dest.getName() + " and unloading its shipment.";
+                case DELIVERED -> "The shipment has been delivered.";
+                case CANCELLED -> "The shipment was cancelled.";
                 case LOST -> "The shipment, along with the fleet, was lost in combat.";
             };
 
@@ -82,17 +83,18 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
                 "The fuel was purchased at a premium from independent merchants.";
 
             String largestCom = "";
-            float amount = 0;
+            double amount = 0;
             for (ComTradeFlow flow : mission.cargo) {
                 if (flow.amount > amount) {
                     amount = flow.amount;
                     largestCom = flow.comID;
                 }
             }
+            largestCom = settings.getCommoditySpec(largestCom).getName();
 
-            tp.addPara("The %s trade mission is from %s to %s and is expected to cover a distance of %s in %s and burn %s units of fuel. " +
-                statusStr + " The shipment consists primarily of %s and the single most abundant commodity was %s. " +
-                fleetOriginStr + " The costs incurred for this shipment was %s credits. " + fuelOriginStr +
+            tp.addPara("The %s trade mission from %s to %s is expected to cover a distance of %s in %s and burn %s units of fuel. " +
+                statusStr + " The shipment consists primarily of %s and the single most abundant commodity is %s. " +
+                fleetOriginStr + " The costs incurred for this shipment was %s. " + fuelOriginStr +
                 " The fleet posesses a combat power of %s.",
                 pad, new Color[]{
                     base,
@@ -115,14 +117,34 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
             final int valueWidth = 50;
             int rowCount = 0;
 
+            tp.addPara("Shipment List", base, opad);
             tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
-
-            tp.addPara("Shipment List", base, pad);
             for (ComTradeFlow flow : mission.cargo) {
                 tp.addToGrid(0, rowCount++, settings.getCommoditySpec(flow.comID).getName(),
                     NumFormat.engNotation(flow.amount));
             }
             tp.addGrid(0);
+
+            final int totalEntries = mission.allocatedShips.size();
+            rowCount = 0;
+            
+            tp.addPara("Fleet Commposition", base, opad);
+            tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
+            for (var entry : mission.allocatedShips.singleEntrySet()) {
+                if (rowCount >= MAX_DISPLAYED_SHIPS) break;
+
+                final String name = entry.getKey().spec.getHullNameWithDashClass();
+                tp.addToGrid(0, rowCount++, name, entry.getValue().toString());
+            }
+
+            tp.addGrid(0);
+
+            if (totalEntries > MAX_DISPLAYED_SHIPS) {
+                final int remaining = totalEntries - MAX_DISPLAYED_SHIPS;
+                tp.addPara("... and %s more ship type%s", opad, Misc.getHighlightColor(),
+                    String.valueOf(remaining), remaining == 1 ? "" : "s"
+                );
+            }
         };
         
         buildUI();
@@ -151,18 +173,18 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
             factionIcon.drawTextureHalo = true;
         }
 
-        final Base fleetIcon = new Base(m_panel, 16, 32, null, null, null);
+        final Base fleetIcon = new Base(m_panel, 10, 20, null, null, null);
         fleetIcon.setSprite(SHIP_OUTLINE);
         fleetIcon.texHaloColor = mission.usedFactionFleet ? UIColors.IN_FACTION : gray; 
         fleetIcon.drawTextureHalo = true;
-        add(fleetIcon).inTR(hpad + pad + 20, hpad);
+        add(fleetIcon).inTR(hpad + hpad + 20, hpad);
 
         if (mission.usedFactionFleet && !mission.usedFuelFromStockpiles) {
             final Base fuelWarningIcon = new Base(m_panel, 20, 20, null, null, null);
             fuelWarningIcon.setSprite(FUEL);
             fuelWarningIcon.texHaloColor = UIColors.COM_DEFICIT;
             fuelWarningIcon.drawTextureHalo = true;
-            add(fuelWarningIcon).inTR(hpad + pad*2 + 36, hpad);
+            add(fuelWarningIcon).inTR(hpad + hpad*2 + 32, hpad);
         }
 
         final int GAP_TOP_1 = 50;
@@ -170,6 +192,8 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
         final LabelAPI srcLbl = settings.createLabel(mission.src.getName(), Fonts.DEFAULT_SMALL);
         final LabelAPI destLbl = settings.createLabel(mission.dest.getName(), Fonts.DEFAULT_SMALL);
         final Base destArrow = new Base(m_panel, 24, 18, null, Color.YELLOW, null);
+        srcLbl.setColor(mission.src.getFaction().getBaseUIColor());
+        destLbl.setColor(mission.dest.getFaction().getBaseUIColor());
         destArrow.setSprite(ARROW);
         final float srcLblW = srcLbl.getPosition().getWidth();
         add(srcLbl).inTL(hpad, GAP_TOP_1);
@@ -188,9 +212,9 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
         final LabelAPI durLbl = settings.createLabel("Total Dur: " + durValue, Fonts.DEFAULT_SMALL);
         durLbl.setHighlightColor(highlight);
         durLbl.setHighlight(durValue);
-        add(durLbl).inTL(hpad + opad*2 + 100, GAP_TOP_2);
+        add(durLbl).inTL(hpad + opad*2 + 70, GAP_TOP_2);
 
-        final String fuelValue = mission.fuelCost + (mission.fuelCost <= 1 ? " Unit" : " Units");
+        final String fuelValue = NumFormat.engNotation(mission.fuelCost) + (mission.fuelCost <= 1 ? " Unit" : " Units");
         final LabelAPI fuelCostLbl = settings.createLabel("Fuel Needed: " + fuelValue, Fonts.DEFAULT_SMALL);
         fuelCostLbl.setHighlightColor(highlight);
         fuelCostLbl.setHighlight(fuelValue);
@@ -240,9 +264,9 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
         crewLbl.setColor(highlight);
         combatLbl.setColor(highlight);
         add(cargoLbl).inTL(hpad + iconS + pad, GAP_TOP_4);
-        add(fuelLbl).inTL(hpad + perEntryW + iconS*2 + pad*2, GAP_TOP_4);
-        add(crewLbl).inTL(hpad + perEntryW*2 + iconS*3 + pad*3, GAP_TOP_4);
-        add(combatLbl).inTL(hpad + perEntryW*3 + iconS*4 + pad*4, GAP_TOP_4);
+        add(fuelLbl).inTL(hpad + iconS + perEntryW + pad*2, GAP_TOP_4);
+        add(crewLbl).inTL(hpad + iconS + perEntryW*2 + pad*3, GAP_TOP_4);
+        add(combatLbl).inTL(hpad + iconS + perEntryW*3 + pad*4, GAP_TOP_4);
 
         final long creditsValue = (long) mission.credits.computeEffective(0f);
         final String creditsStr = NumFormat.formatCredit(creditsValue);

@@ -8,10 +8,10 @@ import java.util.List;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.StatBonus;
+import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconomyConfig;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
-import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 public class TradeMission implements Serializable {
@@ -52,7 +52,7 @@ public class TradeMission implements Serializable {
         this.inFaction = inFaction;
 
         final float meanSize = (float) Math.sqrt(source.getSize()*source.getSize() + dest.getSize()*dest.getSize());
-        dist = Arithmetic.dist(source.getLocationInHyperspace(), dest.getLocationInHyperspace());
+        dist = Misc.getDistanceLY(source.getLocationInHyperspace(), dest.getLocationInHyperspace());
         travelDur = dist / EconomyConfig.TRAVEL_SPEED_LY_DAY;
         transferDur = meanSize * (0.75f + (float) Math.random() * 0.5f);
         totalDur = (int) Math.ceil(travelDur + transferDur * 2);

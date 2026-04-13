@@ -7,7 +7,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import wfg.native_ui.util.ArrayMap;
 
 public class SystemData {
-    private final ArrayMap<Color, Float> colorWeights = new ArrayMap<>(2);
+    private final ArrayMap<Color, Double> colorWeights = new ArrayMap<>(2);
     private float totalColorWeight = 0f;
 
     public boolean isSource = false;
@@ -15,8 +15,8 @@ public class SystemData {
     public StarSystemAPI system = null;
     public float nodeSize = 0f;
 
-    public final void addColorWeight(Color color, float weight) {
-        final Float prev = colorWeights.get(color);
+    public final void addColorWeight(Color color, double weight) {
+        final Double prev = colorWeights.get(color);
         if (prev == null) {
             colorWeights.put(color, weight);
         } else {
@@ -26,11 +26,11 @@ public class SystemData {
         totalColorWeight += weight;
     }
 
-    public final ArrayMap<Color, Float> getColorWeights() {
+    public final ArrayMap<Color, Double> getColorWeights() {
         return colorWeights;
     }
 
-    public final float getWeightSum() {
+    public final double getWeightSum() {
         return totalColorWeight;
     }
 

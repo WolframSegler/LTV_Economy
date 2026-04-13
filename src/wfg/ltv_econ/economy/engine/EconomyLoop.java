@@ -42,6 +42,7 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
+
 import static wfg.ltv_econ.constants.strings.Income.*;
 
 public class EconomyLoop {
@@ -266,6 +267,7 @@ public class EconomyLoop {
     }
 
     private final void dispatchTrade() {
+        final long startTime = System.nanoTime();
         engine.comDomains.values().forEach(CommodityDomain::createFormalTradeFlows);
 
         final ArrayMap<String, TradeMission> missions = new ArrayMap<>(32);
@@ -311,7 +313,8 @@ public class EconomyLoop {
             engine.activeMissions.add(mission);
         }
 
-        log.info("Dispatched " + totalMissions + " new trade missions and added them to the queue");
+        final String time = ((System.nanoTime() - startTime) / 1_000_000) + " ms";
+        log.info("Dispatched " + totalMissions + " new trade missions in "+ time +" and added them to the queue");
     }
 
     private final void advanceMissions() {
@@ -426,7 +429,13 @@ public class EconomyLoop {
 
     private final void allocIndependentFleetToTradeMission(final TradeMission mission) {
         ShipAllocator.allocateShipsForTarget(Global.getSector().getFaction(Factions.INDEPENDENT), mission);
-
+        
+        float fuelCost = 0f;
+        for (Entry<ShipTypeData, Integer> entry : mission.allocatedShips.singleEntrySet()) {
+            fuelCost += entry.getKey().spec.getFuelPerLY() * entry.getValue() * mission.dist;
+        }
+        mission.fuelCost = fuelCost;
+        
         float totalValue = 0f;
         for (ComTradeFlow flow : mission.cargo) {
             totalValue += flow.amount * flow.unitPrice;
@@ -535,6 +544,7 @@ public class EconomyLoop {
                     appliedTier.upkeepMultiplierPercent(),
                     "inefficiencies caused by market debt"
                 );
+                // TODO fix the population debuff to actually apply
                 market.getPopulation().getWeight().modifyFlat(
                     src,
                     appliedTier.immigrationModifier(),

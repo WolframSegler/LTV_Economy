@@ -4,6 +4,7 @@ import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -21,7 +22,7 @@ public class UIUtils {
         final MutableValue credits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
         final LabelAPI label = Global.getSettings().createLabel(
-            "Player Credits: " + Misc.getWithDGS(credits.get()), font
+            "Player Credits: " + Misc.getWithDGS(credits.get()) + Strings.C, font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
         
@@ -40,7 +41,7 @@ public class UIUtils {
         final long credits = EconomyEngine.instance().getCredits(marketID);
 
         final LabelAPI label = Global.getSettings().createLabel(
-            "Colony Credits: " + String.format("%,d", credits), font
+            "Colony Credits: " + String.format("%,d", credits) + Strings.C, font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
         

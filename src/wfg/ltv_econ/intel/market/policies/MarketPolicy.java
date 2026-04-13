@@ -1,7 +1,6 @@
 package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.ltv_econ.constants.strings.Income.POLICY_COST_KEY;
-import static wfg.ltv_econ.constants.strings.Income.getDesc;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.util.List;
@@ -108,7 +107,7 @@ public abstract class MarketPolicy {
         ) return;
 
         MarketFinanceRegistry.instance().getLedger(data.marketID).add(
-            POLICY_COST_KEY + id, -spec.cost, getDesc(POLICY_COST_KEY) + spec.name
+            POLICY_COST_KEY + id, -spec.cost, spec.name
         );
         activeDaysRemaining = durationDays;
         state = PolicyState.ACTIVE;
