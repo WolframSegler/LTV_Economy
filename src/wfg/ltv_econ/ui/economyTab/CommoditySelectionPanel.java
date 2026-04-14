@@ -103,6 +103,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
                     final ComDetailDialog dialogPanel = new ComDetailDialog(
                         null, settings.getFactionSpec(Factions.PLAYER), com
                     );
+                    dialogPanel.setConfirmShortcut();
                     dialogPanel.show(0.3f, 0.3f);
                 }
             };

@@ -58,6 +58,10 @@ public class ShipAllocator {
         allocateShipsForTrade(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
             inventory, mission.allocatedShips, Global.getSector().getFaction(inventory.factionID)
         );
+
+        for (Map.Entry<String, Integer> entry : mission.allocatedShips.singleEntrySet()) {
+            inventory.useShip(entry.getKey(), entry.getValue());
+        }
     }
 
     /**
@@ -74,7 +78,7 @@ public class ShipAllocator {
      */
     public static final void allocateShipsForTrade(
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
-        FactionShipInventory inventory, ArrayMap<ShipTypeData, Integer> allocation, FactionAPI faction
+        FactionShipInventory inventory, ArrayMap<String, Integer> allocation, FactionAPI faction
     ) {
         final double totalShipment = targetCargo + targetFuel + targetCrew;
         if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is: " + totalShipment);
@@ -119,7 +123,7 @@ public class ShipAllocator {
             final int allocated = (int) Math.floor(x[i]);
             if (allocated < 1) continue;
 
-            allocation.put(data, allocated);
+            allocation.put(data.hullID, allocated);
             idleCopy.put(data, idleCopy.get(data) - allocated);
 
             remainingCargo -= allocated * data.spec.getCargo();
@@ -137,7 +141,7 @@ public class ShipAllocator {
                 final int take = Math.min(needed, idle);
                 if (take < 1) continue;
 
-                allocation.merge(data, take, Integer::sum);
+                allocation.merge(data.hullID, take, Integer::sum);
                 idleCopy.put(data, idle - take);
 
                 remainingCargo -= take * data.spec.getCargo();
@@ -158,7 +162,7 @@ public class ShipAllocator {
                 final int take = Math.min(needed, idle);
                 if (take < 1) continue;
 
-                allocation.merge(data, take, Integer::sum);
+                allocation.merge(data.hullID, take, Integer::sum);
                 idleCopy.put(data, idle - take);
 
                 remainingCargo -= take * data.spec.getCargo();
@@ -179,7 +183,7 @@ public class ShipAllocator {
                 final int take = Math.min(needed, idle);
                 if (take < 1) continue;
 
-                allocation.merge(data, take, Integer::sum);
+                allocation.merge(data.hullID, take, Integer::sum);
                 idleCopy.put(data, idle - take);
 
                 remainingCargo -= take * data.spec.getCargo();
@@ -193,10 +197,6 @@ public class ShipAllocator {
         if (remainingCargo > eps) throw new IllegalStateException("Not enough cargo capacity after greedy fill");
         if (remainingFuel > eps) throw new IllegalStateException("Not enough fuel capacity after greedy fill");
         if (remainingCrew > eps) throw new IllegalStateException("Not enough crew capacity after greedy fill");
-
-        for (Map.Entry<ShipTypeData, Integer> entry : allocation.singleEntrySet()) {
-            inventory.useShips(entry.getKey().hullID, entry.getValue());
-        }
     }
 
     public static final float getRequiredCombatPower(TradeMission mission) {
@@ -249,7 +249,7 @@ public class ShipAllocator {
      */
     public static void allocateShipsForTarget(
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
-        FactionAPI faction, Map<ShipTypeData, Integer> allocation
+        FactionAPI faction, Map<String, Integer> allocation
     ) {
         final double totalTarget = targetCargo + targetFuel + targetCrew + targetCombat;
         if (totalTarget <= 0) return;
@@ -341,7 +341,7 @@ public class ShipAllocator {
 
             final ShipTypeData data = candidates.get(i);
             data.useShip(count);
-            allocation.put(data, count);
+            allocation.put(data.hullID, count);
         }
     }
 

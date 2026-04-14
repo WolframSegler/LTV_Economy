@@ -20,6 +20,7 @@ import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
@@ -47,7 +48,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.TimeoutTracker;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
-import wfg.ltv_econ.economy.commodity.ComTradeFlow;
+import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.util.Arithmetic;
@@ -198,6 +199,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	public final boolean shouldCancelRouteAfterDelayCheck(RouteData route) {
 		if (!(route.getCustom() instanceof TradeMission mission)) return false;
+		if (mission.src == null || mission.dest == null) return true;
 
 		if (!mission.smuggling) {
 			if (!mission.src.hasSpaceport() || !mission.dest.hasSpaceport()) {
@@ -235,6 +237,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	public static final CampaignFleetAPI createTradeRouteFleet(RouteData route, Random random) {
 		final TradeMission mission = (TradeMission) route.getCustom();
+		if (mission.src == null || mission.dest == null) return null;
 
 		final MarketAPI src = mission.src;
 		final String factionId = route.getFactionId();
@@ -278,29 +281,29 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 				&& combatPts < (float) FleetFactoryV3.FLEET_POINTS_THRESHOLD_FOR_ANNOYING_SHIPS;
 
 			// Ship selection
-			final ArrayMap<ShipTypeData, Integer> remaining = new ArrayMap<>(mission.allocatedShips);
-			final List<ShipTypeData> selection = new ArrayList<>();
+			final ArrayMap<String, Integer> remaining = new ArrayMap<>(mission.allocatedShips);
+			final List<ShipHullSpecAPI> selection = new ArrayList<>();
 			while (selection.size() < targetShips) {
 				double totalWeight = 0;
-				for (Map.Entry<ShipTypeData, Integer> e : remaining.singleEntrySet()) {
-					final ShipTypeData data = e.getKey();
-					if (banPhaseShipsEtc && data.spec.isPhase()) continue;
+				for (Map.Entry<String, Integer> e : remaining.singleEntrySet()) {
+					final ShipHullSpecAPI spec = settings.getHullSpec(e.getKey());
+					if (banPhaseShipsEtc && spec.isPhase()) continue;
 
-					totalWeight += e.getValue() * Math.max(1.0, data.spec.getFleetPoints());
+					totalWeight += e.getValue() * Math.max(1.0, spec.getFleetPoints());
 				}
 				if (totalWeight == 0) break;
 
-				final Iterator<Map.Entry<ShipTypeData, Integer>> it = remaining.entrySet().iterator();
+				final Iterator<Map.Entry<String, Integer>> it = remaining.entrySet().iterator();
 				final double r = random.nextDouble() * totalWeight;
 				double accum = 0;
 				while (it.hasNext()) {
-					final Map.Entry<ShipTypeData, Integer> e = it.next();
-					final ShipTypeData data = e.getKey();
-					if (banPhaseShipsEtc && data.spec.isPhase()) continue;
+					final Map.Entry<String, Integer> e = it.next();
+					final ShipHullSpecAPI spec = settings.getHullSpec(e.getKey());
+					if (banPhaseShipsEtc && spec.isPhase()) continue;
 
-					accum += e.getValue() * Math.max(1.0, data.spec.getFleetPoints());
+					accum += e.getValue() * Math.max(1.0, spec.getFleetPoints());
 					if (accum >= r) {
-						selection.add(data);
+						selection.add(spec);
 						final int newCount = e.getValue() - 1;
 						if (newCount == 0) it.remove();
 						else e.setValue(newCount);
@@ -310,15 +313,15 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 			}
 
 			selectedAmount = selection.size();
-			for (ShipTypeData data : selection) {
-				final List<String> variantIds = settings.getHullIdToVariantListMap().get(data.hullID);
+			for (ShipHullSpecAPI spec : selection) {
+				final List<String> variantIds = settings.getHullIdToVariantListMap().get(spec.getHullId());
 
 				final ShipVariantAPI variant;
 				if (!variantIds.isEmpty()) {
 					final int index = random.nextInt(variantIds.size());
 					variant = settings.getVariant(variantIds.get(index));
 				} else {
-					variant = settings.createEmptyVariant("", data.spec);
+					variant = settings.createEmptyVariant("", spec);
 				}
 
 				final FleetMemberAPI member = settings.createFleetMember(FleetMemberType.SHIP, variant);
@@ -389,7 +392,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		final float crewRemainingRatio = (cargo.getFreeCrewSpace() / mission.crewAmount) / mission.spawnedFleetCrewCapRatio;
 		mission.setSpawnedFleetCapRatios(cargo);
 
-		for (ComTradeFlow com : mission.cargo) {
+		for (TradeCom com : mission.cargo) {
 			if (com.comID.equals(Commodities.FUEL)) com.amount *= fuelRemainingRatio;
 			else if (com.comID.equals(Commodities.CREW) || com.comID.equals(Commodities.MARINES)) com.amount *= crewRemainingRatio;
 			else com.amount *= cargoRemainingRatio;

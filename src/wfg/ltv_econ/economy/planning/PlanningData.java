@@ -11,6 +11,7 @@ import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
@@ -93,7 +94,9 @@ public class PlanningData {
         final double[] d = new double[commodities.size()];
         for (int i = 0; i < commodities.size(); i++) {
             final String comID = commodities.get(i);
-            d[i] = EconomyEngine.instance().getComCell(comID, marketID).getTargetQuantum(true);
+            
+            final CommodityCell cell = EconomyEngine.instance().getComCell(comID, marketID);
+            d[i] = cell.getTargetQuantum(true);
         }
 
         return d;

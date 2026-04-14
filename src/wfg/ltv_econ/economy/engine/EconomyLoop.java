@@ -12,11 +12,13 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
@@ -28,10 +30,10 @@ import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
+import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipAllocator;
-import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
@@ -46,6 +48,7 @@ import wfg.native_ui.util.ArrayMap;
 import static wfg.ltv_econ.constants.strings.Income.*;
 
 public class EconomyLoop {
+    private static final SettingsAPI settings = Global.getSettings();
     private static final Logger log = Global.getLogger(EconomyLoop.class);
     public static final String KEY = "::";
 
@@ -272,13 +275,14 @@ public class EconomyLoop {
 
         final ArrayMap<String, TradeMission> missions = new ArrayMap<>(32);
         for (CommodityDomain dom : engine.comDomains.values()) {
+            final String comID = dom.comID;
             for (ComTradeFlow flow : dom.getTradeFlows()) {
                 final TradeMission mission = missions.computeIfAbsent(
-                    flow.exporter.getId() + KEY + flow.importer.getId(),
+                    flow.exporterID + KEY + flow.importerID,
                     m -> new TradeMission(flow.exporter, flow.importer, flow.inFaction)
                 );
 
-                mission.cargo.add(flow);
+                mission.cargo.add(new TradeCom(comID, flow.amount, flow.unitPrice));
                 if (flow.comID.equals(Commodities.CREW) || flow.comID.equals(Commodities.MARINES)) {
                     mission.crewAmount += flow.amount;
                 } else if (flow.comID.equals(Commodities.FUEL)) {
@@ -321,6 +325,11 @@ public class EconomyLoop {
         final Iterator<TradeMission> activeIt = engine.activeMissions.iterator();
         while (activeIt.hasNext()) {
             final TradeMission m = activeIt.next();
+            if (m.src == null || m.dest == null) {
+                activeIt.remove(); continue;
+            }
+
+            final FactionShipInventory inv = engine.getFactionShipInventory(m.src.getFactionId());
 
             switch (m.status) {
             case SCHEDULED:
@@ -353,12 +362,12 @@ public class EconomyLoop {
             case DELIVERED:
                 if (!m.spawnedFleetFinishedJob) break;
 
-                for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
-                    entry.getKey().freeShip(entry.getValue());
+                for (Entry<String, Integer> entry : m.allocatedShips.singleEntrySet()) {
+                    inv.freeShip(entry.getKey(), entry.getValue());
                 }
                 
-                for (ComTradeFlow cargo : m.cargo) {
-                    final CommodityCell cell = engine.getComCell(cargo.comID, m.dest.getId());
+                for (TradeCom cargo : m.cargo) {
+                    final CommodityCell cell = engine.getComCell(cargo.comID, m.destID);
                     if (cell == null) continue;
 
                     if (m.inFaction) {
@@ -371,20 +380,20 @@ public class EconomyLoop {
                 break;
 
             case CANCELLED:
-                for (ComTradeFlow cargo : m.cargo) {
-                    final CommodityCell cell = engine.getComCell(cargo.comID, m.src.getId());
+                for (TradeCom cargo : m.cargo) {
+                    final CommodityCell cell = engine.getComCell(cargo.comID, m.srcID);
                     if (cell == null) continue;
                     cell.inFactionImports += cargo.amount;
                 }
-                for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
-                    entry.getKey().freeShip(entry.getValue());
+                for (Entry<String, Integer> entry : m.allocatedShips.singleEntrySet()) {
+                    inv.freeShip(entry.getKey(), entry.getValue());
                 }
                 putMissionToPast(activeIt, m);
                 break;
 
             case LOST:
-                for (Entry<ShipTypeData, Integer> entry : m.allocatedShips.singleEntrySet()) {
-                    entry.getKey().registerShipLoss(entry.getValue());
+                for (Entry<String, Integer> entry : m.allocatedShips.singleEntrySet()) {
+                    inv.registerShipLoss(entry.getKey(), entry.getValue());
                 }
                 putMissionToPast(activeIt, m);
                 break;
@@ -404,8 +413,8 @@ public class EconomyLoop {
         ShipAllocator.allocateShipsForTrade(inv, mission);
 
         float fuelCost = 0f;
-        for (Entry<ShipTypeData, Integer> entry : mission.allocatedShips.singleEntrySet()) {
-            fuelCost += entry.getKey().spec.getFuelPerLY() * entry.getValue() * mission.dist;
+        for (Entry<String, Integer> entry : mission.allocatedShips.singleEntrySet()) {
+            fuelCost += inv.get(entry.getKey()).spec.getFuelPerLY() * entry.getValue() * mission.dist;
         }
         mission.fuelCost = fuelCost;
 
@@ -431,13 +440,14 @@ public class EconomyLoop {
         ShipAllocator.allocateShipsForTarget(Global.getSector().getFaction(Factions.INDEPENDENT), mission);
         
         float fuelCost = 0f;
-        for (Entry<ShipTypeData, Integer> entry : mission.allocatedShips.singleEntrySet()) {
-            fuelCost += entry.getKey().spec.getFuelPerLY() * entry.getValue() * mission.dist;
+        for (Entry<String, Integer> entry : mission.allocatedShips.singleEntrySet()) {
+            final ShipHullSpecAPI spec = settings.getHullSpec(entry.getKey());
+            fuelCost += spec.getFuelPerLY() * entry.getValue() * mission.dist;
         }
         mission.fuelCost = fuelCost;
         
         float totalValue = 0f;
-        for (ComTradeFlow flow : mission.cargo) {
+        for (TradeCom flow : mission.cargo) {
             totalValue += flow.amount * flow.unitPrice;
         }
 

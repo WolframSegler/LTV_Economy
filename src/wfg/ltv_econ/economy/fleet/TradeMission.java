@@ -5,24 +5,28 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
+import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconomyConfig;
-import wfg.ltv_econ.economy.commodity.ComTradeFlow;
+import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.native_ui.util.ArrayMap;
 
 public class TradeMission implements Serializable {
-    public final ArrayMap<ShipTypeData, Integer> allocatedShips = new ArrayMap<>(8);
-    public final List<ComTradeFlow> cargo = new ArrayList<>();
+    public final ArrayMap<String, Integer> allocatedShips = new ArrayMap<>(8);
+    public final List<TradeCom> cargo = new ArrayList<>();
     public final StatBonus credits = new StatBonus();
     public final boolean inFaction;
     public final float dist;
+    public final String srcID;
+    public final String destID;
 
-    public final MarketAPI src;
-    public final MarketAPI dest;
+    public transient MarketAPI src;
+    public transient MarketAPI dest;
 
     public final float transferDur;
     public final float travelDur;
@@ -47,6 +51,8 @@ public class TradeMission implements Serializable {
     public MissionStatus status = MissionStatus.SCHEDULED;
 
     public TradeMission(MarketAPI source, MarketAPI dest, boolean inFaction) {
+        this.srcID = source.getId();
+        this.destID = dest.getId();
         this.src = source;
         this.dest = dest;
         this.inFaction = inFaction;
@@ -58,6 +64,19 @@ public class TradeMission implements Serializable {
         totalDur = (int) Math.ceil(travelDur + transferDur * 2);
         
         durRemaining = totalDur;
+    }
+
+    private final Object readResolve() {
+        final EconomyAPI econ = Global.getSector().getEconomy();
+
+        src = econ.getMarket(srcID);
+        dest = econ.getMarket(destID);
+
+        if (src == null || dest == null) {
+            status = MissionStatus.CANCELLED;
+        }
+
+        return this;
     }
 
     public final float getTotalAmount() {

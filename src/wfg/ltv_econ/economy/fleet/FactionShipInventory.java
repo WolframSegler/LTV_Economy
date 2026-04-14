@@ -51,19 +51,19 @@ public class FactionShipInventory implements Serializable {
         return ships.computeIfAbsent(hullId, k -> new ShipTypeData(hullId));
     }
 
-    public final void addShips(final String hullId, int count) {
+    public final void addShip(final String hullId, int count) {
         get(hullId).addShip(count);
     }
 
-    public final void removeShips(String hullId, int count) {
+    public final void removeShip(String hullId, int count) {
         get(hullId).addShip(-count);
     }
 
-    public final void useShips(String hullId, int count) {
+    public final void useShip(String hullId, int count) {
         get(hullId).useShip(count);
     }
 
-    public final void freeShips(String hullId, int count) {
+    public final void freeShip(String hullId, int count) {
         get(hullId).freeShip(count);
     }
 
@@ -277,7 +277,7 @@ public class FactionShipInventory implements Serializable {
         for (int i = completedIndices.size() - 1; i >= 0; i--) {
             final int idx = completedIndices.get(i);
             final ShipProductionOrder completed = activeQueue.remove(idx);
-            addShips(completed.hullId, 1);
+            addShip(completed.hullId, 1);
         }
     }
 

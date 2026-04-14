@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -14,7 +15,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.constants.UIColors;
-import wfg.ltv_econ.economy.commodity.ComTradeFlow;
+import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.native_ui.internal.util.BorderRenderer;
@@ -42,6 +43,7 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
     private static final SpriteAPI FUEL = settings.getSprite(settings.getCommoditySpec(Commodities.FUEL).getIconName());
     private static final SpriteAPI CREW = settings.getSprite(settings.getCommoditySpec(Commodities.CREW).getIconName());
     private static final SpriteAPI COMBAT = settings.getSprite("ui", "icon_kinetic");
+    private static final Color CARGO_COLOR = new Color(255, 191, 77);
     private static final int MAX_DISPLAYED_SHIPS = 20; // TODO add to config
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -92,7 +94,7 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
 
             String largestCom = "";
             double amount = 0;
-            for (ComTradeFlow flow : mission.cargo) {
+            for (TradeCom flow : mission.cargo) {
                 if (flow.amount > amount) {
                     amount = flow.amount;
                     largestCom = flow.comID;
@@ -127,7 +129,7 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
 
             tp.addPara("Shipment List", base, opad);
             tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
-            for (ComTradeFlow flow : mission.cargo) {
+            for (TradeCom flow : mission.cargo) {
                 tp.addToGrid(0, rowCount++, settings.getCommoditySpec(flow.comID).getName(),
                     NumFormat.engNotation(flow.amount));
             }
@@ -141,7 +143,8 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
             for (var entry : mission.allocatedShips.singleEntrySet()) {
                 if (rowCount >= MAX_DISPLAYED_SHIPS) break;
 
-                final String name = entry.getKey().spec.getHullNameWithDashClass();
+                final ShipHullSpecAPI spec = settings.getHullSpec(entry.getKey());
+                final String name = spec.getHullNameWithDashClass();
                 tp.addToGrid((rowCount % 2 == 0 ? 0 : 1), rowCount / 2, name, entry.getValue().toString());
                 rowCount++;
             }
@@ -187,14 +190,14 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
         fleetIcon.setSprite(SHIP_OUTLINE);
         fleetIcon.texHaloColor = mission.usedFactionFleet ? UIColors.IN_FACTION : gray; 
         fleetIcon.drawTextureHalo = true;
-        add(fleetIcon).inTR(opad + hpad + 20, opad);
+        add(fleetIcon).inTR(opad*2 + 20, opad);
 
         if (mission.usedFactionFleet && !mission.usedFuelFromStockpiles) {
             final Base fuelWarningIcon = new Base(m_panel, 20, 20, null, null, null);
             fuelWarningIcon.setSprite(FUEL);
             fuelWarningIcon.texHaloColor = UIColors.COM_DEFICIT;
             fuelWarningIcon.drawTextureHalo = true;
-            add(fuelWarningIcon).inTR(opad + hpad*2 + 40, opad);
+            add(fuelWarningIcon).inTR(opad*2 + hpad + 30, opad);
         }
 
         final int GAP_TOP_1 = 40;
@@ -241,21 +244,30 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
         final Slider timeSlider = new Slider(m_panel, sliderTxt, 0f, mission.totalDur, panelW - opad*2, 32);
         timeSlider.showLabelOnly = true;
         timeSlider.setUserAdjustable(false);
-        timeSlider.setProgress(mission.totalDur - mission.durRemaining);
         add(timeSlider).inTL(opad, GAP_TOP_3);
         switch (mission.status) {
-            case LOST: timeSlider.setBarColor(UIColors.COM_DEFICIT); break;
-            case DELIVERED: timeSlider.setBarColor(UIColors.COM_EXPORT); break;
-            case CANCELLED: timeSlider.setBarColor(UIColors.COM_IMPORT); break;
-            default: break;
+        case LOST:
+            timeSlider.setBarColor(UIColors.COM_DEFICIT);
+            break;
+        case DELIVERED:
+            timeSlider.setBarColor(UIColors.COM_EXPORT);
+            timeSlider.setProgress(mission.totalDur);
+            break;
+        case CANCELLED:
+            timeSlider.setBarColor(UIColors.COM_IMPORT);
+            break;
+        default:
+            timeSlider.setProgress(mission.totalDur - mission.durRemaining);
+            break;
         }
 
         final int GAP_TOP_4 = GAP_TOP_3 + 42;
         final int perEntryW = (panelW - opad*2) / 4;
         final int iconS = 28;
+        final int iconLS = 32;
 
-        final Base cargoIcon = new Base(m_panel, iconS, iconS, null, null, null);
-        final Base fuelIcon = new Base(m_panel, iconS, iconS, null, null, null);
+        final Base cargoIcon = new Base(m_panel, iconS, iconS, null, CARGO_COLOR, null);
+        final Base fuelIcon = new Base(m_panel, iconLS, iconLS, null, null, null);
         final Base crewIcon = new Base(m_panel, iconS, iconS, null, null, null);
         final Base combatIcon = new Base(m_panel, iconS, iconS, null, null, null);
         cargoIcon.setSprite(CRATES);

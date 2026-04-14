@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.economyTab.tradeFlowMap;
+package wfg.ltv_econ.ui.fleet;
 
 import static wfg.ltv_econ.constants.EconomyConstants.visibleFactions;
 import static wfg.native_ui.util.UIConstants.*;
@@ -29,15 +29,15 @@ import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 public class FiltersDialog extends DockPanel {
     private static final SettingsAPI settings = Global.getSettings();
 
+    private static final float minAmountCeiling = 50000f; // TODO turn this into a config
+
     private final UIBuildableAPI content;
     
     private Slider minAmountSlider;
-    private float minAmountSliderValueCache = ComTradeFlowMap.minTradeAmount;
+    private float minAmountSliderValueCache = TradeFilters.minTradeAmount;
 
     public FiltersDialog(UIBuildableAPI content) {
         super(400, 430, Side.RIGHT);
-
-        removeWhenClosed = true;
 
         this.content = content;
 
@@ -58,15 +58,16 @@ public class FiltersDialog extends DockPanel {
         final LabelAPI modeLblb = settings.createLabel("Direction Mode", Fonts.DEFAULT_SMALL);
         add(modeLblb).inTL(opad, SECT_I_H + opad*2);
 
-        final RadioPanel modeRadio = new RadioPanel(m_panel, (int) pos.getWidth() - opad*2, BTN_H, LayoutMode.HORIZONTAL)
+        final RadioPanel modeRadio = new RadioPanel(m_panel, (int) pos.getWidth() - hpad*3, BTN_H, LayoutMode.HORIZONTAL)
             .addOption("All")
             .addOption("Exporters")
-            .addOption("Importers");
+            .addOption("Importers")
+            .addOption("In-Faction");
         modeRadio.optionSelected = (index) -> {
-            ComTradeFlowMap.directionMode = index;
+            TradeFilters.directionMode = index;
             content.buildUI();
         };
-        modeRadio.setSelectedIndex(ComTradeFlowMap.directionMode);
+        modeRadio.setSelectedIndex(TradeFilters.directionMode);
         modeRadio.buildUI();
         add(modeRadio).inTL(opad, SECT_I_H + LABEL_H + opad*2);
 
@@ -76,8 +77,8 @@ public class FiltersDialog extends DockPanel {
         minAmountLbl.getPosition().setSize(lblW, BTN_H);
         final int sliderW = (int) (pos.getWidth() - opad*3 - lblW);
 
-        minAmountSlider = new Slider(m_panel, null, 0f, 1000f, sliderW, BTN_H);
-        minAmountSlider.setProgress(ComTradeFlowMap.minTradeAmount);
+        minAmountSlider = new Slider(m_panel, null, 0f, minAmountCeiling, sliderW, BTN_H);
+        minAmountSlider.setProgress(TradeFilters.minTradeAmount);
         add(minAmountSlider).inTL(opad + lblW + pad, SECT_I_H + LABEL_H + BTN_H + opad*4);
         minAmountSlider.system().setIfNotPresent(
             NativeSystems.TOOLTIP, TooltipSystem.get(), minAmountSlider
@@ -109,12 +110,12 @@ public class FiltersDialog extends DockPanel {
             final String factionName = spec.getDisplayName();
             final String factionId = spec.getId();
 
-            final boolean initiallyAllowedExport = !ComTradeFlowMap.exporterFactionBlacklist.contains(factionId);
+            final boolean initiallyAllowedExport = !TradeFilters.exporterFactionBlacklist.contains(factionId);
             final CheckboxButton cbExp = new CheckboxButton(m_panel, 20, factionName, Fonts.DEFAULT_SMALL, 
                 (btn) -> {
                     btn.setChecked(!btn.isChecked());
-                    if (btn.isChecked()) ComTradeFlowMap.exporterFactionBlacklist.remove(factionId);
-                    else ComTradeFlowMap.exporterFactionBlacklist.add(factionId);
+                    if (btn.isChecked()) TradeFilters.exporterFactionBlacklist.remove(factionId);
+                    else TradeFilters.exporterFactionBlacklist.add(factionId);
                     content.buildUI();
                 }, UICheckboxSize.SMALL, false
             );
@@ -124,12 +125,12 @@ public class FiltersDialog extends DockPanel {
             exportersContainer.addCustom(cbExp.getPanel(), 0).getPosition().inTL(pad, yLeft);
             yLeft += cbExp.getPanel().getPosition().getHeight() + pad;
 
-            final boolean initiallyAllowedImport = !ComTradeFlowMap.importerFactionBlacklist.contains(factionId);
+            final boolean initiallyAllowedImport = !TradeFilters.importerFactionBlacklist.contains(factionId);
             final CheckboxButton cbImp = new CheckboxButton(m_panel, 20, factionName, Fonts.DEFAULT_SMALL,
                 (btn) -> {
                     btn.setChecked(!btn.isChecked());
-                    if (btn.isChecked()) ComTradeFlowMap.importerFactionBlacklist.remove(factionId);
-                    else ComTradeFlowMap.importerFactionBlacklist.add(factionId);
+                    if (btn.isChecked()) TradeFilters.importerFactionBlacklist.remove(factionId);
+                    else TradeFilters.importerFactionBlacklist.add(factionId);
                     content.buildUI();
                 }, UICheckboxSize.SMALL, false
             );
@@ -148,25 +149,25 @@ public class FiltersDialog extends DockPanel {
 
         final float btnW = 80;
         final Button enableAllExporters = new Button(m_panel, (int)btnW, S_BTN_H, "Enable All", Fonts.DEFAULT_SMALL, (b) -> {
-            for (FactionSpecAPI s : visibleFactions) ComTradeFlowMap.exporterFactionBlacklist.remove(s.getId());
+            for (FactionSpecAPI s : visibleFactions) TradeFilters.exporterFactionBlacklist.remove(s.getId());
             content.buildUI();
             buildUI();
         });
         
         final Button disableAllExporters = new Button(m_panel, (int)btnW, S_BTN_H, "Disable All", Fonts.DEFAULT_SMALL, (b) -> {
-            for (FactionSpecAPI s : visibleFactions) ComTradeFlowMap.exporterFactionBlacklist.add(s.getId());
+            for (FactionSpecAPI s : visibleFactions) TradeFilters.exporterFactionBlacklist.add(s.getId());
             content.buildUI();
             buildUI();
         });
         
         final Button enableAllImporters = new Button(m_panel, (int)btnW, S_BTN_H, "Enable All", Fonts.DEFAULT_SMALL, (b) -> {
-            for (FactionSpecAPI s : visibleFactions) ComTradeFlowMap.importerFactionBlacklist.remove(s.getId());
+            for (FactionSpecAPI s : visibleFactions) TradeFilters.importerFactionBlacklist.remove(s.getId());
             content.buildUI();
             buildUI();
         });
         
         final Button disableAllImporters = new Button(m_panel, (int)btnW, S_BTN_H, "Disable All", Fonts.DEFAULT_SMALL, (b) -> {
-            for (FactionSpecAPI s : visibleFactions) ComTradeFlowMap.importerFactionBlacklist.add(s.getId());
+            for (FactionSpecAPI s : visibleFactions) TradeFilters.importerFactionBlacklist.add(s.getId());
             content.buildUI();
             buildUI();
         });
@@ -187,7 +188,7 @@ public class FiltersDialog extends DockPanel {
         super.advance(delta);
 
         if (minAmountSlider != null && minAmountSliderValueCache != minAmountSlider.getProgress()) {
-            ComTradeFlowMap.minTradeAmount = minAmountSlider.getProgress();
+            TradeFilters.minTradeAmount = minAmountSlider.getProgress();
             minAmountSliderValueCache = minAmountSlider.getProgress();
             content.buildUI();
         }

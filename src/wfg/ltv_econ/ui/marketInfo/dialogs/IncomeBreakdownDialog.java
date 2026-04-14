@@ -24,6 +24,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
+import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
@@ -53,7 +54,6 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         offsetY = GAP;
         bgAlpha = 0.95f;
-        removeWhenClosed = true;
 
         buildUI();
     }
@@ -83,7 +83,9 @@ public class IncomeBreakdownDialog extends DockPanel {
         final float scrollPanelH = pos.getHeight() - offset - opad;
         ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, m_panel).inTL(pad, offset);
 
-        scrollPanel.getExternalScroller().setYOffset(Math.min(scrollLen, scrollPanel.getHeightSoFar() - scrollPanelH));
+        scrollPanel.getExternalScroller().setYOffset(Arithmetic.clamp(
+            scrollLen, 0f, scrollPanel.getHeightSoFar() - scrollPanelH
+        ));
     }
 
     public final void incomeBreakdownUI(final TooltipMakerAPI tp) {

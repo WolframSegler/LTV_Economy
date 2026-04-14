@@ -7,6 +7,7 @@ import org.lwjgl.input.Keyboard;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
+import wfg.ltv_econ.ui.fleet.FiltersDialog;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.functional.DockButton;

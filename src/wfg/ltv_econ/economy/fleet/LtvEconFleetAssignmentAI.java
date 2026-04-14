@@ -23,7 +23,7 @@ import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
-import wfg.ltv_econ.economy.commodity.ComTradeFlow;
+import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 
 public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
@@ -48,21 +48,25 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
 
     @Override
     protected String getStartingActionText(RouteSegment segment) {
+        if (getMission().src == null) return super.getStartingActionText(segment);
         return "loading " + getCargoList(segment) + " at " + getMission().src.getName();
     }
 
     @Override
     protected String getEndingActionText(RouteSegment segment) {
+        if (getMission().src == null) return super.getEndingActionText(segment);
         return "unloading " + getCargoList(segment) + " at " + getMission().src.getName();
     }
 
     @Override
     protected String getTravelActionText(RouteSegment segment) {
+        if (getMission().dest == null) return super.getTravelActionText(segment);
         return "delivering " + getCargoList(segment) + " to " + getMission().dest.getName();
     }
 
     @Override
     protected String getInSystemActionText(RouteSegment segment) {
+        if (getMission().dest == null) return super.getInSystemActionText(segment);
         if (segment.getId() == MissionStatus.IN_DST_ORBIT_UNLOADING.ordinal()) {
             return "unloading " + getCargoList(segment) + " at " + getMission().dest.getName();
         }
@@ -160,13 +164,13 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         }
     }
 
-    private static final String getCargoList(List<ComTradeFlow> cargo) {
+    private static final String getCargoList(List<TradeCom> cargo) {
         if (cargo.isEmpty()) return "";
-        final List<ComTradeFlow> sorted = new ArrayList<>(cargo);
+        final List<TradeCom> sorted = new ArrayList<>(cargo);
 
         sorted.sort((a, b) -> Double.compare(b.amount, a.amount));
         List<String> strings = new ArrayList<>();
-        for (ComTradeFlow flow : sorted) {
+        for (TradeCom flow : sorted) {
             final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(flow.comID);
 
             if (spec.getId().equals(Commodities.SHIPS)) {
@@ -201,7 +205,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         cargo.addFuel(Math.min(mission.fuelAmount * mission.spawnedFleetFuelCapRatio, cargo.getMaxFuel()));
 
         float ships = 0f;
-        for (ComTradeFlow flow : mission.cargo) {
+        for (TradeCom flow : mission.cargo) {
             final String cid = flow.comID;
             final double amount = flow.amount * mission.spawnedFleetCargoCapRatio;
 

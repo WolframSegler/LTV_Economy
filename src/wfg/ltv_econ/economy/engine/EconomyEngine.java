@@ -110,7 +110,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     final ArrayMap<String, Long> marketCredits = new ArrayMap<>(EconomyInfo.getMarketsCount());
     final ArrayMap<String, FactionShipInventory> factionShipInventories = new ArrayMap<>(EconomyConstants.visibleFactionIDs.size());
     final List<TradeMission> activeMissions = new ArrayList<>();
-    final List<TradeMission> pastMissions = new ArrayList<>();
+    transient List<TradeMission> pastMissions = new ArrayList<>();
 
     protected int dayKeyTracker = -1;
     protected int cyclesSinceWorkerAssign = EconomyConfig.WORKER_ASSIGN_INTERVAL;
@@ -142,6 +142,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         info = new EconomyInfo(this);
         logger = new EconomyLogger(this);
         loop = new EconomyLoop(this);
+
+        pastMissions = new ArrayList<>();
 
         return this;
     }

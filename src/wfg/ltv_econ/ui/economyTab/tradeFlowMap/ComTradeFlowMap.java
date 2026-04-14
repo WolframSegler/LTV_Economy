@@ -29,6 +29,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
+import wfg.ltv_econ.ui.fleet.TradeFilters;
 import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.component.NativeComponents;
@@ -75,11 +76,6 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
     private static final float MIN_COLOR_DUR = 0.1f;
 
     private static final float COM_ICON_SIZE = 48f;
-
-    public static final Set<String> exporterFactionBlacklist = new HashSet<>(12);
-    public static final Set<String> importerFactionBlacklist = new HashSet<>(12);
-    public static int directionMode = 0;
-    public static float minTradeAmount = 0f;
 
     private final TooltipComp toolitp = comp().get(NativeComponents.TOOLTIP);
     private final TooltipSystem tooltipSys = system().get(NativeSystems.TOOLTIP);
@@ -148,8 +144,9 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             );
             tradeFlows.removeIf(t -> t.exporter.isHidden() ||
                 t.importer.isHidden() ||
-                exporterFactionBlacklist.contains(t.exporter.getFactionId()) ||
-                importerFactionBlacklist.contains(t.importer.getFactionId())
+                TradeFilters.exporterFactionBlacklist.contains(t.exporter.getFactionId()) ||
+                TradeFilters.importerFactionBlacklist.contains(t.importer.getFactionId()) ||
+                (TradeFilters.directionMode == 3 && !t.inFaction)
             );
 
             for (ComTradeFlow flow : tradeFlows) {
@@ -176,7 +173,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                     }
                 }
 
-                if (directionMode == 1 && !data.isSource || directionMode == 2 && !data.isDest) {
+                if (TradeFilters.directionMode == 1 && !data.isSource || TradeFilters.directionMode == 2 && !data.isDest) {
                     systemsToRemove.add(system);
                     continue;
                 }
@@ -221,7 +218,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                     data.addColorWeight(c, amount);
                 }
 
-                if (totalAmount < minTradeAmount) continue;
+                if (totalAmount < TradeFilters.minTradeAmount) continue;
 
                 data.source = source;
                 data.destination = dest;

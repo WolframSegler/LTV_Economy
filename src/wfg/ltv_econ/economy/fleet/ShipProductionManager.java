@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -24,6 +25,7 @@ import wfg.native_ui.util.ArrayMap;
 
 public class ShipProductionManager {
     private ShipProductionManager() {}
+    private static final SettingsAPI settings = Global.getSettings();
 
     // TODO move these to economy config
     private static final float CARGO_SAFETY_MULT = 1.5f;
@@ -75,15 +77,15 @@ public class ShipProductionManager {
         deficitCrew = Math.max(0f, deficitCrew);
         deficitCombat = Math.max(0f, deficitCombat);
 
-        final ArrayMap<ShipTypeData, Integer> buildList = new ArrayMap<>(8);
+        final ArrayMap<String, Integer> buildList = new ArrayMap<>(8);
         ShipAllocator.allocateShipsForTarget(deficitCargo, deficitFuel, deficitCrew, deficitCombat, faction, buildList);
 
-        for (Map.Entry<ShipTypeData, Integer> entry : buildList.singleEntrySet()) {
-            final ShipTypeData data = entry.getKey();
+        for (Map.Entry<String, Integer> entry : buildList.singleEntrySet()) {
+            final String hullID = entry.getKey();
 
-            final PlannedOrder cost = getProductionCost(data.spec);
+            final PlannedOrder cost = getProductionCost(settings.getHullSpec(hullID));
             for (int i = 0; i < entry.getValue(); i++) {
-                inv.addPlannedOrder(new PlannedOrder(data.hullID, cost.credits, cost.commodities, cost.days));
+                inv.addPlannedOrder(new PlannedOrder(hullID, cost.credits, cost.commodities, cost.days));
             }
         }
     }
