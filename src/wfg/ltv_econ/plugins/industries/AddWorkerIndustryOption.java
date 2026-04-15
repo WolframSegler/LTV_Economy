@@ -65,7 +65,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
             highlight,
             base
         },
-        NumFormat.engNotation(WorkerRegistry.instance().getData(industry).getWorkersAssigned()),
+        NumFormat.engNotate(WorkerRegistry.instance().getData(industry).getWorkersAssigned()),
         industry.getCurrentName()
         );
     }

@@ -100,11 +100,11 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         );
 
         tooltip.addPara("Total Workers: %s", opad, highlight,
-            NumFormat.engNotation(getWorkerPool())
+            NumFormat.engNotate(getWorkerPool())
         );
         tooltip.addPara(
             "Unemployed Workers: %s (%s%%)", opad, highlight,
-            NumFormat.engNotation(freeWorkerRatio * getWorkerPool()),
+            NumFormat.engNotate(freeWorkerRatio * getWorkerPool()),
             String.format("%.1f", freeWorkerRatio * 100)
         );
     }

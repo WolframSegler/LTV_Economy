@@ -5,7 +5,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel.RowPanel;
@@ -53,11 +53,11 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
         } else {
             settings.embargoedFactions.add(factionID);
             final FactionAPI faction = Global.getSector().getFaction(factionID);
-            faction.adjustRelationship(Factions.PLAYER, -EconomyConfig.EMBARGO_REP_DROP);
+            faction.adjustRelationship(Factions.PLAYER, -EconConfig.EMBARGO_REP_DROP);
             Global.getSoundPlayer().playUISound("ui_rep_drop", 1f, 1f);
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
                 "Relations with "+faction.getDisplayName()+" decreased by " +
-                Math.round(EconomyConfig.EMBARGO_REP_DROP * 100f),
+                Math.round(EconConfig.EMBARGO_REP_DROP * 100f),
                 faction.getDisplayName(),
                 faction.getBaseUIColor()
             );

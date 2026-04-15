@@ -93,7 +93,6 @@ public class AssignWorkersDialog extends DialogPanel {
         final int sliderY = 225;
         final int iconSize = 26;
 
-        // Draw Titel
         final String txt = "Assign workers to " + industry.getCurrentName();
         final LabelAPI lbl = settings.createLabel(txt, Fonts.ORBITRON_20AA);
 
@@ -105,13 +104,11 @@ public class AssignWorkersDialog extends DialogPanel {
             180
         ) {{ bg.alpha = 0f;}};
 
-        // Draw Production
         drawProductionAndConsumption(inputOutputContainer.getPanel());
 
         innerPanel.addComponent(inputOutputContainer.getPanel())
             .inTL(0, lbl.computeTextHeight(txt) + opad);
 
-        // Draw separator line
         final BasePanel separator = new BasePanel(
             innerPanel, panelWidth, 1
         ) {{ bg.color = gray;}};
@@ -160,7 +157,6 @@ public class AssignWorkersDialog extends DialogPanel {
             );
             outputSliders.put(output.comID, outputSlider);
 
-            // Configure the slider
             outputSlider.setHighlightOnMouseover(true);
             outputSlider.setBarColor(SLIDER_BASE);
             outputSlider.showValueOnly = true;
@@ -253,7 +249,7 @@ public class AssignWorkersDialog extends DialogPanel {
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
-            final String txt = Strings.X + NumFormat.engNotation(pAmount);
+            final String txt = Strings.X + NumFormat.engNotate(pAmount);
             final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
             final float textH = lbl.computeTextHeight(txt);
@@ -301,7 +297,7 @@ public class AssignWorkersDialog extends DialogPanel {
             iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
             // draw text
-            final String txt = Strings.X + NumFormat.engNotation(dAmount);
+            final String txt = Strings.X + NumFormat.engNotate(dAmount);
             final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
             final float textH = lbl.computeTextHeight(txt);

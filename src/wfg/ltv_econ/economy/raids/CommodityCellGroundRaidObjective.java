@@ -28,7 +28,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -113,7 +113,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
     
 	@Override
 	public String getQuantityString(int marines) {
-		return NumFormat.engNotation(getQuantity(Math.max(1, marines)));
+		return NumFormat.engNotate(getQuantity(Math.max(1, marines)));
 	}
 
     @Override
@@ -215,13 +215,13 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
 	protected static final float getQuantity(CommodityCell cell, int marines, double mult) {
         final double stored = cell.getStored();
-		final double maxQuantity = stored * EconomyConfig.RAID_STOCKPILES_ACCESS_RATIO;
+		final double maxQuantity = stored * EconConfig.RAID_STOCKPILES_ACCESS_RATIO;
         final double marineQuantity = maxQuantity * marines / MarketCMD.MAX_MARINE_TOKENS;
         final double deficitMult = 1.0 / (2.0 - cell.getStoredAvailabilityRatio());
         final double excessMult = Math.min(3.0, (cell.getStoredExcess() + stored) / stored);
         final double prodMult = Arithmetic.clamp(cell.getProduction(true) / (1.0 + cell.getTargetQuantum(true)), 1.0, 2.0);
 
-        final double value = marineQuantity * EconomyConfig.RAID_BASE_EFF * deficitMult * excessMult * prodMult * mult;
+        final double value = marineQuantity * EconConfig.RAID_BASE_EFF * deficitMult * excessMult * prodMult * mult;
         return (float) Math.min(maxQuantity, value);
 	}
 

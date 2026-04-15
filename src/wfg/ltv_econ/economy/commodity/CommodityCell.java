@@ -13,7 +13,7 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.campaign.econ.Market;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -124,7 +124,7 @@ public class CommodityCell implements Serializable {
         return getProduction(true) + getTotalImports();
     }
     public final float getTargetStockpiles() {
-        return EconomyConfig.DAYS_TO_COVER * getTargetQuantum(true);
+        return EconConfig.DAYS_TO_COVER * getTargetQuantum(true);
     }
     public final float getSurplusAfterTargetQuantum() {
         return Math.max(0f, getProduction(true) - getTargetQuantum(true));
@@ -137,12 +137,12 @@ public class CommodityCell implements Serializable {
     }
     public final double computeExportAmount() {
         return Math.max(0.0, stored + getRemainingExportableAfterTargetQuantum()
-            - getProduction(true) * EconomyConfig.PRODUCTION_HOLD_FACTOR
-            - getTargetStockpiles() * EconomyConfig.EXPORT_THRESHOLD_FACTOR
+            - getProduction(true) * EconConfig.PRODUCTION_HOLD_FACTOR
+            - getTargetStockpiles() * EconConfig.EXPORT_THRESHOLD_FACTOR
         );
     }
     public final float computeImportAmount() {
-        final float cap = EconomyConfig.DAYS_TO_COVER_PER_IMPORT * getTargetQuantum(true);
+        final float cap = EconConfig.DAYS_TO_COVER_PER_IMPORT * getTargetQuantum(true);
         final float target = Math.max((float) Math.min(getTargetStockpiles() - stored, cap), 0f);
 
         return Math.max(target - getTotalImports(), 0f);

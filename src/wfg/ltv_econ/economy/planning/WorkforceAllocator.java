@@ -25,7 +25,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
@@ -184,13 +184,13 @@ public class WorkforceAllocator {
 
         for (int i = 0; i < N; i++) {
             objective[i] = WORKER_COST * switch (i % T) {
-                case 0 -> EconomyConfig.LOCAL_WORKER_COST_MULT;
-                case 1 -> EconomyConfig.FACTION_WORKER_COST_MULT;
+                case 0 -> EconConfig.LOCAL_WORKER_COST_MULT;
+                case 1 -> EconConfig.FACTION_WORKER_COST_MULT;
                 case 2 -> 1.0;
                 default -> 1.0;
             };
         }
-        Arrays.fill(objective, idxSlackStr, idxTotalWStr, EconomyConfig.ECON_DEFICIT_COST);
+        Arrays.fill(objective, idxSlackStr, idxTotalWStr, EconConfig.ECON_DEFICIT_COST);
         Arrays.fill(objective, idxTotalWStr, nVars, 0.0);
 
         final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0.0);
@@ -254,9 +254,9 @@ public class WorkforceAllocator {
                 final long marketCap = denseData.columnMarketCap[idx];
                 final double proportion = marketCap / (double) weightSum;
                 final int o = denseData.columnOutputIndex[idx];
-                final double floorMultiplier = EconomyConfig.USE_PRODUCTION_FAIRNESS ?
-                    EconomyConfig.MIN_WORKER_FRACTION / denseData.columnOutputMod[idx] :
-                    EconomyConfig.MIN_WORKER_FRACTION;
+                final double floorMultiplier = EconConfig.USE_PRODUCTION_FAIRNESS ?
+                    EconConfig.MIN_WORKER_FRACTION / denseData.columnOutputMod[idx] :
+                    EconConfig.MIN_WORKER_FRACTION;
 
                 Arrays.fill(coeffs, 0.0);
                 for (int z = 0; z < T; z++) coeffs[i + z] = 1.0;
@@ -270,7 +270,7 @@ public class WorkforceAllocator {
         final double[] comAvailability = new double[C];
         final double[] shortage_mult = new double[O];
 
-        for (int pass = 0; pass < EconomyConfig.ECON_ALLOCATION_PASSES; pass++) {
+        for (int pass = 0; pass < EconConfig.ECON_ALLOCATION_PASSES; pass++) {
             final List<LinearConstraint> constraints = new ArrayList<>();
             constraints.addAll(const_constraints);
             Arrays.fill(netCommodity, 0.0);
@@ -341,7 +341,7 @@ public class WorkforceAllocator {
                 if (start == end) continue;
 
                 for (int c = 0; c < C; c++) {
-                    final double ceiling = marketDemand[m][c] * EconomyConfig.LOCAL_PROD_BUFFER;
+                    final double ceiling = marketDemand[m][c] * EconConfig.LOCAL_PROD_BUFFER;
                     if (ceiling <= 0.0) continue;
 
                     Arrays.fill(coeffs, 0.0);
@@ -363,7 +363,7 @@ public class WorkforceAllocator {
             final double[] coeffs = new double[nVars];
             for (int f = 0; f < F; f++) {
                 for (int c = 0; c < C; c++) {
-                    final double ceiling = factionDemand[f][c] * EconomyConfig.FACTION_PROD_BUFFER;
+                    final double ceiling = factionDemand[f][c] * EconConfig.FACTION_PROD_BUFFER;
                     if (ceiling <= 0.0) continue;
 
                     Arrays.fill(coeffs, 0.0);
@@ -403,7 +403,7 @@ public class WorkforceAllocator {
                 }
 
                 coeffs[idxSlack.apply(c)] = 1.0;
-                final double target = demand[c] * EconomyConfig.PRODUCTION_BUFFER;
+                final double target = demand[c] * EconConfig.PRODUCTION_BUFFER;
                 constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, target));
             }
             }

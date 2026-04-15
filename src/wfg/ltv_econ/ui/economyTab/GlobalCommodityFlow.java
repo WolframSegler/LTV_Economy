@@ -17,7 +17,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -84,7 +84,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                 final long value = engine.info.getGlobalProduction(comID)
                     + (long) dom.getInformalNode().prod;
                 final String txt = "Global production";
-                String valueTxt = NumFormat.engNotation(value);
+                String valueTxt = NumFormat.engNotate(value);
                 if (value < 1) valueTxt = "---";
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -111,7 +111,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             public void buildUI() {
                 final long value = engine.info.getGlobalDemand(comID);
                 final String txt = "Global demand";
-                String valueTxt = NumFormat.engNotation(value);
+                String valueTxt = NumFormat.engNotate(value);
                 if (value < 1) valueTxt = "---";
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -138,7 +138,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             public void buildUI() {
                 final long value = engine.info.getGlobalSurplus(comID);
                 final String txt = "Global surplus";
-                String valueTxt = NumFormat.engNotation(value);
+                String valueTxt = NumFormat.engNotate(value);
                 if (value < 1) valueTxt = "---";
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -165,7 +165,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             public void buildUI() {
                 final long value = engine.info.getGlobalDeficit(comID);
                 final String txt = "Global deficit";
-                String valueTxt = NumFormat.engNotation(value);
+                String valueTxt = NumFormat.engNotate(value);
                 if (value < 1) valueTxt = "---";
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -194,7 +194,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             public void buildUI() {
                 final float value = dom.getTradeVolumeHistory();
                 final String txt = "Sector-wide trade volume";
-                String valueTxt = NumFormat.engNotation(value);
+                String valueTxt = NumFormat.engNotate(value);
                 if (value < 1) valueTxt = "---";
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
@@ -205,7 +205,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Total units of %s traded across the sector for the last %s days, including both in-faction and global cargo.",
-                        pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconomyConfig.HISTORY_LENGTH)
+                        pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconConfig.HISTORY_LENGTH)
                     );
                 };
             }
@@ -231,7 +231,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "The total monetary value (in credits) of all %s trades across the entire sector for the last %s days. This includes both in-faction and global trade, calculated using the prices at which commodities were exchanged.",
-                        pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconomyConfig.HISTORY_LENGTH)
+                        pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconConfig.HISTORY_LENGTH)
                     );
                 };
             }
@@ -293,7 +293,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                         "Indicates how much the daily export volume for %s fluctuates relative to its average.",
                         pad,
                         new Color[] {base, highlight},
-                        Integer.toString(EconomyConfig.HISTORY_LENGTH),
+                        Integer.toString(EconConfig.HISTORY_LENGTH),
                         com.getName()
                     );
                 };
@@ -308,7 +308,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
 
             public void buildUI() {
                 final long value = engine.info.getGlobalStockpiles(comID);
-                final String valueTxt = NumFormat.engNotation(value);
+                final String valueTxt = NumFormat.engNotate(value);
                 final String txt = "Global stockpiles";
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
@@ -339,7 +339,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                     value += data.getAssignedForOutput(comID);
                 }
                 final String txt = "Worker allocation";
-                final String valueTxt = NumFormat.engNotation(value);
+                final String valueTxt = NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
             }
@@ -365,7 +365,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             public void buildUI() {
                 final long value = dom.getExporters().size();
                 final String txt = "Global Exporters";
-                final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -390,7 +390,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             public void buildUI() {
                 final long value = dom.getImporters().size();
                 final String txt = "Global Importers";
-                final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -415,7 +415,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             public void buildUI() {
                 final float value = dom.getInformalNode().prod;
                 final String txt = "Informal Production";
-                final String valueTxt = value < 1 ? "---" : NumFormat.engNotation(value);
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -459,7 +459,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
 
             table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
-            table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
+            table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
 
             final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
                 if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
@@ -508,7 +508,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
 
             table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
-            table.addCell(NumFormat.engNotation(value), cellAlg.MID, value, textColor);
+            table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
 
             final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
                 if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {

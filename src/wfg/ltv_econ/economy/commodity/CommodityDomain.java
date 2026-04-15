@@ -15,7 +15,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.TradeWeights;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
@@ -37,8 +37,8 @@ public class CommodityDomain implements Serializable {
     private final List<ComTradeFlow> tradeFlows = new ArrayList<>(EconomyInfo.getMarketsCount());
     private InformalExchangeNode informalNode;
 
-    private float[] tradeVolumeHistory = new float[EconomyConfig.HISTORY_LENGTH];
-    private long[] creditActivityHistory = new long[EconomyConfig.HISTORY_LENGTH];
+    private float[] tradeVolumeHistory = new float[EconConfig.HISTORY_LENGTH];
+    private long[] creditActivityHistory = new long[EconConfig.HISTORY_LENGTH];
     private int historyIndex = 0;
 
     public CommodityDomain(String comID) {
@@ -59,7 +59,7 @@ public class CommodityDomain implements Serializable {
     public final void advance() {
         comCells.values().forEach(CommodityCell::advance);
 
-        historyIndex = (historyIndex + 1) % EconomyConfig.HISTORY_LENGTH;
+        historyIndex = (historyIndex + 1) % EconConfig.HISTORY_LENGTH;
     }
 
     public final void reset() {
@@ -211,7 +211,7 @@ public class CommodityDomain implements Serializable {
 
             { // ABORT CONDITIONS
                 if (expCell.market.getFaction().getRelationship(impCell.market.getFactionId()) <
-                    EconomyConfig.MIN_RELATION_TO_TRADE
+                    EconConfig.MIN_RELATION_TO_TRADE
                 ) { continue;}
     
                 if (expCell.market.isPlayerOwned()^impCell.market.isPlayerOwned()) {
@@ -247,7 +247,7 @@ public class CommodityDomain implements Serializable {
                 expCell.globalExports += amountToSend;
             }
 
-            final long credits = (long) (sameFaction ? price * EconomyConfig.FACTION_EXCHANGE_MULT : price);
+            final long credits = (long) (sameFaction ? price * EconConfig.FACTION_EXCHANGE_MULT : price);
             tradeCreditActivity += credits;
             tradeVolume += amountToSend;
 
@@ -450,7 +450,7 @@ public class CommodityDomain implements Serializable {
     }
 
     private final void resizeHistoryArrays() {
-        final int newLen = EconomyConfig.HISTORY_LENGTH;
+        final int newLen = EconConfig.HISTORY_LENGTH;
         final int oldLen = tradeVolumeHistory.length;
         final int head = (historyIndex - 1 + oldLen) % oldLen;
 

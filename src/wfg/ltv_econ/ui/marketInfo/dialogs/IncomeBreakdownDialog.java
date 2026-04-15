@@ -46,10 +46,7 @@ public class IncomeBreakdownDialog extends DockPanel {
     private float scrollLen = 0f;
 
     public IncomeBreakdownDialog(final MarketAPI market) {
-        super(Attachments.getCoreUI(), WIDTH,
-            (int) settings.getScreenHeight() - GAP * 2,
-            Side.LEFT
-        );
+        super(Attachments.getCoreUI(), WIDTH, screenH - GAP * 2, Side.LEFT);
         this.market = market;
 
         offsetY = GAP;

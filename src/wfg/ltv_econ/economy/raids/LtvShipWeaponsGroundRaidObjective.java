@@ -259,7 +259,7 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
 
     @Override
     public final String getValueString(int marines) {
-        return NumFormat.engNotation(getQuantity(Math.max(1, marines)));
+        return NumFormat.engNotate(getQuantity(Math.max(1, marines)));
     }
 
     @Override

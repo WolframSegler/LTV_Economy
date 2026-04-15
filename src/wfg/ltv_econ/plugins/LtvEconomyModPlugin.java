@@ -17,7 +17,7 @@ import com.fs.starfarer.api.util.Misc;
 import lunalib.lunaSettings.LunaSettings;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.loader.ConfigLunaSettingsListener;
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -92,7 +92,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             if (market.getSize() < 4 || market.isPlayerOwned()) continue;
             if (market.getPlanetEntity() == null || market.getPlanetEntity().isGasGiant()) continue;
 
-            if (EconomyConfig.MANUFACTURING_EXCLUSION_LIST.contains(market.getId())) continue;
+            if (EconConfig.MANUFACTURING_EXCLUSION_LIST.contains(market.getId())) continue;
 
             boolean hasRequiredIndustry = false;
             for (Industry ind : market.getIndustries()) {

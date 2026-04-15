@@ -3,156 +3,65 @@ package wfg.ltv_econ.ui.economyTab;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
-import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.TradeFlowOptions;
-import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.panel.CustomPanel;
-import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.util.CallbackRunnable;
-import static wfg.native_ui.util.UIConstants.*;
+import wfg.ltv_econ.ui.reusable.AbstractManagementPanel;
 
-public class EconomyOverviewPanel extends CustomPanel<EconomyOverviewPanel> implements UIBuildableAPI {
-
-    public static final int MAIN_PANEL_W = 1250;
-    public static final int MAIN_PANEL_H = 700;
-    public static final int NAVBAR_W = 200;
-    public static final int NAV_BUTTON_W = 180;
-    public static final int NAV_BUTTON_H = 28;
-    public static final int CONTENT_PANEL_W = 1045;
-    public static final int CONTENT_PANEL_H = 700;
-    public static final int OPTIONS_PANEL_W = 200;
-    public static final int OPTIONS_PANEL_H = 450;
-
-    private static LabelAPI title = null;
-    private static LabelAPI subtitle = null;
-    private static UIPanelAPI contentPanel = null;
-    private static UIPanelAPI optionsPanel = null;
-    private static List<Button> navButtons = new ArrayList<>();
-    private static Button firstButton = null;
+public class EconomyOverviewPanel extends AbstractManagementPanel<EconomyOverviewPanel> {
 
     public EconomyOverviewPanel(UIPanelAPI parent) {
-        super(parent, MAIN_PANEL_W, MAIN_PANEL_H);
-
+        super(parent);
         buildUI();
     }
 
-    public void buildUI() {
-        final SettingsAPI settings = Global.getSettings();
-        title = settings.createLabel("Economy Overview", Fonts.INSIGNIA_LARGE);
-        final float titleH = title.computeTextHeight(title.getText());
-        final float titleY = opad;
-        add(title).inTL(pad, titleY);
-
-        subtitle = settings.createLabel("Sector oversight and administration", Fonts.VICTOR_10);
-        final float subtitleH = subtitle.computeTextHeight(title.getText());
-        final float subtitleY = titleY + titleH + pad*2;
-        add(subtitle).inTL(pad, subtitleY);
-
-        createNavButtons();
-
-        final UIPanelAPI navbar = settings.createCustom(NAVBAR_W, 0, null);
-        int currentY = opad*2; 
-        for (Button btn : navButtons) {
-            navbar.addComponent(btn.getPanel()).inTL(opad, currentY);
-            currentY += pad*2 + NAV_BUTTON_H;
-        }
-        currentY += opad*2;
-
-        navbar.getPosition().setSize(NAVBAR_W, currentY);
-        final float navbarY = subtitleY + subtitleH + pad*2;
-        add(navbar).inTL(pad, navbarY);
-
-        contentPanel = settings.createCustom(CONTENT_PANEL_W, CONTENT_PANEL_H, null);
-        optionsPanel = settings.createCustom(OPTIONS_PANEL_W, OPTIONS_PANEL_H, null);
-        add(contentPanel).inTL(pad + NAVBAR_W + opad, titleY);
-        add(optionsPanel).inBL(pad, 0);
-
-        firstButton.click(false);
+    protected final String getTitle() {
+        return "Economy Overview";
     }
 
-    private final void createNavButtons() {
-        navButtons.clear();
-        CallbackRunnable<Button> buttonRunnable = (btn) -> {
-            clearPanelAndButtonState(btn);
-            final GlobalCommodityFlow content = new GlobalCommodityFlow(
-                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
-            );
-            contentPanel.addComponent(content.getPanel()).inBL(0, 0);
-
-            final CommoditySelectionPanel options = new CommoditySelectionPanel(
-                optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
-            );
-            optionsPanel.addComponent(options.getPanel()).inBL(0, 0);
-        };
-        Button button = new Button(
-            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Global Commodity Flow",
-            Fonts.ORBITRON_12, buttonRunnable
-        );
-        button.cutStyle = CutStyle.TL_BR;
-        button.bgAlpha = 1f;
-        navButtons.add(button);
-        firstButton = button;
-
-        buttonRunnable = (btn) -> {
-            clearPanelAndButtonState(btn);
-            final FactionAdministrationPanel content = new FactionAdministrationPanel(
-                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
-            );
-            contentPanel.addComponent(content.getPanel()).inBL(0, 0);
-        };
-        button = new Button(
-            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Faction Administration", Fonts.ORBITRON_12, buttonRunnable
-        );
-        button.cutStyle = CutStyle.TL_BR;
-        button.bgAlpha = 1f;
-        navButtons.add(button);
-
-        buttonRunnable = (btn) -> {
-            clearPanelAndButtonState(btn);
-            final ComTradeFlowMap content = new ComTradeFlowMap(
-                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
-            );
-            contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
-
-            final TradeFlowOptions options = new TradeFlowOptions(
-                optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
-            );
-            optionsPanel.addComponent(options.getPanel()).inBL(0f, 0f);
-        };
-        button = new Button(
-            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Trade Routes", Fonts.ORBITRON_12, buttonRunnable
-        );
-        button.cutStyle = CutStyle.TL_BR;
-        button.bgAlpha = 1f;
-        navButtons.add(button);
-
-        buttonRunnable = (btn) -> {
-            clearPanelAndButtonState(btn);
-            final EconomySettingsPanel content = new EconomySettingsPanel(
-                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
-            );
-            contentPanel.addComponent(content.getPanel()).inBL(0, 0);
-        };
-        button = new Button(
-            getPanel(), NAV_BUTTON_W, NAV_BUTTON_H, "Settings", Fonts.ORBITRON_12, buttonRunnable
-        );
-        button.cutStyle = CutStyle.TL_BR;
-        button.bgAlpha = 1f;
-        navButtons.add(button);
+    protected final String getSubtitle() {
+        return "Sector oversight and administration";
     }
 
-    private static final void clearPanelAndButtonState(Button caller) {
-        navButtons.forEach(b -> b.setChecked(false));
-        caller.setChecked(true);
-        RolfLectionUtil.invokeMethodDirectly(CustomPanel.clearChildrenMethod, contentPanel);
-        RolfLectionUtil.invokeMethodDirectly(CustomPanel.clearChildrenMethod, optionsPanel);
+    protected final List<NavButtonDef> getNavButtonDefs() {
+        final List<NavButtonDef> defs = new ArrayList<>();
+
+        defs.add(new NavButtonDef("Global Commodity Flow",
+            () -> {
+                final GlobalCommodityFlow content = new GlobalCommodityFlow(
+                    contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                );
+                CommoditySelectionPanel options = new CommoditySelectionPanel(
+                    optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
+                );
+                contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+                optionsPanel.addComponent(options.getPanel()).inBL(0f, 0f);
+            }
+        ));
+
+        defs.add(new NavButtonDef("Trade Routes",
+            () -> {
+                final ComTradeFlowMap content = new ComTradeFlowMap(
+                    contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                );
+                final TradeFlowOptions options = new TradeFlowOptions(
+                    optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
+                );
+                contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+                optionsPanel.addComponent(options.getPanel()).inBL(0f, 0f);
+            }
+        ));
+
+        defs.add(new NavButtonDef("Settings",
+            () -> {
+                final EconomySettingsPanel content = new EconomySettingsPanel(
+                    contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                );
+                contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+            }
+        ));
+
+        return defs;
     }
 }

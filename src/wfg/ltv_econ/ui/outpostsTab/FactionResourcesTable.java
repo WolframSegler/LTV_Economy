@@ -80,12 +80,12 @@ public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> im
     
                 table.addCell(icon, cellAlg.MID, null, null);
                 table.addCell(com.getName(), cellAlg.LEFT, null, base);
-                table.addCell(NumFormat.engNotation(stored), cellAlg.LEFTOPAD, stored, base);
-                table.addCell(NumFormat.engNotation(demand), cellAlg.LEFTOPAD, demand, demandColor);
-                table.addCell(NumFormat.engNotation(prod), cellAlg.LEFTOPAD, prod, highlight);
+                table.addCell(NumFormat.engNotate(stored), cellAlg.LEFTOPAD, stored, base);
+                table.addCell(NumFormat.engNotate(demand), cellAlg.LEFTOPAD, demand, demandColor);
+                table.addCell(NumFormat.engNotate(prod), cellAlg.LEFTOPAD, prod, highlight);
                 table.addCell(exportShare + "%", cellAlg.LEFTOPAD, exportShare, base);
                 table.addCell(NumFormat.formatCredit(credits), cellAlg.LEFTOPAD, credits, creditsColor);
-                table.addCell(NumFormat.engNotation(balance), cellAlg.LEFTOPAD, balance, balanceColor);
+                table.addCell(NumFormat.engNotate(balance), cellAlg.LEFTOPAD, balance, balanceColor);
                 table.addCell(autarky + "%", cellAlg.LEFTOPAD, autarky, base);
     
                 table.pushRow(

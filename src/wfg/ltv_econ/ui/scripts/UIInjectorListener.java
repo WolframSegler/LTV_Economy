@@ -30,6 +30,10 @@ public class UIInjectorListener implements CoreUITabListener, CommodityTooltipMo
         case OUTPOSTS:
             sector.addTransientScript(new OutpostsTabUIBuilder());
             break;
+
+        case INTEL:
+            sector.addTransientScript(new IntelTabUIBuilder());
+            break;
     
         default: break;
         }

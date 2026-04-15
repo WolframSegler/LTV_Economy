@@ -733,7 +733,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),
                     highlight,
-                    value < 1f ? "<1" : NumFormat.engNotation(value)
+                    value < 1f ? "<1" : NumFormat.engNotate(value)
                 );
             }
             tp.addTable("", 0, opad);
@@ -772,7 +772,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                     cell.market.getFaction().getBaseUIColor(),
                     cell.market.getName(),
                     net < 0f ? negative : highlight,
-                    Math.abs(net) < 1f ? "<1" : NumFormat.engNotation(net)
+                    Math.abs(net) < 1f ? "<1" : NumFormat.engNotate(net)
                 );
             }
             tp.addTable("", 0, opad);

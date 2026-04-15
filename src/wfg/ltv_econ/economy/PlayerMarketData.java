@@ -16,7 +16,7 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.config.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.config.PolicyConfigLoader.PolicySpec;
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EventConfig;
 import wfg.ltv_econ.config.EventConfig.EventSpec;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -113,7 +113,7 @@ public class PlayerMarketData implements Serializable {
     }
     public final long getWithdrawLimit() {
         return withdrewCreditsThisMonth ? 0l : Math.min(EconomyEngine.instance().getCredits(marketID),
-            EconomyConfig.CREDIT_WITHDRAWAL_LIMIT
+            EconConfig.CREDIT_WITHDRAWAL_LIMIT
         );
     }
 

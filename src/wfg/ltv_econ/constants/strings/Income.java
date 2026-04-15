@@ -2,7 +2,7 @@ package wfg.ltv_econ.constants.strings;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 
 public class Income {
     public static final String FACTION_CREW_WAGES_KEY = "faction_fleet_crew_wages";
@@ -56,11 +56,11 @@ public class Income {
         switch (key) {
             case FACTION_CREW_WAGES_KEY: return FACTION_CREW_WAGES_DESC;
             case FACTION_SHIP_PRODUCTION_KEY: return FACTION_SHIP_PRODUCTION_DESC;
-            case TRADE_FUEL_PREMIUM_KEY: return "Fuel premium (" + Strings.X + EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT + ")";
+            case TRADE_FUEL_PREMIUM_KEY: return "Fuel premium (" + Strings.X + EconConfig.FORCED_FUEL_IMPORT_COST_MULT + ")";
             case TRADE_FLEET_SHIPMENT_KEY: return TRADE_FLEET_SHIPMENT_DESC;
             case INDEPENDENT_BASE_FEE_KEY: return INDEPENDENT_BASE_FEE_DESC;
             case INDEPENDENT_PER_TON_KEY: return INDEPENDENT_PER_TON_DESC;
-            case INDEPENDENT_VALUE_PERCENT_KEY: return "Percentage of cargo value (" + Strings.X + EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT + ")";
+            case INDEPENDENT_VALUE_PERCENT_KEY: return "Percentage of cargo value (" + Strings.X + EconConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT + ")";
             case INDEPENDENT_HAZARD_PAY_KEY: return INDEPENDENT_HAZARD_PAY_DESC;
             case WORKER_WAGES_KEY: return WORKER_WAGES_DESC;
             case POLICY_COST_KEY: return POLICY_COST_DESC;

@@ -26,7 +26,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.LaborConfig;
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
@@ -276,7 +276,7 @@ public class ManagePopulationDialog extends DialogPanel {
                 final String txt = "Workforce: Employed / Total";
                 final long value2 = cond.getWorkerPool();
                 final long value1 = (long) (value2*((double)(1f - cond.getFreeWorkerRatio())));
-                final String valueTxt = NumFormat.engNotation(value1) + " / " + NumFormat.engNotation(value2);
+                final String valueTxt = NumFormat.engNotate(value1) + " / " + NumFormat.engNotate(value2);
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -287,7 +287,7 @@ public class ManagePopulationDialog extends DialogPanel {
                 label2.setColor(baseColor);
                 label2.setHighlightOnMouseover(true);
                 label2.setAlignment(Alignment.MID);
-                label2.setHighlight(NumFormat.engNotation(value1));
+                label2.setHighlight(NumFormat.engNotate(value1));
                 label2.setHighlightColor(highlight);
 
                 final float textH1 = label1.getPosition().getHeight();
@@ -508,7 +508,7 @@ public class ManagePopulationDialog extends DialogPanel {
         innerPanel.addComponent(consciousnessLabel.getPanel()).inTL(opad + LABEL_W*3 + pad*3, SECT_II_H + opad*3);
         }
     
-        if (showPolicies && EconomyConfig.SHOW_MARKET_POLICIES) { // SECTION III
+        if (showPolicies && EconConfig.SHOW_MARKET_POLICIES) { // SECTION III
         final LabelAPI subtitle = settings.createLabel("Policies", Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);

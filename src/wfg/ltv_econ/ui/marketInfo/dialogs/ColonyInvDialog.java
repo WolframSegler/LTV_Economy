@@ -17,7 +17,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -221,7 +221,7 @@ public class ColonyInvDialog extends DialogPanel {
         innerPanel.addComponent(depositSlider.getPanel()).inTL(500, 50);
 
         final Slider profitSlider = new Slider(innerPanel, "", 0f,
-            100f * EconomyConfig.AUTO_TRANSFER_PROFIT_LIMIT, sliderW, sliderH
+            100f * EconConfig.AUTO_TRANSFER_PROFIT_LIMIT, sliderW, sliderH
         );
         if (data != null) {
             profitSlider.setHighlightOnMouseover(true);
@@ -351,12 +351,12 @@ public class ColonyInvDialog extends DialogPanel {
 
             table.addCell(comIcon, cellAlg.MID, null, null);
             table.addCell(com.getName(), cellAlg.LEFT, com.getName(), base);
-            table.addCell(NumFormat.engNotation(stored), cellAlg.LEFTOPAD, stored, null);
-            table.addCell(NumFormat.engNotation(demand), cellAlg.LEFTOPAD, demand, negative);
-            table.addCell(NumFormat.engNotation(baseProd), cellAlg.LEFTOPAD, baseProd, highlight);
-            table.addCell(NumFormat.engNotation(modifiedProd), cellAlg.LEFTOPAD, modifiedProd, highlight);
-            table.addCell(NumFormat.engNotation(baseBalance), cellAlg.LEFTOPAD, baseBalance, baseBlcColor);
-            table.addCell(NumFormat.engNotation(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
+            table.addCell(NumFormat.engNotate(stored), cellAlg.LEFTOPAD, stored, null);
+            table.addCell(NumFormat.engNotate(demand), cellAlg.LEFTOPAD, demand, negative);
+            table.addCell(NumFormat.engNotate(baseProd), cellAlg.LEFTOPAD, baseProd, highlight);
+            table.addCell(NumFormat.engNotate(modifiedProd), cellAlg.LEFTOPAD, modifiedProd, highlight);
+            table.addCell(NumFormat.engNotate(baseBalance), cellAlg.LEFTOPAD, baseBalance, baseBlcColor);
+            table.addCell(NumFormat.engNotate(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             table.pushRow(
                 null, null, null, CodexDataV2.getCommodityEntryId(com.getId()), null, null

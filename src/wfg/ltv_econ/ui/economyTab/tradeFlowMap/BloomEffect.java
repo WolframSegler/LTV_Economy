@@ -7,16 +7,15 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ui.PositionAPI;
+
+import static wfg.native_ui.util.UIConstants.screenH;
+import static wfg.native_ui.util.UIConstants.screenW;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 public class BloomEffect {
-    private static final int screenW = (int) Global.getSettings().getScreenWidth();
-    private static final int screenH = (int) Global.getSettings().getScreenHeight();
-
     private FBObject sceneFBO;
     private FBObject brightPassFBO;
     private FBObject blurFBO1;

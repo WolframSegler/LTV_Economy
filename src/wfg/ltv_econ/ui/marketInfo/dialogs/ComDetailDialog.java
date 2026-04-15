@@ -27,7 +27,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -312,7 +312,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        final int discount = (int)((1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
+                        final int discount = (int)((1f - EconConfig.FACTION_EXCHANGE_MULT)*100);
 
                         tp.addPara(
                             "Sector-wide spendings for the import of " +
@@ -322,7 +322,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                             "The value shown here includes the demand at your colonies, " +
                             "since they must import goods as well. In-faction imports have a %s discount.",
                             pad, new Color[] {base, highlight},
-                            Integer.toString(EconomyConfig.HISTORY_LENGTH), discount + "%"
+                            Integer.toString(EconConfig.HISTORY_LENGTH), discount + "%"
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
@@ -341,7 +341,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 public void buildUI() {
                     final String txt = "Total global exports";
 
-                    final String valueTxt = NumFormat.engNotation(
+                    final String valueTxt = NumFormat.engNotate(
                         engine.info.getGlobalExports(comID)
                     );
 
@@ -388,11 +388,11 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
                     final String txt = "Total " + factionName + " exports";
 
-                    final String globalValue = NumFormat.engNotation(
+                    final String globalValue = NumFormat.engNotate(
                         engine.info.getFactionGlobalExports(
                             comID, currFaction.getId())
                     );
-                    final String inFactionValue = NumFormat.engNotation(
+                    final String inFactionValue = NumFormat.engNotate(
                         engine.info.getFactionInFactionExports(
                             comID, currFaction.getId())
                     );
@@ -706,7 +706,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final String factionName = market.getFaction().getDisplayName();
 
             final float quantityValue = mode == 0 ? cell.globalExports : cell.globalImports;
-            final String quantityTxt = NumFormat.engNotation(quantityValue);
+            final String quantityTxt = NumFormat.engNotate(quantityValue);
 
             final UIPanelAPI infoBar = new CommodityInfoBar(null, 75, iconSize,
                 true, cell).getPanel();
@@ -832,10 +832,10 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             if (!m_com.isMeta()) {
                 if (cell.getStoredExcess() > 0f) {
                     tp.addPara("Excess stockpiles: %s units.", opad, positive, 
-                    highlight, NumFormat.engNotation(cell.getStoredExcess()));
+                    highlight, NumFormat.engNotate(cell.getStoredExcess()));
                 } else if (cell.getStoredDeficit() > 0f) {
                     tp.addPara("Local deficit: %s units.", opad, negative, 
-                    highlight, NumFormat.engNotation(cell.getStoredDeficit()));
+                    highlight, NumFormat.engNotate(cell.getStoredDeficit()));
                 }
     
                 tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{

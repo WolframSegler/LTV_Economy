@@ -137,7 +137,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 			"Contributions update the colony's reserves immediately, and the visible cargo reflects the current stockpile limits.",
 			opad,
 			highlight,
-			NumFormat.engNotation(getStockpileLimit(null))
+			NumFormat.engNotate(getStockpileLimit(null))
 		);
 	}
 }

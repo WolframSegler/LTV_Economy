@@ -44,15 +44,15 @@ public class EconomyLogger {
             }
 
             sb.append("\nCommodity: ").append(dom.getKey()).append("\n")
-            .append("production (daily): ").append(NumFormat.engNotation(totalProduction)).append("\n")
-            .append("consumption (daily): ").append(NumFormat.engNotation(totalConsumption)).append("\n")
-            .append("targetQuantum (daily): ").append(NumFormat.engNotation(totalTargetQuantum)).append("\n")
-            .append("imports (daily): ").append(NumFormat.engNotation(totalImports)).append("\n")
-            .append("exports (daily): ").append(NumFormat.engNotation(totalExports)).append("\n")
-            .append("stockpile: ").append(NumFormat.engNotation(totalStockpile)).append("\n")
-            .append("targetStockpile: ").append(NumFormat.engNotation(totalTargetStockpile)).append("\n")
-            .append("storedDeficit: ").append(NumFormat.engNotation(totalStoredDeficit)).append("\n")
-            .append("storedExcess (exportable): ").append(NumFormat.engNotation(totalStoredExcess)).append("\n")
+            .append("production (daily): ").append(NumFormat.engNotate(totalProduction)).append("\n")
+            .append("consumption (daily): ").append(NumFormat.engNotate(totalConsumption)).append("\n")
+            .append("targetQuantum (daily): ").append(NumFormat.engNotate(totalTargetQuantum)).append("\n")
+            .append("imports (daily): ").append(NumFormat.engNotate(totalImports)).append("\n")
+            .append("exports (daily): ").append(NumFormat.engNotate(totalExports)).append("\n")
+            .append("stockpile: ").append(NumFormat.engNotate(totalStockpile)).append("\n")
+            .append("targetStockpile: ").append(NumFormat.engNotate(totalTargetStockpile)).append("\n")
+            .append("storedDeficit: ").append(NumFormat.engNotate(totalStoredDeficit)).append("\n")
+            .append("storedExcess (exportable): ").append(NumFormat.engNotate(totalStoredExcess)).append("\n")
             .append("---------------------------------------\n");
         }
 

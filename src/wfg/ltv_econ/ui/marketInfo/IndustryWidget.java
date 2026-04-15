@@ -271,7 +271,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             NativeUiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
         );
         if (data != null) {
-            final String assignedStr = NumFormat.engNotation(data.getWorkersAssigned());
+            final String assignedStr = NumFormat.engNotate(data.getWorkersAssigned());
 
             workerCountLabel.setText(assignedStr);
             workerCountLabel.setOpacity(0.9f);

@@ -26,7 +26,7 @@ import com.fs.starfarer.api.campaign.econ.MonthlyReport;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.SubmarketsID;
 import wfg.ltv_econ.economy.PlayerMarketData;
@@ -109,13 +109,13 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     final ArrayMap<String, PlayerMarketData> playerMarketData = new ArrayMap<>();
     final ArrayMap<String, Long> marketCredits = new ArrayMap<>(EconomyInfo.getMarketsCount());
     final ArrayMap<String, FactionShipInventory> factionShipInventories = new ArrayMap<>(EconomyConstants.visibleFactionIDs.size());
-    final List<TradeMission> activeMissions = new ArrayList<>();
-    transient List<TradeMission> pastMissions = new ArrayList<>();
+    final ArrayList<TradeMission> activeMissions = new ArrayList<>(2048);
+    transient ArrayList<TradeMission> pastMissions = new ArrayList<>(1024);
 
     protected int dayKeyTracker = -1;
-    protected int cyclesSinceWorkerAssign = EconomyConfig.WORKER_ASSIGN_INTERVAL;
-    protected int cyclesSinceTrade = EconomyConfig.TRADE_INTERVAL;
-    protected int lastTradeCycle = EconomyConfig.TRADE_INTERVAL;
+    protected int cyclesSinceWorkerAssign = EconConfig.WORKER_ASSIGN_INTERVAL;
+    protected int cyclesSinceTrade = EconConfig.TRADE_INTERVAL;
+    protected int lastTradeCycle = EconConfig.TRADE_INTERVAL;
     protected boolean midDayApplied = false;
 
     public static EconomyEngine instance() {
@@ -166,7 +166,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         dayKeyTracker = dayKey;
         midDayApplied = false;
 
-        if (EconomyConfig.MULTI_THREADING) {
+        if (EconConfig.MULTI_THREADING) {
             mainLoopExecutor.execute(this::realAdvance);
         } else {
             realAdvance();
@@ -192,7 +192,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         MarketFinanceRegistry.instance().register(market);
         if (!registeredMarkets.add(marketID)) return;
 
-        addCredits(marketID, EconomyConfig.STARTING_CREDITS_FOR_MARKET);
+        addCredits(marketID, EconConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) {
             playerMarketData.put(marketID, new PlayerMarketData(marketID));
             market.addSubmarket(SubmarketsID.STOCKPILES);
@@ -413,7 +413,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
                 public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
                     final String inFactionBonus = String.format("%d%%",
-                        (int)(1f - EconomyConfig.FACTION_EXCHANGE_MULT)*100);
+                        (int)(1f - EconConfig.FACTION_EXCHANGE_MULT)*100);
 
                     tp.addPara(
                         "Income from exports by this outpost or colony. " +

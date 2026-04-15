@@ -3,7 +3,7 @@ package wfg.ltv_econ.economy.commodity;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.util.Arithmetic;
 
@@ -42,7 +42,7 @@ public class InformalExchangeNode {
 
     public final void updateBeforeTrade() {
         final EconomyEngine engine = EconomyEngine.instance();
-        final float informalFraction = 0.03f / EconomyConfig.TRADE_INTERVAL; // TODO turn into a config entry
+        final float informalFraction = 0.03f / EconConfig.TRADE_INTERVAL; // TODO turn into a config entry
 
         final float totalDemand;
         final float totalExcess;

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorAPI;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -48,7 +48,7 @@ public class LtvEconSaveData implements Serializable {
         instance = data;
 
         // SETUP
-        if (EconomyConfig.ASSIGN_WORKERS_ON_LOAD || newGame) {
+        if (EconConfig.ASSIGN_WORKERS_ON_LOAD || newGame) {
             data.economyEngine.fakeAdvanceWithAssignWorkers();
         } else {
             data.economyEngine.fakeAdvance();

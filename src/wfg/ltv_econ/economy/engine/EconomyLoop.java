@@ -23,9 +23,9 @@ import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
-import wfg.ltv_econ.config.EconomyConfig.DebtDebuffTier;
+import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -58,7 +58,7 @@ public class EconomyLoop {
 
     /** Not order agnostic */
     final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
-        final boolean allocWorkers = engine.cyclesSinceWorkerAssign >= EconomyConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment;
+        final boolean allocWorkers = engine.cyclesSinceWorkerAssign >= EconConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment;
         refreshMarkets();
 
         discoverInputsOutputs();
@@ -262,7 +262,7 @@ public class EconomyLoop {
 
         if (engine.cyclesSinceTrade >= engine.lastTradeCycle) {
             engine.cyclesSinceTrade = 0;
-            engine.lastTradeCycle = EconomyConfig.TRADE_INTERVAL;
+            engine.lastTradeCycle = EconConfig.TRADE_INTERVAL;
             dispatchTrade();
         } else {
             engine.cyclesSinceTrade++;
@@ -294,10 +294,11 @@ public class EconomyLoop {
         }
 
         final int totalMissions = missions.size();
+        engine.activeMissions.ensureCapacity(engine.activeMissions.size() + totalMissions);
         for (int i = 0; i < totalMissions; i++) {
 
             final TradeMission mission = missions.valueAt(i);
-            mission.startOffset = (i * EconomyConfig.TRADE_INTERVAL) / totalMissions;
+            mission.startOffset = (i * EconConfig.TRADE_INTERVAL) / totalMissions;
             mission.combatPowerTarget = ShipAllocator.getRequiredCombatPower(mission);
 
             final FactionShipInventory inv = engine.getFactionShipInventory(
@@ -426,7 +427,7 @@ public class EconomyLoop {
             
         } else {
             final float unitPrice = fuelCell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost);
-            final float cost = fuelCost * unitPrice * EconomyConfig.FORCED_FUEL_IMPORT_COST_MULT;
+            final float cost = fuelCost * unitPrice * EconConfig.FORCED_FUEL_IMPORT_COST_MULT;
             final String key = TRADE_FUEL_PREMIUM_KEY;
             mission.credits.modifyFlat(key, -cost, getDesc(key));
 
@@ -451,12 +452,12 @@ public class EconomyLoop {
             totalValue += flow.amount * flow.unitPrice;
         }
 
-        final float perTonFee = EconomyConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE * mission.getTotalAmount();
-        final float valueFee = EconomyConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT * totalValue;
-        final float hazardPay = EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
-            + EconomyConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
+        final float perTonFee = EconConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE * mission.getTotalAmount();
+        final float valueFee = EconConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT * totalValue;
+        final float hazardPay = EconConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
+            + EconConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
 
-        mission.credits.modifyFlat(INDEPENDENT_BASE_FEE_KEY, -EconomyConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, getDesc(INDEPENDENT_BASE_FEE_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_BASE_FEE_KEY, -EconConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, getDesc(INDEPENDENT_BASE_FEE_KEY));
         mission.credits.modifyFlat(INDEPENDENT_PER_TON_KEY, -perTonFee, getDesc(INDEPENDENT_PER_TON_KEY));
         mission.credits.modifyFlat(INDEPENDENT_VALUE_PERCENT_KEY, -valueFee, getDesc(INDEPENDENT_VALUE_PERCENT_KEY));
         mission.credits.modifyFlat(INDEPENDENT_HAZARD_PAY_KEY, -hazardPay, getDesc(INDEPENDENT_HAZARD_PAY_KEY));
@@ -532,7 +533,7 @@ public class EconomyLoop {
             final long credits = engine.getCredits(market.getId());
             DebtDebuffTier appliedTier = null;
 
-            for (DebtDebuffTier tier : EconomyConfig.DEBT_DEBUFF_TIERS) {
+            for (DebtDebuffTier tier : EconConfig.DEBT_DEBUFF_TIERS) {
                 if (credits < tier.threshold()) appliedTier = tier;
                 else break;
             }
@@ -568,6 +569,6 @@ public class EconomyLoop {
         engine.pastMissions.add(mission);
         it.remove();
 
-        mission.durRemaining = EconomyConfig.HISTORY_LENGTH;
+        mission.durRemaining = EconConfig.HISTORY_LENGTH;
     }
 }

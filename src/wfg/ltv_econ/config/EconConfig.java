@@ -5,8 +5,8 @@ import java.util.List;
 import wfg.ltv_econ.config.loader.EconomyConfigLoader;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
 
-public class EconomyConfig {
-    private EconomyConfig() {};
+public class EconConfig {
+    private EconConfig() {};
 
     static {
         EconomyConfigLoader.loadConfig();

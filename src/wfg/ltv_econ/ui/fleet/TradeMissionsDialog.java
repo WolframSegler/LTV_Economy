@@ -39,10 +39,7 @@ public class TradeMissionsDialog extends DockPanel {
     private float scrollLen = 0f;
 
     public TradeMissionsDialog(MarketAPI market, boolean marketRelevantOnly) {
-        super(Attachments.getCoreUI(), WIDTH,
-            (int) settings.getScreenHeight() - GAP * 2,
-            Side.LEFT
-        );
+        super(Attachments.getCoreUI(), WIDTH, screenH - GAP * 2, Side.LEFT);
 
         this.market = market;
         this.marketRelevantOnly = marketRelevantOnly;

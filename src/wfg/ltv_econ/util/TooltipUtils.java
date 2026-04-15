@@ -118,7 +118,7 @@ public class TooltipUtils {
                     final double deficit = cell.getStoredDeficit();
                     final boolean deficitPresent = deficit > 10.0;
                     final Color deficitColor = deficitPresent ? negative : gray;
-                    final String quantityLabel = deficitPresent ? NumFormat.engNotation(deficit) : "---";
+                    final String quantityLabel = deficitPresent ? NumFormat.engNotate(deficit) : "---";
 
                     final String factionName = market.getFaction().getDisplayName();
                     String location = "In hyperspace";
@@ -136,7 +136,7 @@ public class TooltipUtils {
                         highlight,
                         Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, true, true) / econUnit),
                         labelColor,
-                        lessThanSymbol + NumFormat.engNotation(target),
+                        lessThanSymbol + NumFormat.engNotate(target),
                         deficitColor,
                         quantityLabel,
                         Alignment.LMID,
@@ -212,9 +212,9 @@ public class TooltipUtils {
                         highlight,
                         Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, false, true) / econUnit),
                         highlight,
-                        availableStr + NumFormat.engNotation(availableValue),
+                        availableStr + NumFormat.engNotate(availableValue),
                         hasExcess ? positive : gray,
-                        hasExcess ? NumFormat.engNotation(excess) : "---",
+                        hasExcess ? NumFormat.engNotate(excess) : "---",
                         Alignment.LMID,
                         market.getFaction().getBaseUIColor(),
                         market.getName() + " - " + factionName,
@@ -262,7 +262,7 @@ public class TooltipUtils {
 
     public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Total production: %s", pad, highlight, NumFormat.engNotation(cell.getProduction(true)));
+        final LabelAPI title = tp.addPara("Total production: %s", pad, highlight, NumFormat.engNotate(cell.getProduction(true)));
         final int gridWidth = 430;
         final int valueWidth = 50;
         int rowCount = 0;
@@ -275,7 +275,7 @@ public class TooltipUtils {
 
             if (mutable.getModifiedInt() > 0) {
                 tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getName()+")",
-                    "+" + NumFormat.engNotation(mutable.base));
+                    "+" + NumFormat.engNotate(mutable.base));
 
                 for (StatMod mod : mutable.getPercentMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
@@ -335,7 +335,7 @@ public class TooltipUtils {
         
         tp.setParaFontDefault();
         final LabelAPI title = tp.addPara("Total consumption: %s", opad, valueColor,
-            NumFormat.engNotation(cell.getConsumption(true))
+            NumFormat.engNotate(cell.getConsumption(true))
         );
 
         tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
@@ -346,7 +346,7 @@ public class TooltipUtils {
 
             if (mutable.getModifiedInt() > 0) {
                 tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getName()+")",
-                    "+" + NumFormat.engNotation(mutable.base), valueColor);
+                    "+" + NumFormat.engNotate(mutable.base), valueColor);
 
                  for (StatMod mod : mutable.getPercentMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
@@ -396,7 +396,7 @@ public class TooltipUtils {
 
     public static final void createComStockpilesChangeBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        tp.addPara("Current Stockpiles: %s", pad, highlight, NumFormat.engNotation(cell.getRoundedStored()));
+        tp.addPara("Current Stockpiles: %s", pad, highlight, NumFormat.engNotate(cell.getRoundedStored()));
         final int gridWidth = 430;
         final int valueWidth = 50;
         int rowCount = 0;
@@ -404,26 +404,26 @@ public class TooltipUtils {
         tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
 
         tp.addToGrid(0, rowCount++, "Desired Stockpiles",
-            NumFormat.engNotation(cell.getTargetStockpiles())
+            NumFormat.engNotate(cell.getTargetStockpiles())
         );
-        tp.addToGrid(0, rowCount++, "Latest Change", NumFormat.engNotation(cell.getQuantumRealBalance()),
+        tp.addToGrid(0, rowCount++, "Latest Change", NumFormat.engNotate(cell.getQuantumRealBalance()),
             cell.getQuantumRealBalance() < 0f ? negative : highlight
         );
 
         { // Exports
             if (cell.inFactionExports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest in-faction exports", "+" +
-                    NumFormat.engNotation(cell.inFactionExports)
+                    NumFormat.engNotate(cell.inFactionExports)
                 );
             }
             if (cell.globalExports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest global exports", "+" +
-                    NumFormat.engNotation(cell.globalExports)
+                    NumFormat.engNotate(cell.globalExports)
                 );
             }
             if (cell.informalExports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest informal market exports", "+" +
-                    NumFormat.engNotation(cell.informalExports)
+                    NumFormat.engNotate(cell.informalExports)
                 );
             }
         }
@@ -431,17 +431,17 @@ public class TooltipUtils {
         { // Imports
             if (cell.inFactionImports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest in-faction imports", "+" +
-                    NumFormat.engNotation(cell.inFactionImports)
+                    NumFormat.engNotate(cell.inFactionImports)
                 );
             }
             if (cell.globalImports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest global imports", "+" +
-                    NumFormat.engNotation(cell.globalImports)
+                    NumFormat.engNotate(cell.globalImports)
                 );
             }
             if (cell.informalImports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest informal market imports", "+" +
-                    NumFormat.engNotation(cell.informalImports)
+                    NumFormat.engNotate(cell.informalImports)
                 );
             }
         }
@@ -464,7 +464,7 @@ public class TooltipUtils {
             tp.addPara(
                 marketName + " profitably exported %s units of " + comName + " and accounted for %s of the global market share. They generated %s last month and %s so far this month.",
                 opad, highlight,
-                NumFormat.engNotation(cell.getTotalExports()),
+                NumFormat.engNotate(cell.getTotalExports()),
                 EconomyEngine.instance().info.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
@@ -476,7 +476,7 @@ public class TooltipUtils {
         if (cell.getSurplusAfterTargetQuantum() > 0f) {
             tp.addPara(
                 "Exports are reduced by %s due to insufficient importers for today.",
-                pad, negative, NumFormat.engNotation(cell.getSurplusAfterTargetQuantum())
+                pad, negative, NumFormat.engNotate(cell.getSurplusAfterTargetQuantum())
             );
         }
 
@@ -487,7 +487,7 @@ public class TooltipUtils {
             tp.addPara(
                 marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. They expended %s last month and %s so far this month.",
                 opad, highlight,
-                NumFormat.engNotation(cell.getTotalImports()),
+                NumFormat.engNotate(cell.getTotalImports()),
                 EconomyEngine.instance().info.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)

@@ -22,7 +22,7 @@ import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
 import com.fs.starfarer.api.util.Highlights;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -220,7 +220,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 			if (spec == null || spec.isNonEcon()) continue;
 
 			final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
-			cell.addStoredAmount(stack.getSize() * EconomyConfig.OPEN_MARKET_TO_STOCKPILES_RATIO);
+			cell.addStoredAmount(stack.getSize() * EconConfig.OPEN_MARKET_TO_STOCKPILES_RATIO);
 		}
     }
 

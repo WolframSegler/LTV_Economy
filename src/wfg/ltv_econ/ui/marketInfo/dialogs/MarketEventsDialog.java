@@ -36,10 +36,7 @@ public class MarketEventsDialog extends DockPanel {
     private final PlayerMarketData data;
 
     public MarketEventsDialog(final MarketAPI market) {
-        super(Attachments.getCoreUI(), 400,
-            (int) settings.getScreenHeight() - 200,
-            Side.LEFT
-        );
+        super(Attachments.getCoreUI(), 400, screenH - 200, Side.LEFT);
         data = EconomyEngine.instance().getPlayerMarketData(market.getId());
 
         offsetY = 100f;

@@ -7,7 +7,7 @@ import java.io.Serializable;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 
-import wfg.ltv_econ.config.EconomyConfig;
+import wfg.ltv_econ.config.EconConfig;
 
 public class ShipTypeData implements Serializable {
     public static final String FRIGATES = "Frigates";
@@ -70,7 +70,7 @@ public class ShipTypeData implements Serializable {
     }
 
     public final float getMonthlyMaintenanceCost() {
-        return (idle * EconomyConfig.IDLE_SHIP_MAINTENANCE_MULT + inUse) * spec.getSuppliesPerMonth();
+        return (idle * EconConfig.IDLE_SHIP_MAINTENANCE_MULT + inUse) * spec.getSuppliesPerMonth();
     }
 
     public final float getDailyMaintenanceCost() {
@@ -82,7 +82,7 @@ public class ShipTypeData implements Serializable {
     }
 
     public final int getTotalCrew() {
-        return (idle + inUse) * getCrewPerShip();
+        return getOwned() * getCrewPerShip();
     }
 
     public final int getIdleCrew() {
@@ -94,13 +94,17 @@ public class ShipTypeData implements Serializable {
     }
 
     public final float getMonthlyCrewWages() {
-        return (idle * EconomyConfig.IDLE_CREW_WAGE_MULT + inUse) * getCrewPerShip() * EconomyConfig.CREW_WAGE_PER_MONTH;
+        return (idle * EconConfig.IDLE_CREW_WAGE_MULT + inUse) * getCrewPerShip() * EconConfig.CREW_WAGE_PER_MONTH;
     }
 
     public final float getCombatPower() {
         final float mult = getCombatMult(spec.getDesignation())
             + spec.getFighterBays() * 0.04f;
         return spec.getFleetPoints() * mult;
+    }
+
+    public final float getTotalCombatPower() {
+        return getCombatPower() * getOwned();
     }
 
     public static final int getCrewPerShip(ShipHullSpecAPI spec) {

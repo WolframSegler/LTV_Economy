@@ -403,7 +403,7 @@ public class IndustryTooltips {
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					String txt = Strings.X + NumFormat.engNotation(amount);
+					String txt = Strings.X + NumFormat.engNotate(amount);
 					LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
 					float textH = lbl.computeTextHeight(txt);
@@ -470,7 +470,7 @@ public class IndustryTooltips {
 					iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
 
 					// draw text
-					final String txt = Strings.X + NumFormat.engNotation(amount);
+					final String txt = Strings.X + NumFormat.engNotate(amount);
 					final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
 
 					final float textH = lbl.computeTextHeight(txt);

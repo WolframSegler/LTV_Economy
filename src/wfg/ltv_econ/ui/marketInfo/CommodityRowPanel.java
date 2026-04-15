@@ -147,7 +147,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
         add(comIcon).inBL(2f, 0f);
 
         // TODO maybe change the comodity row to display another value other than inflow
-        final LabelAPI amountLbl = settings.createLabel(NumFormat.engNotation(
+        final LabelAPI amountLbl = settings.createLabel(NumFormat.engNotate(
             (int)cell.getInflowQuantum()) + Strings.X, Fonts.INSIGNIA_LARGE
         );
         amountLbl.autoSizeToWidth(textWidth);
