@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.fleet;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -171,7 +173,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         sorted.sort((a, b) -> Double.compare(b.amount, a.amount));
         List<String> strings = new ArrayList<>();
         for (TradeCom flow : sorted) {
-            final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(flow.comID);
+            final CommoditySpecAPI spec = settings.getCommoditySpec(flow.comID);
 
             if (spec.getId().equals(Commodities.SHIPS)) {
                 strings.add("ship hulls");
@@ -231,7 +233,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
 
         final Random random = route.getRandom();
         final TradeMission mission = getMission();
-        final float shipValue = Global.getSettings().getCommoditySpec(Commodities.SHIPS).getBasePrice();
+        final float shipValue = settings.getCommoditySpec(Commodities.SHIPS).getBasePrice();
         final ShipPickParams params = !mission.inFaction ? ShipPickParams.imported() : ShipPickParams.priority();
 
         final WeightedRandomPicker<String> roles = new WeightedRandomPicker<>(random);

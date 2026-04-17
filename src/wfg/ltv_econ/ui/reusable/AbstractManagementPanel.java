@@ -1,12 +1,11 @@
 package wfg.ltv_econ.ui.reusable;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -18,9 +17,7 @@ import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public abstract class AbstractManagementPanel<T extends AbstractManagementPanel<T>>
-    extends CustomPanel<T> implements UIBuildableAPI
-{
+public abstract class AbstractManagementPanel extends CustomPanel implements UIBuildableAPI {
     protected static final int MAIN_PANEL_W = 1250;
     protected static final int MAIN_PANEL_H = 700;
     protected static final int NAVBAR_W = 200;
@@ -52,8 +49,6 @@ public abstract class AbstractManagementPanel<T extends AbstractManagementPanel<
 
     @Override
     public void buildUI() {
-        final SettingsAPI settings = Global.getSettings();
-
         titleLabel = settings.createLabel(getTitle(), Fonts.INSIGNIA_LARGE);
         final float titleH = titleLabel.computeTextHeight(titleLabel.getText());
         final float titleY = opad;

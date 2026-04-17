@@ -1,13 +1,12 @@
 package wfg.ltv_econ.ui.fleet;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -26,8 +25,6 @@ import wfg.native_ui.ui.widget.RadioPanel;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 
 public class TradeMissionsDialog extends DockPanel {
-    private static final SettingsAPI settings = Global.getSettings();
-
     private static final int WIDTH = 440;
     private static final int GAP = 100;
     private static final int I_WIDTH = WIDTH - hpad * 3;

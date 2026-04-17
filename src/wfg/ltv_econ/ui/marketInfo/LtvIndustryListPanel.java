@@ -31,7 +31,7 @@ import rolflectionlib.util.ListenerFactory;
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
-import wfg.ltv_econ.ui.marketInfo.IndustryWidget.ConstructionMode;
+import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NativeUiUtils;
@@ -45,9 +45,11 @@ import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.TextPanel;
 import wfg.native_ui.ui.functional.Button.CutStyle;
+
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> implements UIBuildableAPI {
+public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI {
 
 	public static final int BUTTON_SECTION_HEIGHT = 45;
 
@@ -285,7 +287,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 					}
 
 					for (ConstructionQueueItem item : m_market.getConstructionQueue().getItems()) {
-						final IndustrySpecAPI spec = Global.getSettings().getIndustrySpec(item.id);
+						final IndustrySpecAPI spec = settings.getIndustrySpec(item.id);
 						if (spec.hasTag("industry")) {
 							Industry ind = m_market.instantiateIndustry(item.id);
 							tp.addPara(indent + ind.getCurrentName() + " (queued)", paragraphSpacing);
@@ -363,7 +365,7 @@ public class LtvIndustryListPanel extends CustomPanel<LtvIndustryListPanel> impl
 		boolean anyWidgetNotNormal = false;
 		for (Object widgetObj : widgets) {
 			if (widgetObj instanceof IndustryWidget widget) {
-				if (widget.getMode() != ConstructionMode.NORMAL) {
+				if (widget.getMode() != WidgetSelectionState.NONE) {
 					anyWidgetNotNormal = true;
 					break;
 				}

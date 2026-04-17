@@ -30,6 +30,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
@@ -54,9 +55,11 @@ import wfg.native_ui.ui.visual.SpritePanel;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
+
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class IndustryWidget extends CustomPanel<IndustryWidget> implements
+public class IndustryWidget extends CustomPanel implements
     HasBackground, HasHoverGlow, UIBuildableAPI
 {
     public final static int PANEL_WIDTH = 190;
@@ -79,7 +82,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     private int constructionQueueIndex;
     private LabelAPI buildingTitleHeader;
     private LabelAPI constructionStatusText;
-    private ConstructionMode constructionMode;
+    private WidgetSelectionState constructionMode;
     private final MarketAPI market;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
@@ -94,7 +97,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         this.market = market;
         this.ind = ind;
 
-        setMode(ConstructionMode.NORMAL);
+        setMode(WidgetSelectionState.NONE);
         this.indPanel = indPanel;
         constructionQueueIndex = queue;
 
@@ -117,7 +120,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
     }
 
     public void buildUI() {
-        buildingTitleHeader = Global.getSettings().createLabel(
+        buildingTitleHeader = settings.createLabel(
             ind.getCurrentName(), Fonts.DEFAULT_SMALL
         );
         buildingTitleHeader.setColor(
@@ -162,7 +165,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                     return;
                 }
 
-                if (constructionMode == ConstructionMode.NORMAL) {
+                if (constructionMode == WidgetSelectionState.NONE) {
                     for (Object widgetObj : indPanel.widgets) {
                     if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                         if (widget == this) {
@@ -173,13 +176,13 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                     }
                     }
 
-                } else if (constructionMode == ConstructionMode.SWAP) {
+                } else if (constructionMode == WidgetSelectionState.SWAP) {
                     targetInd = null;
 
                     for (Object widgetObj : indPanel.widgets) {
                         if (widgetObj instanceof IndustryWidget widget &&
                             widget.getQueueIndex() >= 0 &&
-                            widget.constructionMode == ConstructionMode.REMOVE
+                            widget.constructionMode == WidgetSelectionState.REMOVE
                         ) {
                             targetInd = widget;
                             break;
@@ -205,7 +208,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
                         indPanel.buildUI();
                     }
-                } else if (constructionMode == ConstructionMode.REMOVE) {
+                } else if (constructionMode == WidgetSelectionState.REMOVE) {
                     List<ConstructionQueueItem> queueItems = market.getConstructionQueue().getItems();
                     if (constructionQueueIndex < queueItems.size() && constructionQueueIndex >= 0) {
 
@@ -265,7 +268,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         };
 
         final WorkerIndustryData data = WorkerRegistry.instance().getData(ind);
-        final LabelAPI workerCountLabel = Global.getSettings().createLabel("", Fonts.DEFAULT_SMALL);
+        final LabelAPI workerCountLabel = settings.createLabel("", Fonts.DEFAULT_SMALL);
         workerCountLabel.setColor(highlight);
         workerCountLabel.setHighlightColor(
             NativeUiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
@@ -305,7 +308,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         int totalW = 0;
         for (SpecialItemData item : ind.getVisibleInstalledItems()) {
 
-            final SpecialItemSpecAPI spec = Global.getSettings().getSpecialItemSpec(item.getId());
+            final SpecialItemSpecAPI spec = settings.getSpecialItemSpec(item.getId());
 
             final Base itemPanel = new Base(m_panel, 28, 28, spec.getIconName(), Color.WHITE, null);
             itemPanel.drawTextureHalo = true;
@@ -318,7 +321,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
         if (ind.getAICoreId() != null) {
 
-            final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(ind.getAICoreId());
+            final CommoditySpecAPI spec = settings.getCommoditySpec(ind.getAICoreId());
 
             final Base aiCorePanel = new Base(m_panel, 28, 28, spec.getIconName(), Color.WHITE, null);
             aiCorePanel.drawTextureHalo = true;
@@ -379,7 +382,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         }
 
         remove(constructionStatusText); 
-        constructionStatusText = Global.getSettings().createLabel(txt, Fonts.INSIGNIA_VERY_LARGE);
+        constructionStatusText = settings.createLabel(txt, Fonts.INSIGNIA_VERY_LARGE);
         constructionStatusText.setColor(baseColor);
         constructionStatusText.setHighlightColor(
             NativeUiUtils.adjustBrightness(constructionStatusText.getColor(), 1.33f)
@@ -388,7 +391,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
         add(constructionStatusText).inMid().setYAlignOffset(-TITLE_HEIGHT / 2f);
 
-        setMode(ConstructionMode.NORMAL);
+        setMode(WidgetSelectionState.NONE);
         addCostTimeLabels();
     }
 
@@ -400,7 +403,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
 
         if (queueItem != null) {
             clearLabels();
-            LabelAPI removeLabel = Global.getSettings().createLabel(
+            LabelAPI removeLabel = settings.createLabel(
                 "Click to remove", Fonts.DEFAULT_SMALL
             );
             removeLabel.setColor(baseColor);
@@ -408,7 +411,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                 NativeUiUtils.adjustBrightness(removeLabel.getColor(), 1.33f)
             );
 
-            LabelAPI refundLabel = Global.getSettings().createLabel(
+            LabelAPI refundLabel = settings.createLabel(
                 Misc.getDGSCredits(queueItem.cost), Fonts.DEFAULT_SMALL
             );
             refundLabel.setColor(highlight);
@@ -416,7 +419,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                 NativeUiUtils.adjustBrightness(refundLabel.getColor(), 1.33f)
             );
 
-            LabelAPI refundLabelAppendix = Global.getSettings().createLabel(
+            LabelAPI refundLabelAppendix = settings.createLabel(
                 " refund", Fonts.DEFAULT_SMALL
             );
             refundLabelAppendix.setColor(baseColor);
@@ -433,14 +436,14 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
             add(removeLabel).aboveMid((UIComponentAPI)constructionStatusText, 0);
             add(refundLabel).belowMid((UIComponentAPI)constructionStatusText, 0).setXAlignOffset(-offset);
             add(refundLabelAppendix).rightOfBottom((UIComponentAPI)refundLabel, 0);
-            setMode(ConstructionMode.REMOVE);
+            setMode(WidgetSelectionState.REMOVE);
             addCostTimeLabels();
         }
     }
 
     public void setSwapMode() {
         clearLabels();
-        LabelAPI swapLabel = Global.getSettings().createLabel("Click to swap", Fonts.DEFAULT_SMALL);
+        LabelAPI swapLabel = settings.createLabel("Click to swap", Fonts.DEFAULT_SMALL);
         swapLabel.setColor(baseColor);
         swapLabel.setHighlightColor(
             NativeUiUtils.adjustBrightness(swapLabel.getColor(), 1.33f)
@@ -448,7 +451,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         
         labels.add(swapLabel);
         add(swapLabel).aboveMid((UIComponentAPI)constructionStatusText, 0);
-        setMode(ConstructionMode.SWAP);
+        setMode(WidgetSelectionState.SWAP);
         addCostTimeLabels();
     }
 
@@ -463,7 +466,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                     buildText = "day";
                 }
 
-                LabelAPI buildTimeLabel = Global.getSettings().createLabel(
+                LabelAPI buildTimeLabel = settings.createLabel(
                     "" + buildTime, Fonts.DEFAULT_SMALL
                 );
                 buildTimeLabel.setColor(highlight);
@@ -471,7 +474,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                     NativeUiUtils.adjustBrightness(buildTimeLabel.getColor(), 1.33f)
                 );
 
-                LabelAPI buildTimeAppendix = Global.getSettings().createLabel(
+                LabelAPI buildTimeAppendix = settings.createLabel(
                     " " + buildText, Fonts.DEFAULT_SMALL
                 );
                 buildTimeAppendix.setColor(baseColor);
@@ -479,7 +482,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
                     NativeUiUtils.adjustBrightness(buildTimeAppendix.getColor(), 1.33f)
                 );
                 
-                LabelAPI costLabel = Global.getSettings().createLabel(
+                LabelAPI costLabel = settings.createLabel(
                     Misc.getDGSCredits(queueItem.cost), Fonts.DEFAULT_SMALL
                 );
                 costLabel.setColor(highlight);
@@ -505,16 +508,16 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         return constructionQueueIndex;
     }
 
-    protected void setMode(ConstructionMode mode) {
+    protected void setMode(WidgetSelectionState mode) {
         constructionMode = mode;
 
         if (indIcon != null) {
-            final Color gColor = mode == ConstructionMode.NORMAL ? Color.WHITE : Color.BLACK;
+            final Color gColor = mode == WidgetSelectionState.NONE ? Color.WHITE : Color.BLACK;
             indIcon.ImgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
         }
     }
 
-    public ConstructionMode getMode() {
+    public WidgetSelectionState getMode() {
         return constructionMode;
     }
 
@@ -551,12 +554,6 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         UIContext.setContext(Context.NONE);
     }
 
-    public enum ConstructionMode {
-        NORMAL,
-        SWAP,
-        REMOVE,
-    }
-
     public class IndustryImagePanel extends SpritePanel<IndustryImagePanel> implements
         HasHoverGlow, HasInteraction, HasTooltip, HasAudioFeedback
     {
@@ -572,7 +569,7 @@ public class IndustryWidget extends CustomPanel<IndustryWidget> implements
         ) {
             super(parent, width, height, spriteID, color, fillColor);
 
-            final Color gColor = constructionMode == ConstructionMode.NORMAL ? Color.WHITE : Color.BLACK;
+            final Color gColor = constructionMode == WidgetSelectionState.NONE ? Color.WHITE : Color.BLACK;
 
             ImgGlow.fader = glow.fader;
             ImgGlow.type = GlowType.ADDITIVE;

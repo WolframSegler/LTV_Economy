@@ -70,6 +70,8 @@ behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons
 
 <a href="https://www.flaticon.com/free-icons/next" title="next icons">Next icons created by Roundicons - Flaticon</a>
 
+<a href="https://www.flaticon.com/free-icons/dormitory" title="dormitory icons">Dormitory icons created by Satawat Anukul - Flaticon</a>
+
 <br>
 
 ## AI Generated Assets

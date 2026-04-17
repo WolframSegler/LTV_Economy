@@ -1,5 +1,6 @@
 package wfg.ltv_econ.economy.engine;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constants.strings.Income.*;
 
 import java.util.Collection;
@@ -418,7 +419,7 @@ public class EconomyInfo {
     }
 
     public static final float getWorkersPerUnit(String comID, String tag) {
-        final float Pout = Global.getSettings().getCommoditySpec(comID).getBasePrice();
+        final float Pout = settings.getCommoditySpec(comID).getBasePrice();
         final float RoVC = LaborConfig.getRoVC(tag);
 
         return (Pout * RoVC) / LaborConfig.LPV_day;

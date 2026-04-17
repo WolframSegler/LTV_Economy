@@ -1,5 +1,6 @@
 package wfg.ltv_econ.economy.raids;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.util.List;
@@ -102,7 +103,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
 	@Override
 	public final void createTooltip(TooltipMakerAPI tp, boolean expanded) {
-		final Description comDesc = Global.getSettings().getDescription(id, Type.RESOURCE);
+		final Description comDesc = settings.getDescription(id, Type.RESOURCE);
 		
 		tp.addPara(comDesc.getText1FirstPara(), 0f);
 		

@@ -5,17 +5,14 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
-
 import static wfg.ltv_econ.constants.Mods.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import lunalib.lunaSettings.LunaSettings;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 
 public class EconomyConfigLoader {
-    private static final SettingsAPI settings = Global.getSettings();
     private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";
 
     private static JSONObject config;

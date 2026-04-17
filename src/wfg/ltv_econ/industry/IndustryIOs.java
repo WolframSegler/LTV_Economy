@@ -1,5 +1,7 @@
 package wfg.ltv_econ.industry;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,7 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -61,7 +62,6 @@ import wfg.native_ui.util.ArrayMap;
  */
 public class IndustryIOs {
     private static final Object MARKET_SIZE_FIELD = RolfLectionUtil.getFieldByName("size", Market.class);
-    private static final SettingsAPI settings = Global.getSettings();
 
     /**
      * Map(industryID, Map(outputID, baseOutput))
@@ -226,7 +226,7 @@ public class IndustryIOs {
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         if (cfg == null) return 2;
         if (cfg.outputs.containsKey(outputID)) return 3;
-        if (Global.getSettings().getCommoditySpec(outputID) == null) return 4;
+        if (settings.getCommoditySpec(outputID) == null) return 4;
         final MutableStat output = ind.getSupply(outputID).getQuantity();
         if (indHasSupply && output.getModifiedValue() < 0.01f) return 5;
 
@@ -313,7 +313,7 @@ public class IndustryIOs {
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         if (cfg == null) return 2;
         if (hasInput(ind, inputID)) return 3;
-        if (Global.getSettings().getCommoditySpec(inputID) == null) return 4;
+        if (settings.getCommoditySpec(inputID) == null) return 4;
         final MutableStat input = ind.getDemand(inputID).getQuantity();
         if (indHasDemand && input.getModifiedValue() < 0.01f) return 5;
 

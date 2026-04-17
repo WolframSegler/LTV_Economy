@@ -1,14 +1,13 @@
 package wfg.ltv_econ.plugins;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constants.Mods.*;
 
 import com.fs.starfarer.api.GameState;
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ModManagerAPI;
 import com.fs.starfarer.api.combat.BaseEveryFrameCombatPlugin;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
 
-import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.dialog.DialogPanel;
 
 public class TitleScreenWarningPlugin extends BaseEveryFrameCombatPlugin {
@@ -16,10 +15,10 @@ public class TitleScreenWarningPlugin extends BaseEveryFrameCombatPlugin {
 
     public void init(CombatEngineAPI engine) {
         if (shown) return;
-        if (Global.getSettings().getCurrentState() != GameState.TITLE) return;
+        if (settings.getCurrentState() != GameState.TITLE) return;
         shown = true;
 
-        final ModManagerAPI manager = Global.getSettings().getModManager();
+        final ModManagerAPI manager = settings.getModManager();
 
         boolean showWarnings = false;
         final StringBuilder txt = new StringBuilder("Warning!");
@@ -38,9 +37,7 @@ public class TitleScreenWarningPlugin extends BaseEveryFrameCombatPlugin {
         }
         if (!showWarnings) return;
 
-        final DialogPanel warningPanel = new DialogPanel(
-            Attachments.getTitleScreenPanel(), null, txt.toString(), "Dismiss"
-        );
+        final DialogPanel warningPanel = new DialogPanel(null, txt.toString(), "Dismiss");
         warningPanel.setConfirmShortcut();
         warningPanel.backgroundDimAmount = 0f;
         warningPanel.holo.borderAlpha = 0.6f;

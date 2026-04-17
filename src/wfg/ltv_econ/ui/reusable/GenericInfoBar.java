@@ -1,5 +1,6 @@
 package wfg.ltv_econ.ui.reusable;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.dark;
 
 import java.awt.Color;
@@ -8,17 +9,16 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.RenderUtils;
 
-public class GenericInfoBar<PanelType extends GenericInfoBar<PanelType>> extends CustomPanel<PanelType> {
+public class GenericInfoBar extends CustomPanel {
     protected static final Color TRANSPARENT_BLACK = new Color(0, 0, 0, 100);
     protected static final Color TRANSPARENT_WHITE = new Color(255, 255, 255, 20);
-    protected static final SpriteAPI GLOW_BG = Global.getSettings().getSprite("ui", "glow_bg");
+    protected static final SpriteAPI GLOW_BG = settings.getSprite("ui", "glow_bg");
 
     protected final Map<Color, Float> barMap = new LinkedHashMap<>(8);
     protected boolean hasOutline;

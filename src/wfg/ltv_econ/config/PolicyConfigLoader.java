@@ -1,14 +1,13 @@
 package wfg.ltv_econ.config;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.native_ui.util.ArrayMap;
@@ -20,7 +19,7 @@ public class PolicyConfigLoader {
 
     private static final void load() {
         try {
-            config = Global.getSettings().getMergedJSON(CONFIG_PATH);
+            config = settings.getMergedJSON(CONFIG_PATH);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load policy config: " + CONFIG_PATH, ex);
         }
@@ -34,7 +33,6 @@ public class PolicyConfigLoader {
     @SuppressWarnings("unchecked")
     public static final void loadConfig() {
         try {
-            final SettingsAPI settings = Global.getSettings();
             final JSONArray root = getConfig().getJSONArray("policies");
 
             for (int i = 0; i < root.length(); i++) {

@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.commodity;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -191,7 +193,7 @@ public class CommodityCell implements Serializable {
 
     public Object readResolve() {
         market = Global.getSector().getEconomy().getMarket(marketID);
-        spec = Global.getSettings().getCommoditySpec(comID);
+        spec = settings.getCommoditySpec(comID);
 
         productionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
         consumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);

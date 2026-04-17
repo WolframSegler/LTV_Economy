@@ -1,5 +1,7 @@
 package wfg.ltv_econ.ui.scripts;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
@@ -42,7 +44,7 @@ public class UIInjectorListener implements CoreUITabListener, CommodityTooltipMo
     @Override
     public void addSectionAfterPrice(TooltipMakerAPI tp, float width, boolean expanded, CargoStackAPI stack) {
         if (!expanded ||!stack.isCommodityStack()) return;
-        final CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(stack.getCommodityId());
+        final CommoditySpecAPI spec = settings.getCommoditySpec(stack.getCommodityId());
         if (spec.isNonEcon()) return;
 
         TooltipUtils.cargoComTooltip(tp, spec, 5,

@@ -26,7 +26,7 @@ import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.panel.CustomPanel;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class LtvCommodityPanel extends CustomPanel<LtvCommodityPanel> implements HasBackground, HasOutline,
+public class LtvCommodityPanel extends CustomPanel implements HasBackground, HasOutline,
     UIBuildableAPI
 {
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);

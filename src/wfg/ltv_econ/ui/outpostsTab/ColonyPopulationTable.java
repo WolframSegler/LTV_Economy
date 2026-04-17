@@ -1,11 +1,10 @@
 package wfg.ltv_econ.ui.outpostsTab;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -20,6 +19,10 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
+import wfg.ltv_econ.ui.marketInfo.population.CohesionPair;
+import wfg.ltv_econ.ui.marketInfo.population.ConsciousnessPair;
+import wfg.ltv_econ.ui.marketInfo.population.HappinessPair;
+import wfg.ltv_econ.ui.marketInfo.population.HealthPair;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
@@ -29,9 +32,8 @@ import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.RowPanel;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
-public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> implements HasBackground {
+public class ColonyPopulationTable extends CustomPanel implements HasBackground {
     public static final int PANEL_W = 935;
 
     protected final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
@@ -46,9 +48,9 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
 
     public void buildUI() {
         final EconomyEngine engine = EconomyEngine.instance();
-        final SettingsAPI settings = Global.getSettings();
         final int rowH = 68;
         final int nameW = 170;
+        final int iconW = 120;
         
         clearChildren();
         final SortableTable table = new SortableTable(m_panel, (int) pos.getWidth(),
@@ -58,19 +60,10 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
         table.addHeaders(
             "Name", nameW + pad, "Colony name.\nSorts colonies by date established.", false, false, -1,
             "Size", 70, "Colony size.", false, false, -1,
-
-            "Health Icon", 30, null, true, false, 1,
-            "Health", 90, "Overall health of the colony's population.", true, true, 1,
-            
-            "Happiness Icon", 30, null, true, false, 2,
-            "Happiness", 90, "Overall happiness and morale of the colony's population.", true, true, 2,
-
-            "Cohesion Icon", 30, null, true, false, 3,
-            "Cohesion", 90, "Degree of social cohesion within the colony's population.", true, true, 3,
-
-            "Consciousness Icon", 30, null, true, false, 4,
-            "Conscious..", 90, "Colony population's awareness of exploitation and social hierarchy.", true, true, 4,
-
+            "Health", iconW, "Overall health of the colony's population.", false, false, -1,
+            "Happiness", iconW, "Overall happiness and morale of the colony's population.", false, false, -1,
+            "Cohesion", iconW, "Degree of social cohesion within the colony's population.", false, false, -1,
+            "Conscious..", iconW, "Colony population's awareness of exploitation and social hierarchy.", false, false, -1,
             "Reserves", 100, "Credit reserves of the colony", false, false, -1,
             "Employment", 112, "Fraction of the workers assigned to an output.", false, false, -1
         );
@@ -99,26 +92,24 @@ public class ColonyPopulationTable extends CustomPanel<ColonyPopulationTable> im
                 ComponentFactory.addTooltip(nameTp, rowH, false, namePanel);
     
                 final int iconS = rowH/3;
-                final Base health = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.HEALTH_ICON, null, null);
-                final Base happiness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SMILING_ICON, null, null);
-                final Base cohesion = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOCIETY_ICON, null, null);
-                final Base consciousness = new Base(table.getPanel(), iconS, iconS, ManagePopulationDialog.SOLIDARITY_ICON, null, null);
-                final long credits = engine.getCredits(data.marketID);
+                final int PairW = iconW - opad;
+                final HealthPair healthPair = new HealthPair(m_panel, PairW, iconS, data, base, null);
+                final HappinessPair happinessPair = new HappinessPair(m_panel, PairW, iconS, data, base, null);
+                final CohesionPair cohesionPair = new CohesionPair(m_panel, PairW, iconS, data, base, null);
+                final ConsciousnessPair consciousnessPair = new ConsciousnessPair(m_panel, PairW, iconS, data, base, null);
+
                 final var cond = WorkerPoolCondition.getPoolCondition(market);
                 final int employment = Math.round(100f - cond.getFreeWorkerRatio()*100f);
 
+                final long credits = engine.getCredits(data.marketID);
                 final Color creditColor = credits < 0l ? negative : highlight;
 
                 table.addCell(namePanel, cellAlg.LEFT, market.getDaysInExistence(), null);
                 table.addCell(market.getSize(), cellAlg.MID, null, null);
-                table.addCell(health, cellAlg.LEFTOPAD, null, null);
-                table.addCell((int) data.getHealth(), cellAlg.MID, null, null);
-                table.addCell(happiness, cellAlg.LEFTOPAD, null, null);
-                table.addCell((int) data.getHappiness(), cellAlg.MID, null, null);
-                table.addCell(cohesion, cellAlg.LEFTOPAD, null, null);
-                table.addCell((int) data.getSocialCohesion(), cellAlg.MID, null, null);
-                table.addCell(consciousness, cellAlg.LEFTOPAD, null, null);
-                table.addCell((int) data.getClassConsciousness(), cellAlg.MID, null, null);
+                table.addCell(healthPair.getPanel(), cellAlg.LEFTOPAD, data.getHealth(), null);
+                table.addCell(happinessPair.getPanel(), cellAlg.LEFTOPAD, data.getHappiness(), null);
+                table.addCell(cohesionPair.getPanel(), cellAlg.LEFTOPAD, data.getSocialCohesion(), null);
+                table.addCell(consciousnessPair.getPanel(), cellAlg.LEFTOPAD, data.getClassConsciousness(), null);
                 table.addCell(NumFormat.formatCredit(credits), cellAlg.MID, credits, creditColor);
                 table.addCell(employment + "%", cellAlg.MID, employment, null);
 

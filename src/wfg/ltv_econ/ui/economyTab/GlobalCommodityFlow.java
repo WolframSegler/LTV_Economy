@@ -3,13 +3,10 @@ package wfg.ltv_econ.ui.economyTab;
 import java.awt.Color;
 import java.util.List;
 
-import org.lwjgl.input.Keyboard;
-
 import java.util.ArrayList;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
-import com.fs.starfarer.api.campaign.FactionSpecAPI;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -37,12 +34,13 @@ import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.ui.visual.PieChart.PieSlice;
 import wfg.native_ui.ui.visual.TextPanel;
+import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
-public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implements UIBuildableAPI {
-    private static final SettingsAPI settings = Global.getSettings();
-    private static final List<FactionSpecAPI> factionList = settings.getAllFactionSpecs();
+public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
+    private static final List<FactionAPI> factionList = Global.getSector().getAllFactions();
     private static final float PIE_CHART_THRESHOLD = 0.001f;
 
     public static final int ICON_SIZE = 135;
@@ -462,9 +460,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
 
             final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
-                if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
-                    return;
-                }
+                if (!NativeUiUtils.isCtrlDown()) return;
 
                 final SectorEntityToken target = cell.market.getPrimaryEntity();
                 if (target != null) {
@@ -511,9 +507,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
             table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
 
             final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
-                if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
-                    return;
-                }
+                if (!NativeUiUtils.isCtrlDown()) return;
 
                 final SectorEntityToken target = cell.market.getPrimaryEntity();
                 if (target != null) {
@@ -541,7 +535,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
         final ArrayList<PieSlice> data = new ArrayList<>(); 
         final float informalShare = engine.info.getInformalExportShare(comID);
 
-        for (FactionSpecAPI faction : factionList) {
+        for (FactionAPI faction : factionList) {
             final float share = engine.info.getFactionExportShareWithInformal(comID, faction.getId());
             if (share < PIE_CHART_THRESHOLD) continue;
 
@@ -582,7 +576,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                 }
             );
 
-            for (FactionSpecAPI faction : factionList) {
+            for (FactionAPI faction : factionList) {
                 final float share = engine.info.getFactionExportShareWithInformal(comID, faction.getId());
                 if (share < PIE_CHART_THRESHOLD) continue;
 
@@ -614,7 +608,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
         final ArrayList<PieSlice> data = new ArrayList<>();
         final float informalShare = engine.info.getInformalImportShare(comID);
 
-        for (FactionSpecAPI faction : factionList) {
+        for (FactionAPI faction : factionList) {
             final float share = engine.info.getFactionImportShareWithInformal(comID, faction.getId());
 
             if (share < PIE_CHART_THRESHOLD) continue;
@@ -656,7 +650,7 @@ public class GlobalCommodityFlow extends CustomPanel<GlobalCommodityFlow> implem
                 }
             );
 
-            for (FactionSpecAPI faction : factionList) {
+            for (FactionAPI faction : factionList) {
                 final float share = engine.info.getFactionImportShareWithInformal(comID, faction.getId());
                 if (share < PIE_CHART_THRESHOLD) continue;
 

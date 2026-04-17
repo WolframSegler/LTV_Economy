@@ -1,9 +1,8 @@
 package wfg.ltv_econ.ui.economyTab;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -16,7 +15,7 @@ import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public class FactionAdministrationPanel extends CustomPanel<FactionAdministrationPanel> implements UIBuildableAPI {
+public class FactionAdministrationPanel extends CustomPanel implements UIBuildableAPI {
 
     public FactionAdministrationPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
@@ -25,7 +24,6 @@ public class FactionAdministrationPanel extends CustomPanel<FactionAdministratio
     }
 
     public void buildUI() {
-        final SettingsAPI settings = Global.getSettings();
         final PlayerFactionSettings factionSettings = LtvEconSaveData.instance().playerFactionSettings;
 
         final int SECTION_I = opad;

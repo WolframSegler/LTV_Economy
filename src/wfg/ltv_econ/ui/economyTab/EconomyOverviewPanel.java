@@ -9,7 +9,7 @@ import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.TradeFlowOptions;
 import wfg.ltv_econ.ui.reusable.AbstractManagementPanel;
 
-public class EconomyOverviewPanel extends AbstractManagementPanel<EconomyOverviewPanel> {
+public class EconomyOverviewPanel extends AbstractManagementPanel {
 
     public EconomyOverviewPanel(UIPanelAPI parent) {
         super(parent);

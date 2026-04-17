@@ -5,7 +5,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 
-public class StockpileInfoBar extends GenericInfoBar<StockpileInfoBar> {
+public class StockpileInfoBar extends GenericInfoBar {
 
     public StockpileInfoBar(UIPanelAPI parent, int width, int height, boolean hasOutline, CommodityCell cell) {
         super(parent, width, height, hasOutline);

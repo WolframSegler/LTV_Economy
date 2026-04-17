@@ -9,7 +9,6 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel.RowPanel;
-import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.UIContext;
 import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.dialog.DialogPanel;
@@ -21,8 +20,7 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
     final RowPanel caller;
 
     public ConfirmEmbargoDialog(FactionSpecAPI faction, RowPanel caller, boolean alreadyEmbargoed) {
-        super(Attachments.getScreenPanel(),
-            null,
+        super(null,
             alreadyEmbargoed ? "Lift the embargo on "+faction.getDisplayName()+"? Colonies may resume trade." : "Impose an embargo on "+faction.getDisplayName()+"? Colonies cannot trade with this faction while the embargo is active. This will negatively impact relations.",
             alreadyEmbargoed ? "Lift" : "Impose",
             "Cancel"

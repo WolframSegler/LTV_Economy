@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.planning;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -7,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
@@ -21,7 +21,6 @@ import wfg.native_ui.util.ArrayMap;
 public class IndustryMatrix {
     private IndustryMatrix() {}
     
-    private static final SettingsAPI settings = Global.getSettings();
     private static double[][] STATIC_MATRIX;
     private static List<String> STATIC_WORKER_COMMODITIES;
     private static List<String> STATIC_INDUSTRY_OUTPUT_PAIRS;

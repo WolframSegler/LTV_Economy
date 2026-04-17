@@ -1,9 +1,7 @@
 package wfg.ltv_econ.ui.economyTab;
 
-import org.lwjgl.input.Keyboard;
+import static wfg.native_ui.util.Globals.settings;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
@@ -34,12 +32,13 @@ import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.util.NativeUiUtils;
+
 import static wfg.native_ui.util.UIConstants.*;
 
-public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel> implements
+public class CommoditySelectionPanel extends CustomPanel implements
     HasOutline, HasBackground, UIBuildableAPI
 {
-    private static final SettingsAPI settings = Global.getSettings();
     private static final int ROW_H = 32;
     private static UIBuildableAPI targetPanel = null;
 
@@ -76,7 +75,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
         ComponentFactory.addTooltip(container, pos.getHeight(), true, m_panel).inTL(0f, 0f);
     }
 
-    public class RowPanel extends CustomPanel<RowPanel> 
+    public class RowPanel extends CustomPanel 
         implements HasInteraction, HasHoverGlow, HasAudioFeedback, HasTooltip
     {
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
@@ -97,9 +96,7 @@ public class CommoditySelectionPanel extends CustomPanel<CommoditySelectionPanel
                 selectedCom = spec;
                 targetPanel.buildUI();
 
-                if (UIUtils.canViewPrices() && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) ||
-                    Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)
-                )) {
+                if (UIUtils.canViewPrices() && NativeUiUtils.isCtrlDown()) {
                     final ComDetailDialog dialogPanel = new ComDetailDialog(
                         null, settings.getFactionSpec(Factions.PLAYER), com
                     );

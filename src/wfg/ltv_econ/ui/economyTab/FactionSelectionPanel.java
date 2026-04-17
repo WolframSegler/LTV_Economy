@@ -1,12 +1,13 @@
 package wfg.ltv_econ.ui.economyTab;
 
 import static wfg.ltv_econ.constants.EconomyConstants.visibleFactions;
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -35,10 +36,10 @@ import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 
-public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> implements
+public class FactionSelectionPanel extends CustomPanel implements
     HasOutline, HasBackground, HasUIContext, UIBuildableAPI
 {
-    public static final String restrictedPath = Global.getSettings().getSpriteName("ui", "restricted");
+    public static final SpriteAPI restrictedPath = settings.getSprite("ui", "restricted");
     private static final int ROW_H = 32;
 
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
@@ -72,7 +73,7 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
         ComponentFactory.addTooltip(container, getPos().getHeight(), true, m_panel).inTL(0f, 0f);
     }
 
-    public class RowPanel extends CustomPanel<RowPanel> implements UIBuildableAPI,
+    public class RowPanel extends CustomPanel implements UIBuildableAPI,
         HasInteraction, HasHoverGlow, HasAudioFeedback, HasBackground, HasTooltip
     {
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -130,7 +131,7 @@ public class FactionSelectionPanel extends CustomPanel<FactionSelectionPanel> im
                 add(restrictedIcon).inBR(pad, (ROW_H - iconSize) / 2f);
             }
 
-            final LabelAPI nameLabel = Global.getSettings().createLabel(faction.getDisplayName(), Fonts.ORBITRON_12);
+            final LabelAPI nameLabel = settings.createLabel(faction.getDisplayName(), Fonts.ORBITRON_12);
             nameLabel.setColor(faction.getBaseUIColor());
             if (alreadyEmbargoed) nameLabel.setOpacity(0.6f);
             final float labelW = nameLabel.computeTextHeight(faction.getDisplayName());

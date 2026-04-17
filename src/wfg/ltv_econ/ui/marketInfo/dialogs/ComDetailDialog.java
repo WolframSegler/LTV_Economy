@@ -1,13 +1,13 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -38,7 +38,6 @@ import wfg.ltv_econ.ui.reusable.ComIconPanel;
 import wfg.ltv_econ.ui.reusable.CommodityInfoBar;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UIUtils;
-import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.UIContext;
 import wfg.native_ui.ui.UIContext.Context;
@@ -62,8 +61,6 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
-    private static final SettingsAPI settings = Global.getSettings();
-
     protected final InputSnapshotComp input = comp().get(NativeComponents.INPUT_SNAPSHOT);
 
     public final int PANEL_W;
@@ -106,7 +103,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com,
         int panelW, int panelH
     ) {
-        super(Attachments.getScreenPanel(), panelW, panelH, null, null, "Dismiss");
+        super(panelW, panelH, null, null, "Dismiss");
 
         PANEL_W = panelW;
         PANEL_H = panelH;
@@ -143,7 +140,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         // Footer
         final int footerH = 40;
 
-        footerPanel = new TextPanel(innerPanel, 400, footerH) {
+        footerPanel = new TextPanel(m_panel, 400, footerH) {
             @Override
             public void buildUI() {
                 final TooltipMakerAPI footer = ComponentFactory.createTooltip(PANEL_W, false);
@@ -198,7 +195,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             }
         };
 
-        innerPanel.addComponent(footerPanel.getPanel()).inBL(opad, pad);
+        add(footerPanel).inBL(opad, pad);
     }
 
     public void createSections() {
@@ -211,7 +208,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     }
 
     public void updateSection1() {
-        innerPanel.removeComponent(section1);
+        remove(section1);
 
         section1 = settings.createCustom(SECT1_WIDTH, SECT1_HEIGHT, null);
 
@@ -219,11 +216,11 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         ComponentFactory.addTooltip(tp, SECT1_HEIGHT, false, section1).inTL(0, 0);
 
         createSection1(section1, tp);
-        innerPanel.addComponent(section1).inTL(pad, pad);
+        add(section1).inTL(pad, pad);
     }
 
     public void updateSection2() {
-        innerPanel.removeComponent(section2);
+        remove(section2);
 
         section2 = settings.createCustom(SECT2_WIDTH, SECT2_HEIGHT, null);
 
@@ -231,7 +228,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         ComponentFactory.addTooltip(tp, SECT2_HEIGHT, false, section2).inTL(0, 0);
 
         createSection2(section2, tp);
-        innerPanel.addComponent(section2).inTR(pad, pad);
+        add(section2).inTR(pad, pad);
     }
 
     /**
@@ -239,16 +236,16 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
      *  MODE_1: Displays the Consumers
      */
     public void updateSection3(int mode) {
-        innerPanel.removeComponent(section3);
+        remove(section3);
 
         section3 = settings.createCustom(SECT3_WIDTH, SECT3_HEIGHT, null);
 
         createSection3(section3, mode);
-        innerPanel.addComponent(section3).inBL(pad, BUTTON_H + pad*2 + opad);
+        add(section3).inBL(pad, BUTTON_H + pad*2 + opad);
     }
 
     public void updateSection4() {
-        innerPanel.removeComponent(section4);
+        remove(section4);
 
         section4 = settings.createCustom(SECT4_WIDTH, SECT4_HEIGHT, null);
 
@@ -256,7 +253,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         ComponentFactory.addTooltip(tp, SECT4_HEIGHT, false, section4).inTL(0, 0);
 
         createSection4(section4);
-        innerPanel.addComponent(section4).inBR(pad, BUTTON_H + pad*2 + opad);
+        add(section4).inBR(pad, BUTTON_H + pad*2 + opad);
     }
 
     private void createSection1(UIPanelAPI section, TooltipMakerAPI tooltip) {
@@ -375,10 +372,10 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         }
         { // Total faction exports
 
-            final FactionSpecAPI currFaction;
+            final FactionAPI currFaction;
 
-            if (m_selectedMarket != null) currFaction = m_selectedMarket.getFaction().getFactionSpec();
-            else currFaction = m_faction;
+            if (m_selectedMarket != null) currFaction = m_selectedMarket.getFaction();
+            else currFaction = Global.getSector().getFaction(m_faction.getId());
 
             final TextPanel textPanel = new TextPanel(section, 210, 0) {
                 @Override

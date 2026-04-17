@@ -1,9 +1,8 @@
 package wfg.ltv_econ.ui.marketInfo;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -40,13 +39,12 @@ import com.fs.starfarer.api.loading.Description.Type;
 
 import java.awt.Color;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
-public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
+public class CommodityRowPanel extends CustomPanel implements
     HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction, UIBuildableAPI
 {
-    private static final SettingsAPI settings = Global.getSettings();
-    private static final String EXPORTS_ICON_PATH = settings.getSpriteName(
-        "commodity_markers", "exports");
+    private static final SpriteAPI EXPORTS_ICON = settings.getSprite("commodity_markers", "exports");
 
     public static final int iconSize = 26;
 
@@ -166,7 +164,7 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
 
         if (cell.globalExports > 0) {
             final Base iconPanel = new Base(m_panel, rowHeight - 4, rowHeight - 4,
-                EXPORTS_ICON_PATH, null, null);
+                EXPORTS_ICON, null, null);
 
             add(iconPanel).inRMid(pad);
         }
@@ -180,69 +178,66 @@ public class CommodityRowPanel extends CustomPanel<CommodityRowPanel> implements
      */
     public static final void legendRowCreator(int mode, TooltipMakerAPI tp, int y, int iconSize) {
 
-        String iconPath;
         String desc;
 
         if (mode == 0) {
             desc = "Proportion of stockpiles compared to the desired amount.";
-            legendRowHelper(tp, y, TooltipUtils.STOCKPILES_FULL_PATH, desc, iconSize, false, null);
+            legendRowHelper(tp, y, TooltipUtils.STOCKPILES_FULL, desc, iconSize, false, null);
             
             y += iconSize + pad;
 
             desc = "Excess production that is exported.";
-            legendRowHelper(tp, y, EXPORTS_ICON_PATH, desc, iconSize, false, null);
+            legendRowHelper(tp, y, EXPORTS_ICON, desc, iconSize, false, null);
             
             y += iconSize + pad;
     
-            iconPath = "";
             desc = "Smuggled or produced by an illegal enterprise. No income from exports.";
-            legendRowHelper(tp, y, iconPath, desc, iconSize, true, null);
+            legendRowHelper(tp, y, null, desc, iconSize, true, null);
             
             y += iconSize + pad;
         }
 
-        iconPath = "";
         desc = "Local production that could not be exported.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_NOT_EXPORTED);
+        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_NOT_EXPORTED);
         
         y += iconSize + pad;
 
         desc = "Exported local production.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_EXPORT);
+        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_EXPORT);
         
         y += iconSize + pad;
 
         desc = "Production used for local demand.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_LOCAL_PROD);
+        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_LOCAL_PROD);
         
         y += iconSize + pad;
 
         desc = "Goods that were imported in-faction.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_FACTION_IMPORT);
+        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_FACTION_IMPORT);
         
         y += iconSize + pad;
 
         desc = "Imported or available through one-time trade or events.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_IMPORT);
+        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_IMPORT);
         
         y += iconSize + pad;
 
         desc = "Excess imports beyond current demand stockpiled for future use.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_OVER_IMPORT);
+        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_OVER_IMPORT);
         
         y += iconSize + pad;
 
         desc = "Deficit not covered by production or imports.";
-        legendRowHelper(tp, y, iconPath, desc, iconSize, false, UIColors.COM_DEFICIT);
+        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_DEFICIT);
     
         tp.setHeightSoFar(y + opad*2);
     }
 
-    public static final void legendRowHelper(TooltipMakerAPI tp, int y, String iconPath, String desc,
+    public static final void legendRowHelper(TooltipMakerAPI tp, int y, SpriteAPI icon, String desc,
         int lgdIconSize, boolean drawRedBorder, Color fillColor
     ) {
         final Base iconPanel = new Base(tp, lgdIconSize, lgdIconSize,
-            iconPath, null, fillColor
+            icon, null, fillColor
         );
         if (drawRedBorder) {
             iconPanel.outline.enabled = true;

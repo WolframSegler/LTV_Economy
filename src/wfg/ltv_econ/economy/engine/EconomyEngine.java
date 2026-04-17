@@ -47,6 +47,7 @@ import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.EconomyConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -218,11 +219,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         MarketFinanceRegistry.instance().remove(marketID);
         WorkerRegistry.instance().remove(marketID);
         for (TradeMission m : activeMissions) {
-            if (m.src.getId().equals(marketID) || m.dest.getId().equals(marketID)) {
+
+            if (m.src == null || m.dest == null || m.src.getId().equals(marketID) || m.dest.getId().equals(marketID)) {
                 m.status = MissionStatus.CANCELLED;
             }
         }
-        pastMissions.removeIf(m -> m.src.getId().equals(marketID) || m.dest.getId().equals(marketID));
+        pastMissions.removeIf(m -> m.src == null || m.dest == null || m.src.getId().equals(marketID) || m.dest.getId().equals(marketID));
     }
 
     public final void refreshMarkets() {
@@ -437,7 +439,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             final FDNode wageNode = report.getNode(mNode, "wages"); 
             wageNode.name = "Wages";
             wageNode.mapEntity = market.getPrimaryEntity();
-            wageNode.icon = Global.getSettings().getSpriteName("income_report", "generic_expense");
+            wageNode.icon = settings.getSpriteName("income_report", "generic_expense");
             wageNode.upkeep = info.getDailyWages(market) * MONTH * r;
             wageNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}
@@ -454,7 +456,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             // Player cut node
             final FDNode playerIncomeNode = report.getNode(mNode, "player_share");
             playerIncomeNode.name = "Effective player share (" + Math.round(r * 100) + "%)";
-            playerIncomeNode.icon = Global.getSettings().getSpriteName("icons", "ratio_chart");
+            playerIncomeNode.icon = settings.getSpriteName("icons", "ratio_chart");
             playerIncomeNode.income = 0.0001f;
             playerIncomeNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}

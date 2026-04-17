@@ -1,5 +1,7 @@
 package wfg.ltv_econ.ui.scripts;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.List;
 
 import com.fs.starfarer.api.EveryFrameScript;
@@ -148,7 +150,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         NativeUiUtils.anchorPanel(stockpilesBtn.getPanel(), popBtn.getPanel(), AnchorType.LeftBottom, gap);
         NativeUiUtils.anchorPanel(eventsBtn.getPanel(), stockpilesBtn.getPanel(), AnchorType.LeftBottom, gap);
 
-        if (Global.getSettings().isDevMode()) {
+        if (settings.isDevMode()) {
             Global.getLogger(MarketUIReplacer.class).info("Added Market Buttons");
         }
     }
@@ -251,7 +253,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         // No need for the old panel
         managementPanel.removeComponent(industryPanel);
 
-        if (Global.getSettings().isDevMode()) {
+        if (settings.isDevMode()) {
             Global.getLogger(MarketUIReplacer.class).info("Replaced IndustryListPanel");
         }
     }
@@ -301,7 +303,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
         managementPanel.removeComponent(commodityPanel);
 
-        if (Global.getSettings().isDevMode()) {
+        if (settings.isDevMode()) {
             Global.getLogger(MarketUIReplacer.class).info("Replaced CommodityPanel");
         }
     }

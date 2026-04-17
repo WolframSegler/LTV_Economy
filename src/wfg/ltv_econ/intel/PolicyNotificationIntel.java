@@ -1,9 +1,9 @@
 package wfg.ltv_econ.intel;
 
 import static wfg.ltv_econ.constants.EconomyConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
@@ -14,7 +14,7 @@ import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 
 public class PolicyNotificationIntel extends BaseIntelPlugin {
 
-    private static final String ICON = Global.getSettings().getSpriteName("icons", "policy_icon");
+    private static final String ICON = settings.getSpriteName("icons", "policy_icon");
 
     private final PlayerMarketData data;
     private final MarketPolicy policy;

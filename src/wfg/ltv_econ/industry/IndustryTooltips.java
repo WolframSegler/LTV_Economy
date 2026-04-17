@@ -1,11 +1,12 @@
 package wfg.ltv_econ.industry;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.awt.Color;
 import java.util.Map;
 import java.util.ArrayList;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -45,8 +46,6 @@ import wfg.native_ui.util.NativeUiUtils;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class IndustryTooltips {
-	private static final SettingsAPI settings = Global.getSettings();
-
 	private static final Map<String, Object> hasPostDemandSectionMethodCache = new ArrayMap<>(12);
 	private static final Class<?>[] hasPostDemandSectionparamTypes = new Class<?>[]{
 		boolean.class,IndustryTooltipMode.class};

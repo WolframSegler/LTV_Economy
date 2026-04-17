@@ -1,9 +1,8 @@
 package wfg.ltv_econ.ui.fleet;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
@@ -11,18 +10,16 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.fleet.ShipProductionOrder;
+import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.functional.UIClickable;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.ui.widget.Slider;
 
-// TODO add click functionality
-public class ShipProductionWidget extends CustomPanel<ShipProductionWidget> implements UIBuildableAPI {
-    private static final SettingsAPI settings = Global.getSettings();
-
+public class ShipProductionWidget extends UIClickable<ShipProductionWidget> implements UIBuildableAPI {
     private static final int WIDTH = 450;
     private static final int HEIGHT = 60;
 
@@ -32,8 +29,26 @@ public class ShipProductionWidget extends CustomPanel<ShipProductionWidget> impl
     private final ShipProductionOrder order;
     private final ShipHullSpecAPI spec;
 
+    public WidgetSelectionState selectionState = WidgetSelectionState.NONE;
+
     public ShipProductionWidget(UIPanelAPI parent, ShipProductionOrder order, boolean isBeingProduced) {
-        super(parent, WIDTH, HEIGHT);
+        super(parent, WIDTH, HEIGHT, null);
+
+        onClicked = (btn) -> {
+            switch (selectionState) {
+            case NONE:
+                selectionState = WidgetSelectionState.REMOVE;
+                break;
+
+            case SWAP:
+                // TODO notify parent it was clicked for swapping.
+                break;
+
+            case REMOVE:
+                // TODO rebuild parent UI after removing itself from the data list
+                break;
+            }
+        };
 
         spec = settings.getHullSpec(order.hullId);
 
@@ -77,6 +92,8 @@ public class ShipProductionWidget extends CustomPanel<ShipProductionWidget> impl
         timeSlider.setUserAdjustable(false);
         timeSlider.setProgress(order.days - order.daysRemaining);
         add(timeSlider).inBL(HEIGHT, hpad);
+
+        PlannedOrderWidget.addSelectionUI(shipSprite.getPanel(), selectionState);
     }
 
     @Override

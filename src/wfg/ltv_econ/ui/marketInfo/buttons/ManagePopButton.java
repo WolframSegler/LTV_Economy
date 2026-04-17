@@ -1,11 +1,12 @@
 package wfg.ltv_econ.ui.marketInfo.buttons;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import org.lwjgl.input.Keyboard;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -15,7 +16,7 @@ import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 
 public class ManagePopButton extends Button {
-    private static final String ICON = Global.getSettings().getSpriteName("icons", "management_button");
+    private static final SpriteAPI ICON = settings.getSprite("icons", "management_button");
 
     public ManagePopButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
         super(parent, width, height, null, null, null);

@@ -2,9 +2,8 @@ package wfg.ltv_econ.ui.fleet;
 
 import static wfg.ltv_econ.constants.EconomyConstants.visibleFactions;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.ui.Fonts;
@@ -27,8 +26,6 @@ import wfg.native_ui.ui.system.TooltipSystem;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 
 public class FiltersDialog extends DockPanel {
-    private static final SettingsAPI settings = Global.getSettings();
-
     private static final float minAmountCeiling = 50000f; // TODO turn this into a config
 
     private final UIBuildableAPI content;

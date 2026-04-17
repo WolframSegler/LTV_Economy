@@ -1,5 +1,6 @@
 package wfg.ltv_econ.submarkets;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constants.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
 import static wfg.ltv_econ.constants.strings.Income.getDesc;
 import static wfg.native_ui.util.UIConstants.negative;
@@ -7,7 +8,6 @@ import static wfg.native_ui.util.UIConstants.negative;
 import java.util.Random;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CampaignUIAPI.CoreUITradeMode;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CoreUIAPI;
@@ -201,7 +201,6 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
     @Override
     public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
 		super.reportPlayerMarketTransaction(transaction);
-		final SettingsAPI settings = Global.getSettings();
 		final EconomyEngine engine = EconomyEngine.instance();
 		final String marketID = market.getId();
 

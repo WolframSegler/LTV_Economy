@@ -1,11 +1,12 @@
 package wfg.ltv_econ.ui.marketInfo.buttons;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import org.lwjgl.input.Keyboard;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.fleet.TradeMissionsDialog;
@@ -15,16 +16,17 @@ import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.util.NativeUiUtils;
 
 public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
-    private static final String ICON = Global.getSettings().getSpriteName("icons", "stockpiles_button");
+    private static final SpriteAPI ICON = settings.getSprite("icons", "stockpiles_button");
 
     public ColonyStockpilesButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
         super(parent, width, height, null, null, () -> new TradeMissionsDialog(market, true));
 
         final CallbackRunnable<Button> dockRun = onClicked;
         onClicked = (btn) -> {
-            if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) {
+            if (NativeUiUtils.isCtrlDown()) {
                 dockRun.run(btn);
             } else {
                 final ColonyInvDialog dialogPanel = new ColonyInvDialog(market);

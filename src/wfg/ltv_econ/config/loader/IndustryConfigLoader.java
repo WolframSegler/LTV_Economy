@@ -1,6 +1,7 @@
 package wfg.ltv_econ.config.loader;
 
 import static wfg.ltv_econ.constants.Mods.LTV_ECON;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,7 +14,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
@@ -23,7 +23,6 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.native_ui.util.ArrayMap;
 
 public class IndustryConfigLoader {
-    private static final SettingsAPI settings = Global.getSettings();
     private static final Logger log = Global.getLogger(IndustryConfigLoader.class);
 
     private static final String CONFIG_PATH = "./data/config/ltvEcon/industry_config.json";

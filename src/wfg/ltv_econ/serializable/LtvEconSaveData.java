@@ -1,5 +1,7 @@
 package wfg.ltv_econ.serializable;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.io.Serializable;
 
 import com.fs.starfarer.api.Global;
@@ -41,7 +43,7 @@ public class LtvEconSaveData implements Serializable {
         if (data == null || forceRefresh) {
             data = new LtvEconSaveData();
 
-            if (Global.getSettings().isDevMode()) {
+            if (settings.isDevMode()) {
                 Global.getLogger(EconomyEngine.class).info("LtvEconomySaveData constructed");
             }
         }

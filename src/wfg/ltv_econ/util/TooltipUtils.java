@@ -10,14 +10,15 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
+import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
@@ -41,15 +42,15 @@ import wfg.native_ui.util.NativeUiUtils;
 
 import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 public class TooltipUtils {
-    private static final SettingsAPI settings = Global.getSettings();
-    public static final String TP_ARROW_PATH = settings.getSpriteName("ui", "cargoTooltipArrow");
-    public static final String STOCKPILES_FULL_PATH = settings.getSpriteName("icons", "stockpiles_full");
-    public static final String STOCKPILES_MEDIUM_PATH = settings.getSpriteName("icons", "stockpiles_medium");
-    public static final String STOCKPILES_LOW_PATH = settings.getSpriteName("icons", "stockpiles_low");
-    public static final String STOCKPILES_EMPTY_PATH = settings.getSpriteName("icons", "stockpiles_empty");
-    public static final String STOCKPILES_NO_DEMAND_PATH = settings.getSpriteName("icons", "stockpiles_no_demand");
+    public static final SpriteAPI TP_ARROW = settings.getSprite("ui", "cargoTooltipArrow");
+    public static final SpriteAPI STOCKPILES_FULL = settings.getSprite("icons", "stockpiles_full");
+    public static final SpriteAPI STOCKPILES_MEDIUM = settings.getSprite("icons", "stockpiles_medium");
+    public static final SpriteAPI STOCKPILES_LOW = settings.getSprite("icons", "stockpiles_low");
+    public static final SpriteAPI STOCKPILES_EMPTY = settings.getSprite("icons", "stockpiles_empty");
+    public static final SpriteAPI STOCKPILES_NO_DEMAND = settings.getSprite("icons", "stockpiles_no_demand");
 
     /**
      * Literally copied this from com.fs.starfarer.ui.impl.CargoTooltipFactory.
@@ -68,9 +69,10 @@ public class TooltipUtils {
 
         final int rowH = 20;
         final EconomyEngine engine = EconomyEngine.instance();
+        final SectorAPI sector = Global.getSector();
         final int baseY = (int) tp.getHeightSoFar();
 
-        if (!Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay()) {
+        if (!sector.getIntelManager().isPlayerInRangeOfCommRelay()) {
             if (showExplanation) {
                 tp.addPara(
                     "Seeing remote price data for various colonies requires being within range of a functional comm relay.",
@@ -98,7 +100,7 @@ public class TooltipUtils {
                 final PositionAPI prevPos = tp.getPrev().getPosition();
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
 
-                tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new Object[] {
+                tp.beginTable(sector.getPlayerFaction(), rowH, new Object[] {
                     "Price", 100, "Desired", 70, "Deficit", 70, "Location", 230,
                     "Star system", 140, "Dist (ly)", 80
                 });
@@ -148,9 +150,9 @@ public class TooltipUtils {
                         Misc.getRoundedValueMaxOneAfterDecimal(distanceToPlayer)
                     );
 
-                    final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW_PATH, null, null);
+                    final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW, null, null);
 
-                    final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
+                    final Vector2f playerLoc = sector.getPlayerFleet().getLocationInHyperspace();
                     final Vector2f targetLoc = market.getStarSystem().getLocation();
 
                     NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
@@ -175,7 +177,7 @@ public class TooltipUtils {
                 tp.addPara("Best places to buy:", opad);
                 final PositionAPI prevPos = tp.getPrev().getPosition();
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
-                tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
+                tp.beginTable(sector.getPlayerFaction(), 20, new Object[] {
                     "Price", 100, "Stored", 70, "Excess", 70, "Location", 230,
                     "Star system", 140, "Dist (ly)", 80 
                 });
@@ -224,9 +226,9 @@ public class TooltipUtils {
                         Misc.getRoundedValueMaxOneAfterDecimal(distance)
                     );
 
-                    final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW_PATH, null, null);
+                    final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW, null, null);
 
-                    final Vector2f playerLoc = Global.getSector().getPlayerFleet().getLocationInHyperspace();
+                    final Vector2f playerLoc = sector.getPlayerFleet().getLocationInHyperspace();
                     final Vector2f targetLoc = market.getStarSystem().getLocation();
 
                     NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
@@ -516,17 +518,17 @@ public class TooltipUtils {
         final UIPanelAPI parent, final Color iconColor, final Color bgColor, final boolean drawBorder,
         final boolean useNoDemandIcon
     ) {
-        final String iconPath;
+        final SpriteAPI iconPath;
         if (useNoDemandIcon) {
-            iconPath = STOCKPILES_NO_DEMAND_PATH;
+            iconPath = STOCKPILES_NO_DEMAND;
         } else if (ratio <= 0.25f) {
-            iconPath = STOCKPILES_EMPTY_PATH;
+            iconPath = STOCKPILES_EMPTY;
         } else if (ratio <= 0.5f) {
-            iconPath = STOCKPILES_LOW_PATH;
+            iconPath = STOCKPILES_LOW;
         } else if (ratio <= 0.75f) {
-            iconPath = STOCKPILES_MEDIUM_PATH;
+            iconPath = STOCKPILES_MEDIUM;
         } else {
-            iconPath = STOCKPILES_FULL_PATH;
+            iconPath = STOCKPILES_FULL;
         }
         final Base icon = new Base(parent, size, size, iconPath, iconColor, bgColor);
         icon.outline.enabled = drawBorder;

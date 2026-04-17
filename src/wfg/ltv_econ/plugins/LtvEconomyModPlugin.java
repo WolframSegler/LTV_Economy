@@ -1,5 +1,6 @@
 package wfg.ltv_econ.plugins;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constants.Mods.*;
 
 import com.fs.starfarer.api.BaseModPlugin;
@@ -32,7 +33,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onApplicationLoad() throws Exception {
-        final ModManagerAPI manager = Global.getSettings().getModManager();
+        final ModManagerAPI manager = settings.getModManager();
         if (manager.isModEnabled(LUNA_LIB)) {
             LunaSettings.addSettingsListener(new ConfigLunaSettingsListener());
         }

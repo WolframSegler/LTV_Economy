@@ -1,11 +1,11 @@
 package wfg.ltv_econ.economy.raids;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.util.Random;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
@@ -34,8 +34,6 @@ import wfg.ltv_econ.util.Arithmetic;
 import wfg.native_ui.util.NumFormat;
 
 public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePluginImpl {
-    private static final SettingsAPI settings = Global.getSettings();
-
     public final CargoAPI looted = Global.getFactory().createCargo(true);
     public final CommodityCell cell;
 

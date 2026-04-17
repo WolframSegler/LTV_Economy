@@ -1,10 +1,10 @@
 package wfg.ltv_econ.economy.fleet;
 
 import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.io.Serializable;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 
 import wfg.ltv_econ.config.EconConfig;
@@ -31,7 +31,7 @@ public class ShipTypeData implements Serializable {
     }
 
     private final Object readResolve() {
-        spec = Global.getSettings().getHullSpec(hullID);
+        spec = settings.getHullSpec(hullID);
 
         return this;
     }

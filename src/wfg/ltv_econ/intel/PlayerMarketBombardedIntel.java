@@ -3,9 +3,9 @@ package wfg.ltv_econ.intel;
 import java.awt.Color;
 
 import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
@@ -14,7 +14,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.ltv_econ.economy.PlayerMarketData;
 
 public class PlayerMarketBombardedIntel extends BaseIntelPlugin {
-    private static final String ICON = Global.getSettings().getSpriteName("icons", "bombardment");
+    private static final String ICON = settings.getSpriteName("icons", "bombardment");
 
     private final PlayerMarketData data;
     private final double stockpileReduction;

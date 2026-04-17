@@ -1,7 +1,6 @@
 package wfg.ltv_econ.ui.economyTab;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
@@ -9,6 +8,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import org.apache.log4j.Logger;
 
@@ -23,8 +23,7 @@ import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public class EconomySettingsPanel extends CustomPanel<EconomySettingsPanel> implements UIBuildableAPI {
-    private static final SettingsAPI settings = Global.getSettings();
+public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI {
     private static final Logger logger = Global.getLogger(EconomySettingsPanel.class); 
 
     public static final int LABEL_W = 150;

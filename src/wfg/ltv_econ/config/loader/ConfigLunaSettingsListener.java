@@ -1,7 +1,8 @@
 package wfg.ltv_econ.config.loader;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import com.fs.starfarer.api.GameState;
-import com.fs.starfarer.api.Global;
 
 import lunalib.lunaSettings.LunaSettingsListener;
 import wfg.ltv_econ.config.IndustryConfigManager;
@@ -24,7 +25,7 @@ public class ConfigLunaSettingsListener implements LunaSettingsListener {
         IndustryMatrix.invalidate();
 
         // REFRESH THE DATA
-        if (Global.getSettings().getCurrentState() == GameState.CAMPAIGN) {
+        if (settings.getCurrentState() == GameState.CAMPAIGN) {
             LtvEconSaveData.saveInstance();
             LtvEconSaveData.loadInstance(false, false);
         }

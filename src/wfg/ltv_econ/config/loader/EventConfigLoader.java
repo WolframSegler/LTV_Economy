@@ -1,10 +1,9 @@
 package wfg.ltv_econ.config.loader;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 
 import wfg.ltv_econ.config.EventConfig;
 import wfg.ltv_econ.config.EventConfig.EventSpec;
@@ -17,7 +16,7 @@ public class EventConfigLoader {
 
     private static final void load() {
         try {
-            config = Global.getSettings().getMergedJSON(CONFIG_PATH);
+            config = settings.getMergedJSON(CONFIG_PATH);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load event config: " + CONFIG_PATH, ex);
         }
@@ -31,7 +30,6 @@ public class EventConfigLoader {
     @SuppressWarnings("unchecked")
     public static final void loadConfig() {
         try {
-            final SettingsAPI settings = Global.getSettings();
             final JSONArray root = getConfig().getJSONArray("events");
 
             for (int i = 0; i < root.length(); i++) {

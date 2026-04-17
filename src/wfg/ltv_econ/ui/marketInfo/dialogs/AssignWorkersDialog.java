@@ -2,18 +2,18 @@ package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.UIColors.SLIDER_BASE;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.awt.Color;
 import java.util.Map;
 import java.util.Set;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
@@ -34,7 +34,6 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.util.ArrayMap;
-import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.UIContext;
 import wfg.native_ui.ui.UIContext.Context;
@@ -48,25 +47,23 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class AssignWorkersDialog extends DialogPanel {
-    private static final SettingsAPI settings = Global.getSettings();
+    private static final SpriteAPI WARNING_BUTTON = settings.getSprite("ui", "warning_button");
+    private static final int PANEL_W = 540;
+    private static final int PANEL_H = 400;
 
-    public static final String WARNING_BUTTON_PATH = settings.getSpriteName("ui", "warning_button");
-    public static final int panelWidth = 540;
-    public static final int panelHeight = 400;
+    private final WorkerRegistry reg;
+    private final Industry industry;
+    private final MarketAPI market;
+    private final WorkerIndustryData data;
+    private final WorkerIndustryData previewData;
+    private final ArrayMap<String, Slider> outputSliders;
 
-    public final WorkerRegistry reg;
-    public final Industry industry;
-    public final MarketAPI market;
-    public final WorkerIndustryData data;
-    public final WorkerIndustryData previewData;
-    public final ArrayMap<String, Slider> outputSliders;
-
-    public BasePanel inputOutputContainer;
+    private BasePanel inputOutputContainer;
 
     private final float initialFreeWorkerRatio;
 
     public AssignWorkersDialog(Industry ind) {
-        super(Attachments.getScreenPanel(), panelWidth, panelHeight, null, null, "Confirm", "Cancel");
+        super(PANEL_W, PANEL_H, null, null, "Confirm", "Cancel");
         setConfirmShortcut();
 
         reg = WorkerRegistry.instance();
@@ -96,28 +93,27 @@ public class AssignWorkersDialog extends DialogPanel {
         final String txt = "Assign workers to " + industry.getCurrentName();
         final LabelAPI lbl = settings.createLabel(txt, Fonts.ORBITRON_20AA);
 
-        final float textX = (panelWidth - lbl.computeTextWidth(txt)) / 2;
-        innerPanel.addComponent((UIComponentAPI)lbl).inTL(textX, pad*2);
+        final float textX = (PANEL_W - lbl.computeTextWidth(txt)) / 2;
+        add(lbl).inTL(textX, pad*2);
 
         inputOutputContainer = new BasePanel(
-            innerPanel, (int) innerPanel.getPosition().getWidth(),
-            180
+            m_panel, (int) pos.getWidth(), 180
         ) {{ bg.alpha = 0f;}};
 
         drawProductionAndConsumption(inputOutputContainer.getPanel());
 
-        innerPanel.addComponent(inputOutputContainer.getPanel())
+        add(inputOutputContainer.getPanel())
             .inTL(0, lbl.computeTextHeight(txt) + opad);
 
         final BasePanel separator = new BasePanel(
-            innerPanel, panelWidth, 1
+            m_panel, PANEL_W, 1
         ) {{ bg.color = gray;}};
         
         separator.getPos().inTL(0, sliderY - opad);
-        innerPanel.addComponent(separator.getPanel());
+        add(separator.getPanel());
 
-        final SpritePanelWithTp help_button = new SpritePanelWithTp(innerPanel, 20 , 20,
-            WARNING_BUTTON_PATH, null, null
+        final SpritePanelWithTp help_button = new SpritePanelWithTp(m_panel, 20 , 20,
+            WARNING_BUTTON, null, null
         ) {{
             context.ignore = true;
             tooltip.builder = (tp, exp) -> {
@@ -135,14 +131,14 @@ public class AssignWorkersDialog extends DialogPanel {
             glow.additiveSprite = m_sprite;
         }};
 
-        innerPanel.addComponent(help_button.getPanel()).inTR(pad, sliderY + pad);
+        add(help_button.getPanel()).inTR(pad, sliderY + pad);
 
         final UIPanelAPI outputsPanel = settings.createCustom(
-            panelWidth,
-            panelHeight - (sliderY + pad * 2),
+            PANEL_W,
+            PANEL_H - (sliderY + pad * 2),
             null
         );
-        final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(panelWidth, true);
+        final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(PANEL_W, true);
         
         int cumulativeYOffset = pad;
         for (OutputConfig output : IndustryConfigManager.getIndConfig(industry).outputs.values()) {
@@ -153,7 +149,7 @@ public class AssignWorkersDialog extends DialogPanel {
             outputsTp.getPrev().getPosition().inTL(pad, cumulativeYOffset);
 
             final Slider outputSlider = new Slider(
-                innerPanel, null, 0, 100, sliderWidth, sliderHeight
+                m_panel, null, 0, 100, sliderWidth, sliderHeight
             );
             outputSliders.put(output.comID, outputSlider);
 
@@ -184,13 +180,13 @@ public class AssignWorkersDialog extends DialogPanel {
 
         outputsTp.setHeightSoFar(cumulativeYOffset);
         ComponentFactory.addTooltip(outputsTp, 180, true, outputsPanel).inTL(-pad, 0);
-        innerPanel.addComponent(outputsPanel).inTL(opad, sliderY);
+        add(outputsPanel).inTL(opad, sliderY);
     }
 
     public void drawProductionAndConsumption(UIPanelAPI panel) {
         final float iconSize = 32f;
         final int itemsPerRow = 2;
-        final float sectionWidth = ((panelWidth / 2) / itemsPerRow) - opad;
+        final float sectionWidth = ((PANEL_W / 2) / itemsPerRow) - opad;
         final EconomyEngine engine = EconomyEngine.instance();
 
         final FactionAPI faction = market.getFaction();
@@ -217,7 +213,7 @@ public class AssignWorkersDialog extends DialogPanel {
             if (stat.getModifiedValue() > 0f) demandList.put(comID, stat);
         }
 
-        TooltipMakerAPI tp = ComponentFactory.createTooltip((panelWidth / 2) - opad, false);
+        TooltipMakerAPI tp = ComponentFactory.createTooltip((PANEL_W / 2) - opad, false);
         tp.addSectionHeading(importing ? "---" : "Production", color, dark, Alignment.MID, opad);
         final float startY = tp.getHeightSoFar() + pad;
 
@@ -261,9 +257,9 @@ public class AssignWorkersDialog extends DialogPanel {
             x += sectionWidth + hpad;
         }
         tp.setHeightSoFar(y);
-        ComponentFactory.addTooltip(tp, panelHeight, false, panel).inTL(hpad, 0);
+        ComponentFactory.addTooltip(tp, PANEL_H, false, panel).inTL(hpad, 0);
 
-        tp = ComponentFactory.createTooltip((panelWidth / 2) - opad, false);
+        tp = ComponentFactory.createTooltip((PANEL_W / 2) - opad, false);
         tp.addSectionHeading(importing ? "Import" : "Demand", color, dark, Alignment.MID, opad);
 
         // Demand
@@ -309,7 +305,7 @@ public class AssignWorkersDialog extends DialogPanel {
             x += sectionWidth + hpad;
         }
         tp.setHeightSoFar(y);
-        ComponentFactory.addTooltip(tp, panelHeight, false, panel).inTR(hpad, 0);
+        ComponentFactory.addTooltip(tp, PANEL_H, false, panel).inTR(hpad, 0);
 
     }
 

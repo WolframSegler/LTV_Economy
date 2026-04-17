@@ -2,13 +2,13 @@ package wfg.ltv_econ.economy.fleet;
 
 import static wfg.ltv_econ.constants.strings.Income.FACTION_SHIP_PRODUCTION_KEY;
 import static wfg.ltv_econ.constants.strings.Income.getDesc;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -25,8 +25,7 @@ import wfg.native_ui.util.ArrayMap;
 
 public class ShipProductionManager {
     private ShipProductionManager() {}
-    private static final SettingsAPI settings = Global.getSettings();
-
+    
     // TODO move these to economy config
     private static final float CARGO_SAFETY_MULT = 1.5f;
     private static final float FUEL_SAFETY_MULT = 1.2f;
@@ -41,7 +40,7 @@ public class ShipProductionManager {
 
     private static final float SHIP_PROD_CREDIT_COST_MULT = 0.35f;
     private static final float SHIP_PROD_SHIPS_COST_MULT = 1.4f;
-    private static final CommoditySpecAPI shipSpec = Global.getSettings().getCommoditySpec(Commodities.SHIPS);
+    private static final CommoditySpecAPI shipSpec = settings.getCommoditySpec(Commodities.SHIPS);
 
     public static final void planOrders(FactionShipInventory inv) {
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);

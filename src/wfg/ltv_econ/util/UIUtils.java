@@ -1,5 +1,6 @@
 package wfg.ltv_econ.util;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
@@ -22,7 +23,7 @@ public class UIUtils {
         final MutableValue credits = Global.getSector().getPlayerFleet().getCargo().getCredits();
         final String valueStr = Misc.getWithDGS(credits.get()) + Strings.C;
 
-        final LabelAPI label = Global.getSettings().createLabel(
+        final LabelAPI label = settings.createLabel(
             "Player Credits: " + valueStr, font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
@@ -42,7 +43,7 @@ public class UIUtils {
         final long credits = EconomyEngine.instance().getCredits(marketID);
         final String valueStr = Misc.getWithDGS(credits) + Strings.C;
 
-        final LabelAPI label = Global.getSettings().createLabel(
+        final LabelAPI label = settings.createLabel(
             "Colony Credits: " + valueStr, font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
@@ -66,7 +67,7 @@ public class UIUtils {
 
         String text = numInd + " / " + maxInd;
 
-        LabelAPI label = Global.getSettings().createLabel("Industries: " + text, font);
+        LabelAPI label = settings.createLabel("Industries: " + text, font);
         if (font == "small_insignia") {
             label.setAlignment(Alignment.LMID);
         }
@@ -88,6 +89,6 @@ public class UIUtils {
 
     public static final boolean canViewPrices() {
         return Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() ||
-            Global.getSettings().getBoolean("allowPriceViewAtAnyColony");
+            settings.getBoolean("allowPriceViewAtAnyColony");
     }
 }

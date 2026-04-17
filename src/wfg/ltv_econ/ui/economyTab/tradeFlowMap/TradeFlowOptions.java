@@ -13,7 +13,7 @@ import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 
-public class TradeFlowOptions extends CustomPanel<TradeFlowOptions> {
+public class TradeFlowOptions extends CustomPanel {
     private static final int FILTERS_BTN_H = 32;
 
     public TradeFlowOptions(UIPanelAPI parent, int width, int height, UIBuildableAPI content) {

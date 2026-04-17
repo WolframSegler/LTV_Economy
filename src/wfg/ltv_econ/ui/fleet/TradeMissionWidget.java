@@ -2,13 +2,8 @@ package wfg.ltv_econ.ui.fleet;
 
 import java.awt.Color;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
-import com.fs.starfarer.api.impl.campaign.ids.Commodities;
-import com.fs.starfarer.api.impl.campaign.ids.Strings;
-import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -26,6 +21,7 @@ import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.visual.IconValuePair;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.util.NativeUiUtils;
@@ -33,16 +29,11 @@ import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.Sprites.*;
+import static wfg.native_ui.util.Globals.settings;
 
-public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implements UIBuildableAPI, HasTooltip {
-    private static final SettingsAPI settings = Global.getSettings();
-    private static final SpriteAPI SMUGGLING = settings.getSprite("icons", "smuggling");
+public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, HasTooltip {
     private static final SpriteAPI SHIP_OUTLINE = settings.getSprite("icons", "ship_outline");
-    private static final SpriteAPI ARROW = settings.getSprite("ui", "arrow");
-    private static final SpriteAPI CRATES = settings.getSprite("icons", "cargo_crates");
-    private static final SpriteAPI FUEL = settings.getSprite(settings.getCommoditySpec(Commodities.FUEL).getIconName());
-    private static final SpriteAPI CREW = settings.getSprite(settings.getCommoditySpec(Commodities.CREW).getIconName());
-    private static final SpriteAPI COMBAT = settings.getSprite("ui", "icon_kinetic");
     private static final int MAX_DISPLAYED_SHIPS = 20; // TODO add to config
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -257,33 +248,18 @@ public class TradeMissionWidget extends CustomPanel<TradeMissionWidget> implemen
         final int GAP_TOP_4 = GAP_TOP_3 + 42;
         final int perEntryW = (panelW - opad*2) / 4;
         final int iconS = 28;
-        final int iconLS = 32;
 
-        final Base cargoIcon = new Base(m_panel, iconS, iconS, CRATES, UIColors.CARGO_COLOR, null);
-        final Base fuelIcon = new Base(m_panel, iconLS, iconLS, FUEL, null, null);
-        final Base crewIcon = new Base(m_panel, iconS, iconS, CREW, null, null);
-        final Base combatIcon = new Base(m_panel, iconS, iconS, COMBAT, null, null);
-        add(cargoIcon).inTL(opad, GAP_TOP_4);
-        add(fuelIcon).inTL(opad + perEntryW, GAP_TOP_4);
-        add(crewIcon).inTL(opad + perEntryW*2, GAP_TOP_4);
-        add(combatIcon).inTL(opad + perEntryW*3, GAP_TOP_4);
+        final IconValuePair cargoPair = new IconValuePair(m_panel, perEntryW, iconS, CRATES, mission.cargoAmount, true, null);
+        final IconValuePair fuelPair = new IconValuePair(m_panel, perEntryW, iconS, FUEL, mission.fuelAmount, true, null);
+        final IconValuePair crewPair = new IconValuePair(m_panel, perEntryW, iconS, BERTH, mission.crewAmount, true, null);
+        final IconValuePair combatPair = new IconValuePair(m_panel, perEntryW, iconS, COMBAT, mission.combatPowerTarget, true, null);
 
-        final LabelAPI cargoLbl = settings.createLabel(Strings.X + NumFormat.engNotate(mission.cargoAmount), Fonts.DEFAULT_SMALL);
-        final LabelAPI fuelLbl = settings.createLabel(Strings.X + NumFormat.engNotate(mission.fuelAmount), Fonts.DEFAULT_SMALL);
-        final LabelAPI crewLbl = settings.createLabel(Strings.X + NumFormat.engNotate(mission.crewAmount), Fonts.DEFAULT_SMALL);
-        final LabelAPI combatLbl = settings.createLabel(Strings.X + NumFormat.engNotate(mission.combatPowerTarget), Fonts.DEFAULT_SMALL);
-        cargoLbl.setAlignment(Alignment.LMID);
-        fuelLbl.setAlignment(Alignment.LMID);
-        crewLbl.setAlignment(Alignment.LMID);
-        combatLbl.setAlignment(Alignment.LMID);
-        cargoLbl.setColor(highlight);
-        fuelLbl.setColor(highlight);
-        crewLbl.setColor(highlight);
-        combatLbl.setColor(highlight);
-        add(cargoLbl).setSize(perEntryW, iconS).inTL(opad + iconS + pad, GAP_TOP_4);
-        add(fuelLbl).setSize(perEntryW, iconS).inTL(opad + iconS + perEntryW + pad*2, GAP_TOP_4);
-        add(crewLbl).setSize(perEntryW, iconS).inTL(opad + iconS + perEntryW*2 + pad*3, GAP_TOP_4);
-        add(combatLbl).setSize(perEntryW, iconS).inTL(opad + iconS + perEntryW*3 + pad*4, GAP_TOP_4);
+        cargoPair.getIcon().texColor = UIColors.CARGO_COLOR;
+
+        add(cargoPair).inTL(opad, GAP_TOP_4);
+        add(fuelPair).inTL(opad + perEntryW, GAP_TOP_4);
+        add(crewPair).inTL(opad + perEntryW*2, GAP_TOP_4);
+        add(combatPair).inTL(opad + perEntryW*3, GAP_TOP_4);
 
         final long creditsValue = (long) mission.credits.computeEffective(0f);
         final String creditsStr = NumFormat.formatCreditAbs(creditsValue);

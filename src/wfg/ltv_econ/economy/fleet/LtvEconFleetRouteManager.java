@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.fleet;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +12,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignEventListener.FleetDespawnReason;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -56,7 +57,6 @@ import wfg.native_ui.util.ArrayMap;
 
 public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements FleetEventListener {
 	private static final Logger log = Global.getLogger(LtvEconFleetRouteManager.class);
-	private static final SettingsAPI settings = Global.getSettings();
 	private static final String SOURCE_ID = "econ";
 	private static final int maxEconFleets = settings.getInt("maxEconFleets");
 	private static final int maxShipsInFleet = settings.getInt("maxShipsInAIFleet");

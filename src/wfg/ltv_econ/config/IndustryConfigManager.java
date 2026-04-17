@@ -1,10 +1,8 @@
 package wfg.ltv_econ.config;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
-import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
@@ -23,6 +21,7 @@ import wfg.ltv_econ.util.ConfigUtils;
 import java.util.List;
 
 import static wfg.ltv_econ.constants.Mods.LTV_ECON;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,8 +36,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class IndustryConfigManager {
-    private static final SettingsAPI settings = Global.getSettings();
-
     private static final ArrayMap<String, String> IndToBaseInd = new ArrayMap<>(EconomyConstants.industryIDs.size());
 
     public static final float dynamicIndMarketScaleBase = 6f;
@@ -356,10 +353,8 @@ public class IndustryConfigManager {
         final Set<String> scaleWithMarketSize = new HashSet<>(8);
 
         // Make every commodity illegal to observe industry behaviour
-        for (CommoditySpecAPI spec : settings.getAllCommoditySpecs()) {
-            if (spec.isNonEcon()) continue;
-
-            testFaction.makeCommodityIllegal(spec.getId());
+        for (String comID : EconomyConstants.econCommodityIDs) {
+            testFaction.makeCommodityIllegal(comID);
         }
 
         for (IndustrySpecAPI indSpec : settings.getAllIndustrySpecs()) { 
@@ -504,6 +499,10 @@ public class IndustryConfigManager {
             }
         }
     
+        for (String comID : EconomyConstants.econCommodityIDs) {
+            testFaction.makeCommodityLegal(comID);
+        }
+
         ind_config.putAll(dynamic_config);
 
         IndustryConfigLoader.serializeAndWriteToCommon(dynamic_config);

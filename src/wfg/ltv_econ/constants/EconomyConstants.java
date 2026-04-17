@@ -1,16 +1,14 @@
 package wfg.ltv_econ.constants;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.Collections;
 import java.util.List;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 
 public class EconomyConstants {
-    private static final SettingsAPI settings = Global.getSettings();
-
     public static final int MONTH = 30;
     public static final List<String> factionIDs = Collections.unmodifiableList(
         settings.getAllFactionSpecs().stream().map(f -> f.getId()).toList()

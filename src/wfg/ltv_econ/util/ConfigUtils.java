@@ -12,7 +12,7 @@ public class ConfigUtils {
     private static final String HIDDEN_SYSTEM_ID = "ltv_dynamic_ind_test_system";
     private static final String HIDDEN_PLANET_ID = "ltv_dynamic_ind_test_planet";
     
-    public static final String TEST_FACTION_ID = "ltv_test";
+    public static final String TEST_FACTION_ID = "neutral";
     public static final String TEST_MARKET_1_ID = "ltv_dynamic_ind_test_market1";
     public static final String TEST_MARKET_2_ID = "ltv_dynamic_ind_test_market2";
     public static final int TEST_MARKET_SIZE = 6;

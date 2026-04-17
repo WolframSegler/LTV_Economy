@@ -1,9 +1,9 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -31,7 +31,6 @@ import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 
 public class MarketEventsDialog extends DockPanel {
-    private static final SettingsAPI settings = Global.getSettings();
     private static final int ROW_H = 48;
     private final PlayerMarketData data;
 
@@ -71,9 +70,7 @@ public class MarketEventsDialog extends DockPanel {
         ComponentFactory.addTooltip(eventsList, pos.getHeight() - offset - opad, true, m_panel).inTL(opad, offset);
     }
 
-    public class RowPanel extends CustomPanel<RowPanel> 
-        implements HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground
-    {
+    public class RowPanel extends CustomPanel implements HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground {
         public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);

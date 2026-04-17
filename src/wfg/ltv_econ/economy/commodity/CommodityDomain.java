@@ -1,5 +1,6 @@
 package wfg.ltv_econ.economy.commodity;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constants.strings.Income.*;
 
 import java.io.Serializable;
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -51,7 +51,7 @@ public class CommodityDomain implements Serializable {
     public Object readResolve() {
         resizeHistoryArrays();
 
-        spec = Global.getSettings().getCommoditySpec(comID);
+        spec = settings.getCommoditySpec(comID);
 
         return this;
     }

@@ -1,5 +1,6 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
@@ -7,7 +8,6 @@ import java.awt.Color;
 import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -24,7 +24,6 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
-import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.UIContext;
 import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.dialog.DialogPanel;
@@ -48,7 +47,7 @@ public class ColonyInvDialog extends DialogPanel {
     private final MarketAPI m_market;
 
     public ColonyInvDialog(MarketAPI market) {
-        super(Attachments.getScreenPanel(), PANEL_W, PANEL_H, null, null, "Dismiss");
+        super(PANEL_W, PANEL_H, null, null, "Dismiss");
         getButton(0).setShortcutAndAppendToText(Keyboard.KEY_3);
 
         m_market = market;
@@ -62,7 +61,6 @@ public class ColonyInvDialog extends DialogPanel {
     @Override
     public void buildUI() {
         UIContext.setContext(Context.DIALOG);
-        final SettingsAPI settings = Global.getSettings();
         final EconomyEngine engine = EconomyEngine.instance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
         final boolean hasData = data != null;
@@ -79,7 +77,7 @@ public class ColonyInvDialog extends DialogPanel {
         final long colonyCredits = engine.getCredits(m_market.getId());
         final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
-        final TextPanel colonyCreditPanel = new TextPanel(innerPanel, 200, 1) {
+        final TextPanel colonyCreditPanel = new TextPanel(m_panel, 200, 1) {
             @Override  
             public void buildUI() {
                 final String credits = NumFormat.formatCredit(colonyCredits);
@@ -111,9 +109,9 @@ public class ColonyInvDialog extends DialogPanel {
                 };
             }
         };
-        innerPanel.addComponent(colonyCreditPanel.getPanel()).inTL(opad, 10);
+        add(colonyCreditPanel).inTL(opad, 10);
 
-        final TextPanel playerCreditPanel = new TextPanel(innerPanel, 200, 1) {
+        final TextPanel playerCreditPanel = new TextPanel(m_panel, 200, 1) {
             @Override  
             public void buildUI() {
                 final String credits = NumFormat.formatCredit(playerCredits.get());
@@ -141,9 +139,9 @@ public class ColonyInvDialog extends DialogPanel {
                 };
             }
         };
-        innerPanel.addComponent(playerCreditPanel.getPanel()).inTL(opad, 50);
+        add(playerCreditPanel).inTL(opad, 50);
 
-        final TextPanel playerProfitPanel = new TextPanel(innerPanel, 200, 1) {
+        final TextPanel playerProfitPanel = new TextPanel(m_panel, 200, 1) {
             @Override  
             public void buildUI() {
                 if (data == null) return;
@@ -182,45 +180,45 @@ public class ColonyInvDialog extends DialogPanel {
                 };
             }
         };
-        if (data != null) innerPanel.addComponent(playerProfitPanel.getPanel()).inTL(opad, 90);
+        if (data != null) add(playerProfitPanel).inTL(opad, 90);
 
         final LabelAPI withdrawLabel = settings.createLabel(
             "Withdraw:", Fonts.ORBITRON_16
         );
         float labelH = withdrawLabel.computeTextHeight(withdrawLabel.getText());
-        innerPanel.addComponent((UIComponentAPI)withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
+        add((UIComponentAPI)withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
 
         final LabelAPI depositLabel = settings.createLabel(
             "Deposit:", Fonts.ORBITRON_16
         );
         labelH = depositLabel.computeTextHeight(depositLabel.getText());
-        innerPanel.addComponent((UIComponentAPI)depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
+        add((UIComponentAPI)depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
 
         final LabelAPI profitLabel = settings.createLabel(
             "Allocate:", Fonts.ORBITRON_16
         );
         labelH = profitLabel.computeTextHeight(profitLabel.getText());
-        innerPanel.addComponent((UIComponentAPI)profitLabel).inTL(400, 90 + (sliderH - labelH) / 2f);
+        add((UIComponentAPI)profitLabel).inTL(400, 90 + (sliderH - labelH) / 2f);
 
         final Slider withdrawSlider = new Slider(
-            innerPanel, "", 0f, hasData ? data.getWithdrawLimit() : colonyCredits, sliderW, sliderH
+            m_panel, "", 0f, hasData ? data.getWithdrawLimit() : colonyCredits, sliderW, sliderH
         );
         withdrawSlider.setHighlightOnMouseover(true);
         withdrawSlider.setBarColor(withdrawColor);
         withdrawSlider.showValueOnly = true;
         withdrawSlider.customText = () -> Misc.getDGSCredits(withdrawSlider.getProgressInterpolated());
-        innerPanel.addComponent(withdrawSlider.getPanel()).inTL(500, 10);
+        add(withdrawSlider).inTL(500, 10);
 
         final Slider depositSlider = new Slider(
-            innerPanel, "", 0f, playerCredits.get(), sliderW, sliderH
+            m_panel, "", 0f, playerCredits.get(), sliderW, sliderH
         );
         depositSlider.setHighlightOnMouseover(true);
         depositSlider.setBarColor(depositColor);
         depositSlider.showValueOnly = true;
         depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgressInterpolated());
-        innerPanel.addComponent(depositSlider.getPanel()).inTL(500, 50);
+        add(depositSlider).inTL(500, 50);
 
-        final Slider profitSlider = new Slider(innerPanel, "", 0f,
+        final Slider profitSlider = new Slider(m_panel, "", 0f,
             100f * EconConfig.AUTO_TRANSFER_PROFIT_LIMIT, sliderW, sliderH
         );
         if (data != null) {
@@ -228,7 +226,7 @@ public class ColonyInvDialog extends DialogPanel {
             profitSlider.showPercent = true;
             profitSlider.roundBarValue = true;
             profitSlider.setProgress(data.playerProfitRatio * 100);
-            innerPanel.addComponent(profitSlider.getPanel()).inTL(500, 90);
+            add(profitSlider).inTL(500, 90);
         }
 
         final Runnable refreshUI = () -> {
@@ -284,13 +282,13 @@ public class ColonyInvDialog extends DialogPanel {
         };
 
         final Button withdrawBtn = new Button(
-            innerPanel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
+            m_panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
         );
         final Button depositBtn = new Button(
-            innerPanel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, depositRunnable
+            m_panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, depositRunnable
         );
         final Button profitBtn = new Button(
-            innerPanel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, profitRunnable
+            m_panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, profitRunnable
         );
 
         withdrawBtn.setQuickMode(true);
@@ -299,13 +297,13 @@ public class ColonyInvDialog extends DialogPanel {
         withdrawBtn.cutStyle = CutStyle.ALL;
         depositBtn.cutStyle = CutStyle.ALL;
         profitBtn.cutStyle = CutStyle.ALL;
-        innerPanel.addComponent(withdrawBtn.getPanel()).inTL(500 + sliderW + opad, 10 + buttonY);
-        innerPanel.addComponent(depositBtn.getPanel()).inTL(500 + sliderW + opad, 50 + buttonY);
-        if (data != null) innerPanel.addComponent(profitBtn.getPanel()).inTL(500 + sliderW + opad, 90 + buttonY);
+        add(withdrawBtn).inTL(500 + sliderW + opad, 10 + buttonY);
+        add(depositBtn).inTL(500 + sliderW + opad, 50 + buttonY);
+        if (data != null) add(profitBtn).inTL(500 + sliderW + opad, 90 + buttonY);
 
 
         final SortableTable table = new SortableTable(
-            innerPanel,
+            m_panel,
             PANEL_W - 20, PANEL_H - (tableStartY + 10),
             20, 30
         );
@@ -331,7 +329,7 @@ public class ColonyInvDialog extends DialogPanel {
             final CommodityCell cell = engine.getComCell(com.getId(), m_market.getId());
 
             final Base comIcon = new Base(
-                innerPanel, 26, 26, com.getIconName(), null, null
+                m_panel, 26, 26, com.getIconName(), null, null
             );
             
             final long stored = cell.getRoundedStored();
@@ -363,7 +361,7 @@ public class ColonyInvDialog extends DialogPanel {
             );
         }
 
-        innerPanel.addComponent(table.getPanel()).inTL(10, tableStartY);
+        add(table).inTL(10, tableStartY);
 
         table.sortRows(2);
     }

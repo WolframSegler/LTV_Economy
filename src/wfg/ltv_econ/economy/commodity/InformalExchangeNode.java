@@ -1,6 +1,7 @@
 package wfg.ltv_econ.economy.commodity;
 
-import com.fs.starfarer.api.Global;
+import static wfg.native_ui.util.Globals.settings;
+
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 
 import wfg.ltv_econ.config.EconConfig;
@@ -26,7 +27,7 @@ public class InformalExchangeNode {
     }
 
     public Object readResolve() {
-        spec = Global.getSettings().getCommoditySpec(comID);
+        spec = settings.getCommoditySpec(comID);
 
         return this;
     }

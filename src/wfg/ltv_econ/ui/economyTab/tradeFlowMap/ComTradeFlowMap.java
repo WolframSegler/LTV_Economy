@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.Set;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.awt.Color;
 
@@ -15,8 +16,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
+import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -45,10 +47,9 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.RenderUtils;
 
-public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
+public class ComTradeFlowMap extends CustomPanel implements
     HasOutline, UIBuildableAPI, HasTooltip
 {
-    private static final SettingsAPI settings = Global.getSettings();
     private static final Random random = new Random();
 
     private static final SpriteAPI NODE_SPRITE = settings.getSprite("map", "star");
@@ -719,6 +720,8 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
             final var entries = new ArrayList<>(data.factionAmounts.entrySet());
             entries.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
+            final SectorAPI sector = Global.getSector();
+
             tp.addPara("Trade Route", base, 0f);
 
             tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
@@ -728,7 +731,7 @@ public class ComTradeFlowMap extends CustomPanel<ComTradeFlowMap> implements
                 final double value = entry.getValue();
                 if (Math.abs(value) < 0.01f) continue;
 
-                final FactionSpecAPI faction = entry.getKey();
+                final FactionAPI faction = sector.getFaction(entry.getKey().getId());
                 tp.addRow(
                     faction.getBaseUIColor(),
                     faction.getDisplayName(),

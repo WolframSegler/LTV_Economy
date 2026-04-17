@@ -2,7 +2,6 @@ package wfg.ltv_econ.ui.reusable;
 
 import java.awt.Color;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -20,6 +19,7 @@ import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.visual.SpritePanel;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class ComIconPanel extends SpritePanel<ComIconPanel> implements
@@ -49,7 +49,7 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements
         tooltip.builder = (tooltip, expanded) -> {
             if (m_com == null) return;
 
-            final String comDesc = Global.getSettings().getDescription(
+            final String comDesc = settings.getDescription(
                 m_com.getId(), Type.RESOURCE).getText1();
 
             tooltip.setParaFont(Fonts.ORBITRON_12);

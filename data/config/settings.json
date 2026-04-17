@@ -32,7 +32,8 @@
       "stockpiles_button": "graphics/icons/buttons/stockpiles.png",
       "smuggling": "graphics/icons/intel/smuggling.png",
       "ship_outline": "graphics/icons/intel/freighter_outline.png",
-      "cargo_crates": "graphics/icons/industry/cargo_crates.png"
+      "cargo_crates": "graphics/icons/industry/cargo_crates.png",
+      "berth": "graphics/icons/intel/berth.png"
     },
     "map": {
       "star": "graphics/map/star.png",

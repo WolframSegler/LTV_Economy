@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -35,8 +35,6 @@ import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 
 public class IncomeBreakdownDialog extends DockPanel {
-    private static final SettingsAPI settings = Global.getSettings();
-
     private static final int WIDTH = 440;
     private static final int GAP = 100;
     private static final int I_WIDTH = WIDTH - hpad * 3;
@@ -263,14 +261,14 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         tp.addSectionHeading("Policy Expenses", base, dark, Alignment.MID, opad);
 
-        tp.addPara("Total Costs: %s", opad, highlight, policyCostStr);
+        tp.addPara("Total Costs: %s", opad, negative, policyCostStr);
 
         for (String key : policyKeys) {
             final long cost = lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key);
             if (cost == 0l) continue;
 
             final String desc = lastMonth ? ledger.getDescLastMonth(key) : ledger.getDescCurrentMonth(key);
-            tp.addPara(desc + ": %s", opad, negative, NumFormat.formatCreditAbs(cost));
+            tp.addPara("  - " + desc + ": %s", opad, negative, NumFormat.formatCreditAbs(cost));
         }
 
         tp.addSectionHeading("Other Transactions", base, dark, Alignment.MID, opad);

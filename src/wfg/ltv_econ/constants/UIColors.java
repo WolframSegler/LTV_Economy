@@ -20,4 +20,7 @@ public class UIColors {
 
     public static final Color SLIDER_BASE = new Color(20, 125, 200);
     public static final Color CARGO_COLOR = new Color(255, 191, 77);
+
+    public static final Color REMOVE_COLOR = new Color(153, 17, 33);
+    public static final Color ADD_COLOR = new Color(27, 141, 61);
 }

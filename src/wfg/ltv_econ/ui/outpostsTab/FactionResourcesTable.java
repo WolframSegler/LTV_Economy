@@ -2,9 +2,9 @@ package wfg.ltv_econ.ui.outpostsTab;
 
 import java.awt.Color;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -24,7 +24,7 @@ import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
 
-public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> implements HasBackground {
+public class FactionResourcesTable extends CustomPanel implements HasBackground {
     protected final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
     public FactionResourcesTable(UIPanelAPI parent, int height) {
@@ -93,7 +93,7 @@ public class FactionResourcesTable extends CustomPanel<ColonyPopulationTable> im
                 );
             }
         } else {
-            final LabelAPI lbl = Global.getSettings().createLabel("No colonies", Fonts.DEFAULT_SMALL);
+            final LabelAPI lbl = settings.createLabel("No colonies", Fonts.DEFAULT_SMALL);
             lbl.setColor(base);
             table.add(lbl).inMid();
         }

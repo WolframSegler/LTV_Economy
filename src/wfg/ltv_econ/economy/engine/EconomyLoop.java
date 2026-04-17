@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.engine;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,7 +14,6 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -48,7 +49,6 @@ import wfg.native_ui.util.ArrayMap;
 import static wfg.ltv_econ.constants.strings.Income.*;
 
 public class EconomyLoop {
-    private static final SettingsAPI settings = Global.getSettings();
     private static final Logger log = Global.getLogger(EconomyLoop.class);
     public static final String KEY = "::";
 
