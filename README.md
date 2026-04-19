@@ -72,6 +72,10 @@ behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons
 
 <a href="https://www.flaticon.com/free-icons/dormitory" title="dormitory icons">Dormitory icons created by Satawat Anukul - Flaticon</a>
 
+<a target="_blank" href="https://icons8.com/icon/124202/test-passed">Checklist</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+
+<a target="_blank" href="https://icons8.com/icon/tLYYFUAkhhRa/stopwatch">Stopwatch</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+
 <br>
 
 ## AI Generated Assets

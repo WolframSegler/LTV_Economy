@@ -20,7 +20,7 @@ public class HealthPair extends IconValuePairTp {
 
     public HealthPair(UIPanelAPI parent, int w, int h, PlayerMarketData data, Color color, String font) {
         super(parent, w, h, HEALTH_ICON, data.getHealth(), false, color, font);
-        final LabelAPI lbl = getValueLbl();
+        final LabelAPI lbl = label();
         lbl.setHighlightOnMouseover(true);
         lbl.setAlignment(Alignment.MID);
         tooltip.builder = (tp, exp) -> {

@@ -38,8 +38,6 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.UIContext;
-import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.panel.CustomPanel;
@@ -308,7 +306,6 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
         }
 
 		final CallbackRunnable<Button> buildBtnRunnable = (btn) -> {
-			UIContext.setContext(Context.DIALOG);
 
 			final Object listener = new ListenerFactory.DialogDismissedListener() {
 				@Override
@@ -336,8 +333,6 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 		buildButton.cutStyle = CutStyle.TL_BR;
 		buildButton.setLabelColor(base);
 		buildButton.setShortcutAndAppendToText(Keyboard.KEY_A);
-		buildButton.context.ignore = false;
-		buildButton.context.target = Context.NONE;
 		
 		add(buildButton).inBL(0, BUTTON_SECTION_HEIGHT);
 		add(playerCreditLblPanel).inBL(buildBtnWidth + 40, BUTTON_SECTION_HEIGHT + 18);
@@ -408,8 +403,6 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 	}
 
 	public final void dialogDismissed(Object... args) {
-		UIContext.setContext(Context.NONE);
-
 		if (((int) args[1]) != 0) return; // 0 means confirm
 		final IndustryPickerDialog buildDialog = (IndustryPickerDialog) args[0];
 		final Object selectedObj = RolfLectionUtil.getMethodAndInvokeDirectly(

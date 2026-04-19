@@ -18,7 +18,6 @@ import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.OutlineComp;
-import wfg.native_ui.ui.component.UIContextComp;
 import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
@@ -31,7 +30,6 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
 {
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
-    public final UIContextComp context = comp().get(NativeComponents.UI_CONTEXT);
 
     public static final int STANDARD_WIDTH = 264;
     public String m_headerTxt;
@@ -62,8 +60,6 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
         m_market = market;
         m_headerTxt = headerTxt;
         this.rowsIgnoreUIState = rowsIgnoreUIState;
-
-        context.ignore = true;
 
         bg.alpha = 0.65f;
     }

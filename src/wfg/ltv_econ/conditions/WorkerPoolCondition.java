@@ -13,7 +13,7 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.NumFormat;
 import static wfg.native_ui.util.UIConstants.*;
 

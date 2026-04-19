@@ -95,6 +95,7 @@ public abstract class AbstractManagementPanel extends CustomPanel implements UIB
                 m_panel, NAV_BUTTON_W, NAV_BUTTON_H, def.label,
                 Fonts.ORBITRON_12, runnable
             );
+            button.setShortcutAndAppendToText(def.shortcut);
             button.cutStyle = CutStyle.TL_BR;
             button.bgAlpha = 1f;
             navButtons.add(button);
@@ -112,10 +113,12 @@ public abstract class AbstractManagementPanel extends CustomPanel implements UIB
     protected static class NavButtonDef {
         public final String label;
         public final Runnable contentSupplier;
+        public final int shortcut;
 
-        public NavButtonDef(String label, Runnable contentSupplier) {
+        public NavButtonDef(String label, int shortcut, Runnable contentSupplier) {
             this.label = label;
             this.contentSupplier = contentSupplier;
+            this.shortcut = shortcut;
         }
     }
 }

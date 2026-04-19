@@ -254,7 +254,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
         final IconValuePair crewPair = new IconValuePair(m_panel, perEntryW, iconS, BERTH, mission.crewAmount, true, null);
         final IconValuePair combatPair = new IconValuePair(m_panel, perEntryW, iconS, COMBAT, mission.combatPowerTarget, true, null);
 
-        cargoPair.getIcon().texColor = UIColors.CARGO_COLOR;
+        cargoPair.icon().texColor = UIColors.CARGO_COLOR;
 
         add(cargoPair).inTL(opad, GAP_TOP_4);
         add(fuelPair).inTL(opad + perEntryW, GAP_TOP_4);

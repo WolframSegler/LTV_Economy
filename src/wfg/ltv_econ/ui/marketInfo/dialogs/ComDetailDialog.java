@@ -39,8 +39,6 @@ import wfg.ltv_econ.ui.reusable.CommodityInfoBar;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.UIContext;
-import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.component.InputSnapshotComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
@@ -133,8 +131,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
     @Override
     public void buildUI() {
-        UIContext.setContext(Context.DIALOG);
-
         createSections();
 
         // Footer
@@ -180,8 +176,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             }
 
             {
-                context.target = Context.DIALOG;
-
                 tooltip.width = getPos().getWidth() * 0.7f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
@@ -305,8 +299,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 }
 
                 {
-                    context.target = Context.DIALOG;
-
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         final int discount = (int)((1f - EconConfig.FACTION_EXCHANGE_MULT)*100);
@@ -351,8 +343,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 }
 
                 {
-                    context.target = Context.DIALOG;
-
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
@@ -412,8 +402,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 }
 
                 {
-                    context.target = Context.DIALOG;
-
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
@@ -452,8 +440,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 }
 
                 {
-                    context.target = Context.DIALOG;
-
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         final String marketOwner = m_faction.getId().equals(Factions.PLAYER) ?
@@ -494,8 +480,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 }
 
                 {
-                    context.target = Context.DIALOG;
-
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
@@ -527,8 +511,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 }
 
                 {
-                    context.target = Context.DIALOG;
-
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         String marketOwner = m_faction.getId().equals(Factions.PLAYER) ?
@@ -896,11 +878,5 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 1, tp, y, 26
             );
         };
-    }
-
-    public void dismiss(int option) {
-        super.dismiss(option);
-
-        UIContext.setContext(Context.NONE);
     }
 }

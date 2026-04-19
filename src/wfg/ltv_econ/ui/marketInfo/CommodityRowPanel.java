@@ -23,7 +23,6 @@ import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.component.UIContextComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
@@ -50,7 +49,6 @@ public class CommodityRowPanel extends CustomPanel implements
 
     public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
     public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
-    public final UIContextComp context = comp().get(NativeComponents.UI_CONTEXT);
     public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
     public final InteractionComp<CommodityRowPanel> interaction = comp().get(NativeComponents.INTERACTION);
 
@@ -130,8 +128,6 @@ public class CommodityRowPanel extends CustomPanel implements
         tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
         tooltip.expandTxt = "%s show legend";
         tooltip.unexpandTxt = "%s hide";
-
-        context.ignore = ignoreUIContext;
 
         buildUI();
     }

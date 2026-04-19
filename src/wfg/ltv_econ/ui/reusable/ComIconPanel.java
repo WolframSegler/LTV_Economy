@@ -37,8 +37,6 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements
         super(parent, width, height, spec.getIconName(), color, fillColor);
         m_faction = faction;
         m_com = spec;
-        
-        context.ignore = true;
 
         glow.type = GlowType.ADDITIVE;
         glow.color = Color.WHITE;

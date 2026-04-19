@@ -6,7 +6,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.intel.market.events.LocalizedGangSkirmishesEvent;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 
 import static wfg.native_ui.util.UIConstants.*;
 

@@ -1,4 +1,4 @@
-package wfg.ltv_econ.ui.economyTab;
+package wfg.ltv_econ.ui.factionTab;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
@@ -9,6 +9,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
@@ -28,6 +29,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
 
         final int SECTION_I = opad;
         final int SECTION_II = SECTION_I + 420;
+        final int SECTION_III = SECTION_II + 50;
 
         { // SECTION I
         final LabelAPI tradeDiploLbl = settings.createLabel(
@@ -64,6 +66,26 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         );
         redistributeBtn.setChecked(factionSettings.redistributeCredits);
         add(redistributeBtn).inTL(opad + pad, SECTION_II + lblW + pad);
+        }
+
+        { // SECTION III
+        final LabelAPI shipPoliciesLbl = settings.createLabel(
+            "Ship Hangar", Fonts.INSIGNIA_VERY_LARGE);
+        add(shipPoliciesLbl).inTL(opad, SECTION_III);
+        final int lblW = (int) shipPoliciesLbl.getPosition().getHeight();
+
+        final CallbackRunnable<Button> automaticProdRun = (btn) -> {
+            btn.setChecked(!btn.isChecked());
+            factionSettings.automaticShipProductionForFaction = btn.isChecked();
+        };
+
+        final Button automaticProdBtn = ComponentFactory.createCheckboxWithText(
+            m_panel, 22,
+            "Auto-manage ship construction to meet trade demands",
+            Fonts.DEFAULT_SMALL, automaticProdRun, base, pad
+        );
+        automaticProdBtn.setChecked(factionSettings.automaticShipProductionForFaction);
+        add(automaticProdBtn).inTL(opad + pad, SECTION_III + lblW + pad);
         }
     }
 }

@@ -35,8 +35,6 @@ import wfg.ltv_econ.ui.marketInfo.population.ConsciousnessPair;
 import wfg.ltv_econ.ui.marketInfo.population.HappinessPair;
 import wfg.ltv_econ.ui.marketInfo.population.HealthPair;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.UIContext;
-import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.dialog.DialogPanel;
@@ -89,7 +87,6 @@ public class ManagePopulationDialog extends DialogPanel {
 
     @Override
     public void buildUI() {
-        UIContext.setContext(Context.DIALOG);
         final EconomyEngine engine = EconomyEngine.instance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
@@ -428,7 +425,6 @@ public class ManagePopulationDialog extends DialogPanel {
             }
 
             {
-                context.target = Context.DIALOG;
                 outline.color = Color.ORANGE;
                 outline.enabled = policy.isActive();
 
@@ -565,12 +561,5 @@ public class ManagePopulationDialog extends DialogPanel {
         exploitationSlider.setBarColor(NativeUiUtils.lerpColor(
             positiveColor, negativeColor, sliderValue/(float)(LaborConfig.MAX_RoSV - 1)
         ));
-    }
-
-    @Override
-    public void dismiss(int option) {
-        super.dismiss(option);
-
-        UIContext.setContext(Context.NONE);
     }
 }

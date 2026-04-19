@@ -8,6 +8,7 @@ import static wfg.native_ui.util.Globals.settings;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -16,6 +17,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
+import wfg.ltv_econ.serializable.StaticData;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.core.UIBuildableAPI;
@@ -32,12 +34,8 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
 
     private final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
-    private final ShipInventoryPanel mainPanel;
-
-    public ShipInventoryNavbar(UIPanelAPI parent, int w, int h, ShipInventoryPanel mainPanel) {
+    public ShipInventoryNavbar(UIPanelAPI parent, int w, int h) {
         super(parent, w, h);
-
-        this.mainPanel = mainPanel;
 
         bg.alpha = 0.6f;
         
@@ -53,7 +51,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final int flagH = h - hpad*2;
         final int flagW = (int) (flagH * flagRatio);
 
-        final FactionShipInventory inv = mainPanel.inv;
+        final FactionShipInventory inv = StaticData.inv;
         final FactionSpecAPI factionSpec = settings.getFactionSpec(inv.factionID);
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
 
@@ -62,11 +60,12 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
 
         final int GAP_LEFT_1 = flagW + opad*2 + pad;
 
-        final LabelAPI title = settings.createLabel("Quartermaster Report", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel("Faction Hangar", Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(GAP_LEFT_1, hpad);
 
+        final MarketAPI market = inv.getCapital();
         final String name = faction.getDisplayName();
-        final String capital = inv.getCapital().getName();
+        final String capital = market == null ? "None" : market.getName();
         final LabelAPI subtitle = settings.createLabel(name + "  |  Capital in " + capital, Fonts.DEFAULT_SMALL);
         subtitle.setHighlightColor(factionSpec.getBaseUIColor());
         subtitle.setHighlight(name, capital);
@@ -104,8 +103,8 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         add(operatorPair).inTL(GAP_LEFT_2 + perPairW, GAP_TOP_2);
         add(wagePair).inTL(GAP_LEFT_2 + perPairW*2, GAP_TOP_2);
 
-        cargoPair.getIcon().texColor = UIColors.CARGO_COLOR;
-        wagePair.getValueLbl().setText(wagePair.getValueLbl().getText() + Strings.C);
+        cargoPair.icon().texColor = UIColors.CARGO_COLOR;
+        wagePair.label().setText(wagePair.label().getText() + Strings.C);
 
         cargoPair.tooltip.builder = (tp, expanded) -> {
             tp.addTitle("Cargo Capacity", base);

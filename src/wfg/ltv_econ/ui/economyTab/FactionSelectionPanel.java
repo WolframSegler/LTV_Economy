@@ -29,29 +29,25 @@ import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.core.UIElementFlags.HasUIContext;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.component.UIContextComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 
 public class FactionSelectionPanel extends CustomPanel implements
-    HasOutline, HasBackground, HasUIContext, UIBuildableAPI
+    HasOutline, HasBackground, UIBuildableAPI
 {
     public static final SpriteAPI restrictedPath = settings.getSprite("ui", "restricted");
     private static final int ROW_H = 32;
 
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
-    public final UIContextComp context = comp().get(NativeComponents.UI_CONTEXT);
 
     public FactionSelectionPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
         outline.type = OutlineType.TEX_THIN;
         outline.color = dark;
-        context.ignore = true;
 
         buildUI();
     }

@@ -97,7 +97,7 @@ public class ShipTypeData implements Serializable {
         return (idle * EconConfig.IDLE_CREW_WAGE_MULT + inUse) * getCrewPerShip() * EconConfig.CREW_WAGE_PER_MONTH;
     }
 
-    public final float getCombatPower() {
+    public final float getCombatPower() { // TODO also add ship flux, armor, weapon mounts etc
         final float mult = getCombatMult(spec.getDesignation())
             + spec.getFighterBays() * 0.04f;
         return spec.getFleetPoints() * mult;

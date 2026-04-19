@@ -4,6 +4,7 @@ import static wfg.ltv_econ.constants.strings.Income.FACTION_SHIP_PRODUCTION_KEY;
 import static wfg.ltv_econ.constants.strings.Income.getDesc;
 import static wfg.native_ui.util.Globals.settings;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 public class ShipProductionManager {
@@ -38,15 +39,17 @@ public class ShipProductionManager {
     private static final float TRADE_COMBAT_SAFETY_MULT = 1.2f;
     private static final float MIN_COMBAT_POWER = 100f;
 
-    private static final float SHIP_PROD_CREDIT_COST_MULT = 0.35f;
+    private static final float SHIP_PROD_CREDIT_COST_MULT = 0.35f; // not the cost of resources, but labor that goes into producing it.
     private static final float SHIP_PROD_SHIPS_COST_MULT = 1.4f;
     private static final CommoditySpecAPI shipSpec = settings.getCommoditySpec(Commodities.SHIPS);
 
     public static final void planOrders(FactionShipInventory inv) {
-        final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
+        final String factionID = inv.factionID;
+        final FactionAPI faction = Global.getSector().getFaction(factionID);
         final List<PlannedOrder> plannedOrders = inv.plannedOrders;
         final List<ShipProductionOrder> activeQueue = inv.activeQueue;
-        final List<TradeMission> missions = EconomyEngine.instance().getActiveMissions();
+        final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
+        missions.removeIf(m -> !m.src.getFactionId().equals(factionID));
 
         float deficitCargo = computeDesiredCargo(missions, faction) - inv.getTotalCargoCapacity();
         float deficitFuel = computeDesiredFuel(missions, faction) - inv.getTotalFuelCapacity();
@@ -123,8 +126,10 @@ public class ShipProductionManager {
         final int days = getBaseDays(spec);
         final long credits = (long) (spec.getBaseValue() * SHIP_PROD_CREDIT_COST_MULT);
         final float shipsCost = (spec.getBaseValue() / shipSpec.getBasePrice()) * SHIP_PROD_SHIPS_COST_MULT;
+        final float crewCost = ShipTypeData.getCrewPerShip(spec);
         
         commodities.put(Commodities.SHIPS, shipsCost);
+        commodities.put(Commodities.CREW, crewCost);
 
         return new PlannedOrder(spec.getHullId(), credits, commodities, days);
     }

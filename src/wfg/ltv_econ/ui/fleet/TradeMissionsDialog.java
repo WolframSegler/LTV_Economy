@@ -14,7 +14,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;

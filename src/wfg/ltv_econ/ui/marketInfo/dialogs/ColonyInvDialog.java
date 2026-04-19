@@ -24,8 +24,6 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
-import wfg.native_ui.ui.UIContext;
-import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
@@ -60,7 +58,6 @@ public class ColonyInvDialog extends DialogPanel {
 
     @Override
     public void buildUI() {
-        UIContext.setContext(Context.DIALOG);
         final EconomyEngine engine = EconomyEngine.instance();
         final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
         final boolean hasData = data != null;
@@ -93,7 +90,6 @@ public class ColonyInvDialog extends DialogPanel {
             }
 
             {
-                context.ignore = true;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows the colony's current credit reserves. These funds cover operating costs, import purchases, and upkeep for industries and structures. " +
@@ -127,7 +123,6 @@ public class ColonyInvDialog extends DialogPanel {
             }
 
             {
-                context.ignore = true;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
                         "Shows your personal credits for transferring funds to or from the colony's reserves.",
@@ -158,8 +153,6 @@ public class ColonyInvDialog extends DialogPanel {
             }
             
             {
-                context.ignore = true;
-
                 tooltip.enabled = data == null;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
@@ -370,7 +363,6 @@ public class ColonyInvDialog extends DialogPanel {
     public void dismiss(int option) {
         super.dismiss(option);
 
-        UIContext.setContext(Context.NONE);
         LtvIndustryListPanel.refreshPanel();
     }
 }

@@ -13,10 +13,13 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
+import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
 
 public class FactionShipInventory implements Serializable {
@@ -31,6 +34,8 @@ public class FactionShipInventory implements Serializable {
 
     public final String factionID;
     String capitalID;
+    int assemblyLines = MAX_SIMULTANEOUS_SHIP_PROD;
+
     transient EconomyAPI econ;
 
     public FactionShipInventory(String factionID) {
@@ -203,11 +208,23 @@ public class FactionShipInventory implements Serializable {
         return Collections.unmodifiableList(plannedOrders);
     }
 
+    public final void clearActiveOrders() {
+        activeQueue.clear();
+    }
+
+    public final void clearPlannedOrders() {
+        plannedOrders.clear();
+    }
+
+    public final int getAssemblyLines() {
+        return assemblyLines;
+    }
+
     public final MarketAPI getCapital() {
         final MarketAPI capital;
         if (capitalID == null || econ.getMarket(capitalID) == null) {
             capital = computeCapital();
-            setCapital(capital.getId());
+            if (capital != null) setCapital(capital.getId());
         } else {
             capital = econ.getMarket(capitalID);
         }
@@ -219,7 +236,7 @@ public class FactionShipInventory implements Serializable {
         activeQueue.add(new ShipProductionOrder(hullId, constructionDays));
     }
 
-    public final ShipProductionOrder cancelActiveOrder(int index) {
+    public final ShipProductionOrder removeActiveOrder(int index) {
         if (index < 0 || index >= activeQueue.size()) return null;
         return activeQueue.remove(index);
     }
@@ -242,8 +259,10 @@ public class FactionShipInventory implements Serializable {
     }
 
     public final void update() {
-        final String capitalID = getCapital().getId();
-        final CommodityCell suppliesCell = EconomyEngine.instance().getComCell(Commodities.SUPPLIES, capitalID);
+        final MarketAPI capital = getCapital();
+        if (capital == null) return;
+
+        final CommodityCell suppliesCell = EconomyEngine.instance().getComCell(Commodities.SUPPLIES, capital.getId());
 
         suppliesCell.getConsumptionStat().modifyFlat(DAILY_SUPPLIES_DEMAND_KEY, getTotalDailyMaintenance(), DAILY_SUPPLIES_DEMAND_DESC);
         suppliesCell.getTargetQuantumStat().modifyFlat(DAILY_SUPPLIES_DEMAND_KEY, getTotalDailyMaintenance(), DAILY_SUPPLIES_DEMAND_DESC);
@@ -252,7 +271,14 @@ public class FactionShipInventory implements Serializable {
     public final void advance() {
         advanceProduction(1);
 
-        ShipProductionManager.planOrders(this);
+        if (factionID.equals(Factions.PLAYER)) {
+            final PlayerFactionSettings factionSettings = LtvEconSaveData.instance().playerFactionSettings;
+            if (factionSettings.automaticShipProductionForFaction) {
+                ShipProductionManager.planOrders(this);
+            }
+        } else {
+            ShipProductionManager.planOrders(this);
+        }
 
         ShipProductionManager.tryStartPlannedOrders(this, capitalID);
     }
@@ -265,8 +291,8 @@ public class FactionShipInventory implements Serializable {
 
     public final void advanceProduction(int days) {
         if (activeQueue.isEmpty()) return;
-        final int activeCount = Math.min(MAX_SIMULTANEOUS_SHIP_PROD, activeQueue.size());
-        final List<Integer> completedIndices = new ArrayList<>(MAX_SIMULTANEOUS_SHIP_PROD);
+        final int activeCount = Math.min(assemblyLines, activeQueue.size());
+        final List<Integer> completedIndices = new ArrayList<>(assemblyLines);
 
         for (int i = 0; i < activeCount; i++) {
             final ShipProductionOrder order = activeQueue.get(i);
@@ -293,29 +319,38 @@ public class FactionShipInventory implements Serializable {
         capitalID = marketID;
     } 
 
-    private final MarketAPI computeCapital() {
+    private MarketAPI computeCapital() {
         MarketAPI best = null;
         for (MarketAPI market : econ.getMarketsCopy()) {
             if (!market.getFactionId().equals(factionID)) continue;
 
             if (best == null) {
                 best = market;
+                continue;
+            }
 
-            } else if (market.getSize() > best.getSize()) {
+            if (market.getSize() > best.getSize()) {
                 best = market;
+            } else if (market.getSize() < best.getSize()) {
+                continue;
+            }
 
-            } else if (market.getShipQualityFactor() > best.getShipQualityFactor()) {
+            if (market.getShipQualityFactor() > best.getShipQualityFactor()) {
                 best = market;
+            } else if (market.getShipQualityFactor() < best.getShipQualityFactor()) {
+                continue;
+            }
 
-            } else if (market.getHazardValue() < best.getHazardValue()) {
+            if (market.getHazardValue() < best.getHazardValue()) {
                 best = market;
+            } else if (market.getHazardValue() > best.getHazardValue()) {
+                continue;
+            }
 
-            } else if (market.getDaysInExistence() > best.getDaysInExistence()) {
+            if (market.getDaysInExistence() > best.getDaysInExistence()) {
                 best = market;
-
             }
         }
-
         return best;
     }
 }

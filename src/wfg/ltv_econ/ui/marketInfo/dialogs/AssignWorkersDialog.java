@@ -35,8 +35,6 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.UIContext;
-import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.panel.BasePanel;
@@ -76,15 +74,14 @@ public class AssignWorkersDialog extends DialogPanel {
         reg.setData(previewData);
         initialFreeWorkerRatio = WorkerPoolCondition.getPoolCondition(market).getFreeWorkerRatio();
 
-        holo.borderAlpha = 0.8f;
+        holo.borderAlpha = 0.7f;
+        backgroundDimAmount = 0.2f;
 
         buildUI();
     }
 
     @Override
     public void buildUI() {
-        UIContext.setContext(Context.DIALOG);
-
         final int sliderHeight = 32;
         final int sliderWidth = 380;
         final int sliderY = 225;
@@ -115,7 +112,6 @@ public class AssignWorkersDialog extends DialogPanel {
         final SpritePanelWithTp help_button = new SpritePanelWithTp(m_panel, 20 , 20,
             WARNING_BUTTON, null, null
         ) {{
-            context.ignore = true;
             tooltip.builder = (tp, exp) -> {
                 tp.addPara(
                     "Adjust each output's slider to allocate a portion of the market's total workforce. " +
@@ -354,7 +350,6 @@ public class AssignWorkersDialog extends DialogPanel {
         if (option == 1) reg.setData(data);
 
         market.reapplyConditions();
-        UIContext.setContext(Context.NONE);
         LtvIndustryListPanel.refreshPanel();
     }
 }

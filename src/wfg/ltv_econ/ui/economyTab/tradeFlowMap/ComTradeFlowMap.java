@@ -32,7 +32,7 @@ import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.ui.fleet.TradeFilters;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;

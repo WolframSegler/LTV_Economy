@@ -1,81 +1,64 @@
 package wfg.ltv_econ.ui.factionTab;
 
-import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
-import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipTypeData;
+import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.fleet.InventoryShipWidget;
 import wfg.ltv_econ.ui.fleet.ShipFilters;
-import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.table.GridTable;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class FactionShipGrid extends CustomPanel implements UIBuildableAPI {
+public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget> {
     
-    private final FactionShipInventory inv;
+    private final UIBuildableAPI navbar;
 
-    public FactionShipGrid(UIPanelAPI parent, int w, int h, FactionShipInventory inv) {
-        super(parent, w, h);
+    public FactionShipGrid(UIPanelAPI parent, int w, int h, UIBuildableAPI navbar) {
+        super(parent, w, h, InventoryShipWidget.WIDTH, InventoryShipWidget.HEIGHT, opad*2);
+        this.navbar = navbar;
 
-        this.inv = inv;
-
+        uniformOuterGap = true;
+        justifyGrid = true;
+        
         buildUI();
     }
 
-    @Override
-    public void buildUI() {
-        clearChildren();
-
-        final List<ShipTypeData> ships = getFilteredAndSortedShips();
-        if (ships.isEmpty()) {
-            showEmptyState();
-            return;
+    protected final List<ShipTypeData> getDataList() {
+        final List<ShipTypeData> list = new ArrayList<>(StaticData.inv.getShips().values());
+        if (!DebugFlags.COLONY_DEBUG) {
+            list.removeIf(d -> d.getOwned() < 1);
         }
-
-        final int cardW = InventoryShipWidget.WIDTH;
-        final int cardH = InventoryShipWidget.HEIGHT;
-        final int gap = pad * 2;
-
-        final int availableWidth = (int)pos.getWidth() - opad * 2;
-        final int cols = Math.max(1, (availableWidth + gap) / (cardW + gap));
-
-        final TooltipMakerAPI container = ComponentFactory.createTooltip(pos.getWidth(), true);
-
-        float contH = 0f;
-        for (int i = 0; i < ships.size(); i++) {
-            final InventoryShipWidget widget = new InventoryShipWidget(container, ships.get(i));
-
-            final int row = i / cols;
-            final int col = i % cols;
-            final int x = opad + col * (cardW + gap);
-            final int y = opad + row * (cardH + gap);
-
-            container.addCustom(widget.getPanel(), 0f).getPosition().inTL(x, y);
-            contH = y + cardH;
-        }
-
-        container.setHeightSoFar(contH);
-        ComponentFactory.addTooltip(container, pos.getHeight(), true, m_panel).inBL(0f, 0f);
-    }
-
-    private final List<ShipTypeData> getFilteredAndSortedShips() {
-        final List<ShipTypeData> list = new ArrayList<>(inv.getShips().values());
-
         list.removeIf(this::shouldFilterOut);
         list.sort(this::compareShips);
 
         return list;
+    }
+
+    protected InventoryShipWidget createWidget(ShipTypeData item, int index) {
+        final InventoryShipWidget widget = new InventoryShipWidget(container, item, navbar);
+
+        widget.tooltip.positioner = (tp, exp) -> {
+            NativeUiUtils.anchorPanel(tp, widget.getPanel(), (calculateColumns() > 2 ?
+                AnchorType.LeftTop : AnchorType.RightTop), opad
+            );
+        };
+
+        return widget;
+    }
+
+    protected void onWidgetClicked(InventoryShipWidget source) {}
+
+    protected String getEmptyMessage() {
+        return "No match.";
     }
 
     private final boolean shouldFilterOut(ShipTypeData data) {
@@ -108,12 +91,5 @@ public class FactionShipGrid extends CustomPanel implements UIBuildableAPI {
             case COMBAT -> Float.compare(b.getCombatPower(), a.getCombatPower());
             case COUNT -> Integer.compare(b.getOwned(), a.getOwned());
         };
-    }
-
-    private final void showEmptyState() {
-        final LabelAPI emptyLbl = settings.createLabel("No match.", Fonts.DEFAULT_SMALL);
-        emptyLbl.setColor(gray);
-        emptyLbl.setAlignment(Alignment.MID);
-        add(emptyLbl).inMid();
     }
 }

@@ -4,21 +4,18 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
-import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.economy.fleet.FactionShipInventory;
+import wfg.ltv_econ.ui.factionTab.dialog.FactionSelectionDialog;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.panel.CustomPanel;
 
 public class ShipInventoryPanel extends CustomPanel implements UIBuildableAPI {
-
-    protected FactionShipInventory inv = EconomyEngine.instance().getFactionShipInventory(Factions.PLAYER);
     
     public ShipInventoryPanel(UIPanelAPI parent, int w, int h) {
         super(parent, w, h);
@@ -40,10 +37,10 @@ public class ShipInventoryPanel extends CustomPanel implements UIBuildableAPI {
         final int panelW = (int) pos.getWidth();
         final int panelH = (int) pos.getHeight();
 
-        final ShipInventoryNavbar navbar = new ShipInventoryNavbar(m_panel, panelW, 130, this);
+        final ShipInventoryNavbar navbar = new ShipInventoryNavbar(m_panel, panelW, 130);
         add(navbar).inTL(0f, 0f);
 
-        final FactionShipGrid grid = new FactionShipGrid(m_panel, panelW, panelH - 160, inv);
+        final FactionShipGrid grid = new FactionShipGrid(m_panel, panelW, panelH - 160, navbar);
         add(grid).inTL(0f, 170f);
 
         final ShipFiltersPanel filters = new ShipFiltersPanel(m_panel, panelW, grid);

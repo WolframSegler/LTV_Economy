@@ -6,7 +6,7 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 
 public class InformalExchangeNode {
 

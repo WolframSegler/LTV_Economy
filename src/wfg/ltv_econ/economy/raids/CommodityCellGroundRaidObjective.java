@@ -35,7 +35,7 @@ import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
 import wfg.ltv_econ.ui.reusable.StockpileInfoBar;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.NumFormat;
 

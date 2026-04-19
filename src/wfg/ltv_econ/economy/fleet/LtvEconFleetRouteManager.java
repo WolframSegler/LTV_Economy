@@ -52,7 +52,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements FleetEventListener {

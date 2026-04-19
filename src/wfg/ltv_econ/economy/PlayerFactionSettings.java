@@ -6,6 +6,7 @@ import java.util.Set;
 
 public class PlayerFactionSettings implements Serializable {
     public boolean redistributeCredits = false;
+    public boolean automaticShipProductionForFaction = false;
 
     public final Set<String> embargoedFactions = new HashSet<>();
 }

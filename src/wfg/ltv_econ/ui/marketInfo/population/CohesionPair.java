@@ -20,7 +20,7 @@ public class CohesionPair extends IconValuePairTp {
 
     public CohesionPair(UIPanelAPI parent, int w, int h, PlayerMarketData data, Color color, String font) {
         super(parent, w, h, SOCIETY_ICON, data.getSocialCohesion(), false, color, font);
-        final LabelAPI lbl = getValueLbl();
+        final LabelAPI lbl = label();
         lbl.setHighlightOnMouseover(true);
         lbl.setAlignment(Alignment.MID);
         tooltip.builder = (tp, exp) -> {

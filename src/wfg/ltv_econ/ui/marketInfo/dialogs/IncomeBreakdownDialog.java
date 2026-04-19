@@ -24,7 +24,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
@@ -268,7 +268,7 @@ public class IncomeBreakdownDialog extends DockPanel {
             if (cost == 0l) continue;
 
             final String desc = lastMonth ? ledger.getDescLastMonth(key) : ledger.getDescCurrentMonth(key);
-            tp.addPara("  - " + desc + ": %s", opad, negative, NumFormat.formatCreditAbs(cost));
+            tp.addPara("  • " + desc + ": %s", opad, negative, NumFormat.formatCreditAbs(cost));
         }
 
         tp.addSectionHeading("Other Transactions", base, dark, Alignment.MID, opad);

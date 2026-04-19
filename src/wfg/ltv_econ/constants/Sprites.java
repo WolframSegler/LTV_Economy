@@ -10,9 +10,12 @@ public class Sprites {
     public static final SpriteAPI SUPPLIES = settings.getSprite(settings.getCommoditySpec(Commodities.SUPPLIES).getIconName());
     public static final SpriteAPI FUEL = settings.getSprite(settings.getCommoditySpec(Commodities.FUEL).getIconName());
     public static final SpriteAPI CREW = settings.getSprite(settings.getCommoditySpec(Commodities.CREW).getIconName());
+    public static final SpriteAPI SHIPS = settings.getSprite(settings.getCommoditySpec(Commodities.SHIPS).getIconName());
     public static final SpriteAPI BERTH = settings.getSprite("icons", "berth");
     public static final SpriteAPI COMBAT = settings.getSprite("ui", "icon_kinetic");
     public static final SpriteAPI ARROW = settings.getSprite("ui", "arrow");
     public static final SpriteAPI SMUGGLING = settings.getSprite("icons", "smuggling");
     public static final SpriteAPI WAGES = settings.getSprite("icons", "ratio_chart");
+    public static final SpriteAPI STOPWATCH = settings.getSprite("icons", "stopwatch");
+    public static final SpriteAPI CHECKLIST = settings.getSprite("icons", "checklist");
 }

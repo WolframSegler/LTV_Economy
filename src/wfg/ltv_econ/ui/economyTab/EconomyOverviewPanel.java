@@ -3,6 +3,8 @@ package wfg.ltv_econ.ui.economyTab;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
+
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
@@ -27,7 +29,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
     protected final List<NavButtonDef> getNavButtonDefs() {
         final List<NavButtonDef> defs = new ArrayList<>();
 
-        defs.add(new NavButtonDef("Global Commodity Flow",
+        defs.add(new NavButtonDef("Global Commodity Flow", Keyboard.KEY_NONE,
             () -> {
                 final GlobalCommodityFlow content = new GlobalCommodityFlow(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -40,7 +42,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef("Trade Routes",
+        defs.add(new NavButtonDef("Trade Routes", Keyboard.KEY_NONE,
             () -> {
                 final ComTradeFlowMap content = new ComTradeFlowMap(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -53,7 +55,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef("Settings",
+        defs.add(new NavButtonDef("Settings", Keyboard.KEY_NONE,
             () -> {
                 final EconomySettingsPanel content = new EconomySettingsPanel(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H

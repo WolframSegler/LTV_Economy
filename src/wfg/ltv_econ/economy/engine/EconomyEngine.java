@@ -43,7 +43,7 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.intel.PlayerMarketBombardedIntel;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constants.EconomyConstants.*;

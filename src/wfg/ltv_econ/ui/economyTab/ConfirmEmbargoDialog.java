@@ -9,8 +9,6 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel.RowPanel;
-import wfg.native_ui.ui.UIContext;
-import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.dialog.DialogPanel;
 
 public class ConfirmEmbargoDialog extends DialogPanel  {
@@ -34,15 +32,11 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
         holo.setBackgroundAlpha(150, 175);
 
         holo.borderAlpha = 0.85f;
-
-        UIContext.setContext(Context.DIALOG);
     }
 
     @Override
     public void dismiss(int option) {
         super.dismiss(option);
-        UIContext.setContext(Context.NONE);
-
         if (option == 1) return;
 
         final PlayerFactionSettings settings = LtvEconSaveData.instance().playerFactionSettings;

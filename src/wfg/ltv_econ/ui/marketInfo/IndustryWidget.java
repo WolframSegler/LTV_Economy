@@ -34,8 +34,6 @@ import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.UIContext;
-import wfg.native_ui.ui.UIContext.Context;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.HoverGlowComp;
@@ -262,8 +260,6 @@ public class IndustryWidget extends CustomPanel implements
 
                 }
                 tradeInfoPanel = true;
-
-                UIContext.setContext(Context.DIALOG);
             }
         };
 
@@ -550,8 +546,6 @@ public class IndustryWidget extends CustomPanel implements
         tradeInfoPanel = false;
         RolfLectionUtil.getMethodAndInvokeDirectly("dialogDismissed",
             indPanel.dummyWidget, null, 0);
-
-        UIContext.setContext(Context.NONE);
     }
 
     public class IndustryImagePanel extends SpritePanel<IndustryImagePanel> implements

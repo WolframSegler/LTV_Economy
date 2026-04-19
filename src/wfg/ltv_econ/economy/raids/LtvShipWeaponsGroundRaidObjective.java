@@ -30,7 +30,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.NumFormat;
 
 public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePluginImpl {

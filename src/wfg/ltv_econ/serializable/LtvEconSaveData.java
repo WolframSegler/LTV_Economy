@@ -59,11 +59,16 @@ public class LtvEconSaveData implements Serializable {
         sector.addTransientScript(data.economyEngine);
         sector.getListenerManager().addListener(data.economyEngine, true);
 
+        StaticData.loadData(data);
+
         return data;
     }
 
     public static final void saveInstance() {
         Global.getSector().getPersistentData().put(LtvEconSaveDataSerialID, instance);
+
+        StaticData.resetData(instance);
+
         instance = null;
     }
 

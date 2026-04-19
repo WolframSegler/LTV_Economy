@@ -27,7 +27,6 @@ public class MarketEventsButton extends DockButton<MarketEventsDialog> {
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;
 
-        context.ignore = false;
         tooltip.builder = (tp, expanded) -> {
             tp.addPara("Market events [%s]", pad, highlight, Keyboard.getKeyName(interaction.shortcut));
         };

@@ -1,11 +1,14 @@
-package wfg.ltv_econ.ui.factionTab;
+package wfg.ltv_econ.ui.factionTab.dialog;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -13,6 +16,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.serializable.StaticData;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp;
@@ -30,9 +34,9 @@ import wfg.native_ui.ui.visual.SpritePanel.Base;
 public class FactionSelectionDialog extends DockPanel {
     private static final int ROW_H = 32;
     
-    private final ShipInventoryPanel content;
+    private final UIBuildableAPI content;
 
-    public FactionSelectionDialog(ShipInventoryPanel content) {
+    public FactionSelectionDialog(UIBuildableAPI content) {
         super(300, 400, Side.BOTTOM);
 
         this.content = content;
@@ -46,9 +50,11 @@ public class FactionSelectionDialog extends DockPanel {
 
         final int width = (int) pos.getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
+        final List<FactionSpecAPI> factions = new ArrayList<>(EconomyConstants.visibleFactions);
+        factions.add(settings.getFactionSpec(Factions.PLAYER));
 
         float yCoord = opad + 1;
-        for (FactionSpecAPI faction : EconomyConstants.visibleFactions) {
+        for (FactionSpecAPI faction : factions) {
             final DebugFactionRow row = new DebugFactionRow(
                 container, width - hpad * 2, ROW_H, faction, this::onFactionSelected
             );
@@ -60,7 +66,7 @@ public class FactionSelectionDialog extends DockPanel {
     }
 
     private void onFactionSelected(FactionSpecAPI faction) {
-        content.inv = EconomyEngine.instance().getFactionShipInventory(faction.getId());
+        StaticData.inv = EconomyEngine.instance().getFactionShipInventory(faction.getId());
         content.buildUI();
     }
 

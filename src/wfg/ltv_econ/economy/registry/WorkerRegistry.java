@@ -15,7 +15,7 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 /**

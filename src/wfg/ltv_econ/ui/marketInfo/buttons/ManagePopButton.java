@@ -31,7 +31,6 @@ public class ManagePopButton extends Button {
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;
 
-        context.ignore = false;
         tooltip.builder = (tp, expanded) -> {
             tp.addPara("Population and worker management [%s]", pad,
                 highlight, Keyboard.getKeyName(interaction.shortcut)

@@ -23,7 +23,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
-import wfg.ltv_econ.util.Arithmetic;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 public class CommodityDomain implements Serializable {
