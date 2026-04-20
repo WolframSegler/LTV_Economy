@@ -19,6 +19,8 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.PlannedOrder;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.dialog.ClearAllDialog;
@@ -40,7 +42,6 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, HasInteraction {
-    private static final int MAX_VISIBLE_ORDERS = 500; // TODO place into config
     private static final int HEADER_HEIGHT = 50;
 
     private final InteractionComp<PlannedOrdersPanel> interaction = comp().get(NativeComponents.INTERACTION); 
@@ -60,6 +61,14 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
     @Override
     public void buildUI() {
         clearChildren();
+
+        final boolean hasColony = EconomyEngine.instance().getPlayerMarketData().size() > 0;
+        if (!DebugFlags.COLONY_DEBUG && !hasColony) {
+            final LabelAPI lbl = settings.createLabel("No static assets", Fonts.DEFAULT_SMALL);
+            lbl.setColor(gray);
+            add(lbl).inMid();
+            return;
+        }
 
         final List<PlannedOrder> orders = StaticData.inv.getPlannedOrders();
         final long totalCost = orders.stream().mapToLong(o -> o.credits).sum();
@@ -153,8 +162,8 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
 
         protected List<PlannedOrder> getDataList() {
             List<PlannedOrder> orders = StaticData.inv.getPlannedOrders();
-            if (orders.size() > MAX_VISIBLE_ORDERS) {
-                orders = orders.subList(0, MAX_VISIBLE_ORDERS);
+            if (orders.size() > EconConfig.MAX_VISIBLE_PLANNED_ORDERS) {
+                orders = orders.subList(0, EconConfig.MAX_VISIBLE_PLANNED_ORDERS);
             }
             return orders;
         }

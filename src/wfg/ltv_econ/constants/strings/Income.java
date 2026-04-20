@@ -25,7 +25,7 @@ public class Income {
     public static final String INDEPENDENT_VALUE_PERCENT_KEY = "independent_value_percent";
 
     public static final String INDEPENDENT_HAZARD_PAY_KEY = "independent_hazard_pay";
-    public static final String INDEPENDENT_HAZARD_PAY_DESC = "Hazard pay (base + multiplier for required escort strength)";
+    public static final String INDEPENDENT_HAZARD_PAY_DESC = "Hazard pay (base + escort strength)";
 
     public static final String WORKER_WAGES_KEY = "wages";
     public static final String WORKER_WAGES_DESC = "Worker wages";

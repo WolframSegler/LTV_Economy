@@ -46,8 +46,9 @@ public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget
     protected InventoryShipWidget createWidget(ShipTypeData item, int index) {
         final InventoryShipWidget widget = new InventoryShipWidget(container, item, navbar);
 
+        final int col = index % calculateColumns();
         widget.tooltip.positioner = (tp, exp) -> {
-            NativeUiUtils.anchorPanel(tp, widget.getPanel(), (calculateColumns() > 2 ?
+            NativeUiUtils.anchorPanel(tp, widget.getPanel(), (col > 2 ?
                 AnchorType.LeftTop : AnchorType.RightTop), opad
             );
         };

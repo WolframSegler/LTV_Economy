@@ -802,7 +802,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 
             TooltipUtils.createComProductionBreakdown(tp, cell);
     
-            TooltipUtils.createComDemandBreakdown(tp, cell);
+            TooltipUtils.createComConsumptionBreakdown(tp, cell);
     
             final float econUnit = m_com.getEconUnit();
             final int sellPrice = (int) (cell.computeVanillaPrice((int)econUnit, true, true) / econUnit);

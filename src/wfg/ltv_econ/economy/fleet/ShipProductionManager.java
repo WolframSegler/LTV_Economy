@@ -17,6 +17,8 @@ import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 
+import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
@@ -26,21 +28,7 @@ import wfg.native_ui.util.ArrayMap;
 
 public class ShipProductionManager {
     private ShipProductionManager() {}
-    
-    // TODO move these to economy config
-    private static final float CARGO_SAFETY_MULT = 1.5f;
-    private static final float FUEL_SAFETY_MULT = 1.2f;
-    private static final float CREW_SAFETY_MULT = 1.2f;
 
-    private static final float COLONY_WEIGHT_PER_SIZE = 100f;
-    private static final float COLONY_SIZE_EXPONENT = 1.5f;
-    private static final float AGGRESSION_COMBAT_MULT = 0.2f;
-    private static final float THREAT_RELATIONSHIP_MULT = 2f;
-    private static final float TRADE_COMBAT_SAFETY_MULT = 1.2f;
-    private static final float MIN_COMBAT_POWER = 100f;
-
-    private static final float SHIP_PROD_CREDIT_COST_MULT = 0.35f; // not the cost of resources, but labor that goes into producing it.
-    private static final float SHIP_PROD_SHIPS_COST_MULT = 1.4f;
     private static final CommoditySpecAPI shipSpec = settings.getCommoditySpec(Commodities.SHIPS);
 
     public static final void planOrders(FactionShipInventory inv) {
@@ -123,9 +111,12 @@ public class ShipProductionManager {
 
     public static final PlannedOrder getProductionCost(ShipHullSpecAPI spec) {
         final ArrayMap<String, Float> commodities = new ArrayMap<>(1);
+        final float rocc = LaborConfig.getRoCC("industry");
+        final float rovc = LaborConfig.getRoVC("industry");
+
         final int days = getBaseDays(spec);
-        final long credits = (long) (spec.getBaseValue() * SHIP_PROD_CREDIT_COST_MULT);
-        final float shipsCost = (spec.getBaseValue() / shipSpec.getBasePrice()) * SHIP_PROD_SHIPS_COST_MULT;
+        final long credits = (long) (spec.getBaseValue() * rovc);
+        final float shipsCost = (spec.getBaseValue() / shipSpec.getBasePrice()) * rocc;
         final float crewCost = ShipTypeData.getCrewPerShip(spec);
         
         commodities.put(Commodities.SHIPS, shipsCost);
@@ -146,7 +137,7 @@ public class ShipProductionManager {
             cargo += mission.cargoAmount;
         }
 
-        return cargo * CARGO_SAFETY_MULT;
+        return cargo * EconConfig.SHIP_ALLOC_CAPACITY_TARGET_BUFFER;
     }
 
     private static final float computeDesiredFuel(List<TradeMission> missions, FactionAPI faction) {
@@ -157,7 +148,7 @@ public class ShipProductionManager {
             fuel += mission.fuelCost;
         }
 
-        return fuel * FUEL_SAFETY_MULT;
+        return fuel * EconConfig.SHIP_ALLOC_CAPACITY_TARGET_BUFFER;
     }
 
     private static final float computeDesiredCrew(List<TradeMission> missions, FactionAPI faction) {
@@ -167,7 +158,7 @@ public class ShipProductionManager {
             crew += mission.crewAmount;
         }
 
-        return crew * CREW_SAFETY_MULT;
+        return crew * EconConfig.SHIP_ALLOC_CAPACITY_TARGET_BUFFER;
     }
 
     private static final float computeDesiredCombat(List<TradeMission> missions, FactionAPI faction) {
@@ -175,21 +166,23 @@ public class ShipProductionManager {
         for (TradeMission mission : missions) {
             tradeCombat += mission.combatPowerTarget;
         }
-        tradeCombat *= TRADE_COMBAT_SAFETY_MULT;
+        tradeCombat *= EconConfig.SHIP_ALLOC_CAPACITY_TARGET_BUFFER;
 
         float colonyCombat = 0f;
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             if (!market.getFaction().equals(faction)) continue;
 
-            colonyCombat += (float) Math.pow(market.getSize() - 2, COLONY_SIZE_EXPONENT) * COLONY_WEIGHT_PER_SIZE;
+            colonyCombat += (float) Math.pow(market.getSize() - 2, EconConfig.SHIP_ALLOC_MARKET_SIZE_EXPONENT)
+                * EconConfig.SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE;
         }
 
-        final float aggressionFactor = 1f + (faction.getDoctrine().getAggression() / 5f) * AGGRESSION_COMBAT_MULT;
+        final float aggressionFactor = 1f + (faction.getDoctrine().getAggression() / 5f)
+            * EconConfig.SHIP_ALLOC_AGGRESSION_COMBAT_MULT;
 
-        final float threatFactor = 1f + (1f - computeAvgRel(faction)) * THREAT_RELATIONSHIP_MULT;
+        final float threatFactor = 1f + (1f - computeAvgRel(faction)) * EconConfig.SHIP_ALLOC_THREAT_RELATIONSHIP_MULT;
 
         final float desiredCombat = (colonyCombat * aggressionFactor * threatFactor) + tradeCombat;
-        return Math.max(desiredCombat, MIN_COMBAT_POWER);
+        return Math.max(desiredCombat, EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER);
     }
 
     private static final float computeAvgRel(FactionAPI faction) {

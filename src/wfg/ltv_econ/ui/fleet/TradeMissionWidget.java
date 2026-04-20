@@ -3,12 +3,15 @@ package wfg.ltv_econ.ui.fleet;
 import java.awt.Color;
 
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -34,7 +37,6 @@ import static wfg.native_ui.util.Globals.settings;
 
 public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, HasTooltip {
     private static final SpriteAPI SHIP_OUTLINE = settings.getSprite("icons", "ship_outline");
-    private static final int MAX_DISPLAYED_SHIPS = 20; // TODO add to config
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
     private final BorderRenderer border = new BorderRenderer(UI_BORDER_3, true);
@@ -112,7 +114,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
             );
 
             final int gridWidth = 390;
-            final int valueWidth = 40;
+            final int valueWidth = 50;
             int rowCount = 0;
 
             tp.addPara("Shipment List", base, opad);
@@ -123,13 +125,24 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
             }
             tp.addGrid(0);
 
+            rowCount = 0;
+
+            tp.addPara("Mission Ledger", base, opad);
+            tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
+            for (StatMod mod : mission.credits.getFlatBonuses().values()) {
+                tp.addToGrid(0, rowCount++, mod.desc, NumFormat.engNotate(mod.value)
+                    +Strings.C, mod.value < 0f ? negative : positive
+                );
+            }
+            tp.addGrid(0);
+
             final int totalEntries = mission.allocatedShips.size();
             rowCount = 0;
             
             tp.addPara("Fleet Members", base, opad);
             tp.beginGridFlipped(gridWidth/2, 4, valueWidth, hpad);
             for (var entry : mission.allocatedShips.singleEntrySet()) {
-                if (rowCount >= MAX_DISPLAYED_SHIPS) break;
+                if (rowCount >= EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) break;
 
                 final ShipHullSpecAPI spec = settings.getHullSpec(entry.getKey());
                 final String name = spec.getHullNameWithDashClass();
@@ -139,8 +152,8 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
             tp.addGrid(0);
 
-            if (totalEntries > MAX_DISPLAYED_SHIPS) {
-                final int remaining = totalEntries - MAX_DISPLAYED_SHIPS;
+            if (totalEntries > EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) {
+                final int remaining = totalEntries - EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS;
                 tp.addPara("... and %s more ship type%s", opad, Misc.getHighlightColor(),
                     String.valueOf(remaining), remaining == 1 ? "" : "s"
                 );

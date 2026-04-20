@@ -10,7 +10,6 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -27,11 +26,9 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -46,11 +43,9 @@ import static wfg.native_ui.util.Globals.settings;
 
 public class TooltipUtils {
     public static final SpriteAPI TP_ARROW = settings.getSprite("ui", "cargoTooltipArrow");
-    public static final SpriteAPI STOCKPILES_FULL = settings.getSprite("icons", "stockpiles_full");
-    public static final SpriteAPI STOCKPILES_MEDIUM = settings.getSprite("icons", "stockpiles_medium");
-    public static final SpriteAPI STOCKPILES_LOW = settings.getSprite("icons", "stockpiles_low");
-    public static final SpriteAPI STOCKPILES_EMPTY = settings.getSprite("icons", "stockpiles_empty");
-    public static final SpriteAPI STOCKPILES_NO_DEMAND = settings.getSprite("icons", "stockpiles_no_demand");
+
+    private static final int GRID_W = 430;
+    private static final int VALUE_W = 50;
 
     /**
      * Literally copied this from com.fs.starfarer.ui.impl.CargoTooltipFactory.
@@ -262,14 +257,99 @@ public class TooltipUtils {
         }
     }
 
-    public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+    public static final void createComStockpilesChangeBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Total production: %s", pad, highlight, NumFormat.engNotate(cell.getProduction(true)));
-        final int gridWidth = 430;
-        final int valueWidth = 50;
+        tp.addPara("Current Stockpiles: %s", pad, highlight, NumFormat.engNotate(cell.getRoundedStored()));
         int rowCount = 0;
 
-        tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
+        tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
+
+        tp.addToGrid(0, rowCount++, "Desired Stockpiles",
+            NumFormat.engNotate(cell.getTargetStockpiles())
+        );
+        tp.addToGrid(0, rowCount++, "Latest Change", NumFormat.engNotate(cell.getQuantumRealBalance()),
+            cell.getQuantumRealBalance() < 0f ? negative : highlight
+        );
+
+        { // Exports
+            if (cell.inFactionExports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest in-faction exports", "+" +
+                    NumFormat.engNotate(cell.inFactionExports)
+                );
+            }
+            if (cell.globalExports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest global exports", "+" +
+                    NumFormat.engNotate(cell.globalExports)
+                );
+            }
+            if (cell.informalExports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest informal market exports", "+" +
+                    NumFormat.engNotate(cell.informalExports)
+                );
+            }
+        }
+
+        { // Imports
+            if (cell.inFactionImports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest in-faction imports", "+" +
+                    NumFormat.engNotate(cell.inFactionImports)
+                );
+            }
+            if (cell.globalImports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest global imports", "+" +
+                    NumFormat.engNotate(cell.globalImports)
+                );
+            }
+            if (cell.informalImports > 0f) {
+                tp.addToGrid(0, rowCount++, "Latest informal market imports", "+" +
+                    NumFormat.engNotate(cell.informalImports)
+                );
+            }
+        }
+
+        tp.addGrid(0);
+    }
+
+    public static final void createComTargetBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+        tp.setParaFontDefault();
+
+        final float dailyTarget = cell.getTargetQuantum(true);
+        int rowCount = 0;
+
+        tp.addPara("Demand: %s", pad, highlight, NumFormat.engNotate(dailyTarget));
+
+        tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
+
+        final ArrayMutableStat targetStat = cell.getTargetQuantumStat();
+
+        for (StatMod mod : targetStat.getFlatMods().values()) {
+            final String formatted = (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value);
+            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value >= 0 ? highlight : negative);
+        }
+
+        for (StatMod mod : targetStat.getPercentMods().values()) {
+            final String formatted = (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value) + "%";
+            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value >= 0 ? highlight : negative);
+        }
+
+        for (StatMod mod : targetStat.getMultMods().values()) {
+            final String formatted = Strings.X + NumFormat.formatMagnitudeAware(mod.value);
+            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value >= 1f ? highlight : negative);
+        }
+
+        if (rowCount <= 0) {
+            tp.addToGrid(0, rowCount++, "No local demand", "", base);
+        }
+
+        tp.addGrid(0);
+    }
+
+    public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+        tp.setParaFontDefault();
+        final LabelAPI title = tp.addPara("Production: %s", pad, highlight, NumFormat.engNotate(cell.getProduction(true)));
+        int rowCount = 0;
+
+        tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
 
         for (Map.Entry<String, MutableStat> entry : cell.getIndProductionStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
@@ -321,26 +401,24 @@ public class TooltipUtils {
             }
         }
 
-        if (rowCount < 0) {
-            title.setText("Not available.");
+        if (rowCount <= 0) {
+            title.setText("No local production.");
             title.setHighlight("");
         }
 
         tp.addGrid(0);
     }
 
-    public static final void createComDemandBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
+    public static final void createComConsumptionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         final Color valueColor = cell.getTargetQuantumUnmet() > 0 ? negative : highlight;
-        final int gridWidth = 430;
-        final int valueWidth = 50;
         int rowCount = 0;
         
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Total consumption: %s", opad, valueColor,
+        final LabelAPI title = tp.addPara("Consumption: %s", opad, valueColor,
             NumFormat.engNotate(cell.getConsumption(true))
         );
 
-        tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
+        tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
 
         for (Map.Entry<String, MutableStat> entry : cell.getIndConsumptionStats().singleEntrySet()) {
             final MutableStat mutable = entry.getValue();
@@ -388,64 +466,9 @@ public class TooltipUtils {
             }
         }
 
-        if (rowCount < 1) {
-            title.setText("No local demand.");
+        if (rowCount <= 0) {
+            title.setText("No local consumption.");
             title.setHighlight("");
-        }
-
-        tp.addGrid(0);
-    }
-
-    public static final void createComStockpilesChangeBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
-        tp.setParaFontDefault();
-        tp.addPara("Current Stockpiles: %s", pad, highlight, NumFormat.engNotate(cell.getRoundedStored()));
-        final int gridWidth = 430;
-        final int valueWidth = 50;
-        int rowCount = 0;
-
-        tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
-
-        tp.addToGrid(0, rowCount++, "Desired Stockpiles",
-            NumFormat.engNotate(cell.getTargetStockpiles())
-        );
-        tp.addToGrid(0, rowCount++, "Latest Change", NumFormat.engNotate(cell.getQuantumRealBalance()),
-            cell.getQuantumRealBalance() < 0f ? negative : highlight
-        );
-
-        { // Exports
-            if (cell.inFactionExports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest in-faction exports", "+" +
-                    NumFormat.engNotate(cell.inFactionExports)
-                );
-            }
-            if (cell.globalExports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest global exports", "+" +
-                    NumFormat.engNotate(cell.globalExports)
-                );
-            }
-            if (cell.informalExports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest informal market exports", "+" +
-                    NumFormat.engNotate(cell.informalExports)
-                );
-            }
-        }
-
-        { // Imports
-            if (cell.inFactionImports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest in-faction imports", "+" +
-                    NumFormat.engNotate(cell.inFactionImports)
-                );
-            }
-            if (cell.globalImports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest global imports", "+" +
-                    NumFormat.engNotate(cell.globalImports)
-                );
-            }
-            if (cell.informalImports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest informal market imports", "+" +
-                    NumFormat.engNotate(cell.informalImports)
-                );
-            }
         }
 
         tp.addGrid(0);
@@ -499,53 +522,7 @@ public class TooltipUtils {
         }
     }
 
-    public static final Base getStockpilesIcon(final float ratio, final int size,
-        final UIPanelAPI parent, final FactionSpecAPI faction, final boolean addRatioColors
-    ) {
-        final Color color = getStockpileColor(ratio, faction, addRatioColors);
-        return getStockpilesIcon(ratio, size, parent, color, null, false, false);
-    }
-
-    public static final Base getStockpilesIcon(final CommodityCell cell, final int size,
-        final UIPanelAPI parent, final Color iconColor
-    ) {
-        return getStockpilesIcon(cell.getDesiredAvailabilityRatio(), size, parent, iconColor,
-            null, false, cell.getTargetQuantum(true) < 0.1f
-        );
-    }
-
-    public static final Base getStockpilesIcon(final float ratio, final int size,
-        final UIPanelAPI parent, final Color iconColor, final Color bgColor, final boolean drawBorder,
-        final boolean useNoDemandIcon
-    ) {
-        final SpriteAPI iconPath;
-        if (useNoDemandIcon) {
-            iconPath = STOCKPILES_NO_DEMAND;
-        } else if (ratio <= 0.25f) {
-            iconPath = STOCKPILES_EMPTY;
-        } else if (ratio <= 0.5f) {
-            iconPath = STOCKPILES_LOW;
-        } else if (ratio <= 0.75f) {
-            iconPath = STOCKPILES_MEDIUM;
-        } else {
-            iconPath = STOCKPILES_FULL;
-        }
-        final Base icon = new Base(parent, size, size, iconPath, iconColor, bgColor);
-        icon.outline.enabled = drawBorder;
-        return icon;
-    }
-
     // PRIVATE METHODS
-    private static final Color getStockpileColor(final float ratio, final FactionSpecAPI faction,
-        final boolean addRatioColors
-    ) {
-        if (!addRatioColors) return faction.getBaseUIColor();
-        if (ratio <= 0.25f) return UIColors.COM_DEFICIT;
-        if (ratio <= 0.5f) return UIColors.COM_IMPORT;
-        if (ratio <= 0.75f) return UIColors.COM_LOCAL_PROD;
-        return UIColors.COM_NOT_EXPORTED;
-    }
-
     private static final Comparator<CommodityCell> createSellComparator(int econUnit) {
         return (s1, s2) -> {
             int price1 = (int) s1.computeVanillaPrice(econUnit, true, true);

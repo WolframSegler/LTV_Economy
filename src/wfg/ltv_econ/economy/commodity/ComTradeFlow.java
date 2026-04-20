@@ -10,14 +10,14 @@ public class ComTradeFlow implements Serializable {
     public final String comID;
     public final String exporterID;
     public final String importerID;
-    public final float unitPrice;
+    public final float totalPrice;
     public final boolean inFaction;
     public transient MarketAPI exporter;
     public transient MarketAPI importer;
     public double amount;
 
     public ComTradeFlow(String comID, MarketAPI exporter, MarketAPI importer, double amount,
-        float unitPrice, boolean inFaction
+        float totalPrice, boolean inFaction
     ) {
         this.comID = comID;
         this.exporterID = exporter.getId();
@@ -25,7 +25,7 @@ public class ComTradeFlow implements Serializable {
         this.exporter = exporter;
         this.importer = importer;
         this.amount = amount;
-        this.unitPrice = unitPrice;
+        this.totalPrice = totalPrice;
         this.inFaction = inFaction;
     }
 

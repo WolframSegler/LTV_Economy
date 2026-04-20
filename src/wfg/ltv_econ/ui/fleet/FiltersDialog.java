@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.NativeComponents;
@@ -26,8 +27,6 @@ import wfg.native_ui.ui.system.TooltipSystem;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 
 public class FiltersDialog extends DockPanel {
-    private static final float minAmountCeiling = 50000f; // TODO turn this into a config
-
     private final UIBuildableAPI content;
     
     private Slider minAmountSlider;
@@ -74,7 +73,7 @@ public class FiltersDialog extends DockPanel {
         minAmountLbl.getPosition().setSize(lblW, BTN_H);
         final int sliderW = (int) (pos.getWidth() - opad*3 - lblW);
 
-        minAmountSlider = new Slider(m_panel, null, 0f, minAmountCeiling, sliderW, BTN_H);
+        minAmountSlider = new Slider(m_panel, null, 0f, EconConfig.TRADE_MAP_MIN_AMOUNT_FILTER, sliderW, BTN_H);
         minAmountSlider.setProgress(TradeFilters.minTradeAmount);
         add(minAmountSlider).inTL(opad + lblW + pad, SECT_I_H + LABEL_H + BTN_H + opad*4);
         minAmountSlider.system().setIfNotPresent(

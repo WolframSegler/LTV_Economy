@@ -336,12 +336,12 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"ships": 0.02,
+					"ships": 0.01,
 					"fuel": 0.05,
 					"supplies": 0.03
 				},
 				"scaleWithMarketSize": true,
-				"marketScaleBase": 9
+				"marketScaleBase": 7
 			},
 			"maintenance": {
 				"InputsPerUnitOutput": {

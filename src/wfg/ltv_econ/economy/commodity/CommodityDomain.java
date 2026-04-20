@@ -27,7 +27,6 @@ import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 public class CommodityDomain implements Serializable {
-    // TODO make this a config entry
     private static final float MIN_TRADE_AMOUNT = 5f;
 
     public final String comID;

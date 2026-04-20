@@ -1,4 +1,4 @@
-v0.3.0-beta | Sliver of Silver Passage | NOT SAVE COMPATIBLE
+v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Switched to WrapUI v0.4.0 for this update. Version 0.3.2 will not work.
 - It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
 - Added a ship inventory for each faction. Currently only used for trade fleets. If a faction cannot use its own ships for trading, it must hire independent haulers at a cost.
@@ -7,6 +7,7 @@ v0.3.0-beta | Sliver of Silver Passage | NOT SAVE COMPATIBLE
     - Fuel shortages can be covered by paying a premium if no stockpiled fuel is available at the source colony.
     - Replaced the old trade fleet manager to use ship inventory and mission data. Trade fleets on the map now correspond to concrete trade missions. Raiding them disrupts the mission.
     - Trade fleets based on trade missions appear on the campaign map, carrying a scaled representation of the cargo and mothballed ships.
+
 - Added new LunaLib settings to configure the ship inventory and independent hauler costs.
 - Trade is now processed in intervals (default 15 days, adjustable in LunaLib) instead of continuously every day.
 - Trade is handled as discrete "Trade Missions". At the start of each interval, colonies allocate goods to export to other markets. A mission is created with a scheduled departure and a travel time based on distance.
@@ -16,8 +17,14 @@ v0.3.0-beta | Sliver of Silver Passage | NOT SAVE COMPATIBLE
 - New Financial Ledger System: Every market now has a comprehensive ledger tracking all income and expenses, including trade, fleet maintenance, crew wages, ship production, policy costs, and player market transactions. Trade flows are now clearly recorded per commodity, and all costs are settled at month‑end.
 - Clicking the colony income label now opens an income breakdown panel with all the info contained within the Finance Ledger.
 - Ctrl + Clicking the colony stockpiles button opens a list of incoming and outgoing trade missions.
-- Moved the Economy section to the intel tab.
+- Moved the Economy section to the intel tab. Removed the administration section from it.
+- Added a faction tab to the command panel.
+    - The Hangar section display a roster of faction owned ships.
+    - The Planned Orders section shows a list of ordered ships waiting for resources to be allocated. Orders can be placed here.
+    - The Assembly Line section shows the queued hulls waiting for their turn to be assembled.
+    - The Administration section contains faction-wide settings.
 
+- Reduced ships and crew demand of certain industries to counter-balance the new ships and crew demand created by Planned Orders.
 - Fixed a bug where the events panel would be duplicated.
 - Fixed bugs where event and policy effects on population growth were not working correctly.
 - Colonies without a spaceport can no longer participate in inter‑colony trade.

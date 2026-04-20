@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 public class TradeCom implements Serializable {
     public final String comID;
-    public final float unitPrice;
+    public final float totalPrice;
     public double amount;
 
-    public TradeCom(String comID, double amount, float unitPrice) {
-        this.unitPrice = unitPrice;
+    public TradeCom(String comID, double amount, float totalPrice) {
+        this.totalPrice = totalPrice;
         this.amount = amount;
         this.comID = comID;
     }

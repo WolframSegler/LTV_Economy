@@ -14,6 +14,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.ShipProductionOrder;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.dialog.DiscardAllDialog;
@@ -55,6 +56,14 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
     public void buildUI() {
         clearChildren();
 
+        final boolean hasColony = EconomyEngine.instance().getPlayerMarketData().size() > 0;
+        if (!DebugFlags.COLONY_DEBUG && !hasColony) {
+            final LabelAPI lbl = settings.createLabel("No static assets", Fonts.DEFAULT_SMALL);
+            lbl.setColor(gray);
+            add(lbl).inMid();
+            return;
+        }
+
         final int prodLines = StaticData.inv.getAssemblyLines();
         final int titleW = 220;
         final int entryW = 100;
@@ -71,7 +80,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         clearAllBtn.setEnabled(orders.size() > 0);
         add(clearAllBtn).inTR(BUTTON_W, hpad);
 
-        final LabelAPI title = settings.createLabel("Hulls in Production", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel("Assembly Line", Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(hpad, hpad).setSize(titleW, entryH);
         title.setAlignment(Alignment.LMID);
 

@@ -174,7 +174,7 @@ public class EconConfig {
     public static int TRAVEL_SPEED_LY_DAY;
 
     /**
-     * The cost multiplier for importing fuel when the stockpiles are empty.
+     * Cost multiplier for importing fuel when the stockpiles are empty.
      */
     public static float FORCED_FUEL_IMPORT_COST_MULT;
 
@@ -185,10 +185,70 @@ public class EconConfig {
     public static float INDEPENDENT_TRADE_FLEET_HAZARD_MULT;
 
     /**
-     * The maximum fraction of a colony's stockpile that can be looted in a single raid.
+     * Maximum fraction of a colony's stockpile that can be looted in a single raid.
      */
     public static double RAID_STOCKPILES_ACCESS_RATIO;
     public static double RAID_BASE_EFF;
+
+    /**
+     * Ceiling for displayed fleet members assigned to the trade mission.
+     */
+    public static int TRADE_MISSION_MAX_DISPLAYED_SHIPS;
+
+    /**
+     * Ceiling for min trade amount filter.
+     */
+    public static int TRADE_MAP_MIN_AMOUNT_FILTER;
+
+    /**
+     * Ceiling for displayed planned orders.
+     */
+    public static int MAX_VISIBLE_PLANNED_ORDERS;
+
+    /**
+     * Share of sector-wide production the informal sector is allowed to move.
+     */
+    public static float INFORMAL_TRADE_SHARE;
+
+    /**
+     * Amount of hull assembly lines owned by npc factions
+     */
+    public static int NPC_FACTION_ASSEMBLY_LINES;
+
+    /**
+     * Starting hull assembly lines for the player faction.
+     */
+    public static int PLAYER_FACTION_ASSEMBLY_LINES;
+
+    /**
+     * Buffer used when determining trade targets to satisfy when allocating ships
+     */
+    public static float SHIP_ALLOC_CAPACITY_TARGET_BUFFER;
+
+    /**
+     * Market size factor multiplier when allocating ships.
+     */
+    public static float SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE;
+
+    /**
+     * Exponent used when determining market size factor.
+     */
+    public static float SHIP_ALLOC_MARKET_SIZE_EXPONENT;
+
+    /**
+     * Bonus to combat targets based on faction doctrine when allocating ships.
+     */
+    public static float SHIP_ALLOC_AGGRESSION_COMBAT_MULT;
+
+    /**
+     * Bonus to combat target based on faction relations with others.
+     */
+    public static float SHIP_ALLOC_THREAT_RELATIONSHIP_MULT;
+
+    /**
+     * Combat target floor when allocating ships for faction inventory.
+     */
+    public static float SHIP_ALLOC_MIN_COMBAT_POWER;
 
     public static record DebtDebuffTier(
         long threshold,

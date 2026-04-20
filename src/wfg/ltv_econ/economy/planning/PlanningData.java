@@ -96,6 +96,8 @@ public class PlanningData {
             final String comID = commodities.get(i);
             
             final CommodityCell cell = EconomyEngine.instance().getComCell(comID, marketID);
+            if (cell == null) continue;
+
             d[i] = cell.getTargetQuantum(true);
         }
 

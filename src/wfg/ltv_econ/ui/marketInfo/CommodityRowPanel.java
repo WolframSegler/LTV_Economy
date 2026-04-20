@@ -91,16 +91,17 @@ public class CommodityRowPanel extends CustomPanel implements
             
             if (!expanded) {
                 tp.setParaFont(Fonts.ORBITRON_12);
-                tp.addSectionHeading("Stockpiles and Trade Flows", Alignment.MID, opad);
+                tp.addSectionHeading("Stockpiles, Trade, and Demand", Alignment.MID, opad);
                 TooltipUtils.createComStockpilesChangeBreakdown(tp, cell);
+                TooltipUtils.createComTargetBreakdown(tp, cell);
 
                 tp.setParaFont(Fonts.ORBITRON_12);
-                tp.addSectionHeading("Production and Demand", Alignment.MID, opad);
+                tp.addSectionHeading("Production and Consumption", Alignment.MID, opad);
                 TooltipUtils.createComProductionBreakdown(tp, cell);
                 
                 tp.addPara("All production sources contribute to the commodity's availability. Formal and informal imports add to supply to help meet demand.", gray, pad);
                 tp.setParaFont(Fonts.ORBITRON_12);
-                TooltipUtils.createComDemandBreakdown(tp, cell);
+                TooltipUtils.createComConsumptionBreakdown(tp, cell);
 
                 tp.addSectionHeading("Trade Ledger", Alignment.MID, opad);
                 TooltipUtils.createComTradeLedgerSection(tp, cell);
@@ -113,8 +114,6 @@ public class CommodityRowPanel extends CustomPanel implements
                 tp.setParaFont(Fonts.ORBITRON_12);
                 tp.addSectionHeading("Legend", Alignment.MID, opad);
                 tp.setParaFontDefault();
-
-                
 
                 final int y = (int)tp.getHeightSoFar() + pad;
 
@@ -149,7 +148,7 @@ public class CommodityRowPanel extends CustomPanel implements
         amountLbl.setColor(market.getFaction().getBaseUIColor());
         add(amountLbl).inBL(pad*2 + rowHeight, (rowHeight - textHeight) / 2f);
 
-        final Base stockIcon = TooltipUtils.getStockpilesIcon(cell,
+        final Base stockIcon = UIUtils.getStockpilesIcon(cell,
             iconSize, m_panel, base
         );
         add(stockIcon).inBL(pad*3 + rowHeight + textWidth, (rowHeight - iconSize) / 2f);
@@ -178,7 +177,7 @@ public class CommodityRowPanel extends CustomPanel implements
 
         if (mode == 0) {
             desc = "Proportion of stockpiles compared to the desired amount.";
-            legendRowHelper(tp, y, TooltipUtils.STOCKPILES_FULL, desc, iconSize, false, null);
+            legendRowHelper(tp, y, UIUtils.STOCKPILES_FULL, desc, iconSize, false, null);
             
             y += iconSize + pad;
 

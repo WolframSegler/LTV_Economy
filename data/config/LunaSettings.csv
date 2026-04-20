@@ -1,58 +1,72 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
-labor_workerPoolHeader,Worker Pool,Header,Worker Pool,,,,,Labor
-labor_workerPoolVisible,Show NPC Worker Pool,Boolean,false,,Should the worker pool condition of NPC markets be visible,,,Labor
-labor_growthIncreasesPool,Growth Effect Worker Pool,Boolean,false,,The worker pool grows with the population growth progress.,,,Labor
-labor_workerConfigHeader,Worker Configuration,Header,Worker Configuration,,,,,Labor
-labor_RoSV,The Default Ratio of Surplus Value,Int,4,,Defines the split between worker wages and surplus output. Higher values mean lower wages. Used by NPC markets.,1,10,Labor
-labor_maxRoSV,The Maximum Ratio of Surplus Value,Int,10,,The maximum value for player owned colonies.,1,20,Labor
-labor_lpvMonth,The Monthly Value of Labor Power,Int,8,,The value in credits produced by a single worker per month.,1,100,Labor
-labor_RoVCHeader,Ratio of Variable Capital,Header,Ratio of Variable Capital,,,,,Labor
-labor_RoVC_average,Default RoCV,Double,0.13,,Used by industries without a specified RoCV entry.,0.0,1.0,Labor
-labor_RoVC_industry,RoCV Heavy Industries,Double,0.04,,Used by heavy industry and refining.,0.0,1.0,Labor
-labor_RoVC_consumer,RoCV Light Industry,Double,0.2,,,0.0,1.0,Labor
-labor_RoVC_manufacture,RoCV Manufacturing,Double,0.35,,,0.0,1.0,Labor
-labor_RoVC_service,RoCV Service Sector,Double,0.4,,,0.0,1.0,Labor
-labor_RoVC_agriculture,RoCV Agriculture,Double,0.23,,,0.0,1.0,Labor
-labor_RoVC_mechanized,RoCV Mechanized Industries,Double,0.1,,Used by mining and fuel production.,0.0,1.0,Labor
-labor_RoVC_manual,RoCV Manual Professions,Double,0.5,,,0.0,1.0,Labor
-labor_RoVC_space,RoCV Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
+header_workerPool,Worker Pool,Header,Worker Pool,,,,,Labor
+NPC_WORKER_POOL_VISIBLE,Show NPC Worker Pool,Boolean,false,,Should the worker pool condition of NPC markets be visible,,,Labor
+GROWTH_EFFECT_WORKER_POOL,Growth Effect Worker Pool,Boolean,false,,The worker pool grows with the population growth progress.,,,Labor
+header_workerConfig,Worker Configuration,Header,Worker Configuration,,,,,Labor
+RoSV,The Default Ratio of Surplus Value,Int,4,,Defines the split between worker wages and surplus output. Higher values mean lower wages. Used by NPC markets.,1,10,Labor
+MAX_RoSV,The Maximum Ratio of Surplus Value,Int,10,,The maximum value for player owned colonies.,1,20,Labor
+LPV_month,The Monthly Value of Labor Power,Int,8,,The value in credits produced by a single worker per month.,1,100,Labor
+header_RoVC,Ratio of Variable Capital,Header,Ratio of Variable Capital,,,,,Labor
+RoVC_average,Default RoVC,Double,0.13,,Used by industries without a specified RoVC entry.,0.0,1.0,Labor
+RoVC_industry,RoVC Heavy Industries,Double,0.04,,"Used by heavy industry, refining and faction ship production.",0.0,1.0,Labor
+RoVC_consumer,RoVC Light Industry,Double,0.2,,,0.0,1.0,Labor
+RoVC_manufacture,RoVC Manufacturing,Double,0.35,,,0.0,1.0,Labor
+RoVC_service,RoVC Service Sector,Double,0.4,,,0.0,1.0,Labor
+RoVC_agriculture,RoVC Agriculture,Double,0.23,,,0.0,1.0,Labor
+RoVC_mechanized,RoVC Mechanized Industries,Double,0.1,,Used by mining and fuel production.,0.0,1.0,Labor
+RoVC_manual,RoVC Manual Professions,Double,0.5,,,0.0,1.0,Labor
+RoVC_space,RoVC Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
 ,,,,,,,,
-economy_generalHeader,General Settings,Header,General Settings,,,,,Economy
-economy_multiThreading,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread.,,,Economy
-economy_assignOnLoad,Assign Workers On Load,Boolean,false,,Re-allocates the workers after loading a save. Includes quick-saves as well.,,,Economy
-economy_startingCredits,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
-economy_withdrawalLimit,Monthly Withdrawal Limit,Int,100000,,Sets the maximum amount of credits you can withdraw from your colonies per month.,0,1000000000,Economy
-economy_autoTransferLimit,Profit Transfer Limit,Double,0.5,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy
-economy_solverHeader,Worker Allocation Settings,Header,Worker Allocation Settings,,,,,Economy
-economy_deficitCost,Deficit Penalty,Double,5000,,Higher values encourage more demand fulfillment.,0,100000,Economy
-economy_localWorkerCost,Local Worker Cost Mult,Double,0.1,,Multiplier for the cost of workers assigned to meet local demand. A value of 1 stops prioritizing production for local demand. Heavy on performance when allocation passes are high.,0.01,1,Economy
-economy_factionWorkerCost,Faction Worker Cost Mult,Double,0.15,,Multiplier for the cost of workers assigned to meet faction demand. A value of 1 disables it. Should ideally be higher than Local Worker Cost Mult.,0.01,1,Economy
-economy_minWorkerFraction,Minimum Worker Fraction,Double,0.3,,Minimum fraction of each output's fair share of workers. Setting a high value may cause production deficits.,0,1,Economy
-economy_localProdBuffer,Local Production Buffer,Double,0.1,,Allocation is prioritized to meet local demand by a factor of 1 + x.,0,3,Economy
-economy_factionProdBuffer,Faction Production Buffer,Double,0.1,,Allocation is prioritized to meet faction demand by a factor of 1 + x.,0,3,Economy
-economy_prodBuffer,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Economy
-economy_allocPasses,Allocation Refinement Passes,Int,3,,Higher values improve allocation stability at the cost of performance. Values beyond 6 have almost no noticable effects.,1,20,Economy
-economy_assignInterval,Worker Assignment Interval,Int,15,,"Workers of NPC markets will be re-allocated every x days.",1,360,Economy
-economy_prodFairness,Fairness Metric,Radio,Commodities Produced,"Commodities Produced, Workers Assigned","Determines the measurement for the fair share.",,,Economy
-economy_tradeHeader,Trade Settings,Header,Trade Settings,,,,,Economy
-economy_tradeInterval,Trade Interval,Int,15,,Markets will trade goods every x days.,7,30,Economy
-economy_daysToCover,Stockpile Coverage Days,Int,45,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Economy
-economy_perImportDaysCover,Trade Coverage Limit,Int,21,,Limits how many days of demand can be satisfied per trade run to reduce volatility. Values lower than Trade Interval will cause constant deficits.,1,360,Economy
-economy_exportThreshold,Export Threshold Factor,Double,1.5,,Multiplier for excess stock required before a market begins exporting.,1,2,Economy
-economy_factionExchangeMult,Faction Price Multiplier,Double,0.3,,Adjusts prices for goods traded between markets of the same faction. Set to 0 for free in-faction trade.,0,1,Economy
-economy_embargoRepDrop,Embargo Reputation Penalty,Double,0.4,,The relationship hit for imposing an embargo. 1 means 100 relation points.,0,1,Economy
-economy_minTradeRelation,Minimum Trade Relationship,Double,-0.9,,Minimum relationship between factions for trade to occur. Factions below this threshold will not trade.,-1,0,Economy
+header_workerAllocator,Worker Allocator,Header,Worker Allocator,,,,,Solver
+ECON_DEFICIT_COST,Deficit Penalty,Double,5000,,Higher values encourage more demand fulfillment.,0,100000,Solver
+LOCAL_WORKER_COST_MULT,Local Worker Cost Mult,Double,0.1,,Multiplier for the cost of workers assigned to meet local demand. A value of 1 stops prioritizing production for local demand. Heavy on performance when allocation passes are high.,0.01,1,Solver
+FACTION_WORKER_COST_MULT,Faction Worker Cost Mult,Double,0.15,,Multiplier for the cost of workers assigned to meet faction demand. A value of 1 disables it. Should ideally be higher than Local Worker Cost Mult.,0.01,1,Solver
+MIN_WORKER_FRACTION,Minimum Worker Fraction,Double,0.3,,Minimum fraction of each output's fair share of workers. Setting a high value may cause production deficits.,0,1,Solver
+LOCAL_PROD_BUFFER,Local Production Buffer,Double,0.1,,Allocation is prioritized to meet local demand by a factor of 1 + x.,0,3,Solver
+FACTION_PROD_BUFFER,Faction Production Buffer,Double,0.1,,Allocation is prioritized to meet faction demand by a factor of 1 + x.,0,3,Solver
+PRODUCTION_BUFFER,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Solver
+ECON_ALLOCATION_PASSES,Allocation Refinement Passes,Int,3,,Number of times the solver re-evaluates deficits and adjusts worker assignments. Computation time grows linearly with the value. Gains become minimal after 6 passes.,1,20,Solver
+WORKER_ASSIGN_INTERVAL,Worker Assignment Interval,Int,15,,"Workers of NPC markets will be re-allocated every x days.",1,360,Solver
+USE_PRODUCTION_FAIRNESS,Fairness Metric,Radio,Commodities Produced,"Commodities Produced, Workers Assigned","Determines the measurement for the fair share.",,,Solver
 ,,,,,,,,
-fleet_idleShipMaintenanceMult,Idle Ships Maintenance Mult,Double,0.3,,Multiplier to maintenance supply cost for idle ships inside the faction inventory. A value of 1 disables the discount.,0,1,Fleet
-fleet_crewWages,Crew Monthly Wages,Double,10,,Monthly wages per crew member operating the faction inventory ships.,1,100,Fleet
-fleet_idleCrewWagesMult,Idle Crew Wage Mult,Double,0.5,,Wage multiplier for idle crew operating the faction inventory ships.,0,1,Fleet
-fleet_travelSpeedLyDay,Trade Fleet Travel Speed,Int,14,,The speed in light-years at which trade fleets travel in hyperspace. Used by the simulation.,1,20,Fleet
-fleet_forcedFuelCostMult,Forced Fuel Cost Mult,Double,3,,Cost multiplier for fuel purchases made to initiate trade when no fuel is stockpiled.,1,10,Fleet
-fleet_independentBaseFee,Independent Hauler Base Fee,Double,1000.0,,Base fee in credits per trade mission when using independent haulers.,0,100000,Fleet
-fleet_independentPerTonFee,Independent Hauler Per-Ton Fee,Double,1.5,,Fee per ton of cargo (including fuel and crew) transported.,0,1000,Fleet
-fleet_independentPercentCut,Independent Hauler Percentage Cut,Double,0.05,,Percentage of the total cargo value taken as fee.,0,1,Fleet
-fleet_independentHazardBase,Independent Hauler Hazard Base,Double,500.0,,Base hazard pay in credits added for dangerous routes.,0,100000,Fleet
-fleet_independentHazardMult,Independent Hauler Hazard Multiplier,Double,4.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
+header_hullAllocator,Hull Allocator,Header,Hull Allocator,,,,,Solver
+SHIP_ALLOC_CAPACITY_TARGET_BUFFER,Ship Allocation Capacity Buffer,Double,1.2,,Multiplier applied to trade mission targets when allocating hulls. Provides a safety margin to ensure demand is fully met.,1.0,3.0,Solver
+SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE,Ship Allocation Market Weight Per Size,Double,100.0,,Base weight per market size factor when prioritizing trade mission assignments.,10.0,1000.0,Solver
+SHIP_ALLOC_MARKET_SIZE_EXPONENT,Ship Allocation Market Size Exponent,Double,1.5,,Exponent applied to market size to calculate the size factor for automatic ship orders.,1.0,4.0,Solver
+SHIP_ALLOC_AGGRESSION_COMBAT_MULT,Ship Allocation Aggression Combat Mult,Double,0.2,,Bonus multiplier to target combat power based on faction aggression doctrine. Higher aggression increases combat oriented hull production.,0.0,1.0,Solver
+SHIP_ALLOC_THREAT_RELATIONSHIP_MULT,Ship Allocation Threat Relationship Mult,Double,2.0,,Multiplier applied to combat power targets when ordering ships.,1.0,10.0,Solver
+SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,100.0,,"Combat power target floor used by factions when ordering ships.",0.0,1000.0,Solver
 ,,,,,,,,
-raids_raidStockpileAccessRatio,Raid Stockpile Access Ratio,Double,0.15,,The maximum fraction of a colony's stockpile that can be looted in a single raid.,0,1,Raids
-raids_raidBaseEff,Raid Base Effectiveness,Double,0.4,,Base multiplier for loot quantity from raids (applies before other modifiers).,0,1,Raids
+MULTI_THREADING,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread.,,,Economy
+ASSIGN_WORKERS_ON_LOAD,Assign Workers On Load,Boolean,false,,Re-allocates the workers after loading a save. Includes quick-saves as well.,,,Economy
+STARTING_CREDITS_FOR_MARKET,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
+CREDIT_WITHDRAWAL_LIMIT,Monthly Withdrawal Limit,Int,100000,,Sets the maximum amount of credits you can withdraw from your colonies per month.,0,1000000000,Economy
+AUTO_TRANSFER_PROFIT_LIMIT,Profit Transfer Limit,Double,0.5,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy
+,,,,,,,,
+TRADE_INTERVAL,Trade Interval,Int,15,,Markets will trade goods every x days.,7,30,Trade
+DAYS_TO_COVER,Stockpile Coverage Days,Int,45,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Trade
+DAYS_TO_COVER_PER_IMPORT,Trade Coverage Limit,Int,21,,Limits how many days of demand can be satisfied per trade run to reduce volatility. Values lower than Trade Interval will cause constant deficits.,1,360,Trade
+EXPORT_THRESHOLD_FACTOR,Export Threshold Factor,Double,1.5,,Multiplier for excess stock required before a market begins exporting.,1,2,Trade
+FACTION_EXCHANGE_MULT,Faction Price Multiplier,Double,0.3,,Adjusts prices for goods traded between markets of the same faction. Set to 0 for free in-faction trade.,0,1,Trade
+EMBARGO_REP_DROP,Embargo Reputation Penalty,Double,0.4,,The relationship hit for imposing an embargo. 1 means 100 relation points.,0,1,Trade
+MIN_RELATION_TO_TRADE,Minimum Trade Relationship,Double,-0.9,,Minimum relationship between factions for trade to occur. Factions below this threshold will not trade.,-1,0,Trade
+TRADE_MISSION_MAX_DISPLAYED_SHIPS,Max Displayed Ships in Trade Mission,Int,20,,Maximum number of allocated ship types shown in a trade mission widget.,1,100,Trade
+TRADE_MAP_MIN_AMOUNT_FILTER,Trade Map Min Amount Filter,Int,50000,,Minimum trade amount (in tons) for a mission to appear in the trade map.,0,1000000,Trade
+INFORMAL_TRADE_SHARE,Informal Trade Share,Double,0.03,,Fraction of sector-wide excess and demand that the informal sector can move every trade interval. Lower values limit informal trade volume.,0.0,1.0,Trade
+,,,,,,,,
+IDLE_SHIP_MAINTENANCE_MULT,Idle Ships Maintenance Mult,Double,0.3,,Multiplier to maintenance supply cost for idle ships inside the faction inventory. A value of 1 disables the discount.,0,1,Fleet
+CREW_WAGE_PER_MONTH,Crew Monthly Wages,Double,10,,Monthly wages per crew member operating the faction ships inventory.,1,100,Fleet
+IDLE_CREW_WAGE_MULT,Idle Crew Wage Mult,Double,0.5,,Wage multiplier for idle crew operating the faction ships inventory.,0,1,Fleet
+TRAVEL_SPEED_LY_DAY,Trade Fleet Travel Speed,Int,14,,The speed in light-years at which trade fleets travel in hyperspace. Used by the simulation.,1,20,Fleet
+FORCED_FUEL_IMPORT_COST_MULT,Forced Fuel Cost Mult,Double,3,,Cost multiplier for fuel purchases made to initiate trade when no fuel is stockpiled.,1,10,Fleet
+INDEPENDENT_TRADE_FLEET_BASE_FEE,Independent Hauler Base Fee,Double,1000.0,,Base fee in credits per trade mission when using independent haulers.,0,100000,Fleet
+INDEPENDENT_TRADE_FLEET_PER_TON_FEE,Independent Hauler Per-Ton Fee,Double,1.5,,Fee per ton of cargo (including fuel and crew) transported.,0,1000,Fleet
+INDEPENDENT_TRADE_FLEET_PERCENT_CUT,Independent Hauler Percentage Cut,Double,0.05,,Percentage of the total cargo value taken as fee.,0,1,Fleet
+INDEPENDENT_TRADE_FLEET_HAZARD_BASE,Independent Hauler Hazard Base,Double,500.0,,Base hazard pay in credits added for dangerous routes.,0,100000,Fleet
+INDEPENDENT_TRADE_FLEET_HAZARD_MULT,Independent Hauler Hazard Multiplier,Double,4.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
+MAX_VISIBLE_PLANNED_ORDERS,Max Visible Planned Orders,Int,500,,Maximum number of planned orders displayed in the Planned Orders and Assembly Line panels. Additional orders are hidden for performance.,50,100000,Fleet
+NPC_FACTION_ASSEMBLY_LINES,NPC Faction Assembly Lines,Int,50,,Number of assembly lines available to NPC factions.,1,1000,Fleet
+PLAYER_FACTION_ASSEMBLY_LINES,Player Faction Assembly Lines,Int,3,,Starting number of assembly lines available to the player faction.,1,100,Fleet
+,,,,,,,,
+RAID_STOCKPILES_ACCESS_RATIO,Raid Stockpile Access Ratio,Double,0.15,,The maximum fraction of a colony's stockpile that can be looted in a single raid.,0,1,Raids
+RAID_BASE_EFF,Raid Base Effectiveness,Double,0.4,,Base multiplier for loot quantity from raids (applies before other modifiers).,0,1,Raids

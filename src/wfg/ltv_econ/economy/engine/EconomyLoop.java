@@ -64,7 +64,7 @@ public class EconomyLoop {
         discoverInputsOutputs();
 
         engine.comDomains.values().forEach(CommodityDomain::reset);
-        engine.factionShipInventories.values().forEach(FactionShipInventory::update);
+        engine.factionShipInventories.values().parallelStream().forEach(FactionShipInventory::update);
 
         if (!fakeAdvance || forceWorkerAssignment) {
             if (allocWorkers) {
@@ -282,7 +282,7 @@ public class EconomyLoop {
                     m -> new TradeMission(flow.exporter, flow.importer, flow.inFaction)
                 );
 
-                mission.cargo.add(new TradeCom(comID, flow.amount, flow.unitPrice));
+                mission.cargo.add(new TradeCom(comID, flow.amount, flow.totalPrice));
                 if (flow.comID.equals(Commodities.CREW) || flow.comID.equals(Commodities.MARINES)) {
                     mission.crewAmount += flow.amount;
                 } else if (flow.comID.equals(Commodities.FUEL)) {
@@ -449,7 +449,7 @@ public class EconomyLoop {
         
         float totalValue = 0f;
         for (TradeCom flow : mission.cargo) {
-            totalValue += flow.amount * flow.unitPrice;
+            totalValue += flow.totalPrice;
         }
 
         final float perTonFee = EconConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE * mission.getTotalAmount();
