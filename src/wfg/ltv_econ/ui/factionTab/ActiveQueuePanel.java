@@ -16,6 +16,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.fleet.ShipProductionOrder;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.dialog.DiscardAllDialog;
@@ -164,6 +165,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
                 break;
 
             case REMOVE:
+                ShipProductionManager.addScrapsToCapital(StaticData.inv, 1, source.spec);
                 StaticData.inv.removeActiveOrder(source.index);
                 buildUI();
                 break;

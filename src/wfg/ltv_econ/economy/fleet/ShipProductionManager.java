@@ -30,6 +30,8 @@ public class ShipProductionManager {
     private ShipProductionManager() {}
 
     private static final CommoditySpecAPI shipSpec = settings.getCommoditySpec(Commodities.SHIPS);
+    private static final CommoditySpecAPI metalsSpec = settings.getCommoditySpec(Commodities.METALS);
+    private static final CommoditySpecAPI rareMetalsSpec = settings.getCommoditySpec(Commodities.RARE_METALS);
 
     public static final void planOrders(FactionShipInventory inv) {
         final String factionID = inv.factionID;
@@ -125,6 +127,21 @@ public class ShipProductionManager {
         return new PlannedOrder(spec.getHullId(), credits, commodities, days);
     }
 
+    public static final void addScrapsToCapital(FactionShipInventory inv, int amount, ShipHullSpecAPI spec) {
+        addScrapsToCapital(inv, spec.getBaseValue() * amount);
+    }
+
+    public static final void addScrapsToCapital(FactionShipInventory inv, float creditValue) {
+        final MarketAPI capital = inv.getCapital();
+        if (capital == null) return;
+        
+        final ArrayMap<String, Float> scraps = ShipProductionManager.getScrapAmounts(creditValue);
+        final EconomyEngine engine = EconomyEngine.instance();
+        for (var e : scraps.singleEntrySet()) {
+            engine.getComCell(e.getKey(), capital.getId()).addStoredAmount(e.getValue());
+        }
+    }
+
     private static final int getBaseDays(ShipHullSpecAPI spec) {
         if (spec.getHullSize() == HullSize.FIGHTER) return 1;
         return Arithmetic.clamp(spec.getFleetPoints() * 2, 1, 180);
@@ -197,5 +214,17 @@ public class ShipProductionManager {
 
         // [-1,1] -> [0,1]
         return (total / count + 1f) / 2f;
+    }
+
+    private static final ArrayMap<String, Float> getScrapAmounts(float baseValue) {
+        final ArrayMap<String, Float> map = new ArrayMap<>(2);
+
+        final float materialValuePerShip = baseValue * LaborConfig.getRoCC("industry");
+        final float scrapValue = materialValuePerShip * EconConfig.SCRAP_REFUND_FRACTION;
+
+        map.put(Commodities.METALS, (scrapValue * 0.5f) / metalsSpec.getBasePrice());
+        map.put(Commodities.RARE_METALS, (scrapValue * 0.5f) / rareMetalsSpec.getBasePrice());
+
+        return map;
     }
 }

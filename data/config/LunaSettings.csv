@@ -21,13 +21,11 @@ header_workerAllocator,Worker Allocator,Header,Worker Allocator,,,,,Solver
 ECON_DEFICIT_COST,Deficit Penalty,Double,5000,,Higher values encourage more demand fulfillment.,0,100000,Solver
 LOCAL_WORKER_COST_MULT,Local Worker Cost Mult,Double,0.1,,Multiplier for the cost of workers assigned to meet local demand. A value of 1 stops prioritizing production for local demand. Heavy on performance when allocation passes are high.,0.01,1,Solver
 FACTION_WORKER_COST_MULT,Faction Worker Cost Mult,Double,0.15,,Multiplier for the cost of workers assigned to meet faction demand. A value of 1 disables it. Should ideally be higher than Local Worker Cost Mult.,0.01,1,Solver
-MIN_WORKER_FRACTION,Minimum Worker Fraction,Double,0.2,,Minimum fraction of each output's fair share of workers. Setting a high value may cause production deficits.,0,1,Solver
 LOCAL_PROD_BUFFER,Local Production Buffer,Double,0.1,,Allocation is prioritized to meet local demand by a factor of 1 + x.,0,3,Solver
 FACTION_PROD_BUFFER,Faction Production Buffer,Double,0.1,,Allocation is prioritized to meet faction demand by a factor of 1 + x.,0,3,Solver
 PRODUCTION_BUFFER,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Solver
 ECON_ALLOCATION_PASSES,Allocation Refinement Passes,Int,3,,Number of times the solver re-evaluates deficits and adjusts worker assignments. Computation time grows linearly with the value. Gains become minimal after 6 passes.,1,20,Solver
 WORKER_ASSIGN_INTERVAL,Worker Assignment Interval,Int,15,,"Workers of NPC markets will be re-allocated every x days.",1,360,Solver
-USE_PRODUCTION_FAIRNESS,Fairness Metric,Radio,Commodities Produced,"Commodities Produced, Workers Assigned","Determines the measurement for the fair share.",,,Solver
 ,,,,,,,,
 header_hullAllocator,Hull Allocator,Header,Hull Allocator,,,,,Solver
 SHIP_ALLOC_CAPACITY_TARGET_BUFFER,Ship Allocation Capacity Buffer,Double,1.2,,Multiplier applied to trade mission targets when allocating hulls. Provides a safety margin to ensure demand is fully met.,1.0,3.0,Solver
@@ -67,6 +65,7 @@ INDEPENDENT_TRADE_FLEET_HAZARD_MULT,Independent Hauler Hazard Multiplier,Double,
 MAX_VISIBLE_PLANNED_ORDERS,Max Visible Planned Orders,Int,500,,Maximum number of planned orders displayed in the Planned Orders and Assembly Line panels. Additional orders are hidden for performance.,50,100000,Fleet
 NPC_FACTION_ASSEMBLY_LINES,NPC Faction Assembly Lines,Int,50,,Number of assembly lines available to NPC factions.,1,1000,Fleet
 PLAYER_FACTION_ASSEMBLY_LINES,Player Faction Assembly Lines,Int,3,,Starting number of assembly lines available to the player faction.,1,100,Fleet
+SCRAP_REFUND_FRACTION,Scrap Refund Fraction,Double,0.5,,Ratio of the hull's value returned as scrap metals when discarded.,0,1,Fleet
 ,,,,,,,,
 RAID_STOCKPILES_ACCESS_RATIO,Raid Stockpile Access Ratio,Double,0.15,,The maximum fraction of a colony's stockpile that can be looted in a single raid.,0,1,Raids
 RAID_BASE_EFF,Raid Base Effectiveness,Double,0.4,,Base multiplier for loot quantity from raids (applies before other modifiers).,0,1,Raids

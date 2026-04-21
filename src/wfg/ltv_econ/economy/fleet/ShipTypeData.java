@@ -24,6 +24,8 @@ public class ShipTypeData implements Serializable {
 
     private int idle, inUse;
 
+    private transient float combatPower = 0f;
+
     public ShipTypeData(String hullID) {
         this.hullID = hullID;
 
@@ -32,6 +34,8 @@ public class ShipTypeData implements Serializable {
 
     private final Object readResolve() {
         spec = settings.getHullSpec(hullID);
+
+        combatPower = getCombatPower(spec);
 
         return this;
     }
@@ -78,7 +82,7 @@ public class ShipTypeData implements Serializable {
     }
 
     public final int getCrewPerShip() {
-        return (int) spec.getMinCrew();
+        return getCrewPerShip(spec);
     }
 
     public final int getTotalCrew() {
@@ -90,7 +94,7 @@ public class ShipTypeData implements Serializable {
     }
 
     public final int getCrewCapacityPerShip() {
-        return (int) Math.max(0f, spec.getMaxCrew() - getCrewPerShip());
+        return getCrewCapacityPerShip(spec);
     }
 
     public final float getMonthlyCrewWages() {
@@ -98,14 +102,7 @@ public class ShipTypeData implements Serializable {
     }
 
     public final float getCombatPower() {
-        final float mult = getCombatMult(spec.getDesignation())
-            + spec.getFighterBays() * 0.04f
-            + spec.getArmorRating() / 500f
-            + spec.getFluxCapacity() / 6000f
-            + spec.getFluxDissipation() / 750f
-            + (1f - spec.getShieldSpec().getFluxPerDamageAbsorbed()) * 2f
-            + (spec.getEngineSpec().getMaxSpeed() - 70) / 70f;
-        return spec.getFleetPoints() * mult;
+        return combatPower;
     }
 
     public final float getTotalCombatPower() {
@@ -118,6 +115,17 @@ public class ShipTypeData implements Serializable {
 
     public static final int getCrewCapacityPerShip(ShipHullSpecAPI spec) {
         return (int) spec.getMaxCrew() - getCrewPerShip(spec);
+    }
+
+    public static final float getCombatPower(ShipHullSpecAPI spec) {
+        final float mult = getCombatMult(spec.getDesignation())
+            + spec.getFighterBays() * 0.04f
+            + spec.getArmorRating() / 500f
+            + spec.getFluxCapacity() / 6000f
+            + spec.getFluxDissipation() / 750f
+            + (1f - spec.getShieldSpec().getFluxPerDamageAbsorbed()) * 2f
+            + (spec.getEngineSpec().getMaxSpeed() - 70) / 70f;
+        return spec.getFleetPoints() * mult;
     }
 
     private static final float getCombatMult(String designation) {

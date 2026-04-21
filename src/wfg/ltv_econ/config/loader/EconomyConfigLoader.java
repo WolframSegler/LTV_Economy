@@ -53,10 +53,8 @@ public class EconomyConfigLoader {
         EconConfig.EMBARGO_REP_DROP = (float) root.getDouble("EMBARGO_REP_DROP");
         EconConfig.MIN_RELATION_TO_TRADE = (float) root.getDouble("MIN_RELATION_TO_TRADE");
         EconConfig.ECON_ALLOCATION_PASSES = root.getInt("ECON_ALLOCATION_PASSES");
-        EconConfig.MIN_WORKER_FRACTION = (float) root.getDouble("MIN_WORKER_FRACTION");
         EconConfig.PRODUCTION_HOLD_FACTOR = (float) root.getDouble("PRODUCTION_HOLD_FACTOR");
         EconConfig.OPEN_MARKET_TO_STOCKPILES_RATIO = (float) root.getDouble("OPEN_MARKET_TO_STOCKPILES_RATIO");
-        EconConfig.USE_PRODUCTION_FAIRNESS = root.getBoolean("USE_PRODUCTION_FAIRNESS");
         EconConfig.CREDIT_WITHDRAWAL_LIMIT = root.getInt("CREDIT_WITHDRAWAL_LIMIT");
         EconConfig.AUTO_TRANSFER_PROFIT_LIMIT = (float) root.getDouble("AUTO_TRANSFER_PROFIT_LIMIT");
         EconConfig.IDLE_SHIP_MAINTENANCE_MULT = (float) root.getDouble("IDLE_SHIP_MAINTENANCE_MULT");
@@ -85,6 +83,7 @@ public class EconomyConfigLoader {
         EconConfig.SHIP_ALLOC_AGGRESSION_COMBAT_MULT = (float) root.getDouble("SHIP_ALLOC_AGGRESSION_COMBAT_MULT");
         EconConfig.SHIP_ALLOC_THREAT_RELATIONSHIP_MULT = (float) root.getDouble("SHIP_ALLOC_THREAT_RELATIONSHIP_MULT");
         EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER = (float) root.getDouble("SHIP_ALLOC_MIN_COMBAT_POWER");
+        EconConfig.SCRAP_REFUND_FRACTION = (float) root.getDouble("SCRAP_REFUND_FRACTION");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
@@ -138,7 +137,6 @@ public class EconomyConfigLoader {
         EconConfig.EMBARGO_REP_DROP = LunaSettings.getDouble(LTV_ECON, "EMBARGO_REP_DROP").floatValue();
         EconConfig.MIN_RELATION_TO_TRADE = LunaSettings.getDouble(LTV_ECON,"MIN_RELATION_TO_TRADE").floatValue();
         EconConfig.ECON_ALLOCATION_PASSES = LunaSettings.getInt(LTV_ECON, "ECON_ALLOCATION_PASSES");
-        EconConfig.MIN_WORKER_FRACTION = LunaSettings.getDouble(LTV_ECON, "MIN_WORKER_FRACTION").floatValue();
         EconConfig.IDLE_SHIP_MAINTENANCE_MULT = LunaSettings.getDouble(LTV_ECON, "IDLE_SHIP_MAINTENANCE_MULT").floatValue();
         EconConfig.CREW_WAGE_PER_MONTH = LunaSettings.getDouble(LTV_ECON, "CREW_WAGE_PER_MONTH").floatValue();
         EconConfig.IDLE_CREW_WAGE_MULT = LunaSettings.getDouble(LTV_ECON, "IDLE_CREW_WAGE_MULT").floatValue();
@@ -164,8 +162,6 @@ public class EconomyConfigLoader {
         EconConfig.SHIP_ALLOC_AGGRESSION_COMBAT_MULT = LunaSettings.getDouble(LTV_ECON, "SHIP_ALLOC_AGGRESSION_COMBAT_MULT").floatValue();
         EconConfig.SHIP_ALLOC_THREAT_RELATIONSHIP_MULT = LunaSettings.getDouble(LTV_ECON, "SHIP_ALLOC_THREAT_RELATIONSHIP_MULT").floatValue();
         EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER = LunaSettings.getDouble(LTV_ECON, "SHIP_ALLOC_MIN_COMBAT_POWER").floatValue();
-
-        final String fairness = LunaSettings.getString(LTV_ECON, "USE_PRODUCTION_FAIRNESS");
-        EconConfig.USE_PRODUCTION_FAIRNESS = fairness.equals("Commodities Produced");
+        EconConfig.SCRAP_REFUND_FRACTION = LunaSettings.getDouble(LTV_ECON, "SCRAP_REFUND_FRACTION").floatValue();
     }
 }

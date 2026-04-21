@@ -83,7 +83,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
             m_panel, 120, entryH, "Order", null, () -> new ShipCommissionDialog(this)
         );
         commissionBtn.cutStyle = CutStyle.ALL;
-        commissionBtn.setShortcutAndAppendToText(Keyboard.KEY_A);
+        commissionBtn.setShortcutAndAppendToText(Keyboard.KEY_T);
         add(commissionBtn).inTR(BUTTON_W, hpad);
 
         final Button clearAllBtn = new Button(m_panel, 120, entryH, "Clear All", null, (btn) -> {

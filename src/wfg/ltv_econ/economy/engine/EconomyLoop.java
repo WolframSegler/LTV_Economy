@@ -534,7 +534,6 @@ public class EconomyLoop {
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             final DebtDebuffTier appliedTier = getDebtDebuffTier(market.getId());
 
-            // TODO test later
             for (MarketImmigrationModifier immigMod : market.getTransientImmigrationModifiers()) {
                 if (immigMod instanceof DebtEffectMarketImmigration debtMod) {
                     market.removeTransientImmigrationModifier(debtMod);

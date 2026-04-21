@@ -18,7 +18,9 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.fleet.ShipTypeData;
+import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.dialog.AddShipDialog;
 import wfg.ltv_econ.ui.factionTab.dialog.RemoveShipDialog;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
@@ -179,9 +181,11 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         add(removeBtn).inBR(pad, pad);
         removeBtn.onClicked = (btn) -> {
             if (NativeUiUtils.isShiftDown()) {
+                ShipProductionManager.addScrapsToCapital(StaticData.inv, 10, data.spec);
                 data.addShip(-10);
                 buildUI();
             } else if (NativeUiUtils.isCtrlDown()) {
+                ShipProductionManager.addScrapsToCapital(StaticData.inv, 1, data.spec);
                 data.addShip(-1);
                 buildUI();
             } else {

@@ -123,11 +123,6 @@ public class EconConfig {
      */
     public static int ECON_ALLOCATION_PASSES;
 
-    /**
-     * Ratio of ideal workers that will be assigned unconditionally.
-     */
-    public static float MIN_WORKER_FRACTION;
-
     /** 
      * Multiplier controlling daily production retained in local stockpiles before exporting.
      */
@@ -137,11 +132,6 @@ public class EconConfig {
      * The ratio of goods sold to the open market that finds its way to the market stockpiles.
      */
     public static float OPEN_MARKET_TO_STOCKPILES_RATIO;
-
-    /**
-     * Determines the use of worker productivity when calculating fair share of workers.
-     */
-    public static boolean USE_PRODUCTION_FAIRNESS;
 
     /**
      * Monthly credits withdraw limit for player colonies.
@@ -249,6 +239,11 @@ public class EconConfig {
      * Combat target floor when allocating ships for faction inventory.
      */
     public static float SHIP_ALLOC_MIN_COMBAT_POWER;
+
+    /**
+     * Fraction of value refunded as metals and rare metals when a huöö production is discarded.
+     */
+    public static float SCRAP_REFUND_FRACTION;
 
     public static record DebtDebuffTier(
         long threshold,

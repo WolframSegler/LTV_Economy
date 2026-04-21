@@ -29,7 +29,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
     protected final List<NavButtonDef> getNavButtonDefs() {
         final List<NavButtonDef> defs = new ArrayList<>();
 
-        defs.add(new NavButtonDef("Global Commodity Flow", Keyboard.KEY_NONE,
+        defs.add(new NavButtonDef("Global Commodity Flow", Keyboard.KEY_Q,
             () -> {
                 final GlobalCommodityFlow content = new GlobalCommodityFlow(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -42,7 +42,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef("Trade Routes", Keyboard.KEY_NONE,
+        defs.add(new NavButtonDef("Trade Routes", Keyboard.KEY_W,
             () -> {
                 final ComTradeFlowMap content = new ComTradeFlowMap(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -55,7 +55,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef("Settings", Keyboard.KEY_NONE,
+        defs.add(new NavButtonDef("Settings", Keyboard.KEY_S,
             () -> {
                 final EconomySettingsPanel content = new EconomySettingsPanel(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H

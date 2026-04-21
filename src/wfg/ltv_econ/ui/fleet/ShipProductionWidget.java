@@ -38,9 +38,8 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
     private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
     private final BorderRenderer border = new BorderRenderer(UI_BORDER_4, true, WIDTH, HEIGHT);
 
-    private final ShipProductionOrder order;
-    private final ShipHullSpecAPI spec;
-
+    public final ShipHullSpecAPI spec;
+    public final ShipProductionOrder order;
     public final int index;
 
     public WidgetSelectionState selectionState = WidgetSelectionState.NONE;
