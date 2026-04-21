@@ -13,6 +13,7 @@ import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.native_ui.util.ArrayMap;
 
@@ -109,15 +110,14 @@ public class TradeMission implements Serializable {
             return displayText;
         }
         
-        // TODO adjust the colors
         public Color getDisplayColor() {
             switch (this) {
-                case SCHEDULED: return Color.CYAN;
-                case IN_TRANSIT: return Color.YELLOW;
-                case DELIVERED: return Color.GREEN;
-                case CANCELLED: return Color.ORANGE;
-                case LOST: return Color.RED;
-                default: return Color.WHITE;
+                case SCHEDULED: return UIColors.STOCKPILES_TARGET;
+                case IN_TRANSIT: return UIColors.CARGO_COLOR;
+                case DELIVERED: return UIColors.COM_EXPORT;
+                case CANCELLED: return UIColors.COM_IMPORT;
+                case LOST: return UIColors.COM_DEFICIT;
+                default: return UIColors.COM_FACTION_IMPORT;
             }
         }
         

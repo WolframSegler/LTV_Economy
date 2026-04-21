@@ -276,7 +276,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         final long creditsValue = (long) mission.credits.computeEffective(0f);
         final String creditsStr = NumFormat.formatCreditAbs(creditsValue);
-        final LabelAPI costLbl = settings.createLabel("Expenses: " + creditsStr, Fonts.INSIGNIA_LARGE);
+        final LabelAPI costLbl = settings.createLabel("Ledger: " + creditsStr, Fonts.INSIGNIA_LARGE);
         costLbl.setHighlightColor(creditsValue < 0l ? negative : highlight);
         costLbl.setHighlight(creditsStr);
         add(costLbl).inBL(opad, opad);

@@ -14,6 +14,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.ShipProductionOrder;
 import wfg.ltv_econ.serializable.StaticData;
@@ -131,7 +132,11 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         }
 
         protected List<ShipProductionOrder> getDataList() {
-            return StaticData.inv.getActiveProductionQueue();
+            List<ShipProductionOrder> orders = StaticData.inv.getActiveProductionQueue();
+            if (orders.size() > EconConfig.MAX_VISIBLE_PLANNED_ORDERS) {
+                orders = orders.subList(0, EconConfig.MAX_VISIBLE_PLANNED_ORDERS);
+            }
+            return orders;
         }
 
         protected ShipProductionWidget createWidget(ShipProductionOrder item, int index) {

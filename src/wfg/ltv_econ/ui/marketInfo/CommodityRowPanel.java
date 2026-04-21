@@ -93,6 +93,7 @@ public class CommodityRowPanel extends CustomPanel implements
                 tp.setParaFont(Fonts.ORBITRON_12);
                 tp.addSectionHeading("Stockpiles, Trade, and Demand", Alignment.MID, opad);
                 TooltipUtils.createComStockpilesChangeBreakdown(tp, cell);
+                tp.addSpacer(opad);
                 TooltipUtils.createComTargetBreakdown(tp, cell);
 
                 tp.setParaFont(Fonts.ORBITRON_12);

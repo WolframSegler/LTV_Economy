@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
+import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.config.LaborConfig;
@@ -20,14 +21,14 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EventConfig;
 import wfg.ltv_econ.config.EventConfig.EventSpec;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
-import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.native_ui.util.Arithmetic;
 
-public class PlayerMarketData implements Serializable {
+public class PlayerMarketData implements Serializable, MarketImmigrationModifier {
     public final String marketID;
     public transient MarketAPI market;
 
@@ -162,10 +163,11 @@ public class PlayerMarketData implements Serializable {
     }
 
     public final void apply() {
-        // TODO modify later to use reportIndustryApplied method in the future
         for (MarketPolicy policy : policies) {
             if (policy.isActive()) policy.apply(this);
         }
+
+        market.addTransientImmigrationModifier(this);
     }
 
     // PRIVATE METHODS
@@ -259,18 +261,23 @@ public class PlayerMarketData implements Serializable {
         );
     }
 
+    public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
+        final String desc = "Colony health";
+        final int baseValue = (int) ((popHealth + 5f - BASELINE_VALUE) / 10f);
+
+        incoming.getWeight().modifyFlat(healthID, baseValue * 2f, desc);
+    }
+
     private final void applyHealthModifiers() {
         final String desc = "Colony health";
 
         final int baseValue = (int) ((popHealth + 5f - BASELINE_VALUE) / 10f);
 
         if (baseValue != 0) {
-            market.getPopulation().getWeight().modifyFlat(healthID, baseValue * 2f, desc);
             market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).modifyMult(
                 healthID, 1f + baseValue * 0.05f, desc
             );
         } else {
-            market.getPopulation().getWeight().unmodifyFlat(healthID);
             market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyMult(healthID);
         }
     }
@@ -282,21 +289,19 @@ public class PlayerMarketData implements Serializable {
 
         if (baseValue != 0) {
             market.getStability().modifyFlat(happinessID, baseValue, desc);
-
-            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
-                ind.getSupplyBonus().modifyMult(
-                    happinessID, 1f + baseValue * 0.2f, desc
-                );
+            for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
+                dom.getCell(marketID).getProductionStat().modifyMult(happinessID, 1f + baseValue * 0.2f, desc);
             }
         } else {
             market.getStability().unmodifyFlat(happinessID);
-            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
-                ind.getSupplyBonus().unmodifyMult(happinessID);
+            for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
+                dom.getCell(marketID).getProductionStat().unmodifyMult(happinessID);
             }
         }
     }
 
     private final void applySocialCohesionModifiers() {
+        // TODO
         // final String desc = "Social cohesion";
 
         /*

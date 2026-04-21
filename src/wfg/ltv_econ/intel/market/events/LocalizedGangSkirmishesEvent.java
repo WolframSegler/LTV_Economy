@@ -1,6 +1,9 @@
 package wfg.ltv_econ.intel.market.events;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
+import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
@@ -39,7 +42,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
         activeDaysRemaining = Math.round(BASE_DUR * durationMult); // base 7 days
         cooldownDaysRemaining = BASE_COOLDOWN + BASE_DUR;
 
-        data.market.getPopulation().getWeight().modifyFlat(id, GROWTH_DEBUFF, spec.name);
+        data.market.addImmigrationModifier(new GangSkirmishesImmigration());
 
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
 
@@ -67,7 +70,12 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
     private final void deactivate(PlayerMarketData data) {
         if (!active) return;
 
-        data.market.getPopulation().getWeight().unmodifyFlat(id);
+        for (MarketImmigrationModifier immigMod : data.market.getTransientImmigrationModifiers()) {
+            if (immigMod instanceof GangSkirmishesImmigration gangMod) {
+                data.market.removeTransientImmigrationModifier(gangMod);
+                break;
+            }
+        }
         data.happinessDelta.unmodifyFlat(id);
 
         active = false;
@@ -89,5 +97,11 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
         tp.addGrid(0);
 
         tp.addPara("Active for %s more days", opad, negative, Integer.toString(activeDaysRemaining));
+    }
+
+    private class GangSkirmishesImmigration implements MarketImmigrationModifier {
+        public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
+            incoming.getWeight().modifyFlat(id, GROWTH_DEBUFF, spec.name);
+        }
     }
 }

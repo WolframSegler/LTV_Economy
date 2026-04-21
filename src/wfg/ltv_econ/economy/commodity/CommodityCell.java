@@ -242,7 +242,7 @@ public class CommodityCell implements Serializable {
                     );
                 } else {
                     consumptionMutables.put(indID, demandStat);
-                    consumption.modifyBase(indID, demandStat.getModifiedValue());
+                    consumption.modifyBase(indID, demandStat.getModifiedValue(), ind.getCurrentName());
                 }
             }
         }

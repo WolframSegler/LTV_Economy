@@ -7,8 +7,10 @@ import static wfg.ltv_econ.constants.strings.Consumption.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
@@ -28,6 +30,8 @@ public class FactionShipInventory implements Serializable {
     private final ArrayMap<String, ShipTypeData> ships = new ArrayMap<>(4);
     final List<ShipProductionOrder> activeQueue = new ArrayList<>();
     final List<PlannedOrder> plannedOrders = new ArrayList<>();
+
+    private final Set<String> lastDemandCommodities = new HashSet<>();
 
     public final String factionID;
     private String capitalID;
@@ -266,11 +270,9 @@ public class FactionShipInventory implements Serializable {
         if (capital == null) return;
 
         final EconomyEngine engine = EconomyEngine.instance();
-        final CommodityCell suppliesCell = engine.getComCell(Commodities.SUPPLIES, capital.getId());
-
-        final float maintenance = getTotalDailyMaintenance();
-        suppliesCell.getConsumptionStat().modifyFlat(FACTION_FLEET_MAINTENANCE_KEY, maintenance, FACTION_FLEET_MAINTENANCE_DESC);
-        suppliesCell.getTargetQuantumStat().modifyFlat(FACTION_FLEET_MAINTENANCE_KEY, maintenance, FACTION_FLEET_MAINTENANCE_DESC);
+        engine.getComCell(Commodities.SUPPLIES, capital.getId()).getConsumptionStat().modifyFlat(
+            FACTION_FLEET_MAINTENANCE_KEY, getTotalDailyMaintenance(), FACTION_FLEET_MAINTENANCE_DESC
+        );
     
         final ArrayMap<String, Float> demands = new ArrayMap<>(4);
         for (PlannedOrder order : plannedOrders) {
@@ -279,11 +281,19 @@ public class FactionShipInventory implements Serializable {
             }
         }
 
+        for (String comID : lastDemandCommodities) {
+            final CommodityCell cell = engine.getComCell(comID, capital.getId());
+            cell.getTargetQuantumStat().unmodifyFlat(ORDERS_DEMAND_KEY);
+        }
+        lastDemandCommodities.clear();
+
         for (var e : demands.singleEntrySet()) {
             final String comID = e.getKey();
             final float value = e.getValue() / EconConfig.DAYS_TO_COVER;
-            final CommodityCell cell = engine.getComCell(comID, capital.getId());
-            cell.getTargetQuantumStat().modifyFlat(ORDERS_DEMAND_KEY, value, ORDERS_DEMAND_DESC);
+            lastDemandCommodities.add(comID);
+            engine.getComCell(comID, capital.getId()).getTargetQuantumStat().modifyFlat(
+                ORDERS_DEMAND_KEY, value, ORDERS_DEMAND_DESC
+            );
         }
     }
 
@@ -335,7 +345,7 @@ public class FactionShipInventory implements Serializable {
         if (oldCapital != null) {
             final CommodityCell suppliesCell = EconomyEngine.instance().getComCell(Commodities.SUPPLIES, capitalID);
             suppliesCell.getConsumptionStat().unmodifyFlat(FACTION_FLEET_MAINTENANCE_KEY);
-            suppliesCell.getTargetQuantumStat().unmodifyFlat(FACTION_FLEET_MAINTENANCE_DESC);
+            suppliesCell.getTargetQuantumStat().unmodifyFlat(FACTION_FLEET_MAINTENANCE_KEY);
         }
 
         capitalID = marketID;

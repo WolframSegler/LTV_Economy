@@ -12,6 +12,7 @@ import com.fs.starfarer.api.impl.campaign.command.WarSimScript;
 import com.fs.starfarer.api.impl.campaign.command.WarSimScript.LocationDanger;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.native_ui.util.ArrayMap;
 
 import org.apache.commons.math4.legacy.optim.linear.*;
@@ -29,15 +30,13 @@ import org.apache.commons.math4.legacy.optim.MaxIter;
 public class ShipAllocator {
     private ShipAllocator() {}
     private static final double eps = 1e-3;
-    private static final SimplexSolver SOLVER = new SimplexSolver(eps, 30, 1e-4);
-
+    private static final SimplexSolver SOLVER = new SimplexSolver(eps, 30, 5e-6);
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
     private static final String DOCT_PREF_KEY = "|";
 
     private static final double DIVERSITY_PENALTY = 0.2;
     private static final double REF_SHIPMENT = 500.0;
     private static final float COMBAT_POWER_BASE_PER_100_TONS = 2.0f;
-    private static final float MIN_COMBAT_POWER = 15f;
     private static final float[] COMBAT_POWER_DANGER_MULT = {
         0.2f, // NONE
         0.8f, // MINIMAL
@@ -107,7 +106,7 @@ public class ShipAllocator {
             }
         }
         
-        final double[] x = getTargetSolution(objective, constraints);
+        final double[] x = getTargetSolution(objective, constraints, targetCargo, targetFuel, targetCrew, targetCombat, candidates);
         
         final ArrayMap<ShipTypeData, Integer> idleCopy = new ArrayMap<>(candidates.size());
         for (ShipTypeData data : candidates) {
@@ -220,7 +219,7 @@ public class ShipAllocator {
 
         final float dangerMult = COMBAT_POWER_DANGER_MULT[dangerOrdinal];
         final float required = (totalShipment / 100f) * COMBAT_POWER_BASE_PER_100_TONS * dangerMult;
-        return Math.max(required, MIN_COMBAT_POWER);
+        return Math.max(required, EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER);
     }
 
     /**
@@ -470,15 +469,13 @@ public class ShipAllocator {
         return coeffs;
     }
 
-    private static final double[] getTargetSolution(final double[] objective, final List<LinearConstraint> constraints) {
-        final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0);
-
+    private static final double[] getTargetSolution(final double[] objective, final List<LinearConstraint> constraints,
+        double targetCargo, double targetFuel, double targetCrew, double targetCombat, List<ShipTypeData> candidates
+    ) {
         return SOLVER.optimize(
-            new MaxIter(1000), objFunc,
-            new LinearConstraintSet(constraints),
-            GoalType.MINIMIZE,
-            new NonNegativeConstraint(true),
-            PivotSelectionRule.DANTZIG
+            new MaxIter(1000), new LinearObjectiveFunction(objective, 0),
+            new LinearConstraintSet(constraints), GoalType.MINIMIZE,
+            new NonNegativeConstraint(true), PivotSelectionRule.DANTZIG
         ).getPoint();
     }
 }

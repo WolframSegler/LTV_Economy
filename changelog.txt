@@ -25,6 +25,7 @@ v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
     - The Administration section contains faction-wide settings.
 
 - Reduced ships and crew demand of certain industries to counter-balance the new ships and crew demand created by Planned Orders.
+- Fixed a critical bug where intermediate commodities (ore, metals etc.) received no local or faction production priority, causing unnecessary imports. The solver now correctly incentivizes domestic production chains, resulting in better autarky.
 - Fixed a bug where the events panel would be duplicated.
 - Fixed bugs where event and policy effects on population growth were not working correctly.
 - Colonies without a spaceport can no longer participate in inter‑colony trade.

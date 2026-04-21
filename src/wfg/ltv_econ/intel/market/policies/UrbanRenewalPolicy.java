@@ -2,11 +2,13 @@ package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
 
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
+import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 
-// TODO fix population affect bug.
 public class UrbanRenewalPolicy extends MarketPolicy {
     public static final float HEALTH_BUFF = 0.4f;
     public static final float HAPPINESS_BUFF = 0.15f;
@@ -19,7 +21,7 @@ public class UrbanRenewalPolicy extends MarketPolicy {
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
 
-        data.market.getPopulation().getWeight().modifyFlat(id, POP_GROWTH_BUFF, spec.name);
+        data.market.addTransientImmigrationModifier(new UrbanRenewalImmigration());
     }
 
     public void unapply(PlayerMarketData data) {
@@ -27,7 +29,12 @@ public class UrbanRenewalPolicy extends MarketPolicy {
         data.happinessDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
 
-        data.market.getPopulation().getWeight().unmodifyFlat(id);
+        for (MarketImmigrationModifier immigMod : data.market.getTransientImmigrationModifiers()) {
+            if (immigMod instanceof UrbanRenewalImmigration urbanMod) {
+                data.market.removeTransientImmigrationModifier(urbanMod);
+                break;
+            }
+        }
     }
 
     @Override
@@ -48,5 +55,11 @@ public class UrbanRenewalPolicy extends MarketPolicy {
         tp.addToGrid(0, 3, "Class Consciousness", String.format("%+.3f", CLASS_DEBUFF));
 
         tp.addGrid(0);
+    }
+
+    private class UrbanRenewalImmigration implements MarketImmigrationModifier {
+        public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
+            incoming.getWeight().modifyFlat(id, POP_GROWTH_BUFF, spec.name);
+        }
     }
 }

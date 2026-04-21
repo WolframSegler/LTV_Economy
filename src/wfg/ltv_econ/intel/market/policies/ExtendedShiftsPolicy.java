@@ -4,20 +4,22 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 
 import static wfg.native_ui.util.UIConstants.*;
 
 public class ExtendedShiftsPolicy extends MarketPolicy {
 
-    public static final int PRODUCTION_BUFF = 15; // 15%
+    public static final int PRODUCTION_BUFF = 15;
     public static final float HAPPINESS_DEBUFF = -0.1f;
     public static final float HEALTH_DEBUFF = -0.07f;
     public static final float CLASS_BUFF = 0.01f;
 
     public void apply(PlayerMarketData data) {
-        for (Industry ind : WorkerRegistry.getVisibleIndustries(data.market)) {
-            ind.getSupplyBonus().modifyPercent(
+        for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
+            dom.getCell(data.marketID).getProductionStat().modifyPercent(
                 id, PRODUCTION_BUFF, spec.name
             );
         }
@@ -30,6 +32,10 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
     public void unapply(PlayerMarketData data) {
         for (Industry ind : WorkerRegistry.getVisibleIndustries(data.market)) {
             ind.getSupplyBonus().unmodifyPercent(id);
+        }
+
+        for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
+            dom.getCell(data.marketID).getProductionStat().unmodifyPercent(id);
         }
         
         data.happinessDelta.unmodifyFlat(id);

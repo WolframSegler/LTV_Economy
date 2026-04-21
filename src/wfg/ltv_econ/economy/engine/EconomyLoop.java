@@ -18,10 +18,12 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
@@ -64,7 +66,7 @@ public class EconomyLoop {
         discoverInputsOutputs();
 
         engine.comDomains.values().forEach(CommodityDomain::reset);
-        engine.factionShipInventories.values().parallelStream().forEach(FactionShipInventory::update);
+        engine.factionShipInventories.values().forEach(FactionShipInventory::update);
 
         if (!fakeAdvance || forceWorkerAssignment) {
             if (allocWorkers) {
@@ -530,39 +532,45 @@ public class EconomyLoop {
 
     private final void applyDebtEffects() {
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            final long credits = engine.getCredits(market.getId());
-            DebtDebuffTier appliedTier = null;
+            final DebtDebuffTier appliedTier = getDebtDebuffTier(market.getId());
 
-            for (DebtDebuffTier tier : EconConfig.DEBT_DEBUFF_TIERS) {
-                if (credits < tier.threshold()) appliedTier = tier;
-                else break;
+            // TODO test later
+            for (MarketImmigrationModifier immigMod : market.getTransientImmigrationModifiers()) {
+                if (immigMod instanceof DebtEffectMarketImmigration debtMod) {
+                    market.removeTransientImmigrationModifier(debtMod);
+                    break;
+                }
             }
-
-            final String src = "ltv_econ_debt_debuff";
 
             if (appliedTier == null) {
-                market.getStability().unmodify(src);
-                market.getUpkeepMult().unmodify(src);
-                market.getPopulation().getWeight().unmodify(src);
+                market.getStability().unmodify(DEBT_DEBUFF_KEY);
+                market.getUpkeepMult().unmodify(DEBT_DEBUFF_KEY);
             } else {
                 market.getStability().modifyFlat(
-                    src,
+                    DEBT_DEBUFF_KEY,
                     appliedTier.stabilityPenalty(),
-                    "market debt"
+                    DEBT_STABILITY_DEBUFF_DESC
                 );
                 market.getUpkeepMult().modifyPercent(
-                    src,
+                    DEBT_DEBUFF_KEY,
                     appliedTier.upkeepMultiplierPercent(),
-                    "inefficiencies caused by market debt"
+                    DEBT_STABILITY_DEBUFF_DESC
                 );
-                // TODO fix the population debuff to actually apply
-                market.getPopulation().getWeight().modifyFlat(
-                    src,
-                    appliedTier.immigrationModifier(),
-                    "Unattractiveness caused by market debt"
-                );
+                market.addTransientImmigrationModifier(new DebtEffectMarketImmigration(appliedTier.immigrationModifier()));
             }
         }
+    }
+
+    private final DebtDebuffTier getDebtDebuffTier(String marketID) {
+        final long credits = engine.getCredits(marketID);
+        DebtDebuffTier appliedTier = null;
+
+        for (DebtDebuffTier tier : EconConfig.DEBT_DEBUFF_TIERS) {
+            if (credits < tier.threshold()) appliedTier = tier;
+            else break;
+        }
+
+        return appliedTier;
     }
 
     private final void putMissionToPast(Iterator<TradeMission> it, TradeMission mission) {
@@ -570,5 +578,15 @@ public class EconomyLoop {
         it.remove();
 
         mission.durRemaining = EconConfig.HISTORY_LENGTH;
+    }
+
+    private static class DebtEffectMarketImmigration implements MarketImmigrationModifier {
+        private float mod;
+        public DebtEffectMarketImmigration(float mod) {
+            this.mod = mod;
+        }
+        public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
+            incoming.getWeight().modifyFlat(DEBT_DEBUFF_KEY, mod, DEBT_IMMIGRATION_DEBUFF_DESC);
+        }
     }
 }

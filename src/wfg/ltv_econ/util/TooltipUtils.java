@@ -274,17 +274,17 @@ public class TooltipUtils {
         { // Exports
             if (cell.inFactionExports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest in-faction exports", "+" +
-                    NumFormat.engNotate(cell.inFactionExports)
+                    NumFormat.formatMagnitudeAware(cell.inFactionExports)
                 );
             }
             if (cell.globalExports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest global exports", "+" +
-                    NumFormat.engNotate(cell.globalExports)
+                    NumFormat.formatMagnitudeAware(cell.globalExports)
                 );
             }
             if (cell.informalExports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest informal market exports", "+" +
-                    NumFormat.engNotate(cell.informalExports)
+                    NumFormat.formatMagnitudeAware(cell.informalExports)
                 );
             }
         }
@@ -292,17 +292,17 @@ public class TooltipUtils {
         { // Imports
             if (cell.inFactionImports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest in-faction imports", "+" +
-                    NumFormat.engNotate(cell.inFactionImports)
+                    NumFormat.formatMagnitudeAware(cell.inFactionImports)
                 );
             }
             if (cell.globalImports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest global imports", "+" +
-                    NumFormat.engNotate(cell.globalImports)
+                    NumFormat.formatMagnitudeAware(cell.globalImports)
                 );
             }
             if (cell.informalImports > 0f) {
                 tp.addToGrid(0, rowCount++, "Latest informal market imports", "+" +
-                    NumFormat.engNotate(cell.informalImports)
+                    NumFormat.formatMagnitudeAware(cell.informalImports)
                 );
             }
         }
@@ -316,25 +316,30 @@ public class TooltipUtils {
         final float dailyTarget = cell.getTargetQuantum(true);
         int rowCount = 0;
 
-        tp.addPara("Demand: %s", pad, highlight, NumFormat.engNotate(dailyTarget));
+        tp.addPara("Demand: %s", pad, highlight, NumFormat.formatMagnitudeAware(dailyTarget));
 
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
 
         final ArrayMutableStat targetStat = cell.getTargetQuantumStat();
 
-        for (StatMod mod : targetStat.getFlatMods().values()) {
+        for (StatMod mod : targetStat.getBaseMods().values()) {
             final String formatted = (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value);
-            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value >= 0 ? highlight : negative);
+            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value < 0 ? highlight : negative);
         }
 
         for (StatMod mod : targetStat.getPercentMods().values()) {
             final String formatted = (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value) + "%";
-            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value >= 0 ? highlight : negative);
+            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value < 0 ? highlight : negative);
         }
 
         for (StatMod mod : targetStat.getMultMods().values()) {
             final String formatted = Strings.X + NumFormat.formatMagnitudeAware(mod.value);
-            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value >= 1f ? highlight : negative);
+            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value < 1f ? highlight : negative);
+        }
+
+        for (StatMod mod : targetStat.getFlatMods().values()) {
+            final String formatted = (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value);
+            tp.addToGrid(0, rowCount++, mod.desc, formatted, mod.value < 0 ? highlight : negative);
         }
 
         if (rowCount <= 0) {
@@ -346,7 +351,7 @@ public class TooltipUtils {
 
     public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Production: %s", pad, highlight, NumFormat.engNotate(cell.getProduction(true)));
+        final LabelAPI title = tp.addPara("Production: %s", pad, highlight, NumFormat.formatMagnitudeAware(cell.getProduction(true)));
         int rowCount = 0;
 
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
@@ -357,11 +362,15 @@ public class TooltipUtils {
 
             if (mutable.getModifiedInt() > 0) {
                 tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getName()+")",
-                    "+" + NumFormat.engNotate(mutable.base));
+                    (mutable.getBaseValue() >= 0f ? "+" : "") + NumFormat.formatMagnitudeAware(mutable.getBaseValue()),
+                    mutable.getBaseValue() < 0f ? negative : highlight
+                );
 
                 for (StatMod mod : mutable.getPercentMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
-                        "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
+                        (mod.value >= 0f ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value) + "%",
+                        mod.value < 0f ? negative : highlight
+                    );
                 }
 
                 for (StatMod mod : mutable.getMultMods().values()) {
@@ -374,7 +383,9 @@ public class TooltipUtils {
 
             for (StatMod mod : mutable.getFlatMods().values()) {
                 tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
-                    "+" + NumFormat.formatMagnitudeAware(mod.value));
+                    (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value),
+                    mod.value < 0f ? negative : highlight
+                );
             }
         }
 
@@ -384,7 +395,9 @@ public class TooltipUtils {
             if (mutable.getModifiedInt() > 0) {
                 for (StatMod mod : mutable.getPercentMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc,
-                        "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
+                        (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value) + "%",
+                        mod.value < 0f ? negative : highlight
+                    );
                 }
 
                 for (StatMod mod : mutable.getMultMods().values()) {
@@ -397,7 +410,9 @@ public class TooltipUtils {
             
             for (StatMod mod : mutable.getFlatMods().values()) {
                 tp.addToGrid(0, rowCount++, mod.desc,
-                    "+" + NumFormat.formatMagnitudeAware(mod.value));
+                    (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value),
+                    mod.value < 0f ? negative : highlight
+                );
             }
         }
 
@@ -410,12 +425,11 @@ public class TooltipUtils {
     }
 
     public static final void createComConsumptionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
-        final Color valueColor = cell.getTargetQuantumUnmet() > 0 ? negative : highlight;
         int rowCount = 0;
         
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Consumption: %s", opad, valueColor,
-            NumFormat.engNotate(cell.getConsumption(true))
+        final LabelAPI title = tp.addPara("Consumption: %s", opad, highlight,
+            NumFormat.formatMagnitudeAware(cell.getConsumption(true))
         );
 
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
@@ -426,22 +440,30 @@ public class TooltipUtils {
 
             if (mutable.getModifiedInt() > 0) {
                 tp.addToGrid(0, rowCount++, BaseIndustry.BASE_VALUE_TEXT + " ("+ind.getName()+")",
-                    "+" + NumFormat.engNotate(mutable.base), valueColor);
+                    (mutable.getBaseValue() >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mutable.getBaseValue()),
+                    mutable.getBaseValue() < 0f ? highlight : negative
+                );
 
-                 for (StatMod mod : mutable.getPercentMods().values()) {
+                for (StatMod mod : mutable.getPercentMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
-                        "+" + NumFormat.formatMagnitudeAware(mod.value) + "%", valueColor);
+                        (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value) + "%",
+                        mod.value < 0f ? highlight : negative
+                    );
                 }
 
                 for (StatMod mod : mutable.getMultMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc + " ("+ind.getName()+")",
-                        Strings.X + NumFormat.formatMagnitudeAware(mod.value), valueColor);
+                        Strings.X + NumFormat.formatMagnitudeAware(mod.value),
+                        mod.value < 0f ? highlight : negative
+                    );
                 }
             }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
                 tp.addToGrid(0, rowCount++, "Needed by " + ind.getName(),
-                    "+" + NumFormat.formatMagnitudeAware(mod.value), valueColor);
+                    (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value),
+                    mod.value < 0f ? highlight : negative
+                );
             }
         }
 
@@ -450,19 +472,23 @@ public class TooltipUtils {
             if (mutable.getModifiedInt() > 0) {
                 for (StatMod mod : mutable.getPercentMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc,
-                        "+" + NumFormat.formatMagnitudeAware(mod.value) + "%");
+                        (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value) + "%",
+                        mod.value < 0f ? highlight : negative
+                    );
                 }
                 for (StatMod mod : mutable.getMultMods().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc,
                         Strings.X + NumFormat.formatMagnitudeAware(mod.value),
-                        mod.value < 1f ? negative:highlight
+                        mod.value < 1f ? highlight:negative
                     );
                 }
             }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
                 tp.addToGrid(0, rowCount++, mod.desc,
-                    "+" + NumFormat.formatMagnitudeAware(mod.value));
+                    (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value),
+                    mod.value < 0f ? highlight : negative
+                );
             }
         }
 
@@ -489,7 +515,7 @@ public class TooltipUtils {
             tp.addPara(
                 marketName + " profitably exported %s units of " + comName + " and accounted for %s of the global market share. They generated %s last month and %s so far this month.",
                 opad, highlight,
-                NumFormat.engNotate(cell.getTotalExports()),
+                NumFormat.formatMagnitudeAware(cell.getTotalExports()),
                 EconomyEngine.instance().info.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
@@ -501,7 +527,7 @@ public class TooltipUtils {
         if (cell.getSurplusAfterTargetQuantum() > 0f) {
             tp.addPara(
                 "Exports are reduced by %s due to insufficient importers for today.",
-                pad, negative, NumFormat.engNotate(cell.getSurplusAfterTargetQuantum())
+                pad, negative, NumFormat.formatMagnitudeAware(cell.getSurplusAfterTargetQuantum())
             );
         }
 
@@ -512,7 +538,7 @@ public class TooltipUtils {
             tp.addPara(
                 marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. They expended %s last month and %s so far this month.",
                 opad, highlight,
-                NumFormat.engNotate(cell.getTotalImports()),
+                NumFormat.formatMagnitudeAware(cell.getTotalImports()),
                 EconomyEngine.instance().info.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)

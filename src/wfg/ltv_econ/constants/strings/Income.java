@@ -50,6 +50,11 @@ public class Income {
     public static final String INDUSTRY_UPKEEP_KEY = "industry_upkeep";
     public static final String INDUSTRY_UPKEEP_DESC = "Industry upkeep";
 
+    public static final String DEBT_DEBUFF_KEY = "ltv_econ_debt_debuff";
+    public static final String DEBT_STABILITY_DEBUFF_DESC = "Market debt";
+    public static final String DEBT_UPKEEP_DEBUFF_DESC = "Inefficiencies caused by market debt";
+    public static final String DEBT_IMMIGRATION_DEBUFF_DESC = "Unattractiveness caused by market debt";
+
     public static final String REDISTRIBUTION_DISCLAIMER =  "* If the redistribute credits option is enabled, credit reserves may differ from the calculated net income due to internal reallocation.";
 
     public static String getDesc(String key) {
