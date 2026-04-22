@@ -3,6 +3,7 @@ package wfg.ltv_econ.ui.economyTab.tradeFlowMap;
 import java.awt.Color;
 
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 import wfg.native_ui.util.ArrayMap;
 
@@ -10,6 +11,7 @@ public class SystemData {
     private final ArrayMap<Color, Double> colorWeights = new ArrayMap<>(2);
     private float totalColorWeight = 0f;
 
+    public final ArrayMap<MarketAPI, Double> marketAmounts = new ArrayMap<>(2);
     public boolean isSource = false;
     public boolean isDest = false;
     public StarSystemAPI system = null;

@@ -13,24 +13,16 @@ import com.fs.starfarer.api.impl.campaign.command.WarSimScript.LocationDanger;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.native_ui.util.ArrayMap;
-
-import org.apache.commons.math4.legacy.optim.linear.*;
-import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.math4.legacy.optim.MaxIter;
-
 public class ShipAllocator {
     private ShipAllocator() {}
     private static final double eps = 1e-3;
-    private static final SimplexSolver SOLVER = new SimplexSolver(eps, 30, 5e-6);
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
     private static final String DOCT_PREF_KEY = "|";
 
@@ -45,158 +37,6 @@ public class ShipAllocator {
         3.2f, // HIGH
         5.0f  // EXTREME
     };
-
-    /**
-     * Allocate ships from the faction inventory to meet given targets. Updates the tracking values inside the inventory and the mission.
-     * 
-     * @param inventory the faction's ship inventory
-     * @param mission the mission to be used and modified
-     * @throws IllegalStateException if after greedy fill cargo target is still not met
-     */
-    public static final void allocateShipsForTrade(FactionShipInventory inventory, TradeMission mission) {
-        allocateShipsForTrade(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
-            inventory, mission.allocatedShips, Global.getSector().getFaction(inventory.factionID)
-        );
-
-        for (Map.Entry<String, Integer> entry : mission.allocatedShips.singleEntrySet()) {
-            inventory.useShip(entry.getKey(), entry.getValue());
-        }
-    }
-
-    /**
-     * Allocate ships from the faction inventory to meet given targets. Updates the tracking values inside the inventory and the mission.
-     *
-     * @param targetCargo cargo capacity (tons)
-     * @param targetFuel fuel capacity (tons)
-     * @param targetCrew crew transport capacity
-     * @param targetCombat combat power
-     * @param inventory the faction's ship inventory
-     * @param allocation the map to be filled with allocations
-     * @param faction the faction (for doctrine preferences)
-     * @throws IllegalStateException if after greedy fill targets are still not met
-     */
-    public static final void allocateShipsForTrade(
-        double targetCargo, double targetFuel, double targetCrew, double targetCombat,
-        FactionShipInventory inventory, ArrayMap<String, Integer> allocation, FactionAPI faction
-    ) {
-        final double totalShipment = targetCargo + targetFuel + targetCrew;
-        if (totalShipment <= 0) throw new IllegalArgumentException("Total shipment value is: " + totalShipment);
-
-        final ArrayList<ShipTypeData> candidates = new ArrayList<>();
-        for (ShipTypeData data : inventory.getShips().values()) {
-            if (data.getIdle() > 0) candidates.add(data);
-        }
-        if (candidates.isEmpty()) return;
-
-        final int N = candidates.size();
-
-        final double[] objective = buildTargetObjective(
-            candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat
-        );
-        final ArrayList<LinearConstraint> constraints = new ArrayList<>(N + 4);
-
-        constraints.addAll(buildTargetConstraints(candidates, targetCargo, targetFuel, targetCrew, targetCombat));
-
-        { // Upper Bound by Idle Constraint 
-            final double[] coeffs = new double[N];
-            for (int i = 0; i < N; i++) {
-                Arrays.fill(coeffs, 0.0);
-                coeffs[i] = 1.0;
-                constraints.add(new LinearConstraint(coeffs, Relationship.LEQ, candidates.get(i).getIdle()));
-            }
-        }
-        
-        final double[] x = getTargetSolution(objective, constraints, targetCargo, targetFuel, targetCrew, targetCombat, candidates);
-        
-        final ArrayMap<ShipTypeData, Integer> idleCopy = new ArrayMap<>(candidates.size());
-        for (ShipTypeData data : candidates) {
-            idleCopy.put(data, data.getIdle());
-        }
-
-        double remainingCargo = targetCargo;
-        double remainingFuel = targetFuel;
-        double remainingCrew = targetCrew;
-
-        for (int i = 0; i < N; i++) { // Track updated targets
-            final ShipTypeData data = candidates.get(i);
-            final int allocated = (int) Math.floor(x[i]);
-            if (allocated < 1) continue;
-
-            allocation.put(data.hullID, allocated);
-            idleCopy.put(data, idleCopy.get(data) - allocated);
-
-            remainingCargo -= allocated * data.spec.getCargo();
-            remainingFuel -= allocated * data.spec.getFuel();
-            remainingCrew -= allocated * data.getCrewCapacityPerShip();
-        }
-
-        if (remainingCargo > 0) { // Greedy fill for cargo
-            candidates.sort((a, b) -> Float.compare(b.spec.getCargo(), a.spec.getCargo()));
-            for (ShipTypeData data : candidates) {
-                final int idle = idleCopy.get(data);
-                if (idle == 0) continue;
-
-                final int needed = (int) Math.ceil(remainingCargo / data.spec.getCargo());
-                final int take = Math.min(needed, idle);
-                if (take < 1) continue;
-
-                allocation.merge(data.hullID, take, Integer::sum);
-                idleCopy.put(data, idle - take);
-
-                remainingCargo -= take * data.spec.getCargo();
-                remainingFuel -= take * data.spec.getFuel();
-                remainingCrew -= take * data.getCrewCapacityPerShip();
-
-                if (remainingCargo <= 0) break;
-            }
-        }
-
-        if (remainingFuel > 0) { // Greedy fill for fuel
-            candidates.sort((a, b) -> Float.compare(b.spec.getFuel(), a.spec.getFuel()));
-            for (ShipTypeData data : candidates) {
-                final int idle = idleCopy.get(data);
-                if (idle == 0) continue;
-
-                final int needed = (int) Math.ceil(remainingFuel / data.spec.getFuel());
-                final int take = Math.min(needed, idle);
-                if (take < 1) continue;
-
-                allocation.merge(data.hullID, take, Integer::sum);
-                idleCopy.put(data, idle - take);
-
-                remainingCargo -= take * data.spec.getCargo();
-                remainingFuel -= take * data.spec.getFuel();
-                remainingCrew -= take * data.getCrewCapacityPerShip();
-
-                if (remainingFuel <= 0) break;
-            }
-        }
-
-        if (remainingCrew > 0) { // Greedy fill for crew
-            candidates.sort((a, b) -> Integer.compare(b.getCrewCapacityPerShip(), a.getCrewCapacityPerShip()));
-            for (ShipTypeData data : candidates) {
-                final int idle = idleCopy.get(data);
-                if (idle == 0) continue;
-
-                final int needed = (int) Math.ceil(remainingCrew / data.getCrewCapacityPerShip());
-                final int take = Math.min(needed, idle);
-                if (take < 1) continue;
-
-                allocation.merge(data.hullID, take, Integer::sum);
-                idleCopy.put(data, idle - take);
-
-                remainingCargo -= take * data.spec.getCargo();
-                remainingFuel -= take * data.spec.getFuel();
-                remainingCrew -= take * data.getCrewCapacityPerShip();
-
-                if (remainingCrew <= 0) break;
-            }
-        }
-
-        if (remainingCargo > eps) throw new IllegalStateException("Not enough cargo capacity after greedy fill");
-        if (remainingFuel > eps) throw new IllegalStateException("Not enough fuel capacity after greedy fill");
-        if (remainingCrew > eps) throw new IllegalStateException("Not enough crew capacity after greedy fill");
-    }
 
     public static final float getRequiredCombatPower(TradeMission mission) {
         final float totalShipment = mission.getTotalAmount();
@@ -228,11 +68,35 @@ public class ShipAllocator {
      * @param faction used for doctrine preferences
      * @param mission the mission to be updated.
      */
+    public static final void allocateShipsForTrade(
+        FactionShipInventory inventory, TradeMission mission
+    ) {
+        final List<ShipTypeData> ships = new ArrayList<>(inventory.getShips().values());
+        ships.removeIf(s -> s.getIdle() <= 0);
+        allocateShipsForTarget(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
+            Global.getSector().getFaction(inventory.factionID), mission.allocatedShips, ships
+        );
+    }
+
+    /**
+     * Allocate ships to meet given targets. Updates the tracking values inside the mission.
+     * 
+     * @param faction used for doctrine preferences
+     * @param mission the mission to be updated.
+     */
     public static final void allocateShipsForTarget(
         FactionAPI faction, TradeMission mission
     ) {
+        final List<ShipTypeData> candidates = new ArrayList<>();
+        for (String hullId : faction.getKnownShips()) {
+            final ShipTypeData dummy = new ShipTypeData(hullId);
+            dummy.addShip(4096);
+            candidates.add(dummy);
+        }
+        if (candidates.isEmpty()) return;
+
         allocateShipsForTarget(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
-            faction, mission.allocatedShips
+            faction, mission.allocatedShips, candidates
         );
     }
 
@@ -246,22 +110,43 @@ public class ShipAllocator {
      * @param faction used for doctrine preferences
      * @param allocation the allocation to be populated.
      */
-    public static void allocateShipsForTarget(
+    public static final void allocateShipsForTarget(
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
         FactionAPI faction, Map<String, Integer> allocation
     ) {
-        final double totalTarget = targetCargo + targetFuel + targetCrew + targetCombat;
-        if (totalTarget <= 0) return;
-
         final List<ShipTypeData> candidates = new ArrayList<>();
         for (String hullId : faction.getKnownShips()) {
             final ShipTypeData dummy = new ShipTypeData(hullId);
-            dummy.addShip(1023);
+            dummy.addShip(4096);
             candidates.add(dummy);
         }
         if (candidates.isEmpty()) return;
 
+        allocateShipsForTarget(targetCargo, targetFuel, targetCrew, targetCombat,
+            faction, allocation, candidates
+        );
+    }
+
+    /**
+     * Allocate ships to meet given targets. Populates the allocation map.
+     * 
+     * @param targetCargo cargo capacity (tons)
+     * @param targetFuel fuel capacity (tons)
+     * @param targetCrew crew transport capacity
+     * @param targetCombat combat power
+     * @param faction used for doctrine preferences
+     * @param allocation the allocation to be populated.
+     * @param candidates the pool of hulls to choose from
+     */
+    public static void allocateShipsForTarget(
+        double targetCargo, double targetFuel, double targetCrew, double targetCombat,
+        FactionAPI faction, Map<String, Integer> allocation, List<ShipTypeData> candidates
+    ) {
+        final double totalTarget = targetCargo + targetFuel + targetCrew + targetCombat;
+        if (totalTarget <= 0) return;
+
         final int N = candidates.size();
+        final int[] idleRemaining = new int[N];
         final double[] weight = buildTargetObjective(candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat);
         final double[] cargoCap = new double[N];
         final double[] fuelCap = new double[N];
@@ -274,6 +159,7 @@ public class ShipAllocator {
             fuelCap[i] = data.spec.getFuel();
             crewCap[i] = data.getCrewCapacityPerShip();
             combatCap[i] = data.getCombatPower();
+            idleRemaining[i] = data.getIdle();
         }
 
         final int[] counts = new int[N];
@@ -292,6 +178,8 @@ public class ShipAllocator {
             double[] weights = new double[N];
 
             for (int i = 0; i < N; i++) {
+                if (idleRemaining[i] <= 0) continue;
+
                 boolean useful = false;
                 if (remCargo > 0.0 && cargoCap[i] > 0.0) useful = true;
                 if (remFuel > 0.0 && fuelCap[i] > 0.0) useful = true;
@@ -327,12 +215,17 @@ public class ShipAllocator {
             }
 
             counts[picked]++;
+            idleRemaining[picked]--;
 
             remCargo = Math.max(0.0, remCargo - cargoCap[picked]);
             remFuel = Math.max(0.0, remFuel - fuelCap[picked]);
             remCrew = Math.max(0.0, remCrew - crewCap[picked]);
-            remCombat= Math.max(0.0, remCombat- combatCap[picked]);
+            remCombat = Math.max(0.0, remCombat- combatCap[picked]);
         }
+
+        if (remCargo > eps) throw new IllegalStateException("Not enough cargo capacity after allocation");
+        if (remFuel > eps) throw new IllegalStateException("Not enough fuel capacity after allocation");
+        if (remCrew > eps) throw new IllegalStateException("Not enough crew capacity after allocation");
 
         for (int i = 0; i < N; i++) {
             final int count = counts[i];
@@ -399,38 +292,6 @@ public class ShipAllocator {
         };
     }
 
-    private static final List<LinearConstraint> buildTargetConstraints(List<ShipTypeData> candidates,
-        double targetCargo, double targetFuel, double targetCrew, double targetCombat
-    ) {
-        final int N = candidates.size();
-        final List<LinearConstraint> constraints = new ArrayList<>(4);
-        { // Cargo Capacity Constraint
-            final double[] coeffs = new double[N];
-            for (int i = 0; i < N; i++) coeffs[i] = candidates.get(i).spec.getCargo();
-            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetCargo));
-        }
-
-        { // Fuel Capacity Constraint
-            final double[] coeffs = new double[N];
-            for (int i = 0; i < N; i++) coeffs[i] = candidates.get(i).spec.getFuel();
-            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetFuel));
-        }
-
-        { // Crew Capacity Constraint
-            final double[] coeffs = new double[N];
-            for (int i = 0; i < N; i++) coeffs[i] = candidates.get(i).getCrewCapacityPerShip();
-            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetCrew));
-        }
-
-        if (targetCombat > 0f) { // Combat Capacity Constraint
-            final double[] coeffs = new double[N];
-            for (int i = 0; i < N; i++) coeffs[i] = candidates.get(i).getCombatPower();
-            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, targetCombat));
-        }
-
-        return constraints;
-    }
-
     private static final double[] buildTargetObjective(List<ShipTypeData> candidates, FactionAPI faction,
         double targetCargo, double targetFuel, double targetCrew, double targetCombat
     ) {
@@ -467,15 +328,5 @@ public class ShipAllocator {
         }
 
         return coeffs;
-    }
-
-    private static final double[] getTargetSolution(final double[] objective, final List<LinearConstraint> constraints,
-        double targetCargo, double targetFuel, double targetCrew, double targetCombat, List<ShipTypeData> candidates
-    ) {
-        return SOLVER.optimize(
-            new MaxIter(1000), new LinearObjectiveFunction(objective, 0),
-            new LinearConstraintSet(constraints), GoalType.MINIMIZE,
-            new NonNegativeConstraint(true), PivotSelectionRule.DANTZIG
-        ).getPoint();
     }
 }

@@ -29,7 +29,7 @@ public class TradeFlowOptions extends CustomPanel {
         );
         filterBtn.cutStyle = CutStyle.TL_TR;
         filterBtn.bgAlpha = 1f;
-        filterBtn.setShortcutAndAppendToText(Keyboard.KEY_Q);
+        filterBtn.setShortcutAndAppendToText(Keyboard.KEY_T);
         add(filterBtn).inTL(0f, 0f);
     }
 }

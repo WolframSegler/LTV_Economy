@@ -19,7 +19,6 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -27,11 +26,13 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.economy.commodity.CommodityCell;
-import wfg.ltv_econ.economy.commodity.ComTradeFlow;
+import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.fleet.TradeMission;
+import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.ui.fleet.TradeFilters;
+import wfg.ltv_econ.ui.fleet.TradeMissionWidget;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.component.NativeComponents;
@@ -62,7 +63,7 @@ public class ComTradeFlowMap extends CustomPanel implements
 
     private static final float BOUNDS_PAD = 100f;
     private static final float ZOOM_MAX = 4f;
-    private static final float ZOOM_MIN = 0.25f;
+    private static final float ZOOM_MIN = 0.1f;
     private static final float ZOOM_SENSITIVITY = 0.001f;
 
     private static final float BASE_NODE_RADIUS = 28f;
@@ -80,7 +81,6 @@ public class ComTradeFlowMap extends CustomPanel implements
 
     private final TooltipComp toolitp = comp().get(NativeComponents.TOOLTIP);
     private final TooltipSystem tooltipSys = system().get(NativeSystems.TOOLTIP);
-    private boolean tooltipAdded = false;
     private Object hoveredElement = null;
 
     private final SpriteAPI bgImg = switch (random.nextInt(2)) {
@@ -90,8 +90,9 @@ public class ComTradeFlowMap extends CustomPanel implements
     private SpriteAPI comSprite;
     private BloomEffect bloom;
 
+    private List<TradeMission> missions = new ArrayList<>(0);
     private final Set<StarSystemAPI> systems = new HashSet<>(24);
-    private final List<SystemData> systemData = new ArrayList<>(24);
+    private final ArrayMap<StarSystemAPI, SystemData> systemData = new ArrayMap<>(24);
     private final List<PathData> flowData = new ArrayList<>(32);
 
     private Vector2f lastMouse = null;
@@ -105,14 +106,11 @@ public class ComTradeFlowMap extends CustomPanel implements
     private float sectorMaxYCoord = 0f;
 
     private float time = 0f;
-    private boolean hoverRegistered = false;
-
-    // TODO modify the map to use trade missions instead of daily flows
+    private int hoverRegistered = 0;
 
     public ComTradeFlowMap(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
-        toolitp.width = 220f;
         toolitp.bgAlpha = 0.85f;
 
         buildUI();
@@ -120,8 +118,12 @@ public class ComTradeFlowMap extends CustomPanel implements
 
     @Override
     public void buildUI() {
+        final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
+        final String comID = com.getId();
+
         { // Clear data
             clearChildren();
+            missions = getFilteredMissions(comID);
             systems.clear();
             systemData.clear();
             flowData.clear();
@@ -137,22 +139,10 @@ public class ComTradeFlowMap extends CustomPanel implements
             if (bloom != null)  bloom.cleanup();
         }
 
-        final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
-
         { // Create render data
-            final List<ComTradeFlow> tradeFlows = new ArrayList<>(
-                EconomyEngine.instance().getComDomain(com.getId()).getTradeFlows()
-            );
-            tradeFlows.removeIf(t -> t.exporter.isHidden() ||
-                t.importer.isHidden() ||
-                TradeFilters.exporterFactionBlacklist.contains(t.exporter.getFactionId()) ||
-                TradeFilters.importerFactionBlacklist.contains(t.importer.getFactionId()) ||
-                (TradeFilters.directionMode == 3 && !t.inFaction)
-            );
-
-            for (ComTradeFlow flow : tradeFlows) {
-                systems.add(flow.exporter.getStarSystem());
-                systems.add(flow.importer.getStarSystem());
+            for (TradeMission m : missions) {
+                systems.add(m.src.getStarSystem());
+                systems.add(m.dest.getStarSystem());
             }
 
             final List<StarSystemAPI> systemsToRemove = new ArrayList<>(systems.size());
@@ -160,17 +150,25 @@ public class ComTradeFlowMap extends CustomPanel implements
                 final SystemData data = new SystemData();
                 data.system = system;
 
-                float totalAmount = 0f;
-                for (ComTradeFlow flow : tradeFlows) {
-                    if (flow.exporter.getStarSystem().equals(system)) {
-                        data.isSource = true;
-                        totalAmount += flow.amount;
-
-                        final Color c = flow.exporter.getFaction().getBrightUIColor();
-                        data.addColorWeight(c, flow.amount);
+                double totalAmount = 0f;
+                for (TradeMission m : missions) {
+                    double amount = 0.0;
+                    for (TradeCom tradeCom : m.cargo) {
+                        if (tradeCom.comID.equals(comID)) {
+                            amount = tradeCom.amount;
+                            break;
+                        }
                     }
-                    if (flow.importer.getStarSystem().equals(system)) {
+                    totalAmount += amount;
+
+                    if (m.src.getStarSystem().equals(system)) {
+                        data.isSource = true;
+                        data.marketAmounts.merge(m.src, amount, Double::sum);
+
+                        data.addColorWeight(m.src.getFaction().getBrightUIColor(), amount);
+                    } else if (m.dest.getStarSystem().equals(system)) {
                         data.isDest = true;
+                        data.marketAmounts.merge(m.dest, -amount, Double::sum);
                     }
                 }
 
@@ -180,54 +178,50 @@ public class ComTradeFlowMap extends CustomPanel implements
                 }
 
                 data.nodeSize = calculateNodeSize(totalAmount);
-
-                systemData.add(data);
+                systemData.put(system, data);
             }
             systems.removeAll(systemsToRemove);
             
-            final ArrayMap<SystemPair, List<ComTradeFlow>> uniqueFlows = new ArrayMap<>(tradeFlows.size() / 2);
-            for (ComTradeFlow flow : tradeFlows) {
-                if (flow.exporter.getStarSystem().equals(flow.importer.getStarSystem())) continue;
+            final ArrayMap<SystemPair, List<TradeMission>> uniqueFlows = new ArrayMap<>(missions.size() / 4);
+            for (TradeMission m : missions) {
+                if (m.src.getStarSystem().equals(m.dest.getStarSystem())) continue;
 
                 final SystemPair pair = new SystemPair(
-                    flow.exporter.getStarSystem(), flow.importer.getStarSystem()
+                    m.src.getStarSystem(), m.dest.getStarSystem()
                 );
-                final List<ComTradeFlow> list = uniqueFlows.computeIfAbsent(
-                    pair, k -> new ArrayList<>()
-                );
-                list.add(flow);
+                uniqueFlows.computeIfAbsent(pair, k -> new ArrayList<>()).add(m);
             }
 
-            for (List<ComTradeFlow> flows : uniqueFlows.values()) {
-                final ComTradeFlow first = flows.get(0);
+            for (List<TradeMission> flows : uniqueFlows.values()) {
                 final PathData data = new PathData();
-                final StarSystemAPI source = first.exporter.getStarSystem();
-                final StarSystemAPI dest = first.importer.getStarSystem();
+                final TradeMission first = flows.get(0);
+                final StarSystemAPI source = first.src.getStarSystem();
+                final StarSystemAPI dest = first.dest.getStarSystem();
 
                 if (!systems.contains(source) || !systems.contains(dest)) continue;
                 
-                float totalAmount = 0f;
-                for (ComTradeFlow flow : flows) {
-                    final FactionSpecAPI faction = flow.exporter.getFaction().getFactionSpec();
-                    final double amount = flow.amount;
-                    totalAmount += amount;  
+                double totalAmount = 0.0;
+                for (TradeMission m : flows) {
+                    final FactionSpecAPI faction = m.src.getFaction().getFactionSpec();
+                    double amount = 0.0;
+                    for (TradeCom tradeCom : m.cargo) {
+                        if (tradeCom.comID.equals(comID)) {
+                            amount = tradeCom.amount;
+                            break;
+                        }
+                    }
+                    totalAmount += amount;
 
-                    final Double current = data.factionAmounts.get(faction);
-                    data.factionAmounts.put(faction, current == null ? amount : current + amount);
-
-                    final Color c = faction.getBrightUIColor();
-                    data.addColorWeight(c, amount);
+                    data.factionAmounts.merge(faction, amount, Double::sum);
+                    data.addColorWeight(faction.getBrightUIColor(), amount);
                 }
-
-                if (totalAmount < TradeFilters.minTradeAmount) continue;
 
                 data.source = source;
                 data.destination = dest;
                 data.pathWidth = calculatePathWidth(totalAmount);
-                data.nodeSize = calculateNodeSize(totalAmount);
 
-                final float len = Arithmetic.dist(source.getLocation(), dest.getLocation());
-                data.travelDuration = len * 0.002f;
+                // TODO modify later to use actual trade data instead of this
+                data.travelDuration = first.dist * 4f;
                 data.pauseDuration = 10f + data.travelDuration;
                 data.pulseOffset = random.nextFloat() * data.travelDuration;
                 flowData.add(data);
@@ -277,8 +271,7 @@ public class ComTradeFlowMap extends CustomPanel implements
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        tooltipAdded = false;
-        hoverRegistered = false;
+        hoverRegistered = 0;
         toolitp.builder = null;
 
         // TODO add a bloom pass to the map.
@@ -290,6 +283,7 @@ public class ComTradeFlowMap extends CustomPanel implements
             renderGrid(alpha);
             renderPaths(alpha);
             renderNodes(alpha);
+            renderShips(alpha);
             renderIcon(alpha);
 
             // bloom.endSceneCapture();
@@ -472,13 +466,14 @@ public class ComTradeFlowMap extends CustomPanel implements
             final float len = Arithmetic.dist(srcX, srcY, destX, destY);
             if (len == 0f) continue;
 
-            final float gap = data.nodeSize * PATH_GAP_MULT;
+            final float gapSrc = systemData.get(data.source).nodeSize * PATH_GAP_MULT;
+            final float gapDest = systemData.get(data.destination).nodeSize * PATH_GAP_MULT;
 
             // move endpoints toward each other
-            final float ax = srcX + diffX / len * gap;
-            final float ay = srcY + diffY / len * gap;
-            final float bx = destX - diffX / len * gap;
-            final float by = destY - diffY / len * gap;
+            final float ax = srcX + diffX / len * gapSrc;
+            final float ay = srcY + diffY / len * gapSrc;
+            final float bx = destX - diffX / len * gapDest;
+            final float by = destY - diffY / len * gapDest;
 
             final boolean isHovering;
             {
@@ -492,8 +487,8 @@ public class ComTradeFlowMap extends CustomPanel implements
                     final float t = Arithmetic.clamp(((mx - ax) * dx + (my - ay) * dy) / len2, 0f, 1f);
                     final float cx = ax + t * dx;
                     final float cy = ay + t * dy;
-                    isHovering = Arithmetic.dist(mx, my, cx, cy) <= hw && !hoverRegistered;
-                    if (isHovering) hoverRegistered = true;
+                    isHovering = Arithmetic.dist(mx, my, cx, cy) <= hw && hoverRegistered < 1;
+                    if (isHovering) hoverRegistered = 1;
                 }
             }
 
@@ -512,35 +507,8 @@ public class ComTradeFlowMap extends CustomPanel implements
             // thin white specular (center)
             RenderUtils.drawGradientSprite(ax, ay, bx, by, Math.max(1f, data.pathWidth * 0.05f),
                 Color.WHITE, true, 0.8f * alpha, 0.5f * alpha, 0.8f * alpha);
-
-            final float totalPeriod = data.travelDuration + data.pauseDuration;
-            if (totalPeriod > 0f) {
-
-                final float localT = (time + data.pulseOffset) % totalPeriod;
-                if (localT <= data.travelDuration) {
-                    final float travelFrac = localT / data.travelDuration;
-
-                    float arrowAlpha = alpha;
-                    if (travelFrac < 0.03f) {
-                        arrowAlpha *= travelFrac / 0.03f;
-                    } else if (travelFrac > 0.97f) {
-                        arrowAlpha *= (1f - travelFrac) / 0.03f;
-                    }
-
-                    final float cx = ax + (bx - ax) * travelFrac;
-                    final float cy = ay + (by - ay) * travelFrac;
-
-                    final float arrowSize = data.pathWidth * 2.5f * (0.4f + 0.6f*arrowAlpha);
-                    NativeUiUtils.rotateSprite(aLocal, bLocal, SHIP_ARROW);
-                    SHIP_ARROW.setSize(arrowSize, arrowSize);
-                    SHIP_ARROW.setAlphaMult(arrowAlpha);
-                    SHIP_ARROW.renderAtCenter(cx, cy);
-                }
-            }
         
-            if (isHovering && !tooltipAdded) {
-                updateTpState(data);
-            }
+            if (isHovering) updateTpState(data);
         }
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -560,7 +528,7 @@ public class ComTradeFlowMap extends CustomPanel implements
         final int mx = Mouse.getX();
         final int my = Mouse.getY();
 
-        for (SystemData data : systemData) {
+        for (SystemData data : systemData.values()) {
             final Vector2f sysPos = project(data.system.getLocation());
             final float nodeSize = data.nodeSize;
 
@@ -574,8 +542,8 @@ public class ComTradeFlowMap extends CustomPanel implements
             { continue; }
 
             final boolean isHovering = mx >= x - nodeSize/2 && mx <= x + nodeSize/2 &&
-                my >= y - nodeSize/2 && my <= y + nodeSize/2 && !hoverRegistered;
-            if (isHovering) hoverRegistered = true;
+                my >= y - nodeSize/2 && my <= y + nodeSize/2 && hoverRegistered < 2;
+            if (isHovering) hoverRegistered = 2;
 
             final Color color = getWeightedCycleColor(data.getColorWeights(), data.getWeightSum());
 
@@ -595,9 +563,75 @@ public class ComTradeFlowMap extends CustomPanel implements
             NODE_OVERLAY.setAlphaMult(alpha * 0.5f * (isHovering ? 2f : glow));
             NODE_OVERLAY.renderAtCenter(x, y);
         
-            if (isHovering && !tooltipAdded) {
-                updateTpState(data);
+            if (isHovering) updateTpState(data);
+        }
+    }
+
+    private final void renderShips(float alpha) {
+        final int mx = Mouse.getX();
+        final int my = Mouse.getY();
+
+        final String comID = CommoditySelectionPanel.selectedCom.getId();
+        for (TradeMission m : missions) {
+            if (m.status != MissionStatus.IN_TRANSIT || m.travelDur <= 0f) continue;
+            final SystemData srcData = systemData.get(m.src.getStarSystem());
+            final SystemData dstData = systemData.get(m.dest.getStarSystem());
+            if (srcData == null || dstData == null) continue;
+
+            final Vector2f aLocal = project(m.src.getLocation());
+            final Vector2f bLocal = project(m.dest.getLocation());
+
+            final float srcX = pos.getX() + aLocal.x;
+            final float srcY = pos.getY() + aLocal.y;
+            final float destX = pos.getX() + bLocal.x;
+            final float destY = pos.getY() + bLocal.y;
+
+            final float diffX = destX - srcX;
+            final float diffY = destY - srcY;
+            final float len = Arithmetic.dist(srcX, srcY, destX, destY);
+
+            // move endpoints toward each other
+            final float gapSrc = srcData.nodeSize * PATH_GAP_MULT;
+            final float gapDest = dstData.nodeSize * PATH_GAP_MULT;
+
+            final float ax = srcX + diffX / len * gapSrc;
+            final float ay = srcY + diffY / len * gapSrc;
+            final float bx = destX - diffX / len * gapDest;
+            final float by = destY - diffY / len * gapDest;
+
+            final float travelFrac = Arithmetic.clamp(1f - (m.durRemaining - m.transferDur) / m.travelDur, 0f, 1f);
+            final float cx = ax + (bx - ax) * travelFrac;
+            final float cy = ay + (by - ay) * travelFrac;
+
+            float arrowAlpha = alpha;
+            if (travelFrac < 0.03f) {
+                arrowAlpha *= travelFrac / 0.03f;
+            } else if (travelFrac > 0.97f) {
+                arrowAlpha *= (1f - travelFrac) / 0.03f;
             }
+            double amount = 0.0;
+            for (TradeCom c : m.cargo) {
+                if (c.comID.equals(comID)) {
+                    amount = c.amount;
+                    break;
+                }
+            }
+            final float arrowSize = calculatePathWidth(amount) * 2f * (0.4f + 0.6f*arrowAlpha);
+
+            final boolean isHovering = mx >= cx - arrowSize/2 && mx <= cx + arrowSize/2 &&
+                my >= cy - arrowSize/2 && my <= cy + arrowSize/2 && hoverRegistered < 3;
+            if (isHovering) hoverRegistered = 3;
+
+            final Color baseColor = m.src.getFaction().getBaseUIColor();
+            final Color color = isHovering ? NativeUiUtils.adjustBrightness(baseColor, 1.7f) : baseColor;
+
+            NativeUiUtils.rotateSprite(aLocal, bLocal, SHIP_ARROW);
+            SHIP_ARROW.setSize(arrowSize, arrowSize);
+            SHIP_ARROW.setAlphaMult(arrowAlpha);
+            SHIP_ARROW.setColor(color);
+            SHIP_ARROW.renderAtCenter(cx, cy);
+
+            if (isHovering) updateTpState(m);
         }
     }
 
@@ -646,11 +680,11 @@ public class ComTradeFlowMap extends CustomPanel implements
         return new Vector2f(worldX, worldY);
     }
 
-    private final float calculatePathWidth(float amount) {
+    private final float calculatePathWidth(double amount) {
         return (BASE_FLOW_PATH_W + (float) Math.log10(1f + amount) * FLOW_PATH_SCALE) * visualZoom();
     }
 
-    private final float calculateNodeSize(float amount) {
+    private final float calculateNodeSize(double amount) {
         return (BASE_NODE_RADIUS + (float) Math.log10(1f + amount) * NODE_RADIUS_SCALE) * visualZoom();
     }
 
@@ -745,37 +779,25 @@ public class ComTradeFlowMap extends CustomPanel implements
     }
 
     private static final TooltipBuilder createNodeTp(SystemData data) {
-        final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
-        final EconomyEngine engine = EconomyEngine.instance();
-
         return (tp, expanded) -> {
-            final List<CommodityCell> cells = new ArrayList<>();
-            for (SectorEntityToken entity : data.system.getAllEntities()) {
-                final MarketAPI market = entity.getMarket();
-                if (market != null && market.isInEconomy() && !market.isHidden()) {
-                    final CommodityCell cell = engine.getComCell(com.getId(), market.getId());
-                    if (cell != null && !cells.contains(cell)) cells.add(cell);
-                }
-            }
-            cells.sort((a, b) -> Float.compare(
-                b.getTotalExports() - b.getTotalImports(),
-                a.getTotalExports() - a.getTotalImports()
-            ));
+            final var entries = new ArrayList<>(data.marketAmounts.entrySet());
+            entries.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
             tp.addPara(data.system.getName(), base, 0f);
 
             tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
                 "Colony", 140, "Net Trade", 70
             });
-            for (CommodityCell cell : cells) {
-                final float net = cell.getTotalExports() - cell.getTotalImports();
-                if (Math.abs(net) < 0.01f) continue;
+            for (var entry : entries) {
+                final MarketAPI market = entry.getKey();
+                final double amount = entry.getValue();
+                if (Math.abs(amount) < 0.01) continue;
 
                 tp.addRow(
-                    cell.market.getFaction().getBaseUIColor(),
-                    cell.market.getName(),
-                    net < 0f ? negative : highlight,
-                    Math.abs(net) < 1f ? "<1" : NumFormat.engNotate(net)
+                    market.getFaction().getBaseUIColor(),
+                    market.getName(),
+                    amount < 0.0 ? negative : highlight,
+                    Math.abs(amount) < 1f ? "<1" : NumFormat.engNotate(amount)
                 );
             }
             tp.addTable("", 0, opad);
@@ -784,16 +806,50 @@ public class ComTradeFlowMap extends CustomPanel implements
     }
 
     private final void updateTpState(Object dataObj) {
-        tooltipAdded = true;
         if (hoveredElement == null || hoveredElement != dataObj) {
             tooltipSys.hideTooltip(toolitp);
             hoveredElement = dataObj;
         }
         if (dataObj instanceof PathData data) {
+            toolitp.width = 220f;
             toolitp.builder = createPathTp(data);
-        }else if (dataObj instanceof SystemData data) {
+        } else if (dataObj instanceof SystemData data) {
+            toolitp.width = 220f;
             toolitp.builder = createNodeTp(data);
+        } else if (dataObj instanceof TradeMission mission) {
+            toolitp.width = 380f;
+            toolitp.builder = TradeMissionWidget.createMissionTp(mission, false);
         }
+    }
+
+    private static final List<TradeMission> getFilteredMissions(String comID) {
+        final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
+
+        missions.removeIf(m -> !m.cargo.stream().anyMatch(c -> c.comID.equals(comID)) || m.src == null || m.dest == null);
+        missions.removeIf(m -> TradeFilters.exporterFactionBlacklist.contains(m.src.getFactionId()));
+        missions.removeIf(m -> TradeFilters.importerFactionBlacklist.contains(m.dest.getFactionId()));
+        missions.removeIf(m -> m.src.isHidden() || m.dest.isHidden());
+        
+        if (TradeFilters.hideVirtualFleets) {
+            missions.removeIf(m -> m.spawnedFleetFinishedJob);
+        }
+
+        if (TradeFilters.directionMode == 3) {
+            missions.removeIf(m -> !m.inFaction);
+        }
+
+        missions.removeIf(m -> {
+            double amount = 0.0;
+            for (TradeCom c : m.cargo) {
+                if (c.comID.equals(comID)) {
+                    amount = c.amount;
+                    break;
+                }
+            }
+            return amount < TradeFilters.minTradeAmount;
+        });
+
+        return missions;
     }
 
     private static record SystemPair(StarSystemAPI source, StarSystemAPI dest) {}

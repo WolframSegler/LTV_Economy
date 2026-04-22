@@ -99,8 +99,8 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
 
         final IconValuePairTp ordersPair = new IconValuePairTp(m_panel, entryW, entryH, CHECKLIST, orders.size(), true, null);
         final IconValuePairTp costPair = new IconValuePairTp(m_panel, entryW, entryH, WAGES, totalCost, false, null);
-        final IconValuePairTp timePair = new IconValuePairTp(m_panel, entryW, entryH, STOPWATCH, totalTime, false, null);
-        final IconValuePairTp shipsPair = new IconValuePairTp(m_panel, entryW, entryH, SHIPS, totalShips, false, null);
+        final IconValuePairTp timePair = new IconValuePairTp(m_panel, entryW, entryH, STOPWATCH, totalTime, true, null);
+        final IconValuePairTp shipsPair = new IconValuePairTp(m_panel, entryW, entryH, SHIPS, totalShips, true, null);
         costPair.label().setText(costPair.label().getText() + Strings.C);
 
         add(ordersPair).inTL(hpad + titleW, hpad);

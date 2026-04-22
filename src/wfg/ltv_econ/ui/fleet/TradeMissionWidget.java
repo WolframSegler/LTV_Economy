@@ -20,6 +20,7 @@ import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.OutlineComp.OutlineType;
+import wfg.native_ui.ui.component.TooltipComp.TooltipBuilder;
 import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
@@ -57,108 +58,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
         tooltip.positioner = (tp, exp) -> {
             NativeUiUtils.anchorPanel(tp, dock.getPanel(), AnchorType.RightTop, pad*2);
         };
-        tooltip.builder = (tp, expanded) -> {
-            final EconomyEngine engine = EconomyEngine.instance();
-            tp.addTitle("Trade Mission", base);
-
-            final int beginTime = mission.startOffset - engine.getCyclesSinceTrade();
-            final int arrivalTime = mission.durRemaining - (int) mission.transferDur;
-
-            final String statusStr = switch(mission.status) {
-                case SCHEDULED -> "The mission is scheduled to begin preparations in " + beginTime + (beginTime < 2 ? " Day." : " Days.");
-                case IN_SRC_ORBIT_LOADING -> "The shipment is currently being loaded into the fleet.";
-                case IN_TRANSIT -> "The shipment is in-transit and is projected to arrive to its destination in " + arrivalTime + (arrivalTime < 2 ? " Day." : " Days.");
-                case IN_DST_ORBIT_UNLOADING -> "The fleet is orbiting " + mission.dest.getName() + " and unloading its shipment.";
-                case DELIVERED -> "The shipment has been delivered.";
-                case CANCELLED -> "The shipment was cancelled.";
-                case LOST -> "The shipment, along with the fleet, was lost in combat.";
-            };
-
-            final String fleetOriginStr = mission.usedFactionFleet ?
-                "The fleet was assembled using ships from the faction inventory." :
-                "The fleet belongs to an independent captain who was hired to deliver the shipment.";
-
-            final String fuelOriginStr = mission.usedFuelFromStockpiles ?
-                "The fuel for the journey was taken from local stockpiles." :
-                "The fuel was purchased at a premium from independent merchants.";
-
-            String largestCom = "";
-            double amount = 0;
-            for (TradeCom flow : mission.cargo) {
-                if (flow.amount > amount) {
-                    amount = flow.amount;
-                    largestCom = flow.comID;
-                }
-            }
-            largestCom = settings.getCommoditySpec(largestCom).getName();
-
-            tp.addPara("The %s trade mission from %s to %s is expected to cover a distance of %s in %s and burn %s units of fuel. " +
-                statusStr + " The shipment consists primarily of %s and the single most abundant commodity is %s. " +
-                fleetOriginStr + " The costs incurred for this shipment was %s. " + fuelOriginStr +
-                " The fleet posesses a combat power of %s.",
-                pad, new Color[]{
-                    base,
-                    mission.src.getFaction().getBaseUIColor(),
-                    mission.dest.getFaction().getBaseUIColor(),
-                    highlight, highlight, highlight, base, highlight, negative,
-                    highlight
-                },
-                mission.inFaction ? "in-faction" : "global",
-                mission.src.getName(), mission.dest.getName(),
-                Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + "LY",
-                mission.totalDur + (mission.totalDur <= 1 ? " Day" : " Days"),
-                NumFormat.engNotate(mission.fuelCost),
-                mission.crewAmount > mission.cargoAmount ? "crew" : mission.fuelAmount > mission.cargoAmount ? "fuel" : "cargo",
-                largestCom, NumFormat.formatCreditAbs(mission.credits.computeEffective(0f)),
-                NumFormat.engNotate(mission.combatPowerTarget)
-            );
-
-            final int gridWidth = 390;
-            final int valueWidth = 50;
-            int rowCount = 0;
-
-            tp.addPara("Shipment List", base, opad);
-            tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
-            for (TradeCom flow : mission.cargo) {
-                tp.addToGrid(0, rowCount++, settings.getCommoditySpec(flow.comID).getName(),
-                    NumFormat.engNotate(flow.amount));
-            }
-            tp.addGrid(0);
-
-            rowCount = 0;
-
-            tp.addPara("Mission Ledger", base, opad);
-            tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
-            for (StatMod mod : mission.credits.getFlatBonuses().values()) {
-                tp.addToGrid(0, rowCount++, mod.desc, NumFormat.engNotate(mod.value)
-                    +Strings.C, mod.value < 0f ? negative : positive
-                );
-            }
-            tp.addGrid(0);
-
-            final int totalEntries = mission.allocatedShips.size();
-            rowCount = 0;
-            
-            tp.addPara("Fleet Members", base, opad);
-            tp.beginGridFlipped(gridWidth/2, 4, valueWidth, hpad);
-            for (var entry : mission.allocatedShips.singleEntrySet()) {
-                if (rowCount >= EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) break;
-
-                final ShipHullSpecAPI spec = settings.getHullSpec(entry.getKey());
-                final String name = spec.getHullNameWithDashClass();
-                tp.addToGrid((rowCount % 2 == 0 ? 0 : 1), rowCount / 2, name, entry.getValue().toString());
-                rowCount++;
-            }
-
-            tp.addGrid(0);
-
-            if (totalEntries > EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) {
-                final int remaining = totalEntries - EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS;
-                tp.addPara("... and %s more ship type%s", opad, Misc.getHighlightColor(),
-                    String.valueOf(remaining), remaining == 1 ? "" : "s"
-                );
-            }
-        };
+        tooltip.builder = createMissionTp(mission, true);
         
         buildUI();
     }
@@ -287,5 +187,133 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
         super.renderBelow(alpha);
 
         border.render(pos.getX(), pos.getY(), alpha);
+    }
+
+    public static final TooltipBuilder createMissionTp(TradeMission mission, boolean detailed) {
+        return (tp, expanded) -> {
+            final EconomyEngine engine = EconomyEngine.instance();
+            tp.addTitle(detailed ? "Trade Mission" : "Trade Fleet", base);
+
+            final int beginTime = mission.startOffset - engine.getCyclesSinceTrade();
+            final int arrivalTime = mission.durRemaining - (int) mission.transferDur;
+
+            final String statusStr = switch(mission.status) {
+                case SCHEDULED -> !detailed ? "Scheduled" :
+                    "Scheduled to begin preparations in " + beginTime + (beginTime < 2 ? " day." : " days.");
+                case IN_SRC_ORBIT_LOADING -> "Loading at " + mission.src.getName();
+                case IN_TRANSIT -> "En route, arriving in " + arrivalTime + (arrivalTime < 2 ? " day" : " days");
+                case IN_DST_ORBIT_UNLOADING -> "Unloading at " + mission.dest.getName();
+                case DELIVERED -> "Delivered";
+                case CANCELLED -> "Cancelled";
+                case LOST -> "Lost in combat";
+            };
+
+            if (detailed) {
+                String largestCom = "";
+                double amount = 0;
+                for (TradeCom flow : mission.cargo) {
+                    if (flow.amount > amount) {
+                        amount = flow.amount;
+                        largestCom = flow.comID;
+                    }
+                }
+                largestCom = settings.getCommoditySpec(largestCom).getName();
+
+                final String fleetOriginStr = mission.usedFactionFleet ?
+                    "The fleet was assembled using ships from the faction inventory." :
+                    "The fleet belongs to an independent captain who was hired to deliver the shipment.";
+                final String fuelOriginStr = mission.usedFuelFromStockpiles ?
+                    "The fuel for the journey was taken from local stockpiles." :
+                    "The fuel was purchased at a premium from independent merchants.";
+
+                tp.addPara("The %s trade mission from %s to %s is expected to cover a distance of %s in %s and burn %s units of fuel. " +
+                    statusStr + " The shipment consists primarily of %s and the single most abundant commodity is %s. " +
+                    fleetOriginStr + " The costs incurred for this shipment was %s. " + fuelOriginStr +
+                    " The fleet posesses a combat power of %s.",
+                    pad, new Color[]{
+                        base,
+                        mission.src.getFaction().getBaseUIColor(),
+                        mission.dest.getFaction().getBaseUIColor(),
+                        highlight, highlight, highlight, base, highlight, negative,
+                        highlight
+                    },
+                    mission.inFaction ? "in-faction" : "global",
+                    mission.src.getName(), mission.dest.getName(),
+                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + "LY",
+                    mission.totalDur + (mission.totalDur <= 1 ? " Day" : " Days"),
+                    NumFormat.engNotate(mission.fuelCost),
+                    mission.crewAmount > mission.cargoAmount ? "crew" : mission.fuelAmount > mission.cargoAmount ? "fuel" : "cargo",
+                    largestCom, NumFormat.formatCreditAbs(mission.credits.computeEffective(0f)),
+                    NumFormat.engNotate(mission.combatPowerTarget)
+                );
+            } else {
+                tp.addPara("From %s to %s  •  Distance: %s  •  Arrival: %s", pad,
+                    new Color[]{mission.src.getFaction().getBaseUIColor(), mission.dest.getFaction().getBaseUIColor(),
+                        highlight, highlight
+                    }, mission.src.getName(), mission.dest.getName(),
+                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + "LY",
+                    arrivalTime + (arrivalTime < 2 ? " day" : " days")
+                );
+
+                final int fleetSize = mission.allocatedShips.size();
+                tp.addPara("Fleet: %s ship%s",
+                    pad, highlight,
+                    String.valueOf(fleetSize), fleetSize == 1 ? "" : "s"
+                );
+            }
+
+            final int gridWidth = 390;
+            final int valueWidth = 50;
+            int rowCount = 0;
+
+            tp.addPara("Shipment List", base, opad);
+            tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
+            for (TradeCom flow : mission.cargo) {
+                tp.addToGrid(0, rowCount++, settings.getCommoditySpec(flow.comID).getName(),
+                    NumFormat.engNotate(flow.amount));
+            }
+            tp.addGrid(0);
+
+            if (detailed) {
+                rowCount = 0;
+    
+                tp.addPara("Mission Ledger", base, opad);
+                tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
+                for (StatMod mod : mission.credits.getFlatBonuses().values()) {
+                    tp.addToGrid(0, rowCount++, mod.desc, NumFormat.engNotate(mod.value)
+                        +Strings.C, mod.value < 0f ? negative : positive
+                    );
+                }
+                tp.addGrid(0);
+    
+                final int totalEntries = mission.allocatedShips.size();
+                rowCount = 0;
+                
+                tp.addPara("Fleet Members", base, opad);
+                tp.beginGridFlipped(gridWidth/2, 4, valueWidth, hpad);
+                for (var entry : mission.allocatedShips.singleEntrySet()) {
+                    if (rowCount >= EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) break;
+    
+                    final ShipHullSpecAPI spec = settings.getHullSpec(entry.getKey());
+                    final String name = spec.getHullNameWithDashClass();
+                    tp.addToGrid((rowCount % 2 == 0 ? 0 : 1), rowCount / 2, name, entry.getValue().toString());
+                    rowCount++;
+                }
+    
+                tp.addGrid(0);
+    
+                if (totalEntries > EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) {
+                    final int remaining = totalEntries - EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS;
+                    tp.addPara("... and %s more ship type%s", opad, Misc.getHighlightColor(),
+                        String.valueOf(remaining), remaining == 1 ? "" : "s"
+                    );
+                }
+            }
+            
+            final String virtualStateStr = mission.spawnedFleetFinishedJob ?
+                "Virtual fleet - hauls cargo and uses resources, but cannot be engaged." :
+                "Active fleet - currently in space and open to interception.";
+            tp.addPara(virtualStateStr, gray, opad);
+        };
     }
 }

@@ -15,7 +15,6 @@ public class PathData {
     public StarSystemAPI source;
     public StarSystemAPI destination;
     public float pathWidth;
-    public float nodeSize;
     public float travelDuration;
     public float pauseDuration;
     public float pulseOffset;

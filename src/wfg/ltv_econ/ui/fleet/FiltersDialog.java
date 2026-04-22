@@ -33,7 +33,7 @@ public class FiltersDialog extends DockPanel {
     private float minAmountSliderValueCache = TradeFilters.minTradeAmount;
 
     public FiltersDialog(UIBuildableAPI content) {
-        super(400, 430, Side.RIGHT);
+        super(400, 465, Side.RIGHT);
 
         this.content = content;
 
@@ -177,6 +177,18 @@ public class FiltersDialog extends DockPanel {
         add(disableAllExporters).inTL(opad*1.5f + btnW, SECT_II_H + LABEL_H + opad + pad*2);
         add(enableAllImporters).inTL(opad*2 + halfW, SECT_II_H + LABEL_H + opad + pad*2);
         add(disableAllImporters).inTL(opad*2.5f + halfW + btnW, SECT_II_H + LABEL_H + opad + pad*2);
+
+        final int SECT_III_H = SECT_II_H + LIST_H + LABEL_H + S_BTN_H + opad*3;
+
+        final CheckboxButton virtualFleetToggle = new CheckboxButton(m_panel, 20, "Hide virtual fleets", Fonts.DEFAULT_SMALL,
+            (btn) -> {
+                btn.setChecked(!btn.isChecked());
+                TradeFilters.hideVirtualFleets = btn.isChecked();
+                content.buildUI();
+            }, UICheckboxSize.SMALL, false
+        );
+        virtualFleetToggle.setChecked(TradeFilters.hideVirtualFleets);
+        add(virtualFleetToggle).inTL(opad + pad, SECT_III_H);
     }
 
     @Override

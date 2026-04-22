@@ -55,7 +55,7 @@ INFORMAL_TRADE_SHARE,Informal Trade Share,Double,0.03,,Fraction of sector-wide e
 IDLE_SHIP_MAINTENANCE_MULT,Idle Ships Maintenance Mult,Double,0.3,,Multiplier to maintenance supply cost for idle ships inside the faction inventory. A value of 1 disables the discount.,0,1,Fleet
 CREW_WAGE_PER_MONTH,Crew Monthly Wages,Double,10,,Monthly wages per crew member operating the faction ships inventory.,1,100,Fleet
 IDLE_CREW_WAGE_MULT,Idle Crew Wage Mult,Double,0.5,,Wage multiplier for idle crew operating the faction ships inventory.,0,1,Fleet
-TRAVEL_SPEED_LY_DAY,Trade Fleet Travel Speed,Int,14,,The speed in light-years at which trade fleets travel in hyperspace. Used by the simulation.,1,20,Fleet
+TRAVEL_SPEED_LY_DAY,Trade Fleet Travel Speed,Int,7,,The speed in light-years at which trade fleets travel in hyperspace. Used by the simulation.,1,20,Fleet
 FORCED_FUEL_IMPORT_COST_MULT,Forced Fuel Cost Mult,Double,3,,Cost multiplier for fuel purchases made to initiate trade when no fuel is stockpiled.,1,10,Fleet
 INDEPENDENT_TRADE_FLEET_BASE_FEE,Independent Hauler Base Fee,Double,1000.0,,Base fee in credits per trade mission when using independent haulers.,0,100000,Fleet
 INDEPENDENT_TRADE_FLEET_PER_TON_FEE,Independent Hauler Per-Ton Fee,Double,1.5,,Fee per ton of cargo (including fuel and crew) transported.,0,1000,Fleet

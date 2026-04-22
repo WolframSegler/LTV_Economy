@@ -55,7 +55,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final FactionSpecAPI factionSpec = settings.getFactionSpec(inv.factionID);
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
 
-        final Base banner = new Base(m_panel, flagW, flagH, factionSpec.getLogo(), null, null);
+        final Base banner = new Base(m_panel, flagW, flagH, faction.getLogo(), null, null);
         add(banner).inTL(hpad, hpad);
 
         final int GAP_LEFT_1 = flagW + opad*2 + pad;

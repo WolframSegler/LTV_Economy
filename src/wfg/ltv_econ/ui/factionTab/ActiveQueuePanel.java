@@ -87,8 +87,8 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         title.setAlignment(Alignment.LMID);
 
         final IconValuePairTp ordersPair = new IconValuePairTp(m_panel, entryW, entryH, CHECKLIST, orders.size(), true, null);
-        final IconValuePairTp timePair = new IconValuePairTp(m_panel, entryW, entryH, STOPWATCH, estimatedTime, false, null);
-        final IconValuePairTp prodPair = new IconValuePairTp(m_panel, entryW, entryH, PRODUCTION, prodLines, false, null);
+        final IconValuePairTp timePair = new IconValuePairTp(m_panel, entryW, entryH, STOPWATCH, estimatedTime, true, null);
+        final IconValuePairTp prodPair = new IconValuePairTp(m_panel, entryW, entryH, PRODUCTION, prodLines, true, null);
 
         add(ordersPair).inTL(hpad + titleW, hpad);
         add(timePair).inTL(hpad + titleW + entryW, hpad);

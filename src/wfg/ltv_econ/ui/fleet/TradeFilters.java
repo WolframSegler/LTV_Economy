@@ -10,4 +10,6 @@ public class TradeFilters {
 
     /** all, exporters, importers, in-faction */
     public static int directionMode = 0;
+
+    public static boolean hideVirtualFleets = false;
 }

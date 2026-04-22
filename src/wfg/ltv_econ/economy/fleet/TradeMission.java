@@ -3,7 +3,6 @@ package wfg.ltv_econ.economy.fleet;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -19,7 +18,7 @@ import wfg.native_ui.util.ArrayMap;
 
 public class TradeMission implements Serializable {
     public final ArrayMap<String, Integer> allocatedShips = new ArrayMap<>(8);
-    public final List<TradeCom> cargo = new ArrayList<>();
+    public final ArrayList<TradeCom> cargo = new ArrayList<>();
     public final StatBonus credits = new StatBonus();
     public final boolean inFaction;
     public final float dist;

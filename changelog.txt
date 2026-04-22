@@ -30,6 +30,7 @@ v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Fixed bugs where event and policy effects on population growth were not working correctly.
 - Colonies without a spaceport can no longer participate in inter‑colony trade.
 - Switched internal data structures for performance.
+- Adde a filter to the trade map to show active missions only for raiding.
 
 v0.2.12-beta | SAVE COMPATIBLE
 - The effects of saving LunaLib Settings now takes effect immideatly. No restart required.

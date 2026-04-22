@@ -78,6 +78,7 @@ public class TradeMissionsDialog extends DockPanel {
         for (TradeMission m : missions) {
             if (marketRelevantOnly && market != null && market != m.src && market != m.dest) continue;
 
+            if (TradeFilters.hideVirtualFleets && m.spawnedFleetFinishedJob) continue;
             if (TradeFilters.directionMode == 1 && market != m.src) continue;
             if (TradeFilters.directionMode == 2 && market != m.dest) continue;
             if (TradeFilters.directionMode == 3 && !m.inFaction) continue;
