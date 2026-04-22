@@ -6,6 +6,7 @@ import static wfg.ltv_econ.constants.strings.Income.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,6 +35,8 @@ public class CommodityDomain implements Serializable {
 
     private final ArrayMap<String, CommodityCell> comCells = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
     private final List<ComTradeFlow> tradeFlows = new ArrayList<>(EconomyInfo.getMarketsCount());
+    private final ArrayMap<String, Float> informalExportFlows = new ArrayMap<>(EconomyInfo.getMarketsCount());
+    private final ArrayMap<String, Float> informalImportFlows = new ArrayMap<>(EconomyInfo.getMarketsCount());
     private InformalExchangeNode informalNode;
 
     private float[] tradeVolumeHistory = new float[EconConfig.HISTORY_LENGTH];
@@ -114,7 +117,7 @@ public class CommodityDomain implements Serializable {
         final List <CommodityCell> importers = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
-            if (cell.computeImportAmount() > 0f) importers.add(cell);
+            if (cell.computeImportAmount() > 0.0) importers.add(cell);
         }
 
         return importers;
@@ -124,7 +127,7 @@ public class CommodityDomain implements Serializable {
         final List <CommodityCell> exporters = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
-            if (cell.computeExportAmount() > 0f) exporters.add(cell);
+            if (cell.computeExportAmount() > 0.0) exporters.add(cell);
         }
 
         return exporters;
@@ -136,6 +139,22 @@ public class CommodityDomain implements Serializable {
 
     public final List<ComTradeFlow> getTradeFlows() {
         return tradeFlows;
+    }
+
+    public final float getInformalExports(String marketID) {
+        return informalExportFlows.getOrDefault(marketID, 0f);
+    }
+
+    public final float getInformalImports(String marketID) {
+        return informalImportFlows.getOrDefault(marketID, 0f);
+    }
+
+    public final Map<String, Float> getInformalExports() {
+        return Collections.unmodifiableMap(informalExportFlows);
+    }
+
+    public final Map<String, Float> getInformalImports() {
+        return Collections.unmodifiableMap(informalImportFlows);
     }
 
     public final float getTradeVolumeHistory() {
@@ -250,7 +269,7 @@ public class CommodityDomain implements Serializable {
             tradeCreditActivity += credits;
             tradeVolume += amountToSend;
 
-            tradeFlows.add(new ComTradeFlow(comID,
+            tradeFlows.add(new ComTradeFlow(
                 expCell.market, impCell.market, amountToSend, credits, sameFaction
             ));
 
@@ -262,8 +281,13 @@ public class CommodityDomain implements Serializable {
         creditActivityHistory[historyIndex] += tradeCreditActivity;
     }
 
-    public final void informalTrade(boolean fakeAdvance) {
+    public final void informalTrade(boolean newTradeCycle) {
         informalNode.updateBeforeTrade();
+
+        if (newTradeCycle) {
+            informalExportFlows.clear();
+            informalImportFlows.clear();
+        }
 
         final MarketFinanceRegistry registry = MarketFinanceRegistry.instance();
         final List<CommodityCell> exporters = getExporters();
@@ -293,11 +317,11 @@ public class CommodityDomain implements Serializable {
                 * informalNode.priceMultImporting * amount * (1f + exporter.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementImporting)
             );
 
+            informalExportFlows.merge(exporter.marketID, amount, Float::sum);
             exporter.informalExports += amount;
             tradeVolume += amount;
             tradeCreditActivity += price;
             
-            if (fakeAdvance) continue;
             registry.getLedger(exporter.marketID).add(TRADE_EXPORT_KEY + comID, price, getDesc(TRADE_EXPORT_KEY) + spec.getName());
         }
 
@@ -311,10 +335,10 @@ public class CommodityDomain implements Serializable {
                 * informalNode.priceMultExporting * amount * (1f + importer.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementExporting)
             );
 
+            informalImportFlows.merge(importer.marketID, amount, Float::sum);
             importer.informalImports += amount;
             tradeCreditActivity += price;
             
-            if (fakeAdvance) continue;
             registry.getLedger(importer.marketID).add(TRADE_IMPORT_KEY + comID, -price, getDesc(TRADE_IMPORT_KEY) + spec.getName());
         }
 

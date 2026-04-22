@@ -219,11 +219,6 @@ public class ComTradeFlowMap extends CustomPanel implements
                 data.source = source;
                 data.destination = dest;
                 data.pathWidth = calculatePathWidth(totalAmount);
-
-                // TODO modify later to use actual trade data instead of this
-                data.travelDuration = first.dist * 4f;
-                data.pauseDuration = 10f + data.travelDuration;
-                data.pulseOffset = random.nextFloat() * data.travelDuration;
                 flowData.add(data);
             }
         }

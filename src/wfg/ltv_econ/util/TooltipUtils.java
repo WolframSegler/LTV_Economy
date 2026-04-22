@@ -500,50 +500,52 @@ public class TooltipUtils {
         tp.addGrid(0);
     }
 
-    // TODO modify this section to make it clear trade and exhange happens on certain intervals
     public static final void createComTradeLedgerSection(TooltipMakerAPI tp, CommodityCell cell) {
         final String comID = cell.comID;
         final String marketID = cell.marketID;
         final String comName = cell.spec.getName();
         final String marketName = cell.market.getName();
+        final EconomyEngine engine = EconomyEngine.instance();
         final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
 
         final long exportIncomeLastMonth = ledger.getLastMonth(TRADE_EXPORT_KEY + comID);
         final long exportIncomeThisMonth = ledger.getCurrentMonth(TRADE_EXPORT_KEY + comID);
+        final double exportAmount = engine.info.getExportAmount(comID, marketID);
 
-        if (exportIncomeLastMonth > 1l || exportIncomeThisMonth > 1l) {
+        if (exportIncomeLastMonth > 0l || exportIncomeThisMonth > 0l) {
             tp.addPara(
                 marketName + " profitably exported %s units of " + comName + " and accounted for %s of the global market share. They generated %s last month and %s so far this month.",
                 opad, highlight,
-                NumFormat.formatMagnitudeAware(cell.getTotalExports()),
-                EconomyEngine.instance().info.getExportMarketShare(comID, marketID) + "%",
+                NumFormat.formatMagnitudeAware(exportAmount),
+                engine.info.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
             );
-        } else if (cell.getTotalExports() < 1f) {
-            tp.addPara("No local production to export for today.", opad);
+        } else {
+            tp.addPara("No local production to export for this trade cycle.", opad);
         }
 
         if (cell.getSurplusAfterTargetQuantum() > 0f) {
             tp.addPara(
-                "Exports are reduced by %s due to insufficient importers for today.",
+                "Exports are reduced by %s due to insufficient importers for this trade cycle.",
                 pad, negative, NumFormat.formatMagnitudeAware(cell.getSurplusAfterTargetQuantum())
             );
         }
 
         final long importExpenseLastMonth = ledger.getLastMonth(TRADE_IMPORT_KEY + comID);
         final long importExpenseThisMonth = ledger.getCurrentMonth(TRADE_IMPORT_KEY + comID);
+        final double importAmount = engine.info.getImportAmount(comID, marketID);
 
-        if (importExpenseLastMonth > 1l || importExpenseThisMonth > 1l) {
+        if (importExpenseLastMonth > 0l || importExpenseThisMonth > 0l) {
             tp.addPara(
                 marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. They expended %s last month and %s so far this month.",
                 opad, highlight,
-                NumFormat.formatMagnitudeAware(cell.getTotalImports()),
-                EconomyEngine.instance().info.getImportMarketShare(comID, marketID) + "%",
+                NumFormat.formatMagnitudeAware(importAmount),
+                engine.info.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)
             );
-        } else if (cell.getTotalImports() < 1f) {
+        } else {
             tp.addPara("No local demand or stockpiles full.", opad);
         }
     }

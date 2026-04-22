@@ -130,7 +130,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		route.addSegment(new RouteSegment(MissionStatus.IN_TRANSIT.ordinal(), mission.travelDur, src.getPrimaryEntity(), dest.getPrimaryEntity()));
 		route.addSegment(new RouteSegment(MissionStatus.IN_DST_ORBIT_UNLOADING.ordinal(), mission.transferDur, dest.getPrimaryEntity()));
 
-		setDelayAndSendMessage(route);
+		final int currentDay = EconomyEngine.instance().getCyclesSinceTrade();
+		route.setDelay(Math.max(0, mission.startOffset - currentDay));
 		mission.spawnedFleetFinishedJob = false;
 
 		recentlySentTradeFleet.add(src.getId(), minEconSpawnInterval);
@@ -162,18 +163,6 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		}
 
 		return factionId;
-	}
-
-	protected void setDelayAndSendMessage(RouteData route) {
-		final TradeMission mission = (TradeMission) route.getCustom();
-		final int currentDay = EconomyEngine.instance().getCyclesSinceTrade();
-		final int delay = Math.max(0, mission.startOffset - currentDay);
-		route.setDelay(delay);
-
-		if (!Factions.PLAYER.equals(route.getFactionId())) {
-			// TODO maybe create a custom TradeFleetIntel that does not rely on CustomData
-			// new TradeFleetDepartureIntel(route);
-		}
 	}
 
 	public final TradeMission pickTradeMission() {

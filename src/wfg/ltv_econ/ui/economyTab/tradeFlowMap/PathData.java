@@ -15,9 +15,6 @@ public class PathData {
     public StarSystemAPI source;
     public StarSystemAPI destination;
     public float pathWidth;
-    public float travelDuration;
-    public float pauseDuration;
-    public float pulseOffset;
 
     public final void addColorWeight(Color color, double weight) {
         final Double prev = colorWeights.get(color);

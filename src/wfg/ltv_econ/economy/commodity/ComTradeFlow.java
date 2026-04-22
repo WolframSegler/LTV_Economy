@@ -7,7 +7,6 @@ import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 public class ComTradeFlow implements Serializable {
-    public final String comID;
     public final String exporterID;
     public final String importerID;
     public final float totalPrice;
@@ -16,10 +15,9 @@ public class ComTradeFlow implements Serializable {
     public transient MarketAPI importer;
     public double amount;
 
-    public ComTradeFlow(String comID, MarketAPI exporter, MarketAPI importer, double amount,
+    public ComTradeFlow(MarketAPI exporter, MarketAPI importer, double amount,
         float totalPrice, boolean inFaction
     ) {
-        this.comID = comID;
         this.exporterID = exporter.getId();
         this.importerID = importer.getId();
         this.exporter = exporter;

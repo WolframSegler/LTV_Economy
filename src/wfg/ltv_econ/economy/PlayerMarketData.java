@@ -301,7 +301,7 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
     }
 
     private final void applySocialCohesionModifiers() {
-        // TODO
+        // TODO create apply social cohesion modifiers
         // final String desc = "Social cohesion";
 
         /*

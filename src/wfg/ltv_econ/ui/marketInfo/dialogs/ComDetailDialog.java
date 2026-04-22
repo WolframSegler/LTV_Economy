@@ -250,6 +250,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         add(section4).inBR(pad, BUTTON_H + pad*2 + opad);
     }
 
+    // TODO fix this file
     private void createSection1(UIPanelAPI section, TooltipMakerAPI tooltip) {
         if (m_com == null) return;
         final EconomyEngine engine = EconomyEngine.instance();
@@ -346,7 +347,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
-                            "The total number of " + m_com.getName() + " being exported globally by all producing markets in the sector.\n\n" +
+                            "The total number of " + m_com.getName() + " exported globally by all producing markets in the last trade cycle.\n\n" +
                             "This figure reflects the total global supply that reaches exportable surplus after local and in-faction demand is met.", pad
                         );
                     };

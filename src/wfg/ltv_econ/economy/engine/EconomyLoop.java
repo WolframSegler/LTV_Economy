@@ -92,8 +92,6 @@ public class EconomyLoop {
             handleTrade();
         }
 
-        engine.comDomains.values().parallelStream().forEach(d -> d.informalTrade(fakeAdvance));
-
         if (!fakeAdvance) {
             engine.comDomains.values().forEach(CommodityDomain::advance);
             engine.factionShipInventories.values().forEach(FactionShipInventory::advance);
@@ -266,8 +264,10 @@ public class EconomyLoop {
             engine.cyclesSinceTrade = 0;
             engine.lastTradeCycle = EconConfig.TRADE_INTERVAL;
             dispatchTrade();
+            engine.comDomains.values().parallelStream().forEach(d -> d.informalTrade(true));
         } else {
             engine.cyclesSinceTrade++;
+            engine.comDomains.values().parallelStream().forEach(d -> d.informalTrade(false));
         }
     }
 
@@ -285,9 +285,9 @@ public class EconomyLoop {
                 );
 
                 mission.cargo.add(new TradeCom(comID, flow.amount, flow.totalPrice));
-                if (flow.comID.equals(Commodities.CREW) || flow.comID.equals(Commodities.MARINES)) {
+                if (comID.equals(Commodities.CREW) || comID.equals(Commodities.MARINES)) {
                     mission.crewAmount += flow.amount;
-                } else if (flow.comID.equals(Commodities.FUEL)) {
+                } else if (comID.equals(Commodities.FUEL)) {
                     mission.fuelAmount += flow.amount;
                 } else {
                     mission.cargoAmount += flow.amount;

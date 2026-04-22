@@ -79,8 +79,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalProduction(comID)
-                    + (long) dom.getInformalNode().prod;
+                final long value = engine.info.getGlobalProduction(comID);
                 final String txt = "Global production";
                 String valueTxt = NumFormat.engNotate(value);
                 if (value < 1) valueTxt = "---";
@@ -361,7 +360,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = dom.getExporters().size();
+                final long value = engine.info.getGlobalExporterCount(comID);
                 final String txt = "Global Exporters";
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -372,7 +371,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
-                        "The total count of markets in the sector that exported %s on the previous day. Only markets that actually sent units to other markets are included, regardless of faction.",
+                        "The total count of markets in the sector that globally exported %s on the previous trade cycle. Informal trade excluded.",
                         pad, highlight, com.getName()
                     );
                 };
@@ -386,7 +385,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = dom.getImporters().size();
+                final long value = engine.info.getGlobalImporterCount(comID);
                 final String txt = "Global Importers";
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -397,7 +396,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(
-                        "The total count of markets in the sector that imported %s on the previous day. Only markets that actually received units from other markets are included, regardless of faction.",
+                        "The total count of markets in the sector that globally imported %s on the previous trade cycle. Informal trade excluded.",
                         pad, highlight, com.getName()
                     );
                 };
@@ -453,7 +452,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             final String iconPath = cell.market.getFaction().getCrest();
             final Base iconPanel = new Base(table.getPanel(), 24, 24, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
-            final long value = (long) cell.getProduction(true);
+            final float value = cell.getProduction(true);
 
             table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
@@ -500,7 +499,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             final String iconPath = cell.market.getFaction().getCrest();
             final Base iconPanel = new Base(table.getPanel(), 24, 24, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
-            final long value = (long) cell.getConsumption(true);
+            final float value = cell.getConsumption(true);
 
             table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
@@ -536,7 +535,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final float informalShare = engine.info.getInformalExportShare(comID);
 
         for (FactionAPI faction : factionList) {
-            final float share = engine.info.getFactionExportShareWithInformal(comID, faction.getId());
+            final float share = engine.info.getFactionExportShare(comID, faction.getId());
             if (share < PIE_CHART_THRESHOLD) continue;
 
             data.add(new PieSlice(
@@ -566,7 +565,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             tp.addPara(
                 "Shows the percentage of total exports controlled by factions and informals. " +
                 "Percentages do not include in-faction trade." +
-                "Values are based on the previous day.",
+                "Values are based on the previous trade cycle.",
                 pad
             );
 
@@ -577,7 +576,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             );
 
             for (FactionAPI faction : factionList) {
-                final float share = engine.info.getFactionExportShareWithInformal(comID, faction.getId());
+                final float share = engine.info.getFactionExportShare(comID, faction.getId());
                 if (share < PIE_CHART_THRESHOLD) continue;
 
                 tp.addRow(new Object[] {
@@ -609,7 +608,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final float informalShare = engine.info.getInformalImportShare(comID);
 
         for (FactionAPI faction : factionList) {
-            final float share = engine.info.getFactionImportShareWithInformal(comID, faction.getId());
+            final float share = engine.info.getFactionImportShare(comID, faction.getId());
 
             if (share < PIE_CHART_THRESHOLD) continue;
 
@@ -640,7 +639,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             tp.addPara(
                 "Shows the percentage of total imports made by factions and informals. " +
                 "Percentages do not include in-faction trade." +
-                "Values are based on the previous day.",
+                "Values are based on the previous trade cycle.",
                 pad
             );
 
@@ -651,7 +650,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             );
 
             for (FactionAPI faction : factionList) {
-                final float share = engine.info.getFactionImportShareWithInformal(comID, faction.getId());
+                final float share = engine.info.getFactionImportShare(comID, faction.getId());
                 if (share < PIE_CHART_THRESHOLD) continue;
 
                 tp.addRow(new Object[] {
@@ -682,7 +681,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final ArrayList<PieSlice> data = new ArrayList<>();
         final double globalExports = engine.info.getGlobalExports(comID);
         final double inFactionExports = engine.info.getInFactionExports(comID);
-        final double informalExports = dom.getInformalNode().exports;
+        final double informalExports = engine.info.getGlobalInformalExports(comID);
         final double total = globalExports + inFactionExports + informalExports;
         final float globalTradeShare = (float) (globalExports / total);
         final float inFactionTradeShare = (float) (inFactionExports / total);
