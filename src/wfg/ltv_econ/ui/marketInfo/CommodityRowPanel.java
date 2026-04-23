@@ -1,6 +1,5 @@
 package wfg.ltv_econ.ui.marketInfo;
 
-import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -52,9 +51,7 @@ public class CommodityRowPanel extends CustomPanel implements
     public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
     public final InteractionComp<CommodityRowPanel> interaction = comp().get(NativeComponents.INTERACTION);
 
-    public final CommoditySpecAPI com;
-
-    private final CommodityCell cell;
+    public final CommodityCell cell;
     private final MarketAPI market;
 
     public CommodityRowPanel(UIPanelAPI parent, MarketAPI market, String comID,
@@ -62,8 +59,8 @@ public class CommodityRowPanel extends CustomPanel implements
     ) {
         super(parent, width, height);
 
-        cell = EconomyEngine.instance().getComCell(comID, market.getId());
-        com = settings.getCommoditySpec(comID);
+        final EconomyEngine engine = EconomyEngine.instance();
+        cell = engine.getComCell(comID, market.getId());
         this.market = market;
 
         glow.color = base;
@@ -71,12 +68,59 @@ public class CommodityRowPanel extends CustomPanel implements
 
         tooltip.width = 500f;
         tooltip.expandable = true;
+        tooltip.positioner = (tp, expanded) -> {
+            NativeUiUtils.anchorPanel(tp, m_parent, AnchorType.LeftTop, pad*4);
+        };
+        tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
+        tooltip.expandTxt = "%s show legend";
+        tooltip.unexpandTxt = "%s hide";
+
+        buildUI();
+    }
+
+    public void buildUI() {
+        final int textW = 60;
+        final int rowH = (int) getPos().getHeight();
+
+        final Base comIcon = new Base(m_panel, rowH, rowH, cell.spec.getIconName(), null, null);
+        add(comIcon).inBL(2f, 0f);
+
+        final float consumption = cell.getConsumption(true);
+        final String amountStr;
+        if (consumption <= 0f) {
+            amountStr = " n/a";
+        } else {
+            amountStr = NumFormat.engNotate(cell.getStored() / consumption) + "d";
+        }
+        final LabelAPI amountLbl = settings.createLabel(Strings.X + amountStr, Fonts.INSIGNIA_LARGE);
+        amountLbl.autoSizeToWidth(textW);
+        final float textHeight = amountLbl.computeTextHeight(amountLbl.getText());
+        amountLbl.setColor(market.getFaction().getBaseUIColor());
+        add(amountLbl).inBL(pad*2 + rowH, (rowH - textHeight) / 2f);
+
+        final Base stockIcon = UIUtils.getStockpilesIcon(cell,
+            iconSize, m_panel, base
+        );
+        add(stockIcon).inBL(pad*3 + rowH + textW, (rowH - iconSize) / 2f);
+
+        final UIPanelAPI infoBar = new CommodityInfoBar(null, 85, iconSize,
+            true, cell).getPanel();
+        add(infoBar).inBL(pad*4 + rowH + textW + iconSize, (rowH - iconSize) / 2f);
+
+        if (EconomyEngine.instance().info.getExportAmount(cell.comID, cell.marketID) > 0.0) {
+            final Base iconPanel = new Base(m_panel, rowH - 4, rowH - 4,
+                EXPORTS_ICON, null, null);
+
+            add(iconPanel).inRMid(pad);
+        }
+
         tooltip.builder = (tp, expanded) -> {
-            // TODO maybe modify later to show incoming and outgoing trade missions
-            final String comDesc = settings.getDescription(comID, Type.RESOURCE).getText1();
+            final String comDesc = settings.getDescription(cell.comID, Type.RESOURCE).getText1();
+            final String timerStr = "    -   " + amountStr + " stock";
 
             tp.setParaFont(Fonts.ORBITRON_12);
-            tp.addPara(com.getName(), market.getFaction().getBaseUIColor(), pad);
+            final LabelAPI title = tp.addPara(cell.spec.getName(), market.getFaction().getBaseUIColor(), pad);
+            title.setText(title.getText() + timerStr);
 
             tp.setParaFontDefault();
             tp.addPara(comDesc, opad);
@@ -100,7 +144,7 @@ public class CommodityRowPanel extends CustomPanel implements
                 tp.addSectionHeading("Production and Consumption", Alignment.MID, opad);
                 TooltipUtils.createComProductionBreakdown(tp, cell);
                 
-                tp.addPara("All production sources contribute to the commodity's availability. Formal and informal imports add to supply to help meet demand.", gray, pad);
+                tp.addSpacer(hpad);
                 tp.setParaFont(Fonts.ORBITRON_12);
                 TooltipUtils.createComConsumptionBreakdown(tp, cell);
 
@@ -122,48 +166,6 @@ public class CommodityRowPanel extends CustomPanel implements
                 tp.addSpacer(pad);
             }
         };
-        tooltip.positioner = (tp, expanded) -> {
-            NativeUiUtils.anchorPanel(tp, m_parent, AnchorType.LeftTop, pad*4);
-        };
-        tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
-        tooltip.expandTxt = "%s show legend";
-        tooltip.unexpandTxt = "%s hide";
-
-        buildUI();
-    }
-
-    public void buildUI() {
-        final int textWidth = 65;
-        final int rowHeight = (int) getPos().getHeight();
-
-        final Base comIcon = new Base(m_panel, rowHeight, rowHeight, cell.spec.getIconName(),
-            null, null);
-        add(comIcon).inBL(2f, 0f);
-
-        // TODO maybe change the comodity row to display another value other than inflow
-        final LabelAPI amountLbl = settings.createLabel(NumFormat.engNotate(
-            (int)cell.getInflowQuantum()) + Strings.X, Fonts.INSIGNIA_LARGE
-        );
-        amountLbl.autoSizeToWidth(textWidth);
-        final float textHeight = amountLbl.computeTextHeight(amountLbl.getText());
-        amountLbl.setColor(market.getFaction().getBaseUIColor());
-        add(amountLbl).inBL(pad*2 + rowHeight, (rowHeight - textHeight) / 2f);
-
-        final Base stockIcon = UIUtils.getStockpilesIcon(cell,
-            iconSize, m_panel, base
-        );
-        add(stockIcon).inBL(pad*3 + rowHeight + textWidth, (rowHeight - iconSize) / 2f);
-
-        final UIPanelAPI infoBar = new CommodityInfoBar(null, 85, iconSize,
-            true, cell).getPanel();
-        add(infoBar).inBL(pad*4 + rowHeight + textWidth + iconSize, (rowHeight - iconSize) / 2f);
-
-        if (EconomyEngine.instance().info.getExportAmount(cell.comID, cell.marketID) > 0.0) {
-            final Base iconPanel = new Base(m_panel, rowHeight - 4, rowHeight - 4,
-                EXPORTS_ICON, null, null);
-
-            add(iconPanel).inRMid(pad);
-        }
     }
 
     /**
@@ -213,12 +215,12 @@ public class CommodityRowPanel extends CustomPanel implements
         
         y += iconSize + pad;
 
-        desc = "Imported or available through one-time trade or events.";
+        desc = "Imported from the global market.";
         legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_IMPORT);
         
         y += iconSize + pad;
 
-        desc = "Excess imports beyond current demand stockpiled for future use.";
+        desc = "Excess imports stockpiled for future use.";
         legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_OVER_IMPORT);
         
         y += iconSize + pad;

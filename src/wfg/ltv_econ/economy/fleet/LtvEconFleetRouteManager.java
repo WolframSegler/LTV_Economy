@@ -21,6 +21,7 @@ import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
+import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
@@ -49,6 +50,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.TimeoutTracker;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
@@ -355,6 +357,12 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 			p.timestamp = route.getTimestamp();
 			p.factionId = factionId;
 
+			for (FleetMemberAPI member : fData.getMembersListCopy()) {
+				final MutableStat stat = member.getStats().getMaxBurnLevel();
+				stat.unmodify();
+				stat.setBaseValue(EconConfig.TRAVEL_SPEED_LY_DAY);
+			}
+
 			fleet.setInflater(Misc.getInflater(fleet, p));
 			fData.setOnlySyncMemberLists(false);
 			fData.sort();
@@ -426,7 +434,9 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		mission.spawnedFleetFinishedJob = true;
 		RouteManager.getInstance().removeRoute(route);
 			
-		ShippingDisruption.getDisruption(mission.src).addShippingLost(1);
-		ShippingDisruption.getDisruption(mission.src).notifyDisrupted(ShippingDisruption.ACCESS_LOSS_DURATION);
+		if (mission.src != null) {
+			ShippingDisruption.getDisruption(mission.src).addShippingLost(1);
+			ShippingDisruption.getDisruption(mission.src).notifyDisrupted(ShippingDisruption.ACCESS_LOSS_DURATION);
+		}
 	}
 }

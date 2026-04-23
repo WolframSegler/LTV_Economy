@@ -69,7 +69,6 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
     }
 
     public void buildUI() {
-        // Select relevant commodities
         final List<CommoditySpecAPI> commodities = new ArrayList<>(EconomyConstants.econCommoditySpecs);
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
@@ -116,7 +115,7 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
     public void selectRow(String comID) {
         final CommodityOnMarketAPI com = m_market.getCommodityData(comID);
         for (CommodityRowPanel row : commodityRows) {
-            row.glow.persistent = row.com == com;
+            row.glow.persistent = row.cell.spec == com;
         }
     }
 

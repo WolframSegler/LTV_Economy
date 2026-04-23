@@ -36,9 +36,9 @@ public abstract class MarketPolicy {
     public void preAdvance(PlayerMarketData data) {};
     public void postAdvance(PlayerMarketData data) {};
     public boolean isEnabled(PlayerMarketData data) { return true; }
-    public boolean isActive() { return state == PolicyState.ACTIVE; }
-    public boolean isAvailable() { return state == PolicyState.AVAILABLE; }
-    public boolean isOnCooldown() { return state == PolicyState.COOLDOWN; }
+    public boolean isActive(PlayerMarketData data) { return state == PolicyState.ACTIVE; }
+    public boolean isAvailable(PlayerMarketData data) { return state == PolicyState.AVAILABLE; }
+    public boolean isOnCooldown(PlayerMarketData data) { return state == PolicyState.COOLDOWN; }
 
     public Object readResolve() {
         spec = PolicyConfig.map.get(id);

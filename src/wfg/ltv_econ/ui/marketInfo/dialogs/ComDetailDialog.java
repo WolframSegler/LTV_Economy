@@ -1,6 +1,8 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.Income.TRADE_EXPORT_KEY;
+import static wfg.ltv_econ.constants.strings.Income.TRADE_IMPORT_KEY;
 import static wfg.native_ui.util.Globals.settings;
 
 import org.lwjgl.input.Keyboard;
@@ -15,14 +17,12 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
-import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.MapParams;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI.ActionListenerDelegate;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -32,6 +32,7 @@ import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
 import wfg.ltv_econ.ui.marketInfo.LtvCommodityPanel;
 import wfg.ltv_econ.ui.reusable.ComIconPanel;
@@ -47,6 +48,7 @@ import wfg.native_ui.ui.component.TooltipComp.TooltipBuilder;
 import wfg.native_ui.ui.core.UIElementFlags.HasInputSnapshot;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.functional.CheckboxButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.RowPanel;
@@ -85,19 +87,22 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     private final FactionSpecAPI m_faction;
 
     private CommoditySpecAPI m_com;
-    public MarketAPI m_selectedMarket = null;
+    public MarketAPI selectedMarket = null;
 
-    public TextPanel footerPanel = null;
+    public CheckboxButton footer = null;
     public Button producerButton = null;
     public Button consumerButton = null;
-    public LtvCommodityPanel section4ComPanel = null;
 
-    /** market can be null */
+    /**
+     * @param market nullable
+     */
     public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com) {
-        this(market, faction, com, 1166, 658 + 20);
+        this(market, faction, com, 1166, 678);
     }
 
-    /** market can be null */
+    /**
+     * @param market nullable
+     */
     public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com,
         int panelW, int panelH
     ) {
@@ -132,64 +137,27 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     @Override
     public void buildUI() {
         createSections();
-
-        // Footer
-        final int footerH = 40;
-
-        footerPanel = new TextPanel(m_panel, 400, footerH) {
-            @Override
-            public void buildUI() {
-                final TooltipMakerAPI footer = ComponentFactory.createTooltip(PANEL_W, false);
-                footer.setActionListenerDelegate(
-                    new ActionListenerDelegate() {
-                        public void actionPerformed(Object data, Object source) {
-                            updateSection3(producerButton.isChecked() ? 0 : 1);
-                        }
-                    }
-                );
-                m_checkbox = footer.addCheckbox(20, 20, "", "stockpile_toggle",
-                    Fonts.ORBITRON_12, highlight, UICheckboxSize.SMALL, 0);
-
-                m_checkbox.getPosition().inBL(0, 0);
-                m_checkbox.setShortcut(Keyboard.KEY_Q, false);
-
-                footer.setParaFont(Fonts.ORBITRON_12);
-                footer.setParaFontColor(m_faction.getBaseUIColor());
-                LabelAPI txt = footer.addPara("Only show colonies with excess stockpiles or shortages (%s)", 0f, highlight, "Q");
-                txt.setHighlightOnMouseover(true);
-
-                int TextY = (int) txt.computeTextHeight(txt.getText());
-                txt.getPosition().inBL(20 + pad, (20 - TextY) / 2);
-
-                ComponentFactory.addTooltip(footer, footerH, false, m_panel);
-            }
-
-            @Override
-            public void advance(float delta) {
-                super.advance(delta);
-
-                if (input.hoveredLastFrame && input.LMBUpLastFrame) {
-                    if (m_checkbox != null) {
-                        m_checkbox.setChecked(!m_checkbox.isChecked());
-                    }
-                }
-            }
-
-            {
-                tooltip.width = getPos().getWidth() * 0.7f;
-                tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
-                        pad
-                    );
-                };
-                tooltip.positioner = (tp, exp) -> {
-                    NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, pad);
-                };
-            }
+        
+        footer = new CheckboxButton(m_panel, 20, "Only show colonies with excess stockpiles or shortages",
+            Fonts.ORBITRON_12, (btn) -> {
+                btn.setChecked(!btn.isChecked());
+                updateSection3(producerButton.isChecked() ? 0 : 1);
+            },
+            UICheckboxSize.SMALL, false
+        );
+        footer.setShortcutAndAppendToText(Keyboard.KEY_Q);
+        footer.tooltip.width = getPos().getWidth() * 0.7f;
+        footer.tooltip.builder = (tp, exp) -> {
+            tp.addPara(
+                "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
+                pad
+            );
+        };
+        footer.tooltip.positioner = (tp, exp) -> {
+            NativeUiUtils.anchorPanel(tp, footer.getPanel(), AnchorType.TopLeft, pad);
         };
 
-        add(footerPanel).inBL(opad, pad);
+        add(footer).inBL(pad, pad);
     }
 
     public void createSections() {
@@ -250,7 +218,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         add(section4).inBR(pad, BUTTON_H + pad*2 + opad);
     }
 
-    // TODO fix this file
     private void createSection1(UIPanelAPI section, TooltipMakerAPI tooltip) {
         if (m_com == null) return;
         final EconomyEngine engine = EconomyEngine.instance();
@@ -285,17 +252,13 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final TextPanel textPanel = new TextPanel(section, 170, 0) {
                 @Override
                 public void buildUI() {
-                    final long value = engine.getComDomain(comID)
-                        .getCreditActivityHistory();
+                    final long value = engine.getComDomain(comID).getCreditActivityHistory();
                     final String txt = "Global market value";
                     String valueTxt = NumFormat.formatCredit(value);
-                    if (value < 1) valueTxt = "---";
+                    if (value < 1l) valueTxt = "---";
 
                     ComponentFactory.addCaptionValueBlock(
-                        m_panel,
-                        txt,
-                        valueTxt,
-                        baseColor
+                        m_panel, txt, valueTxt, baseColor
                     );
                 }
 
@@ -307,7 +270,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                         tp.addPara(
                             "Sector-wide spendings for the import of " +
                             m_com.getName() + " in the last %s days. " +
-                            "Colonies with higher accessibility, faction relations and a shorter distance will have priority when exporting.\n\n"
+                            "Colonies with higher accessibility, faction relations and a shorter distance to customers will have priority when exporting.\n\n"
                             +
                             "The value shown here includes the demand at your colonies, " +
                             "since they must import goods as well. In-faction imports have a %s discount.",
@@ -365,7 +328,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
             final FactionAPI currFaction;
 
-            if (m_selectedMarket != null) currFaction = m_selectedMarket.getFaction();
+            if (selectedMarket != null) currFaction = selectedMarket.getFaction();
             else currFaction = Global.getSector().getFaction(m_faction.getId());
 
             final TextPanel textPanel = new TextPanel(section, 210, 0) {
@@ -377,12 +340,10 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String txt = "Total " + factionName + " exports";
 
                     final String globalValue = NumFormat.engNotate(
-                        engine.info.getFactionGlobalExports(
-                            comID, currFaction.getId())
+                        engine.info.getFactionGlobalExports(comID, currFaction.getId())
                     );
                     final String inFactionValue = NumFormat.engNotate(
-                        engine.info.getFactionInFactionExports(
-                            comID, currFaction.getId())
+                        engine.info.getFactionInFactionExports(comID, currFaction.getId())
                     );
 
                     final String valueTxt = globalValue + "  |  " + inFactionValue;
@@ -406,10 +367,10 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
-                            "The total number of units exported to all consumers globally, as well as the total exported within the faction under " + currFaction.getPersonNamePrefix() + " control.\n\n" +
+                            "The total number of units exported to %s, as well as the total exported %s under " + currFaction.getPersonNamePrefix() + " control.\n\n" +
                             "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
                             pad, new Color[] {currFaction.getBaseUIColor(), UIColors.IN_FACTION},
-                            new String[] {"all consumers globally", "within the faction"}
+                            "global consumers", "within the faction"
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
@@ -423,7 +384,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         final int baseRow2Y = baseY * 3 + pad;
 
-        if (m_selectedMarket == null || m_selectedMarket.isPlayerOwned()) { // Faction market share
+        if (selectedMarket == null || selectedMarket.isPlayerOwned()) { // Faction market share
             final TextPanel textPanel = new TextPanel(section, 250, 0) {
                 @Override
                 public void buildUI() {
@@ -466,17 +427,17 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final TextPanel textPanelLeft = new TextPanel(section, 250, 0) {
                 @Override
                 public void buildUI() {
-                    final String factionName = m_selectedMarket.getFaction().getDisplayName();
+                    final String factionName = selectedMarket.getFaction().getDisplayName();
                     final String txt = factionName + " market share";
 
                     final String valueTxt = (int) (engine.info.getFactionExportShare(
-                        comID, m_selectedMarket.getFactionId()
+                        comID, selectedMarket.getFactionId()
                     ) * 100) + "%";
 
                     ComponentFactory.addCaptionValueBlock(
                         m_panel, txt, valueTxt,
-                        m_selectedMarket.getFaction().getBaseUIColor(),
-                        m_selectedMarket.getFaction().getBaseUIColor()
+                        selectedMarket.getFaction().getBaseUIColor(),
+                        selectedMarket.getFaction().getBaseUIColor()
                     );
                 }
 
@@ -484,7 +445,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(
-                            "Total export market share for " + m_com.getName() + " for all colonies under " + m_selectedMarket.getFaction().getDisplayName() + " control.",
+                            "Total export market share for " + m_com.getName() + " for all colonies under " + selectedMarket.getFaction().getDisplayName() + " control.",
                             pad
                         );
                     };
@@ -555,11 +516,11 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         params.showSystem(starSystem);
         params.showMarket(m_market, 1);
 
-        if (m_selectedMarket != null) {
-            title += " and " + m_selectedMarket.getName();
+        if (selectedMarket != null) {
+            title += " and " + selectedMarket.getName();
 
-            params.showSystem(m_selectedMarket.getStarSystem());
-            params.showMarket(m_selectedMarket, 1);
+            params.showSystem(selectedMarket.getStarSystem());
+            params.showMarket(selectedMarket, 1);
         }
         
         params.positionToShowAllMarkersAndSystems(false, mapHeight);
@@ -640,9 +601,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         :
         "The portion of the global market value that this colony contributes.\n\nIncludes player-controlled colonies.";
         
-        final String creditTpDesc = mode == 0 ? "An estimate of how much daily income the colony is getting from exporting its production of the commodity.\n\nIncome also depends on colony stability, so may not directly correlate with market share." 
-        :
-        "How much the colony's demand contributes to the global market value for the commodity.";
+        final String creditTpDesc = mode == 0 ? "Last month's income the colony earned from exports." :
+            "Last month's expenses the colony spent on imports.";
 
         table.addHeaders(
             "", (int)(0.04 * SECT3_WIDTH), null, true, false, 1,
@@ -651,29 +611,27 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
             "Quantity", (int)(0.05 * SECT3_WIDTH), quantityTooltip, true, true, 2,
             "", (int)(0.1 * SECT3_WIDTH), null, true, false, 2,
-            "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. Influences trade order", false, false, -1,
+            "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. Influences trade priority.", false, false, -1,
             marketHeader, (int)(0.15 * SECT3_WIDTH), marketTpDesc, false, false, -1,
             creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
         );
 
         final EconomyEngine engine = EconomyEngine.instance();
 
-        // TODO maybe change in the future to use stored values instead of flow values
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-
             if (market.isHidden()) continue;
 
             final String marketID = market.getId();
             final CommodityCell cell = engine.getComCell(comID, marketID);
 
-            if (cell.globalExports < 1f && mode == 0 ||
-                cell.getTargetQuantum(true) < 1f && mode == 1
-            ) continue;
-
-            if (footerPanel != null && footerPanel.m_checkbox.isChecked() &&
-                !(cell.getSurplusAfterTargetQuantum() > 0f || cell.getTargetQuantumUnmet() > 0f)) {
+            if (footer != null && footer.isChecked() && !(cell.getStoredDeficit() + cell.getStoredExcess() > 0f)) {
                 continue;
             }
+
+            final double quantity = mode == 0 ?
+                engine.info.getExportAmount(comID, marketID):
+                engine.info.getImportAmount(comID, marketID);
+            if (quantity <= 0.0) continue;
 
             final String iconPath = market.getFaction().getCrest();
             final Base iconPanel = new Base(section, iconSize, iconSize,
@@ -685,9 +643,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
             final String factionName = market.getFaction().getDisplayName();
 
-            final float quantityValue = mode == 0 ? cell.globalExports : cell.globalImports;
-            final String quantityTxt = NumFormat.engNotate(quantityValue);
-
             final UIPanelAPI infoBar = new CommodityInfoBar(null, 75, iconSize,
                 true, cell).getPanel();
 
@@ -696,7 +651,9 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final int marketShare = mode == 0 ? engine.info.getExportMarketShare(comID, marketID) :
                 engine.info.getImportMarketShare(comID, marketID);
 
-            final int incomeValue = (int) (quantityValue * m_com.getBasePrice());
+            final long incomeValue = MarketFinanceRegistry.instance().getLedger(marketID).getLastMonth(
+                (mode == 0 ? TRADE_EXPORT_KEY : TRADE_IMPORT_KEY) + comID
+            );
 
             final Color textColor = market.getFaction().getBaseUIColor();
 
@@ -704,7 +661,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             table.addCell(market.getName(), cellAlg.LEFTPAD, null, textColor);
             table.addCell(market.getSize(), cellAlg.MID, null, textColor);
             table.addCell(factionName, cellAlg.MID, null, textColor);
-            table.addCell(quantityTxt, cellAlg.MID, quantityValue, null);
+            table.addCell(NumFormat.engNotate(quantity), cellAlg.MID, quantity, null);
             table.addCell(infoBar, cellAlg.MID, null, null);
             table.addCell(accessibility + "%", cellAlg.MID, accessibility, null);
             table.addCell(marketShare + "%", cellAlg.MID, marketShare, null);
@@ -720,7 +677,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             }
 
             final ClickHandler<RowPanel> rowSelectedRunnable = (row, isLeftClick) -> {
-                m_selectedMarket = (MarketAPI) row.customData;
+                selectedMarket = (MarketAPI) row.customData;
                 updateSection1();
                 updateSection2();
             };
@@ -741,7 +698,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     private void createSection4(UIPanelAPI section) {
         if (m_market == null) return;
 
-        section4ComPanel = new LtvCommodityPanel(
+        final LtvCommodityPanel section4ComPanel = new LtvCommodityPanel(
             section,
             (int) section.getPosition().getWidth(),
             (int) section.getPosition().getHeight(),
@@ -753,7 +710,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         section4ComPanel.selectionListener = (source, isLeftClick) -> {
             if (!isLeftClick) return;
 
-            m_com = source.com;
+            m_com = source.cell.spec;
 
             section4ComPanel.selectRow(source);
 
@@ -779,9 +736,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     
             final Color darkColor = faction.getDarkUIColor();
             
-            tp.setParaFont(Fonts.ORBITRON_12);
-            tp.addPara(marketName + " - " + m_com.getName(), baseColor, pad);
-            tp.setParaFontDefault();
+            tp.setTitleSmallOrbitron();
+            tp.addTitle(marketName + " - " + m_com.getName(), baseColor);
     
             String locString = "in the " + market.getContainingLocation().getNameWithLowercaseType();
             if (market.getContainingLocation().isHyperspace()) {
@@ -853,22 +809,14 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     }
                 }
             );
-    
-            tp.addPara("   - " + "Market share of exports multiplied by %s",
-                0, highlight, Strings.X + Misc.getRoundedValue(Math.max(stability, 0) / 100.0F)
-            );
-            tp.addPara(
-                "The same-faction export bonus does not increase market share or income from exports.", opad
-            );
         };
     }
 
-    private TooltipBuilder createSection3QuantityHeaderTooltip(
+    private static final TooltipBuilder createSection3QuantityHeaderTooltip(
         int mode, SortableTable table
     ) {
-        final String quantityDesc = mode == 0
-            ? "Units of this commodity exported globally."
-            : "Units of this commodity imported globally to meet demand.";
+        final String quantityDesc = "Units of this commodity " + (mode == 0 ? "exported" : "imported") +
+            " globally in the last trade cycle.";
 
         return (tp, exp) -> {
             tp.addPara(quantityDesc, pad);

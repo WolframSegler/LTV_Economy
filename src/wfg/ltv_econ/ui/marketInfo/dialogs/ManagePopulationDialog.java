@@ -401,10 +401,10 @@ public class ManagePopulationDialog extends DialogPanel {
         ) {{ interaction.onClicked = listener;}};
 
         final SpritePanelWithTp poster = new SpritePanelWithTp(posterWrap.getPanel(), width, height,
-            policy.spec.posterPath, policy.isOnCooldown() ? gray : null, null
+            policy.spec.posterPath, policy.isOnCooldown(mData) ? gray : null, null
         ) {
             public void buildUI() {
-                if (policy.isOnCooldown()) {
+                if (policy.isOnCooldown(mData)) {
                     final float cooledRatio = (float) policy.cooldownDaysRemaining/policy.spec.cooldownDays;
                     final ArrayList<PieSlice> pieData = new ArrayList<>(
                         List.of(
@@ -426,7 +426,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 outline.color = Color.ORANGE;
-                outline.enabled = policy.isActive();
+                outline.enabled = policy.isActive(mData);
 
                 glow.type = GlowType.ADDITIVE;
                 glow.additiveSprite = m_sprite;
@@ -480,7 +480,7 @@ public class ManagePopulationDialog extends DialogPanel {
         activateButton.bgAlpha = 1f;
         final long marketCredits = EconomyEngine.instance().getCredits(m_market.getId());
         final boolean hasSufficientCredits = Math.max(0, marketCredits) >= policy.spec.cost;
-        if ((!policy.isAvailable() || !hasSufficientCredits) && !DebugFlags.COLONY_DEBUG) {
+        if ((!policy.isAvailable(mData) || !hasSufficientCredits) && !DebugFlags.COLONY_DEBUG) {
             activateButton.setEnabled(false);
 
             activateButton.setShowTooltipWhileInactive(true);

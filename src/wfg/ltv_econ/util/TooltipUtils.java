@@ -525,13 +525,6 @@ public class TooltipUtils {
             tp.addPara("No local production to export for this trade cycle.", opad);
         }
 
-        if (cell.getSurplusAfterTargetQuantum() > 0f) {
-            tp.addPara(
-                "Exports are reduced by %s due to insufficient importers for this trade cycle.",
-                pad, negative, NumFormat.formatMagnitudeAware(cell.getSurplusAfterTargetQuantum())
-            );
-        }
-
         final long importExpenseLastMonth = ledger.getLastMonth(TRADE_IMPORT_KEY + comID);
         final long importExpenseThisMonth = ledger.getCurrentMonth(TRADE_IMPORT_KEY + comID);
         final double importAmount = engine.info.getImportAmount(comID, marketID);

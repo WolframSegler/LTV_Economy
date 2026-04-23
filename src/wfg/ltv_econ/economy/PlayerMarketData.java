@@ -120,7 +120,7 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
 
     public final void advance(int days) {
         for (MarketPolicy policy : policies) {
-            if (policy.isActive()) policy.preAdvance(this);
+            if (policy.isActive(this)) policy.preAdvance(this);
         }
         for (MarketEvent event : events) {
             event.preAdvance(this);
@@ -129,7 +129,7 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
         advanceMarket(days);
 
         for (MarketPolicy policy : policies) {
-            if (policy.isActive())  policy.postAdvance(this);
+            if (policy.isActive(this))  policy.postAdvance(this);
         }
         for (MarketEvent event : events) {
             event.postAdvance(this);
@@ -164,7 +164,7 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
 
     public final void apply() {
         for (MarketPolicy policy : policies) {
-            if (policy.isActive()) policy.apply(this);
+            if (policy.isActive(this)) policy.apply(this);
         }
 
         market.addTransientImmigrationModifier(this);

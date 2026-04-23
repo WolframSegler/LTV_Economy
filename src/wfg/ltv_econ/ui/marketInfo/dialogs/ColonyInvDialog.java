@@ -304,7 +304,9 @@ public class ColonyInvDialog extends DialogPanel {
         final String BaseProdTpTxt = "Theoretical local daily production, assuming no deficits or shortages.";
         final String RealProdTpTxt = "Actual daily production after accounting for stored deficits.";
         final String BaseBalanceTpTxt = "Net daily change in stockpile, ignoring imports or exports.";
-        final String RealBalanceTpTxt = "Net daily change in stockpile, including imports or exports.";
+        final String RealBalanceTpTxt = "Net daily change in stockpile, including imports or exports. " +
+            "Does not account for discrete expenditures such as hull production for the faction hangar.\n\n"+
+            "This value may not reflect the effects of imports and exports due to their periodic nature";
 
         table.addHeaders(
             "", 40, null, true, false, 1,
@@ -326,7 +328,7 @@ public class ColonyInvDialog extends DialogPanel {
             );
             
             final long stored = cell.getRoundedStored();
-            final int demand = (int) cell.getConsumption(true);
+            final int demand = (int) cell.getTargetQuantum(true);
             final int baseProd = (int) cell.getProduction(false);
             final int modifiedProd = (int) cell.getProduction(true);
             final int baseBalance = (int) (cell.getProduction(true) - cell.getConsumption(true));

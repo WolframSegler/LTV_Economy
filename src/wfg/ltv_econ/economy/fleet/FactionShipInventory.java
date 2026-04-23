@@ -227,6 +227,10 @@ public class FactionShipInventory implements Serializable {
         return assemblyLines;
     }
 
+    public final void addAssemblyLines(int amount) {
+        assemblyLines += Math.max(amount, 0);
+    }
+
     public final MarketAPI getCapital() {
         final MarketAPI capital;
         if (capitalID == null || econ.getMarket(capitalID) == null) {

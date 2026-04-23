@@ -31,6 +31,7 @@ v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Colonies without a spaceport can no longer participate in inter‑colony trade.
 - Switched internal data structures for performance.
 - Adde a filter to the trade map to show active missions only for raiding.
+- Added the Expand Shipyards policy to increase the assembly lines for the player faction.
 
 v0.2.12-beta | SAVE COMPATIBLE
 - The effects of saving LunaLib Settings now takes effect immideatly. No restart required.

@@ -60,7 +60,7 @@ public class SubstanceControlPolicy extends MarketPolicy {
 
     @Override
     public boolean isEnabled(PlayerMarketData data) {
-        return !data.market.isFreePort() || isActive();
+        return !data.market.isFreePort() || isActive(data);
     }
 
     @Override

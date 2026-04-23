@@ -129,6 +129,16 @@
       "durationDays": 480,
       "cooldownDays": 480,
       "description": "A regulatory framework restricting the distribution, and consumption of controlled substances within the colony. Enhanced enforcement and compliance measures aim to reduce substance abuse, improve public health, and reinforce social order."
+    },
+    {
+      "id": "expand_the_yards",
+      "name": "Expand the Yards",
+      "class": "wfg.ltv_econ.intel.market.policies.ExpandShipyardsPolicy",
+      "posterPath": "graphics/policies/expand_the_yards.png",
+      "cost": 600000,
+      "durationDays": 120,
+      "cooldownDays": 240,
+      "description": "A massive industrial undertaking to construct additional orbital drydocks and assembly gantries. Requires enormous quantities of resources. Upon completion, the faction's fleet construction capacity is permanently increased by one assembly line."
     }
   ]
 }
