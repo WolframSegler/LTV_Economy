@@ -90,9 +90,7 @@ public class EconomyLoop {
             engine.playerMarketData.values().forEach(PlayerMarketData::advance);
 
             handleTrade();
-        }
-
-        if (!fakeAdvance) {
+            
             engine.comDomains.values().forEach(CommodityDomain::advance);
             engine.factionShipInventories.values().forEach(FactionShipInventory::advance);
 

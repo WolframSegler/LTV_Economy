@@ -26,6 +26,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.LaborConfig;
+import wfg.ltv_econ.constants.SubmarketsID;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -357,7 +358,9 @@ public class ManagePopulationDialog extends DialogPanel {
                 );
 
                 final CallbackRunnable<Button> activateRun = (btn) -> {
-                    policy.activate(data);
+                    if (!policy.isActive(data)) policy.activate(data);
+                    m_market.getSubmarket(SubmarketsID.STOCKPILES).getPlugin().updateCargoPrePlayerInteraction();
+
                     buildPoster(policyContainer.getContentPanel(), policy, data,
                         source.interaction.onClicked, policyWidth, policyHeight
                     ).inBL(pad + posterIndex*(policyWidth + pad), hpad);
@@ -480,16 +483,26 @@ public class ManagePopulationDialog extends DialogPanel {
         activateButton.bgAlpha = 1f;
         final long marketCredits = EconomyEngine.instance().getCredits(m_market.getId());
         final boolean hasSufficientCredits = Math.max(0, marketCredits) >= policy.spec.cost;
-        if ((!policy.isAvailable(mData) || !hasSufficientCredits) && !DebugFlags.COLONY_DEBUG) {
-            activateButton.setEnabled(false);
 
+        final boolean cantActivate = !policy.isAvailable(mData) || !hasSufficientCredits;
+        final boolean shouldDisable = (cantActivate && !DebugFlags.COLONY_DEBUG) || policy.isActive(mData);
+
+        if (shouldDisable) {
+            activateButton.setEnabled(false);
             activateButton.setShowTooltipWhileInactive(true);
+
             activateButton.tooltip.builder = (tp, exp) -> {
-                tp.addPara("Not enough market credits to activate this policy", pad);
+                if (policy.isActive(mData)) {
+                    tp.addPara("This policy is already active.", pad);
+                } else if (!hasSufficientCredits) {
+                    tp.addPara("Not enough market credits to activate this policy.", pad);
+                } else {
+                    tp.addPara("Policy requirements are not met.", pad);
+                }
             };
-            activateButton.tooltip.positioner = (tp, exp) -> {
+
+            activateButton.tooltip.positioner = (tp, exp) ->
                 NativeUiUtils.anchorPanel(tp, activateButton.getPanel(), AnchorType.TopLeft, pad);
-            };
         }
 
         cont.addComponent(activateButton.getPanel()).inBR(opad + PANEL_W/2f, pad);

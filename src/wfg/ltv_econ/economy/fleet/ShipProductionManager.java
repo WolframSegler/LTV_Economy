@@ -28,6 +28,7 @@ import wfg.native_ui.util.ArrayMap;
 
 public class ShipProductionManager {
     private ShipProductionManager() {}
+    private static final float MAX_TARGET_FOR_PLANNED_ORDERS = 100_000f;
 
     private static final CommoditySpecAPI shipSpec = settings.getCommoditySpec(Commodities.SHIPS);
     private static final CommoditySpecAPI metalsSpec = settings.getCommoditySpec(Commodities.METALS);
@@ -45,6 +46,10 @@ public class ShipProductionManager {
         float deficitFuel = computeDesiredFuel(missions, faction) - inv.getTotalFuelCapacity();
         float deficitCrew = computeDesiredCrew(missions, faction) - inv.getTotalCrewCapacity();
         float deficitCombat = computeDesiredCombat(missions, faction) - inv.getTotalCombatPower();
+        deficitCargo = Math.min(deficitCargo, MAX_TARGET_FOR_PLANNED_ORDERS);
+        deficitFuel = Math.min(deficitFuel, MAX_TARGET_FOR_PLANNED_ORDERS);
+        deficitCrew = Math.min(deficitCrew, MAX_TARGET_FOR_PLANNED_ORDERS);
+        deficitCombat = Math.min(deficitCombat, MAX_TARGET_FOR_PLANNED_ORDERS);
 
         for (ShipProductionOrder order : activeQueue) {
             final ShipTypeData data = inv.get(order.hullId);

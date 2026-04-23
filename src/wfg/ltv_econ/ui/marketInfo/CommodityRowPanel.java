@@ -79,7 +79,7 @@ public class CommodityRowPanel extends CustomPanel implements
     }
 
     public void buildUI() {
-        final int textW = 60;
+        final int textW = 65;
         final int rowH = (int) getPos().getHeight();
 
         final Base comIcon = new Base(m_panel, rowH, rowH, cell.spec.getIconName(), null, null);
@@ -88,7 +88,7 @@ public class CommodityRowPanel extends CustomPanel implements
         final float consumption = cell.getConsumption(true);
         final String amountStr;
         if (consumption <= 0f) {
-            amountStr = " n/a";
+            amountStr = "n/a";
         } else {
             amountStr = NumFormat.engNotate(cell.getStored() / consumption) + "d";
         }

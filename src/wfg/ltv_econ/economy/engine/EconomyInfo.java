@@ -172,6 +172,16 @@ public class EconomyInfo {
         return (float) (imports / total);
     }
 
+    public final double getFactionFormalGlobalImports(String comID, String factionID) {
+        double total = 0.0;
+        for (ComTradeFlow flow : engine.getComDomain(comID).getTradeFlows()) {
+            if (!flow.inFaction && flow.importer.getFactionId().equals(factionID)) {
+                total += flow.amount;
+            }
+        }
+        return total;
+    }
+
     public final float getFactionExportShare(String comID, String factionID) {
         final double total = getGlobalExports(comID);
         if (total == 0) return 0;
@@ -202,6 +212,16 @@ public class EconomyInfo {
         }
         
         return (float) (exports / total);
+    }
+
+    public final double getFactionFormalGlobalExports(String comID, String factionID) {
+        double total = 0.0;
+        for (ComTradeFlow flow : engine.getComDomain(comID).getTradeFlows()) {
+            if (!flow.inFaction && flow.exporter.getFactionId().equals(factionID)) {
+                total += flow.amount;
+            }
+        }
+        return total;
     }
 
     public final long getFactionNetComSpending(String comID, String factionID) {

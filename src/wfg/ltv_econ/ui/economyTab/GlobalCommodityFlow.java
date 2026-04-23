@@ -531,40 +531,34 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
       
         { // Global export share per faction (percent)
-        final ArrayList<PieSlice> data = new ArrayList<>(); 
-        final float informalShare = engine.info.getInformalExportShare(comID);
+        final ArrayList<PieSlice> data = new ArrayList<>();
+        final double globalExports = engine.info.getGlobalExports(comID);
 
-        for (FactionAPI faction : factionList) {
-            final float share = engine.info.getFactionExportShare(comID, faction.getId());
-            if (share < PIE_CHART_THRESHOLD) continue;
+        if (globalExports > 0) {
+            for (FactionAPI faction : factionList) {
+                final double factionFormalExports = engine.info.getFactionFormalGlobalExports(comID, faction.getId());
+                final float share = (float) (factionFormalExports / globalExports);
+                if (share >= PIE_CHART_THRESHOLD) {
+                    data.add(new PieSlice(faction.getId(), faction.getBaseUIColor(), share));
+                }
+            }
 
-            data.add(new PieSlice(
-                null,
-                faction.getBaseUIColor(),
-                share
-            ));
-        }
-
-        if (informalShare >= PIE_CHART_THRESHOLD) {
-            data.add(new PieSlice(
-                null,
-                UIColors.INFORMAL_SECTOR,
-                informalShare
-            ));
+            final double informalExports = dom.getInformalExports().values().stream().mapToDouble(d -> d).sum();
+            final float informalShare = (float) (informalExports / globalExports);
+            if (informalShare >= PIE_CHART_THRESHOLD) {
+                data.add(new PieSlice(null, UIColors.INFORMAL_SECTOR, informalShare));
+            }
         }
 
         final PieChart chart = new PieChart(m_panel, PIECHART_W, PIECHART_H, data);
         add(chart).inBL(360, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
-            tp.setParaFont(Fonts.ORBITRON_12);
-            tp.setParaFontColor(base);
-            tp.addPara("Global Export Share by Faction", pad);
-            tp.setParaFontDefault();
-            tp.setParaFontColor(text_color);
+            tp.addTitle("Global Export Share by Faction", base);
+
             tp.addPara(
                 "Shows the percentage of total exports controlled by factions and informals. " +
-                "Percentages do not include in-faction trade." +
+                "Percentages do not include in-faction trade. " +
                 "Values are based on the previous trade cycle.",
                 pad
             );
@@ -575,67 +569,53 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 }
             );
 
-            for (FactionAPI faction : factionList) {
-                final float share = engine.info.getFactionExportShare(comID, faction.getId());
-                if (share < PIE_CHART_THRESHOLD) continue;
+            for (PieSlice slice : data) {
+                String label = (slice.color == UIColors.INFORMAL_SECTOR)
+                    ? "Informal Sector"
+                    : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
 
                 tp.addRow(new Object[] {
-                    faction.getBaseUIColor(),
-                    faction.getDisplayName(),
-                    highlight, (int) (share * 100) + "%"
+                    slice.color,
+                    label,
+                    highlight,
+                    (int) (slice.fraction * 100) + "%"
                 });
             }
-
-            if (informalShare >= PIE_CHART_THRESHOLD) {
-                tp.addRow(new Object[] {
-                    UIColors.INFORMAL_SECTOR,
-                    "Informal Sector",
-                    highlight, (int) (informalShare * 100) + "%"
-                });
-            }
-
             tp.addTable("", 0, opad);
         };
 
         final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
-        add(label).inBL(360 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
+        add(label).inBL(360 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad * 2);
         }
 
         { // Global import share per faction (percent)
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final float informalShare = engine.info.getInformalImportShare(comID);
+        final double globalImports = engine.info.getGlobalImports(comID);
 
-        for (FactionAPI faction : factionList) {
-            final float share = engine.info.getFactionImportShare(comID, faction.getId());
-
-            if (share < PIE_CHART_THRESHOLD) continue;
-
-            data.add(new PieSlice(
-                null,
-                faction.getBaseUIColor(),
-                share
-            ));
-        }
-
-        if (informalShare >= PIE_CHART_THRESHOLD) {
-            data.add(new PieSlice(
-                null,
-                UIColors.INFORMAL_SECTOR,
-                informalShare
-            ));
+        if (globalImports > 0.0) {
+            for (FactionAPI faction : factionList) {
+                final double factionFormalImports = engine.info.getFactionFormalGlobalImports(comID, faction.getId());
+                final float share = (float) (factionFormalImports / globalImports);
+                if (share >= PIE_CHART_THRESHOLD) {
+                    data.add(new PieSlice(faction.getId(), faction.getBaseUIColor(), share));
+                }
+            }
+    
+            final double informalImports = dom.getInformalImports().values().stream().mapToDouble(d -> d).sum();
+            final float informalShare = (float) (informalImports / globalImports);
+            if (informalShare >= PIE_CHART_THRESHOLD) {
+                data.add(new PieSlice(null, UIColors.INFORMAL_SECTOR, informalShare));
+            }
         }
 
         final PieChart chart = new PieChart(m_panel, PIECHART_W, PIECHART_H, data);
         add(chart).inBL(580, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
-            tp.setParaFont(Fonts.ORBITRON_12);
-            tp.setParaFontColor(base);
-            tp.addPara("Global Import Share by Faction", pad);
-            tp.setParaFontDefault();
-            tp.setParaFontColor(text_color);
+            tp.addTitle("Global Import Share by Faction", base);
+            
             tp.addPara(
                 "Shows the percentage of total imports made by factions and informals. " +
                 "Percentages do not include in-faction trade." +
@@ -649,26 +629,19 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 }
             );
 
-            for (FactionAPI faction : factionList) {
-                final float share = engine.info.getFactionImportShare(comID, faction.getId());
-                if (share < PIE_CHART_THRESHOLD) continue;
+            for (PieSlice slice : data) {
+            String label = (slice.color == UIColors.INFORMAL_SECTOR)
+                ? "Informal Sector"
+                : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
 
-                tp.addRow(new Object[] {
-                    faction.getBaseUIColor(),
-                    faction.getDisplayName(),
-                    highlight, (int) (share * 100) + "%"
-                });
-            }
-
-            if (informalShare >= PIE_CHART_THRESHOLD) {
-                tp.addRow(new Object[] {
-                    UIColors.INFORMAL_SECTOR,
-                    "Informal Sector",
-                    highlight, (int) (informalShare * 100) + "%"
-                });
-            }
-
-            tp.addTable("", 0, opad);
+            tp.addRow(new Object[] {
+                slice.color,
+                label,
+                highlight,
+                (int) (slice.fraction * 100) + "%"
+            });
+        }
+        tp.addTable("", 0, opad);
         };
 
         final LabelAPI label = settings.createLabel("Import share", Fonts.ORBITRON_16);

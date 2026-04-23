@@ -138,9 +138,10 @@ public class CommodityCell implements Serializable {
         return Math.max(0f, getTotalImports() - getTargetQuantumMetViaTrade());
     }
     public final double computeExportAmount() {
-        return Math.max(0.0, stored + getRemainingExportableAfterTargetQuantum()
+        return Math.max(0.0, stored + getSurplusAfterTargetQuantum()
             - getProduction(true) * EconConfig.PRODUCTION_HOLD_FACTOR
             - getTargetStockpiles() * EconConfig.EXPORT_THRESHOLD_FACTOR
+            - getTotalExports()
         );
     }
     public final float computeImportAmount() {

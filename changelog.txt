@@ -1,6 +1,8 @@
 v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Switched to WrapUI v0.4.0 for this update. Version 0.3.2 will not work.
 - It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
+- This version has not been play-tested thoroughly.
+
 - Added a ship inventory for each faction. Currently only used for trade fleets. If a faction cannot use its own ships for trading, it must hire independent haulers at a cost.
     - Player‑owned fleets require sufficient idle cargo, fuel, crew, and escort ships from the faction inventory; otherwise independent haulers are used.
     - Independent hauler fees include a base fee, a per‑ton charge, a percentage of cargo value, and hazard pay based on route danger.
@@ -15,11 +17,11 @@ v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Saturation and tactical bombardments now reduce colony stockpiles and negatively affect health and happiness. The player will be notified when this happens.
 - Separated daily consumption from stockpile targets. Colonies now track production, consumption, and desired daily inflow (targetQuantum), resulting in more realistic import/export behavior.
 - New Financial Ledger System: Every market now has a comprehensive ledger tracking all income and expenses, including trade, fleet maintenance, crew wages, ship production, policy costs, and player market transactions. Trade flows are now clearly recorded per commodity, and all costs are settled at month‑end.
-- Clicking the colony income label now opens an income breakdown panel with all the info contained within the Finance Ledger.
+- Clicking the colony income label now opens an income breakdown panel with all the info contained within the Financial Ledger.
 - Ctrl + Clicking the colony stockpiles button opens a list of incoming and outgoing trade missions.
 - Moved the Economy section to the intel tab. Removed the administration section from it.
 - Added a faction tab to the command panel.
-    - The Hangar section display a roster of faction owned ships.
+    - The Hangar section displays a roster of faction owned ships.
     - The Planned Orders section shows a list of ordered ships waiting for resources to be allocated. Orders can be placed here.
     - The Assembly Line section shows the queued hulls waiting for their turn to be assembled.
     - The Administration section contains faction-wide settings.
@@ -30,8 +32,9 @@ v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Fixed bugs where event and policy effects on population growth were not working correctly.
 - Colonies without a spaceport can no longer participate in inter‑colony trade.
 - Switched internal data structures for performance.
-- Adde a filter to the trade map to show active missions only for raiding.
+- Added a filter to the trade map to show active missions only for raiding.
 - Added the Expand Shipyards policy to increase the assembly lines for the player faction.
+- Added in-game tips.
 
 v0.2.12-beta | SAVE COMPATIBLE
 - The effects of saving LunaLib Settings now takes effect immideatly. No restart required.

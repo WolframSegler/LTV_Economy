@@ -64,7 +64,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
 	@Override
 	public String getIllegalTransferText(CargoStackAPI stack, TransferAction action) {
-		return "Can only store commodities used by the economy";
+		return "Can only store economy relevant commodities";
 	}
 
 	@Override

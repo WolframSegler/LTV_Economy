@@ -33,7 +33,7 @@ SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE,Ship Allocation Market Weight Per Size,Double,
 SHIP_ALLOC_MARKET_SIZE_EXPONENT,Ship Allocation Market Size Exponent,Double,1.5,,Exponent applied to market size to calculate the size factor for automatic ship orders.,1.0,4.0,Solver
 SHIP_ALLOC_AGGRESSION_COMBAT_MULT,Ship Allocation Aggression Combat Mult,Double,0.2,,Bonus multiplier to target combat power based on faction aggression doctrine. Higher aggression increases combat oriented hull production.,0.0,1.0,Solver
 SHIP_ALLOC_THREAT_RELATIONSHIP_MULT,Ship Allocation Threat Relationship Mult,Double,2.0,,Multiplier applied to combat power targets when ordering ships.,1.0,10.0,Solver
-SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,100.0,,"Combat power target floor used by factions when ordering ships.",0.0,1000.0,Solver
+SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,200.0,,"Combat power target floor used by factions when ordering ships.",0.0,1000.0,Solver
 ,,,,,,,,
 MULTI_THREADING,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread.,,,Economy
 ASSIGN_WORKERS_ON_LOAD,Assign Workers On Load,Boolean,false,,Re-allocates the workers after loading a save. Includes quick-saves as well.,,,Economy
@@ -49,7 +49,7 @@ FACTION_EXCHANGE_MULT,Faction Price Multiplier,Double,0.3,,Adjusts prices for go
 EMBARGO_REP_DROP,Embargo Reputation Penalty,Double,0.4,,The relationship hit for imposing an embargo. 1 means 100 relation points.,0,1,Trade
 MIN_RELATION_TO_TRADE,Minimum Trade Relationship,Double,-0.9,,Minimum relationship between factions for trade to occur. Factions below this threshold will not trade.,-1,0,Trade
 TRADE_MISSION_MAX_DISPLAYED_SHIPS,Max Displayed Ships in Trade Mission,Int,20,,Maximum number of allocated ship types shown in a trade mission widget.,1,100,Trade
-TRADE_MAP_MIN_AMOUNT_FILTER,Trade Map Min Amount Filter,Int,50000,,Minimum trade amount (in tons) for a mission to appear in the trade map.,0,1000000,Trade
+TRADE_MAP_MIN_AMOUNT_FILTER,Trade Map Min Amount Filter,Int,10000,,Minimum trade amount (in tons) for a mission to appear in the trade map.,0,1000000,Trade
 INFORMAL_TRADE_SHARE,Informal Trade Share,Double,0.03,,Fraction of sector-wide excess and demand that the informal sector can move every trade interval. Lower values limit informal trade volume.,0.0,1.0,Trade
 ,,,,,,,,
 IDLE_SHIP_MAINTENANCE_MULT,Idle Ships Maintenance Mult,Double,0.3,,Multiplier to maintenance supply cost for idle ships inside the faction inventory. A value of 1 disables the discount.,0,1,Fleet

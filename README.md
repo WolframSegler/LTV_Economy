@@ -96,6 +96,7 @@ behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons
     <li>graphics/policies/bres_vitalis.png</li>
     <li>graphics/policies/convergence_festival.png</li>
     <li>graphics/policies/substance_control_act.png</li>
+    <li>graphics/policies/expand_the_yards.png</li>
     <li>graphics/icons/markets/wfg_labor.png</li>
     <li>graphics/icons/intel/policy_icon.png</li>
     <li>graphics/icons/industry/manufacturing.png</li>
