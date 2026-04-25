@@ -70,6 +70,7 @@ public class ManagePopulationDialog extends DialogPanel {
     private final MarketAPI m_market;
 
     public Slider exploitationSlider = null;
+    private float sliderValue = 0f;
 
     private MarketPolicy selectedPolicy = null;
     private UIPanelAPI selectedPolicyCont = null;
@@ -561,8 +562,6 @@ public class ManagePopulationDialog extends DialogPanel {
         cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*2);
         cont.addComponent(repeatAfterCooldownBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
     }
-
-    float sliderValue = 0f;
 
     @Override
     public void advance(float delta) {
