@@ -25,10 +25,9 @@ public abstract class MarketEvent {
     }
 
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
-        tp.setParaFontOrbitron();
-        tp.addPara(spec.name, base, pad);
+        tp.setTitleSmallOrbitron();
+        tp.addTitle(spec.name, base);
         
-        tp.setParaFontDefault();
         tp.addPara(spec.description, pad);
     }
 }

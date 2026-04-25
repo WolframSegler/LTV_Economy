@@ -16,11 +16,11 @@ import static wfg.native_ui.util.UIConstants.*;
 import java.util.List;
 
 public class LocalizedGangSkirmishesEvent extends MarketEvent {
-    public static final int BASE_DUR = 7;
-    public static final int BASE_COOLDOWN = 30;
-    public static final int DISRUPTION_DUR = 21;
-    public static final int GROWTH_DEBUFF = -10;
-    public static final float HAPPINESS_DEBUFF = -0.3f;
+    private static final int BASE_DUR = 7;
+    private static final int BASE_COOLDOWN = 30;
+    private static final int DISRUPTION_DUR = 21;
+    private static final int GROWTH_DEBUFF = -10;
+    private static final float HAPPINESS_DEBUFF = -0.3f;
 
     private int cooldownDaysRemaining = 0;
     private int activeDaysRemaining = 0;
@@ -83,10 +83,9 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
 
     @Override
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
-        tp.setParaFontOrbitron();
-        tp.addPara(spec.name, negative, pad);
+        tp.setTitleSmallOrbitron();
+        tp.addTitle(spec.name, negative);
 
-        tp.setParaFontDefault();
         tp.addPara(spec.description, pad);
 
         final int cols = 2;

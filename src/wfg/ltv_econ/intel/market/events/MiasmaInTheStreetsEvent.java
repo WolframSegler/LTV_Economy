@@ -5,10 +5,10 @@ import static wfg.native_ui.util.UIConstants.*;
 import wfg.ltv_econ.economy.PlayerMarketData;
 
 public class MiasmaInTheStreetsEvent extends MarketEvent {
-    public static final int BASE_DURATION = 40;
-    public static final int BASE_COOLDOWN = 360;
-    public static final float HEALTH_DEBUFF = -0.25f;
-    public static final float HAPPINESS_DEBUFF = -0.1f;
+    private static final int BASE_DURATION = 40;
+    private static final int BASE_COOLDOWN = 360;
+    private static final float HEALTH_DEBUFF = -0.25f;
+    private static final float HAPPINESS_DEBUFF = -0.1f;
 
     private int activeDaysRemaining = 0;
     private int cooldownDaysRemaining = 0;
@@ -48,10 +48,9 @@ public class MiasmaInTheStreetsEvent extends MarketEvent {
 
     @Override
     public void createTooltip(PlayerMarketData data, com.fs.starfarer.api.ui.TooltipMakerAPI tp) {
-        tp.setParaFontOrbitron();
-        tp.addPara(spec.name, negative, pad);
+        tp.setTitleSmallOrbitron();
+        tp.addTitle(spec.name, negative);
 
-        tp.setParaFontDefault();
         tp.addPara(spec.description, pad);
 
         final int cols = 2;
