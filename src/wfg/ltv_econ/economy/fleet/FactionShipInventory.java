@@ -2,6 +2,7 @@ package wfg.ltv_econ.economy.fleet;
 
 import static wfg.ltv_econ.constants.strings.Income.FACTION_CREW_WAGES_KEY;
 import static wfg.ltv_econ.constants.strings.Income.getDesc;
+import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
 import static wfg.ltv_econ.constants.strings.Consumption.*;
 
 import java.io.Serializable;
@@ -187,6 +188,14 @@ public class FactionShipInventory implements Serializable {
         return total;
     }
 
+    public final float getTotalDailyCrewWage() {
+        float total = 0f;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getMonthlyCrewWages();
+        }
+        return total / MONTH;
+    }
+
     public final int getTotalCrew() {
         int total = 0;
         for (ShipTypeData data : ships.values()) {
@@ -314,16 +323,16 @@ public class FactionShipInventory implements Serializable {
         }
 
         ShipProductionManager.tryStartPlannedOrders(this, capitalID);
-    }
 
-    public final void endMonth() {
         final MarketAPI capital = getCapital();
-        if (capital == null) return;
-
-        MarketFinanceRegistry.instance().getLedger(capital).add(
-            FACTION_CREW_WAGES_KEY, -getTotalMonthlyCrewWage(), getDesc(FACTION_CREW_WAGES_KEY)
-        );
+        if (capital != null) {
+            MarketFinanceRegistry.instance().getLedger(capital).add(
+                FACTION_CREW_WAGES_KEY, -getTotalDailyCrewWage(), getDesc(FACTION_CREW_WAGES_KEY)
+            );
+        }
     }
+
+    public final void endMonth() {}
 
     public final void advanceProduction(int days) {
         if (activeQueue.isEmpty()) return;
