@@ -263,7 +263,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
             }
 
             final int gridWidth = 390;
-            final int valueWidth = 50;
+            final int valueWidth = 60;
             int rowCount = 0;
 
             tp.addPara("Shipment List", base, opad);

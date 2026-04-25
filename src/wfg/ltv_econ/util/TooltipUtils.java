@@ -17,7 +17,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
@@ -42,7 +41,7 @@ import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
 
 public class TooltipUtils {
-    public static final SpriteAPI TP_ARROW = settings.getSprite("ui", "cargoTooltipArrow");
+    public static final String TP_ARROW = settings.getSpriteName("ui", "cargoTooltipArrow");
 
     private static final int GRID_W = 430;
     private static final int VALUE_W = 50;
@@ -148,7 +147,7 @@ public class TooltipUtils {
                     final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW, null, null);
 
                     final Vector2f playerLoc = sector.getPlayerFleet().getLocationInHyperspace();
-                    final Vector2f targetLoc = market.getStarSystem().getLocation();
+                    final Vector2f targetLoc = market.getLocationInHyperspace();
 
                     NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
 
@@ -224,7 +223,7 @@ public class TooltipUtils {
                     final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW, null, null);
 
                     final Vector2f playerLoc = sector.getPlayerFleet().getLocationInHyperspace();
-                    final Vector2f targetLoc = market.getStarSystem().getLocation();
+                    final Vector2f targetLoc = market.getLocationInHyperspace();
 
                     NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
 

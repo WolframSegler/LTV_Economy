@@ -20,7 +20,7 @@ public class MarketFinanceRegistry implements Serializable {
         return LtvEconSaveData.instance().financeRegistry;
     }
 
-    public final void register(String marketID) {
+    public final synchronized void register(String marketID) {
         registry.putIfAbsent(marketID, new MarketLedger(marketID));
     }
 
@@ -28,7 +28,7 @@ public class MarketFinanceRegistry implements Serializable {
         register(market.getId());
     }
 
-    public final void remove(String marketID) {
+    public final synchronized void remove(String marketID) {
         registry.remove(marketID);
     }
 
@@ -56,7 +56,7 @@ public class MarketFinanceRegistry implements Serializable {
         registry.values().forEach(MarketLedger::endMonth);
     }
 
-    public final MarketLedger overrideLedger(String marketID, MarketLedger ledger) {
+    public final synchronized MarketLedger overrideLedger(String marketID, MarketLedger ledger) {
         return registry.put(marketID, ledger);
     }
 

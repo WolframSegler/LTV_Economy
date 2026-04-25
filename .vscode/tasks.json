@@ -47,7 +47,8 @@
         "cwd": "${workspaceFolder}/../.."
       },
       "group": {
-        "kind": "build"
+        "kind": "build",
+        "isDefault": false
       },
       "presentation": {
         "reveal": "always",

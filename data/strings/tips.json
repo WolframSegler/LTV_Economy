@@ -1,76 +1,76 @@
 {
     "tips":[
         {
-            "freq":1, "tip":"[LTV] Navigate to the faction tab (Command > Faction) to manage ships owned by your faction."
+            "freq":0.5, "tip":"[LTV] Navigate to the faction tab (Command > Faction) to manage ships owned by your faction."
         },
         {
-            "freq":1, "tip":"[LTV] Press on the colony income label to open a detailed breakdown panel."
+            "freq":0.5, "tip":"[LTV] Press on the colony income label to open a detailed breakdown panel."
         },
         {
-            "freq":1, "tip":"[LTV] Trade missions are dispatched in discrete cycles configurable through LunaLib settings."
+            "freq":0.5, "tip":"[LTV] Trade missions are dispatched in discrete cycles configurable through LunaLib settings."
         },
         {
-            "freq":0.5, "tip":"[LTV] The informal sector seeks imbalances between supply and demand to make a quick buck."
+            "freq":0.25, "tip":"[LTV] The informal sector seeks imbalances between supply and demand to make a quick buck."
         },
         {
-            "freq":0.5, "tip":"[LTV] Factions can be embargoed at a relation cost (Command > Faction > Administration)."
+            "freq":0.25, "tip":"[LTV] Factions can be embargoed at a relation cost (Command > Faction > Administration)."
         },
         {
-            "freq":0.8, "tip":"[LTV] There is no limit to transferring credits to a colony. But only a limited amount can be withdrawn per month."
+            "freq":0.4, "tip":"[LTV] There is no limit to transferring credits to a colony. But only a limited amount can be withdrawn per month."
         },
         {
-            "freq":1, "tip":"[LTV] Colony-relevant trade missions can be viewed by pressing Ctrl+3 in the Colony Info menu."
+            "freq":0.5, "tip":"[LTV] Colony-relevant trade missions can be viewed by pressing Ctrl+3 in the Colony Info menu."
         },
         {
-            "freq":1, "tip":"[LTV] Income and upkeep multipliers only affect industries."
+            "freq":0.5, "tip":"[LTV] Income and upkeep multipliers only affect industries."
         },
         {
-            "freq":0.5, "tip":"[LTV] Once enabled, a policy cannot be disabled."
+            "freq":0.25, "tip":"[LTV] Once enabled, a policy cannot be disabled."
         },
         {
-            "freq":1, "tip":"[LTV] An unhealthy population decreases ground defenses and population growth, while an unhappy population decreases stability and productivity."
+            "freq":0.5, "tip":"[LTV] An unhealthy population decreases ground defenses and population growth, while an unhappy population decreases stability and productivity."
         },
         {
-            "freq":1, "tip":"[LTV] Increasing the rate of exploitation decreases worker wages, but causes unhappiness. If the population cannot afford basic goods, it degrades their health."
+            "freq":0.5, "tip":"[LTV] Increasing the rate of exploitation decreases worker wages, but causes unhappiness. If the population cannot afford basic goods, it degrades their health."
         },
         {
             "freq":0.05, "tip":"[LTV] Don't let class consciousness get too high."
         },
         {
-            "freq":0.5, "tip":"[LTV] All colony-related expenses and income are realized at the end of the month."
+            "freq":0.25, "tip":"[LTV] All colony-related expenses and income are realized at the end of the month."
         },
         {
-            "freq":1, "tip":"[LTV] Vitalize your day with Bres Vitalis!"
+            "freq":0.5, "tip":"[LTV] Vitalize your day with Bres Vitalis!"
         },
         {
-            "freq":0.5, "tip":"[LTV] The number of assembly lines owned by the faction can be increased through policies."
+            "freq":0.25, "tip":"[LTV] The number of assembly lines owned by the faction can be increased through policies."
         },
         {
-            "freq":1, "tip":"[LTV] Paying independent captains for haulage is generally less profitable than using faction-owned fleets."
+            "freq":0.5, "tip":"[LTV] Paying independent captains for haulage is generally less profitable than using faction-owned fleets."
         },
         {
-            "freq":1, "tip":"[LTV] Detailed information about the economy can be found under the intel tab (Intel > Economy)."
+            "freq":0.5, "tip":"[LTV] Detailed information about the economy can be found under the intel tab (Intel > Economy)."
         },
         {
-            "freq":1, "tip":"[LTV] Watch the sector's heartbeat! (Intel > Economy > Trade Routes)"
+            "freq":0.5, "tip":"[LTV] Watch the sector's heartbeat! (Intel > Economy > Trade Routes)"
         },
         {
-            "freq":1, "tip":"[LTV] The trade routes map has an option to exclusively show real fleets for raiding."
+            "freq":0.5, "tip":"[LTV] The trade routes map has an option to exclusively show real fleets for raiding."
         },
         {
-            "freq":0.5, "tip":"[LTV] Your faction's population can be seen at a glance (Command > Colonies > Population metrics)."
+            "freq":0.25, "tip":"[LTV] Your faction's population can be seen at a glance (Command > Colonies > Population metrics)."
         },
         {
-            "freq":0.5, "tip":"[LTV] A self-sufficient faction is an unbeatable faction (Command > Colonies > Faction resources)."
+            "freq":0.25, "tip":"[LTV] A self-sufficient faction is an unbeatable faction (Command > Colonies > Faction resources)."
         },
         {
-            "freq":1, "tip":"[LTV] Colonies in debt suffer from stability and upkeep maluses."
+            "freq":0.5, "tip":"[LTV] Colonies in debt suffer from stability and upkeep maluses."
         },
         {
-            "freq":1, "tip":"[LTV] Faction-owned ships require supplies and crew to maintain."
+            "freq":0.5, "tip":"[LTV] Faction-owned ships require supplies and crew to maintain."
         },
         {
-            "freq":0.5, "tip":"[LTV] Detailed configuration of the mod is made easier with LunaLib."
+            "freq":0.25, "tip":"[LTV] Detailed configuration of the mod is made easier with LunaLib."
         }
     ]
 }

@@ -25,6 +25,7 @@ import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.LtvEconFleetRouteManager;
+import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
@@ -132,11 +133,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         for (String factionID : EconomyConstants.visibleFactionIDs) {
             final FactionShipInventory inv = engine.getFactionShipInventory(factionID);
 
-            inv.addShip("atlas", 750);
-            inv.addShip("colossus", 5000);
-            inv.addShip("starliner", 750);
-            inv.addShip("prometheus", 750);
-            inv.addShip("phaeton", 5000);
+            ShipProductionManager.injectShipGameStart(inv);
         }
     }
 }

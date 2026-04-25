@@ -18,14 +18,14 @@ RoVC_manual,RoVC Manual Professions,Double,0.5,,,0.0,1.0,Labor
 RoVC_space,RoVC Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
 ,,,,,,,,
 header_workerAllocator,Worker Allocator,Header,Worker Allocator,,,,,Solver
-ECON_DEFICIT_COST,Deficit Penalty,Double,5000,,Higher values encourage more demand fulfillment.,0,100000,Solver
+ECON_DEFICIT_COST,Deficit Penalty,Double,4000,,Higher values encourage more demand fulfillment.,0,100000,Solver
 LOCAL_WORKER_COST_MULT,Local Worker Cost Mult,Double,0.1,,Multiplier for the cost of workers assigned to meet local demand. A value of 1 stops prioritizing production for local demand. Heavy on performance when allocation passes are high.,0.01,1,Solver
 FACTION_WORKER_COST_MULT,Faction Worker Cost Mult,Double,0.15,,Multiplier for the cost of workers assigned to meet faction demand. A value of 1 disables it. Should ideally be higher than Local Worker Cost Mult.,0.01,1,Solver
 LOCAL_PROD_BUFFER,Local Production Buffer,Double,0.1,,Allocation is prioritized to meet local demand by a factor of 1 + x.,0,3,Solver
 FACTION_PROD_BUFFER,Faction Production Buffer,Double,0.1,,Allocation is prioritized to meet faction demand by a factor of 1 + x.,0,3,Solver
 PRODUCTION_BUFFER,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Solver
 ECON_ALLOCATION_PASSES,Allocation Refinement Passes,Int,3,,Number of times the solver re-evaluates deficits and adjusts worker assignments. Computation time grows linearly with the value. Gains become minimal after 6 passes.,1,20,Solver
-WORKER_ASSIGN_INTERVAL,Worker Assignment Interval,Int,15,,"Workers of NPC markets will be re-allocated every x days.",1,360,Solver
+WORKER_ASSIGN_INTERVAL,Worker Assignment Interval,Int,20,,"Workers of NPC markets will be re-allocated every x days.",1,360,Solver
 ,,,,,,,,
 header_hullAllocator,Hull Allocator,Header,Hull Allocator,,,,,Solver
 SHIP_ALLOC_CAPACITY_TARGET_BUFFER,Ship Allocation Capacity Buffer,Double,1.2,,Multiplier applied to trade mission targets when allocating hulls. Provides a safety margin to ensure demand is fully met.,1.0,3.0,Solver
@@ -42,28 +42,28 @@ CREDIT_WITHDRAWAL_LIMIT,Monthly Withdrawal Limit,Int,100000,,Sets the maximum am
 AUTO_TRANSFER_PROFIT_LIMIT,Profit Transfer Limit,Double,0.5,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy
 ,,,,,,,,
 TRADE_INTERVAL,Trade Interval,Int,15,,Markets will trade goods every x days.,7,30,Trade
-DAYS_TO_COVER,Stockpile Coverage Days,Int,45,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Trade
-DAYS_TO_COVER_PER_IMPORT,Trade Coverage Limit,Int,21,,Limits how many days of demand can be satisfied per trade run to reduce volatility. Values lower than Trade Interval will cause constant deficits.,1,360,Trade
-EXPORT_THRESHOLD_FACTOR,Export Threshold Factor,Double,1.5,,Multiplier for excess stock required before a market begins exporting.,1,2,Trade
+DAYS_TO_COVER,Stockpile Coverage Days,Int,60,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Trade
+DAYS_TO_COVER_PER_IMPORT,Trade Coverage Limit,Int,28,,Limits how many days of demand can be satisfied per trade run to reduce volatility. Values lower than Trade Interval will cause constant deficits.,1,360,Trade
+EXPORT_THRESHOLD_FACTOR,Export Threshold Factor,Double,1.6,,Multiplier for excess stock required before a market begins exporting.,1,2,Trade
 FACTION_EXCHANGE_MULT,Faction Price Multiplier,Double,0.3,,Adjusts prices for goods traded between markets of the same faction. Set to 0 for free in-faction trade.,0,1,Trade
 EMBARGO_REP_DROP,Embargo Reputation Penalty,Double,0.4,,The relationship hit for imposing an embargo. 1 means 100 relation points.,0,1,Trade
-MIN_RELATION_TO_TRADE,Minimum Trade Relationship,Double,-0.9,,Minimum relationship between factions for trade to occur. Factions below this threshold will not trade.,-1,0,Trade
+MIN_RELATION_TO_TRADE,Minimum Trade Relationship,Double,-0.75,,Minimum relationship between factions for trade to occur. Factions below this threshold will not trade.,-1,0,Trade
 TRADE_MISSION_MAX_DISPLAYED_SHIPS,Max Displayed Ships in Trade Mission,Int,20,,Maximum number of allocated ship types shown in a trade mission widget.,1,100,Trade
-TRADE_MAP_MIN_AMOUNT_FILTER,Trade Map Min Amount Filter,Int,10000,,Minimum trade amount (in tons) for a mission to appear in the trade map.,0,1000000,Trade
+TRADE_MAP_MIN_AMOUNT_FILTER,Trade Map Min Amount Filter,Int,10000,,Ceiling for minimum trade amount filter slider (in tons).,0,1000000,Trade
 INFORMAL_TRADE_SHARE,Informal Trade Share,Double,0.03,,Fraction of sector-wide excess and demand that the informal sector can move every trade interval. Lower values limit informal trade volume.,0.0,1.0,Trade
 ,,,,,,,,
-IDLE_SHIP_MAINTENANCE_MULT,Idle Ships Maintenance Mult,Double,0.3,,Multiplier to maintenance supply cost for idle ships inside the faction inventory. A value of 1 disables the discount.,0,1,Fleet
+IDLE_SHIP_MAINTENANCE_MULT,Idle Ships Maintenance Mult,Double,0.2,,Multiplier to maintenance supply cost for idle ships inside the faction inventory. A value of 1 disables the discount.,0,1,Fleet
 CREW_WAGE_PER_MONTH,Crew Monthly Wages,Double,10,,Monthly wages per crew member operating the faction ships inventory.,1,100,Fleet
-IDLE_CREW_WAGE_MULT,Idle Crew Wage Mult,Double,0.5,,Wage multiplier for idle crew operating the faction ships inventory.,0,1,Fleet
+IDLE_CREW_WAGE_MULT,Idle Crew Wage Mult,Double,0.3,,Wage multiplier for idle crew operating the faction ships inventory.,0,1,Fleet
 TRAVEL_SPEED_LY_DAY,Trade Fleet Travel Speed,Int,7,,The speed in light-years at which trade fleets travel in hyperspace. Used by the simulation.,1,20,Fleet
 FORCED_FUEL_IMPORT_COST_MULT,Forced Fuel Cost Mult,Double,3,,Cost multiplier for fuel purchases made to initiate trade when no fuel is stockpiled.,1,10,Fleet
 INDEPENDENT_TRADE_FLEET_BASE_FEE,Independent Hauler Base Fee,Double,1000.0,,Base fee in credits per trade mission when using independent haulers.,0,100000,Fleet
 INDEPENDENT_TRADE_FLEET_PER_TON_FEE,Independent Hauler Per-Ton Fee,Double,1.5,,Fee per ton of cargo (including fuel and crew) transported.,0,1000,Fleet
-INDEPENDENT_TRADE_FLEET_PERCENT_CUT,Independent Hauler Percentage Cut,Double,0.05,,Percentage of the total cargo value taken as fee.,0,1,Fleet
+INDEPENDENT_TRADE_FLEET_PERCENT_CUT,Independent Hauler Percentage Cut,Double,0.08,,Percentage of the total cargo value taken as fee.,0,1,Fleet
 INDEPENDENT_TRADE_FLEET_HAZARD_BASE,Independent Hauler Hazard Base,Double,500.0,,Base hazard pay in credits added for dangerous routes.,0,100000,Fleet
 INDEPENDENT_TRADE_FLEET_HAZARD_MULT,Independent Hauler Hazard Multiplier,Double,4.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
 MAX_VISIBLE_PLANNED_ORDERS,Max Visible Planned Orders,Int,500,,Maximum number of planned orders displayed in the Planned Orders and Assembly Line panels. Additional orders are hidden for performance.,50,100000,Fleet
-NPC_FACTION_ASSEMBLY_LINES,NPC Faction Assembly Lines,Int,50,,Number of assembly lines available to NPC factions.,1,1000,Fleet
+NPC_FACTION_ASSEMBLY_LINES,NPC Faction Assembly Lines,Int,60,,Number of assembly lines available to NPC factions.,1,1000,Fleet
 PLAYER_FACTION_ASSEMBLY_LINES,Player Faction Assembly Lines,Int,3,,Starting number of assembly lines available to the player faction.,1,100,Fleet
 SCRAP_REFUND_FRACTION,Scrap Refund Fraction,Double,0.5,,Ratio of the hull's value returned as scrap metals when discarded.,0,1,Fleet
 ,,,,,,,,

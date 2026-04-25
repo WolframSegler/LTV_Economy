@@ -14,7 +14,6 @@ import com.fs.starfarer.api.campaign.CoreUIAPI;
 import com.fs.starfarer.api.campaign.FactionAPI.ShipPickMode;
 import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
-import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.impl.campaign.submarkets.BaseSubmarketPlugin;
@@ -27,12 +26,9 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.native_ui.util.Arithmetic;
 
 public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
-	
-	public void init(SubmarketAPI submarket) {
-		super.init(submarket);
-	}
 
 	public void updateCargoPrePlayerInteraction() {
 		final float seconds = Global.getSector().getClock().convertToSeconds(sinceLastCargoUpdate);
@@ -169,16 +165,25 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	}
 	
 	public static float getBaseStockpileLimit(String comID, String marketID) {
-        final CommodityCell cell = EconomyEngine.instance().getComCell(
+		final EconomyEngine engine = EconomyEngine.instance();
+        final CommodityCell cell = engine.getComCell(
             comID, marketID
         );
 
-		final float base = Math.max(1f,Math.max(cell.getInflowQuantum(), cell.getTargetQuantum(true)));
+		final float prod = cell.getProduction(true);
+        final float target = cell.getTargetQuantum(true);
+		final float imports = (float) (engine.info.getImportAmount(comID, marketID) / EconConfig.TRADE_INTERVAL);
 
-		final float impRatio = cell.getTotalImports() / base;
-		final float prodRatio = cell.getProduction(true) / base;
-		final float extraRatio = cell.getSurplusAfterTargetQuantum() / base;
-		final float defRatio = cell.getTargetQuantumUnmet() / base;
+        final float demandMetLocally = Math.min(prod, target);
+        final float demandMetViaTrade = (float) Math.min(imports, target - demandMetLocally);
+        final float demandUnmet = target - demandMetLocally - demandMetViaTrade;
+
+		final float base = Math.max(1f,Math.max(prod + imports, target));
+
+		final float impRatio = imports / base;
+		final float prodRatio = prod / base;
+		final float extraRatio = Math.max(0f, prod - target) / base;
+		final float defRatio = demandUnmet / base;
 
 		final float mult = 1f
 			+ impRatio  * ECON_UNIT_MULT_IMPORTS
@@ -190,10 +195,9 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 		final float baseLinear = base * ECON_UNIT_MULT_BASE * mult;
 
 		final float ratio = STOCKPILE_BASELINE / base;
-		float scale = (float) Math.pow(ratio, RATIO_EXP);
-
-		if (scale < STOCKPILE_SCALE_MIN) scale = STOCKPILE_SCALE_MIN;
-		if (scale > STOCKPILE_SCALE_MAX) scale = STOCKPILE_SCALE_MAX;
+		final float scale = (float) Arithmetic.clamp(Math.pow(ratio, RATIO_EXP),
+			STOCKPILE_SCALE_MIN, STOCKPILE_SCALE_MAX
+		);
 
 		return (int) Math.max(0f, baseLinear * scale);
 	}

@@ -85,6 +85,7 @@ public class MarketUIReplacer implements EveryFrameScript {
                 )).findFirst().get();
         }
         marketAPI = (MarketAPI) RolfLectionUtil.getPrivateVariable(marketAPIField, managementPanel);
+        if (!marketAPI.isInEconomy()) return;
 
         final List<?> managementChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, managementPanel);

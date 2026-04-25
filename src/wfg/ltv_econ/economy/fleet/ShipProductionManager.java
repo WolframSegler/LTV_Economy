@@ -17,6 +17,7 @@ import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 
+import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -33,6 +34,30 @@ public class ShipProductionManager {
     private static final CommoditySpecAPI shipSpec = settings.getCommoditySpec(Commodities.SHIPS);
     private static final CommoditySpecAPI metalsSpec = settings.getCommoditySpec(Commodities.METALS);
     private static final CommoditySpecAPI rareMetalsSpec = settings.getCommoditySpec(Commodities.RARE_METALS);
+
+    public static final void injectShipGameStart(FactionShipInventory inv) {
+        final String factionID = inv.factionID;
+        final FactionAPI faction = Global.getSector().getFaction(factionID);
+
+        long pop = 0l;
+        long workers = 0l;
+        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
+            if (!market.getFaction().equals(faction)) continue;
+
+            pop += Math.pow(10, market.getSize());
+            workers += WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+        }
+
+        final long shipmentTarget = workers / 25l;
+        final long combatTarget = pop / 90l;
+
+        final ArrayMap<String, Integer> buildList = new ArrayMap<>(32);
+        ShipAllocator.allocateShipsForTarget(shipmentTarget, shipmentTarget, shipmentTarget, combatTarget, faction, buildList);
+
+        for (Map.Entry<String, Integer> entry : buildList.singleEntrySet()) {
+            inv.addShip(entry.getKey(), entry.getValue());
+        }
+    }
 
     public static final void planOrders(FactionShipInventory inv) {
         final String factionID = inv.factionID;
@@ -74,7 +99,7 @@ public class ShipProductionManager {
         deficitCrew = Math.max(0f, deficitCrew);
         deficitCombat = Math.max(0f, deficitCombat);
 
-        final ArrayMap<String, Integer> buildList = new ArrayMap<>(8);
+        final ArrayMap<String, Integer> buildList = new ArrayMap<>(12);
         ShipAllocator.allocateShipsForTarget(deficitCargo, deficitFuel, deficitCrew, deficitCombat, faction, buildList);
 
         for (Map.Entry<String, Integer> entry : buildList.singleEntrySet()) {

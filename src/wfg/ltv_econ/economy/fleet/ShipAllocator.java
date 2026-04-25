@@ -146,6 +146,8 @@ public class ShipAllocator {
         if (totalTarget <= 0) return;
 
         final int N = candidates.size();
+        if (N <= 0) throw new IllegalStateException("No ship candidates: " + faction.getId());
+
         final int[] idleRemaining = new int[N];
         final double[] weight = buildTargetObjective(candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat);
         final double[] cargoCap = new double[N];
@@ -197,7 +199,7 @@ public class ShipAllocator {
                     + crewContrib * crewNeed
                     + combatContrib * combatNeed;
 
-                final double w = weight[i] * Math.pow(utility, 2.0) / (1.0 + DIVERSITY_PENALTY * counts[i]);
+                final double w = weight[i] * Math.pow(utility, 1.8) / (1.0 + DIVERSITY_PENALTY * counts[i]);
 
                 weights[i] = w;
                 totalWeight += w;
@@ -213,6 +215,7 @@ public class ShipAllocator {
                     break;
                 }
             }
+            if (picked < 0) break;
 
             counts[picked]++;
             idleRemaining[picked]--;

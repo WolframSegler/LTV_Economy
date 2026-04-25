@@ -8,6 +8,7 @@ import java.io.Serializable;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 
 import wfg.ltv_econ.config.EconConfig;
+import wfg.native_ui.util.Arithmetic;
 
 public class ShipTypeData implements Serializable {
     public static final String FRIGATES = "Frigates";
@@ -62,13 +63,13 @@ public class ShipTypeData implements Serializable {
     }
 
     public final void useShip(int amount) {
-        final int used = Math.min(Math.max(0, amount), idle);
+        final int used = Arithmetic.clamp(amount, 0, idle);
         inUse += used;
         idle -= used;
     }
 
     public final void freeShip(int amount) {
-        final int freed = Math.min(Math.max(0, amount), inUse);
+        final int freed = Arithmetic.clamp(amount, 0, inUse);
         idle += freed;
         inUse -= freed;
     }
@@ -114,7 +115,7 @@ public class ShipTypeData implements Serializable {
     }
 
     public static final int getCrewCapacityPerShip(ShipHullSpecAPI spec) {
-        return (int) spec.getMaxCrew() - getCrewPerShip(spec);
+        return (int) Math.max(0f, spec.getMaxCrew() - getCrewPerShip(spec));
     }
 
     public static final float getCombatPower(ShipHullSpecAPI spec) {

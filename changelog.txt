@@ -1,3 +1,11 @@
+v0.3.1-beta | SAVE COMPATIBLE
+- Fixed crash from accessing abandoned stations.
+- Fixed a bug where best places to buy/sell would have incorrectly rotated direction arrows.
+- Fixed a refactor bug causing submarkets to lack many commodities.
+- Changed faction ship inventory generation. Now they use ships unique to their faction.
+- Tuned some config settings and ship selection algorithm.
+- Fixed ship allocation bug for ships where skeleton crew is larger than crew capacity.
+
 v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Switched to WrapUI v0.4.0 for this update. Version 0.3.2 will not work.
 - It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
