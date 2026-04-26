@@ -73,29 +73,7 @@ import com.fs.starfarer.api.campaign.listeners.EconomyTickListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
 
 /**
- * The {@link EconomyEngine} is the core controller for the LTV-Economy simulation.
- * <p>
- * It manages all economic activity across markets, including:
- * <ul>
- *     <li>Commodity production, demand, and trade flows</li>
- *     <li>Market credit balances and transactions</li>
- *     <li>Worker assignment and labor optimization</li>
- *     <li>Synchronization with the Starsector campaign economy</li>
- * </ul>
- *
- * The engine runs continuously as a listener to the campaign economy. It replaces
- * vanilla credit flows with its own localized financial model, while remaining compatible
- * with other game systems and mods.
- *
- * <h3>Main Responsibilities</h3>
- * <ul>
- *     <li>Maintain lists of all registered and player-owned markets.</li>
- *     <li>Track and update per-market credit balances.</li>
- *     <li>Run the economic update loop.</li>
- *     <li>Handle market lifecycle events such as colonization, decivilization, and abandonment.</li>
- * </ul>
- *
- * @author Wolfram Segler
+ * The core controller for the LTV-Economy simulation.
  */
 public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColonizationListener, ColonyDecivListener,
     GroundRaidObjectivesListener, CoreUITabListener, EconomyTickListener, ColonyInteractionListener, ColonyPlayerHostileActListener

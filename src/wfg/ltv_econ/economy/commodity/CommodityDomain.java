@@ -141,6 +141,11 @@ public class CommodityDomain implements Serializable {
         return tradeFlows;
     }
 
+    public final List<ComTradeFlow> getSanitizedTradeFlows() {
+        tradeFlows.removeIf(f -> f.exporter == null || f.importer == null);
+        return tradeFlows;
+    }
+
     public final float getInformalExports(String marketID) {
         return informalExportFlows.getOrDefault(marketID, 0f);
     }

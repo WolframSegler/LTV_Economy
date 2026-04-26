@@ -276,7 +276,7 @@ public class EconomyLoop {
         final ArrayMap<String, TradeMission> missions = new ArrayMap<>(32);
         for (CommodityDomain dom : engine.comDomains.values()) {
             final String comID = dom.comID;
-            for (ComTradeFlow flow : dom.getTradeFlows()) {
+            for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
                 final TradeMission mission = missions.computeIfAbsent(
                     flow.exporterID + KEY + flow.importerID,
                     m -> new TradeMission(flow.exporter, flow.importer, flow.inFaction)
@@ -317,6 +317,8 @@ public class EconomyLoop {
             }
             engine.activeMissions.add(mission);
         }
+
+        engine.info.tradeFlowCache.clear();
 
         final String time = ((System.nanoTime() - startTime) / 1_000_000) + " ms";
         log.info("Dispatched " + totalMissions + " new trade missions in "+ time +" and added them to the queue");

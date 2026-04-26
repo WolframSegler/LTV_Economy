@@ -10,6 +10,7 @@ import com.fs.starfarer.api.campaign.SectorAPI;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.fleet.LtvEconFleetRouteManager;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 
@@ -22,6 +23,7 @@ public class LtvEconSaveData implements Serializable {
     public WorkerRegistry workerRegistry;
     public MarketFinanceRegistry financeRegistry;
     public EconomyEngine economyEngine;
+    public LtvEconFleetRouteManager routeManager;
 
     private LtvEconSaveData() {
         instance = this;
@@ -29,6 +31,7 @@ public class LtvEconSaveData implements Serializable {
         workerRegistry = new WorkerRegistry();
         financeRegistry = new MarketFinanceRegistry();
         economyEngine = new EconomyEngine();
+        routeManager = new LtvEconFleetRouteManager();
     }
 
     public static final LtvEconSaveData loadInstance(boolean forceRefresh,
@@ -56,8 +59,9 @@ public class LtvEconSaveData implements Serializable {
             data.economyEngine.fakeAdvance();
         }
 
-        sector.addTransientScript(data.economyEngine);
         sector.getListenerManager().addListener(data.economyEngine, true);
+        sector.addTransientScript(data.economyEngine);
+        sector.addTransientScript(data.routeManager);
 
         StaticData.loadData(data);
 

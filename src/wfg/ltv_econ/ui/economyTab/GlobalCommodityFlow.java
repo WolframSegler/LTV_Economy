@@ -47,7 +47,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
     public static final int LABEL_W = 150;
     public static final int LABEL_H = 50;
     public static final int TABLE_W = 240;
-    public static final int TABLE_H = 28*5 + 20 + opad*3;
+    public static final int TABLE_H = 28*5 + 20 + opad*2;
     public static final int PIECHART_W = TABLE_H;
     public static final int PIECHART_H = TABLE_H;
 

@@ -6,7 +6,6 @@ import static wfg.ltv_econ.constants.Mods.*;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ModManagerAPI;
-import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
@@ -44,9 +43,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onNewGameAfterProcGen() {
-        final SectorAPI sector = Global.getSector();
-        sector.removeScriptsOfClass(EconomyFleetRouteManager.class);
-        sector.addScript(new LtvEconFleetRouteManager());
+        Global.getSector().removeScriptsOfClass(EconomyFleetRouteManager.class);
     }
 
     @Override
@@ -57,6 +54,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
+        Global.getSector().removeScriptsOfClass(LtvEconFleetRouteManager.class); // TODO remove after incompatible update
         LtvEconSaveData.loadInstance(false, newGame);
 
         final ListenerManagerAPI listenerManager = Global.getSector().getListenerManager();

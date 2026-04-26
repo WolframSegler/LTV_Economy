@@ -17,6 +17,7 @@ import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.native_ui.util.ArrayMap;
 
 public class TradeMission implements Serializable {
+    public final long uniqueID = Misc.genRandomSeed();
     public final ArrayMap<String, Integer> allocatedShips = new ArrayMap<>(8);
     public final ArrayList<TradeCom> cargo = new ArrayList<>();
     public final StatBonus credits = new StatBonus();

@@ -199,6 +199,7 @@ public class ShipAllocator {
                     + crewContrib * crewNeed
                     + combatContrib * combatNeed;
 
+                // TODO make ship allocator hull weight scaler use faction ship size preference to affect the exponent
                 final double w = weight[i] * Math.pow(utility, 1.8) / (1.0 + DIVERSITY_PENALTY * counts[i]);
 
                 weights[i] = w;

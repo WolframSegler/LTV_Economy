@@ -19,14 +19,14 @@ import wfg.native_ui.util.CallbackRunnable;
 
 public abstract class AbstractManagementPanel extends CustomPanel implements UIBuildableAPI {
     protected static final int MAIN_PANEL_W = 1250;
-    protected static final int MAIN_PANEL_H = 700;
+    protected static final int MAIN_PANEL_H = screenH - 140;
     protected static final int NAVBAR_W = 200;
-    protected static final int NAV_BUTTON_W = 180;
+    protected static final int NAV_BUTTON_W = NAVBAR_W - opad*2;
     protected static final int NAV_BUTTON_H = 28;
-    protected static final int CONTENT_PANEL_W = 1045;
-    protected static final int CONTENT_PANEL_H = 700;
-    protected static final int OPTIONS_PANEL_W = 200;
-    protected static final int OPTIONS_PANEL_H = 450;
+    protected static final int CONTENT_PANEL_W = MAIN_PANEL_W - NAVBAR_W - hpad;
+    protected static final int CONTENT_PANEL_H = MAIN_PANEL_H;
+    protected static final int OPTIONS_PANEL_W = NAVBAR_W;
+    protected static final int OPTIONS_PANEL_H = MAIN_PANEL_H - 220;
 
     protected LabelAPI titleLabel;
     protected LabelAPI subtitleLabel;

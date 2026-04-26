@@ -1,3 +1,6 @@
+v0.3.2-beta | SAVE COMPATIBLE
+- Bug fixes related to the overhauled trade fleets.
+
 v0.3.1-beta | SAVE COMPATIBLE
 - Fixed crash from accessing abandoned stations.
 - Fixed a bug where best places to buy/sell would have incorrectly rotated direction arrows.

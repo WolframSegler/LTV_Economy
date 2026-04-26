@@ -2,7 +2,9 @@ package wfg.ltv_econ.economy.fleet;
 
 import static wfg.native_ui.util.Globals.settings;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -54,21 +56,51 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
-public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements FleetEventListener {
+public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements FleetEventListener, Serializable {
 	private static final Logger log = Global.getLogger(LtvEconFleetRouteManager.class);
-	private static final String SOURCE_ID = "econ";
 	private static final int maxEconFleets = settings.getInt("maxEconFleets");
 	private static final int maxShipsInFleet = settings.getInt("maxShipsInAIFleet");
 	private static final float minEconSpawnInterval = settings.getFloat("minEconSpawnIntervalPerMarket");
 	private static final float SMALL_CARGO_AMOUNT = 1000f;
 
 	private final TimeoutTracker<String> recentlySentTradeFleet = new TimeoutTracker<String>();
+	private HashMap<Long, Long> routeToMissionPersistent = new HashMap<>(); // TODO make final after incompatible update
+	private transient HashMap<RouteData, TradeMission> routeToMission = new HashMap<>();
 
 	public LtvEconFleetRouteManager() {
 		super(0.2f, 0.3f);
+	}
+
+	private final Object readResolve() {
+		if (routeToMissionPersistent == null) routeToMissionPersistent = new HashMap<>();
+		routeToMission = new HashMap<>();
+
+		if (!LtvEconSaveData.isInitialized()) return this; // TODO remove after incompatible update
+
+		final List<RouteData> routes = RouteManager.getInstance().getRoutesForSource(getRouteSourceId());
+		final List<TradeMission> missions = EconomyEngine.instance().getActiveMissions();
+
+		for (TradeMission mission : missions) {
+			if (mission.spawnedFleetFinishedJob) continue;
+
+			for (RouteData route : routes) {
+				if (routeToMissionPersistent.getOrDefault(route.getSeed(), 0l).equals(mission.uniqueID)) {
+					routeToMission.put(route, mission);
+					break;
+				}
+			}
+		}
+
+		routeToMissionPersistent.clear();
+		for (Map.Entry<RouteData, TradeMission> entry : routeToMission.entrySet()) {
+			routeToMissionPersistent.put(entry.getKey().getSeed(), entry.getValue().uniqueID);
+		}
+
+		return this;
 	}
 
 	@Override
@@ -80,7 +112,11 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	}
 
 	protected String getRouteSourceId() {
-		return SOURCE_ID;
+		return EconomyFleetRouteManager.SOURCE_ID;
+	}
+
+	public final TradeMission getMission(RouteData route) {
+		return routeToMission.get(route);
 	}
 
 	protected int getMaxFleets() {
@@ -99,16 +135,17 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		final String factionId = getFleetFaction(mission);
 		extra.factionId = factionId;
 
-		final RouteData route = RouteManager.getInstance().addRoute(
-				getRouteSourceId(), src, Misc.genRandomSeed(), extra, this);
-		route.setCustom(mission);
+		final RouteData route = RouteManager.getInstance().addRoute(getRouteSourceId(), src, Misc.genRandomSeed(),
+			extra, this, EconomyFleetRouteManager.createData(src, dest)
+		);
+		registerRoute(route, mission);
 
 		final StarSystemAPI sysFrom = src.getStarSystem();
 		final StarSystemAPI sysTo = dest.getStarSystem();
 
 		EconomyFleetRouteManager.ENEMY_STRENGTH_CHECK_EXCLUDE_PIRATES = (src.getFaction().isPlayerFaction()
-				|| dest.getFaction().isPlayerFaction()) &&
-				PiracyRespiteScript.playerHasPiracyRespite() ? true : false;
+			|| dest.getFaction().isPlayerFaction()) &&
+			PiracyRespiteScript.playerHasPiracyRespite() ? true : false;
 
 		final LocationDanger dFrom = WarSimScript.getDangerFor(factionId, sysFrom);
 		final LocationDanger dTo = WarSimScript.getDangerFor(factionId, sysTo);
@@ -116,8 +153,6 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		LocationDanger danger = dFrom.ordinal() > dTo.ordinal() ? dFrom : dTo;
 
 		if (sysFrom != null && sysFrom.isCurrentLocation()) {
-			// the player is in the from location, don't auto-lose the trade fleet.
-			// Let it get destroyed by actual fleets, if it does
 			danger = LocationDanger.NONE;
 		}
 
@@ -167,7 +202,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		return factionId;
 	}
 
-	public final TradeMission pickTradeMission() {
+	private final TradeMission pickTradeMission() {
 		final Set<String> excludeList = SharedData.getData().getMarketsWithoutTradeFleetSpawn();
 		final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
 		final WeightedRandomPicker<TradeMission> missionPicker = new WeightedRandomPicker<>();
@@ -189,7 +224,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	}
 
 	public final boolean shouldCancelRouteAfterDelayCheck(RouteData route) {
-		if (!(route.getCustom() instanceof TradeMission mission)) return false;
+		final TradeMission mission = getMission(route);
+		if (mission == null) return false;
 		if (mission.src == null || mission.dest == null) return true;
 
 		if (!mission.smuggling) {
@@ -209,7 +245,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		final CampaignFleetAPI fleet = createTradeRouteFleet(route, random);
 		if (fleet == null) return null;
 
-		final TradeMission mission = (TradeMission) route.getCustom();
+		final TradeMission mission = getMission(route);
 		mission.setSpawnedFleetCapRatios(fleet.getCargo());
 
 		if (KantaCMD.playerHasProtection()) {
@@ -226,9 +262,9 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		return fleet;
 	}
 
-	public static final CampaignFleetAPI createTradeRouteFleet(RouteData route, Random random) {
-		final TradeMission mission = (TradeMission) route.getCustom();
-		if (mission.src == null || mission.dest == null) return null;
+	private final CampaignFleetAPI createTradeRouteFleet(RouteData route, Random random) {
+		final TradeMission mission = getMission(route);
+		if (mission == null || mission.src == null || mission.dest == null) return null;
 
 		final MarketAPI src = mission.src;
 		final String factionId = route.getFactionId();
@@ -376,7 +412,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	public final void reportBattleOccurred(CampaignFleetAPI fleet, CampaignFleetAPI primaryWinner, BattleAPI battle) {
 		final RouteData route = RouteManager.getInstance().getRoute(getRouteSourceId(), fleet);
-		if (route == null || route.isExpired() || !(route.getCustom() instanceof TradeMission mission)) return;
+		final TradeMission mission = getMission(route);
+		if (route == null || route.isExpired() || mission == null) return;
 
 		if (fleet.getFleetData().getNumMembers() < 1) {
 			onRouteLost(route, mission);
@@ -404,7 +441,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	public final void reportFleetDespawnedToListener(CampaignFleetAPI fleet, FleetDespawnReason reason, Object param) {
 		final RouteData route = RouteManager.getInstance().getRoute(getRouteSourceId(), fleet);
-		if (route == null || route.isExpired() || !(route.getCustom() instanceof TradeMission mission)) return;
+		final TradeMission mission = getMission(route);
+		if (route == null || route.isExpired() || mission == null) return;
 
 		switch (reason) {
 		case REACHED_DESTINATION:
@@ -424,9 +462,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	}
 
 	public final void reportAboutToBeDespawnedByRouteManager(RouteData route) {
-		if (route.getCustom() instanceof TradeMission mission) {
-			mission.spawnedFleetFinishedJob = true;
-		}
+		final TradeMission mission = getMission(route);
+		if (mission != null) mission.spawnedFleetFinishedJob = true;
 	}
 
 	private static final void onRouteLost(RouteData route, TradeMission mission) {
@@ -438,5 +475,10 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 			ShippingDisruption.getDisruption(mission.src).addShippingLost(1);
 			ShippingDisruption.getDisruption(mission.src).notifyDisrupted(ShippingDisruption.ACCESS_LOSS_DURATION);
 		}
+	}
+
+	private final void registerRoute(RouteData route, TradeMission mission) {
+		routeToMissionPersistent.put(route.getSeed(), mission.uniqueID);
+		routeToMission.put(route, mission);
 	}
 }
