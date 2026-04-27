@@ -1,5 +1,9 @@
 v0.3.2-beta | SAVE COMPATIBLE
 - Bug fixes related to the overhauled trade fleets.
+- Factions should now have more smaller ships.
+- Fixed an infinite loop bug where ships without any crew capacity would cause an infinite loop.
+- Removed test system after configs were created. It was causing issues with pirate base generation.
+- Fixed nexerelin market creation bug.
 
 v0.3.1-beta | SAVE COMPATIBLE
 - Fixed crash from accessing abandoned stations.

@@ -136,7 +136,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
             Global.getSector().getClock().getMonth() * 170000
         );
 
-        float limit = OpenSubmarketPlugin.getBaseStockpileLimit(com, market.getId());
+        float limit = getBaseStockpileLimit(com, market.getId());
 		
 		limit *= 0.9f + 0.2f * random.nextFloat();
 		
@@ -158,7 +158,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	private static final float STOCKPILE_SCALE_MAX = 4f;
 
 	public static float getBaseStockpileLimit(CommodityOnMarketAPI com, String marketID) {
-		if (!LtvEconSaveData.isInitialized()) {
+		if (!LtvEconSaveData.isInitialized() || EconomyEngine.instance().getComCell(com.getId(), marketID) == null) {
 			return OpenMarketPlugin.getBaseStockpileLimit(com);
 		}
 		return getBaseStockpileLimit(com.getId(), marketID);
@@ -178,7 +178,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
         final float demandMetViaTrade = (float) Math.min(imports, target - demandMetLocally);
         final float demandUnmet = target - demandMetLocally - demandMetViaTrade;
 
-		final float base = Math.max(1f,Math.max(prod + imports, target));
+		final float base = Math.max(1f, Math.max(prod + imports, target));
 
 		final float impRatio = imports / base;
 		final float prodRatio = prod / base;
@@ -194,7 +194,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 		final float baseLinear = base * ECON_UNIT_MULT_BASE * mult;
 
-		final float ratio = STOCKPILE_BASELINE / base;
+		final float ratio = STOCKPILE_BASELINE / baseLinear;
 		final float scale = (float) Arithmetic.clamp(Math.pow(ratio, RATIO_EXP),
 			STOCKPILE_SCALE_MIN, STOCKPILE_SCALE_MAX
 		);

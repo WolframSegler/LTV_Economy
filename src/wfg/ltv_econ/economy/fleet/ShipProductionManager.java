@@ -62,10 +62,13 @@ public class ShipProductionManager {
     public static final void planOrders(FactionShipInventory inv) {
         final String factionID = inv.factionID;
         final FactionAPI faction = Global.getSector().getFaction(factionID);
+
         final List<PlannedOrder> plannedOrders = inv.plannedOrders;
         final List<ShipProductionOrder> activeQueue = inv.activeQueue;
+
         final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
         missions.removeIf(m -> !m.src.getFactionId().equals(factionID));
+
 
         float deficitCargo = computeDesiredCargo(missions, faction) - inv.getTotalCargoCapacity();
         float deficitFuel = computeDesiredFuel(missions, faction) - inv.getTotalFuelCapacity();

@@ -81,4 +81,12 @@ public class ConfigUtils {
     public static final MarketAPI getTestMarket2() {
         return createMarketOnPlanetInHiddenSystem(TEST_MARKET_2_ID, TEST_MARKET_SIZE - 1);
     }
+
+    public static void removeHiddenTestSystem() {
+        final SectorAPI sector = Global.getSector();
+        final StarSystemAPI system = sector.getStarSystem(HIDDEN_SYSTEM_ID);
+        if (system == null) return;
+
+        sector.removeStarSystem(system);
+    }
 }

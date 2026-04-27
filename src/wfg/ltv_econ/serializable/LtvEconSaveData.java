@@ -34,6 +34,13 @@ public class LtvEconSaveData implements Serializable {
         routeManager = new LtvEconFleetRouteManager();
     }
 
+    // TODO remove after incompatible update
+    private final Object readResolve() {
+        if (routeManager == null) routeManager = new LtvEconFleetRouteManager();
+
+        return this;
+    }
+
     public static final LtvEconSaveData loadInstance(boolean forceRefresh,
         boolean newGame
     ) {

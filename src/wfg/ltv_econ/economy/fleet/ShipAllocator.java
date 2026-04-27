@@ -20,8 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 public class ShipAllocator {
     private ShipAllocator() {}
+    private static final Logger log = Global.getLogger(ShipAllocator.class);
     private static final double eps = 1e-3;
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
     private static final String DOCT_PREF_KEY = "|";
@@ -199,12 +202,12 @@ public class ShipAllocator {
                     + crewContrib * crewNeed
                     + combatContrib * combatNeed;
 
-                // TODO make ship allocator hull weight scaler use faction ship size preference to affect the exponent
-                final double w = weight[i] * Math.pow(utility, 1.8) / (1.0 + DIVERSITY_PENALTY * counts[i]);
+                final double w = weight[i] * Math.pow(utility, 1.5) / (1.0 + DIVERSITY_PENALTY * counts[i]);
 
                 weights[i] = w;
                 totalWeight += w;
             }
+            if (totalWeight <= 0.0) break;
 
             final double r = Math.random() * totalWeight;
             int picked = -1;
@@ -227,9 +230,9 @@ public class ShipAllocator {
             remCombat = Math.max(0.0, remCombat- combatCap[picked]);
         }
 
-        if (remCargo > eps) throw new IllegalStateException("Not enough cargo capacity after allocation");
-        if (remFuel > eps) throw new IllegalStateException("Not enough fuel capacity after allocation");
-        if (remCrew > eps) throw new IllegalStateException("Not enough crew capacity after allocation");
+        if (remCargo > eps) log.warn(faction.getId() + " - Not enough cargo capacity after allocation, remaining: " + remCargo);
+        if (remFuel > eps) log.warn(faction.getId() + " - Not enough fuel capacity after allocation, remaining: " + remFuel);
+        if (remCrew > eps) log.warn(faction.getId() + " - Not enough crew capacity after allocation, remaining: " + remCrew);
 
         for (int i = 0; i < N; i++) {
             final int count = counts[i];

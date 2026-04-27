@@ -145,7 +145,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         dayKeyTracker = dayKey;
         midDayApplied = false;
 
-        if (EconConfig.MULTI_THREADING) {
+        if (EconConfig.MULTI_THREADING) { 
             mainLoopExecutor.execute(this::realAdvance);
         } else {
             realAdvance();

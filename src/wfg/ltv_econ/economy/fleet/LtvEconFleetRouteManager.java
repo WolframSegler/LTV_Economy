@@ -2,7 +2,6 @@ package wfg.ltv_econ.economy.fleet;
 
 import static wfg.native_ui.util.Globals.settings;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,7 +59,7 @@ import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
-public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements FleetEventListener, Serializable {
+public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements FleetEventListener {
 	private static final Logger log = Global.getLogger(LtvEconFleetRouteManager.class);
 	private static final int maxEconFleets = settings.getInt("maxEconFleets");
 	private static final int maxShipsInFleet = settings.getInt("maxShipsInAIFleet");
@@ -73,11 +72,13 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	public LtvEconFleetRouteManager() {
 		super(0.2f, 0.3f);
+
+		readResolve();
 	}
 
 	private final Object readResolve() {
-		if (routeToMissionPersistent == null) routeToMissionPersistent = new HashMap<>();
-		routeToMission = new HashMap<>();
+		if (routeToMissionPersistent == null) routeToMissionPersistent = new HashMap<>(32);
+		routeToMission = new HashMap<>(32);
 
 		if (!LtvEconSaveData.isInitialized()) return this; // TODO remove after incompatible update
 
@@ -116,7 +117,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	}
 
 	public final TradeMission getMission(RouteData route) {
-		return routeToMission.get(route);
+		return routeToMission.getOrDefault(route, new TradeMission(route.getMarket(), route.getMarket(), false));
 	}
 
 	protected int getMaxFleets() {

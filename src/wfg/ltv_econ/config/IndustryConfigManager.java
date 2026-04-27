@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class IndustryConfigManager {
     private static final ArrayMap<String, String> IndToBaseInd = new ArrayMap<>(EconomyConstants.industryIDs.size());
@@ -307,8 +306,6 @@ public class IndustryConfigManager {
      */
     private static final void validateOrRebuildDynamicConfigs() {
         final ArrayMap<String, IndustryConfig> dynamic_config = IndustryConfigLoader.loadAsMap(true);
-        final Set<String> validIndustryIds = settings.getAllIndustrySpecs().stream()
-            .map(IndustrySpecAPI::getId).collect(Collectors.toSet());
 
         boolean allIndustriesHaveConfig = true;
         final boolean current = settings.getModManager().getModSpec(LTV_ECON).getVersion()
@@ -330,7 +327,7 @@ public class IndustryConfigManager {
         // 2) Check that dynamic configs don’t reference missing industries
         if (allIndustriesHaveConfig) {
             for (String cfgId : dynamic_config.keySet()) {
-                if (!validIndustryIds.contains(cfgId)) {
+                if (!EconomyConstants.industryIDs.contains(cfgId)) {
                     allIndustriesHaveConfig = false;
                     break;
                 }
@@ -339,6 +336,7 @@ public class IndustryConfigManager {
 
         if (allIndustriesHaveConfig && current) {
             ind_config.putAll(dynamic_config);
+            ConfigUtils.removeHiddenTestSystem();
             return;
         }
 
@@ -504,6 +502,7 @@ public class IndustryConfigManager {
         }
 
         ind_config.putAll(dynamic_config);
+        ConfigUtils.removeHiddenTestSystem();
 
         IndustryConfigLoader.serializeAndWriteToCommon(dynamic_config);
     }

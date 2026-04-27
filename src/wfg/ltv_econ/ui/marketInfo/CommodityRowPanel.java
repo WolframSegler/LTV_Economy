@@ -79,7 +79,7 @@ public class CommodityRowPanel extends CustomPanel implements
     }
 
     public void buildUI() {
-        final int textW = 65;
+        final int textW = 70;
         final int rowH = (int) getPos().getHeight();
 
         final Base comIcon = new Base(m_panel, rowH, rowH, cell.spec.getIconName(), null, null);

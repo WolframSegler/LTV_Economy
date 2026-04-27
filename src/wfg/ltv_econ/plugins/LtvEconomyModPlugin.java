@@ -1,6 +1,7 @@
 package wfg.ltv_econ.plugins;
 
 import static wfg.native_ui.util.Globals.settings;
+
 import static wfg.ltv_econ.constants.Mods.*;
 
 import com.fs.starfarer.api.BaseModPlugin;
@@ -54,7 +55,9 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
-        Global.getSector().removeScriptsOfClass(LtvEconFleetRouteManager.class); // TODO remove after incompatible update
+        // TODO remove after incompatible update
+        Global.getSector().getScripts().removeIf(k -> k instanceof LtvEconFleetRouteManager);
+
         LtvEconSaveData.loadInstance(false, newGame);
 
         final ListenerManagerAPI listenerManager = Global.getSector().getListenerManager();
