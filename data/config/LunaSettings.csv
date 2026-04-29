@@ -18,7 +18,7 @@ RoVC_manual,RoVC Manual Professions,Double,0.5,,,0.0,1.0,Labor
 RoVC_space,RoVC Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
 ,,,,,,,,
 header_workerAllocator,Worker Allocator,Header,Worker Allocator,,,,,Solver
-ECON_DEFICIT_COST,Deficit Penalty,Double,4000,,Higher values encourage more demand fulfillment.,0,100000,Solver
+ECON_DEFICIT_COST,Deficit Penalty,Double,3000,,Higher values encourage more demand fulfillment.,0,100000,Solver
 LOCAL_WORKER_COST_MULT,Local Worker Cost Mult,Double,0.1,,Multiplier for the cost of workers assigned to meet local demand. A value of 1 stops prioritizing production for local demand. Heavy on performance when allocation passes are high.,0.01,1,Solver
 FACTION_WORKER_COST_MULT,Faction Worker Cost Mult,Double,0.15,,Multiplier for the cost of workers assigned to meet faction demand. A value of 1 disables it. Should ideally be higher than Local Worker Cost Mult.,0.01,1,Solver
 LOCAL_PROD_BUFFER,Local Production Buffer,Double,0.1,,Allocation is prioritized to meet local demand by a factor of 1 + x.,0,3,Solver
@@ -29,11 +29,11 @@ WORKER_ASSIGN_INTERVAL,Worker Assignment Interval,Int,20,,"Workers of NPC market
 ,,,,,,,,
 header_hullAllocator,Hull Allocator,Header,Hull Allocator,,,,,Solver
 SHIP_ALLOC_CAPACITY_TARGET_BUFFER,Ship Allocation Capacity Buffer,Double,1.2,,Multiplier applied to trade mission targets when allocating hulls. Provides a safety margin to ensure demand is fully met.,1.0,3.0,Solver
-SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE,Ship Allocation Market Weight Per Size,Double,100.0,,Base weight per market size factor when prioritizing trade mission assignments.,10.0,1000.0,Solver
+SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE,Ship Allocation Market Weight Per Size,Double,150.0,,Base weight per market size factor when prioritizing trade mission assignments.,10.0,1000.0,Solver
 SHIP_ALLOC_MARKET_SIZE_EXPONENT,Ship Allocation Market Size Exponent,Double,1.5,,Exponent applied to market size to calculate the size factor for automatic ship orders.,1.0,4.0,Solver
 SHIP_ALLOC_AGGRESSION_COMBAT_MULT,Ship Allocation Aggression Combat Mult,Double,0.2,,Bonus multiplier to target combat power based on faction aggression doctrine. Higher aggression increases combat oriented hull production.,0.0,1.0,Solver
 SHIP_ALLOC_THREAT_RELATIONSHIP_MULT,Ship Allocation Threat Relationship Mult,Double,2.0,,Multiplier applied to combat power targets when ordering ships.,1.0,10.0,Solver
-SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,200.0,,"Combat power target floor used by factions when ordering ships.",0.0,1000.0,Solver
+SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,50.0,,"Combat power target floor used by factions when ordering ships.",0.0,1000.0,Solver
 ,,,,,,,,
 MULTI_THREADING,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread.,,,Economy
 ASSIGN_WORKERS_ON_LOAD,Assign Workers On Load,Boolean,false,,Re-allocates the workers after loading a save. Includes quick-saves as well.,,,Economy
@@ -56,12 +56,12 @@ IDLE_SHIP_MAINTENANCE_MULT,Idle Ships Maintenance Mult,Double,0.2,,Multiplier to
 CREW_WAGE_PER_MONTH,Crew Monthly Wages,Double,10,,Monthly wages per crew member operating the faction ships inventory.,1,100,Fleet
 IDLE_CREW_WAGE_MULT,Idle Crew Wage Mult,Double,0.3,,Wage multiplier for idle crew operating the faction ships inventory.,0,1,Fleet
 TRAVEL_SPEED_LY_DAY,Trade Fleet Travel Speed,Int,7,,The speed in light-years at which trade fleets travel in hyperspace. Used by the simulation.,1,20,Fleet
-FORCED_FUEL_IMPORT_COST_MULT,Forced Fuel Cost Mult,Double,3,,Cost multiplier for fuel purchases made to initiate trade when no fuel is stockpiled.,1,10,Fleet
+FORCED_FUEL_IMPORT_COST_MULT,Forced Fuel Cost Mult,Double,2.0,,Cost multiplier for fuel purchases made to initiate trade when no fuel is stockpiled.,1,10,Fleet
 INDEPENDENT_TRADE_FLEET_BASE_FEE,Independent Hauler Base Fee,Double,1200.0,,Base fee in credits per trade mission when using independent haulers.,0,100000,Fleet
 INDEPENDENT_TRADE_FLEET_PER_TON_FEE,Independent Hauler Per-Ton Fee,Double,1.5,,Fee per ton of cargo (including fuel and crew) transported.,0,1000,Fleet
 INDEPENDENT_TRADE_FLEET_PERCENT_CUT,Independent Hauler Percentage Cut,Double,0.08,,Percentage of the total cargo value taken as fee.,0,1,Fleet
 INDEPENDENT_TRADE_FLEET_HAZARD_BASE,Independent Hauler Hazard Base,Double,600.0,,Base hazard pay in credits added for dangerous routes.,0,100000,Fleet
-INDEPENDENT_TRADE_FLEET_HAZARD_MULT,Independent Hauler Hazard Multiplier,Double,9.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
+INDEPENDENT_TRADE_FLEET_HAZARD_MULT,Independent Hauler Hazard Multiplier,Double,7.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
 MAX_VISIBLE_PLANNED_ORDERS,Max Visible Planned Orders,Int,500,,Maximum number of planned orders displayed in the Planned Orders and Assembly Line panels. Additional orders are hidden for performance.,50,100000,Fleet
 NPC_FACTION_ASSEMBLY_LINES,NPC Faction Assembly Lines,Int,60,,Number of assembly lines available to NPC factions.,1,1000,Fleet
 PLAYER_FACTION_ASSEMBLY_LINES,Player Faction Assembly Lines,Int,3,,Starting number of assembly lines available to the player faction.,1,100,Fleet

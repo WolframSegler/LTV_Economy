@@ -20,7 +20,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.combat.MutableStat;
-import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
@@ -34,7 +33,6 @@ import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.commodity.TradeCom;
-import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipAllocator;
 import wfg.ltv_econ.economy.fleet.TradeMission;
@@ -52,6 +50,7 @@ import static wfg.ltv_econ.constants.strings.Income.*;
 
 public class EconomyLoop {
     private static final Logger log = Global.getLogger(EconomyLoop.class);
+    private static final int DAYS_AFTER_SHIP_FREE_IN_COMPLETED = 7;
     public static final String KEY = "::";
 
     transient EconomyEngine engine;
@@ -363,7 +362,8 @@ public class EconomyLoop {
                 break;
             
             case DELIVERED:
-                if (!m.spawnedFleetFinishedJob) break;
+                m.durRemaining++;
+                if (!m.spawnedFleetFinishedJob && m.durRemaining <= DAYS_AFTER_SHIP_FREE_IN_COMPLETED) break;
 
                 for (Entry<String, Integer> entry : m.allocatedShips.singleEntrySet()) {
                     inv.freeShip(entry.getKey(), entry.getValue());
@@ -414,40 +414,28 @@ public class EconomyLoop {
 
     private final void allocShipsAndFuelToTradeMission(final FactionShipInventory inv, final TradeMission mission) {
         ShipAllocator.allocateShipsForTrade(inv, mission);
-
-        float fuelCost = 0f;
-        for (Entry<String, Integer> entry : mission.allocatedShips.singleEntrySet()) {
-            fuelCost += inv.get(entry.getKey()).spec.getFuelPerLY() * entry.getValue() * mission.dist;
-        }
-        mission.fuelCost = fuelCost;
+        mission.fuelCost = ShipAllocator.getRequiredFuelForShips(mission.allocatedShips, mission.dist);
 
         final String marketID = mission.src.getId();
         final CommodityCell fuelCell = engine.getComCell(Commodities.FUEL, marketID);
-        if (fuelCell.getStored() >= fuelCost) {
+        if (fuelCell.getStored() >= mission.fuelCost) {
             mission.usedFuelFromStockpiles = true;
-            fuelCell.addStoredAmount(-fuelCost);
+            fuelCell.addStoredAmount(-mission.fuelCost);
             
         } else {
-            final float unitPrice = fuelCell.getUnitPrice(PriceType.MARKET_BUYING, (int) fuelCost);
-            final float cost = fuelCost * unitPrice * EconConfig.FORCED_FUEL_IMPORT_COST_MULT;
+            final float cost = mission.fuelCost * fuelCell.spec.getBasePrice() * EconConfig.FORCED_FUEL_IMPORT_COST_MULT;
             final String key = TRADE_FUEL_PREMIUM_KEY;
             mission.credits.modifyFlat(key, -cost, getDesc(key));
 
             MarketFinanceRegistry.instance().getLedger(marketID).add(
-                TRADE_FLEET_SHIPMENT_KEY, -mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
+                TRADE_FLEET_SHIPMENT_KEY, mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
             );
         }
     }
 
     private final void allocIndependentFleetToTradeMission(final TradeMission mission) {
         ShipAllocator.allocateShipsForTarget(Global.getSector().getFaction(Factions.INDEPENDENT), mission);
-        
-        float fuelCost = 0f;
-        for (Entry<String, Integer> entry : mission.allocatedShips.singleEntrySet()) {
-            final ShipHullSpecAPI spec = settings.getHullSpec(entry.getKey());
-            fuelCost += spec.getFuelPerLY() * entry.getValue() * mission.dist;
-        }
-        mission.fuelCost = fuelCost;
+        mission.fuelCost = ShipAllocator.getRequiredFuelForShips(mission.allocatedShips, mission.dist);
         
         float totalValue = 0f;
         for (TradeCom flow : mission.cargo) {
@@ -458,11 +446,13 @@ public class EconomyLoop {
         final float valueFee = EconConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT * totalValue;
         final float hazardPay = EconConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
             + EconConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
+        final float fuelCostFee = mission.fuelCost * settings.getCommoditySpec(Commodities.FUEL).getBasePrice();
 
         mission.credits.modifyFlat(INDEPENDENT_BASE_FEE_KEY, -EconConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, getDesc(INDEPENDENT_BASE_FEE_KEY));
         mission.credits.modifyFlat(INDEPENDENT_PER_TON_KEY, -perTonFee, getDesc(INDEPENDENT_PER_TON_KEY));
         mission.credits.modifyFlat(INDEPENDENT_VALUE_PERCENT_KEY, -valueFee, getDesc(INDEPENDENT_VALUE_PERCENT_KEY));
         mission.credits.modifyFlat(INDEPENDENT_HAZARD_PAY_KEY, -hazardPay, getDesc(INDEPENDENT_HAZARD_PAY_KEY));
+        mission.credits.modifyFlat(INDEPENDENT_FUEL_COST_KEY, -fuelCostFee, getDesc(INDEPENDENT_FUEL_COST_KEY));
 
         MarketFinanceRegistry.instance().getLedger(mission.src.getId()).add(
             TRADE_FLEET_SHIPMENT_KEY, mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)

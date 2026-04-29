@@ -13,6 +13,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -29,6 +30,8 @@ import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.container.DockPanel;
+import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.widget.RadioPanel;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 import wfg.native_ui.util.ArrayMap;
@@ -41,6 +44,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
     private final MarketAPI market;
     private boolean lastMonth = true;
+    private boolean raw = false;
     private float scrollLen = 0f;
 
     public IncomeBreakdownDialog(final MarketAPI market) {
@@ -71,6 +75,22 @@ public class IncomeBreakdownDialog extends DockPanel {
         };
         monthSwitch.buildUI();
         add(monthSwitch).inTR(opad*2, opad*2);
+
+        final Button rawToggle = new Button(m_panel, 60, 18, "raw", Fonts.DEFAULT_SMALL, (btn) -> {
+            scrollLen = 0f;
+            raw = !raw;
+            buildUI();
+        });
+        rawToggle.cutStyle = CutStyle.ALL;
+        rawToggle.setEnabled(DebugFlags.COLONY_DEBUG);
+        if (!rawToggle.getEnabled()) {
+            rawToggle.setShowTooltipWhileInactive(true);
+            rawToggle.tooltip.width = 100f;
+            rawToggle.tooltip.builder = (tp, expanded) -> {
+                tp.addPara("Debug only", 0f);
+            };
+        }
+        add(rawToggle).inTR(opad*3 + 110, opad*2 + pad);
 
         incomeBreakdownUI(scrollPanel);
 
@@ -153,6 +173,13 @@ public class IncomeBreakdownDialog extends DockPanel {
         tp.addTitle(lastMonth ? "Previous Month" : "Current Month", base);
         tp.addSpacer(opad);
 
+        if (raw) {
+        for (var entry : (lastMonth ? ledger.getAllLast() : ledger.getAllCurrent()).entrySet()) {
+            final long value = entry.getValue();
+            tp.addPara(entry.getKey() + ": %s", opad, (value < 0l ? negative : highlight), NumFormat.formatCreditAbs(value));
+        }
+
+        } else {
         tp.addPara("Net income: %s", opad, netIncome > 0l ? highlight : negative, NumFormat.formatCredit(netIncome));
         tp.addPara("Gross income: %s", opad, highlight, NumFormat.formatCreditAbs(grossIncome));
         tp.addPara("Gross expense: %s", opad, negative, NumFormat.formatCreditAbs(grossExpense));
@@ -199,7 +226,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         if (exportIncome > 0l) {
             tp.beginTable(faction, rowH, "Commodity", 220f, "Income", 180f);
- 
+    
             domains.sort((c1, c2) ->
                 Long.compare(
                     lastMonth ? ledger.getLastMonth(TRADE_EXPORT_KEY + c2.comID) : ledger.getCurrentMonth(TRADE_EXPORT_KEY + c2.comID),
@@ -288,5 +315,6 @@ public class IncomeBreakdownDialog extends DockPanel {
         }
 
         tp.addPara(REDISTRIBUTION_DISCLAIMER, gray, opad);
+        }
     }
 }

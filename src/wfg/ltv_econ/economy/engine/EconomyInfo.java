@@ -19,6 +19,7 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.LaborConfig;
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -620,7 +621,7 @@ public class EconomyInfo {
         final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
 
         long exportIncome = 0;
-        for (String comID : engine.comDomains.keySet()) {
+        for (String comID : EconomyConstants.econCommodityIDs) {
             final String key = TRADE_EXPORT_KEY + comID;
             exportIncome += lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key);
         }
@@ -646,7 +647,7 @@ public class EconomyInfo {
         final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
 
         long importCost = 0;
-        for (String comID : engine.comDomains.keySet()) {
+        for (String comID : EconomyConstants.econCommodityIDs) {
             final String key = TRADE_IMPORT_KEY + comID;
             importCost -= lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key);
         }

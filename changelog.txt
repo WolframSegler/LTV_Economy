@@ -1,9 +1,16 @@
 v0.3.2-beta | SAVE COMPATIBLE
+- It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
 - Bug fixes related to the overhauled trade fleets.
 - Factions should now have more smaller ships.
 - Fixed an infinite loop bug where ships without any crew capacity would cause an infinite loop.
 - Removed test system after configs were created. It was causing issues with pirate base generation.
 - Fixed nexerelin market creation bug.
+- Fixed bug where ships were not getting freed if the trade fleet despawned unexpectedly
+- Balanced config values to make forced fuel imports cheaper and reduced the minimum combat power for a trade fleet.
+- Fixed a bug where expenses for faction trade fleets gained the colony money.
+- Fixed a double-counting bug where the immideate fuel purchase multiplier was being applied to the (already high) colony prices for fuel. Now it only applies to the base price.
+- Fixed a bug causing only player-owned colonies to gain tariff income and stockpile bonuses from open-market trade, while it should be all but player-owned colonies.
+- Fuel fee for independent captains when creating a trade missions is now covered by the faction. Helps balance costs compared to faction fleets. Is also more realistic.
 
 v0.3.1-beta | SAVE COMPATIBLE
 - Fixed crash from accessing abandoned stations.

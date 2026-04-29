@@ -177,7 +177,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		log.info("Added trade fleet route from " + src.getName() + " to " + dest.getName());
 	}
 
-	protected String getFleetFaction(TradeMission mission) {
+	private static final String getFleetFaction(TradeMission mission) {
 		final MarketAPI src = mission.src;
 		final boolean canBeIndependent = !src.getFaction().isHostileTo(Factions.INDEPENDENT) &&
 				!mission.dest.getFaction().isHostileTo(Factions.INDEPENDENT);
@@ -413,8 +413,9 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	public final void reportBattleOccurred(CampaignFleetAPI fleet, CampaignFleetAPI primaryWinner, BattleAPI battle) {
 		final RouteData route = RouteManager.getInstance().getRoute(getRouteSourceId(), fleet);
+		if (route == null) return;
 		final TradeMission mission = getMission(route);
-		if (route == null || route.isExpired() || mission == null) return;
+		if (route.isExpired() || mission == null) return;
 
 		if (fleet.getFleetData().getNumMembers() < 1) {
 			onRouteLost(route, mission);
@@ -443,13 +444,11 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	public final void reportFleetDespawnedToListener(CampaignFleetAPI fleet, FleetDespawnReason reason, Object param) {
 		final RouteData route = RouteManager.getInstance().getRoute(getRouteSourceId(), fleet);
 		final TradeMission mission = getMission(route);
-		if (route == null || route.isExpired() || mission == null) return;
+		if (mission != null) mission.spawnedFleetFinishedJob = true;
+
+		if (route == null || route.isExpired()) return;
 
 		switch (reason) {
-		case REACHED_DESTINATION:
-			mission.spawnedFleetFinishedJob = true;
-			break;
-
 		case DESTROYED_BY_BATTLE, NO_MEMBERS:
 			onRouteLost(route, mission);
 			break;

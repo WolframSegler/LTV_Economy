@@ -27,6 +27,9 @@ public class Income {
     public static final String INDEPENDENT_HAZARD_PAY_KEY = "independent_hazard_pay";
     public static final String INDEPENDENT_HAZARD_PAY_DESC = "Hazard pay (base + escort strength)";
 
+    public static final String INDEPENDENT_FUEL_COST_KEY = "independent_fuel_cost";
+    public static final String INDEPENDENT_FUEL_COST_DESC = "Fuel cost for the fleet.";
+
     public static final String WORKER_WAGES_KEY = "wages";
     public static final String WORKER_WAGES_DESC = "Worker wages";
 
@@ -67,6 +70,7 @@ public class Income {
             case INDEPENDENT_PER_TON_KEY: return INDEPENDENT_PER_TON_DESC;
             case INDEPENDENT_VALUE_PERCENT_KEY: return "Percentage of cargo value (" + Strings.X + EconConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT + ")";
             case INDEPENDENT_HAZARD_PAY_KEY: return INDEPENDENT_HAZARD_PAY_DESC;
+            case INDEPENDENT_FUEL_COST_KEY: return INDEPENDENT_FUEL_COST_DESC;
             case WORKER_WAGES_KEY: return WORKER_WAGES_DESC;
             case POLICY_COST_KEY: return POLICY_COST_DESC;
             case PLAYER_MARKET_TRANSACTION_KEY: return PLAYER_MARKET_TRANSACTION_DESC;

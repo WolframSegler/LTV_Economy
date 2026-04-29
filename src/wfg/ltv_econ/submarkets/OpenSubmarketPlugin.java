@@ -192,7 +192,8 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 			- defRatio  * ECON_UNIT_MULT_DEFICIT
 		;
 
-		final float baseLinear = base * ECON_UNIT_MULT_BASE * mult;
+		final float baseLinear = Math.max(0f, base * ECON_UNIT_MULT_BASE * mult);
+		if (baseLinear <= 0f) return 0f;
 
 		final float ratio = STOCKPILE_BASELINE / baseLinear;
 		final float scale = (float) Arithmetic.clamp(Math.pow(ratio, RATIO_EXP),
@@ -208,7 +209,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 		final EconomyEngine engine = EconomyEngine.instance();
 		final String marketID = market.getId();
 
-		if (!market.isPlayerOwned()) return;
+		if (market.isPlayerOwned()) return;
 
         if (getTariff() > 0f) {
 			final float tariffValue = transaction.getCreditValue() * getTariff();

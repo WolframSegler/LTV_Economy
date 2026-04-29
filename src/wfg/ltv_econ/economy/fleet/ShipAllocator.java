@@ -1,6 +1,7 @@
 package wfg.ltv_econ.economy.fleet;
 
 import static wfg.ltv_econ.economy.fleet.ShipTypeData.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -13,6 +14,7 @@ import com.fs.starfarer.api.impl.campaign.command.WarSimScript.LocationDanger;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
 import wfg.ltv_econ.config.EconConfig;
+import wfg.native_ui.util.ArrayMap;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -31,14 +33,14 @@ public class ShipAllocator {
 
     private static final double DIVERSITY_PENALTY = 0.2;
     private static final double REF_SHIPMENT = 500.0;
-    private static final float COMBAT_POWER_BASE_PER_100_TONS = 5.0f;
+    private static final float COMBAT_POWER_BASE_PER_100_TONS = 9f;
     private static final float[] COMBAT_POWER_DANGER_MULT = {
-        0.2f, // NONE
-        0.8f, // MINIMAL
-        1.5f, // LOW
-        2.2f, // MEDIUM
-        3.2f, // HIGH
-        5.0f  // EXTREME
+        0.1f, // NONE
+        0.4f, // MINIMAL
+        0.8f, // LOW
+        1.4f, // MEDIUM
+        2.5f, // HIGH
+        3.7f  // EXTREME
     };
 
     public static final float getRequiredCombatPower(TradeMission mission) {
@@ -63,6 +65,14 @@ public class ShipAllocator {
         final float dangerMult = COMBAT_POWER_DANGER_MULT[dangerOrdinal];
         final float required = (totalShipment / 100f) * COMBAT_POWER_BASE_PER_100_TONS * dangerMult;
         return Math.max(required, EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER);
+    }
+
+    public static final float getRequiredFuelForShips(ArrayMap<String, Integer> allocatedShips, float distLY) {
+        float cost = 0f;
+        for (Map.Entry<String, Integer> entry : allocatedShips.singleEntrySet()) {
+            cost += settings.getHullSpec(entry.getKey()).getFuelPerLY() * entry.getValue() * distLY;
+        }
+        return cost;
     }
 
     /**
