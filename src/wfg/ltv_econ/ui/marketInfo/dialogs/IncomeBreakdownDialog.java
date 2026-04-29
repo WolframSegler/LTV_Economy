@@ -35,7 +35,9 @@ import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.widget.RadioPanel;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 import wfg.native_ui.util.ArrayMap;
+import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class IncomeBreakdownDialog extends DockPanel {
     private static final int WIDTH = 440;
@@ -88,6 +90,9 @@ public class IncomeBreakdownDialog extends DockPanel {
             rawToggle.tooltip.width = 100f;
             rawToggle.tooltip.builder = (tp, expanded) -> {
                 tp.addPara("Debug only", 0f);
+            };
+            rawToggle.tooltip.positioner = (tp, e) -> {
+                NativeUiUtils.anchorPanel(tp, rawToggle.getPanel(), AnchorType.LeftMid, opad);
             };
         }
         add(rawToggle).inTR(opad*3 + 110, opad*2 + pad);

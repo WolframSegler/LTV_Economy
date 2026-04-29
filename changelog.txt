@@ -11,6 +11,7 @@ v0.3.2-beta | SAVE COMPATIBLE
 - Fixed a double-counting bug where the immideate fuel purchase multiplier was being applied to the (already high) colony prices for fuel. Now it only applies to the base price.
 - Fixed a bug causing only player-owned colonies to gain tariff income and stockpile bonuses from open-market trade, while it should be all but player-owned colonies.
 - Fuel fee for independent captains when creating a trade missions is now covered by the faction. Helps balance costs compared to faction fleets. Is also more realistic.
+- Fixed a bug where the orbital lamp getting installed on population&industry would create volatile demand for all the colonies in the sector.
 
 v0.3.1-beta | SAVE COMPATIBLE
 - Fixed crash from accessing abandoned stations.

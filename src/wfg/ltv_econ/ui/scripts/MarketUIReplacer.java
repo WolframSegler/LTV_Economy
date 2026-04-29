@@ -133,15 +133,14 @@ public class MarketUIReplacer implements EveryFrameScript {
             (!DebugFlags.COLONY_DEBUG || DebugFlags.HIDE_COLONY_CONTROLS)
         ) return;
 
-        final int panelWidth = LtvCommodityPanel.STANDARD_WIDTH;
-        final int buttonWidth = (int) (panelWidth / 3f - 4f);
+        final int buttonWidth = (int) (LtvCommodityPanel.STANDARD_WIDTH / 3f - 4f);
         final int buttonHeight = (int) (buttonWidth / 1.63f);
 
         final MarketEventsButton eventsBtn = new MarketEventsButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
         final ColonyStockpilesButton stockpilesBtn = new ColonyStockpilesButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
         final ManagePopButton popBtn = new ManagePopButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
 
-        final int gap = (panelWidth - buttonWidth * 3) / 2;
+        final int gap = (LtvCommodityPanel.STANDARD_WIDTH - buttonWidth * 3) / 2;
 
         colonyInfoPanel.addComponent(eventsBtn.getPanel());
         colonyInfoPanel.addComponent(stockpilesBtn.getPanel());
@@ -271,11 +270,10 @@ public class MarketUIReplacer implements EveryFrameScript {
         }
         if (commodityPanel == null) return;
 
-        final int width = (int) commodityPanel.getPosition().getWidth();
         final int height = (int) commodityPanel.getPosition().getHeight();
 
         final LtvCommodityPanel replacement = new LtvCommodityPanel(
-            managementPanel, width, height, marketAPI
+            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, height, marketAPI
         );
 
         final ClickHandler<CommodityRowPanel> listener = (source, isLeftClick) -> {

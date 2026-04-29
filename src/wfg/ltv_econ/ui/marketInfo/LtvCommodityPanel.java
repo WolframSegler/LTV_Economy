@@ -31,7 +31,7 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
 
-    public static final int STANDARD_WIDTH = 264;
+    public static final int STANDARD_WIDTH = 284;
     public String m_headerTxt;
     public boolean rowsIgnoreUIState = false;
     public final List<CommodityRowPanel> commodityRows = new ArrayList<>();
@@ -90,12 +90,13 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
             pos.getWidth(), true
         );
         
+        final int rowWidth = (int) pos.getWidth() - opad * 2;
         final int rowHeight = 28;
         int cumulativeYOffset = opad;
 
         for (CommoditySpecAPI com : commodities) {
             final CommodityRowPanel comRow = new CommodityRowPanel(
-                m_panel, m_market, com.getId(), (int)(pos.getWidth() - opad * 2), 
+                m_panel, m_market, com.getId(), rowWidth, 
                 rowHeight, rowsIgnoreUIState
             );
 

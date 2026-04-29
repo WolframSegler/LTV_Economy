@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class IndustryConfigManager {
@@ -122,8 +121,8 @@ public class IndustryConfigManager {
         public final boolean checkLegality;
         public final boolean activeDuringBuilding; // will be inactive during normal operations.
 
-        private static final BooleanSupplier dynamicOutputActiveDefault = () -> true;
-        public BooleanSupplier dynamicOutputActive = dynamicOutputActiveDefault;
+        private static final IndustryBooleanSupplier dynamicOutputActiveDefault = (ind) -> true;
+        public IndustryBooleanSupplier dynamicOutputActive = dynamicOutputActiveDefault;
         public boolean dynamic = false;
 
         public OutputConfig(
@@ -189,9 +188,13 @@ public class IndustryConfigManager {
                 "isAbstract=" + isAbstract + " ,\n" +
                 "checkLegality=" + checkLegality + " ,\n" +
                 "activeDuringBuilding=" + activeDuringBuilding + " ,\n" +
-                "dynamicOutputActive=" + dynamicOutputActive.getAsBoolean() + " ,\n" +
-                '}';
+            '}';
         }
+    }
+
+    @FunctionalInterface
+    public interface IndustryBooleanSupplier {
+        boolean isActive(Industry industry);
     }
 
     public static final void populateInputs(final Industry ind, final Map<String, Float> inputs,

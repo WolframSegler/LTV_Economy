@@ -279,8 +279,8 @@ public class IndustryIOs {
             IndustryConfigManager.dynamicIndMarketScaleBase, -1, false
         );
         outputConfig.dynamic = true;
-        outputConfig.dynamicOutputActive = () -> {
-            return output.getModifiedValue() > 0.01f;
+        outputConfig.dynamicOutputActive = (industry) -> {
+            return industry.getSupply(outputID).getQuantity().getModifiedValue() > 0f;
         };
 
         cfg.outputs.put(outputID, outputConfig);
@@ -346,8 +346,8 @@ public class IndustryIOs {
             IndustryConfigManager.dynamicIndMarketScaleBase, -1, false
         );
         output.dynamic = true;
-        output.dynamicOutputActive = () -> {
-            return input.getModifiedValue() > 0.01f;
+        output.dynamicOutputActive = (industry) -> {
+            return industry.getDemand(inputID).getQuantity().getModifiedValue() > 0f;
         };
 
         cfg.outputs.put(outputID, output);
@@ -366,7 +366,7 @@ public class IndustryIOs {
     public static final boolean isOutputValidForMarket(final OutputConfig output, Industry ind) {
         final MarketAPI market = ind.getMarket();
         if (output.checkLegality && market.isIllegal(output.comID)) return false;
-        if (output.dynamic && !output.dynamicOutputActive.getAsBoolean()) return false;
+        if (output.dynamic && !output.dynamicOutputActive.isActive(ind)) return false;
 
         if (output == null || ind.isDisrupted()) return false;
         final boolean buildingOnly = ind.isBuilding() && !ind.isUpgrading();
