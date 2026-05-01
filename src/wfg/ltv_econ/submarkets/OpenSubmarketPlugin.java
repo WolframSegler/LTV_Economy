@@ -55,8 +55,8 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 			
 
             final EconomyEngine engine = EconomyEngine.instance(); 
-            final CommodityCell shipsCell = engine.getComCell(Commodities.SHIPS, market.getId());
-            final CommodityCell fuelCell  = engine.getComCell(Commodities.FUEL,  market.getId());
+            final CommodityCell shipsCell = engine.getOrCreateComCell(Commodities.SHIPS, market);
+            final CommodityCell fuelCell = engine.getOrCreateComCell(Commodities.FUEL,  market);
 
 			getCargo().getMothballedShips().clear();
 

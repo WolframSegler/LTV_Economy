@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>wfg_ltv_econ</groupId>
   <artifactId>LTV-Economy</artifactId>
-  <version>0.3.2</version>
+  <version>0.3.3</version>
   <packaging>jar</packaging>
   <name>LTV Economy</name>
 
@@ -77,7 +77,7 @@
   </build>
 
   <dependencies>
-  <dependency>
+    <dependency>
       <groupId>local</groupId>
       <artifactId>native_ui</artifactId>
       <version>1.0</version>

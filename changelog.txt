@@ -1,3 +1,7 @@
+v0.3.3-beta | SAVE COMPATIBLE
+- Fixed bug where summary bar inside faction ship orders and production queue wouldn't update after ship removal.
+- Fixed crash due to economy route manager.
+
 v0.3.2-beta | SAVE COMPATIBLE
 - It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
 - Bug fixes related to the overhauled trade fleets.

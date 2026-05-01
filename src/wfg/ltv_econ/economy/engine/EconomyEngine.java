@@ -82,6 +82,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     public transient EconomyLogger logger;
     transient EconomyLoop loop;
     private transient ExecutorService mainLoopExecutor;
+    private volatile boolean mainLoopExecutorRunning = false;
     
     final Set<String> registeredMarkets = new HashSet<>();
     final ArrayMap<String, CommodityDomain> comDomains = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
@@ -145,7 +146,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         dayKeyTracker = dayKey;
         midDayApplied = false;
 
-        if (EconConfig.MULTI_THREADING) { 
+        if (EconConfig.MULTI_THREADING) {
             mainLoopExecutor.execute(this::realAdvance);
         } else {
             realAdvance();
@@ -153,7 +154,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     private final void realAdvance() {
-        loop.mainLoop(false, false);
+        try {
+            mainLoopExecutorRunning = true;
+            loop.mainLoop(false, false);
+        } finally {
+            mainLoopExecutorRunning = false;
+        }
     }
 
     public final void fakeAdvance() {
@@ -164,11 +170,15 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         loop.mainLoop(true, true);
     }
 
-    public final void registerMarket(MarketAPI market) {
+    public final boolean isMainLoopExecutorRunning() {
+        return mainLoopExecutorRunning;
+    }
+
+    public final synchronized void registerMarket(MarketAPI market) {
         // Order here is very important
         final String marketID = market.getId();
         WorkerRegistry.instance().register(market);
-        MarketFinanceRegistry.instance().register(market);
+        MarketFinanceRegistry.instance().register(marketID);
         if (!registeredMarkets.add(marketID)) return;
 
         addCredits(marketID, EconConfig.STARTING_CREDITS_FOR_MARKET);
@@ -185,7 +195,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         removeMarket(market.getId());
     }
 
-    public final void removeMarket(String marketID) {
+    public final synchronized void removeMarket(String marketID) {
         if (!registeredMarkets.remove(marketID)) return;
 
         for (CommodityDomain dom : comDomains.values()) {
@@ -253,6 +263,14 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         }
 
         return dom.getCell(marketID);
+    }
+
+    public final CommodityCell getOrCreateComCell(String comID, MarketAPI market) {
+        final CommodityCell cell = getComCell(comID, market.getId());
+        if (cell != null) return cell;
+
+        registerMarket(market);
+        return comDomains.get(comID).getCell(market.getId());
     }
 
     public final void addCredits(String marketID, double amount) {

@@ -443,10 +443,11 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	public final void reportFleetDespawnedToListener(CampaignFleetAPI fleet, FleetDespawnReason reason, Object param) {
 		final RouteData route = RouteManager.getInstance().getRoute(getRouteSourceId(), fleet);
+		if (route == null) return;
+
 		final TradeMission mission = getMission(route);
 		if (mission != null) mission.spawnedFleetFinishedJob = true;
-
-		if (route == null || route.isExpired()) return;
+		if (route.isExpired()) return;
 
 		switch (reason) {
 		case DESTROYED_BY_BATTLE, NO_MEMBERS:

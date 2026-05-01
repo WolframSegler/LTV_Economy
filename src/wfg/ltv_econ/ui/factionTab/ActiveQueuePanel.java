@@ -150,7 +150,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
             case NONE:
                 if (NativeUiUtils.isShiftDown()) {
                     StaticData.inv.removeActiveOrder(source.index);
-                    buildUI();
+                    ActiveQueuePanel.this.buildUI();
                     break;
                 }
                 source.selectionState = WidgetSelectionState.REMOVE;
@@ -167,7 +167,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
             case REMOVE:
                 ShipProductionManager.addScrapsToCapital(StaticData.inv, 1, source.spec);
                 StaticData.inv.removeActiveOrder(source.index);
-                buildUI();
+                ActiveQueuePanel.this.buildUI();
                 break;
 
             case SWAP:

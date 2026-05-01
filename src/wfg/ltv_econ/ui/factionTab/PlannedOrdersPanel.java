@@ -177,7 +177,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
             case NONE:
                 if (NativeUiUtils.isShiftDown()) {
                     StaticData.inv.removePlannedOrder(source.index);
-                    buildUI();
+                    PlannedOrdersPanel.this.buildUI();
                     break;
                 }
                 source.selectionState = WidgetSelectionState.REMOVE;
@@ -193,7 +193,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
 
             case REMOVE:
                 StaticData.inv.removePlannedOrder(source.index);
-                buildUI();
+                PlannedOrdersPanel.this.buildUI();
                 break;
 
             case SWAP:
