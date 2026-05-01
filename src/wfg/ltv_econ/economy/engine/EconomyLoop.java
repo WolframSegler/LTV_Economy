@@ -461,20 +461,14 @@ public class EconomyLoop {
 
     private final void applyWages() {
         final MarketFinanceRegistry registry = MarketFinanceRegistry.instance();
-        final EconomyAPI econ = Global.getSector().getEconomy(); 
-        final List<String> toRemove = new ArrayList<>(4);
+        final EconomyAPI econ = Global.getSector().getEconomy();
 
         for (String marketID : engine.registeredMarkets) {
-            if (econ.getMarket(marketID) == null) {
-                toRemove.add(marketID);
-            } else {
-                final float wageCost = engine.info.getDailyWages(econ.getMarket(marketID));
+            final MarketAPI market = econ.getMarket(marketID);
+            if (market != null) {
+                final float wageCost = engine.info.getDailyWages(market);
                 registry.getLedger(marketID).add(WORKER_WAGES_KEY, -wageCost, getDesc(WORKER_WAGES_KEY));
             }
-        }
-
-        for (String marketID : toRemove) {
-            engine.removeMarket(marketID);
         }
     }
 
