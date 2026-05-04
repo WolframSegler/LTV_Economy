@@ -30,9 +30,11 @@ public abstract class MarketPolicy {
     public boolean notifyWhenFinished = false;
     public boolean repeatAfterCooldown = false;
 
-    /** Can be called multiple times */
+    /** Called exactly once */
     public abstract void apply(PlayerMarketData data);
+    /** Called exactly once */
     public abstract void unapply(PlayerMarketData data);
+
     public void preAdvance(PlayerMarketData data) {};
     public void postAdvance(PlayerMarketData data) {};
     public boolean isEnabled(PlayerMarketData data) { return true; }

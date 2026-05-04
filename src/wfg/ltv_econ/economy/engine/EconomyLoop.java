@@ -22,11 +22,12 @@ import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.Industries;
+import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
@@ -46,6 +47,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
 
+import static wfg.ltv_econ.constants.CommoditiesID.*;
 import static wfg.ltv_econ.constants.strings.Income.*;
 
 public class EconomyLoop {
@@ -72,6 +74,7 @@ public class EconomyLoop {
                 WorkerRegistry.instance().resetWorkersAssigned(false);
                 engine.comDomains.values().parallelStream().forEach(CommodityDomain::update);
                 assignWorkers();
+                applyServiceSectorEffects();
 
                 engine.cyclesSinceWorkerAssign = 0;
             } else {
@@ -99,7 +102,7 @@ public class EconomyLoop {
         }
     }
 
-    public final void refreshMarkets() {
+    final void refreshMarkets() {
         final List<MarketAPI> econMarkets = EconomyInfo.getMarketsCopy();
         final Set<String> econMarketIDs = econMarkets.stream()
             .map(MarketAPI::getId)
@@ -115,7 +118,7 @@ public class EconomyLoop {
         }
     }
 
-    public final void refreshMarketsHard() {
+    final void refreshMarketsHard() {
         final List<MarketAPI> econMarkets = EconomyInfo.getMarketsCopy();
         final Set<String> econMarketIDs = econMarkets.stream()
             .map(MarketAPI::getId)
@@ -166,7 +169,7 @@ public class EconomyLoop {
         }
     }
 
-    public final void assignWorkers() {
+    private final void assignWorkers() {
         final WorkerRegistry reg = WorkerRegistry.instance();
         final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
@@ -189,12 +192,7 @@ public class EconomyLoop {
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(KEY);
 
                 final float ratio = (assignments[i] / totalWorkers);
-                final String baseInd = IndustryConfigManager.getBaseIndustryID(indAndOutputID[0]);
-                WorkerIndustryData data = reg.getData(market.getId(), baseInd);
-                if (data == null) {
-                    reg.register(market);
-                    data = reg.getData(market.getId(), baseInd);
-                }
+                final WorkerIndustryData data = reg.getRegisterData(market.getId(), indAndOutputID[0]);
                 data.setRatioForOutput(indAndOutputID[1], ratio);
             }
         }
@@ -519,8 +517,8 @@ public class EconomyLoop {
             final DebtDebuffTier appliedTier = getDebtDebuffTier(market.getId());
 
             for (MarketImmigrationModifier immigMod : market.getTransientImmigrationModifiers()) {
-                if (immigMod instanceof DebtEffectMarketImmigration debtMod) {
-                    market.removeTransientImmigrationModifier(debtMod);
+                if (immigMod instanceof DebtEffectMarketImmigration) {
+                    market.removeTransientImmigrationModifier(immigMod);
                     break;
                 }
             }
@@ -563,6 +561,49 @@ public class EconomyLoop {
         mission.durRemaining = EconConfig.HISTORY_LENGTH;
     }
 
+    private final void applyServiceSectorEffects() {
+        // TODO make the solver give value to these outputs
+        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
+            applyServiceSectorEffectsToMarket(market);
+        }
+    }
+
+    final void applyServiceSectorEffectsToMarket(MarketAPI market) {
+        final String marketID = market.getId();
+        final WorkerIndustryData idata = WorkerRegistry.instance().getRegisterData(marketID, Industries.POPULATION);
+
+        final float logiRatio = idata.getAssignedRatioForOutput(SERVICE_LOGISTICS);
+        final float healthRatio = idata.getAssignedRatioForOutput(SERVICE_HEALTHCARE);
+        final float secRatio = idata.getAssignedRatioForOutput(SERVICE_SECURITY);
+        final float pubInfoRatio = idata.getAssignedRatioForOutput(SERVICE_PUBLIC_INFO);
+
+        for (CommodityDomain dom : engine.comDomains.values()) {
+            final CommodityCell cell = dom.getCell(marketID);
+            cell.getConsumptionStat().modifyMult(SERVICE_LOGISTICS, 1f - logiRatio, "Logistics sector");
+        }
+        for (MarketImmigrationModifier immigMod : market.getTransientImmigrationModifiers()) {
+            if (immigMod instanceof ServiceSectorMarketImmigration) {
+                market.removeTransientImmigrationModifier(immigMod);
+                break;
+            }
+        }
+        if (healthRatio * 20f >= 1f) {
+            market.addTransientImmigrationModifier(new ServiceSectorMarketImmigration((int) (healthRatio * 20f)));
+        }
+
+        market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).modifyFlat(
+            SERVICE_SECURITY, secRatio * 100f, "Security sector"
+        );
+        market.getAccessibilityMod().modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio, "Public info sector");
+        
+        final PlayerMarketData mData = engine.getPlayerMarketData(marketID);
+        if (mData != null) {
+            mData.healthDelta.modifyFlat(SERVICE_HEALTHCARE, healthRatio / 2f, "Healthcare sector");
+            mData.classConsciousnessDelta.modifyFlat(SERVICE_SECURITY, -secRatio / 10f, "Security sector");
+            mData.socialCohesionDelta.modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio / 2f, "Public info sector");
+        }
+    }
+
     private static class DebtEffectMarketImmigration implements MarketImmigrationModifier {
         private float mod;
         public DebtEffectMarketImmigration(float mod) {
@@ -570,6 +611,16 @@ public class EconomyLoop {
         }
         public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
             incoming.getWeight().modifyFlat(DEBT_DEBUFF_KEY, mod, DEBT_IMMIGRATION_DEBUFF_DESC);
+        }
+    }
+
+    private static class ServiceSectorMarketImmigration implements MarketImmigrationModifier {
+        private float mod;
+        public ServiceSectorMarketImmigration(float mod) {
+            this.mod = mod;
+        }
+        public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
+            incoming.getWeight().modifyFlat(SERVICE_HEALTHCARE, mod, "Healthcare");
         }
     }
 }

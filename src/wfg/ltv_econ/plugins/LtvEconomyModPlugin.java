@@ -29,6 +29,7 @@ import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
+import wfg.ltv_econ.plugins.industries.ServiceSectorIndustryOption;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.scripts.UIInjectorListener;
 
@@ -64,6 +65,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
         listenerManager.addListener(new UIInjectorListener(), true);
         listenerManager.addListener(new AddWorkerIndustryOption(), true);
+        listenerManager.addListener(new ServiceSectorIndustryOption(), true);
 
         registerBarEvents();
 

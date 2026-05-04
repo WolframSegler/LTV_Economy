@@ -163,10 +163,6 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
     }
 
     public final void apply() {
-        for (MarketPolicy policy : policies) {
-            if (policy.isActive(this)) policy.apply(this);
-        }
-
         market.addTransientImmigrationModifier(this);
     }
 
@@ -261,6 +257,7 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
         );
     }
 
+    @Override
     public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
         final String desc = "Colony health";
         final int baseValue = (int) ((popHealth + 5f - BASELINE_VALUE) / 10f);

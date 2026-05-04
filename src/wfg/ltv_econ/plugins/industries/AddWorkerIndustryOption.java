@@ -20,13 +20,10 @@ import java.awt.Color;
 
 public class AddWorkerIndustryOption implements IndustryOptionProvider {
 
-    public static Object PluginID = new Object();
-    public Industry industry = null;
+    public static final Object pluginID = new Object();
 
-    public boolean isSuitable(Industry ind, boolean allowUnderConstruction){
-        if (ind == null || ind.getMarket() == null ||
-            (!allowUnderConstruction && (ind.isBuilding() || ind.isUpgrading()))
-        ) return false;
+    private static final boolean isSuitable(Industry ind){
+        if (ind == null || ind.getMarket() == null || (ind.isBuilding() || ind.isUpgrading())) return false;
         if (!DebugFlags.COLONY_DEBUG && !ind.getMarket().isPlayerOwned()) return false;
 
         return IndustryConfigManager.getIndConfig(ind).workerAssignable;
@@ -34,12 +31,11 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
 
     @Override
     public List<IndustryOptionData> getIndustryOptions(Industry ind) {
-        if (!isSuitable(ind, false)) return null;
+        if (!isSuitable(ind)) return null;
 
-        final List<IndustryOptionData> result = new ArrayList<IndustryOptionData>();
-        industry = ind;
+        final List<IndustryOptionData> result = new ArrayList<>();
 
-        final IndustryOptionData opt = new IndustryOptionData("Assign Workers...", PluginID, ind, this);
+        final IndustryOptionData opt = new IndustryOptionData("Assign Workers...", pluginID, ind, this);
         opt.color = ind.getMarket().getFaction().getBrightUIColor();
         result.add(opt);
 
@@ -48,16 +44,10 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
 
     @Override
     public void createTooltip(IndustryOptionData opt, TooltipMakerAPI tooltip, float width) {
-        if (opt.id != PluginID) return;
+        if (opt.id != pluginID) return;
 
-        tooltip.addPara("Assign idle workers to increase this industry's output.", 0f);
+        tooltip.addPara("Assign idle workers to increase this industry's output.\n", 0f);
 
-        final WorkerRegistry reg = WorkerRegistry.instance();
-        if (reg.getData(opt.ind) == null) {
-            reg.register(opt.ind);
-        }
-
-        tooltip.addPara(null, 0f);
         tooltip.addPara(
         "The number of workers that can be assigned to an industry is determined by the colony size, and certain industries have a natural limit on how many workers they can employ. Currently, there are %s workers employed in %s.",
         0f,
@@ -65,26 +55,18 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
             highlight,
             base
         },
-        NumFormat.engNotate(WorkerRegistry.instance().getData(industry).getWorkersAssigned()),
-        industry.getCurrentName()
+        NumFormat.engNotate(WorkerRegistry.instance().getRegisterData(opt.ind).getWorkersAssigned()),
+        opt.ind.getCurrentName()
         );
     }
 
     @Override
-    public void addToIndustryTooltip(Industry ind, Industry.IndustryTooltipMode mode, TooltipMakerAPI tooltip, float width, boolean expanded) {
-
-    }
+    public void addToIndustryTooltip(Industry ind, Industry.IndustryTooltipMode mode, TooltipMakerAPI tp, float w, boolean exp) {}
 
     @Override
     public void optionSelected(IndustryOptionData opt, DialogCreatorUI ui) {
-        if (opt.id != PluginID) return;
-        
-        final WorkerRegistry reg = WorkerRegistry.instance();
-        if (reg.getData(opt.ind) == null) {
-            reg.register(opt.ind);
-        }
+        if (opt.id != pluginID) return;
 
-        final AssignWorkersDialog dialog = new AssignWorkersDialog(opt.ind);
-        dialog.show(0.3f, 0.3f);
+        new AssignWorkersDialog(opt.ind).show(0.3f, 0.3f);
     }
 }

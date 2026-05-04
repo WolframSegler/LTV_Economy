@@ -7,10 +7,11 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.ltv_econ.economy.PlayerMarketData;
 
 public class WellnessCompliancePolicy extends MarketPolicy {
-    public static final float HEALTH_BUFF = 0.06f;
-    public static final float HAPPINESS_DEBUFF = -0.1f;
-    public static final float COHESION_DEBUFF = -0.09f;
-    public static final float CLASS_DEBUFF = -0.008f;
+    private static final String memKey = "$policy_wellness_compliance";
+    private static final float HEALTH_BUFF = 0.06f;
+    private static final float HAPPINESS_DEBUFF = -0.1f;
+    private static final float COHESION_DEBUFF = -0.09f;
+    private static final float CLASS_DEBUFF = -0.008f;
 
     public void apply(PlayerMarketData data) {
         data.healthDelta.modifyFlat(id, HEALTH_BUFF, spec.name);
@@ -18,7 +19,7 @@ public class WellnessCompliancePolicy extends MarketPolicy {
         data.socialCohesionDelta.modifyFlat(id, COHESION_DEBUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
 
-        data.market.getMemoryWithoutUpdate().set("$policy_wellness_compliance", true);
+        data.market.getMemoryWithoutUpdate().set(memKey, true);
     }
 
     public void unapply(PlayerMarketData data) {
@@ -27,7 +28,7 @@ public class WellnessCompliancePolicy extends MarketPolicy {
         data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
 
-        data.market.getMemoryWithoutUpdate().set("$policy_wellness_compliance", false);
+        data.market.getMemoryWithoutUpdate().set(memKey, false);
     }
 
     @Override

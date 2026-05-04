@@ -76,6 +76,6 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
 
         tp.addGrid(0);
 
-        tp.addPara("This policy can only be activated at the faction capital.", gray, opad);
+        tp.addPara("This policy can only be activated at the faction capital, and resources are drawn from its stockpiles.", gray, opad);
     }
 }

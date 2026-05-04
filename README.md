@@ -76,6 +76,10 @@ behaviour by Adrien Coquet from <a href="https://thenounproject.com/browse/icons
 
 <a target="_blank" href="https://icons8.com/icon/tLYYFUAkhhRa/stopwatch">Stopwatch</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 
+Healthcare by Pong Pong from <a href="https://thenounproject.com/browse/icons/term/healthcare/" target="_blank" title="Healthcare Icons">Noun Project</a> (CC BY 3.0)
+
+Radio Tower by Rockicon from <a href="https://thenounproject.com/browse/icons/term/radio-tower/" target="_blank" title="Radio Tower Icons">Noun Project</a> (CC BY 3.0)
+
 <br>
 
 ## AI Generated Assets

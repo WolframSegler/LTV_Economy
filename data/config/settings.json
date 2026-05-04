@@ -35,7 +35,9 @@
       "smuggling": "graphics/icons/intel/smuggling.png",
       "ship_outline": "graphics/icons/intel/freighter_outline.png",
       "cargo_crates": "graphics/icons/industry/cargo_crates.png",
-      "berth": "graphics/icons/intel/berth.png"
+      "berth": "graphics/icons/intel/berth.png",
+      "healthcare": "graphics/icons/industry/healthcare.png",
+      "radio_tower": "graphics/icons/industry/radio_tower.png"
     },
     "map": {
       "star": "graphics/map/star.png",

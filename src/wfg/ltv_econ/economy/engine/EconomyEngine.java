@@ -338,6 +338,10 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         } else market.getStability().unmodifyFlat(popID + 2);
     }
 
+    public final void applyServiceSectorEffectsToMarket(MarketAPI market) {
+        loop.applyServiceSectorEffectsToMarket(market);
+    }
+
     // LISTENERS ------------------------------------------------------------------------------------
 
     public void reportEconomyTick(int iterIndex) {

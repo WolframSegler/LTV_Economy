@@ -141,6 +141,38 @@ public class UIUtils {
         return icon;
     }
 
+    public static final String getDayOrDays(int val) {
+        return getDayOrDays(val, false);
+    }
+
+    public static final String getDayOrDays(long val) {
+        return getDayOrDays(val, false);
+    }
+
+    public static final String getDayOrDays(float val) {
+        return getDayOrDays(val, false);
+    }
+
+    public static final String getDayOrDays(double val) {
+        return getDayOrDays(val, false);
+    }
+
+    public static final String getDayOrDays(int val, boolean capitalized) {
+        return dayOrDays(val == 1, capitalized);
+    }
+
+    public static final String getDayOrDays(long val, boolean capitalized) {
+        return dayOrDays(val == 1l, capitalized);
+    }
+
+    public static final String getDayOrDays(float val, boolean capitalized) {
+        return dayOrDays(Math.abs(val - 1f) < 1e-4f, capitalized);
+    }
+
+    public static final String getDayOrDays(double val, boolean capitalized) {
+        return dayOrDays(Math.abs(val - 1d) < 1e-4d, capitalized);
+    }
+
     private static final Color getStockpileColor(final float ratio, final FactionSpecAPI faction,
         final boolean addRatioColors
     ) {
@@ -149,5 +181,11 @@ public class UIUtils {
         if (ratio <= 0.5f) return UIColors.COM_IMPORT;
         if (ratio <= 0.75f) return UIColors.COM_LOCAL_PROD;
         return UIColors.COM_NOT_EXPORTED;
+    }
+
+    private static final String dayOrDays(boolean isSingular, boolean capitalized) {
+        return capitalized ?
+            isSingular ? "Day" : "Days":
+            isSingular ? "day" : "days";
     }
 }

@@ -108,7 +108,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final int policyWidth = 100;
         final int policyHeight = 141;
 
-        final LabelAPI title = settings.createLabel("Manage Workers", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel("Manage Population", Fonts.INSIGNIA_VERY_LARGE);
         title.autoSizeToWidth(PANEL_W);
         title.setAlignment(Alignment.MID);
         add(title).inTL(0, 0);

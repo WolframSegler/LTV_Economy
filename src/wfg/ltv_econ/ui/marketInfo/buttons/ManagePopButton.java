@@ -35,6 +35,8 @@ public class ManagePopButton extends Button {
             tp.addPara("Population and worker management [%s]", pad,
                 highlight, Keyboard.getKeyName(interaction.shortcut)
             );
+
+            tp.addPara("The Statistics Bureau tracks census data, health trends, and workforce allocation across all industries. Policy decrees can be drafted and enacted from this office, shaping the colony's social and economic direction.", opad);
         };
 
         final Base icon = new Base(m_panel, width, height, ICON, null, null);

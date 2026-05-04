@@ -1,6 +1,8 @@
 v0.3.3-beta | SAVE COMPATIBLE
 - Fixed bug where summary bar inside faction ship orders and production queue wouldn't update after ship removal.
 - Fixed crash due to economy route manager.
+- Fixed a reapply bug on reloading a save.
+- Added a service sector with four departments. Each department gives unique bonuses. AI colonies do not use these for now.
 
 v0.3.2-beta | SAVE COMPATIBLE
 - It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.

@@ -39,6 +39,7 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
@@ -204,12 +205,8 @@ public class IndustryTooltips {
 				"addRightAfterDescriptionSection", ind, tp, mode);
 
 		if (ind.isDisrupted()) {
-			int left = (int) ind.getDisruptedDays();
-			if (left < 1)
-				left = 1;
-			String days = "days";
-			if (left == 1)
-				days = "day";
+			final int left = (int) ind.getDisruptedDays();
+			final String days = UIUtils.getDayOrDays(Math.max(1, left));
 
 			tp.addPara("Operations disrupted! %s " + days + " until return to normal function.",
 					opad, negative, highlight, Integer.toString(left));
@@ -229,11 +226,8 @@ public class IndustryTooltips {
 			tp.addPara("Click to remove or adjust position in queue", positive, opad);
 			tp.addPara("Currently queued for construction. Does not have any impact on the colony.", opad);
 
-			int left = Math.round((ind.getSpec().getBuildTime()));
-			String days = "days";
-			if (left < 2)
-				days = "day";
-			tp.addPara("Requires %s " + days + " to build.", opad, highlight, "" + left);
+			final int left = Math.round((ind.getSpec().getBuildTime()));
+			tp.addPara("Requires %s " + UIUtils.getDayOrDays(left) + " to build.", opad, highlight, "" + left);
 
 		} else if (!ind.isFunctional() && mode == IndustryTooltipMode.NORMAL && !ind.isDisrupted()) {
 			tp.addPara(
@@ -241,12 +235,10 @@ public class IndustryTooltips {
 				opad
 			);
 
-			float buildTime = (float) RolfLectionUtil.getPrivateVariable("buildTime", ind);
-			int left = Math.round((buildTime - ((BaseIndustry)ind).getBuildProgress()));
-			String days = "days";
-			if (left < 2)
-				days = "day";
-			tp.addPara("Requires %s more " + days + " to finish building.", opad, highlight, "" + left);
+			final float buildTime = (float) RolfLectionUtil.getPrivateVariable("buildTime", ind);
+			final int left = Math.round((buildTime - ((BaseIndustry)ind).getBuildProgress()));
+
+			tp.addPara("Requires %s more " + UIUtils.getDayOrDays(left) + " to finish building.", opad, highlight, "" + left);
 		}
 
 		if (!ind.isAvailableToBuild() &&
@@ -265,13 +257,11 @@ public class IndustryTooltips {
 			int credits = (int) Global.getSector().getPlayerFleet().getCargo().getCredits().get();
 			String creditsStr = Misc.getDGSCredits(credits);
 			if (mode == IndustryTooltipMode.UPGRADE || mode == IndustryTooltipMode.ADD_INDUSTRY) {
-				int cost = (int) ind.getBuildCost();
-				String costStr = Misc.getDGSCredits(cost);
+				final int cost = (int) ind.getBuildCost();
+				final String costStr = Misc.getDGSCredits(cost);
 
-				int days = (int) ind.getBuildTime();
-				String daysStr = "days";
-				if (days == 1)
-					daysStr = "day";
+				final int days = (int) ind.getBuildTime();
+				final String daysStr = UIUtils.getDayOrDays(days);
 
 				LabelAPI label = null;
 				if (mode == IndustryTooltipMode.UPGRADE) {

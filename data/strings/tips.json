@@ -52,6 +52,9 @@
             "freq":0.5, "tip":"[LTV] Detailed information about the economy can be found under the intel tab (Intel > Economy)."
         },
         {
+            "freq":0.5, "tip":"[LTV] The Service Sector can be managed through Population & Infrastructure."
+        },
+        {
             "freq":0.5, "tip":"[LTV] Watch the sector's heartbeat! (Intel > Economy > Trade Routes)"
         },
         {

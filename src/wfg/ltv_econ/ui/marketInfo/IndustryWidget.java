@@ -31,6 +31,7 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
@@ -264,20 +265,19 @@ public class IndustryWidget extends CustomPanel implements
         };
 
         final WorkerIndustryData data = WorkerRegistry.instance().getData(ind);
-        final LabelAPI workerCountLabel = settings.createLabel("", Fonts.DEFAULT_SMALL);
-        workerCountLabel.setColor(highlight);
-        workerCountLabel.setHighlightColor(
-            NativeUiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
-        );
-        if (data != null) {
-            final String assignedStr = NumFormat.engNotate(data.getWorkersAssigned());
+        if (data != null && data.getWorkersAssigned() > 0l) {
+            final LabelAPI workerCountLabel = settings.createLabel("", Fonts.DEFAULT_SMALL);
+            workerCountLabel.setColor(highlight);
+            workerCountLabel.setHighlightColor(
+                NativeUiUtils.adjustBrightness(workerCountLabel.getColor(), 1.33f)
+            );
 
-            workerCountLabel.setText(assignedStr);
             workerCountLabel.setOpacity(0.9f);
+            workerCountLabel.setText(NumFormat.engNotate(data.getWorkersAssigned()));
             workerCountLabel.autoSizeToWidth(PANEL_WIDTH - pad*4);
-        }
 
-        add(workerCountLabel).inTL(pad*2, TITLE_HEIGHT + pad*2);
+            add(workerCountLabel).inTL(pad*2, TITLE_HEIGHT + pad*2);
+        }
 
         final TooltipMakerAPI tp = ComponentFactory.createTooltip(PANEL_WIDTH, false);
 
@@ -399,7 +399,7 @@ public class IndustryWidget extends CustomPanel implements
 
         if (queueItem != null) {
             clearLabels();
-            LabelAPI removeLabel = settings.createLabel(
+            final LabelAPI removeLabel = settings.createLabel(
                 "Click to remove", Fonts.DEFAULT_SMALL
             );
             removeLabel.setColor(baseColor);
@@ -407,7 +407,7 @@ public class IndustryWidget extends CustomPanel implements
                 NativeUiUtils.adjustBrightness(removeLabel.getColor(), 1.33f)
             );
 
-            LabelAPI refundLabel = settings.createLabel(
+            final LabelAPI refundLabel = settings.createLabel(
                 Misc.getDGSCredits(queueItem.cost), Fonts.DEFAULT_SMALL
             );
             refundLabel.setColor(highlight);
@@ -415,7 +415,7 @@ public class IndustryWidget extends CustomPanel implements
                 NativeUiUtils.adjustBrightness(refundLabel.getColor(), 1.33f)
             );
 
-            LabelAPI refundLabelAppendix = settings.createLabel(
+            final LabelAPI refundLabelAppendix = settings.createLabel(
                 " refund", Fonts.DEFAULT_SMALL
             );
             refundLabelAppendix.setColor(baseColor);
@@ -439,7 +439,7 @@ public class IndustryWidget extends CustomPanel implements
 
     public void setSwapMode() {
         clearLabels();
-        LabelAPI swapLabel = settings.createLabel("Click to swap", Fonts.DEFAULT_SMALL);
+        final LabelAPI swapLabel = settings.createLabel("Click to swap", Fonts.DEFAULT_SMALL);
         swapLabel.setColor(baseColor);
         swapLabel.setHighlightColor(
             NativeUiUtils.adjustBrightness(swapLabel.getColor(), 1.33f)
@@ -457,12 +457,8 @@ public class IndustryWidget extends CustomPanel implements
                 .getConstructionQueue().getItems().get(constructionQueueIndex);
             if (queueItem != null) {
                 final int buildTime = (int) ind.getSpec().getBuildTime();
-                String buildText = "days";
-                if (buildTime == 1) {
-                    buildText = "day";
-                }
 
-                LabelAPI buildTimeLabel = settings.createLabel(
+                final LabelAPI buildTimeLabel = settings.createLabel(
                     "" + buildTime, Fonts.DEFAULT_SMALL
                 );
                 buildTimeLabel.setColor(highlight);
@@ -470,15 +466,15 @@ public class IndustryWidget extends CustomPanel implements
                     NativeUiUtils.adjustBrightness(buildTimeLabel.getColor(), 1.33f)
                 );
 
-                LabelAPI buildTimeAppendix = settings.createLabel(
-                    " " + buildText, Fonts.DEFAULT_SMALL
+                final LabelAPI buildTimeAppendix = settings.createLabel(
+                    " " + UIUtils.getDayOrDays(buildTime), Fonts.DEFAULT_SMALL
                 );
                 buildTimeAppendix.setColor(baseColor);
                 buildTimeAppendix.setHighlightColor(
                     NativeUiUtils.adjustBrightness(buildTimeAppendix.getColor(), 1.33f)
                 );
                 
-                LabelAPI costLabel = settings.createLabel(
+                final LabelAPI costLabel = settings.createLabel(
                     Misc.getDGSCredits(queueItem.cost), Fonts.DEFAULT_SMALL
                 );
                 costLabel.setColor(highlight);
@@ -497,7 +493,6 @@ public class IndustryWidget extends CustomPanel implements
                 add(costLabel).inBR(labelOpad, pad);
             }
         }
-
     }
 
     public int getQueueIndex() {

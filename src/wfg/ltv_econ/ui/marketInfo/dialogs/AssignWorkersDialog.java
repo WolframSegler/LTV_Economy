@@ -33,6 +33,7 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
@@ -49,7 +50,6 @@ public class AssignWorkersDialog extends DialogPanel {
     private static final int PANEL_W = 540;
     private static final int PANEL_H = 400;
 
-    private final WorkerRegistry reg;
     private final Industry industry;
     private final MarketAPI market;
     private final WorkerIndustryData data;
@@ -64,10 +64,10 @@ public class AssignWorkersDialog extends DialogPanel {
         super(PANEL_W, PANEL_H, null, null, "Confirm", "Cancel");
         setConfirmShortcut();
 
-        reg = WorkerRegistry.instance();
+        final WorkerRegistry reg = WorkerRegistry.instance();
         industry = ind;
         market = ind.getMarket();
-        data = reg.getData(ind);
+        data = reg.getRegisterData(ind);
         previewData = new WorkerIndustryData(data);
         outputSliders = new ArrayMap<>(IndustryConfigManager.getIndConfig(industry).outputs.size());
 
@@ -82,16 +82,16 @@ public class AssignWorkersDialog extends DialogPanel {
 
     @Override
     public void buildUI() {
-        final int sliderHeight = 32;
-        final int sliderWidth = 380;
+        final int sliderH = 32;
+        final int sliderW = 380;
         final int sliderY = 225;
         final int iconSize = 26;
 
         final String txt = "Assign workers to " + industry.getCurrentName();
-        final LabelAPI lbl = settings.createLabel(txt, Fonts.ORBITRON_20AA);
-
-        final float textX = (PANEL_W - lbl.computeTextWidth(txt)) / 2;
-        add(lbl).inTL(textX, pad*2);
+        final LabelAPI titleLbl = settings.createLabel(txt, Fonts.ORBITRON_20AA);
+        titleLbl.setAlignment(Alignment.MID);
+        titleLbl.autoSizeToWidth(PANEL_W);
+        add(titleLbl).inTL(0f, pad*2);
 
         inputOutputContainer = new BasePanel(
             m_panel, (int) pos.getWidth(), 180
@@ -99,8 +99,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         drawProductionAndConsumption(inputOutputContainer.getPanel());
 
-        add(inputOutputContainer.getPanel())
-            .inTL(0, lbl.computeTextHeight(txt) + opad);
+        add(inputOutputContainer.getPanel()).inTL(0, titleLbl.computeTextHeight(txt) + opad);
 
         final BasePanel separator = new BasePanel(
             m_panel, PANEL_W, 1
@@ -129,11 +128,6 @@ public class AssignWorkersDialog extends DialogPanel {
 
         add(help_button.getPanel()).inTR(pad, sliderY + pad);
 
-        final UIPanelAPI outputsPanel = settings.createCustom(
-            PANEL_W,
-            PANEL_H - (sliderY + pad * 2),
-            null
-        );
         final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(PANEL_W, true);
         
         int cumulativeYOffset = pad;
@@ -145,7 +139,7 @@ public class AssignWorkersDialog extends DialogPanel {
             outputsTp.getPrev().getPosition().inTL(pad, cumulativeYOffset);
 
             final Slider outputSlider = new Slider(
-                m_panel, null, 0, 100, sliderWidth, sliderHeight
+                m_panel, null, 0, 100, sliderW, sliderH
             );
             outputSliders.put(output.comID, outputSlider);
 
@@ -170,13 +164,12 @@ public class AssignWorkersDialog extends DialogPanel {
 
             outputSlider.setProgress(data.getAssignedRatioForOutput(output.comID) * 100);
 
-            outputsTp.addComponent(outputSlider.getPanel()).inTL(iconSize + pad*2, cumulativeYOffset);
-            cumulativeYOffset += pad + sliderHeight;
+            outputsTp.addComponent(outputSlider.getPanel()).inTL(iconSize + pad, cumulativeYOffset);
+            cumulativeYOffset += pad + sliderH;
         }
 
         outputsTp.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(outputsTp, 180, true, outputsPanel).inTL(-pad, 0);
-        add(outputsPanel).inTL(opad, sliderY);
+        ComponentFactory.addTooltip(outputsTp, 180, true, m_panel).inTL(opad, sliderY);
     }
 
     public void drawProductionAndConsumption(UIPanelAPI panel) {
@@ -249,7 +242,6 @@ public class AssignWorkersDialog extends DialogPanel {
             final float textY = y + (iconSize - textH) * 0.5f;
             lbl.getPosition().inTL(textX, textY);
 
-            // advance X
             x += sectionWidth + hpad;
         }
         tp.setHeightSoFar(y);
@@ -297,7 +289,6 @@ public class AssignWorkersDialog extends DialogPanel {
             final float textY = y + (iconSize - textH) * 0.5f;
             lbl.getPosition().inTL(textX, textY);
 
-            // advance X
             x += sectionWidth + hpad;
         }
         tp.setHeightSoFar(y);
@@ -327,12 +318,7 @@ public class AssignWorkersDialog extends DialogPanel {
                 update = true;
             }
 
-            final float max = Math.max(0,
-                sliderValue + getNewFreeWorkerRatio()
-            );
-
-            slider.maxValue = Math.min(
-                max,
+            slider.maxValue = Arithmetic.clamp(sliderValue + getNewFreeWorkerRatio(), 0f,
                 IndustryConfigManager.getIndConfig(industry).outputs.get(comID).workerAssignableLimit
             ) * 100;
         }
@@ -347,7 +333,7 @@ public class AssignWorkersDialog extends DialogPanel {
     public void dismiss(int option) {
         super.dismiss(option);
 
-        if (option == 1) reg.setData(data);
+        if (option == 1) WorkerRegistry.instance().setData(data);
 
         market.reapplyConditions();
         LtvIndustryListPanel.refreshPanel();

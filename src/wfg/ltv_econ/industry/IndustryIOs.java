@@ -397,10 +397,8 @@ public class IndustryIOs {
         float scale = 1f;
 
         if (output.usesWorkers && !output.isAbstract) {
-            final WorkerIndustryData data = WorkerRegistry.instance().getData(ind);
-            if (data != null) {
-                scale *= data.getAssignedForOutput(output.comID);
-            }
+            final WorkerIndustryData data = WorkerRegistry.instance().getRegisterData(ind);
+            scale *= data.getAssignedForOutput(output.comID);
         }
 
         if (output.scaleWithMarketSize) scale *= Math.pow(output.marketScaleBase, market.getSize() - 3);

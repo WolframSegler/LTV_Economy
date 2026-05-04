@@ -47,7 +47,7 @@ public class WorkerRegistry implements Serializable {
         if (!IndustryConfigManager.getIndConfig(ind).workerAssignable) return;
 
         final String key = makeKey(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
-        registry.putIfAbsent(key, new WorkerIndustryData(ind.getMarket().getId(), ind));
+        registry.putIfAbsent(key, new WorkerIndustryData(ind.getMarket().getId(), ind.getId()));
     }
 
     public final void register(MarketAPI market) {
@@ -98,9 +98,7 @@ public class WorkerRegistry implements Serializable {
     }
 
     public static final long getWorkerCap(MarketAPI market) {
-        final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
-
-        return pool.getWorkerPool();
+        return WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
     }
 
     public final WorkerIndustryData getData(String marketID, String industryID) {
@@ -113,6 +111,18 @@ public class WorkerRegistry implements Serializable {
 
     public final WorkerIndustryData getData(Industry ind) {
         return getData(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
+    }
+
+    public final WorkerIndustryData getRegisterData(String marketID, String industryID) {
+        return registry.computeIfAbsent(makeKey(marketID, industryID), a -> new WorkerIndustryData(marketID, industryID));
+    }
+
+    public final WorkerIndustryData getRegisterData(String marketID, IndustrySpecAPI ind) {
+        return getRegisterData(marketID, IndustryConfigManager.getBaseIndustryID(ind));
+    }
+
+    public final WorkerIndustryData getRegisterData(Industry ind) {
+        return getRegisterData(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
     }
 
     public final void setData(WorkerIndustryData data) {
@@ -145,13 +155,12 @@ public class WorkerRegistry implements Serializable {
         public transient MarketAPI market;
         public transient Industry ind;
         
-        private final ArrayMap<String, Float> outputRatios;
+        private final ArrayMap<String, Float> outputRatios = new ArrayMap<>(2);
         private float outputRatioSum = 0;
 
-        public WorkerIndustryData(String marketID, Industry industry) {
+        public WorkerIndustryData(String marketID, String industryID) {
             this.marketID = marketID;
-            this.indID = IndustryConfigManager.getBaseIndustryID(industry);
-            this.outputRatios = new ArrayMap<>(2);
+            this.indID = IndustryConfigManager.getBaseIndustryID(industryID);
 
             readResolve();
         }
@@ -163,14 +172,12 @@ public class WorkerRegistry implements Serializable {
             return this;
         }
 
-        /**
-         * Copy Constructor
-         */
+        /** Copy Constructor */
         public WorkerIndustryData(WorkerIndustryData other) {
             this.marketID = other.marketID;
             this.indID = other.indID;
 
-            this.outputRatios = new ArrayMap<>(other.outputRatios);
+            this.outputRatios.putAll(other.outputRatios);
 
             this.outputRatioSum = other.outputRatioSum;
 
@@ -197,17 +204,11 @@ public class WorkerRegistry implements Serializable {
         }
 
         public final long getWorkersAssigned() {
-            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
-
-            return (long) (outputRatioSum * pool.getWorkerPool());
+            return (long) (outputRatioSum * WorkerRegistry.getWorkerCap(market));
         }
 
         public final long getAssignedForOutput(String comID) {
-            if (!outputRatios.containsKey(comID)) return 0;
-
-            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
-
-            return (long) (pool.getWorkerPool() * outputRatios.get(comID));
+            return (long) (WorkerRegistry.getWorkerCap(market) * outputRatios.getOrDefault(comID, 0f));
         }
 
         public final float getAssignedRatioForOutput(String comID) {

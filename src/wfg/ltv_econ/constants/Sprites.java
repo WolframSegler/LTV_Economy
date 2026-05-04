@@ -18,4 +18,8 @@ public class Sprites {
     public static final SpriteAPI WAGES = settings.getSprite("icons", "ratio_chart");
     public static final SpriteAPI STOPWATCH = settings.getSprite("icons", "stopwatch");
     public static final SpriteAPI CHECKLIST = settings.getSprite("icons", "checklist");
+    public static final SpriteAPI LOGISTICS = settings.getSprite("commodity_markers", "imports");
+    public static final SpriteAPI HEALTHCARE = settings.getSprite("icons", "healthcare");
+    public static final SpriteAPI SECURITY = settings.getSprite("simulator", "behavior_defensive");
+    public static final SpriteAPI PUBLIC_INFO = settings.getSprite("icons", "radio_tower");
 }

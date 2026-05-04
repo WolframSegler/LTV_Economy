@@ -22,14 +22,10 @@ public class SubstanceControlPolicy extends MarketPolicy {
     public static final float COHESION_DEBUFF_P2 = -0.01f;
     public static final float CLASS_BUFF_P2 = 0.004f;
 
-    private boolean applied = false;
     private boolean phase2 = false;
     private CommodityCell cell;
 
     public void apply(PlayerMarketData data) {
-        if (applied) return;
-        applied = true;
-
         cell = EconomyEngine.instance().getComCell(Commodities.DRUGS, data.marketID);
         cell.getConsumptionStat().modifyMult(id, DRUGS_MULT_P1, spec.name);
         data.healthDelta.modifyFlat(id, HEALTH_BUFF_P1, spec.name);
