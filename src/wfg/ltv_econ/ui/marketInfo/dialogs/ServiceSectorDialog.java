@@ -264,7 +264,7 @@ public class ServiceSectorDialog extends DialogPanel {
             valueLbl.setAlignment(Alignment.RMID);
             add(valueLbl).inTR(0f, 0f).setSize(50f, iconS);
 
-            add(slider).inTR(50f, (iconS - 16) / 2);
+            add(slider).inTR(50f, ((iconS - 16) / 2) + 1);
 
             final int SECOND_ROW = 45;
 
