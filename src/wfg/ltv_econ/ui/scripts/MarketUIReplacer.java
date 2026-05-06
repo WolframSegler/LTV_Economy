@@ -1,6 +1,7 @@
 package wfg.ltv_econ.ui.scripts;
 
 import static wfg.native_ui.util.Globals.settings;
+import static com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipLocation.BELOW;
 
 import java.util.List;
 
@@ -15,6 +16,8 @@ import wfg.ltv_econ.ui.marketInfo.buttons.IncomeLabel;
 import wfg.ltv_econ.ui.marketInfo.buttons.ManagePopButton;
 import wfg.ltv_econ.ui.marketInfo.buttons.MarketEventsButton;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ComDetailDialog;
+import wfg.ltv_econ.ui.reusable.IdentityMarker;
+import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.util.NativeUiUtils;
@@ -33,9 +36,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.ButtonAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.campaign.ui.MarketConditionsWidget;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
 public class MarketUIReplacer implements EveryFrameScript {
@@ -45,14 +48,10 @@ public class MarketUIReplacer implements EveryFrameScript {
     private static final Class<?> knownClass3 = CommodityPanel.class;
     private static final Class<?> knownClass4 = LtvCommodityPanel.class;
 
-    public static Object marketAPIField = null;
-    public static Object marketField = null;
+    private static Object marketAPIField = null;
+    private static Object marketField = null;
 
-    public static MarketAPI marketAPI = null;
-    public static Market market = null;
-
-    public static Object incomeLblPlugin;
-
+    private static MarketAPI market = null;
     @Override
     public void advance(float amount) {
         final UIPanelAPI masterTab = Attachments.getCurrentTab();
@@ -62,6 +61,15 @@ public class MarketUIReplacer implements EveryFrameScript {
             "getTradePanel", masterTab);
         if (tradePanel == null) return;
 
+        if (marketAPIField == null) {
+            marketAPIField = RolfLectionUtil.getAllFields(tradePanel.getClass())
+                .stream().filter(f -> MarketAPI.class.isAssignableFrom(
+                    RolfLectionUtil.getFieldType(f)
+                )).findFirst().get();
+        }
+        market = (MarketAPI) RolfLectionUtil.getPrivateVariable(marketAPIField, tradePanel);
+        if (!market.isInEconomy()) return;
+
         final List<?> outpostChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, tradePanel);
         final UIPanelAPI overviewPanel = outpostChildren.stream()
@@ -69,6 +77,13 @@ public class MarketUIReplacer implements EveryFrameScript {
             .map(child -> (UIPanelAPI) child)
             .findFirst().orElse(null);
         if (overviewPanel == null) return;
+
+        final UIPanelAPI marketStatsPanel = outpostChildren.stream()
+            .filter(c -> RolfLectionUtil.getAllFields(c.getClass()).stream()
+                .anyMatch(f -> RolfLectionUtil.getFieldType(f).equals(MarketConditionsWidget.class)))
+            .map(child -> (UIPanelAPI) child)
+            .findFirst().orElse(null);
+        if (marketStatsPanel == null) return;
 
         final List<?> overviewChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, overviewPanel);
@@ -78,14 +93,8 @@ public class MarketUIReplacer implements EveryFrameScript {
             .findFirst().orElse(null);
         if (managementPanel == null) return;
 
-        if (marketAPIField == null) {
-            marketAPIField = RolfLectionUtil.getAllFields(managementPanel.getClass())
-                .stream().filter(f -> MarketAPI.class.isAssignableFrom(
-                    RolfLectionUtil.getFieldType(f)
-                )).findFirst().get();
-        }
-        marketAPI = (MarketAPI) RolfLectionUtil.getPrivateVariable(marketAPIField, managementPanel);
-        if (!marketAPI.isInEconomy()) return;
+        if (IdentityMarker.isPresent(managementPanel)) return;
+        IdentityMarker.attach(managementPanel);
 
         final List<?> managementChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
             CustomPanel.getChildrenNonCopyMethod, managementPanel);
@@ -113,6 +122,8 @@ public class MarketUIReplacer implements EveryFrameScript {
         replaceCommodityPanel(managementPanel, managementChildren, anchorChild);
 
         replaceMarketInstanceForPriceControl(masterTab);
+
+        replaceAccessLabelTooltip(marketStatsPanel);
     }
 
     private static final void addManagementButtons(
@@ -129,16 +140,16 @@ public class MarketUIReplacer implements EveryFrameScript {
         useStockpilesBtn.setOpacity(0f);
         useStockpilesBtn.setEnabled(false);
 
-        if (!marketAPI.isPlayerOwned() &&
+        if (!market.isPlayerOwned() &&
             (!DebugFlags.COLONY_DEBUG || DebugFlags.HIDE_COLONY_CONTROLS)
         ) return;
 
         final int buttonWidth = (int) (LtvCommodityPanel.STANDARD_WIDTH / 3f - 4f);
         final int buttonHeight = (int) (buttonWidth / 1.63f);
 
-        final MarketEventsButton eventsBtn = new MarketEventsButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
-        final ColonyStockpilesButton stockpilesBtn = new ColonyStockpilesButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
-        final ManagePopButton popBtn = new ManagePopButton(managementPanel, buttonWidth, buttonHeight, marketAPI);
+        final MarketEventsButton eventsBtn = new MarketEventsButton(managementPanel, buttonWidth, buttonHeight, market);
+        final ColonyStockpilesButton stockpilesBtn = new ColonyStockpilesButton(managementPanel, buttonWidth, buttonHeight, market);
+        final ManagePopButton popBtn = new ManagePopButton(managementPanel, buttonWidth, buttonHeight, market);
 
         final int gap = (LtvCommodityPanel.STANDARD_WIDTH - buttonWidth * 3) / 2;
 
@@ -158,17 +169,7 @@ public class MarketUIReplacer implements EveryFrameScript {
     private static final void replaceMarketCreditsLabel(
         UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
-        if (!DebugFlags.COLONY_DEBUG && !marketAPI.isPlayerOwned()) return;
-
-        final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
-        RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, colonyInfoPanel);
-        for (Object child : children) {
-            if (child instanceof CustomPanelAPI cp && cp.getPlugin() == incomeLblPlugin) {
-                return;
-            }
-        }
-        
+        if (!DebugFlags.COLONY_DEBUG && !market.isPlayerOwned()) return;
         if (!RolfLectionUtil.hasMethodOfName("getIncome", colonyInfoPanel)) return;
         
         final UIPanelAPI incomePanel = (UIPanelAPI) RolfLectionUtil.getMethodAndInvokeDirectly(
@@ -182,8 +183,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         final ButtonAPI hazardBtn = Buttons.get(1);
         incomePanel.removeComponent(creditBtn);
 
-        final IncomeLabel colonyCreditLabel = new IncomeLabel(colonyInfoPanel, 150, 50, marketAPI);
-        incomeLblPlugin = ((CustomPanelAPI)colonyCreditLabel.getPanel()).getPlugin();
+        final IncomeLabel colonyCreditLabel = new IncomeLabel(colonyInfoPanel, 150, 50, market);
 
         final PositionAPI posS = colonyCreditLabel.getPos();
         final PositionAPI posA = hazardBtn.getPosition();
@@ -210,7 +210,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
         final LtvIndustryListPanel replacement = new LtvIndustryListPanel(
             managementPanel, width, height,
-            marketAPI, industryPanel
+            market, industryPanel
         );
 
         managementPanel.addComponent(replacement.getPanel());
@@ -273,7 +273,7 @@ public class MarketUIReplacer implements EveryFrameScript {
         final int height = (int) commodityPanel.getPosition().getHeight();
 
         final LtvCommodityPanel replacement = new LtvCommodityPanel(
-            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, height, marketAPI
+            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, height, market
         );
 
         final ClickHandler<CommodityRowPanel> listener = (source, isLeftClick) -> {
@@ -285,7 +285,7 @@ public class MarketUIReplacer implements EveryFrameScript {
 
             if (UIUtils.canViewPrices()) {
                 final ComDetailDialog dialogPanel = new ComDetailDialog(
-                    marketAPI, marketAPI.getFaction().getFactionSpec(), panel.cell.spec
+                    market, market.getFaction().getFactionSpec(), panel.cell.spec
                 );
                 dialogPanel.show(0.3f, 0.3f);
             }
@@ -322,6 +322,27 @@ public class MarketUIReplacer implements EveryFrameScript {
         if (original instanceof MarketWrapper) return;
 
         RolfLectionUtil.setPrivateVariable(marketField, handler, new MarketWrapper(original));
+    }
+
+    private static final void replaceAccessLabelTooltip(UIPanelAPI statsPanel) {
+        final List<?> statsChilren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
+            CustomPanel.getChildrenNonCopyMethod, statsPanel);
+        final List<ButtonAPI> buttons = statsChilren.stream()
+            .filter(c -> c instanceof ButtonAPI)
+            .map(child -> (ButtonAPI) child)
+            .toList();
+
+        ButtonAPI accessBtn = null;
+        for (ButtonAPI candidate : buttons) {
+            if (accessBtn == null) {
+                accessBtn = candidate;
+            } else if (candidate.getPosition().getX() < accessBtn.getPosition().getX()) {
+                accessBtn = candidate;
+            }
+        }
+        if (accessBtn == null) return;
+
+        UIUtils.getTpForStaticAccess().addTooltipTo(TooltipUtils.createAccessTp(market), accessBtn, BELOW, false);
     }
 
     public boolean isDone() { return !Global.getSector().isPaused(); }

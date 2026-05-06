@@ -12,6 +12,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
@@ -171,6 +172,10 @@ public class UIUtils {
 
     public static final String getDayOrDays(double val, boolean capitalized) {
         return dayOrDays(Math.abs(val - 1d) < 1e-4d, capitalized);
+    }
+
+    public static final TooltipMakerAPI getTpForStaticAccess() {
+        return settings.createCustom(1f, 1f, null).createUIElement(1f, 1f, false);
     }
 
     private static final Color getStockpileColor(final float ratio, final FactionSpecAPI faction,

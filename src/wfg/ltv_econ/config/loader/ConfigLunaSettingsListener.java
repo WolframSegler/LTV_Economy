@@ -6,6 +6,7 @@ import com.fs.starfarer.api.GameState;
 
 import lunalib.lunaSettings.LunaSettingsListener;
 import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.constants.Mods;
 import wfg.ltv_econ.economy.planning.IndustryGrouper;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -14,6 +15,8 @@ import wfg.ltv_econ.serializable.LtvEconSaveData;
 public class ConfigLunaSettingsListener implements LunaSettingsListener {
     @Override
     public void settingsChanged(String modID) {
+        if (!Mods.LTV_ECON.equals(modID)) return;
+        
         // LOAD CONFIGS
         EconomyConfigLoader.loadFromLunaSettings();
         LaborConfigLoader.loadFromLunaSettings();

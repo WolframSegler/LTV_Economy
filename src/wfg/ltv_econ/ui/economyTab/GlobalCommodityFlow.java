@@ -40,7 +40,6 @@ import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
 
 public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
-    private static final List<FactionAPI> factionList = Global.getSector().getAllFactions();
     private static final float PIE_CHART_THRESHOLD = 0.001f;
 
     public static final int ICON_SIZE = 135;
@@ -65,6 +64,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final EconomyEngine engine = EconomyEngine.instance();
         final CommoditySpecAPI com = CommoditySelectionPanel.selectedCom;
         final String comID = com.getId();
+        final List<FactionAPI> factionList = sector.getAllFactions();
         final CommodityDomain dom = engine.getComDomain(comID);
 
         clearChildren();
@@ -630,18 +630,18 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             );
 
             for (PieSlice slice : data) {
-            String label = (slice.color == UIColors.INFORMAL_SECTOR)
-                ? "Informal Sector"
-                : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
+                String label = (slice.color == UIColors.INFORMAL_SECTOR)
+                    ? "Informal Sector"
+                    : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
 
-            tp.addRow(new Object[] {
-                slice.color,
-                label,
-                highlight,
-                (int) (slice.fraction * 100) + "%"
-            });
-        }
-        tp.addTable("", 0, opad);
+                tp.addRow(new Object[] {
+                    slice.color,
+                    label,
+                    highlight,
+                    (int) (slice.fraction * 100) + "%"
+                });
+            }
+            tp.addTable("", 0, opad);
         };
 
         final LabelAPI label = settings.createLabel("Import share", Fonts.ORBITRON_16);

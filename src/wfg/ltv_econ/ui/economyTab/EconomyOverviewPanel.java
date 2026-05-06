@@ -55,7 +55,16 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef("Settings", Keyboard.KEY_S,
+        defs.add(new NavButtonDef("Population", Keyboard.KEY_A,
+            () -> {
+                final SectorPopulationPanel content = new SectorPopulationPanel(
+                    contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                );
+                contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+            }
+        ));
+
+        defs.add(new NavButtonDef("Debug", Keyboard.KEY_S,
             () -> {
                 final EconomySettingsPanel content = new EconomySettingsPanel(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H

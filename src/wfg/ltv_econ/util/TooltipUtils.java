@@ -10,12 +10,14 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -25,9 +27,12 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.StatModValueGetter;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator;
 import com.fs.starfarer.api.util.CountingMap;
 import com.fs.starfarer.api.util.Misc;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -41,10 +46,11 @@ import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
 
 public class TooltipUtils {
-    public static final String TP_ARROW = settings.getSpriteName("ui", "cargoTooltipArrow");
-
+    private static final String TP_ARROW = settings.getSpriteName("ui", "cargoTooltipArrow");
     private static final int GRID_W = 430;
     private static final int VALUE_W = 50;
+
+    private static TooltipCreator ACCESS_TP = null;
 
     /**
      * Literally copied this from com.fs.starfarer.ui.impl.CargoTooltipFactory.
@@ -540,6 +546,60 @@ public class TooltipUtils {
         } else {
             tp.addPara("No local demand or stockpiles full.", opad);
         }
+    }
+
+    public static final TooltipCreator createAccessTp(MarketAPI market) {
+        if (ACCESS_TP == null) ACCESS_TP = new TooltipCreator() {
+        public boolean isTooltipExpandable(Object args) {
+            return false;
+        }
+
+        public float getTooltipWidth(Object args) {
+            return 450f;
+        }
+
+        @Override
+        public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object args) {
+            final StatBonus accessMod = market.getAccessibilityMod();
+            final FactionAPI faction = market.getFaction();
+            final Color facBase = faction.getBaseUIColor();
+
+            tp.addTitle("Accessibility", facBase);
+            final int access = Math.round(accessMod.computeEffective(0f) * 100f);
+
+            tp.addPara("A colony with high accessibility is able to import and export earlier in the trade cycle, and can in turn claim a greater market share for commodities it exports.", opad);
+            tp.addPara("Accessibility: %s", opad, access <= 0 ? negative : highlight, access + "%");
+            tp.addStatModGrid(getTooltipWidth(null), 50f, opad, pad, accessMod, new StatModValueGetter(){
+
+                public String getPercentValue(StatMod mod) {return null;}
+                public String getMultValue(StatMod mod) {return null;}
+
+                public Color getModColor(StatMod mod) {
+                    if (mod.value < 0f) return negative;
+                    return null;
+                }
+
+                public String getFlatValue(StatMod mod) {
+                    return (mod.value >= 0f ? "+" : "") + Math.round(mod.value * 100f) + "%";
+                }
+            });
+
+            tp.addSectionHeading("Trade Cycle", facBase, faction.getDarkUIColor(), Alignment.MID, opad);
+            tp.addPara("Trade fleets are dispatched every %s days. The %s tab shows data from the most recent trade cycle.", opad,
+                new Color[] {highlight, base}, Integer.toString(EconConfig.TRADE_INTERVAL), "Economy"
+            );
+
+            tp.addPara("Trade fleets first consume fuel from colony stockpiles; if stockpiles are empty, they purchase fuel from independent merchants at %s the base cost.",
+                opad, highlight, Strings.X + Float.toString(EconConfig.FORCED_FUEL_IMPORT_COST_MULT)
+            );
+
+            tp.addPara("Should the controlling faction lack sufficient ships, independent captains are hired instead and charge an additional fee on top of fuel costs. There are currently %s active trade missions.",
+                pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getActiveMissions().size())
+            );
+        }
+        };
+
+        return ACCESS_TP;
     }
 
     // PRIVATE METHODS

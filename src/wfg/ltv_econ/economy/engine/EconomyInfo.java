@@ -431,6 +431,16 @@ public class EconomyInfo {
         return total;
     }
 
+    public static final long getFactionWorkerCount(String factionID) {
+        long total = 0;
+        for (MarketAPI market : getMarketsCopy()) {
+            if (market.getFactionId().equals(factionID)) {
+                total += WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+            }
+        }
+        return total;
+    }
+
     public final long getGlobalDemand(String comID) {
         double total = 0;
 
@@ -733,5 +743,27 @@ public class EconomyInfo {
 
     public static final int getMarketsCount() {
         return Global.getSector().getEconomy().getNumMarkets();
+    }
+
+    public static final long getGlobalPopulationCount() {
+        long total = 0l;
+
+        for (MarketAPI market : getMarketsCopy()) {
+            total += Math.pow(10, market.getSize());
+        }
+
+        return total;
+    }
+
+    public static final long getFactionPopulationCount(String factionID) {
+        long total = 0l;
+
+        for (MarketAPI market : getMarketsCopy()) {
+            if (market.getFactionId().equals(factionID)) {
+                total += Math.pow(10, market.getSize());
+            }
+        }
+
+        return total;
     }
 }

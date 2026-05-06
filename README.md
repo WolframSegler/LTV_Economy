@@ -38,9 +38,11 @@ Due to the intrusive nature of the mod, anything that modifies the Colony Info P
 
 Lukas04 -  for providing the access pattern to UI Panels inside the colony detail screen.
 
-SirHartley - for helping with IndustryOptionProvider
+SirHartley - for helping with IndustryOptionProvider.
 
-rolfosian - for providing the [reflection library](https://github.com/rolfosian/RolflectionLib-SS)
+rolfosian - for providing the [reflection library](https://github.com/rolfosian/RolflectionLib-SS).
+
+Kaysaar - for advice on UI design, creative direction and reflection help.
 
 <br>
 
