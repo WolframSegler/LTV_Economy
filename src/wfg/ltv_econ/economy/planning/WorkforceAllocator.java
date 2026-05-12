@@ -389,7 +389,7 @@ public class WorkforceAllocator {
             }
 
             final SimplexSolver solver = new SimplexSolver(
-                1e-2, 30, 1e-5
+                1e-3d, 30, 1e-6d
             );
             vars = solver.optimize(
                 new MaxIter(50000), objFunc,

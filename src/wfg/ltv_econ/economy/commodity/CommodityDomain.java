@@ -278,8 +278,8 @@ public class CommodityDomain implements Serializable {
                 expCell.market, impCell.market, amountToSend, credits, sameFaction
             ));
 
-            registry.getLedger(expCell.marketID).add(TRADE_EXPORT_KEY + comID, credits, getDesc(TRADE_EXPORT_KEY) + spec.getName());
-            registry.getLedger(impCell.marketID).add(TRADE_IMPORT_KEY + comID, -credits, getDesc(TRADE_IMPORT_KEY) + spec.getName());
+            registry.getLedger(expCell.marketID).add(TRADE_EXPORT_KEY + comID, credits, String.format(getDesc(TRADE_EXPORT_KEY), spec.getName()));
+            registry.getLedger(impCell.marketID).add(TRADE_IMPORT_KEY + comID, -credits, String.format(getDesc(TRADE_IMPORT_KEY), spec.getName()));
         }
 
         tradeVolumeHistory[historyIndex] += tradeVolume;
@@ -327,7 +327,7 @@ public class CommodityDomain implements Serializable {
             tradeVolume += amount;
             tradeCreditActivity += price;
             
-            registry.getLedger(exporter.marketID).add(TRADE_EXPORT_KEY + comID, price, getDesc(TRADE_EXPORT_KEY) + spec.getName());
+            registry.getLedger(exporter.marketID).add(TRADE_EXPORT_KEY + comID, price, String.format(getDesc(TRADE_EXPORT_KEY), spec.getName()));
         }
 
         if (sumImportable < 1f) return;
@@ -344,7 +344,7 @@ public class CommodityDomain implements Serializable {
             importer.informalImports += amount;
             tradeCreditActivity += price;
             
-            registry.getLedger(importer.marketID).add(TRADE_IMPORT_KEY + comID, -price, getDesc(TRADE_IMPORT_KEY) + spec.getName());
+            registry.getLedger(importer.marketID).add(TRADE_IMPORT_KEY + comID, -price, String.format(getDesc(TRADE_IMPORT_KEY), spec.getName()));
         }
 
         tradeVolumeHistory[historyIndex] += tradeVolume;

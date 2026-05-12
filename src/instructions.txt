@@ -1,5 +1,3 @@
-DO NOT INCLUDE THIS FILE IN RELEASE
-
 This project uses maven.
 
 Compile the main project. Navigate to Ltv_Economy and run:
@@ -16,6 +14,3 @@ Extra Instructions:
   -> select s from java.lang.String s where s.toString().contains("target_string")
 
 - Add the prefix "Ltv" to classes who also have a vanilla counterpart. Like BaseIndustry and LtvBaseIndustry
-
-- Standard porter message for AI agent:
-  -> Create me a porter message with all the relevant info about what we were working on and the overall project. This chat is getting slow. Paragraph format.

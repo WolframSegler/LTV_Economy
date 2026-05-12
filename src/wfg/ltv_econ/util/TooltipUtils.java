@@ -50,8 +50,6 @@ public class TooltipUtils {
     private static final int GRID_W = 430;
     private static final int VALUE_W = 50;
 
-    private static TooltipCreator ACCESS_TP = null;
-
     /**
      * Literally copied this from com.fs.starfarer.ui.impl.CargoTooltipFactory.
      * Only modified the parts that concern me. All hail Alex, the Lion of Sindria.
@@ -549,7 +547,7 @@ public class TooltipUtils {
     }
 
     public static final TooltipCreator createAccessTp(MarketAPI market) {
-        if (ACCESS_TP == null) ACCESS_TP = new TooltipCreator() {
+        return new TooltipCreator() {
         public boolean isTooltipExpandable(Object args) {
             return false;
         }
@@ -598,8 +596,6 @@ public class TooltipUtils {
             );
         }
         };
-
-        return ACCESS_TP;
     }
 
     // PRIVATE METHODS

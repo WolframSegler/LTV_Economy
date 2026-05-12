@@ -25,7 +25,6 @@ public abstract class MarketEvent {
     }
 
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
-        tp.setTitleSmallOrbitron();
         tp.addTitle(spec.name, base);
         
         tp.addPara(spec.description, pad);

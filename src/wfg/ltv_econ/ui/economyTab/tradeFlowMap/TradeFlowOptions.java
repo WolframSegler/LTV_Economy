@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.economyTab.tradeFlowMap;
 
-import static wfg.native_ui.util.UIConstants.opad;
+import static wfg.native_ui.util.UIConstants.pad;
 
 import org.lwjgl.input.Keyboard;
 
@@ -20,7 +20,7 @@ public class TradeFlowOptions extends CustomPanel {
         super(parent, width, height);
 
         final CommoditySelectionPanel options = new CommoditySelectionPanel(
-            m_panel, (int) pos.getWidth(), (int) pos.getHeight() - FILTERS_BTN_H - opad, content
+            m_panel, (int) pos.getWidth(), (int) pos.getHeight() - FILTERS_BTN_H - pad, content
         );
         add(options.getPanel()).inBL(0f, 0f);
 

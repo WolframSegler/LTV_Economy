@@ -20,6 +20,7 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
+import wfg.ltv_econ.constants.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -716,7 +717,7 @@ public class EconomyInfo {
         final MutableStat upkeep = new MutableStat(ind.getSpec().getUpkeep());
         upkeep.modifyMult("market_size", ind.getMarket().getSize() - 2);
 		upkeep.modifyMultAlways(
-            "ind_hazard", ind.getMarket().getUpkeepMult().getModifiedValue(), "Market upkeep multiplier"
+            "ind_hazard", ind.getMarket().getUpkeepMult().getModifiedValue(), LocalizedStrings.str("marketUpkeepMultTxt")
         );
 
         return upkeep;

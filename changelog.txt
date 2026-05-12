@@ -1,6 +1,8 @@
 v0.3.4-beta | SAVE COMPATIBLE
+- Switched to WrapUI v0.4.1 for this update. Version 0.4.0 will not work.
 - Added a population info panel to the economy tab.
-- Modified the access tooltip the colony screen.
+- Modified the access tooltip inside the colony screen.
+- Fixed UI issues that arise from using non-default UI scales.
 
 v0.3.3-beta | SAVE COMPATIBLE
 - Fixed bug where summary bar inside faction ship orders and production queue wouldn't update after ship removal.

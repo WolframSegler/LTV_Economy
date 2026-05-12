@@ -49,6 +49,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         }
     }
 
+    // TODO continue string externalization from here
     @Override
     protected String getStartingActionText(RouteSegment segment) {
         if (getMission().src == null) return super.getStartingActionText(segment);

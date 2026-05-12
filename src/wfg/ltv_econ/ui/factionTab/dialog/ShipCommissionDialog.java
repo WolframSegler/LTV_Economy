@@ -5,9 +5,6 @@ import static wfg.ltv_econ.constants.Sprites.STOPWATCH;
 import static wfg.ltv_econ.constants.Sprites.WAGES;
 import static wfg.native_ui.util.UIConstants.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -49,7 +46,7 @@ public class ShipCommissionDialog extends DockPanel {
     private final PlannedOrdersPanel content;
 
     public ShipCommissionDialog(PlannedOrdersPanel content) {
-        super(450, screenH - 200, Side.LEFT);
+        super(450, screenH - 200, Side.LEFT, 8);
         this.content = content;
         buildUI();
     }
@@ -61,19 +58,18 @@ public class ShipCommissionDialog extends DockPanel {
         final FactionShipInventory inv = StaticData.inv;
 
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
-        final List<String> knownHulls = new ArrayList<>(faction.getKnownShips());
 
-        final int width = (int) pos.getWidth() - hpad*3;
+        final int width = (int) contentContainer.getPosition().getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
 
-        float yCoord = opad;
-        for (String hullId : knownHulls) {
+        float yCoord = 0f;
+        for (String hullId : faction.getKnownShips()) {
             final HullRow row = new HullRow(container, width, ROW_H, settings.getHullSpec(hullId));
-            container.addCustom(row.getPanel(), 0f).getPosition().inTL(hpad, yCoord);
+            container.addCustom(row.getPanel(), 0f).getPosition().inTL(0f, yCoord);
             yCoord += ROW_H + pad;
         }
         container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, getPos().getHeight() - hpad*4, true, m_panel).inTL(0f, opad + hpad);
+        ComponentFactory.addTooltip(container, contentContainer.getPosition().getHeight() - hpad*4, true, contentContainer).inTL(0f, hpad);
     }
 
     private final void addOrder(String hullId, int count) {

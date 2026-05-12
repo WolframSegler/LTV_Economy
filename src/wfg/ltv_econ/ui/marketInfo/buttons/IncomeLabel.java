@@ -33,6 +33,7 @@ import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.util.NumFormat;
 
 import static wfg.ltv_econ.constants.strings.Income.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements HasTooltip, UIBuildableAPI {
@@ -235,7 +236,7 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
 
             final long policyCost = ledger.getLastMonth(POLICY_COST_KEY);
             if (policyCost > 0l) {
-                tp.addPara(getDesc(POLICY_COST_KEY) + ": %s", pad, negative, Misc.getDGSCredits(policyCost));
+                tp.addPara(getDesc(POLICY_COST_KEY), pad, negative, Misc.getDGSCredits(policyCost));
             }
 
             final int incentive = (int) ledger.getLastMonth(COLONY_HAZARD_PAY_KEY);
@@ -243,7 +244,7 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
                 tp.addPara(getDesc(COLONY_HAZARD_PAY_KEY) + ": %s", pad, negative, Misc.getDGSCredits(incentive));
             }
 
-            tp.addPara(REDISTRIBUTION_DISCLAIMER, gray, opad);
+            tp.addPara(str("REDISTRIBUTION_DISCLAIMER"), gray, opad);
         };
     
         setShortcut(Keyboard.KEY_1);

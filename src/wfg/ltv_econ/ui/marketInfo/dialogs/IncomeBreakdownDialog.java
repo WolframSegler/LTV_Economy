@@ -1,6 +1,7 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.ltv_econ.constants.strings.Income.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
 
@@ -40,9 +41,8 @@ import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class IncomeBreakdownDialog extends DockPanel {
-    private static final int WIDTH = 440;
+    private static final int WIDTH = 420;
     private static final int GAP = 100;
-    private static final int I_WIDTH = WIDTH - hpad * 3;
 
     private final MarketAPI market;
     private boolean lastMonth = true;
@@ -50,7 +50,7 @@ public class IncomeBreakdownDialog extends DockPanel {
     private float scrollLen = 0f;
 
     public IncomeBreakdownDialog(final MarketAPI market) {
-        super(Attachments.getCoreUI(), WIDTH, screenH - GAP * 2, Side.LEFT);
+        super(Attachments.getCoreUI(), WIDTH, screenH - GAP * 2, Side.LEFT, 8);
         this.market = market;
 
         offsetY = GAP;
@@ -63,11 +63,11 @@ public class IncomeBreakdownDialog extends DockPanel {
     public void buildUI() {
         clearChildren();
         final LabelAPI title = settings.createLabel("Income Breakdown", Fonts.INSIGNIA_LARGE);
-        add(title).inTL(opad, opad * 2);
+        add(title).inTL(0f, opad);
 
-        final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(I_WIDTH, true);
+        final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(WIDTH, true);
 
-        final RadioPanel monthSwitch = new RadioPanel(m_panel, 110, 18, LayoutMode.HORIZONTAL)
+        final RadioPanel monthSwitch = new RadioPanel(contentContainer, 110, 18, LayoutMode.HORIZONTAL)
             .addOption("Prev.", lastMonth)
             .addOption("Curr.", !lastMonth);
         monthSwitch.optionSelected = code -> {
@@ -76,16 +76,16 @@ public class IncomeBreakdownDialog extends DockPanel {
             buildUI();
         };
         monthSwitch.buildUI();
-        add(monthSwitch).inTR(opad*2, opad*2);
+        add(monthSwitch).inTR(opad, opad);
 
-        final Button rawToggle = new Button(m_panel, 60, 18, "raw", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button rawToggle = new Button(contentContainer, 60, 18, "raw", Fonts.DEFAULT_SMALL, (btn) -> {
             scrollLen = 0f;
             raw = !raw;
             buildUI();
         });
         rawToggle.cutStyle = CutStyle.ALL;
         rawToggle.setEnabled(DebugFlags.COLONY_DEBUG);
-        if (!rawToggle.getEnabled()) {
+        if (!rawToggle.isEnabled()) {
             rawToggle.setShowTooltipWhileInactive(true);
             rawToggle.tooltip.width = 100f;
             rawToggle.tooltip.builder = (tp, expanded) -> {
@@ -95,13 +95,13 @@ public class IncomeBreakdownDialog extends DockPanel {
                 NativeUiUtils.anchorPanel(tp, rawToggle.getPanel(), AnchorType.LeftMid, opad);
             };
         }
-        add(rawToggle).inTR(opad*3 + 110, opad*2 + pad);
+        add(rawToggle).inTR(opad*2 + 110, opad + pad);
 
         incomeBreakdownUI(scrollPanel);
 
-        final int offset = opad * 2 + 30;
-        final float scrollPanelH = pos.getHeight() - offset - opad;
-        ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, m_panel).inTL(pad, offset);
+        final int offset = opad + 30;
+        final float scrollPanelH = contentContainer.getPosition().getHeight() - offset - opad;
+        ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, contentContainer).inTL(0f, offset);
 
         scrollPanel.getExternalScroller().setYOffset(Arithmetic.clamp(
             scrollLen, 0f, scrollPanel.getHeightSoFar() - scrollPanelH
@@ -213,13 +213,13 @@ public class IncomeBreakdownDialog extends DockPanel {
         tp.addPara("Income multiplier: %s", opad, highlight,
             Math.round(market.getIncomeMult().getModifiedValue() * 100f) + "%"
         );
-        tp.addStatModGrid(I_WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null);
+        tp.addStatModGrid(WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null);
 
         tp.addPara("Upkeep multiplier: %s", opad, highlight,
             Math.round(market.getUpkeepMult().getModifiedValue() * 100f) + "%"
         );
         tp.addStatModGrid(
-            I_WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null
+            WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null
         );
 
         tp.addPara("These modifiers affect industry income & upkeep only.", gray, opad);
@@ -319,7 +319,7 @@ public class IncomeBreakdownDialog extends DockPanel {
             tp.addPara(desc + ": %s", opad, value < 0l ? negative : highlight, NumFormat.formatCreditAbs(value));
         }
 
-        tp.addPara(REDISTRIBUTION_DISCLAIMER, gray, opad);
+        tp.addPara(str("REDISTRIBUTION_DISCLAIMER"), gray, opad);
         }
     }
 }

@@ -5,6 +5,7 @@ import static wfg.native_ui.util.Globals.settings;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -35,7 +36,7 @@ public class MarketEventsDialog extends DockPanel {
     private final PlayerMarketData data;
 
     public MarketEventsDialog(final MarketAPI market) {
-        super(Attachments.getCoreUI(), 400, screenH - 200, Side.LEFT);
+        super(Attachments.getCoreUI(), 400, screenH - 200, Side.LEFT, 8);
         data = EconomyEngine.instance().getPlayerMarketData(market.getId());
 
         offsetY = 100f;
@@ -46,19 +47,19 @@ public class MarketEventsDialog extends DockPanel {
 
     @Override
     public void buildUI() {
-        final int width = (int) (pos.getWidth() - opad*2);
+        final int width = (int) contentContainer.getPosition().getWidth();
 
         final LabelAPI title = settings.createLabel("Current Events", Fonts.INSIGNIA_LARGE);
-        add(title).inTL(opad, opad*2);
+        add(title).inTL(0f, opad);
 
         final TooltipMakerAPI eventsList = ComponentFactory.createTooltip(width, true);
 
-        float yCoord = pad;
+        float yCoord = 0f;
         for (MarketEvent event : data.getEvents()) {
-            if (!event.isVisible(data)) return;
+            if (!event.isVisible(data) && !DebugFlags.COLONY_DEBUG) return;
 
             final RowPanel row = new RowPanel(
-                eventsList, width - opad, ROW_H, event
+                eventsList, width - pad*2, ROW_H, event
             );
             eventsList.addCustom(row.getPanel(), 0).getPosition().inTL(pad, yCoord);
 
@@ -66,8 +67,8 @@ public class MarketEventsDialog extends DockPanel {
         }
 
         eventsList.setHeightSoFar(yCoord);
-        final int offset = opad*2 + 30;
-        ComponentFactory.addTooltip(eventsList, pos.getHeight() - offset - opad, true, m_panel).inTL(opad, offset);
+        final float scrollPanelH = contentContainer.getPosition().getHeight() - 30 - opad*2;
+        ComponentFactory.addTooltip(eventsList, scrollPanelH, true, contentContainer).inBL(0f, 0f);
     }
 
     public class RowPanel extends CustomPanel implements HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground {
@@ -110,7 +111,7 @@ public class MarketEventsDialog extends DockPanel {
             );
             RowPanel.this.add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
 
-            final LabelAPI comNameLabel = settings.createLabel(event.spec.name, Fonts.ORBITRON_16);
+            final LabelAPI comNameLabel = settings.createLabel(event.spec.name, Fonts.INSIGNIA_LARGE);
             comNameLabel.setColor(event.spec.tags.contains("negative") ? negative : base);
             final float labelW = comNameLabel.computeTextHeight(event.spec.name);
             RowPanel.this.add(comNameLabel).inBL(iconSize + opad, (ROW_H - labelW) / 2f);

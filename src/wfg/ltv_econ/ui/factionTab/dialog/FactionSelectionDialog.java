@@ -48,21 +48,21 @@ public class FactionSelectionDialog extends DockPanel {
     public void buildUI() {
         clearChildren();
 
-        final int width = (int) pos.getWidth();
+        final int width = (int) contentContainer.getPosition().getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
         final List<FactionSpecAPI> factions = new ArrayList<>(EconomyConstants.visibleFactions);
         factions.add(settings.getFactionSpec(Factions.PLAYER));
 
-        float yCoord = opad + 1;
+        float yCoord = 0f;
         for (FactionSpecAPI faction : factions) {
             final DebugFactionRow row = new DebugFactionRow(
-                container, width - hpad * 2, ROW_H, faction, this::onFactionSelected
+                container, width, ROW_H, faction, this::onFactionSelected
             );
-            container.addCustom(row.getPanel(), 0f).getPosition().inTL(hpad, yCoord);
+            container.addCustom(row.getPanel(), 0f).getPosition().inTL(0f, yCoord);
             yCoord += ROW_H + pad;
         }
         container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, getPos().getHeight(), true, m_panel).inTL(0f, 0f);
+        ComponentFactory.addTooltip(container, contentContainer.getPosition().getHeight(), true, contentContainer).inTL(0f, 0f);
     }
 
     private void onFactionSelected(FactionSpecAPI faction) {

@@ -16,10 +16,11 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.NumFormat;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
-    public static final String ConditionID = "worker_pool";
+    private static final String ConditionID = "worker_pool";
 
     private long workerPool = 0;
     private float freeWorkerRatio = 1f;
@@ -95,15 +96,13 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     @Override
     protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
-        tooltip.addPara(
-            "Smaller colonies have mostly workers, while larger colonies house more families and independent residents, limiting the labor controlled by the government.", opad
-        );
+        tooltip.addPara(str("workerPoolConditionDesc"), opad);
 
-        tooltip.addPara("Total Workers: %s", opad, highlight,
+        tooltip.addPara(str("localWorkersWithValue"), opad, highlight,
             NumFormat.engNotate(getWorkerPool())
         );
         tooltip.addPara(
-            "Unemployed Workers: %s (%s%%)", opad, highlight,
+            str("unemployedWorkersWithValue"), opad, highlight,
             NumFormat.engNotate(freeWorkerRatio * getWorkerPool()),
             String.format("%.1f", freeWorkerRatio * 100)
         );

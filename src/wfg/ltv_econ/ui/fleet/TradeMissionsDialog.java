@@ -25,9 +25,8 @@ import wfg.native_ui.ui.widget.RadioPanel;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 
 public class TradeMissionsDialog extends DockPanel {
-    private static final int WIDTH = 440;
+    private static final int WIDTH = 420;
     private static final int GAP = 100;
-    private static final int I_WIDTH = WIDTH - hpad * 3;
     private static final int ROW_H = 200;
 
     private final MarketAPI market;
@@ -36,7 +35,7 @@ public class TradeMissionsDialog extends DockPanel {
     private float scrollLen = 0f;
 
     public TradeMissionsDialog(MarketAPI market, boolean marketRelevantOnly) {
-        super(Attachments.getCoreUI(), WIDTH, screenH - GAP * 2, Side.LEFT);
+        super(Attachments.getCoreUI(), WIDTH, screenH - GAP * 2, Side.LEFT, 8);
 
         this.market = market;
         this.marketRelevantOnly = marketRelevantOnly;
@@ -48,14 +47,14 @@ public class TradeMissionsDialog extends DockPanel {
     public void buildUI() {
         clearChildren();
         final LabelAPI title = settings.createLabel("Trade Missions", Fonts.INSIGNIA_LARGE);
-        add(title).inTL(opad, opad * 2);
+        add(title).inTL(0f, opad);
 
         EconomyEngine engine = EconomyEngine.instance();
         final List<TradeMission> missions = activeMissions ? engine.getActiveMissions() : engine.getPastMissions();
 
-        final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(I_WIDTH, true);
+        final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(WIDTH, true);
 
-        final RadioPanel monthSwitch = new RadioPanel(m_panel, 110, 18, LayoutMode.HORIZONTAL)
+        final RadioPanel monthSwitch = new RadioPanel(contentContainer, 110, 18, LayoutMode.HORIZONTAL)
             .addOption("Active", activeMissions)
             .addOption("Past", !activeMissions);
         monthSwitch.optionSelected = code -> {
@@ -64,15 +63,15 @@ public class TradeMissionsDialog extends DockPanel {
             buildUI();
         };
         monthSwitch.buildUI();
-        add(monthSwitch).inTR(opad*2, opad*2);
+        add(monthSwitch).inTR(opad, opad);
 
-        final DockButton<FiltersDialog> filterBtn = new DockButton<>(m_panel, 90, 18, "Filters",
+        final DockButton<FiltersDialog> filterBtn = new DockButton<>(contentContainer, 90, 18, "Filters",
             Fonts.DEFAULT_SMALL, () -> new FiltersDialog(this)
         );
         filterBtn.cutStyle = CutStyle.ALL;
         filterBtn.bgAlpha = 1f;
         filterBtn.setShortcutAndAppendToText(Keyboard.KEY_Q);
-        add(filterBtn).inTR(opad*2 + 110 + hpad, opad*2 + pad);
+        add(filterBtn).inTR(opad + 110 + hpad, opad + pad);
 
         float yCoord = pad;
         for (TradeMission m : missions) {
@@ -88,10 +87,10 @@ public class TradeMissionsDialog extends DockPanel {
 
             final boolean isSrcMarket = market != null && market == m.src;
             final TradeMissionWidget row = new TradeMissionWidget(
-                scrollPanel, I_WIDTH - opad, ROW_H - opad, m, isSrcMarket, this
+                scrollPanel, WIDTH - pad*3, ROW_H - opad, m, isSrcMarket, this
             );
 
-            scrollPanel.addCustom(row.getPanel(), 0).getPosition().inTL(hpad, yCoord);
+            scrollPanel.addCustom(row.getPanel(), 0).getPosition().inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }
@@ -104,10 +103,10 @@ public class TradeMissionsDialog extends DockPanel {
             add(lbl).inMid();
         }
 
-        final int offset = opad * 2 + 30;
+        final int offset = opad + 30;
         scrollPanel.setHeightSoFar(yCoord);
-        final float scrollPanelH = pos.getHeight() - offset - opad;
-        ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, m_panel).inTL(pad, offset);
+        final float scrollPanelH = contentContainer.getPosition().getHeight() - offset - opad;
+        ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, contentContainer).inTL(0f, offset);
 
         scrollPanel.getExternalScroller().setYOffset(Arithmetic.clamp(
             scrollLen, 0f, scrollPanel.getHeightSoFar() - scrollPanelH

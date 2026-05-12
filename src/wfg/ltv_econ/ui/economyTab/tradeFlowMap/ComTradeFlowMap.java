@@ -253,7 +253,7 @@ public class ComTradeFlowMap extends CustomPanel implements
         final float h = pos.getHeight();
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor((int) x, (int) y, (int) w, (int) h);
+        GL11.glScissor((int) (x * uiScale), (int) (y * uiScale), (int) (w * uiScale), (int) (h * uiScale));
 
         RenderUtils.drawQuad(x, y, w, h, Color.BLACK, alpha, false);
     }
@@ -443,8 +443,8 @@ public class ComTradeFlowMap extends CustomPanel implements
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
 
-        final int mx = Mouse.getX();
-        final int my = Mouse.getY();
+        final int mx = Math.round(Mouse.getX() / uiScale);
+        final int my = Math.round(Mouse.getY() / uiScale);
 
         for (PathData data : flowData) {
             final Vector2f aLocal = project(data.source.getLocation());
@@ -520,8 +520,8 @@ public class ComTradeFlowMap extends CustomPanel implements
         final float glow = 0.5f + 0.5f * (float)Math.sin(time * freq);
         final float overlaySizeMult = 1f + (float)Math.sin(time * freq) * 0.3f;
 
-        final int mx = Mouse.getX();
-        final int my = Mouse.getY();
+        final int mx = Math.round(Mouse.getX() / uiScale);
+        final int my = Math.round(Mouse.getY() / uiScale);
 
         for (SystemData data : systemData.values()) {
             final Vector2f sysPos = project(data.system.getLocation());
@@ -563,8 +563,8 @@ public class ComTradeFlowMap extends CustomPanel implements
     }
 
     private final void renderShips(float alpha) {
-        final int mx = Mouse.getX();
-        final int my = Mouse.getY();
+        final int mx = Math.round(Mouse.getX() / uiScale);
+        final int my = Math.round(Mouse.getY() / uiScale);
 
         final String comID = CommoditySelectionPanel.selectedCom.getId();
         for (TradeMission m : missions) {

@@ -1,10 +1,12 @@
 package wfg.ltv_econ.constants.strings;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 public class Consumption {
     public static final String FACTION_FLEET_MAINTENANCE_KEY = "ffmk";
-    public static final String FACTION_FLEET_MAINTENANCE_DESC = "Maintenance of faction ships";
+    public static final String FACTION_FLEET_MAINTENANCE_DESC = str("FACTION_FLEET_MAINTENANCE_DESC");
     public static final String ORDERS_DEMAND_KEY = "odk";
-    public static final String ORDERS_DEMAND_DESC = "Production of faction ships";
+    public static final String ORDERS_DEMAND_DESC = str("ORDERS_DEMAND_DESC");
 
     public static final String getDesc(String key) {
         switch (key) {

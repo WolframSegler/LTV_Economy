@@ -46,10 +46,11 @@ import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
-import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.EconomyConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constants.strings.Income.*;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -314,12 +315,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         final CommodityCell orgCell = getComCell(Commodities.ORGANICS, marketID);
         
         if (domCell.getStoredAvailabilityRatio() > 0.9) { // 90% or more
-            market.getStability().modifyFlat(popID + 0, 1, "Domestic goods demand met");
+            market.getStability().modifyFlat(popID + 0, 1, str("domesticDemandMetTxt"));
         } else market.getStability().unmodifyFlat(popID + 0);
 
         final int luxuryThreshold = 3;
         if (luxCell.getStoredAvailabilityRatio() > 0.9 && market.getSize() > luxuryThreshold) {
-            market.getStability().modifyFlat(popID + 1, 1, "Luxury goods demand met");
+            market.getStability().modifyFlat(popID + 1, 1, str("luxuryDemandMetTxt"));
         } else market.getStability().unmodifyFlat(popID + 1);
 
         final boolean useOrganicsValues = foodCell.getStoredAvailabilityRatio() >
@@ -356,7 +357,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         financeReg.endMonth();
         
         final FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
-        marketsNode.name = "Colonies";
+        marketsNode.name = str("coloniesTitle");
         marketsNode.custom = MonthlyReport.OUTPOSTS;
         marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
 
@@ -373,7 +374,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
             // Industries & structures
             final FDNode indNode = report.getNode(mNode, "industries"); 
-            indNode.name = "Industries & Structures";
+            indNode.name = str("industriesTitle");
             indNode.custom = MonthlyReport.INDUSTRIES;
             indNode.mapEntity = market.getPrimaryEntity();
             indNode.tooltipCreator = report.getMonthlyReportTooltip();
@@ -404,7 +405,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
             // Exports
             final FDNode exportNode = report.getNode(mNode, "exports"); 
-            exportNode.name = "Exports & Imports";
+            exportNode.name = str("exportsImportsTitle");
             exportNode.custom = MonthlyReport.EXPORTS;
             exportNode.mapEntity = market.getPrimaryEntity();
             exportNode.getChildren().clear();
@@ -417,10 +418,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
                     final String inFactionBonus = String.format("%d%%",
                         (int)(1f - EconConfig.FACTION_EXCHANGE_MULT)*100);
 
-                    tp.addPara(
-                        "Income from exports by this outpost or colony. " +
-                        "Smuggling exports do not produce income. " +
-                        "In-faction imports are %s cheaper than normal",
+                    tp.addPara(str("incomeReportExportsDesc"),
                         pad, highlight, inFactionBonus
                     );
                 }
@@ -437,7 +435,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
             // Wages
             final FDNode wageNode = report.getNode(mNode, "wages"); 
-            wageNode.name = "Wages";
+            wageNode.name = str("wagesTitle");
             wageNode.mapEntity = market.getPrimaryEntity();
             wageNode.icon = settings.getSpriteName("income_report", "generic_expense");
             wageNode.upkeep = info.getDailyWages(market) * MONTH * r;
@@ -448,14 +446,14 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
                 public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
                     tp.addPara(
-                        "Monthly wages for workers at this colony.", pad
+                        str("incomeReportWagesDesc"), pad
                     );
                 }
             };
         
             // Player cut node
             final FDNode playerIncomeNode = report.getNode(mNode, "player_share");
-            playerIncomeNode.name = "Effective player share (" + Math.round(r * 100) + "%)";
+            playerIncomeNode.name = strf("incomeReportPlayerCutTitle", Math.round(r * 100));
             playerIncomeNode.icon = settings.getSpriteName("icons", "ratio_chart");
             playerIncomeNode.income = 0.0001f;
             playerIncomeNode.tooltipCreator = new TooltipCreator() {
@@ -464,15 +462,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
                 public float getTooltipWidth(Object params) {return 400f;}
 
                 public void createTooltip(TooltipMakerAPI tp, boolean expanded, Object params) {
-                    tp.addPara(
-                        "The ratio of monthly profits that get automatically transferred to you: %s.",
+                    tp.addPara(str("incomeReportPlayerCutDesc1"),
                         pad, highlight, NumFormat.formatCredit(playerIncome)
                     );
-                    tp.addPara(
-                        "The effective value can be below the chosen value if the colony is in debt.", 
-                        pad
-                    );
-                    tp.addPara("All income values are modified by this value", pad);
+                    tp.addPara(str("incomeReportPlayerCutDesc2"), pad);
+
+                    tp.addPara(str("incomeReportPlayerCutDesc3"), pad);
                 }
             };
         }
@@ -602,12 +597,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             for (Industry ind : market.getIndustries()) {
                 final int indIncome = info.getIndustryIncome(ind).getModifiedInt();
                 if (indIncome != 0) {
-                    ledger.add(INDUSTRY_INCOME_KEY + ind.getId(), indIncome, ind.getCurrentName() + " income");
+                    ledger.add(INDUSTRY_INCOME_KEY + ind.getId(), indIncome, strf("incomeReportIndustryIncomeTxt", ind.getCurrentName()));
                 }
 
                 final int indUpkeep = info.getIndustryUpkeep(ind).getModifiedInt();
                 if (indUpkeep != 0) {
-                    ledger.add(INDUSTRY_UPKEEP_KEY + ind.getId(), -indUpkeep, ind.getCurrentName() + " upkeep");
+                    ledger.add(INDUSTRY_UPKEEP_KEY + ind.getId(), -indUpkeep, strf("incomeReportIndustryUpkeepTxt", ind.getCurrentName()));
                 }
             }
         }

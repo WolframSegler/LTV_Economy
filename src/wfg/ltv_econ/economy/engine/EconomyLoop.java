@@ -49,6 +49,7 @@ import wfg.native_ui.util.ArrayMap;
 
 import static wfg.ltv_econ.constants.CommoditiesID.*;
 import static wfg.ltv_econ.constants.strings.Income.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.str;
 
 public class EconomyLoop {
     private static final Logger log = Global.getLogger(EconomyLoop.class);
@@ -247,7 +248,7 @@ public class EconomyLoop {
 
         if (totalDeficit > 0f) {
             cell.getProductionStat().modifyMult(
-                "deficits", Math.max(1f - totalDeficit, 0.01f), "Input shortages"
+                "deficits", Math.max(1f - totalDeficit, 0.01f), str("econLoopInputShortages")
             );
         } else cell.getProductionStat().unmodifyMult("deficits");
     }
@@ -579,7 +580,7 @@ public class EconomyLoop {
 
         for (CommodityDomain dom : engine.comDomains.values()) {
             final CommodityCell cell = dom.getCell(marketID);
-            cell.getConsumptionStat().modifyMult(SERVICE_LOGISTICS, 1f - logiRatio, "Logistics sector");
+            cell.getConsumptionStat().modifyMult(SERVICE_LOGISTICS, 1f - logiRatio, str("serviceSectorLogisticsDesc"));
         }
         for (MarketImmigrationModifier immigMod : market.getTransientImmigrationModifiers()) {
             if (immigMod instanceof ServiceSectorMarketImmigration) {
@@ -592,15 +593,15 @@ public class EconomyLoop {
         }
 
         market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).modifyFlat(
-            SERVICE_SECURITY, secRatio * 100f, "Security sector"
+            SERVICE_SECURITY, secRatio * 100f, str("serviceSectorSecurityDesc")
         );
-        market.getAccessibilityMod().modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio, "Public info sector");
+        market.getAccessibilityMod().modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio, str("serviceSectorPublicInfoDesc"));
         
         final PlayerMarketData mData = engine.getPlayerMarketData(marketID);
         if (mData != null) {
-            mData.healthDelta.modifyFlat(SERVICE_HEALTHCARE, healthRatio / 2f, "Healthcare sector");
-            mData.classConsciousnessDelta.modifyFlat(SERVICE_SECURITY, -secRatio / 10f, "Security sector");
-            mData.socialCohesionDelta.modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio / 2f, "Public info sector");
+            mData.healthDelta.modifyFlat(SERVICE_HEALTHCARE, healthRatio / 2f, str("serviceSectorHealthcareDesc"));
+            mData.classConsciousnessDelta.modifyFlat(SERVICE_SECURITY, -secRatio / 10f, str("serviceSectorSecurityDesc"));
+            mData.socialCohesionDelta.modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio / 2f, str("serviceSectorPublicInfoDesc"));
         }
     }
 
@@ -620,7 +621,7 @@ public class EconomyLoop {
             this.mod = mod;
         }
         public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
-            incoming.getWeight().modifyFlat(SERVICE_HEALTHCARE, mod, "Healthcare");
+            incoming.getWeight().modifyFlat(SERVICE_HEALTHCARE, mod, str("serviceSectorHealthcareDesc"));
         }
     }
 }

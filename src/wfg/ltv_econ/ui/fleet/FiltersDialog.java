@@ -33,7 +33,7 @@ public class FiltersDialog extends DockPanel {
     private float minAmountSliderValueCache = TradeFilters.minTradeAmount;
 
     public FiltersDialog(UIBuildableAPI content) {
-        super(400, 465, Side.RIGHT);
+        super(400, 440, Side.RIGHT, hpad*3);
 
         this.content = content;
 
@@ -45,16 +45,16 @@ public class FiltersDialog extends DockPanel {
         clearChildren();
         
         final LabelAPI title = settings.createLabel("Map Filters", Fonts.INSIGNIA_VERY_LARGE);
-        add(title).inTL(opad, opad + pad*2);
-        final int SECT_I_H = 36;
+        add(title).inTL(0f, pad);
+        final int SECT_I_H = 26;
         final int LABEL_H = 16;
         final int BTN_H = 32;
         final int S_BTN_H = 18;
 
         final LabelAPI modeLblb = settings.createLabel("Direction Mode", Fonts.DEFAULT_SMALL);
-        add(modeLblb).inTL(opad, SECT_I_H + opad*2);
+        add(modeLblb).inTL(0f, SECT_I_H + opad);
 
-        final RadioPanel modeRadio = new RadioPanel(m_panel, (int) pos.getWidth() - hpad*3, BTN_H, LayoutMode.HORIZONTAL)
+        final RadioPanel modeRadio = new RadioPanel(contentContainer, (int) pos.getWidth() - hpad*3, BTN_H, LayoutMode.HORIZONTAL)
             .addOption("All")
             .addOption("Exporters")
             .addOption("Importers")
@@ -65,17 +65,17 @@ public class FiltersDialog extends DockPanel {
         };
         modeRadio.setSelectedIndex(TradeFilters.directionMode);
         modeRadio.buildUI();
-        add(modeRadio).inTL(opad, SECT_I_H + LABEL_H + opad*2);
+        add(modeRadio).inTL(0f, SECT_I_H + LABEL_H + opad);
 
         final LabelAPI minAmountLbl = settings.createLabel("Min Volume", Fonts.INSIGNIA_LARGE);
         final float lblW = minAmountLbl.getPosition().getWidth();
-        add(minAmountLbl).inTL(opad, SECT_I_H + LABEL_H + BTN_H + opad*4);
+        add(minAmountLbl).inTL(0f, SECT_I_H + LABEL_H + BTN_H + opad*3);
         minAmountLbl.getPosition().setSize(lblW, BTN_H);
         final int sliderW = (int) (pos.getWidth() - opad*3 - lblW);
 
-        minAmountSlider = new Slider(m_panel, null, 0f, EconConfig.TRADE_MAP_MIN_AMOUNT_FILTER, sliderW, BTN_H);
+        minAmountSlider = new Slider(contentContainer, null, 0f, EconConfig.TRADE_MAP_MIN_AMOUNT_FILTER, sliderW, BTN_H);
         minAmountSlider.setProgress(TradeFilters.minTradeAmount);
-        add(minAmountSlider).inTL(opad + lblW + pad, SECT_I_H + LABEL_H + BTN_H + opad*4);
+        add(minAmountSlider).inTL(lblW + pad, SECT_I_H + LABEL_H + BTN_H + opad*3);
         minAmountSlider.system().setIfNotPresent(
             NativeSystems.TOOLTIP, TooltipSystem.get(), minAmountSlider
         );
@@ -90,11 +90,11 @@ public class FiltersDialog extends DockPanel {
         final int SECT_II_H = SECT_I_H + LABEL_H + BTN_H*2 + opad*5;
 
         final LabelAPI exportersLbl = settings.createLabel("Exporters", Fonts.INSIGNIA_LARGE);
-        add(exportersLbl).inTL(opad, SECT_II_H + opad);
+        add(exportersLbl).inTL(0f, SECT_II_H);
 
         final LabelAPI importersLbl = settings.createLabel("Importers", Fonts.INSIGNIA_LARGE);
         final float halfW = (pos.getWidth() - opad*3) * 0.5f;
-        add(importersLbl).inTL(opad + halfW + opad, SECT_II_H + opad);
+        add(importersLbl).inTL(halfW + opad, SECT_II_H);
 
         final TooltipMakerAPI exportersContainer = ComponentFactory.createTooltip((int)halfW, true);
         final TooltipMakerAPI importersContainer = ComponentFactory.createTooltip((int)halfW, true);
@@ -107,7 +107,7 @@ public class FiltersDialog extends DockPanel {
             final String factionId = spec.getId();
 
             final boolean initiallyAllowedExport = !TradeFilters.exporterFactionBlacklist.contains(factionId);
-            final CheckboxButton cbExp = new CheckboxButton(m_panel, 20, factionName, Fonts.DEFAULT_SMALL, 
+            final CheckboxButton cbExp = new CheckboxButton(contentContainer, 20, factionName, Fonts.DEFAULT_SMALL, 
                 (btn) -> {
                     btn.setChecked(!btn.isChecked());
                     if (btn.isChecked()) TradeFilters.exporterFactionBlacklist.remove(factionId);
@@ -122,7 +122,7 @@ public class FiltersDialog extends DockPanel {
             yLeft += cbExp.getPanel().getPosition().getHeight() + pad;
 
             final boolean initiallyAllowedImport = !TradeFilters.importerFactionBlacklist.contains(factionId);
-            final CheckboxButton cbImp = new CheckboxButton(m_panel, 20, factionName, Fonts.DEFAULT_SMALL,
+            final CheckboxButton cbImp = new CheckboxButton(contentContainer, 20, factionName, Fonts.DEFAULT_SMALL,
                 (btn) -> {
                     btn.setChecked(!btn.isChecked());
                     if (btn.isChecked()) TradeFilters.importerFactionBlacklist.remove(factionId);
@@ -140,29 +140,29 @@ public class FiltersDialog extends DockPanel {
         exportersContainer.setHeightSoFar(yLeft);
         importersContainer.setHeightSoFar(yRight);
 
-        ComponentFactory.addTooltip(exportersContainer, LIST_H, true, m_panel).inTL(opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
-        ComponentFactory.addTooltip(importersContainer, LIST_H, true, m_panel).inTL(opad + halfW + opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
+        ComponentFactory.addTooltip(exportersContainer, LIST_H, true, contentContainer).inTL(opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
+        ComponentFactory.addTooltip(importersContainer, LIST_H, true, contentContainer).inTL(opad + halfW + opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
 
         final float btnW = 80;
-        final Button enableAllExporters = new Button(m_panel, (int)btnW, S_BTN_H, "Enable All", Fonts.DEFAULT_SMALL, (b) -> {
+        final Button enableAllExporters = new Button(contentContainer, (int)btnW, S_BTN_H, "Enable All", Fonts.DEFAULT_SMALL, (b) -> {
             for (FactionSpecAPI s : visibleFactions) TradeFilters.exporterFactionBlacklist.remove(s.getId());
             content.buildUI();
             buildUI();
         });
         
-        final Button disableAllExporters = new Button(m_panel, (int)btnW, S_BTN_H, "Disable All", Fonts.DEFAULT_SMALL, (b) -> {
+        final Button disableAllExporters = new Button(contentContainer, (int)btnW, S_BTN_H, "Disable All", Fonts.DEFAULT_SMALL, (b) -> {
             for (FactionSpecAPI s : visibleFactions) TradeFilters.exporterFactionBlacklist.add(s.getId());
             content.buildUI();
             buildUI();
         });
         
-        final Button enableAllImporters = new Button(m_panel, (int)btnW, S_BTN_H, "Enable All", Fonts.DEFAULT_SMALL, (b) -> {
+        final Button enableAllImporters = new Button(contentContainer, (int)btnW, S_BTN_H, "Enable All", Fonts.DEFAULT_SMALL, (b) -> {
             for (FactionSpecAPI s : visibleFactions) TradeFilters.importerFactionBlacklist.remove(s.getId());
             content.buildUI();
             buildUI();
         });
         
-        final Button disableAllImporters = new Button(m_panel, (int)btnW, S_BTN_H, "Disable All", Fonts.DEFAULT_SMALL, (b) -> {
+        final Button disableAllImporters = new Button(contentContainer, (int)btnW, S_BTN_H, "Disable All", Fonts.DEFAULT_SMALL, (b) -> {
             for (FactionSpecAPI s : visibleFactions) TradeFilters.importerFactionBlacklist.add(s.getId());
             content.buildUI();
             buildUI();
@@ -173,14 +173,14 @@ public class FiltersDialog extends DockPanel {
         enableAllImporters.cutStyle = CutStyle.TL_BL;
         disableAllImporters.cutStyle = CutStyle.TR_BR;
 
-        add(enableAllExporters).inTL(opad, SECT_II_H + LABEL_H + opad + pad*2);
-        add(disableAllExporters).inTL(opad*1.5f + btnW, SECT_II_H + LABEL_H + opad + pad*2);
-        add(enableAllImporters).inTL(opad*2 + halfW, SECT_II_H + LABEL_H + opad + pad*2);
-        add(disableAllImporters).inTL(opad*2.5f + halfW + btnW, SECT_II_H + LABEL_H + opad + pad*2);
+        add(enableAllExporters).inTL(0f, SECT_II_H + LABEL_H + opad + pad*2);
+        add(disableAllExporters).inTL(hpad + btnW, SECT_II_H + LABEL_H + opad + pad*2);
+        add(enableAllImporters).inTL(hpad*2 + halfW, SECT_II_H + LABEL_H + opad + pad*2);
+        add(disableAllImporters).inTL(hpad*3 + halfW + btnW, SECT_II_H + LABEL_H + opad + pad*2);
 
         final int SECT_III_H = SECT_II_H + LIST_H + LABEL_H + S_BTN_H + opad*3;
 
-        final CheckboxButton virtualFleetToggle = new CheckboxButton(m_panel, 20, "Hide virtual fleets", Fonts.DEFAULT_SMALL,
+        final CheckboxButton virtualFleetToggle = new CheckboxButton(contentContainer, 20, "Hide virtual fleets", Fonts.DEFAULT_SMALL,
             (btn) -> {
                 btn.setChecked(!btn.isChecked());
                 TradeFilters.hideVirtualFleets = btn.isChecked();
@@ -188,7 +188,7 @@ public class FiltersDialog extends DockPanel {
             }, UICheckboxSize.SMALL, false
         );
         virtualFleetToggle.setChecked(TradeFilters.hideVirtualFleets);
-        add(virtualFleetToggle).inTL(opad + pad, SECT_III_H);
+        add(virtualFleetToggle).inTL(pad, SECT_III_H);
     }
 
     @Override
