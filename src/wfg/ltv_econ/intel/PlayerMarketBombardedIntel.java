@@ -5,6 +5,7 @@ import java.awt.Color;
 import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
@@ -33,8 +34,8 @@ public class PlayerMarketBombardedIntel extends BaseIntelPlugin {
     @Override
     public final String getSmallDescriptionTitle() {
         return isSaturation
-            ? "Saturation Bombardment - " + data.market.getName()
-            : "Tactical Bombardment - " + data.market.getName();
+            ? str("intelSatBombTitle") + data.market.getName()
+            : str("intelTacticalBombTitle") + data.market.getName();
     }
     
     @Override
@@ -44,9 +45,8 @@ public class PlayerMarketBombardedIntel extends BaseIntelPlugin {
 
     @Override
     public final void createSmallDescription(TooltipMakerAPI tp, float width, float height) {
-        tp.addPara("%s was " + (isSaturation ? "saturation" : "tactically") + " bombarded. Destroyed %s of local stockpiles and " +
-            "reduced population health and happiness by %s.", 0f,
-            new Color[] {highlight, negative, negative},
+        final String txt1 = strf("intelBombardTpTxt1", isSaturation ? str("intelSatBombVerb") : str("intelTacticalBombVerb"));
+        tp.addPara(txt1, 0f, new Color[] {highlight, negative, negative},
             data.market.getName(), Integer.toString((int) stockpileReduction) + "%", Integer.toString((int) statsReduction)
         );
     }

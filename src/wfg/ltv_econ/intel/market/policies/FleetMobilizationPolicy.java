@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
@@ -65,11 +66,11 @@ public class FleetMobilizationPolicy extends MarketPolicy {
         super.createTooltip(data, tp);
         
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Supplies Cost", Integer.toString(SUPPLIES_COST), negative);
-        tp.addToGrid(0, 1, "Ships Cost", Integer.toString(SHIPS_COST), negative);
-        tp.addToGrid(0, 2, "Happiness", String.format("%+.2f", HAPPINESS_DEBUFF), negative);
+        tp.addToGrid(0, 0, str("marketPolicySuppliesCostTxt"), Integer.toString(SUPPLIES_COST), negative);
+        tp.addToGrid(0, 1, str("marketPolicyShipsCostTxt"), Integer.toString(SHIPS_COST), negative);
+        tp.addToGrid(0, 2, str("marketPopDataHappinessTxt"), String.format("%+.2f", HAPPINESS_DEBUFF), negative);
 
         tp.addGrid(0);
     }

@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -64,16 +65,16 @@ public class SubstanceControlPolicy extends MarketPolicy {
         super.createTooltip(data, tp);
         
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Drugs Demand", Strings.X + String.format("%.1f", DRUGS_MULT_P1));
-        tp.addToGrid(0, 1, "Health", String.format("%+.1f", HEALTH_BUFF_P1));
-        tp.addToGrid(0, 2, "Happiness", String.format("%+.2f", HAPPINESS_DEBUFF_P1), negative);
-        tp.addToGrid(0, 3, "Social Cohesion", String.format("%+.3f", COHESION_BUFF_P1), negative);
+        tp.addToGrid(0, 0, str("marketPolicyDrugsDemandTxt"), Strings.X + String.format("%.1f", DRUGS_MULT_P1));
+        tp.addToGrid(0, 1, str("marketPopDataHealthTxt"), String.format("%+.1f", HEALTH_BUFF_P1));
+        tp.addToGrid(0, 2, str("marketPopDataHappinessTxt"), String.format("%+.2f", HAPPINESS_DEBUFF_P1), negative);
+        tp.addToGrid(0, 3, str("marketPopDataCohesionTxt"), String.format("%+.3f", COHESION_BUFF_P1), negative);
 
         tp.addGrid(0);
 
         tp.setParaFontColor(gray);
-        tp.addPara("Effects may change over time", pad);
+        tp.addPara(str("effectsMayChangeOverTimeTxt"), pad);
     }
 }

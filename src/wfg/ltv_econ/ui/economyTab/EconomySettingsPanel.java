@@ -9,6 +9,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import org.apache.log4j.Logger;
 
@@ -44,8 +45,8 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
 
         { // SECTION I
         final LabelAPI debuOptions = settings.createLabel(
-            "Debug Options", Fonts.INSIGNIA_VERY_LARGE);
-        final int lblH = (int) debuOptions.computeTextHeight("Debug Options");
+            str("uiDebugOptionsTitle"), Fonts.INSIGNIA_VERY_LARGE);
+        final int lblH = (int) debuOptions.computeTextHeight(str("uiDebugOptionsTitle"));
         add(debuOptions).inTL(opad, SECTION_I);
 
         { // REFRESH MARKETS
@@ -53,18 +54,18 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 engine.refreshMarketsHard();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                "Refresh Markets", Fonts.DEFAULT_SMALL, run
+                str("uiRefreshMarketsBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + lblH + pad*2);
 
             button.tooltip.width = 400f;
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Synchronizes EconomyEngine markets with vanilla Economy markets. Does extra checks to make sure no data is missing.", pad);
+                tp.addPara(str("uiRefreshMarketsTpTxt"), pad);
             };
         }
         
         { // RECALCULATE WORKER ASSIGNMENTS
-            final String btnText = "Re-Allocate Workers ";
+            final String btnText = str("uiAllocateWorkersBtnTxt");
             final CallbackRunnable<Button> run = (btn) -> {
                 final long startTime = System.nanoTime();
 
@@ -72,8 +73,8 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 engine.fakeAdvanceWithAssignWorkers();
 
                 final long endTime = System.nanoTime();
-                final String time = ((endTime - startTime) / 1_000_000) + " ms";
-                logger.info("Elapsed time: " + time);
+                final String time = ((endTime - startTime) / 1_000_000) + " " + str("uiMilliseconds");
+                logger.info(str("uiElapsedTimeTxt") + time);
                 btn.setText(btnText + " - " + time);
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
@@ -82,20 +83,20 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             add(button).inTL(opad, SECTION_I + pad*4 + lblH + BUTTON_H);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Recreates the production matrix, and recalculates worker assignments. Also does a fake advance.", pad);
+                tp.addPara(str("uiAllocateWorkersTpTxt"), pad);
             };
         }
 
         { // FAKE ADVANCE
-            final String btnText = "Fake Advance ";
+            final String btnText = str("uiFakeAdvanceTitle");
             final CallbackRunnable<Button> run = (btn) -> {                
                 final long startTime = System.nanoTime();
                 
                 engine.fakeAdvance();
 
                 final long endTime = System.nanoTime();
-                final String time = ((endTime - startTime) / 1_000_000) + " ms";
-                logger.info("Elapsed time: " + time);
+                final String time = ((endTime - startTime) / 1_000_000) + " " + str("uiMilliseconds");
+                logger.info(str("uiElapsedTimeTxt") + time);
                 btn.setText(btnText + " - " + time);
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
@@ -104,7 +105,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             add(button).inTL(opad, SECTION_I + pad*6 + lblH + BUTTON_H*2);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Advances the economy by one tick without worker assignments or updating any values.", pad);
+                tp.addPara(str("uiFakeAdvanceTpTxt"), pad);
             };
         }
 
@@ -117,12 +118,12 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 }
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                "Log All Commodity Cells", Fonts.DEFAULT_SMALL, run
+                str("uiLogAllComCellsBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*8 + lblH + BUTTON_H*3);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Logs all the information about the CommodityCell for each cell", pad);
+                tp.addPara(str("uiLogAllComCellsTpTxt"), pad);
             };
         }
 
@@ -132,12 +133,12 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 engine.logger.logCreditsSnapshot();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                "Log Economy Information", Fonts.DEFAULT_SMALL, run
+                str("uiLogEconInfoBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Logs all the information about the Economy", pad);
+                tp.addPara(str("uiLogEconInfoTpTxt"), pad);
             };
         }
 
@@ -146,11 +147,11 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 logger.info(engine.getPlayerMarketData().values());
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                "Log Player Market Data", Fonts.DEFAULT_SMALL, run
+                str("uiLogMarketPopDataBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Logs all player market data's", pad);
+                tp.addPara(str("uiLogMarketPopDataTpTxt"), pad);
             };
         }
 
@@ -159,25 +160,25 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 IndustryIOs.logMaps();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                "Log Industry IO Maps", Fonts.DEFAULT_SMALL, run
+                str("uiLogIndIOBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*14 + lblH + BUTTON_H*6);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Logs the maps used by IndustryIOs to manage industry inputs and outputs", pad);
+                tp.addPara(str("uiLogIndIOTpTxt"), pad);
             };
         }
 
         { // SHIP ALLOCATION
-            final String btnText = "Allocate Ships ";
+            final String btnText = str("uiAllocateShipsBtnTitle");
             final CallbackRunnable<Button> run = (btn) -> {                
                 final long startTime = System.nanoTime();
                 
                 ShipProductionManager.planOrders(engine.getFactionShipInventory(Factions.HEGEMONY));
 
                 final long endTime = System.nanoTime();
-                final String time = ((endTime - startTime) / 1_000_000) + " ms";
-                logger.info("Elapsed time: " + time);
+                final String time = ((endTime - startTime) / 1_000_000) + " " + str("uiMilliseconds");
+                logger.info(str("uiElapsedTimeTxt") + time);
                 btn.setText(btnText + " - " + time);
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
@@ -188,7 +189,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             button.setEnabled(DebugFlags.COLONY_DEBUG);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Plans and allocates ship orders for Hegemony's FactionShipInventory", pad);
+                tp.addPara(str("uiAllocateShipsTpTxt"), pad);
             };
         }
         }

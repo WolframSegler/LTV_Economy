@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
@@ -58,13 +59,13 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
         super.createTooltip(data, tp);
         
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Marines Cost", Integer.toString(MARINES_COST), negative);
-        tp.addToGrid(0, 1, "Heavy Armaments Cost", Integer.toString(HAND_WEAPONS_COST), negative);
-        tp.addToGrid(0, 2, "Happiness", String.format("%+.2f", HAPPINESS_BUFF));
-        tp.addToGrid(0, 3, "Defense Bonus", "+"+DEFENSE_FLAT_BUFF);
-        tp.addToGrid(0, 4, "Defense Bonus", Strings.X + String.format("%.1f", DEFENSE_MULT_BUFF));
+        tp.addToGrid(0, 0, str("marketPolicyMarinesCostTxt"), Integer.toString(MARINES_COST), negative);
+        tp.addToGrid(0, 1, str("marketPolicyHeavyWeaponsCostTxt"), Integer.toString(HAND_WEAPONS_COST), negative);
+        tp.addToGrid(0, 2, str("marketPopDataHappinessTxt"), String.format("%+.2f", HAPPINESS_BUFF));
+        tp.addToGrid(0, 3, str("marketPolicyDefenseBonusTxt"), "+"+DEFENSE_FLAT_BUFF);
+        tp.addToGrid(0, 4, str("marketPolicyDefenseBonusTxt"), Strings.X + String.format("%.1f", DEFENSE_MULT_BUFF));
 
         tp.addGrid(0);
     }

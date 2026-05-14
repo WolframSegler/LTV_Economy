@@ -3,6 +3,7 @@ package wfg.ltv_econ.intel;
 import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
@@ -31,8 +32,8 @@ public class PolicyNotificationIntel extends BaseIntelPlugin {
     @Override
     public String getSmallDescriptionTitle() {
         return available
-            ? "Policy Available - " + data.market.getName()
-            : "Policy Finished - " + data.market.getName();
+            ? str("intelPolicyTitle1") + data.market.getName()
+            : str("intelPolicyTitle2") + data.market.getName();
     }
     
     @Override
@@ -44,11 +45,10 @@ public class PolicyNotificationIntel extends BaseIntelPlugin {
     public void createSmallDescription(TooltipMakerAPI tp, float width, float height) {
         tp.addPara(
             available
-                ? "The policy %s is now available on %s."
-                : "The policy %s has finished on %s.",
+                ? str("intelPolicyTpTxt1")
+                : str("intelPolicyTpTxt2"),
             0f,
-            highlight,
-            policy.spec.name,
+            highlight, policy.spec.name,
             data.market.getName()
         );
     }

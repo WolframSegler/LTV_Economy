@@ -22,6 +22,7 @@ import com.fs.starfarer.api.util.Highlights;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.constants.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -241,7 +242,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	@Override
 	public String getTooltipAppendix(CoreUIAPI ui) {
 		if (ui.getTradeMode() == CoreUITradeMode.SNEAK) {
-			return "Requires: proper docking authorization (transponder on)";
+			return LocalizedStrings.str("submarketProperDockingTransponderTxt");
 		}
 		return super.getTooltipAppendix(ui);
 	}

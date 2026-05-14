@@ -8,4 +8,9 @@ public class Mods {
     public static final String NEX = "nexerelin";
     public static final String GRAND_COL = "GrandColonies";
     public static final String ASTRAL_ASCENT = "Planetace_AstralAscension";
+    public static final String AOTD_CBB = "Cryo_but_better";
+    public static final String AOTD_VOK = "aotd_vok";
+    public static final String AOTD_QOL = "aotd_qol";
+    public static final String AOTD_SOP = "aotd_sop";
+    public static final String AOTD_VOS = "aotd_vos";
 }

@@ -38,6 +38,7 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
     private static final float PIE_CHART_THRESHOLD = 0.001f;
@@ -80,9 +81,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalProduction(comID);
-                final String txt = "Global production";
-                String valueTxt = NumFormat.engNotate(value);
-                if (value < 1) valueTxt = "---";
+                final String txt = str("uiGlobalProdTitle");
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -90,9 +90,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The combined daily output of %s across all colonies and the informals in the Sector. " +
-                        "Represents active industrial and informal production, excluding existing stockpiles.",
+                    tp.addPara(str("uiGlobalProdTpTxt"),
                         pad, highlight, com.getName()
                     );
                 };
@@ -107,9 +105,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalDemand(comID);
-                final String txt = "Global demand";
-                String valueTxt = NumFormat.engNotate(value);
-                if (value < 1) valueTxt = "---";
+                final String txt = str("uiGlobalDemandTitle");
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -117,9 +114,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The combined daily demand of all colonies for %s. " +
-                        "Demand reflects how much the sector needs to maintain standard production, growth, and stability.",
+                    tp.addPara(str("uiGlobalDemandTpTxt"),
                         pad, highlight, com.getName()
                     );
                 };
@@ -134,9 +129,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalSurplus(comID);
-                final String txt = "Global surplus";
-                String valueTxt = NumFormat.engNotate(value);
-                if (value < 1) valueTxt = "---";
+                final String txt = str("uiGlobalSurplusTitle");
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -144,9 +138,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The amount of %s that the sector produced beyond what was demanded. " +
-                        "A higher surplus means that, even after all importing markets had their needs filled, some production still remained unused.",
+                    tp.addPara(str("uiGlobalSurplusTpTxt"),
                         pad, highlight, com.getName()
                     );
                 };
@@ -161,9 +153,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalDeficit(comID);
-                final String txt = "Global deficit";
-                String valueTxt = NumFormat.engNotate(value);
-                if (value < 1) valueTxt = "---";
+                final String txt = str("uiGlobalDeficitTitle");
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -171,12 +162,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Global deficit represents the total amount of demand that remained unfulfilled on the previous day. " +
-                        "This value does not track shortages in stockpiles and only measures demand that was not supplied on the previous day. " +
-                        "A colony may have large reserves and still contribute to the global deficit if trade routes could not deliver enough units in time.",
-                        pad
-                    );
+                    tp.addPara(str("uiGlobalDeficitTpTxt"), pad);
                 };
             }
         };
@@ -190,9 +176,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final float value = dom.getTradeVolumeHistory();
-                final String txt = "Sector-wide trade volume";
-                String valueTxt = NumFormat.engNotate(value);
-                if (value < 1) valueTxt = "---";
+                final String txt = str("uiSectorTradeVolumeTitle");
+                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
             }
@@ -200,9 +185,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Total units of %s traded across the sector for the last %s days, including both in-faction and global cargo.",
-                        pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconConfig.HISTORY_LENGTH)
+                    tp.addPara(str("uiSectorTradeVolumeTpTxt"),pad, new Color[] {highlight, base},
+                        com.getName(), Integer.toString(EconConfig.HISTORY_LENGTH)
                     );
                 };
             }
@@ -216,9 +200,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = dom.getCreditActivityHistory();
-                final String txt = "Sector-wide trade value";
-                String valueTxt = NumFormat.formatCredit(value);
-                if (value < 1) valueTxt = "---";
+                final String txt = str("uiSectorTradeValueTitle");
+                final String valueTxt = value < 1 ? "---" : NumFormat.formatCredit(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
             }
@@ -226,8 +209,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The total monetary value (in credits) of all %s trades across the entire sector for the last %s days. This includes both in-faction and global trade, calculated using the prices at which commodities were exchanged.",
+                    tp.addPara(str("uiSectorTradeValueTpTxt"),
                         pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconConfig.HISTORY_LENGTH)
                     );
                 };
@@ -242,9 +224,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final int value = (int) engine.info.getGlobalAveragePrice(comID, 0);
-                final String txt = "Global average price";
-                final String valueTxt = com.isExotic() ? "Localized"
-                    : NumFormat.formatCredit(value);
+                final String txt = str("uiGlobalAvgPriceTitle");
+                final String valueTxt = com.isExotic() ? "Localized" : NumFormat.formatCredit(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
             }
@@ -252,10 +233,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The average price of %s across all markets in the sector on the previous day, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
-                        pad, highlight, com.getName()
-                    );
+                    tp.addPara(str("uiGlobalAvgPriceTpTxt"), pad, highlight, com.getName());
                 };
             }
         };
@@ -268,7 +246,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final float value = dom.getTradeVolatility();
-                final String txt = "Trade volatility";
+                final String txt = str("uiSectorTradeVolatilityTitle");
                 final String valueTxt = (int) (value * 100f) + "%";
 
                 Color volatilityColor;
@@ -285,13 +263,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Trade Volatility for the last %s days. " +
-                        "Indicates how much the daily export volume for %s fluctuates relative to its average.",
-                        pad,
-                        new Color[] {base, highlight},
-                        Integer.toString(EconConfig.HISTORY_LENGTH),
-                        com.getName()
+                    tp.addPara(str("uiSectorTradeVolatilityTpTxt"), pad, new Color[] {base, highlight},
+                        Integer.toString(EconConfig.HISTORY_LENGTH), com.getName()
                     );
                 };
             }
@@ -306,7 +279,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             public void buildUI() {
                 final long value = engine.info.getGlobalStockpiles(comID);
                 final String valueTxt = NumFormat.engNotate(value);
-                final String txt = "Global stockpiles";
+                final String txt = str("uiGlobalStockpilesTitle");
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
             }
@@ -314,12 +287,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Shows the total amount of %s currently stored across all markets in the sector. " +
-                        "This value reflects available stock and does not account for daily production or consumption. " +
-                        "High stockpiles indicate abundance, while low stockpiles signal scarcity and potential trade opportunities.",
-                        pad, highlight, com.getName()
-                    );
+                    tp.addPara(str("uiGlobalStockpilesTpTxt"), pad, highlight, com.getName());
                 };
             }
         };
@@ -335,8 +303,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 for (WorkerIndustryData data : WorkerRegistry.instance().getRegistry()) {
                     value += data.getAssignedForOutput(comID);
                 }
-                final String txt = "Worker allocation";
-                final String valueTxt = NumFormat.engNotate(value);
+                final String txt = str("uiGlobalWorkersAllocatedTitle");
+                final String valueTxt = value < 0l ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
             }
@@ -344,11 +312,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Displays the total number of workers currently assigned to producing %s across all markets in the sector ."+
-                        "Workers are counted based on the output of industries producing this commodity, not the industry as a whole.",
-                        pad, highlight, com.getName()
-                    );
+                    tp.addPara(str("uiGlobalWorkersAllocatedTpTxt"), pad, highlight, com.getName());
                 };
             }
         };
@@ -361,7 +325,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalExporterCount(comID);
-                final String txt = "Global Exporters";
+                final String txt = str("uiGlobalExportsTitle");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -370,10 +334,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The total count of markets in the sector that globally exported %s on the previous trade cycle. Informal trade excluded.",
-                        pad, highlight, com.getName()
-                    );
+                    tp.addPara(str("uiGlobalExportsTpTxt"), pad, highlight, com.getName());
                 };
             }
         };
@@ -386,7 +347,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalImporterCount(comID);
-                final String txt = "Global Importers";
+                final String txt = str("uiGlobalImportsTitle");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -395,10 +356,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The total count of markets in the sector that globally imported %s on the previous trade cycle. Informal trade excluded.",
-                        pad, highlight, com.getName()
-                    );
+                    tp.addPara(str("uiGlobalImportsTpTxt"), pad, highlight, com.getName());
                 };
             }
         };
@@ -411,7 +369,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final float value = dom.getInformalNode().prod;
-                final String txt = "Informal Production";
+                final String txt = str("uiInformalProdTitle");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -420,10 +378,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The amount of %s produced by the informal sector on the previous day.",
-                        pad, highlight, com.getName()
-                    );
+                    tp.addPara(str("uiInformalProdTpTxt"), pad, highlight, com.getName());
                 };
             }
         };
@@ -432,8 +387,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         final TooltipBuilder tableTp = (tp, exp) -> {
-            tp.addPara("Ctrl + Click to set course", pad, highlight, new String[]{
-                "Ctrl", "Click"
+            tp.addPara(str("uiCtrlClickSetCourseTxt"), pad, highlight, new String[]{
+                str("uiCtrlTxt"), str("uiClickTxt")
             });
         };
         { // Top 5 producers
@@ -441,8 +396,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
-            "Colony", 100, "Colony name", true, true, 1,
-            "Production", 100, "Daily units of " + com.getName() + " produced", false, false, -1
+            str("mapColonyTitle"), 100, str("uiTableColonyNameTitle"), true, true, 1,
+            str("uiTableProductionTitle"), 100, strf("uiTableDailyProdTitle", com.getName()), false, false, -1
         );
 
         final ArrayList<CommodityCell> producers = dom.getSortedByProduction(5);
@@ -477,7 +432,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(table).inBL(opad*2, TABLE_H + LABEL_H / 2f);
         table.buildUI();
 
-        final LabelAPI label = settings.createLabel("Top 5 producers", Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiTop5ProdTitle"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(opad*2 + (TABLE_W - labelW) / 2f, TABLE_H*2 + LABEL_H / 2f + pad*2);
@@ -488,8 +443,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
-            "Colony", 100, "Colony name", true, true, 1,
-            "Demand", 100, "Daily units of " + com.getName() + " consumed", false, false, -1
+            str("mapColonyTitle"), 100, str("uiTableColonyNameTitle"), true, true, 1,
+            str("uiTableDemandTitle"), 100, strf("uiTableDailyConsumptionTitle", com.getName()), false, false, -1
         );
 
         final ArrayList<CommodityCell> consumers = dom.getSortedByTargetQuantum(5);
@@ -524,7 +479,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(table).inBL(opad*2, 0);
         table.buildUI();
 
-        final LabelAPI label = settings.createLabel("Top 5 consumers", Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiTop5ConsumptionTitle"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(opad*2 + (TABLE_W - labelW) / 2f, TABLE_H + pad*2);
@@ -554,24 +509,19 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(chart).inBL(360, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
-            tp.addTitle("Global Export Share by Faction", base);
+            tp.addTitle(str("uiGlobalExportShareFactionTitle"), base);
 
-            tp.addPara(
-                "Shows the percentage of total exports controlled by factions and informals. " +
-                "Percentages do not include in-faction trade. " +
-                "Values are based on the previous trade cycle.",
-                pad
-            );
+            tp.addPara(str("uiGlobalExportShareFactionTpTxt"), pad);
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
-                    "Faction", 200, "Share", 100
+                    str("mapFactionTitle"), 200, str("uiTableShareTitle"), 100
                 }
             );
 
             for (PieSlice slice : data) {
                 String label = (slice.color == UIColors.INFORMAL_SECTOR)
-                    ? "Informal Sector"
+                    ? str("uiInformalSectorTitle")
                     : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
 
                 tp.addRow(new Object[] {
@@ -584,7 +534,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             tp.addTable("", 0, opad);
         };
 
-        final LabelAPI label = settings.createLabel("Export share", Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiExportShareTitle"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(360 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad * 2);
@@ -614,24 +564,19 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(chart).inBL(580, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
-            tp.addTitle("Global Import Share by Faction", base);
+            tp.addTitle(str("uiGlobalImportShareFactionTitle"), base);
             
-            tp.addPara(
-                "Shows the percentage of total imports made by factions and informals. " +
-                "Percentages do not include in-faction trade." +
-                "Values are based on the previous trade cycle.",
-                pad
-            );
+            tp.addPara(str("uiGlobalImportShareFactionTpTxt"), pad);
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
-                    "Faction", 200, "Share", 100
+                    str("mapFactionTitle"), 200, str("uiTableShareTitle"), 100
                 }
             );
 
             for (PieSlice slice : data) {
                 String label = (slice.color == UIColors.INFORMAL_SECTOR)
-                    ? "Informal Sector"
+                    ? str("uiInformalSectorTitle")
                     : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
 
                 tp.addRow(new Object[] {
@@ -644,7 +589,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             tp.addTable("", 0, opad);
         };
 
-        final LabelAPI label = settings.createLabel("Import share", Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiImportShareTitle"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(580 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
@@ -682,19 +627,15 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         chart.tooltip.builder = (tp, exp) -> {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
-            tp.addPara("Global vs In-Faction Trade Share", pad);
+            tp.addPara(str("uiInFactionTradeRatioTitle"), pad);
             tp.setParaFontDefault();
             tp.setParaFontColor(text_color);
-            tp.addPara(
-                "Shows the proportion of this commodity's total exports that are traded outside the producing faction (%s)" +
-                " versus exports consumed within the same faction (%s). " +
-                "Values are based on the previous day.",
-                pad,
+            tp.addPara(str("uiInFactionTradeRatioTpTxt"), pad,
                 highlight, ((int)(globalTradeShare*100)) + "%", ((int)((1f-globalTradeShare)*100)) + "%"
             );
         };
 
-        final LabelAPI label = settings.createLabel("Trade Breakdown", Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiInFactionTradeRatioLblTitle"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(800 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);

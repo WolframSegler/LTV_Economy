@@ -65,8 +65,8 @@ public final class IndustryGrouper {
 
             // merge similar columns only if same input/output pattern
             for (int k = j + 1; k < columns; k++) {
-                final String outputJ = industryOutputPairs.get(j).split("::")[1];
-                final String outputK = industryOutputPairs.get(k).split("::")[1];
+                final String outputJ = industryOutputPairs.get(j).split(EconomyLoop.KEY)[1];
+                final String outputK = industryOutputPairs.get(k).split(EconomyLoop.KEY)[1];
                 if (!outputJ.equals(outputK)) continue;
 
                 if (grouped[k] || !haveSameCommodityPattern(A, j, k)) continue;                

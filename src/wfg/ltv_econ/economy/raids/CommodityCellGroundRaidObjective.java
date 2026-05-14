@@ -2,6 +2,7 @@ package wfg.ltv_econ.economy.raids;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 import java.util.Map;
@@ -107,7 +108,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		
 		tp.addPara(comDesc.getText1FirstPara(), 0f);
 		
-		tp.addPara("Base value: %s per unit", opad, highlight, Misc.getDGSCredits(cell.spec.getBasePrice()));
+		tp.addPara(str("comCellRaidObjectiveBaseValueTxt"), opad, highlight, Misc.getDGSCredits(cell.spec.getBasePrice()));
 
         if (expanded) addStockpileLegend(tp, expanded);
 	}
@@ -244,21 +245,14 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 	protected static final void addStockpileLegend(TooltipMakerAPI tp, boolean expanded) {
 		final int iconSize = CommodityRowPanel.iconSize;
         int y = (int) tp.getHeightSoFar() + pad;
-        String desc;
 
-        desc = "Reserved stockpiles for local demand.";
-        CommodityRowPanel.legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.STOCKPILES_TARGET);
-        
+        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockLocalDemand"), iconSize, false, UIColors.STOCKPILES_TARGET);
         y += iconSize + pad;
 
-        desc = "Shortfall between the target and current stockpiles.";
-        CommodityRowPanel.legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.STOCKPILES_DEFICIT);
-        
+        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockShortages"), iconSize, false, UIColors.STOCKPILES_DEFICIT);
         y += iconSize + pad;
 
-        desc = "Surplus stock available for export.";
-        CommodityRowPanel.legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.STOCKPILES_EXCESS);
-        
+        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockSurplus"), iconSize, false, UIColors.STOCKPILES_EXCESS);
         y += iconSize + pad;
     
         tp.setHeightSoFar(y);

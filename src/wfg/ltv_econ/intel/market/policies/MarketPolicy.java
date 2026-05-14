@@ -2,6 +2,7 @@ package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.ltv_econ.constants.strings.Income.POLICY_COST_KEY;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -78,9 +79,7 @@ public abstract class MarketPolicy {
         tp.addPara(spec.description, text_color, pad);
 
         if (state == PolicyState.COOLDOWN) {
-            tp.addPara(String.format(
-                "Policy currently on cooldown. Available in %d days.", cooldownDaysRemaining), pad
-            );
+            tp.addPara(strf("marketPolicyCooldownTxt", cooldownDaysRemaining), pad);
         }
     }
 

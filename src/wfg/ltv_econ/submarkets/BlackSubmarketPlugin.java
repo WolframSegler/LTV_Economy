@@ -1,6 +1,7 @@
 package wfg.ltv_econ.submarkets;
 
 import static wfg.native_ui.util.UIConstants.negative;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.Random;
 
@@ -247,21 +248,21 @@ public class BlackSubmarketPlugin extends BaseSubmarketPlugin {
 		if (isEnabled(ui)) {
 			
 			float p = CoreCampaignPluginImpl.computeSmugglingSuspicionLevel(market);
-			if (p < 0.05f) return "Suspicion level: none";
+			if (p < 0.05f) return str("suspicionLevel0Txt");
 			
 			if (p < 0.1f) {
-				return "Suspicion level: minimal";
+				return str("suspicionLevel1Txt");
 			}
 			if (p < 0.2f) {
-				return "Suspicion level: medium";
+				return str("suspicionLevel2Txt");
 			}
 			if (p < 0.3f) {
-				return "Suspicion level: high";
+				return str("suspicionLevel3Txt");
 			}
 			if (p < 0.5f) {
-				return "Suspicion level: very high";
+				return str("suspicionLevel4Txt");
 			}
-			return "Suspicion level: extreme";
+			return str("suspicionLevel5Txt");
 		}
 
 		return null;

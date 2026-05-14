@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
@@ -37,14 +38,13 @@ public class IronFistPolicy extends MarketPolicy {
     @Override
     public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
-        tp.addPara("Order is temporarily restored. The populace marches in line… for now.", pad);
 
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Happiness", String.format("%+.1f", HAPPINESS_DEBUFF), negative);
-        tp.addToGrid(0, 1, "Social Cohesion", String.format("%+.1f", COHESION_BUFF));
-        tp.addToGrid(0, 2, "Stability Bonus", "+"+STABILITY_BUFF);
+        tp.addToGrid(0, 0, str("marketPopDataHappinessTxt"), String.format("%+.1f", HAPPINESS_DEBUFF), negative);
+        tp.addToGrid(0, 1, str("marketPopDataCohesionTxt"), String.format("%+.1f", COHESION_BUFF));
+        tp.addToGrid(0, 2, str("marketPopDataStabilityTxt"), "+"+STABILITY_BUFF);
         
         // This is a surprise for later
         // tp.addToGrid(0, 2, "Class Consciousness", String.format("%+.2f", CLASS_BUFF), negative);

@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -41,14 +42,13 @@ public class PharmaceuticalPromotionPolicy extends MarketPolicy {
                 -FACTION_RELATION_DROP : FACTION_RELATION_INCREASE
             );
         }
-        String relationChanges = "Faction Relations changed:";
+        String relationChanges = str("marketPolicyRelationChangesTxt");
         Global.getSoundPlayer().playUISound("ui_rep_drop", 1f, 1f);
         for (FactionAPI faction : factions) {
             final boolean drugsIllegal = faction.isIllegal(Commodities.DRUGS);
-            final String changeVerb = drugsIllegal ? " decreased by " : "increased by";
-            relationChanges += "\nRelations with "+faction.getDisplayName() +
-                changeVerb + (drugsIllegal ?
-                "-"+FACTION_RELATION_DROP : ""+FACTION_RELATION_INCREASE);
+            final String changeVerb = drugsIllegal ? str("decreasedbyTxt") : str("increasedByTxt");
+            relationChanges += "\n" + str("relationWithTxt") + faction.getDisplayName() + " " +
+                changeVerb + " " + (drugsIllegal ? "-"+FACTION_RELATION_DROP : ""+FACTION_RELATION_INCREASE);
         }
         sector.getCampaignUI().addMessage(relationChanges);
     }
@@ -58,12 +58,12 @@ public class PharmaceuticalPromotionPolicy extends MarketPolicy {
         super.createTooltip(data, tp);
         
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Health", String.format("%+.1f", HEALTH_DEBUFF), negative);
-        tp.addToGrid(0, 1, "Happiness", String.format("%+.1f", HAPPINESS_BUFF));
-        tp.addToGrid(0, 2, "Social Cohesion", String.format("%+.2f", COHESION_DEBUFF), negative);
-        tp.addToGrid(0, 3, "Class Consciousness", String.format("%+.3f", CLASS_DEBUFF));
+        tp.addToGrid(0, 0, str("marketPopDataHealthTxt"), String.format("%+.1f", HEALTH_DEBUFF), negative);
+        tp.addToGrid(0, 1, str("marketPopDataHappinessTxt"), String.format("%+.1f", HAPPINESS_BUFF));
+        tp.addToGrid(0, 2, str("marketPopDataCohesionTxt"), String.format("%+.2f", COHESION_DEBUFF), negative);
+        tp.addToGrid(0, 3, str("marketPopDataConsciousness"), String.format("%+.3f", CLASS_DEBUFF));
 
         tp.addGrid(0);
     }

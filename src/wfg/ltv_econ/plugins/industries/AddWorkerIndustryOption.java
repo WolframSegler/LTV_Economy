@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -35,7 +36,7 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
 
         final List<IndustryOptionData> result = new ArrayList<>();
 
-        final IndustryOptionData opt = new IndustryOptionData("Assign Workers...", pluginID, ind, this);
+        final IndustryOptionData opt = new IndustryOptionData(str("assignWorkersTxt"), pluginID, ind, this);
         opt.color = ind.getMarket().getFaction().getBrightUIColor();
         result.add(opt);
 
@@ -46,17 +47,11 @@ public class AddWorkerIndustryOption implements IndustryOptionProvider {
     public void createTooltip(IndustryOptionData opt, TooltipMakerAPI tooltip, float width) {
         if (opt.id != pluginID) return;
 
-        tooltip.addPara("Assign idle workers to increase this industry's output.\n", 0f);
+        tooltip.addPara(str("assignWorkersTpTxt1"), 0f);
 
-        tooltip.addPara(
-        "The number of workers that can be assigned to an industry is determined by the colony size, and certain industries have a natural limit on how many workers they can employ. Currently, there are %s workers employed in %s.",
-        0f,
-        new Color[] {
-            highlight,
-            base
-        },
-        NumFormat.engNotate(WorkerRegistry.instance().getRegisterData(opt.ind).getWorkersAssigned()),
-        opt.ind.getCurrentName()
+        tooltip.addPara(str("assignWorkersTpTxt2"), 0f, new Color[] {highlight, base},
+            NumFormat.engNotate(WorkerRegistry.instance().getRegisterData(opt.ind).getWorkersAssigned()),
+            opt.ind.getCurrentName()
         );
     }
 

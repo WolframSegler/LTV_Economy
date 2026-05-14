@@ -1,5 +1,6 @@
 package wfg.ltv_econ.ui.economyTab;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 import static wfg.ltv_econ.constants.EconomyConstants.visibleFactions;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
@@ -94,9 +95,9 @@ public class FactionSelectionPanel extends CustomPanel implements
 
             tooltip.builder = (tp, exp) -> {
                 if (alreadyEmbargoed) {
-                    tp.addPara("Click to lift the embargo", pad);
+                    tp.addPara(str("uiEmbargoBtnTpTxt1"), pad);
                 } else {
-                    tp.addPara("Click to impose an embargo", pad);
+                    tp.addPara(str("uiEmbargoBtnTpTxt2"), pad);
                 }
             };
 

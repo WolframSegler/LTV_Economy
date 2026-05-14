@@ -45,6 +45,7 @@ import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class IndustryTooltips {
 	private static final Map<String, Object> hasPostDemandSectionMethodCache = new ArrayMap<>(12);
@@ -54,6 +55,24 @@ public class IndustryTooltips {
 	private static final Map<String, Object> addNonAICoreInstalledItemsMethodCache = new ArrayMap<>(12);
 	private static final Class<?>[] addNonAICoreInstalledItemsparamTypes = new Class<?>[]{
 		IndustryTooltipMode.class, TooltipMakerAPI.class, boolean.class};
+
+	private static final StatModValueGetter incomeValueGetter = new StatModValueGetter() {
+		public String getPercentValue(StatMod mod) {
+			return null;
+		}
+
+		public String getMultValue(StatMod mod) {
+			return null;
+		}
+
+		public Color getModColor(StatMod mod) {
+			return null;
+		}
+
+		public String getFlatValue(StatMod mod) {
+			return Misc.getWithDGS(mod.value) + Strings.C;
+		}
+	};
 
 	/**
      * @param ind The industry instance
@@ -141,11 +160,8 @@ public class IndustryTooltips {
 		// market.reapplyConditions();
 		// ind.reapply();
 
-		String type = "";
-		if (ind.isIndustry())
-			type = " - Industry";
-		if (ind.isStructure())
-			type = " - Structure";
+		final String type = ind.isIndustry() ? str("industryTooltipIndustryTxt") :
+			ind.isStructure() ? str("industryTooltipStructureTxt") : "";
 
 		tp.addTitle(ind.getCurrentName() + type, color);
 
@@ -197,7 +213,7 @@ public class IndustryTooltips {
 			if (num > max) {
 
 				num--;
-				tp.addPara("Maximum number of industries reached", negative, opad);
+				tp.addPara(str("industryTooltipMaxIndAmountReachedTxt"), negative, opad);
 			}
 		}
 
@@ -208,37 +224,33 @@ public class IndustryTooltips {
 			final int left = (int) ind.getDisruptedDays();
 			final String days = UIUtils.getDayOrDays(Math.max(1, left));
 
-			tp.addPara("Operations disrupted! %s " + days + " until return to normal function.",
-					opad, negative, highlight, Integer.toString(left));
+			tp.addPara(strf("industryTooltipOperationsDisruptedTxt", days), opad, negative, highlight, Integer.toString(left));
 		}
 
 		if (DebugFlags.COLONY_DEBUG || market.isPlayerOwned()) {
 			if (mode == IndustryTooltipMode.NORMAL) {
 				if (ind.getSpec().getUpgrade() != null && !ind.isBuilding()) {
-					tp.addPara("Click to manage or upgrade", positive, opad);
+					tp.addPara(str("industryTooltipClickManageUpgrade"), positive, opad);
 				} else {
-					tp.addPara("Click to manage", positive, opad);
+					tp.addPara(str("industryTooltipClickManage"), positive, opad);
 				}
 			}
 		}
 
 		if (mode == IndustryTooltipMode.QUEUED) {
-			tp.addPara("Click to remove or adjust position in queue", positive, opad);
-			tp.addPara("Currently queued for construction. Does not have any impact on the colony.", opad);
+			tp.addPara(str("industryTooltipQueuedSection1"), positive, opad);
+			tp.addPara(str("industryTooltipQueuedSection2"), opad);
 
 			final int left = Math.round((ind.getSpec().getBuildTime()));
-			tp.addPara("Requires %s " + UIUtils.getDayOrDays(left) + " to build.", opad, highlight, "" + left);
+			tp.addPara(strf("industryTooltipRequiredDaysToBuild", UIUtils.getDayOrDays(left)), opad, highlight, Integer.toString(left));
 
 		} else if (!ind.isFunctional() && mode == IndustryTooltipMode.NORMAL && !ind.isDisrupted()) {
-			tp.addPara(
-				"Currently under construction and not producing anything or providing other benefits.",
-				opad
-			);
+			tp.addPara(str("industryTooltipNormalSection1"), opad);
 
 			final float buildTime = (float) RolfLectionUtil.getPrivateVariable("buildTime", ind);
 			final int left = Math.round((buildTime - ((BaseIndustry)ind).getBuildProgress()));
 
-			tp.addPara("Requires %s more " + UIUtils.getDayOrDays(left) + " to finish building.", opad, highlight, "" + left);
+			tp.addPara(strf("industryTooltipNormalSection2", UIUtils.getDayOrDays(left)), opad, highlight, Integer.toString(left));
 		}
 
 		if (!ind.isAvailableToBuild() &&
@@ -254,8 +266,8 @@ public class IndustryTooltips {
 		boolean category = ind.getSpec().hasTag(Industries.TAG_PARENT);
 
 		if (!category) {
-			int credits = (int) Global.getSector().getPlayerFleet().getCargo().getCredits().get();
-			String creditsStr = Misc.getDGSCredits(credits);
+			final int credits = (int) Global.getSector().getPlayerFleet().getCargo().getCredits().get();
+			final String creditsStr = Misc.getDGSCredits(credits);
 			if (mode == IndustryTooltipMode.UPGRADE || mode == IndustryTooltipMode.ADD_INDUSTRY) {
 				final int cost = (int) ind.getBuildCost();
 				final String costStr = Misc.getDGSCredits(cost);
@@ -263,13 +275,11 @@ public class IndustryTooltips {
 				final int days = (int) ind.getBuildTime();
 				final String daysStr = UIUtils.getDayOrDays(days);
 
-				LabelAPI label = null;
+				final LabelAPI label;
 				if (mode == IndustryTooltipMode.UPGRADE) {
-					label = tp.addPara("%s and %s " + daysStr + " to upgrade. You have %s.", opad,
-							highlight, costStr, Integer.toString(days), creditsStr);
+					label = tp.addPara(strf("industryTooltipUpgradeTxt1", daysStr), opad, highlight, costStr, Integer.toString(days), creditsStr);
 				} else {
-					label = tp.addPara("%s and %s " + daysStr + " to build. You have %s.", opad,
-							highlight, costStr, Integer.toString(days), creditsStr);
+					label = tp.addPara(strf("industryTooltipUpgradeTxt2", daysStr), opad, highlight, costStr, Integer.toString(days), creditsStr);
 				}
 				label.setHighlight(costStr, Integer.toString(days), creditsStr);
 				if (credits >= cost) {
@@ -279,13 +289,13 @@ public class IndustryTooltips {
 				}
 			} else if (mode == IndustryTooltipMode.DOWNGRADE) {
 				if (ind.getSpec().getUpgrade() != null) {
-					float refundFraction = settings.getFloat("industryRefundFraction");
+					final float refundFraction = settings.getFloat("industryRefundFraction");
 
 					IndustrySpecAPI spec = settings.getIndustrySpec(ind.getSpec().getUpgrade());
 					int cost = (int) (spec.getCost() * refundFraction);
 					String refundStr = Misc.getDGSCredits(cost);
 
-					tp.addPara("%s refunded for downgrade.", opad, highlight, refundStr);
+					tp.addPara(str("industryTooltipDowngradeTxt1"), opad, highlight, refundStr);
 				}
 			}
 
@@ -296,47 +306,14 @@ public class IndustryTooltips {
 
 			if (!ind.getIncome().isUnmodified()) {
 				int income = ind.getIncome().getModifiedInt();
-				tp.addPara("Monthly income: %s", opad, highlight, Misc.getDGSCredits(income));
-				tp.addStatModGrid(300, 65, 10, pad, ind.getIncome(), true, new StatModValueGetter() {
-					public String getPercentValue(StatMod mod) {
-						return null;
-					}
-
-					public String getMultValue(StatMod mod) {
-						return null;
-					}
-
-					public Color getModColor(StatMod mod) {
-						return null;
-					}
-
-					public String getFlatValue(StatMod mod) {
-						return Misc.getWithDGS(mod.value) + Strings.C;
-					}
-				});
+				tp.addPara(str("industryTooltipMonthlyIncomeTxt"), opad, highlight, Misc.getDGSCredits(income));
+				tp.addStatModGrid(300, 65, 10, pad, ind.getIncome(), true, incomeValueGetter);
 			}
 
 			if (!ind.getUpkeep().isUnmodified()) {
 				int upkeep = ind.getUpkeep().getModifiedInt();
-				tp.addPara("Monthly upkeep: %s", opad, highlight, Misc.getDGSCredits(upkeep));
-				tp.addStatModGrid(300, 65, 10, pad, ind.getUpkeep(), true, new StatModValueGetter() {
-
-					public String getPercentValue(StatMod mod) {
-						return null;
-					}
-
-					public String getMultValue(StatMod mod) {
-						return null;
-					}
-
-					public Color getModColor(StatMod mod) {
-						return null;
-					}
-
-					public String getFlatValue(StatMod mod) {
-						return Misc.getWithDGS(mod.value) + Strings.C;
-					}
-				});
+				tp.addPara(str("industryTooltipMonthlyUpkeepTxt"), opad, highlight, Misc.getDGSCredits(upkeep));
+				tp.addStatModGrid(300, 65, 10, pad, ind.getUpkeep(), true, incomeValueGetter);
 			}
 
 			RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
@@ -357,11 +334,12 @@ public class IndustryTooltips {
         		}
 			}
 
+			final String perDaySuffix = str("industryPerDayProductionSuffix");
 			final int iconSize = 32;
 			final int itemsPerRow = 3;
 
 			if (!supplyList.isEmpty()) {
-				tp.addSectionHeading("Production", color, dark, Alignment.MID, opad);
+				tp.addSectionHeading(str("industryTooltipProductionHeaderTitle"), color, dark, Alignment.MID, opad);
 
 				final float startY = tp.getHeightSoFar() + opad;
 
@@ -393,7 +371,7 @@ public class IndustryTooltips {
 
 					// draw text
 					String txt = Strings.X + NumFormat.engNotate(amount);
-					LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
+					LabelAPI lbl = tp.addPara(txt + perDaySuffix, 0f, highlight, txt);
 
 					float textH = lbl.computeTextHeight(txt);
 					float textX = x + iconSize + pad;
@@ -417,7 +395,7 @@ public class IndustryTooltips {
 
 
 			if (!demandList.isEmpty() || hasPostDemandSection) {
-				tp.addSectionHeading("Demand & effects", color, dark, Alignment.MID, opad);
+				tp.addSectionHeading(str("industryTooltipDemandHeaderTitle"), color, dark, Alignment.MID, opad);
 				headerHeight = tp.getPrev().getPosition().getHeight();
 			}
 
@@ -460,7 +438,7 @@ public class IndustryTooltips {
 
 					// draw text
 					final String txt = Strings.X + NumFormat.engNotate(amount);
-					final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
+					final LabelAPI lbl = tp.addPara(txt + perDaySuffix, 0f, highlight, txt);
 
 					final float textH = lbl.computeTextHeight(txt);
 					final float textX = x + iconSize + pad;
@@ -483,9 +461,7 @@ public class IndustryTooltips {
 				ListenerUtil.addToIndustryTooltip(ind, mode, tp, ind.getTooltipWidth(), expanded);
 			}
 
-			tp.addPara("*Shown production and demand values are already adjusted based on current market"
-				+ "size and local conditions.",
-				gray, opad);
+			tp.addPara(str("industryTooltipIOValuesDisclaimer"), gray, opad);
 			tp.addSpacer(opad + pad);
 		}
 
@@ -507,7 +483,7 @@ public class IndustryTooltips {
 		final Color color = faction.getBaseUIColor();
 		final Color dark = faction.getDarkUIColor();
 		
-		final LabelAPI heading = tooltip.addSectionHeading("Items", color, dark, Alignment.MID, opad);
+		final LabelAPI heading = tooltip.addSectionHeading(str("industryTooltipItemHeaderTitle"), color, dark, Alignment.MID, opad);
 
 		boolean addedSomething = false;
 		if (ind.getAICoreId() != null) {
@@ -520,8 +496,7 @@ public class IndustryTooltips {
 		addedSomething |= r;
 		
 		if (!addedSomething) {
-			heading.setText("No items installed");
-			//tooltip.addPara("None.", opad);
+			heading.setText(str("industryTooltipNoItemsTxt"));
 		}
 	}
 
@@ -530,40 +505,42 @@ public class IndustryTooltips {
     ) {
 		if (mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
 			if (coreId == null) {
-				tooltip.addPara("No AI core currently assigned. Click to assign an AI core from your cargo.", opad);
+				tooltip.addPara(str("industryTooltipNoAICoresInstalledTxt"), opad);
 				return;
 			}
 		}
 		
-		boolean alpha = coreId.equals(Commodities.ALPHA_CORE); 
-		boolean beta = coreId.equals(Commodities.BETA_CORE); 
-		boolean gamma = coreId.equals(Commodities.GAMMA_CORE);
-		
-		if (alpha) {
+		switch (coreId) {
+		case Commodities.ALPHA_CORE:
 			addAlphaCoreDescription(tooltip, mode, ind);
-		} else if (beta) {
+			break;
+
+		case Commodities.BETA_CORE:
 			addBetaCoreDescription(tooltip, mode, ind);
-		} else if (gamma) {
+			break;
+
+		case Commodities.GAMMA_CORE:
 			addGammaCoreDescription(tooltip, mode, ind);
-		} else {
-            RolfLectionUtil.getMethodAndInvokeDirectly(
-			"addUnknownCoreDescription", ind, coreId, tooltip, mode);
+			break;
+	
+		default:
+			RolfLectionUtil.getMethodAndInvokeDirectly(
+				"addUnknownCoreDescription", ind, coreId, tooltip, mode);
+			break;
 		}
 	}
 
 	public static void addAlphaCoreDescription(
         TooltipMakerAPI tp, AICoreDescriptionMode mode, Industry ind
     ) {
+		final String pre = (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) ?
+			str("industryTooltipAlphaCoreDesc1"):
+			str("industryTooltipAlphaCoreDesc2");
 
-		String pre = "Alpha-level AI core currently assigned. ";
-		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
-			pre = "Alpha-level AI core. ";
-		}
 		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
-			CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
-			TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
-			text.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. " +
-					"Increases production by %s. All modifiers are multiplicative", 0f, highlight,
+			final CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
+			final TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
+			text.addPara(pre + str("industryTooltipAlphaCoreDesc3"), 0f, highlight,
 					String.valueOf(Math.round((1f - ALPHA_CORE_INPUT_REDUCTION) * 100f)) + "%",
 					String.valueOf(Math.round((1f - ALPHA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%",
 					String.valueOf(Math.round((ALPHA_CORE_PRODUCTION_BOOST - 1f) * 100f)) + "%");
@@ -571,8 +548,7 @@ public class IndustryTooltips {
 			return;
 		}
 
-		tp.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. " +
-				"Increases production by %s. All modifiers are multiplicative", 0f, highlight,
+		tp.addPara(pre + str("industryTooltipAlphaCoreDesc3"), 0f, highlight,
 				String.valueOf(Math.round((1f - ALPHA_CORE_INPUT_REDUCTION) * 100f)) + "%",
 				String.valueOf(Math.round((1f - ALPHA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%",
 				String.valueOf(Math.round((ALPHA_CORE_PRODUCTION_BOOST - 1f) * 100f)) + "%");
@@ -581,23 +557,21 @@ public class IndustryTooltips {
 	public static void addBetaCoreDescription(
         TooltipMakerAPI tp, AICoreDescriptionMode mode, Industry ind
     ) {
-		String pre = "Beta-level AI core currently assigned. ";
-		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
-			pre = "Beta-level AI core. ";
-		}
+		final String pre = (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) ?
+			str("industryTooltipBetaCoreDesc1"):
+			str("industryTooltipBetaCoreDesc2");
+			
 		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
-			CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
-			TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
-			text.addPara(pre + "Reduces demand by %s.Reduces upkeep cost by %s. All modifiers are multiplicative", opad,
-					highlight,
+			final CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
+			final TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
+			text.addPara(pre + str("industryTooltipBetaCoreDesc3"), opad, highlight,
 					String.valueOf(Math.round((1f - BETA_CORE_INPUT_REDUCTION) * 100f)) + "%",
 					String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%");
 			tp.addImageWithText(opad);
 			return;
 		}
 
-		tp.addPara(pre + "Reduces demand by %s. Reduces upkeep cost by %s. All modifiers are multiplicative", opad,
-				highlight,
+		tp.addPara(pre + str("industryTooltipBetaCoreDesc3"), opad, highlight,
 				String.valueOf(Math.round((1f - BETA_CORE_INPUT_REDUCTION) * 100f)) + "%",
 				String.valueOf(Math.round((1f - BETA_CORE_UPKEEP_REDUCTION_MULT) * 100f)) + "%");
 	}
@@ -605,21 +579,21 @@ public class IndustryTooltips {
 	public static void addGammaCoreDescription(
         TooltipMakerAPI tp, AICoreDescriptionMode mode, Industry ind
     ) {
-		String pre = "Gamma-level AI core currently assigned. ";
-		if (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) {
-			pre = "Gamma-level AI core. ";
-		}
-		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
-			CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
-			TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
+		final String pre = (mode == AICoreDescriptionMode.MANAGE_CORE_DIALOG_LIST || mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP) ?
+			str("industryTooltipGammaCoreDesc1"):
+			str("industryTooltipGammaCoreDesc2");
 
-			text.addPara(pre + "Reduces demand by %s. All modifiers are multiplicative", opad, highlight,
+		if (mode == AICoreDescriptionMode.INDUSTRY_TOOLTIP || mode == AICoreDescriptionMode.MANAGE_CORE_TOOLTIP) {
+			final CommoditySpecAPI coreSpec = settings.getCommoditySpec(ind.getAICoreId());
+			final TooltipMakerAPI text = tp.beginImageWithText(coreSpec.getIconName(), 48);
+
+			text.addPara(pre + str("industryTooltipGammaCoreDesc3"), opad, highlight,
 					String.valueOf(Math.round((1f - GAMMA_CORE_INPUT_REDUCTION) * 100f)) + "%");
 			tp.addImageWithText(opad);
 			return;
 		}
 
-		tp.addPara(pre + "Reduces demand by %s. All modifiers are multiplicative", opad, highlight,
+		tp.addPara(pre + str("industryTooltipGammaCoreDesc3"), opad, highlight,
 				String.valueOf(Math.round((1f - GAMMA_CORE_INPUT_REDUCTION) * 100f)) + "%");
 	}
 
@@ -629,7 +603,7 @@ public class IndustryTooltips {
         if (!ind.isImproved()) return;
 
 		tooltip.addSectionHeading(
-            "Improvements made", Misc.getStoryOptionColor(), Misc.getStoryDarkColor(), Alignment.MID, opad
+            str("industryTooltipImprovementsMadeTxt"), Misc.getStoryOptionColor(), Misc.getStoryDarkColor(), Alignment.MID, opad
         );
 		
 		tooltip.addSpacer(opad);
@@ -642,14 +616,15 @@ public class IndustryTooltips {
 		float initPad = 0f;
 
 		boolean addedSomething = false;
-        boolean canImprove = (boolean) RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
+        final boolean canImprove = (boolean) RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
 			"canImproveToIncreaseProduction", ind);
+
 		if (canImprove) {
 			if (mode == ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
-				tp.addPara("Production increased by %s.", initPad, highlight,
+				tp.addPara(str("industryTooltipImproveProdTxt"), initPad, highlight,
 						Strings.X + DEFAULT_IMPROVE_PRODUCTION_BONUS);
 			} else {
-				tp.addPara("Increases production by %s.", initPad, highlight,
+				tp.addPara(str("industryTooltipCanImproveProdTxt"), initPad, highlight,
 						Strings.X + DEFAULT_IMPROVE_PRODUCTION_BONUS);
 			}
 			initPad = opad;
@@ -657,10 +632,8 @@ public class IndustryTooltips {
 		}
 
 		if (mode != ImprovementDescriptionMode.INDUSTRY_TOOLTIP) {
-
-			tp.addPara("Each improvement made at a colony doubles the number of " +
-					"" + Misc.STORY + " points required to make an additional improvement.", initPad,
-					Misc.getStoryOptionColor(), Misc.STORY + " points");
+			final String storyPointStr = str("industryTooltipStoryPointTxt");
+			tp.addPara(strf("industryTooltipImprovementDisclaimer", storyPointStr), initPad, Misc.getStoryOptionColor(), storyPointStr);
 			addedSomething = true;
 		}
 		if (!addedSomething) {

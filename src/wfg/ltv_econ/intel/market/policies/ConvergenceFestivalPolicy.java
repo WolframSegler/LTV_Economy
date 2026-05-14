@@ -3,6 +3,7 @@ package wfg.ltv_econ.intel.market.policies;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -42,12 +43,12 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         super.createTooltip(data, tp);
         
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Happiness", String.format("%+.2f", HAPPINESS_BUFF));
-        tp.addToGrid(0, 1, "Social Cohesion", String.format("%+.2f", COHESION_BUFF));
-        tp.addToGrid(0, 2, "Class Consciousness", String.format("%.3f", CLASS_DEBUFF));
-        tp.addToGrid(0, 3, "Local Production", Integer.toString(PRODUCTION_DEBUFF) + "%", negative);
+        tp.addToGrid(0, 0, str("marketPopDataHappinessTxt"), String.format("%+.2f", HAPPINESS_BUFF));
+        tp.addToGrid(0, 1, str("marketPopDataCohesionTxt"), String.format("%+.2f", COHESION_BUFF));
+        tp.addToGrid(0, 2, str("marketPopDataConsciousness"), String.format("%.3f", CLASS_DEBUFF));
+        tp.addToGrid(0, 3, str("marketPolicyLocalProductionTxt"), Integer.toString(PRODUCTION_DEBUFF) + "%", negative);
 
         tp.addGrid(0);
     }

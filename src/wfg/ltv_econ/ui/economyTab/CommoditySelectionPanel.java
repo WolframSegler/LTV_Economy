@@ -35,6 +35,7 @@ import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.NativeUiUtils;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class CommoditySelectionPanel extends CustomPanel implements
     HasOutline, HasBackground, UIBuildableAPI
@@ -107,11 +108,11 @@ public class CommoditySelectionPanel extends CustomPanel implements
 
             tooltip.builder = (tp, exp) -> {
                 if (UIUtils.canViewPrices()) {
-                    tp.addPara("Ctrl + Click to view global market info", pad, highlight, new String[]{
-                        "Ctrl", "Click"
+                    tp.addPara(str("uiComSelectionTxt1"), pad, highlight, new String[]{
+                        str("uiCtrlTxt"), str("uiClickTxt")
                     });
                 } else {
-                    final String text = "Must be in range of a comm relay to view global market info";
+                    final String text = str("uiComSelectionTxt2");
                     tp.addPara(text, pad, negative, text);
                 }
             };

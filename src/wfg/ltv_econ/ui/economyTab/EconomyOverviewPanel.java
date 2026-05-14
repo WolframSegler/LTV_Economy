@@ -11,6 +11,8 @@ import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.TradeFlowOptions;
 import wfg.ltv_econ.ui.reusable.AbstractManagementPanel;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 public class EconomyOverviewPanel extends AbstractManagementPanel {
 
     public EconomyOverviewPanel(UIPanelAPI parent) {
@@ -19,17 +21,17 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
     }
 
     protected final String getTitle() {
-        return "Economy Overview";
+        return str("uiEconOverviewTitle");
     }
 
     protected final String getSubtitle() {
-        return "Sector oversight and administration";
+        return str("uiEconOverviewSubtitle");
     }
 
     protected final List<NavButtonDef> getNavButtonDefs() {
         final List<NavButtonDef> defs = new ArrayList<>();
 
-        defs.add(new NavButtonDef("Commodity Flows", Keyboard.KEY_Q,
+        defs.add(new NavButtonDef(str("uiComFlowsBtnTitle"), Keyboard.KEY_Q,
             () -> {
                 final GlobalCommodityFlow content = new GlobalCommodityFlow(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -42,7 +44,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef("Trade Routes", Keyboard.KEY_W,
+        defs.add(new NavButtonDef(str("uiTradeRoutesBtnTitle"), Keyboard.KEY_W,
             () -> {
                 final ComTradeFlowMap content = new ComTradeFlowMap(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -55,7 +57,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef("Population", Keyboard.KEY_A,
+        defs.add(new NavButtonDef(str("uiPopulationBtnTitle"), Keyboard.KEY_A,
             () -> {
                 final SectorPopulationPanel content = new SectorPopulationPanel(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -64,7 +66,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef("Debug", Keyboard.KEY_S,
+        defs.add(new NavButtonDef(str("uiDebugBtnTitle"), Keyboard.KEY_S,
             () -> {
                 final EconomySettingsPanel content = new EconomySettingsPanel(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H

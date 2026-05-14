@@ -2,6 +2,7 @@ package wfg.ltv_econ.economy.raids;
 
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.Random;
 
@@ -292,20 +293,15 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
 
     @Override
     public final void createTooltip(TooltipMakerAPI tp, boolean expanded) {
-        tp.addPara("Ship weapons, fighter LPCs, and hullmod specs. Availability is based on the \""
-            + cell.spec.getName() + "\" commodity.", 0f
-        );
-        tp.addPara( "The colony faction's doctrine affects the number of weapons vs fighter LPCs acquired. " +
-            "Higher ship quality increases the probability of finding modspecs..", opad
-        );
+        tp.addPara(strf("weaponsRaidObjectiveTp1", cell.spec.getName()), 0f);
+        tp.addPara(str("weaponsRaidObjectiveTp2"), opad);
+
         if (!Misc.hasHeavyIndustry(market) && !Misc.isMilitary(market)) {
-            tp.addPara("This colony does not have heavy industry or a military presence and has no access to high-tier ship equipment.",
-                negative, opad
-            );
+            tp.addPara(str("weaponsRaidObjectiveTp3"), negative, opad);
         } else if (Misc.hasHeavyIndustry(market)) {
-            tp.addPara("This colony has heavy industry and high-tier equipment may be found.", positive, opad);
+            tp.addPara(str("weaponsRaidObjectiveTp4"), positive, opad);
         } else if (Misc.isMilitary(market)) {
-            tp.addPara("This colony has a military presence and high-tier equipment may be found.", positive, opad);
+            tp.addPara(str("weaponsRaidObjectiveTp5"), positive, opad);
         }
 
         if (expanded) CommodityCellGroundRaidObjective.addStockpileLegend(tp, expanded);

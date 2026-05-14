@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -66,7 +67,7 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
         final Color subassemblyColor = subassembly.getStored() >= SUBASSEMBLY_COMPONENTS_COST ? highlight : negative;
         
         final int cols = 2;
-        tp.addPara("Required resources to start", pad);
+        tp.addPara(str("marketPolicyRequiredResourcesTxt"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
         tp.addToGrid(0, 0, metals.spec.getName(), Integer.toString(METALS_COST), metalsColor);
         tp.addToGrid(0, 1, rare_metals.spec.getName(), Integer.toString(RARE_METALS_COST), rareMetalsColor);
@@ -76,6 +77,6 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
 
         tp.addGrid(0);
 
-        tp.addPara("This policy can only be activated at the faction capital, and resources are drawn from its stockpiles.", gray, opad);
+        tp.addPara(str("marketPolicyExpandShipyardsDisclaimer"), gray, opad);
     }
 }

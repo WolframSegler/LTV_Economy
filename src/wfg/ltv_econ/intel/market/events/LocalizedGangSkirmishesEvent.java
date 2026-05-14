@@ -12,6 +12,7 @@ import wfg.ltv_econ.intel.market.events.LocalizedGangSkirmishesEvent;
 import wfg.native_ui.util.Arithmetic;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 
@@ -89,13 +90,13 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
         tp.addPara(spec.description, pad);
 
         final int cols = 2;
-        tp.addPara("Daily effects", opad);
+        tp.addPara(str("marketEventDailyEffects"), opad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Happiness", String.format("%.1f", HAPPINESS_DEBUFF), negative);
-        tp.addToGrid(0, 1, "Pop. growth", String.format("%d", GROWTH_DEBUFF), negative);
+        tp.addToGrid(0, 0, str("marketPopDataHappinessTxt"), String.format("%.1f", HAPPINESS_DEBUFF), negative);
+        tp.addToGrid(0, 1, str("marketEventPopGrowthTxt"), String.format("%d", GROWTH_DEBUFF), negative);
         tp.addGrid(0);
 
-        tp.addPara("Active for %s more days", opad, negative, Integer.toString(activeDaysRemaining));
+        tp.addPara(str("marketEventActiveForTxt"), opad, negative, Integer.toString(activeDaysRemaining));
     }
 
     private class GangSkirmishesImmigration implements MarketImmigrationModifier {

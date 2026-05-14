@@ -6,6 +6,7 @@ import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.constants.strings.LocalizedStrings;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.ui.fleet.FiltersDialog;
 import wfg.native_ui.ui.core.UIBuildableAPI;
@@ -24,7 +25,7 @@ public class TradeFlowOptions extends CustomPanel {
         );
         add(options.getPanel()).inBL(0f, 0f);
 
-        final DockButton<FiltersDialog> filterBtn = new DockButton<>(m_panel, width, FILTERS_BTN_H, "Filters",
+        final DockButton<FiltersDialog> filterBtn = new DockButton<>(m_panel, width, FILTERS_BTN_H, LocalizedStrings.str("filtersTitle"),
             null, () -> new FiltersDialog(content)
         );
         filterBtn.cutStyle = CutStyle.TL_TR;

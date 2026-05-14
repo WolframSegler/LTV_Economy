@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.economyTab;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +53,7 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
         }
         Collections.sort(data, (a, b) -> Float.compare(b.fraction, a.fraction));
 
-        final LabelAPI title = settings.createLabel("Sector Population", Fonts.ORBITRON_24AABOLD);
+        final LabelAPI title = settings.createLabel(str("uiSectorPopTitle"), Fonts.ORBITRON_24AABOLD);
         title.setColor(base);
         title.setAlignment(Alignment.TMID);
         add(title).inTL(opad*2, opad*2).setSize(PIECHART_S, TITLE_H);
@@ -62,13 +63,13 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
 
         chart.tooltip.width = 360;
         chart.tooltip.builder = (tp, exp) -> {
-            tp.addTitle("Sector Population Breakdown", base);
+            tp.addTitle(str("uiSectorPopBreakdownTitle"), base);
             
-            tp.addPara("Shows the population of the sector with the share of each faction.", pad);
+            tp.addPara(str("uiSectorPopBreakdownTpTxt1"), pad);
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
-                    "Faction", 200, "Population", 100
+                    str("mapFactionTitle"), 200, str("uiTablePopulationTitle"), 100
                 }
             );
 
@@ -99,7 +100,7 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
         }
         Collections.sort(data, (a, b) -> Float.compare(b.fraction, a.fraction));
 
-        final LabelAPI title = settings.createLabel("Sector Workforce", Fonts.ORBITRON_24AABOLD);
+        final LabelAPI title = settings.createLabel(str("uiSectorWorkforceTitle"), Fonts.ORBITRON_24AABOLD);
         title.setColor(base);
         title.setAlignment(Alignment.TMID);
         add(title).inTL(opad*4 + PIECHART_S, opad*2).setSize(PIECHART_S, TITLE_H);
@@ -109,13 +110,13 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
 
         chart.tooltip.width = 360;
         chart.tooltip.builder = (tp, exp) -> {
-            tp.addTitle("Sector Workforce Breakdown", base);
+            tp.addTitle(str("uiSectorWorkforceBreakdownTitle"), base);
             
-            tp.addPara("Shows the worker population of the sector with the share of each faction.", pad);
+            tp.addPara(str("uiSectorWorkforceBreakdownTpTxt"), pad);
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
-                    "Faction", 200, "Workers", 100
+                    str("mapTradeFaction"), 200, str("uiTableWorkersTitle"), 100
                 }
             );
 

@@ -1,5 +1,7 @@
 package wfg.ltv_econ.ui.factionTab.dialog;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 import wfg.ltv_econ.ui.fleet.InventoryShipWidget;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.widget.Slider;

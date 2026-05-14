@@ -20,6 +20,7 @@ import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepRewards;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
+// TODO externalize strings or place into rules.csv
 public class BresVitalisBarEvent extends BaseBarEvent {
 
     private enum OptionID {

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -751,10 +752,10 @@ public class ComTradeFlowMap extends CustomPanel implements
 
             final SectorAPI sector = Global.getSector();
 
-            tp.addPara("Trade Route", base, 0f);
+            tp.addPara(str("mapTradeRouteTitle"), base, 0f);
 
             tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
-                "Faction", 140, "Volume", 70
+                str("mapFactionTitle"), 140, str("mapVolumeTitle"), 70
             });
             for (var entry : entries) {
                 final double value = entry.getValue();
@@ -781,7 +782,7 @@ public class ComTradeFlowMap extends CustomPanel implements
             tp.addPara(data.system.getName(), base, 0f);
 
             tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
-                "Colony", 140, "Net Trade", 70
+                str("mapColonyTitle"), 140, str("mapNetTradeTitle"), 70
             });
             for (var entry : entries) {
                 final MarketAPI market = entry.getKey();

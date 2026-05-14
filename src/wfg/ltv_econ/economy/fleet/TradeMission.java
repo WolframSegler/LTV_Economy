@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.fleet;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -92,13 +94,13 @@ public class TradeMission implements Serializable {
 
     /** Order matters for the ordinal */
     public enum MissionStatus {
-        SCHEDULED("Scheduled"),
-        IN_SRC_ORBIT_LOADING("Loading at Source"),
-        IN_TRANSIT("In Transit"),
-        IN_DST_ORBIT_UNLOADING("Unloading at Destination"),
-        DELIVERED("Delivered"),
-        CANCELLED("Cancelled"),
-        LOST("Lost");
+        SCHEDULED(str("tradeMissionStatusScheduled")),
+        IN_SRC_ORBIT_LOADING(str("tradeMissionStatusLoading")),
+        IN_TRANSIT(str("tradeMissionStatusTransit")),
+        IN_DST_ORBIT_UNLOADING(str("tradeMissionStatusUnloading")),
+        DELIVERED(str("tradeMissionStatusDelivered")),
+        CANCELLED(str("tradeMissionStatusCancelled")),
+        LOST(str("tradeMissionStatusLost"));
         
         private final String displayText;
         

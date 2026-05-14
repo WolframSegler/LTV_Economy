@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.events;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -79,9 +80,9 @@ public class GeneralStrikeEvent extends MarketEvent {
 
         tp.addPara(spec.description, pad);
 
-        tp.addPara("Production reduced to %s", pad, negative, String.format("%.0f%%", PROD_MULT * 100f));
+        tp.addPara(str("marketEventProdReducedToTxt"), pad, negative, String.format("%.0f%%", PROD_MULT * 100f));
 
-        tp.addPara("Active for %s more days", opad, negative, Integer.toString(activeDaysRemaining));
+        tp.addPara(str("marketEventActiveForTxt"), opad, negative, Integer.toString(activeDaysRemaining));
     }
 
     private class GeneralStrikeIntel extends BaseIntelPlugin {
@@ -93,7 +94,7 @@ public class GeneralStrikeEvent extends MarketEvent {
 
         @Override
         public final String getSmallDescriptionTitle() {
-            return "General Strike - " + market.getName();
+            return str("marketEventGeneralStrikeTitle") + market.getName();
         }
         
         @Override

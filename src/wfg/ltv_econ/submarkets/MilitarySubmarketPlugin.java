@@ -1,5 +1,6 @@
 package wfg.ltv_econ.submarkets;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 import static wfg.ltv_econ.constants.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
 import static wfg.ltv_econ.constants.strings.Income.getDesc;
 import static wfg.native_ui.util.UIConstants.negative;
@@ -111,7 +112,7 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 		if (submarket.getFaction().getId().equals(Factions.LUDDIC_CHURCH)) {
 			return "Knights of Ludd";
 		}
-		return Misc.ucFirst(submarket.getFaction().getPersonNamePrefix()) + "\n" + "Military";
+		return Misc.ucFirst(submarket.getFaction().getPersonNamePrefix()) + "\n" + str("submarketMilitary");
 	}
 
 	protected boolean requiresCommission(RepLevel req) {
@@ -186,15 +187,15 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 
 		if (req != null) {
 			if (requiresCommission(req)) {
-				return "Req: " +
+				return str("requiredTxt") +
 						submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase() + ", " +
-						" commission";
+						" " + str("commissionTxt");
 			}
-			return "Req: " + 
+			return str("requiredTxt") + 
 					submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase();
 		}
 		
-		return "Illegal to trade in " + stack.getDisplayName() + " here";
+		return strf("submarketIllegalToTradeTxt", stack.getDisplayName());
 	}
 	
 	public Highlights getIllegalTransferTextHighlights(CargoStackAPI stack, TransferAction action) {
@@ -206,7 +207,7 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 				h.append(submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase(), negative);
 			}
 			if (requiresCommission(req) && !hasCommission()) {
-				h.append("commission", negative);
+				h.append(str("commissionTxt"), negative);
 			}
 			return h;
 		}
@@ -278,20 +279,18 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 				Global.getSector().getFaction(Factions.PLAYER)
 			);
 			if (!level.isAtWorst(req)) {
-				str += "Req: " + submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase();				
+				str += str("requiredTxt") + submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase();				
 			}
 			if (requiresCommission(req) && !hasCommission()) {
 				if (!str.isEmpty()) str += "\n";
-				str += "Req: " + submarket.getFaction().getDisplayName() + " - " + "commission";
+				str += str("requiredTxt") + submarket.getFaction().getDisplayName() + " - " + str("commissionTxt");
 			}
 			return str;
 		}
 		
-		if (action == TransferAction.PLAYER_BUY) {
-			return "Illegal to buy";
-		} else {
-			return "Illegal to sell";
-		}
+		return action == TransferAction.PLAYER_BUY ? 
+			str("illegalToBuyTxt"):
+			str("illegalToSellTxt");
 	}
 
 	public Highlights getIllegalTransferTextHighlights(FleetMemberAPI member, TransferAction action) {
@@ -304,10 +303,10 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 				Global.getSector().getFaction(Factions.PLAYER)
 			);
 			if (!level.isAtWorst(req)) {
-				h.append("Req: " + submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase(), negative);
+				h.append(str("requiredTxt") + submarket.getFaction().getDisplayName() + " - " + req.getDisplayName().toLowerCase(), negative);
 			}
 			if (requiresCommission(req) && !hasCommission()) {
-				h.append("Req: " + submarket.getFaction().getDisplayName() + " - commission", negative);
+				h.append(str("requiredTxt") + submarket.getFaction().getDisplayName() + " - "+str("commissionTxt"), negative);
 			}
 			return h;
 		}
@@ -343,10 +342,10 @@ public class MilitarySubmarketPlugin extends BaseSubmarketPlugin {
 	
 	public String getTooltipAppendix(CoreUIAPI ui) {
 		if (!isEnabled(ui)) {
-			return "Requires: " + submarket.getFaction().getDisplayName() + " - " + minStanding.getDisplayName().toLowerCase();
+			return str("requiredTxtFull") + submarket.getFaction().getDisplayName() + " - " + minStanding.getDisplayName().toLowerCase();
 		}
 		if (ui.getTradeMode() == CoreUITradeMode.SNEAK) {
-			return "Requires: proper docking authorization";
+			return str("submarketProperDockingTxt");
 		}
 		return null;
 	}

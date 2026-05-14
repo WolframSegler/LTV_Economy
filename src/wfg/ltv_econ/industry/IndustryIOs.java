@@ -39,26 +39,7 @@ import wfg.native_ui.util.ArrayMap;
  * 
  * <p>This class serves as a precomputed wrapper around <code>IndustryConfig</code> data. 
  * It stores base production values and input requirements for all industries, 
- * allowing fast, reusable access without recalculating values each game cycle.</p>
- * 
- * <p>Features:</p>
- * <ul>
- *   <li>Pre-calculated mapping of industry outputs: 
- *       <code>Map&lt;industryID, Map&lt;outputID, baseOutput&gt;&gt;</code></li>
- *   <li>Pre-calculated mapping of inputs per output: 
- *       <code>Map&lt;industryID, Map&lt;outputID, Map&lt;inputID, baseInput&gt;&gt;&gt;</code></li>
- *   <li>Reverse lookup table from inputs to dependent outputs: 
- *       <code>Map&lt;inputID, List&lt;outputID&gt;&gt;</code></li>
- *   <li>Singleton-style access for global usage across the mod</li>
- *   <li>Getter methods that respect market conditions, legality, and market size scaling</li>
- * </ul>
- * 
- * <p>Usage:</p>
- * <ol>
- *   <li>Query output values using <code>getOutput(Industry, MarketAPI, String)</code>.</li>
- *   <li>Query input requirements using <code>getInput(Industry, MarketAPI, String, String)</code> or 
- *       <code>getInput(Industry, MarketAPI, String)</code> for cumulative input demand.</li>
- * </ol>
+ * allowing fast, reusable access.</p>
  */
 public class IndustryIOs {
     private static final Object MARKET_SIZE_FIELD = RolfLectionUtil.getFieldByName("size", Market.class);

@@ -9,6 +9,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class ExtendedShiftsPolicy extends MarketPolicy {
 
@@ -48,12 +49,12 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
         super.createTooltip(data, tp);
         
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Production", "+" + PRODUCTION_BUFF + "%");
-        tp.addToGrid(0, 1, "Health", String.format("%+.2f", HEALTH_DEBUFF), negative);
-        tp.addToGrid(0, 2, "Happiness", String.format("%+.1f", HAPPINESS_DEBUFF), negative);
-        tp.addToGrid(0, 3, "Class Consciousness", String.format("%+.2f", CLASS_BUFF), negative);
+        tp.addToGrid(0, 0, str("marketPolicyLocalProductionTxt"), "+" + PRODUCTION_BUFF + "%");
+        tp.addToGrid(0, 1, str("marketPopDataHealthTxt"), String.format("%+.2f", HEALTH_DEBUFF), negative);
+        tp.addToGrid(0, 2, str("marketPopDataHappinessTxt"), String.format("%+.1f", HAPPINESS_DEBUFF), negative);
+        tp.addToGrid(0, 3, str("marketPopDataConsciousness"), String.format("%+.2f", CLASS_BUFF), negative);
 
         tp.addGrid(0);
     }

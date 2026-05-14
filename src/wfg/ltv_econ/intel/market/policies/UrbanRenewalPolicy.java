@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.policies;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
@@ -47,12 +48,12 @@ public class UrbanRenewalPolicy extends MarketPolicy {
         super.createTooltip(data, tp);
         
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Population Growth", "+"+POP_GROWTH_BUFF);
-        tp.addToGrid(0, 1, "Health", String.format("%+.2f", HEALTH_BUFF));
-        tp.addToGrid(0, 2, "Happiness", String.format("%+.1f", HAPPINESS_BUFF));
-        tp.addToGrid(0, 3, "Class Consciousness", String.format("%+.3f", CLASS_DEBUFF));
+        tp.addToGrid(0, 0, str("marketEventPopGrowthTxt"), "+"+POP_GROWTH_BUFF);
+        tp.addToGrid(0, 1, str("marketPopDataHealthTxt"), String.format("%+.2f", HEALTH_BUFF));
+        tp.addToGrid(0, 2, str("marketPopDataHappinessTxt"), String.format("%+.1f", HAPPINESS_BUFF));
+        tp.addToGrid(0, 3, str("marketPopDataConsciousness"), String.format("%+.3f", CLASS_DEBUFF));
 
         tp.addGrid(0);
     }

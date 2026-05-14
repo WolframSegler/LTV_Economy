@@ -20,6 +20,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerso
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
+// TODO externalize strings or place into rules.csv
 public class ConvergenceFestivalBarEvent extends BaseBarEventWithPerson {
     private enum OptionID {
         APPROACH_PERFORMER,

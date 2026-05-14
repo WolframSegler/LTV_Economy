@@ -1,6 +1,7 @@
 package wfg.ltv_econ.economy.fleet;
 
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,30 +50,29 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         }
     }
 
-    // TODO continue string externalization from here
     @Override
     protected String getStartingActionText(RouteSegment segment) {
         if (getMission().src == null) return super.getStartingActionText(segment);
-        return "loading " + getCargoList(segment) + " at " + getMission().src.getName();
+        return strf("econFleetAIstartingActionText", getCargoList(segment), getMission().src.getName());
     }
 
     @Override
     protected String getEndingActionText(RouteSegment segment) {
         if (getMission().src == null) return super.getEndingActionText(segment);
-        return "unloading " + getCargoList(segment) + " at " + getMission().src.getName();
+        return strf("econFleetAIendingActionText", getCargoList(segment), getMission().dest.getName());
     }
 
     @Override
     protected String getTravelActionText(RouteSegment segment) {
         if (getMission().dest == null) return super.getTravelActionText(segment);
-        return "delivering " + getCargoList(segment) + " to " + getMission().dest.getName();
+        return strf("econFleetAItravelActionText", getCargoList(segment), getMission().dest.getName());
     }
 
     @Override
     protected String getInSystemActionText(RouteSegment segment) {
         if (getMission().dest == null) return super.getInSystemActionText(segment);
         if (segment.getId() == MissionStatus.IN_DST_ORBIT_UNLOADING.ordinal()) {
-            return "unloading " + getCargoList(segment) + " at " + getMission().dest.getName();
+            return strf("econFleetAIendingActionText", getCargoList(segment), getMission().dest.getName());
         }
 
         return super.getInSystemActionText(segment);
@@ -184,7 +184,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
 
         if (cargo.size() > 4 && strings.size() > 2) {
             strings = new ArrayList<>(strings.subList(0, 2));
-            strings.add("other commodities");
+            strings.add(str("econFleetAIotherCommoditiesTxt"));
         }
         return Misc.getAndJoined(strings);
     }

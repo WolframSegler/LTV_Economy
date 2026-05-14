@@ -2,6 +2,7 @@ package wfg.ltv_econ.plugins;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constants.Mods.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.ModManagerAPI;
@@ -21,23 +22,25 @@ public class TitleScreenWarningPlugin extends BaseEveryFrameCombatPlugin {
         final ModManagerAPI manager = settings.getModManager();
 
         boolean showWarnings = false;
-        final StringBuilder txt = new StringBuilder("Warning!");
+        final StringBuilder txt = new StringBuilder(str("warningTitle"));
         if (manager.isModEnabled(GRAND_COL)) {
             showWarnings = true;
-            txt.append("\n\nLTV-Economy already has a scroll bar for industries."+
-                " Using Grand.Colonies will break the game."
-            );
+            txt.append(str("warningTxtGrandColonies"));
         }
 
         if (manager.isModEnabled(ASTRAL_ASCENT)) {
             showWarnings = true;
-            txt.append("\n\nAstral Ascension is not supported by LTV-Economy."+
-                " Use at your own risk."
-            );
+            txt.append(str("warningTxtAstralAscension"));
         }
+
+        if (manager.isModEnabled(AOTD_CBB) || manager.isModEnabled(AOTD_QOL) || manager.isModEnabled(AOTD_SOP) || manager.isModEnabled(AOTD_VOK) || manager.isModEnabled(AOTD_VOS)) {
+            showWarnings = true;
+            txt.append(str("warningTxtAOTD"));
+        }
+
         if (!showWarnings) return;
 
-        final DialogPanel warningPanel = new DialogPanel(null, txt.toString(), "Dismiss");
+        final DialogPanel warningPanel = new DialogPanel(null, txt.toString(), str("dismissTxt"));
         warningPanel.setConfirmShortcut();
         warningPanel.backgroundDimAmount = 0f;
         warningPanel.holo.borderAlpha = 0.6f;

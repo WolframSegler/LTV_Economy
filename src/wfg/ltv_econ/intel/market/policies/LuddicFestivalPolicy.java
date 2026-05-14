@@ -5,6 +5,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.ltv_econ.economy.PlayerMarketData;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class LuddicFestivalPolicy extends MarketPolicy {
     public static final float HAPPINESS_BUFF = 0.6f;
@@ -28,11 +29,11 @@ public class LuddicFestivalPolicy extends MarketPolicy {
         super.createTooltip(data, tp);
 
         final int cols = 2;
-        tp.addPara("Daily effects", pad);
+        tp.addPara(str("marketEventDailyEffects"), pad);
         tp.beginGridFlipped(250f, cols, 60f, pad);
-        tp.addToGrid(0, 0, "Happiness", String.format("%+.1f", HAPPINESS_BUFF));
-        tp.addToGrid(0, 1, "Social Cohesion", String.format("%+.1f", COHESION_BUFF));
-        tp.addToGrid(0, 2, "Class Consciousness", String.format("%+.3f", CLASS_BUFF), negative);
+        tp.addToGrid(0, 0, str("marketPopDataHappinessTxt"), String.format("%+.1f", HAPPINESS_BUFF));
+        tp.addToGrid(0, 1, str("marketPopDataCohesionTxt"), String.format("%+.1f", COHESION_BUFF));
+        tp.addToGrid(0, 2, str("marketPopDataConsciousness"), String.format("%+.3f", CLASS_BUFF), negative);
 
         tp.addGrid(0);
     }

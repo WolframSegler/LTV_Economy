@@ -18,8 +18,8 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.util.NumFormat;
 
-import static wfg.native_ui.util.UIConstants.highlight;
-import static wfg.native_ui.util.UIConstants.opad;
+import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
@@ -64,7 +64,7 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
 	@Override
 	public String getIllegalTransferText(CargoStackAPI stack, TransferAction action) {
-		return "Can only store economy relevant commodities";
+		return str("submarketEconCommodityOnlyTxt");
 	}
 
 	@Override
@@ -121,9 +121,9 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		}
 	}
 
-	public String getBuyVerb() { return "Take"; }
-	public String getSellVerb() { return "Give"; }
-	public String getTotalTextOverride() { return "Transfer"; }
+	public String getBuyVerb() { return str("submarketTakeTxt"); }
+	public String getSellVerb() { return str("submarketGiveTxt"); }
+	public String getTotalTextOverride() { return str("submarketTransferTxt"); }
 	public String getTotalValueOverride() { return ""; }
 	public float getTooltipWidth() { return 500f;}
 
@@ -131,13 +131,6 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		tooltip.addSectionHeading("Player Interaction", market.getFaction().getBaseUIColor(),
 			market.getFaction().getDarkUIColor(), Alignment.MID, opad);
 
-		tooltip.addPara(
-			"Commodities can be deposited into or withdrawn from the stockpiles. " +
-			"The displayed cargo shows up to the stockpile limit of %s or the amount currently stored, whichever is lower. " +
-			"Contributions update the colony's reserves immediately, and the visible cargo reflects the current stockpile limits.",
-			opad,
-			highlight,
-			NumFormat.engNotate(getStockpileLimit(null))
-		);
+		tooltip.addPara(str("submarketStockpilesTpTxt1"), opad, highlight, NumFormat.engNotate(getStockpileLimit(null)));
 	}
 }

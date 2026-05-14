@@ -1,6 +1,7 @@
 package wfg.ltv_econ.plugins.industries;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class ServiceSectorIndustryOption implements IndustryOptionProvider {
 
         final List<IndustryOptionData> result = new ArrayList<>();
 
-        final IndustryOptionData opt = new IndustryOptionData("Manage Service Sector...", pluginID, ind, this);
+        final IndustryOptionData opt = new IndustryOptionData(str("serviceSectorManageTxt"), pluginID, ind, this);
         opt.color = ind.getMarket().getFaction().getBrightUIColor();
         result.add(opt);
 
@@ -44,17 +45,10 @@ public class ServiceSectorIndustryOption implements IndustryOptionProvider {
     public void createTooltip(IndustryOptionData opt, TooltipMakerAPI tooltip, float width) {
         if (opt.id != pluginID) return;
 
-        tooltip.addPara(
-            "Assign workers to public services that improve stability, growth, trade efficiency, and planetary defense.\n",
-            0f);
+        tooltip.addPara(str("serviceSectorTpTxt1"), 0f);
 
         final long assignedWorkers = WorkerRegistry.instance().getRegisterData(opt.ind).getWorkersAssigned();
-        tooltip.addPara(
-            "The number of workers available for public services depends on colony size " +
-            "and how many are already employed in other industries. Currently, %s workers " +
-            "serve in civil departments across the colony.", 0f, new Color[] {highlight},
-            NumFormat.engNotate(assignedWorkers)
-        );
+        tooltip.addPara(str("serviceSectorTpTxt2"), 0f, new Color[] {highlight}, NumFormat.engNotate(assignedWorkers));
     }
 
     @Override

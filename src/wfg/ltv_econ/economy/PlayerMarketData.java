@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
@@ -28,6 +30,7 @@ import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.native_ui.util.Arithmetic;
 
+// TODO after incompat update rename to MarketPopulationData
 public class PlayerMarketData implements Serializable, MarketImmigrationModifier {
     public final String marketID;
     public transient MarketAPI market;
@@ -197,24 +200,24 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
             fulfillmentRatio < 0.4 ? -0.1f :
             fulfillmentRatio < 0.7 ? -0.05f : 0;
 
-        healthDelta.modifyFlat("food_organic_deficit", modifier, "Food or organics deficit");
+        healthDelta.modifyFlat("food_organic_deficit", modifier, str("marketPopDataFoodOrganicsDeficitTxt"));
 
-        healthDelta.modifyFlat("hazard", (1f - market.getHazardValue()) * 0.16f, "Hazard rating");
+        healthDelta.modifyFlat("hazard", (1f - market.getHazardValue()) * 0.16f, str("marketPopDataHazardTxt"));
 
-        healthDelta.modifyFlat("wage", (LaborConfig.LPV_month / RoSV - 1f) * 0.08f, "Wages");
+        healthDelta.modifyFlat("wage", (LaborConfig.LPV_month / RoSV - 1f) * 0.08f, str("wagesTitle"));
     }
 
     private final void updateHappinessDelta() {
-        happinessDelta.modifyFlat("health", (popHealth - BASELINE_VALUE) * 0.003f, "Health");
+        happinessDelta.modifyFlat(healthID, (popHealth - BASELINE_VALUE) * 0.003f, str("marketPopDataHealthTxt"));
 
         happinessDelta.modifyFlat(
-            "stability", (market.getStability().getModifiedValue() - 5f) * 0.025f, "Stability"
+            "stability", (market.getStability().getModifiedValue() - 5f) * 0.025f, str("marketPopDataStabilityTxt")
         );
 
-        happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.04f, "Wages");
+        happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.04f, str("wagesTitle"));
 
         happinessDelta.modifyFlat(
-            "cohesion", (popSocialCohesion - BASELINE_VALUE) * 0.0008f, "Social Cohesion"
+            socialCohesionID, (popSocialCohesion - BASELINE_VALUE) * 0.0008f, str("marketPopDataCohesionTxt")
         );
     }
 
@@ -233,46 +236,43 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
 
         final float baseline = 0.6f;
         socialCohesionDelta.modifyFlat(
-            "composition", (homogeneity - baseline) * 0.0002f, "Cultural Composition"
+            "composition", (homogeneity - baseline) * 0.0002f, str("marketPopDataCulturalCompositionTxt")
         );
 
         socialCohesionDelta.modifyFlat(
-            "consciousness", popClassConsciousness * 0.0007f, "Class Consciousness"
+            "consciousness", popClassConsciousness * 0.0007f, str("marketPopDataConsciousness")
         );
 
         socialCohesionDelta.modifyFlat(
-            "random", (float) (Math.random() * 0.006 - 0.003), "Natural drift"
+            "random", (float) (Math.random() * 0.006 - 0.003), str("marketPopDataNaturalDrift")
         );
     }
 
     private final void updateClassConsciousnessDelta() {
-        classConsciousnessDelta.modifyFlat("base", -0.003f, "Base change");
+        classConsciousnessDelta.modifyFlat("base", -0.003f, str("marketPopDataBaseChange"));
 
-        classConsciousnessDelta.modifyFlat("wage", 0.02f * (RoSV - RoSV_Equalibrium) / RoSV, "Wages");
+        classConsciousnessDelta.modifyFlat("wage", 0.02f * (RoSV - RoSV_Equalibrium) / RoSV, str("wagesTitle"));
 
-        classConsciousnessDelta.modifyFlat("health", (BASELINE_VALUE - popHealth) * 0.0002f, "Health");
+        classConsciousnessDelta.modifyFlat(healthID, (BASELINE_VALUE - popHealth) * 0.0002f, str("marketPopDataHealthTxt"));
 
         classConsciousnessDelta.modifyFlat(
-            "happiness", (BASELINE_VALUE - popHappiness) * 0.00016f, "Happiness"
+            happinessID, (BASELINE_VALUE - popHappiness) * 0.00016f, str("marketPopDataHappinessTxt")
         );
     }
 
     @Override
     public final void modifyIncoming(MarketAPI market, PopulationComposition incoming) {
-        final String desc = "Colony health";
         final int baseValue = (int) ((popHealth + 5f - BASELINE_VALUE) / 10f);
 
-        incoming.getWeight().modifyFlat(healthID, baseValue * 2f, desc);
+        incoming.getWeight().modifyFlat(healthID, baseValue * 2f, str("marketPopDataColonyHealthTxt"));
     }
 
     private final void applyHealthModifiers() {
-        final String desc = "Colony health";
-
         final int baseValue = (int) ((popHealth + 5f - BASELINE_VALUE) / 10f);
 
         if (baseValue != 0) {
             market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).modifyMult(
-                healthID, 1f + baseValue * 0.05f, desc
+                healthID, 1f + baseValue * 0.05f, str("marketPopDataColonyHealthTxt")
             );
         } else {
             market.getStats().getDynamic().getMod(Stats.GROUND_DEFENSES_MOD).unmodifyMult(healthID);
@@ -280,7 +280,7 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
     }
 
     private final void applyHappinessModifiers() {
-        final String desc = "Colony happiness";
+        final String desc = str("marketPopDataColonyHappiness");
 
         final int baseValue = popHappiness < 20f ? -1 : (popHappiness > 80f ? 1 : 0);
 
@@ -299,7 +299,7 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
 
     private final void applySocialCohesionModifiers() {
         // TODO create apply social cohesion modifiers
-        // final String desc = "Social cohesion";
+        // final String desc = str("marketPopDataCohesionTxt");
 
         /*
         Crisis response speed
