@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.fleet;
 
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class TradeMissionsDialog extends DockPanel {
     @Override
     public void buildUI() {
         clearChildren();
-        final LabelAPI title = settings.createLabel("Trade Missions", Fonts.INSIGNIA_LARGE);
+        final LabelAPI title = settings.createLabel(str("tradeMissionsTitle"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
 
         EconomyEngine engine = EconomyEngine.instance();
@@ -55,8 +56,8 @@ public class TradeMissionsDialog extends DockPanel {
         final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(WIDTH, true);
 
         final RadioPanel monthSwitch = new RadioPanel(contentContainer, 110, 18, LayoutMode.HORIZONTAL)
-            .addOption("Active", activeMissions)
-            .addOption("Past", !activeMissions);
+            .addOption(str("activeTitle"), activeMissions)
+            .addOption(str("pastTitle"), !activeMissions);
         monthSwitch.optionSelected = code -> {
             activeMissions = code == 0;
             scrollLen = scrollPanel.getExternalScroller().getYOffset();
@@ -65,7 +66,7 @@ public class TradeMissionsDialog extends DockPanel {
         monthSwitch.buildUI();
         add(monthSwitch).inTR(opad, opad);
 
-        final DockButton<FiltersDialog> filterBtn = new DockButton<>(contentContainer, 90, 18, "Filters",
+        final DockButton<FiltersDialog> filterBtn = new DockButton<>(contentContainer, 90, 18, str("filtersTitle"),
             Fonts.DEFAULT_SMALL, () -> new FiltersDialog(this)
         );
         filterBtn.cutStyle = CutStyle.ALL;
@@ -97,7 +98,7 @@ public class TradeMissionsDialog extends DockPanel {
 
         if (missions.isEmpty()) {
             final LabelAPI lbl = settings.createLabel(activeMissions ?
-                "No active missions" : "Past missions are not saved", Fonts.DEFAULT_SMALL
+               str("noActiveMissions") : str("noPastMissions"), Fonts.DEFAULT_SMALL
             );
             lbl.setColor(gray);
             add(lbl).inMid();

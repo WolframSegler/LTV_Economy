@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.fleet;
 
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -15,6 +16,7 @@ import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.fleet.ShipProductionOrder;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
@@ -60,14 +62,12 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
         final boolean isBeingProduced = index <= StaticData.inv.getAssemblyLines() - 1;
 
         tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Production Item", base);
+            tp.addTitle(str("productionItemTitle"), base);
 
-            final String statusStr = "The " + spec.getHullNameWithDashClass() + (isBeingProduced ?
-                " is being assembled in the shipyards." :
-                " awaits its turn in the production queue.");
-            tp.addPara(
-                statusStr + " The production will be completed in %s. Cancelling a production line does not refund the expended resources.",
-                pad, highlight, order.daysRemaining + (order.daysRemaining <= 1 ? " Day" : " Days")
+            final String statusStr = strf(isBeingProduced ? "shipProductionItemTpTxt1" : "shipProductionItemTpTxt2", spec.getHullNameWithDashClass());
+
+            tp.addPara(statusStr + str("shipProductionItemTpTxt3"),
+                pad, highlight, order.daysRemaining + " " + UIUtils.getDayOrDays(order.daysRemaining)
             );
         };
 
@@ -96,9 +96,9 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
         add(shipSprite).inLMid(hpad + (maxSize - scaledW) / 2);
 
         final String shipStr = spec.getHullNameWithDashClass();
-        final String timeStr = order.daysRemaining + (order.daysRemaining <= 1 ? " Day" : " Days");
+        final String timeStr = order.daysRemaining + " " + UIUtils.getDayOrDays(order.daysRemaining);
         final LabelAPI topSection = settings.createLabel(
-            shipStr + "  •  Remaining: " + timeStr, Fonts.DEFAULT_SMALL
+            shipStr + str("uiRemainingSectionTitle") + timeStr, Fonts.DEFAULT_SMALL
         );
         topSection.setHighlightColor(base);
         topSection.setHighlight(timeStr);
@@ -108,7 +108,7 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
 
         final boolean isBeingProduced = index <= StaticData.inv.getAssemblyLines() - 1;
 
-        final String sliderTxt = isBeingProduced ? order.daysRemaining + "d / " + order.days + "d" : "Waiting";
+        final String sliderTxt = isBeingProduced ? order.daysRemaining + str("uiSingleLetterDay") +" / " + order.days + str("uiSingleLetterDay") : str("waitingTitle");
         final Slider timeSlider = new Slider(m_panel, sliderTxt, 0f, order.days, CONTENT_W - opad, 32);
         timeSlider.showLabelOnly = true;
         timeSlider.setUserAdjustable(false);

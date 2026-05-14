@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.factionTab;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -32,13 +33,11 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         final int SECTION_III = SECTION_II + 50;
 
         { // SECTION I
-        final LabelAPI tradeDiploLbl = settings.createLabel(
-            "Trade & Diplomacy", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI tradeDiploLbl = settings.createLabel(str("uiTradeDiploTitle"), Fonts.INSIGNIA_VERY_LARGE);
         add(tradeDiploLbl).inTL(opad, SECTION_I);
         int lblW = (int) tradeDiploLbl.getPosition().getHeight();
 
-        final LabelAPI embargoListLbl = settings.createLabel(
-            "Embargo Menu", Fonts.INSIGNIA_LARGE);
+        final LabelAPI embargoListLbl = settings.createLabel(str("uiEmbargoMenuTitle"), Fonts.INSIGNIA_LARGE);
         add(embargoListLbl).inTL(opad + pad, SECTION_I + lblW + opad);
         lblW += (int) embargoListLbl.getPosition().getHeight();
         
@@ -49,8 +48,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         }
         
         { // SECTION II
-        final LabelAPI financePoliciesLbl = settings.createLabel(
-            "Financial Policies", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI financePoliciesLbl = settings.createLabel(str("uiFinancielPoliciesTitle"), Fonts.INSIGNIA_VERY_LARGE);
         add(financePoliciesLbl).inTL(opad, SECTION_II);
         final int lblW = (int) financePoliciesLbl.getPosition().getHeight();
 
@@ -59,9 +57,8 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
             factionSettings.redistributeCredits = btn.isChecked();
         };
 
-        final Button redistributeBtn = ComponentFactory.createCheckboxWithText(
-            m_panel, 22,
-            "Redistribute credits between markets",
+        final Button redistributeBtn = ComponentFactory.createCheckboxWithText(m_panel, 22,
+            str("uiCheckboxRedistributeCreditsTxt"),
             Fonts.DEFAULT_SMALL, redistributeRun, base, pad
         );
         redistributeBtn.setChecked(factionSettings.redistributeCredits);
@@ -70,7 +67,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
 
         { // SECTION III
         final LabelAPI shipPoliciesLbl = settings.createLabel(
-            "Ship Hangar", Fonts.INSIGNIA_VERY_LARGE);
+            str("uiShipHangarTitle"), Fonts.INSIGNIA_VERY_LARGE);
         add(shipPoliciesLbl).inTL(opad, SECTION_III);
         final int lblW = (int) shipPoliciesLbl.getPosition().getHeight();
 
@@ -79,9 +76,8 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
             factionSettings.automaticShipProductionForFaction = btn.isChecked();
         };
 
-        final Button automaticProdBtn = ComponentFactory.createCheckboxWithText(
-            m_panel, 22,
-            "Auto-manage ship construction to meet trade demands",
+        final Button automaticProdBtn = ComponentFactory.createCheckboxWithText(m_panel, 22,
+            str("uiShipProdCheckboxTxt"),
             Fonts.DEFAULT_SMALL, automaticProdRun, base, pad
         );
         automaticProdBtn.setChecked(factionSettings.automaticShipProductionForFaction);

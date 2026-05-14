@@ -142,6 +142,39 @@ public class UIUtils {
         return icon;
     }
 
+    public static final String getTimeWithDay(int val) {
+        return getTimeWithDay(val, false);
+    }
+
+    public static final String getTimeWithDay(long val) {
+        return getTimeWithDay(val, false);
+    }
+
+    public static final String getTimeWithDay(float val) {
+        return getTimeWithDay(val, false);
+    }
+
+    public static final String getTimeWithDay(double val) {
+        return getTimeWithDay(val, false);
+    }
+
+    public static final String getTimeWithDay(int val, boolean capitalized) {
+        return Integer.toString(val) + " " + getDayOrDays(val, capitalized);
+    }
+
+    public static final String getTimeWithDay(long val, boolean capitalized) {
+        return Long.toString(val) + " " + getDayOrDays(val, capitalized);
+    }
+
+    public static final String getTimeWithDay(float val, boolean capitalized) {
+        return String.format("%.1f", val) + " " + getDayOrDays(val, capitalized);
+    }
+
+    public static final String getTimeWithDay(double val, boolean capitalized) {
+        return String.format("%.1f", val) + " " + getDayOrDays(val, capitalized);
+    }
+
+    // TODO modify each call to this method to use one above if applicable
     public static final String getDayOrDays(int val) {
         return getDayOrDays(val, false);
     }
@@ -167,11 +200,11 @@ public class UIUtils {
     }
 
     public static final String getDayOrDays(float val, boolean capitalized) {
-        return dayOrDays(Math.abs(val - 1f) < 1e-4f, capitalized);
+        return dayOrDays(Math.abs(val - 1f) < 1e-2f, capitalized);
     }
 
     public static final String getDayOrDays(double val, boolean capitalized) {
-        return dayOrDays(Math.abs(val - 1d) < 1e-4d, capitalized);
+        return dayOrDays(Math.abs(val - 1d) < 1e-2d, capitalized);
     }
 
     public static final TooltipMakerAPI getTpForStaticAccess() {

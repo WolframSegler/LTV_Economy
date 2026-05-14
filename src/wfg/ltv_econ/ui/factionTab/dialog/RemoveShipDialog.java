@@ -1,5 +1,7 @@
 package wfg.ltv_econ.ui.factionTab.dialog;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.fleet.InventoryShipWidget;
@@ -11,7 +13,7 @@ public class RemoveShipDialog extends DialogPanel {
     private final Slider slider;
 
     public RemoveShipDialog(InventoryShipWidget widget) {
-        super(500, 150, null, "Scuttle vessels? A portion of the hull materials will be recovered as scrap metal.", "Confirm", "Cancel");
+        super(500, 150, null, str("uiScuttleVesselsTxt"), str("confirmTxt"), str("uiCancel"));
 
         this.widget = widget;
 

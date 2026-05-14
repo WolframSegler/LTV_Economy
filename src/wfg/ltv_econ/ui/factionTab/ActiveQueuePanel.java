@@ -4,6 +4,7 @@ import static wfg.ltv_econ.constants.Sprites.CHECKLIST;
 import static wfg.ltv_econ.constants.Sprites.STOPWATCH;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
 
         final boolean hasColony = EconomyEngine.instance().getPlayerMarketData().size() > 0;
         if (!DebugFlags.COLONY_DEBUG && !hasColony) {
-            final LabelAPI lbl = settings.createLabel("No static assets", Fonts.DEFAULT_SMALL);
+            final LabelAPI lbl = settings.createLabel(str("uiNoStaticAssets"), Fonts.DEFAULT_SMALL);
             lbl.setColor(gray);
             add(lbl).inMid();
             return;
@@ -75,14 +76,14 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         final int totalTime = orders.stream().mapToInt(o -> o.daysRemaining).sum();
         final int estimatedTime = prodLines < 1 ? 0 : totalTime / prodLines;
 
-        final Button clearAllBtn = new Button(m_panel, 120, entryH, "Clear All", null, (btn) -> {
+        final Button clearAllBtn = new Button(m_panel, 120, entryH, str("uiClearAllBtnTitle"), null, (btn) -> {
             new DiscardAllDialog(this).show(0.3f, 0.3f);
         });
         clearAllBtn.cutStyle = CutStyle.ALL;
         clearAllBtn.setEnabled(orders.size() > 0);
         add(clearAllBtn).inTR(BUTTON_W, hpad);
 
-        final LabelAPI title = settings.createLabel("Assembly Line", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiAssemblyLineTitle"), Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(hpad, hpad).setSize(titleW, entryH);
         title.setAlignment(Alignment.LMID);
 
@@ -95,16 +96,16 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         add(prodPair).inTL(hpad + titleW + entryW*2, hpad);
 
         ordersPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Active Orders", base);
-            tp.addPara("Number of ships on the production queue.", pad);
+            tp.addTitle(str("uiActiveOrdersTitle"), base);
+            tp.addPara(str("uiActiveOrdersTpTxt"), pad);
         };
         timePair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Total Build Time", base);
-            tp.addPara("Estimated number of days needed to construct all queued vessels assuming all the assembly lines are utilized.", pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
+            tp.addTitle(str("uiHullsTotalBuildTimeTitle"), base);
+            tp.addPara(str("uiHullsTotalBuildTimeTpTxt"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
         };
         prodPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Assembly Lines", base);
-            tp.addPara("Number of assembly lines that can concurrently produce ships. Can be increased with policies.", pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
+            tp.addTitle(str("uiAssemblyLineTitle"), base);
+            tp.addPara(str("uiHullsAssemblyLinesTpTxt"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
         };
 
         ordersPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, ordersPair.getPanel(), AnchorType.RightTop, hpad);
@@ -113,7 +114,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, "Pick Faction", null, () -> new FactionSelectionDialog(this)
+                m_panel, 120, 28, str("uiPickFactionBtnTitle"), null, () -> new FactionSelectionDialog(this)
             );
             factionSelection.cutStyle = CutStyle.ALL;
             add(factionSelection).inTR(hpad, hpad);
@@ -183,7 +184,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         }
 
         protected String getEmptyMessage() {
-            return "No ships in production";
+            return str("uiAssemblyLinesEmptyTxt");
         }
 
         public final void clearSelection() {

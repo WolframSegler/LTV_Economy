@@ -11,7 +11,7 @@ public class AddShipDialog extends DialogPanel {
     private final Slider slider;
 
     public AddShipDialog(InventoryShipWidget widget) {
-        super(500, 150, null, "Debug add ship amount", "Confirm", "Cancel");
+        super(500, 150, null, str("uiDebugAddShipTxt"), str("confirmTxt"), str("uiCancel"));
 
         this.widget = widget;
 

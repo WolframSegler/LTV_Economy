@@ -5,6 +5,7 @@ import java.awt.Color;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.Sprites.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
@@ -80,22 +81,16 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         tooltip.width = 500f;
         tooltip.codexID = CodexDataV2.getShipEntryId(data.hullID);
         tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Faction Ship", base);
+            tp.addTitle(str("factionInvShipTitle"), base);
 
-            tp.addPara(
-                "The faction inventory owns a total of %s " + data.spec.getHullNameWithDashClass() + " ships, " +
-                "%s of which are in-use and the rest (%s) are idle. It takes %s tons of supplies per day to maintain " +
-                "the ships, where the maintenance costs of idle ships are reduced by %s.", pad,
+            tp.addPara(strf("factionInvShipTpTxt1", data.spec.getHullNameWithDashClass()), pad,
                 new Color[] {highlight, highlight, highlight, highlight, base},
                 NumFormat.engNotate(data.getOwned()), NumFormat.engNotate(data.getInUse()),
                 NumFormat.engNotate(data.getIdle()), NumFormat.engNotate(data.getDailyMaintenanceCost()),
                 Integer.toString((int) (100f - EconConfig.IDLE_SHIP_MAINTENANCE_MULT*100f)) + "%"
             );
 
-            tp.addPara(
-                "It takes %s crew to maintain the ships throughout the month. Each active crew member is paid %s " +
-                "per month, whereas the wages of idle ship crew are reduced by %s, for a total of %s. The " +
-                data.spec.getHullNameWithDashClass() + " boasts a combat power of %s for a total power of %s.",
+            tp.addPara(strf("factionInvShipTpTxt2", data.spec.getHullNameWithDashClass()),
                 pad, new Color[]{highlight, highlight, base, highlight, highlight, highlight},
                 NumFormat.engNotate(data.getTotalCrew()), NumFormat.formatCredit(EconConfig.CREW_WAGE_PER_MONTH),
                 Integer.toString((int) (100f - EconConfig.IDLE_CREW_WAGE_MULT*100f)) + "%",
@@ -145,8 +140,8 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
 
         final String idleStr = Strings.X + NumFormat.engNotate(data.getIdle());
         final String inUseStr = Strings.X + NumFormat.engNotate(data.getInUse());
-        final LabelAPI idleLbl = settings.createLabel("Idle: " + idleStr, Fonts.DEFAULT_SMALL);
-        final LabelAPI inUseLbl = settings.createLabel("In Use: " + inUseStr, Fonts.DEFAULT_SMALL);
+        final LabelAPI idleLbl = settings.createLabel(str("uiIdleTxt") + idleStr, Fonts.DEFAULT_SMALL);
+        final LabelAPI inUseLbl = settings.createLabel(str("uiInUseTxt") + inUseStr, Fonts.DEFAULT_SMALL);
         idleLbl.setHighlightColor(highlight);
         inUseLbl.setHighlightColor(highlight);
         idleLbl.setHighlight(idleStr);
@@ -199,7 +194,7 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         );
         final TooltipComp removeTp = removeBtn.comp().get(NativeComponents.TOOLTIP);
         removeTp.builder = (tp, expanded) -> {
-            tp.addPara("%s + %s to remove one. %s + %s to remove ten", pad, highlight, "Ctrl", "Click", "Shift", "Click");
+            tp.addPara(str("uiFactionInvShipWidgetRemoveTpTxt"), pad, highlight, str("uiCtrlTxt"), str("uiClickTxt"), str("uiShift"));
         };
 
         if (DebugFlags.COLONY_DEBUG) {
@@ -225,7 +220,7 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
             );
             final TooltipComp addTp = addBtn.comp().get(NativeComponents.TOOLTIP);
             addTp.builder = (tp, expanded) -> {
-                tp.addPara("%s + %s to open the dialog. %s + %s to add ten", pad, highlight, "Ctrl", "Click", "Shift", "Click");
+                tp.addPara(str("uiFactionInvShipWidgetAddTpTxt"), pad, highlight, str("uiCtrlTxt"), str("uiClickTxt"), str("uiShift"));
             };
         }
     }

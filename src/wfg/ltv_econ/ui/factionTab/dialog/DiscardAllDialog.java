@@ -1,6 +1,7 @@
 package wfg.ltv_econ.ui.factionTab.dialog;
 
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
@@ -14,7 +15,7 @@ public class DiscardAllDialog extends DialogPanel {
     private final UIBuildableAPI content;
 
     public DiscardAllDialog(UIBuildableAPI content) {
-        super(500, 150, null, "Discard all hulls? A portion of allocated resources will be recovered as scrap metal.", "Confirm", "Cancel");
+        super(500, 150, null, str("uiDiscardHullsTxt"), str("confirmTxt"), str("uiCancel"));
 
         this.content = content;
 

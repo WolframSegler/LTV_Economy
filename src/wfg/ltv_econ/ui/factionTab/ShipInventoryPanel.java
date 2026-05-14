@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.factionTab;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.Fonts;
@@ -29,7 +30,7 @@ public class ShipInventoryPanel extends CustomPanel implements UIBuildableAPI {
         
         final boolean hasColony = EconomyEngine.instance().getPlayerMarketData().size() > 0;
         if (!DebugFlags.COLONY_DEBUG && !hasColony) {
-            final LabelAPI lbl = settings.createLabel("No static assets", Fonts.DEFAULT_SMALL);
+            final LabelAPI lbl = settings.createLabel(str("uiNoStaticAssets"), Fonts.DEFAULT_SMALL);
             lbl.setColor(gray);
             add(lbl).inMid();
             return;
@@ -48,7 +49,7 @@ public class ShipInventoryPanel extends CustomPanel implements UIBuildableAPI {
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, "Pick Faction", null, () -> new FactionSelectionDialog(this)
+                m_panel, 120, 28, str("uiPickFactionBtnTitle"), null, () -> new FactionSelectionDialog(this)
             );
             factionSelection.cutStyle = CutStyle.ALL;
             add(factionSelection).inTMid(pad);

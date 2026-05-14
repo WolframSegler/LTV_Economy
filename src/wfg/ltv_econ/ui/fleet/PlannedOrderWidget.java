@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.fleet;
 
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -23,6 +24,7 @@ import wfg.ltv_econ.economy.fleet.PlannedOrder;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.PlannedOrdersPanel;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
@@ -73,24 +75,21 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
         tooltip.builder = (tp, expanded) -> {
             final FactionSpecAPI faction = settings.getFactionSpec(StaticData.inv.factionID);
             final MarketAPI capital = StaticData.inv.getCapital();
-            final String capitalName = capital == null ? "None" : capital.getName();
+            final String capitalName = capital == null ? str("noneTxt") : capital.getName();
 
-            tp.addTitle("Ship Order", base);
+            tp.addTitle(str("uiShipOrderTitle"), base);
 
-            tp.addPara(
-                "The " + spec.getHullNameWithDashClass() + " production order will enter the queue once the required resources " +
-                "are allocated. A total cost of %s will be charged to the faction's capital, %s, and construction " +
-                "is expected to take %s before the ship is ready for service.",
+            tp.addPara(strf("uiShipOrderTpTxt1", spec.getHullNameWithDashClass()),
                 pad, new Color[]{highlight, faction.getBaseUIColor(), highlight},
                 NumFormat.formatCreditAbs(order.credits), capitalName,
-                order.days + (order.days == 1 ? " day" : " days")
+                order.days + " " + UIUtils.getDayOrDays(order.days)
             );
 
             final int gridWidth = 390;
             final int valueWidth = 40;
             int rowCount = 0;
 
-            tp.addPara("Required Resources", base, opad);
+            tp.addPara(str("uiRequiredResourcesTxt"), base, opad);
             tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
             for (var e : order.commodities.singleEntrySet()) {
                 final CommoditySpecAPI com = settings.getCommoditySpec(e.getKey());
@@ -100,7 +99,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
             }
             tp.addGrid(0);
 
-            tp.addPara("%s + %s to remove instantly.", opad, highlight, "Shift", "Click");
+            tp.addPara(str("uiShipOrderTpTxt2"), opad, highlight, str("uiShift"), str("uiClickTxt"));
         };
 
         buildUI();
@@ -130,7 +129,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
 
         final String shipStr = spec.getHullNameWithDashClass();
         final String costStr = NumFormat.formatCredit(order.credits);
-        final String timeStr = order.days + (order.days <= 1 ? " Day" : " Days");
+        final String timeStr = order.days + " " + UIUtils.getDayOrDays(order.days);
         final String gapStr = " • ";
         final LabelAPI topSection = settings.createLabel(
             shipStr + gapStr + costStr + gapStr + timeStr, Fonts.DEFAULT_SMALL
@@ -179,7 +178,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
             bgPanel.bg.offset.setOffset(4, 4, -8, -8);
 
             if (state == WidgetSelectionState.REMOVE) {
-                final LabelAPI removeLabel = settings.createLabel("Click to remove", Fonts.DEFAULT_SMALL);
+                final LabelAPI removeLabel = settings.createLabel(str("clickToRemove"), Fonts.DEFAULT_SMALL);
                 removeLabel.setColor(base);
                 removeLabel.setHighlightColor(
                     NativeUiUtils.adjustBrightness(removeLabel.getColor(), 1.33f)
@@ -187,7 +186,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
                 bgPanel.add(removeLabel).inMid();
     
             } else if (state == WidgetSelectionState.SWAP) {
-                final LabelAPI swapLabel = settings.createLabel("Click to swap", Fonts.DEFAULT_SMALL);
+                final LabelAPI swapLabel = settings.createLabel(str("clickToSpaw"), Fonts.DEFAULT_SMALL);
                 swapLabel.setColor(base);
                 swapLabel.setHighlightColor(
                     NativeUiUtils.adjustBrightness(swapLabel.getColor(), 1.33f)

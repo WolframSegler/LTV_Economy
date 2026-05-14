@@ -4,11 +4,13 @@ import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.ltv_econ.serializable.StaticData;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 public class ClearAllDialog extends DialogPanel {
     private final UIBuildableAPI content;
 
     public ClearAllDialog(UIBuildableAPI content) {
-        super(500, 100, null, "Clear all orders?", "Confirm", "Cancel");
+        super(500, 100, null, str("uiClearAllOrdersTxt"), str("confirmTxt"), str("uiCancel"));
 
         this.content = content;
 

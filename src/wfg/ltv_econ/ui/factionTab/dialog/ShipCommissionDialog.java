@@ -4,6 +4,7 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constants.Sprites.STOPWATCH;
 import static wfg.ltv_econ.constants.Sprites.WAGES;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -110,12 +111,12 @@ public class ShipCommissionDialog extends DockPanel {
 
             tooltip.builder = (tp, expanded) -> {
                 tp.addTitle(spec.getHullNameWithDashClass(), base);
-                tp.addPara("Cost: %s  •  Build time: %s days", pad, highlight,
+                tp.addPara(str("uiHullsCostBuildTimeTxt"), pad, highlight,
                     NumFormat.formatCreditAbs(order.credits), String.valueOf(order.days)
                 );
 
                 int row = 0;
-                tp.addPara("Required Resources", base, opad);
+                tp.addPara(str("uiRequiredResourcesTxt"), base, opad);
                 tp.beginGridFlipped(300, 2, 50, hpad);
                 for (var e : order.commodities.singleEntrySet()) {
                     final CommoditySpecAPI com = settings.getCommoditySpec(e.getKey());
@@ -124,8 +125,8 @@ public class ShipCommissionDialog extends DockPanel {
                 }
                 tp.addGrid(0);
 
-                tp.addPara("%s + Click: 5  •  %s + Click: 10  •  %s + %s + Click: 50",
-                    opad*2, highlight, "Ctrl", "Shift", "Ctrl", "Shift"
+                tp.addPara(str("uiHullsCommissionShortcutsTxt"),
+                    opad*2, highlight, str("uiCtrlTxt"), str("uiShift"), str("uiClickTxt")
                 );
             };
 

@@ -1,6 +1,7 @@
 package wfg.ltv_econ.ui.factionTab;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -41,7 +42,7 @@ public class ShipFiltersPanel extends CustomPanel {
 
         float btnX = 200 + hpad*3;
 
-        final Button civilianBtn = new Button(m_panel, btnW, btnH, "Civilian", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button civilianBtn = new Button(m_panel, btnW, btnH, str("uiCivilianShipTypeTitle"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showCivilian = !ShipFilters.showCivilian;
             btn.setChecked(ShipFilters.showCivilian);
             target.buildUI();
@@ -51,7 +52,7 @@ public class ShipFiltersPanel extends CustomPanel {
         add(civilianBtn.getPanel()).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button combatBtn = new Button(m_panel, btnW, btnH, "Combat", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button combatBtn = new Button(m_panel, btnW, btnH, str("uiCombatShipTypeTitle"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showCombat = !ShipFilters.showCombat;
             btn.setChecked(ShipFilters.showCombat);
             target.buildUI();
@@ -60,7 +61,7 @@ public class ShipFiltersPanel extends CustomPanel {
         add(combatBtn.getPanel()).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button idleBtn = new Button(m_panel, btnW, btnH, "Idle Only", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button idleBtn = new Button(m_panel, btnW, btnH, str("uiIdleOnlyShipTypeTitle"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showOnlyIdle = !ShipFilters.showOnlyIdle;
             btn.setChecked(ShipFilters.showOnlyIdle);
             target.buildUI();
@@ -70,7 +71,7 @@ public class ShipFiltersPanel extends CustomPanel {
         add(idleBtn.getPanel()).inBL(btnX, 0f);
         btnX += btnW + opad*2;
 
-        final Button frigateBtn = new Button(m_panel, btnW, btnH, "Frigates", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button frigateBtn = new Button(m_panel, btnW, btnH, str("uiFrigatesShipTypeTitle"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showFrigates = !ShipFilters.showFrigates;
             btn.setChecked(ShipFilters.showFrigates);
             target.buildUI();
@@ -80,7 +81,7 @@ public class ShipFiltersPanel extends CustomPanel {
         add(frigateBtn.getPanel()).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button destroyerBtn = new Button(m_panel, btnW, btnH, "Destroyers", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button destroyerBtn = new Button(m_panel, btnW, btnH, str("uiDestroyersShipTypeTitle"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showDestroyers = !ShipFilters.showDestroyers;
             btn.setChecked(ShipFilters.showDestroyers);
             target.buildUI();
@@ -89,7 +90,7 @@ public class ShipFiltersPanel extends CustomPanel {
         add(destroyerBtn.getPanel()).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button cruiserBtn = new Button(m_panel, btnW, btnH, "Cruisers", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button cruiserBtn = new Button(m_panel, btnW, btnH, str("uiCruisersShipTypeTitle"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showCruisers = !ShipFilters.showCruisers;
             btn.setChecked(ShipFilters.showCruisers);
             target.buildUI();
@@ -98,7 +99,7 @@ public class ShipFiltersPanel extends CustomPanel {
         add(cruiserBtn.getPanel()).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button capitalBtn = new Button(m_panel, btnW, btnH, "Capitals", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button capitalBtn = new Button(m_panel, btnW, btnH, str("uiCapitalsShipTypeTitle"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showCapitals = !ShipFilters.showCapitals;
             btn.setChecked(ShipFilters.showCapitals);
             target.buildUI();

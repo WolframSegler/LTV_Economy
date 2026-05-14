@@ -6,6 +6,7 @@ import static wfg.ltv_econ.constants.Sprites.STOPWATCH;
 import static wfg.ltv_econ.constants.Sprites.WAGES;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 
@@ -64,7 +65,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
 
         final boolean hasColony = EconomyEngine.instance().getPlayerMarketData().size() > 0;
         if (!DebugFlags.COLONY_DEBUG && !hasColony) {
-            final LabelAPI lbl = settings.createLabel("No static assets", Fonts.DEFAULT_SMALL);
+            final LabelAPI lbl = settings.createLabel(str("uiNoStaticAssets"), Fonts.DEFAULT_SMALL);
             lbl.setColor(gray);
             add(lbl).inMid();
             return;
@@ -80,20 +81,20 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         final int entryH = 32;
 
         final DockButton<ShipCommissionDialog> commissionBtn = new DockButton<>(
-            m_panel, 120, entryH, "Order", null, () -> new ShipCommissionDialog(this)
+            m_panel, 120, entryH, str("uiHullOrderBtnTitle"), null, () -> new ShipCommissionDialog(this)
         );
         commissionBtn.cutStyle = CutStyle.ALL;
         commissionBtn.setShortcutAndAppendToText(Keyboard.KEY_T);
         add(commissionBtn).inTR(BUTTON_W, hpad);
 
-        final Button clearAllBtn = new Button(m_panel, 120, entryH, "Clear All", null, (btn) -> {
+        final Button clearAllBtn = new Button(m_panel, 120, entryH, str("uiClearAllBtnTitle"), null, (btn) -> {
             new ClearAllDialog(this).show(0.3f, 0.3f);
         });
         clearAllBtn.cutStyle = CutStyle.ALL;
         clearAllBtn.setEnabled(orders.size() > 0);
         add(clearAllBtn).inTR(BUTTON_W*2, hpad);
 
-        final LabelAPI title = settings.createLabel("Vessels on Order", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiOrderedHullsTitle"), Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(hpad, hpad).setSize(titleW, entryH);
         title.setAlignment(Alignment.LMID);
 
@@ -109,20 +110,20 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         add(shipsPair).inTL(hpad + titleW + entryW*3, hpad);
 
         ordersPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Pending Orders", base);
-            tp.addPara("The number of ship orders awaiting resource allocation. Once the required commodities are available, they will be moved to the production queue.", pad);
+            tp.addTitle(str("uiPendingOrdersTitle"), base);
+            tp.addPara(str("uiPendingOrdersTpTxt"), pad);
         };
         costPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Total Credit Cost", base);
-            tp.addPara("The sum of credits required to fulfill all pending orders. This amount will be deducted from the faction's capital as each order is activated.", pad);
+            tp.addTitle(str("uiTotalCreditCostTitle"), base);
+            tp.addPara(str("uiTotalCreditCostPendingOrdersTpTitle"), pad);
         };
         timePair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Total Build Time", base);
-            tp.addPara("The cumulative number of days needed to construct all pending vessels, assuming they are built sequentially. Actual completion may be shorter (up to %s production lines may operate concurrently).", pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
+            tp.addTitle(str("uiHullsTotalBuildTimeTitle"), base);
+            tp.addPara(str("uiActiveHullsTotalBuildTimeTpTxt"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
         };
         shipsPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Ships Commodity Cost", base);
-            tp.addPara("The total amount of the \"Ships\" commodity required across all pending orders. This resource represents the hull components and prefabricated sections needed for construction.", pad);
+            tp.addTitle(str("uiShipsCommodityCostTitle"), base);
+            tp.addPara(str("uiShipsCommodityCostTpTxt"), pad);
         };
 
         ordersPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, ordersPair.getPanel(), AnchorType.RightTop, hpad);
@@ -132,7 +133,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, "Pick Faction", null, () -> new FactionSelectionDialog(this)
+                m_panel, 120, 28, str("uiPickFactionBtnTitle"), null, () -> new FactionSelectionDialog(this)
             );
             factionSelection.cutStyle = CutStyle.ALL;
             add(factionSelection).inTR(hpad, hpad);
@@ -206,7 +207,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         }
 
         protected String getEmptyMessage() {
-            return "No planned orders";
+            return str("uiNoPlannedOrdersTitle");
         }
     }
 }

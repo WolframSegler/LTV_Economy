@@ -3,6 +3,7 @@ package wfg.ltv_econ.ui.fleet;
 import static wfg.ltv_econ.constants.EconomyConstants.visibleFactions;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
@@ -44,21 +45,21 @@ public class FiltersDialog extends DockPanel {
     public void buildUI() {
         clearChildren();
         
-        final LabelAPI title = settings.createLabel("Map Filters", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiMapFiltersTitle"), Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(0f, pad);
         final int SECT_I_H = 26;
         final int LABEL_H = 16;
         final int BTN_H = 32;
         final int S_BTN_H = 18;
 
-        final LabelAPI modeLblb = settings.createLabel("Direction Mode", Fonts.DEFAULT_SMALL);
+        final LabelAPI modeLblb = settings.createLabel(str("uiFilterDirModeTxt"), Fonts.DEFAULT_SMALL);
         add(modeLblb).inTL(0f, SECT_I_H + opad);
 
         final RadioPanel modeRadio = new RadioPanel(contentContainer, (int) pos.getWidth() - hpad*3, BTN_H, LayoutMode.HORIZONTAL)
-            .addOption("All")
-            .addOption("Exporters")
-            .addOption("Importers")
-            .addOption("In-Faction");
+            .addOption(str("uiAllTxt"))
+            .addOption(str("uiExportersTxt"))
+            .addOption(str("uiImportersTxt"))
+            .addOption(str("uiInFaction"));
         modeRadio.optionSelected = (index) -> {
             TradeFilters.directionMode = index;
             content.buildUI();
@@ -67,7 +68,7 @@ public class FiltersDialog extends DockPanel {
         modeRadio.buildUI();
         add(modeRadio).inTL(0f, SECT_I_H + LABEL_H + opad);
 
-        final LabelAPI minAmountLbl = settings.createLabel("Min Volume", Fonts.INSIGNIA_LARGE);
+        final LabelAPI minAmountLbl = settings.createLabel(str("uiMinVolumeTxt"), Fonts.INSIGNIA_LARGE);
         final float lblW = minAmountLbl.getPosition().getWidth();
         add(minAmountLbl).inTL(0f, SECT_I_H + LABEL_H + BTN_H + opad*3);
         minAmountLbl.getPosition().setSize(lblW, BTN_H);
@@ -81,7 +82,7 @@ public class FiltersDialog extends DockPanel {
         );
         final TooltipComp sliderTp = minAmountSlider.comp().get(NativeComponents.TOOLTIP);
         sliderTp.builder = (tp, expanded) -> {
-            tp.addPara("Filter trade routes by daily volume (%s tonnes)", pad, highlight,
+            tp.addPara(str("uiDailyTonnageFilterTpTxt"), pad, highlight,
                 Integer.toString((int) minAmountSlider.getProgress())
             );
         };
@@ -89,10 +90,10 @@ public class FiltersDialog extends DockPanel {
         final int LIST_H = 200;
         final int SECT_II_H = SECT_I_H + LABEL_H + BTN_H*2 + opad*5;
 
-        final LabelAPI exportersLbl = settings.createLabel("Exporters", Fonts.INSIGNIA_LARGE);
+        final LabelAPI exportersLbl = settings.createLabel(str("uiExportersTxt"), Fonts.INSIGNIA_LARGE);
         add(exportersLbl).inTL(0f, SECT_II_H);
 
-        final LabelAPI importersLbl = settings.createLabel("Importers", Fonts.INSIGNIA_LARGE);
+        final LabelAPI importersLbl = settings.createLabel(str("uiImportersTxt"), Fonts.INSIGNIA_LARGE);
         final float halfW = (pos.getWidth() - opad*3) * 0.5f;
         add(importersLbl).inTL(halfW + opad, SECT_II_H);
 
@@ -144,25 +145,25 @@ public class FiltersDialog extends DockPanel {
         ComponentFactory.addTooltip(importersContainer, LIST_H, true, contentContainer).inTL(opad + halfW + opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
 
         final float btnW = 80;
-        final Button enableAllExporters = new Button(contentContainer, (int)btnW, S_BTN_H, "Enable All", Fonts.DEFAULT_SMALL, (b) -> {
+        final Button enableAllExporters = new Button(contentContainer, (int)btnW, S_BTN_H, str("uiEnableAll"), Fonts.DEFAULT_SMALL, (b) -> {
             for (FactionSpecAPI s : visibleFactions) TradeFilters.exporterFactionBlacklist.remove(s.getId());
             content.buildUI();
             buildUI();
         });
         
-        final Button disableAllExporters = new Button(contentContainer, (int)btnW, S_BTN_H, "Disable All", Fonts.DEFAULT_SMALL, (b) -> {
+        final Button disableAllExporters = new Button(contentContainer, (int)btnW, S_BTN_H, str("uiDisableAll"), Fonts.DEFAULT_SMALL, (b) -> {
             for (FactionSpecAPI s : visibleFactions) TradeFilters.exporterFactionBlacklist.add(s.getId());
             content.buildUI();
             buildUI();
         });
         
-        final Button enableAllImporters = new Button(contentContainer, (int)btnW, S_BTN_H, "Enable All", Fonts.DEFAULT_SMALL, (b) -> {
+        final Button enableAllImporters = new Button(contentContainer, (int)btnW, S_BTN_H, str("uiEnableAll"), Fonts.DEFAULT_SMALL, (b) -> {
             for (FactionSpecAPI s : visibleFactions) TradeFilters.importerFactionBlacklist.remove(s.getId());
             content.buildUI();
             buildUI();
         });
         
-        final Button disableAllImporters = new Button(contentContainer, (int)btnW, S_BTN_H, "Disable All", Fonts.DEFAULT_SMALL, (b) -> {
+        final Button disableAllImporters = new Button(contentContainer, (int)btnW, S_BTN_H, str("uiDisableAll"), Fonts.DEFAULT_SMALL, (b) -> {
             for (FactionSpecAPI s : visibleFactions) TradeFilters.importerFactionBlacklist.add(s.getId());
             content.buildUI();
             buildUI();
@@ -180,7 +181,7 @@ public class FiltersDialog extends DockPanel {
 
         final int SECT_III_H = SECT_II_H + LIST_H + LABEL_H + S_BTN_H + opad*3;
 
-        final CheckboxButton virtualFleetToggle = new CheckboxButton(contentContainer, 20, "Hide virtual fleets", Fonts.DEFAULT_SMALL,
+        final CheckboxButton virtualFleetToggle = new CheckboxButton(contentContainer, 20, str("uiHideVirtualFleetsCheckboxTxt"), Fonts.DEFAULT_SMALL,
             (btn) -> {
                 btn.setChecked(!btn.isChecked());
                 TradeFilters.hideVirtualFleets = btn.isChecked();

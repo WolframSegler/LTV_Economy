@@ -9,6 +9,7 @@ import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.constants.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.fleet.InventoryShipWidget;
@@ -59,7 +60,7 @@ public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget
     protected void onWidgetClicked(InventoryShipWidget source) {}
 
     protected String getEmptyMessage() {
-        return "No match.";
+        return LocalizedStrings.str("uiNoMatchTxt");
     }
 
     private final boolean shouldFilterOut(ShipTypeData data) {

@@ -38,6 +38,7 @@ public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;
 
+        // TODO continue string externalization here
         tooltip.builder = (tp, expanded) -> {
             tp.addPara("Colony stockpiles and credits [%s]", pad,
                 highlight, Keyboard.getKeyName(interaction.shortcut)

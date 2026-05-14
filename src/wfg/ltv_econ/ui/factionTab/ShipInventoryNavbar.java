@@ -1,7 +1,7 @@
 package wfg.ltv_econ.ui.factionTab;
 
 import static wfg.native_ui.util.UIConstants.*;
-
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 import static wfg.ltv_econ.constants.Sprites.*;
 import static wfg.native_ui.util.Globals.settings;
 
@@ -60,13 +60,13 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
 
         final int GAP_LEFT_1 = flagW + opad*2 + pad;
 
-        final LabelAPI title = settings.createLabel("Faction Hangar", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiFactionHangarBtnTitle"), Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(GAP_LEFT_1, hpad);
 
         final MarketAPI market = inv.getCapital();
         final String name = faction.getDisplayName();
-        final String capital = market == null ? "None" : market.getName();
-        final LabelAPI subtitle = settings.createLabel(name + "  |  Capital in " + capital, Fonts.DEFAULT_SMALL);
+        final String capital = market == null ? str("noneTxt") : market.getName();
+        final LabelAPI subtitle = settings.createLabel(name + str("uiCapitalInTxt") + capital, Fonts.DEFAULT_SMALL);
         subtitle.setHighlightColor(factionSpec.getBaseUIColor());
         subtitle.setHighlight(name, capital);
         add(subtitle).inTR(opad, opad);
@@ -75,7 +75,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final int perPairW = ((w - flagW)/2 - opad) / 4;
         final int iconS = 32;
 
-        final LabelAPI shipmentLbl = settings.createLabel("Shipment Capacities", Fonts.INSIGNIA_LARGE);
+        final LabelAPI shipmentLbl = settings.createLabel(str("uiShipmentCapacitiesTitle"), Fonts.INSIGNIA_LARGE);
         add(shipmentLbl).inTL(GAP_LEFT_1, GAP_TOP_1);
 
         final IconValuePairTp cargoPair = new IconValuePairTp(m_panel, perPairW, iconS, CRATES, inv.getTotalCargoCapacity(), true, null);
@@ -92,7 +92,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
 
         final int GAP_LEFT_2 = GAP_LEFT_1 + (w - GAP_LEFT_1)/2 + opad;
 
-        final LabelAPI operationLbl = settings.createLabel("Operations", Fonts.INSIGNIA_LARGE);
+        final LabelAPI operationLbl = settings.createLabel(str("uiOperationsTitle"), Fonts.INSIGNIA_LARGE);
         add(operationLbl).inTL(GAP_LEFT_2, GAP_TOP_1);
 
         final IconValuePairTp suppliesPair = new IconValuePairTp(m_panel, perPairW, iconS, SUPPLIES, inv.getTotalDailyMaintenance(), true, null);
@@ -107,70 +107,70 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         wagePair.label().setText(wagePair.label().getText() + Strings.C);
 
         cargoPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Cargo Capacity", base);
+            tp.addTitle(str("uiCargoCapacityTitle"), base);
 
-            tp.addPara("The total cargo space available across all faction ships, including both idle vessels and those currently assigned to missions.", pad);
+            tp.addPara(str("uiCargoCapacityTpTxt"), pad);
             final float idle = inv.getIdleCargoCapacity();
             final float inUse = inv.getTotalCargoCapacity() - idle;
-            tp.addPara("Idle: %s  |  In Use: %s", pad, highlight, 
+            tp.addPara(str("uiIdleInUseSectionTxt"), pad, highlight, 
                 NumFormat.engNotate(idle), NumFormat.engNotate(inUse)
             );
         };
 
         fuelPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Fuel Capacity", base);
+            tp.addTitle(str("uiFuelCapacityTitle"), base);
 
-            tp.addPara("Total fuel tankage of the faction's ships, including both idle vessels and those currently assigned to missions.", pad);
+            tp.addPara(str("uiFuelCapacityTpTxt"), pad);
             final float idle = inv.getIdleFuelCapacity();
             final float inUse = inv.getTotalFuelCapacity() - idle;
-            tp.addPara("Idle: %s  |  In Use: %s", pad, highlight, 
+            tp.addPara(str("uiIdleInUseSectionTxt"), pad, highlight, 
                 NumFormat.engNotate(idle), NumFormat.engNotate(inUse));
         };
 
         crewPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Crew Capacity", base);
+            tp.addTitle(str("uiCrewCapacityTitle"), base);
 
-            tp.addPara("Maximum crew berths across all ships. Idle capacity represents space for additional personnel beyond skeleton crew.", pad);
+            tp.addPara(str("uiCrewCapacityTpTxt"), pad);
             final float idle = inv.getIdleCrewCapacity();
             final float inUse = inv.getTotalCrewCapacity() - idle;
-            tp.addPara("Idle: %s  |  In Use: %s", pad, highlight, 
+            tp.addPara(str("uiIdleInUseSectionTxt"), pad, highlight, 
                 NumFormat.engNotate(idle), NumFormat.engNotate(inUse));
         };
 
         combatPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Combat Power", base);
+            tp.addTitle(str("uiCombatPowerTitle"), base);
 
-            tp.addPara("Total combat strength of the ships. Idle power is available for future escort assignments.", pad);
+            tp.addPara(str("uiCombatPowerTpTxt"), pad);
             final float idle = inv.getIdleCombatPower();
             final float inUse = inv.getTotalCombatPower() - idle;
-            tp.addPara("Idle: %s  |  In Use: %s", pad, highlight, 
+            tp.addPara(str("uiIdleInUseSectionTxt"), pad, highlight, 
                 NumFormat.engNotate(idle), NumFormat.engNotate(inUse));
         };
 
         suppliesPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Daily Maintenance", base);
+            tp.addTitle(str("uiDailyMaintenanceTitle"), base);
 
-            tp.addPara("Supplies consumed per day to keep all ships operational. Idle ships incur reduced maintenance (%s).", pad, highlight, (int)(EconConfig.IDLE_SHIP_MAINTENANCE_MULT * 100) + "%");
+            tp.addPara(str("uiDailyMaintenanceTpStr"), pad, highlight, (int)(EconConfig.IDLE_SHIP_MAINTENANCE_MULT * 100) + "%");
             final float daily = inv.getTotalDailyMaintenance();
-            tp.addPara("Daily usage: %s supplies", pad, highlight, NumFormat.engNotate(daily));
+            tp.addPara(str("uiDailyMaintenanceSupplyUsageTxt"), pad, highlight, NumFormat.engNotate(daily));
         };
 
         operatorPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Crew Complement", base);
+            tp.addTitle(str("uiCrewComplementTitle"), base);
 
-            tp.addPara("Total crew employed across all ships, including maintenance crews for idle ships and full complements for active vessels.", pad);
+            tp.addPara(str("uiCrewComplementTpTxt"), pad);
             final int idle = inv.getIdleCrew();
             final int inUse = inv.getTotalCrew() - idle;
-            tp.addPara("Idle: %s  |  Active: %s", pad, highlight, 
+            tp.addPara(str("uiIdleActiveSectionTxt"), pad, highlight, 
                 NumFormat.engNotate(idle), NumFormat.engNotate(inUse));
         };
 
         wagePair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle("Monthly Crew Wages", base);
+            tp.addTitle(str("uiMonthlyCrewWagesTitle"), base);
             
-            tp.addPara("Total credits paid to all crew per month. Idle crew receive reduced wages (%s).", pad, highlight, (int)(EconConfig.IDLE_CREW_WAGE_MULT * 100) + "%");
+            tp.addPara(str("uiMonthlyCrewWagesTpTxt1"), pad, highlight, (int)(EconConfig.IDLE_CREW_WAGE_MULT * 100) + "%");
             float wages = inv.getTotalMonthlyCrewWage();
-            tp.addPara("Monthly payroll: %s", pad, highlight, NumFormat.formatCreditAbs(wages));
+            tp.addPara(str("uiMonthlyCrewWagesTpTxt2"), pad, highlight, NumFormat.formatCreditAbs(wages));
         };
 
         cargoPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(

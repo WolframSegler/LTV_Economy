@@ -16,6 +16,7 @@ import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
@@ -35,6 +36,7 @@ import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.Sprites.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, HasTooltip {
     private static final SpriteAPI SHIP_OUTLINE = settings.getSprite("icons", "ship_outline");
@@ -114,20 +116,20 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         final int GAP_TOP_2 = GAP_TOP_1 + 20;
 
-        final String distValue = Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + "LY";
-        final LabelAPI distLbl = settings.createLabel("Dist: " + distValue, Fonts.DEFAULT_SMALL);
+        final String distValue = Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + str("lightYearsAbb");
+        final LabelAPI distLbl = settings.createLabel(str("uiDistTxt") + distValue, Fonts.DEFAULT_SMALL);
         distLbl.setHighlightColor(highlight);
         distLbl.setHighlight(distValue);
         add(distLbl).inTL(opad, GAP_TOP_2);
 
-        final String durValue = mission.totalDur + (mission.totalDur <= 1 ? " Day" : " Days");
-        final LabelAPI durLbl = settings.createLabel("Total Dur: " + durValue, Fonts.DEFAULT_SMALL);
+        final String durValue = mission.totalDur + UIUtils.getDayOrDays(mission.totalDur, true);
+        final LabelAPI durLbl = settings.createLabel(str("uiTotalDurTxt") + durValue, Fonts.DEFAULT_SMALL);
         durLbl.setHighlightColor(highlight);
         durLbl.setHighlight(durValue);
         add(durLbl).inTL(opad + opad*2 + 70, GAP_TOP_2);
 
-        final String fuelValue = NumFormat.engNotate(mission.fuelCost) + (mission.fuelCost <= 1 ? " Unit" : " Units");
-        final LabelAPI fuelCostLbl = settings.createLabel("Fuel Needed: " + fuelValue, Fonts.DEFAULT_SMALL);
+        final String fuelValue = NumFormat.engNotate(mission.fuelCost) + str("uiUnits");
+        final LabelAPI fuelCostLbl = settings.createLabel(str("uiFuelNeededTxt") + fuelValue, Fonts.DEFAULT_SMALL);
         fuelCostLbl.setHighlightColor(highlight);
         fuelCostLbl.setHighlight(fuelValue);
         add(fuelCostLbl).inTL(opad + opad*3 + 200, GAP_TOP_2);
@@ -136,7 +138,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         final String sliderTxt = switch(mission.status) {
             case SCHEDULED, DELIVERED, CANCELLED, LOST -> mission.status.getDisplayText();
-            default -> mission.durRemaining + (mission.durRemaining <= 1 ? " Day" : " Days");
+            default -> mission.durRemaining + UIUtils.getDayOrDays(mission.durRemaining, true);
         };
         final Slider timeSlider = new Slider(m_panel, sliderTxt, 0f, mission.totalDur, panelW - opad*2, 32);
         timeSlider.showLabelOnly = true;
@@ -176,7 +178,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         final long creditsValue = (long) mission.credits.computeEffective(0f);
         final String creditsStr = NumFormat.formatCreditAbs(creditsValue);
-        final LabelAPI costLbl = settings.createLabel("Ledger: " + creditsStr, Fonts.INSIGNIA_LARGE);
+        final LabelAPI costLbl = settings.createLabel(str("uiLedgerTxt") + creditsStr, Fonts.INSIGNIA_LARGE);
         costLbl.setHighlightColor(creditsValue < 0l ? negative : highlight);
         costLbl.setHighlight(creditsStr);
         add(costLbl).inBL(opad, opad);
@@ -192,20 +194,20 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
     public static final TooltipBuilder createMissionTp(TradeMission mission, boolean detailed) {
         return (tp, expanded) -> {
             final EconomyEngine engine = EconomyEngine.instance();
-            tp.addTitle(detailed ? "Trade Mission" : "Trade Fleet", base);
+            tp.addTitle(detailed ? str("tradeMissionTitle") : str("tradeFleetTitle"), base);
 
             final int beginTime = mission.startOffset - engine.getCyclesSinceTrade();
             final int arrivalTime = mission.durRemaining - (int) mission.transferDur;
 
             final String statusStr = switch(mission.status) {
-                case SCHEDULED -> !detailed ? "Scheduled" :
-                    "Scheduled to begin preparations in " + beginTime + (beginTime < 2 ? " day." : " days.");
-                case IN_SRC_ORBIT_LOADING -> "Loading at " + mission.src.getName();
-                case IN_TRANSIT -> "En route, arriving in " + arrivalTime + (arrivalTime < 2 ? " day" : " days");
-                case IN_DST_ORBIT_UNLOADING -> "Unloading at " + mission.dest.getName();
-                case DELIVERED -> "Delivered";
-                case CANCELLED -> "Cancelled";
-                case LOST -> "Lost in combat";
+                case SCHEDULED -> !detailed ? str("tradeMissionStatusScheduled") :
+                    strf("tradeMissionScheduledTxt", beginTime, UIUtils.getDayOrDays(beginTime));
+                case IN_SRC_ORBIT_LOADING -> strf("tradeMissionLoadingTxt", mission.src.getName());
+                case IN_TRANSIT -> strf("tradeMissionTransitTxt", arrivalTime, UIUtils.getDayOrDays(arrivalTime));
+                case IN_DST_ORBIT_UNLOADING -> strf("tradeMissionUnloadingTxt", mission.dest.getName());
+                case DELIVERED -> str("tradeMissionStatusDelivered");
+                case CANCELLED -> str("tradeMissionStatusCancelled");
+                case LOST -> str("tradeMissionLostTxt");
             };
 
             if (detailed) {
@@ -220,16 +222,11 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
                 largestCom = settings.getCommoditySpec(largestCom).getName();
 
                 final String fleetOriginStr = mission.usedFactionFleet ?
-                    "The fleet was assembled using ships from the faction inventory." :
-                    "The fleet belongs to an independent captain who was hired to deliver the shipment.";
+                    str("tradeMissionWidgetTpTxt1") : str("tradeMissionWidgetTpTxt2");
                 final String fuelOriginStr = mission.usedFuelFromStockpiles ?
-                    "The fuel for the journey was taken from local stockpiles." :
-                    "The fuel was purchased at a premium from independent merchants.";
+                    str("tradeMissionWidgetTpTxt3") : str("tradeMissionWidgetTpTxt4");
 
-                tp.addPara("The %s trade mission from %s to %s is expected to cover a distance of %s in %s and burn %s units of fuel. " +
-                    statusStr + " The shipment consists primarily of %s and the single most abundant commodity is %s. " +
-                    fleetOriginStr + " The costs incurred for this shipment was %s. " + fuelOriginStr +
-                    " The fleet posesses a combat power of %s.",
+                tp.addPara(strf("tradeMissionWidgetTpTxt5", statusStr, fleetOriginStr, fuelOriginStr),
                     pad, new Color[]{
                         base,
                         mission.src.getFaction().getBaseUIColor(),
@@ -237,36 +234,33 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
                         highlight, highlight, highlight, base, highlight, negative,
                         highlight
                     },
-                    mission.inFaction ? "in-faction" : "global",
+                    mission.inFaction ? str("uiInfactionLowercase") : str("uiGlobalLowercase"),
                     mission.src.getName(), mission.dest.getName(),
-                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + "LY",
-                    mission.totalDur + (mission.totalDur <= 1 ? " Day" : " Days"),
+                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + str("lightYearsAbb"),
+                    UIUtils.getTimeWithDay(mission.totalDur, true),
                     NumFormat.engNotate(mission.fuelCost),
-                    mission.crewAmount > mission.cargoAmount ? "crew" : mission.fuelAmount > mission.cargoAmount ? "fuel" : "cargo",
+                    mission.crewAmount > mission.cargoAmount ? str("uiCrewTxt") : mission.fuelAmount > mission.cargoAmount ? str("uiFuelTxt") : str("uiCargoTxt"),
                     largestCom, NumFormat.formatCreditAbs(mission.credits.computeEffective(0f)),
                     NumFormat.engNotate(mission.combatPowerTarget)
                 );
             } else {
-                tp.addPara("From %s to %s  •  Distance: %s  •  Arrival: %s", pad,
+                tp.addPara(str("tradeMissionWidgetTpTxt6"), pad,
                     new Color[]{mission.src.getFaction().getBaseUIColor(), mission.dest.getFaction().getBaseUIColor(),
                         highlight, highlight
                     }, mission.src.getName(), mission.dest.getName(),
-                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + "LY",
-                    arrivalTime + (arrivalTime < 2 ? " day" : " days")
+                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + str("lightYearsAbb"),
+                    UIUtils.getTimeWithDay(arrivalTime)
                 );
 
                 final int fleetSize = mission.allocatedShips.size();
-                tp.addPara("Fleet: %s ship%s",
-                    pad, highlight,
-                    String.valueOf(fleetSize), fleetSize == 1 ? "" : "s"
-                );
+                tp.addPara(str("tradeMissionWidgetTpTxt7"), pad, highlight, String.valueOf(fleetSize));
             }
 
             final int gridWidth = 390;
             final int valueWidth = 60;
             int rowCount = 0;
 
-            tp.addPara("Shipment List", base, opad);
+            tp.addPara(str("uiShipmentListTitle"), base, opad);
             tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
             for (TradeCom flow : mission.cargo) {
                 tp.addToGrid(0, rowCount++, settings.getCommoditySpec(flow.comID).getName(),
@@ -277,7 +271,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
             if (detailed) {
                 rowCount = 0;
     
-                tp.addPara("Mission Ledger", base, opad);
+                tp.addPara(str("uiMissionLedgerTitle"), base, opad);
                 tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
                 for (StatMod mod : mission.credits.getFlatBonuses().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc, NumFormat.engNotate(mod.value)
@@ -289,7 +283,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
                 final int totalEntries = mission.allocatedShips.size();
                 rowCount = 0;
                 
-                tp.addPara("Fleet Members", base, opad);
+                tp.addPara(str("uiFleetMembersTitle"), base, opad);
                 tp.beginGridFlipped(gridWidth/2, 4, valueWidth, hpad);
                 for (var entry : mission.allocatedShips.singleEntrySet()) {
                     if (rowCount >= EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) break;
@@ -304,15 +298,11 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
     
                 if (totalEntries > EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) {
                     final int remaining = totalEntries - EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS;
-                    tp.addPara("... and %s more ship type%s", opad, Misc.getHighlightColor(),
-                        String.valueOf(remaining), remaining == 1 ? "" : "s"
-                    );
+                    tp.addPara(str("tradeMissionWidgetTpTxt8"), opad, highlight, String.valueOf(remaining));
                 }
             }
             
-            final String virtualStateStr = mission.spawnedFleetFinishedJob ?
-                "Virtual fleet - hauls cargo and uses resources, but cannot be engaged." :
-                "Active fleet - currently in space and open to interception.";
+            final String virtualStateStr = mission.spawnedFleetFinishedJob ? str("virtualFleetTpTxt") : str("activeFleetTpTxt");
             tp.addPara(virtualStateStr, gray, opad);
         };
     }
