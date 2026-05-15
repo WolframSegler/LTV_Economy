@@ -1,16 +1,17 @@
-v0.3.4-beta | SAVE COMPATIBLE
+Version 0.3.4-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.4.1 for this update. Version 0.4.0 will not work.
 - Added a population info panel to the economy tab.
 - Modified the access tooltip inside the colony screen.
 - Fixed UI issues that arise from using non-default UI scales.
+- For other modders: externalized almost all strings inside the mod. Can be found under data/strings/strings.json
 
-v0.3.3-beta | SAVE COMPATIBLE
+Version 0.3.3-beta | SAVE COMPATIBLE
 - Fixed bug where summary bar inside faction ship orders and production queue wouldn't update after ship removal.
 - Fixed crash due to economy route manager.
 - Fixed a reapply bug on reloading a save.
 - Added a service sector with four departments. Each department gives unique bonuses. AI colonies do not use these for now.
 
-v0.3.2-beta | SAVE COMPATIBLE
+Version 0.3.2-beta | SAVE COMPATIBLE
 - It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
 - Bug fixes related to the overhauled trade fleets.
 - Factions should now have more smaller ships.
@@ -25,7 +26,7 @@ v0.3.2-beta | SAVE COMPATIBLE
 - Fuel fee for independent captains when creating a trade missions is now covered by the faction. Helps balance costs compared to faction fleets. Is also more realistic.
 - Fixed a bug where the orbital lamp getting installed on population&industry would create volatile demand for all the colonies in the sector.
 
-v0.3.1-beta | SAVE COMPATIBLE
+Version 0.3.1-beta | SAVE COMPATIBLE
 - Fixed crash from accessing abandoned stations.
 - Fixed a bug where best places to buy/sell would have incorrectly rotated direction arrows.
 - Fixed a refactor bug causing submarkets to lack many commodities.
@@ -35,7 +36,7 @@ v0.3.1-beta | SAVE COMPATIBLE
 - Added an event called "General Strike" that has a chance to activate as class consciousness gets higher. Reduces all production by 95%.
 - Faction ship crew wages now tracked daily to reflect the actual monthly use.
 
-v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
+Version 0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Switched to WrapUI v0.4.0 for this update. Version 0.3.2 will not work.
 - It is recommended to reset LunaLib settings to their defaults. Some default values have been adjusted.
 - This version has not been play-tested thoroughly.
@@ -73,7 +74,7 @@ v0.3.0-beta | Sliver of Silver Lining | NOT SAVE COMPATIBLE
 - Added the Expand Shipyards policy to increase the assembly lines for the player faction.
 - Added in-game tips.
 
-v0.2.12-beta | SAVE COMPATIBLE
+Version 0.2.12-beta | SAVE COMPATIBLE
 - The effects of saving LunaLib Settings now takes effect immideatly. No restart required.
 - Added a setting to toggle worker pool growth with population growth progress.
 - Relaxed the eligibility conditions for manufacturing.
@@ -81,13 +82,13 @@ v0.2.12-beta | SAVE COMPATIBLE
 - Manufacturing can now be improved.
 - A warning dialog is shown when incompatible mods are active.
 
-v0.2.11-beta | SAVE COMPATIBLE
+Version 0.2.11-beta | SAVE COMPATIBLE
 - Added employment rate to population table.
 - Some UI fixes inside the trade map.
 - The worker allocator now tries to satisfy local demand first, then faction demand second, and global demand at last. Added four LunaLib settings to tune its effectiveness. Factions try to be as self-sufficient as possible now.
 - Fixed happiness prod modifiers.
 
-v0.2.10-beta | SAVE COMPATIBLE
+Version 0.2.10-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.3.2 for this update.
 - Added the industry tooltip to the income report as well.
 - Switched internal data structures for performance.
@@ -96,7 +97,7 @@ v0.2.10-beta | SAVE COMPATIBLE
     - The flow of trade and exact amounts between systems are now visible.
     - Filters make finding strategic targets easier (sabotaging Kazeron is now easier than ever!)
 
-v0.2.9-beta | SAVE COMPATIBLE
+Version 0.2.9-beta | SAVE COMPATIBLE
 - Fixed a crash resulting from a market with no outputs
 - Fixed industries producing/demanding while under construction
 - Added a monthly credits withdrawal limit to player colonies (LunaLib setting).
@@ -106,7 +107,7 @@ v0.2.9-beta | SAVE COMPATIBLE
 - Re-organized the commodity info tooltip to group relevant information together.
 - Auto transfer of colony profits to the player now has a limit of 50%. Can be changed (LunaLib setting).
 
-v0.2.8-beta | SAVE COMPATIBLE
+Version 0.2.8-beta | SAVE COMPATIBLE
 - Fixed best places to buy / sell again
 - Fixed dynamic config generator again.
 - A portion of the goods sold to the open market makes their way to the colony stockpiles for npc markets
@@ -119,7 +120,7 @@ v0.2.8-beta | SAVE COMPATIBLE
 - WrapUI is no longer packaged with the release.
 - Changed the industry configs to include meta data.
 
-v0.2.7-beta | SAVE COMPATIBLE
+Version 0.2.7-beta | SAVE COMPATIBLE
 - Added a new policy reducing drugs demand
 - Re-balanced the policies a bit
 - Added a new event
@@ -127,19 +128,19 @@ v0.2.7-beta | SAVE COMPATIBLE
 - Added a new stockpile icon to indicate no demand
 - Farming is now more labor intensive
 
-v0.2.6-beta | NOT SAVE COMPATIBLE
+Version 0.2.6-beta | NOT SAVE COMPATIBLE
 - Added LunaLib settings support
 - Added a table to the command tab colonies section to show faction controlled resources.
 - UI fixes
 - Fixed best places to sell & buy list.
 - Fixed exotic goods having strange prices.
 
-v0.2.5-beta | SAVE COMPATIBLE
+Version 0.2.5-beta | SAVE COMPATIBLE
 - Changed some dialog background transparency
 - Overhauled the worker assigner. The workers should now be distributed more efficiently, reducing deficits.
 - Misc. bug fixes
 
-v0.2.4-beta | SAVE COMPATIBLE
+Version 0.2.4-beta | SAVE COMPATIBLE
 - Fixed colony income tooltip not being expandable for more info
 - Fixed policies list not being scrollable
 - Fixed policy cooldown icon not showing
@@ -154,12 +155,12 @@ v0.2.4-beta | SAVE COMPATIBLE
 - Fixed check for manufacturing industry to markets.
 - Made light industry more labor intensive
 
-v0.2.3-beta | SAVE COMPATIBLE
+Version 0.2.3-beta | SAVE COMPATIBLE
 - Modified UI code to fit the new WrapUI changes of composition.
 - Fixed crash where the tooltip was trying to access removed industries.
 - The Commodity tooltip now shows the correct best places to buy/sell tables.
 
-v0.2.2-beta | SAVE COMPATIBLE
+Version 0.2.2-beta | SAVE COMPATIBLE
 - Redistributing credits between faction markets should no longer create more credits than existing
 - Top 5 producers/consumers table can now be Ctrl + Clicked to set a target to the market
 - More bug fixes
@@ -167,12 +168,12 @@ v0.2.2-beta | SAVE COMPATIBLE
 - Updated the tooltip on Commodity Panel to make seperation between daily flows and stockpiles clearer
 - Fixed orbital station mid and high configs. Values should now reflect intended amounts
 
-v0.2.1-beta | SAVE COMPATIBLE
+Version 0.2.1-beta | SAVE COMPATIBLE
 - Changed dynamic industry config creation to be less intrusive. This should decrease crashes.
 - More bug fixes
 - Changed location of config files
 
-v0.2.0-beta | NOT SAVE COMPATIBLE
+Version 0.2.0-beta | NOT SAVE COMPATIBLE
 - Switched to RolflectionLib to stop relying on kotlin
 - Switched to WrapUI Dialogs for more consistent behaviour
 - Bug fixes
@@ -183,5 +184,5 @@ v0.2.0-beta | NOT SAVE COMPATIBLE
 - Added flavor bar events dependent on colony policies
 - Population Health and Happiness now have direct effects on the colony
 
-v0.1.0-beta
+Version 0.1.0-beta
 - Initial release
