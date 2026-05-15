@@ -82,7 +82,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
             tp.addPara(strf("uiShipOrderTpTxt1", spec.getHullNameWithDashClass()),
                 pad, new Color[]{highlight, faction.getBaseUIColor(), highlight},
                 NumFormat.formatCreditAbs(order.credits), capitalName,
-                order.days + " " + UIUtils.getDayOrDays(order.days)
+                UIUtils.getTimeWithDay(order.days)
             );
 
             final int gridWidth = 390;
@@ -129,7 +129,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
 
         final String shipStr = spec.getHullNameWithDashClass();
         final String costStr = NumFormat.formatCredit(order.credits);
-        final String timeStr = order.days + " " + UIUtils.getDayOrDays(order.days);
+        final String timeStr = UIUtils.getTimeWithDay(order.days);
         final String gapStr = " • ";
         final LabelAPI topSection = settings.createLabel(
             shipStr + gapStr + costStr + gapStr + timeStr, Fonts.DEFAULT_SMALL

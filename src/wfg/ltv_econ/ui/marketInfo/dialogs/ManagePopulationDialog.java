@@ -12,6 +12,7 @@ import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.awt.Color;
+import java.text.DecimalFormat;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -123,7 +124,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel RoSVLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
             public void buildUI() {
                 final String txt = str("uiRateOfExploitationTitle");
-                final String valueTxt = String.format("%.1f", data.getRoSV());
+                final String valueTxt = new DecimalFormat("#.#").format(data.getRoSV());
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -236,7 +237,7 @@ public class ManagePopulationDialog extends DialogPanel {
             data.setRoSV(exploitationSlider.getProgress());
 
             RoSVLabel.label2.setText(
-                String.format("%d", Math.round(exploitationSlider.getProgress()))
+                new DecimalFormat("#.#").format(exploitationSlider.getProgress())
             );
 
             wagesLabel.label2.setText(

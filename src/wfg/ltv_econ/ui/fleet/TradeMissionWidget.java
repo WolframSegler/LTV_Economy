@@ -122,7 +122,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
         distLbl.setHighlight(distValue);
         add(distLbl).inTL(opad, GAP_TOP_2);
 
-        final String durValue = mission.totalDur + UIUtils.getDayOrDays(mission.totalDur, true);
+        final String durValue =UIUtils.getTimeWithDay(mission.totalDur, true);
         final LabelAPI durLbl = settings.createLabel(str("uiTotalDurTxt") + durValue, Fonts.DEFAULT_SMALL);
         durLbl.setHighlightColor(highlight);
         durLbl.setHighlight(durValue);
@@ -138,7 +138,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         final String sliderTxt = switch(mission.status) {
             case SCHEDULED, DELIVERED, CANCELLED, LOST -> mission.status.getDisplayText();
-            default -> mission.durRemaining + UIUtils.getDayOrDays(mission.durRemaining, true);
+            default -> UIUtils.getTimeWithDay(mission.durRemaining, true);
         };
         final Slider timeSlider = new Slider(m_panel, sliderTxt, 0f, mission.totalDur, panelW - opad*2, 32);
         timeSlider.showLabelOnly = true;

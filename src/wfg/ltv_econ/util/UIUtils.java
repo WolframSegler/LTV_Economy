@@ -197,7 +197,6 @@ public class UIUtils {
         return String.format("%.1f", val) + " " + getDayOrDays(val, capitalized);
     }
 
-    // TODO modify each call to this method to use one above if applicable
     public static final String getDayOrDays(int val) {
         return getDayOrDays(val, false);
     }

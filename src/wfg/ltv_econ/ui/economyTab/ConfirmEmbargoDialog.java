@@ -21,7 +21,7 @@ public class ConfirmEmbargoDialog extends DialogPanel  {
 
     public ConfirmEmbargoDialog(FactionSpecAPI faction, RowPanel caller, boolean alreadyEmbargoed) {
         super(null,
-            alreadyEmbargoed ? str("uiLiftEmbargoTxt") : str("uiImposeEmbargoTxt"),
+            strf(alreadyEmbargoed ? "uiLiftEmbargoTxt" : "uiImposeEmbargoTxt", faction.getDisplayName()),
             alreadyEmbargoed ? str("uiLiftEmbargoVerb") : str("uiImposeEmbargoVerb"),
             str("uiCancel")
         );

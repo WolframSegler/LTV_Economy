@@ -67,7 +67,7 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
             final String statusStr = strf(isBeingProduced ? "shipProductionItemTpTxt1" : "shipProductionItemTpTxt2", spec.getHullNameWithDashClass());
 
             tp.addPara(statusStr + str("shipProductionItemTpTxt3"),
-                pad, highlight, order.daysRemaining + " " + UIUtils.getDayOrDays(order.daysRemaining)
+                pad, highlight, UIUtils.getTimeWithDay(order.daysRemaining)
             );
         };
 
@@ -96,7 +96,7 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
         add(shipSprite).inLMid(hpad + (maxSize - scaledW) / 2);
 
         final String shipStr = spec.getHullNameWithDashClass();
-        final String timeStr = order.daysRemaining + " " + UIUtils.getDayOrDays(order.daysRemaining);
+        final String timeStr = UIUtils.getTimeWithDay(order.daysRemaining);
         final LabelAPI topSection = settings.createLabel(
             shipStr + str("uiRemainingSectionTitle") + timeStr, Fonts.DEFAULT_SMALL
         );
