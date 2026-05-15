@@ -11,6 +11,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.constants.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
@@ -49,7 +50,7 @@ public class MarketEventsDialog extends DockPanel {
     public void buildUI() {
         final int width = (int) contentContainer.getPosition().getWidth();
 
-        final LabelAPI title = settings.createLabel("Current Events", Fonts.INSIGNIA_LARGE);
+        final LabelAPI title = settings.createLabel(LocalizedStrings.str("uiCurrentEventsTitle"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
 
         final TooltipMakerAPI eventsList = ComponentFactory.createTooltip(width, true);

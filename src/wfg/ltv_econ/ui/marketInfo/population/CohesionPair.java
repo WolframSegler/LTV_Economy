@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.marketInfo.population;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -24,13 +25,13 @@ public class CohesionPair extends IconValuePairTp {
         lbl.setHighlightOnMouseover(true);
         lbl.setAlignment(Alignment.MID);
         tooltip.builder = (tp, exp) -> {
-            tp.addTitle("Cohesion", base);
+            tp.addTitle(str("marketPopDataCohesionTxt"), base);
 
-            tp.addPara("Degree of social cohesion within the population. High cohesion reduces conflict and increases stability.", opad);
+            tp.addPara(str("uiCohesionTpTxt"), opad);
 
             final float value = data.socialCohesionDelta.computeEffective(
                 data.getSocialCohesion()) - data.getSocialCohesion();
-            tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
+            tp.addPara(str("uiDailyChangePrefix"), 3, highlight, String.format("%.2f", value));
             tp.addStatModGrid(PopStatModValueGetter.GRID_W, PopStatModValueGetter.VALUE_W,
                 pad, pad, data.socialCohesionDelta, new PopStatModValueGetter()
             );

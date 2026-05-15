@@ -44,7 +44,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef(str("uiTradeRoutesBtnTitle"), Keyboard.KEY_W,
+        defs.add(new NavButtonDef(str("uiTableTradeRoutesBtnTitle"), Keyboard.KEY_W,
             () -> {
                 final ComTradeFlowMap content = new ComTradeFlowMap(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H

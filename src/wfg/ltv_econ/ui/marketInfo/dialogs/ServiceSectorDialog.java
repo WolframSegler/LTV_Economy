@@ -4,6 +4,7 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.CommoditiesID.*;
 import static wfg.ltv_econ.constants.Sprites.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class ServiceSectorDialog extends DialogPanel {
     private final float initialFreeWorkerRatio;
 
     public ServiceSectorDialog(Industry ind) {
-        super(PANEL_W, PANEL_H, null, null, "Confirm", "Cancel");
+        super(PANEL_W, PANEL_H, null, null, str("confirmTxt"), str("uiCancel"));
         setConfirmShortcut();
 
         final WorkerRegistry reg = WorkerRegistry.instance();
@@ -64,7 +65,7 @@ public class ServiceSectorDialog extends DialogPanel {
 
     @Override
     public void buildUI() {
-        final LabelAPI titleLbl = settings.createLabel("Manage Public Services", Fonts.ORBITRON_20AA);
+        final LabelAPI titleLbl = settings.createLabel(str("uiPublicServicesTitle"), Fonts.ORBITRON_20AA);
         titleLbl.setAlignment(Alignment.MID);
         titleLbl.autoSizeToWidth(PANEL_W);
         add(titleLbl).inTL(0f, pad*2);
@@ -79,12 +80,11 @@ public class ServiceSectorDialog extends DialogPanel {
             final float publicInfoLim = 0.1f;
 
             final SectorCard logistics = new SectorCard(sectorsCont, SERVICE_LOGISTICS, logisticsLim, LOGISTICS,
-                "Logistics", (slider) -> {
+                str("uiLogisticsTitle"), (slider) -> {
                     final String eff1 = Integer.toString(Math.round(slider.getProgress()));
                     final String max1 = Integer.toString(Math.round(logisticsLim * 100f));
-                    final String txt = String.format("Tasked with the efficient allocation and transportation of resources, " +
-                        "the logistics sector reduces overall resource consumption by %s%% (max %s%%).", eff1, max1
-                    );
+                    final String txt = strf("uiLogisticsTpTxt", eff1, max1);
+
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base);
                     lbl.setHighlight(eff1, max1);
@@ -93,14 +93,13 @@ public class ServiceSectorDialog extends DialogPanel {
                 }, null
             );
             final SectorCard healthcare = new SectorCard(sectorsCont, SERVICE_HEALTHCARE, healthcareLim, HEALTHCARE,
-                "Healthcare", (slider) -> {
+                str("uiHealthcareTitle"), (slider) -> {
                     final String eff1 = Integer.toString((int) (slider.getProgress() / 5f));
                     final String max1 = Integer.toString(Math.round(healthcareLim * 20f));
                     final String eff2 = String.format("%.2f", slider.getProgress() / 200f);
                     final String max2 = String.format("%.2f", healthcareLim / 2f);
-                    final String txt = String.format("The healthcare sector increases life expectancy, which contributes %s (max %s) growth points. " +
-                        "The health of the population is also increased by %s (max %s) per-day.", eff1, max1, eff2, max2
-                    );
+                    final String txt = strf("uiHealthcareTpTxt", eff1, max1, eff2, max2);
+
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base, highlight, base);
                     lbl.setHighlight(eff1, max1, eff2, max2);
@@ -109,14 +108,13 @@ public class ServiceSectorDialog extends DialogPanel {
                 }, MED_GREEN
             );
             final SectorCard security = new SectorCard(sectorsCont, SERVICE_SECURITY, securityLim, SECURITY,
-                "Security", (slider) -> {
+                str("uiSecurityTitle"), (slider) -> {
                     final String eff1 = String.format("%.3f", slider.getProgress() / 1000f);
                     final String max1 = String.format("%.3f", securityLim / 10f);
                     final String eff2 = Integer.toString((int) (slider.getProgress()));
                     final String max2 = Integer.toString(Math.round(securityLim * 100f));
-                    final String txt = String.format("The ministry of security is distinct from COMSEC in that it is tasked with ensuring public order, subduing \"troublemakers\" among the populace and creating a secondary line against invaders. " +
-                        "Decreases class consciousness by %s (max %s) and boosts ground defenses by %s (max %s).", eff1, max1, eff2, max2
-                    );
+                    final String txt = strf("uiSecurityTpTxt", eff1, max1, eff2, max2);
+
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base, highlight, base);
                     lbl.setHighlight(eff1, max1, eff2, max2);
@@ -125,14 +123,13 @@ public class ServiceSectorDialog extends DialogPanel {
                 }, grid
             );
             final SectorCard publicInfo = new SectorCard(sectorsCont, SERVICE_PUBLIC_INFO, publicInfoLim, PUBLIC_INFO,
-                "Public Information", (slider) -> {
+                str("uiPublicInfoTitle"), (slider) -> {
                     final String eff1 = String.format("%.3f", slider.getProgress() / 200f);
                     final String max1 = String.format("%.3f", publicInfoLim / 2f);
                     final String eff2 = Integer.toString((int) (slider.getProgress()));
                     final String max2 = Integer.toString(Math.round(publicInfoLim * 100f));
-                    final String txt = String.format("The public information department broadcasts daily news and educational programmes. " +
-                        "Increases social cohesion by %s (max %s) and accessibility by %s (max %s).", eff1, max1, eff2, max2
-                    );
+                    final String txt = strf("uiPublicInfoTpTxt", eff1, max1, eff2, max2);
+                    
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base, highlight, base);
                     lbl.setHighlight(eff1, max1, eff2, max2);

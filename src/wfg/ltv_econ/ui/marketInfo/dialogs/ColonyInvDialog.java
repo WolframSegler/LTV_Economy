@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -11,6 +12,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
+import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
@@ -45,7 +47,7 @@ public class ColonyInvDialog extends DialogPanel {
     private final MarketAPI m_market;
 
     public ColonyInvDialog(MarketAPI market) {
-        super(PANEL_W, PANEL_H, null, null, "Dismiss");
+        super(PANEL_W, PANEL_H, null, null, str("dismissTxt"));
         getButton(0).setShortcutAndAppendToText(Keyboard.KEY_3);
 
         m_market = market;
@@ -80,7 +82,7 @@ public class ColonyInvDialog extends DialogPanel {
                 final String credits = NumFormat.formatCredit(colonyCredits);
 
                 label1 = settings.createLabel(
-                    "Colony Balance: " + credits, Fonts.ORBITRON_16
+                    strf("colonyBalanceTitle", credits), Fonts.ORBITRON_16
                 );
                 label1.setHighlight(credits);
                 label1.setHighlightColor(highlight);
@@ -91,14 +93,7 @@ public class ColonyInvDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Shows the colony's current credit reserves. These funds cover operating costs, import purchases, and upkeep for industries and structures. " +
-                        "A low balance can slow trade and reduce output. " +
-                        (m_market.isPlayerOwned()
-                            ? "Colony reserves are separate from your personal credits."
-                            : ""),
-                        pad
-                    );
+                    tp.addPara(str("colonyBalanceTpTxt1") + (m_market.isPlayerOwned() ? str("colonyBalanceTpTxt2") : ""), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, hpad);
@@ -113,21 +108,18 @@ public class ColonyInvDialog extends DialogPanel {
                 final String credits = NumFormat.formatCredit(playerCredits.get());
 
                 label1 = settings.createLabel(
-                    "Your Balance: " + credits, Fonts.ORBITRON_16
+                    strf("playerBalanceTitle", credits), Fonts.ORBITRON_16
                 );
                 label1.setHighlight(credits);
                 label1.setHighlightColor(highlight);
-                final float height = label1.computeTextHeight(label1.getText());
-                add(label1).inTL(0, (sliderH - height) / 2f);
+                label1.setAlignment(Alignment.LMID);
+                add(label1).setSize(label1.getPosition().getWidth(), sliderH).inTL(0f, 0f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
             }
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Shows your personal credits for transferring funds to or from the colony's reserves.",
-                        pad
-                    );
+                    tp.addPara(str("playerBalanceTpTxt"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, hpad);
@@ -143,7 +135,7 @@ public class ColonyInvDialog extends DialogPanel {
                 final String ratio = Math.round(data.playerProfitRatio * 100) + "%";
 
                 label1 = settings.createLabel(
-                    "Auto Transfer Ratio: " + ratio, Fonts.ORBITRON_16
+                    strf("autoTransferTitle", ratio), Fonts.ORBITRON_16
                 );
                 label1.setHighlight(ratio);
                 label1.setHighlightColor(base);
@@ -155,14 +147,9 @@ public class ColonyInvDialog extends DialogPanel {
             {
                 tooltip.enabled = data == null;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The ratio of monthly profits that get automatically transferred to the player",
-                        pad
-                    );
+                    tp.addPara(str("autoTransferTpTxt1"), pad);
 
-                    tp.addPara(
-                        "You would receive %s from this colony so far this month.",
-                        pad, highlight,
+                    tp.addPara(str("autoTransferTpTxt2"), pad, highlight,
                         NumFormat.formatCredit(Math.max(0f, data.playerProfitRatio *
                             MarketFinanceRegistry.instance().getLedger(m_market).getNetCurrentMonth()
                         ))
@@ -176,25 +163,25 @@ public class ColonyInvDialog extends DialogPanel {
         if (data != null) add(playerProfitPanel).inTL(opad, 90);
 
         final LabelAPI withdrawLabel = settings.createLabel(
-            "Withdraw:", Fonts.ORBITRON_16
+            str("withdrawTxt"), Fonts.ORBITRON_16
         );
         float labelH = withdrawLabel.computeTextHeight(withdrawLabel.getText());
         add((UIComponentAPI)withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
 
         final LabelAPI depositLabel = settings.createLabel(
-            "Deposit:", Fonts.ORBITRON_16
+            str("depostiTxt"), Fonts.ORBITRON_16
         );
         labelH = depositLabel.computeTextHeight(depositLabel.getText());
         add((UIComponentAPI)depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
 
         final LabelAPI profitLabel = settings.createLabel(
-            "Allocate:", Fonts.ORBITRON_16
+            str("allocaleTxt"), Fonts.ORBITRON_16
         );
         labelH = profitLabel.computeTextHeight(profitLabel.getText());
         add((UIComponentAPI)profitLabel).inTL(400, 90 + (sliderH - labelH) / 2f);
 
         final Slider withdrawSlider = new Slider(
-            m_panel, "", 0f, hasData ? data.getWithdrawLimit() : colonyCredits, sliderW, sliderH
+            m_panel, null, 0f, hasData ? data.getWithdrawLimit() : colonyCredits, sliderW, sliderH
         );
         withdrawSlider.setHighlightOnMouseover(true);
         withdrawSlider.setBarColor(withdrawColor);
@@ -203,7 +190,7 @@ public class ColonyInvDialog extends DialogPanel {
         add(withdrawSlider).inTL(500, 10);
 
         final Slider depositSlider = new Slider(
-            m_panel, "", 0f, playerCredits.get(), sliderW, sliderH
+            m_panel, null, 0f, playerCredits.get(), sliderW, sliderH
         );
         depositSlider.setHighlightOnMouseover(true);
         depositSlider.setBarColor(depositColor);
@@ -211,7 +198,7 @@ public class ColonyInvDialog extends DialogPanel {
         depositSlider.customText = () -> Misc.getDGSCredits(depositSlider.getProgressInterpolated());
         add(depositSlider).inTL(500, 50);
 
-        final Slider profitSlider = new Slider(m_panel, "", 0f,
+        final Slider profitSlider = new Slider(m_panel, null, 0f,
             100f * EconConfig.AUTO_TRANSFER_PROFIT_LIMIT, sliderW, sliderH
         );
         if (data != null) {
@@ -236,22 +223,18 @@ public class ColonyInvDialog extends DialogPanel {
             withdrawSlider.maxRange = hasData ? data.getWithdrawLimit() : colonyCred;
             profitSlider.setProgress(profitRatio);
 
-            colonyLbl.setText(
-                "Colony Balance: " + NumFormat.formatCredit(colonyCred)
-            );
+            colonyLbl.setText(strf("colonyBalanceTitle", NumFormat.formatCredit(colonyCred)));
             colonyLbl.setHighlight(NumFormat.formatCredit(colonyCred));
             colonyLbl.autoSizeToWidth(colonyLbl.computeTextWidth(colonyLbl.getText()));
             colonyCreditPanel.getPos().setSize(colonyLbl.getPosition().getWidth(), sliderH);
 
-            playerLbl.setText(
-                "Your Balance: " + NumFormat.formatCredit(playerCred)
-            );
+            playerLbl.setText(strf("playerBalanceTitle", NumFormat.formatCredit(playerCred)));
             playerLbl.setHighlight(NumFormat.formatCredit(playerCred));
             playerLbl.autoSizeToWidth(playerLbl.computeTextWidth(playerLbl.getText()));
             playerCreditPanel.getPos().setSize(playerLbl.getPosition().getWidth(), sliderH);
 
             if (data != null) {
-                profitLbl.setText("Auto Transfer Ratio: " + profitRatio + "%");
+                profitLbl.setText(strf("autoTransferTitle", profitRatio + "%"));
                 profitLbl.setHighlight(profitRatio + "%");
                 profitLbl.autoSizeToWidth(profitLbl.computeTextWidth(profitLbl.getText()));
                 playerProfitPanel.getPos().setSize(profitLbl.getPosition().getWidth(), sliderH);
@@ -275,13 +258,13 @@ public class ColonyInvDialog extends DialogPanel {
         };
 
         final Button withdrawBtn = new Button(
-            m_panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, withdrawRunnable
+            m_panel, buttonW, buttonH, str("confirmTxt"), Fonts.ORBITRON_12, withdrawRunnable
         );
         final Button depositBtn = new Button(
-            m_panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, depositRunnable
+            m_panel, buttonW, buttonH, str("confirmTxt"), Fonts.ORBITRON_12, depositRunnable
         );
         final Button profitBtn = new Button(
-            m_panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, profitRunnable
+            m_panel, buttonW, buttonH, str("confirmTxt"), Fonts.ORBITRON_12, profitRunnable
         );
 
         withdrawBtn.setQuickMode(true);
@@ -301,22 +284,15 @@ public class ColonyInvDialog extends DialogPanel {
             20, 30
         );
 
-        final String BaseProdTpTxt = "Theoretical local daily production, assuming no deficits or shortages.";
-        final String RealProdTpTxt = "Actual daily production after accounting for stored deficits.";
-        final String BaseBalanceTpTxt = "Net daily change in stockpile, ignoring imports or exports.";
-        final String RealBalanceTpTxt = "Net daily change in stockpile, including imports or exports. " +
-            "Does not account for discrete expenditures such as hull production for the faction hangar.\n\n"+
-            "This value may not reflect the effects of imports and exports due to their periodic nature";
-
         table.addHeaders(
             "", 40, null, true, false, 1,
-            "Commodity", 160, "Commodity.", true, true, 1,
-            "Stored", 100, "Amount in Colony stockpile.", false, false, -1,
-            "Consumed", 100, "Total demand by colony.", false, false, -1,
-            "Base Prod", 140, BaseProdTpTxt, false, false, -1,
-            "Real Prod", 140, RealProdTpTxt, false, false, -1,
-            "Base Balance", 130, BaseBalanceTpTxt, false, false, -1,
-            "Real Balance", 120, RealBalanceTpTxt, false, false, -1
+            str("uiTableCommodityTitle"), 160, null, true, true, 1,
+            str("uiTableStored"), 100, null, false, false, -1,
+            str("uiTableConsumed"), 100, str("uiTableConsumedTpTxt"), false, false, -1,
+            str("uiTableBaseProd"), 140, str("uiTableBaseProdTpTxt"), false, false, -1,
+            str("uiTableRealProd"), 140, str("uiTableRealProdTpTxt"), false, false, -1,
+            str("uiTableBaseBalance"), 130, str("uiTableBaseBalanceTpTxt"), false, false, -1,
+            str("uiTableRealBalance"), 120, str("uiTableRealBalanceTpTxt"), false, false, -1
         );
 
         for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {

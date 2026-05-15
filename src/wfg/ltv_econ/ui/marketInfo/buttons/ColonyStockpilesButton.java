@@ -18,6 +18,8 @@ import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NativeUiUtils;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
     private static final SpriteAPI ICON = settings.getSprite("icons", "stockpiles_button");
 
@@ -38,14 +40,13 @@ public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;
 
-        // TODO continue string externalization here
         tooltip.builder = (tp, expanded) -> {
-            tp.addPara("Colony stockpiles and credits [%s]", pad,
+            tp.addPara(str("uiColonyStockpilesBtnTpTxt1"), pad,
                 highlight, Keyboard.getKeyName(interaction.shortcut)
             );
 
-            tp.addPara("Trade Missions [%s + %s]", pad,
-                highlight, "Ctrl", Keyboard.getKeyName(interaction.shortcut)
+            tp.addPara(str("uiColonyStockpilesBtnTpTxt2"), pad,
+                highlight, str("uiCtrlTxt"), Keyboard.getKeyName(interaction.shortcut)
             );
         };
 

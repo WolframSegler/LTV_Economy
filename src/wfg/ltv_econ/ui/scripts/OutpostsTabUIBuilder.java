@@ -1,6 +1,7 @@
 package wfg.ltv_econ.ui.scripts;
 
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
     }
 
     protected String getButtonLabel() {
-        return "Faction";
+        return str("uiTableFaction");
     }
 
     protected UIComponentAPI createCustomComponent(UIPanelAPI parent) {
@@ -82,9 +83,9 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         popTable.getPanel().setOpacity(0f);
         facTable.getPanel().setOpacity(0f);
 
-        final String coloniesTxt = "      Owned colonies";
-        final String populationTxt = "      Population metrics";
-        final String factionTxt = "      Faction resources";
+        final String coloniesTxt = str("uiOwnedColoniesBtnTitle");
+        final String populationTxt = str("uiPopulationListBtnTitle");
+        final String factionTxt = str("uiFactionResourcesBtnTitle");
 
         final Button showColoniesButton = new Button(panel, 280, 24, coloniesTxt,
             Fonts.ORBITRON_12, null);

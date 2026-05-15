@@ -62,14 +62,14 @@ public class IncomeBreakdownDialog extends DockPanel {
     @Override
     public void buildUI() {
         clearChildren();
-        final LabelAPI title = settings.createLabel("Income Breakdown", Fonts.INSIGNIA_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiIncomeBreakdownTitle"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
 
         final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(WIDTH, true);
 
         final RadioPanel monthSwitch = new RadioPanel(contentContainer, 110, 18, LayoutMode.HORIZONTAL)
-            .addOption("Prev.", lastMonth)
-            .addOption("Curr.", !lastMonth);
+            .addOption(str("uiPrevious"), lastMonth)
+            .addOption(str("uiCurrent"), !lastMonth);
         monthSwitch.optionSelected = code -> {
             lastMonth = code == 0;
             scrollLen = scrollPanel.getExternalScroller().getYOffset();
@@ -78,7 +78,7 @@ public class IncomeBreakdownDialog extends DockPanel {
         monthSwitch.buildUI();
         add(monthSwitch).inTR(opad, opad);
 
-        final Button rawToggle = new Button(contentContainer, 60, 18, "raw", Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button rawToggle = new Button(contentContainer, 60, 18, str("uiRawTxt"), Fonts.DEFAULT_SMALL, (btn) -> {
             scrollLen = 0f;
             raw = !raw;
             buildUI();
@@ -89,7 +89,7 @@ public class IncomeBreakdownDialog extends DockPanel {
             rawToggle.setShowTooltipWhileInactive(true);
             rawToggle.tooltip.width = 100f;
             rawToggle.tooltip.builder = (tp, expanded) -> {
-                tp.addPara("Debug only", 0f);
+                tp.addPara(str("uiDebugOnly"), 0f);
             };
             rawToggle.tooltip.positioner = (tp, e) -> {
                 NativeUiUtils.anchorPanel(tp, rawToggle.getPanel(), AnchorType.LeftMid, opad);
@@ -175,7 +175,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         // VISUALS
 
-        tp.addTitle(lastMonth ? "Previous Month" : "Current Month", base);
+        tp.addTitle(lastMonth ? str("uiPrevMonthTitle") : str("uiCurrMonthTitle"), base);
         tp.addSpacer(opad);
 
         if (raw) {
@@ -185,17 +185,17 @@ public class IncomeBreakdownDialog extends DockPanel {
         }
 
         } else {
-        tp.addPara("Net income: %s", opad, netIncome > 0l ? highlight : negative, NumFormat.formatCredit(netIncome));
-        tp.addPara("Gross income: %s", opad, highlight, NumFormat.formatCreditAbs(grossIncome));
-        tp.addPara("Gross expense: %s", opad, negative, NumFormat.formatCreditAbs(grossExpense));
+        tp.addPara(str("uiNetIncomePrefix"), opad, netIncome > 0l ? highlight : negative, NumFormat.formatCredit(netIncome));
+        tp.addPara(str("uiGrossIncome"), opad, highlight, NumFormat.formatCreditAbs(grossIncome));
+        tp.addPara(str("uiGrossExpense"), opad, negative, NumFormat.formatCreditAbs(grossExpense));
 
-        tp.addSectionHeading("Industries & Structures", base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("industriesTitle"), base, dark, Alignment.MID, opad);
 
-        tp.addPara("Income: %s", opad, highlight, indIncome);
-        tp.addPara("Upkeep: %s", opad, negative, indUpkeep);
+        tp.addPara(str("uiIncomeWithValue"), opad, highlight, indIncome);
+        tp.addPara(str("uiUpkeepWithvalue"), opad, negative, indUpkeep);
 
         tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new Object[] {
-            "Industry", 220, "Income", 90, "Upkeep", 90
+            str("uiTableIndustryTitle"), 220, str("uiTableIncomeTitle"), 90, str("uiTableUpkeepTitle"), 90
         });
 
         for (Industry ind : industries) {
@@ -210,27 +210,27 @@ public class IncomeBreakdownDialog extends DockPanel {
         }
         tp.addTable("", 0, pad);
 
-        tp.addPara("Income multiplier: %s", opad, highlight,
+        tp.addPara(str("uiIncomeMultTitle"), opad, highlight,
             Math.round(market.getIncomeMult().getModifiedValue() * 100f) + "%"
         );
         tp.addStatModGrid(WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null);
 
-        tp.addPara("Upkeep multiplier: %s", opad, highlight,
+        tp.addPara(str("uiUpkeepMultTitle"), opad, highlight,
             Math.round(market.getUpkeepMult().getModifiedValue() * 100f) + "%"
         );
         tp.addStatModGrid(
             WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null
         );
 
-        tp.addPara("These modifiers affect industry income & upkeep only.", gray, opad);
+        tp.addPara(str("uiMonthlyIncomeUpkeepTpTxt3"), gray, opad);
 
-        tp.addSectionHeading("Imports & Exports", base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("importsExportsTitle"), base, dark, Alignment.MID, opad);
         
-        tp.addPara("Export Income: %s", opad, highlight, NumFormat.formatCreditAbs(exportIncome));
-        tp.addPara("Import Expense: %s", opad, negative, NumFormat.formatCreditAbs(importExpense));
+        tp.addPara(str("uiExportIncomeTitle"), opad, highlight, NumFormat.formatCreditAbs(exportIncome));
+        tp.addPara(str("uiImportExpenseTitle"), opad, negative, NumFormat.formatCreditAbs(importExpense));
 
         if (exportIncome > 0l) {
-            tp.beginTable(faction, rowH, "Commodity", 220f, "Income", 180f);
+            tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 220f, str("uiTableIncomeTitle"), 180f);
     
             domains.sort((c1, c2) ->
                 Long.compare(
@@ -250,11 +250,11 @@ public class IncomeBreakdownDialog extends DockPanel {
                 );
             }
 
-            tp.addTable("No exports", 0, opad);
+            tp.addTable(str("noExports"), 0, opad);
         }
 
         if (importExpense > 0l) {
-            tp.beginTable(faction, rowH, "Commodity", 220f, "Expense", 180f);
+            tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 220f, str("uiTableIncomeTitle"), 180f);
 
             domains.sort((c1, c2) ->
                 Long.compare(
@@ -274,10 +274,10 @@ public class IncomeBreakdownDialog extends DockPanel {
                 );
             }
 
-            tp.addTable("No imports", 0, opad);
+            tp.addTable(str("noImports"), 0, opad);
         }
 
-        tp.addSectionHeading("Wages & Population", base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("uiWagesPopulationTitle"), base, dark, Alignment.MID, opad);
 
         tp.addPara(getDesc(COLONY_HAZARD_PAY_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(incentive));
 
@@ -285,15 +285,15 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         tp.addPara(getDesc(FACTION_CREW_WAGES_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(factionShipsCrewWages));
         
-        tp.addSectionHeading("Faction Expenses", base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("uiFactionExpensesTitle"), base, dark, Alignment.MID, opad);
 
         tp.addPara(getDesc(FACTION_SHIP_PRODUCTION_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(factionShipsProd));
         
         tp.addPara(getDesc(TRADE_FLEET_SHIPMENT_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(tradeFleetShipment));
 
-        tp.addSectionHeading("Policy Expenses", base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("uiPolicyExpensesTitle"), base, dark, Alignment.MID, opad);
 
-        tp.addPara("Total Costs: %s", opad, negative, policyCostStr);
+        tp.addPara(str("uiTotalCostsPrefix"), opad, negative, policyCostStr);
 
         for (String key : policyKeys) {
             final long cost = lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key);
@@ -303,7 +303,7 @@ public class IncomeBreakdownDialog extends DockPanel {
             tp.addPara("  • " + desc + ": %s", opad, negative, NumFormat.formatCreditAbs(cost));
         }
 
-        tp.addSectionHeading("Other Transactions", base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("uiOtherTransactionsTitle"), base, dark, Alignment.MID, opad);
 
         if (sumbarketTransaction > 0l) {
             tp.addPara(getDesc(PLAYER_MARKET_TRANSACTION_KEY) + ": %s", opad, highlight,

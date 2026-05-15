@@ -3,6 +3,7 @@ package wfg.ltv_econ.ui.marketInfo.dialogs;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.UIColors.SLIDER_BASE;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class AssignWorkersDialog extends DialogPanel {
     private final float initialFreeWorkerRatio;
 
     public AssignWorkersDialog(Industry ind) {
-        super(PANEL_W, PANEL_H, null, null, "Confirm", "Cancel");
+        super(PANEL_W, PANEL_H, null, null, str("confirmTxt"), str("uiCancel"));
         setConfirmShortcut();
 
         final WorkerRegistry reg = WorkerRegistry.instance();
@@ -87,7 +88,7 @@ public class AssignWorkersDialog extends DialogPanel {
         final int sliderY = 225;
         final int iconSize = 26;
 
-        final String txt = "Assign workers to " + industry.getCurrentName();
+        final String txt = strf("uiAssignWorkersToTitle", industry.getCurrentName());
         final LabelAPI titleLbl = settings.createLabel(txt, Fonts.ORBITRON_20AA);
         titleLbl.setAlignment(Alignment.MID);
         titleLbl.autoSizeToWidth(PANEL_W);
@@ -112,11 +113,7 @@ public class AssignWorkersDialog extends DialogPanel {
             WARNING_BUTTON, null, null
         ) {{
             tooltip.builder = (tp, exp) -> {
-                tp.addPara(
-                    "Adjust each output's slider to allocate a portion of the market's total workforce. " +
-                    "The values represent the percentage of available workers assigned to that output.",
-                    pad
-                );
+                tp.addPara(str("uiAssignWorkersDialogTpTxt"), pad);
             };
             tooltip.positioner = (tp, exp) -> {
                 NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.TopLeft, 0);
@@ -203,7 +200,7 @@ public class AssignWorkersDialog extends DialogPanel {
         }
 
         TooltipMakerAPI tp = ComponentFactory.createTooltip((PANEL_W / 2) - opad, false);
-        tp.addSectionHeading(importing ? "---" : "Production", color, dark, Alignment.MID, opad);
+        tp.addSectionHeading(importing ? "---" : str("uiTableProductionTitle"), color, dark, Alignment.MID, opad);
         final float startY = tp.getHeightSoFar() + pad;
 
         // Supply
@@ -235,7 +232,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
             // draw text
             final String txt = Strings.X + NumFormat.engNotate(pAmount);
-            final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
+            final LabelAPI lbl = tp.addPara(txt + str("industryPerDayProductionSuffix"), 0f, highlight, txt);
 
             final float textH = lbl.computeTextHeight(txt);
             final float textX = x + iconSize + pad;
@@ -248,7 +245,7 @@ public class AssignWorkersDialog extends DialogPanel {
         ComponentFactory.addTooltip(tp, PANEL_H, false, panel).inTL(hpad, 0);
 
         tp = ComponentFactory.createTooltip((PANEL_W / 2) - opad, false);
-        tp.addSectionHeading(importing ? "Import" : "Demand", color, dark, Alignment.MID, opad);
+        tp.addSectionHeading(importing ? str("uiTableImport") : str("uiTableDemandTitle"), color, dark, Alignment.MID, opad);
 
         // Demand
         x = opad;
@@ -282,7 +279,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
             // draw text
             final String txt = Strings.X + NumFormat.engNotate(dAmount);
-            final LabelAPI lbl = tp.addPara(txt + " / Day", 0f, highlight, txt);
+            final LabelAPI lbl = tp.addPara(txt + str("industryPerDayProductionSuffix"), 0f, highlight, txt);
 
             final float textH = lbl.computeTextHeight(txt);
             final float textX = x + iconSize + pad;

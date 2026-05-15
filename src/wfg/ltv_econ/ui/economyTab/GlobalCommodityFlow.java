@@ -325,7 +325,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalExporterCount(comID);
-                final String txt = str("uiGlobalExportsTitle");
+                final String txt = str("uiGlobalExportersTitle");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -334,7 +334,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalExportsTpTxt"), pad, highlight, com.getName());
+                    tp.addPara(str("uiGlobalExportersTpTxt"), pad, highlight, com.getName());
                 };
             }
         };
@@ -347,7 +347,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalImporterCount(comID);
-                final String txt = str("uiGlobalImportsTitle");
+                final String txt = str("uiGlobalImportersTitle");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -356,7 +356,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalImportsTpTxt"), pad, highlight, com.getName());
+                    tp.addPara(str("uiGlobalImportersTpTxt"), pad, highlight, com.getName());
                 };
             }
         };
@@ -396,7 +396,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
-            str("mapColonyTitle"), 100, str("uiTableColonyNameTitle"), true, true, 1,
+            str("uiTableColony"), 100, str("uiTableColonyNameTitle"), true, true, 1,
             str("uiTableProductionTitle"), 100, strf("uiTableDailyProdTitle", com.getName()), false, false, -1
         );
 
@@ -443,7 +443,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
-            str("mapColonyTitle"), 100, str("uiTableColonyNameTitle"), true, true, 1,
+            str("uiTableColony"), 100, str("uiTableColonyNameTitle"), true, true, 1,
             str("uiTableDemandTitle"), 100, strf("uiTableDailyConsumptionTitle", com.getName()), false, false, -1
         );
 
@@ -515,7 +515,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
-                    str("mapFactionTitle"), 200, str("uiTableShareTitle"), 100
+                    str("uiTableFaction"), 200, str("uiTableShareTitle"), 100
                 }
             );
 
@@ -570,7 +570,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
-                    str("mapFactionTitle"), 200, str("uiTableShareTitle"), 100
+                    str("uiTableFaction"), 200, str("uiTableShareTitle"), 100
                 }
             );
 

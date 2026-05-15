@@ -6,6 +6,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.comms.IntelTabData;
 
+import wfg.ltv_econ.constants.strings.LocalizedStrings;
 import wfg.ltv_econ.ui.economyTab.EconomyOverviewPanel;
 import wfg.ltv_econ.ui.reusable.AbstractTabButtonInjector;
 
@@ -25,7 +26,7 @@ public class IntelTabUIBuilder extends AbstractTabButtonInjector {
     }
 
     protected String getButtonLabel() {
-        return "Economy";
+        return LocalizedStrings.str("uiEconomyBtnTitle");
     }
 
     protected UIComponentAPI createCustomComponent(UIPanelAPI parent) {

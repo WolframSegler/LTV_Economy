@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
@@ -76,7 +77,7 @@ public class ManagePopulationDialog extends DialogPanel {
     private UIPanelAPI selectedPolicyCont = null;
     
     public ManagePopulationDialog(MarketAPI market) {
-        super(PANEL_W, PANEL_H, null, null, "Dismiss");
+        super(PANEL_W, PANEL_H, null, null, str("dismissTxt"));
         getButton(0).setShortcutAndAppendToText(Keyboard.KEY_4);
 
         m_market = market;
@@ -108,21 +109,21 @@ public class ManagePopulationDialog extends DialogPanel {
         final int policyWidth = 100;
         final int policyHeight = 141;
 
-        final LabelAPI title = settings.createLabel("Manage Population", Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiManagePopTitle"), Fonts.INSIGNIA_VERY_LARGE);
         title.autoSizeToWidth(PANEL_W);
         title.setAlignment(Alignment.MID);
         add(title).inTL(0, 0);
 
         { // SECTION I
-        final LabelAPI subtitle = settings.createLabel("Income", Fonts.INSIGNIA_LARGE);
+        final LabelAPI subtitle = settings.createLabel(str("uiTableIncomeTitle"), Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
         add(subtitle).inTL(opad, SECT_I_H);
 
         final TextPanel RoSVLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
             public void buildUI() {
-                final String txt = "Rate of Exploitation";
-                final String valueTxt = ((int)data.getRoSV())+"";
+                final String txt = str("uiRateOfExploitationTitle");
+                final String valueTxt = String.format("%.1f", data.getRoSV());
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
                 label1.setColor(baseColor);
@@ -142,13 +143,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Controls the proportion of worker output the colony retains as profit." +
-                        "A higher value means the colony keeps more of the workers' production," +
-                        "increasing colony income but reducing worker wages." +
-                        "A lower value increases wages but reduces the colony's net income." +
-                        "Adjust carefully — extreme values might have unintended consequences.", pad
-                    );
+                    tp.addPara(str("uiRateOfExploitationTpTxt"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -158,7 +153,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         final TextPanel wagesLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
             public void buildUI() {
-                final String txt = "Monthly Wages";
+                final String txt = str("uiMonthlyWagesTitle");
                 final String valueTxt = NumFormat.formatCredit((int)(engine.info.getDailyWages(m_market)*MONTH));
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
@@ -179,9 +174,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Total wages paid to workers this month.", pad
-                    );
+                    tp.addPara(str("uiMonthlyWagsTpTxt"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -191,7 +184,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         final TextPanel avgWageLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
             public void buildUI() {
-                final String txt = "Average Wage";
+                final String txt = str("uiAvgWageTitle");
                 final float value = LaborConfig.LPV_month / data.getRoSV();
                 final String valueTxt = String.format("%.2f%s", value, Strings.C);
 
@@ -213,11 +206,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "The average monthly income of workers in the colony. Each person spends 1" +
-                        Strings.C + " each month to purchase food.",
-                        pad
-                    );
+                    tp.addPara(strf("uiAvgWageTpTxt", Strings.C), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -230,7 +219,7 @@ public class ManagePopulationDialog extends DialogPanel {
         add(avgWageLabel.getPanel()).inTL(opad + LABEL_W, LABEL_H + opad*4 + SECT_I_H);
 
         exploitationSlider = new Slider(
-            m_panel, "", 1, LaborConfig.MAX_RoSV, sliderW, sliderH
+            m_panel, null, 1, LaborConfig.MAX_RoSV, sliderW, sliderH
         );
         exploitationSlider.setHighlightOnMouseover(true);
         exploitationSlider.setProgress(data.getRoSV());
@@ -260,7 +249,7 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final Button exploitationBtn = new Button(
-            m_panel, buttonW, buttonH, "Confirm", Fonts.ORBITRON_12, exploitationRunnable
+            m_panel, buttonW, buttonH, str("confirmTxt"), Fonts.ORBITRON_12, exploitationRunnable
         );
 
         exploitationBtn.setQuickMode(true);
@@ -269,7 +258,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         final TextPanel workerAmount = new TextPanel(m_panel, LABEL_W+100, LABEL_H) {
             public void buildUI() {
-                final String txt = "Workforce: Employed / Total";
+                final String txt = str("uiWorkforceEmployedTotalTitle");
                 final long value2 = cond.getWorkerPool();
                 final long value1 = (long) (value2*((double)(1f - cond.getFreeWorkerRatio())));
                 final String valueTxt = NumFormat.engNotate(value1) + " / " + NumFormat.engNotate(value2);
@@ -299,10 +288,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(
-                        "Shows how many workers are currently employed compared to the colony's total labor capacity.",
-                        pad
-                    );
+                    tp.addPara(str("uiWorkforceEmployedTotalTpTxt"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.LeftTop, opad);
@@ -314,7 +300,7 @@ public class ManagePopulationDialog extends DialogPanel {
         }
     
         { // SECTION II
-        final LabelAPI subtitle = settings.createLabel("Population", Fonts.INSIGNIA_LARGE);
+        final LabelAPI subtitle = settings.createLabel(str("uiTablePopulationTitle"), Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
         add(subtitle).inTL(opad, SECT_II_H);
@@ -331,7 +317,7 @@ public class ManagePopulationDialog extends DialogPanel {
         }
     
         if (showPolicies && EconConfig.SHOW_MARKET_POLICIES) { // SECTION III
-        final LabelAPI subtitle = settings.createLabel("Policies", Fonts.INSIGNIA_LARGE);
+        final LabelAPI subtitle = settings.createLabel(str("uiPoliciesTitle"), Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
         add(subtitle).inTL(opad, SECT_III_H);
@@ -459,21 +445,25 @@ public class ManagePopulationDialog extends DialogPanel {
         final String buttonTxt;
         final String buttonSideTxt;
         final String buttonSideHighlight;
+        final String cooldownStr = Integer.toString(policy.cooldownDaysRemaining);
+        final String activeStr = Integer.toString(policy.activeDaysRemaining);
+        final String durationStr = Integer.toString(policy.spec.durationDays);
+
         switch (policy.state) {
         case COOLDOWN:
-            buttonTxt = "On Cooldown";
-            buttonSideTxt = "Available in " + policy.cooldownDaysRemaining + " days";
-            buttonSideHighlight = Integer.toString(policy.cooldownDaysRemaining);
+            buttonTxt = str("uiOnCooldownBtnTitle");
+            buttonSideTxt = strf("uiAvailableInBtnTitle", cooldownStr);
+            buttonSideHighlight = cooldownStr;
             break;
         case ACTIVE:
-            buttonTxt = "Already Active";
-            buttonSideTxt = "Effect lasts for " + policy.activeDaysRemaining + " days";
-            buttonSideHighlight = Integer.toString(policy.activeDaysRemaining);
+            buttonTxt = str("uiAlreadyActiveBtnTitle");
+            buttonSideTxt = strf("uiEffectLastsForBtnTitle", activeStr);
+            buttonSideHighlight = activeStr;
             break;
         default:
-            buttonTxt = "Activate";
-            buttonSideTxt = "Active for " + policy.spec.durationDays + " days";
-            buttonSideHighlight = Integer.toString(policy.spec.durationDays);
+            buttonTxt = str("uiActivateBtnTitle");
+            buttonSideTxt = strf("uiActiveForBtnTitle", durationStr);
+            buttonSideHighlight = durationStr;
             break;
         }
         final Button activateButton = new Button(
@@ -494,11 +484,11 @@ public class ManagePopulationDialog extends DialogPanel {
 
             activateButton.tooltip.builder = (tp, exp) -> {
                 if (policy.isActive(mData)) {
-                    tp.addPara("This policy is already active.", pad);
+                    tp.addPara(str("uiPolicyWidgetTpTxt1"), pad);
                 } else if (!hasSufficientCredits) {
-                    tp.addPara("Not enough market credits to activate this policy.", pad);
+                    tp.addPara(str("uiPolicyWidgetTpTxt2"), pad);
                 } else {
-                    tp.addPara("Policy requirements are not met.", pad);
+                    tp.addPara(str("uiPolicyWidgetTpTxt3"), pad);
                 }
             };
 
@@ -543,15 +533,15 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final Button notifyAvailableBtn = ComponentFactory.createCheckboxWithText(
-            cont, 18, "Notify when available",
+            cont, 18, str("uiPolicyWidgetCheckboxTxt1"),
             Fonts.DEFAULT_SMALL, availableRn, base, pad
         );
         final Button notifyFinishedBtn = ComponentFactory.createCheckboxWithText(
-            cont, 18, "Notify when finished",
+            cont, 18, str("uiPolicyWidgetCheckboxTxt2"),
             Fonts.DEFAULT_SMALL, finishedRn, base, pad
         );
         final Button repeatAfterCooldownBtn = ComponentFactory.createCheckboxWithText(
-            cont, 18, "Repeat after cooldown",
+            cont, 18, str("uiPolicyWidgetCheckboxTxt3"),
             Fonts.DEFAULT_SMALL, repeatRn, base, pad
         );
 

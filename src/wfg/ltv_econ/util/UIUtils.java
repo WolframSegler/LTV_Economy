@@ -2,12 +2,16 @@ package wfg.ltv_econ.util;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI.MarketInteractionMode;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
@@ -23,6 +27,11 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 
 public class UIUtils {
+    private static final String DAY_S_L = str("uiDayTxtLowercase");
+    private static final String DAY_P_L = str("uiDaysTxtLowercase");
+    private static final String DAY_S_C = str("uiDayTxtCapitalized");
+    private static final String DAY_P_C = str("uiDaysTxtCapitalized");
+
     public static final SpriteAPI STOCKPILES_FULL = settings.getSprite("icons", "stockpiles_full");
     public static final SpriteAPI STOCKPILES_MEDIUM = settings.getSprite("icons", "stockpiles_medium");
     public static final SpriteAPI STOCKPILES_LOW = settings.getSprite("icons", "stockpiles_low");
@@ -38,7 +47,7 @@ public class UIUtils {
         final String valueStr = Misc.getWithDGS(credits.get()) + Strings.C;
 
         final LabelAPI label = settings.createLabel(
-            "Player Credits: " + valueStr, font
+            strf("uiPlayerCreditsPrefix", valueStr), font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
         
@@ -58,7 +67,7 @@ public class UIUtils {
         final String valueStr = Misc.getWithDGS(credits) + Strings.C;
 
         final LabelAPI label = settings.createLabel(
-            "Colony Credits: " + valueStr, font
+            strf("uiColonyCreditsPrefix", valueStr), font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
         
@@ -79,9 +88,9 @@ public class UIUtils {
         final int numInd = Misc.getNumIndustries(market);
         final int maxInd = Misc.getMaxIndustries(market);
 
-        String text = numInd + " / " + maxInd;
+        final String text = numInd + " / " + maxInd;
 
-        LabelAPI label = settings.createLabel("Industries: " + text, font);
+        LabelAPI label = settings.createLabel(strf("uiIndustriesCountPrefix", text), font);
         if (font == "small_insignia") {
             label.setAlignment(Alignment.LMID);
         }
@@ -105,6 +114,20 @@ public class UIUtils {
         return Global.getSector().getIntelManager().isPlayerInRangeOfCommRelay() ||
             settings.getBoolean("allowPriceViewAtAnyColony");
     }
+
+    public static final MarketInteractionMode getMarketInteractionMode(MarketAPI market) {
+		final InteractionDialogAPI dialog = Global.getSector().getCampaignUI().getCurrentInteractionDialog();
+		if (dialog == null) {
+			return MarketInteractionMode.REMOTE;
+		}
+
+		final SectorEntityToken interactingTarget = dialog.getInteractionTarget();
+		if (interactingTarget != null && interactingTarget.getMarket() == market) {
+			return MarketInteractionMode.LOCAL;
+		} else {
+			return MarketInteractionMode.REMOTE;
+		}
+	}
 
     public static final Base getStockpilesIcon(final float ratio, final int size,
         final UIPanelAPI parent, final FactionSpecAPI faction, final boolean addRatioColors
@@ -223,7 +246,7 @@ public class UIUtils {
 
     private static final String dayOrDays(boolean isSingular, boolean capitalized) {
         return capitalized ?
-            isSingular ? "Day" : "Days":
-            isSingular ? "day" : "days";
+            isSingular ? DAY_S_C : DAY_P_C:
+            isSingular ? DAY_S_L : DAY_P_L;
     }
 }

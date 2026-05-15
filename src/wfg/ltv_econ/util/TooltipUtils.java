@@ -44,6 +44,7 @@ import wfg.native_ui.util.NativeUiUtils;
 import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class TooltipUtils {
     private static final String TP_ARROW = settings.getSpriteName("ui", "cargoTooltipArrow");
@@ -72,10 +73,7 @@ public class TooltipUtils {
 
         if (!sector.getIntelManager().isPlayerInRangeOfCommRelay()) {
             if (showExplanation) {
-                tp.addPara(
-                    "Seeing remote price data for various colonies requires being within range of a functional comm relay.",
-                    gray, pad
-                );
+                tp.addPara(str("uiRemotePricesTpTxt"), gray, pad);
             }
             return;
         }
@@ -94,13 +92,13 @@ public class TooltipUtils {
         if (showBestSell) {
             Collections.sort(marketList, createSellComparator(econUnit));
             if (!marketList.isEmpty()) {
-                tp.addPara("Best places to sell:", pad);
+                tp.addPara(str("uiBestPlacesToSell"), pad);
                 final PositionAPI prevPos = tp.getPrev().getPosition();
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
 
                 tp.beginTable(sector.getPlayerFaction(), rowH, new Object[] {
-                    "Price", 100, "Desired", 70, "Deficit", 70, "Location", 230,
-                    "Star system", 140, "Dist (ly)", 80
+                    str("uiTablePrice"), 100, str("uiTableDesired"), 70, str("uiTableDeficit"), 70, str("uiTableLocation"), 230,
+                    str("uiTableStarSystem"), 140, str("uiTableDistance"), 80
                 });
                 countingMap.clear();
 
@@ -121,7 +119,7 @@ public class TooltipUtils {
                     final String quantityLabel = deficitPresent ? NumFormat.engNotate(deficit) : "---";
 
                     final String factionName = market.getFaction().getDisplayName();
-                    String location = "In hyperspace";
+                    String location = str("uiLocationHyperspaceCapitalized");
                     Color locationColor = gray;
                     if (market.getStarSystem() != null) {
                         final StarSystemAPI starSystem = market.getStarSystem();
@@ -172,12 +170,12 @@ public class TooltipUtils {
             Collections.sort(marketList, createBuyComparator(econUnit));
             if (!marketList.isEmpty()) {
 
-                tp.addPara("Best places to buy:", opad);
+                tp.addPara(str("uiBestPlacesToBuy"), opad);
                 final PositionAPI prevPos = tp.getPrev().getPosition();
                 final int relativeY = (int) (baseY + tp.getPosition().getY() + prevPos.getHeight() - prevPos.getY());
                 tp.beginTable(sector.getPlayerFaction(), 20, new Object[] {
-                    "Price", 100, "Stored", 70, "Excess", 70, "Location", 230,
-                    "Star system", 140, "Dist (ly)", 80 
+                    str("uiTablePrice"), 100, str("uiTableStored"), 70, str("uiTableExcess"), 70, str("uiTableLocation"), 230,
+                    str("uiTableStarSystem"), 140, str("uiTableDistance"), 80 
                 });
                 countingMap.clear();
 
@@ -196,7 +194,7 @@ public class TooltipUtils {
                     final boolean hasExcess = excess > 10.0;
 
                     final String factionName = market.getFaction().getDisplayName();
-                    String location = "In hyperspace";
+                    String location = str("uiLocationHyperspaceCapitalized");
                     Color locationColor = gray;
                     if (market.getStarSystem() != null) {
                         final StarSystemAPI StarSystem = market.getStarSystem();
@@ -246,47 +244,40 @@ public class TooltipUtils {
         }
 
         if (showExplanation) {
-            tp.addPara(
-                "All values approximate. Prices do not include tariffs, which can be avoided through black market trade.",
-                gray, opad);
+            tp.addPara(str("cargoComTpTxt1"), gray, opad);
 
             final Color txtColor = Misc.setAlpha(highlight, 155);
-            tp.addPara(
-                "*Per unit prices assume buying or selling a batch of %s " +
-                "units. Each unit bought costs more as the market's supply is reduced, and" +
-                "each unit sold brings in less as demand is fulfilled.",
-                opad, gray, txtColor, new String[]{"" + econUnit}
-            );
+            tp.addPara(str("cargoComTpTxt2"), opad, gray, txtColor, Integer.toString(econUnit));
         }
     }
 
     public static final void createComStockpilesChangeBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        tp.addPara("Current Stockpiles: %s", pad, highlight, NumFormat.engNotate(cell.getRoundedStored()));
+        tp.addPara(str("uiCurrentStockpiles"), pad, highlight, NumFormat.engNotate(cell.getRoundedStored()));
         int rowCount = 0;
 
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
 
-        tp.addToGrid(0, rowCount++, "Desired Stockpiles",
+        tp.addToGrid(0, rowCount++, str("uiDesiredStockpilesTxt"),
             NumFormat.engNotate(cell.getTargetStockpiles())
         );
-        tp.addToGrid(0, rowCount++, "Latest Change", NumFormat.engNotate(cell.getQuantumRealBalance()),
+        tp.addToGrid(0, rowCount++, str("uiLatestChange"), NumFormat.engNotate(cell.getQuantumRealBalance()),
             cell.getQuantumRealBalance() < 0f ? negative : highlight
         );
 
         { // Exports
             if (cell.inFactionExports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest in-faction exports", "+" +
+                tp.addToGrid(0, rowCount++, str("uiLatestInFactionExports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.inFactionExports)
                 );
             }
             if (cell.globalExports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest global exports", "+" +
+                tp.addToGrid(0, rowCount++, str("uiLatestGlobalExports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.globalExports)
                 );
             }
             if (cell.informalExports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest informal market exports", "+" +
+                tp.addToGrid(0, rowCount++, str("uiLatestInformalExports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.informalExports)
                 );
             }
@@ -294,17 +285,17 @@ public class TooltipUtils {
 
         { // Imports
             if (cell.inFactionImports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest in-faction imports", "+" +
+                tp.addToGrid(0, rowCount++, str("uiLatestInFactionImports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.inFactionImports)
                 );
             }
             if (cell.globalImports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest global imports", "+" +
+                tp.addToGrid(0, rowCount++, str("uiLatestGlobalImports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.globalImports)
                 );
             }
             if (cell.informalImports > 0f) {
-                tp.addToGrid(0, rowCount++, "Latest informal market imports", "+" +
+                tp.addToGrid(0, rowCount++, str("uiLatestInformalImports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.informalImports)
                 );
             }
@@ -319,7 +310,7 @@ public class TooltipUtils {
         final float dailyTarget = cell.getTargetQuantum(true);
         int rowCount = 0;
 
-        tp.addPara("Demand: %s", pad, highlight, NumFormat.formatMagnitudeAware(dailyTarget));
+        tp.addPara(str("uiDemandPrefix"), pad, highlight, NumFormat.formatMagnitudeAware(dailyTarget));
 
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
 
@@ -346,7 +337,7 @@ public class TooltipUtils {
         }
 
         if (rowCount <= 0) {
-            tp.addToGrid(0, rowCount++, "No local demand", "", base);
+            tp.addToGrid(0, rowCount++, str("noLocalDemand"), "", base);
         }
 
         tp.addGrid(0);
@@ -354,7 +345,7 @@ public class TooltipUtils {
 
     public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Production: %s", pad, highlight, NumFormat.formatMagnitudeAware(cell.getProduction(true)));
+        final LabelAPI title = tp.addPara(str("uiProductionPrefix"), pad, highlight, NumFormat.formatMagnitudeAware(cell.getProduction(true)));
         int rowCount = 0;
 
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
@@ -420,7 +411,7 @@ public class TooltipUtils {
         }
 
         if (rowCount <= 0) {
-            title.setText("No local production.");
+            title.setText(str("noLocalProduction"));
             title.setHighlight("");
         }
 
@@ -431,7 +422,7 @@ public class TooltipUtils {
         int rowCount = 0;
         
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara("Consumption: %s", opad, highlight,
+        final LabelAPI title = tp.addPara(str("uiConsumptionPrefix"), opad, highlight,
             NumFormat.formatMagnitudeAware(cell.getConsumption(true))
         );
 
@@ -463,7 +454,7 @@ public class TooltipUtils {
             }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
-                tp.addToGrid(0, rowCount++, "Needed by " + ind.getName(),
+                tp.addToGrid(0, rowCount++, strf("uiNeededbyIndustryPrefix", ind.getName()),
                     (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value),
                     mod.value < 0f ? highlight : negative
                 );
@@ -496,7 +487,7 @@ public class TooltipUtils {
         }
 
         if (rowCount <= 0) {
-            title.setText("No local consumption.");
+            title.setText(str("noLocalConsumption"));
             title.setHighlight("");
         }
 
@@ -516,16 +507,14 @@ public class TooltipUtils {
         final double exportAmount = engine.info.getExportAmount(comID, marketID);
 
         if (exportIncomeLastMonth > 0l || exportIncomeThisMonth > 0l) {
-            tp.addPara(
-                marketName + " profitably exported %s units of " + comName + " and accounted for %s of the global market share. They generated %s last month and %s so far this month.",
-                opad, highlight,
+            tp.addPara(strf("uiLedgerTpTxt1", marketName, comName), opad, highlight,
                 NumFormat.formatMagnitudeAware(exportAmount),
                 engine.info.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
             );
         } else {
-            tp.addPara("No local production to export for this trade cycle.", opad);
+            tp.addPara(str("uiLedgerTpTxt2"), opad);
         }
 
         final long importExpenseLastMonth = ledger.getLastMonth(TRADE_IMPORT_KEY + comID);
@@ -533,16 +522,14 @@ public class TooltipUtils {
         final double importAmount = engine.info.getImportAmount(comID, marketID);
 
         if (importExpenseLastMonth > 0l || importExpenseThisMonth > 0l) {
-            tp.addPara(
-                marketName + " imported %s units of " + comName + " and accounted for %s of the global market share. They expended %s last month and %s so far this month.",
-                opad, highlight,
+            tp.addPara(strf("uiLedgerTpTxt3", marketName, comName), opad, highlight,
                 NumFormat.formatMagnitudeAware(importAmount),
                 engine.info.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)
             );
         } else {
-            tp.addPara("No local demand or stockpiles full.", opad);
+            tp.addPara(str("uiLedgerTpTxt4"), opad);
         }
     }
 
@@ -562,11 +549,11 @@ public class TooltipUtils {
             final FactionAPI faction = market.getFaction();
             final Color facBase = faction.getBaseUIColor();
 
-            tp.addTitle("Accessibility", facBase);
+            tp.addTitle(str("uiAccessibilityTitle"), facBase);
             final int access = Math.round(accessMod.computeEffective(0f) * 100f);
 
-            tp.addPara("A colony with high accessibility is able to import and export earlier in the trade cycle, and can in turn claim a greater market share for commodities it exports.", opad);
-            tp.addPara("Accessibility: %s", opad, access <= 0 ? negative : highlight, access + "%");
+            tp.addPara(str("uiAccessibilityTpTxt1"), opad);
+            tp.addPara(str("uiAccessibilitySuffix"), opad, access <= 0 ? negative : highlight, access + "%");
             tp.addStatModGrid(getTooltipWidth(null), 50f, opad, pad, accessMod, new StatModValueGetter(){
 
                 public String getPercentValue(StatMod mod) {return null;}
@@ -582,18 +569,14 @@ public class TooltipUtils {
                 }
             });
 
-            tp.addSectionHeading("Trade Cycle", facBase, faction.getDarkUIColor(), Alignment.MID, opad);
-            tp.addPara("Trade fleets are dispatched every %s days. The %s tab shows data from the most recent trade cycle.", opad,
-                new Color[] {highlight, base}, Integer.toString(EconConfig.TRADE_INTERVAL), "Economy"
+            tp.addSectionHeading(str("uiTradeCycleTitle"), facBase, faction.getDarkUIColor(), Alignment.MID, opad);
+            tp.addPara(str("uiTradeCycleTpTxt"), opad, new Color[] {highlight, base},
+                Integer.toString(EconConfig.TRADE_INTERVAL), str("uiEconomyBtnTitle")
             );
 
-            tp.addPara("Trade fleets first consume fuel from colony stockpiles; if stockpiles are empty, they purchase fuel from independent merchants at %s the base cost.",
-                opad, highlight, Strings.X + Float.toString(EconConfig.FORCED_FUEL_IMPORT_COST_MULT)
-            );
+            tp.addPara(str("uiAccessibilityTpTxt2"), opad, highlight,Strings.X + Float.toString(EconConfig.FORCED_FUEL_IMPORT_COST_MULT));
 
-            tp.addPara("Should the controlling faction lack sufficient ships, independent captains are hired instead and charge an additional fee on top of fuel costs. There are currently %s active trade missions.",
-                pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getActiveMissions().size())
-            );
+            tp.addPara(str("uiAccessibilityTpTxt3"), pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getActiveMissions().size()));
         }
         };
     }

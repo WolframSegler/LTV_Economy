@@ -38,6 +38,7 @@ import com.fs.starfarer.api.loading.Description.Type;
 import java.awt.Color;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class CommodityRowPanel extends CustomPanel implements
     HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction, UIBuildableAPI
@@ -72,8 +73,8 @@ public class CommodityRowPanel extends CustomPanel implements
             NativeUiUtils.anchorPanel(tp, m_parent, AnchorType.LeftTop, pad*4);
         };
         tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
-        tooltip.expandTxt = "%s show legend";
-        tooltip.unexpandTxt = "%s hide";
+        tooltip.expandTxt = str("uiTpShowLegend");
+        tooltip.unexpandTxt = str("uiHide");
 
         buildUI();
     }
@@ -88,9 +89,9 @@ public class CommodityRowPanel extends CustomPanel implements
         final float consumption = cell.getConsumption(true);
         final String amountStr;
         if (consumption <= 0f) {
-            amountStr = "n/a";
+            amountStr = str("notApplicable");
         } else {
-            amountStr = NumFormat.engNotate(cell.getStored() / consumption) + "d";
+            amountStr = NumFormat.engNotate(cell.getStored() / consumption) + str("uiSingleLetterDay");
         }
         final LabelAPI amountLbl = settings.createLabel(Strings.X + amountStr, Fonts.INSIGNIA_LARGE);
         amountLbl.autoSizeToWidth(textW);
@@ -116,7 +117,7 @@ public class CommodityRowPanel extends CustomPanel implements
 
         tooltip.builder = (tp, expanded) -> {
             final String comDesc = settings.getDescription(cell.comID, Type.RESOURCE).getText1();
-            final String timerStr = "    -   " + amountStr + " stock";
+            final String timerStr = "    -   " + strf("uiDaysOfStockSuffix", amountStr);
 
             tp.setParaFont(Fonts.ORBITRON_12);
             final LabelAPI title = tp.addPara(cell.spec.getName(), market.getFaction().getBaseUIColor(), pad);
@@ -126,38 +127,34 @@ public class CommodityRowPanel extends CustomPanel implements
             tp.addPara(comDesc, opad);
 
             if (UIUtils.canViewPrices()) {
-                final String text = "Click to view global market info";
-                tp.addPara(text, opad, positive, text);
+                tp.addPara(str("uiViewGlobalMarketInfo"), opad, positive);
             } else {
-                final String text = "Must be in range of a comm relay to view global market info";
-                tp.addPara(text, opad, negative, text);
+                tp.addPara(str("uiCannotViewGlobalMarketInfo"), opad, negative);
             }
             
             if (!expanded) {
                 tp.setParaFont(Fonts.ORBITRON_12);
-                tp.addSectionHeading("Stockpiles, Trade, and Demand", Alignment.MID, opad);
+                tp.addSectionHeading(str("uiTitleStockpilesTradeDemand"), Alignment.MID, opad);
                 TooltipUtils.createComStockpilesChangeBreakdown(tp, cell);
                 tp.addSpacer(opad);
                 TooltipUtils.createComTargetBreakdown(tp, cell);
 
                 tp.setParaFont(Fonts.ORBITRON_12);
-                tp.addSectionHeading("Production and Consumption", Alignment.MID, opad);
+                tp.addSectionHeading(str("uiProductionConsumptionTitle"), Alignment.MID, opad);
                 TooltipUtils.createComProductionBreakdown(tp, cell);
                 
                 tp.addSpacer(hpad);
                 tp.setParaFont(Fonts.ORBITRON_12);
                 TooltipUtils.createComConsumptionBreakdown(tp, cell);
 
-                tp.addSectionHeading("Trade Ledger", Alignment.MID, opad);
+                tp.addSectionHeading(str("uiTradeLedgerTitle"), Alignment.MID, opad);
                 TooltipUtils.createComTradeLedgerSection(tp, cell);
                 
-                tp.addPara(
-                    "Markets with higher production and accessibility are prioritized for exports and imports.", gray, opad
-                );
+                tp.addPara(str("uiCommodityWidgetTpTxt1"), gray, opad);
 
             } else {
                 tp.setParaFont(Fonts.ORBITRON_12);
-                tp.addSectionHeading("Legend", Alignment.MID, opad);
+                tp.addSectionHeading(str("uiInfoLegendTitle"), Alignment.MID, opad);
                 tp.setParaFontDefault();
 
                 final int y = (int)tp.getHeightSoFar() + pad;
@@ -176,57 +173,45 @@ public class CommodityRowPanel extends CustomPanel implements
      */
     public static final void legendRowCreator(int mode, TooltipMakerAPI tp, int y, int iconSize) {
 
-        String desc;
-
         if (mode == 0) {
-            desc = "Proportion of stockpiles compared to the desired amount.";
-            legendRowHelper(tp, y, UIUtils.STOCKPILES_FULL, desc, iconSize, false, null);
+            legendRowHelper(tp, y, UIUtils.STOCKPILES_FULL, str("uiLegendRowDesc1"), iconSize, false, null);
             
             y += iconSize + pad;
 
-            desc = "Excess production that is exported.";
-            legendRowHelper(tp, y, EXPORTS_ICON, desc, iconSize, false, null);
+            legendRowHelper(tp, y, EXPORTS_ICON, str("uiLegendRowDesc2"), iconSize, false, null);
             
             y += iconSize + pad;
     
-            desc = "Smuggled or produced by an illegal enterprise. No income from exports.";
-            legendRowHelper(tp, y, null, desc, iconSize, true, null);
+            legendRowHelper(tp, y, null, str("uiLegendRowDesc3"), iconSize, true, null);
             
             y += iconSize + pad;
         }
 
-        desc = "Local production that could not be exported.";
-        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_NOT_EXPORTED);
+        legendRowHelper(tp, y, null, str("uiLegendRowDesc4"), iconSize, false, UIColors.COM_NOT_EXPORTED);
         
         y += iconSize + pad;
 
-        desc = "Exported local production.";
-        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_EXPORT);
+        legendRowHelper(tp, y, null, str("uiLegendRowDesc5"), iconSize, false, UIColors.COM_EXPORT);
         
         y += iconSize + pad;
 
-        desc = "Production used for local demand.";
-        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_LOCAL_PROD);
+        legendRowHelper(tp, y, null, str("uiLegendRowDesc6"), iconSize, false, UIColors.COM_LOCAL_PROD);
         
         y += iconSize + pad;
 
-        desc = "Goods that were imported in-faction.";
-        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_FACTION_IMPORT);
+        legendRowHelper(tp, y, null, str("uiLegendRowDesc7"), iconSize, false, UIColors.COM_FACTION_IMPORT);
         
         y += iconSize + pad;
 
-        desc = "Imported from the global market.";
-        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_IMPORT);
+        legendRowHelper(tp, y, null, str("uiLegendRowDesc8"), iconSize, false, UIColors.COM_IMPORT);
         
         y += iconSize + pad;
 
-        desc = "Excess imports stockpiled for future use.";
-        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_OVER_IMPORT);
+        legendRowHelper(tp, y, null, str("uiLegendRowDesc9"), iconSize, false, UIColors.COM_OVER_IMPORT);
         
         y += iconSize + pad;
 
-        desc = "Deficit not covered by production or imports.";
-        legendRowHelper(tp, y, null, desc, iconSize, false, UIColors.COM_DEFICIT);
+        legendRowHelper(tp, y, null, str("uiLegendRowDesc10"), iconSize, false, UIColors.COM_DEFICIT);
     
         tp.setHeightSoFar(y + opad*2);
     }

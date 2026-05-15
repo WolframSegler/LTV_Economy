@@ -21,6 +21,7 @@ import wfg.native_ui.ui.visual.SpritePanel;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class ComIconPanel extends SpritePanel<ComIconPanel> implements
     HasTooltip, HasHoverGlow
@@ -57,10 +58,10 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements
             tooltip.addPara(comDesc, opad);
 
             String basePrice = ((int)m_com.getBasePrice()) + Strings.C;
-            tooltip.addPara("Base value: %s per unit.", opad, highlight, basePrice);
+            tooltip.addPara(str("comCellRaidObjectiveBaseValueTxt"), opad, highlight, basePrice);
 
             if (!expanded) {
-                tooltip.addPara("Expand to see remote price data.", gray, opad);
+                tooltip.addPara(str("uiExpandRemotePriceTxt"), gray, opad);
 
             } else {
                 tooltip.addSpacer(opad);

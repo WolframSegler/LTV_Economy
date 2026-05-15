@@ -154,7 +154,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         }
     }
 
-    private final void realAdvance() {
+    public final void realAdvance() {
         try {
             mainLoopExecutorRunning = true;
             loop.mainLoop(false, false);

@@ -4,6 +4,7 @@ import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.strings.Income.TRADE_EXPORT_KEY;
 import static wfg.ltv_econ.constants.strings.Income.TRADE_IMPORT_KEY;
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import org.lwjgl.input.Keyboard;
 
@@ -16,7 +17,6 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
-import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.ui.Fonts;
@@ -61,24 +61,24 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
+    private static final int PANEL_W = 1166;
+    private static final int PANEL_H = 678;
+
+    private static final int SECT1_WIDTH = (int) (PANEL_W * 0.76f - opad);
+    private static final int SECT2_WIDTH = (int) (PANEL_W * 0.24f - opad);
+    private static final int SECT3_WIDTH = (int) (PANEL_W * 0.76f - opad);
+    private static final int SECT4_WIDTH = (int) (PANEL_W * 0.24f - opad);
+
+    private static final int SECT1_HEIGHT = (int) (PANEL_H * 0.28f - opad);
+    private static final int SECT2_HEIGHT = (int) (PANEL_H * 0.28f - opad);
+    private static final int SECT3_HEIGHT = (int) (PANEL_H * 0.72f - opad); // 876
+    private static final int SECT4_HEIGHT = (int) (PANEL_H * 0.72f - opad);
+
     protected final InputSnapshotComp input = comp().get(NativeComponents.INPUT_SNAPSHOT);
-
-    public final int PANEL_W;
-    public final int PANEL_H;
-
-    public final int SECT1_WIDTH;
-    public final int SECT2_WIDTH;
-    public final int SECT3_WIDTH;
-    public final int SECT4_WIDTH;
-
-    public final int SECT1_HEIGHT;
-    public final int SECT2_HEIGHT;
-    public final int SECT3_HEIGHT;
-    public final int SECT4_HEIGHT;
 
     protected UIPanelAPI section1; // CommodityInfo
     protected UIPanelAPI section2; // Sector Map
-    protected UIPanelAPI section3; // Prod&Consump Tables
+    protected UIPanelAPI section3; // Prod&Consumption Tables
     protected UIPanelAPI section4; // Commodity Panel
 
     public final static int iconSize = 24;
@@ -97,31 +97,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
      * @param market nullable
      */
     public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com) {
-        this(market, faction, com, 1166, 678);
-    }
-
-    /**
-     * @param market nullable
-     */
-    public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com,
-        int panelW, int panelH
-    ) {
-        super(panelW, panelH, null, null, "Dismiss");
-
-        PANEL_W = panelW;
-        PANEL_H = panelH;
-
-        SECT1_WIDTH = (int) (PANEL_W * 0.76f - opad);
-        SECT1_HEIGHT = (int) (PANEL_H * 0.28f - opad);
-
-        SECT2_WIDTH = (int) (PANEL_W * 0.24f - opad);
-        SECT2_HEIGHT = (int) (PANEL_H * 0.28f - opad);
-
-        SECT3_WIDTH = (int) (PANEL_W * 0.76f - opad);
-        SECT3_HEIGHT = (int) (PANEL_H * 0.72f - opad);
-
-        SECT4_WIDTH = (int) (PANEL_W * 0.24f - opad);
-        SECT4_HEIGHT = (int) (PANEL_H * 0.72f - opad);
+        super(PANEL_W, PANEL_H, null, null, str("dismissTxt"));
 
         m_market = market;
         m_faction = faction;
@@ -138,7 +114,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     public void buildUI() {
         createSections();
         
-        footer = new CheckboxButton(m_panel, 20, "Only show colonies with excess stockpiles or shortages",
+        footer = new CheckboxButton(m_panel, 20, str("uiShowExcessDeficitTxt"),
             Fonts.ORBITRON_12, (btn) -> {
                 btn.setChecked(!btn.isChecked());
                 updateSection3(producerButton.isChecked() ? 0 : 1);
@@ -148,10 +124,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         footer.setShortcutAndAppendToText(Keyboard.KEY_Q);
         footer.tooltip.width = getPos().getWidth() * 0.7f;
         footer.tooltip.builder = (tp, exp) -> {
-            tp.addPara(
-                "Only show colonies that are either suffering from a shortage or have excess stockpiles.\n\nColonies with excess stockpiles have more of the goods available on the open market and have lower prices.\n\nColonies with shortages have less or none available for sale, and have higher prices.",
-                pad
-            );
+            tp.addPara(str("uiSHowExcessDeficitTpTxt"), pad);
         };
         footer.tooltip.positioner = (tp, exp) -> {
             NativeUiUtils.anchorPanel(tp, footer.getPanel(), AnchorType.TopLeft, pad);
@@ -253,9 +226,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 @Override
                 public void buildUI() {
                     final long value = engine.getComDomain(comID).getCreditActivityHistory();
-                    final String txt = "Global market value";
-                    String valueTxt = NumFormat.formatCredit(value);
-                    if (value < 1l) valueTxt = "---";
+                    final String txt = str("uiGlobalMarketValueTitle");
+                    final String valueTxt = value < 1l ? "---" : NumFormat.formatCredit(value);
 
                     ComponentFactory.addCaptionValueBlock(
                         m_panel, txt, valueTxt, baseColor
@@ -267,13 +239,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     tooltip.builder = (tp, exp) -> {
                         final int discount = (int)((1f - EconConfig.FACTION_EXCHANGE_MULT)*100);
 
-                        tp.addPara(
-                            "Sector-wide spendings for the import of " +
-                            m_com.getName() + " in the last %s days. " +
-                            "Colonies with higher accessibility, faction relations and a shorter distance to customers will have priority when exporting.\n\n"
-                            +
-                            "The value shown here includes the demand at your colonies, " +
-                            "since they must import goods as well. In-faction imports have a %s discount.",
+                        tp.addPara(strf("uiGlobalMarketValueTpTxt", m_com.getName()),
                             pad, new Color[] {base, highlight},
                             Integer.toString(EconConfig.HISTORY_LENGTH), discount + "%"
                         );
@@ -292,27 +258,20 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final TextPanel textPanel = new TextPanel(section, 170, 0) {
                 @Override
                 public void buildUI() {
-                    final String txt = "Total global exports";
-
                     final String valueTxt = NumFormat.engNotate(
                         engine.info.getGlobalExports(comID)
                     );
 
                     ComponentFactory.addCaptionValueBlock(
-                        m_panel,
-                        txt,
-                        valueTxt,
-                        baseColor
+                        m_panel, str("uiGlobalExportsTitle"),
+                        valueTxt, baseColor
                     );
                 }
 
                 {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        tp.addPara(
-                            "The total number of " + m_com.getName() + " exported globally by all producing markets in the last trade cycle.\n\n" +
-                            "This figure reflects the total global supply that reaches exportable surplus after local and in-faction demand is met.", pad
-                        );
+                        tp.addPara(strf("uiGlobalExportsTpTxt",  m_com.getName()), pad);
                     };
                     tooltip.positioner = (tp, exp) -> {
                         NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
@@ -337,7 +296,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     final String factionName = currFaction.getDisplayName();
                     final Color factionColor = currFaction.getBaseUIColor();
 
-                    final String txt = "Total " + factionName + " exports";
+                    final String txt = strf("uiTotalFactionExportsTitle", factionName);
 
                     final String globalValue = NumFormat.engNotate(
                         engine.info.getFactionGlobalExports(comID, currFaction.getId())
@@ -366,11 +325,9 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        tp.addPara(
-                            "The total number of units exported to %s, as well as the total exported %s under " + currFaction.getPersonNamePrefix() + " control.\n\n" +
-                            "Global exports are shaped by the colony's accessibility, its faction relations and other factors.",
+                        tp.addPara(strf("uiTotalFactionExportsTpTxt", currFaction.getPersonNamePrefix()),
                             pad, new Color[] {currFaction.getBaseUIColor(), UIColors.IN_FACTION},
-                            "global consumers", "within the faction"
+                            str("uiTotalFactionExportsTpGlobalConsumersTxt"), str("uiTotalFactionExportsTpInFactionTxt")
                         );
                     };
                     tooltip.positioner = (tp, exp) -> {
@@ -389,7 +346,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 @Override
                 public void buildUI() {
                     final String factionName = m_faction.getDisplayName();
-                    final String txt = factionName + " market share";
+                    final String txt = strf("uiFactionMarketShareTitle", factionName);
 
                     final String valueTxt = (int)(engine.info.getFactionExportShare(
                         comID, m_faction.getId()
@@ -404,13 +361,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        final String marketOwner = m_faction.getId().equals(Factions.PLAYER) ?
-                            "your" : m_faction.getPersonNamePrefix(); 
-
-                        tp.addPara(
-                            "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
-                            pad
-                        );
+                        tp.addPara(strf("uiFactionMarketShareTpTxt", m_com.getName(), m_faction.getPersonNamePrefix()), pad);
                     };
                     tooltip.positioner = (tp, exp) -> {
                         NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
@@ -428,7 +379,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 @Override
                 public void buildUI() {
                     final String factionName = selectedMarket.getFaction().getDisplayName();
-                    final String txt = factionName + " market share";
+                    final String txt = strf("uiFactionMarketShareTitle", factionName);
 
                     final String valueTxt = (int) (engine.info.getFactionExportShare(
                         comID, selectedMarket.getFactionId()
@@ -444,10 +395,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        tp.addPara(
-                            "Total export market share for " + m_com.getName() + " for all colonies under " + selectedMarket.getFaction().getDisplayName() + " control.",
-                            pad
-                        );
+                        tp.addPara(strf("uiFactionMarketShareTpTxt", m_com.getName(), selectedMarket.getFaction().getDisplayName()), pad);
                     };
                     tooltip.positioner = (tp, exp) -> {
                         NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
@@ -460,7 +408,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 @Override
                 public void buildUI() {
                     final String factionName = m_faction.getDisplayName();
-                    final String txt = factionName + " market share";
+                    final String txt = strf("uiFactionMarketShareTitle", factionName);
 
                     final String valueTxt = (int) (engine.info.getFactionExportShare(
                         comID, m_faction.getId()
@@ -475,13 +423,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        String marketOwner = m_faction.getId().equals(Factions.PLAYER) ?
-                            "your" : m_faction.getPersonNamePrefix(); 
-
-                        tp.addPara(
-                            "Total export market share for " + m_com.getName() + " for all colonies under " + marketOwner + " control.",
-                            pad
-                        );
+                        tp.addPara(strf("uiFactionMarketShareTpTxt", m_com.getName(), m_faction.getPersonNamePrefix()), pad);
                     };
                     tooltip.positioner = (tp, exp) -> {
                         NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.RightTop, opad);
@@ -504,7 +446,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         final int mapHeight = (int) section.getPosition().getHeight() - 2 * opad;
 
         final StarSystemAPI starSystem = m_market.getStarSystem();
-        String title = m_market.getName();
+        final String title = selectedMarket == null ? m_market.getName() :
+            strf("uiTwoNameAndSeparator", m_market.getName(), selectedMarket.getName());
 
         final MapParams params = new MapParams();
         params.showFilter = false;
@@ -517,8 +460,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         params.showMarket(m_market, 1);
 
         if (selectedMarket != null) {
-            title += " and " + selectedMarket.getName();
-
             params.showSystem(selectedMarket.getStarSystem());
             params.showMarket(selectedMarket, 1);
         }
@@ -559,12 +500,12 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         producerButton = new Button(
             section, btnWidth, btnHeight,
-            "Producers", Fonts.ORBITRON_12,
+            str("uiProducersBtnTitle"), Fonts.ORBITRON_12,
             producerRunnable
         );
         consumerButton = new Button(
             section, btnWidth, btnHeight,
-            "Consumers", Fonts.ORBITRON_12,
+            str("uiConsumersBtnTitle"), Fonts.ORBITRON_12,
             consumerRunnable
         );
         producerButton.setLabelColor(base);
@@ -592,28 +533,24 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         );
 
         final String comID = m_com.getId();
-        final String marketHeader = mode == 0 ? "Mkt Share" : "Mkt percent";
-        final String creditHeader = mode == 0 ? "Income" : "Value";
+        final String creditHeader = mode == 0 ? str("uiTableIncomeTitle") : str("uiTableValue");
 
         final TooltipBuilder quantityTooltip = createSection3QuantityHeaderTooltip(mode, table);
 
-        final String marketTpDesc = mode == 0 ? "What percentage of the global market value the colony receives as income from its exports of the commodity.\n\nThe market share is affected by the number of units produced and the colony's accessibility." 
-        :
-        "The portion of the global market value that this colony contributes.\n\nIncludes player-controlled colonies.";
+        final String marketTpDesc = mode == 0 ? str("uiMarketShareTpTxt1") : str("uiMarketShareTpTxt2");
         
-        final String creditTpDesc = mode == 0 ? "Last month's income the colony earned from exports." :
-            "Last month's expenses the colony spent on imports.";
+        final String creditTpDesc = mode == 0 ? str("uiCreditHeaderTpTxt1") : str("uiCreditHeaderTpTxt2");
 
-        table.addHeaders(
-            "", (int)(0.04 * SECT3_WIDTH), null, true, false, 1,
-            "Colony", (int)(0.18 * SECT3_WIDTH), "Colony name.", true, true, 1,
-            "Size", (int)(0.09 * SECT3_WIDTH), "Colony size.", false, false, -1,
-            "Faction", (int)(0.17 * SECT3_WIDTH), "Faction that controls this colony.", false, false, -1,
-            "Quantity", (int)(0.05 * SECT3_WIDTH), quantityTooltip, true, true, 2,
-            "", (int)(0.1 * SECT3_WIDTH), null, true, false, 2,
-            "Access", (int)(0.11 * SECT3_WIDTH), "A colony's accessibility. Influences trade priority.", false, false, -1,
-            marketHeader, (int)(0.15 * SECT3_WIDTH), marketTpDesc, false, false, -1,
-            creditHeader, (int)(0.11 * SECT3_WIDTH), creditTpDesc, false, false, -1
+        table.addHeaders( // 876 pixels wide
+            "", 0.04 * SECT3_WIDTH, null, true, false, 1,
+            str("uiTableColony"), 0.18 * SECT3_WIDTH, str("uiTableColonyTpTxT"), true, true, 1,
+            str("uiTableSize"), 0.09 * SECT3_WIDTH, str("uiTableSizeTpTxt"), false, false, -1,
+            str("uiTableFaction"), 0.17 * SECT3_WIDTH, str("uiTableFactionTpTxt"), false, false, -1,
+            str("uiTableQuantity"), 0.05 * SECT3_WIDTH, quantityTooltip, true, true, 2,
+            "", 0.1 * SECT3_WIDTH, null, true, false, 2,
+            str("uiTableAccessibility"), 0.11 * SECT3_WIDTH, str("uiTableAccessibilityTpTxt"), false, false, -1,
+            str("uiTableMarketShare"), 0.15 * SECT3_WIDTH, marketTpDesc, false, false, -1,
+            creditHeader, 0.11 * SECT3_WIDTH, creditTpDesc, false, false, -1
         );
 
         final EconomyEngine engine = EconomyEngine.instance();
@@ -702,7 +639,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             section,
             (int) section.getPosition().getWidth(),
             (int) section.getPosition().getHeight(),
-            m_market.getName() + " - Commodities",
+            m_market.getName() + str("uiTitleCommoditiesSuffix"),
             true, m_market
         );
         section4ComPanel.selectRow(m_com.getId());
@@ -739,23 +676,23 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             tp.setTitleSmallOrbitron();
             tp.addTitle(marketName + " - " + m_com.getName(), baseColor);
     
-            String locString = "in the " + market.getContainingLocation().getNameWithLowercaseType();
+            String locString = strf("uiLocationPrefix", market.getContainingLocation().getNameWithLowercaseType());
             if (market.getContainingLocation().isHyperspace()) {
-               locString = "in hyperspace";
+               locString = str("uiLocationHyperspace");
             }
     
-            tp.addPara(market.getName() + " is a size %s %s colony located " + locString +
-                ". Its current stability is %s.", opad, new Color[]{
-                    highlight, baseColor, highlight
-                }, new String[]{
-                    "" + market.getSize(),
+            tp.addPara(strf("uiMarketStatusSummaryTxt", market.getName(), locString),
+                opad, new Color[]{highlight, baseColor, highlight},
+                new String[]{
+                    Integer.toString(market.getSize()),
                     market.getFaction().getPersonNamePrefix(),
-                    "" + (int)market.getStabilityValue()
+                    Integer.toString((int)market.getStabilityValue())
                 }
             );
     
-            tp.addSectionHeading(m_com.getName() + " production & availability",
-            baseColor, darkColor, Alignment.MID, opad);
+            tp.addSectionHeading(strf("uiProductionConsumptionSuffix", m_com.getName()),
+                baseColor, darkColor, Alignment.MID, opad
+            );
                 
             TooltipUtils.createComProductionBreakdown(tp, cell);
     
@@ -767,19 +704,19 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     
             if (!m_com.isMeta()) {
                 if (cell.getStoredExcess() > 0f) {
-                    tp.addPara("Excess stockpiles: %s units.", opad, positive, 
+                    tp.addPara(str("uiExcessStockSuffix"), opad, positive, 
                     highlight, NumFormat.engNotate(cell.getStoredExcess()));
                 } else if (cell.getStoredDeficit() > 0f) {
-                    tp.addPara("Local deficit: %s units.", opad, negative, 
+                    tp.addPara(str("uiDeficitStockSuffix"), opad, negative, 
                     highlight, NumFormat.engNotate(cell.getStoredDeficit()));
                 }
     
-                tp.addPara("Can be bought for %s and sold for %s per unit, assuming a batch of %s units traded.", opad, highlight, new String[]{
+                tp.addPara(str("uiBoughtAndSoldForTxt"), opad, highlight, new String[]{
                     Misc.getDGSCredits(buyPrice), Misc.getDGSCredits(sellPrice), Misc.getWithDGS(econUnit)
                 });
             }
     
-            tp.addSectionHeading("Colony accessibility", baseColor, darkColor, Alignment.MID, opad);
+            tp.addSectionHeading(str("uiColonyAccessibilityTitle"), baseColor, darkColor, Alignment.MID, opad);
     
             final int stability = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
             Color valueColor = highlight;
@@ -787,7 +724,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 valueColor = negative;
             }
     
-            tp.addPara("Accessibility: %s", opad, valueColor, stability + "%");
+            tp.addPara(str("uiAccessibilitySuffix"), opad, valueColor, stability + "%");
     
             tp.addStatModGrid(450f, 50, opad, pad, market.getAccessibilityMod(),
                 new StatModValueGetter() {
@@ -815,8 +752,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
     private static final TooltipBuilder createSection3QuantityHeaderTooltip(
         int mode, SortableTable table
     ) {
-        final String quantityDesc = "Units of this commodity " + (mode == 0 ? "exported" : "imported") +
-            " globally in the last trade cycle.";
+        final String quantityDesc = mode == 0 ? str("uiTableQuantityTpTxt1") : str("uiTableQuantityTpTxt2");
 
         return (tp, exp) -> {
             tp.addPara(quantityDesc, pad);

@@ -109,6 +109,30 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             };
         }
 
+        { // REAL ADVANCE
+            final String btnText = str("uiRealAdvanceTitle");
+            final CallbackRunnable<Button> run = (btn) -> {                
+                final long startTime = System.nanoTime();
+                
+                engine.realAdvance();
+
+                final long endTime = System.nanoTime();
+                final String time = ((endTime - startTime) / 1_000_000) + " " + str("uiMilliseconds");
+                logger.info(str("uiElapsedTimeTxt") + time);
+                btn.setText(btnText + " - " + time);
+            };
+            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+                btnText, Fonts.DEFAULT_SMALL, run
+            );
+            add(button).inTL(opad, SECTION_I + pad*8 + lblH + BUTTON_H*3);
+
+            button.setEnabled(DebugFlags.COLONY_DEBUG);
+
+            button.tooltip.builder = (tp, expanded) -> {
+                tp.addPara(str("uiRealAdvanceTpTxt"), pad);
+            };
+        }
+
         { // LOG ALL COMMODITY CELLS
             final CallbackRunnable<Button> run = (btn) -> {
                 for (CommodityDomain dom : engine.getComDomains()) {
@@ -120,7 +144,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 str("uiLogAllComCellsBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*8 + lblH + BUTTON_H*3);
+            add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
 
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara(str("uiLogAllComCellsTpTxt"), pad);
@@ -135,7 +159,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 str("uiLogEconInfoBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
+            add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
 
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara(str("uiLogEconInfoTpTxt"), pad);
@@ -149,7 +173,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 str("uiLogMarketPopDataBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
+            add(button).inTL(opad, SECTION_I + pad*14 + lblH + BUTTON_H*6);
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara(str("uiLogMarketPopDataTpTxt"), pad);
             };
@@ -162,7 +186,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 str("uiLogIndIOBtnTitle"), Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*14 + lblH + BUTTON_H*6);
+            add(button).inTL(opad, SECTION_I + pad*16 + lblH + BUTTON_H*7);
 
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara(str("uiLogIndIOTpTxt"), pad);
@@ -184,7 +208,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 btnText, Fonts.DEFAULT_SMALL, run
             );
-            add(button).inTL(opad, SECTION_I + pad*16 + lblH + BUTTON_H*7);
+            add(button).inTL(opad, SECTION_I + pad*18 + lblH + BUTTON_H*8);
 
             button.setEnabled(DebugFlags.COLONY_DEBUG);
 

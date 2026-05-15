@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.marketInfo.buttons;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import org.lwjgl.input.Keyboard;
 
@@ -32,11 +33,11 @@ public class ManagePopButton extends Button {
         bgDisabledAlpha = 0f;
 
         tooltip.builder = (tp, expanded) -> {
-            tp.addPara("Population and worker management [%s]", pad,
+            tp.addPara(str("uiPopWorkforceManageBtnTitle"), pad,
                 highlight, Keyboard.getKeyName(interaction.shortcut)
             );
 
-            tp.addPara("The Statistics Bureau tracks census data, health trends, and workforce allocation across all industries. Policy decrees can be drafted and enacted from this office, shaping the colony's social and economic direction.", opad);
+            tp.addPara(str("uiPopWorkforceManageBtnTpTxt"), opad);
         };
 
         final Base icon = new Base(m_panel, width, height, ICON, null, null);

@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.outpostsTab;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -58,14 +59,14 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
         );
 
         table.addHeaders(
-            "Name", nameW + pad, "Colony name.\nSorts colonies by date established.", false, false, -1,
-            "Size", 70, "Colony size.", false, false, -1,
-            "Health", iconW, "Overall health of the colony's population.", false, false, -1,
-            "Happiness", iconW, "Overall happiness and morale of the colony's population.", false, false, -1,
-            "Cohesion", iconW, "Degree of social cohesion within the colony's population.", false, false, -1,
-            "Conscious..", iconW, "Colony population's awareness of exploitation and social hierarchy.", false, false, -1,
-            "Reserves", 100, "Credit reserves of the colony", false, false, -1,
-            "Employment", 112, "Fraction of the workers assigned to an output.", false, false, -1
+            str("uiTableColonyNameTitle"), nameW + pad, null, false, false, -1,
+            str("uiTableSize"), 70, null, false, false, -1,
+            str("marketPopDataHealthTxt"), iconW, str("uiHealthTpTxtShort"), false, false, -1,
+            str("marketPopDataHappinessTxt"), iconW, str("uiHappinessTpTxtShort"), false, false, -1,
+            str("marketPopDataCohesionShortTxt"), iconW, str("uiCohesionTpTxtShort"), false, false, -1,
+            str("marketPopDataConsciousnessShort"), iconW, str("uiClassConsciousnessTpTxtShort"), false, false, -1,
+            str("uiTableCreditReserves"), 100, str("uiTableCreditReservesTpTxt"), false, false, -1,
+            str("uiTableEmployment"), 112, str("uiTableEmploymentTpTxt"), false, false, -1
         );
 
         if (engine.getPlayerMarketData().size() > 0) {
@@ -121,7 +122,7 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
                 table.pushRow(null, null, run, null, null, null);
             }
         } else {
-            final LabelAPI lbl = settings.createLabel("No colonies", Fonts.DEFAULT_SMALL);
+            final LabelAPI lbl = settings.createLabel(str("noColonies"), Fonts.DEFAULT_SMALL);
             lbl.setColor(base);
             table.add(lbl).inMid();
         }

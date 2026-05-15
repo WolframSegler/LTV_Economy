@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.marketInfo.population;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -24,13 +25,13 @@ public class HealthPair extends IconValuePairTp {
         lbl.setHighlightOnMouseover(true);
         lbl.setAlignment(Alignment.MID);
         tooltip.builder = (tp, exp) -> {
-            tp.addTitle("Health", base);
+            tp.addTitle(str("marketPopDataHealthTxt"), base);
 
-            tp.addPara("Overall health of the population. A higher value indicates better living conditions, food availability, and lower hazard exposure.", pad);
+            tp.addPara(str("uiHealthTpTxt"), pad);
         
             final float value = data.healthDelta
                 .computeEffective(data.getHealth()) - data.getHealth();
-            tp.addPara("Daily Change: %s", 3, highlight, String.format("%.2f", value));
+            tp.addPara(str("uiDailyChangePrefix"), 3, highlight, String.format("%.2f", value));
             tp.addStatModGrid(PopStatModValueGetter.GRID_W, PopStatModValueGetter.VALUE_W,
                 pad, pad, data.healthDelta, new PopStatModValueGetter()
             );

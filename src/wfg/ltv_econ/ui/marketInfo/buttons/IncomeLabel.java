@@ -46,10 +46,12 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
 
         this.market = market;
 
+        setShortcut(Keyboard.KEY_1);
+
         final float TP_WIDTH = 500f;
         tooltip.expandable = true;
-        tooltip.expandTxt = "%s Show details";
-        tooltip.unexpandTxt = "%s Hide";
+        tooltip.expandTxt = str("uiShowDetails");
+        tooltip.unexpandTxt = str("uiHide");
         tooltip.width = TP_WIDTH;
         tooltip.positioner = (tp, expanded) -> {
             NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.LeftTop, 50);
@@ -63,16 +65,17 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
             final Color dark = faction.getDarkUIColor();
             final float rowH = 20f;
 
-            final LabelAPI title = tp.addTitle("Monthly Income & Upkeep [1]", base);
+            final String shortcutStr = Keyboard.getKeyName(interaction.shortcut);
+            final LabelAPI title = tp.addTitle(strf("uiMonthlyIncomeUpkeepTitle", shortcutStr), base);
             title.setHighlightColor(highlight);
-            title.setHighlight("1");
+            title.setHighlight(shortcutStr);
             final long income = ledger.getNetLastMonth();
 
             final String incomeTxt = NumFormat.formatCreditAbs(income);
             if (income >= 0l) {
-                tp.addPara("The net monthly income of this colony last month was %s.", opad, highlight, incomeTxt);
+                tp.addPara(str("uiMonthlyIncomeUpkeepTpTxt1"), opad, highlight, incomeTxt);
             } else {
-                tp.addPara("The net monthly upkeep for this colony last month was %s.", opad, negative, incomeTxt);
+                tp.addPara(str("uiMonthlyIncomeUpkeepTpTxt2"), opad, negative, incomeTxt);
             }
 
             final ArrayList<Industry> industries = new ArrayList<>(market.getIndustries());
@@ -98,28 +101,28 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
                 indIncomeMap.getOrDefault(i1.getId(), 0l)
             ));
 
-            tp.addSectionHeading("Industries & Structures", base, dark, Alignment.MID, opad);
+            tp.addSectionHeading(str("industriesTitle"), base, dark, Alignment.MID, opad);
 
-            tp.addPara("Income: %s", opad, highlight, indIncome);
-            tp.addPara("Upkeep: %s", opad, negative, indUpkeep);
+            tp.addPara(str("uiIncomeWithValue"), opad, highlight, indIncome);
+            tp.addPara(str("uiUpkeepWithvalue"), opad, negative, indUpkeep);
 
             if (expanded) {
-                tp.addPara("Income multiplier: %s", opad, highlight,
+                tp.addPara(str("uiIncomeMultTitle"), opad, highlight,
                     Math.round(market.getIncomeMult().getModifiedValue() * 100f) + "%"
                 );
                 tp.addStatModGrid(TP_WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null);
 
-                tp.addPara("Upkeep multiplier: %s", opad, highlight,
+                tp.addPara(str("uiUpkeepMultTitle"), opad, highlight,
                     Math.round(market.getUpkeepMult().getModifiedValue() * 100f) + "%"
                 );
                 tp.addStatModGrid(
                     TP_WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null
                 );
 
-                tp.addPara("These modifiers affect industry income & upkeep only.", gray, opad);
+                tp.addPara(str("uiMonthlyIncomeUpkeepTpTxt3"), gray, opad);
 
                 tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new Object[] {
-                    "Industry", 250, "Income", 115, "Upkeep", 115
+                    str("uiTableIndustryTitle"), 250, str("uiTableIncomeTitle"), 115, str("uiTableUpkeepTitle"), 115
                 });
 
                 for (Industry ind : industries) {
@@ -135,15 +138,15 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
                 tp.addTable("", 0, pad);
             }
 
-            tp.addSectionHeading("Imports & Exports", base, dark, Alignment.MID, opad);
+            tp.addSectionHeading(str("importsExportsTitle"), base, dark, Alignment.MID, opad);
 
             final int maxCommoditiesToDisplay = 8;
             final float extraPad = 30f;
 
             final long exportIncome = info.getExportIncome(market, true);
-            tp.addPara("Last Month's Exports: %s", opad, highlight, NumFormat.formatCredit(exportIncome));
+            tp.addPara(str("uiLastMonthExportsTitle"), opad, highlight, NumFormat.formatCredit(exportIncome));
             if (exportIncome > 0l && expanded) {
-                tp.beginTable(faction, rowH, "Commodity", 200f + extraPad, "Market share", 100f + extraPad, "Income", 100f + extraPad);
+                tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 200f + extraPad, str("uiTableMarketShare"), 100f + extraPad, str("uiTableIncomeTitle"), 100f + extraPad);
                 int exportedCount = 0;
                 for (CommodityDomain com : domains) {
                     if (ledger.getLastMonth(TRADE_EXPORT_KEY + com.comID) > 0l) {
@@ -174,13 +177,13 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
                     }
                 }
 
-                tp.addTable("No exports", exportedCount - comCount, opad);
+                tp.addTable(str("noExports"), exportedCount - comCount, opad);
             }
 
             final long importExpense = info.getImportExpense(market, true);
-            tp.addPara("Last Month's Imports: %s", opad, negative, NumFormat.formatCredit(importExpense));
+            tp.addPara(str("uiLastMonthImportsTitle"), opad, negative, NumFormat.formatCredit(importExpense));
             if (importExpense > 0l && expanded) {
-                tp.beginTable(faction, rowH, "Commodity", 200f + extraPad, "Market share", 100f + extraPad, "Expense", 100f + extraPad);
+                tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 200f + extraPad, str("uiTableMarketShare"), 100f + extraPad, str("uiTableExpense"), 100f + extraPad);
                 int importedCount = 0;
                 for (CommodityDomain com : domains) {
                     if (ledger.getLastMonth(TRADE_IMPORT_KEY + com.comID) < 0l) {
@@ -211,7 +214,7 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
                     }
                 }
 
-                tp.addTable("No imports", importedCount - comCount, opad);
+                tp.addTable(str("noImports"), importedCount - comCount, opad);
             }
 
             final long monthlyWages = ledger.getLastMonth(WORKER_WAGES_KEY);
@@ -247,14 +250,12 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
             tp.addPara(str("REDISTRIBUTION_DISCLAIMER"), gray, opad);
         };
     
-        setShortcut(Keyboard.KEY_1);
-
         buildUI();
     }
 
     public void buildUI() {
         final long value = MarketFinanceRegistry.instance().getLedger(market).getNetLastMonth();
-        final String txt = "Credits/month";
+        final String txt = str("uiCreditsPerMonth");
         final String valueTxt = NumFormat.formatCredit(value);
         final Color valueColor = value < 0l ? negative : market.getFaction().getBrightUIColor();
 

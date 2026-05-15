@@ -24,6 +24,7 @@ import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.panel.CustomPanel;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class LtvCommodityPanel extends CustomPanel implements HasBackground, HasOutline,
     UIBuildableAPI
@@ -44,13 +45,13 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
         MarketAPI market) {
-        this(parent, width, height, "Commodities", false, market);
+        this(parent, width, height, str("uiCommoditiesTitle"), false, market);
     }
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
         boolean rowsIgnoreUIState, MarketAPI market
     ) {
-        this(parent, width, height, "Commodities", rowsIgnoreUIState, market);
+        this(parent, width, height, str("uiCommoditiesTitle"), rowsIgnoreUIState, market);
     }
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,

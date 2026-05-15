@@ -752,10 +752,10 @@ public class ComTradeFlowMap extends CustomPanel implements
 
             final SectorAPI sector = Global.getSector();
 
-            tp.addPara(str("mapTradeRouteTitle"), base, 0f);
+            tp.addPara(str("uiTableTradeRoute"), base, 0f);
 
             tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
-                str("mapFactionTitle"), 140, str("mapVolumeTitle"), 70
+                str("uiTableFaction"), 140, str("uiTableVolume"), 70
             });
             for (var entry : entries) {
                 final double value = entry.getValue();
@@ -782,7 +782,7 @@ public class ComTradeFlowMap extends CustomPanel implements
             tp.addPara(data.system.getName(), base, 0f);
 
             tp.beginTable(Global.getSector().getPlayerFaction(), 20, new Object[] {
-                str("mapColonyTitle"), 140, str("mapNetTradeTitle"), 70
+                str("uiTableColony"), 140, str("uiTableNetTrade"), 70
             });
             for (var entry : entries) {
                 final MarketAPI market = entry.getKey();

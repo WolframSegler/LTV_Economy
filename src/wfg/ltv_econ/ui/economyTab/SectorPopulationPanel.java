@@ -69,7 +69,7 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
-                    str("mapFactionTitle"), 200, str("uiTablePopulationTitle"), 100
+                    str("uiTableFaction"), 200, str("uiTablePopulationTitle"), 100
                 }
             );
 

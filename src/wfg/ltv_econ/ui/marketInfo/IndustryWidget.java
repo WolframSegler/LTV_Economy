@@ -57,6 +57,7 @@ import wfg.native_ui.util.NativeUiUtils;
 
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class IndustryWidget extends CustomPanel implements
     HasBackground, HasHoverGlow, UIBuildableAPI
@@ -217,7 +218,7 @@ public class IndustryWidget extends CustomPanel implements
                         int itemCost = item.cost;
                         if (itemCost > 0) {
                             Global.getSector().getPlayerFleet().getCargo().getCredits().add(itemCost);
-                            Misc.addCreditsMessage("Received %s", itemCost);
+                            Misc.addCreditsMessage(str("uiCreditsReceivedPrefix"), itemCost);
                         }
 
                         indPanel.buildUI();
@@ -248,7 +249,7 @@ public class IndustryWidget extends CustomPanel implements
                         LtvIndustryListPanel.indOptCtor,
                         ind,
                         indPanel.dummyWidget,
-                        LtvIndustryListPanel.getMarketInteractionMode(market),
+                        UIUtils.getMarketInteractionMode(market),
                         Attachments.getCampaignScreenPanel(),
                         listener
                     );
@@ -332,7 +333,7 @@ public class IndustryWidget extends CustomPanel implements
             if (ind.isBuilding() && !ind.isUpgrading() && !ind.isDisrupted()) {
 
                 tp.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                constructionStatusText = tp.createLabel("Building", baseColor);
+                constructionStatusText = tp.createLabel(str("uiIndustryBeingBuiltTxt"), baseColor);
                 constructionStatusText.setHighlightColor(
                     NativeUiUtils.adjustBrightness(constructionStatusText.getColor(), 1.33f)
                 );
@@ -372,10 +373,8 @@ public class IndustryWidget extends CustomPanel implements
 
     public void setNormalMode() {
         clearLabels();
-        String txt = "Queued";
-        if (Misc.getCurrentlyBeingConstructed(market) == null && constructionQueueIndex == 0) {
-            txt = "Building";
-        }
+        final String txt = (Misc.getCurrentlyBeingConstructed(market) == null && constructionQueueIndex == 0) ?
+            str("uiIndustryBeingBuiltTxt") : str("uiItemQueuedTxt");
 
         remove(constructionStatusText); 
         constructionStatusText = settings.createLabel(txt, Fonts.INSIGNIA_VERY_LARGE);
@@ -400,7 +399,7 @@ public class IndustryWidget extends CustomPanel implements
         if (queueItem != null) {
             clearLabels();
             final LabelAPI removeLabel = settings.createLabel(
-                "Click to remove", Fonts.DEFAULT_SMALL
+                str("clickToRemove"), Fonts.DEFAULT_SMALL
             );
             removeLabel.setColor(baseColor);
             removeLabel.setHighlightColor(
@@ -416,7 +415,7 @@ public class IndustryWidget extends CustomPanel implements
             );
 
             final LabelAPI refundLabelAppendix = settings.createLabel(
-                " refund", Fonts.DEFAULT_SMALL
+                str("uiRefundSuffix"), Fonts.DEFAULT_SMALL
             );
             refundLabelAppendix.setColor(baseColor);
             refundLabelAppendix.setHighlightColor(
@@ -439,7 +438,7 @@ public class IndustryWidget extends CustomPanel implements
 
     public void setSwapMode() {
         clearLabels();
-        final LabelAPI swapLabel = settings.createLabel("Click to swap", Fonts.DEFAULT_SMALL);
+        final LabelAPI swapLabel = settings.createLabel(str("clickToSpaw"), Fonts.DEFAULT_SMALL);
         swapLabel.setColor(baseColor);
         swapLabel.setHighlightColor(
             NativeUiUtils.adjustBrightness(swapLabel.getColor(), 1.33f)
@@ -459,7 +458,7 @@ public class IndustryWidget extends CustomPanel implements
                 final int buildTime = (int) ind.getSpec().getBuildTime();
 
                 final LabelAPI buildTimeLabel = settings.createLabel(
-                    "" + buildTime, Fonts.DEFAULT_SMALL
+                    Integer.toString(buildTime), Fonts.DEFAULT_SMALL
                 );
                 buildTimeLabel.setColor(highlight);
                 buildTimeLabel.setHighlightColor(
@@ -487,7 +486,7 @@ public class IndustryWidget extends CustomPanel implements
                 labels.add(costLabel);
 
                 final int labelOpad = 7;
-                final float timeLblW = buildTimeLabel.computeTextWidth("" + buildTime);
+                final float timeLblW = buildTimeLabel.computeTextWidth(Integer.toString(buildTime));
                 add(buildTimeLabel).inBL(labelOpad, pad);
                 add(buildTimeAppendix).inBL(labelOpad + timeLblW, pad);
                 add(costLabel).inBR(labelOpad, pad);
@@ -523,6 +522,7 @@ public class IndustryWidget extends CustomPanel implements
             }
 
             for (LabelAPI label : labels) {
+
                 label.setHighlight(label.getText());
             }
 

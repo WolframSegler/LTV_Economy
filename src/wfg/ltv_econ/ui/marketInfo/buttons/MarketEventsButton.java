@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.constants.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.MarketEventsDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
@@ -28,7 +29,7 @@ public class MarketEventsButton extends DockButton<MarketEventsDialog> {
         bgDisabledAlpha = 0f;
 
         tooltip.builder = (tp, expanded) -> {
-            tp.addPara("Market events [%s]", pad, highlight, Keyboard.getKeyName(interaction.shortcut));
+            tp.addPara(LocalizedStrings.str("uiMarketEventsBtnTitle"), pad, highlight, Keyboard.getKeyName(interaction.shortcut));
         };
 
         final Base icon = new Base(m_panel, width, height, ICON, null, null);
