@@ -28,7 +28,6 @@ import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.fleet.RepairTrackerAPI;
-import com.fs.starfarer.api.impl.campaign.command.WarSimScript;
 import com.fs.starfarer.api.impl.campaign.command.WarSimScript.LocationDanger;
 import com.fs.starfarer.api.impl.campaign.econ.ShippingDisruption;
 import com.fs.starfarer.api.impl.campaign.fleets.BaseRouteFleetManager;
@@ -148,14 +147,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 			|| dest.getFaction().isPlayerFaction()) &&
 			PiracyRespiteScript.playerHasPiracyRespite() ? true : false;
 
-		final LocationDanger dFrom = WarSimScript.getDangerFor(factionId, sysFrom);
-		final LocationDanger dTo = WarSimScript.getDangerFor(factionId, sysTo);
-
-		LocationDanger danger = dFrom.ordinal() > dTo.ordinal() ? dFrom : dTo;
-
-		if (sysFrom != null && sysFrom.isCurrentLocation()) {
-			danger = LocationDanger.NONE;
-		}
+		final LocationDanger danger = (sysFrom != null && sysFrom.isCurrentLocation()) ?
+			LocationDanger.NONE : ShipAllocator.getHighestLocationDangerInRoute(factionId, sysFrom, sysTo);
 
 		float pLoss = 0.5f * EconomyFleetRouteManager.DANGER_LOSS_PROB.get(danger);
 		if (mission.smuggling) pLoss *= 0.5;

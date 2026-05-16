@@ -37,12 +37,13 @@ import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
  */
 public class EconomyInfo {
     transient EconomyEngine engine;
-    final transient HashMap<Integer, Double> tradeFlowCache = new HashMap<>(32);
+    final transient HashMap<String, Double> tradeFlowCache = new HashMap<>(64);
 
     EconomyInfo(EconomyEngine engine) { this.engine = engine; }
 
     public final double getInFactionExports(String comID) {
-        final Double value = tradeFlowCache.get(0);
+        final String key = 0 + EconomyLoop.KEY + comID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
         double total = 0.0;
@@ -50,12 +51,13 @@ public class EconomyInfo {
             if (flow.inFaction) total += flow.amount;
         }
 
-        tradeFlowCache.put(0, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
     public final int getExportMarketShare(String comID, String marketID) {
-        final Double value = tradeFlowCache.get(1);
+        final String key = 1 + EconomyLoop.KEY + comID + EconomyLoop.KEY + marketID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.intValue();
 
         double total = 0.0;
@@ -69,12 +71,13 @@ public class EconomyInfo {
         if (total <= 0.0) return 0;
         total = (marketAmount / total) * 100;
 
-        tradeFlowCache.put(1, total);
+        tradeFlowCache.put(key, total);
         return (int) total;
     }
 
     public final int getImportMarketShare(String comID, String marketID) {
-        final Double value = tradeFlowCache.get(2);
+        final String key = 2 + EconomyLoop.KEY + comID + EconomyLoop.KEY + marketID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.intValue();
 
         double total = 0.0;
@@ -88,12 +91,13 @@ public class EconomyInfo {
         if (total <= 0.0) return 0;
         total = (marketAmount / total) * 100;
 
-        tradeFlowCache.put(2, total);
+        tradeFlowCache.put(key, total);
         return (int) total;
     }
 
     public final double getExportAmount(String comID, String marketID) {
-        final Double value = tradeFlowCache.get(3);
+        final String key = 3 + EconomyLoop.KEY + comID + EconomyLoop.KEY + marketID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
@@ -105,12 +109,13 @@ public class EconomyInfo {
         }
         amount += dom.getInformalExports(marketID);
 
-        tradeFlowCache.put(3, amount);
+        tradeFlowCache.put(key, amount);
         return amount;
     }
 
     public final double getImportAmount(String comID, String marketID) {
-        final Double value = tradeFlowCache.get(4);
+        final String key = 4 + EconomyLoop.KEY + comID + EconomyLoop.KEY + marketID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
@@ -122,12 +127,13 @@ public class EconomyInfo {
         }
         amount += dom.getInformalImports(marketID);
 
-        tradeFlowCache.put(4, amount);
+        tradeFlowCache.put(key, amount);
         return amount;
     }
 
     public final double getGlobalExportAmount(String comID, String marketID) {
-        final Double value = tradeFlowCache.get(5);
+        final String key = 5 + EconomyLoop.KEY + comID + EconomyLoop.KEY + marketID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
@@ -139,12 +145,13 @@ public class EconomyInfo {
         }
         amount += dom.getInformalExports(marketID);
 
-        tradeFlowCache.put(5, amount);
+        tradeFlowCache.put(key, amount);
         return amount;
     }
 
     public final double getGlobalImportAmount(String comID, String marketID) {
-        final Double value = tradeFlowCache.get(6);
+        final String key = 6 + EconomyLoop.KEY + comID + EconomyLoop.KEY + marketID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
@@ -156,12 +163,13 @@ public class EconomyInfo {
         }
         amount += dom.getInformalImports(marketID);
 
-        tradeFlowCache.put(6, amount);
+        tradeFlowCache.put(key, amount);
         return amount;
     }
 
     public final double getInFactionExportAmount(String comID, String marketID) {
-        final Double value = tradeFlowCache.get(7);
+        final String key = 7 + EconomyLoop.KEY + comID + EconomyLoop.KEY + marketID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
         double amount = 0.0;
@@ -171,12 +179,13 @@ public class EconomyInfo {
             }
         }
 
-        tradeFlowCache.put(7, amount);
+        tradeFlowCache.put(key, amount);
         return amount;
     }
 
     public final double getInFactionImportAmount(String comID, String marketID) {
-        final Double value = tradeFlowCache.get(8);
+        final String key = 8 + EconomyLoop.KEY + comID + EconomyLoop.KEY + marketID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
         double amount = 0.0;
@@ -186,12 +195,13 @@ public class EconomyInfo {
             }
         }
 
-        tradeFlowCache.put(8, amount);
+        tradeFlowCache.put(key, amount);
         return amount;
     }
 
     public final double getFactionInFactionExports(String comID, String factionID) {
-        final Double value = tradeFlowCache.get(9);
+        final String key = 9 + EconomyLoop.KEY + comID + EconomyLoop.KEY + factionID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         double amount = 0;
 
@@ -201,11 +211,12 @@ public class EconomyInfo {
             }
         }
 
-        tradeFlowCache.put(9, amount);
+        tradeFlowCache.put(key, amount);
         return amount;
     }
 
     public final float getFactionImportShare(String comID, String factionID) {
+        
         final double total = getGlobalImports(comID);
         if (total == 0.0) return 0f;
         final double imports = getFactionGlobalImports(comID, factionID);
@@ -214,7 +225,8 @@ public class EconomyInfo {
     }
 
     public final double getFactionFormalGlobalImports(String comID, String factionID) {
-        final Double value = tradeFlowCache.get(10);
+        final String key = 10 + EconomyLoop.KEY + comID + EconomyLoop.KEY + factionID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
         double total = 0.0;
@@ -224,7 +236,7 @@ public class EconomyInfo {
             }
         }
 
-        tradeFlowCache.put(10, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
@@ -261,7 +273,8 @@ public class EconomyInfo {
     }
 
     public final double getFactionFormalGlobalExports(String comID, String factionID) {
-        final Double value = tradeFlowCache.get(11);
+        final String key = 11 + EconomyLoop.KEY + comID + EconomyLoop.KEY + factionID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
         double total = 0.0;
@@ -271,7 +284,7 @@ public class EconomyInfo {
             }
         }
 
-        tradeFlowCache.put(11, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
@@ -334,7 +347,8 @@ public class EconomyInfo {
     }
 
     public final float getFactionImportSufficiency(String comID, String factionID) {
-        final Double value = tradeFlowCache.get(12);
+        final String key = 12 + EconomyLoop.KEY + comID + EconomyLoop.KEY + factionID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.floatValue();
 
         final EconomyAPI econ = Global.getSector().getEconomy();
@@ -361,18 +375,19 @@ public class EconomyInfo {
         }
 
         if (totalImports == 0.0) {
-            tradeFlowCache.put(12, 1.0);
+            tradeFlowCache.put(key, 1.0);
             return 1f;
         } else {
             totalImports = Math.min(1.0, inFactionImports / totalImports);
         }
 
-        tradeFlowCache.put(12, totalImports);
+        tradeFlowCache.put(key, totalImports);
         return (float) totalImports;
     }
 
     public final double getFactionGlobalImports(String comID, String factionID) {
-        final Double value = tradeFlowCache.get(13);
+        final String key = 13 + EconomyLoop.KEY + comID + EconomyLoop.KEY + factionID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
         final CommodityDomain dom = engine.getComDomain(comID);
@@ -392,12 +407,13 @@ public class EconomyInfo {
             }
         }
 
-        tradeFlowCache.put(13, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
     public final double getFactionGlobalExports(String comID, String factionID) {
-        final Double value = tradeFlowCache.get(14);
+        final String key = 14 + EconomyLoop.KEY + comID + EconomyLoop.KEY + factionID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
         final CommodityDomain dom = engine.getComDomain(comID);
@@ -418,7 +434,7 @@ public class EconomyInfo {
             }
         }
 
-        tradeFlowCache.put(14, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
@@ -480,7 +496,8 @@ public class EconomyInfo {
     }
 
     public final double getGlobalImports(String comID) {
-        final Double value = tradeFlowCache.get(15);
+        final String key = 15 + EconomyLoop.KEY + comID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
@@ -492,12 +509,13 @@ public class EconomyInfo {
             total += amount;
         }
 
-        tradeFlowCache.put(15, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
     public final double getGlobalExports(String comID) {
-        final Double value = tradeFlowCache.get(16);
+        final String key = 16 + EconomyLoop.KEY + comID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
@@ -509,12 +527,13 @@ public class EconomyInfo {
             total += amount;
         }
 
-        tradeFlowCache.put(16, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
     public final double getTotalImports(String comID) {
-        final Double value = tradeFlowCache.get(17);
+        final String key = 17 + EconomyLoop.KEY + comID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
@@ -526,12 +545,13 @@ public class EconomyInfo {
             total += amount;
         }
 
-        tradeFlowCache.put(17, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
     public final double getTotalExports(String comID) {
-        final Double value = tradeFlowCache.get(18);
+        final String key = 18 + EconomyLoop.KEY + comID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
@@ -543,7 +563,7 @@ public class EconomyInfo {
             total += amount;
         }
 
-        tradeFlowCache.put(18, total);
+        tradeFlowCache.put(key, total);
         return total;
     }
 
@@ -564,7 +584,8 @@ public class EconomyInfo {
     }
     
     public final long getGlobalTradeVolume(String comID) {
-        final Double value = tradeFlowCache.get(19);
+        final String key = 19 + EconomyLoop.KEY + comID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.longValue();
         final CommodityDomain dom = engine.getComDomain(comID);
         double total = 0;
@@ -576,7 +597,7 @@ public class EconomyInfo {
             total += amount;
         }
 
-        tradeFlowCache.put(19, total);
+        tradeFlowCache.put(key, total);
         return (long) total;
     }
 
@@ -599,7 +620,8 @@ public class EconomyInfo {
     }
 
     public final int getGlobalExporterCount(String comID) {
-        final Double value = tradeFlowCache.get(20);
+        final String key = 20 + EconomyLoop.KEY + comID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.intValue();
 
         final Set<String> exporters = new HashSet<>();
@@ -607,12 +629,13 @@ public class EconomyInfo {
             if (!flow.inFaction) exporters.add(flow.exporterID);
         }
 
-        tradeFlowCache.put(20, (double) exporters.size());
+        tradeFlowCache.put(key, (double) exporters.size());
         return exporters.size();
     }
 
     public final int getGlobalImporterCount(String comID) {
-        final Double value = tradeFlowCache.get(21);
+        final String key = 21 + EconomyLoop.KEY + comID;
+        final Double value = tradeFlowCache.get(key);
         if (value != null) return value.intValue();
 
         final Set<String> importer = new HashSet<>();
@@ -620,7 +643,7 @@ public class EconomyInfo {
             if (!flow.inFaction) importer.add(flow.importerID);
         }
 
-        tradeFlowCache.put(21, (double) importer.size());
+        tradeFlowCache.put(key, (double) importer.size());
         return importer.size();
     }
 

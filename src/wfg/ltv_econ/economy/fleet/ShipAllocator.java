@@ -50,17 +50,7 @@ public class ShipAllocator {
         final StarSystemAPI srcSys = mission.src.getStarSystem();
         final StarSystemAPI dstSys = mission.dest.getStarSystem();
         
-        int dangerOrdinal = 0;
-        try {
-            if (srcSys != null) {
-                final LocationDanger d = WarSimScript.getDangerFor(mission.src.getFaction().getId(), srcSys);
-                dangerOrdinal = Math.max(dangerOrdinal, d.ordinal());
-            }
-            if (dstSys != null) {
-                final LocationDanger d = WarSimScript.getDangerFor(mission.dest.getFaction().getId(), dstSys);
-                dangerOrdinal = Math.max(dangerOrdinal, d.ordinal());
-            }
-        } catch (ConcurrentModificationException e) {}
+        final int dangerOrdinal = getHighestLocationDangerInRoute(mission.src.getFaction().getId(), srcSys, dstSys).ordinal();
 
         final float dangerMult = COMBAT_POWER_DANGER_MULT[dangerOrdinal];
         final float required = (totalShipment / 100f) * COMBAT_POWER_BASE_PER_100_TONS * dangerMult;
@@ -74,6 +64,22 @@ public class ShipAllocator {
         }
         return cost;
     }
+
+    public static final LocationDanger getHighestLocationDangerInRoute(final String factionID, final StarSystemAPI src, final StarSystemAPI dest) {
+        LocationDanger danger = LocationDanger.NONE;
+        try {
+            if (src != null) {
+                final LocationDanger d = WarSimScript.getDangerFor(factionID, src);
+                if (d.ordinal() > danger.ordinal()) danger = d;
+            }
+            if (dest != null) {
+                final LocationDanger d = WarSimScript.getDangerFor(factionID, dest);
+                if (d.ordinal() > danger.ordinal()) danger = d;
+            }
+        } catch (ConcurrentModificationException e) {}
+
+        return danger;
+    } 
 
     /**
      * Allocate ships to meet given targets. Updates the tracking values inside the mission.

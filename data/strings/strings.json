@@ -327,7 +327,7 @@
         "uiCruisersShipTypeTitle": "Cruisers",
         "uiCapitalsShipTypeTitle": "Capitals",
         "uiFactionHangarBtnTitle": "Faction Hangar",
-        "uiCapitalInTxt": "  |  Capital in ",
+        "uiCapitalCityInTxt": "  |  Capital in ",
         "uiShipmentCapacitiesTitle": "Shipment Capacities",
         "uiOperationsTitle": "Operations",
         "uiCargoCapacityTitle": "Cargo Capacity",

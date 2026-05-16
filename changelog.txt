@@ -1,3 +1,7 @@
+Version 0.3.5-beta | SAVE COMPATIBLE
+- Fixed crash caused by WarSimScript.getDangerFor access from a different thread.
+- Fixed stale cache bug.
+
 Version 0.3.4-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.4.1 for this update. Version 0.4.0 will not work.
 - Added a population info panel to the economy tab.
