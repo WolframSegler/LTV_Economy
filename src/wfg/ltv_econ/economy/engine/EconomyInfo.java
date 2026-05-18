@@ -37,7 +37,7 @@ import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
  */
 public class EconomyInfo {
     transient EconomyEngine engine;
-    final transient HashMap<String, Double> tradeFlowCache = new HashMap<>(64);
+    final transient HashMap<String, Double> tradeFlowCache = new HashMap<>(256);
 
     EconomyInfo(EconomyEngine engine) { this.engine = engine; }
 

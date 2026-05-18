@@ -16,7 +16,6 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.util.Misc;
 
 import lunalib.lunaSettings.LunaSettings;
-import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.loader.ConfigLunaSettingsListener;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.config.EconConfig;
@@ -50,7 +49,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onNewGameAfterEconomyLoad() {
-        WorkerPoolCondition.initialize();
         addManufacturingToMarkets();
     }
 

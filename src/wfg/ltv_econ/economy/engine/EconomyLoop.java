@@ -1,8 +1,7 @@
 package wfg.ltv_econ.economy.engine;
 
-import static wfg.native_ui.util.Globals.settings;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +19,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
@@ -45,7 +45,9 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.ltv_econ.util.ArrayMutableStat;
 import wfg.native_ui.util.ArrayMap;
+import wfg.ltv_econ.constants.strings.Consumption;
 
 import static wfg.ltv_econ.constants.CommoditiesID.*;
 import static wfg.ltv_econ.constants.strings.Income.*;
@@ -54,6 +56,7 @@ import static wfg.ltv_econ.constants.strings.LocalizedStrings.str;
 public class EconomyLoop {
     private static final Logger log = Global.getLogger(EconomyLoop.class);
     private static final int DAYS_AFTER_SHIP_FREE_IN_COMPLETED = 7;
+    private static final float FUEL_TARGET_TRADE_ALPHA = 0.5f;
     public static final String KEY = "::";
 
     transient EconomyEngine engine;
@@ -291,6 +294,7 @@ public class EconomyLoop {
             }
         }
 
+        final HashMap<MarketAPI, Float> fuelDemands = new HashMap<>(EconomyInfo.getMarketsCount());
         final int totalMissions = missions.size();
         engine.activeMissions.ensureCapacity(engine.activeMissions.size() + totalMissions);
         for (int i = 0; i < totalMissions; i++) {
@@ -302,19 +306,17 @@ public class EconomyLoop {
             final FactionShipInventory inv = engine.getFactionShipInventory(
                 mission.src.getFaction().getId()
             );
-            if (inv.getIdleCargoCapacity() >= mission.cargoAmount &&
-                inv.getIdleFuelCapacity() >= mission.fuelAmount &&
-                inv.getIdleCrewCapacity() >= mission.crewAmount &&
-                inv.getIdleCombatPower() >= mission.combatPowerTarget
-            ) {
-                allocShipsAndFuelToTradeMission(inv, mission);
-                mission.usedFactionFleet = true;
-            } else {
-                allocIndependentFleetToTradeMission(mission);
-                mission.usedFactionFleet = false;
-            }
+            final boolean canUseFactionFleet = inv.getIdleCargoCapacity() >= mission.cargoAmount
+                && inv.getIdleFuelCapacity() >= mission.fuelAmount
+                && inv.getIdleCrewCapacity() >= mission.crewAmount
+                && inv.getIdleCombatPower() >= mission.combatPowerTarget;
+
+            allocShipsAndFuelToTradeMission(inv, mission, canUseFactionFleet);
             engine.activeMissions.add(mission);
+
+            fuelDemands.merge(mission.src, mission.fuelCost, Float::sum);
         }
+        updateFuelDemands(fuelDemands);
 
         engine.info.tradeFlowCache.clear();
 
@@ -411,51 +413,64 @@ public class EconomyLoop {
         }
     }
 
-    private final void allocShipsAndFuelToTradeMission(final FactionShipInventory inv, final TradeMission mission) {
-        ShipAllocator.allocateShipsForTrade(inv, mission);
-        mission.fuelCost = ShipAllocator.getRequiredFuelForShips(mission.allocatedShips, mission.dist);
-
+    private final void allocShipsAndFuelToTradeMission(final FactionShipInventory inv, final TradeMission mission, boolean isFactionFleet) {
         final String marketID = mission.src.getId();
+        if (isFactionFleet) {
+            ShipAllocator.allocateShipsForTrade(inv, mission);
+        } else {
+            ShipAllocator.allocateShipsForTarget(Global.getSector().getFaction(Factions.INDEPENDENT), mission);
+        }
+        mission.fuelCost = ShipAllocator.getRequiredFuelForShips(mission.allocatedShips, mission.dist);
+        mission.usedFactionFleet = isFactionFleet;
+
         final CommodityCell fuelCell = engine.getComCell(Commodities.FUEL, marketID);
         if (fuelCell.getStored() >= mission.fuelCost) {
             mission.usedFuelFromStockpiles = true;
             fuelCell.addStoredAmount(-mission.fuelCost);
             
         } else {
-            final float cost = mission.fuelCost * fuelCell.spec.getBasePrice() * EconConfig.FORCED_FUEL_IMPORT_COST_MULT;
-            final String key = TRADE_FUEL_PREMIUM_KEY;
-            mission.credits.modifyFlat(key, -cost, getDesc(key));
-
-            MarketFinanceRegistry.instance().getLedger(marketID).add(
-                TRADE_FLEET_SHIPMENT_KEY, mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
+            final float fuelCostFee = mission.fuelCost * fuelCell.spec.getBasePrice()
+                * (isFactionFleet ? EconConfig.FORCED_FUEL_IMPORT_COST_MULT : 1f);
+            
+            mission.credits.modifyFlat(
+                isFactionFleet ? TRADE_FUEL_PREMIUM_KEY : INDEPENDENT_FUEL_COST_KEY,
+                -fuelCostFee,
+                getDesc(isFactionFleet ? TRADE_FUEL_PREMIUM_KEY : INDEPENDENT_FUEL_COST_KEY)
             );
         }
-    }
 
-    private final void allocIndependentFleetToTradeMission(final TradeMission mission) {
-        ShipAllocator.allocateShipsForTarget(Global.getSector().getFaction(Factions.INDEPENDENT), mission);
-        mission.fuelCost = ShipAllocator.getRequiredFuelForShips(mission.allocatedShips, mission.dist);
-        
-        float totalValue = 0f;
-        for (TradeCom flow : mission.cargo) {
-            totalValue += flow.totalPrice;
+        if (!isFactionFleet) {
+            float totalValue = 0f;
+            for (TradeCom flow : mission.cargo) totalValue += flow.totalPrice;
+
+            final float perTonFee = EconConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE * mission.getTotalAmount();
+            final float valueFee = EconConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT * totalValue;
+            final float hazardPay = EconConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
+                + EconConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
+
+            mission.credits.modifyFlat(INDEPENDENT_BASE_FEE_KEY, -EconConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, getDesc(INDEPENDENT_BASE_FEE_KEY));
+            mission.credits.modifyFlat(INDEPENDENT_PER_TON_KEY, -perTonFee, getDesc(INDEPENDENT_PER_TON_KEY));
+            mission.credits.modifyFlat(INDEPENDENT_VALUE_PERCENT_KEY, -valueFee, getDesc(INDEPENDENT_VALUE_PERCENT_KEY));
+            mission.credits.modifyFlat(INDEPENDENT_HAZARD_PAY_KEY, -hazardPay, getDesc(INDEPENDENT_HAZARD_PAY_KEY));
         }
 
-        final float perTonFee = EconConfig.INDEPENDENT_TRADE_FLEET_PER_TON_FEE * mission.getTotalAmount();
-        final float valueFee = EconConfig.INDEPENDENT_TRADE_FLEET_PERCENT_CUT * totalValue;
-        final float hazardPay = EconConfig.INDEPENDENT_TRADE_FLEET_HAZARD_BASE
-            + EconConfig.INDEPENDENT_TRADE_FLEET_HAZARD_MULT * mission.combatPowerTarget;
-        final float fuelCostFee = mission.fuelCost * settings.getCommoditySpec(Commodities.FUEL).getBasePrice();
-
-        mission.credits.modifyFlat(INDEPENDENT_BASE_FEE_KEY, -EconConfig.INDEPENDENT_TRADE_FLEET_BASE_FEE, getDesc(INDEPENDENT_BASE_FEE_KEY));
-        mission.credits.modifyFlat(INDEPENDENT_PER_TON_KEY, -perTonFee, getDesc(INDEPENDENT_PER_TON_KEY));
-        mission.credits.modifyFlat(INDEPENDENT_VALUE_PERCENT_KEY, -valueFee, getDesc(INDEPENDENT_VALUE_PERCENT_KEY));
-        mission.credits.modifyFlat(INDEPENDENT_HAZARD_PAY_KEY, -hazardPay, getDesc(INDEPENDENT_HAZARD_PAY_KEY));
-        mission.credits.modifyFlat(INDEPENDENT_FUEL_COST_KEY, -fuelCostFee, getDesc(INDEPENDENT_FUEL_COST_KEY));
-
-        MarketFinanceRegistry.instance().getLedger(mission.src.getId()).add(
+        MarketFinanceRegistry.instance().getLedger(marketID).add(
             TRADE_FLEET_SHIPMENT_KEY, mission.credits.computeEffective(0f), getDesc(TRADE_FLEET_SHIPMENT_KEY)
         );
+    }
+
+    private final void updateFuelDemands(HashMap<MarketAPI, Float> fuelDemands) {
+        for (Map.Entry<MarketAPI, Float> entry : fuelDemands.entrySet()) {
+            final ArrayMutableStat mutable = engine.getComCell(Commodities.FUEL, entry.getKey().getId()).getTargetQuantumStat();
+
+            final StatMod statMod = mutable.getFlatStatMod(Consumption.FUEL_TARGET_TRADE_KEY);
+            final float oldTarget = statMod != null ? statMod.value : 0f;
+            final float newTarget = FUEL_TARGET_TRADE_ALPHA * entry.getValue() / EconConfig.TRADE_INTERVAL + (1f - FUEL_TARGET_TRADE_ALPHA) * oldTarget;
+            mutable.modifyFlat(
+                Consumption.FUEL_TARGET_TRADE_KEY, newTarget,
+                Consumption.getDesc(Consumption.FUEL_TARGET_TRADE_KEY)
+            );
+        }
     }
 
     private final void applyWages() {

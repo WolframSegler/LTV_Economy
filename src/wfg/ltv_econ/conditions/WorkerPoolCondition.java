@@ -1,6 +1,5 @@
 package wfg.ltv_econ.conditions;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
@@ -125,12 +124,6 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
             case 9: return 0.15f;
             case 10: return 0.08f;
             default: return 1f/(2f * size);
-        }
-    }
-
-    public static final void initialize() {
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
-            addConditionToMarket(market);
         }
     }
 
