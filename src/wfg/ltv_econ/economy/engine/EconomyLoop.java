@@ -29,6 +29,7 @@ import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
+import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -45,8 +46,10 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.ltv_econ.ui.marketInfo.dialogs.ServiceSectorDialog;
 import wfg.ltv_econ.util.ArrayMutableStat;
 import wfg.native_ui.util.ArrayMap;
+import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.strings.Consumption;
 
 import static wfg.ltv_econ.constants.CommoditiesID.*;
@@ -185,19 +188,45 @@ public class EconomyLoop {
 
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.singleEntrySet()) {
             final MarketAPI market = entry.getKey();
+            final String marketID = market.getId();
+            final WorkerIndustryData popData = reg.getRegisterData(marketID, Industries.POPULATION);
             final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
-
             final float[] assignments = entry.getValue();
             final long totalWorkers = cond.getWorkerPool();
 
+            float remaining = 1f;
             for (int i = 0; i < industryOutputPairs.size(); i++) {
                 if (assignments[i] == 0f) continue;
 
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(KEY);
-
                 final float ratio = (assignments[i] / totalWorkers);
-                final WorkerIndustryData data = reg.getRegisterData(market.getId(), indAndOutputID[0]);
+                remaining -= ratio;
+
+                final WorkerIndustryData data = reg.getRegisterData(marketID, indAndOutputID[0]);
                 data.setRatioForOutput(indAndOutputID[1], ratio);
+            }
+
+            if (remaining <= 0f) continue; // Service sectors
+
+            final String[] serviceOrder = {
+                SERVICE_LOGISTICS,
+                SERVICE_HEALTHCARE,
+                SERVICE_SECURITY,
+                SERVICE_PUBLIC_INFO,
+                SERVICE_CULTURE
+            };
+            final float[] serviceLimits = {
+                ServiceSectorDialog.LOGISTICS_LIM,
+                ServiceSectorDialog.HEALTHCARE_LIM,
+                ServiceSectorDialog.SECURITY_LIM,
+                ServiceSectorDialog.PUBLIC_INFO_LIM,
+                ServiceSectorDialog.CULTURE_LIM
+            };
+
+            for (int i = 0; i < serviceOrder.length && remaining > 0f; i++) {
+                final float toAssign = Math.min(remaining, serviceLimits[i]);
+                popData.setRatioForOutput(serviceOrder[i], toAssign);
+                remaining -= toAssign;
             }
         }
     }
@@ -592,6 +621,7 @@ public class EconomyLoop {
         final float healthRatio = idata.getAssignedRatioForOutput(SERVICE_HEALTHCARE);
         final float secRatio = idata.getAssignedRatioForOutput(SERVICE_SECURITY);
         final float pubInfoRatio = idata.getAssignedRatioForOutput(SERVICE_PUBLIC_INFO);
+        final float cultureRatio = idata.getAssignedRatioForOutput(SERVICE_CULTURE);
 
         for (CommodityDomain dom : engine.comDomains.values()) {
             final CommodityCell cell = dom.getCell(marketID);
@@ -611,12 +641,20 @@ public class EconomyLoop {
             SERVICE_SECURITY, secRatio * 100f, str("serviceSectorSecurityDesc")
         );
         market.getAccessibilityMod().modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio, str("serviceSectorPublicInfoDesc"));
+
+        final float workerPool = WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+        final double monthlyRevenue = cultureRatio * workerPool * LaborConfig.LPV_month * 0.5f / EconomyConstants.MONTH;
+        if (monthlyRevenue > 0d) {
+            MarketFinanceRegistry.instance().getLedger(marketID).add(SERVICE_CULTURE, monthlyRevenue, str("serviceSectorCultureDesc"));
+        }
         
         final PlayerMarketData mData = engine.getMarketPopulationData(marketID);
         if (mData != null) {
             mData.healthDelta.modifyFlat(SERVICE_HEALTHCARE, healthRatio / 2f, str("serviceSectorHealthcareDesc"));
             mData.classConsciousnessDelta.modifyFlat(SERVICE_SECURITY, -secRatio / 10f, str("serviceSectorSecurityDesc"));
             mData.socialCohesionDelta.modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio / 2f, str("serviceSectorPublicInfoDesc"));
+            mData.socialCohesionDelta.modifyFlat(SERVICE_CULTURE, cultureRatio / 4f, str("serviceSectorCultureDesc"));
+            mData.happinessDelta.modifyFlat(SERVICE_CULTURE, cultureRatio * 2f, str("serviceSectorCultureDesc"));
         }
     }
 

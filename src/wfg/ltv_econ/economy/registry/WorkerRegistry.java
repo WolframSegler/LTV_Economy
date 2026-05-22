@@ -220,25 +220,16 @@ public class WorkerRegistry implements Serializable {
             return getAssignedRatioForOutput(comID) / outputRatioSum;
         }
 
-        /**
-         * @return A boolean indicating the success of the operation.
-         */
-        public final boolean setRatioForOutput(String comID, float ratio) {
-            if (!outputRatios.containsKey(comID)) outputRatios.put(comID, 0f);
+        public final void setRatioForOutput(String comID, float ratio) {
+            final float oldRatio = outputRatios.computeIfAbsent(comID, id -> 0f);
+            final float diff = Arithmetic.clamp(ratio - oldRatio,
+                -oldRatio, // minAllowedDiff
+                1f - outputRatioSum // maxAllowedDiff
+            );
 
-            final float oldRatio = outputRatios.get(comID);
-            final float maxAllowedDiff = 1f - outputRatioSum;
-            final float minAllowedDiff = -oldRatio;
-            final float diff = Arithmetic.clamp(ratio - oldRatio, minAllowedDiff, maxAllowedDiff);
-
-            // apply adjusted ratio
-            final float newRatio = oldRatio + diff;
-            outputRatios.put(comID, newRatio);
+            outputRatios.put(comID, oldRatio + diff);
             outputRatioSum += diff;
-
-            return true;
         }
-
 
         public final void recalculateOutputRatioSum() {
             outputRatioSum = 0f;

@@ -47,6 +47,7 @@
         "serviceSectorHealthcareDesc": "Healthcare sector",
         "serviceSectorSecurityDesc": "Security sector",
         "serviceSectorPublicInfoDesc": "Public info sector",
+        "serviceSectorCultureDesc": "Culture sector",
         "econFleetAIstartingActionText": "loading %1$s at %2$s",
         "econFleetAIendingActionText": "unloading %1$s at %2$s",
         "econFleetAItravelActionText": "delivering %1$s to %2$s",

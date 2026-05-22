@@ -21,7 +21,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     private static final String ConditionID = "worker_pool";
 
-    private long workerPool = 0;
+    private long workerPool = 0l;
     private float freeWorkerRatio = 1f;
 
     @Override
@@ -29,28 +29,37 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         recalculateWorkerPool();
     }
 
-    public final void recalculateWorkerPool() {
+    public final synchronized void recalculateWorkerPool() {
+        workerPool = getWorkerPoolUncached();
+
+        setFreeWorkerRatio(getFreeWorkerRatioUncached());
+    }
+
+    public final synchronized long getWorkerPoolUncached() {
         final int size = market.getSize();
         final double base = getWorkerRatio(size) * Math.pow(10, size);
         if (LaborConfig.GROWTH_EFFECT_WORKER_POOL) {
             final float t = Misc.getMarketSizeProgress(market);
             final double dest = getWorkerRatio(size+1) * Math.pow(10, size+1);
-            workerPool = (long) Arithmetic.lerp(base, dest, t);
+            return (long) Arithmetic.lerp(base, dest, t);
         } else {
-            workerPool = (long) base;
+            return (long) base;
         }
+    }
 
-        float totalAssigned = 0;
+    public final synchronized float getFreeWorkerRatioUncached() {
         final WorkerRegistry reg = WorkerRegistry.instance();
-        if (reg == null) return;
+        if (reg == null) return 0f;
 
+        float totalAssigned = 0f;
         for (Industry ind : market.getIndustries()) {
             final WorkerIndustryData data = reg.getData(ind);
             if (data != null) {
                 totalAssigned += data.getWorkerAssignedRatio(false);
             }
         }
-        setFreeWorkerRatio(Math.max(0f, 1f - totalAssigned));
+
+        return Math.max(0f, 1f - totalAssigned);
     }
 
     public final long getWorkerPool() {
@@ -62,14 +71,13 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
     }
 
     public final void setWorkerPool(long workers) {
-        if (workers < 0) return;
+        if (workers < 0l) return;
         workerPool = workers;
     }
 
     public final boolean setFreeWorkerRatio(float workers) {
-        if (0f > workers || workers > 1f) {
-            return false;
-        }
+        if (workers < 0f || workers > 1f) return false;
+
         freeWorkerRatio = workers;
         return true;
     }
@@ -103,7 +111,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         tooltip.addPara(
             str("unemployedWorkersWithValue"), opad, highlight,
             NumFormat.engNotate(freeWorkerRatio * getWorkerPool()),
-            String.format("%.1f", freeWorkerRatio * 100)
+            String.format("%.1f", freeWorkerRatio * 100f)
         );
     }
 
