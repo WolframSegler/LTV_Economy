@@ -13,4 +13,5 @@ public class Mods {
     public static final String AOTD_QOL = "aotd_qol";
     public static final String AOTD_SOP = "aotd_sop";
     public static final String AOTD_VOS = "aotd_vos";
+    public static final String AOTD_TOT = "aotd_theory_of_toolbox";
 }

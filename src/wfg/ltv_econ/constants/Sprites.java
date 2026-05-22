@@ -22,4 +22,5 @@ public class Sprites {
     public static final SpriteAPI HEALTHCARE = settings.getSprite("icons", "healthcare");
     public static final SpriteAPI SECURITY = settings.getSprite("simulator", "behavior_defensive");
     public static final SpriteAPI PUBLIC_INFO = settings.getSprite("icons", "radio_tower");
+    public static final SpriteAPI CULTURE = settings.getSprite("icons", "theater_mask");
 }

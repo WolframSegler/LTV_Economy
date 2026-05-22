@@ -111,7 +111,7 @@ public class IncomeBreakdownDialog extends DockPanel {
     public final void incomeBreakdownUI(final TooltipMakerAPI tp) {
         final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(market);
         final EconomyEngine engine = EconomyEngine.instance();
-        final PlayerMarketData data = engine.getPlayerMarketData(market.getId());
+        final PlayerMarketData data = engine.getMarketPopulationData(market.getId());
         final List<CommodityDomain> domains = engine.getComDomains();
         final List<String> policyKeys = data != null ? MarketPolicy.getPolicyLedgerKeys(data) : Collections.emptyList();
         final FactionAPI faction = market.getFaction();

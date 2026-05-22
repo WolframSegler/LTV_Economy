@@ -82,6 +82,8 @@ Healthcare by Pong Pong from <a href="https://thenounproject.com/browse/icons/te
 
 Radio Tower by Rockicon from <a href="https://thenounproject.com/browse/icons/term/radio-tower/" target="_blank" title="Radio Tower Icons">Noun Project</a> (CC BY 3.0)
 
+theater mask by Hilmy Abiyyu Asad from <a href="https://thenounproject.com/browse/icons/term/theater-mask/" target="_blank" title="theater mask Icons">Noun Project</a> (CC BY 3.0)
+
 <br>
 
 ## AI Generated Assets

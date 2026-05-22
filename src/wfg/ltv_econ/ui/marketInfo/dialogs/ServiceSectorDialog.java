@@ -19,6 +19,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
@@ -71,6 +72,8 @@ public class ServiceSectorDialog extends DialogPanel {
         add(titleLbl).inTL(0f, pad*2);
 
         final TooltipMakerAPI sectorsCont = ComponentFactory.createTooltip(PANEL_W, true);
+
+        final float workerPool = WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
         
         int cumulativeYOffset = opad;
         { // Sectors
@@ -78,6 +81,7 @@ public class ServiceSectorDialog extends DialogPanel {
             final float healthcareLim = 0.2f;
             final float securityLim = 0.05f;
             final float publicInfoLim = 0.1f;
+            final float cultureLim = 0.1f;
 
             final SectorCard logistics = new SectorCard(sectorsCont, SERVICE_LOGISTICS, logisticsLim, LOGISTICS,
                 str("uiLogisticsTitle"), (slider) -> {
@@ -137,6 +141,23 @@ public class ServiceSectorDialog extends DialogPanel {
                     return lbl;
                 }, grid
             );
+            final SectorCard culture = new SectorCard(sectorsCont, SERVICE_CULTURE, cultureLim, CULTURE,
+                str("uiCultureTitle"), (slider) -> {
+                    final String eff1 = String.format("%.3f", slider.getProgress() / 400f);
+                    final String max1 = String.format("%.3f", cultureLim / 4f);
+                    final String eff2 = String.format("%.2f", slider.getProgress() / 50f);
+                    final String max2 = String.format("%.2f", cultureLim * 2f);
+                    final String eff3 = String.format("%.0f", slider.getProgress() * workerPool * LaborConfig.LPV_month * 0.5f / 100f);
+                    final String max3 = String.format("%.0f", cultureLim * workerPool * LaborConfig.LPV_month * 0.5f);
+                    final String txt = strf("uiCultureTpTxt", eff1, max1, eff2, max2, eff3, max3);
+
+                    final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
+                    lbl.setHighlightColors(highlight, base, highlight, base, highlight, base);
+                    lbl.setHighlight(eff1, max1, eff2, max2, eff3, max3);
+
+                    return lbl;
+                }, grid
+            );
 
             sectorsCont.addComponent(logistics.getPanel()).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
@@ -146,21 +167,26 @@ public class ServiceSectorDialog extends DialogPanel {
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
             sectorsCont.addComponent(publicInfo.getPanel()).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
+            sectorsCont.addComponent(culture.getPanel()).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
 
             logistics.slider.setProgress(data.getAssignedRatioForOutput(SERVICE_LOGISTICS) * 100f);
             healthcare.slider.setProgress(data.getAssignedRatioForOutput(SERVICE_HEALTHCARE) * 100f);
             security.slider.setProgress(data.getAssignedRatioForOutput(SERVICE_SECURITY) * 100f);
             publicInfo.slider.setProgress(data.getAssignedRatioForOutput(SERVICE_PUBLIC_INFO) * 100f);
+            culture.slider.setProgress(data.getAssignedRatioForOutput(SERVICE_CULTURE) * 100f);
 
             logistics.buildUI();
             healthcare.buildUI();
             security.buildUI();
             publicInfo.buildUI();
+            culture.buildUI();
 
             sectorCards.add(logistics);
             sectorCards.add(healthcare);
             sectorCards.add(security);
             sectorCards.add(publicInfo);
+            sectorCards.add(culture);
         }
 
         sectorsCont.setHeightSoFar(cumulativeYOffset);

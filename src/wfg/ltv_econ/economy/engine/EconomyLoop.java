@@ -142,7 +142,7 @@ public class EconomyLoop {
 
             final String marketID = market.getId();
             if (!engine.playerMarketData.containsKey(marketID)) {
-                engine.addPlayerMarketData(marketID);
+                engine.addMarketPopulationData(marketID);
             }
             for (CommodityDomain dom : engine.getComDomains()) {
                 if (dom.getCell(marketID) == null) dom.addMarket(marketID);
@@ -179,7 +179,7 @@ public class EconomyLoop {
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         markets.removeIf(MarketAPI::isPlayerOwned);
 
-        final ArrayMap<MarketAPI, float[]> assignedWorkersPerMarket = WorkforceAllocator.computeWorkerAllocations(
+        final ArrayMap<MarketAPI, float[]> assignedWorkersPerMarket = WorkforceAllocator.computeWorkerAllocation(
             markets, industryOutputPairs
         );
 
@@ -612,7 +612,7 @@ public class EconomyLoop {
         );
         market.getAccessibilityMod().modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio, str("serviceSectorPublicInfoDesc"));
         
-        final PlayerMarketData mData = engine.getPlayerMarketData(marketID);
+        final PlayerMarketData mData = engine.getMarketPopulationData(marketID);
         if (mData != null) {
             mData.healthDelta.modifyFlat(SERVICE_HEALTHCARE, healthRatio / 2f, str("serviceSectorHealthcareDesc"));
             mData.classConsciousnessDelta.modifyFlat(SERVICE_SECURITY, -secRatio / 10f, str("serviceSectorSecurityDesc"));

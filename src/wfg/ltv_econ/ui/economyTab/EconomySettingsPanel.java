@@ -168,7 +168,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
 
         { // LOG PLAYER MARKET DATA
             final CallbackRunnable<Button> run = (btn) -> {
-                logger.info(engine.getPlayerMarketData().values());
+                logger.info(engine.getMarketPopulationData().values());
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 str("uiLogMarketPopDataBtnTitle"), Fonts.DEFAULT_SMALL, run

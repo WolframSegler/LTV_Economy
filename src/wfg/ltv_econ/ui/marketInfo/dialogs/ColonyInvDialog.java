@@ -61,7 +61,7 @@ public class ColonyInvDialog extends DialogPanel {
     @Override
     public void buildUI() {
         final EconomyEngine engine = EconomyEngine.instance();
-        final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
+        final PlayerMarketData data = engine.getMarketPopulationData(m_market.getId());
         final boolean hasData = data != null;
 
         final int sliderH = 32;

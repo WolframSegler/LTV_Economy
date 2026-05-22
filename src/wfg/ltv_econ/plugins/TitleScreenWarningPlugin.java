@@ -33,7 +33,7 @@ public class TitleScreenWarningPlugin extends BaseEveryFrameCombatPlugin {
             txt.append(str("warningTxtAstralAscension"));
         }
 
-        if (manager.isModEnabled(AOTD_CBB) || manager.isModEnabled(AOTD_QOL) || manager.isModEnabled(AOTD_SOP) || manager.isModEnabled(AOTD_VOK) || manager.isModEnabled(AOTD_VOS)) {
+        if (manager.isModEnabled(AOTD_CBB) || manager.isModEnabled(AOTD_QOL) || manager.isModEnabled(AOTD_SOP) || manager.isModEnabled(AOTD_VOK) || manager.isModEnabled(AOTD_VOS) || manager.isModEnabled(AOTD_TOT)) {
             showWarnings = true;
             txt.append(str("warningTxtAOTD"));
         }

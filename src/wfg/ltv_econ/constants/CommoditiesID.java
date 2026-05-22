@@ -10,4 +10,5 @@ public class CommoditiesID {
     public static final String SERVICE_HEALTHCARE = "healthcare";
     public static final String SERVICE_SECURITY = "security";
     public static final String SERVICE_PUBLIC_INFO = "public_info";
+    public static final String SERVICE_CULTURE = "culture";
 }

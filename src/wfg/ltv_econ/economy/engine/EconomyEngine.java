@@ -228,7 +228,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return Collections.unmodifiableSet(registeredMarkets);
     }
 
-    public Map<String, PlayerMarketData> getPlayerMarketData() {
+    public Map<String, PlayerMarketData> getMarketPopulationData() {
         return Collections.unmodifiableMap(playerMarketData);
     }
 
@@ -236,11 +236,11 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return playerMarketData.containsKey(marketID);
     }
 
-    public final PlayerMarketData getPlayerMarketData(String marketID) {
+    public final PlayerMarketData getMarketPopulationData(String marketID) {
         return playerMarketData.get(marketID);
     }
 
-    public final PlayerMarketData addPlayerMarketData(String marketID) {
+    public final PlayerMarketData addMarketPopulationData(String marketID) {
         return playerMarketData.computeIfAbsent(marketID, m -> new PlayerMarketData(marketID));
     }
 
@@ -558,7 +558,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         }
 
         if (isPlayerMarket(marketID)) {
-            final PlayerMarketData data = getPlayerMarketData(marketID);
+            final PlayerMarketData data = getMarketPopulationData(marketID);
             final float penalty = isSaturation ? PlayerMarketData.BASELINE_VALUE : PlayerMarketData.BASELINE_VALUE / 4f;
             data.setHealth(data.getHealth() - penalty);
             data.setHappiness(data.getHappiness() - penalty);

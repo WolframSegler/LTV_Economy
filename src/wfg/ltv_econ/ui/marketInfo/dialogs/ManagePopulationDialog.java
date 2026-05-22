@@ -92,7 +92,7 @@ public class ManagePopulationDialog extends DialogPanel {
     @Override
     public void buildUI() {
         final EconomyEngine engine = EconomyEngine.instance();
-        final PlayerMarketData data = engine.getPlayerMarketData(m_market.getId());
+        final PlayerMarketData data = engine.getMarketPopulationData(m_market.getId());
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
 
         final int SECT_I_H = 30;

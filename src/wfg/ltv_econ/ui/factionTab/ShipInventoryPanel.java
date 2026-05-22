@@ -28,7 +28,7 @@ public class ShipInventoryPanel extends CustomPanel implements UIBuildableAPI {
     public void buildUI() {
         clearChildren();
         
-        final boolean hasColony = EconomyEngine.instance().getPlayerMarketData().size() > 0;
+        final boolean hasColony = EconomyEngine.instance().getMarketPopulationData().size() > 0;
         if (!DebugFlags.COLONY_DEBUG && !hasColony) {
             final LabelAPI lbl = settings.createLabel(str("uiNoStaticAssets"), Fonts.DEFAULT_SMALL);
             lbl.setColor(gray);

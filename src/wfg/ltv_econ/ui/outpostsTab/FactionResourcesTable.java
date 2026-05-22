@@ -58,7 +58,7 @@ public class FactionResourcesTable extends CustomPanel implements HasBackground 
             str("uiAutarky"), 95, str("uiAutarkyTpTxt"), false, false, -1
         );
 
-        if (engine.getPlayerMarketData().size() > 0) {
+        if (engine.getMarketPopulationData().size() > 0) {
             for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {
                 final String comID = com.getId();
                 final Base icon = new Base(

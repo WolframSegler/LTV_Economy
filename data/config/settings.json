@@ -37,7 +37,8 @@
       "cargo_crates": "graphics/icons/industry/cargo_crates.png",
       "berth": "graphics/icons/intel/berth.png",
       "healthcare": "graphics/icons/industry/healthcare.png",
-      "radio_tower": "graphics/icons/industry/radio_tower.png"
+      "radio_tower": "graphics/icons/industry/radio_tower.png",
+      "theater_mask": "graphics/icons/industry/theater_mask.png"
     },
     "map": {
       "star": "graphics/map/star.png",

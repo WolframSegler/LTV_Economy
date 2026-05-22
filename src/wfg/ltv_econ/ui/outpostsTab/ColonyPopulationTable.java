@@ -69,14 +69,14 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
             str("uiTableEmployment"), 112, str("uiTableEmploymentTpTxt"), false, false, -1
         );
 
-        if (engine.getPlayerMarketData().size() > 0) {
+        if (engine.getMarketPopulationData().size() > 0) {
             final PlanetInfoParams params = new PlanetInfoParams();
             params.showName = true;
             params.showConditions = false;
             params.showHazardRating = false;
             params.scaleEvenWhenShowingName = true;
     
-            for (PlayerMarketData data : engine.getPlayerMarketData().values()) {
+            for (PlayerMarketData data : engine.getMarketPopulationData().values()) {
                 final UIPanelAPI namePanel = settings.createCustom(nameW, rowH, null);
                 final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(nameW, false);
                 final MarketAPI market = data.market;

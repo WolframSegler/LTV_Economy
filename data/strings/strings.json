@@ -557,6 +557,8 @@
         "uiSecurityTpTxt": "The ministry of security is distinct from COMSEC in that it is tasked with ensuring public order, subduing \"troublemakers\" among the populace and creating a secondary line against invaders. Decreases class consciousness by %1$s (max %2$s) and boosts ground defenses by %3$s (max %4$s).",
         "uiPublicInfoTitle": "Public Information",
         "uiPublicInfoTpTxt": "The public information department broadcasts daily news and educational programmes. Increases social cohesion by %1$s (max %2$s) and accessibility by %3$s (max %4$s).",
+        "uiCultureTitle": "Cultural Services",
+        "uiCultureTpTxt": "The ministry of culture organizes social events, funds artistic venues, and supports recreational programs. Increases social cohesion by %1$s (max %2$s), happiness by %3$s (max %4$s), and generates %5$s credits per month from event participation (max %6$s).",
         "uiCohesionTpTxt": "Degree of social cohesion within the population. High cohesion reduces conflict and increases stability.",
         "uiDailyChangePrefix": "Daily Change: %1$s",
         "uiClassConsciousnessTpTxt": "The population's awareness of exploitation and social hierarchy. Higher values indicate a greater likelihood of collective action. Can be lowered by increasing wages, improving health, raising happiness, or implementing policies that reduce perceived inequities.",
