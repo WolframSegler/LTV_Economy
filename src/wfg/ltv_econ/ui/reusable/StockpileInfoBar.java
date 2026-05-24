@@ -12,7 +12,7 @@ public class StockpileInfoBar extends GenericInfoBar {
 
         final double footprint = cell.getStoredEconomicFootprint();
 
-        if (footprint <= 0.0) {
+        if (footprint <= 0d) {
             throw new IllegalStateException("StockpileInfoBar cannot display: economic footprint is zero for " + cell.comID);
         }
 

@@ -32,7 +32,7 @@ public class ShipAllocator {
     private static final char DOCT_PREF_KEY = '|';
 
     private static final double DIVERSITY_PENALTY = 0.2;
-    private static final double REF_SHIPMENT = 500.0;
+    private static final double REF_SHIPMENT = 500.d;
     private static final float COMBAT_POWER_BASE_PER_100_TONS = 9f;
     private static final float[] COMBAT_POWER_DANGER_MULT = {
         0.1f, // NONE
@@ -190,40 +190,40 @@ public class ShipAllocator {
         double remCombat = targetCombat;
 
         while ((remCargo > eps || remFuel > eps || remCrew > eps || remCombat > eps)) {
-            final double combatNeed = (targetCombat > eps) ? remCombat / targetCombat : 0.0;
-            final double cargoNeed = (targetCargo > eps) ? remCargo / targetCargo : 0.0;
-            final double fuelNeed = (targetFuel > eps) ? remFuel / targetFuel : 0.0;
-            final double crewNeed = (targetCrew > eps) ? remCrew / targetCrew : 0.0;
+            final double combatNeed = (targetCombat > eps) ? remCombat / targetCombat : 0.d;
+            final double cargoNeed = (targetCargo > eps) ? remCargo / targetCargo : 0.d;
+            final double fuelNeed = (targetFuel > eps) ? remFuel / targetFuel : 0.d;
+            final double crewNeed = (targetCrew > eps) ? remCrew / targetCrew : 0.d;
 
-            double totalWeight = 0.0;
+            double totalWeight = 0.d;
             double[] weights = new double[N];
 
             for (int i = 0; i < N; i++) {
                 if (idleRemaining[i] <= 0) continue;
 
                 boolean useful = false;
-                if (remCargo > 0.0 && cargoCap[i] > 0.0) useful = true;
-                if (remFuel > 0.0 && fuelCap[i] > 0.0) useful = true;
-                if (remCrew > 0.0 && crewCap[i] > 0.0) useful = true;
-                if (remCombat > 0.0 && combatCap[i] > 0.0) useful = true;
+                if (remCargo > 0d && cargoCap[i] > 0d) useful = true;
+                if (remFuel > 0d && fuelCap[i] > 0d) useful = true;
+                if (remCrew > 0d && crewCap[i] > 0d) useful = true;
+                if (remCombat > 0d && combatCap[i] > 0d) useful = true;
                 if (!useful) continue;
 
-                final double cargoContrib = (targetCargo > 0) ? Math.min(1.0, cargoCap[i] / targetCargo) : 0.0;
-                final double fuelContrib = (targetFuel > 0) ? Math.min(1.0, fuelCap[i] / targetFuel) : 0.0;
-                final double crewContrib = (targetCrew > 0) ? Math.min(1.0, crewCap[i] / targetCrew) : 0.0;
-                final double combatContrib = (targetCombat > 0) ? Math.min(1.0, combatCap[i] / targetCombat) : 0.0;
+                final double cargoContrib = (targetCargo > 0) ? Math.min(1.0, cargoCap[i] / targetCargo) : 0.d;
+                final double fuelContrib = (targetFuel > 0) ? Math.min(1.0, fuelCap[i] / targetFuel) : 0.d;
+                final double crewContrib = (targetCrew > 0) ? Math.min(1.0, crewCap[i] / targetCrew) : 0.d;
+                final double combatContrib = (targetCombat > 0) ? Math.min(1.0, combatCap[i] / targetCombat) : 0.d;
 
                 final double utility = cargoContrib * cargoNeed
                     + fuelContrib * fuelNeed
                     + crewContrib * crewNeed
                     + combatContrib * combatNeed;
 
-                final double w = weight[i] * Math.pow(utility, 1.5) / (1.0 + DIVERSITY_PENALTY * counts[i]);
+                final double w = weight[i] * Math.pow(utility, 1.5) / (1d + DIVERSITY_PENALTY * counts[i]);
 
                 weights[i] = w;
                 totalWeight += w;
             }
-            if (totalWeight <= 0.0) break;
+            if (totalWeight <= 0d) break;
 
             final double r = Math.random() * totalWeight;
             int picked = -1;
@@ -265,7 +265,7 @@ public class ShipAllocator {
         final Double cached = DOCTRINE_PREF_CACHE.get(key);
         if (cached != null) return cached.doubleValue();
 
-        double mult = 1.0;
+        double mult = 1.d;
 
         final FactionDoctrineAPI doctrine = faction.getDoctrine();
         if (faction.knowsShip(data.hullID)) {
@@ -276,7 +276,7 @@ public class ShipAllocator {
         final int diff = Math.abs(doctrine.getShipSize() - shipSizeWeight); // [1, 5]
         mult *= getSizeMatchMultiplier(diff);
         mult *= getHullSizePreferenceMult(doctrine, data.spec.getDesignation());
-        mult *= faction.isShipPriority(data.hullID) ? 0.5 : 1.0;
+        mult *= faction.isShipPriority(data.hullID) ? 0.5 : 1.d;
 
         if (!faction.getId().equals(Factions.PLAYER)) DOCTRINE_PREF_CACHE.put(key, mult);
         return mult;
@@ -296,22 +296,22 @@ public class ShipAllocator {
         switch (diff) {
             case 0: return 0.6;
             case 1: return 0.8;
-            case 2: return 1.0;
+            case 2: return 1.d;
             default: return 1.2;
         }
     }
 
     private static final double getHullSizePreferenceMult(FactionDoctrineAPI doctrine, String designation) {
-        if (designation == null) return 1.0;
+        if (designation == null) return 1.d;
 
-        return 1.0 / switch (designation) {
-            case CIVILIAN -> 1.0 + doctrine.getCombatFreighterProbability();
-            case FRIGATES -> 1.0 + doctrine.getNumShips() * 0.3; // [1, 5]
-            case DESTROYERS -> 1.0 + doctrine.getNumShips() * 0.5; // [1, 5]
-            case CAPITALS -> 1.0 + doctrine.getWarships() * 0.3; // [1, 5]
-            case PHASE_SHIPS -> 1.0 + doctrine.getPhaseShips() * 0.3; // [1, 5]
-            case CARRIERS -> 1.0 + doctrine.getCarriers() * 0.3; // [1, 5]
-            default -> 1.0;
+        return 1d / switch (designation) {
+            case CIVILIAN -> 1d + doctrine.getCombatFreighterProbability();
+            case FRIGATES -> 1d + doctrine.getNumShips() * 0.3; // [1, 5]
+            case DESTROYERS -> 1d + doctrine.getNumShips() * 0.5; // [1, 5]
+            case CAPITALS -> 1d + doctrine.getWarships() * 0.3; // [1, 5]
+            case PHASE_SHIPS -> 1d + doctrine.getPhaseShips() * 0.3; // [1, 5]
+            case CARRIERS -> 1d + doctrine.getCarriers() * 0.3; // [1, 5]
+            default -> 1.d;
         };
     }
 
@@ -343,7 +343,7 @@ public class ShipAllocator {
             final double combinedScore = Math.pow(transportScore, transportWeight)
                 * Math.pow(combatScore, combatWeight);
             
-            final double baseCost = 1.0 / (1.0 + combinedScore * data.spec.getFleetPoints());
+            final double baseCost = 1d / (1d + combinedScore * data.spec.getFleetPoints());
             final double doctrineFactor = getDoctrinePreference(faction, data);
             final double randFactor = 0.7 + 0.6 * Math.random();
             

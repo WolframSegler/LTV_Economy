@@ -123,7 +123,7 @@ public class BloomEffect {
             "    if (brightness > threshold) {\n" +
             "        gl_FragColor = color;\n" +
             "    } else {\n" +
-            "        gl_FragColor = vec4(0.0);\n" +
+            "        gl_FragColor = vec4(0d);\n" +
             "    }\n" +
             "}";
         
@@ -142,14 +142,14 @@ public class BloomEffect {
             "uniform int horizontal;\n" +
             "void main() {\n" +
             "    vec2 uv = gl_TexCoord[0].xy;\n" +
-            "    vec4 color = vec4(0.0);\n" +
+            "    vec4 color = vec4(0d);\n" +
             "    \n" +
             "    // Gaussian weights (7-tap)\n" +
             "    float weights[7] = float[7](0.00598, 0.060626, 0.241843, 0.383103, 0.241843, 0.060626, 0.00598);\n" +
             "    \n" +
             "    if (horizontal == 1) {\n" +
             "        for (int i = -3; i <= 3; i++) {\n" +
-            "            vec2 offset = vec2(pixelSize.x * float(i), 0.0);\n" +
+            "            vec2 offset = vec2(pixelSize.x * float(i), 0d);\n" +
             "            color += texture2D(tex, uv + offset) * weights[i+3];\n" +
             "        }\n" +
             "    } else {\n" +
@@ -174,7 +174,7 @@ public class BloomEffect {
             "#version 120\n" +
             "uniform sampler2D sceneTex;\n" +
             "uniform sampler2D bloomTex;\n" +
-            "uniform float intensity = 1.0;\n" +
+            "uniform float intensity = 1.d;\n" +
             "void main() {\n" +
             "    vec4 sceneColor = texture2D(sceneTex, gl_TexCoord[0].xy);\n" +
             "    vec4 bloomColor = texture2D(bloomTex, gl_TexCoord[0].xy);\n" +

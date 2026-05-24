@@ -17,6 +17,15 @@ public class PiecewiseSegments {
     public final int size() { return segments.size(); }
     public final PiecewiseSegment get(String label) { return segments.get(label); }
 
+    public final int indexOf(String label) {
+        int i = 0;
+        for (String key : segments.keySet()) {
+            if (key.equals(label)) return i;
+            i++;
+        }
+        return -1;
+    }
+
     public static class PiecewiseSegment {
         public final double cost;
         public final String id;

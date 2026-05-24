@@ -46,7 +46,7 @@ public class EconomyInfo {
         final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
-        double total = 0.0;
+        double total = 0.d;
         for (ComTradeFlow flow : engine.getComDomain(comID).getSanitizedTradeFlows()) {
             if (flow.inFaction) total += flow.amount;
         }
@@ -60,15 +60,15 @@ public class EconomyInfo {
         final Double value = tradeFlowCache.get(key);
         if (value != null) return value.intValue();
 
-        double total = 0.0;
-        double marketAmount = 0.0;
+        double total = 0.d;
+        double marketAmount = 0.d;
         for (ComTradeFlow flow : EconomyEngine.instance().getComDomain(comID).getSanitizedTradeFlows()) {
             total += flow.amount;
             if (flow.exporter.getId().equals(marketID)) {
                 marketAmount += flow.amount;
             }
         }
-        if (total <= 0.0) return 0;
+        if (total <= 0d) return 0;
         total = (marketAmount / total) * 100;
 
         tradeFlowCache.put(key, total);
@@ -80,15 +80,15 @@ public class EconomyInfo {
         final Double value = tradeFlowCache.get(key);
         if (value != null) return value.intValue();
 
-        double total = 0.0;
-        double marketAmount = 0.0;
+        double total = 0.d;
+        double marketAmount = 0.d;
         for (ComTradeFlow flow : EconomyEngine.instance().getComDomain(comID).getSanitizedTradeFlows()) {
             total += flow.amount;
             if (flow.importer.getId().equals(marketID)) {
                 marketAmount += flow.amount;
             }
         }
-        if (total <= 0.0) return 0;
+        if (total <= 0d) return 0;
         total = (marketAmount / total) * 100;
 
         tradeFlowCache.put(key, total);
@@ -101,7 +101,7 @@ public class EconomyInfo {
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
-        double amount = 0.0;
+        double amount = 0d;
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (flow.exporter.getId().equals(marketID)) {
                 amount += flow.amount;
@@ -119,7 +119,7 @@ public class EconomyInfo {
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
-        double amount = 0.0;
+        double amount = 0.d;
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (flow.importer.getId().equals(marketID)) {
                 amount += flow.amount;
@@ -137,7 +137,7 @@ public class EconomyInfo {
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
-        double amount = 0.0;
+        double amount = 0.d;
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (flow.exporter.getId().equals(marketID)) {
                 if (!flow.inFaction) amount += flow.amount;
@@ -155,7 +155,7 @@ public class EconomyInfo {
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
-        double amount = 0.0;
+        double amount = 0.d;
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (flow.importer.getId().equals(marketID)) {
                 if (!flow.inFaction) amount += flow.amount;
@@ -172,7 +172,7 @@ public class EconomyInfo {
         final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
-        double amount = 0.0;
+        double amount = 0.d;
         for (ComTradeFlow flow : engine.getComDomain(comID).getSanitizedTradeFlows()) {
             if (flow.exporter.getId().equals(marketID)) {
                 if (flow.inFaction) amount += flow.amount;
@@ -188,7 +188,7 @@ public class EconomyInfo {
         final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
-        double amount = 0.0;
+        double amount = 0.d;
         for (ComTradeFlow flow : engine.getComDomain(comID).getSanitizedTradeFlows()) {
             if (flow.importer.getId().equals(marketID)) {
                 if (flow.inFaction) amount += flow.amount;
@@ -218,7 +218,7 @@ public class EconomyInfo {
     public final float getFactionImportShare(String comID, String factionID) {
         
         final double total = getGlobalImports(comID);
-        if (total == 0.0) return 0f;
+        if (total == 0d) return 0f;
         final double imports = getFactionGlobalImports(comID, factionID);
 
         return (float) (imports / total);
@@ -229,7 +229,7 @@ public class EconomyInfo {
         final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
-        double total = 0.0;
+        double total = 0.d;
         for (ComTradeFlow flow : engine.getComDomain(comID).getSanitizedTradeFlows()) {
             if (!flow.inFaction && flow.importer.getFactionId().equals(factionID)) {
                 total += flow.amount;
@@ -250,9 +250,9 @@ public class EconomyInfo {
 
     public final float getInformalImportShare(String comID) {
         final double total = getGlobalImports(comID);
-        if (total == 0.0) return 0f;
+        if (total == 0d) return 0f;
 
-        double imports = 0.0;
+        double imports = 0.d;
         for (float amount : engine.getComDomain(comID).getInformalImports().values()) {
             imports += amount;
         }
@@ -264,7 +264,7 @@ public class EconomyInfo {
         final double total = getGlobalExports(comID);
         if (total == 0) return 0;
 
-        double exports = 0.0;
+        double exports = 0.d;
         for (float amount : engine.getComDomain(comID).getInformalExports().values()) {
             exports += amount;
         }
@@ -277,7 +277,7 @@ public class EconomyInfo {
         final Double value = tradeFlowCache.get(key);
         if (value != null) return value.doubleValue();
 
-        double total = 0.0;
+        double total = 0.d;
         for (ComTradeFlow flow : engine.getComDomain(comID).getSanitizedTradeFlows()) {
             if (!flow.inFaction && flow.exporter.getFactionId().equals(factionID)) {
                 total += flow.amount;
@@ -355,8 +355,8 @@ public class EconomyInfo {
         final CommodityDomain dom = engine.getComDomain(comID);
         if (dom == null) return 1f;
 
-        double totalImports = 0.0;
-        double inFactionImports = 0.0;
+        double totalImports = 0.d;
+        double inFactionImports = 0.d;
 
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (!flow.importer.getFactionId().equals(factionID)) continue;
@@ -374,8 +374,8 @@ public class EconomyInfo {
             }
         }
 
-        if (totalImports == 0.0) {
-            tradeFlowCache.put(key, 1.0);
+        if (totalImports == 0d) {
+            tradeFlowCache.put(key, 1d);
             return 1f;
         } else {
             totalImports = Math.min(1.0, inFactionImports / totalImports);
@@ -393,7 +393,7 @@ public class EconomyInfo {
         final CommodityDomain dom = engine.getComDomain(comID);
         final EconomyAPI econ = Global.getSector().getEconomy();
 
-        double total = 0.0;
+        double total = 0.d;
 
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (flow.inFaction) continue;
@@ -419,7 +419,7 @@ public class EconomyInfo {
         final CommodityDomain dom = engine.getComDomain(comID);
         final EconomyAPI econ = Global.getSector().getEconomy();
 
-        double total = 0.0;
+        double total = 0.d;
 
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (flow.inFaction) continue;
@@ -501,7 +501,7 @@ public class EconomyInfo {
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
-        double total = 0.0;
+        double total = 0.d;
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (!flow.inFaction) total += flow.amount;
         }
@@ -519,7 +519,7 @@ public class EconomyInfo {
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
-        double total = 0.0;
+        double total = 0.d;
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (!flow.inFaction) total += flow.amount;
         }
@@ -537,7 +537,7 @@ public class EconomyInfo {
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
-        double total = 0.0;
+        double total = 0.d;
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (!flow.inFaction) total += flow.amount;
         }
@@ -555,7 +555,7 @@ public class EconomyInfo {
         if (value != null) return value.doubleValue();
         final CommodityDomain dom = engine.getComDomain(comID);
 
-        double total = 0.0;
+        double total = 0.d;
         for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
             if (!flow.inFaction) total += flow.amount;
         }
@@ -568,7 +568,7 @@ public class EconomyInfo {
     }
 
     public final double getGlobalInformalImports(String comID) {
-        double total = 0.0;
+        double total = 0.d;
         for (double amount : engine.getComDomain(comID).getInformalImports().values()) {
             total += amount;
         }
@@ -576,7 +576,7 @@ public class EconomyInfo {
     }
 
     public final double getGlobalInformalExports(String comID) {
-        double total = 0.0;
+        double total = 0.d;
         for (double amount : engine.getComDomain(comID).getInformalExports().values()) {
             total += amount;
         }

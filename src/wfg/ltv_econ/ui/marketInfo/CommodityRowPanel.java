@@ -108,7 +108,7 @@ public class CommodityRowPanel extends CustomPanel implements
             true, cell).getPanel();
         add(infoBar).inBL(pad*4 + rowH + textW + iconSize, (rowH - iconSize) / 2f);
 
-        if (EconomyEngine.instance().info.getExportAmount(cell.comID, cell.marketID) > 0.0) {
+        if (EconomyEngine.instance().info.getExportAmount(cell.comID, cell.marketID) > 0d) {
             final Base iconPanel = new Base(m_panel, rowH - 4, rowH - 4,
                 EXPORTS_ICON, null, null);
 

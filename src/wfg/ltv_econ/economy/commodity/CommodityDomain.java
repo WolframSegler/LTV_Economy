@@ -117,7 +117,7 @@ public class CommodityDomain implements Serializable {
         final List <CommodityCell> importers = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
-            if (cell.computeImportAmount() > 0.0) importers.add(cell);
+            if (cell.computeImportAmount() > 0d) importers.add(cell);
         }
 
         return importers;
@@ -127,7 +127,7 @@ public class CommodityDomain implements Serializable {
         final List <CommodityCell> exporters = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
-            if (cell.computeExportAmount() > 0.0) exporters.add(cell);
+            if (cell.computeExportAmount() > 0d) exporters.add(cell);
         }
 
         return exporters;

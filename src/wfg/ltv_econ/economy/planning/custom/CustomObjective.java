@@ -1,8 +1,14 @@
 package wfg.ltv_econ.economy.planning.custom;
 
+import java.util.List;
+
+import wfg.ltv_econ.economy.planning.custom.goalParams.GoalParameter;
+
 public interface CustomObjective {
     String getSerializationId();
     ObjectiveAllocation allocateVariables(PlanningContext context);
+    default void modifyWorkerObjective(double[] objective, VariableLayout layout, PlanningContext context) {}
+    List<GoalParameter> getParameters();
 
     public static class ObjectiveAllocation {
         /** dense array of coefficients */

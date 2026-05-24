@@ -77,7 +77,7 @@ public class FactionResourcesTable extends CustomPanel implements HasBackground 
     
                 final Color demandColor = demand > prod ? negative : base;
                 final Color creditsColor = credits < 0 ? negative : highlight;
-                final Color balanceColor = balance < 0.0 ? negative : highlight;
+                final Color balanceColor = balance < 0d ? negative : highlight;
     
                 table.addCell(icon, cellAlg.MID, null, null);
                 table.addCell(com.getName(), cellAlg.LEFT, null, base);

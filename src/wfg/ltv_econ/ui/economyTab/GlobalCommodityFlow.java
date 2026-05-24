@@ -544,7 +544,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final ArrayList<PieSlice> data = new ArrayList<>();
         final double globalImports = engine.info.getGlobalImports(comID);
 
-        if (globalImports > 0.0) {
+        if (globalImports > 0d) {
             for (FactionAPI faction : factionList) {
                 final double factionFormalImports = engine.info.getFactionFormalGlobalImports(comID, faction.getId());
                 final float share = (float) (factionFormalImports / globalImports);

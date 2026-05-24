@@ -268,7 +268,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		if (totalAllocated < 1) return null;
 
 		final float usageFraction = (float) Arithmetic.clamp(
-			(1.0 / Math.log10(totalAllocated * 2)) * (mission.smuggling ? 0.5 : 1.0), 
+			(1d / Math.log10(totalAllocated * 2)) * (mission.smuggling ? 0.5 : 1d), 
 			0.1, 1.0
 		);
 		final int targetShips = Math.min(Math.round(totalAllocated * usageFraction), Math.min(totalAllocated, maxShipsInFleet));

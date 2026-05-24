@@ -267,7 +267,7 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
 
     @Override
     public final float getQuantity(int marines) {
-        return getQuantity(marines, 1.0);
+        return getQuantity(marines, 1d);
     }
 
     public final float getQuantity(int marines, double mult) {

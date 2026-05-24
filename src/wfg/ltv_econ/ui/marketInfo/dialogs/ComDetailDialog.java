@@ -568,7 +568,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final double quantity = mode == 0 ?
                 engine.info.getExportAmount(comID, marketID):
                 engine.info.getImportAmount(comID, marketID);
-            if (quantity <= 0.0) continue;
+            if (quantity <= 0d) continue;
 
             final String iconPath = market.getFaction().getCrest();
             final Base iconPanel = new Base(section, iconSize, iconSize,

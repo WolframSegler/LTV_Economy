@@ -38,7 +38,7 @@ public class CommodityCell implements Serializable {
     public transient MarketAPI market;
     public transient CommoditySpecAPI spec;
 
-    private double stored = 0.0;
+    private double stored = 0.d;
 
     private final ArrayMutableStat production = new ArrayMutableStat(0f);
     private final ArrayMutableStat consumption = new ArrayMutableStat(0f);
@@ -280,7 +280,7 @@ public class CommodityCell implements Serializable {
     private static final float SHIFT_FRACTION = 0.002f;
     private static final float epsilon = 1e-3f;
     private static final double scarcityExpBuy = 0.85;
-    private static final double scarcityExpNeutral = 1.0;
+    private static final double scarcityExpNeutral = 1.d;
     private static final double scarcityExpSell = 1.15;
     public static final float getUnitPrice(PriceType type, long amount, double stored, float basePrice,
         float preferred
@@ -310,11 +310,11 @@ public class CommodityCell implements Serializable {
             avgMult = (float) Math.pow(sd / s0, exp);
         } else {
             final double I;
-            if (exp == 1.0) {
+            if (exp == 1d) {
                 I = sd * Math.log(b / a);
             } else {
-                final double prefactor = Math.pow(sd, exp) / (1.0 - exp);
-                I = prefactor * (Math.pow(b, 1.0 - exp) - Math.pow(a, 1.0 - exp));
+                final double prefactor = Math.pow(sd, exp) / (1d - exp);
+                I = prefactor * (Math.pow(b, 1d - exp) - Math.pow(a, 1d - exp));
             }
             avgMult = (float) (I / delta);
         }

@@ -29,12 +29,13 @@ public class DenseModel {
     public final int[] columnFaction;
     public final int[] columnComIdx;
     public final boolean[] columnIsOutputAbstract;
+    public final String[] columnIndustryId;
     public final Map<String, Integer> commodityIndex;
 
     private DenseModel(int columnSize, long[] columnMarketCap, long[] columnWeightSum,
         double[] columnOutputMod, int[] marketStart, int[] columnOutputIndex,
         float[] columnWorkerLimitFrac, Map<String, Integer> commodityIndex, int[] columnFaction,
-        boolean[] columnIsAbstract, int[] columnComIdx
+        boolean[] columnIsAbstract, int[] columnComIdx, String[] columnIndustryId
     ) {
         this.columnSize = columnSize;
         this.columnMarketCap = columnMarketCap;
@@ -47,6 +48,7 @@ public class DenseModel {
         this.columnFaction = columnFaction;
         this.columnIsOutputAbstract = columnIsAbstract;
         this.columnComIdx = columnComIdx;
+        this.columnIndustryId = columnIndustryId;
     }
 
     public static final DenseModel createDenseData(final List<MarketAPI> markets,
@@ -70,6 +72,7 @@ public class DenseModel {
         final float[] columnWorkerLimitFrac = new float[denseCount];
         final int[] columnFaction = new int[denseCount];
         final int[] columnComIdx = new int[denseCount];
+        final String[] columnIndustryId = new String[denseCount];
         final boolean[] columnIsOutputAbstract = new boolean[denseCount];
         final Map<String, Integer> commodityIndex = new ArrayMap<>(numCommodities);
 
@@ -145,6 +148,7 @@ public class DenseModel {
                 columnWorkerLimitFrac[denseIdx] = output.workerAssignableLimit;
                 columnIsOutputAbstract[denseIdx] = output.isAbstract || columnComIdx[denseIdx] == -1;
                 columnOutputMod[denseIdx] = CompatLayer.getModifiersMult(ind, outputID, false);
+                columnIndustryId[denseIdx] = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
 
                 denseIdx++;
             }
@@ -153,7 +157,7 @@ public class DenseModel {
 
         return new DenseModel(denseCount, columnMarketCap, columnWeightSum, columnOutputMod, marketStart,
             columnOutputIndex, columnWorkerLimitFrac, commodityIndex, columnFaction, columnIsOutputAbstract,
-            columnComIdx
+            columnComIdx, columnIndustryId
         );
     }
 

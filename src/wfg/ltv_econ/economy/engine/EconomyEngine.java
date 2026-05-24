@@ -582,7 +582,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             if (dom.spec.isPersonnel() || dom.spec.isMeta()) continue;
             final CommodityCell cell = dom.getCell(market.getId());
 
-            if (cell != null && cell.getStored() > 1.0) result.add(cell);
+            if (cell != null && cell.getStored() > 1d) result.add(cell);
         }
 		return result;
 	}

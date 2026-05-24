@@ -113,7 +113,7 @@ public final class IndustryGrouper {
     }
 
     private static final double columnDistance(double[][] A, double[] base, int col) {
-        double sumSq = 0.0;
+        double sumSq = 0.d;
         for (int i = 0; i < A.length; i++) {
             double diff = A[i][col] - base[i];
             sumSq += diff * diff;

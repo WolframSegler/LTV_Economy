@@ -257,8 +257,12 @@ public class IndustryConfigManager {
     }
 
     public static final boolean hasConfig(IndustrySpecAPI ind) {
-        return IndustryConfigManager.ind_config.containsKey(ind.getId()) 
-            || IndustryConfigManager.ind_config.containsKey(getBaseIndustryID(ind.getId()));
+        return hasConfig(ind.getId());
+    }
+
+    public static final boolean hasConfig(String indID) {
+        return IndustryConfigManager.ind_config.containsKey(indID) 
+            || IndustryConfigManager.ind_config.containsKey(getBaseIndustryID(indID));
     }
 
     public static final String getBaseIndustryID(String id) {
@@ -274,10 +278,14 @@ public class IndustryConfigManager {
     }
 
     public static final String getBaseIndIDifNoConfig(IndustrySpecAPI ind) {
-        if (IndustryConfigManager.ind_config.containsKey(ind.getId())) {
-            return ind.getId();
+        return getBaseIndIDifNoConfig(ind.getId());
+    }
+
+    public static final String getBaseIndIDifNoConfig(String indID) {
+        if (IndustryConfigManager.ind_config.containsKey(indID)) {
+            return indID;
         }
-        return getBaseIndustryID(ind.getId());
+        return getBaseIndustryID(indID);
     }
 
     public static final IndustryConfig getIndConfig(Industry ind) {
@@ -285,10 +293,14 @@ public class IndustryConfigManager {
     }
 
     public static final IndustryConfig getIndConfig(IndustrySpecAPI ind) {
-        final IndustryConfig indConfig = IndustryConfigManager.ind_config.get(ind.getId());
+        return getIndConfig(ind.getId());
+    }
+
+    public static final IndustryConfig getIndConfig(String indID) {
+        final IndustryConfig indConfig = IndustryConfigManager.ind_config.get(indID);
 
         return indConfig != null ? indConfig :
-            IndustryConfigManager.ind_config.get(getBaseIndustryID(ind.getId()));
+            IndustryConfigManager.ind_config.get(getBaseIndustryID(indID));
     }
 
     private static final void buildBaseIdMapping() {

@@ -95,7 +95,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
     @Override
 	public float getQuantity(int marines) {
-        return getQuantity(marines, 1.0);
+        return getQuantity(marines, 1d);
 	}
 
     public final float getQuantity(int marines, double mult) {
@@ -219,9 +219,9 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
         final double stored = cell.getStored();
 		final double maxQuantity = stored * EconConfig.RAID_STOCKPILES_ACCESS_RATIO;
         final double marineQuantity = maxQuantity * marines / MarketCMD.MAX_MARINE_TOKENS;
-        final double deficitMult = 1.0 / (2.0 - cell.getStoredAvailabilityRatio());
+        final double deficitMult = 1d / (2d - cell.getStoredAvailabilityRatio());
         final double excessMult = Math.min(3.0, (cell.getStoredExcess() + stored) / stored);
-        final double prodMult = Arithmetic.clamp(cell.getProduction(true) / (1.0 + cell.getTargetQuantum(true)), 1.0, 2.0);
+        final double prodMult = Arithmetic.clamp(cell.getProduction(true) / (1d + cell.getTargetQuantum(true)), 1.0, 2d);
 
         final double value = marineQuantity * EconConfig.RAID_BASE_EFF * deficitMult * excessMult * prodMult * mult;
         return (float) Math.min(maxQuantity, value);
@@ -233,7 +233,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
         if (cell.getDesiredAvailabilityRatio() < 0.7f) {
             danger = danger.next();
         }
-        if (cell.getStoredExcess() > 0.0) {
+        if (cell.getStoredExcess() > 0d) {
             danger = danger.prev();
         }
         if (source != null) {
