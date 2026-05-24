@@ -1,6 +1,7 @@
 package wfg.ltv_econ.economy.fleet;
 
 import com.fs.starfarer.api.impl.campaign.fleets.EconomyFleetAssignmentAI.EconomyRouteData;
+import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteData;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
@@ -33,5 +34,12 @@ public class LtvEconomyRouteData extends EconomyRouteData {
         data.smuggling = mission.smuggling;
 
         return data;
+    }
+
+    public static final TradeMission getMission(RouteData route) {
+        if (route.getCustom() instanceof LtvEconomyRouteData data) {
+            return data.mission;
+        }
+        return null;
     }
 }

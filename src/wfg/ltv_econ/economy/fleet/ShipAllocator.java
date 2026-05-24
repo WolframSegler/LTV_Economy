@@ -29,7 +29,7 @@ public class ShipAllocator {
     private static final Logger log = Global.getLogger(ShipAllocator.class);
     private static final double eps = 1e-3;
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
-    private static final String DOCT_PREF_KEY = "|";
+    private static final char DOCT_PREF_KEY = '|';
 
     private static final double DIVERSITY_PENALTY = 0.2;
     private static final double REF_SHIPMENT = 500.0;

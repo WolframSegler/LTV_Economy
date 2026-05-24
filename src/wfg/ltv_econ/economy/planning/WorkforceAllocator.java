@@ -3,24 +3,31 @@ package wfg.ltv_econ.economy.planning;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.math4.legacy.exception.DimensionMismatchException;
+import org.apache.commons.math4.legacy.exception.TooManyIterationsException;
 import org.apache.commons.math4.legacy.optim.MaxIter;
 import org.apache.commons.math4.legacy.optim.linear.LinearConstraint;
 import org.apache.commons.math4.legacy.optim.linear.LinearConstraintSet;
 import org.apache.commons.math4.legacy.optim.linear.LinearObjectiveFunction;
+import org.apache.commons.math4.legacy.optim.linear.NoFeasibleSolutionException;
 import org.apache.commons.math4.legacy.optim.linear.NonNegativeConstraint;
 import org.apache.commons.math4.legacy.optim.linear.PivotSelectionRule;
 import org.apache.commons.math4.legacy.optim.linear.Relationship;
 import org.apache.commons.math4.legacy.optim.linear.SimplexSolver;
+import org.apache.commons.math4.legacy.optim.linear.UnboundedSolutionException;
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 import org.apache.log4j.Logger;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
@@ -29,6 +36,13 @@ import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
+import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
+import wfg.ltv_econ.economy.planning.custom.CustomObjective;
+import wfg.ltv_econ.economy.planning.custom.CustomObjective.ObjectiveAllocation;
+import wfg.ltv_econ.economy.planning.custom.ObjectiveConfig;
+import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments;
+import wfg.ltv_econ.economy.planning.custom.PlanningContext;
+import wfg.ltv_econ.economy.planning.custom.VariableLayout;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
@@ -146,7 +160,7 @@ public class WorkforceAllocator {
      * @param industryOutputPairs industryID::outputID
      * @return Map of MarketAPI to float[] arrays representing worker assignments per output
      */
-    public final static ArrayMap<MarketAPI, float[]> computeWorkerAllocation(
+    public static final ArrayMap<MarketAPI, float[]> computeWorkerAllocation(
         List<MarketAPI> markets, List<String> industryOutputPairs
     ) {
         final IndustryMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
@@ -162,16 +176,19 @@ public class WorkforceAllocator {
     }
 
     /**
-     * Computes optimal worker assignments across markets for all outputs,
-     * satisfying custom constraints and objectives.
+     * Computes optimal worker assignments across player-owned markets for all outputs,
+     * satisfying custom constraints and objectives defined by the player.
      * 
      * @param markets List of markets to distribute to
      * @param industryOutputPairs industryID::outputID
      * @return Map of MarketAPI to float[] arrays representing worker assignments per output
      */
-    public static ArrayMap<MarketAPI, float[]> computeWorkerAllocationCustom(
-        List<MarketAPI> markets, List<String> industryOutputPairs
-    ) {
+    public static final ArrayMap<MarketAPI, float[]> computeWorkerAllocationCustom(
+        List<MarketAPI> markets, List<String> industryOutputPairs, ObjectiveConfig objConfig, PiecewiseSegments segments,
+        List<CustomObjective> customObjectives, List<CustomConstraint> customConstraints
+    ) throws NoFeasibleSolutionException, UnboundedSolutionException, TooManyIterationsException,
+        DimensionMismatchException, IllegalArgumentException
+    {
         final IndustryMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
         final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
             markets, industryOutputPairs, PlanningData.getOutputsPerMarket(markets),
@@ -179,12 +196,16 @@ public class WorkforceAllocator {
         );
 
         return IndustryGrouper.expandGroupedAssignments(
-            optimizeCustomWorkerAlloc(markets, groupedMatrix.reducedMatrix, groupedData.one, groupedData.two),
+            optimizeCustomWorkerAlloc(
+                markets, groupedMatrix.reducedMatrix, groupedData.one,
+                groupedData.two, objConfig, segments,
+                customObjectives, customConstraints
+            ),
             groupedMatrix, markets, industryOutputPairs
         );
     }
 
-    private final static ArrayMap<MarketAPI, float[]> optimizePiecewiseWorkerAlloc(
+    private static final ArrayMap<MarketAPI, float[]> optimizePiecewiseWorkerAlloc(
         final List<MarketAPI> markets, final double[][] A, final List<String> outputPairs,
         final List<BitSet> outputsPerMarket
     ) {
@@ -194,7 +215,7 @@ public class WorkforceAllocator {
         final double[][] factionDemand = PlanningData.getFactionDemandVectors();
 
         // INDEXES
-        final int T = 4; // Tiers per output
+        final int T = 4; // Tiers per output (piecewise linear objective)
         final int N = denseData.columnSize * T;
         final int C = A.length; // Commodities length
         final int O = outputPairs.size();
@@ -422,12 +443,97 @@ public class WorkforceAllocator {
         return assignments;
     }
 
-    private final static ArrayMap<MarketAPI, float[]> optimizeCustomWorkerAlloc(
+    private static final ArrayMap<MarketAPI, float[]> optimizeCustomWorkerAlloc(
         final List<MarketAPI> markets, final double[][] A, final List<String> outputPairs,
-        final List<BitSet> outputsPerMarket
+        final List<BitSet> outputsPerMarket, final ObjectiveConfig objConfig, final PiecewiseSegments segments,
+        final List<CustomObjective> customObjectives, final List<CustomConstraint> customConstraints
     ) {
-        // TODO Add a faction option to automatically assign workers to industries with several options to choose from such as "most profitable", "autarky", "most worker efficient" etc.
-        return null;
+        final DenseModel denseData = DenseModel.createDenseData(markets, outputPairs, outputsPerMarket);
+        final double[] globalDemand = PlanningData.getGlobalDemandVector();
+        final double[][] marketDemand = PlanningData.getMarketDemandVectorsFromMarkets(markets);
+        final double[] factionDemand = PlanningData.getFactionDemandVector(Factions.PLAYER);
+        final int O = outputPairs.size();
+        final int M = markets.size();
+        final int C = A.length;
+
+        for (String id : CustomConstraint.getSegmentIds(customConstraints)) {
+            if (!segments.segments.containsKey(id)) {
+                throw new IllegalArgumentException("missing segment");
+            }
+        }
+
+        final PlanningContext context = new PlanningContext(
+            denseData, A, globalDemand, marketDemand, factionDemand, O, M, C, segments
+        );
+
+        final int T = segments.size();
+        final int N = denseData.columnSize * T;
+
+        final Map<String, ObjectiveAllocation> customObjData = new LinkedHashMap<>(customObjectives.size());
+        int customObjectivesLen = 0;
+        for (int i = 0; i < customObjectives.size(); i++) {
+            final ObjectiveAllocation data = customObjectives.get(i).allocateVariables(context);
+            data.startIndex = N + customObjectivesLen;
+            customObjData.put(data.id, data);
+            customObjectivesLen += data.coefficients.length;
+        }
+        final int totalVars = N + customObjectivesLen;
+        final VariableLayout layout = new VariableLayout(N, T, totalVars);
+
+        final double[] objective = new double[totalVars];
+        final double[] costs = segments.getAsArray();
+        for (int i = 0; i < N; i++) {
+            objective[i] = WORKER_COST * costs[i % T];
+        }
+        int offset = N;
+        for (ObjectiveAllocation chunk : customObjData.values()) {
+            final double[] coeffs = chunk.coefficients;
+            System.arraycopy(coeffs, 0, objective, offset, coeffs.length);
+            offset += coeffs.length;
+        }
+
+        final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0.0);
+        final List<LinearConstraint> constraints = new ArrayList<>(totalVars);
+        constraints.addAll(getBaseConstraints(denseData, totalVars, N, T));
+
+        final var unmodifiableCustomObjData = Collections.unmodifiableMap(customObjData);
+        for (CustomConstraint cc : customConstraints) {
+            constraints.addAll(cc.buildConstraints(layout, context, unmodifiableCustomObjData));
+        }
+
+        final SimplexSolver solver = new SimplexSolver(1e-3d, 30, 1e-6d);
+        final double[] vars = solver.optimize(
+            new MaxIter(objConfig.maxIter), objFunc,
+            new LinearConstraintSet(constraints),
+            objConfig.goal,
+            new NonNegativeConstraint(true),
+            PivotSelectionRule.DANTZIG
+        ).getPoint();
+
+        final ArrayMap<MarketAPI, float[]> assignments = new ArrayMap<>(M);
+        { // Extract assignments w[m,o] into map for grouped outputs
+            final double[] denseWorkerVars = new double[N / T];
+            for (int i = 0; i < N; i+=T) {
+                double total = 0.0;
+                for (int z = 0; z < T; z++) total += vars[i + z];
+                denseWorkerVars[i/T] = total;
+            }
+
+            final double[] fullWorkers = DenseModel.expandDenseSolution(
+                denseWorkerVars, outputsPerMarket, O
+            );
+
+            for (int m = 0; m < M; m++) {
+                final float[] arr = new float[O];
+                final int base = m * O;
+                for (int o = 0; o < O; o++) {
+                    arr[o] = (float) fullWorkers[base + o];
+                }
+                assignments.put(markets.get(m), arr);
+            }
+        }
+
+        return assignments;
     }
 
     private static final List<LinearConstraint> getBaseConstraints(final DenseModel denseData, int nVars, int N, int T) {

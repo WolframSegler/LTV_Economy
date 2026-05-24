@@ -6,7 +6,7 @@ Compile the main project. Navigate to Ltv_Economy and run:
 Run tests:
   mvn clean test -Dsurefire.useFile=false
 
-Extra Instructions:
+Extra:
 
 - Word Wrap shortcut: Alt + Z
 
