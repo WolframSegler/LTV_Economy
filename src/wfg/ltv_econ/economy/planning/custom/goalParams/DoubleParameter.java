@@ -26,4 +26,5 @@ public class DoubleParameter extends GoalParameter {
     @Override public String getValueAsString() { return Double.toString(getValue()); }
     @Override public void setValueFromString(String s) { setValue(Double.parseDouble(s)); }
     @Override public WidgetType getWidgetType() { return WidgetType.SLIDER; }
+    @Override public ParamType getParamType() { return ParamType.DOUBLE; }
 }

@@ -15,7 +15,6 @@ import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
 
-import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.config.LaborConfig;
@@ -32,6 +31,7 @@ public class IndustryConfigLoader {
     private static JSONObject config;
     private static JSONObject dynamic_config;
 
+    private IndustryConfigLoader() {}
     public static final String getDynamicConfigVersion() {
         final JSONObject root = getConfig(true);
         try {
@@ -239,8 +239,7 @@ public class IndustryConfigLoader {
         }
         root.put("industryList", industries);
         } catch (JSONException e) {
-            Global.getLogger(IndustryConfigManager.class)
-                .error("Failed to serialize industry configs to JSON", e);
+            log.error("Failed to serialize industry configs to JSON", e);
         }
 
         return root;

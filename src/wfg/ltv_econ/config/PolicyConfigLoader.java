@@ -13,6 +13,7 @@ import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.native_ui.util.ArrayMap;
 
 public class PolicyConfigLoader {
+    private PolicyConfigLoader() {}
     private static final String CONFIG_PATH = "./data/config/ltvEcon/policy_config.json";
 
     private static JSONObject config;
@@ -68,6 +69,7 @@ public class PolicyConfigLoader {
     }
 
     public static class PolicyConfig {
+        private PolicyConfig() {}
         public static final Map<String, PolicySpec> map = new ArrayMap<>(16);
         public static final List<PolicySpec> getPoliciesCopy() {
             return new ArrayList<>(map.values());

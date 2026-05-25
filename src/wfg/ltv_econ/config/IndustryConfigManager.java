@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 public class IndustryConfigManager {
+    private IndustryConfigManager() {}
     private static final ArrayMap<String, String> IndToBaseInd = new ArrayMap<>(EconomyConstants.industryIDs.size());
 
     public static final float dynamicIndMarketScaleBase = 6f;

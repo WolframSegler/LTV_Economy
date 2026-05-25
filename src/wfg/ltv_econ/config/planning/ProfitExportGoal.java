@@ -19,7 +19,7 @@ import wfg.ltv_econ.economy.planning.custom.PlanningContext;
 import wfg.ltv_econ.economy.planning.custom.VariableLayout;
 import wfg.ltv_econ.economy.planning.custom.goalParams.DoubleParameter;
 import wfg.ltv_econ.economy.planning.custom.goalParams.GoalParameter;
-import wfg.ltv_econ.economy.planning.custom.goalParams.StringListParameter;
+import wfg.ltv_econ.economy.planning.custom.goalParams.RadioParameter;
 import wfg.native_ui.util.Arithmetic;
 
 public class ProfitExportGoal implements CustomObjective, CustomConstraint {
@@ -72,7 +72,7 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
     }
     public List<GoalParameter> getParameters() {
         return Arrays.asList(
-            new StringListParameter("metric", "Value metric",
+            new RadioParameter("metric", "Value metric",
                 Arrays.asList("Base value", "Production margin"),
                 () -> metric == Metric.BASE_VALUE ? "Base value" : "Production margin",
                 v -> metric = "Base value".equals(v) ? Metric.BASE_VALUE : Metric.MARGIN

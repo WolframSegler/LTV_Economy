@@ -9,6 +9,7 @@ import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.native_ui.util.ArrayMap;
 
 public class EventConfig {
+    private EventConfig() {}
     public static final Map<String, EventSpec> map = new ArrayMap<>(16);
 
     static {

@@ -159,7 +159,7 @@ public class EconomyLoop {
             for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
                 for (var supply : ind.getAllSupply()) {
                     if (supply.getQuantity().getModifiedValue() > 0.01f) {
-                        if (!IndustryIOs.hasOutput(ind, supply.getCommodityId())) {
+                        if (!IndustryIOs.hasOutput(ind.getSpec().getId(), supply.getCommodityId())) {
                             IndustryIOs.createAndRegisterDynamicOutput(ind, supply.getCommodityId(), true);
                         }
                     }
@@ -167,7 +167,7 @@ public class EconomyLoop {
 
                 for (var demand : ind.getAllDemand()) {
                     if (demand.getQuantity().getModifiedValue() > 0.01f) {
-                        if (!IndustryIOs.hasInput(ind, demand.getCommodityId())) {
+                        if (!IndustryIOs.hasInput(ind.getSpec().getId(), demand.getCommodityId())) {
                             IndustryIOs.createAndRegisterDynamicInput(ind, demand.getCommodityId(), true);
                         }
                     }

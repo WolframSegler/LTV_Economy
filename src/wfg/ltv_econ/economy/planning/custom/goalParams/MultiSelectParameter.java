@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 public class MultiSelectParameter extends GoalParameter {
     private final Supplier<Set<String>> getter;
     private final Consumer<Set<String>> setter;
-    private final List<String> allOptions;   // all possible commodity IDs
+    private final List<String> allOptions;
 
     public MultiSelectParameter(String id, String name, List<String> allOptions, Supplier<Set<String>> getter, Consumer<Set<String>> setter) {
         super(id, name);
@@ -28,5 +28,7 @@ public class MultiSelectParameter extends GoalParameter {
     @Override public void setValueFromString(String s) {
         setValue(new HashSet<>(Arrays.asList(s.split(","))));
     }
+
     @Override public WidgetType getWidgetType() { return WidgetType.MULTI_SELECT; }
+    @Override public ParamType getParamType() { return ParamType.MULTI_SELECT; }
 }

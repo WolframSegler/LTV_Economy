@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 public class PiecewiseSegments {
     public final LinkedHashMap<String, PiecewiseSegment> segments = new LinkedHashMap<>(4);
+    
     public final double[] getAsArray() {
         final double[] costs = new double[segments.size()];
 
