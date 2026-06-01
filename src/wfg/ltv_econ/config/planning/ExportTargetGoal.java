@@ -83,8 +83,8 @@ public class ExportTargetGoal implements CustomObjective, CustomConstraint {
     @Override
     public List<GoalParameter> getParameters() {
         return Arrays.asList(
-            new DoubleParameter("target", "Export target amount", 0d, 1_000_000_000d, 10d, () -> targetAmount, v -> targetAmount = v),
-            new DoubleParameter("penalty", "Shortfall penalty", 1d, 1_000_000d, 100d, () -> penalty, v -> penalty = v)
+            new DoubleParameter("target", "Export target amount", 0d, 1_000_000_000d, () -> targetAmount, v -> targetAmount = v),
+            new DoubleParameter("penalty", "Shortfall penalty", 1d, 1_000_000d, () -> penalty, v -> penalty = v)
         );
     }
 }

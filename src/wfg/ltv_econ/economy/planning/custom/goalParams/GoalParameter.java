@@ -14,16 +14,7 @@ public abstract class GoalParameter {
     /** Restore the value from a previously serialised string. */
     public abstract void setValueFromString(String value);
 
-    public abstract WidgetType getWidgetType();
     public abstract ParamType getParamType();
-
-    public enum WidgetType {
-        SLIDER,
-        DROPDOWN,
-        CHECKBOX,
-        MULTI_SELECT,
-        TEXT_FIELD,
-    }
 
     public enum ParamType {
         BOOLEAN,

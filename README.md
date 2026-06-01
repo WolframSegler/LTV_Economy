@@ -84,6 +84,10 @@ Radio Tower by Rockicon from <a href="https://thenounproject.com/browse/icons/te
 
 theater mask by Hilmy Abiyyu Asad from <a href="https://thenounproject.com/browse/icons/term/theater-mask/" target="_blank" title="theater mask Icons">Noun Project</a> (CC BY 3.0)
 
+customize by Adrien Coquet from <a href="https://thenounproject.com/browse/icons/term/customize/" target="_blank" title="customize Icons">Noun Project</a> (CC BY 3.0)
+
+Blueprint by NAPISAH from <a href="https://thenounproject.com/browse/icons/term/blueprint/" target="_blank" title="Blueprint Icons">Noun Project</a> (CC BY 3.0)
+
 <br>
 
 ## AI Generated Assets

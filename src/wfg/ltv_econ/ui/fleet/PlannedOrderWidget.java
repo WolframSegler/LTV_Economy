@@ -67,7 +67,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
         glow.overlayBrightness = 0.6f;
         glow.color = UIColors.IN_FACTION;
 
-        border.centerColor = InventoryShipWidget.WIDGET_BG;
+        border.centerColor = UIColors.WIDGET_BG;
 
         spec = settings.getHullSpec(order.hullId);
 

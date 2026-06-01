@@ -170,13 +170,13 @@ public class IndustryIOs {
         inputToInd.clear();
 
         for (Map.Entry<String, IndustryConfig> e : IndustryConfigManager.ind_config.singleEntrySet()) {
-            String indID = e.getKey();
-            IndustryConfig cfg = e.getValue();
+            final String indID = e.getKey();
+            final IndustryConfig cfg = e.getValue();
 
             for (String outputID : cfg.outputs.keySet()) {
                 outputToInd.computeIfAbsent(outputID, k -> new HashSet<>()).add(indID);
 
-                Map<String, Float> inputs = baseInputs.get(indID).get(outputID);
+                final Map<String, Float> inputs = baseInputs.get(indID).get(outputID);
                 if (inputs != null) {
                     for (String inputID : inputs.keySet()) {
                         inputToInd.computeIfAbsent(inputID, k -> new HashSet<>()).add(indID);

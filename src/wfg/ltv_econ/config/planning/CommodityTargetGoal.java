@@ -71,13 +71,13 @@ public class CommodityTargetGoal implements CustomObjective, CustomConstraint {
         return Arrays.asList(
             new DoubleParameter(
                 "target", "Target amount",
-                0d, 1_000_000_000d, 10d,
+                0d, 1_000_000_000d,
                 () -> CommodityTargetGoal.this.targetAmount,
                 v -> CommodityTargetGoal.this.targetAmount = v
             ),
             new DoubleParameter(
                 "penalty", "Shortfall penalty",
-                1d, 1_000_000d, 100d,
+                1d, 1_000_000d,
                 () -> CommodityTargetGoal.this.penalty,
                 v -> CommodityTargetGoal.this.penalty = v
             )

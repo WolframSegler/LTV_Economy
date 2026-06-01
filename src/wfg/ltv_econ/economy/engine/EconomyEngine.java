@@ -27,6 +27,7 @@ import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 
 import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.SubmarketsID;
 import wfg.ltv_econ.economy.PlayerMarketData;
@@ -173,6 +174,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public final boolean isMainLoopExecutorRunning() {
         return mainLoopExecutorRunning;
+    }
+
+    public final void assignPlayerWorkers(WorkerAllocationPlan plan) {
+        // TODO in the future store player plan in player faction settings and use it to call this every x days.
+
+        loop.assignPlayerWorkers(plan);
     }
 
     public final synchronized void registerMarket(MarketAPI market) {

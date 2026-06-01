@@ -17,6 +17,7 @@ import com.fs.starfarer.campaign.econ.Market;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.constants.strings.Consumption;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
@@ -28,8 +29,6 @@ import wfg.native_ui.util.ArrayMap;
  * <code>inflowQuantum</code> (actual daily inflow).</p>
  */
 public class CommodityCell implements Serializable {
-    private static final String DEMAND_ONLY_KEY = "dok";
-    private static final String DEMAND_ONLY_DESC = "Demand without consumption";
     private static final int IND_ARRAY_AVG_SIZE = 6;
 
     public final String comID;
@@ -38,7 +37,7 @@ public class CommodityCell implements Serializable {
     public transient MarketAPI market;
     public transient CommoditySpecAPI spec;
 
-    private double stored = 0.d;
+    private double stored = 0d;
 
     private final ArrayMutableStat production = new ArrayMutableStat(0f);
     private final ArrayMutableStat consumption = new ArrayMutableStat(0f);
@@ -211,22 +210,22 @@ public class CommodityCell implements Serializable {
         targetQuantum.unmodifyBase();
 
         for (Industry ind : getVisibleIndustries()) {
-            final String indID = ind.getId();
+            final String indID = ind.getSpec().getId();
             // Register IOs
             if (ind.getSupply(comID).getQuantity().getModifiedValue() > 0.01f &&
-                !IndustryIOs.hasOutput(ind, comID)
+                !IndustryIOs.hasOutput(indID, comID)
             ) {
                 IndustryIOs.createAndRegisterDynamicOutput(ind, comID, true);
             }
 
             if (ind.getDemand(comID).getQuantity().getModifiedValue() > 0.01f &&
-                !IndustryIOs.hasInput(ind, comID)
+                !IndustryIOs.hasInput(indID, comID)
             ) {
                 IndustryIOs.createAndRegisterDynamicInput(ind, comID, true);
             }
 
             // Retrieve IOs
-            if (IndustryIOs.hasOutput(ind, comID)) {
+            if (IndustryIOs.hasOutput(indID, comID)) {
                 if (!IndustryConfigManager.getIndConfig(ind).demandOnly) {
                     final MutableStat supplyStat = CompatLayer.convertIndSupplyStat(ind, comID);
                     productionMutables.put(indID, supplyStat);
@@ -234,12 +233,12 @@ public class CommodityCell implements Serializable {
                 }
 
             }
-            if (IndustryIOs.hasInput(ind, comID)) {
+            if (IndustryIOs.hasInput(indID, comID)) {
                 final MutableStat demandStat = CompatLayer.convertIndDemandStat(ind, comID);
                 
                 if (IndustryConfigManager.getIndConfig(ind).demandOnly) {
-                    targetQuantum.modifyBase(DEMAND_ONLY_KEY + "_" + indID, demandStat.getModifiedValue(),
-                        DEMAND_ONLY_DESC + " - " + ind.getCurrentName()
+                    targetQuantum.modifyBase(Consumption.DEMAND_ONLY_KEY + "_" + indID, demandStat.getModifiedValue(),
+                        Consumption.DEMAND_ONLY_DESC + " - " + ind.getCurrentName()
                     );
                 } else {
                     consumptionMutables.put(indID, demandStat);
@@ -278,9 +277,9 @@ public class CommodityCell implements Serializable {
     
     private static final float INHERENT_DEMAND = 4f;
     private static final float SHIFT_FRACTION = 0.002f;
-    private static final float epsilon = 1e-3f;
+    private static final double epsilon = 1e-3d;
     private static final double scarcityExpBuy = 0.85;
-    private static final double scarcityExpNeutral = 1.d;
+    private static final double scarcityExpNeutral = 1d;
     private static final double scarcityExpSell = 1.15;
     public static final float getUnitPrice(PriceType type, long amount, double stored, float basePrice,
         float preferred
@@ -324,19 +323,19 @@ public class CommodityCell implements Serializable {
     }
 
     public final float computeVanillaPrice(long amount, boolean isSellingToMarket, boolean isPlayer) {
-        if (amount < 1 || market == null) return 0f;
+        if (amount < 1l || market == null) return 0f;
 
         final Market mkt = (Market) market;
 
         if (spec.isExotic()) {
             return mkt.getDemandPriceAssumingStockpileUtility(
-                mkt.getCommodityData(comID), 0.0, amount, isPlayer
+                mkt.getCommodityData(comID), 0d, amount, isPlayer
             );
         }
 
         final PriceType type = isSellingToMarket ? PriceType.MARKET_BUYING : PriceType.MARKET_SELLING;
         final float unitPrice = getUnitPrice(
-            type, amount, stored + market.getCommodityData(comID).getTradeModPlus().getModifiedInt(),
+            type, amount, stored + market.getCommodityData(comID).getCombinedTradeModQuantity(),
             spec.getBasePrice(), getTargetStockpiles()
         );
 
@@ -406,8 +405,11 @@ public class CommodityCell implements Serializable {
     }
 
     public static enum PriceType {
-        MARKET_BUYING,   // what the market will pay when buying from others
-        MARKET_SELLING,  // what the market charges when selling to others
-        NEUTRAL  // internal baseline
+        /** Buying from the player. Stock increases. */
+        MARKET_BUYING,
+        /** Selling to the player. Stock decreases. */
+        MARKET_SELLING,
+        /** Internal baseline */
+        NEUTRAL
     }
 }

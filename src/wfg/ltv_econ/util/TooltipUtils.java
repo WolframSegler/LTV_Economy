@@ -114,7 +114,7 @@ public class TooltipUtils {
                     final Color labelColor = lowTarget ? gray : highlight;
 
                     final double deficit = cell.getStoredDeficit();
-                    final boolean deficitPresent = deficit > 10.d;
+                    final boolean deficitPresent = deficit > 10d;
                     final Color deficitColor = deficitPresent ? negative : gray;
                     final String quantityLabel = deficitPresent ? NumFormat.engNotate(deficit) : "---";
 
@@ -191,7 +191,7 @@ public class TooltipUtils {
                     final String availableStr = available < 100l ? "<" : "";
 
                     final double excess = cell.getStoredExcess();
-                    final boolean hasExcess = excess > 10.d;
+                    final boolean hasExcess = excess > 10d;
 
                     final String factionName = market.getFaction().getDisplayName();
                     String location = str("uiLocationHyperspaceCapitalized");

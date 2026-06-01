@@ -82,7 +82,7 @@ public class FactionDemandCoverageGoal implements CustomObjective, CustomConstra
             new DoubleParameter(
                 "penalty",
                 "Under-production penalty",
-                1d, 100_000d, 100d,
+                1d, 5000d,
                 () -> FactionDemandCoverageGoal.this.penalty,
                 (v) -> FactionDemandCoverageGoal.this.penalty = v
             )

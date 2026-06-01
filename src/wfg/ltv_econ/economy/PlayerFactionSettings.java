@@ -9,4 +9,15 @@ public class PlayerFactionSettings implements Serializable {
     public boolean automaticShipProductionForFaction = false;
 
     public final Set<String> embargoedFactions = new HashSet<>();
+
+    public Set<String> excludedMarketsFromWorkerAllocation = new HashSet<>(); // TODO make final after incompat update
+
+    // TODO remove after incompat update
+    private Object readResolve() {
+        if (excludedMarketsFromWorkerAllocation == null) {
+            excludedMarketsFromWorkerAllocation = new HashSet<>();
+        }
+
+        return this;
+    }
 }

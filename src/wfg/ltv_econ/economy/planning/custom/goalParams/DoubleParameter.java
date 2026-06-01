@@ -6,13 +6,13 @@ import java.util.function.DoubleSupplier;
 public class DoubleParameter extends GoalParameter {
     private final DoubleSupplier getter;
     private final DoubleConsumer setter;
-    private final double min, max, step;
+    private final double min, max;
 
-    public DoubleParameter(String id, String name, double min, double max, double step,
+    public DoubleParameter(String id, String name, double min, double max,
         DoubleSupplier getter, DoubleConsumer setter
     ) {
         super(id, name);
-        this.min = min; this.max = max; this.step = step;
+        this.min = min; this.max = max;
         this.getter = getter;
         this.setter = setter;
     }
@@ -21,10 +21,8 @@ public class DoubleParameter extends GoalParameter {
     public void setValue(double value) { setter.accept(value); }
     public double getMin() { return min; }
     public double getMax() { return max; }
-    public double getStep() { return step; }
 
     @Override public String getValueAsString() { return Double.toString(getValue()); }
     @Override public void setValueFromString(String s) { setValue(Double.parseDouble(s)); }
-    @Override public WidgetType getWidgetType() { return WidgetType.SLIDER; }
     @Override public ParamType getParamType() { return ParamType.DOUBLE; }
 }

@@ -53,7 +53,6 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
 {
     public static final int WIDTH = 180;
     public static final int HEIGHT = 300;
-    public static final Color WIDGET_BG = new Color(28, 35, 48, 240);
 
     private final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
     private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
@@ -76,7 +75,7 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         glow.overlayBrightness = 0.6f;
         glow.color = UIColors.IN_FACTION;
 
-        border.centerColor = WIDGET_BG;
+        border.centerColor = UIColors.WIDGET_BG;
 
         tooltip.width = 500f;
         tooltip.codexID = CodexDataV2.getShipEntryId(data.hullID);

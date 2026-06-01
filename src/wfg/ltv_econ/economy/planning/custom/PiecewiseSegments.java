@@ -28,12 +28,16 @@ public class PiecewiseSegments {
     }
 
     public static class PiecewiseSegment {
-        public final double cost;
-        public final String id;
+        public double cost;
+        public String id;
 
-        public PiecewiseSegment(double cost, String label) {
+        public PiecewiseSegment(double cost, String id) {
             this.cost = cost;
-            this.id = label;
+            this.id = id;
+        }
+
+        public final PiecewiseSegment copy() {
+            return new PiecewiseSegment(cost, id);
         }
     }
 }

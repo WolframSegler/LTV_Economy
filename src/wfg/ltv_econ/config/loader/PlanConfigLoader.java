@@ -1,5 +1,6 @@
 package wfg.ltv_econ.config.loader;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.str;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments;
 import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments.PiecewiseSegment;
 import wfg.ltv_econ.economy.planning.custom.goalParams.GoalParameter;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
+import wfg.native_ui.ui.dialog.DialogPanel;
 
 public class PlanConfigLoader {
     private PlanConfigLoader() {}
@@ -42,68 +44,65 @@ public class PlanConfigLoader {
     }
 
     private static final void processConfig(JSONObject config, boolean isCustom, Set<String> seenIds) {
-        try {
         final JSONArray plansArray = config.optJSONArray("worker_allocation_plans");
+        if (plansArray == null) return;
 
         for (int i = 0; i < plansArray.length(); i++) {
-            final JSONObject planJson = plansArray.getJSONObject(i);
-            final WorkerAllocationPlan plan = new WorkerAllocationPlan();
+            try {
+                final JSONObject planJson = plansArray.getJSONObject(i);
+                final WorkerAllocationPlan plan = new WorkerAllocationPlan();
 
-            final String id = planJson.getString("id");
-            if (!seenIds.add(id)) {
-                throw new RuntimeException("Duplicate worker allocation plan ID: " + id);
-            }
-            plan.id = id;
-            plan.isCustom = isCustom;
+                final String planId = planJson.getString("id");
+                if (!seenIds.add(planId)) {
+                    throw new RuntimeException("Duplicate worker allocation plan ID: " + planId);
+                }
+                plan.id = planId;
+                plan.description = planJson.optString("description", "");
+                plan.isCustom = isCustom;
 
-            final JSONArray excluded = planJson.optJSONArray("excluded_markets");
-            for (int j = 0; j < excluded.length(); j++) {
-                plan.excludedMarkets.add(excluded.getString(j));
-            }
-
-            final JSONArray segs = planJson.getJSONArray("segments");
-            for (int j = 0; j < segs.length(); j++) {
-                final JSONObject segJson = segs.getJSONObject(j);
-                final String label = segJson.getString("id");
-                final double cost = segJson.getDouble("cost");
-                plan.segments.segments.put(label, new PiecewiseSegments.PiecewiseSegment(cost, label));
-            }
-
-            final JSONObject objConfJson = planJson.optJSONObject("objective_config");
-            plan.objConfig.maxIter = objConfJson.getInt("maxIter");
-            final String goalTypeName = objConfJson.getString("goalType");
-            plan.objConfig.goal = GoalType.valueOf(goalTypeName);
-
-            final JSONArray goalsJson = planJson.optJSONArray("goals");
-            for (int j = 0; j < goalsJson.length(); j++) {
-                final JSONObject goalJson = goalsJson.getJSONObject(j);
-                final String goalId = goalJson.getString("id");
-                final CustomGoal goal = PlanningGoalRegistry.createGoal(goalId);
-                if (goal == null) {
-                    throw new RuntimeException("Unknown custom goal id: " + goalId + " in plan " + id);
+                final JSONArray segs = planJson.getJSONArray("segments");
+                for (int j = 0; j < segs.length(); j++) {
+                    final JSONObject segJson = segs.getJSONObject(j);
+                    final String label = segJson.getString("id");
+                    final double cost = segJson.getDouble("cost");
+                    plan.segments.segments.put(label, new PiecewiseSegments.PiecewiseSegment(cost, label));
                 }
 
-                final JSONArray params = goalJson.optJSONArray("parameters");
-                for (int k = 0; k < params.length(); k++) {
-                    final JSONObject pJson = params.getJSONObject(k);
-                    final String paramId = pJson.getString("id");
-                    final String valueStr = pJson.getString("value");
-                    for (GoalParameter param : goal.getParameters()) {
-                        if (param.id.equals(paramId)) {
-                            param.setValueFromString(valueStr);
-                            break;
+                final JSONObject objConfJson = planJson.optJSONObject("objective_config");
+                plan.objConfig.maxIter = objConfJson.getInt("maxIter");
+                final String goalTypeName = objConfJson.getString("goalType");
+                plan.objConfig.goal = GoalType.valueOf(goalTypeName);
+
+                final JSONArray goalsJson = planJson.optJSONArray("goals");
+                for (int j = 0; j < goalsJson.length(); j++) {
+                    final JSONObject goalJson = goalsJson.getJSONObject(j);
+                    final String goalId = goalJson.getString("id");
+                    final CustomGoal goal = PlanningGoalRegistry.createGoal(goalId);
+                    if (goal == null) {
+                        throw new RuntimeException("Unknown custom goal id: " + goalId + " in plan " + planId);
+                    }
+
+                    final JSONArray params = goalJson.optJSONArray("params");
+                    for (int k = 0; k < params.length(); k++) {
+                        final JSONObject pJson = params.getJSONObject(k);
+                        final String paramId = pJson.getString("id");
+                        final String valueStr = pJson.getString("value");
+                        for (GoalParameter param : goal.getParameters()) {
+                            if (param.id.equals(paramId)) {
+                                param.setValueFromString(valueStr);
+                                break;
+                            }
                         }
                     }
+
+                    plan.goals.add(goal);
                 }
 
-                plan.goals.add(goal);
+                PlanConfig.map.put(planId, plan);
+            } catch (Exception e) {
+                log.error("Exception loading worker allocation plan at index " + i, e);
+                new DialogPanel(400, 100, null, str("uiTitleFailedToLoadWorkerAllocationPlan") + e.toString(), str("dismissTxt")).show(0.2f, 0.2f);
             }
-
-            PlanConfig.map.put(id, plan);
-        }
-        } catch (JSONException e) {
-            log.error("Failed to parse worker allocation plan config", e);
-            throw new RuntimeException("Invalid plan config", e);
         }
     }
 
@@ -133,7 +132,7 @@ public class PlanConfigLoader {
 
             final JSONObject planJson = new JSONObject();
             planJson.put("id", plan.id);
-            planJson.put("excluded_markets", plan.excludedMarkets);
+            planJson.put("description", plan.description);
 
             final List<JSONObject> segmentsJson = new ArrayList<>(4);
             for (PiecewiseSegment seg : plan.segments.segments.values()) {

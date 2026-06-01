@@ -11,6 +11,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel;
+import wfg.ltv_econ.ui.factionTab.dialog.WorkerAllocationDialog;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
@@ -82,6 +83,13 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         );
         automaticProdBtn.setChecked(factionSettings.automaticShipProductionForFaction);
         add(automaticProdBtn).inTL(opad + pad, SECTION_III + lblW + pad);
+        }
+
+        { // SECTION IV
+        final Button workerAllocatorBtn = new Button(m_panel, 150, 35, str("uiBtnTitleWorkforceAllocatorDialog"), Fonts.DEFAULT_SMALL, (btn) -> {
+            new WorkerAllocationDialog().show(0.3f, 0.3f);
+        });
+        add(workerAllocatorBtn).inTR(0f, 0f);
         }
     }
 }

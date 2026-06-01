@@ -77,7 +77,7 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
                 () -> metric == Metric.BASE_VALUE ? "Base value" : "Production margin",
                 v -> metric = "Base value".equals(v) ? Metric.BASE_VALUE : Metric.MARGIN
             ),
-            new DoubleParameter("weight", "Discount strength", 0d, 1d, 0.01d,
+            new DoubleParameter("weight", "Discount strength", 0d, 1d,
                 () -> weight,
                 v -> weight = v
             )

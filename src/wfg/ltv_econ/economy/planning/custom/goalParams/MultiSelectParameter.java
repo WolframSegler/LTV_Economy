@@ -29,6 +29,5 @@ public class MultiSelectParameter extends GoalParameter {
         setValue(new HashSet<>(Arrays.asList(s.split(","))));
     }
 
-    @Override public WidgetType getWidgetType() { return WidgetType.MULTI_SELECT; }
     @Override public ParamType getParamType() { return ParamType.MULTI_SELECT; }
 }

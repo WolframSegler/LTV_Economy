@@ -153,7 +153,7 @@ public class ComTradeFlowMap extends CustomPanel implements
 
                 double totalAmount = 0f;
                 for (TradeMission m : missions) {
-                    double amount = 0.d;
+                    double amount = 0d;
                     for (TradeCom tradeCom : m.cargo) {
                         if (tradeCom.comID.equals(comID)) {
                             amount = tradeCom.amount;
@@ -201,10 +201,10 @@ public class ComTradeFlowMap extends CustomPanel implements
 
                 if (!systems.contains(source) || !systems.contains(dest)) continue;
                 
-                double totalAmount = 0.d;
+                double totalAmount = 0d;
                 for (TradeMission m : flows) {
                     final FactionSpecAPI faction = m.src.getFaction().getFactionSpec();
-                    double amount = 0.d;
+                    double amount = 0d;
                     for (TradeCom tradeCom : m.cargo) {
                         if (tradeCom.comID.equals(comID)) {
                             amount = tradeCom.amount;
@@ -605,7 +605,7 @@ public class ComTradeFlowMap extends CustomPanel implements
             } else if (travelFrac > 0.97f) {
                 arrowAlpha *= (1f - travelFrac) / 0.03f;
             }
-            double amount = 0.d;
+            double amount = 0d;
             for (TradeCom c : m.cargo) {
                 if (c.comID.equals(comID)) {
                     amount = c.amount;
@@ -835,7 +835,7 @@ public class ComTradeFlowMap extends CustomPanel implements
         }
 
         missions.removeIf(m -> {
-            double amount = 0.d;
+            double amount = 0d;
             for (TradeCom c : m.cargo) {
                 if (c.comID.equals(comID)) {
                     amount = c.amount;

@@ -29,6 +29,7 @@ import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
+import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.PlayerMarketData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
@@ -227,6 +228,36 @@ public class EconomyLoop {
                 final float toAssign = Math.min(remaining, serviceLimits[i]);
                 popData.setRatioForOutput(serviceOrder[i], toAssign);
                 remaining -= toAssign;
+            }
+        }
+    }
+
+    final void assignPlayerWorkers(WorkerAllocationPlan plan) {
+        final WorkerRegistry reg = WorkerRegistry.instance();
+        final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
+        markets.removeIf(m -> !m.isPlayerOwned());
+        final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
+
+        reg.resetPlayerWorkers();
+
+        final ArrayMap<MarketAPI, float[]> assignedWorkersPerMarket = WorkforceAllocator
+            .computeWorkerAllocationCustom(markets, industryOutputPairs, plan);
+
+        for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.singleEntrySet()) {
+            final MarketAPI market = entry.getKey();
+            final String marketID = market.getId();
+            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
+            final float[] assignments = entry.getValue();
+            final long totalWorkers = cond.getWorkerPool();
+
+            for (int i = 0; i < industryOutputPairs.size(); i++) {
+                if (assignments[i] == 0f) continue;
+
+                final String[] indAndOutputID = industryOutputPairs.get(i).split(KEY);
+                final float ratio = (assignments[i] / totalWorkers);
+
+                final WorkerIndustryData data = reg.getRegisterData(marketID, indAndOutputID[0]);
+                data.setRatioForOutput(indAndOutputID[1], ratio);
             }
         }
     }

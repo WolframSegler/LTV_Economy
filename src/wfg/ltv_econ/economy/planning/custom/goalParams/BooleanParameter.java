@@ -18,6 +18,5 @@ public class BooleanParameter extends GoalParameter {
 
     @Override public String getValueAsString() { return Boolean.toString(getValue()); }
     @Override public void setValueFromString(String s) { setValue(Boolean.parseBoolean(s)); }
-    @Override public WidgetType getWidgetType() { return WidgetType.CHECKBOX; }
     @Override public ParamType getParamType() { return ParamType.BOOLEAN; }
 }

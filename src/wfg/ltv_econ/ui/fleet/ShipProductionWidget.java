@@ -53,7 +53,7 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
         this.index = index;
         spec = settings.getHullSpec(order.hullId);
 
-        border.centerColor = InventoryShipWidget.WIDGET_BG;
+        border.centerColor = UIColors.WIDGET_BG;
 
         glow.type = GlowType.UNDERLAY;
         glow.overlayBrightness = 0.6f;

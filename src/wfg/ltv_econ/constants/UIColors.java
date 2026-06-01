@@ -23,4 +23,7 @@ public class UIColors {
 
     public static final Color REMOVE_COLOR = new Color(153, 17, 33);
     public static final Color ADD_COLOR = new Color(27, 141, 61);
+
+    public static final Color WIDGET_BG = new Color(28, 35, 48, 240);
+    public static final Color WIDGET_BG_SELECTED = new Color(60, 80, 120, 255);
 }

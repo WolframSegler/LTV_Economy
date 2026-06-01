@@ -154,7 +154,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         }
 
         public final void clearSelection() {
-            for (PlannedOrderWidget w : grid.widgets) {
+            for (PlannedOrderWidget w : widgets) {
                 w.selectionState = WidgetSelectionState.NONE;
                 w.buildUI();
             }

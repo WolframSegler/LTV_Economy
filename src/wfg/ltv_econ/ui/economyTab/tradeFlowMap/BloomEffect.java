@@ -174,7 +174,7 @@ public class BloomEffect {
             "#version 120\n" +
             "uniform sampler2D sceneTex;\n" +
             "uniform sampler2D bloomTex;\n" +
-            "uniform float intensity = 1.d;\n" +
+            "uniform float intensity = 1d;\n" +
             "void main() {\n" +
             "    vec4 sceneColor = texture2D(sceneTex, gl_TexCoord[0].xy);\n" +
             "    vec4 bloomColor = texture2D(bloomTex, gl_TexCoord[0].xy);\n" +

@@ -17,6 +17,11 @@ import com.fs.starfarer.api.util.Misc;
 
 import lunalib.lunaSettings.LunaSettings;
 import wfg.ltv_econ.config.loader.ConfigLunaSettingsListener;
+import wfg.ltv_econ.config.planning.CommodityTargetGoal;
+import wfg.ltv_econ.config.planning.ExportTargetGoal;
+import wfg.ltv_econ.config.planning.FactionDemandCoverageGoal;
+import wfg.ltv_econ.config.planning.HardAutarkyConstraint;
+import wfg.ltv_econ.config.planning.ProfitExportGoal;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -25,6 +30,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.LtvEconFleetRouteManager;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
+import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
 import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
@@ -40,6 +46,13 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         if (manager.isModEnabled(LUNA_LIB)) {
             LunaSettings.addSettingsListener(new ConfigLunaSettingsListener());
         }
+
+        // TODO find a way to make these goals customizable
+        PlanningGoalRegistry.register(CommodityTargetGoal.SERIAL_ID, () -> new CommodityTargetGoal("supplies", 10, 5));
+        PlanningGoalRegistry.register(ExportTargetGoal.SERIAL_ID, () -> new ExportTargetGoal("organics", 50, 100));
+        PlanningGoalRegistry.register(FactionDemandCoverageGoal.SERIAL_ID, () -> new FactionDemandCoverageGoal());
+        PlanningGoalRegistry.register(HardAutarkyConstraint.SERIAL_ID, () -> new HardAutarkyConstraint());
+        PlanningGoalRegistry.register(ProfitExportGoal.SERIAL_ID, () -> new ProfitExportGoal());
     }
 
     @Override

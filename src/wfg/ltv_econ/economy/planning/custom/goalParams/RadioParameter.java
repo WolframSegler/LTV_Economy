@@ -25,6 +25,5 @@ public class RadioParameter extends GoalParameter {
     public String getValue() { return getter.get(); }
     public void setValue(String value) { setter.accept(value); }
     public List<String> getAllOptions() { return allOptions; }
-    @Override public WidgetType getWidgetType() { return WidgetType.MULTI_SELECT; }
     @Override public ParamType getParamType() { return ParamType.RADIO; }
 }

@@ -32,11 +32,13 @@ import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
 import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
+import wfg.ltv_econ.economy.planning.custom.CustomGoal;
 import wfg.ltv_econ.economy.planning.custom.CustomObjective;
 import wfg.ltv_econ.economy.planning.custom.CustomObjective.ObjectiveAllocation;
 import wfg.ltv_econ.economy.planning.custom.ObjectiveConfig;
@@ -44,6 +46,7 @@ import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments;
 import wfg.ltv_econ.economy.planning.custom.PlanningContext;
 import wfg.ltv_econ.economy.planning.custom.VariableLayout;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
@@ -51,7 +54,7 @@ public class WorkforceAllocator {
     private WorkforceAllocator() {}
     private static final Logger logger = Global.getLogger(WorkforceAllocator.class);
 
-    public static final double WORKER_COST = 1.d;
+    private static final double WORKER_COST = 1d;
 
     /**
      * For reduced / grouped matrixes
@@ -101,7 +104,7 @@ public class WorkforceAllocator {
         Map<MarketAPI, float[]> assignedWorkersPerMarket,
         List<String> industryOutputPairs
     ) {
-        double totalAssigned = 0.d;
+        double totalAssigned = 0d;
         final long workersAvailable = EconomyInfo.getGlobalWorkerCount(false);
         final StringBuilder sb = new StringBuilder("\n=== Worker Distribution Report ===\n");
 
@@ -184,24 +187,37 @@ public class WorkforceAllocator {
      * @return Map of MarketAPI to float[] arrays representing worker assignments per output
      */
     public static final ArrayMap<MarketAPI, float[]> computeWorkerAllocationCustom(
-        List<MarketAPI> markets, List<String> industryOutputPairs, ObjectiveConfig objConfig, PiecewiseSegments segments,
-        List<CustomObjective> customObjectives, List<CustomConstraint> customConstraints
+        List<MarketAPI> markets, List<String> industryOutputPairs, WorkerAllocationPlan plan
     ) throws NoFeasibleSolutionException, UnboundedSolutionException, TooManyIterationsException,
         DimensionMismatchException, IllegalArgumentException
     {
+        final List<CustomObjective> objectives = new ArrayList<>(4);
+        final List<CustomConstraint> constraints = new ArrayList<>(4);
+        for (CustomGoal goal : plan.goals) {
+            if (goal instanceof CustomObjective objective) {
+                objectives.add(objective);
+            }
+            if (goal instanceof CustomConstraint constraint) {
+                constraints.add(constraint);
+            }
+        }
+
+        final List<MarketAPI> filteredMarkets = new ArrayList<>(markets);
+        filteredMarkets.removeIf(m -> LtvEconSaveData.instance().playerFactionSettings.excludedMarketsFromWorkerAllocation.contains(m.getId()));
+
         final IndustryMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
         final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
-            markets, industryOutputPairs, PlanningData.getOutputsPerMarket(markets),
+            filteredMarkets, industryOutputPairs, PlanningData.getOutputsPerMarket(filteredMarkets),
             groupedMatrix.memberToGroup
         );
 
         return IndustryGrouper.expandGroupedAssignments(
             optimizeCustomWorkerAlloc(
-                markets, groupedMatrix.reducedMatrix, groupedData.one,
-                groupedData.two, objConfig, segments,
-                customObjectives, customConstraints
+                filteredMarkets, groupedMatrix.reducedMatrix, groupedData.one,
+                groupedData.two, plan.objConfig, plan.segments,
+                objectives, constraints
             ),
-            groupedMatrix, markets, industryOutputPairs
+            groupedMatrix, filteredMarkets, industryOutputPairs
         );
     }
 
@@ -234,8 +250,8 @@ public class WorkforceAllocator {
                 case 0 -> 0.3;
                 case 1 -> EconConfig.LOCAL_WORKER_COST_MULT;
                 case 2 -> EconConfig.FACTION_WORKER_COST_MULT;
-                case 3 -> 1.d;
-                default -> 1.d;
+                case 3 -> 1d;
+                default -> 1d;
             };
         }
         Arrays.fill(objective, idxSlackStr, nVars, EconConfig.ECON_DEFICIT_COST);
@@ -253,7 +269,7 @@ public class WorkforceAllocator {
                 if (start == end) continue;
 
                 Arrays.fill(coeffs, 0d);
-                for (int idx = start; idx < end; idx++) coeffs[idx * T] = 1.d;
+                for (int idx = start; idx < end; idx++) coeffs[idx * T] = 1d;
 
                 final double marketCap = denseData.columnMarketCap[start];
                 final double rhs = marketCap * getBaselineFraction(marketCap);
@@ -277,7 +293,7 @@ public class WorkforceAllocator {
             if (pass != 0 && vars != null) {
                 for (int i = 0; i < N; i+=T) {
                     final int orgIdx = i/T;
-                    double wTotal = 0.d;
+                    double wTotal = 0d;
                     for (int z = 0; z < T; z++) wTotal += vars[orgIdx + z];
                     if (wTotal == 0d) continue;
 
@@ -293,7 +309,7 @@ public class WorkforceAllocator {
                 }
     
                 for (int c = 0; c < C; c++) {
-                    if (demand[c] <= 0d) comAvailability[c] = 1.d;
+                    if (demand[c] <= 0d) comAvailability[c] = 1d;
                     else comAvailability[c] = Math.min(1.0, netCommodity[c] / demand[c]);
                 }
     
@@ -309,11 +325,11 @@ public class WorkforceAllocator {
                     final ArrayMap<String, Float> inputs = byOutput.get(outputID);
                     if (inputs == null || inputs.isEmpty()) continue;
     
-                    double deficitWeightSum = 0.d;
+                    double deficitWeightSum = 0d;
                     for (float v : inputs.values()) deficitWeightSum += v;
                     if (deficitWeightSum <= 0d) continue;
     
-                    double deficit = 0.d;
+                    double deficit = 0d;
     
                     for (Map.Entry<String, Float> e : inputs.singleEntrySet()) {
                         final String inputID = e.getKey();
@@ -399,7 +415,7 @@ public class WorkforceAllocator {
                     coeffs[i + 3] += coeff;
                 }
 
-                coeffs[idxSlack.apply(c)] = 1.d;
+                coeffs[idxSlack.apply(c)] = 1d;
                 final double target = demand[c] * EconConfig.PRODUCTION_BUFFER;
                 constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, target));
             }
@@ -421,7 +437,7 @@ public class WorkforceAllocator {
         { // 6) Extract assignments w[m,o] into map for grouped outputs
             final double[] denseWorkerVars = new double[N / T];
             for (int i = 0; i < N; i+=T) {
-                double total = 0.d;
+                double total = 0d;
                 for (int z = 0; z < T; z++) total += vars[i + z];
                 denseWorkerVars[i/T] = total;
             }
@@ -527,7 +543,7 @@ public class WorkforceAllocator {
         { // Extract assignments w[m,o] into map for grouped outputs
             final double[] denseWorkerVars = new double[N / T];
             for (int i = 0; i < N; i+=T) {
-                double total = 0.d;
+                double total = 0d;
                 for (int z = 0; z < T; z++) total += vars[i + z];
                 denseWorkerVars[i/T] = total;
             }
@@ -560,7 +576,7 @@ public class WorkforceAllocator {
                 if (start == end) continue;
     
                 Arrays.fill(coeffs, 0d);
-                for (int i = start*T; i < end*T; i++) coeffs[i] = 1.d;
+                for (int i = start*T; i < end*T; i++) coeffs[i] = 1d;
     
                 constraints.add(
                     new LinearConstraint(coeffs, Relationship.LEQ, denseData.columnMarketCap[start])
@@ -572,7 +588,7 @@ public class WorkforceAllocator {
             final double[] coeffs = new double[nVars];
             for (int i = 0; i < N; i+=T) {
                 Arrays.fill(coeffs, 0d);
-                for (int z = 0; z < T; z++) coeffs[i + z] = 1.d;
+                for (int z = 0; z < T; z++) coeffs[i + z] = 1d;
 
                 final int orgIdx = i/T;
                 final double rhs = denseData.columnWorkerLimitFrac[orgIdx] * 

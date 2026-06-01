@@ -188,7 +188,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         }
 
         public final void clearSelection() {
-            for (ShipProductionWidget w : grid.widgets) {
+            for (ShipProductionWidget w : widgets) {
                 w.selectionState = WidgetSelectionState.NONE;
                 w.buildUI();
             }

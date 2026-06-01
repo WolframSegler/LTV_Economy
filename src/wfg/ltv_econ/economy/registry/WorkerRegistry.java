@@ -37,6 +37,14 @@ public class WorkerRegistry implements Serializable {
         }
     }
 
+    public final void resetPlayerWorkers() {
+        for (WorkerIndustryData data : registry.values()) {
+            if (data.market.isPlayerOwned()) {
+                data.resetWorkersAssigned();
+            }
+        }
+    }
+
     public static final List<Industry> getVisibleIndustries(MarketAPI market) {
         final List<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);

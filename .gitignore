@@ -21,7 +21,7 @@
 
 # Custom
 /api/
-/jars/
+/jars/main/
 /ProjectFiles/Diagrams
 
 /.vscode/settings.json
