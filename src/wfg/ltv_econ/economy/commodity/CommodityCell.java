@@ -21,6 +21,7 @@ import wfg.ltv_econ.constants.strings.Consumption;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
+import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 /**
@@ -52,6 +53,8 @@ public class CommodityCell implements Serializable {
     public transient float globalExports = 0f;
     public transient float informalImports = 0f;
     public transient float informalExports = 0f;
+
+    public float nonExportableStock;
 
     public final ArrayMap<String, MutableStat> getIndProductionStats() {
         return productionMutables;
@@ -137,15 +140,15 @@ public class CommodityCell implements Serializable {
         return Math.max(0f, getTotalImports() - getTargetQuantumMetViaTrade());
     }
     public final double computeExportAmount() {
-        return Math.max(0.0, stored + getSurplusAfterTargetQuantum()
+        return Math.max(0d, stored + getSurplusAfterTargetQuantum()
             - getProduction(true) * EconConfig.PRODUCTION_HOLD_FACTOR
             - getTargetStockpiles() * EconConfig.EXPORT_THRESHOLD_FACTOR
-            - getTotalExports()
+            - getTotalExports() - nonExportableStock
         );
     }
     public final float computeImportAmount() {
-        final float cap = EconConfig.DAYS_TO_COVER_PER_IMPORT * getTargetQuantum(true);
-        final float target = Math.max((float) Math.min(getTargetStockpiles() - stored, cap), 0f);
+        final double cap = EconConfig.DAYS_TO_COVER_PER_IMPORT * getTargetQuantum(true);
+        final float target = (float) Arithmetic.clamp(getTargetStockpiles() - stored, 0d, cap);
 
         return Math.max(target - getTotalImports(), 0f);
     }

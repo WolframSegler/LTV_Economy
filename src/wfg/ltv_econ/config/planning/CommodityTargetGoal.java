@@ -25,10 +25,8 @@ public class CommodityTargetGoal implements CustomObjective, CustomConstraint {
     private double penalty;
     private final String allocationId;
 
-    public CommodityTargetGoal(String commodityId, double targetAmount, double penalty) {
+    public CommodityTargetGoal(String commodityId) {
         this.commodityId = commodityId;
-        this.targetAmount = targetAmount;
-        this.penalty = penalty;
         this.allocationId = SERIAL_ID + EconomyLoop.KEY + commodityId;
     }
 

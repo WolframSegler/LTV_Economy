@@ -31,7 +31,7 @@ import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.table.SortableTable;
-import wfg.native_ui.ui.table.SortableTable.RowPanel;
+import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.util.NumFormat;
 public class ColonyPopulationTable extends CustomPanel implements HasBackground {
@@ -114,7 +114,7 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
                 table.addCell(NumFormat.formatCredit(credits), cellAlg.MID, credits, creditColor);
                 table.addCell(employment + "%", cellAlg.MID, employment, null);
 
-                final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
+                final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                     final ManagePopulationDialog dialogPanel = new ManagePopulationDialog(market);
                     dialogPanel.show(0.3f, 0.3f);
                 };

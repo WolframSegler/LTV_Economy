@@ -51,7 +51,7 @@ import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.CheckboxButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.table.SortableTable;
-import wfg.native_ui.ui.table.SortableTable.RowPanel;
+import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.ui.visual.TextPanel;
@@ -613,7 +613,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 table.getPendingRow().outline.color = base;
             }
 
-            final ClickHandler<RowPanel> rowSelectedRunnable = (row, isLeftClick) -> {
+            final ClickHandler<TableRow> rowSelectedRunnable = (row, isLeftClick) -> {
                 selectedMarket = (MarketAPI) row.customData;
                 updateSection1();
                 updateSection2();

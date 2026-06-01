@@ -674,10 +674,10 @@
         "uiBtnTitleSaveWorkerAllocationPlan": "Save Plan",
         "uiBtnTitleDeleteWorkerAllocationPlan": "Delete Plan",
         "uiBtnTitleRunWorkerAllocationPlan": "Run Plan",
-        "uiTitleNoPlansToSelect": "No Pre-defined Plans",
+        "uiTitleNoPlansToSelect": "No predefined plans",
         "uiTitleNoGoalsToSelect": "No goals",
-        "uiTpTxtCustomWorkerAllocationPlanNotice": "This is a custom plan. Can be modified or deleted",
-        "uiTpTxtDefaultWorkerAllocationPlanNotice": "This is a preset plan. Cannot be modified or deleted",
+        "uiTpTxtCustomWorkerAllocationPlanNotice": "This is a custom plan. It can be modified or deleted.",
+        "uiTpTxtDefaultWorkerAllocationPlanNotice": "This is a predefined plan. It cannot be modified or deleted.",
         "uiTpTxtNoWorkerAllocationPlanSelected": "No plan selected.",
         "uiTitleFailedToLoadWorkerAllocationPlan": "Failed to load plan: ",
         "uiTitleFailedToSaveWorkerAllocationPlan": "Failed to save plan: ",
@@ -694,8 +694,10 @@
         "uiTpTitleWorkerAllocationPlanDesc": "Description",
         "uiBtnTitleAddWorkerAllocationPlanSegment": "Add Segment",
         "uiBtnTitleAddWorkerAllocationPlanGoal": "Add Goal",
-        "uiDialogTitleSelectWorkerAllocationPlanGoal": "Select Plan",
+        "uiDialogTitleSelectWorkerAllocationPlanGoal": "Select Goal",
         "uiTitleWorkerAllocationPlanRunSuccess": "Success",
-        "uiAcknowledged": "OK"
+        "uiAcknowledged": "OK",
+        "uiTpTxtPressToSetNotExportableStock": "Press to configure locked stock amount",
+        "uiDialogTitleNotExportableStock": "Locked Stock"
     }
 }

@@ -4,6 +4,7 @@ Version 0.3.5-beta | SAVE COMPATIBLE
 - Created fuel demand for exporting markets.
 - Added a new service sector for cultural activities.
 - NPC colonies now assign workers to the service sector (basic greedy alloc).
+- An amount of a commodity to be kept in reserves can be specified through the stockpiles.
 
 Version 0.3.4-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.4.1 for this update. Version 0.4.0 will not work.

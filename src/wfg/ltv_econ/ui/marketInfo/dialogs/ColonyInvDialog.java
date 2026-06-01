@@ -26,9 +26,11 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
+import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
+import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.table.SortableTable;
@@ -279,15 +281,14 @@ public class ColonyInvDialog extends DialogPanel {
 
 
         final SortableTable table = new SortableTable(
-            m_panel,
-            PANEL_W - 20, PANEL_H - (tableStartY + 10),
-            20, 30
+            m_panel, PANEL_W - 20, PANEL_H - (tableStartY + 10),
+            20, 60
         );
 
         table.addHeaders(
-            "", 40, null, true, false, 1,
-            str("uiTableCommodityTitle"), 160, null, true, true, 1,
-            str("uiTableStored"), 100, null, false, false, -1,
+            "", 55, null, true, false, 1,
+            str("uiTableCommodityTitle"), 150, null, true, true, 1,
+            str("uiTableStored"), 95, null, false, false, -1,
             str("uiTableConsumed"), 100, str("uiTableConsumedTpTxt"), false, false, -1,
             str("uiTableBaseProd"), 140, str("uiTableBaseProdTpTxt"), false, false, -1,
             str("uiTableRealProd"), 140, str("uiTableRealProdTpTxt"), false, false, -1,
@@ -300,7 +301,7 @@ public class ColonyInvDialog extends DialogPanel {
             final CommodityCell cell = engine.getComCell(com.getId(), m_market.getId());
 
             final Base comIcon = new Base(
-                m_panel, 26, 26, com.getIconName(), null, null
+                m_panel, 42, 42, com.getIconName(), null, null
             );
             
             final long stored = cell.getRoundedStored();
@@ -327,8 +328,14 @@ public class ColonyInvDialog extends DialogPanel {
             table.addCell(NumFormat.engNotate(baseBalance), cellAlg.LEFTOPAD, baseBalance, baseBlcColor);
             table.addCell(NumFormat.engNotate(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
+            final ClickHandler<TableRow> rowSelectedRun = (row, isLeftClick) -> {
+                
+            };
+
             table.pushRow(
-                null, null, null, CodexDataV2.getCommodityEntryId(com.getId()), null, null
+                null, (tp, exp) -> {
+                    tp.addPara(str("uiTpTxtPressToSetNotExportableStock"), 0f);
+                }, rowSelectedRun, CodexDataV2.getCommodityEntryId(com.getId()), null, null
             );
         }
 
@@ -342,5 +349,38 @@ public class ColonyInvDialog extends DialogPanel {
         super.dismiss(option);
 
         LtvIndustryListPanel.refreshPanel();
+    }
+
+    public static class SetNotExportableStockDialog extends DialogPanel {
+        private final Slider slider;
+        private final CommodityCell cell;
+
+        public SetNotExportableStockDialog(CommodityCell cell) {
+            super(400, 70, null, null, str("confirmTxt"), str("uiCancel"));
+            this.cell = cell;
+
+            backgroundDimAmount = 0.1f;
+            holo.borderAlpha = 0.66f;
+
+            setConfirmShortcut();
+
+            final LabelAPI title = settings.createLabel(str("uiDialogTitleNotExportableStock"), Fonts.INSIGNIA_LARGE);
+            add(title).inTL(0f, 0f);
+
+            final Base icon = new Base(m_panel, 32, 32, cell.spec.getIconName(), null, null);
+            add(icon).inTR(0f, 0f);
+
+            slider = new Slider(m_panel, null, 0f, 1_000_000f, 350, 32);
+            slider.setProgress(cell.nonExportableStock);
+            slider.customText = () -> NumFormat.engNotate(slider.getProgress());
+            add(slider).inBMid(0f);
+        }
+
+        @Override
+        public void dismiss(int option) {
+            super.dismiss(option);
+
+            if (option == 0) cell.nonExportableStock = slider.getProgress();
+        }
     }
 }

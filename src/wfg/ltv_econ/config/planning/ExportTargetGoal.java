@@ -24,10 +24,8 @@ public class ExportTargetGoal implements CustomObjective, CustomConstraint {
     private double penalty;
     private final String allocationId;
 
-    public ExportTargetGoal(String comID, double targetAmount, double penalty) {
+    public ExportTargetGoal(String comID) {
         this.comID = comID;
-        this.targetAmount = targetAmount;
-        this.penalty = penalty;
         this.allocationId = SERIAL_ID + "_" + comID;
     }
 

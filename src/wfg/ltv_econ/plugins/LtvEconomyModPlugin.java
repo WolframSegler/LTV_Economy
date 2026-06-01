@@ -47,9 +47,10 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             LunaSettings.addSettingsListener(new ConfigLunaSettingsListener());
         }
 
-        // TODO find a way to make these goals customizable
-        PlanningGoalRegistry.register(CommodityTargetGoal.SERIAL_ID, () -> new CommodityTargetGoal("supplies", 10, 5));
-        PlanningGoalRegistry.register(ExportTargetGoal.SERIAL_ID, () -> new ExportTargetGoal("organics", 50, 100));
+        for (String comID : EconomyConstants.econCommodityIDs) {
+            PlanningGoalRegistry.register(CommodityTargetGoal.SERIAL_ID, () -> new CommodityTargetGoal(comID));
+            PlanningGoalRegistry.register(ExportTargetGoal.SERIAL_ID, () -> new ExportTargetGoal(comID));
+        }
         PlanningGoalRegistry.register(FactionDemandCoverageGoal.SERIAL_ID, () -> new FactionDemandCoverageGoal());
         PlanningGoalRegistry.register(HardAutarkyConstraint.SERIAL_ID, () -> new HardAutarkyConstraint());
         PlanningGoalRegistry.register(ProfitExportGoal.SERIAL_ID, () -> new ProfitExportGoal());
