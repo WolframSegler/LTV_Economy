@@ -1,5 +1,7 @@
 package wfg.ltv_econ.config.planning;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+
 import java.util.*;
 
 import org.apache.commons.math4.legacy.optim.linear.LinearConstraint;
@@ -81,7 +83,7 @@ public class FactionDemandCoverageGoal implements CustomObjective, CustomConstra
         return Collections.singletonList(
             new DoubleParameter(
                 "penalty",
-                "Under-production penalty",
+                str("uiGoalParamUnderProductionPenalty"),
                 1d, 5000d,
                 () -> FactionDemandCoverageGoal.this.penalty,
                 (v) -> FactionDemandCoverageGoal.this.penalty = v

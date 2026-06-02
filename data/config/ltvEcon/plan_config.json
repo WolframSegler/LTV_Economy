@@ -1,3 +1,116 @@
 {
-    "worker_allocation_plans": []
+    "worker_allocation_plans": [
+        {
+            "description": "Prioritise meeting faction demand. Leftover workers assigned to cheapest production.",
+            "goals": [
+                {
+                    "id": "faction_demand_coverage",
+                    "params": [{
+                        "id": "penalty",
+                        "name": "Under-production penalty",
+                        "value": "3000.0"
+                    }]
+                },
+                {
+                    "id": "profit_export",
+                    "params": [
+                        {
+                            "id": "metric",
+                            "name": "Value metric",
+                            "value": "Base value"
+                        },
+                        {
+                            "id": "weight",
+                            "name": "Discount strength",
+                            "value": "0.0"
+                        },
+                        {
+                            "id": "targetFraction",
+                            "name": "Target (ratio of global demand)",
+                            "value": "1.0"
+                        },
+                        {
+                            "id": "penalty",
+                            "name": "Shortfall penalty",
+                            "value": "100.0"
+                        }
+                    ]
+                }
+            ],
+            "id": "Self-Sufficiency",
+            "objective_config": {
+                "goalType": "MINIMIZE",
+                "maxIter": 10000
+            },
+            "segments": [
+                {
+                    "cost": 0.3,
+                    "id": "fair"
+                },
+                {
+                    "cost": 0.1,
+                    "id": "local"
+                },
+                {
+                    "cost": 0.15,
+                    "id": "faction"
+                },
+                {
+                    "cost": 1,
+                    "id": "global"
+                }
+            ]
+        },
+        {
+            "description": "Maximise exports of the most valuable commodities up to global demand.",
+            "goals": [{
+                "id": "profit_export",
+                "params": [
+                    {
+                        "id": "metric",
+                        "name": "Value metric",
+                        "value": "Base value"
+                    },
+                    {
+                        "id": "weight",
+                        "name": "Discount strength",
+                        "value": "0.5"
+                    },
+                    {
+                        "id": "targetFraction",
+                        "name": "Target (ratio of global demand)",
+                        "value": "1.0"
+                    },
+                    {
+                        "id": "penalty",
+                        "name": "Shortfall penalty",
+                        "value": "2000.0"
+                    }
+                ]
+            }],
+            "id": "Max Profit",
+            "objective_config": {
+                "goalType": "MINIMIZE",
+                "maxIter": 10000
+            },
+            "segments": [
+                {
+                    "cost": 0.3,
+                    "id": "fair"
+                },
+                {
+                    "cost": 0.1,
+                    "id": "local"
+                },
+                {
+                    "cost": 1,
+                    "id": "global"
+                },
+                {
+                    "cost": 0.15,
+                    "id": "faction"
+                }
+            ]
+        }
+    ]
 }

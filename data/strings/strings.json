@@ -701,6 +701,15 @@
         "uiDialogTitleNotExportableStock": "Locked Stock",
         "uiDialogTitleMarketsToExclude": "Exclude Colonies",
         "uiBtnTitleClickToExcludeMarkets": "Exclude Colonies",
-        "uiBtnTitleRemove": "Remove"
+        "uiBtnTitleRemove": "Remove",
+        "uiGoalParamTargetAmount": "Target amount",
+        "uiGoalParamShortfallPenalty": "Shortfall penalty",
+        "uiGoalParamExportTargetAmount": "Export target amount",
+        "uiGoalParamUnderProductionPenalty": "Under-production penalty",
+        "uiGoalParamValueMetric": "Value metric",
+        "uiGoalParamDiscountStrength": "Discount strength",
+        "uiGoalParamTargetFraction": "Target (ratio of global demand)",
+        "uiGoalParamValueMetricBaseValue": "Base value",
+        "uiGoalParamValueMetricProductionMargin": "Production margin"
     }
 }

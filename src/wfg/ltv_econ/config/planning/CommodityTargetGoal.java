@@ -1,5 +1,8 @@
 package wfg.ltv_econ.config.planning;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.math4.legacy.optim.linear.LinearConstraint;
 import org.apache.commons.math4.legacy.optim.linear.Relationship;
+
+import com.fs.starfarer.api.graphics.SpriteAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.DenseModel;
@@ -20,14 +25,16 @@ import wfg.ltv_econ.economy.planning.custom.goalParams.GoalParameter;
 public class CommodityTargetGoal implements CustomObjective, CustomConstraint {
     public static final String SERIAL_ID = "commodity_target";
 
-    private final String commodityId;
+    private final String comID;
+    private final String comName;
     private double targetAmount;
     private double penalty;
     private final String allocationId;
 
-    public CommodityTargetGoal(String commodityId) {
-        this.commodityId = commodityId;
-        this.allocationId = SERIAL_ID + EconomyLoop.KEY + commodityId;
+    public CommodityTargetGoal(String comID, String comName) {
+        this.comID = comID;
+        this.comName = comName;
+        this.allocationId = SERIAL_ID + EconomyLoop.KEY + comName;
     }
 
     public ObjectiveAllocation allocateVariables(PlanningContext context) {
@@ -39,8 +46,8 @@ public class CommodityTargetGoal implements CustomObjective, CustomConstraint {
         final double[][] A = context.A;
         final int T = layout.tierCount;
 
-        final Integer c = dense.commodityIndex.get(commodityId);
-        if (c == null) throw new IllegalArgumentException("Unknown commodity: " + commodityId);
+        final Integer c = dense.commodityIndex.get(comID);
+        if (c == null) throw new IllegalArgumentException("Unknown commodity: " + comName);
 
         final ObjectiveAllocation alloc = objectives.get(allocationId);
         final double[] coeffs = new double[layout.totalVars];
@@ -60,7 +67,11 @@ public class CommodityTargetGoal implements CustomObjective, CustomConstraint {
         return Collections.singletonList(new LinearConstraint(coeffs, Relationship.GEQ, targetAmount));
     }
 
-    public String getSerializationId() { return SERIAL_ID; }
+    @Override
+    public SpriteAPI getIcon() {
+        return settings.getSprite(settings.getCommoditySpec(comID).getIconName());
+    }
+    public String getSerializationId() { return SERIAL_ID + EconomyLoop.KEY + comName; }
     public List<String> getRequiredSegmentIds() { return Collections.emptyList(); }
     public List<String> getRequiredObjectiveIds() { return Collections.singletonList(allocationId); }
 
@@ -68,17 +79,17 @@ public class CommodityTargetGoal implements CustomObjective, CustomConstraint {
     public List<GoalParameter> getParameters() {
         return Arrays.asList(
             new DoubleParameter(
-                "target", "Target amount",
-                0d, 1_000_000_000d,
+                "target", str("uiGoalParamTargetAmount"),
+                0d, 50_000d,
                 () -> CommodityTargetGoal.this.targetAmount,
                 v -> CommodityTargetGoal.this.targetAmount = v
             ),
             new DoubleParameter(
-                "penalty", "Shortfall penalty",
-                1d, 1_000_000d,
+                "penalty", str("uiGoalParamShortfallPenalty"),
+                1d, 5000d,
                 () -> CommodityTargetGoal.this.penalty,
                 v -> CommodityTargetGoal.this.penalty = v
             )
         );
-    }
+}
 }

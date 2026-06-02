@@ -1,5 +1,8 @@
 package wfg.ltv_econ.config.planning;
 
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +11,9 @@ import java.util.Map;
 import org.apache.commons.math4.legacy.optim.linear.LinearConstraint;
 import org.apache.commons.math4.legacy.optim.linear.Relationship;
 
+import com.fs.starfarer.api.graphics.SpriteAPI;
+
+import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.DenseModel;
 import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
 import wfg.ltv_econ.economy.planning.custom.CustomObjective;
@@ -20,13 +26,15 @@ public class ExportTargetGoal implements CustomObjective, CustomConstraint {
     public static final String SERIAL_ID = "export_target";
 
     private final String comID;
+    private final String comName;
     private double targetAmount;
     private double penalty;
     private final String allocationId;
 
-    public ExportTargetGoal(String comID) {
+    public ExportTargetGoal(String comID, String comName) {
         this.comID = comID;
-        this.allocationId = SERIAL_ID + "_" + comID;
+        this.comName = comName;
+        this.allocationId = SERIAL_ID + EconomyLoop.KEY + comName;
     }
 
     public ObjectiveAllocation allocateVariables(PlanningContext context) {
@@ -39,7 +47,7 @@ public class ExportTargetGoal implements CustomObjective, CustomConstraint {
         final int T = layout.tierCount;
 
         final Integer c = dense.commodityIndex.get(comID);
-        if (c == null) throw new IllegalArgumentException("Unknown commodity: " + comID);
+        if (c == null) throw new IllegalArgumentException("Unknown commodity: " + comName);
 
         final ObjectiveAllocation alloc = objectives.get(allocationId);
         final int slackIdx = alloc.startIndex;
@@ -74,15 +82,28 @@ public class ExportTargetGoal implements CustomObjective, CustomConstraint {
         return Arrays.asList(softConstraint, hardConstraint);
     }
 
-    public String getSerializationId() { return SERIAL_ID; }
+    public String getSerializationId() { return SERIAL_ID + EconomyLoop.KEY + comName; }
     public List<String> getRequiredSegmentIds() { return Collections.emptyList(); }
     public List<String> getRequiredObjectiveIds() { return Collections.singletonList(allocationId); }
 
     @Override
     public List<GoalParameter> getParameters() {
         return Arrays.asList(
-            new DoubleParameter("target", "Export target amount", 0d, 1_000_000_000d, () -> targetAmount, v -> targetAmount = v),
-            new DoubleParameter("penalty", "Shortfall penalty", 1d, 1_000_000d, () -> penalty, v -> penalty = v)
+            new DoubleParameter(
+                "target", str("uiGoalParamExportTargetAmount"),
+                0d, 50_000d,
+                () -> targetAmount, v -> targetAmount = v
+            ),
+            new DoubleParameter(
+                "penalty", str("uiGoalParamShortfallPenalty"),
+                1d, 5000d,
+                () -> penalty, v -> penalty = v
+            )
         );
+    }
+
+    @Override
+    public SpriteAPI getIcon() {
+        return settings.getSprite(settings.getCommoditySpec(comID).getIconName());
     }
 }

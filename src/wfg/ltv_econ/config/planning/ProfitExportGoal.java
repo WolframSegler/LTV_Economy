@@ -1,13 +1,16 @@
 package wfg.ltv_econ.config.planning;
 
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math4.legacy.optim.linear.LinearConstraint;
+import org.apache.commons.math4.legacy.optim.linear.Relationship;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.LaborConfig;
@@ -29,6 +32,16 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
 
     private Metric metric = Metric.BASE_VALUE;
     private double weight = 1d;
+    private double targetFraction = 1d;
+    private double penalty = 100d;
+
+    @Override
+    public ObjectiveAllocation allocateVariables(PlanningContext context) {
+        final int C = context.commodityCount;
+        final double[] coeffs = new double[C];
+        Arrays.fill(coeffs, penalty);
+        return new ObjectiveAllocation(SERIAL_ID, coeffs);
+    }
 
     @Override
     public void modifyWorkerObjective(double[] objective, VariableLayout layout, PlanningContext context) {
@@ -61,25 +74,71 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
     }
 
     public List<LinearConstraint> buildConstraints(VariableLayout layout, PlanningContext context, Map<String, ObjectiveAllocation> objectives) {
-        return Collections.emptyList();
+        final DenseModel dense = context.denseData;
+        final double[][] A = context.A;
+        final int T = layout.tierCount;
+        final int C = context.commodityCount;
+
+        final ObjectiveAllocation alloc = objectives.get(SERIAL_ID);
+        final int slackStart = alloc.startIndex;
+
+        final List<LinearConstraint> constraints = new ArrayList<>();
+
+        for (int c = 0; c < C; c++) {
+            final double[] coeffs = new double[layout.totalVars];
+
+            // Sum production of this commodity across all markets and all tiers
+            for (int col = 0; col < dense.columnSize; col++) {
+                final int o = dense.columnOutputIndex[col];
+                final double base = A[c][o];
+                if (base == 0.0) continue;
+
+                final double coeff = base * dense.columnOutputMod[col];
+                final int varBase = col * T;
+                for (int t = 0; t < T; t++) {
+                    coeffs[varBase + t] += coeff;
+                }
+            }
+
+            coeffs[slackStart + c] = 1.0;
+
+            final double target = context.globalDemand[c] * targetFraction;
+            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, target));
+        }
+        return constraints;
     }
 
     public List<String> getRequiredSegmentIds() { return Collections.emptyList(); }
     public List<String> getRequiredObjectiveIds() { return Collections.emptyList(); }
     public String getSerializationId() { return SERIAL_ID; }
-    public ObjectiveAllocation allocateVariables(PlanningContext context) {
-        return new ObjectiveAllocation(SERIAL_ID, new double[0]);
-    }
     public List<GoalParameter> getParameters() {
         return Arrays.asList(
-            new RadioParameter("metric", "Value metric",
-                Arrays.asList("Base value", "Production margin"),
-                () -> metric == Metric.BASE_VALUE ? "Base value" : "Production margin",
-                v -> metric = "Base value".equals(v) ? Metric.BASE_VALUE : Metric.MARGIN
+            new RadioParameter(
+                "metric", str("uiGoalParamValueMetric"),
+                Arrays.asList(
+                    str("uiGoalParamValueMetricBaseValue"),
+                    str("uiGoalParamValueMetricProductionMargin")
+                ),
+                () -> metric == Metric.BASE_VALUE
+                        ? str("uiGoalParamValueMetricBaseValue")
+                        : str("uiGoalParamValueMetricProductionMargin"),
+                v -> metric = str("uiGoalParamValueMetricBaseValue").equals(v)
+                        ? Metric.BASE_VALUE : Metric.MARGIN
             ),
-            new DoubleParameter("weight", "Discount strength", 0d, 1d,
-                () -> weight,
-                v -> weight = v
+            new DoubleParameter(
+                "weight", str("uiGoalParamDiscountStrength"),
+                0.0, 1.0,
+                () -> weight, v -> weight = v
+            ),
+            new DoubleParameter(
+                "targetFraction", str("uiGoalParamTargetFraction"),
+                0.0, 1.0,
+                () -> targetFraction, v -> targetFraction = v
+            ),
+            new DoubleParameter(
+                "penalty", str("uiGoalParamShortfallPenalty"),
+                1.0, 5000.0,
+                () -> penalty, v -> penalty = v
             )
         );
     }

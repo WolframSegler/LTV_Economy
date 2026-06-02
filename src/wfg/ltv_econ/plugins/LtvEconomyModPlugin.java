@@ -7,6 +7,7 @@ import static wfg.ltv_econ.constants.Mods.*;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.ModManagerAPI;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
@@ -27,6 +28,7 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.LtvEconFleetRouteManager;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
@@ -47,9 +49,11 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             LunaSettings.addSettingsListener(new ConfigLunaSettingsListener());
         }
 
-        for (String comID : EconomyConstants.econCommodityIDs) {
-            PlanningGoalRegistry.register(CommodityTargetGoal.SERIAL_ID, () -> new CommodityTargetGoal(comID));
-            PlanningGoalRegistry.register(ExportTargetGoal.SERIAL_ID, () -> new ExportTargetGoal(comID));
+        for (CommoditySpecAPI spec : EconomyConstants.econCommoditySpecs) {
+            final String comID = spec.getId();
+            final String name = spec.getName();
+            PlanningGoalRegistry.register(CommodityTargetGoal.SERIAL_ID + EconomyLoop.KEY + name, () -> new CommodityTargetGoal(comID, name));
+            PlanningGoalRegistry.register(ExportTargetGoal.SERIAL_ID + EconomyLoop.KEY + name, () -> new ExportTargetGoal(comID, name));
         }
         PlanningGoalRegistry.register(FactionDemandCoverageGoal.SERIAL_ID, () -> new FactionDemandCoverageGoal());
         PlanningGoalRegistry.register(HardAutarkyConstraint.SERIAL_ID, () -> new HardAutarkyConstraint());
