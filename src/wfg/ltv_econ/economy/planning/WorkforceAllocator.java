@@ -46,7 +46,6 @@ import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments;
 import wfg.ltv_econ.economy.planning.custom.PlanningContext;
 import wfg.ltv_econ.economy.planning.custom.VariableLayout;
 import wfg.ltv_econ.industry.IndustryIOs;
-import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
@@ -202,22 +201,19 @@ public class WorkforceAllocator {
             }
         }
 
-        final List<MarketAPI> filteredMarkets = new ArrayList<>(markets);
-        filteredMarkets.removeIf(m -> LtvEconSaveData.instance().playerFactionSettings.excludedMarketsFromWorkerAllocation.contains(m.getId()));
-
         final IndustryMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
         final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
-            filteredMarkets, industryOutputPairs, PlanningData.getOutputsPerMarket(filteredMarkets),
+            markets, industryOutputPairs, PlanningData.getOutputsPerMarket(markets),
             groupedMatrix.memberToGroup
         );
 
         return IndustryGrouper.expandGroupedAssignments(
             optimizeCustomWorkerAlloc(
-                filteredMarkets, groupedMatrix.reducedMatrix, groupedData.one,
+                markets, groupedMatrix.reducedMatrix, groupedData.one,
                 groupedData.two, plan.objConfig, plan.segments,
                 objectives, constraints
             ),
-            groupedMatrix, filteredMarkets, industryOutputPairs
+            groupedMatrix, markets, industryOutputPairs
         );
     }
 

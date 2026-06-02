@@ -698,6 +698,9 @@
         "uiTitleWorkerAllocationPlanRunSuccess": "Success",
         "uiAcknowledged": "OK",
         "uiTpTxtPressToSetNotExportableStock": "Press to configure locked stock amount",
-        "uiDialogTitleNotExportableStock": "Locked Stock"
+        "uiDialogTitleNotExportableStock": "Locked Stock",
+        "uiDialogTitleMarketsToExclude": "Exclude Colonies",
+        "uiBtnTitleClickToExcludeMarkets": "Exclude Colonies",
+        "uiBtnTitleRemove": "Remove"
     }
 }

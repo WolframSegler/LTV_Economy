@@ -35,9 +35,17 @@ import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.util.NumFormat;
 public class ColonyPopulationTable extends CustomPanel implements HasBackground {
-    public static final int PANEL_W = 935;
+    static final int PANEL_W = 935;
 
-    protected final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
+    private static final PlanetInfoParams params = new PlanetInfoParams();
+    static {
+        params.showName = true;
+        params.showConditions = false;
+        params.showHazardRating = false;
+        params.scaleEvenWhenShowingName = true;
+    }
+
+    private final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
     public ColonyPopulationTable(UIPanelAPI parent, int height) {
         super(parent, PANEL_W, height);
@@ -70,12 +78,6 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
         );
 
         if (engine.getMarketPopulationData().size() > 0) {
-            final PlanetInfoParams params = new PlanetInfoParams();
-            params.showName = true;
-            params.showConditions = false;
-            params.showHazardRating = false;
-            params.scaleEvenWhenShowingName = true;
-    
             for (PlayerMarketData data : engine.getMarketPopulationData().values()) {
                 final UIPanelAPI namePanel = settings.createCustom(nameW, rowH, null);
                 final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(nameW, false);

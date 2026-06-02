@@ -37,9 +37,17 @@ public class WorkerRegistry implements Serializable {
         }
     }
 
-    public final void resetPlayerWorkers() {
+    public final void resetWorkersAssignedByMarket(List<MarketAPI> markets) {
         for (WorkerIndustryData data : registry.values()) {
-            if (data.market.isPlayerOwned()) {
+            if (markets.contains(data.market)) {
+                data.resetWorkersAssigned();
+            }
+        }
+    }
+
+    public final void resetWorkersAssignedById(List<String> marketIDs) {
+        for (WorkerIndustryData data : registry.values()) {
+            if (marketIDs.contains(data.marketID)) {
                 data.resetWorkersAssigned();
             }
         }

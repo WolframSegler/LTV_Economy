@@ -88,6 +88,8 @@ customize by Adrien Coquet from <a href="https://thenounproject.com/browse/icons
 
 Blueprint by NAPISAH from <a href="https://thenounproject.com/browse/icons/term/blueprint/" target="_blank" title="Blueprint Icons">Noun Project</a> (CC BY 3.0)
 
+Forbidden by Kosong Tujuh from <a href="https://thenounproject.com/browse/icons/term/forbidden/" target="_blank" title="Forbidden Icons">Noun Project</a> (CC BY 3.0)
+
 <br>
 
 ## AI Generated Assets

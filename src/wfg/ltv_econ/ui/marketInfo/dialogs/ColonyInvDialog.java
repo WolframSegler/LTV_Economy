@@ -329,12 +329,13 @@ public class ColonyInvDialog extends DialogPanel {
             table.addCell(NumFormat.engNotate(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             final ClickHandler<TableRow> rowSelectedRun = (row, isLeftClick) -> {
-                
+                new SetNotExportableStockDialog(cell).show(0.3f, 0.3f);
             };
 
             table.pushRow(
                 null, (tp, exp) -> {
-                    tp.addPara(str("uiTpTxtPressToSetNotExportableStock"), 0f);
+                    final String value = NumFormat.engNotate(cell.nonExportableStock);
+                    tp.addPara(str("uiTpTxtPressToSetNotExportableStock") + " • " + value, 0f, highlight, value);
                 }, rowSelectedRun, CodexDataV2.getCommodityEntryId(com.getId()), null, null
             );
         }
@@ -367,13 +368,13 @@ public class ColonyInvDialog extends DialogPanel {
             final LabelAPI title = settings.createLabel(str("uiDialogTitleNotExportableStock"), Fonts.INSIGNIA_LARGE);
             add(title).inTL(0f, 0f);
 
-            final Base icon = new Base(m_panel, 32, 32, cell.spec.getIconName(), null, null);
+            final Base icon = new Base(m_panel, 28, 28, cell.spec.getIconName(), null, null);
             add(icon).inTR(0f, 0f);
 
-            slider = new Slider(m_panel, null, 0f, 1_000_000f, 350, 32);
+            slider = new Slider(m_panel, null, 0f, 100_000f, 370, 32);
             slider.setProgress(cell.nonExportableStock);
             slider.customText = () -> NumFormat.engNotate(slider.getProgress());
-            add(slider).inBMid(0f);
+            add(slider).inBMid(30f);
         }
 
         @Override

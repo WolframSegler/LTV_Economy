@@ -29,7 +29,7 @@ import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.PieChart;
 import wfg.native_ui.ui.table.SortableTable;
-import wfg.native_ui.ui.table.SortableTable.RowPanel;
+import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.ui.visual.PieChart.PieSlice;
@@ -413,7 +413,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
 
-            final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
+            final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                 if (!NativeUiUtils.isCtrlDown()) return;
 
                 final SectorEntityToken target = cell.market.getPrimaryEntity();
@@ -460,7 +460,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
 
-            final ClickHandler<RowPanel> run = (row, isLeftClick) -> {
+            final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                 if (!NativeUiUtils.isCtrlDown()) return;
 
                 final SectorEntityToken target = cell.market.getPrimaryEntity();

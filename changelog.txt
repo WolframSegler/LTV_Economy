@@ -1,6 +1,8 @@
 Version 0.3.5-beta | SAVE COMPATIBLE
+- Switched to WrapUI v0.4.2 for this update. Version 0.4.1 will not work.
 - Fixed crash caused by WarSimScript.getDangerFor access from a different thread.
 - Fixed stale cache bug.
+- Hopefully fixed a crash caused when starting a new game.
 - Created fuel demand for exporting markets.
 - Added a new service sector for cultural activities.
 - NPC colonies now assign workers to the service sector (basic greedy alloc).

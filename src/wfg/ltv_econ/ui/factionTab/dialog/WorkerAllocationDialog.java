@@ -4,6 +4,7 @@ import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIElementFlags.HasDebugBg;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
@@ -51,6 +53,7 @@ import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.CheckboxButton;
 import wfg.native_ui.ui.functional.UIClickable;
+import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.table.GridTable;
 import wfg.native_ui.ui.table.WidgetAPI;
@@ -96,6 +99,12 @@ public class WorkerAllocationDialog extends DialogPanel {
     public void buildUI() {
         clearChildren();
 
+        final Button excludedBtn = new Button(m_panel, 200, BUTTON_H, str("uiBtnTitleClickToExcludeMarkets"), Fonts.DEFAULT_SMALL, (btn) -> {
+            new ExcludedMarketsDialog().show(0.3f, 0.3f);
+        });
+        excludedBtn.cutStyle = CutStyle.ALL;
+        add(excludedBtn).inTR(pad, pad);
+
         final LabelAPI title = settings.createLabel(str("uiTitleWorkerAllocPlanner"), Fonts.INSIGNIA_VERY_LARGE);
         title.autoSizeToWidth(PANEL_W);
         title.setAlignment(Alignment.MID);
@@ -119,7 +128,7 @@ public class WorkerAllocationDialog extends DialogPanel {
     public class PlanSelectionGrid extends GridTable<WorkerAllocationPlan, PlanSelectionWidget> implements HasOutline {
 
         public PlanSelectionGrid(UIPanelAPI parent, ContentPanel content) {
-            super(parent, LEFT_SIDE_W, PANEL_H - CREATE_PLAN_BTN_H, WIDGET_W, WIDGET_H);
+            super(parent, LEFT_SIDE_W, PANEL_H - CREATE_PLAN_BTN_H, WIDGET_W, WIDGET_H, pad);
 
             uniformOuterGap = true;
             isSelectionEnabled = true;
@@ -321,13 +330,10 @@ public class WorkerAllocationDialog extends DialogPanel {
                     container.addCustom(addGoalBtn.getPanel(), pad);
 
                     for (CustomGoal goal : selectedPlan.goals) {
-                        final GoalPanel goalPanel = new GoalPanel(container, goal);
+                        final GoalPanel goalPanel = new GoalPanel(container, this, goal);
                         container.addCustom(goalPanel.getPanel(), opad);
                     }
                 }
-
-                container.addSpacer(60f);
-                NativeUiUtils.resetFlowLeft(container, hpad);
 
                 if (editable) {
                     final Button savePlanBtn = new Button(container, 100, 30, str("uiBtnTitleSaveWorkerAllocationPlan"), null, null);
@@ -399,7 +405,7 @@ public class WorkerAllocationDialog extends DialogPanel {
         }
     }
 
-    public static class SegmentPanel extends CustomPanel {
+    public static class SegmentPanel extends CustomPanel implements HasDebugBg {
         private final PiecewiseSegment segment;
         private final PiecewiseSegments segments;
         private final TextFieldAPI idField;
@@ -444,11 +450,14 @@ public class WorkerAllocationDialog extends DialogPanel {
     }
 
     public static class GoalPanel extends CustomPanel {
-        public GoalPanel(UIPanelAPI parent, CustomGoal goal) {
+        public GoalPanel(UIPanelAPI parent, ContentPanel content, CustomGoal goal) {
             super(parent, GOAL_PANEL_W, GOAL_PANEL_H);
 
             final LabelAPI title = settings.createLabel(goal.getSerializationId(), Fonts.INSIGNIA_LARGE);
             add(title).inTL(hpad, hpad);
+
+            final RemoveGoalBtn removeBtn = new RemoveGoalBtn(m_panel, content, goal);
+            add(removeBtn).inTR(hpad, hpad);
 
             float yStart = opad + title.getPosition().getHeight();
             final float settingTitleH = 20f;
@@ -512,6 +521,8 @@ public class WorkerAllocationDialog extends DialogPanel {
 
                 yStart += 50;
             }
+
+            setHeight((int) Math.max(yStart, GOAL_PANEL_H));
         }
     }
 
@@ -588,6 +599,25 @@ public class WorkerAllocationDialog extends DialogPanel {
 
         public UIComponentAPI getElement() {
             return m_panel;
+        }
+    }
+
+    public static class RemoveGoalBtn extends Button {
+        private static final SpriteAPI ICON = settings.getSprite("warroom", "icon_close");
+
+        public RemoveGoalBtn(final UIPanelAPI parent, final ContentPanel content, final CustomGoal goal) {
+            super(parent, 20, 20, null, null, (btn) -> {
+                content.selectedPlan.goals.remove(goal);
+                content.buildUI();
+            });
+
+            bgAlpha = 0f;
+            bgDisabledAlpha = 0f;
+
+            final Base icon = new Base(m_panel, 20, 20, ICON, Color.RED, null);
+            add(icon).inBL(0f, 0f);
+            glow.type = GlowType.ADDITIVE;
+            glow.additiveSprite = icon.getSprite();
         }
     }
 }

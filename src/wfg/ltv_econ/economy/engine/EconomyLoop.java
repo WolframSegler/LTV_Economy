@@ -236,9 +236,10 @@ public class EconomyLoop {
         final WorkerRegistry reg = WorkerRegistry.instance();
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         markets.removeIf(m -> !m.isPlayerOwned());
+        markets.removeIf(m -> LtvEconSaveData.instance().playerFactionSettings.excludedMarketsFromWorkerAllocation.contains(m.getId()));
         final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
 
-        reg.resetPlayerWorkers();
+        reg.resetWorkersAssignedByMarket(markets);
 
         final ArrayMap<MarketAPI, float[]> assignedWorkersPerMarket = WorkforceAllocator
             .computeWorkerAllocationCustom(markets, industryOutputPairs, plan);
