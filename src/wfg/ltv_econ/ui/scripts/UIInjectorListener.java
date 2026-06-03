@@ -20,8 +20,7 @@ public class UIInjectorListener implements CoreUITabListener, CommodityTooltipMo
         final SectorAPI sector = Global.getSector();
 
         { // Clear all listeners
-        sector.removeTransientScriptsOfClass(MarketUIReplacer.class);
-        sector.removeTransientScriptsOfClass(OutpostsTabUIBuilder.class);
+        sector.removeTransientScriptsOfClass(LtvCoreTabUIBuilder.class);
         }
 
         switch (tabID) {
@@ -35,6 +34,10 @@ public class UIInjectorListener implements CoreUITabListener, CommodityTooltipMo
 
         case INTEL:
             sector.addTransientScript(new IntelTabUIBuilder());
+            break;
+
+        case FLEET:
+            sector.addTransientScript(new FleetTabUIBuilder());
             break;
     
         default: break;

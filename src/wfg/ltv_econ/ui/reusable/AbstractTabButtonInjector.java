@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
-import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
@@ -17,13 +16,14 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import rolflectionlib.util.RolfLectionUtil;
+import wfg.ltv_econ.ui.scripts.LtvCoreTabUIBuilder;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public abstract class AbstractTabButtonInjector implements EveryFrameScript, CallbackRunnable<Button> {
+public abstract class AbstractTabButtonInjector implements LtvCoreTabUIBuilder, CallbackRunnable<Button> {
     protected static final int BUTTON_HEIGHT = 18;
     protected static final int BUTTON_WIDTH = 130;
 
@@ -158,15 +158,5 @@ public abstract class AbstractTabButtonInjector implements EveryFrameScript, Cal
             case 8 -> Keyboard.KEY_9;
             case 9 -> Keyboard.KEY_0;
         };
-    }
-
-    @Override
-    public boolean isDone() {
-        return !Global.getSector().isPaused();
-    }
-
-    @Override
-    public boolean runWhilePaused() {
-        return true;
     }
 }

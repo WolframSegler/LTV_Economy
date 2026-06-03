@@ -87,6 +87,6 @@ public class ConfigUtils {
         final StarSystemAPI system = sector.getStarSystem(HIDDEN_SYSTEM_ID);
         if (system == null) return;
 
-        sector.removeStarSystem(system);
+        sector.removeStarSystemNextFrame(system);
     }
 }

@@ -5,7 +5,6 @@ import static com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipLocation.BELOW;
 
 import java.util.List;
 
-import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
@@ -41,7 +40,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.MarketConditionsWidget;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
-public class MarketUIReplacer implements EveryFrameScript {
+public class MarketUIReplacer implements LtvCoreTabUIBuilder {
 
     private static final Class<?> knownClass1 = IndustryListPanel.class;
     private static final Class<?> knownClass2 = LtvIndustryListPanel.class;
@@ -344,7 +343,4 @@ public class MarketUIReplacer implements EveryFrameScript {
 
         UIUtils.getTpForStaticAccess().addTooltipTo(TooltipUtils.createAccessTp(market), accessBtn, BELOW, false);
     }
-
-    public boolean isDone() { return !Global.getSector().isPaused(); }
-    public boolean runWhilePaused() { return true; }
 }

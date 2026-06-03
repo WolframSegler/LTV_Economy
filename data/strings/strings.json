@@ -710,6 +710,10 @@
         "uiGoalParamDiscountStrength": "Discount strength",
         "uiGoalParamTargetFraction": "Target (ratio of global demand)",
         "uiGoalParamValueMetricBaseValue": "Base value",
-        "uiGoalParamValueMetricProductionMargin": "Production margin"
+        "uiGoalParamValueMetricProductionMargin": "Production margin",
+        "uiTpTransferToFactionInventoryTitle": "Transfer to Faction Hangar",
+        "uiTpTransferToFactionInventoryTxt": "Strip this ship of all its hullmods and weapons, and transfer it to the faction hangar. Built-in hullmods that were installed by you grant %1$s.\n\nThis action is permanent and cannot be undone.",
+        "uiTxtBonusExperience": "bonus experience",
+        "uiDialogTransferToFactionInventoryTxt": "Transfer ship to the faction hangar? It cannot be undone. The transfer will grant you %1$s %2$s."
     }
 }
