@@ -143,6 +143,7 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
     private final void updateColoniesPanel() {
         final OutpostListPanel panel = (OutpostListPanel) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getColoniesPanel", targetTab);
+        if (panel == null) return;
 
         final UITable table = (UITable) RolfLectionUtil.getAllVariables(panel).stream()
             .filter(e -> e instanceof UITable).findFirst().get();

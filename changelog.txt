@@ -1,5 +1,6 @@
 Version 0.3.6-beta | SAVE COMPATIBLE
 - Added an option to transfer ships from player fleet to the faction hangar.
+- Fixed a crash that could occur when a buildingn notification was pressed.
 
 Version 0.3.5-beta | SAVE COMPATIBLE
 - Switched to WrapUI v0.4.2 for this update. Version 0.4.1 will not work.
