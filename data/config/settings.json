@@ -48,6 +48,9 @@
       "ship_arrow": "graphics/map/ship_arrow.png",
       "bg1": "graphics/map/map_bg_1.jpg",
       "bg2": "graphics/map/map_bg_2.jpg"
+    },
+    "fleetScreen": {
+      "icon_transfer_hangar": "graphics/ui/fleet/transfer_hangar.png"
     }
   }
 }

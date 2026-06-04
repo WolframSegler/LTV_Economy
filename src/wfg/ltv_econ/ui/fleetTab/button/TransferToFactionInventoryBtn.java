@@ -5,6 +5,7 @@ import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.strings.LocalizedStrings.str;
 
 import com.fs.graphics.util.Fader;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -18,17 +19,18 @@ import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class TransferToFactionInventoryBtn extends Button {
     private static final int SIZE = 32;
-    private static final SpriteAPI ICON = settings.getSprite("fleetScreen", "icon_more_info");
+    private static final SpriteAPI ICON = settings.getSprite("fleetScreen", "icon_transfer_hangar");
 
     private final Fader parentWidgetFader;
     private final Base icon;
 
-    public TransferToFactionInventoryBtn(UIPanelAPI parent, Fader parentWidgetFader) {
+    public TransferToFactionInventoryBtn(UIPanelAPI parent, Fader parentWidgetFader, FleetMemberAPI member, UIPanelAPI fleetList) {
         super(parent, SIZE, SIZE, null, null, (btn) -> {
-            new TransferToFactionInventoryDialog().show(0.3f, 0.3f);
+            new TransferToFactionInventoryDialog(member, fleetList).show(0.3f, 0.3f);
         });
 
         this.parentWidgetFader = parentWidgetFader;
+        setShowTooltipWhileInactive(true);
 
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;
@@ -37,7 +39,13 @@ public class TransferToFactionInventoryBtn extends Button {
         tooltip.builder = (tp, expanded) -> {
             tp.addTitle(str("uiTpTransferToFactionInventoryTitle"), base);
 
-            tp.addPara(str("uiTpTransferToFactionInventoryTxt"), opad, Misc.getStoryBrightColor(), str("uiTxtBonusExperience"));
+            tp.addPara(str("uiTpTransferToFactionInventoryTxt1"), opad, Misc.getStoryBrightColor(), str("uiTxtBonusExperience"));
+
+            if (member.isFlagship()) {
+                tp.addPara(str("uiTpTransferToFactionInventoryTxt3"), negative, opad);
+            } else {
+                tp.addPara(str("uiTpTransferToFactionInventoryTxt2"), opad);
+            }
         };
 
         icon = new Base(m_panel, SIZE, SIZE, ICON, dark, null);
@@ -47,6 +55,8 @@ public class TransferToFactionInventoryBtn extends Button {
         glow.additiveBrightness = 1.05f;
         glow.additiveSprite = icon.getSprite();
         glow.color = dark;
+
+        if (member.isFlagship()) setEnabled(false);
     }
 
     @Override

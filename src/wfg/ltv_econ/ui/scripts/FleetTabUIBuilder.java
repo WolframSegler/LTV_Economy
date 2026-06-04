@@ -8,9 +8,11 @@ import com.fs.graphics.util.Fader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.campaign.fleet.FleetMember;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.fleetTab.button.TransferToFactionInventoryBtn;
@@ -60,7 +62,8 @@ public class FleetTabUIBuilder implements LtvCoreTabUIBuilder {
             if (buttons == null) continue;
 
             final Fader widgetFader = (Fader) RolfLectionUtil.getMethodAndInvokeDirectly("getHoverFader", widget);
-            final var btn = new TransferToFactionInventoryBtn(widget, widgetFader);
+            final FleetMemberAPI member = (FleetMember) RolfLectionUtil.getMethodAndInvokeDirectly("getMember", widget);
+            final var btn = new TransferToFactionInventoryBtn(widget, widgetFader, member, fleetPanel);
 
             widget.addComponent(btn.getPanel());
             NativeUiUtils.anchorPanel(btn.getPanel(), buttons.get(buttons.size() - 1), AnchorType.LeftMid, pad);
