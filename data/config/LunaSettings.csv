@@ -44,7 +44,7 @@ AUTO_TRANSFER_PROFIT_LIMIT,Profit Transfer Limit,Double,0.5,,The maximum share o
 TRADE_INTERVAL,Trade Interval,Int,15,,Markets will trade goods every x days.,7,30,Trade
 DAYS_TO_COVER,Stockpile Coverage Days,Int,60,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Trade
 DAYS_TO_COVER_PER_IMPORT,Trade Coverage Limit,Int,28,,Limits how many days of demand can be satisfied per trade run to reduce volatility. Values lower than Trade Interval will cause constant deficits.,1,360,Trade
-EXPORT_THRESHOLD_FACTOR,Export Threshold Factor,Double,2.1,,Multiplier for excess stock required before a market begins exporting.,1,2,Trade
+EXPORT_THRESHOLD_FACTOR,Export Threshold Factor,Double,2.1,,Multiplier for excess stock required before a market begins exporting.,1,5,Trade
 FACTION_EXCHANGE_MULT,Faction Price Multiplier,Double,0.3,,Adjusts prices for goods traded between markets of the same faction. Set to 0 for free in-faction trade.,0,1,Trade
 EMBARGO_REP_DROP,Embargo Reputation Penalty,Double,0.4,,The relationship hit for imposing an embargo. 1 means 100 relation points.,0,1,Trade
 MIN_RELATION_TO_TRADE,Minimum Trade Relationship,Double,-0.75,,Minimum relationship between factions for trade to occur. Factions below this threshold will not trade.,-1,0,Trade
