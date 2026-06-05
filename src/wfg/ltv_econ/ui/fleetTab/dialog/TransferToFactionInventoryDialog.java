@@ -32,7 +32,7 @@ public class TransferToFactionInventoryDialog extends DialogPanel {
     private final UIPanelAPI fleetList;
     
     public TransferToFactionInventoryDialog(FleetMemberAPI member, UIPanelAPI fleetList) {
-        super(450, 120, null, null, str("confirmTxt"), str("uiCancel"));
+        super(450, 120, null, null, str("uiConfirm"), str("uiCancel"));
 
         this.member = member;
         this.fleetList = fleetList;

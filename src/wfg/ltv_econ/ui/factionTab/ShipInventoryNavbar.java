@@ -65,7 +65,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
 
         final MarketAPI market = inv.getCapital();
         final String name = faction.getDisplayName();
-        final String capital = market == null ? str("noneTxt") : market.getName();
+        final String capital = market == null ? str("uiNone") : market.getName();
         final LabelAPI subtitle = settings.createLabel(name + str("uiCapitalCityInTxt") + capital, Fonts.DEFAULT_SMALL);
         subtitle.setHighlightColor(factionSpec.getBaseUIColor());
         subtitle.setHighlight(name, capital);

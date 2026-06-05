@@ -15,7 +15,7 @@ public class DiscardAllDialog extends DialogPanel {
     private final UIBuildableAPI content;
 
     public DiscardAllDialog(UIBuildableAPI content) {
-        super(500, 150, null, str("uiDiscardHullsTxt"), str("confirmTxt"), str("uiCancel"));
+        super(500, 150, null, str("uiDiscardHullsTxt"), str("uiConfirm"), str("uiCancel"));
 
         this.content = content;
 

@@ -53,7 +53,7 @@ public class ServiceSectorDialog extends DialogPanel {
     private final float initialFreeWorkerRatio;
 
     public ServiceSectorDialog(Industry ind) {
-        super(PANEL_W, PANEL_H, null, null, str("confirmTxt"), str("uiCancel"));
+        super(PANEL_W, PANEL_H, null, null, str("uiConfirm"), str("uiCancel"));
         setConfirmShortcut();
 
         final WorkerRegistry reg = WorkerRegistry.instance();

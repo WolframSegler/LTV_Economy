@@ -49,7 +49,7 @@ public class ExcludedMarketsDialog extends DialogPanel {
     }
     
     public ExcludedMarketsDialog() {
-        super(GRID_W, 600, null, null, str("dismissTxt"));
+        super(GRID_W, 600, null, null, str("uiDismiss"));
 
         backgroundDimAmount = 0.1f;
         holo.borderAlpha = 0.66f;

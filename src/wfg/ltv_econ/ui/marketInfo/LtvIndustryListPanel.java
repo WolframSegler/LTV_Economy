@@ -289,7 +289,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 					}
 
 					if (!anyIndustryAdded) {
-						tp.addPara(indent + str("noneTxt"), paraSpacing);
+						tp.addPara(indent + str("uiNone"), paraSpacing);
 					}
 				};
 				tooltip.positioner = (tp, exp) -> {

@@ -97,7 +97,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
      * @param market nullable
      */
     public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com) {
-        super(PANEL_W, PANEL_H, null, null, str("dismissTxt"));
+        super(PANEL_W, PANEL_H, null, null, str("uiDismiss"));
 
         m_market = market;
         m_faction = faction;

@@ -124,7 +124,7 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
                 table.pushRow(null, null, run, null, null, null);
             }
         } else {
-            final LabelAPI lbl = settings.createLabel(str("noColonies"), Fonts.DEFAULT_SMALL);
+            final LabelAPI lbl = settings.createLabel(str("uiNoStaticAssets"), Fonts.DEFAULT_SMALL);
             lbl.setColor(base);
             table.add(lbl).inMid();
         }

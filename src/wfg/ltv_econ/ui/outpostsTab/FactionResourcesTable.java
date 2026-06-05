@@ -94,7 +94,7 @@ public class FactionResourcesTable extends CustomPanel implements HasBackground 
                 );
             }
         } else {
-            final LabelAPI lbl = settings.createLabel(str("noColonies"), Fonts.DEFAULT_SMALL);
+            final LabelAPI lbl = settings.createLabel(str("uiNoStaticAssets"), Fonts.DEFAULT_SMALL);
             lbl.setColor(base);
             table.add(lbl).inMid();
         }

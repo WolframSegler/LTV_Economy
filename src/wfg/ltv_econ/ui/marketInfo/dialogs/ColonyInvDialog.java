@@ -49,7 +49,7 @@ public class ColonyInvDialog extends DialogPanel {
     private final MarketAPI m_market;
 
     public ColonyInvDialog(MarketAPI market) {
-        super(PANEL_W, PANEL_H, null, null, str("dismissTxt"));
+        super(PANEL_W, PANEL_H, null, null, str("uiDismiss"));
         getButton(0).setShortcutAndAppendToText(Keyboard.KEY_3);
 
         m_market = market;
@@ -260,13 +260,13 @@ public class ColonyInvDialog extends DialogPanel {
         };
 
         final Button withdrawBtn = new Button(
-            m_panel, buttonW, buttonH, str("confirmTxt"), Fonts.ORBITRON_12, withdrawRunnable
+            m_panel, buttonW, buttonH, str("uiConfirm"), Fonts.ORBITRON_12, withdrawRunnable
         );
         final Button depositBtn = new Button(
-            m_panel, buttonW, buttonH, str("confirmTxt"), Fonts.ORBITRON_12, depositRunnable
+            m_panel, buttonW, buttonH, str("uiConfirm"), Fonts.ORBITRON_12, depositRunnable
         );
         final Button profitBtn = new Button(
-            m_panel, buttonW, buttonH, str("confirmTxt"), Fonts.ORBITRON_12, profitRunnable
+            m_panel, buttonW, buttonH, str("uiConfirm"), Fonts.ORBITRON_12, profitRunnable
         );
 
         withdrawBtn.setQuickMode(true);
@@ -357,7 +357,7 @@ public class ColonyInvDialog extends DialogPanel {
         private final CommodityCell cell;
 
         public SetNotExportableStockDialog(CommodityCell cell) {
-            super(400, 70, null, null, str("confirmTxt"), str("uiCancel"));
+            super(400, 70, null, null, str("uiConfirm"), str("uiCancel"));
             this.cell = cell;
 
             backgroundDimAmount = 0.1f;

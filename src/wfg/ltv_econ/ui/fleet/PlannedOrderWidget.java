@@ -75,7 +75,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
         tooltip.builder = (tp, expanded) -> {
             final FactionSpecAPI faction = settings.getFactionSpec(StaticData.inv.factionID);
             final MarketAPI capital = StaticData.inv.getCapital();
-            final String capitalName = capital == null ? str("noneTxt") : capital.getName();
+            final String capitalName = capital == null ? str("uiNone") : capital.getName();
 
             tp.addTitle(str("uiShipOrderTitle"), base);
 

@@ -101,7 +101,7 @@ public class PlanConfigLoader {
                 PlanConfig.map.put(planId, plan);
             } catch (Exception e) {
                 log.error("Exception loading worker allocation plan at index " + i, e);
-                new DialogPanel(400, 100, null, str("uiTitleFailedToLoadWorkerAllocationPlan") + e.toString(), str("dismissTxt")).show(0.2f, 0.2f);
+                new DialogPanel(400, 100, null, str("uiTitleFailedToLoadWorkerAllocationPlan") + e.toString(), str("uiDismiss")).show(0.2f, 0.2f);
             }
         }
     }

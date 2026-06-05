@@ -78,7 +78,7 @@ public class ManagePopulationDialog extends DialogPanel {
     private UIPanelAPI selectedPolicyCont = null;
     
     public ManagePopulationDialog(MarketAPI market) {
-        super(PANEL_W, PANEL_H, null, null, str("dismissTxt"));
+        super(PANEL_W, PANEL_H, null, null, str("uiDismiss"));
         getButton(0).setShortcutAndAppendToText(Keyboard.KEY_4);
 
         m_market = market;
@@ -250,7 +250,7 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final Button exploitationBtn = new Button(
-            m_panel, buttonW, buttonH, str("confirmTxt"), Fonts.ORBITRON_12, exploitationRunnable
+            m_panel, buttonW, buttonH, str("uiConfirm"), Fonts.ORBITRON_12, exploitationRunnable
         );
 
         exploitationBtn.setQuickMode(true);

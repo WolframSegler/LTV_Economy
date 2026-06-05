@@ -83,7 +83,7 @@ public class WorkerAllocationDialog extends DialogPanel {
     private PlanSelectionGrid gridPanel;
 
     public WorkerAllocationDialog() {
-        super(PANEL_W, PANEL_H, null, null, str("dismissTxt"));
+        super(PANEL_W, PANEL_H, null, null, str("uiDismiss"));
 
         backgroundDimAmount = 0.2f;
         holo.borderAlpha = 0.8f;
@@ -344,7 +344,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                             PlanConfigLoader.serializeAndWriteToCommon();
                             gridPanel.buildUI();
                         } catch (Exception e) {
-                            new DialogPanel(400, 100, null, str("uiTitleFailedToSaveWorkerAllocationPlan") + e.toString(), str("dismissTxt"))
+                            new DialogPanel(400, 100, null, str("uiTitleFailedToSaveWorkerAllocationPlan") + e.toString(), str("uiDismiss"))
                                 .show(0.3f, 0.3f);
                         }
                     };
@@ -359,7 +359,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                             gridPanel.buildUI();
                             buildUI();
                         } catch (Exception e) {
-                            new DialogPanel(400, 100, null, str("uiTitleFailedToDeleteWorkerAllocationPlan") + e.toString(), str("dismissTxt"))
+                            new DialogPanel(400, 100, null, str("uiTitleFailedToDeleteWorkerAllocationPlan") + e.toString(), str("uiDismiss"))
                                 .show(0.3f, 0.3f);
                         }
                     };
@@ -373,7 +373,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                             .show(0.3f, 0.3f);
 
                     } catch (Exception e) {
-                        new DialogPanel(400, 100, null, str("uiTitleFailedToRunWorkerAllocationPlan") + e.toString(), str("dismissTxt"))
+                        new DialogPanel(400, 100, null, str("uiTitleFailedToRunWorkerAllocationPlan") + e.toString(), str("uiDismiss"))
                             .show(0.3f, 0.3f);
                     }
                 };
