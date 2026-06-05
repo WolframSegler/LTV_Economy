@@ -60,26 +60,27 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
 
     @Override
     protected void onPostInject() {
-        updateColoniesPanel();
-        addColonyInfoButtons();
-    }
-
-    private final void addColonyInfoButtons() {
         final OutpostListPanel panel = (OutpostListPanel) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getColoniesPanel", targetTab);
+        if (panel == null) return;
 
-        final UITable marketTable = (UITable) RolfLectionUtil.getAllVariables(panel).stream()
+        updateColoniesPanel(panel);
+        addColonyInfoButtons(panel);
+    }
+
+    private final void addColonyInfoButtons(final UIPanelAPI colonyPanel) {
+        final UITable marketTable = (UITable) RolfLectionUtil.getAllVariables(colonyPanel).stream()
             .filter(e -> e instanceof UITable).findFirst().get();
-        final ButtonAPI anchor = (ButtonAPI) RolfLectionUtil.getAllVariables(panel).stream()
+        final ButtonAPI anchor = (ButtonAPI) RolfLectionUtil.getAllVariables(colonyPanel).stream()
             .filter(e -> e instanceof ButtonAPI).map(e -> (ButtonAPI) e)
             .filter(e -> e.getText() != null && e.getText().contains("Manage administrators"))
             .findFirst().get();
 
         final int tableH = (int) marketTable.getHeight() + 2;
-        final ColonyPopulationTable popTable = new ColonyPopulationTable(panel, tableH);
-        final FactionResourcesTable facTable = new FactionResourcesTable(panel, tableH);
-        panel.addComponent(popTable.getPanel()).inTL(1, opad + 1);
-        panel.addComponent(facTable.getPanel()).inTL(1, opad + 1);
+        final ColonyPopulationTable popTable = new ColonyPopulationTable(colonyPanel, tableH);
+        final FactionResourcesTable facTable = new FactionResourcesTable(colonyPanel, tableH);
+        colonyPanel.addComponent(popTable.getPanel()).inTL(1, opad + 1);
+        colonyPanel.addComponent(facTable.getPanel()).inTL(1, opad + 1);
         popTable.getPanel().setOpacity(0f);
         facTable.getPanel().setOpacity(0f);
 
@@ -87,11 +88,11 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         final String populationTxt = str("uiPopulationListBtnTitle");
         final String factionTxt = str("uiFactionResourcesBtnTitle");
 
-        final Button showColoniesButton = new Button(panel, 280, 24, coloniesTxt,
+        final Button showColoniesButton = new Button(colonyPanel, 280, 24, coloniesTxt,
             Fonts.ORBITRON_12, null);
-        final Button showPopButton = new Button(panel, 280, 24, populationTxt,
+        final Button showPopButton = new Button(colonyPanel, 280, 24, populationTxt,
             Fonts.ORBITRON_12, null);
-        final Button showFacButton = new Button(panel, 280, 24, factionTxt,
+        final Button showFacButton = new Button(colonyPanel, 280, 24, factionTxt,
             Fonts.ORBITRON_12, null);
 
         final Runnable resetState = () -> {
@@ -132,20 +133,16 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         showPopButton.setShortcutAndAppendToText(Keyboard.KEY_A);
         showFacButton.setShortcutAndAppendToText(Keyboard.KEY_S);
 
-        panel.addComponent(showColoniesButton.getPanel()).belowMid(anchor, opad);
-        panel.addComponent(showPopButton.getPanel()).belowMid(showColoniesButton.getPanel(), opad);
-        panel.addComponent(showFacButton.getPanel()).belowMid(showPopButton.getPanel(), opad);
+        colonyPanel.addComponent(showColoniesButton.getPanel()).belowMid(anchor, opad);
+        colonyPanel.addComponent(showPopButton.getPanel()).belowMid(showColoniesButton.getPanel(), opad);
+        colonyPanel.addComponent(showFacButton.getPanel()).belowMid(showPopButton.getPanel(), opad);
 
         showColoniesButton.setChecked(true);
     }
 
     @SuppressWarnings("unchecked")
-    private final void updateColoniesPanel() {
-        final OutpostListPanel panel = (OutpostListPanel) RolfLectionUtil.getMethodAndInvokeDirectly(
-            "getColoniesPanel", targetTab);
-        if (panel == null) return;
-
-        final UITable table = (UITable) RolfLectionUtil.getAllVariables(panel).stream()
+    private final void updateColoniesPanel(final UIPanelAPI colonyPanel) {
+        final UITable table = (UITable) RolfLectionUtil.getAllVariables(colonyPanel).stream()
             .filter(e -> e instanceof UITable).findFirst().get();
         final var rows = (List<OutpostItemRow>) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getRows", table);
