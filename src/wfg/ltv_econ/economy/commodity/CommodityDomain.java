@@ -264,7 +264,8 @@ public class CommodityDomain implements Serializable {
             final double unitPrice = exporterPrice * (1f - weight) + importerPrice * weight;
             final double price = unitPrice * amountToSend;
 
-            if(sameFaction) {
+            impCell.virtualImports += amountToSend;
+            if (sameFaction) {
                 expCell.inFactionExports += amountToSend;
             } else {
                 expCell.globalExports += amountToSend;

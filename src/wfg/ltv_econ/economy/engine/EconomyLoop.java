@@ -336,6 +336,7 @@ public class EconomyLoop {
         engine.comDomains.values().forEach(CommodityDomain::createFormalTradeFlows);
 
         final ArrayMap<String, TradeMission> missions = new ArrayMap<>(32);
+
         for (CommodityDomain dom : engine.comDomains.values()) {
             final String comID = dom.comID;
             for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {

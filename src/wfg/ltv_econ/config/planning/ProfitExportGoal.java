@@ -51,7 +51,10 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
         final double[] scores = new double[dense.columnSize];
         double maxScore = 0d;
         for (int col = 0; col < dense.columnSize; col++) {
-            final String comID = IndustryMatrix.getWorkerRelatedCommodityIDs().get(dense.columnComIdx[col]);
+            final int comIndex = dense.columnComIdx[col];
+            if (comIndex < 0) continue;
+
+            final String comID = IndustryMatrix.getWorkerRelatedCommodityIDs().get(comIndex);
             final String indID = dense.columnIndustryId[col];
             final double s = computeScore(comID, indID);
             scores[col] = s;

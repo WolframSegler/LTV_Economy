@@ -10,7 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
+import org.apache.log4j.Logger;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
@@ -63,6 +65,7 @@ import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 import wfg.native_ui.util.NativeUiUtils;
 
 public class WorkerAllocationDialog extends DialogPanel {
+    private static final Logger log = Global.getLogger(WorkerAllocationDialog.class);
     private static final SpriteAPI CUSTOM = settings.getSprite("ui", "customize");
     private static final SpriteAPI PRESET = settings.getSprite("ui", "blueprint");
     private static final int PANEL_W = 1100;
@@ -346,6 +349,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                         } catch (Exception e) {
                             new DialogPanel(400, 100, null, str("uiTitleFailedToSaveWorkerAllocationPlan") + e.toString(), str("uiDismiss"))
                                 .show(0.3f, 0.3f);
+                            log.error(e.toString());
                         }
                     };
 
@@ -361,6 +365,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                         } catch (Exception e) {
                             new DialogPanel(400, 100, null, str("uiTitleFailedToDeleteWorkerAllocationPlan") + e.toString(), str("uiDismiss"))
                                 .show(0.3f, 0.3f);
+                            log.error(e.toString());
                         }
                     };
                 }
@@ -375,6 +380,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                     } catch (Exception e) {
                         new DialogPanel(400, 100, null, str("uiTitleFailedToRunWorkerAllocationPlan") + e.toString(), str("uiDismiss"))
                             .show(0.3f, 0.3f);
+                        log.error(e.toString());
                     }
                 };
             }

@@ -57,7 +57,7 @@ public class MarketEventsDialog extends DockPanel {
 
         float yCoord = 0f;
         for (MarketEvent event : data.getEvents()) {
-            if (!event.isVisible(data) && !DebugFlags.COLONY_DEBUG) return;
+            if (!event.isVisible(data) && !DebugFlags.COLONY_DEBUG) continue;
 
             final RowPanel row = new RowPanel(
                 eventsList, width - pad*2, ROW_H, event

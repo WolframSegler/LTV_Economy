@@ -47,6 +47,8 @@ public class CommodityCell implements Serializable {
     private transient ArrayMap<String, MutableStat> productionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
     private transient ArrayMap<String, MutableStat> consumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
     
+    /** used by {@link CommodityDomain#createFormalTradeFlows} for accounting */ 
+    transient float virtualImports = 0f;
     public transient float inFactionImports = 0f;
     public transient float inFactionExports = 0f;
     public transient float globalImports = 0f;
@@ -150,7 +152,7 @@ public class CommodityCell implements Serializable {
         final double cap = EconConfig.DAYS_TO_COVER_PER_IMPORT * getTargetQuantum(true);
         final float target = (float) Arithmetic.clamp(getTargetStockpiles() - stored, 0d, cap);
 
-        return Math.max(target - getTotalImports(), 0f);
+        return Math.max(target - getTotalImports() - virtualImports, 0f);
     }
     public final float getFlowEconomicFootprint() {
         return getTargetQuantumMet() + getTargetQuantumUnmet() + getOverImports()
@@ -257,6 +259,7 @@ public class CommodityCell implements Serializable {
         inFactionImports = 0f;
         globalImports = 0f;
         informalImports = 0f;
+        virtualImports = 0f;
 
         inFactionExports = 0f;
         globalExports = 0f;
