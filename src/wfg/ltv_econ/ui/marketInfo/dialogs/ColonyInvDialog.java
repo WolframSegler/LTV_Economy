@@ -374,7 +374,7 @@ public class ColonyInvDialog extends DialogPanel {
             slider = new Slider(m_panel, null, 0f, 100_000f, 370, 32);
             slider.setProgress(cell.nonExportableStock);
             slider.customText = () -> NumFormat.engNotate(slider.getProgress());
-            add(slider).inBMid(30f);
+            add(slider).inBMid(35f);
         }
 
         @Override

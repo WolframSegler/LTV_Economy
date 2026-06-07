@@ -2,7 +2,7 @@ Version 0.3.7-beta | SAVE COMPATIBLE
 - Fixed dockyard construction policy not looking at local storage.
 - Fixed some custom allocator bugs.
 - Fixed events not being visible.
-- Fixed critical logical bug in the trade resolver. 
+- Fixed critical logical bug in the trade resolver. Markets should no longer import more than they need.
 
 Version 0.3.6-beta | SAVE COMPATIBLE
 - Added an option to transfer ships from player fleet to the faction hangar.
