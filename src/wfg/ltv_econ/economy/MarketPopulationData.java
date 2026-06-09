@@ -30,14 +30,11 @@ import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.native_ui.util.Arithmetic;
 
-// TODO after incompat update rename to MarketPopulationData
-public class PlayerMarketData implements Serializable, MarketImmigrationModifier {
+public class MarketPopulationData implements Serializable, MarketImmigrationModifier {
     public final String marketID;
     public transient MarketAPI market;
 
-    /**
-     * Value must be between 0 and 1.
-     */
+    /** Value must be between 0 and 1. */
     public float playerProfitRatio = 0f;
 
     public final StatBonus healthDelta = new StatBonus();
@@ -61,7 +58,7 @@ public class PlayerMarketData implements Serializable, MarketImmigrationModifier
     private final ArrayList<MarketPolicy> policies = new ArrayList<>();
     private final ArrayList<MarketEvent> events = new ArrayList<>();
 
-    public PlayerMarketData(String marketID) {
+    public MarketPopulationData(String marketID) {
         this.marketID = marketID;
         readResolve();
 

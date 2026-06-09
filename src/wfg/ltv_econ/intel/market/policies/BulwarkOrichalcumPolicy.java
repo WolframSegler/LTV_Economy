@@ -9,7 +9,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class BulwarkOrichalcumPolicy extends MarketPolicy {
@@ -21,7 +21,7 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
     public static final float DEFENSE_MULT_BUFF = 2.5f;
     public static final int DEFENSE_FLAT_BUFF = 150;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
 
         final EconomyEngine engine = EconomyEngine.instance();
@@ -36,7 +36,7 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
             id, DEFENSE_MULT_BUFF, spec.name);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.happinessDelta.unmodifyFlat(id);
 
         final EconomyEngine engine = EconomyEngine.instance();
@@ -50,12 +50,12 @@ public class BulwarkOrichalcumPolicy extends MarketPolicy {
     }
 
     @Override
-    public boolean isEnabled(PlayerMarketData data) {
+    public boolean isEnabled(MarketPopulationData data) {
         return data.market.getIndustry(Industries.HEAVYBATTERIES) != null;
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

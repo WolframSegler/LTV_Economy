@@ -173,7 +173,7 @@ public class CommodityCell implements Serializable {
         return target <= 0f ? 1f : (float) Math.min(stored / target, 1f);
     }
     public final double getStoredDeficit() {
-        return Math.max(0.0, getTargetStockpiles() - stored);
+        return Math.max(0d, getTargetStockpiles() - stored);
     }
     public final double getStoredExcess() {
         return computeExportAmount();
@@ -186,7 +186,7 @@ public class CommodityCell implements Serializable {
     }
 
     public final void addStoredAmount(double a) {
-        stored = Math.max(0.0, stored + a);
+        stored = Math.max(0d, stored + a);
     }
 
     public CommodityCell(String comID, String marketID) {

@@ -58,7 +58,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		if (marinesAssigned <= 0) return 0;
 		
 		lootMult *= 0.9f + random.nextFloat() * 0.2f;
-        quantityLooted = (int) Math.max(1.0, Math.floor(getQuantity(marinesAssigned, lootMult)));
+        quantityLooted = (int) Math.max(1d, Math.floor(getQuantity(marinesAssigned, lootMult)));
 		
 		loot.addCommodity(id, quantityLooted);
 		cell.addStoredAmount(-quantityLooted);
@@ -220,8 +220,8 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		final double maxQuantity = stored * EconConfig.RAID_STOCKPILES_ACCESS_RATIO;
         final double marineQuantity = maxQuantity * marines / MarketCMD.MAX_MARINE_TOKENS;
         final double deficitMult = 1d / (2d - cell.getStoredAvailabilityRatio());
-        final double excessMult = Math.min(3.0, (cell.getStoredExcess() + stored) / stored);
-        final double prodMult = Arithmetic.clamp(cell.getProduction(true) / (1d + cell.getTargetQuantum(true)), 1.0, 2d);
+        final double excessMult = Math.min(3d, (cell.getStoredExcess() + stored) / stored);
+        final double prodMult = Arithmetic.clamp(cell.getProduction(true) / (1d + cell.getTargetQuantum(true)), 1d, 2d);
 
         final double value = marineQuantity * EconConfig.RAID_BASE_EFF * deficitMult * excessMult * prodMult * mult;
         return (float) Math.min(maxQuantity, value);

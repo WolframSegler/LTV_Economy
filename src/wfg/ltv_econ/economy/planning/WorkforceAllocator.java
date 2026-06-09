@@ -306,7 +306,7 @@ public class WorkforceAllocator {
     
                 for (int c = 0; c < C; c++) {
                     if (demand[c] <= 0d) comAvailability[c] = 1d;
-                    else comAvailability[c] = Math.min(1.0, netCommodity[c] / demand[c]);
+                    else comAvailability[c] = Math.min(1d, netCommodity[c] / demand[c]);
                 }
     
                 final var byIndustry = IndustryIOs.getBaseInputsMap();

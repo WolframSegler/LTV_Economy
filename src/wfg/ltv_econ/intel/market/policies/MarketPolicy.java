@@ -13,7 +13,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.config.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.config.PolicyConfigLoader.PolicySpec;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.intel.PolicyNotificationIntel;
@@ -32,16 +32,16 @@ public abstract class MarketPolicy {
     public boolean repeatAfterCooldown = false;
 
     /** Called exactly once */
-    public abstract void apply(PlayerMarketData data);
+    public abstract void apply(MarketPopulationData data);
     /** Called exactly once */
-    public abstract void unapply(PlayerMarketData data);
+    public abstract void unapply(MarketPopulationData data);
 
-    public void preAdvance(PlayerMarketData data) {};
-    public void postAdvance(PlayerMarketData data) {};
-    public boolean isEnabled(PlayerMarketData data) { return true; }
-    public boolean isActive(PlayerMarketData data) { return state == PolicyState.ACTIVE; }
-    public boolean isAvailable(PlayerMarketData data) { return state == PolicyState.AVAILABLE; }
-    public boolean isOnCooldown(PlayerMarketData data) { return state == PolicyState.COOLDOWN; }
+    public void preAdvance(MarketPopulationData data) {};
+    public void postAdvance(MarketPopulationData data) {};
+    public boolean isEnabled(MarketPopulationData data) { return true; }
+    public boolean isActive(MarketPopulationData data) { return state == PolicyState.ACTIVE; }
+    public boolean isAvailable(MarketPopulationData data) { return state == PolicyState.AVAILABLE; }
+    public boolean isOnCooldown(MarketPopulationData data) { return state == PolicyState.COOLDOWN; }
 
     public Object readResolve() {
         spec = PolicyConfig.map.get(id);
@@ -49,7 +49,7 @@ public abstract class MarketPolicy {
         return this;
     }
 
-    public final void advanceTime(PlayerMarketData data, int days) {
+    public final void advanceTime(MarketPopulationData data, int days) {
         switch (state) {
         case ACTIVE:
             activeDaysRemaining -= days;
@@ -73,7 +73,7 @@ public abstract class MarketPolicy {
         }
     }
 
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         tp.addTitle(spec.name, base);
         
         tp.addPara(spec.description, text_color, pad);
@@ -83,25 +83,25 @@ public abstract class MarketPolicy {
         }
     }
 
-    public void notifyAvailable(PlayerMarketData data) {
+    public void notifyAvailable(MarketPopulationData data) {
         Global.getSector().getIntelManager().addIntel(
             new PolicyNotificationIntel(data, this, true),
             false
         );
     }
 
-    public void notifyFinished(PlayerMarketData data) {
+    public void notifyFinished(MarketPopulationData data) {
         Global.getSector().getIntelManager().addIntel(
             new PolicyNotificationIntel(data, this, false),
             false
         );
     }
 
-    public final void activate(PlayerMarketData data) {
+    public final void activate(MarketPopulationData data) {
         activate(data, spec.durationDays);
     }
 
-    public final void activate(PlayerMarketData data, int durationDays) {
+    public final void activate(MarketPopulationData data, int durationDays) {
         if (state != PolicyState.AVAILABLE) return;
         if (EconomyEngine.instance().getCredits(data.marketID) < spec.cost &&
             !DebugFlags.COLONY_DEBUG
@@ -115,11 +115,11 @@ public abstract class MarketPolicy {
         apply(data);
     }
 
-    public final void deactivate(PlayerMarketData data) {
+    public final void deactivate(MarketPopulationData data) {
         deactivate(data, spec.cooldownDays);
     }
 
-    public final void deactivate(PlayerMarketData data, int cooldownDays) {
+    public final void deactivate(MarketPopulationData data, int cooldownDays) {
         if (state != PolicyState.ACTIVE) return;
 
         cooldownDaysRemaining = cooldownDays;
@@ -127,7 +127,7 @@ public abstract class MarketPolicy {
         unapply(data);
     }
 
-    public static final List<String> getPolicyLedgerKeys(final PlayerMarketData data) {
+    public static final List<String> getPolicyLedgerKeys(final MarketPopulationData data) {
         final List<String> keys = new ArrayList<>(4);
         for (MarketPolicy policy : data.getPolicies()) {
             keys.add(POLICY_COST_KEY + policy.spec.id);

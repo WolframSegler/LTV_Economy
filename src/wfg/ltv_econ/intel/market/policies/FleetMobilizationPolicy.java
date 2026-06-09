@@ -9,7 +9,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class FleetMobilizationPolicy extends MarketPolicy {
@@ -22,7 +22,7 @@ public class FleetMobilizationPolicy extends MarketPolicy {
     public static final int MEDIUM_FLEETS = 4;
     public static final int HEAVY_FLEETS = 2;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
 
         final EconomyEngine engine = EconomyEngine.instance();
@@ -40,7 +40,7 @@ public class FleetMobilizationPolicy extends MarketPolicy {
             .modifyFlat(id, HEAVY_FLEETS, spec.name);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.happinessDelta.unmodifyFlat(id);
 
         final EconomyEngine engine = EconomyEngine.instance();
@@ -56,13 +56,13 @@ public class FleetMobilizationPolicy extends MarketPolicy {
     }
 
     @Override
-    public boolean isEnabled(PlayerMarketData data) {
+    public boolean isEnabled(MarketPopulationData data) {
         return data.market.getIndustry(Industries.MILITARYBASE) != null ||
             data.market.getIndustry(Industries.HIGHCOMMAND) != null;
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

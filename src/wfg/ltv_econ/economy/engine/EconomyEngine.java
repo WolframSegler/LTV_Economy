@@ -30,7 +30,7 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.ltv_econ.constants.SubmarketsID;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
@@ -88,7 +88,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     
     final Set<String> registeredMarkets = new HashSet<>();
     final ArrayMap<String, CommodityDomain> comDomains = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
-    final ArrayMap<String, PlayerMarketData> playerMarketData = new ArrayMap<>();
+    final ArrayMap<String, MarketPopulationData> playerMarketData = new ArrayMap<>();
     final ArrayMap<String, Long> marketCredits = new ArrayMap<>(EconomyInfo.getMarketsCount());
     final ArrayMap<String, FactionShipInventory> factionShipInventories = new ArrayMap<>(EconomyConstants.visibleFactionIDs.size());
     final ArrayList<TradeMission> activeMissions = new ArrayList<>(2048);
@@ -191,7 +191,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
         addCredits(marketID, EconConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) {
-            playerMarketData.put(marketID, new PlayerMarketData(marketID));
+            playerMarketData.put(marketID, new MarketPopulationData(marketID));
             market.addSubmarket(SubmarketsID.STOCKPILES);
             market.removeSubmarket(Submarkets.LOCAL_RESOURCES);
         }
@@ -235,7 +235,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return Collections.unmodifiableSet(registeredMarkets);
     }
 
-    public Map<String, PlayerMarketData> getMarketPopulationData() {
+    public Map<String, MarketPopulationData> getMarketPopulationData() {
         return Collections.unmodifiableMap(playerMarketData);
     }
 
@@ -243,12 +243,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return playerMarketData.containsKey(marketID);
     }
 
-    public final PlayerMarketData getMarketPopulationData(String marketID) {
+    public final MarketPopulationData getMarketPopulationData(String marketID) {
         return playerMarketData.get(marketID);
     }
 
-    public final PlayerMarketData addMarketPopulationData(String marketID) {
-        return playerMarketData.computeIfAbsent(marketID, m -> new PlayerMarketData(marketID));
+    public final MarketPopulationData addMarketPopulationData(String marketID) {
+        return playerMarketData.computeIfAbsent(marketID, m -> new MarketPopulationData(marketID));
     }
 
     public final List<CommodityDomain> getComDomains() {
@@ -359,7 +359,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         final MonthlyReport report = SharedData.getData().getCurrentReport();
 
         endMonth();
-        playerMarketData.values().forEach(PlayerMarketData::endMonth);
+        playerMarketData.values().forEach(MarketPopulationData::endMonth);
         factionShipInventories.values().forEach(FactionShipInventory::endMonth);
         financeReg.endMonth();
         
@@ -368,7 +368,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         marketsNode.custom = MonthlyReport.OUTPOSTS;
         marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
 
-        for (PlayerMarketData data : playerMarketData.values()) {
+        for (MarketPopulationData data : playerMarketData.values()) {
             final MarketAPI market = data.market;
             final long netIncome = financeReg.getLedger(market).getNetLastMonth();
             final float r = data.getEffectiveProfitRatio();
@@ -565,8 +565,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         }
 
         if (isPlayerMarket(marketID)) {
-            final PlayerMarketData data = getMarketPopulationData(marketID);
-            final float penalty = isSaturation ? PlayerMarketData.BASELINE_VALUE : PlayerMarketData.BASELINE_VALUE / 4f;
+            final MarketPopulationData data = getMarketPopulationData(marketID);
+            final float penalty = isSaturation ? MarketPopulationData.BASELINE_VALUE : MarketPopulationData.BASELINE_VALUE / 4f;
             data.setHealth(data.getHealth() - penalty);
             data.setHappiness(data.getHappiness() - penalty);
 

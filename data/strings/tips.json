@@ -7,10 +7,10 @@
         "freq":0.5, "tip":"[LTV] Press on the colony income label to open a detailed breakdown panel."
     },
     {
-        "freq":0.5, "tip":"[LTV] Trade missions are dispatched in discrete cycles configurable through LunaLib settings."
+        "freq":0.0, "tip":"[LTV] Trade missions are dispatched in discrete cycles configurable through LunaLib settings."
     },
     {
-        "freq":0.25, "tip":"[LTV] The informal sector seeks imbalances between supply and demand to make a quick buck."
+        "freq":0.0, "tip":"[LTV] The informal sector seeks imbalances between supply and demand to make a quick buck."
     },
     {
         "freq":0.25, "tip":"[LTV] Factions can be embargoed at a relation cost (Command > Faction > Administration)."

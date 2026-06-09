@@ -11,6 +11,7 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.LtvEconFleetRouteManager;
+import wfg.ltv_econ.economy.fleet.PatrolFleetRouteManager;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 
@@ -23,7 +24,8 @@ public class LtvEconSaveData implements Serializable {
     public WorkerRegistry workerRegistry;
     public MarketFinanceRegistry financeRegistry;
     public EconomyEngine economyEngine;
-    public LtvEconFleetRouteManager routeManager;
+    public LtvEconFleetRouteManager econRouteManager;
+    public PatrolFleetRouteManager patrolRouteManager;
 
     private LtvEconSaveData() {
         instance = this;
@@ -31,14 +33,8 @@ public class LtvEconSaveData implements Serializable {
         workerRegistry = new WorkerRegistry();
         financeRegistry = new MarketFinanceRegistry();
         economyEngine = new EconomyEngine();
-        routeManager = new LtvEconFleetRouteManager();
-    }
-
-    // TODO remove after incompatible update
-    private final Object readResolve() {
-        if (routeManager == null) routeManager = new LtvEconFleetRouteManager();
-
-        return this;
+        econRouteManager = new LtvEconFleetRouteManager();
+        patrolRouteManager = new PatrolFleetRouteManager();
     }
 
     public static final LtvEconSaveData loadInstance(boolean forceRefresh,
@@ -68,7 +64,7 @@ public class LtvEconSaveData implements Serializable {
 
         sector.getListenerManager().addListener(data.economyEngine, true);
         sector.addTransientScript(data.economyEngine);
-        sector.addTransientScript(data.routeManager);
+        sector.addTransientScript(data.econRouteManager);
 
         StaticData.loadData(data);
 

@@ -6,7 +6,7 @@ import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.intel.market.events.LocalizedGangSkirmishesEvent;
 import wfg.native_ui.util.Arithmetic;
@@ -27,7 +27,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
     private int activeDaysRemaining = 0;
 
     @Override
-    public void preAdvance(PlayerMarketData data) {
+    public void preAdvance(MarketPopulationData data) {
         if (active || cooldownDaysRemaining > 0) return;
 
         final float cohesion = data.getSocialCohesion();
@@ -59,7 +59,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
     }
 
     @Override
-        public void postAdvance(PlayerMarketData data) {
+        public void postAdvance(MarketPopulationData data) {
         if (active) {
             activeDaysRemaining--;
             if (activeDaysRemaining <= 0) deactivate(data);
@@ -68,7 +68,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
         }
     }
 
-    private final void deactivate(PlayerMarketData data) {
+    private final void deactivate(MarketPopulationData data) {
         if (!active) return;
 
         for (MarketImmigrationModifier immigMod : data.market.getTransientImmigrationModifiers()) {
@@ -83,7 +83,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         tp.setTitleSmallOrbitron();
         tp.addTitle(spec.name, negative);
 

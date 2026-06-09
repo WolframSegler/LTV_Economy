@@ -17,7 +17,7 @@ import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.CustomRepImpact;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActions;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepRewards;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 // TODO externalize strings or place into rules.csv
@@ -31,7 +31,7 @@ public class BresVitalisBarEvent extends BaseBarEvent {
 
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
-        final PlayerMarketData data = EconomyEngine.instance().getMarketPopulationData(market.getId());
+        final MarketPopulationData data = EconomyEngine.instance().getMarketPopulationData(market.getId());
         if (data == null || !data.getPolicy("bres_vitalis").isActive(data)) return false;
         return Math.random() < 0.15f || DebugFlags.BAR_DEBUG;
     }

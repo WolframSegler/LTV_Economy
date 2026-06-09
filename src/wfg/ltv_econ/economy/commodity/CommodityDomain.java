@@ -260,7 +260,7 @@ public class CommodityDomain implements Serializable {
             // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
             final double exporterPrice = expCell.getUnitPrice(PriceType.MARKET_SELLING, (long)amountToSend);
             final double importerPrice = impCell.getUnitPrice(PriceType.MARKET_BUYING, (long)amountToSend);
-            final double weight = Math.min(1.0, impCell.getTargetQuantumPreTrade() / amountToSend);
+            final double weight = Math.min(1d, impCell.getTargetQuantumPreTrade() / amountToSend);
             final double unitPrice = exporterPrice * (1f - weight) + importerPrice * weight;
             final double price = unitPrice * amountToSend;
 

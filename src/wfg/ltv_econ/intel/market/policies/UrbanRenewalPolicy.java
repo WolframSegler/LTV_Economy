@@ -8,7 +8,7 @@ import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 
 public class UrbanRenewalPolicy extends MarketPolicy {
     public static final float HEALTH_BUFF = 0.4f;
@@ -17,7 +17,7 @@ public class UrbanRenewalPolicy extends MarketPolicy {
 
     public static final int POP_GROWTH_BUFF = 10;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         data.healthDelta.modifyFlat(id, HEALTH_BUFF, spec.name);
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
@@ -25,7 +25,7 @@ public class UrbanRenewalPolicy extends MarketPolicy {
         data.market.addTransientImmigrationModifier(new UrbanRenewalImmigration());
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.healthDelta.unmodifyFlat(id);
         data.happinessDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
@@ -39,12 +39,12 @@ public class UrbanRenewalPolicy extends MarketPolicy {
     }
 
     @Override
-    public boolean isEnabled(PlayerMarketData data) {
+    public boolean isEnabled(MarketPopulationData data) {
         return data.market.getSize() > 3;
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

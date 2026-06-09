@@ -7,7 +7,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
@@ -26,7 +26,7 @@ public class SubstanceControlPolicy extends MarketPolicy {
     private boolean phase2 = false;
     private CommodityCell cell;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         cell = EconomyEngine.instance().getComCell(Commodities.DRUGS, data.marketID);
         cell.getConsumptionStat().modifyMult(id, DRUGS_MULT_P1, spec.name);
         data.healthDelta.modifyFlat(id, HEALTH_BUFF_P1, spec.name);
@@ -35,7 +35,7 @@ public class SubstanceControlPolicy extends MarketPolicy {
     }
 
     @Override
-    public void preAdvance(PlayerMarketData data) {
+    public void preAdvance(MarketPopulationData data) {
         if (activeDaysRemaining > 180 || phase2) return;
 
         cell.getConsumptionStat().modifyMult(id, DRUGS_MULT_P2, spec.name);
@@ -46,7 +46,7 @@ public class SubstanceControlPolicy extends MarketPolicy {
         phase2 = true;
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         cell.getConsumptionStat().unmodifyMult(id);
         data.healthDelta.unmodifyFlat(id);
         data.happinessDelta.unmodifyFlat(id);
@@ -56,12 +56,12 @@ public class SubstanceControlPolicy extends MarketPolicy {
     }
 
     @Override
-    public boolean isEnabled(PlayerMarketData data) {
+    public boolean isEnabled(MarketPopulationData data) {
         return !data.market.isFreePort() || isActive(data);
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

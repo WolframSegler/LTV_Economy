@@ -5,14 +5,17 @@ import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteData;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
-// TODO After incompatible update change route manager access TradeMission through this class.
 public class LtvEconomyRouteData extends EconomyRouteData {
-    private transient TradeMission mission;
     public final long uniqueID;
+    private transient TradeMission mission;
 
     public LtvEconomyRouteData(TradeMission mission) {
         uniqueID = mission.uniqueID;
         this.mission = mission;
+
+        from = mission.src;
+        to = mission.dest;
+        smuggling = mission.smuggling;
     }
 
     public final TradeMission getMission() {
@@ -25,15 +28,6 @@ public class LtvEconomyRouteData extends EconomyRouteData {
             }
         }
         return mission;
-    }
-
-    public static final LtvEconomyRouteData createData(TradeMission mission) {
-        final LtvEconomyRouteData data = new LtvEconomyRouteData(mission);
-        data.from = mission.src;
-        data.to = mission.dest;
-        data.smuggling = mission.smuggling;
-
-        return data;
     }
 
     public static final TradeMission getMission(RouteData route) {

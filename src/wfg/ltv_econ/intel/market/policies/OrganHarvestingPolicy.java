@@ -10,7 +10,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.native_ui.util.NumFormat;
@@ -24,7 +24,7 @@ public class OrganHarvestingPolicy extends MarketPolicy {
     public static final int HARVESTED_ORGANS_BUFF = 10;
     public static final int ASSET_SEIZURE_CREDITS_BUFF = 100;
 
-    public void apply(PlayerMarketData data) {     
+    public void apply(MarketPopulationData data) {     
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
         data.healthDelta.modifyFlat(id, HEALTH_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
@@ -34,7 +34,7 @@ public class OrganHarvestingPolicy extends MarketPolicy {
             .getProductionStat().modifyFlat(id, HARVESTED_ORGANS_BUFF, spec.name);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.happinessDelta.unmodifyFlat(id);
         data.healthDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id) ;
@@ -49,17 +49,17 @@ public class OrganHarvestingPolicy extends MarketPolicy {
             .getProductionStat().unmodifyFlat(id);
     }
 
-    public void postAdvance(PlayerMarketData data) {
+    public void postAdvance(MarketPopulationData data) {
         MarketFinanceRegistry.instance().getLedger(data.marketID).add(id, ASSET_SEIZURE_CREDITS_BUFF, spec.name);
     }
 
     @Override
-    public boolean isEnabled(PlayerMarketData data) {
+    public boolean isEnabled(MarketPopulationData data) {
         return data.market.getSize() > 4;
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

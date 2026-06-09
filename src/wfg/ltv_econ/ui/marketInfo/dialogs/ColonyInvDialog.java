@@ -21,7 +21,7 @@ import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constants.EconomyConstants;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -63,7 +63,7 @@ public class ColonyInvDialog extends DialogPanel {
     @Override
     public void buildUI() {
         final EconomyEngine engine = EconomyEngine.instance();
-        final PlayerMarketData data = engine.getMarketPopulationData(m_market.getId());
+        final MarketPopulationData data = engine.getMarketPopulationData(m_market.getId());
         final boolean hasData = data != null;
 
         final int sliderH = 32;

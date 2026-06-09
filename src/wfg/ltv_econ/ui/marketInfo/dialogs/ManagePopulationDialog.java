@@ -30,7 +30,7 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constants.SubmarketsID;
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.ltv_econ.ui.marketInfo.population.CohesionPair;
@@ -92,7 +92,7 @@ public class ManagePopulationDialog extends DialogPanel {
     @Override
     public void buildUI() {
         final EconomyEngine engine = EconomyEngine.instance();
-        final PlayerMarketData data = engine.getMarketPopulationData(m_market.getId());
+        final MarketPopulationData data = engine.getMarketPopulationData(m_market.getId());
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
 
         final int SECT_I_H = 30;
@@ -379,7 +379,7 @@ public class ManagePopulationDialog extends DialogPanel {
     }
 
     private final PositionAPI buildPoster(UIPanelAPI cont, MarketPolicy policy,
-        PlayerMarketData mData, ClickHandler<ListenerProviderPanel> listener, int width, int height
+        MarketPopulationData mData, ClickHandler<ListenerProviderPanel> listener, int width, int height
     ) {
         try {
             settings.loadTexture(policy.spec.posterPath);
@@ -433,7 +433,7 @@ public class ManagePopulationDialog extends DialogPanel {
     }
 
     private final void buildSelectedPosterMenu(UIPanelAPI cont,
-        MarketPolicy policy, PlayerMarketData mData, CallbackRunnable<Button> activateRun
+        MarketPolicy policy, MarketPopulationData mData, CallbackRunnable<Button> activateRun
     ) {
         final int posterW = 163;
         final int buttonW = 140;

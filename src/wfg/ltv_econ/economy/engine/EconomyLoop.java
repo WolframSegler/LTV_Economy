@@ -31,7 +31,7 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.config.LaborConfig;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -94,10 +94,10 @@ public class EconomyLoop {
         
         weightedOutputDeficitMods();
 
-        engine.playerMarketData.values().forEach(PlayerMarketData::apply);
+        engine.playerMarketData.values().forEach(MarketPopulationData::apply);
 
         if (!fakeAdvance) {
-            engine.playerMarketData.values().forEach(PlayerMarketData::advance);
+            engine.playerMarketData.values().forEach(MarketPopulationData::advance);
 
             handleTrade();
             
@@ -681,7 +681,7 @@ public class EconomyLoop {
             MarketFinanceRegistry.instance().getLedger(marketID).add(SERVICE_CULTURE, monthlyRevenue, str("serviceSectorCultureDesc"));
         }
         
-        final PlayerMarketData mData = engine.getMarketPopulationData(marketID);
+        final MarketPopulationData mData = engine.getMarketPopulationData(marketID);
         if (mData != null) {
             mData.healthDelta.modifyFlat(SERVICE_HEALTHCARE, healthRatio / 2f, str("serviceSectorHealthcareDesc"));
             mData.classConsciousnessDelta.modifyFlat(SERVICE_SECURITY, -secRatio / 10f, str("serviceSectorSecurityDesc"));

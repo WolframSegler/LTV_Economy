@@ -5,7 +5,7 @@ import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 
 public class IronFistPolicy extends MarketPolicy {
     public static final float HAPPINESS_DEBUFF = -0.3f;
@@ -14,7 +14,7 @@ public class IronFistPolicy extends MarketPolicy {
 
     public static final int STABILITY_BUFF = 3;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         data.happinessDelta.modifyFlat(id, HAPPINESS_DEBUFF, spec.name);
         data.socialCohesionDelta.modifyFlat(id, COHESION_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
@@ -22,7 +22,7 @@ public class IronFistPolicy extends MarketPolicy {
         data.market.getStability().modifyFlat(id, STABILITY_BUFF, spec.name);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.happinessDelta.unmodifyFlat(id);
         data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
@@ -31,12 +31,12 @@ public class IronFistPolicy extends MarketPolicy {
     }
 
     @Override
-    public boolean isEnabled(PlayerMarketData data) {
+    public boolean isEnabled(MarketPopulationData data) {
         return data.getSocialCohesion() < 30f;
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
 
         final int cols = 2;

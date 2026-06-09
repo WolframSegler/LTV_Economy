@@ -38,7 +38,7 @@ public class TradeMission implements Serializable {
     public float cargoAmount = 0f;
     public float crewAmount = 0f;
     public float fuelAmount = 0f;
-    public float combatPowerTarget = 0f; // value depends on the above three
+    public float combatPowerTarget = 0f;
     public float fuelCost = 0f; // operation cost in units
     public float spawnedFleetCargoCapRatio = 0f;
     public float spawnedFleetFuelCapRatio = 0f;

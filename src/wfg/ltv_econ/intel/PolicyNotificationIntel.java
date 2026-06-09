@@ -10,18 +10,18 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 
 public class PolicyNotificationIntel extends BaseIntelPlugin {
 
     private static final String ICON = settings.getSpriteName("icons", "policy_icon");
 
-    private final PlayerMarketData data;
+    private final MarketPopulationData data;
     private final MarketPolicy policy;
     private final boolean available;
 
-    public PolicyNotificationIntel(PlayerMarketData data, MarketPolicy policy, boolean available) {
+    public PolicyNotificationIntel(MarketPopulationData data, MarketPolicy policy, boolean available) {
         this.data = data;
         this.policy = policy;
         this.available = available;

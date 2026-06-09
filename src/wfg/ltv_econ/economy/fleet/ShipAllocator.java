@@ -14,6 +14,7 @@ import com.fs.starfarer.api.impl.campaign.command.WarSimScript.LocationDanger;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
 import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.economy.fleet.PatrolFleetRouteManager.PatrolMission;
 import wfg.native_ui.util.ArrayMap;
 
 import java.util.ArrayList;
@@ -98,25 +99,41 @@ public class ShipAllocator {
     }
 
     /**
+     * Allocate ships to meet given fleet points. Updates the tracking values inside the mission.
+     * 
+     * @param faction used for doctrine preferences
+     * @param mission the mission to be updated.
+     */
+    public static final void allocateShipsForPatrol(
+        FactionShipInventory inventory, PatrolMission mission
+    ) {
+        final List<ShipTypeData> ships = new ArrayList<>(inventory.getShips().values());
+        ships.removeIf(s -> s.getIdle() <= 0);
+        allocateShipsForFleetPoints(mission.fleetPoints,
+            Global.getSector().getFaction(inventory.factionID), mission.allocatedShips, ships
+        );
+    }
+
+    /**
      * Allocate ships to meet given targets. Updates the tracking values inside the mission.
      * 
      * @param faction used for doctrine preferences
      * @param mission the mission to be updated.
      */
-    public static final void allocateShipsForTarget(
-        FactionAPI faction, TradeMission mission
-    ) {
-        final List<ShipTypeData> candidates = new ArrayList<>();
-        for (String hullId : faction.getKnownShips()) {
-            final ShipTypeData dummy = new ShipTypeData(hullId);
-            dummy.addShip(4096);
-            candidates.add(dummy);
-        }
-        if (candidates.isEmpty()) return;
-
+    public static final void allocateShipsForTarget(FactionAPI faction, TradeMission mission) {
         allocateShipsForTarget(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
-            faction, mission.allocatedShips, candidates
+            faction, mission.allocatedShips
         );
+    }
+
+    /**
+     * Allocate ships to meet given fleet points. Updates the tracking values inside the mission.
+     * 
+     * @param faction used for doctrine preferences
+     * @param mission the mission to be updated.
+     */
+    public static final void allocateShipsFleetPoints(FactionAPI faction, PatrolMission mission) {
+        allocateShipsForFleetPoints(mission.fleetPoints, faction, mission.allocatedShips);
     }
 
     /**
@@ -147,6 +164,25 @@ public class ShipAllocator {
     }
 
     /**
+     * Allocate ships to meet given fleet points. Populates the allocation map.
+     * 
+     * @param fleetPoints combat power
+     * @param faction used for doctrine preferences
+     * @param allocation the allocation to be populated.
+     */
+    public static void allocateShipsForFleetPoints(double fleetPoints, FactionAPI faction, Map<String, Integer> allocation) {
+        final List<ShipTypeData> candidates = new ArrayList<>();
+        for (String hullId : faction.getKnownShips()) {
+            final ShipTypeData dummy = new ShipTypeData(hullId);
+            dummy.addShip(4096);
+            candidates.add(dummy);
+        }
+        if (candidates.isEmpty()) return;
+
+        allocateShipsForFleetPoints(fleetPoints, faction, allocation, candidates);
+    }
+
+    /**
      * Allocate ships to meet given targets. Populates the allocation map.
      * 
      * @param targetCargo cargo capacity (tons)
@@ -162,13 +198,13 @@ public class ShipAllocator {
         FactionAPI faction, Map<String, Integer> allocation, List<ShipTypeData> candidates
     ) {
         final double totalTarget = targetCargo + targetFuel + targetCrew + targetCombat;
-        if (totalTarget <= 0) return;
+        if (totalTarget <= 0d) return;
 
         final int N = candidates.size();
         if (N <= 0) throw new IllegalStateException("No ship candidates: " + faction.getId());
 
         final int[] idleRemaining = new int[N];
-        final double[] weight = buildTargetObjective(candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat);
+        final double[] weight = buildTargetWeights(candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat);
         final double[] cargoCap = new double[N];
         final double[] fuelCap = new double[N];
         final double[] crewCap = new double[N];
@@ -189,7 +225,7 @@ public class ShipAllocator {
         double remCrew = targetCrew;
         double remCombat = targetCombat;
 
-        while ((remCargo > eps || remFuel > eps || remCrew > eps || remCombat > eps)) {
+        while (remCargo > eps || remFuel > eps || remCrew > eps || remCombat > eps) {
             final double combatNeed = (targetCombat > eps) ? remCombat / targetCombat : 0d;
             final double cargoNeed = (targetCargo > eps) ? remCargo / targetCargo : 0d;
             final double fuelNeed = (targetFuel > eps) ? remFuel / targetFuel : 0d;
@@ -208,10 +244,10 @@ public class ShipAllocator {
                 if (remCombat > 0d && combatCap[i] > 0d) useful = true;
                 if (!useful) continue;
 
-                final double cargoContrib = (targetCargo > 0) ? Math.min(1.0, cargoCap[i] / targetCargo) : 0d;
-                final double fuelContrib = (targetFuel > 0) ? Math.min(1.0, fuelCap[i] / targetFuel) : 0d;
-                final double crewContrib = (targetCrew > 0) ? Math.min(1.0, crewCap[i] / targetCrew) : 0d;
-                final double combatContrib = (targetCombat > 0) ? Math.min(1.0, combatCap[i] / targetCombat) : 0d;
+                final double cargoContrib = (targetCargo > 0) ? Math.min(1d, cargoCap[i] / targetCargo) : 0d;
+                final double fuelContrib = (targetFuel > 0) ? Math.min(1d, fuelCap[i] / targetFuel) : 0d;
+                final double crewContrib = (targetCrew > 0) ? Math.min(1d, crewCap[i] / targetCrew) : 0d;
+                final double combatContrib = (targetCombat > 0) ? Math.min(1d, combatCap[i] / targetCombat) : 0d;
 
                 final double utility = cargoContrib * cargoNeed
                     + fuelContrib * fuelNeed
@@ -240,15 +276,88 @@ public class ShipAllocator {
             counts[picked]++;
             idleRemaining[picked]--;
 
-            remCargo = Math.max(0.0, remCargo - cargoCap[picked]);
-            remFuel = Math.max(0.0, remFuel - fuelCap[picked]);
-            remCrew = Math.max(0.0, remCrew - crewCap[picked]);
-            remCombat = Math.max(0.0, remCombat- combatCap[picked]);
+            remCargo = Math.max(0d, remCargo - cargoCap[picked]);
+            remFuel = Math.max(0d, remFuel - fuelCap[picked]);
+            remCrew = Math.max(0d, remCrew - crewCap[picked]);
+            remCombat = Math.max(0d, remCombat- combatCap[picked]);
         }
 
         if (remCargo > eps) log.warn(faction.getId() + " - Not enough cargo capacity after allocation, remaining: " + remCargo);
         if (remFuel > eps) log.warn(faction.getId() + " - Not enough fuel capacity after allocation, remaining: " + remFuel);
         if (remCrew > eps) log.warn(faction.getId() + " - Not enough crew capacity after allocation, remaining: " + remCrew);
+
+        for (int i = 0; i < N; i++) {
+            final int count = counts[i];
+            if (count <= 0) continue;
+
+            final ShipTypeData data = candidates.get(i);
+            data.useShip(count);
+            allocation.put(data.hullID, count);
+        }
+    }
+
+    /**
+     * Allocate ships to meet given fleet points. Populates the allocation map.
+     * 
+     * @param fleetPoints combat power
+     * @param faction used for doctrine preferences
+     * @param allocation the allocation to be populated.
+     * @param candidates the pool of hulls to choose from
+     */
+    public static void allocateShipsForFleetPoints(
+        double fleetPoints, FactionAPI faction, Map<String, Integer> allocation, List<ShipTypeData> candidates
+    ) {
+        if (fleetPoints <= 0d) return;
+
+        final int N = candidates.size();
+        if (N <= 0) throw new IllegalStateException("No ship candidates: " + faction.getId());
+
+        final double[] weight = buildFleetPointWeights(candidates, faction);
+        final int[] idleRemaining = new int[N];
+        final float[] fleetPointsCandidates = new float[N];
+
+        for (int i = 0; i < N; i++) {
+            final ShipTypeData ship = candidates.get(i);
+            idleRemaining[i] = ship.getIdle();
+            fleetPointsCandidates[i] = ship.spec.getFleetPoints();
+        }
+
+        final int[] counts = new int[N];
+        double remFp = fleetPoints;
+
+        while (remFp > eps) {
+            double totalWeight = 0d;
+            double[] weights = new double[N];
+
+            for (int i = 0; i < N; i++) {
+                if (idleRemaining[i] <= 0) continue;
+
+                final double w = weight[i] / (1d + DIVERSITY_PENALTY * counts[i]);
+
+                weights[i] = w;
+                totalWeight += w;
+            }
+            if (totalWeight <= 0d) break;
+
+            final double r = Math.random() * totalWeight;
+            int picked = -1;
+            double accum = 0;
+            for (int i = 0; i < N; i++) {
+                accum += weights[i];
+                if (r <= accum) {
+                    picked = i;
+                    break;
+                }
+            }
+            if (picked < 0) break;
+
+            counts[picked]++;
+            idleRemaining[picked]--;
+
+            remFp = Math.max(0d, remFp - fleetPointsCandidates[picked]);
+        }
+
+        if (remFp > eps) log.warn(faction.getId() + " - Not enough fleet points after allocation, remaining: " + remFp);
 
         for (int i = 0; i < N; i++) {
             final int count = counts[i];
@@ -315,7 +424,7 @@ public class ShipAllocator {
         };
     }
 
-    private static final double[] buildTargetObjective(List<ShipTypeData> candidates, FactionAPI faction,
+    private static final double[] buildTargetWeights(List<ShipTypeData> candidates, FactionAPI faction,
         double targetCargo, double targetFuel, double targetCrew, double targetCombat
     ) {
         final int N = candidates.size();
@@ -344,6 +453,24 @@ public class ShipAllocator {
                 * Math.pow(combatScore, combatWeight);
             
             final double baseCost = 1d / (1d + combinedScore * data.spec.getFleetPoints());
+            final double doctrineFactor = getDoctrinePreference(faction, data);
+            final double randFactor = 0.7 + 0.6 * Math.random();
+            
+            coeffs[i] = baseCost * doctrineFactor * randFactor;
+        }
+
+        return coeffs;
+    }
+
+    private static final double[] buildFleetPointWeights(List<ShipTypeData> candidates, FactionAPI faction) {
+        final int N = candidates.size();
+
+        final double[] coeffs = new double[N];
+        for (int i = 0; i < N; i++) {
+            final ShipTypeData data = candidates.get(i);
+
+            final double score = data.spec.getFleetPoints() * data.getCombatPower();
+            final double baseCost = 1d / (1d + score);
             final double doctrineFactor = getDoctrinePreference(faction, data);
             final double randFactor = 0.7 + 0.6 * Math.random();
             

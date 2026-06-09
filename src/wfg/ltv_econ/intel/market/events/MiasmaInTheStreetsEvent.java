@@ -3,7 +3,7 @@ package wfg.ltv_econ.intel.market.events;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 
 public class MiasmaInTheStreetsEvent extends MarketEvent {
     private static final int BASE_DURATION = 40;
@@ -15,7 +15,7 @@ public class MiasmaInTheStreetsEvent extends MarketEvent {
     private int cooldownDaysRemaining = 0;
 
     @Override
-    public void preAdvance(PlayerMarketData data) {
+    public void preAdvance(MarketPopulationData data) {
         if (active || cooldownDaysRemaining > 0) return;
 
         final float dailyChance = 0.003f;
@@ -30,7 +30,7 @@ public class MiasmaInTheStreetsEvent extends MarketEvent {
     }
 
     @Override
-    public void postAdvance(PlayerMarketData data) {
+    public void postAdvance(MarketPopulationData data) {
         if (active) {
             activeDaysRemaining--;
             if (activeDaysRemaining <= 0) deactivate(data);
@@ -39,7 +39,7 @@ public class MiasmaInTheStreetsEvent extends MarketEvent {
         }
     }
 
-    private final void deactivate(PlayerMarketData data) {
+    private final void deactivate(MarketPopulationData data) {
         if (!active) return;
 
         active = false;
@@ -48,7 +48,7 @@ public class MiasmaInTheStreetsEvent extends MarketEvent {
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, com.fs.starfarer.api.ui.TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, com.fs.starfarer.api.ui.TooltipMakerAPI tp) {
         tp.setTitleSmallOrbitron();
         tp.addTitle(spec.name, negative);
 

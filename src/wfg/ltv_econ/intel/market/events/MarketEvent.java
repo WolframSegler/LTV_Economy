@@ -6,17 +6,17 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.config.EventConfig;
 import wfg.ltv_econ.config.EventConfig.EventSpec;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 
 public abstract class MarketEvent {
     public String id;
     public transient EventSpec spec;
     protected boolean active = false;
 
-    public void preAdvance(PlayerMarketData data) {};
-    public void postAdvance(PlayerMarketData data) {};
+    public void preAdvance(MarketPopulationData data) {};
+    public void postAdvance(MarketPopulationData data) {};
     public boolean isActive() { return active; }
-    public boolean isVisible(PlayerMarketData data) { return active; }
+    public boolean isVisible(MarketPopulationData data) { return active; }
 
     public Object readResolve() {
         spec = EventConfig.map.get(id);
@@ -24,7 +24,7 @@ public abstract class MarketEvent {
         return this;
     }
 
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         tp.addTitle(spec.name, base);
         
         tp.addPara(spec.description, pad);

@@ -130,17 +130,17 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
             ),
             new DoubleParameter(
                 "weight", str("uiGoalParamDiscountStrength"),
-                0.0, 1.0,
+                0d, 1d,
                 () -> weight, v -> weight = v
             ),
             new DoubleParameter(
                 "targetFraction", str("uiGoalParamTargetFraction"),
-                0.0, 1.0,
+                0d, 1d,
                 () -> targetFraction, v -> targetFraction = v
             ),
             new DoubleParameter(
                 "penalty", str("uiGoalParamShortfallPenalty"),
-                1.0, 5000.0,
+                1d, 5000d,
                 () -> penalty, v -> penalty = v
             )
         );

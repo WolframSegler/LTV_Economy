@@ -154,7 +154,7 @@ public class BloomEffect {
             "        }\n" +
             "    } else {\n" +
             "        for (int i = -3; i <= 3; i++) {\n" +
-            "            vec2 offset = vec2(0.0, pixelSize.y * float(i));\n" +
+            "            vec2 offset = vec2(0d, pixelSize.y * float(i));\n" +
             "            color += texture2D(tex, uv + offset) * weights[i+3];\n" +
             "        }\n" +
             "    }\n" +

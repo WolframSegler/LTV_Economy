@@ -10,7 +10,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 
 public class PharmaceuticalPromotionPolicy extends MarketPolicy {
     public static final float HEALTH_DEBUFF = -0.4f;
@@ -20,14 +20,14 @@ public class PharmaceuticalPromotionPolicy extends MarketPolicy {
     public static final float FACTION_RELATION_DROP = 0.1f;
     public static final float FACTION_RELATION_INCREASE = 0.07f;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         data.healthDelta.modifyFlat(id, HEALTH_DEBUFF, spec.name);
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
         data.socialCohesionDelta.modifyFlat(id, COHESION_DEBUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.healthDelta.unmodifyFlat(id);
         data.happinessDelta.unmodifyFlat(id);
         data.socialCohesionDelta.unmodifyFlat(id);
@@ -54,7 +54,7 @@ public class PharmaceuticalPromotionPolicy extends MarketPolicy {
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

@@ -20,7 +20,7 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -111,7 +111,7 @@ public class IncomeBreakdownDialog extends DockPanel {
     public final void incomeBreakdownUI(final TooltipMakerAPI tp) {
         final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(market);
         final EconomyEngine engine = EconomyEngine.instance();
-        final PlayerMarketData data = engine.getMarketPopulationData(market.getId());
+        final MarketPopulationData data = engine.getMarketPopulationData(market.getId());
         final List<CommodityDomain> domains = engine.getComDomains();
         final List<String> policyKeys = data != null ? MarketPolicy.getPolicyLedgerKeys(data) : Collections.emptyList();
         final FactionAPI faction = market.getFaction();

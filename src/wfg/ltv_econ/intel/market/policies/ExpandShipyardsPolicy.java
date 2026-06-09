@@ -12,7 +12,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.constants.CommoditiesID;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
@@ -23,7 +23,7 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
     private static final int STRUCTURAL_COMPONENTS_COST = 1000;
     private static final int SUBASSEMBLY_COMPONENTS_COST = 250;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         removeStored(data.market, Commodities.METALS, METALS_COST);
         removeStored(data.market, Commodities.RARE_METALS, RARE_METALS_COST);
         removeStored(data.market, Commodities.SUPPLIES, SUPPLIES_COST);
@@ -31,17 +31,17 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
         removeStored(data.market, CommoditiesID.SUBASSEMBLY_COMPONENTS, SUBASSEMBLY_COMPONENTS_COST);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         EconomyEngine.instance().getFactionShipInventory(data.market.getFactionId()).addAssemblyLines(1);
     }
 
     @Override
-    public boolean isEnabled(PlayerMarketData data) {
+    public boolean isEnabled(MarketPopulationData data) {
         return EconomyEngine.instance().getFactionShipInventory(data.market.getFactionId()).getCapital().equals(data.market);
     }
 
     @Override
-    public boolean isAvailable(PlayerMarketData data) {
+    public boolean isAvailable(MarketPopulationData data) {
         if (getStored(data.market, Commodities.METALS) < METALS_COST) return false;
         if (getStored(data.market, Commodities.RARE_METALS) < RARE_METALS_COST) return false;
         if (getStored(data.market, Commodities.SUPPLIES) < SUPPLIES_COST) return false;
@@ -52,7 +52,7 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
 
         final Color metalsColor = getStored(data.market, Commodities.METALS) >= METALS_COST ? highlight : negative;

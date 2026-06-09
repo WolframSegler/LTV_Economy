@@ -1,38 +1,32 @@
 # LTV-Economy
 
 A deep overhaul of Starsector's economy and additional colony systems.
-LTV-Economy replaces abstract production values with a **unit-based simulation** where production and trade correspond to actual cargo units. The mod deepens economic simulation by introducing **workers** as a production factor. Player-enacted policies and market events build on top of this framework.
+LTV-Economy replaces abstract production values with a **unit-based simulation** where production and trade correspond to actual cargo units. The mod deepens economic simulation by introducing **workers** as a production factor. Player-enacted policies and market events build on top of this framework. Trade fleets are deeply integrated into the economy, corresponding to concrete trade missions, and assembled from the faction ship inventory.
 
 [![Download](https://img.shields.io/badge/Download-Latest%20Release-brightgreen)](https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV_Economy.zip)
-
-<br>
 
 
 ## Forum Page
 Content details related to the mod can be found on [the fractalsoftworks forums](https://fractalsoftworks.com/forum/index.php?topic=34632.0).
 
 
-## Modding & Compatibility
-
-- Designed to be **data-driven and extensible**.
-- NativeUI is reusable and intended for other mods as well.
-- Compatible with mods that do not deeply replace the economy.
-
-
 ## Incompatible Mods
 
-Due to the intrusive nature of the mod, anything that modifies the Colony Info Panel are likely to cause problems. Here are mods that are definitely incompatible:
 - <a href="https://fractalsoftworks.com/forum/index.php?topic=20986.0">Grand.Colonies</a>
 - <a href="https://fractalsoftworks.com/forum/index.php?topic=28273.0">Astral Ascension</a>
 - <a href="https://fractalsoftworks.com/forum/index.php?topic=26307.0">Ashes of The Domain</a>
+- <a href="https://fractalsoftworks.com/forum/index.php?topic=26969.0">Starpocalypse Revengeance</a>
 
 
 ## For Other Modders
 
-- If you want your mod's industries to be compatible, you can add an <code>industry_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder. The documentation file <code>data/config/ltvEcon/industry_config_doc.md</code> provides the necessary information.
-- If you want your mod to add market policies, you can add a <code>policy_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder.
-- If you want your mod to add market events, you can add an <code>events_config.json</code> entry under <code>data/config/ltvEcon/</code> inside your own mod folder.
-
+- For full compatibility, add your own industry configs to `data/config/ltvEcon/industry_config.json`. See [`industry_config_doc.md`](data/config/ltvEcon/industry_config_doc.md) for details.
+- To add market policies: place a `policy_config.json` file inside `data/config/ltvEcon/` in your own mod folder.
+- To add market events: place an `events_config.json` file inside `data/config/ltvEcon/` in your own mod folder.
+- This mod automatically removes the following submarket from markets: `local_resources`.
+- This mod adds the following submarket: `stockpiles`. It is a view to the CommodityCell's of a market.
+- This mod overrides the following submarkets: `open_market`, `black_market`, `generic_military`. This is done to modify their stockpile limits.
+- This mod overrides the following industries: `patrolhq`, `militarybase`, `highcommand`.
 
 ## Credits
 
@@ -120,6 +114,4 @@ Forbidden by Kosong Tujuh from <a href="https://thenounproject.com/browse/icons/
     <li>graphics/icons/cargo/components_precision_1.png</li>
     <li>graphics/icons/cargo/components_structural_1.png</li>
     <li>graphics/icons/cargo/components_subassembly_1.png</li>
-    <li>graphics/icons/cargo/components_subassembly_2.png</li>
-    <li>graphics/icons/cargo/components_subassembly_3.png</li>
 </ul>

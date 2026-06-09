@@ -10,7 +10,7 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
@@ -23,7 +23,7 @@ public class GeneralStrikeEvent extends MarketEvent {
     private int activeDaysRemaining = 0;
 
     @Override
-    public void preAdvance(PlayerMarketData data) {
+    public void preAdvance(MarketPopulationData data) {
         if (active || cooldownDaysRemaining > 0) return;
 
         final float consciousness = data.getClassConsciousness();
@@ -36,7 +36,7 @@ public class GeneralStrikeEvent extends MarketEvent {
         activate(data);
     }
 
-    private final void activate(PlayerMarketData data) {
+    private final void activate(MarketPopulationData data) {
         if (active) return;
         active = true;
 
@@ -54,7 +54,7 @@ public class GeneralStrikeEvent extends MarketEvent {
     }
 
     @Override
-        public void postAdvance(PlayerMarketData data) {
+        public void postAdvance(MarketPopulationData data) {
         if (active) {
             activeDaysRemaining--;
             if (activeDaysRemaining <= 0) deactivate(data);
@@ -63,7 +63,7 @@ public class GeneralStrikeEvent extends MarketEvent {
         }
     }
 
-    private final void deactivate(PlayerMarketData data) {
+    private final void deactivate(MarketPopulationData data) {
         if (!active) return;
         active = false;
 
@@ -74,7 +74,7 @@ public class GeneralStrikeEvent extends MarketEvent {
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         tp.setTitleSmallOrbitron();
         tp.addTitle(spec.name, negative);
 

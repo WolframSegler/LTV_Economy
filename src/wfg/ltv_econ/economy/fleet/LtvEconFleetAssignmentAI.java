@@ -28,7 +28,6 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
-import wfg.ltv_econ.serializable.LtvEconSaveData;
 
 public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
     private static final int MAX_MOTHBALLED_SHIPS = 15;
@@ -103,15 +102,11 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
     }
 
     protected TradeMission getMission() {
-        return getMission(route);
-    }
-
-    private static final TradeMission getMission(RouteData route) {
-        return LtvEconSaveData.instance().routeManager.getMission(route);
+        return LtvEconomyRouteData.getMission(route);
     }
 
     private final String getCargoList(RouteSegment segment) {
-        return getCargoList(getMission(route).cargo);
+        return getCargoList(getMission().cargo);
     }
 
     @Override

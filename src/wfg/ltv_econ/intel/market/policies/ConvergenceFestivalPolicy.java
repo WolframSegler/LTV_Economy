@@ -5,7 +5,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
@@ -16,7 +16,7 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
 
     public static final int PRODUCTION_DEBUFF = -20;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
         data.socialCohesionDelta.modifyFlat(id, COHESION_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
@@ -28,7 +28,7 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         }
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.happinessDelta.unmodifyFlat(id);
         data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
@@ -39,7 +39,7 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

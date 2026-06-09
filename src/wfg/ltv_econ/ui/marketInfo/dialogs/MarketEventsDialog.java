@@ -12,7 +12,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constants.strings.LocalizedStrings;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.native_ui.internal.ui.Side;
@@ -34,7 +34,7 @@ import wfg.native_ui.ui.visual.SpritePanel.Base;
 
 public class MarketEventsDialog extends DockPanel {
     private static final int ROW_H = 48;
-    private final PlayerMarketData data;
+    private final MarketPopulationData data;
 
     public MarketEventsDialog(final MarketAPI market) {
         super(Attachments.getCoreUI(), 400, screenH - 200, Side.LEFT, 8);

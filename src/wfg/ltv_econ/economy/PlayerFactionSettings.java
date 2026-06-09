@@ -10,14 +10,5 @@ public class PlayerFactionSettings implements Serializable {
 
     public final Set<String> embargoedFactions = new HashSet<>();
 
-    public Set<String> excludedMarketsFromWorkerAllocation = new HashSet<>(); // TODO make final after incompat update
-
-    // TODO remove after incompat update
-    private Object readResolve() {
-        if (excludedMarketsFromWorkerAllocation == null) {
-            excludedMarketsFromWorkerAllocation = new HashSet<>();
-        }
-
-        return this;
-    }
+    public final Set<String> excludedMarketsFromWorkerAllocation = new HashSet<>();
 }

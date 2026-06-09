@@ -3,7 +3,7 @@ package wfg.ltv_econ.intel.market.policies;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
@@ -18,7 +18,7 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
     public static final float HEALTH_DEBUFF = -0.07f;
     public static final float CLASS_BUFF = 0.01f;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
             dom.getCell(data.marketID).getProductionStat().modifyPercent(
                 id, PRODUCTION_BUFF, spec.name
@@ -30,7 +30,7 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         for (Industry ind : WorkerRegistry.getVisibleIndustries(data.market)) {
             ind.getSupplyBonus().unmodifyPercent(id);
         }
@@ -45,7 +45,7 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

@@ -17,7 +17,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator;
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 // TODO externalize strings or place into rules.csv
@@ -42,7 +42,7 @@ public class ConvergenceFestivalBarEvent extends BaseBarEventWithPerson {
 
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
-        final PlayerMarketData data = EconomyEngine.instance().getMarketPopulationData(market.getId());
+        final MarketPopulationData data = EconomyEngine.instance().getMarketPopulationData(market.getId());
         if (data == null || !data.getPolicy("convergence_festival").isActive(data)) return false;
 
         return Math.random() < 0.5f || DebugFlags.BAR_DEBUG;

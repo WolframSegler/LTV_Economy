@@ -17,7 +17,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.PlanetInfoParams;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
 import wfg.ltv_econ.ui.marketInfo.population.CohesionPair;
@@ -78,7 +78,7 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
         );
 
         if (engine.getMarketPopulationData().size() > 0) {
-            for (PlayerMarketData data : engine.getMarketPopulationData().values()) {
+            for (MarketPopulationData data : engine.getMarketPopulationData().values()) {
                 final UIPanelAPI namePanel = settings.createCustom(nameW, rowH, null);
                 final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(nameW, false);
                 final MarketAPI market = data.market;

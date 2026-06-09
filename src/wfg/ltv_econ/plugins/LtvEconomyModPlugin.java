@@ -30,7 +30,6 @@ import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
-import wfg.ltv_econ.economy.fleet.LtvEconFleetRouteManager;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
 import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
@@ -72,9 +71,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
-        // TODO remove after incompatible update
-        Global.getSector().getScripts().removeIf(k -> k instanceof LtvEconFleetRouteManager);
-
         LtvEconSaveData.loadInstance(false, newGame);
 
         final ListenerManagerAPI listenerManager = Global.getSector().getListenerManager();

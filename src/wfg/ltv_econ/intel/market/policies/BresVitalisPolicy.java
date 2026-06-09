@@ -5,27 +5,27 @@ import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 
 public class BresVitalisPolicy extends MarketPolicy {
     public static final float HEALTH_DEBUFF = -0.05f;
     public static final float HAPPINESS_BUFF = 0.1f;
     public static final float CLASS_BUFF = 0.001f;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         data.healthDelta.modifyFlat(id, HEALTH_DEBUFF, spec.name);
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.healthDelta.unmodifyFlat(id);
         data.happinessDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
         
         final int cols = 2;

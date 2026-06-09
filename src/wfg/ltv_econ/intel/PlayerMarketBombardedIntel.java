@@ -12,17 +12,17 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 
 public class PlayerMarketBombardedIntel extends BaseIntelPlugin {
     private static final String ICON = settings.getSpriteName("icons", "bombardment");
 
-    private final PlayerMarketData data;
+    private final MarketPopulationData data;
     private final double stockpileReduction;
     private final float statsReduction;
     private final boolean isSaturation;
 
-    public PlayerMarketBombardedIntel(PlayerMarketData data, double stockpileReduction, float statsReduction, boolean isSaturation) {
+    public PlayerMarketBombardedIntel(MarketPopulationData data, double stockpileReduction, float statsReduction, boolean isSaturation) {
         this.data = data;
         this.stockpileReduction = stockpileReduction;
         this.statsReduction = statsReduction;

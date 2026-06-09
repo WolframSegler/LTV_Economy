@@ -11,7 +11,7 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.native_ui.ui.visual.IconValuePairTp;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
@@ -19,7 +19,7 @@ import wfg.native_ui.util.NativeUiUtils.AnchorType;
 public class HealthPair extends IconValuePairTp {
     private static final SpriteAPI HEALTH_ICON = settings.getSprite("ui", "health");
 
-    public HealthPair(UIPanelAPI parent, int w, int h, PlayerMarketData data, Color color, String font) {
+    public HealthPair(UIPanelAPI parent, int w, int h, MarketPopulationData data, Color color, String font) {
         super(parent, w, h, HEALTH_ICON, data.getHealth(), false, color, font);
         final LabelAPI lbl = label();
         lbl.setHighlightOnMouseover(true);

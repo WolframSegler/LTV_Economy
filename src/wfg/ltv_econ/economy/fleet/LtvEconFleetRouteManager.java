@@ -3,7 +3,6 @@ package wfg.ltv_econ.economy.fleet;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,6 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
-import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
@@ -66,41 +64,9 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	private static final float SMALL_CARGO_AMOUNT = 1000f;
 
 	private final TimeoutTracker<String> recentlySentTradeFleet = new TimeoutTracker<String>();
-	private HashMap<Long, Long> routeToMissionPersistent = new HashMap<>(); // TODO make final after incompatible update
-	private transient HashMap<RouteData, TradeMission> routeToMission = new HashMap<>();
 
 	public LtvEconFleetRouteManager() {
 		super(0.2f, 0.3f);
-
-		readResolve();
-	}
-
-	private final Object readResolve() {
-		if (routeToMissionPersistent == null) routeToMissionPersistent = new HashMap<>(32);
-		routeToMission = new HashMap<>(32);
-
-		if (!LtvEconSaveData.isInitialized()) return this; // TODO remove after incompatible update
-
-		final List<RouteData> routes = RouteManager.getInstance().getRoutesForSource(getRouteSourceId());
-		final List<TradeMission> missions = EconomyEngine.instance().getActiveMissions();
-
-		for (TradeMission mission : missions) {
-			if (mission.spawnedFleetFinishedJob) continue;
-
-			for (RouteData route : routes) {
-				if (routeToMissionPersistent.getOrDefault(route.getSeed(), 0l).equals(mission.uniqueID)) {
-					routeToMission.put(route, mission);
-					break;
-				}
-			}
-		}
-
-		routeToMissionPersistent.clear();
-		for (Map.Entry<RouteData, TradeMission> entry : routeToMission.entrySet()) {
-			routeToMissionPersistent.put(entry.getKey().getSeed(), entry.getValue().uniqueID);
-		}
-
-		return this;
 	}
 
 	@Override
@@ -113,10 +79,6 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	protected String getRouteSourceId() {
 		return EconomyFleetRouteManager.SOURCE_ID;
-	}
-
-	public final TradeMission getMission(RouteData route) {
-		return routeToMission.getOrDefault(route, new TradeMission(route.getMarket(), route.getMarket(), false));
 	}
 
 	protected int getMaxFleets() {
@@ -135,10 +97,9 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		final String factionId = getFleetFaction(mission);
 		extra.factionId = factionId;
 
-		final RouteData route = RouteManager.getInstance().addRoute(getRouteSourceId(), src, Misc.genRandomSeed(),
-			extra, this, EconomyFleetRouteManager.createData(src, dest)
+		final RouteData route = RouteManager.getInstance().addRoute(getRouteSourceId(), src, mission.uniqueID,
+			extra, this,new LtvEconomyRouteData(mission)
 		);
-		registerRoute(route, mission);
 
 		final StarSystemAPI sysFrom = src.getStarSystem();
 		final StarSystemAPI sysTo = dest.getStarSystem();
@@ -202,14 +163,11 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		final WeightedRandomPicker<TradeMission> missionPicker = new WeightedRandomPicker<>();
 
 		for (TradeMission m : missions) {
-			if (m.status != MissionStatus.SCHEDULED || !m.spawnedFleetFinishedJob)
-				continue;
+			if (m.status != MissionStatus.SCHEDULED || !m.spawnedFleetFinishedJob) continue;
 
-			if (excludeList.contains(m.src.getId()) || excludeList.contains(m.dest.getId()))
-				continue;
+			if (excludeList.contains(m.src.getId()) || excludeList.contains(m.dest.getId())) continue;
 
-			if (recentlySentTradeFleet.contains(m.src.getId()))
-				continue;
+			if (recentlySentTradeFleet.contains(m.src.getId())) continue;
 
 			missionPicker.add(m, m.src.getSize());
 		}
@@ -218,7 +176,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	}
 
 	public final boolean shouldCancelRouteAfterDelayCheck(RouteData route) {
-		final TradeMission mission = getMission(route);
+		final TradeMission mission = LtvEconomyRouteData.getMission(route);
 		if (mission == null) return false;
 		if (mission.src == null || mission.dest == null) return true;
 
@@ -239,7 +197,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		final CampaignFleetAPI fleet = createTradeRouteFleet(route, random);
 		if (fleet == null) return null;
 
-		final TradeMission mission = getMission(route);
+		
+		final TradeMission mission = LtvEconomyRouteData.getMission(route);
 		mission.setSpawnedFleetCapRatios(fleet.getCargo());
 
 		if (KantaCMD.playerHasProtection()) {
@@ -257,7 +216,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	}
 
 	private final CampaignFleetAPI createTradeRouteFleet(RouteData route, Random random) {
-		final TradeMission mission = getMission(route);
+		final TradeMission mission = LtvEconomyRouteData.getMission(route);
 		if (mission == null || mission.src == null || mission.dest == null) return null;
 
 		final MarketAPI src = mission.src;
@@ -310,7 +269,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 					final ShipHullSpecAPI spec = settings.getHullSpec(e.getKey());
 					if (banPhaseShipsEtc && spec.isPhase()) continue;
 
-					totalWeight += e.getValue() * Math.max(1.0, spec.getFleetPoints());
+					totalWeight += e.getValue() * Math.max(1d, spec.getFleetPoints());
 				}
 				if (totalWeight == 0) break;
 
@@ -322,7 +281,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 					final ShipHullSpecAPI spec = settings.getHullSpec(e.getKey());
 					if (banPhaseShipsEtc && spec.isPhase()) continue;
 
-					accum += e.getValue() * Math.max(1.0, spec.getFleetPoints());
+					accum += e.getValue() * Math.max(1d, spec.getFleetPoints());
 					if (accum >= r) {
 						selection.add(spec);
 						final int newCount = e.getValue() - 1;
@@ -405,15 +364,12 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	}
 
 	public final void reportBattleOccurred(CampaignFleetAPI fleet, CampaignFleetAPI primaryWinner, BattleAPI battle) {
+		if (fleet.getFleetData().getNumMembers() < 1) return;
+
 		final RouteData route = RouteManager.getInstance().getRoute(getRouteSourceId(), fleet);
 		if (route == null) return;
-		final TradeMission mission = getMission(route);
-		if (route.isExpired() || mission == null) return;
-
-		if (fleet.getFleetData().getNumMembers() < 1) {
-			onRouteLost(route, mission);
-			return;
-		}
+		final TradeMission mission = LtvEconomyRouteData.getMission(route);
+		if (mission == null) return;
 
 		final CargoAPI cargo = fleet.getCargo();
 		final float cargoRemainingRatio = (cargo.getMaxCapacity() / mission.cargoAmount) / mission.spawnedFleetCargoCapRatio;
@@ -438,7 +394,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		final RouteData route = RouteManager.getInstance().getRoute(getRouteSourceId(), fleet);
 		if (route == null) return;
 
-		final TradeMission mission = getMission(route);
+		final TradeMission mission = LtvEconomyRouteData.getMission(route);
 		if (mission != null) mission.spawnedFleetFinishedJob = true;
 		if (route.isExpired()) return;
 
@@ -455,11 +411,6 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		return false;
 	}
 
-	public final void reportAboutToBeDespawnedByRouteManager(RouteData route) {
-		final TradeMission mission = getMission(route);
-		if (mission != null) mission.spawnedFleetFinishedJob = true;
-	}
-
 	private static final void onRouteLost(RouteData route, TradeMission mission) {
 		mission.status = MissionStatus.LOST;
 		mission.spawnedFleetFinishedJob = true;
@@ -471,8 +422,5 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		}
 	}
 
-	private final void registerRoute(RouteData route, TradeMission mission) {
-		routeToMissionPersistent.put(route.getSeed(), mission.uniqueID);
-		routeToMission.put(route, mission);
-	}
+	public final void reportAboutToBeDespawnedByRouteManager(RouteData route) {}
 }

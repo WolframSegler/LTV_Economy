@@ -378,7 +378,7 @@ public class EconomyInfo {
             tradeFlowCache.put(key, 1d);
             return 1f;
         } else {
-            totalImports = Math.min(1.0, inFactionImports / totalImports);
+            totalImports = Math.min(1d, inFactionImports / totalImports);
         }
 
         tradeFlowCache.put(key, totalImports);

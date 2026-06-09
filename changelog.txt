@@ -1,3 +1,7 @@
+Version 0.4.0-beta | NOT SAVE COMPATIBLE
+- Added a frame to the policy posters.
+- 
+
 Version 0.3.7-beta | SAVE COMPATIBLE
 - Fixed dockyard construction policy not looking at local storage.
 - Fixed some custom allocator bugs.

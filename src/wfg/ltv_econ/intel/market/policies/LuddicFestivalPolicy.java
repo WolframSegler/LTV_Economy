@@ -2,7 +2,7 @@ package wfg.ltv_econ.intel.market.policies;
 
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.PlayerMarketData;
+import wfg.ltv_econ.economy.MarketPopulationData;
 
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
@@ -12,20 +12,20 @@ public class LuddicFestivalPolicy extends MarketPolicy {
     public static final float COHESION_BUFF = 0.3f;
     public static final float CLASS_BUFF = 0.005f;
 
-    public void apply(PlayerMarketData data) {
+    public void apply(MarketPopulationData data) {
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
         data.socialCohesionDelta.modifyFlat(id, COHESION_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
     }
 
-    public void unapply(PlayerMarketData data) {
+    public void unapply(MarketPopulationData data) {
         data.happinessDelta.unmodifyFlat(id);
         data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
     }
 
     @Override
-    public void createTooltip(PlayerMarketData data, TooltipMakerAPI tp) {
+    public void createTooltip(MarketPopulationData data, TooltipMakerAPI tp) {
         super.createTooltip(data, tp);
 
         final int cols = 2;
