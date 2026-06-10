@@ -2,6 +2,8 @@ Version 0.4.0-beta | The Metal Broom | NOT SAVE COMPATIBLE
 - Added a frame to the policy posters.
 - Fixed a logical bug where less desirable ships were selected more often, while the opposite was true for more desirable ships, when creating trade missions.
 - Replaced the patrolHQ industry. Patrol fleets now use the faction hangar. If there aren't enough ships, independent captains are hired at a cost.
+- Adjusted maintenance and operation costs of patrolHQ and its upgrades.
+- Reduced crew production efficiency of patrolHQ and its upgrades.
 
 Version 0.3.7-beta | SAVE COMPATIBLE
 - Fixed dockyard construction policy not looking at local storage.
