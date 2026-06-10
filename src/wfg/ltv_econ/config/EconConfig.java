@@ -174,6 +174,8 @@ public class EconConfig {
     public static float INDEPENDENT_TRADE_FLEET_HAZARD_BASE;
     public static float INDEPENDENT_TRADE_FLEET_HAZARD_MULT;
 
+    public static float INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP;
+
     /**
      * Maximum fraction of a colony's stockpile that can be looted in a single raid.
      */

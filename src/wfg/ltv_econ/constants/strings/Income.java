@@ -34,6 +34,9 @@ public class Income {
     public static final String INDEPENDENT_FUEL_COST_KEY = "independent_fuel_cost";
     public static final String INDEPENDENT_FUEL_COST_DESC = str("INDEPENDENT_FUEL_COST_DESC");
 
+    public static final String INDEPENDENT_PATROL_COST_KEY = "independent_patrol_cost";
+    public static final String INDEPENDENT_PATROL_COST_DESC = str("INDEPENDENT_PATROL_COST_DESC");
+
     public static final String WORKER_WAGES_KEY = "wages";
     public static final String WORKER_WAGES_DESC = str("WORKER_WAGES_DESC");
 
@@ -81,6 +84,7 @@ public class Income {
             case INDUSTRY_INCOME_KEY: return INDUSTRY_INCOME_DESC;
             case INDUSTRY_UPKEEP_KEY: return INDUSTRY_UPKEEP_DESC;
             case COLONY_HAZARD_PAY_KEY: return COLONY_HAZARD_PAY_DESC;
+            case INDEPENDENT_PATROL_COST_KEY: return INDEPENDENT_PATROL_COST_DESC;
             default: return "";
         }
     }

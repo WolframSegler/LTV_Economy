@@ -84,6 +84,7 @@ public class EconomyConfigLoader {
         EconConfig.SHIP_ALLOC_THREAT_RELATIONSHIP_MULT = (float) root.getDouble("SHIP_ALLOC_THREAT_RELATIONSHIP_MULT");
         EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER = (float) root.getDouble("SHIP_ALLOC_MIN_COMBAT_POWER");
         EconConfig.SCRAP_REFUND_FRACTION = (float) root.getDouble("SCRAP_REFUND_FRACTION");
+        EconConfig.INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP = (float) root.getDouble("INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
@@ -163,5 +164,6 @@ public class EconomyConfigLoader {
         EconConfig.SHIP_ALLOC_THREAT_RELATIONSHIP_MULT = LunaSettings.getDouble(LTV_ECON, "SHIP_ALLOC_THREAT_RELATIONSHIP_MULT").floatValue();
         EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER = LunaSettings.getDouble(LTV_ECON, "SHIP_ALLOC_MIN_COMBAT_POWER").floatValue();
         EconConfig.SCRAP_REFUND_FRACTION = LunaSettings.getDouble(LTV_ECON, "SCRAP_REFUND_FRACTION").floatValue();
+        EconConfig.INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP = LunaSettings.getDouble(LTV_ECON, "INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP").floatValue();
     }
 }

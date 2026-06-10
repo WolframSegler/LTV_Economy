@@ -62,6 +62,7 @@ INDEPENDENT_TRADE_FLEET_PER_TON_FEE,Independent Hauler Per-Ton Fee,Double,1.5,,F
 INDEPENDENT_TRADE_FLEET_PERCENT_CUT,Independent Hauler Percentage Cut,Double,0.08,,Percentage of the total cargo value taken as fee.,0,1,Fleet
 INDEPENDENT_TRADE_FLEET_HAZARD_BASE,Independent Hauler Hazard Base,Double,600.0,,Base hazard pay in credits added for dangerous routes.,0,100000,Fleet
 INDEPENDENT_TRADE_FLEET_HAZARD_MULT,Independent Hauler Hazard Multiplier,Double,7.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
+INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP,Independent Patrol Fee Per 100 FP,Double,8000.0,,Base patrol mission fee per 100 fleet points worth of ships.,0,100000,Fleet
 MAX_VISIBLE_PLANNED_ORDERS,Max Visible Planned Orders,Int,500,,Maximum number of planned orders displayed in the Planned Orders and Assembly Line panels. Additional orders are hidden for performance.,50,100000,Fleet
 NPC_FACTION_ASSEMBLY_LINES,NPC Faction Assembly Lines,Int,60,,Number of assembly lines available to NPC factions.,1,1000,Fleet
 PLAYER_FACTION_ASSEMBLY_LINES,Player Faction Assembly Lines,Int,3,,Starting number of assembly lines available to the player faction.,1,100,Fleet

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Map.Entry;
 
-import org.lwjgl.util.vector.Vector2f;
-
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignEventListener.FleetDespawnReason;
@@ -16,7 +14,6 @@ import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.MilitaryBase;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactory.PatrolType;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
-import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.fleets.PatrolAssignmentAIV4;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.OptionalFleetData;
@@ -31,6 +28,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
+import wfg.ltv_econ.economy.fleet.FleetFactoryHelpers;
 import wfg.ltv_econ.economy.fleet.PatrolFleetRouteManager;
 import wfg.ltv_econ.economy.fleet.PatrolFleetRouteManager.PatrolMission;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -152,20 +150,17 @@ public class LtvMilitaryBase extends MilitaryBase {
 	
 	@Override
 	public CampaignFleetAPI spawnFleet(RouteData route) {
+		final PatrolFleetData custom = (PatrolFleetData) route.getCustom();
+		final PatrolType type = custom.type;
 		
-		PatrolFleetData custom = (PatrolFleetData) route.getCustom();
-		PatrolType type = custom.type;
-		
-		Random random = route.getRandom();
-		
-		CampaignFleetAPI fleet = createPatrol(type, market.getFactionId(), route, market, null, random);
-		
-		if (fleet == null || fleet.isEmpty()) return null;
+		final CampaignFleetAPI fleet = createPatrol(type, market.getFactionId(), route, market, route.getRandom());
+		if (fleet == null) return null;
 		
 		fleet.addEventListener(this);
 		
 		market.getContainingLocation().addEntity(fleet);
 		fleet.setFacing((float) Math.random() * 360f);
+
 		// this will get overridden by the patrol assignment AI, depending on route-time elapsed etc
 		fleet.setLocation(market.getPrimaryEntity().getLocation().x, market.getPrimaryEntity().getLocation().y);
 		
@@ -173,61 +168,36 @@ public class LtvMilitaryBase extends MilitaryBase {
 		
 		fleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true, 0.3f);
 		
-		if (custom.spawnFP <= 0) {
-			custom.spawnFP = fleet.getFleetPoints();
-		}
+		custom.spawnFP = Math.max(0, fleet.getFleetPoints());
 		
 		return fleet;
 	}
-	
-	public static CampaignFleetAPI createPatrol(PatrolType type, String factionId, RouteData route, MarketAPI market, Vector2f locInHyper, Random random) {
-		return createPatrol(type, 0f, factionId, route, market, locInHyper, random);
-	}
 
-	public static CampaignFleetAPI createPatrol(PatrolType type, float extraTankerPts, String factionId, RouteData route, MarketAPI market, Vector2f locInHyper, Random random) {
+	private static final CampaignFleetAPI createPatrol(PatrolType type,
+		String factionId, RouteData route, MarketAPI market, Random random
+	) {
 		if (random == null) random = new Random();
-		
-		
-		float combat = getPatrolCombatFP(type, random);
-		float tanker = 0f;
-		float freighter = 0f;
-		String fleetType = type.getFleetType();
-		switch (type) {
-		case FAST:
-			break;
-		case COMBAT:
-			tanker = Math.round((float) random.nextFloat() * 5f);
-			break;
-		case HEAVY:
-			tanker = Math.round((float) random.nextFloat() * 10f);
-			freighter = Math.round((float) random.nextFloat() * 10f);
-			break;
-		}
-		
-		tanker += extraTankerPts;
-		
-		FleetParamsV3 params = new FleetParamsV3(
-				market, 
-				locInHyper,
-				factionId,
-				route == null ? null : route.getQualityOverride(),
-				fleetType,
-				combat, // combatPts
-				freighter, // freighterPts 
-				tanker, // tankerPts
-				0f, // transportPts
-				0f, // linerPts
-				0f, // utilityPts
-				0f // qualityMod
-				);
-		if (route != null) {
-			params.timestamp = route.getTimestamp();
-		}
-		params.random = random;
-		CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
-		
+
+		final PatrolMission mission = LtvEconSaveData.instance().patrolRouteManager.getMission(route);
+		if (mission == null || mission.allocatedShips.isEmpty()) return null;
+
+		final float fleetPoints = route.getExtra().getStrengthModifiedByDamage();
+		final boolean banPhaseShips = !Global.getSector().getFaction(factionId).isPlayerFaction()
+			&& fleetPoints < FleetFactoryV3.FLEET_POINTS_THRESHOLD_FOR_ANNOYING_SHIPS;
+
+		final CampaignFleetAPI fleet = FleetFactoryV3.createEmptyFleet(factionId, type.getFleetType(), market);
+		if (fleet == null) return null;
+
+		FleetFactoryHelpers.populateFleetFromAllocation(fleet, mission.allocatedShips, -1, banPhaseShips, random);
+
+		FleetFactoryHelpers.configureFleetAfterAllocation(
+			fleet, factionId,
+			route.getQualityOverride() + Misc.getShipQuality(market, factionId),
+			route.getTimestamp(), 1.0f, 0,
+			random, -1
+		);
 		if (fleet == null || fleet.isEmpty()) return null;
-		
+
 		if (!fleet.getFaction().getCustomBoolean(Factions.CUSTOM_PATROLS_HAVE_NO_PATROL_MEMORY_KEY)) {
 			fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_PATROL_FLEET, true);
 			if (type == PatrolType.FAST || type == PatrolType.COMBAT) {
@@ -236,30 +206,22 @@ public class LtvMilitaryBase extends MilitaryBase {
 		} else if (fleet.getFaction().getCustomBoolean(Factions.CUSTOM_PIRATE_BEHAVIOR)) {
 			fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_PIRATE, true);
 			
-			// hidden pather and pirate bases
-			// make them raid so there's some consequence to just having a colony in a system with one of those
+			// make hidden pather and pirate bases raid so there's some consequence to just having a colony in a system with one of those.
 			if (market != null && market.isHidden()) {
 				fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_RAIDER, true);
 			}
 		}
-		
-		String postId = Ranks.POST_PATROL_COMMANDER;
-		String rankId = Ranks.SPACE_COMMANDER;
-		switch (type) {
-		case FAST:
-			rankId = Ranks.SPACE_LIEUTENANT;
-			break;
-		case COMBAT:
-			rankId = Ranks.SPACE_COMMANDER;
-			break;
-		case HEAVY:
-			rankId = Ranks.SPACE_CAPTAIN;
-			break;
-		}
-		
-		fleet.getCommander().setPostId(postId);
+
+		final String rankId = switch (type) {
+			case FAST -> Ranks.SPACE_LIEUTENANT;
+			case COMBAT -> Ranks.SPACE_COMMANDER;
+			case HEAVY -> Ranks.SPACE_CAPTAIN;
+			default -> Ranks.SPACE_COMMANDER;
+		};
+
+		fleet.getCommander().setPostId(Ranks.POST_PATROL_COMMANDER);
 		fleet.getCommander().setRankId(rankId);
-		
+
 		return fleet;
 	}
 }

@@ -12,6 +12,7 @@
         "INDEPENDENT_PER_TON_DESC": "Per-ton transport fee",
         "INDEPENDENT_HAZARD_PAY_DESC": "Hazard pay (base + escort strength)",
         "INDEPENDENT_FUEL_COST_DESC": "Fuel cost for the fleet",
+        "INDEPENDENT_PATROL_COST_DESC": "Fee for independent patrol fleets",
         "FUEL_TARGET_TRADE_DESC": "Trade convoys",
         "WORKER_WAGES_DESC": "Worker wages",
         "COLONY_HAZARD_PAY_DESC": "Hazard pay",

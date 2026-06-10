@@ -3,9 +3,7 @@ package wfg.ltv_econ.economy.fleet;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -16,24 +14,14 @@ import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignEventListener.FleetDespawnReason;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
-import com.fs.starfarer.api.campaign.FactionAPI.ShipPickMode;
-import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
-import com.fs.starfarer.api.combat.MutableStat;
-import com.fs.starfarer.api.combat.ShipHullSpecAPI;
-import com.fs.starfarer.api.combat.ShipVariantAPI;
-import com.fs.starfarer.api.fleet.FleetMemberAPI;
-import com.fs.starfarer.api.fleet.FleetMemberType;
-import com.fs.starfarer.api.fleet.RepairTrackerAPI;
 import com.fs.starfarer.api.impl.campaign.command.WarSimScript.LocationDanger;
 import com.fs.starfarer.api.impl.campaign.econ.ShippingDisruption;
 import com.fs.starfarer.api.impl.campaign.fleets.BaseRouteFleetManager;
-import com.fs.starfarer.api.impl.campaign.fleets.DefaultFleetInflaterParams;
 import com.fs.starfarer.api.impl.campaign.fleets.EconomyFleetRouteManager;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
-import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.OptionalFleetData;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteData;
@@ -54,7 +42,6 @@ import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.native_ui.util.Arithmetic;
-import wfg.native_ui.util.ArrayMap;
 
 public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements FleetEventListener {
 	private static final Logger log = Global.getLogger(LtvEconFleetRouteManager.class);
@@ -196,7 +183,6 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 		final CampaignFleetAPI fleet = createTradeRouteFleet(route, random);
 		if (fleet == null) return null;
-
 		
 		final TradeMission mission = LtvEconomyRouteData.getMission(route);
 		mission.setSpawnedFleetCapRatios(fleet.getCargo());
@@ -253,109 +239,22 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 			fleet = FleetFactoryV3.createEmptyFleet(factionId, fleetType, src);
 			if (fleet == null) return null;
 
-			final FleetDataAPI fData = fleet.getFleetData();
-			fData.setOnlySyncMemberLists(true);
-			Misc.getSalvageSeed(fleet);
+			final boolean banPhaseShips = !fleet.getFaction().isPlayerFaction()
+				&& combatPts < FleetFactoryV3.FLEET_POINTS_THRESHOLD_FOR_ANNOYING_SHIPS;
 
-			final boolean banPhaseShipsEtc = !fleet.getFaction().isPlayerFaction()
-				&& combatPts < (float) FleetFactoryV3.FLEET_POINTS_THRESHOLD_FOR_ANNOYING_SHIPS;
+			selectedAmount = FleetFactoryHelpers.populateFleetFromAllocation(
+				fleet, mission.allocatedShips, targetShips, banPhaseShips, random
+			);
 
-			// Ship selection
-			final ArrayMap<String, Integer> remaining = new ArrayMap<>(mission.allocatedShips);
-			final List<ShipHullSpecAPI> selection = new ArrayList<>();
-			while (selection.size() < targetShips) {
-				double totalWeight = 0;
-				for (Map.Entry<String, Integer> e : remaining.singleEntrySet()) {
-					final ShipHullSpecAPI spec = settings.getHullSpec(e.getKey());
-					if (banPhaseShipsEtc && spec.isPhase()) continue;
+			FleetFactoryHelpers.configureFleetAfterAllocation(
+				fleet, factionId,
+				route.getQualityOverride() + Misc.getShipQuality(src, factionId),
+				route.getTimestamp(), 0.5f, -2,
+				random, EconConfig.TRAVEL_SPEED_LY_DAY
+			);
 
-					totalWeight += e.getValue() * Math.max(1d, spec.getFleetPoints());
-				}
-				if (totalWeight == 0) break;
-
-				final Iterator<Map.Entry<String, Integer>> it = remaining.entrySet().iterator();
-				final double r = random.nextDouble() * totalWeight;
-				double accum = 0;
-				while (it.hasNext()) {
-					final Map.Entry<String, Integer> e = it.next();
-					final ShipHullSpecAPI spec = settings.getHullSpec(e.getKey());
-					if (banPhaseShipsEtc && spec.isPhase()) continue;
-
-					accum += e.getValue() * Math.max(1d, spec.getFleetPoints());
-					if (accum >= r) {
-						selection.add(spec);
-						final int newCount = e.getValue() - 1;
-						if (newCount == 0) it.remove();
-						else e.setValue(newCount);
-						break;
-					}
-				}
-			}
-
-			selectedAmount = selection.size();
-			for (ShipHullSpecAPI spec : selection) {
-				final List<String> variantIds = settings.getHullIdToVariantListMap().get(spec.getHullId());
-
-				final ShipVariantAPI variant;
-				if (!variantIds.isEmpty()) {
-					final int index = random.nextInt(variantIds.size());
-					variant = settings.getVariant(variantIds.get(index));
-				} else {
-					variant = settings.createEmptyVariant("", spec);
-				}
-
-				final FleetMemberAPI member = settings.createFleetMember(FleetMemberType.SHIP, variant);
-				final RepairTrackerAPI repair = member.getRepairTracker();
-				member.setShipName(fData.pickShipName(member, random));
-				fData.addFleetMember(member);
-				repair.setCR(Math.max(repair.getMaxCR(), 0.5f));
-			}
-
-			final FleetParamsV3 officerParams = new FleetParamsV3();
-			officerParams.officerNumberMult = 0.5f;
-			officerParams.officerLevelBonus = -2;
-			officerParams.random = random;
-			officerParams.timestamp = route.getTimestamp();
-
-			FleetFactoryV3.addCommanderAndOfficers(fleet, officerParams, random);
-
-			if (fleet.getFlagship() != null && fleet.getFlagship().getStatus() != null) {
-				fleet.getFlagship().getStatus().updateNumStatusesFromMember();
-			}
-
-			for (FleetMemberAPI member : fData.getMembersListCopy()) {
-				member.getRepairTracker().setCR(member.getRepairTracker().getMaxCR());
-			}
-
-			if (Misc.isPirateFaction(fleet.getFaction())) {
-				fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FORCE_TRANSPONDER_OFF, true);
-			}
-
-			if (mission.smuggling) {
-				fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_SMUGGLER, true);
-				Misc.makeLowRepImpact(fleet, "smuggler");
-			} else {
-				fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_TRADE_FLEET, true);
-			}
-
-			final DefaultFleetInflaterParams p = new DefaultFleetInflaterParams();
-			p.quality = route.getQualityOverride() + Misc.getShipQuality(src, factionId);
-			p.persistent = true;
-			p.seed = random.nextLong();
-			p.mode = ShipPickMode.ALL;
-			p.timestamp = route.getTimestamp();
-			p.factionId = factionId;
-
-			for (FleetMemberAPI member : fData.getMembersListCopy()) {
-				final MutableStat stat = member.getStats().getMaxBurnLevel();
-				stat.unmodify();
-				stat.setBaseValue(EconConfig.TRAVEL_SPEED_LY_DAY);
-			}
-
-			fleet.setInflater(Misc.getInflater(fleet, p));
-			fData.setOnlySyncMemberLists(false);
-			fData.sort();
-			fleet.forceSync();
+			fleet.getMemoryWithoutUpdate().set(mission.smuggling ? MemFlags.MEMORY_KEY_SMUGGLER : MemFlags.MEMORY_KEY_TRADE_FLEET, true);
+			if (mission.smuggling) Misc.makeLowRepImpact(fleet, "smuggler");
 		}
 
 		log.info("Created trade fleet with " + selectedAmount + " ships for market [" + src.getName() + "]");
