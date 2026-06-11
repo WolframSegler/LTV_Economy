@@ -473,6 +473,7 @@ public class ManagePopulationDialog extends DialogPanel {
         activateButton.setQuickMode(true);
         activateButton.cutStyle = CutStyle.TL_BR;
         activateButton.bgAlpha = 1f;
+        activateButton.setShortcutAndAppendToText(Keyboard.KEY_G);
         final long marketCredits = EconomyEngine.instance().getCredits(m_market.getId());
         final boolean hasSufficientCredits = Math.max(0, marketCredits) >= policy.spec.cost;
 

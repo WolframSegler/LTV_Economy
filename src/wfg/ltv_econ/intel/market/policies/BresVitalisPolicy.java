@@ -8,6 +8,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.ltv_econ.economy.MarketPopulationData;
 
 public class BresVitalisPolicy extends MarketPolicy {
+    private static final String memKey = "$policy_bres_vitalis";
     public static final float HEALTH_DEBUFF = -0.05f;
     public static final float HAPPINESS_BUFF = 0.1f;
     public static final float CLASS_BUFF = 0.001f;
@@ -16,12 +17,16 @@ public class BresVitalisPolicy extends MarketPolicy {
         data.healthDelta.modifyFlat(id, HEALTH_DEBUFF, spec.name);
         data.happinessDelta.modifyFlat(id, HAPPINESS_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_BUFF, spec.name);
+
+        data.market.getMemoryWithoutUpdate().set(memKey, true);
     }
 
     public void unapply(MarketPopulationData data) {
         data.healthDelta.unmodifyFlat(id);
         data.happinessDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
+
+        data.market.getMemoryWithoutUpdate().set(memKey, false);
     }
 
     @Override

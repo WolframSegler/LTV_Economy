@@ -94,10 +94,10 @@ public class EconomyLoop {
         
         weightedOutputDeficitMods();
 
-        engine.playerMarketData.values().forEach(MarketPopulationData::apply);
+        engine.marketPopData.values().forEach(MarketPopulationData::apply);
 
         if (!fakeAdvance) {
-            engine.playerMarketData.values().forEach(MarketPopulationData::advance);
+            engine.marketPopData.values().forEach(MarketPopulationData::advance);
 
             handleTrade();
             
@@ -145,7 +145,7 @@ public class EconomyLoop {
             if (!market.isPlayerOwned()) continue;
 
             final String marketID = market.getId();
-            if (!engine.playerMarketData.containsKey(marketID)) {
+            if (!engine.marketPopData.containsKey(marketID)) {
                 engine.addMarketPopulationData(marketID);
             }
             for (CommodityDomain dom : engine.getComDomains()) {

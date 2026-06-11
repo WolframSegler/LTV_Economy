@@ -13,7 +13,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.EconomyFleetRouteManager;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
-import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager;
 import com.fs.starfarer.api.util.Misc;
 
 import lunalib.lunaSettings.LunaSettings;
@@ -34,8 +33,6 @@ import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
-import wfg.ltv_econ.intel.bar.events.BresVitalisBarEvent.BresVitalisBarEventCreator;
-import wfg.ltv_econ.intel.bar.events.ConvergenceFestivalBarEvent.ConvergenceFestivalBarEventCreator;
 import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
 import wfg.ltv_econ.plugins.industries.ServiceSectorIndustryOption;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -83,8 +80,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         listenerManager.addListener(new AddWorkerIndustryOption(), true);
         listenerManager.addListener(new ServiceSectorIndustryOption(), true);
 
-        registerBarEvents();
-
         if (newGame) {
             injectStockpiles();
             injectShips();
@@ -99,17 +94,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void afterGameSave() {
         LtvEconSaveData.loadInstance(false, false);
-    }
-
-    private static final void registerBarEvents() {
-        final BarEventManager barManager = BarEventManager.getInstance();
-
-        if (!barManager.hasEventCreator(BresVitalisBarEventCreator.class)) {
-            barManager.addEventCreator(new BresVitalisBarEventCreator());
-        }
-        if (!barManager.hasEventCreator(ConvergenceFestivalBarEventCreator.class)) {
-            barManager.addEventCreator(new ConvergenceFestivalBarEventCreator());
-        }
     }
 
     private static final void addManufacturingToMarkets() {

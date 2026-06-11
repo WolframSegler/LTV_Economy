@@ -10,6 +10,7 @@ import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
 public class ConvergenceFestivalPolicy extends MarketPolicy {
+    private static final String memKey = "$policy_convergence_festival";
     public static final float HAPPINESS_BUFF = 0.67f;
     public static final float COHESION_BUFF = 0.34f;
     public static final float CLASS_DEBUFF = -0.06f;
@@ -26,6 +27,8 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
                 id, PRODUCTION_DEBUFF, spec.name
             );
         }
+
+        data.market.getMemoryWithoutUpdate().set(memKey, true);
     }
 
     public void unapply(MarketPopulationData data) {
@@ -36,6 +39,8 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
             dom.getCell(data.marketID).getProductionStat().unmodifyPercent(id);
         }
+
+        data.market.getMemoryWithoutUpdate().set(memKey, false);
     }
 
     @Override

@@ -704,7 +704,7 @@ public class EconomyInfo {
         final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
         final float wage = cond.getWorkerPool() * (1f - cond.getFreeWorkerRatio()) *
             (LaborConfig.LPV_day / (engine.isPlayerMarket(marketID) ?
-            engine.playerMarketData.get(marketID).getRoSV() : LaborConfig.RoSV)
+            engine.marketPopData.get(marketID).getRoSV() : LaborConfig.RoSV)
         );
 
         return wage * market.getUpkeepMult().getModifiedValue();
