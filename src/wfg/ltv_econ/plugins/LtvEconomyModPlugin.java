@@ -24,10 +24,12 @@ import wfg.ltv_econ.config.planning.FactionDemandCoverageGoal;
 import wfg.ltv_econ.config.planning.HardAutarkyConstraint;
 import wfg.ltv_econ.config.planning.ProfitExportGoal;
 import wfg.ltv_econ.constants.EconomyConstants;
+import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
@@ -67,6 +69,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     @Override
     public void onNewGameAfterEconomyLoad() {
         addManufacturingToMarkets();
+
+        WorkerPoolCondition.initialize();
     }
 
     @Override
@@ -109,7 +113,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
     }
 
     private static final void addManufacturingToMarkets() {
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             if (market.hasIndustry("manufacturing")) continue;
             if (market.getSize() < 4 || market.isPlayerOwned()) continue;
             if (market.getPlanetEntity() == null || market.getPlanetEntity().isGasGiant()) continue;

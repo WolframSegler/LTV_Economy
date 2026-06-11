@@ -32,7 +32,7 @@ public class LtvEconomyRouteData extends EconomyRouteData {
 
     public static final TradeMission getMission(RouteData route) {
         if (route.getCustom() instanceof LtvEconomyRouteData data) {
-            return data.mission;
+            return data.getMission();
         }
         return null;
     }

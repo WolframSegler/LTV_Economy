@@ -32,7 +32,7 @@ public class ShipAllocator {
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
     private static final char DOCT_PREF_KEY = '|';
 
-    private static final double DIVERSITY_PENALTY = 0.2;
+    private static final double DIVERSITY_PENALTY = 0.4;
     private static final double REF_SHIPMENT = 500d;
     private static final float COMBAT_POWER_BASE_PER_100_TONS = 9f;
     private static final float[] COMBAT_POWER_DANGER_MULT = {
@@ -254,7 +254,7 @@ public class ShipAllocator {
                     + crewContrib * crewNeed
                     + combatContrib * combatNeed;
 
-                final double w = weight[i] * Math.pow(utility, 1.65) / (1d + DIVERSITY_PENALTY * counts[i]);
+                final double w = weight[i] * Math.pow(utility, 1.4) / (1d + DIVERSITY_PENALTY * counts[i]);
 
                 weights[i] = w;
                 totalWeight += w;
@@ -276,10 +276,10 @@ public class ShipAllocator {
             counts[picked]++;
             idleRemaining[picked]--;
 
-            remCargo = Math.max(0d, remCargo - cargoCap[picked]);
-            remFuel = Math.max(0d, remFuel - fuelCap[picked]);
-            remCrew = Math.max(0d, remCrew - crewCap[picked]);
-            remCombat = Math.max(0d, remCombat- combatCap[picked]);
+            remCargo -= cargoCap[picked];
+            remFuel -= fuelCap[picked];
+            remCrew -= crewCap[picked];
+            remCombat -= combatCap[picked];
         }
 
         if (remCargo > eps) log.warn(faction.getId() + " - Not enough cargo capacity after allocation, remaining: " + remCargo);
@@ -299,41 +299,33 @@ public class ShipAllocator {
     /**
      * Allocate ships to meet given fleet points. Populates the allocation map.
      * 
-     * @param fleetPoints combat power
+     * @param targetFp combat power
      * @param faction used for doctrine preferences
      * @param allocation the allocation to be populated.
      * @param candidates the pool of hulls to choose from
      */
     public static final void allocateShipsForFleetPoints(
-        double fleetPoints, FactionAPI faction, Map<String, Integer> allocation, List<ShipTypeData> candidates
+        double targetFp, FactionAPI faction, Map<String, Integer> allocation, List<ShipTypeData> candidates
     ) {
-        if (fleetPoints <= 0d) return;
+        if (targetFp <= 0d) return;
 
         final int N = candidates.size();
         if (N <= 0) throw new IllegalStateException("No ship candidates: " + faction.getId());
 
         final double[] baseWeights = buildFleetPointWeights(candidates, faction);
-        final float[] combatPowers = new float[N];
+        final float[] fleetPoints = new float[N];
         final int[] idleRemaining = new int[N];
 
-        double totalCp = 0d;
-        double totalFp = 0d;
         for (int i = 0; i < N; i++) {
             final ShipTypeData ship = candidates.get(i);
             idleRemaining[i] = ship.getIdle();
-            combatPowers[i] = ship.getCombatPower();
-            if (idleRemaining[i] <= 0) continue;
-
-            totalCp += baseWeights[i] * ship.getCombatPower();
-            totalFp += baseWeights[i] * ship.spec.getFleetPoints();
+            fleetPoints[i] = ship.spec.getFleetPoints();
         }
-        final double conversion = totalCp / totalFp;
-        final double combatTarget = fleetPoints * conversion;
 
         final int[] counts = new int[N];
-        double remCombat = combatTarget;
+        double remFp = targetFp;
 
-        while (remCombat > eps) {
+        while (remFp > eps) {
             double totalWeight = 0d;
             double[] weights = new double[N];
 
@@ -362,10 +354,10 @@ public class ShipAllocator {
             counts[picked]++;
             idleRemaining[picked]--;
 
-            remCombat = Math.max(0d, remCombat - combatPowers[picked]);
+            remFp -= fleetPoints[picked];
         }
 
-        if (remCombat > eps) log.warn(faction.getId() + " - Not enough combat power after allocation, remaining: " + remCombat);
+        if (remFp > eps) log.warn(faction.getId() + " - Not enough fleet points after allocation, remaining: " + remFp);
 
         for (int i = 0; i < N; i++) {
             final int count = counts[i];
@@ -473,11 +465,13 @@ public class ShipAllocator {
     private static final double[] buildFleetPointWeights(List<ShipTypeData> candidates, FactionAPI faction) {
         final int N = candidates.size();
 
+        final double sizeBiasExponent = 0.5;
+
         final double[] coeffs = new double[N];
         for (int i = 0; i < N; i++) {
             final ShipTypeData data = candidates.get(i);
 
-            final double baseCost = data.getCombatPower() / data.spec.getFleetPoints();
+            final double baseCost = data.getCombatPower() / Math.pow(data.spec.getFleetPoints(), 1d + sizeBiasExponent);
             final double doctrineFactor = getDoctrinePreference(faction, data);
             final double randFactor = 0.7 + 0.6 * Math.random();
             

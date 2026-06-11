@@ -119,13 +119,15 @@ public class ShipTypeData implements Serializable {
     }
 
     public static final float getCombatPower(ShipHullSpecAPI spec) {
-        final float mult = getCombatMult(spec.getDesignation())
+        final float stats = 1f
             + spec.getFighterBays() * 0.04f
-            + spec.getArmorRating() / 500f
+            + spec.getArmorRating() / 750f
             + spec.getFluxCapacity() / 6000f
             + spec.getFluxDissipation() / 750f
-            + (1f - spec.getShieldSpec().getFluxPerDamageAbsorbed()) * 2f
-            + (spec.getEngineSpec().getMaxSpeed() - 70) / 70f;
+            + (1f - spec.getShieldSpec().getFluxPerDamageAbsorbed()) * 3f
+            + (spec.getEngineSpec().getMaxSpeed() - 80) / 30f;
+            
+        final float mult = getCombatMult(spec.getDesignation()) * stats;
         return spec.getFleetPoints() * mult;
     }
 
@@ -137,10 +139,10 @@ public class ShipTypeData implements Serializable {
             case COMBAT_SHIPS -> 1f;
             case FRIGATES -> 0.7f;
             case DESTROYERS -> 1.2f;
-            case CRUISERS -> 1f;
-            case CAPITALS -> 1.1f;
-            case PHASE_SHIPS -> 0.5f;
-            case CARRIERS -> 0.3f;
+            case CRUISERS -> 1.1f;
+            case CAPITALS -> 1f;
+            case PHASE_SHIPS -> 0.7f;
+            case CARRIERS -> 0.4f;
             default -> 0.5f;
         };
     }

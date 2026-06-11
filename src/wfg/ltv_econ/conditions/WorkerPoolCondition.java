@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.LaborConfig;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.native_ui.util.Arithmetic;
@@ -148,5 +149,11 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         final MarketConditionAPI cond = market.getCondition(ConditionID);
         if (cond == null) return new WorkerPoolCondition();
         return (WorkerPoolCondition) cond.getPlugin();
+    }
+
+    public static final void initialize() {
+        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
+            addConditionToMarket(market);
+        }
     }
 }

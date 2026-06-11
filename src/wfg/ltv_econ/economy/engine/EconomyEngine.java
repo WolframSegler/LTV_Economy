@@ -100,6 +100,9 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     protected int lastTradeCycle = EconConfig.TRADE_INTERVAL;
     protected boolean midDayApplied = false;
 
+    public transient boolean postLoadRestorePending = false;
+    public transient boolean postLoadRestoreWithAssignWorkers = false;
+
     public static EconomyEngine instance() {
         return LtvEconSaveData.instance().economyEngine;
     }
@@ -137,9 +140,20 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         final int hour = clock.getHour();
         final int dayKey = (clock.getCycle() << 10) + (clock.getMonth() << 5) + clock.getDay();
 
+        // TODO replace with population industry apply listener after new update.
         if (hour >= 6 && !midDayApplied) {
             applyPopulationStabilityMods();
             midDayApplied = true;
+        }
+
+        if (postLoadRestorePending) {
+            if (postLoadRestoreWithAssignWorkers) {
+                fakeAdvanceWithAssignWorkers();
+            } else {
+                fakeAdvance();
+            }
+            postLoadRestorePending = false;
+            return; // Already simulated economy tick
         }
 
         if (dayKeyTracker == -1) { dayKeyTracker = dayKey; return;}
@@ -597,7 +611,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     private final void endMonth() {
         final MarketFinanceRegistry reg = MarketFinanceRegistry.instance();
 
-        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             if (!registeredMarkets.contains(market.getId())) continue;
             final MarketLedger ledger = reg.getLedger(market.getId());
 

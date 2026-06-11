@@ -56,11 +56,8 @@ public class LtvEconSaveData implements Serializable {
         instance = data;
 
         // SETUP
-        if (EconConfig.ASSIGN_WORKERS_ON_LOAD || newGame) {
-            data.economyEngine.fakeAdvanceWithAssignWorkers();
-        } else {
-            data.economyEngine.fakeAdvance();
-        }
+        data.economyEngine.postLoadRestorePending = true;
+        data.economyEngine.postLoadRestoreWithAssignWorkers = (EconConfig.ASSIGN_WORKERS_ON_LOAD || newGame);
 
         sector.getListenerManager().addListener(data.economyEngine, true);
         sector.addTransientScript(data.economyEngine);
