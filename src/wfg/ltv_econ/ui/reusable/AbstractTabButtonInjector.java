@@ -61,6 +61,10 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
         final CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
         if (!campaignUI.isShowingDialog()) return;
 
+        for (UIPanelAPI panel : hiddenPanels) {
+            if (panel.getOpacity() > 0f && getCurrentTabIndex() == buttonTabId) panel.setOpacity(0f);
+        }
+
         final int index = getCurrentTabIndex();
         if (uiInjected) {
             if (index == buttonTabId) return;
@@ -123,7 +127,11 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
             if (injectedBtn != null) injectedBtn.setChecked(false);
             if (injectedComp != null) injectedComp.setOpacity(0f);
 
-            hiddenPanels.forEach(p -> p.setOpacity(1f));
+            hiddenPanels.forEach(p -> {
+                if (!(p instanceof CustomPanelAPI custom && custom.getPlugin() instanceof CustomPanel)) {
+                    p.setOpacity(1f);
+                }
+            });
             hiddenPanels.clear();
         }
     }
@@ -140,9 +148,9 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
             if (child instanceof ButtonAPI button) {
                 button.setChecked(false);
                 button.unhighlight();
-            } else if (child instanceof CustomPanelAPI) {
-
-            } else if (child instanceof UIPanelAPI panel) {
+            } else if (child instanceof UIPanelAPI panel && child != injectedComp
+                && !(child instanceof CustomPanelAPI custom && custom.getPlugin() instanceof Button)
+            ) {
                 panel.setOpacity(0f);
                 hiddenPanels.add(panel);
             }
