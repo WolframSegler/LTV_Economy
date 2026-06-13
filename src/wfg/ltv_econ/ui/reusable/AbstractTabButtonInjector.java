@@ -16,14 +16,14 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.ui.scripts.LtvCoreTabUIBuilder;
+import wfg.ltv_econ.ui.scripts.CoreTabUIBuilder;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public abstract class AbstractTabButtonInjector implements LtvCoreTabUIBuilder, CallbackRunnable<Button> {
+public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, CallbackRunnable<Button> {
     protected static final int BUTTON_HEIGHT = 18;
     protected static final int BUTTON_WIDTH = 130;
 

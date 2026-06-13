@@ -19,9 +19,7 @@ public class UIInjectorListener implements CoreUITabListener, CommodityTooltipMo
     public void reportAboutToOpenCoreTab(CoreUITabId tabID, Object param) {
         final SectorAPI sector = Global.getSector();
 
-        { // Clear all listeners
-        sector.removeTransientScriptsOfClass(LtvCoreTabUIBuilder.class);
-        }
+        sector.removeTransientScriptsOfClass(CoreTabUIBuilder.class);
 
         switch (tabID) {
         case CARGO:

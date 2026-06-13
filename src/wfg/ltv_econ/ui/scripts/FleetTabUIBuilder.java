@@ -22,7 +22,7 @@ import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class FleetTabUIBuilder implements LtvCoreTabUIBuilder {
+public class FleetTabUIBuilder implements CoreTabUIBuilder {
     
     @SuppressWarnings("unchecked")
     public void advance(float delta) {

@@ -30,7 +30,6 @@ public class IntelTabUIBuilder extends AbstractTabButtonInjector {
     }
 
     protected UIComponentAPI createCustomComponent(UIPanelAPI parent) {
-        final EconomyOverviewPanel panel = new EconomyOverviewPanel(parent);
-        return panel.getPanel();
+        return new EconomyOverviewPanel(parent).getPanel();
     }
 }

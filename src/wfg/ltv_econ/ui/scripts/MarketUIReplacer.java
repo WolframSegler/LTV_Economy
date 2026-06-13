@@ -40,7 +40,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.MarketConditionsWidget;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
-public class MarketUIReplacer implements LtvCoreTabUIBuilder {
+public class MarketUIReplacer implements CoreTabUIBuilder {
 
     private static final Class<?> knownClass1 = IndustryListPanel.class;
     private static final Class<?> knownClass2 = LtvIndustryListPanel.class;

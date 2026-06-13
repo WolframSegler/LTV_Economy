@@ -54,8 +54,7 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
     }
 
     protected UIComponentAPI createCustomComponent(UIPanelAPI parent) {
-        final FactionManagementPanel panel = new FactionManagementPanel(parent);
-        return panel.getPanel();
+        return new FactionManagementPanel(parent).getPanel();
     }
 
     @Override
