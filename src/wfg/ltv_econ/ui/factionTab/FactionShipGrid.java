@@ -38,8 +38,8 @@ public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget
         if (!DebugFlags.COLONY_DEBUG) {
             list.removeIf(d -> d.getOwned() < 1);
         }
-        list.removeIf(this::shouldFilterOut);
-        list.sort(this::compareShips);
+        list.removeIf(FactionShipGrid::shouldFilterOut);
+        list.sort(FactionShipGrid::compareShips);
 
         return list;
     }
@@ -63,7 +63,7 @@ public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget
         return LocalizedStrings.str("uiNoMatchTxt");
     }
 
-    private final boolean shouldFilterOut(ShipTypeData data) {
+    private static final boolean shouldFilterOut(ShipTypeData data) {
         if (!ShipFilters.showCivilian && data.spec.getDesignation().equals(ShipTypeData.CIVILIAN)) return true;
         if (!ShipFilters.showCombat && !data.spec.getDesignation().equals(ShipTypeData.CIVILIAN)) return true;
         if (ShipFilters.showOnlyIdle && data.getIdle() < 1) return true;
@@ -84,7 +84,7 @@ public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget
         return false;
     }
 
-    private final int compareShips(ShipTypeData a, ShipTypeData b) {
+    private static final int compareShips(ShipTypeData a, ShipTypeData b) {
         return switch (ShipFilters.sortMode) {
             case NAME -> a.spec.getHullName().compareToIgnoreCase(b.spec.getHullName());
             case CARGO -> Float.compare(b.spec.getCargo(), a.spec.getCargo());
