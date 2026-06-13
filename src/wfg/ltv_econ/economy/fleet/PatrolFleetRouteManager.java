@@ -64,7 +64,7 @@ public class PatrolFleetRouteManager {
             final float fee = EconConfig.INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP * totalValue / 100f;
 
             MarketFinanceRegistry.instance().getLedger(inv.getCapital()).add(
-                INDEPENDENT_PATROL_COST_KEY, fee, getDesc(INDEPENDENT_PATROL_COST_KEY)
+                INDEPENDENT_PATROL_COST_KEY, -fee, getDesc(INDEPENDENT_PATROL_COST_KEY)
             );
         }
     }

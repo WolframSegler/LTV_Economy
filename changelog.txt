@@ -4,7 +4,7 @@ Version 0.4.0-beta | The Metal Broom | NOT SAVE COMPATIBLE
 - The above fix caused many trade fleets to be armored. Apparently capital ships are more efficient than small ships? Might need to balance further.
 - Made patrol fleets more tough.
 - Replaced the patrolHQ industry. Patrol fleets now use the faction hangar. If there aren't enough ships, independent captains are hired at a cost.
-- Adjusted maintenance and operation costs of patrolHQ and its upgrades.
+- Reduced maintenance and operation costs of patrolHQ and its upgrades.
 - Reduced crew production efficiency of patrolHQ and its upgrades.
 - Fixed a concurrency bug when starting a new game.
 - Placed all bar events into rules.csv for easier localization.

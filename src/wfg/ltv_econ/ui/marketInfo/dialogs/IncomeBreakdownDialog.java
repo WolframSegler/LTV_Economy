@@ -157,6 +157,7 @@ public class IncomeBreakdownDialog extends DockPanel {
         allKeys.remove(TRADE_FLEET_SHIPMENT_KEY);
         allKeys.remove(COLONY_HAZARD_PAY_KEY);
         allKeys.remove(PLAYER_MARKET_TRANSACTION_KEY);
+        allKeys.remove(INDEPENDENT_PATROL_COST_KEY);
 
         final long netIncome = lastMonth ? ledger.getNetLastMonth() : ledger.getNetCurrentMonth();
         final long grossIncome = lastMonth ? ledger.getIncomeLastMonth() : ledger.getIncomeCurrentMonth();
@@ -169,6 +170,7 @@ public class IncomeBreakdownDialog extends DockPanel {
         final long factionShipsCrewWages = lastMonth ? ledger.getLastMonth(FACTION_CREW_WAGES_KEY) : ledger.getCurrentMonth(FACTION_CREW_WAGES_KEY);
         final long factionShipsProd = lastMonth ? ledger.getLastMonth(FACTION_SHIP_PRODUCTION_KEY) : ledger.getCurrentMonth(FACTION_SHIP_PRODUCTION_KEY);
         final long tradeFleetShipment = lastMonth ? ledger.getLastMonth(TRADE_FLEET_SHIPMENT_KEY) : ledger.getCurrentMonth(TRADE_FLEET_SHIPMENT_KEY);
+        final long patrolFleetIndependent = lastMonth ? ledger.getLastMonth(INDEPENDENT_PATROL_COST_KEY) : ledger.getCurrentMonth(INDEPENDENT_PATROL_COST_KEY);
         final String policyCostStr = NumFormat.formatCreditAbs(policyCosts);
         final int incentive = (int) (lastMonth ? ledger.getLastMonth(COLONY_HAZARD_PAY_KEY) : ledger.getCurrentMonth(COLONY_HAZARD_PAY_KEY));
         final int sumbarketTransaction = (int) (lastMonth ? ledger.getLastMonth(PLAYER_MARKET_TRANSACTION_KEY) : ledger.getCurrentMonth(PLAYER_MARKET_TRANSACTION_KEY));
@@ -290,6 +292,8 @@ public class IncomeBreakdownDialog extends DockPanel {
         tp.addPara(getDesc(FACTION_SHIP_PRODUCTION_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(factionShipsProd));
         
         tp.addPara(getDesc(TRADE_FLEET_SHIPMENT_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(tradeFleetShipment));
+
+        tp.addPara(getDesc(INDEPENDENT_PATROL_COST_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(patrolFleetIndependent));
 
         tp.addSectionHeading(str("uiPolicyExpensesTitle"), base, dark, Alignment.MID, opad);
 
