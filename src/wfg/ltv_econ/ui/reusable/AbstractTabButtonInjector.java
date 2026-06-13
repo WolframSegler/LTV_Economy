@@ -91,6 +91,11 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
                 if (lastBtn == null || lastBtn.getPosition().getX() < button.getPosition().getX()) {
                     lastBtn = button;
                 }
+            } else if (child instanceof CustomPanelAPI custom && custom instanceof Button btn && injectedBtn != btn) {
+                buttonTabId++;
+                if (lastBtn == null || lastBtn.getPosition().getX() < btn.getPos().getX()) {
+                    lastBtn = custom;
+                }
             }
         }
         if (lastBtn == null) return;
