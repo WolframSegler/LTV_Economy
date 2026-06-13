@@ -84,6 +84,8 @@ Blueprint by NAPISAH from <a href="https://thenounproject.com/browse/icons/term/
 
 Forbidden by Kosong Tujuh from <a href="https://thenounproject.com/browse/icons/term/forbidden/" target="_blank" title="Forbidden Icons">Noun Project</a> (CC BY 3.0)
 
+The Fairest of the Fair by <a href="https://www.youtube.com/@usnavyband" target="_blank" title="Forbidden Icons">United States Navy Band</a>
+
 <br>
 
 ## AI Generated Assets

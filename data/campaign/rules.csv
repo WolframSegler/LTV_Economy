@@ -3,30 +3,26 @@ id,trigger,conditions,script,text,options,notes
 ltvWlscmpHijack,DialogOptionSelected,"$option == marketVisitBar
 $market.policy_wellness_compliance
 !$global.ltv_wlscmp_cooldown
-RollProbability 0.3 score:10","$option = ltv_wlscmp_intro 0
+RollProbability 0.3 score:100","$option = ltv_wlscmp_intro 0
 FireBest DialogOptionSelected",,,WellnessCompliance bar event
 
-# 1. INTRO TEXT,,,,,,
-ltvWlscmpIntro,DialogOptionSelected,$option == ltv_wlscmp_intro,,"As you enter the bar, the chatter seems unusually tense. Conversations trail off mid-sentence, and people keep glancing at each other with a quiet, uneasy suspicion.",ltv_wlscmp_observe:Go to the bar counter for a drink,
+ltvWlscmpIntro,DialogOptionSelected,$option == ltv_wlscmp_intro,,"As you enter the bar, the chatter seems unusually tense. Conversations trail off mid-sentence, and people keep glancing at each other with a quiet, uneasy suspicion.",ltv_wlscmp_observe:Go to the bar counter for a drink,INTRO TEXT
 
-# 2. OBSERVE PATRONS,,,,,,
 ltvWlscmpObserve,DialogOptionSelected,$option == ltv_wlscmp_observe,,"As you make your way to the counter, you notice patrons giving each other subtle side-eye, and a few are keeping their distance without any obvious reason. Nobody seems relaxed.","ltv_wlscmp_ask:Ask the bartender what's going on
-ltv_wlscmp_leave:Leave quietly",
+ltv_wlscmp_leave:Leave quietly",OBSERVE PATRONS
 
-# 3. ASK QUESTIONS,,,,,,
-ltvWlscmpAsk,DialogOptionSelected,$option == ltv_wlscmp_ask,,"He leans in, whispering that certain districts are supposedly higher-risk. He doesn't elaborate, just shrugs and straightens up again. Nobody in the bar looks comfortable hearing it said out loud.",ltv_wlscmp_leave:Leave the bar,
+ltvWlscmpAsk,DialogOptionSelected,$option == ltv_wlscmp_ask,,"He leans in, whispering that certain districts are supposedly higher-risk. He doesn't elaborate, just shrugs and straightens up again. Nobody in the bar looks comfortable hearing it said out loud.",ltv_wlscmp_leave:Leave the bar,ASK QUESTIONS
 
-# 4. LEAVE,,,,,,
 ltvWlscmpLeave,DialogOptionSelected,$option == ltv_wlscmp_leave,"$global.ltv_wlscmp_cooldown = true 60
 $option = gaKA_hegJustLeave 0
-FireBest DialogOptionSelected","You decide it's best not to get involved and step away.",,
+FireBest DialogOptionSelected","You decide it's best not to get involved and step away.",,LEAVE
 
 
 
 bresVitalis_button,AddBarEvents,"$market.policy_bres_vitalis
 !$global.ltv_bresvitalis_cooldown
 !$global.isDevMode
-RollProbability 0.15 score:10",,"From the corner of your eye, you notice a man passed out in a table full of cans. The staff seem to ignore him.",bresVitalis_start:Inspect the man sleeping next to the mountain of cans,BresVitalis bar event (normal)
+RollProbability 0.15",,"From the corner of your eye, you notice a man passed out in a table full of cans. The staff seem to ignore him.",bresVitalis_start:Inspect the man sleeping next to the mountain of cans,BresVitalis bar event (normal)
 
 bresVitalis_button_debug,AddBarEvents,"$market.policy_bres_vitalis
 !$global.ltv_bresvitalis_cooldown
@@ -43,11 +39,11 @@ bresVitalis_leave,DialogOptionSelected,$option == bresVitalis_leave,,"You decide
 
 convergence_festival_flavor,AddBarEvents,"$market.policy_convergence_festival
 !$global.isDevMode
-RollProbability 0.5 score:10",FireBest ConvergenceFestivalStart,"The bar is decorated with colorful banners and holographic displays celebrating The Convergence Festival. Patrons cheer and participate in the festive mood.",,The flavor text without the actual event
+RollProbability 0.5",FireBest ConvergenceFestivalStart,"The bar is decorated with colorful banners and holographic displays celebrating The Convergence Festival. Patrons cheer and participate in the festive mood.",,The flavor text without the actual event
 
 convergence_festival_start,ConvergenceFestivalStart,"!$global.ltv_convergence_festival_cooldown
 !$global.isDevMode
-RollProbability 0.2 score:10",,"Your eyes lock onto a festival performer among the crowd.
+RollProbability 0.2",,"Your eyes lock onto a festival performer among the crowd.
 He looks tense and exhausted, glancing nervously at the crowd from his booth.",ConvergenceFestivalApproach:Approach the convergence festival performer,
 
 convergence_festival_flavor_debug,AddBarEvents,"$market.policy_convergence_festival
@@ -74,12 +70,11 @@ ConvergenceFestivalClarification:Ask what he means by that",
 convergence_festival_clarification,DialogOptionSelected,$option == ConvergenceFestivalClarification,,"He narrows his eyes, voice tight. ""The guards practically dragged me out. They made sure I was ready for the drills. I barely had a moment to catch my breath.""","ConvergenceFestivalFinalAdvice:Remind him that choosing to join makes participation mandatory
 ConvergenceFestivalApologize:Apologize on behalf of the authorities and leave",
 
-convergence_festival_final_advice,DialogOptionSelected,$option == ConvergenceFestivalFinalAdvice,AdjustRepNPC market $convergence_performer -5 HOSTILE,"You tell him quietly: ""Choosing to join the events is voluntary, but once in, you must fulfill your duty. Otherwise, the whole festival would crumble.""
-The performer exhales sharply, eyes flicking to the holographic banners above the plaza. Beyond the bar, drums beat in rhythm with the thousands still rehearsing, the crowd echoing rhythmically, as if the festival has become a living organism. You leave him for a moment, sensing its pulse; lights, banners, and cheers flood the bar, and in your mind, the festival takes on a life of its own.",ConvergenceFestivalDaze:Continue,
+convergence_festival_final_advice,DialogOptionSelected,$option == ConvergenceFestivalFinalAdvice,"AdjustRepNPC market $convergence_performer -5 HOSTILE
+ConvergenceFestivalCMD kill_music","You tell him quietly: ""Choosing to join the events is voluntary, but once in, you must fulfill your duty. Otherwise, the whole festival would crumble.""",ConvergenceFestivalDaze:Continue,
 
-# TODO add custom audio here while muffling the bar chatter audio,,,,,,
-convergence_festival_daze,DialogOptionSelected,$option == ConvergenceFestivalDaze,,"The performer exhales sharply, eyes flicking to the holographic banners above the plaza. Beyond the bar, drums beat in rhythm with the thousands still rehearsing, the crowd echoing rhythmically, as if the festival has become a living organism. You leave him for a moment, sensing its pulse; lights, banners, and cheers flood the bar, and in your mind, the festival takes on a life of its own.",ConvergenceFestivalLeave:Snap out of it,
+convergence_festival_daze,DialogOptionSelected,$option == ConvergenceFestivalDaze,"ConvergenceFestivalCMD start_daze","The performer exhales sharply, eyes flicking to the holographic banners above the plaza. Beyond the bar, drums beat in rhythm with the thousands still rehearsing, the crowd echoing rhythmically, as if the festival has become a living organism. You leave him for a moment, sensing its pulse; lights, banners, and cheers flood the bar, and in your mind, the festival takes on a life of its own.",ConvergenceFestivalLeave:Snap out of it,
 
 convergence_festival_apologize,DialogOptionSelected,$option == ConvergenceFestivalApologize,,"You apologize quietly and step away. The performer watches you go, muttering a curse under his breath as he sips his drink.",barHRE_goToNormalBar:Continue,
 
-convergence_festival_leave,DialogOptionSelected,$option == ConvergenceFestivalLeave,,"Suddenly the festival cheers go quiet and you find yourself back at the bar.",barHRE_goToNormalBar:Continue,
+convergence_festival_leave,DialogOptionSelected,$option == ConvergenceFestivalLeave,ConvergenceFestivalCMD end_daze,"Suddenly the festival cheers go quiet and you find yourself back at the bar.",barHRE_goToNormalBar:Continue,
