@@ -1,6 +1,6 @@
 {
   "plugins": {
-    "TitleScreenWarning": "wfg.ltv_econ.plugins.TitleScreenWarningPlugin"
+    "TitleScreenWarning": "wfg.ltv_econ.plugin.TitleScreenWarningPlugin"
   },
   "graphics": {
     "ui": {
