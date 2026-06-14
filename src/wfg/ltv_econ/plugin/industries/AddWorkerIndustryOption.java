@@ -1,4 +1,4 @@
-package wfg.ltv_econ.plugins.industries;
+package wfg.ltv_econ.plugin.industries;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;

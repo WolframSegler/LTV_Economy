@@ -30,7 +30,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 
-import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;

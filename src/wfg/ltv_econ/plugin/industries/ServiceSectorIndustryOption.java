@@ -1,4 +1,4 @@
-package wfg.ltv_econ.plugins.industries;
+package wfg.ltv_econ.plugin.industries;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;

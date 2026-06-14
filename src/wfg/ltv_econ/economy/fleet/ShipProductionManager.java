@@ -17,7 +17,7 @@ import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 
-import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;

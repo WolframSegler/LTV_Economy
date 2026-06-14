@@ -14,7 +14,7 @@
 		"jars/libs/commons-math4-legacy-core-4.0-beta1.jar",
 		"jars/libs/commons-numbers-core-1.2.jar"
     ],
-	"modPlugin": "wfg.ltv_econ.plugins.LtvEconomyModPlugin",
+	"modPlugin": "wfg.ltv_econ.plugin.LtvEconomyModPlugin",
 	"dependencies": [
         {
             "id": "wfg_native_ui",

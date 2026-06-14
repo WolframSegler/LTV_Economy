@@ -18,7 +18,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.engine.EconomyEngine;

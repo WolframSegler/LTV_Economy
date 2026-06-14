@@ -1,4 +1,4 @@
-package wfg.ltv_econ.plugins;
+package wfg.ltv_econ.plugin;
 
 import static wfg.ltv_econ.constant.Mods.*;
 import static wfg.native_ui.util.Globals.settings;
@@ -22,7 +22,7 @@ import wfg.ltv_econ.config.planning.FactionDemandCoverageGoal;
 import wfg.ltv_econ.config.planning.HardAutarkyConstraint;
 import wfg.ltv_econ.config.planning.ProfitExportGoal;
 import wfg.ltv_econ.constant.EconomyConstants;
-import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -32,8 +32,8 @@ import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
-import wfg.ltv_econ.plugins.industries.AddWorkerIndustryOption;
-import wfg.ltv_econ.plugins.industries.ServiceSectorIndustryOption;
+import wfg.ltv_econ.plugin.industries.AddWorkerIndustryOption;
+import wfg.ltv_econ.plugin.industries.ServiceSectorIndustryOption;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.scripts.UIInjectorListener;
 

@@ -1,4 +1,4 @@
-package wfg.ltv_econ.submarkets;
+package wfg.ltv_econ.submarket;
 
 import static wfg.ltv_econ.constant.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
 import static wfg.ltv_econ.constant.strings.Income.getDesc;

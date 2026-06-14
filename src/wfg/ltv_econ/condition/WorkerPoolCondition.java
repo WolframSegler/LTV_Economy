@@ -1,4 +1,4 @@
-package wfg.ltv_econ.conditions;
+package wfg.ltv_econ.condition;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;

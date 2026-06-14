@@ -1,4 +1,4 @@
-package wfg.ltv_econ.plugins;
+package wfg.ltv_econ.plugin;
 
 import static wfg.ltv_econ.constant.Mods.*;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;

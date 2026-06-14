@@ -24,7 +24,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.economy.CompatLayer;

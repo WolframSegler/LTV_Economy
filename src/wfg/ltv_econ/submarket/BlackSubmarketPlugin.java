@@ -1,4 +1,4 @@
-package wfg.ltv_econ.submarkets;
+package wfg.ltv_econ.submarket;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.negative;

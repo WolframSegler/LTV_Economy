@@ -1,4 +1,4 @@
-package wfg.ltv_econ.submarkets;
+package wfg.ltv_econ.submarket;
 
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;

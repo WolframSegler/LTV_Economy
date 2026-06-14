@@ -11,7 +11,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
-import wfg.ltv_econ.conditions.WorkerPoolCondition;
+import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.serializable.LtvEconSaveData;

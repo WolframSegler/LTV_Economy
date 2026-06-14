@@ -26,9 +26,9 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constant.SubmarketsID;
+import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
