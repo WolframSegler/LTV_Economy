@@ -115,5 +115,4 @@ The Fairest of the Fair by <a href="https://www.youtube.com/@usnavyband" target=
     <li>graphics/icons/cargo/components_light_3.png</li>
     <li>graphics/icons/cargo/components_precision_1.png</li>
     <li>graphics/icons/cargo/components_structural_1.png</li>
-    <li>graphics/icons/cargo/components_subassembly_1.png</li>
 </ul>

@@ -1,5 +1,7 @@
-Version 0.4.1-beta | SAVE COMPATIBLE
+Version 0.4.1-beta | NOT SAVE COMPATIBLE
 - UI bug and alignment fixes
+- Removed subassembly parts.
+- Manufacturing now produces light machinery.
 
 Version 0.4.0-beta | The Metal Broom | NOT SAVE COMPATIBLE
 - Added a frame to the policy posters.

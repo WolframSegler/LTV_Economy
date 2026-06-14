@@ -8,29 +8,19 @@
 		"outputList": {
 			"heavy_machinery": {
 				"CCMoneyDist": {
-					"metals": 0.05,
-					"components_subassembly": 0.3,
-					"components_structural": 0.3,
-					"components_precision": 0.35
+					"metals": 0.2,
+					"rare_metals":0.05,
+					"components_structural": 0.35,
+					"components_precision": 0.4
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.3
 			},
-			"light_machinery": {
-				"CCMoneyDist": {
-					"metals": 0.1,
-					"components_light": 0.45,
-					"components_subassembly": 0.2,
-					"components_precision": 0.25
-				},
-				"usesWorkers": true,
-				"workerAssignableLimit": 0.4
-			},
 			"supplies": {
 				"CCMoneyDist": {
-					"metals": 0.05,
-					"components_subassembly": 0.2,
-					"components_structural": 0.1,
+					"metals": 0.15,
+					"rare_metals":0.05,
+					"components_structural": 0.15,
 					"components_light": 0.4,
 					"components_precision": 0.25
 				},
@@ -39,22 +29,21 @@
 			},
 			"hand_weapons": {
 				"CCMoneyDist": {
-					"metals": 0.05,
-					"components_subassembly": 0.2,
+					"metals": 0.1,
+					"rare_metals":0.1,
 					"components_structural": 0.25,
-					"components_precision": 0.5
+					"components_precision": 0.55
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.3
 			},
 			"ships": {
 				"CCMoneyDist": {
-					"metals": 0.1,
-					"rare_metals": 0.1,
-					"components_subassembly": 0.2,
-					"components_structural": 0.45,
+					"metals": 0.15,
+					"rare_metals": 0.15,
+					"components_structural": 0.5,
 					"components_light": 0.05,
-					"components_precision": 0.1
+					"components_precision": 0.15
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.5
@@ -68,20 +57,18 @@
 		"outputList": {
 			"domestic_goods": {
 				"CCMoneyDist": {
-					"organics": 0.1,
-					"components_subassembly": 0.25,
+					"organics": 0.3,
 					"components_light": 0.6,
-					"light_machinery": 0.05
+					"light_machinery": 0.1
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.7
 			},
 			"luxury_goods": {
 				"CCMoneyDist": {
-					"organics": 0.1,
-					"components_subassembly": 0.3,
-					"components_light": 0.45,
-					"light_machinery": 0.15
+					"organics": 0.25,
+					"components_light": 0.5,
+					"light_machinery": 0.25
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.6,
@@ -117,31 +104,29 @@
 			"components_precision": {
 				"CCMoneyDist": {
 					"metals": 0.1,
-					"rare_metals": 0.75,
-					"heavy_machinery": 0.05,
-					"light_machinery": 0.1
+					"rare_metals": 0.8,
+					"heavy_machinery": 0.1
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.5
 			},
-			"components_subassembly": {
-				"CCMoneyDist": {
-					"metals": 0.45,
-					"rare_metals": 0.35,
-					"heavy_machinery": 0.05,
-					"light_machinery": 0.05
-				},
-				"usesWorkers": true,
-				"workerAssignableLimit": 0.8
-			},
 			"components_light": {
 				"CCMoneyDist": {
 					"metals": 0.1,
-					"organics": 0.85,
-					"light_machinery": 0.05
+					"organics": 0.9
 				},
 				"usesWorkers": true,
 				"workerAssignableLimit": 0.55
+			},
+			"light_machinery": {
+				"CCMoneyDist": {
+					"metals": 0.5,
+					"organics": 0.2,
+					"rare_metals": 0.2,
+					"heavy_machinery": 0.1
+				},
+				"usesWorkers": true,
+				"workerAssignableLimit": 0.4
 			}
 		}
 	},

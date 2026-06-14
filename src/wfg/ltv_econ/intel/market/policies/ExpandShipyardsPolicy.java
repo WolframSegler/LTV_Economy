@@ -21,14 +21,14 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
     private static final int RARE_METALS_COST = 500;
     private static final int SUPPLIES_COST = 1000;
     private static final int STRUCTURAL_COMPONENTS_COST = 1000;
-    private static final int SUBASSEMBLY_COMPONENTS_COST = 250;
+    private static final int HEAVY_MACHINERY_COST = 250;
 
     public void apply(MarketPopulationData data) {
         removeStored(data.market, Commodities.METALS, METALS_COST);
         removeStored(data.market, Commodities.RARE_METALS, RARE_METALS_COST);
         removeStored(data.market, Commodities.SUPPLIES, SUPPLIES_COST);
+        removeStored(data.market, Commodities.HEAVY_MACHINERY, HEAVY_MACHINERY_COST);
         removeStored(data.market, CommoditiesID.STRUCTURAL_COMPONENTS, STRUCTURAL_COMPONENTS_COST);
-        removeStored(data.market, CommoditiesID.SUBASSEMBLY_COMPONENTS, SUBASSEMBLY_COMPONENTS_COST);
     }
 
     public void unapply(MarketPopulationData data) {
@@ -46,7 +46,7 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
         if (getStored(data.market, Commodities.RARE_METALS) < RARE_METALS_COST) return false;
         if (getStored(data.market, Commodities.SUPPLIES) < SUPPLIES_COST) return false;
         if (getStored(data.market, CommoditiesID.STRUCTURAL_COMPONENTS) < STRUCTURAL_COMPONENTS_COST) return false;
-        if (getStored(data.market, CommoditiesID.SUBASSEMBLY_COMPONENTS) < SUBASSEMBLY_COMPONENTS_COST) return false;
+        if (getStored(data.market, Commodities.HEAVY_MACHINERY) < HEAVY_MACHINERY_COST) return false;
 
         return super.isAvailable(data);
     }
@@ -59,7 +59,7 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
         final Color rareMetalsColor = getStored(data.market, Commodities.RARE_METALS) >= RARE_METALS_COST ? highlight : negative;
         final Color suppliesColor = getStored(data.market, Commodities.SUPPLIES) >= SUPPLIES_COST ? highlight : negative;
         final Color structuralColor = getStored(data.market, CommoditiesID.STRUCTURAL_COMPONENTS) >= STRUCTURAL_COMPONENTS_COST ? highlight : negative;
-        final Color subassemblyColor = getStored(data.market, CommoditiesID.SUBASSEMBLY_COMPONENTS) >= SUBASSEMBLY_COMPONENTS_COST ? highlight : negative;
+        final Color heavyMachineryColor = getStored(data.market, Commodities.HEAVY_MACHINERY) >= HEAVY_MACHINERY_COST ? highlight : negative;
         
         final int cols = 2;
         tp.addPara(str("marketPolicyRequiredResourcesTxt"), pad);
@@ -68,7 +68,7 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
         tp.addToGrid(0, 1, settings.getCommoditySpec(Commodities.RARE_METALS).getName(), Integer.toString(RARE_METALS_COST), rareMetalsColor);
         tp.addToGrid(0, 2, settings.getCommoditySpec(Commodities.SUPPLIES).getName(), Integer.toString(SUPPLIES_COST), suppliesColor);
         tp.addToGrid(0, 3, settings.getCommoditySpec(CommoditiesID.STRUCTURAL_COMPONENTS).getName(), Integer.toString(STRUCTURAL_COMPONENTS_COST), structuralColor);
-        tp.addToGrid(0, 4, settings.getCommoditySpec(CommoditiesID.SUBASSEMBLY_COMPONENTS).getName(), Integer.toString(SUBASSEMBLY_COMPONENTS_COST), subassemblyColor);
+        tp.addToGrid(0, 4, settings.getCommoditySpec(Commodities.HEAVY_MACHINERY).getName(), Integer.toString(HEAVY_MACHINERY_COST), heavyMachineryColor);
 
         tp.addGrid(0);
 
