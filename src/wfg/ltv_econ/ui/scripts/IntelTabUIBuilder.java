@@ -6,7 +6,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.comms.IntelTabData;
 
-import wfg.ltv_econ.constants.strings.LocalizedStrings;
+import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.ui.economyTab.EconomyOverviewPanel;
 import wfg.ltv_econ.ui.reusable.AbstractTabButtonInjector;
 

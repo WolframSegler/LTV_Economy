@@ -1,4 +1,4 @@
-package wfg.ltv_econ.constants;
+package wfg.ltv_econ.constant;
 
 import static wfg.native_ui.util.Globals.settings;
 

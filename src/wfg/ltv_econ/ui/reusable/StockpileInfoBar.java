@@ -2,7 +2,7 @@ package wfg.ltv_econ.ui.reusable;
 
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 
 public class StockpileInfoBar extends GenericInfoBar {

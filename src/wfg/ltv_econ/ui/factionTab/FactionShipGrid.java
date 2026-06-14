@@ -9,7 +9,7 @@ import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.constants.strings.LocalizedStrings;
+import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.fleet.InventoryShipWidget;

@@ -12,7 +12,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission;
@@ -34,9 +34,9 @@ import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.Sprites.*;
+import static wfg.ltv_econ.constant.Sprites.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, HasTooltip {
     private static final SpriteAPI SHIP_OUTLINE = settings.getSprite("icons", "ship_outline");

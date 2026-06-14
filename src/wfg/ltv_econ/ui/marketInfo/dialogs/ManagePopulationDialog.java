@@ -6,9 +6,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
-import static wfg.ltv_econ.constants.EconomyConstants.*;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constant.EconomyConstants.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.awt.Color;
@@ -28,7 +28,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.LaborConfig;
-import wfg.ltv_econ.constants.SubmarketsID;
+import wfg.ltv_econ.constant.SubmarketsID;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;

@@ -1,9 +1,9 @@
 package wfg.ltv_econ.intel;
 
-import static wfg.ltv_econ.constants.EconomyConstants.*;
+import static wfg.ltv_econ.constant.EconomyConstants.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;

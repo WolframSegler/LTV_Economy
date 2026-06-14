@@ -1,10 +1,10 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
+import static wfg.ltv_econ.constant.CommoditiesID.*;
+import static wfg.ltv_econ.constant.Sprites.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.CommoditiesID.*;
-import static wfg.ltv_econ.constants.Sprites.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.LaborConfig;
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;

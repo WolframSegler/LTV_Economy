@@ -1,6 +1,6 @@
-package wfg.ltv_econ.constants.strings;
+package wfg.ltv_econ.constant.strings;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 
 public class Consumption {
     public static final String FACTION_FLEET_MAINTENANCE_KEY = "ffmk";

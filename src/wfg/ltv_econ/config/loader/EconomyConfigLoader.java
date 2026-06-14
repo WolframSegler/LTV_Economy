@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import static wfg.ltv_econ.constants.Mods.*;
+import static wfg.ltv_econ.constant.Mods.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import lunalib.lunaSettings.LunaSettings;
@@ -14,6 +14,7 @@ import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 
 public class EconomyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";
+    private static final String FAILURE_MESSAGE = "Failed to load economy config: " + CONFIG_PATH;
 
     private static JSONObject config;
 
@@ -22,7 +23,7 @@ public class EconomyConfigLoader {
         try {
             config = settings.getMergedJSON(CONFIG_PATH);
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to load economy config: " + CONFIG_PATH, ex);
+            throw new RuntimeException(FAILURE_MESSAGE, ex);
         }
     }
 
@@ -111,11 +112,8 @@ public class EconomyConfigLoader {
         }
 
         } catch (Exception e) {
-        throw new RuntimeException(
-            "Failed to load economy configuration from " + CONFIG_PATH + ": "
-            + e.getMessage(), e
-        );
-    }
+            throw new RuntimeException(FAILURE_MESSAGE, e);
+        }
     }
 
     public static final void loadFromLunaSettings() {

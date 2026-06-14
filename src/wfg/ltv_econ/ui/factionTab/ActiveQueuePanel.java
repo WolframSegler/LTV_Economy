@@ -1,10 +1,10 @@
 package wfg.ltv_econ.ui.factionTab;
 
-import static wfg.ltv_econ.constants.Sprites.CHECKLIST;
-import static wfg.ltv_econ.constants.Sprites.STOPWATCH;
+import static wfg.ltv_econ.constant.Sprites.CHECKLIST;
+import static wfg.ltv_econ.constant.Sprites.STOPWATCH;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 

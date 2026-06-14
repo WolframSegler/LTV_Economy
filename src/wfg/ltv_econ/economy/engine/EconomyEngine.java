@@ -28,8 +28,8 @@ import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
-import wfg.ltv_econ.constants.EconomyConstants;
-import wfg.ltv_econ.constants.SubmarketsID;
+import wfg.ltv_econ.constant.EconomyConstants;
+import wfg.ltv_econ.constant.SubmarketsID;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -47,11 +47,12 @@ import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
+
+import static wfg.ltv_econ.constant.EconomyConstants.*;
+import static wfg.ltv_econ.constant.strings.Income.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.EconomyConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
-import static wfg.ltv_econ.constants.strings.Income.*;
 
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;

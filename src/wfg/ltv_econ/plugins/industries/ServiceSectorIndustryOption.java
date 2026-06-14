@@ -1,7 +1,7 @@
 package wfg.ltv_econ.plugins.industries;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 import java.util.ArrayList;

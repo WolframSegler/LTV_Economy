@@ -1,6 +1,6 @@
 package wfg.ltv_econ.economy.fleet;
 
-import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
+import static wfg.ltv_econ.constant.EconomyConstants.MONTH;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.io.Serializable;

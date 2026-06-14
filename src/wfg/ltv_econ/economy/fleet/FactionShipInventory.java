@@ -1,9 +1,9 @@
 package wfg.ltv_econ.economy.fleet;
 
-import static wfg.ltv_econ.constants.strings.Income.FACTION_CREW_WAGES_KEY;
-import static wfg.ltv_econ.constants.strings.Income.getDesc;
-import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
-import static wfg.ltv_econ.constants.strings.Consumption.*;
+import static wfg.ltv_econ.constant.EconomyConstants.MONTH;
+import static wfg.ltv_econ.constant.strings.Consumption.*;
+import static wfg.ltv_econ.constant.strings.Income.FACTION_CREW_WAGES_KEY;
+import static wfg.ltv_econ.constant.strings.Income.getDesc;
 
 import java.io.Serializable;
 import java.util.ArrayList;

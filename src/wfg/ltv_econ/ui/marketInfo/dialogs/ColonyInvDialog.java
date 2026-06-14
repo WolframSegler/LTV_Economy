@@ -1,8 +1,8 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 
@@ -20,7 +20,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.EconomyConstants;
+import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;

@@ -1,8 +1,8 @@
 package wfg.ltv_econ.intel.market.policies;
 
-import static wfg.ltv_econ.constants.strings.Income.POLICY_COST_KEY;
+import static wfg.ltv_econ.constant.strings.Income.POLICY_COST_KEY;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 import java.util.ArrayList;

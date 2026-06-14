@@ -1,4 +1,4 @@
-package wfg.ltv_econ.constants;
+package wfg.ltv_econ.constant;
 
 public class Mods {
     public static final String LTV_ECON = "wfg_ltv_econ";

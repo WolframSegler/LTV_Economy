@@ -41,10 +41,10 @@ import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 
-import static wfg.ltv_econ.constants.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constant.strings.Income.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class TooltipUtils {
     private static final String TP_ARROW = settings.getSpriteName("ui", "cargoTooltipArrow");

@@ -1,10 +1,10 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.Income.TRADE_EXPORT_KEY;
-import static wfg.ltv_econ.constants.strings.Income.TRADE_IMPORT_KEY;
+import static wfg.ltv_econ.constant.strings.Income.TRADE_EXPORT_KEY;
+import static wfg.ltv_econ.constant.strings.Income.TRADE_IMPORT_KEY;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import org.lwjgl.input.Keyboard;
 
@@ -28,7 +28,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;

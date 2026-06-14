@@ -1,8 +1,8 @@
-package wfg.ltv_econ.constants.strings;
+package wfg.ltv_econ.constant.strings;
 
 import com.fs.starfarer.api.Global;
 
-import wfg.ltv_econ.constants.Mods;
+import wfg.ltv_econ.constant.Mods;
 
 public class LocalizedStrings {
     public static final String str(String id) {

@@ -1,7 +1,7 @@
 package wfg.ltv_econ.economy.engine;
 
+import static wfg.ltv_econ.constant.strings.Income.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.Income.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,8 +19,8 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.LaborConfig;
-import wfg.ltv_econ.constants.EconomyConstants;
-import wfg.ltv_econ.constants.strings.LocalizedStrings;
+import wfg.ltv_econ.constant.EconomyConstants;
+import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;

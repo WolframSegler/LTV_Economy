@@ -1,6 +1,6 @@
 package wfg.ltv_econ.economy.fleet;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 import java.io.Serializable;
@@ -14,7 +14,7 @@ import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.native_ui.util.ArrayMap;
 

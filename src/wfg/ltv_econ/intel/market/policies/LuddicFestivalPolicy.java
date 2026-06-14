@@ -4,8 +4,8 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.MarketPopulationData;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class LuddicFestivalPolicy extends MarketPolicy {
     public static final float HAPPINESS_BUFF = 0.6f;

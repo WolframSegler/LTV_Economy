@@ -1,10 +1,10 @@
-package wfg.ltv_econ.constants.strings;
+package wfg.ltv_econ.constant.strings;
+
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
 import wfg.ltv_econ.config.EconConfig;
-
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class Income {
     public static final String FACTION_CREW_WAGES_KEY = "faction_fleet_crew_wages";

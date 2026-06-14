@@ -19,10 +19,10 @@ public class Manufacturing extends BaseIndustry {
     public void apply() {
         super.apply(true);
 
-        supply(wfg.ltv_econ.constants.CommoditiesID.LIGHT_COMPONENTS, 1);
-        supply(wfg.ltv_econ.constants.CommoditiesID.PRECISION_COMPONENTS, 1);
-        supply(wfg.ltv_econ.constants.CommoditiesID.STRUCTURAL_COMPONENTS, 1);
-        supply(wfg.ltv_econ.constants.CommoditiesID.LIGHT_COMPONENTS, 1);
+        supply(wfg.ltv_econ.constant.CommoditiesID.LIGHT_COMPONENTS, 1);
+        supply(wfg.ltv_econ.constant.CommoditiesID.PRECISION_COMPONENTS, 1);
+        supply(wfg.ltv_econ.constant.CommoditiesID.STRUCTURAL_COMPONENTS, 1);
+        supply(wfg.ltv_econ.constant.CommoditiesID.LIGHT_COMPONENTS, 1);
 
         demand(Commodities.METALS, 1);
         demand(Commodities.RARE_METALS, 1);

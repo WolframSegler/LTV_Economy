@@ -2,8 +2,8 @@ package wfg.ltv_econ.intel.market.policies;
 
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;

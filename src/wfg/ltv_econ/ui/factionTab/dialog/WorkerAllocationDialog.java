@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.factionTab.dialog;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -27,7 +27,7 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.config.PlanConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.config.loader.PlanConfigLoader;
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.planning.custom.CustomGoal;
 import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments;

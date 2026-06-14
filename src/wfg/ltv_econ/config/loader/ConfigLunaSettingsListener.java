@@ -6,7 +6,7 @@ import com.fs.starfarer.api.GameState;
 
 import lunalib.lunaSettings.LunaSettingsListener;
 import wfg.ltv_econ.config.IndustryConfigManager;
-import wfg.ltv_econ.constants.Mods;
+import wfg.ltv_econ.constant.Mods;
 import wfg.ltv_econ.economy.planning.IndustryGrouper;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;

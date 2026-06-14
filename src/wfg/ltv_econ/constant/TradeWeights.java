@@ -1,4 +1,5 @@
-package wfg.ltv_econ.constants;
+
+package wfg.ltv_econ.constant;
 
 /**
  * Base Deficit weights for each indicator. 

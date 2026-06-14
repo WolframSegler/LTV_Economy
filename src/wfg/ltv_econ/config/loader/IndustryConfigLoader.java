@@ -1,6 +1,6 @@
 package wfg.ltv_econ.config.loader;
 
-import static wfg.ltv_econ.constants.Mods.LTV_ECON;
+import static wfg.ltv_econ.constant.Mods.LTV_ECON;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;
@@ -17,8 +17,8 @@ import com.fs.starfarer.api.Global;
 
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
+import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.config.LaborConfig;
-import wfg.ltv_econ.constants.EconomyConstants;
 import wfg.native_ui.util.ArrayMap;
 
 public class IndustryConfigLoader {

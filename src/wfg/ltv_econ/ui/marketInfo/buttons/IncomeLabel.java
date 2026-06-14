@@ -32,8 +32,8 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.util.NumFormat;
 
-import static wfg.ltv_econ.constants.strings.Income.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.Income.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements HasTooltip, UIBuildableAPI {

@@ -1,5 +1,7 @@
 package wfg.ltv_econ.ui.economyTab;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,8 +12,6 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.TradeFlowOptions;
 import wfg.ltv_econ.ui.reusable.AbstractManagementPanel;
-
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class EconomyOverviewPanel extends AbstractManagementPanel {
 

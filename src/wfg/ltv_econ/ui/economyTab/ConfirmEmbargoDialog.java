@@ -1,5 +1,7 @@
 package wfg.ltv_econ.ui.economyTab;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
@@ -10,8 +12,6 @@ import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel.RowPanel;
 import wfg.native_ui.ui.dialog.DialogPanel;
-
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class ConfirmEmbargoDialog extends DialogPanel  {
 

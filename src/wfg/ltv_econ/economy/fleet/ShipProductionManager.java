@@ -1,7 +1,7 @@
 package wfg.ltv_econ.economy.fleet;
 
-import static wfg.ltv_econ.constants.strings.Income.FACTION_SHIP_PRODUCTION_KEY;
-import static wfg.ltv_econ.constants.strings.Income.getDesc;
+import static wfg.ltv_econ.constant.strings.Income.FACTION_SHIP_PRODUCTION_KEY;
+import static wfg.ltv_econ.constant.strings.Income.getDesc;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;

@@ -1,8 +1,7 @@
 package wfg.ltv_econ.plugins;
 
+import static wfg.ltv_econ.constant.Mods.*;
 import static wfg.native_ui.util.Globals.settings;
-
-import static wfg.ltv_econ.constants.Mods.*;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
@@ -22,7 +21,7 @@ import wfg.ltv_econ.config.planning.ExportTargetGoal;
 import wfg.ltv_econ.config.planning.FactionDemandCoverageGoal;
 import wfg.ltv_econ.config.planning.HardAutarkyConstraint;
 import wfg.ltv_econ.config.planning.ProfitExportGoal;
-import wfg.ltv_econ.constants.EconomyConstants;
+import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;

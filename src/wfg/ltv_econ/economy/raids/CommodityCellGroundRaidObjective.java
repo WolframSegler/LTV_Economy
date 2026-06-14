@@ -1,8 +1,8 @@
 package wfg.ltv_econ.economy.raids;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;

@@ -1,5 +1,9 @@
 package wfg.ltv_econ.economy.engine;
 
+import static wfg.ltv_econ.constant.CommoditiesID.*;
+import static wfg.ltv_econ.constant.strings.Income.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.str;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +34,8 @@ import wfg.ltv_econ.conditions.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
+import wfg.ltv_econ.constant.EconomyConstants;
+import wfg.ltv_econ.constant.strings.Consumption;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
@@ -50,12 +56,6 @@ import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ServiceSectorDialog;
 import wfg.ltv_econ.util.ArrayMutableStat;
 import wfg.native_ui.util.ArrayMap;
-import wfg.ltv_econ.constants.EconomyConstants;
-import wfg.ltv_econ.constants.strings.Consumption;
-
-import static wfg.ltv_econ.constants.CommoditiesID.*;
-import static wfg.ltv_econ.constants.strings.Income.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.str;
 
 public class EconomyLoop {
     private static final Logger log = Global.getLogger(EconomyLoop.class);

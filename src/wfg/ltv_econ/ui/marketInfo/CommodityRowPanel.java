@@ -8,10 +8,10 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.reusable.CommodityInfoBar;
-import wfg.ltv_econ.constants.UIColors;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.NumFormat;
@@ -37,8 +37,8 @@ import com.fs.starfarer.api.loading.Description.Type;
 
 import java.awt.Color;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class CommodityRowPanel extends CustomPanel implements
     HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction, UIBuildableAPI

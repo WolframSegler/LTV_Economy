@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.factionTab.dialog;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.serializable.StaticData;

@@ -11,6 +11,7 @@ import wfg.ltv_econ.intel.market.events.MarketEvent;
 
 public class EventConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/event_config.json";
+    private static final String FAILURE_MESSAGE = "Failed to load event config: " + CONFIG_PATH;
 
     private static JSONObject config;
 
@@ -18,7 +19,7 @@ public class EventConfigLoader {
         try {
             config = settings.getMergedJSON(CONFIG_PATH);
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to load event config: " + CONFIG_PATH, ex);
+            throw new RuntimeException(FAILURE_MESSAGE, ex);
         }
     }
 
@@ -59,10 +60,7 @@ public class EventConfigLoader {
 
 
         } catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to load event configuration from " + CONFIG_PATH + ": "
-                + e.getMessage(), e
-            );
+            throw new RuntimeException(FAILURE_MESSAGE, e);
         }
     }
 }

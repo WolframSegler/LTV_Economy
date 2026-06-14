@@ -1,8 +1,8 @@
 package wfg.ltv_econ.ui.fleetTab.button;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.str;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.str;
 
 import com.fs.graphics.util.Fader;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;

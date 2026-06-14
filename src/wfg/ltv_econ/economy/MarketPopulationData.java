@@ -1,6 +1,6 @@
 package wfg.ltv_econ.economy;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;

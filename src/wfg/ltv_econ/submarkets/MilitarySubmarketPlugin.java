@@ -1,8 +1,8 @@
 package wfg.ltv_econ.submarkets;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
-import static wfg.ltv_econ.constants.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
-import static wfg.ltv_econ.constants.strings.Income.getDesc;
+import static wfg.ltv_econ.constant.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
+import static wfg.ltv_econ.constant.strings.Income.getDesc;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.negative;
 
 import java.util.Random;

@@ -14,8 +14,8 @@ import wfg.native_ui.util.NumFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import java.awt.Color;
 

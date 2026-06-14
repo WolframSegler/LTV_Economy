@@ -1,6 +1,6 @@
 package wfg.ltv_econ.economy.fleet;
 
-import static wfg.ltv_econ.constants.strings.Income.*;
+import static wfg.ltv_econ.constant.strings.Income.*;
 
 import java.io.Serializable;
 import java.util.HashMap;

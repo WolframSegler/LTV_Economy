@@ -1,10 +1,10 @@
 package wfg.ltv_econ.ui.factionTab.dialog;
 
+import static wfg.ltv_econ.constant.Sprites.STOPWATCH;
+import static wfg.ltv_econ.constant.Sprites.WAGES;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.Sprites.STOPWATCH;
-import static wfg.ltv_econ.constants.Sprites.WAGES;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;

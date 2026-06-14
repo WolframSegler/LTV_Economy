@@ -1,7 +1,7 @@
 package wfg.ltv_econ.economy.commodity;
 
+import static wfg.ltv_econ.constant.strings.Income.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.Income.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,8 +17,8 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.EconomyConstants;
-import wfg.ltv_econ.constants.TradeWeights;
+import wfg.ltv_econ.constant.EconomyConstants;
+import wfg.ltv_econ.constant.TradeWeights;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.engine.EconomyInfo;

@@ -1,4 +1,4 @@
-package wfg.ltv_econ.constants;
+package wfg.ltv_econ.constant;
 
 public class CommoditiesID {
     public static final String LIGHT_MACHINERY = "light_machinery";

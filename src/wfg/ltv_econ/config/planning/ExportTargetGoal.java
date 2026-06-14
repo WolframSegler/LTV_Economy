@@ -1,6 +1,6 @@
 package wfg.ltv_econ.config.planning;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.Arrays;

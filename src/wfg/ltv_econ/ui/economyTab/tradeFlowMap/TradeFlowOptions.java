@@ -6,7 +6,7 @@ import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.constants.strings.LocalizedStrings;
+import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.ui.fleet.FiltersDialog;
 import wfg.native_ui.ui.core.UIBuildableAPI;

@@ -1,8 +1,8 @@
 package wfg.ltv_econ.submarkets;
 
+import static wfg.ltv_econ.constant.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
+import static wfg.ltv_econ.constant.strings.Income.getDesc;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
-import static wfg.ltv_econ.constants.strings.Income.getDesc;
 import static wfg.native_ui.util.UIConstants.negative;
 
 import java.util.Random;
@@ -22,7 +22,7 @@ import com.fs.starfarer.api.util.Highlights;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.strings.LocalizedStrings;
+import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;

@@ -1,5 +1,6 @@
 package wfg.ltv_econ.ui.marketInfo.buttons;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -17,8 +18,6 @@ import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NativeUiUtils;
-
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
     private static final SpriteAPI ICON = settings.getSprite("icons", "stockpiles_button");

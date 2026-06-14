@@ -1,6 +1,6 @@
 package wfg.ltv_econ.config.loader;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.str;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.str;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;

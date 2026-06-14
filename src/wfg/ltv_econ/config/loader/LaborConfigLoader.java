@@ -1,7 +1,7 @@
 package wfg.ltv_econ.config.loader;
 
-import static wfg.ltv_econ.constants.EconomyConstants.MONTH;
-import static wfg.ltv_econ.constants.Mods.*;
+import static wfg.ltv_econ.constant.EconomyConstants.MONTH;
+import static wfg.ltv_econ.constant.Mods.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import org.json.JSONArray;
@@ -12,6 +12,7 @@ import wfg.ltv_econ.config.LaborConfig;
 
 public class LaborConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/labor_config.json";
+    private static final String FAILURE_MESSAGE = "Failed to load labor config: " + CONFIG_PATH;
 
     private static JSONObject config;
 
@@ -22,7 +23,7 @@ public class LaborConfigLoader {
         try {
             config = settings.getMergedJSON(CONFIG_PATH);
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to load labor config: " + CONFIG_PATH, ex);
+            throw new RuntimeException(FAILURE_MESSAGE, ex);
         }
     }
 
@@ -60,9 +61,7 @@ public class LaborConfigLoader {
         }
 
         } catch (Exception e) {
-        throw new RuntimeException(
-            "Failed to load labor configuration from " + CONFIG_PATH, e
-        );
+            throw new RuntimeException(FAILURE_MESSAGE, e);
         }
     }
 

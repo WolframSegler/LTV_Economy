@@ -17,7 +17,7 @@ import com.fs.starfarer.campaign.econ.Market;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
-import wfg.ltv_econ.constants.strings.Consumption;
+import wfg.ltv_econ.constant.strings.Consumption;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;

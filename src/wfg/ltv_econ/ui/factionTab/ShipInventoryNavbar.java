@@ -1,8 +1,8 @@
 package wfg.ltv_econ.ui.factionTab;
 
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
-import static wfg.ltv_econ.constants.Sprites.*;
+import static wfg.ltv_econ.constant.Sprites.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import com.fs.starfarer.api.Global;
@@ -15,7 +15,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.native_ui.ui.component.BackgroundComp;

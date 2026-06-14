@@ -1,5 +1,6 @@
 package wfg.ltv_econ.ui.economyTab;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
@@ -10,7 +11,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.constants.EconomyConstants;
+import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ComDetailDialog;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.ui.ComponentFactory;
@@ -35,7 +36,6 @@ import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.NativeUiUtils;
 
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class CommoditySelectionPanel extends CustomPanel implements
     HasOutline, HasBackground, UIBuildableAPI

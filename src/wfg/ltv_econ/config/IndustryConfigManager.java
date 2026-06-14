@@ -12,7 +12,7 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.config.loader.IndustryConfigLoader;
 import wfg.ltv_econ.config.loader.LaborConfigLoader;
-import wfg.ltv_econ.constants.EconomyConstants;
+import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.native_ui.util.ArrayMap;
@@ -20,7 +20,7 @@ import wfg.ltv_econ.util.ConfigUtils;
 
 import java.util.List;
 
-import static wfg.ltv_econ.constants.Mods.LTV_ECON;
+import static wfg.ltv_econ.constant.Mods.LTV_ECON;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;

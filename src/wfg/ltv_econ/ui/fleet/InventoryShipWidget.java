@@ -3,9 +3,9 @@ package wfg.ltv_econ.ui.fleet;
 import java.awt.Color;
 
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.Sprites.*;
+import static wfg.ltv_econ.constant.Sprites.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
@@ -18,7 +18,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.constants.UIColors;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.ltv_econ.serializable.StaticData;

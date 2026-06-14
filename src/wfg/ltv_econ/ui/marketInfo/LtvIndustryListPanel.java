@@ -41,9 +41,9 @@ import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.TextPanel;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 
 public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI {
 

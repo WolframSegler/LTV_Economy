@@ -2,9 +2,10 @@ package wfg.ltv_econ.ui.factionTab.dialog;
 
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.dialog.DialogPanel;
-import wfg.ltv_econ.serializable.StaticData;
 
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
+
+import wfg.ltv_econ.serializable.StaticData;
 
 public class ClearAllDialog extends DialogPanel {
     private final UIBuildableAPI content;

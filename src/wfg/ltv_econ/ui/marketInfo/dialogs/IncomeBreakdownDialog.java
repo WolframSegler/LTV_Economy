@@ -1,8 +1,8 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
-import static wfg.ltv_econ.constants.strings.Income.*;
-import static wfg.ltv_econ.constants.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.ltv_econ.constant.strings.Income.*;
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.awt.Color;
