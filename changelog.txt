@@ -1,5 +1,5 @@
 Version 0.4.1-beta | SAVE COMPATIBLE
-- UI bug fixes
+- UI bug and alignment fixes
 
 Version 0.4.0-beta | The Metal Broom | NOT SAVE COMPATIBLE
 - Added a frame to the policy posters.

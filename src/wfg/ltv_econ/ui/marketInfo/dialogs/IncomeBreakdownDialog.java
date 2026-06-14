@@ -76,7 +76,7 @@ public class IncomeBreakdownDialog extends DockPanel {
             buildUI();
         };
         monthSwitch.buildUI();
-        add(monthSwitch).inTR(opad, opad);
+        add(monthSwitch).inTR(opad - pad, opad);
 
         final Button rawToggle = new Button(contentContainer, 60, 18, str("uiRawTxt"), Fonts.DEFAULT_SMALL, (btn) -> {
             scrollLen = 0f;
@@ -95,7 +95,7 @@ public class IncomeBreakdownDialog extends DockPanel {
                 NativeUiUtils.anchorPanel(tp, rawToggle.getPanel(), AnchorType.LeftMid, opad);
             };
         }
-        add(rawToggle).inTR(opad*2 + 110, opad + pad);
+        add(rawToggle).inTR(opad*2 + 110 - pad, opad);
 
         incomeBreakdownUI(scrollPanel);
 

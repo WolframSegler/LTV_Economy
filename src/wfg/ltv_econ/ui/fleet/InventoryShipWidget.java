@@ -114,7 +114,7 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         final int scaledW = (int) (spriteW * scale);
         final int scaledH = (int) (spriteH * scale);
         
-        final SpritePanelWithTp shipSprite = new SpritePanelWithTp(m_panel, scaledW, scaledH, data.spec.getSpriteName(), null, null);
+        final SpritePanelWithTp shipSprite = new SpritePanelWithTp(m_panel, scaledW, scaledH, sprite, null, null);
         shipSprite.tooltip.enabled = false;
         shipSprite.audio.enabled = false;
         shipSprite.glow.isFaderOwner = false;

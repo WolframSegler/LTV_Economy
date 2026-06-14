@@ -64,7 +64,7 @@ public class TradeMissionsDialog extends DockPanel {
             buildUI();
         };
         monthSwitch.buildUI();
-        add(monthSwitch).inTR(opad, opad);
+        add(monthSwitch).inTR(opad - pad, opad);
 
         final DockButton<FiltersDialog> filterBtn = new DockButton<>(contentContainer, 90, 18, str("filtersTitle"),
             Fonts.DEFAULT_SMALL, () -> new FiltersDialog(this)
@@ -72,7 +72,7 @@ public class TradeMissionsDialog extends DockPanel {
         filterBtn.cutStyle = CutStyle.ALL;
         filterBtn.bgAlpha = 1f;
         filterBtn.setShortcutAndAppendToText(Keyboard.KEY_Q);
-        add(filterBtn).inTR(opad + 110 + hpad, opad + pad);
+        add(filterBtn).inTR(opad + 110 + hpad - pad, opad);
 
         float yCoord = pad;
         for (TradeMission m : missions) {
