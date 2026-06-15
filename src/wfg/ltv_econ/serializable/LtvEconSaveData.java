@@ -37,9 +37,7 @@ public class LtvEconSaveData implements Serializable {
         patrolRouteManager = new PatrolFleetRouteManager();
     }
 
-    public static final LtvEconSaveData loadInstance(boolean forceRefresh,
-        boolean newGame
-    ) {
+    public static final LtvEconSaveData loadInstance(boolean forceRefresh, boolean newGame) {
         final SectorAPI sector = Global.getSector();
 
         LtvEconSaveData data = (LtvEconSaveData) sector.getPersistentData().get(

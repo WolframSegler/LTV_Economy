@@ -147,16 +147,6 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             midDayApplied = true;
         }
 
-        if (postLoadRestorePending) {
-            if (postLoadRestoreWithAssignWorkers) {
-                fakeAdvanceWithAssignWorkers();
-            } else {
-                fakeAdvance();
-            }
-            postLoadRestorePending = false;
-            return; // Already simulated economy tick
-        }
-
         if (dayKeyTracker == -1) { dayKeyTracker = dayKey; return;}
         if (dayKeyTracker == dayKey) return;
 
