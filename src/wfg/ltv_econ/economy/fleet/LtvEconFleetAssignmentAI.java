@@ -117,7 +117,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
 
     private final void doSmugglingFactionChangeCheck(float delta) {
         final TradeMission mission = getMission();
-        if (!mission.smuggling) return;
+        if (mission == null || !mission.smuggling) return;
         
         final float days = Global.getSector().getClock().convertToDays(delta);
         factionChangeTracker.advance(days);

@@ -594,9 +594,11 @@ public class EconomyLoop {
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             final DebtDebuffTier appliedTier = getDebtDebuffTier(market.getId());
 
+            DebtEffectMarketImmigration debtMod = null;
             for (MarketImmigrationModifier immigMod : market.getTransientImmigrationModifiers()) {
                 if (immigMod instanceof DebtEffectMarketImmigration) {
-                    market.removeTransientImmigrationModifier(immigMod);
+                    debtMod = (DebtEffectMarketImmigration) immigMod;
+                    debtMod.mod = 0f;
                     break;
                 }
             }
@@ -615,7 +617,9 @@ public class EconomyLoop {
                     appliedTier.upkeepMultiplierPercent(),
                     DEBT_STABILITY_DEBUFF_DESC
                 );
-                market.addTransientImmigrationModifier(new DebtEffectMarketImmigration(appliedTier.immigrationModifier()));
+
+                if (debtMod != null) debtMod.mod = appliedTier.immigrationModifier();
+                else market.addTransientImmigrationModifier(new DebtEffectMarketImmigration(appliedTier.immigrationModifier()));
             }
         }
     }
@@ -692,7 +696,7 @@ public class EconomyLoop {
     }
 
     private static class DebtEffectMarketImmigration implements MarketImmigrationModifier {
-        private float mod;
+        protected float mod;
         public DebtEffectMarketImmigration(float mod) {
             this.mod = mod;
         }
@@ -702,7 +706,7 @@ public class EconomyLoop {
     }
 
     private static class ServiceSectorMarketImmigration implements MarketImmigrationModifier {
-        private float mod;
+        protected float mod;
         public ServiceSectorMarketImmigration(float mod) {
             this.mod = mod;
         }
