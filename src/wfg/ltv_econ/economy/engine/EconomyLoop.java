@@ -72,6 +72,8 @@ public class EconomyLoop {
     final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
         refreshMarkets();
 
+        WorkerPoolRegistry.instance().recalculateWorkerPool();
+
         discoverInputsOutputs();
 
         engine.comDomains.values().forEach(CommodityDomain::reset);
@@ -83,6 +85,7 @@ public class EconomyLoop {
                 engine.comDomains.values().parallelStream().forEach(CommodityDomain::update);
                 assignWorkers();
                 applyServiceSectorEffects();
+                WorkerPoolRegistry.instance().recalculateFreeWorkers();
 
                 engine.cyclesSinceWorkerAssign = 0;
             } else {

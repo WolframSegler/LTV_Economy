@@ -13,7 +13,7 @@ public class StaticData {
         inv = data.economyEngine.getFactionShipInventory(Factions.PLAYER);
     }
 
-    public static final void resetData(LtvEconSaveData data) {
+    public static final void resetData() {
         inv = null;
     }
 }

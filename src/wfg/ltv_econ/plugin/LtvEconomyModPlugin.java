@@ -79,16 +79,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         listenerManager.addListener(new AddWorkerIndustryOption(), true);
         listenerManager.addListener(new ServiceSectorIndustryOption(), true);
 
-        final EconomyEngine engine = EconomyEngine.instance();
-        if (engine.postLoadRestorePending) {
-            if (engine.postLoadRestoreWithAssignWorkers) {
-                engine.fakeAdvanceWithAssignWorkers();
-            } else {
-                engine.fakeAdvance();
-            }
-            engine.postLoadRestorePending = false;
-        }
-
         if (newGame) {
             injectStockpiles();
             injectShips();

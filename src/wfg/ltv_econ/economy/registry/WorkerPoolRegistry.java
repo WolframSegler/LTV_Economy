@@ -42,6 +42,18 @@ public class WorkerPoolRegistry {
         return registry.computeIfAbsent(marketID, p -> new WorkerPool(marketID));
     }
 
+    public final void recalculate() {
+        registry.values().forEach(WorkerPool::recalculate);
+    }
+
+    public final void recalculateWorkerPool() {
+        registry.values().forEach(WorkerPool::recalculateWorkerPool);
+    }
+
+    public final void recalculateFreeWorkers() {
+        registry.values().forEach(WorkerPool::recalculateFreeWorkers);
+    }
+
     public static class WorkerPool {
         private final String marketID;
         private transient MarketAPI market;
@@ -53,17 +65,26 @@ public class WorkerPoolRegistry {
             this.marketID = marketID;
 
             readResolve();
+
+            recalculate();
         }
 
         private final Object readResolve() {
-            Global.getSector().getEconomy().getMarket(marketID);
+            market = Global.getSector().getEconomy().getMarket(marketID);
 
             return this;
         }
 
+        public final synchronized void recalculate() {
+            recalculateWorkerPool();
+            recalculateFreeWorkers();
+        }
+
         public final synchronized void recalculateWorkerPool() {
             workerPool = getWorkerPoolUncached();
+        }
 
+        public final synchronized void recalculateFreeWorkers() {
             setFreeWorkerRatio(getFreeWorkerRatioUncached());
         }
 

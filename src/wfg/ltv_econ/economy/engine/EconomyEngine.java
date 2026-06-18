@@ -26,6 +26,7 @@ import com.fs.starfarer.api.campaign.econ.MonthlyReport;
 import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MonthlyReport.FDNode;
 
+import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constant.EconomyConstants;
@@ -97,9 +98,6 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     protected int cyclesSinceTrade = EconConfig.TRADE_INTERVAL;
     protected int lastTradeCycle = EconConfig.TRADE_INTERVAL;
     protected boolean midDayApplied = false;
-
-    public transient boolean postLoadRestorePending = false;
-    public transient boolean postLoadRestoreWithAssignWorkers = false;
 
     public static EconomyEngine instance() {
         return LtvEconSaveData.instance().economyEngine;
@@ -187,6 +185,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     public final synchronized void registerMarket(MarketAPI market) {
         // Order here is very important
         final String marketID = market.getId();
+        WorkerPoolCondition.addToMarket(market);
         WorkerRegistry.instance().register(market);
         MarketFinanceRegistry.instance().register(marketID);
         if (!registeredMarkets.add(marketID)) return;

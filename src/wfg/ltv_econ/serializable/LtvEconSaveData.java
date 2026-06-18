@@ -3,7 +3,6 @@ package wfg.ltv_econ.serializable;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.io.Serializable;
-import java.util.stream.Collectors;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorAPI;
@@ -49,10 +48,6 @@ public class LtvEconSaveData implements Serializable {
     }
 
     public static final LtvEconSaveData loadInstance(boolean forceRefresh, boolean newGame) {
-        Global.getLogger(LtvEconSaveData.class).error("Loaded data. forceRefresh: " + forceRefresh + "   newGame: " + newGame +"\n" +
-            getStackTraceAsString()
-        );
-
         final SectorAPI sector = Global.getSector();
 
         LtvEconSaveData data = (LtvEconSaveData) sector.getPersistentData().get(
@@ -69,8 +64,11 @@ public class LtvEconSaveData implements Serializable {
         instance = data;
 
         // SETUP
-        data.economyEngine.postLoadRestorePending = true;
-        data.economyEngine.postLoadRestoreWithAssignWorkers = (EconConfig.ASSIGN_WORKERS_ON_LOAD || newGame);
+        if (EconConfig.ASSIGN_WORKERS_ON_LOAD || newGame) {
+            data.economyEngine.fakeAdvanceWithAssignWorkers();
+        } else {
+            data.economyEngine.fakeAdvance();
+        }
 
         sector.getListenerManager().addListener(data.economyEngine, true);
         sector.addTransientScript(data.economyEngine);
@@ -84,7 +82,7 @@ public class LtvEconSaveData implements Serializable {
     public static final void saveInstance() {
         Global.getSector().getPersistentData().put(LtvEconSaveDataSerialID, instance);
 
-        StaticData.resetData(instance);
+        StaticData.resetData();
 
         instance = null;
     }
@@ -96,12 +94,5 @@ public class LtvEconSaveData implements Serializable {
 
     public static boolean isInitialized() {
         return instance != null;
-    }
-
-    public static String getStackTraceAsString() {
-        return StackWalker.getInstance()
-                .walk(frames -> frames
-                        .map(frame -> frame.toString())
-                        .collect(Collectors.joining("\n")));
     }
 }

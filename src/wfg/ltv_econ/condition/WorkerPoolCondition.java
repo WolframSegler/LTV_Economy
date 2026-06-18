@@ -39,17 +39,17 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         return DebugFlags.COLONY_DEBUG || LaborConfig.NPC_WORKER_POOL_VISIBLE || market.isPlayerOwned();
     }
 
-    public static final void addConditionToMarket(MarketAPI market, Object param) {
+    public static final void addToMarket(MarketAPI market) {
         if (market.hasCondition(ConditionID) ||
             market.getFactionId().equals(Factions.NEUTRAL)
         ) return;
 
-        market.addCondition(ConditionID, param);
+        market.addCondition(ConditionID);
     }
 
     public static final void initialize() {
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            addConditionToMarket(market, Boolean.valueOf(true));
+            addToMarket(market);
         }
     }
 }

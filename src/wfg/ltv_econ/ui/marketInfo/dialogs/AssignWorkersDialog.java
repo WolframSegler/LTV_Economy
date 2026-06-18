@@ -149,7 +149,7 @@ public class AssignWorkersDialog extends DialogPanel {
             outputSlider.roundingIncrement = 1;
 
             final WorkerPool pool = WorkerPoolRegistry.get(market);
-            pool.recalculateWorkerPool();
+            pool.recalculate();
 
             final float max = Math.max(0,
                 data.getAssignedRatioForOutput(output.comID) + pool.getFreeWorkerRatio()
@@ -333,7 +333,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         if (option == 1) WorkerRegistry.instance().setData(data);
 
-        market.reapplyConditions();
+        WorkerPoolRegistry.get(market).recalculate();
         LtvIndustryListPanel.refreshPanel();
     }
 }
