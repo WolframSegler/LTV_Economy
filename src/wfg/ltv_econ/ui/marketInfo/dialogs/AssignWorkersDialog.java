@@ -24,13 +24,14 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
@@ -73,7 +74,7 @@ public class AssignWorkersDialog extends DialogPanel {
         outputSliders = new ArrayMap<>(IndustryConfigManager.getIndConfig(industry).outputs.size());
 
         reg.setData(previewData);
-        initialFreeWorkerRatio = WorkerPoolCondition.getPoolCondition(market).getFreeWorkerRatio();
+        initialFreeWorkerRatio = WorkerPoolRegistry.get(market).getFreeWorkerRatio();
 
         holo.borderAlpha = 0.7f;
         backgroundDimAmount = 0.2f;
@@ -147,7 +148,7 @@ public class AssignWorkersDialog extends DialogPanel {
             outputSlider.clampCurrToMax = true;
             outputSlider.roundingIncrement = 1;
 
-            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(market);
+            final WorkerPool pool = WorkerPoolRegistry.get(market);
             pool.recalculateWorkerPool();
 
             final float max = Math.max(0,

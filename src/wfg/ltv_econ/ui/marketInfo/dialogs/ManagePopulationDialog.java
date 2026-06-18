@@ -28,10 +28,11 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constant.SubmarketsID;
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.ltv_econ.ui.marketInfo.population.CohesionPair;
 import wfg.ltv_econ.ui.marketInfo.population.ConsciousnessPair;
@@ -93,7 +94,7 @@ public class ManagePopulationDialog extends DialogPanel {
     public void buildUI() {
         final EconomyEngine engine = EconomyEngine.instance();
         final MarketPopulationData data = engine.getMarketPopulationData(m_market.getId());
-        final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(m_market);
+        final WorkerPool cond = WorkerPoolRegistry.get(m_market);
 
         final int SECT_I_H = 30;
         final int SECT_II_H = 160;

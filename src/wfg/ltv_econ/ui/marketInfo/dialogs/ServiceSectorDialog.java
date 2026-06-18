@@ -18,10 +18,10 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
@@ -62,7 +62,7 @@ public class ServiceSectorDialog extends DialogPanel {
         previewData = new WorkerIndustryData(data);
 
         reg.setData(previewData);
-        initialFreeWorkerRatio = WorkerPoolCondition.getPoolCondition(market).getFreeWorkerRatio();
+        initialFreeWorkerRatio = WorkerPoolRegistry.get(market).getFreeWorkerRatio();
 
         holo.borderAlpha = 0.7f;
         backgroundDimAmount = 0.2f;
@@ -79,7 +79,7 @@ public class ServiceSectorDialog extends DialogPanel {
 
         final TooltipMakerAPI sectorsCont = ComponentFactory.createTooltip(PANEL_W, true);
 
-        final float workerPool = WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+        final float workerPool = WorkerPoolRegistry.get(market).getWorkerPool();
         
         int cumulativeYOffset = opad;
         { // Sectors

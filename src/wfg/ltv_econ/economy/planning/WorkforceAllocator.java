@@ -30,7 +30,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Pair;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constant.EconomyConstants;
@@ -41,6 +40,8 @@ import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
 import wfg.ltv_econ.economy.planning.custom.CustomGoal;
 import wfg.ltv_econ.economy.planning.custom.CustomObjective;
 import wfg.ltv_econ.economy.planning.custom.CustomObjective.ObjectiveAllocation;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.economy.planning.custom.ObjectiveConfig;
 import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments;
 import wfg.ltv_econ.economy.planning.custom.PlanningContext;
@@ -121,7 +122,7 @@ public class WorkforceAllocator {
         // 2. Market-level details
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.entrySet()) {
             final MarketAPI market = entry.getKey();
-            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
+            final WorkerPool cond = WorkerPoolRegistry.get(market);
             final float pool = (cond != null) ? cond.getWorkerPool() : 0f;
 
             float used = 0f;

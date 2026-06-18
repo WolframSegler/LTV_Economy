@@ -8,13 +8,14 @@ import java.util.Map;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
@@ -82,7 +83,7 @@ public class DenseModel {
         final Object[] industryKeys = new Object[numOutputs]; 
 
         for (int m = 0; m < numMarkets; m++) {
-            final WorkerPoolCondition pool = WorkerPoolCondition.getPoolCondition(markets.get(m));
+            final WorkerPool pool = WorkerPoolRegistry.get(markets.get(m));
             baseCapacities[m] = (pool != null) ? pool.getWorkerPool() : 0l;
         }
 

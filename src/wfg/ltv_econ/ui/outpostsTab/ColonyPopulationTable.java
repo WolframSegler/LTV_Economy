@@ -16,9 +16,9 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.PlanetInfoParams;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
 import wfg.ltv_econ.ui.marketInfo.population.CohesionPair;
 import wfg.ltv_econ.ui.marketInfo.population.ConsciousnessPair;
@@ -101,7 +101,7 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
                 final CohesionPair cohesionPair = new CohesionPair(m_panel, PairW, iconS, data, base, null);
                 final ConsciousnessPair consciousnessPair = new ConsciousnessPair(m_panel, PairW, iconS, data, base, null);
 
-                final var cond = WorkerPoolCondition.getPoolCondition(market);
+                final var cond = WorkerPoolRegistry.get(market);
                 final int employment = Math.round(100f - cond.getFreeWorkerRatio()*100f);
 
                 final long credits = engine.getCredits(data.marketID);

@@ -1,119 +1,36 @@
 package wfg.ltv_econ.condition;
 
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.ltv_econ.economy.registry.WorkerRegistry;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
-import wfg.native_ui.util.Arithmetic;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.native_ui.util.NumFormat;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class WorkerPoolCondition extends BaseMarketConditionPlugin {
-
     private static final String ConditionID = "worker_pool";
-
-    private long workerPool = 0l;
-    private float freeWorkerRatio = 1f;
-
-    @Override
-    public void apply(String id) {
-        recalculateWorkerPool();
-    }
-
-    public final synchronized void recalculateWorkerPool() {
-        workerPool = getWorkerPoolUncached();
-
-        setFreeWorkerRatio(getFreeWorkerRatioUncached());
-    }
-
-    public final synchronized long getWorkerPoolUncached() {
-        final int size = market.getSize();
-        final double base = getWorkerRatio(size) * Math.pow(10, size);
-        if (LaborConfig.GROWTH_EFFECT_WORKER_POOL) {
-            final float t = Misc.getMarketSizeProgress(market);
-            final double dest = getWorkerRatio(size+1) * Math.pow(10, size+1);
-            return (long) Arithmetic.lerp(base, dest, t);
-        } else {
-            return (long) base;
-        }
-    }
-
-    public final synchronized float getFreeWorkerRatioUncached() {
-        final WorkerRegistry reg = WorkerRegistry.instance();
-        if (reg == null) return 0f;
-
-        float totalAssigned = 0f;
-        for (Industry ind : market.getIndustries()) {
-            final WorkerIndustryData data = reg.getData(ind);
-            if (data != null) {
-                totalAssigned += data.getWorkerAssignedRatio(false);
-            }
-        }
-
-        return Math.max(0f, 1f - totalAssigned);
-    }
-
-    public final long getWorkerPool() {
-        return workerPool;
-    }
-
-    public final float getFreeWorkerRatio() {
-        return freeWorkerRatio;
-    }
-
-    public final void setWorkerPool(long workers) {
-        if (workers < 0l) return;
-        workerPool = workers;
-    }
-
-    public final boolean setFreeWorkerRatio(float workers) {
-        if (workers < 0f || workers > 1f) return false;
-
-        freeWorkerRatio = workers;
-        return true;
-    }
-
-    public final boolean isWorkerRatioAssignable(float amount) {
-        return freeWorkerRatio >= amount;
-    }
-
-    public final boolean assignFreeWorkers(float assignedWorkers) {
-        if (freeWorkerRatio < assignedWorkers)
-            return false;
-
-        freeWorkerRatio -= assignedWorkers;
-        return true;
-    }
-
-    public final void releaseWorkers(float releasedWorkers) {
-        freeWorkerRatio += releasedWorkers;
-        if (freeWorkerRatio > 1f) {
-            freeWorkerRatio = 1f;
-        }
-    }
 
     @Override
     protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
+        final WorkerPool pool = WorkerPoolRegistry.get(market);
+
         tooltip.addPara(str("workerPoolConditionDesc"), opad);
 
         tooltip.addPara(str("localWorkersWithValue"), opad, highlight,
-            NumFormat.engNotate(getWorkerPool())
+            NumFormat.engNotate(pool.getWorkerPool())
         );
         tooltip.addPara(
             str("unemployedWorkersWithValue"), opad, highlight,
-            NumFormat.engNotate(freeWorkerRatio * getWorkerPool()),
-            String.format("%.1f", freeWorkerRatio * 100f)
+            NumFormat.engNotate(pool.getFreeWorkerRatio() * pool.getWorkerPool()),
+            String.format("%.1f", pool.getFreeWorkerRatio() * 100f)
         );
     }
 
@@ -122,39 +39,17 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
         return DebugFlags.COLONY_DEBUG || LaborConfig.NPC_WORKER_POOL_VISIBLE || market.isPlayerOwned();
     }
 
-    public static final float getWorkerRatio(int size) {
-        switch (size) {
-            case 1, 2: return 1f;
-            case 3: return 0.9f;
-            case 4: return 0.8f;
-            case 5: return 0.68f;
-            case 6: return 0.52f;
-            case 7: return 0.4f;
-            case 8: return 0.26f;
-            case 9: return 0.15f;
-            case 10: return 0.08f;
-            default: return 1f/(2f * size);
-        }
-    }
-
-    public static final void addConditionToMarket(MarketAPI market) {
+    public static final void addConditionToMarket(MarketAPI market, Object param) {
         if (market.hasCondition(ConditionID) ||
             market.getFactionId().equals(Factions.NEUTRAL)
         ) return;
 
-        market.addCondition(ConditionID);
-    }
-
-    public static final WorkerPoolCondition getPoolCondition(MarketAPI market) {
-        if (!market.hasCondition(ConditionID)) addConditionToMarket(market);
-        final MarketConditionAPI cond = market.getCondition(ConditionID);
-        if (cond == null) return new WorkerPoolCondition();
-        return (WorkerPoolCondition) cond.getPlugin();
+        market.addCondition(ConditionID, param);
     }
 
     public static final void initialize() {
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            addConditionToMarket(market);
+            addConditionToMarket(market, Boolean.valueOf(true));
         }
     }
 }

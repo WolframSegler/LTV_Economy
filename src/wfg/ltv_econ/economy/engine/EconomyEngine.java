@@ -75,9 +75,6 @@ import com.fs.starfarer.api.campaign.listeners.CoreUITabListener;
 import com.fs.starfarer.api.campaign.listeners.EconomyTickListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
 
-/**
- * The core controller for the LTV-Economy simulation.
- */
 public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColonizationListener, ColonyDecivListener,
     GroundRaidObjectivesListener, CoreUITabListener, EconomyTickListener, ColonyInteractionListener, ColonyPlayerHostileActListener
 {
@@ -129,7 +126,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         logger = new EconomyLogger(this);
         loop = new EconomyLoop(this);
 
-        pastMissions = new ArrayList<>();
+        pastMissions = new ArrayList<>(1024);
 
         return this;
     }

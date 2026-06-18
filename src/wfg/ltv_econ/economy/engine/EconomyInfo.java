@@ -15,7 +15,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.LaborConfig;
@@ -26,7 +25,9 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 
 /**
  * <p><b>Trade Cycle Standard</b></p>
@@ -443,7 +444,7 @@ public class EconomyInfo {
         for (MarketAPI market : getMarketsCopy()) {
             if (!includePlayerMarkets && market.isPlayerOwned()) continue;
             
-            total += WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+            total += WorkerPoolRegistry.get(market).getWorkerPool();
         }
         return total;
     }
@@ -452,7 +453,7 @@ public class EconomyInfo {
         long total = 0;
         for (MarketAPI market : getMarketsCopy()) {
             if (market.getFactionId().equals(factionID)) {
-                total += WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+                total += WorkerPoolRegistry.get(market).getWorkerPool();
             }
         }
         return total;
@@ -701,7 +702,7 @@ public class EconomyInfo {
     public final float getDailyWages(final MarketAPI market) {
         final String marketID = market.getId();
 
-        final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
+        final WorkerPool cond = WorkerPoolRegistry.get(marketID);
         final float wage = cond.getWorkerPool() * (1f - cond.getFreeWorkerRatio()) *
             (LaborConfig.LPV_day / (engine.isPlayerMarket(marketID) ?
             engine.marketPopData.get(marketID).getRoSV() : LaborConfig.RoSV)

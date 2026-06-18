@@ -11,7 +11,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -24,7 +23,7 @@ import wfg.native_ui.util.ArrayMap;
 public class WorkerRegistry implements Serializable {
     public static final String KEY = "::";
 
-    private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>(EconomyInfo.getMarketsCount());
+    private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>(EconomyInfo.getMarketsCount() * 4);
 
     public static final WorkerRegistry instance() {
         return LtvEconSaveData.instance().workerRegistry;
@@ -114,7 +113,7 @@ public class WorkerRegistry implements Serializable {
     }
 
     public static final long getWorkerCap(MarketAPI market) {
-        return WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+        return WorkerPoolRegistry.get(market).getWorkerPool();
     }
 
     public final WorkerIndustryData getData(String marketID, String industryID) {

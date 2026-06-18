@@ -17,13 +17,13 @@ import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
@@ -45,7 +45,7 @@ public class ShipProductionManager {
             if (!market.getFaction().equals(faction)) continue;
 
             pop += Math.pow(10, market.getSize());
-            workers += WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+            workers += WorkerPoolRegistry.get(market).getWorkerPool();
         }
 
         final long shipmentTarget = workers / 25l;

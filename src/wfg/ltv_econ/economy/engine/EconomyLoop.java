@@ -30,7 +30,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 
-import wfg.ltv_econ.condition.WorkerPoolCondition;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
@@ -49,7 +48,9 @@ import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.economy.planning.WorkforceAllocator;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -69,7 +70,6 @@ public class EconomyLoop {
 
     /** Not order agnostic */
     final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
-        final boolean allocWorkers = engine.cyclesSinceWorkerAssign >= EconConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment;
         refreshMarkets();
 
         discoverInputsOutputs();
@@ -78,7 +78,7 @@ public class EconomyLoop {
         engine.factionShipInventories.values().forEach(FactionShipInventory::update);
 
         if (!fakeAdvance || forceWorkerAssignment) {
-            if (allocWorkers) {
+            if (engine.cyclesSinceWorkerAssign >= EconConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment) {
                 WorkerRegistry.instance().resetWorkersAssigned(false);
                 engine.comDomains.values().parallelStream().forEach(CommodityDomain::update);
                 assignWorkers();
@@ -191,7 +191,7 @@ public class EconomyLoop {
             final MarketAPI market = entry.getKey();
             final String marketID = market.getId();
             final WorkerIndustryData popData = reg.getRegisterData(marketID, Industries.POPULATION);
-            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
+            final WorkerPool cond = WorkerPoolRegistry.get(market);
             final float[] assignments = entry.getValue();
             final long totalWorkers = cond.getWorkerPool();
 
@@ -247,7 +247,7 @@ public class EconomyLoop {
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.singleEntrySet()) {
             final MarketAPI market = entry.getKey();
             final String marketID = market.getId();
-            final WorkerPoolCondition cond = WorkerPoolCondition.getPoolCondition(market);
+            final WorkerPool cond = WorkerPoolRegistry.get(market);
             final float[] assignments = entry.getValue();
             final long totalWorkers = cond.getWorkerPool();
 
@@ -679,7 +679,7 @@ public class EconomyLoop {
         );
         market.getAccessibilityMod().modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio, str("serviceSectorPublicInfoDesc"));
 
-        final float workerPool = WorkerPoolCondition.getPoolCondition(market).getWorkerPool();
+        final float workerPool = WorkerPoolRegistry.get(market).getWorkerPool();
         final double monthlyRevenue = cultureRatio * workerPool * LaborConfig.LPV_month * 0.5f / EconomyConstants.MONTH;
         if (monthlyRevenue > 0d) {
             MarketFinanceRegistry.instance().getLedger(marketID).add(SERVICE_CULTURE, monthlyRevenue, str("serviceSectorCultureDesc"));
