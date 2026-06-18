@@ -227,7 +227,7 @@ public class ServiceSectorDialog extends DialogPanel {
             WorkerRegistry.instance().setData(data);
         }
 
-        market.reapplyConditions();
+        WorkerPoolRegistry.get(market).recalculate();
         LtvIndustryListPanel.refreshPanel();
     }
 

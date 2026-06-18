@@ -1,3 +1,7 @@
+Version 0.4.2-beta | SAVE COMPATIBLE
+- Fixed a serialization bug concerning the worker pool. The economy should have less bugs now.
+- Fixed a concurrency issue related to immigration modifiers.
+
 Version 0.4.1-beta | NOT SAVE COMPATIBLE
 - UI bug and alignment fixes
 - Removed subassembly parts.
