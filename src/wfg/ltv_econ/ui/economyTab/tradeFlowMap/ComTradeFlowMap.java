@@ -80,7 +80,7 @@ public class ComTradeFlowMap extends CustomPanel implements
 
     private static final float COM_ICON_SIZE = 48f;
 
-    private final TooltipComp toolitp = comp().get(NativeComponents.TOOLTIP);
+    private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
     private final TooltipSystem tooltipSys = system().get(NativeSystems.TOOLTIP);
     private Object hoveredElement = null;
 
@@ -89,7 +89,6 @@ public class ComTradeFlowMap extends CustomPanel implements
         case 1 -> BG_2;
     };
     private SpriteAPI comSprite;
-    private BloomEffect bloom;
 
     private List<TradeMission> missions = new ArrayList<>(0);
     private final Set<StarSystemAPI> systems = new HashSet<>(24);
@@ -112,7 +111,7 @@ public class ComTradeFlowMap extends CustomPanel implements
     public ComTradeFlowMap(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
-        toolitp.bgAlpha = 0.85f;
+        tooltip.bgAlpha = 0.85f;
 
         buildUI();
     }
@@ -136,8 +135,6 @@ public class ComTradeFlowMap extends CustomPanel implements
             sectorMaxXCoord = Float.NEGATIVE_INFINITY;
             sectorMinYCoord = Float.POSITIVE_INFINITY;
             sectorMaxYCoord = Float.NEGATIVE_INFINITY;
-
-            if (bloom != null)  bloom.cleanup();
         }
 
         { // Create render data
@@ -238,10 +235,6 @@ public class ComTradeFlowMap extends CustomPanel implements
                 if (loc.y > sectorMaxYCoord) sectorMaxYCoord = loc.y;
             }
         }
-    
-        { // Bloom
-            bloom = new BloomEffect();
-        }
     }
 
     @Override
@@ -268,23 +261,15 @@ public class ComTradeFlowMap extends CustomPanel implements
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         hoverRegistered = 0;
-        toolitp.builder = null;
+        tooltip.builder = null;
 
-        // TODO add a bloom pass to the map.
         { // Render Calls
-            // if (!bloom.isInitialized()) bloom.init(pos);
-            // bloom.beginSceneCapture();
-
             renderBg(alpha);
             renderGrid(alpha);
             renderPaths(alpha);
             renderNodes(alpha);
             renderShips(alpha);
             renderIcon(alpha);
-
-            // bloom.endSceneCapture();
-            
-            // bloom.render();
         }
 
         GL11.glDisable(GL11.GL_BLEND);
@@ -803,18 +788,18 @@ public class ComTradeFlowMap extends CustomPanel implements
 
     private final void updateTpState(Object dataObj) {
         if (hoveredElement == null || hoveredElement != dataObj) {
-            tooltipSys.hideTooltip(toolitp);
+            tooltipSys.hideTooltip(tooltip);
             hoveredElement = dataObj;
         }
         if (dataObj instanceof PathData data) {
-            toolitp.width = 220f;
-            toolitp.builder = createPathTp(data);
+            tooltip.width = 220f;
+            tooltip.builder = createPathTp(data);
         } else if (dataObj instanceof SystemData data) {
-            toolitp.width = 220f;
-            toolitp.builder = createNodeTp(data);
+            tooltip.width = 220f;
+            tooltip.builder = createNodeTp(data);
         } else if (dataObj instanceof TradeMission mission) {
-            toolitp.width = 380f;
-            toolitp.builder = TradeMissionWidget.createMissionTp(mission, false);
+            tooltip.width = 380f;
+            tooltip.builder = TradeMissionWidget.createMissionTp(mission, false);
         }
     }
 

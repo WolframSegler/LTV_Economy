@@ -21,7 +21,7 @@ public class UiHierarchyTree implements EveryFrameScript {
     private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
     private final DefaultTreeModel treeModel = new DefaultTreeModel(root);
     private final JTree tree = new JTree(treeModel);
-    private final JFrame frame = new JFrame("LTV UI Hierarchy");
+    private final JFrame frame = new JFrame("UI Hierarchy");
 
     public UiHierarchyTree() {
         frame.add(new JScrollPane(tree));
