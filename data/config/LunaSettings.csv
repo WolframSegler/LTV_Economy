@@ -6,16 +6,14 @@ header_workerConfig,Worker Configuration,Header,Worker Configuration,,,,,Labor
 RoSV,The Default Ratio of Surplus Value,Int,4,,Defines the split between worker wages and surplus output. Higher values mean lower wages. Used by NPC markets.,1,10,Labor
 MAX_RoSV,The Maximum Ratio of Surplus Value,Int,10,,The maximum value for player owned colonies.,1,20,Labor
 LPV_month,The Monthly Value of Labor Power,Int,8,,The value in credits produced by a single worker per month.,1,100,Labor
-header_RoVC,Ratio of Variable Capital,Header,Ratio of Variable Capital,,,,,Labor
-RoVC_average,Default RoVC,Double,0.13,,Used by industries without a specified RoVC entry.,0.0,1.0,Labor
-RoVC_industry,RoVC Heavy Industries,Double,0.04,,"Used by heavy industry, refining and faction ship production.",0.0,1.0,Labor
-RoVC_consumer,RoVC Light Industry,Double,0.2,,,0.0,1.0,Labor
-RoVC_manufacture,RoVC Manufacturing,Double,0.35,,,0.0,1.0,Labor
-RoVC_service,RoVC Service Sector,Double,0.4,,,0.0,1.0,Labor
-RoVC_agriculture,RoVC Agriculture,Double,0.23,,,0.0,1.0,Labor
-RoVC_mechanized,RoVC Mechanized Industries,Double,0.1,,Used by mining and fuel production.,0.0,1.0,Labor
-RoVC_manual,RoVC Manual Professions,Double,0.5,,,0.0,1.0,Labor
-RoVC_space,RoVC Space Sector,Double,0.3,,Used by space related industries.,0.0,1.0,Labor
+,,,,,,,,
+header_hullAllocator,Hull Allocator,Header,Hull Allocator,,,,,Solver
+SHIP_ALLOC_CAPACITY_TARGET_BUFFER,Ship Allocation Capacity Buffer,Double,1.2,,Multiplier applied to trade mission targets when allocating hulls. Provides a safety margin to ensure demand is fully met.,1.0,3.0,Solver
+SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE,Ship Allocation Market Weight Per Size,Double,150.0,,Base weight per market size factor when prioritizing trade mission assignments.,10.0,1000.0,Solver
+SHIP_ALLOC_MARKET_SIZE_EXPONENT,Ship Allocation Market Size Exponent,Double,1.5,,Exponent applied to market size to calculate the size factor for automatic ship orders.,1.0,4.0,Solver
+SHIP_ALLOC_AGGRESSION_COMBAT_MULT,Ship Allocation Aggression Combat Mult,Double,0.2,,Bonus multiplier to target combat power based on faction aggression doctrine. Higher aggression increases combat oriented hull production.,0.0,1.0,Solver
+SHIP_ALLOC_THREAT_RELATIONSHIP_MULT,Ship Allocation Threat Relationship Mult,Double,2.0,,Multiplier applied to combat power targets when ordering ships.,1.0,10.0,Solver
+SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,50.0,,"Combat power target floor used by factions when ordering ships.",0.0,1000.0,Solver
 ,,,,,,,,
 header_workerAllocator,Worker Allocator,Header,Worker Allocator,,,,,Solver
 ECON_DEFICIT_COST,Deficit Penalty,Double,3000,,Higher values encourage more demand fulfillment.,0,100000,Solver
@@ -27,19 +25,11 @@ PRODUCTION_BUFFER,Target Production Buffer,Double,0.05,,Workers are allocated to
 ECON_ALLOCATION_PASSES,Allocation Refinement Passes,Int,3,,Number of times the solver re-evaluates deficits and adjusts worker assignments. Computation time grows linearly with the value. Gains become minimal after 6 passes.,1,20,Solver
 WORKER_ASSIGN_INTERVAL,Worker Assignment Interval,Int,20,,"Workers of NPC markets will be re-allocated every x days.",1,360,Solver
 ,,,,,,,,
-header_hullAllocator,Hull Allocator,Header,Hull Allocator,,,,,Solver
-SHIP_ALLOC_CAPACITY_TARGET_BUFFER,Ship Allocation Capacity Buffer,Double,1.2,,Multiplier applied to trade mission targets when allocating hulls. Provides a safety margin to ensure demand is fully met.,1.0,3.0,Solver
-SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE,Ship Allocation Market Weight Per Size,Double,150.0,,Base weight per market size factor when prioritizing trade mission assignments.,10.0,1000.0,Solver
-SHIP_ALLOC_MARKET_SIZE_EXPONENT,Ship Allocation Market Size Exponent,Double,1.5,,Exponent applied to market size to calculate the size factor for automatic ship orders.,1.0,4.0,Solver
-SHIP_ALLOC_AGGRESSION_COMBAT_MULT,Ship Allocation Aggression Combat Mult,Double,0.2,,Bonus multiplier to target combat power based on faction aggression doctrine. Higher aggression increases combat oriented hull production.,0.0,1.0,Solver
-SHIP_ALLOC_THREAT_RELATIONSHIP_MULT,Ship Allocation Threat Relationship Mult,Double,2.0,,Multiplier applied to combat power targets when ordering ships.,1.0,10.0,Solver
-SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,50.0,,"Combat power target floor used by factions when ordering ships.",0.0,1000.0,Solver
-,,,,,,,,
 MULTI_THREADING,Multi Threading,Boolean,true,,Runs the economy loop inside a separate thread.,,,Economy
 ASSIGN_WORKERS_ON_LOAD,Assign Workers On Load,Boolean,false,,Re-allocates the workers after loading a save. Includes quick-saves as well.,,,Economy
 STARTING_CREDITS_FOR_MARKET,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
 CREDIT_WITHDRAWAL_LIMIT,Monthly Withdrawal Limit,Int,100000,,Sets the maximum amount of credits you can withdraw from your colonies per month.,0,1000000000,Economy
-AUTO_TRANSFER_PROFIT_LIMIT,Profit Transfer Limit,Double,0.5,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy
+AUTO_TRANSFER_PROFIT_LIMIT,Profit Transfer Limit,Double,0.3,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy
 ,,,,,,,,
 TRADE_INTERVAL,Trade Interval,Int,15,,Markets will trade goods every x days.,7,30,Trade
 DAYS_TO_COVER,Stockpile Coverage Days,Int,60,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Trade
@@ -64,7 +54,6 @@ INDEPENDENT_TRADE_FLEET_HAZARD_BASE,Independent Hauler Hazard Base,Double,600.0,
 INDEPENDENT_TRADE_FLEET_HAZARD_MULT,Independent Hauler Hazard Multiplier,Double,7.0,,Multiplier for hazard pay based on the required combat power of the mission.,0,100,Fleet
 INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP,Independent Patrol Fee Per 100 FP,Double,8000.0,,Base patrol mission fee per 100 fleet points worth of ships.,0,100000,Fleet
 MAX_VISIBLE_PLANNED_ORDERS,Max Visible Planned Orders,Int,500,,Maximum number of planned orders displayed in the Planned Orders and Assembly Line panels. Additional orders are hidden for performance.,50,100000,Fleet
-NPC_FACTION_ASSEMBLY_LINES,NPC Faction Assembly Lines,Int,60,,Number of assembly lines available to NPC factions.,1,1000,Fleet
 PLAYER_FACTION_ASSEMBLY_LINES,Player Faction Assembly Lines,Int,3,,Starting number of assembly lines available to the player faction.,1,100,Fleet
 SCRAP_REFUND_FRACTION,Scrap Refund Fraction,Double,0.5,,Ratio of the hull's value returned as scrap metals when discarded.,0,1,Fleet
 ,,,,,,,,

@@ -77,14 +77,5 @@ public class LaborConfigLoader {
 
         final float avgValue = LunaSettings.getDouble(LTV_ECON, "RoVC_average").floatValue();
         LaborConfig.RoVC_average = avgValue;
-        LaborConfig.RoVC_map.put(AVERAGE_OCC_TAG, avgValue);
-        LaborConfig.RoVC_map.put("industry", LunaSettings.getDouble(LTV_ECON, "RoVC_industry").floatValue());
-        LaborConfig.RoVC_map.put("consumer", LunaSettings.getDouble(LTV_ECON, "RoVC_consumer").floatValue());
-        LaborConfig.RoVC_map.put("manufacture", LunaSettings.getDouble(LTV_ECON, "RoVC_manufacture").floatValue());
-        LaborConfig.RoVC_map.put("service", LunaSettings.getDouble(LTV_ECON, "RoVC_service").floatValue());
-        LaborConfig.RoVC_map.put("agriculture", LunaSettings.getDouble(LTV_ECON, "RoVC_agriculture").floatValue());
-        LaborConfig.RoVC_map.put("mechanized", LunaSettings.getDouble(LTV_ECON, "RoVC_mechanized").floatValue());
-        LaborConfig.RoVC_map.put("manual", LunaSettings.getDouble(LTV_ECON, "RoVC_manual").floatValue());
-        LaborConfig.RoVC_map.put("space", LunaSettings.getDouble(LTV_ECON, "RoVC_space").floatValue());
     }
 }

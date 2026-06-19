@@ -153,7 +153,6 @@ public class EconomyConfigLoader {
         EconConfig.TRADE_MAP_MIN_AMOUNT_FILTER = LunaSettings.getInt(LTV_ECON, "TRADE_MAP_MIN_AMOUNT_FILTER");
         EconConfig.MAX_VISIBLE_PLANNED_ORDERS = LunaSettings.getInt(LTV_ECON, "MAX_VISIBLE_PLANNED_ORDERS");
         EconConfig.INFORMAL_TRADE_SHARE = LunaSettings.getDouble(LTV_ECON, "INFORMAL_TRADE_SHARE").floatValue();
-        EconConfig.NPC_FACTION_ASSEMBLY_LINES = LunaSettings.getInt(LTV_ECON, "NPC_FACTION_ASSEMBLY_LINES");
         EconConfig.PLAYER_FACTION_ASSEMBLY_LINES = LunaSettings.getInt(LTV_ECON, "PLAYER_FACTION_ASSEMBLY_LINES");
         EconConfig.SHIP_ALLOC_CAPACITY_TARGET_BUFFER = LunaSettings.getDouble(LTV_ECON, "SHIP_ALLOC_CAPACITY_TARGET_BUFFER").floatValue();
         EconConfig.SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE = LunaSettings.getDouble(LTV_ECON, "SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE").floatValue();

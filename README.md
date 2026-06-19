@@ -1,7 +1,7 @@
 # LTV-Economy
 
 A deep overhaul of Starsector's economy and additional colony systems.
-LTV-Economy replaces abstract production values with a **unit-based simulation** where production and trade correspond to actual cargo units. The mod deepens economic simulation by introducing **workers** as a production factor. Player-enacted policies and market events build on top of this framework. Trade fleets are deeply integrated into the economy, corresponding to concrete trade missions, and assembled from the faction ship inventory.
+LTV-Economy replaces abstract production values with a **unit-based simulation** where production and trade correspond to actual cargo units. The mod deepens economic simulation by introducing **workers** as a production factor. Player-enacted policies and market events build on top of this framework. Trade and patrol fleets are deeply integrated into the economy, corresponding to concrete trade missions, and assembled from the faction ship inventory.
 
 [![Download](https://img.shields.io/badge/Download-Latest%20Release-brightgreen)](https://github.com/WolframSegler/LTV_Economy/releases/latest/download/LTV_Economy.zip)
 
