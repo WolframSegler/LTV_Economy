@@ -69,12 +69,12 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
         table.addHeaders(
             str("uiTableColonyNameTitle"), nameW + pad, null, false, false, -1,
             str("uiTableSize"), 70, null, false, false, -1,
-            str("marketPopDataHealthTxt"), iconW, str("uiHealthTpTxtShort"), false, false, -1,
-            str("marketPopDataHappinessTxt"), iconW, str("uiHappinessTpTxtShort"), false, false, -1,
-            str("marketPopDataCohesionShortTxt"), iconW, str("uiCohesionTpTxtShort"), false, false, -1,
-            str("marketPopDataConsciousnessShort"), iconW, str("uiClassConsciousnessTpTxtShort"), false, false, -1,
-            str("uiTableCreditReserves"), 100, str("uiTableCreditReservesTpTxt"), false, false, -1,
-            str("uiTableEmployment"), 112, str("uiTableEmploymentTpTxt"), false, false, -1
+            str("marketPopDataHealthTxt"), iconW, str("uiTpTxtShortHealth"), false, false, -1,
+            str("marketPopDataHappinessTxt"), iconW, str("uiTpTxtShortHappiness"), false, false, -1,
+            str("marketPopDataCohesionShortTxt"), iconW, str("uiTpTxtShortCohesion"), false, false, -1,
+            str("marketPopDataConsciousnessShort"), iconW, str("uiTpTxtShortClassConsciousness"), false, false, -1,
+            str("uiTableCreditReserves"), 100, str("uiTableTpTxtCreditReserves"), false, false, -1,
+            str("uiTableEmployment"), 112, str("uiTableTpTxtEmployment"), false, false, -1
         );
 
         if (engine.getMarketPopulationData().size() > 0) {

@@ -234,7 +234,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
                         highlight, highlight, highlight, base, highlight, negative,
                         highlight
                     },
-                    mission.inFaction ? str("uiInfactionLowercase") : str("uiGlobalLowercase"),
+                    mission.inFaction ? str("uiInFactionLowercase") : str("uiGlobalLowercase"),
                     mission.src.getName(), mission.dest.getName(),
                     Misc.getRoundedValueOneAfterDecimalIfNotWhole(mission.dist) + str("lightYearsAbb"),
                     UIUtils.getTimeWithDay(mission.totalDur, true),
@@ -260,7 +260,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
             final int valueWidth = 60;
             int rowCount = 0;
 
-            tp.addPara(str("uiShipmentListTitle"), base, opad);
+            tp.addPara(str("uiTitleShipmentList"), base, opad);
             tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
             for (TradeCom flow : mission.cargo) {
                 tp.addToGrid(0, rowCount++, settings.getCommoditySpec(flow.comID).getName(),
@@ -271,7 +271,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
             if (detailed) {
                 rowCount = 0;
     
-                tp.addPara(str("uiMissionLedgerTitle"), base, opad);
+                tp.addPara(str("uiTitleMissionLedger"), base, opad);
                 tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
                 for (StatMod mod : mission.credits.getFlatBonuses().values()) {
                     tp.addToGrid(0, rowCount++, mod.desc, NumFormat.engNotate(mod.value)
@@ -283,7 +283,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
                 final int totalEntries = mission.allocatedShips.size();
                 rowCount = 0;
                 
-                tp.addPara(str("uiFleetMembersTitle"), base, opad);
+                tp.addPara(str("uiTitleFleetMembers"), base, opad);
                 tp.beginGridFlipped(gridWidth/2, 4, valueWidth, hpad);
                 for (var entry : mission.allocatedShips.singleEntrySet()) {
                     if (rowCount >= EconConfig.TRADE_MISSION_MAX_DISPLAYED_SHIPS) break;

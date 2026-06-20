@@ -45,7 +45,7 @@ public class FiltersDialog extends DockPanel {
     public void buildUI() {
         clearChildren();
         
-        final LabelAPI title = settings.createLabel(str("uiMapFiltersTitle"), Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiTitleMapFilters"), Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(0f, pad);
         final int SECT_I_H = 26;
         final int LABEL_H = 16;
@@ -82,7 +82,7 @@ public class FiltersDialog extends DockPanel {
         );
         final TooltipComp sliderTp = minAmountSlider.comp().get(NativeComponents.TOOLTIP);
         sliderTp.builder = (tp, expanded) -> {
-            tp.addPara(str("uiDailyTonnageFilterTpTxt"), pad, highlight,
+            tp.addPara(str("uiTpTxtDailyTonnageFilter"), pad, highlight,
                 Integer.toString((int) minAmountSlider.getProgress())
             );
         };

@@ -45,8 +45,8 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
 
         { // SECTION I
         final LabelAPI debuOptions = settings.createLabel(
-            str("uiDebugOptionsTitle"), Fonts.INSIGNIA_VERY_LARGE);
-        final int lblH = (int) debuOptions.computeTextHeight(str("uiDebugOptionsTitle"));
+            str("uiTitleDebugOptions"), Fonts.INSIGNIA_VERY_LARGE);
+        final int lblH = (int) debuOptions.computeTextHeight(str("uiTitleDebugOptions"));
         add(debuOptions).inTL(opad, SECTION_I);
 
         { // REFRESH MARKETS
@@ -54,13 +54,13 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 engine.refreshMarketsHard();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                str("uiRefreshMarketsBtnTitle"), Fonts.DEFAULT_SMALL, run
+                str("uiBtnTitleRefreshMarkets"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + lblH + pad*2);
 
             button.tooltip.width = 400f;
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiRefreshMarketsTpTxt"), pad);
+                tp.addPara(str("uiTpTxtRefreshMarkets"), pad);
             };
         }
         
@@ -83,12 +83,12 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             add(button).inTL(opad, SECTION_I + pad*4 + lblH + BUTTON_H);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiAllocateWorkersTpTxt"), pad);
+                tp.addPara(str("uiTpTxtAllocateWorkers"), pad);
             };
         }
 
         { // FAKE ADVANCE
-            final String btnText = str("uiFakeAdvanceTitle");
+            final String btnText = str("uiTitleFakeAdvance");
             final CallbackRunnable<Button> run = (btn) -> {                
                 final long startTime = System.nanoTime();
                 
@@ -105,12 +105,12 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             add(button).inTL(opad, SECTION_I + pad*6 + lblH + BUTTON_H*2);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiFakeAdvanceTpTxt"), pad);
+                tp.addPara(str("uiTpTxtFakeAdvance"), pad);
             };
         }
 
         { // REAL ADVANCE
-            final String btnText = str("uiRealAdvanceTitle");
+            final String btnText = str("uiTitleRealAdvance");
             final CallbackRunnable<Button> run = (btn) -> {                
                 final long startTime = System.nanoTime();
                 
@@ -129,7 +129,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             button.setEnabled(DebugFlags.COLONY_DEBUG);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiRealAdvanceTpTxt"), pad);
+                tp.addPara(str("uiTpTxtRealAdvance"), pad);
             };
         }
 
@@ -142,12 +142,12 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 }
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                str("uiLogAllComCellsBtnTitle"), Fonts.DEFAULT_SMALL, run
+                str("uiBtnTitleLogAllComCells"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiLogAllComCellsTpTxt"), pad);
+                tp.addPara(str("uiTpTxtLogAllComCells"), pad);
             };
         }
 
@@ -157,12 +157,12 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 engine.logger.logCreditsSnapshot();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                str("uiLogEconInfoBtnTitle"), Fonts.DEFAULT_SMALL, run
+                str("uiBtnTitleLogEconInfo"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiLogEconInfoTpTxt"), pad);
+                tp.addPara(str("uiTpTxtLogEconInfo"), pad);
             };
         }
 
@@ -171,11 +171,11 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 logger.info(engine.getMarketPopulationData().values());
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                str("uiLogMarketPopDataBtnTitle"), Fonts.DEFAULT_SMALL, run
+                str("uiBtnTitleLogMarketPopData"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*14 + lblH + BUTTON_H*6);
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiLogMarketPopDataTpTxt"), pad);
+                tp.addPara(str("uiTpTxtLogMarketPopData"), pad);
             };
         }
 
@@ -184,17 +184,17 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
                 IndustryIOs.logMaps();
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
-                str("uiLogIndIOBtnTitle"), Fonts.DEFAULT_SMALL, run
+                str("uiBtnTitleLogIndIO"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*16 + lblH + BUTTON_H*7);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiLogIndIOTpTxt"), pad);
+                tp.addPara(str("uiTpTxtLogIndIO"), pad);
             };
         }
 
         { // SHIP ALLOCATION
-            final String btnText = str("uiAllocateShipsBtnTitle");
+            final String btnText = str("uiBtnTitleAllocateShips");
             final CallbackRunnable<Button> run = (btn) -> {                
                 final long startTime = System.nanoTime();
                 
@@ -213,7 +213,7 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             button.setEnabled(DebugFlags.COLONY_DEBUG);
 
             button.tooltip.builder = (tp, expanded) -> {
-                tp.addPara(str("uiAllocateShipsTpTxt"), pad);
+                tp.addPara(str("uiTpTxtAllocateShips"), pad);
             };
         }
         }

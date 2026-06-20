@@ -52,26 +52,26 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
     @Override
     protected String getStartingActionText(RouteSegment segment) {
         if (getMission().src == null) return super.getStartingActionText(segment);
-        return strf("econFleetAIstartingActionText", getCargoList(segment), getMission().src.getName());
+        return strf("econFleetAIStartingActionTxt", getCargoList(segment), getMission().src.getName());
     }
 
     @Override
     protected String getEndingActionText(RouteSegment segment) {
         if (getMission().src == null) return super.getEndingActionText(segment);
-        return strf("econFleetAIendingActionText", getCargoList(segment), getMission().dest.getName());
+        return strf("econFleetAIEndingActionTxt", getCargoList(segment), getMission().dest.getName());
     }
 
     @Override
     protected String getTravelActionText(RouteSegment segment) {
         if (getMission().dest == null) return super.getTravelActionText(segment);
-        return strf("econFleetAItravelActionText", getCargoList(segment), getMission().dest.getName());
+        return strf("econFleetAITravelActionTxt", getCargoList(segment), getMission().dest.getName());
     }
 
     @Override
     protected String getInSystemActionText(RouteSegment segment) {
         if (getMission().dest == null) return super.getInSystemActionText(segment);
         if (segment.getId() == MissionStatus.IN_DST_ORBIT_UNLOADING.ordinal()) {
-            return strf("econFleetAIendingActionText", getCargoList(segment), getMission().dest.getName());
+            return strf("econFleetAIEndingActionTxt", getCargoList(segment), getMission().dest.getName());
         }
 
         return super.getInSystemActionText(segment);
@@ -179,7 +179,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
 
         if (cargo.size() > 4 && strings.size() > 2) {
             strings = new ArrayList<>(strings.subList(0, 2));
-            strings.add(str("econFleetAIotherCommoditiesTxt"));
+            strings.add(str("econFleetAIOtherCommoditiesTxt"));
         }
         return Misc.getAndJoined(strings);
     }

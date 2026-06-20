@@ -98,7 +98,7 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
         final String shipStr = spec.getHullNameWithDashClass();
         final String timeStr = UIUtils.getTimeWithDay(order.daysRemaining);
         final LabelAPI topSection = settings.createLabel(
-            shipStr + str("uiRemainingSectionTitle") + timeStr, Fonts.DEFAULT_SMALL
+            shipStr + str("uiTitleRemainingSection") + timeStr, Fonts.DEFAULT_SMALL
         );
         topSection.setHighlightColor(base);
         topSection.setHighlight(timeStr);

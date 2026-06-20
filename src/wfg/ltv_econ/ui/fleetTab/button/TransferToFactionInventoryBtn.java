@@ -37,7 +37,7 @@ public class TransferToFactionInventoryBtn extends Button {
 
         tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.BottomLeft, pad);
         tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiTpTransferToFactionInventoryTitle"), base);
+            tp.addTitle(str("uiTpTitleTransferToFactionInventory"), base);
 
             tp.addPara(str("uiTpTransferToFactionInventoryTxt1"), opad, Misc.getStoryBrightColor(), str("uiTxtBonusExperience"));
 

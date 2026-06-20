@@ -176,7 +176,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 
 			{
 				tooltip.builder = (tp, exp) -> {
-					tp.addPara(str("uiPlayerCreditsTpTxt"), 0);
+					tp.addPara(str("uiTpTxtPlayerCredits"), 0);
 				};
 				tooltip.positioner = (tp, exp) -> {
 					NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
@@ -205,7 +205,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 
 			{
 				tooltip.builder = (tp, exp) -> {
-					tp.addPara(str("uiColonyCreditsTpTxt"), 0);
+					tp.addPara(str("uiTpTxtColonyCredits"), 0);
 				};
 				tooltip.positioner = (tp, exp) -> {
 					NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
@@ -232,7 +232,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 
 			{
 				tooltip.builder = (tp, exp) -> {
-					tp.addPara(str("uiIndustryMaxNumTpTxt1"), 0f);
+					tp.addPara(str("uiTpTxtIndustryMaxNum1"), 0f);
 
 					tp.beginTable(
 						m_market.getFaction(), 20, new Object[]{str("uiTableSize"), 120, str("uiTableBaseIndustries"), 120}
@@ -244,10 +244,10 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 					}
 
 					tp.addTable("", 0, 10);
-					tp.addPara(str("uiIndustryMaxNumTpTxt2"), 20,
+					tp.addPara(str("uiTpTxtIndustryMaxNum2"), 20,
 						highlight, Integer.toString(Misc.OVER_MAX_INDUSTRIES_PENALTY)
 					);
-					tp.addPara(str("uiIndustriesOnPrefix"), 10, m_market.getFaction().getBaseUIColor(),
+					tp.addPara(str("uiPrefixIndustriesOn"), 10, m_market.getFaction().getBaseUIColor(),
 						m_market.getName()
 					);
 
@@ -269,7 +269,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 								Industry upgradedIndustry = m_market.instantiateIndustry(upgradeId);
 								if (upgradedIndustry.isIndustry()) {
 									tp.addPara(indent +
-										strf("uiIndustryUpgradingToTxt", industry.getCurrentName(), upgradedIndustry.getCurrentName()), paraSpacing
+										strf("uiTxtIndustryUpgradingTo", industry.getCurrentName(), upgradedIndustry.getCurrentName()), paraSpacing
 									);
 									paraSpacing = pad;
 									anyIndustryAdded = true;
@@ -282,7 +282,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 						final IndustrySpecAPI spec = settings.getIndustrySpec(item.id);
 						if (spec.hasTag("industry")) {
 							Industry ind = m_market.instantiateIndustry(item.id);
-							tp.addPara(indent + strf("uiIndustryQueuedTxt", ind.getCurrentName()), paraSpacing);
+							tp.addPara(indent + strf("uiTxtIndustryQueued", ind.getCurrentName()), paraSpacing);
 							paraSpacing = pad;
 							anyIndustryAdded = true;
 						}
@@ -320,7 +320,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 
 		final int buildBtnWidth = 350;
 		buildButton = new Button(m_panel, buildBtnWidth, 25,
-			str("uiAddIndustryBtnTitle"), Fonts.ORBITRON_20AABOLD,
+			str("uiBtnTitleAddIndustry"), Fonts.ORBITRON_20AABOLD,
 			buildBtnRunnable
 		);
 		buildButton.cutStyle = CutStyle.TL_BR;
@@ -414,7 +414,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 		if (playerCredits.get() <= 0) playerCredits.set(0);
 
 		Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
-			String.format(str("uiSpentPrefix"), Misc.getDGSCredits(buildCost)),
+			String.format(str("uiPrefixSpent"), Misc.getDGSCredits(buildCost)),
 			glowHighlight, Misc.getDGSCredits(buildCost), highlight
 		);
 

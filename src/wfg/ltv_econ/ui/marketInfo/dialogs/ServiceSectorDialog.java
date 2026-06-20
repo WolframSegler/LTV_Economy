@@ -72,7 +72,7 @@ public class ServiceSectorDialog extends DialogPanel {
 
     @Override
     public void buildUI() {
-        final LabelAPI titleLbl = settings.createLabel(str("uiPublicServicesTitle"), Fonts.ORBITRON_20AA);
+        final LabelAPI titleLbl = settings.createLabel(str("uiTitlePublicServices"), Fonts.ORBITRON_20AA);
         titleLbl.setAlignment(Alignment.MID);
         titleLbl.autoSizeToWidth(PANEL_W);
         add(titleLbl).inTL(0f, pad*2);
@@ -84,10 +84,10 @@ public class ServiceSectorDialog extends DialogPanel {
         int cumulativeYOffset = opad;
         { // Sectors
             final SectorCard logistics = new SectorCard(sectorsCont, SERVICE_LOGISTICS, LOGISTICS_LIM, LOGISTICS,
-                str("uiLogisticsTitle"), (slider) -> {
+                str("uiTitleLogistics"), (slider) -> {
                     final String eff1 = Integer.toString(Math.round(slider.getProgress()));
                     final String max1 = Integer.toString(Math.round(LOGISTICS_LIM * 100f));
-                    final String txt = strf("uiLogisticsTpTxt", eff1, max1);
+                    final String txt = strf("uiTpTxtLogistics", eff1, max1);
 
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base);
@@ -97,12 +97,12 @@ public class ServiceSectorDialog extends DialogPanel {
                 }, null
             );
             final SectorCard healthcare = new SectorCard(sectorsCont, SERVICE_HEALTHCARE, HEALTHCARE_LIM, HEALTHCARE,
-                str("uiHealthcareTitle"), (slider) -> {
+                str("uiTitleHealthcare"), (slider) -> {
                     final String eff1 = Integer.toString((int) (slider.getProgress() / 5f));
                     final String max1 = Integer.toString(Math.round(HEALTHCARE_LIM * 20f));
                     final String eff2 = String.format("%.2f", slider.getProgress() / 200f);
                     final String max2 = String.format("%.2f", HEALTHCARE_LIM / 2f);
-                    final String txt = strf("uiHealthcareTpTxt", eff1, max1, eff2, max2);
+                    final String txt = strf("uiTpTxtHealthcare", eff1, max1, eff2, max2);
 
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base, highlight, base);
@@ -112,12 +112,12 @@ public class ServiceSectorDialog extends DialogPanel {
                 }, MED_GREEN
             );
             final SectorCard security = new SectorCard(sectorsCont, SERVICE_SECURITY, SECURITY_LIM, SECURITY,
-                str("uiSecurityTitle"), (slider) -> {
+                str("uiTitleSecurity"), (slider) -> {
                     final String eff1 = String.format("%.3f", slider.getProgress() / 1000f);
                     final String max1 = String.format("%.3f", SECURITY_LIM / 10f);
                     final String eff2 = Integer.toString((int) (slider.getProgress()));
                     final String max2 = Integer.toString(Math.round(SECURITY_LIM * 100f));
-                    final String txt = strf("uiSecurityTpTxt", eff1, max1, eff2, max2);
+                    final String txt = strf("uiTpTxtSecurity", eff1, max1, eff2, max2);
 
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base, highlight, base);
@@ -127,12 +127,12 @@ public class ServiceSectorDialog extends DialogPanel {
                 }, grid
             );
             final SectorCard publicInfo = new SectorCard(sectorsCont, SERVICE_PUBLIC_INFO, PUBLIC_INFO_LIM, PUBLIC_INFO,
-                str("uiPublicInfoTitle"), (slider) -> {
+                str("uiTitlePublicInfo"), (slider) -> {
                     final String eff1 = String.format("%.3f", slider.getProgress() / 200f);
                     final String max1 = String.format("%.3f", PUBLIC_INFO_LIM / 2f);
                     final String eff2 = Integer.toString((int) (slider.getProgress()));
                     final String max2 = Integer.toString(Math.round(PUBLIC_INFO_LIM * 100f));
-                    final String txt = strf("uiPublicInfoTpTxt", eff1, max1, eff2, max2);
+                    final String txt = strf("uiTpTxtPublicInfo", eff1, max1, eff2, max2);
                     
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base, highlight, base);
@@ -142,14 +142,14 @@ public class ServiceSectorDialog extends DialogPanel {
                 }, grid
             );
             final SectorCard culture = new SectorCard(sectorsCont, SERVICE_CULTURE, CULTURE_LIM, CULTURE,
-                str("uiCultureTitle"), (slider) -> {
+                str("uiTitleCulture"), (slider) -> {
                     final String eff1 = String.format("%.3f", slider.getProgress() / 400f);
                     final String max1 = String.format("%.3f", CULTURE_LIM / 4f);
                     final String eff2 = String.format("%.2f", slider.getProgress() / 50f);
                     final String max2 = String.format("%.2f", CULTURE_LIM * 2f);
                     final String eff3 = String.format("%.0f", slider.getProgress() * workerPool * LaborConfig.LPV_month * 0.5f / 100f);
                     final String max3 = String.format("%.0f", CULTURE_LIM * workerPool * LaborConfig.LPV_month * 0.5f);
-                    final String txt = strf("uiCultureTpTxt", eff1, max1, eff2, max2, eff3, max3);
+                    final String txt = strf("uiTpTxtCulture", eff1, max1, eff2, max2, eff3, max3);
 
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);
                     lbl.setHighlightColors(highlight, base, highlight, base, highlight, base);

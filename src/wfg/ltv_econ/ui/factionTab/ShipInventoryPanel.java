@@ -49,7 +49,7 @@ public class ShipInventoryPanel extends CustomPanel implements UIBuildableAPI {
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, str("uiPickFactionBtnTitle"), null, () -> new FactionSelectionDialog(this)
+                m_panel, 120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
             );
             factionSelection.cutStyle = CutStyle.ALL;
             add(factionSelection).inTMid(pad);

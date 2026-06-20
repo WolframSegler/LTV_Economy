@@ -29,7 +29,7 @@ public class MarketEventsButton extends DockButton<MarketEventsDialog> {
         bgDisabledAlpha = 0f;
 
         tooltip.builder = (tp, expanded) -> {
-            tp.addPara(LocalizedStrings.str("uiMarketEventsBtnTitle"), pad, highlight, Keyboard.getKeyName(interaction.shortcut));
+            tp.addPara(LocalizedStrings.str("uiBtnTitleMarketEvents"), pad, highlight, Keyboard.getKeyName(interaction.shortcut));
         };
 
         final Base icon = new Base(m_panel, width, height, ICON, null, null);

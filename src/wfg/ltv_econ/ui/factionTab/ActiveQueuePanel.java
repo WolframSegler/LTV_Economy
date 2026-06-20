@@ -76,14 +76,14 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         final int totalTime = orders.stream().mapToInt(o -> o.daysRemaining).sum();
         final int estimatedTime = prodLines < 1 ? 0 : totalTime / prodLines;
 
-        final Button clearAllBtn = new Button(m_panel, 120, entryH, str("uiClearAllBtnTitle"), null, (btn) -> {
+        final Button clearAllBtn = new Button(m_panel, 120, entryH, str("uiBtnTitleClearAll"), null, (btn) -> {
             new DiscardAllDialog(this).show(0.3f, 0.3f);
         });
         clearAllBtn.cutStyle = CutStyle.ALL;
         clearAllBtn.setEnabled(orders.size() > 0);
         add(clearAllBtn).inTR(BUTTON_W, hpad);
 
-        final LabelAPI title = settings.createLabel(str("uiAssemblyLineTitle"), Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiTitleAssemblyLine"), Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(hpad, hpad).setSize(titleW, entryH);
         title.setAlignment(Alignment.LMID);
 
@@ -96,16 +96,16 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         add(prodPair).inTL(hpad + titleW + entryW*2, hpad);
 
         ordersPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiActiveOrdersTitle"), base);
-            tp.addPara(str("uiActiveOrdersTpTxt"), pad);
+            tp.addTitle(str("uiTitleActiveOrders"), base);
+            tp.addPara(str("uiTpTxtActiveOrders"), pad);
         };
         timePair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiHullsTotalBuildTimeTitle"), base);
-            tp.addPara(str("uiHullsTotalBuildTimeTpTxt"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
+            tp.addTitle(str("uiTitleHullsTotalBuildTime"), base);
+            tp.addPara(str("uiTpTxtHullsTotalBuildTime"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
         };
         prodPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiAssemblyLineTitle"), base);
-            tp.addPara(str("uiHullsAssemblyLinesTpTxt"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
+            tp.addTitle(str("uiTitleAssemblyLine"), base);
+            tp.addPara(str("uiTpTxtHullsAssemblyLines"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
         };
 
         ordersPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, ordersPair.getPanel(), AnchorType.RightTop, hpad);
@@ -114,7 +114,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, str("uiPickFactionBtnTitle"), null, () -> new FactionSelectionDialog(this)
+                m_panel, 120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
             );
             factionSelection.cutStyle = CutStyle.ALL;
             add(factionSelection).inTR(hpad, hpad);

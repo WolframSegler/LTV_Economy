@@ -61,7 +61,7 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements
             tooltip.addPara(str("comCellRaidObjectiveBaseValueTxt"), opad, highlight, basePrice);
 
             if (!expanded) {
-                tooltip.addPara(str("uiExpandRemotePriceTxt"), gray, opad);
+                tooltip.addPara(str("uiTxtExpandRemotePrice"), gray, opad);
 
             } else {
                 tooltip.addSpacer(opad);

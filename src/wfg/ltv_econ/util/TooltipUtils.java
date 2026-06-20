@@ -73,7 +73,7 @@ public class TooltipUtils {
 
         if (!sector.getIntelManager().isPlayerInRangeOfCommRelay()) {
             if (showExplanation) {
-                tp.addPara(str("uiRemotePricesTpTxt"), gray, pad);
+                tp.addPara(str("uiTpTxtRemotePrices"), gray, pad);
             }
             return;
         }
@@ -244,10 +244,10 @@ public class TooltipUtils {
         }
 
         if (showExplanation) {
-            tp.addPara(str("cargoComTpTxt1"), gray, opad);
+            tp.addPara(str("uiTpTxtcargoCom1"), gray, opad);
 
             final Color txtColor = Misc.setAlpha(highlight, 155);
-            tp.addPara(str("cargoComTpTxt2"), opad, gray, txtColor, Integer.toString(econUnit));
+            tp.addPara(str("uiTpTxtcargoCom2"), opad, gray, txtColor, Integer.toString(econUnit));
         }
     }
 
@@ -310,7 +310,7 @@ public class TooltipUtils {
         final float dailyTarget = cell.getTargetQuantum(true);
         int rowCount = 0;
 
-        tp.addPara(str("uiDemandPrefix"), pad, highlight, NumFormat.formatMagnitudeAware(dailyTarget));
+        tp.addPara(str("uiPrefixDemand"), pad, highlight, NumFormat.formatMagnitudeAware(dailyTarget));
 
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
 
@@ -345,7 +345,7 @@ public class TooltipUtils {
 
     public static final void createComProductionBreakdown(TooltipMakerAPI tp, CommodityCell cell) {
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara(str("uiProductionPrefix"), pad, highlight, NumFormat.formatMagnitudeAware(cell.getProduction(true)));
+        final LabelAPI title = tp.addPara(str("uiPrefixProduction"), pad, highlight, NumFormat.formatMagnitudeAware(cell.getProduction(true)));
         int rowCount = 0;
 
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
@@ -422,7 +422,7 @@ public class TooltipUtils {
         int rowCount = 0;
         
         tp.setParaFontDefault();
-        final LabelAPI title = tp.addPara(str("uiConsumptionPrefix"), opad, highlight,
+        final LabelAPI title = tp.addPara(str("uiPrefixConsumption"), opad, highlight,
             NumFormat.formatMagnitudeAware(cell.getConsumption(true))
         );
 
@@ -454,7 +454,7 @@ public class TooltipUtils {
             }
 
             for (StatMod mod : mutable.getFlatMods().values()) {
-                tp.addToGrid(0, rowCount++, strf("uiNeededbyIndustryPrefix", ind.getName()),
+                tp.addToGrid(0, rowCount++, strf("uiPrefixNeededByIndustry", ind.getName()),
                     (mod.value >= 0 ? "+" : "") + NumFormat.formatMagnitudeAware(mod.value),
                     mod.value < 0f ? highlight : negative
                 );
@@ -507,14 +507,14 @@ public class TooltipUtils {
         final double exportAmount = engine.info.getExportAmount(comID, marketID);
 
         if (exportIncomeLastMonth > 0l || exportIncomeThisMonth > 0l) {
-            tp.addPara(strf("uiLedgerTpTxt1", marketName, comName), opad, highlight,
+            tp.addPara(strf("uiTpTxtLedger1", marketName, comName), opad, highlight,
                 NumFormat.formatMagnitudeAware(exportAmount),
                 engine.info.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
             );
         } else {
-            tp.addPara(str("uiLedgerTpTxt2"), opad);
+            tp.addPara(str("uiTpTxtLedger2"), opad);
         }
 
         final long importExpenseLastMonth = ledger.getLastMonth(TRADE_IMPORT_KEY + comID);
@@ -522,14 +522,14 @@ public class TooltipUtils {
         final double importAmount = engine.info.getImportAmount(comID, marketID);
 
         if (importExpenseLastMonth > 0l || importExpenseThisMonth > 0l) {
-            tp.addPara(strf("uiLedgerTpTxt3", marketName, comName), opad, highlight,
+            tp.addPara(strf("uiTpTxtLedger3", marketName, comName), opad, highlight,
                 NumFormat.formatMagnitudeAware(importAmount),
                 engine.info.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)
             );
         } else {
-            tp.addPara(str("uiLedgerTpTxt4"), opad);
+            tp.addPara(str("uiTpTxtLedger4"), opad);
         }
     }
 
@@ -549,10 +549,10 @@ public class TooltipUtils {
             final FactionAPI faction = market.getFaction();
             final Color facBase = faction.getBaseUIColor();
 
-            tp.addTitle(str("uiAccessibilityTitle"), facBase);
+            tp.addTitle(str("uiTitleAccessibility"), facBase);
             final int access = Math.round(accessMod.computeEffective(0f) * 100f);
 
-            tp.addPara(str("uiAccessibilityTpTxt1"), opad);
+            tp.addPara(str("uiTpTxtAccessibility1"), opad);
             tp.addPara(str("uiAccessibilitySuffix"), opad, access <= 0 ? negative : highlight, access + "%");
             tp.addStatModGrid(getTooltipWidth(null), 50f, opad, pad, accessMod, new StatModValueGetter(){
 
@@ -569,14 +569,14 @@ public class TooltipUtils {
                 }
             });
 
-            tp.addSectionHeading(str("uiTradeCycleTitle"), facBase, faction.getDarkUIColor(), Alignment.MID, opad);
-            tp.addPara(str("uiTradeCycleTpTxt"), opad, new Color[] {highlight, base},
-                Integer.toString(EconConfig.TRADE_INTERVAL), str("uiEconomyBtnTitle")
+            tp.addSectionHeading(str("uiTitleTradeCycle"), facBase, faction.getDarkUIColor(), Alignment.MID, opad);
+            tp.addPara(str("uiTpTxtTradeCycle"), opad, new Color[] {highlight, base},
+                Integer.toString(EconConfig.TRADE_INTERVAL), str("uiBtnTitleEconomy")
             );
 
-            tp.addPara(str("uiAccessibilityTpTxt2"), opad, highlight,Strings.X + Float.toString(EconConfig.FORCED_FUEL_IMPORT_COST_MULT));
+            tp.addPara(str("uiTpTxtAccessibility2"), opad, highlight,Strings.X + Float.toString(EconConfig.FORCED_FUEL_IMPORT_COST_MULT));
 
-            tp.addPara(str("uiAccessibilityTpTxt3"), pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getActiveMissions().size()));
+            tp.addPara(str("uiTpTxtAccessibility3"), pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getActiveMissions().size()));
         }
         };
     }

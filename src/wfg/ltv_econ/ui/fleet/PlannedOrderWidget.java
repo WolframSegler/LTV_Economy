@@ -77,9 +77,9 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
             final MarketAPI capital = StaticData.inv.getCapital();
             final String capitalName = capital == null ? str("uiNone") : capital.getName();
 
-            tp.addTitle(str("uiShipOrderTitle"), base);
+            tp.addTitle(str("uiTitleShipOrder"), base);
 
-            tp.addPara(strf("uiShipOrderTpTxt1", spec.getHullNameWithDashClass()),
+            tp.addPara(strf("uiTpTxtShipOrder1", spec.getHullNameWithDashClass()),
                 pad, new Color[]{highlight, faction.getBaseUIColor(), highlight},
                 NumFormat.formatCreditAbs(order.credits), capitalName,
                 UIUtils.getTimeWithDay(order.days)
@@ -99,7 +99,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
             }
             tp.addGrid(0);
 
-            tp.addPara(str("uiShipOrderTpTxt2"), opad, highlight, str("uiShift"), str("uiClickTxt"));
+            tp.addPara(str("uiTpTxtShipOrder2"), opad, highlight, str("uiShift"), str("uiClickTxt"));
         };
 
         buildUI();
@@ -186,7 +186,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
                 bgPanel.add(removeLabel).inMid();
     
             } else if (state == WidgetSelectionState.SWAP) {
-                final LabelAPI swapLabel = settings.createLabel(str("clickToSpaw"), Fonts.DEFAULT_SMALL);
+                final LabelAPI swapLabel = settings.createLabel(str("clickToSwap"), Fonts.DEFAULT_SMALL);
                 swapLabel.setColor(base);
                 swapLabel.setHighlightColor(
                     NativeUiUtils.adjustBrightness(swapLabel.getColor(), 1.33f)

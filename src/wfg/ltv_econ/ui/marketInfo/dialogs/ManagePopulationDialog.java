@@ -111,7 +111,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final int policyWidth = 100;
         final int policyHeight = 141;
 
-        final LabelAPI title = settings.createLabel(str("uiManagePopTitle"), Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiTitleManagePop"), Fonts.INSIGNIA_VERY_LARGE);
         title.autoSizeToWidth(PANEL_W);
         title.setAlignment(Alignment.MID);
         add(title).inTL(0, 0);
@@ -124,7 +124,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         final TextPanel RoSVLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
             public void buildUI() {
-                final String txt = str("uiRateOfExploitationTitle");
+                final String txt = str("uiTitleRateOfExploitation");
                 final String valueTxt = new DecimalFormat("#.#").format(data.getRoSV());
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
@@ -145,7 +145,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiRateOfExploitationTpTxt"), pad);
+                    tp.addPara(str("uiTpTxtRateOfExploitation"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -155,7 +155,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         final TextPanel wagesLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
             public void buildUI() {
-                final String txt = str("uiMonthlyWagesTitle");
+                final String txt = str("uiTitleMonthlyWages");
                 final String valueTxt = NumFormat.formatCredit((int)(engine.info.getDailyWages(m_market)*MONTH));
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
@@ -176,7 +176,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiMonthlyWagsTpTxt"), pad);
+                    tp.addPara(str("uiTpTxtMonthlyWages"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -186,7 +186,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         final TextPanel avgWageLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
             public void buildUI() {
-                final String txt = str("uiAvgWageTitle");
+                final String txt = str("uiTitleAvgWage");
                 final float value = LaborConfig.LPV_month / data.getRoSV();
                 final String valueTxt = String.format("%.2f%s", value, Strings.C);
 
@@ -208,7 +208,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(strf("uiAvgWageTpTxt", Strings.C), pad);
+                    tp.addPara(strf("uiTpTxtAvgWage", Strings.C), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
@@ -260,7 +260,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         final TextPanel workerAmount = new TextPanel(m_panel, LABEL_W+100, LABEL_H) {
             public void buildUI() {
-                final String txt = str("uiWorkforceEmployedTotalTitle");
+                final String txt = str("uiTitleWorkforceEmployedTotal");
                 final long value2 = cond.getWorkerPool();
                 final long value1 = (long) (value2*((double)(1f - cond.getFreeWorkerRatio())));
                 final String valueTxt = NumFormat.engNotate(value1) + " / " + NumFormat.engNotate(value2);
@@ -290,7 +290,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
             {
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiWorkforceEmployedTotalTpTxt"), pad);
+                    tp.addPara(str("uiTpTxtWorkforceEmployedTotal"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.LeftTop, opad);
@@ -319,7 +319,7 @@ public class ManagePopulationDialog extends DialogPanel {
         }
     
         if (showPolicies && EconConfig.SHOW_MARKET_POLICIES) { // SECTION III
-        final LabelAPI subtitle = settings.createLabel(str("uiPoliciesTitle"), Fonts.INSIGNIA_LARGE);
+        final LabelAPI subtitle = settings.createLabel(str("uiTitlePolicies"), Fonts.INSIGNIA_LARGE);
         subtitle.autoSizeToWidth(PANEL_W - opad);
         subtitle.setAlignment(Alignment.LMID);
         add(subtitle).inTL(opad, SECT_III_H);
@@ -453,18 +453,18 @@ public class ManagePopulationDialog extends DialogPanel {
 
         switch (policy.state) {
         case COOLDOWN:
-            buttonTxt = str("uiOnCooldownBtnTitle");
-            buttonSideTxt = strf("uiAvailableInBtnTitle", cooldownStr);
+            buttonTxt = str("uiBtnTitleOnCooldown");
+            buttonSideTxt = strf("uiBtnTitleAvailableIn", cooldownStr);
             buttonSideHighlight = cooldownStr;
             break;
         case ACTIVE:
-            buttonTxt = str("uiAlreadyActiveBtnTitle");
-            buttonSideTxt = strf("uiEffectLastsForBtnTitle", activeStr);
+            buttonTxt = str("uiBtnTitleAlreadyActive");
+            buttonSideTxt = strf("uiBtnTitleEffectLastsFor", activeStr);
             buttonSideHighlight = activeStr;
             break;
         default:
-            buttonTxt = str("uiActivateBtnTitle");
-            buttonSideTxt = strf("uiActiveForBtnTitle", durationStr);
+            buttonTxt = str("uiBtnTitleActivate");
+            buttonSideTxt = strf("uiBtnTitleActiveFor", durationStr);
             buttonSideHighlight = durationStr;
             break;
         }
@@ -487,11 +487,11 @@ public class ManagePopulationDialog extends DialogPanel {
 
             activateButton.tooltip.builder = (tp, exp) -> {
                 if (policy.isActive(mData)) {
-                    tp.addPara(str("uiPolicyWidgetTpTxt1"), pad);
+                    tp.addPara(str("uiTpTxtPolicyWidget1"), pad);
                 } else if (!hasSufficientCredits) {
-                    tp.addPara(str("uiPolicyWidgetTpTxt2"), pad);
+                    tp.addPara(str("uiTpTxtPolicyWidget2"), pad);
                 } else {
-                    tp.addPara(str("uiPolicyWidgetTpTxt3"), pad);
+                    tp.addPara(str("uiTpTxtPolicyWidget3"), pad);
                 }
             };
 

@@ -20,7 +20,7 @@ public class FactionManagementPanel extends AbstractManagementPanel {
     }
 
     protected final String getTitle() {
-        return str("uiFactionMenuTitle");
+        return str("uiTitleFactionMenu");
     }
 
     protected final String getSubtitle() {
@@ -30,28 +30,28 @@ public class FactionManagementPanel extends AbstractManagementPanel {
     protected final List<NavButtonDef> getNavButtonDefs() {
         final List<NavButtonDef> defs = new ArrayList<>();
 
-        defs.add(new NavButtonDef(str("uiShipHangarTitle"), Keyboard.KEY_Q, () -> {
+        defs.add(new NavButtonDef(str("uiTitleShipHangar"), Keyboard.KEY_Q, () -> {
             final ShipInventoryPanel content = new ShipInventoryPanel(
                 contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
             );
             contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
         }));
 
-        defs.add(new NavButtonDef(str("uiFactionShipPlannedOrdersTitle"), Keyboard.KEY_W, () -> {
+        defs.add(new NavButtonDef(str("uiTitleFactionShipPlannedOrders"), Keyboard.KEY_W, () -> {
             final PlannedOrdersPanel content = new PlannedOrdersPanel(
                 contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
             );
             contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
         }));
 
-        defs.add(new NavButtonDef(str("uiAssemblyLineTitle"), Keyboard.KEY_A, () -> {
+        defs.add(new NavButtonDef(str("uiTitleAssemblyLine"), Keyboard.KEY_A, () -> {
             final ActiveQueuePanel content = new ActiveQueuePanel(
                 contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
             );
             contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
         }));
 
-        defs.add(new NavButtonDef(str("uiAdministrationBtnTitle"), Keyboard.KEY_S, () -> {
+        defs.add(new NavButtonDef(str("uiBtnTitleAdministration"), Keyboard.KEY_S, () -> {
             final FactionAdministrationPanel content = new FactionAdministrationPanel(
                 contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
             );

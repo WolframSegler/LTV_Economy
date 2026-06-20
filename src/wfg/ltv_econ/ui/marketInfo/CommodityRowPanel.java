@@ -117,7 +117,7 @@ public class CommodityRowPanel extends CustomPanel implements
 
         tooltip.builder = (tp, expanded) -> {
             final String comDesc = settings.getDescription(cell.comID, Type.RESOURCE).getText1();
-            final String timerStr = "    -   " + strf("uiDaysOfStockSuffix", amountStr);
+            final String timerStr = "    -   " + strf("uiSuffixDaysOfStock", amountStr);
 
             tp.setParaFont(Fonts.ORBITRON_12);
             final LabelAPI title = tp.addPara(cell.spec.getName(), market.getFaction().getBaseUIColor(), pad);
@@ -140,21 +140,21 @@ public class CommodityRowPanel extends CustomPanel implements
                 TooltipUtils.createComTargetBreakdown(tp, cell);
 
                 tp.setParaFont(Fonts.ORBITRON_12);
-                tp.addSectionHeading(str("uiProductionConsumptionTitle"), Alignment.MID, opad);
+                tp.addSectionHeading(str("uiTitleProductionConsumption"), Alignment.MID, opad);
                 TooltipUtils.createComProductionBreakdown(tp, cell);
                 
                 tp.addSpacer(hpad);
                 tp.setParaFont(Fonts.ORBITRON_12);
                 TooltipUtils.createComConsumptionBreakdown(tp, cell);
 
-                tp.addSectionHeading(str("uiTradeLedgerTitle"), Alignment.MID, opad);
+                tp.addSectionHeading(str("uiTitleTradeLedger"), Alignment.MID, opad);
                 TooltipUtils.createComTradeLedgerSection(tp, cell);
                 
-                tp.addPara(str("uiCommodityWidgetTpTxt1"), gray, opad);
+                tp.addPara(str("uiTpTxtCommodityWidget1"), gray, opad);
 
             } else {
                 tp.setParaFont(Fonts.ORBITRON_12);
-                tp.addSectionHeading(str("uiInfoLegendTitle"), Alignment.MID, opad);
+                tp.addSectionHeading(str("uiTitleInfoLegend"), Alignment.MID, opad);
                 tp.setParaFontDefault();
 
                 final int y = (int)tp.getHeightSoFar() + pad;
@@ -174,44 +174,44 @@ public class CommodityRowPanel extends CustomPanel implements
     public static final void legendRowCreator(int mode, TooltipMakerAPI tp, int y, int iconSize) {
 
         if (mode == 0) {
-            legendRowHelper(tp, y, UIUtils.STOCKPILES_FULL, str("uiLegendRowDesc1"), iconSize, false, null);
+            legendRowHelper(tp, y, UIUtils.STOCKPILES_FULL, str("uiDescLegendRow1"), iconSize, false, null);
             
             y += iconSize + pad;
 
-            legendRowHelper(tp, y, EXPORTS_ICON, str("uiLegendRowDesc2"), iconSize, false, null);
+            legendRowHelper(tp, y, EXPORTS_ICON, str("uiDescLegendRow2"), iconSize, false, null);
             
             y += iconSize + pad;
     
-            legendRowHelper(tp, y, null, str("uiLegendRowDesc3"), iconSize, true, null);
+            legendRowHelper(tp, y, null, str("uiDescLegendRow3"), iconSize, true, null);
             
             y += iconSize + pad;
         }
 
-        legendRowHelper(tp, y, null, str("uiLegendRowDesc4"), iconSize, false, UIColors.COM_NOT_EXPORTED);
+        legendRowHelper(tp, y, null, str("uiDescLegendRow4"), iconSize, false, UIColors.COM_NOT_EXPORTED);
         
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiLegendRowDesc5"), iconSize, false, UIColors.COM_EXPORT);
+        legendRowHelper(tp, y, null, str("uiDescLegendRow5"), iconSize, false, UIColors.COM_EXPORT);
         
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiLegendRowDesc6"), iconSize, false, UIColors.COM_LOCAL_PROD);
+        legendRowHelper(tp, y, null, str("uiDescLegendRow6"), iconSize, false, UIColors.COM_LOCAL_PROD);
         
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiLegendRowDesc7"), iconSize, false, UIColors.COM_FACTION_IMPORT);
+        legendRowHelper(tp, y, null, str("uiDescLegendRow7"), iconSize, false, UIColors.COM_FACTION_IMPORT);
         
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiLegendRowDesc8"), iconSize, false, UIColors.COM_IMPORT);
+        legendRowHelper(tp, y, null, str("uiDescLegendRow8"), iconSize, false, UIColors.COM_IMPORT);
         
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiLegendRowDesc9"), iconSize, false, UIColors.COM_OVER_IMPORT);
+        legendRowHelper(tp, y, null, str("uiDescLegendRow9"), iconSize, false, UIColors.COM_OVER_IMPORT);
         
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiLegendRowDesc10"), iconSize, false, UIColors.COM_DEFICIT);
+        legendRowHelper(tp, y, null, str("uiDescLegendRow10"), iconSize, false, UIColors.COM_DEFICIT);
     
         tp.setHeightSoFar(y + opad*2);
     }

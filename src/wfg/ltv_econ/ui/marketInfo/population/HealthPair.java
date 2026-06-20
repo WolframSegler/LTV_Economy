@@ -27,11 +27,11 @@ public class HealthPair extends IconValuePairTp {
         tooltip.builder = (tp, exp) -> {
             tp.addTitle(str("marketPopDataHealthTxt"), base);
 
-            tp.addPara(str("uiHealthTpTxt"), pad);
+            tp.addPara(str("uiTpTxtHealth"), pad);
         
             final float value = data.healthDelta
                 .computeEffective(data.getHealth()) - data.getHealth();
-            tp.addPara(str("uiDailyChangePrefix"), 3, highlight, String.format("%.2f", value));
+            tp.addPara(str("uiPrefixDailyChange"), 3, highlight, String.format("%.2f", value));
             tp.addStatModGrid(PopStatModValueGetter.GRID_W, PopStatModValueGetter.VALUE_W,
                 pad, pad, data.healthDelta, new PopStatModValueGetter()
             );

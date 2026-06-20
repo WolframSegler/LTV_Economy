@@ -38,6 +38,7 @@ import wfg.ltv_econ.economy.planning.custom.goalParams.GoalParameter;
 import wfg.ltv_econ.economy.planning.custom.goalParams.MultiSelectParameter;
 import wfg.ltv_econ.economy.planning.custom.goalParams.RadioParameter;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
+import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp;
@@ -376,11 +377,13 @@ public class WorkerAllocationDialog extends DialogPanel {
                         EconomyEngine.instance().assignPlayerWorkers(selectedPlan);
                         new DialogPanel(400, 100, null, str("uiTitleWorkerAllocationPlanRunSuccess"), str("uiAcknowledged"))
                             .show(0.3f, 0.3f);
+                        LtvEconSaveData.instance().playerFactionSettings.factionPlan = selectedPlan;
 
                     } catch (Exception e) {
                         new DialogPanel(400, 100, null, str("uiTitleFailedToRunWorkerAllocationPlan") + e.toString(), str("uiDismiss"))
                             .show(0.3f, 0.3f);
                         log.error(e.toString());
+                        LtvEconSaveData.instance().playerFactionSettings.factionPlan = null;
                     }
                 };
             }

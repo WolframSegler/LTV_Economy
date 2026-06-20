@@ -89,7 +89,7 @@ public class AssignWorkersDialog extends DialogPanel {
         final int sliderY = 225;
         final int iconSize = 26;
 
-        final String txt = strf("uiAssignWorkersToTitle", industry.getCurrentName());
+        final String txt = strf("uiTitleAssignWorkersTo", industry.getCurrentName());
         final LabelAPI titleLbl = settings.createLabel(txt, Fonts.ORBITRON_20AA);
         titleLbl.setAlignment(Alignment.MID);
         titleLbl.autoSizeToWidth(PANEL_W);
@@ -114,7 +114,7 @@ public class AssignWorkersDialog extends DialogPanel {
             WARNING_BUTTON, null, null
         ) {{
             tooltip.builder = (tp, exp) -> {
-                tp.addPara(str("uiAssignWorkersDialogTpTxt"), pad);
+                tp.addPara(str("uiDialogTpTxtAssignWorkers"), pad);
             };
             tooltip.positioner = (tp, exp) -> {
                 NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.TopLeft, 0);

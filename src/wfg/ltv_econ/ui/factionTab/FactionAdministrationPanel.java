@@ -31,14 +31,14 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
 
         final int SECTION_I = opad;
         final int SECTION_II = SECTION_I + 420;
-        final int SECTION_III = SECTION_II + 50;
+        final int SECTION_III = SECTION_II + 80;
 
         { // SECTION I
-        final LabelAPI tradeDiploLbl = settings.createLabel(str("uiTradeDiploTitle"), Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI tradeDiploLbl = settings.createLabel(str("uiTitleTradeDiplo"), Fonts.INSIGNIA_VERY_LARGE);
         add(tradeDiploLbl).inTL(opad, SECTION_I);
         int lblW = (int) tradeDiploLbl.getPosition().getHeight();
 
-        final LabelAPI embargoListLbl = settings.createLabel(str("uiEmbargoMenuTitle"), Fonts.INSIGNIA_LARGE);
+        final LabelAPI embargoListLbl = settings.createLabel(str("uiTitleEmbargoMenu"), Fonts.INSIGNIA_LARGE);
         add(embargoListLbl).inTL(opad + pad, SECTION_I + lblW + opad);
         lblW += (int) embargoListLbl.getPosition().getHeight();
         
@@ -49,7 +49,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         }
         
         { // SECTION II
-        final LabelAPI financePoliciesLbl = settings.createLabel(str("uiFinancielPoliciesTitle"), Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI financePoliciesLbl = settings.createLabel(str("uiTitleFinancialPolicies"), Fonts.INSIGNIA_VERY_LARGE);
         add(financePoliciesLbl).inTL(opad, SECTION_II);
         final int lblW = (int) financePoliciesLbl.getPosition().getHeight();
 
@@ -64,11 +64,22 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         );
         redistributeBtn.setChecked(factionSettings.redistributeCredits);
         add(redistributeBtn).inTL(opad + pad, SECTION_II + lblW + pad);
+
+        final CallbackRunnable<Button> automaticAssignWorkers = (btn) -> {
+            btn.setChecked(!btn.isChecked());
+            factionSettings.automaticWorkerAllocationForFaction = btn.isChecked();
+        };
+
+        final Button autoAllocatoWorkersBtn = ComponentFactory.createCheckboxWithText(m_panel, 22,
+            str("uiCheckboxTxtAutoAssignWorkers"), Fonts.DEFAULT_SMALL, automaticAssignWorkers, base, pad
+        );
+        autoAllocatoWorkersBtn.setChecked(factionSettings.automaticWorkerAllocationForFaction);
+        add(autoAllocatoWorkersBtn).inTL(opad + pad, SECTION_II + (lblW + pad) * 2);
         }
 
         { // SECTION III
         final LabelAPI shipPoliciesLbl = settings.createLabel(
-            str("uiShipHangarTitle"), Fonts.INSIGNIA_VERY_LARGE);
+            str("uiTitleShipHangar"), Fonts.INSIGNIA_VERY_LARGE);
         add(shipPoliciesLbl).inTL(opad, SECTION_III);
         final int lblW = (int) shipPoliciesLbl.getPosition().getHeight();
 
@@ -78,15 +89,14 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         };
 
         final Button automaticProdBtn = ComponentFactory.createCheckboxWithText(m_panel, 22,
-            str("uiShipProdCheckboxTxt"),
-            Fonts.DEFAULT_SMALL, automaticProdRun, base, pad
+            str("uiShipProdCheckboxTxt"), Fonts.DEFAULT_SMALL, automaticProdRun, base, pad
         );
         automaticProdBtn.setChecked(factionSettings.automaticShipProductionForFaction);
         add(automaticProdBtn).inTL(opad + pad, SECTION_III + lblW + pad);
         }
 
         { // SECTION IV
-        final Button workerAllocatorBtn = new Button(m_panel, 150, 35, str("uiBtnTitleWorkforceAllocatorDialog"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button workerAllocatorBtn = new Button(m_panel, 150, 35, str("uiDialogBtnTitleWorkforceAllocator"), Fonts.DEFAULT_SMALL, (btn) -> {
             new WorkerAllocationDialog().show(0.3f, 0.3f);
         });
         add(workerAllocatorBtn).inTR(0f, 0f);

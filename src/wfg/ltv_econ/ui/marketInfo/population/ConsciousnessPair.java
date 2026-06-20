@@ -27,11 +27,11 @@ public class ConsciousnessPair extends IconValuePairTp {
         tooltip.builder = (tp, exp) -> {
             tp.addTitle(str("marketPopDataConsciousness"), base);
 
-            tp.addPara(str("uiClassConsciousnessTpTxt"), opad);
+            tp.addPara(str("uiTpTxtClassConsciousness"), opad);
 
             final float value = data.classConsciousnessDelta.computeEffective(
                 data.getClassConsciousness()) - data.getClassConsciousness();
-            tp.addPara(str("uiDailyChangePrefix"), 3, highlight, String.format("%.2f", value));
+            tp.addPara(str("uiPrefixDailyChange"), 3, highlight, String.format("%.2f", value));
             tp.addStatModGrid(PopStatModValueGetter.GRID_W, PopStatModValueGetter.VALUE_W,
                 pad, pad, data.classConsciousnessDelta, new PopStatModValueGetter()
             );

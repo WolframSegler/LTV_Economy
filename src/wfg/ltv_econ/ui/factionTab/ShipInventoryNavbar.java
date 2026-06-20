@@ -60,7 +60,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
 
         final int GAP_LEFT_1 = flagW + opad*2 + pad;
 
-        final LabelAPI title = settings.createLabel(str("uiFactionHangarBtnTitle"), Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiBtnTitleFactionHangar"), Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(GAP_LEFT_1, hpad);
 
         final MarketAPI market = inv.getCapital();
@@ -75,7 +75,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final int perPairW = ((w - flagW)/2 - opad) / 4;
         final int iconS = 32;
 
-        final LabelAPI shipmentLbl = settings.createLabel(str("uiShipmentCapacitiesTitle"), Fonts.INSIGNIA_LARGE);
+        final LabelAPI shipmentLbl = settings.createLabel(str("uiTitleShipmentCapacities"), Fonts.INSIGNIA_LARGE);
         add(shipmentLbl).inTL(GAP_LEFT_1, GAP_TOP_1);
 
         final IconValuePairTp cargoPair = new IconValuePairTp(m_panel, perPairW, iconS, CRATES, inv.getTotalCargoCapacity(), true, null);
@@ -92,7 +92,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
 
         final int GAP_LEFT_2 = GAP_LEFT_1 + (w - GAP_LEFT_1)/2 + opad;
 
-        final LabelAPI operationLbl = settings.createLabel(str("uiOperationsTitle"), Fonts.INSIGNIA_LARGE);
+        final LabelAPI operationLbl = settings.createLabel(str("uiTitleOperations"), Fonts.INSIGNIA_LARGE);
         add(operationLbl).inTL(GAP_LEFT_2, GAP_TOP_1);
 
         final IconValuePairTp suppliesPair = new IconValuePairTp(m_panel, perPairW, iconS, SUPPLIES, inv.getTotalDailyMaintenance(), true, null);
@@ -107,9 +107,9 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         wagePair.label().setText(wagePair.label().getText() + Strings.C);
 
         cargoPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiCargoCapacityTitle"), base);
+            tp.addTitle(str("uiTitleCargoCapacity"), base);
 
-            tp.addPara(str("uiCargoCapacityTpTxt"), pad);
+            tp.addPara(str("uiTpTxtCargoCapacity"), pad);
             final float idle = inv.getIdleCargoCapacity();
             final float inUse = inv.getTotalCargoCapacity() - idle;
             tp.addPara(str("uiIdleInUseSectionTxt"), pad, highlight, 
@@ -118,9 +118,9 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         fuelPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiFuelCapacityTitle"), base);
+            tp.addTitle(str("uiTitleFuelCapacity"), base);
 
-            tp.addPara(str("uiFuelCapacityTpTxt"), pad);
+            tp.addPara(str("uiTpTxtFuelCapacity"), pad);
             final float idle = inv.getIdleFuelCapacity();
             final float inUse = inv.getTotalFuelCapacity() - idle;
             tp.addPara(str("uiIdleInUseSectionTxt"), pad, highlight, 
@@ -128,9 +128,9 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         crewPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiCrewCapacityTitle"), base);
+            tp.addTitle(str("uiTitleCrewCapacity"), base);
 
-            tp.addPara(str("uiCrewCapacityTpTxt"), pad);
+            tp.addPara(str("uiTpTxtCrewCapacity"), pad);
             final float idle = inv.getIdleCrewCapacity();
             final float inUse = inv.getTotalCrewCapacity() - idle;
             tp.addPara(str("uiIdleInUseSectionTxt"), pad, highlight, 
@@ -138,9 +138,9 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         combatPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiCombatPowerTitle"), base);
+            tp.addTitle(str("uiTitleCombatPower"), base);
 
-            tp.addPara(str("uiCombatPowerTpTxt"), pad);
+            tp.addPara(str("uiTpTxtCombatPower"), pad);
             final float idle = inv.getIdleCombatPower();
             final float inUse = inv.getTotalCombatPower() - idle;
             tp.addPara(str("uiIdleInUseSectionTxt"), pad, highlight, 
@@ -148,7 +148,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         suppliesPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiDailyMaintenanceTitle"), base);
+            tp.addTitle(str("uiTitleDailyMaintenance"), base);
 
             tp.addPara(str("uiDailyMaintenanceTpStr"), pad, highlight, (int)(EconConfig.IDLE_SHIP_MAINTENANCE_MULT * 100) + "%");
             final float daily = inv.getTotalDailyMaintenance();
@@ -156,9 +156,9 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         operatorPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiCrewComplementTitle"), base);
+            tp.addTitle(str("uiTitleCrewComplement"), base);
 
-            tp.addPara(str("uiCrewComplementTpTxt"), pad);
+            tp.addPara(str("uiTpTxtCrewComplement"), pad);
             final int idle = inv.getIdleCrew();
             final int inUse = inv.getTotalCrew() - idle;
             tp.addPara(str("uiIdleActiveSectionTxt"), pad, highlight, 
@@ -166,11 +166,11 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         wagePair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiMonthlyCrewWagesTitle"), base);
+            tp.addTitle(str("uiTitleMonthlyCrewWages"), base);
             
-            tp.addPara(str("uiMonthlyCrewWagesTpTxt1"), pad, highlight, (int)(EconConfig.IDLE_CREW_WAGE_MULT * 100) + "%");
+            tp.addPara(str("uiTpTxtMonthlyCrewWages1"), pad, highlight, (int)(EconConfig.IDLE_CREW_WAGE_MULT * 100) + "%");
             float wages = inv.getTotalMonthlyCrewWage();
-            tp.addPara(str("uiMonthlyCrewWagesTpTxt2"), pad, highlight, NumFormat.formatCreditAbs(wages));
+            tp.addPara(str("uiTpTxtMonthlyCrewWages2"), pad, highlight, NumFormat.formatCreditAbs(wages));
         };
 
         cargoPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(

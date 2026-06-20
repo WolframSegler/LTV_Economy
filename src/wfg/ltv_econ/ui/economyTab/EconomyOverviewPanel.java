@@ -21,7 +21,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
     }
 
     protected final String getTitle() {
-        return str("uiEconOverviewTitle");
+        return str("uiTitleEconOverview");
     }
 
     protected final String getSubtitle() {
@@ -31,7 +31,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
     protected final List<NavButtonDef> getNavButtonDefs() {
         final List<NavButtonDef> defs = new ArrayList<>();
 
-        defs.add(new NavButtonDef(str("uiComFlowsBtnTitle"), Keyboard.KEY_Q,
+        defs.add(new NavButtonDef(str("uiBtnTitleComFlows"), Keyboard.KEY_Q,
             () -> {
                 final GlobalCommodityFlow content = new GlobalCommodityFlow(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -44,7 +44,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef(str("uiTableTradeRoutesBtnTitle"), Keyboard.KEY_W,
+        defs.add(new NavButtonDef(str("uiTableBtnTitleTradeRoutes"), Keyboard.KEY_W,
             () -> {
                 final ComTradeFlowMap content = new ComTradeFlowMap(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -57,7 +57,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef(str("uiPopulationBtnTitle"), Keyboard.KEY_A,
+        defs.add(new NavButtonDef(str("uiBtnTitlePopulation"), Keyboard.KEY_A,
             () -> {
                 final SectorPopulationPanel content = new SectorPopulationPanel(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
@@ -66,7 +66,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
             }
         ));
 
-        defs.add(new NavButtonDef(str("uiDebugBtnTitle"), Keyboard.KEY_S,
+        defs.add(new NavButtonDef(str("uiBtnTitleDebug"), Keyboard.KEY_S,
             () -> {
                 final EconomySettingsPanel content = new EconomySettingsPanel(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H

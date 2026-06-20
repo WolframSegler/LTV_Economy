@@ -33,11 +33,11 @@ public class ManagePopButton extends Button {
         bgDisabledAlpha = 0f;
 
         tooltip.builder = (tp, expanded) -> {
-            tp.addPara(str("uiPopWorkforceManageBtnTitle"), pad,
+            tp.addPara(str("uiBtnTitlePopWorkforceManage"), pad,
                 highlight, Keyboard.getKeyName(interaction.shortcut)
             );
 
-            tp.addPara(str("uiPopWorkforceManageBtnTpTxt"), opad);
+            tp.addPara(str("uiBtnTpTxtPopWorkforceManage"), opad);
         };
 
         final Base icon = new Base(m_panel, width, height, ICON, null, null);

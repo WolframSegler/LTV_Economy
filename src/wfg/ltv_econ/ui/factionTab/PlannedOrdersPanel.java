@@ -81,20 +81,20 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         final int entryH = 32;
 
         final DockButton<ShipCommissionDialog> commissionBtn = new DockButton<>(
-            m_panel, 120, entryH, str("uiHullOrderBtnTitle"), null, () -> new ShipCommissionDialog(this)
+            m_panel, 120, entryH, str("uiBtnTitleHullOrder"), null, () -> new ShipCommissionDialog(this)
         );
         commissionBtn.cutStyle = CutStyle.ALL;
         commissionBtn.setShortcutAndAppendToText(Keyboard.KEY_T);
         add(commissionBtn).inTR(BUTTON_W, hpad);
 
-        final Button clearAllBtn = new Button(m_panel, 120, entryH, str("uiClearAllBtnTitle"), null, (btn) -> {
+        final Button clearAllBtn = new Button(m_panel, 120, entryH, str("uiBtnTitleClearAll"), null, (btn) -> {
             new ClearAllDialog(this).show(0.3f, 0.3f);
         });
         clearAllBtn.cutStyle = CutStyle.ALL;
         clearAllBtn.setEnabled(orders.size() > 0);
         add(clearAllBtn).inTR(BUTTON_W*2, hpad);
 
-        final LabelAPI title = settings.createLabel(str("uiOrderedHullsTitle"), Fonts.INSIGNIA_VERY_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiTitleOrderedHulls"), Fonts.INSIGNIA_VERY_LARGE);
         add(title).inTL(hpad, hpad).setSize(titleW, entryH);
         title.setAlignment(Alignment.LMID);
 
@@ -110,20 +110,20 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         add(shipsPair).inTL(hpad + titleW + entryW*3, hpad);
 
         ordersPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiPendingOrdersTitle"), base);
-            tp.addPara(str("uiPendingOrdersTpTxt"), pad);
+            tp.addTitle(str("uiTitlePendingOrders"), base);
+            tp.addPara(str("uiTpTxtPendingOrders"), pad);
         };
         costPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiTotalCreditCostTitle"), base);
-            tp.addPara(str("uiTotalCreditCostPendingOrdersTpTitle"), pad);
+            tp.addTitle(str("uiTitleTotalCreditCost"), base);
+            tp.addPara(str("uiTpTitleTotalCreditCostPendingOrders"), pad);
         };
         timePair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiHullsTotalBuildTimeTitle"), base);
-            tp.addPara(str("uiActiveHullsTotalBuildTimeTpTxt"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
+            tp.addTitle(str("uiTitleHullsTotalBuildTime"), base);
+            tp.addPara(str("uiTpTxtActiveHullsTotalBuildTime"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
         };
         shipsPair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiShipsCommodityCostTitle"), base);
-            tp.addPara(str("uiShipsCommodityCostTpTxt"), pad);
+            tp.addTitle(str("uiTitleShipsCommodityCost"), base);
+            tp.addPara(str("uiTpTxtShipsCommodityCost"), pad);
         };
 
         ordersPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, ordersPair.getPanel(), AnchorType.RightTop, hpad);
@@ -133,7 +133,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, str("uiPickFactionBtnTitle"), null, () -> new FactionSelectionDialog(this)
+                m_panel, 120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
             );
             factionSelection.cutStyle = CutStyle.ALL;
             add(factionSelection).inTR(hpad, hpad);
@@ -207,7 +207,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         }
 
         protected String getEmptyMessage() {
-            return str("uiNoPlannedOrdersTitle");
+            return str("uiTitleNoPlannedOrders");
         }
     }
 }

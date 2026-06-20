@@ -46,7 +46,7 @@ public class PharmaceuticalPromotionPolicy extends MarketPolicy {
         Global.getSoundPlayer().playUISound("ui_rep_drop", 1f, 1f);
         for (FactionAPI faction : factions) {
             final boolean drugsIllegal = faction.isIllegal(Commodities.DRUGS);
-            final String changeVerb = drugsIllegal ? str("decreasedbyTxt") : str("increasedByTxt");
+            final String changeVerb = drugsIllegal ? str("decreasedByTxt") : str("increasedByTxt");
             relationChanges += "\n" + str("relationWithTxt") + faction.getDisplayName() + " " +
                 changeVerb + " " + (drugsIllegal ? "-"+FACTION_RELATION_DROP : ""+FACTION_RELATION_INCREASE);
         }

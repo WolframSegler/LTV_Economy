@@ -95,9 +95,9 @@ public class FactionSelectionPanel extends CustomPanel implements
 
             tooltip.builder = (tp, exp) -> {
                 if (alreadyEmbargoed) {
-                    tp.addPara(str("uiEmbargoBtnTpTxt1"), pad);
+                    tp.addPara(str("uiBtnTpTxtEmbargo1"), pad);
                 } else {
-                    tp.addPara(str("uiEmbargoBtnTpTxt2"), pad);
+                    tp.addPara(str("uiBtnTpTxtEmbargo2"), pad);
                 }
             };
 

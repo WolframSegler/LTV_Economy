@@ -80,7 +80,7 @@ public class IndustryWidget extends CustomPanel implements
 
     private boolean tradeInfoPanel;
     private int constructionQueueIndex;
-    private LabelAPI buildingTitleHeader;
+    private LabelAPI buiTitleldingHeader;
     private LabelAPI constructionStatusText;
     private WidgetSelectionState constructionMode;
     private final MarketAPI market;
@@ -120,18 +120,18 @@ public class IndustryWidget extends CustomPanel implements
     }
 
     public void buildUI() {
-        buildingTitleHeader = settings.createLabel(
+        buiTitleldingHeader = settings.createLabel(
             ind.getCurrentName(), Fonts.DEFAULT_SMALL
         );
-        buildingTitleHeader.setColor(
+        buiTitleldingHeader.setColor(
             ind.isImproved() ? Misc.getStoryOptionColor() : baseColor
         );
-        buildingTitleHeader.setHighlightColor(
-            NativeUiUtils.adjustBrightness(buildingTitleHeader.getColor(), 1.33f)
+        buiTitleldingHeader.setHighlightColor(
+            NativeUiUtils.adjustBrightness(buiTitleldingHeader.getColor(), 1.33f)
         );
-        buildingTitleHeader.setAlignment(Alignment.LMID);
-        buildingTitleHeader.getPosition().setSize(PANEL_WIDTH + 50, TITLE_HEIGHT);
-        add(buildingTitleHeader).inTL(pad, 0f);
+        buiTitleldingHeader.setAlignment(Alignment.LMID);
+        buiTitleldingHeader.getPosition().setSize(PANEL_WIDTH + 50, TITLE_HEIGHT);
+        add(buiTitleldingHeader).inTL(pad, 0f);
 
 
         indIcon = new IndustryImagePanel(
@@ -218,7 +218,7 @@ public class IndustryWidget extends CustomPanel implements
                         int itemCost = item.cost;
                         if (itemCost > 0) {
                             Global.getSector().getPlayerFleet().getCargo().getCredits().add(itemCost);
-                            Misc.addCreditsMessage(str("uiCreditsReceivedPrefix"), itemCost);
+                            Misc.addCreditsMessage(str("uiPrefixCreditsReceived"), itemCost);
                         }
 
                         indPanel.buildUI();
@@ -333,7 +333,7 @@ public class IndustryWidget extends CustomPanel implements
             if (ind.isBuilding() && !ind.isUpgrading() && !ind.isDisrupted()) {
 
                 tp.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                constructionStatusText = tp.createLabel(str("uiIndustryBeingBuiltTxt"), baseColor);
+                constructionStatusText = tp.createLabel(str("uiTxtIndustryBeingBuilt"), baseColor);
                 constructionStatusText.setHighlightColor(
                     NativeUiUtils.adjustBrightness(constructionStatusText.getColor(), 1.33f)
                 );
@@ -374,7 +374,7 @@ public class IndustryWidget extends CustomPanel implements
     public void setNormalMode() {
         clearLabels();
         final String txt = (Misc.getCurrentlyBeingConstructed(market) == null && constructionQueueIndex == 0) ?
-            str("uiIndustryBeingBuiltTxt") : str("uiItemQueuedTxt");
+            str("uiTxtIndustryBeingBuilt") : str("uiTxtItemQueued");
 
         remove(constructionStatusText); 
         constructionStatusText = settings.createLabel(txt, Fonts.INSIGNIA_VERY_LARGE);
@@ -415,7 +415,7 @@ public class IndustryWidget extends CustomPanel implements
             );
 
             final LabelAPI refundLabelAppendix = settings.createLabel(
-                str("uiRefundSuffix"), Fonts.DEFAULT_SMALL
+                str("uiSuffixRefund"), Fonts.DEFAULT_SMALL
             );
             refundLabelAppendix.setColor(baseColor);
             refundLabelAppendix.setHighlightColor(
@@ -438,7 +438,7 @@ public class IndustryWidget extends CustomPanel implements
 
     public void setSwapMode() {
         clearLabels();
-        final LabelAPI swapLabel = settings.createLabel(str("clickToSpaw"), Fonts.DEFAULT_SMALL);
+        final LabelAPI swapLabel = settings.createLabel(str("clickToSwap"), Fonts.DEFAULT_SMALL);
         swapLabel.setColor(baseColor);
         swapLabel.setHighlightColor(
             NativeUiUtils.adjustBrightness(swapLabel.getColor(), 1.33f)
@@ -515,7 +515,7 @@ public class IndustryWidget extends CustomPanel implements
     public void renderBelow(float alpha) {
         super.renderBelow(alpha);
         if (glow.fader.getBrightness() > 0f) {
-            buildingTitleHeader.setHighlight(buildingTitleHeader.getText());
+            buiTitleldingHeader.setHighlight(buiTitleldingHeader.getText());
 
             if (constructionStatusText != null) {
                 constructionStatusText.setHighlight(constructionStatusText.getText());
@@ -527,7 +527,7 @@ public class IndustryWidget extends CustomPanel implements
             }
 
         } else {
-            buildingTitleHeader.setHighlight("");
+            buiTitleldingHeader.setHighlight("");
             if (constructionStatusText != null) {
                 constructionStatusText.setHighlight("");
             }

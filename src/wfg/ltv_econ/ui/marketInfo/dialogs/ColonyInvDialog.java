@@ -171,13 +171,13 @@ public class ColonyInvDialog extends DialogPanel {
         add((UIComponentAPI)withdrawLabel).inTL(400, 10 + (sliderH - labelH) / 2f);
 
         final LabelAPI depositLabel = settings.createLabel(
-            str("depostiTxt"), Fonts.ORBITRON_16
+            str("depositTxt"), Fonts.ORBITRON_16
         );
         labelH = depositLabel.computeTextHeight(depositLabel.getText());
         add((UIComponentAPI)depositLabel).inTL(400, 50 + (sliderH - labelH) / 2f);
 
         final LabelAPI profitLabel = settings.createLabel(
-            str("allocaleTxt"), Fonts.ORBITRON_16
+            str("allocateTxt"), Fonts.ORBITRON_16
         );
         labelH = profitLabel.computeTextHeight(profitLabel.getText());
         add((UIComponentAPI)profitLabel).inTL(400, 90 + (sliderH - labelH) / 2f);

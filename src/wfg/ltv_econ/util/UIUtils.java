@@ -27,10 +27,10 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 
 public class UIUtils {
-    private static final String DAY_S_L = str("uiDayTxtLowercase");
-    private static final String DAY_P_L = str("uiDaysTxtLowercase");
-    private static final String DAY_S_C = str("uiDayTxtCapitalized");
-    private static final String DAY_P_C = str("uiDaysTxtCapitalized");
+    private static final String DAY_S_L = str("uiTxtDayLowercase");
+    private static final String DAY_P_L = str("uiTxtDaysLowercase");
+    private static final String DAY_S_C = str("uiTxtDayCapitalized");
+    private static final String DAY_P_C = str("uiTxtDaysCapitalized");
 
     public static final SpriteAPI STOCKPILES_FULL = settings.getSprite("icons", "stockpiles_full");
     public static final SpriteAPI STOCKPILES_MEDIUM = settings.getSprite("icons", "stockpiles_medium");
@@ -47,7 +47,7 @@ public class UIUtils {
         final String valueStr = Misc.getWithDGS(credits.get()) + Strings.C;
 
         final LabelAPI label = settings.createLabel(
-            strf("uiPlayerCreditsPrefix", valueStr), font
+            strf("uiPrefixPlayerCredits", valueStr), font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
         
@@ -67,7 +67,7 @@ public class UIUtils {
         final String valueStr = Misc.getWithDGS(credits) + Strings.C;
 
         final LabelAPI label = settings.createLabel(
-            strf("uiColonyCreditsPrefix", valueStr), font
+            strf("uiPrefixColonyCredits", valueStr), font
         );
         if (font == "small_insignia") label.setAlignment(Alignment.LMID);
         
@@ -90,7 +90,7 @@ public class UIUtils {
 
         final String text = numInd + " / " + maxInd;
 
-        LabelAPI label = settings.createLabel(strf("uiIndustriesCountPrefix", text), font);
+        LabelAPI label = settings.createLabel(strf("uiPrefixIndustriesCount", text), font);
         if (font == "small_insignia") {
             label.setAlignment(Alignment.LMID);
         }

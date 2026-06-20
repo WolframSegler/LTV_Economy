@@ -66,16 +66,16 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
             final float rowH = 20f;
 
             final String shortcutStr = Keyboard.getKeyName(interaction.shortcut);
-            final LabelAPI title = tp.addTitle(strf("uiMonthlyIncomeUpkeepTitle", shortcutStr), base);
+            final LabelAPI title = tp.addTitle(strf("uiTitleMonthlyIncomeUpkeep", shortcutStr), base);
             title.setHighlightColor(highlight);
             title.setHighlight(shortcutStr);
             final long income = ledger.getNetLastMonth();
 
             final String incomeTxt = NumFormat.formatCreditAbs(income);
             if (income >= 0l) {
-                tp.addPara(str("uiMonthlyIncomeUpkeepTpTxt1"), opad, highlight, incomeTxt);
+                tp.addPara(str("uiTpTxtMonthlyIncomeUpkeep1"), opad, highlight, incomeTxt);
             } else {
-                tp.addPara(str("uiMonthlyIncomeUpkeepTpTxt2"), opad, negative, incomeTxt);
+                tp.addPara(str("uiTpTxtMonthlyIncomeUpkeep2"), opad, negative, incomeTxt);
             }
 
             final ArrayList<Industry> industries = new ArrayList<>(market.getIndustries());
@@ -104,22 +104,22 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
             tp.addSectionHeading(str("industriesTitle"), base, dark, Alignment.MID, opad);
 
             tp.addPara(str("uiIncomeWithValue"), opad, highlight, indIncome);
-            tp.addPara(str("uiUpkeepWithvalue"), opad, negative, indUpkeep);
+            tp.addPara(str("uiUpkeepWithValue"), opad, negative, indUpkeep);
 
             if (expanded) {
-                tp.addPara(str("uiIncomeMultTitle"), opad, highlight,
+                tp.addPara(str("uiTitleIncomeMult"), opad, highlight,
                     Math.round(market.getIncomeMult().getModifiedValue() * 100f) + "%"
                 );
                 tp.addStatModGrid(TP_WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null);
 
-                tp.addPara(str("uiUpkeepMultTitle"), opad, highlight,
+                tp.addPara(str("uiTitleUpkeepMult"), opad, highlight,
                     Math.round(market.getUpkeepMult().getModifiedValue() * 100f) + "%"
                 );
                 tp.addStatModGrid(
                     TP_WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null
                 );
 
-                tp.addPara(str("uiMonthlyIncomeUpkeepTpTxt3"), gray, opad);
+                tp.addPara(str("uiTpTxtMonthlyIncomeUpkeep3"), gray, opad);
 
                 tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new Object[] {
                     str("uiTableIndustryTitle"), 250, str("uiTableIncomeTitle"), 115, str("uiTableUpkeepTitle"), 115
@@ -144,7 +144,7 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
             final float extraPad = 30f;
 
             final long exportIncome = info.getExportIncome(market, true);
-            tp.addPara(str("uiLastMonthExportsTitle"), opad, highlight, NumFormat.formatCredit(exportIncome));
+            tp.addPara(str("uiTitleLastMonthExports"), opad, highlight, NumFormat.formatCredit(exportIncome));
             if (exportIncome > 0l && expanded) {
                 tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 200f + extraPad, str("uiTableMarketShare"), 100f + extraPad, str("uiTableIncomeTitle"), 100f + extraPad);
                 int exportedCount = 0;
@@ -181,7 +181,7 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
             }
 
             final long importExpense = info.getImportExpense(market, true);
-            tp.addPara(str("uiLastMonthImportsTitle"), opad, negative, NumFormat.formatCredit(importExpense));
+            tp.addPara(str("uiTitleLastMonthImports"), opad, negative, NumFormat.formatCredit(importExpense));
             if (importExpense > 0l && expanded) {
                 tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 200f + extraPad, str("uiTableMarketShare"), 100f + extraPad, str("uiTableExpense"), 100f + extraPad);
                 int importedCount = 0;

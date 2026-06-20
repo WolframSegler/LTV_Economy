@@ -26,7 +26,7 @@ public class IntelTabUIBuilder extends AbstractTabButtonInjector {
     }
 
     protected String getButtonLabel() {
-        return LocalizedStrings.str("uiEconomyBtnTitle");
+        return LocalizedStrings.str("uiBtnTitleEconomy");
     }
 
     protected UIComponentAPI createCustomComponent(UIPanelAPI parent) {

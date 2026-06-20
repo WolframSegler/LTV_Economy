@@ -50,7 +50,7 @@ public class MarketEventsDialog extends DockPanel {
     public void buildUI() {
         final int width = (int) contentContainer.getPosition().getWidth();
 
-        final LabelAPI title = settings.createLabel(LocalizedStrings.str("uiCurrentEventsTitle"), Fonts.INSIGNIA_LARGE);
+        final LabelAPI title = settings.createLabel(LocalizedStrings.str("uiTitleCurrentEvents"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
 
         final TooltipMakerAPI eventsList = ComponentFactory.createTooltip(width, true);

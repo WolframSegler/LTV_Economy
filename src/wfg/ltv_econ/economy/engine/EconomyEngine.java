@@ -177,8 +177,6 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     public final void assignPlayerWorkers(WorkerAllocationPlan plan) {
-        // TODO in the future store player plan in player faction settings and use it to call this every x days.
-
         loop.assignPlayerWorkers(plan);
     }
 

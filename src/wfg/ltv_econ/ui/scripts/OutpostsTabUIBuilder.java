@@ -83,9 +83,9 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         popTable.getPanel().setOpacity(0f);
         facTable.getPanel().setOpacity(0f);
 
-        final String coloniesTxt = str("uiOwnedColoniesBtnTitle");
-        final String populationTxt = str("uiPopulationListBtnTitle");
-        final String factionTxt = str("uiFactionResourcesBtnTitle");
+        final String coloniesTxt = str("uiBtnTitleOwnedColonies");
+        final String populationTxt = str("uiBtnTitlePopulationList");
+        final String factionTxt = str("uiBtnTitleFactionResources");
 
         final Button showColoniesButton = new Button(colonyPanel, 280, 24, coloniesTxt,
             Fonts.ORBITRON_12, null);

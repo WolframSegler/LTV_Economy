@@ -27,11 +27,11 @@ public class HappinessPair extends IconValuePairTp {
         tooltip.builder = (tp, exp) -> {
             tp.addTitle(str("marketPopDataHappinessTxt"), base);
 
-            tp.addPara(str("uiHappinessTpTxt"), opad);
+            tp.addPara(str("uiTpTxtHappiness"), opad);
 
             final float value = data.happinessDelta
                 .computeEffective(data.getHappiness()) - data.getHappiness();
-            tp.addPara(str("uiDailyChangePrefix"), 3, highlight, String.format("%.2f", value));
+            tp.addPara(str("uiPrefixDailyChange"), 3, highlight, String.format("%.2f", value));
             tp.addStatModGrid(PopStatModValueGetter.GRID_W, PopStatModValueGetter.VALUE_W,
                 pad, pad, data.happinessDelta, new PopStatModValueGetter()
             );

@@ -53,7 +53,7 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
         }
         Collections.sort(data, (a, b) -> Float.compare(b.fraction, a.fraction));
 
-        final LabelAPI title = settings.createLabel(str("uiSectorPopTitle"), Fonts.ORBITRON_24AABOLD);
+        final LabelAPI title = settings.createLabel(str("uiTitleSectorPop"), Fonts.ORBITRON_24AABOLD);
         title.setColor(base);
         title.setAlignment(Alignment.TMID);
         add(title).inTL(opad*2, opad*2).setSize(PIECHART_S, TITLE_H);
@@ -63,9 +63,9 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
 
         chart.tooltip.width = 360;
         chart.tooltip.builder = (tp, exp) -> {
-            tp.addTitle(str("uiSectorPopBreakdownTitle"), base);
+            tp.addTitle(str("uiTitleSectorPopBreakdown"), base);
             
-            tp.addPara(str("uiSectorPopBreakdownTpTxt1"), pad);
+            tp.addPara(str("uiTpTxtSectorPopBreakdown1"), pad);
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
@@ -100,7 +100,7 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
         }
         Collections.sort(data, (a, b) -> Float.compare(b.fraction, a.fraction));
 
-        final LabelAPI title = settings.createLabel(str("uiSectorWorkforceTitle"), Fonts.ORBITRON_24AABOLD);
+        final LabelAPI title = settings.createLabel(str("uiTitleSectorWorkforce"), Fonts.ORBITRON_24AABOLD);
         title.setColor(base);
         title.setAlignment(Alignment.TMID);
         add(title).inTL(opad*4 + PIECHART_S, opad*2).setSize(PIECHART_S, TITLE_H);
@@ -110,9 +110,9 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
 
         chart.tooltip.width = 360;
         chart.tooltip.builder = (tp, exp) -> {
-            tp.addTitle(str("uiSectorWorkforceBreakdownTitle"), base);
+            tp.addTitle(str("uiTitleSectorWorkforceBreakdown"), base);
             
-            tp.addPara(str("uiSectorWorkforceBreakdownTpTxt"), pad);
+            tp.addPara(str("uiTpTxtSectorWorkforceBreakdown"), pad);
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {

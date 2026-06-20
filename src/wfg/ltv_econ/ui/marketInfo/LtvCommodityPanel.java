@@ -46,13 +46,13 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
         MarketAPI market) {
-        this(parent, width, height, str("uiCommoditiesTitle"), false, market);
+        this(parent, width, height, str("uiTitleCommodities"), false, market);
     }
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
         boolean rowsIgnoreUIState, MarketAPI market
     ) {
-        this(parent, width, height, str("uiCommoditiesTitle"), rowsIgnoreUIState, market);
+        this(parent, width, height, str("uiTitleCommodities"), rowsIgnoreUIState, market);
     }
 
     public LtvCommodityPanel(UIPanelAPI parent, int width, int height,

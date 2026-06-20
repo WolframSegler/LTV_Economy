@@ -193,7 +193,7 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         );
         final TooltipComp removeTp = removeBtn.comp().get(NativeComponents.TOOLTIP);
         removeTp.builder = (tp, expanded) -> {
-            tp.addPara(str("uiFactionInvShipWidgetRemoveTpTxt"), pad, highlight, str("uiCtrlTxt"), str("uiClickTxt"), str("uiShift"));
+            tp.addPara(str("uiTpTxtFactionInvShipWidgetRemove"), pad, highlight, str("uiCtrlTxt"), str("uiClickTxt"), str("uiShift"));
         };
 
         if (DebugFlags.COLONY_DEBUG) {
@@ -219,7 +219,7 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
             );
             final TooltipComp addTp = addBtn.comp().get(NativeComponents.TOOLTIP);
             addTp.builder = (tp, expanded) -> {
-                tp.addPara(str("uiFactionInvShipWidgetAddTpTxt"), pad, highlight, str("uiCtrlTxt"), str("uiClickTxt"), str("uiShift"));
+                tp.addPara(str("uiTpTxtFactionInvShipWidgetAdd"), pad, highlight, str("uiCtrlTxt"), str("uiClickTxt"), str("uiShift"));
             };
         }
     }

@@ -27,11 +27,11 @@ public class CohesionPair extends IconValuePairTp {
         tooltip.builder = (tp, exp) -> {
             tp.addTitle(str("marketPopDataCohesionTxt"), base);
 
-            tp.addPara(str("uiCohesionTpTxt"), opad);
+            tp.addPara(str("uiTpTxtCohesion"), opad);
 
             final float value = data.socialCohesionDelta.computeEffective(
                 data.getSocialCohesion()) - data.getSocialCohesion();
-            tp.addPara(str("uiDailyChangePrefix"), 3, highlight, String.format("%.2f", value));
+            tp.addPara(str("uiPrefixDailyChange"), 3, highlight, String.format("%.2f", value));
             tp.addStatModGrid(PopStatModValueGetter.GRID_W, PopStatModValueGetter.VALUE_W,
                 pad, pad, data.socialCohesionDelta, new PopStatModValueGetter()
             );

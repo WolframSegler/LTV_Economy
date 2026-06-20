@@ -62,7 +62,7 @@ public class IncomeBreakdownDialog extends DockPanel {
     @Override
     public void buildUI() {
         clearChildren();
-        final LabelAPI title = settings.createLabel(str("uiIncomeBreakdownTitle"), Fonts.INSIGNIA_LARGE);
+        final LabelAPI title = settings.createLabel(str("uiTitleIncomeBreakdown"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
 
         final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(WIDTH, true);
@@ -177,7 +177,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         // VISUALS
 
-        tp.addTitle(lastMonth ? str("uiPrevMonthTitle") : str("uiCurrMonthTitle"), base);
+        tp.addTitle(lastMonth ? str("uiTitlePrevMonth") : str("uiTitleCurrMonth"), base);
         tp.addSpacer(opad);
 
         if (raw) {
@@ -194,7 +194,7 @@ public class IncomeBreakdownDialog extends DockPanel {
         tp.addSectionHeading(str("industriesTitle"), base, dark, Alignment.MID, opad);
 
         tp.addPara(str("uiIncomeWithValue"), opad, highlight, indIncome);
-        tp.addPara(str("uiUpkeepWithvalue"), opad, negative, indUpkeep);
+        tp.addPara(str("uiUpkeepWithValue"), opad, negative, indUpkeep);
 
         tp.beginTable(Global.getSector().getPlayerFaction(), rowH, new Object[] {
             str("uiTableIndustryTitle"), 220, str("uiTableIncomeTitle"), 90, str("uiTableUpkeepTitle"), 90
@@ -212,24 +212,24 @@ public class IncomeBreakdownDialog extends DockPanel {
         }
         tp.addTable("", 0, pad);
 
-        tp.addPara(str("uiIncomeMultTitle"), opad, highlight,
+        tp.addPara(str("uiTitleIncomeMult"), opad, highlight,
             Math.round(market.getIncomeMult().getModifiedValue() * 100f) + "%"
         );
         tp.addStatModGrid(WIDTH, 50f, opad, pad, market.getIncomeMult(), true, null);
 
-        tp.addPara(str("uiUpkeepMultTitle"), opad, highlight,
+        tp.addPara(str("uiTitleUpkeepMult"), opad, highlight,
             Math.round(market.getUpkeepMult().getModifiedValue() * 100f) + "%"
         );
         tp.addStatModGrid(
             WIDTH, 50f, opad, pad, market.getUpkeepMult(), true, null
         );
 
-        tp.addPara(str("uiMonthlyIncomeUpkeepTpTxt3"), gray, opad);
+        tp.addPara(str("uiTpTxtMonthlyIncomeUpkeep3"), gray, opad);
 
         tp.addSectionHeading(str("importsExportsTitle"), base, dark, Alignment.MID, opad);
         
-        tp.addPara(str("uiExportIncomeTitle"), opad, highlight, NumFormat.formatCreditAbs(exportIncome));
-        tp.addPara(str("uiImportExpenseTitle"), opad, negative, NumFormat.formatCreditAbs(importExpense));
+        tp.addPara(str("uiTitleExportIncome"), opad, highlight, NumFormat.formatCreditAbs(exportIncome));
+        tp.addPara(str("uiTitleImportExpense"), opad, negative, NumFormat.formatCreditAbs(importExpense));
 
         if (exportIncome > 0l) {
             tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 220f, str("uiTableIncomeTitle"), 180f);
@@ -279,7 +279,7 @@ public class IncomeBreakdownDialog extends DockPanel {
             tp.addTable(str("noImports"), 0, opad);
         }
 
-        tp.addSectionHeading(str("uiWagesPopulationTitle"), base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("uiTitleWagesPopulation"), base, dark, Alignment.MID, opad);
 
         tp.addPara(getDesc(COLONY_HAZARD_PAY_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(incentive));
 
@@ -287,7 +287,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         tp.addPara(getDesc(FACTION_CREW_WAGES_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(factionShipsCrewWages));
         
-        tp.addSectionHeading(str("uiFactionExpensesTitle"), base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("uiTitleFactionExpenses"), base, dark, Alignment.MID, opad);
 
         tp.addPara(getDesc(FACTION_SHIP_PRODUCTION_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(factionShipsProd));
         
@@ -295,7 +295,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         tp.addPara(getDesc(INDEPENDENT_PATROL_COST_KEY) + ": %s", opad, negative, NumFormat.formatCreditAbs(patrolFleetIndependent));
 
-        tp.addSectionHeading(str("uiPolicyExpensesTitle"), base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("uiTitlePolicyExpenses"), base, dark, Alignment.MID, opad);
 
         tp.addPara(str("uiTotalCostsPrefix"), opad, negative, policyCostStr);
 
@@ -307,7 +307,7 @@ public class IncomeBreakdownDialog extends DockPanel {
             tp.addPara("  • " + desc + ": %s", opad, negative, NumFormat.formatCreditAbs(cost));
         }
 
-        tp.addSectionHeading(str("uiOtherTransactionsTitle"), base, dark, Alignment.MID, opad);
+        tp.addSectionHeading(str("uiTitleOtherTransactions"), base, dark, Alignment.MID, opad);
 
         if (sumbarketTransaction > 0l) {
             tp.addPara(getDesc(PLAYER_MARKET_TRANSACTION_KEY) + ": %s", opad, highlight,

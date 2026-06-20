@@ -48,14 +48,14 @@ public class FactionResourcesTable extends CustomPanel implements HasBackground 
 
         table.addHeaders(
             "", 40, null, true, false, 1,
-            str("uiTableCommodityTitle"), 160, str("uiFactionComTpTxt"), true, true, 1,
-            str("uiTableStored"), 85, str("uiTableStoredTpTxt"), false, false, -1,
-            str("uiTableDemandTitle"), 95, str("uiTableDemandTpTxt"), false, false, -1,
-            str("uiTableProductionTitle"), 120, str("uiFactionProdTpTxt"), false, false, -1,
-            str("uiTableMarketShare"), 120, str("uiFactionComShareTpTxt"), false, false, -1,
-            str("uiTableCreditFlow"), 120, str("uiTableCreditFlowTpTxt"), false, false, -1,
-            str("uiTableInputOutputBalance"), 100, str("uiTableInputOutputBalanceTpTxt"), false, false, -1,
-            str("uiAutarky"), 95, str("uiAutarkyTpTxt"), false, false, -1
+            str("uiTableCommodityTitle"), 160, str("uiTpTxtFactionCom"), true, true, 1,
+            str("uiTableStored"), 85, str("uiTableTpTxtStored"), false, false, -1,
+            str("uiTableDemandTitle"), 95, str("uiTableTpTxtDemand"), false, false, -1,
+            str("uiTableProductionTitle"), 120, str("uiTpTxtFactionProd"), false, false, -1,
+            str("uiTableMarketShare"), 120, str("uiTpTxtFactionComShare"), false, false, -1,
+            str("uiTableCreditFlow"), 120, str("uiTableTpTxtCreditFlow"), false, false, -1,
+            str("uiTableInputOutputBalance"), 100, str("uiTableTpTxtInputOutputBalance"), false, false, -1,
+            str("uiAutarky"), 95, str("uiTpTxtAutarky"), false, false, -1
         );
 
         if (engine.getMarketPopulationData().size() > 0) {

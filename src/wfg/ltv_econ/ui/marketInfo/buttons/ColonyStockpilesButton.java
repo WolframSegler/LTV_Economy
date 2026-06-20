@@ -40,11 +40,11 @@ public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
         bgDisabledAlpha = 0f;
 
         tooltip.builder = (tp, expanded) -> {
-            tp.addPara(str("uiColonyStockpilesBtnTpTxt1"), pad,
+            tp.addPara(str("uiBtnTpTxtColonyStockpiles1"), pad,
                 highlight, Keyboard.getKeyName(interaction.shortcut)
             );
 
-            tp.addPara(str("uiColonyStockpilesBtnTpTxt2"), pad,
+            tp.addPara(str("uiBtnTpTxtColonyStockpiles2"), pad,
                 highlight, str("uiCtrlTxt"), Keyboard.getKeyName(interaction.shortcut)
             );
         };

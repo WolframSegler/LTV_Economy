@@ -37,6 +37,7 @@ import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.constant.strings.Consumption;
 import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -70,9 +71,12 @@ public class EconomyLoop {
 
     /** Not order agnostic */
     final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
+        final PlayerFactionSettings playerFacSettings = LtvEconSaveData.instance().playerFactionSettings;
+        final WorkerPoolRegistry poolReg = WorkerPoolRegistry.instance();
+
         refreshMarkets();
 
-        WorkerPoolRegistry.instance().recalculateWorkerPool();
+        poolReg.recalculateWorkerPool();
 
         discoverInputsOutputs();
 
@@ -84,8 +88,14 @@ public class EconomyLoop {
                 WorkerRegistry.instance().resetWorkersAssigned(false);
                 engine.comDomains.values().parallelStream().forEach(CommodityDomain::update);
                 assignWorkers();
-                applyServiceSectorEffects();
-                WorkerPoolRegistry.instance().recalculateFreeWorkers();
+                applyServiceSectorEffects(); // run before player faction plan so that the player allocator sees the modified demand values.
+                
+                if (playerFacSettings.automaticWorkerAllocationForFaction && playerFacSettings.factionPlan != null) {
+                    assignPlayerWorkers(playerFacSettings.factionPlan);
+                    applyServiceSectorEffects();
+                }
+
+                poolReg.recalculateFreeWorkers();
 
                 engine.cyclesSinceWorkerAssign = 0;
             } else {
@@ -250,9 +260,8 @@ public class EconomyLoop {
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.singleEntrySet()) {
             final MarketAPI market = entry.getKey();
             final String marketID = market.getId();
-            final WorkerPool cond = WorkerPoolRegistry.get(market);
             final float[] assignments = entry.getValue();
-            final long totalWorkers = cond.getWorkerPool();
+            final long totalWorkers = WorkerPoolRegistry.get(marketID).getWorkerPool();
 
             for (int i = 0; i < industryOutputPairs.size(); i++) {
                 if (assignments[i] == 0f) continue;

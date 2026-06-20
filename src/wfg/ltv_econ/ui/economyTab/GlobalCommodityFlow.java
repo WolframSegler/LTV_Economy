@@ -81,7 +81,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalProduction(comID);
-                final String txt = str("uiGlobalProdTitle");
+                final String txt = str("uiTitleGlobalProd");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -90,7 +90,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalProdTpTxt"),
+                    tp.addPara(str("uiTpTxtGlobalProd"),
                         pad, highlight, com.getName()
                     );
                 };
@@ -105,7 +105,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalDemand(comID);
-                final String txt = str("uiGlobalDemandTitle");
+                final String txt = str("uiTitleGlobalDemand");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -114,7 +114,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalDemandTpTxt"),
+                    tp.addPara(str("uiTpTxtGlobalDemand"),
                         pad, highlight, com.getName()
                     );
                 };
@@ -129,7 +129,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalSurplus(comID);
-                final String txt = str("uiGlobalSurplusTitle");
+                final String txt = str("uiTitleGlobalSurplus");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -138,7 +138,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalSurplusTpTxt"),
+                    tp.addPara(str("uiTpTxtGlobalSurplus"),
                         pad, highlight, com.getName()
                     );
                 };
@@ -153,7 +153,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalDeficit(comID);
-                final String txt = str("uiGlobalDeficitTitle");
+                final String txt = str("uiTitleGlobalDeficit");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -162,7 +162,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalDeficitTpTxt"), pad);
+                    tp.addPara(str("uiTpTxtGlobalDeficit"), pad);
                 };
             }
         };
@@ -176,7 +176,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final float value = dom.getTradeVolumeHistory();
-                final String txt = str("uiSectorTradeVolumeTitle");
+                final String txt = str("uiTitleSectorTradeVolume");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
@@ -185,7 +185,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiSectorTradeVolumeTpTxt"),pad, new Color[] {highlight, base},
+                    tp.addPara(str("uiTpTxtSectorTradeVolume"),pad, new Color[] {highlight, base},
                         com.getName(), Integer.toString(EconConfig.HISTORY_LENGTH)
                     );
                 };
@@ -200,7 +200,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = dom.getCreditActivityHistory();
-                final String txt = str("uiSectorTradeValueTitle");
+                final String txt = str("uiTitleSectorTradeValue");
                 final String valueTxt = value < 1 ? "---" : NumFormat.formatCredit(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
@@ -209,7 +209,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiSectorTradeValueTpTxt"),
+                    tp.addPara(str("uiTpTxtSectorTradeValue"),
                         pad, new Color[] {highlight, base}, com.getName(), Integer.toString(EconConfig.HISTORY_LENGTH)
                     );
                 };
@@ -224,7 +224,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final int value = (int) engine.info.getGlobalAveragePrice(comID, 0);
-                final String txt = str("uiGlobalAvgPriceTitle");
+                final String txt = str("uiTitleGlobalAvgPrice");
                 final String valueTxt = com.isExotic() ? "Localized" : NumFormat.formatCredit(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -233,7 +233,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalAvgPriceTpTxt"), pad, highlight, com.getName());
+                    tp.addPara(str("uiTpTxtGlobalAvgPrice"), pad, highlight, com.getName());
                 };
             }
         };
@@ -246,7 +246,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final float value = dom.getTradeVolatility();
-                final String txt = str("uiSectorTradeVolatilityTitle");
+                final String txt = str("uiTitleSectorTradeVolatility");
                 final String valueTxt = (int) (value * 100f) + "%";
 
                 Color volatilityColor;
@@ -263,7 +263,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiSectorTradeVolatilityTpTxt"), pad, new Color[] {base, highlight},
+                    tp.addPara(str("uiTpTxtSectorTradeVolatility"), pad, new Color[] {base, highlight},
                         Integer.toString(EconConfig.HISTORY_LENGTH), com.getName()
                     );
                 };
@@ -279,7 +279,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             public void buildUI() {
                 final long value = engine.info.getGlobalStockpiles(comID);
                 final String valueTxt = NumFormat.engNotate(value);
-                final String txt = str("uiGlobalStockpilesTitle");
+                final String txt = str("uiTitleGlobalStockpiles");
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
             }
@@ -287,7 +287,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalStockpilesTpTxt"), pad, highlight, com.getName());
+                    tp.addPara(str("uiTpTxtGlobalStockpiles"), pad, highlight, com.getName());
                 };
             }
         };
@@ -303,7 +303,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 for (WorkerIndustryData data : WorkerRegistry.instance().getRegistry()) {
                     value += data.getAssignedForOutput(comID);
                 }
-                final String txt = str("uiGlobalWorkersAllocatedTitle");
+                final String txt = str("uiTitleGlobalWorkersAllocated");
                 final String valueTxt = value < 0l ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
@@ -312,7 +312,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalWorkersAllocatedTpTxt"), pad, highlight, com.getName());
+                    tp.addPara(str("uiTpTxtGlobalWorkersAllocated"), pad, highlight, com.getName());
                 };
             }
         };
@@ -325,7 +325,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalExporterCount(comID);
-                final String txt = str("uiGlobalExportersTitle");
+                final String txt = str("uiTitleGlobalExporters");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -334,7 +334,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalExportersTpTxt"), pad, highlight, com.getName());
+                    tp.addPara(str("uiTpTxtGlobalExporters"), pad, highlight, com.getName());
                 };
             }
         };
@@ -347,7 +347,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalImporterCount(comID);
-                final String txt = str("uiGlobalImportersTitle");
+                final String txt = str("uiTitleGlobalImporters");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -356,7 +356,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiGlobalImportersTpTxt"), pad, highlight, com.getName());
+                    tp.addPara(str("uiTpTxtGlobalImporters"), pad, highlight, com.getName());
                 };
             }
         };
@@ -369,7 +369,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             public void buildUI() {
                 final float value = dom.getInformalNode().prod;
-                final String txt = str("uiInformalProdTitle");
+                final String txt = str("uiTitleInformalProd");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -378,7 +378,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiInformalProdTpTxt"), pad, highlight, com.getName());
+                    tp.addPara(str("uiTpTxtInformalProd"), pad, highlight, com.getName());
                 };
             }
         };
@@ -432,7 +432,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(table).inBL(opad*2, TABLE_H + LABEL_H / 2f);
         table.buildUI();
 
-        final LabelAPI label = settings.createLabel(str("uiTop5ProdTitle"), Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiTitleTop5Prod"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(opad*2 + (TABLE_W - labelW) / 2f, TABLE_H*2 + LABEL_H / 2f + pad*2);
@@ -479,7 +479,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(table).inBL(opad*2, 0);
         table.buildUI();
 
-        final LabelAPI label = settings.createLabel(str("uiTop5ConsumptionTitle"), Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiTitleTop5Consumption"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(opad*2 + (TABLE_W - labelW) / 2f, TABLE_H + pad*2);
@@ -509,9 +509,9 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(chart).inBL(360, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
-            tp.addTitle(str("uiGlobalExportShareFactionTitle"), base);
+            tp.addTitle(str("uiTitleGlobalExportShareFaction"), base);
 
-            tp.addPara(str("uiGlobalExportShareFactionTpTxt"), pad);
+            tp.addPara(str("uiTpTxtGlobalExportShareFaction"), pad);
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
@@ -521,7 +521,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             for (PieSlice slice : data) {
                 String label = (slice.color == UIColors.INFORMAL_SECTOR)
-                    ? str("uiInformalSectorTitle")
+                    ? str("uiTitleInformalSector")
                     : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
 
                 tp.addRow(new Object[] {
@@ -534,7 +534,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             tp.addTable("", 0, opad);
         };
 
-        final LabelAPI label = settings.createLabel(str("uiExportShareTitle"), Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiTitleExportShare"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(360 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad * 2);
@@ -564,9 +564,9 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(chart).inBL(580, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
-            tp.addTitle(str("uiGlobalImportShareFactionTitle"), base);
+            tp.addTitle(str("uiTitleGlobalImportShareFaction"), base);
             
-            tp.addPara(str("uiGlobalImportShareFactionTpTxt"), pad);
+            tp.addPara(str("uiTpTxtGlobalImportShareFaction"), pad);
 
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
@@ -576,7 +576,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
             for (PieSlice slice : data) {
                 String label = (slice.color == UIColors.INFORMAL_SECTOR)
-                    ? str("uiInformalSectorTitle")
+                    ? str("uiTitleInformalSector")
                     : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
 
                 tp.addRow(new Object[] {
@@ -589,7 +589,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             tp.addTable("", 0, opad);
         };
 
-        final LabelAPI label = settings.createLabel(str("uiImportShareTitle"), Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiTitleImportShare"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(580 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
@@ -627,15 +627,15 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         chart.tooltip.builder = (tp, exp) -> {
             tp.setParaFont(Fonts.ORBITRON_12);
             tp.setParaFontColor(base);
-            tp.addPara(str("uiInFactionTradeRatioTitle"), pad);
+            tp.addPara(str("uiTitleInFactionTradeRatio"), pad);
             tp.setParaFontDefault();
             tp.setParaFontColor(text_color);
-            tp.addPara(str("uiInFactionTradeRatioTpTxt"), pad,
+            tp.addPara(str("uiTpTxtInFactionTradeRatio"), pad,
                 highlight, ((int)(globalTradeShare*100)) + "%", ((int)((1f-globalTradeShare)*100)) + "%"
             );
         };
 
-        final LabelAPI label = settings.createLabel(str("uiInFactionTradeRatioLblTitle"), Fonts.ORBITRON_16);
+        final LabelAPI label = settings.createLabel(str("uiTitleInFactionTradeRatioLbl"), Fonts.ORBITRON_16);
         final float labelW = label.computeTextWidth(label.getText());
         label.setColor(base);
         add(label).inBL(800 + (PIECHART_W - labelW) / 2f, PIECHART_H + pad*2);
