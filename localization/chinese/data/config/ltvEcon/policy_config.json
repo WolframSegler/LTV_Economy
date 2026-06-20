@@ -1,0 +1,144 @@
+{
+  "policies": [
+    {
+      "id": "extended_shifts",
+      "name": "延长工时",
+      "class": "wfg.ltv_econ.intel.market.policies.ExtendedShiftsPolicy",
+      "posterPath": "graphics/policies/extended_shifts.png",
+      "cost": 500,
+      "durationDays": 21,
+      "cooldownDays": 42,
+      "description": "管理层强制延长工作班次以最大化产出。殖民者辛勤劳作，为市场生产更多产品，但额外的压力使他们疲惫不堪，满意度降低。"
+    },
+    {
+      "id": "luddic_prophet_festival",
+      "name": "创教先知节",
+      "class": "wfg.ltv_econ.intel.market.policies.LuddicFestivalPolicy",
+      "posterPath": "graphics/policies/luddic_prophet_festival.png",
+      "cost": 6e4,
+      "durationDays": 7,
+      "cooldownDays": 120,
+      "description": "殖民者聚集在一起，纪念先知卢德的教义和吉列德的建立。在几天的时间里，信徒们庆祝、冥想，并拒绝机械的束缚。空气中回荡着圣歌和仪式，提醒所有人社群的力量高于工业。"
+    },
+    {
+      "id": "organ_harvesting_program",
+      "name": "人力资本回收计划",
+      "class": "wfg.ltv_econ.intel.market.policies.OrganHarvestingPolicy",
+      "posterPath": "graphics/policies/organ_harvesting_program.png",
+      "cost": 7500,
+      "durationDays": 60,
+      "cooldownDays": 180,
+      "description": "一项针对健康和生产力指标下被视为“非可行”公民的秘密回收计划。通过谨慎的收缴和资产清算，生物资源与财产被回收以支持更广大的殖民地。该计划依赖于大量的行政和合规支出。"
+    },
+    {
+      "id": "pharmaceutical_promotion",
+      "name": "药品促销计划",
+      "class": "wfg.ltv_econ.intel.market.policies.PharmaceuticalPromotionPolicy",
+      "posterPath": "graphics/policies/pharmaceutical_promotion.png",
+      "cost": 3000,
+      "durationDays": 30,
+      "cooldownDays": 210,
+      "description": "使本地消遣性物质的生产合法化并给予补贴。该计划提振了公共士气，但损害了健康，并暗中削弱了社会凝聚力。控制这些物质非法的派系可能反对，而其他派系则欢迎它。"
+    },
+    {
+      "id": "fleet_mobilization_order",
+      "name": "舰队动员令",
+      "class": "wfg.ltv_econ.intel.market.policies.FleetMobilizationPolicy",
+      "posterPath": "graphics/policies/fleet_mobilization_order.png",
+      "cost": 5e5,
+      "durationDays": 35,
+      "cooldownDays": 240,
+      "description": "临时增强殖民地控制下的现役舰队数量，以投射更大的武力。该行动需要大量资金和后勤支持，限制了其部署频率。"
+    },
+    {
+      "id": "bulwark_of_orichalcum",
+      "name": "精金壁垒",
+      "class": "wfg.ltv_econ.intel.market.policies.BulwarkOrichalcumPolicy",
+      "posterPath": "graphics/policies/bulwark_of_orichalcum.png",
+      "cost": 250000,
+      "durationDays": 50,
+      "cooldownDays": 360,
+      "description": "最高优先级的行星防御计划。防御工事、驻军和防御工事得到近乎神话级别的加强，确保殖民地能够承受长期的围攻。该计划需要庞大的后勤支持和持续维护。"
+    },
+    {
+      "id": "iron_fist_decree",
+      "name": "铁拳法令",
+      "class": "wfg.ltv_econ.intel.market.policies.IronFistPolicy",
+      "posterPath": "graphics/policies/iron_fist_decree.png",
+      "cost": 0,
+      "durationDays": 60,
+      "cooldownDays": 180,
+      "description": "在殖民地全境宣布戒严状态。安全部队被授予广泛权力以镇压骚乱、瓦解异议并强加绝对秩序。在严格控制下社会凝聚力急剧上升，但随着公民自由被中止、服从以武力强制执行，公共士气和幸福感遭受损失。"
+    },
+    {
+      "id": "urban_renewal_initiative",
+      "name": "城市更新计划",
+      "class": "wfg.ltv_econ.intel.market.policies.UrbanRenewalPolicy",
+      "posterPath": "graphics/policies/urban_renewal_initiative.png",
+      "cost": 1e6,
+      "durationDays": 120,
+      "cooldownDays": 480,
+      "description": "一项旨在改善殖民地生活条件、公共卫生和整体士气的综合性住房开发计划。大规模建设和基础设施投资旨在促进人口增长并长期提升福祉。"
+    },
+    {
+      "id": "public_health_education",
+      "name": "公共卫生教育计划",
+      "class": "wfg.ltv_econ.intel.market.policies.PublicHealthEducationPolicy",
+      "posterPath": "graphics/policies/public_health_education.png",
+      "cost": 1e5,
+      "durationDays": 120,
+      "cooldownDays": 0,
+      "description": "全殖民地的公共卫生运动，教育公民有关卫生、营养和疾病预防的知识。这些措施改善了整体健康和社会凝聚力，培育了更具韧性的人口，且对日常生活干扰最小。无冷却时间。"
+    },
+    {
+      "id": "bres_vitalis",
+      "name": "维塔利斯之酿",
+      "class": "wfg.ltv_econ.intel.market.policies.BresVitalisPolicy",
+      "posterPath": "graphics/policies/bres_vitalis.png",
+      "cost": 3e4,
+      "durationDays": 60,
+      "cooldownDays": 360,
+      "description": "殖民地行政部门与速子科技顾问协商，开发了一种新饮品：维塔利斯之酿。它作为一种提神滋补品进行营销，含有提升士气和刺激生产力的添加剂，同时对健康的影响微乎其微，并避免引起其他派系的关注。"
+    },
+    {
+      "id": "wellness_compliance_directive",
+      "name": "健康合规指令",
+      "class": "wfg.ltv_econ.intel.market.policies.WellnessCompliancePolicy",
+      "posterPath": "graphics/policies/wellness_compliance_directive.png",
+      "cost": 2000,
+      "durationDays": 45,
+      "cooldownDays": 360,
+      "description": "一项公共卫生倡议，分发强调警惕与个人责任的通知和宣教材料。报告显示不同社区和职业之间的健康结果存在差异，鼓励公民对被视为最高风险的人群进行监督。"
+    },
+    {
+      "id": "convergence_festival",
+      "name": "汇聚节",
+      "class": "wfg.ltv_econ.intel.market.policies.ConvergenceFestivalPolicy",
+      "posterPath": "graphics/policies/convergence_festival.png",
+      "cost": 750000,
+      "durationDays": 30,
+      "cooldownDays": 360,
+      "description": "一场盛大的公民庆典，包括大规模表演、公众集会和全星区广播。汇聚节通过共同盛况和协调参与将民众凝聚在一起。庆典的规模需要庞大的后勤支持。"
+    },
+    {
+      "id": "substance_control_act",
+      "name": "物质管控法案",
+      "class": "wfg.ltv_econ.intel.market.policies.SubstanceControlPolicy",
+      "posterPath": "graphics/policies/substance_control_act.png",
+      "cost": 17000,
+      "durationDays": 480,
+      "cooldownDays": 480,
+      "description": "限制殖民地内受控物质分销和消费的监管框架。加强执法和合规措施，旨在减少药物滥用、改善公共卫生并加强社会秩序。"
+    },
+    {
+      "id": "expand_the_yards",
+      "name": "扩建船坞",
+      "class": "wfg.ltv_econ.intel.market.policies.ExpandShipyardsPolicy",
+      "posterPath": "graphics/policies/expand_the_yards.png",
+      "cost": 600000,
+      "durationDays": 120,
+      "cooldownDays": 240,
+      "description": "一项建造额外轨道干船坞和装配龙门架的大型工业工程。需要大量资源。完成后，派系的舰队建造能力将永久增加一条装配线。"
+    }
+  ]
+}

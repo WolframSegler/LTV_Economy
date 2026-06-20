@@ -1,0 +1,2 @@
+name,id,tags,planetary,decivRemove,script,desc,icon,order
+劳动力储备,worker_pool,,FALSE,TRUE,"wfg.ltv_econ.condition.WorkerPoolCondition","可分配给各工业设施的劳动力储备。",graphics/icons/markets/wfg_labor.png,200

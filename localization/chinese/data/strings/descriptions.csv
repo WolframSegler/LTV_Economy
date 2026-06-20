@@ -1,0 +1,5 @@
+id,type,text1,text2,text3,text4,text5,notes
+light_machinery,RESOURCE,"用于轻型制造和装配的精密工程机械与工具。生产消费品和小型工业组件所必需。",,,,,
+components_structural,RESOURCE,"用于重型组装和下部结构的批量结构零件和框架。",,,,,
+components_precision,RESOURCE,"由稀有金属制成的高精度加工零件，对先进系统和精密密集型组装至关重要。用于制造机械、电子设备以及需要精确公差和耐久性的专用设备的组件。",,,,,
+components_light,RESOURCE,"用于消费品和轻工业产品的轻型劳动密集型组件。构成日常制造和装配的基石。",,,,,

@@ -1,0 +1,5 @@
+id,name,cost mult,build time,income,upkeep,downgrade,upgrade,tags,data,image,plugin,desc,order,disruptDanger
+manufacturing,制造厂,50,90,,10,,,"industry, manufacturing, nanoforge",,graphics/icons/industry/manufacturing.png,wfg.ltv_econ.industry.Manufacturing,"将金属和机械转化为标准化的组件和子部件，为高级工业和消费品生产提供必需的零件。",1300,MEDIUM
+patrolhq,巡逻队总部,60,60,,8,,militarybase,"patrol, unraidable, tactical_bombardment, structure",,graphics/icons/industry/patrol_hq.png,wfg.ltv_econ.industry.LtvMilitaryBase,"包含必要的机库、维护船坞、指挥与控制中心、兵营以及在整个星系内投射武力所需的后勤行动。一旦建成，军事化巡逻队将追捕海盗并保护友方船队。",2400,
+militarybase,军事基地,90,120,,10,patrolhq,highcommand,"military, unraidable, tactical_bombardment, industry",,graphics/icons/industry/military_base.png,wfg.ltv_econ.industry.LtvMilitaryBase,"这些设施能够在星系之间投射武力。任何此类军事行动都是一项庞大的后勤行动，需要协调数十甚至数百艘星舰以及数千名军官、船员和士兵。",2500,
+highcommand,最高指挥部,30,120,,14,militarybase,,"command, unraidable, tactical_bombardment, industry",,graphics/icons/industry/high_command.png,wfg.ltv_econ.industry.LtvMilitaryBase,"唯有通过一支卓越的军官和官僚队伍，并赋予他们对整个星系资源的权力，才能实现跨星域帝国。已建成的高级指挥部能够协调在整个星区范围内组织和执行军事行动。",2600,

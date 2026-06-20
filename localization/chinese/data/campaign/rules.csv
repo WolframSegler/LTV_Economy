@@ -1,0 +1,80 @@
+id,trigger,conditions,script,text,options,notes
+
+ltvWlscmpHijack,DialogOptionSelected,"$option == marketVisitBar
+$market.policy_wellness_compliance
+!$global.ltv_wlscmp_cooldown
+RollProbability 0.3 score:100","$option = ltv_wlscmp_intro 0
+FireBest DialogOptionSelected",,,WellnessCompliance bar event
+
+ltvWlscmpIntro,DialogOptionSelected,$option == ltv_wlscmp_intro,,"当你走进酒吧时，交谈声显得异常紧张。人们的话说到一半便戛然而止，彼此之间带着一种无声而不安的猜疑，频繁地交换着眼神。",ltv_wlscmp_observe:走向吧台点杯酒,INTRO TEXT
+
+ltvWlscmpObserve,DialogOptionSelected,$option == ltv_wlscmp_observe,,"当你走向吧台时，你注意到顾客们互相投来微妙的目光，还有几个人毫无明显原因地保持着距离。似乎没有人感到轻松。","ltv_wlscmp_ask:询问酒保发生了什么事
+ltv_wlscmp_leave:悄悄离开",OBSERVE PATRONS
+
+ltvWlscmpAsk,DialogOptionSelected,$option == ltv_wlscmp_ask,,"他凑过身来，低声说某些区域据说风险较高。他没有详细解释，只是耸了耸肩，又直起身来。酒吧里没有人听到这番公开议论时感到自在。",ltv_wlscmp_leave:离开酒吧,ASK QUESTIONS
+
+ltvWlscmpLeave,DialogOptionSelected,$option == ltv_wlscmp_leave,"$global.ltv_wlscmp_cooldown = true 60
+$option = gaKA_hegJustLeave 0
+FireBest DialogOptionSelected","你决定最好别卷入其中，于是转身走开了。",,LEAVE
+
+
+
+bresVitalis_button,AddBarEvents,"$market.policy_bres_vitalis
+!$global.ltv_bresvitalis_cooldown
+!$global.isDevMode
+RollProbability 0.15",,"余光中，你注意到一名男子瘫倒在一张堆满罐头的桌子旁，而店员似乎对他视而不见。",bresVitalis_start:检查那个睡在罐头山旁边的男人,BresVitalis bar event (normal)
+
+bresVitalis_button_debug,AddBarEvents,"$market.policy_bres_vitalis
+!$global.ltv_bresvitalis_cooldown
+$global.isDevMode",,"余光中，你注意到一名男子瘫倒在一张堆满罐头的桌子旁，而店员似乎对他视而不见。",bresVitalis_start:检查那个睡在罐头山旁边的男人,BresVitalis bar event (debug)
+
+bresVitalis_start,DialogOptionSelected,$option == bresVitalis_start,$global.ltv_bresvitalis_cooldown = true 60,"你走近那名男子，注意到桌上堆满了数十个发光的“维塔利斯之酿”罐头。","bresVitalis_call:呼叫医务室来帮助他
+bresVitalis_leave:别管他",
+
+bresVitalis_call,DialogOptionSelected,$option == bresVitalis_call,AdjustRep independent COOPERATIVE 1,"你叫醒那名男子，并呼叫了医疗援助。医务人员迅速赶到，将他送往最近的医务室。",barHRE_goToNormalBar:继续,
+
+bresVitalis_leave,DialogOptionSelected,$option == bresVitalis_leave,,"你决定最好别卷入其中，让那名男子继续他的小憩。",barHRE_goToNormalBar:继续,
+
+
+
+convergence_festival_flavor,AddBarEvents,"$market.policy_convergence_festival
+!$global.isDevMode
+RollProbability 0.5",FireBest ConvergenceFestivalStart,"酒吧里装饰着五彩缤纷的横幅和全息显示屏，庆祝着汇聚节。顾客们欢呼雀跃，沉浸在节日氛围中。",,The flavor text without the actual event
+
+convergence_festival_start,ConvergenceFestivalStart,"!$global.ltv_convergence_festival_cooldown
+!$global.isDevMode
+RollProbability 0.2",,"你的目光锁定在人群中一位节日表演者身上。
+他显得紧张而疲惫，从自己的摊位紧张地扫视着人群。",ConvergenceFestivalApproach:接近那位汇聚节表演者,
+
+convergence_festival_flavor_debug,AddBarEvents,"$market.policy_convergence_festival
+$global.isDevMode",FireBest ConvergenceFestivalStart,"酒吧里装饰着五彩缤纷的横幅和全息显示屏，庆祝着汇聚节。顾客们欢呼雀跃，沉浸在节日氛围中。",,The flavor text without the actual event
+
+convergence_festival_start_debug,ConvergenceFestivalStart,"!$global.ltv_convergence_festival_cooldown
+$global.isDevMode",,"你的目光锁定在人群中一位节日表演者身上。
+他显得紧张而疲惫，从自己的摊位紧张地扫视着人群。",ConvergenceFestivalApproach:接近那位汇聚节表演者,
+
+convergence_festival_approach,DialogOptionSelected,$option == ConvergenceFestivalApproach,"CreateRandomNPC player market $convergence_performer male
+DisplayNPC market $convergence_performer true
+$global.ltv_convergence_festival_cooldown = true 60","你走向那位表演者，他沉默地盯着自己的酒杯，回避着你的目光。",ConvergenceFestivalSmallTalk:"寒暄几句",
+
+convergence_festival_small_talk,DialogOptionSelected,$option == ConvergenceFestivalSmallTalk,,"你问他是不是节日里的表演者。
+他没有回答，只是低低地咕哝了一声，继续盯着他的酒杯。","ConvergenceFestivalCompliment:""在你的努力下，殖民地比以往任何时候都更加团结。你的汗水没有白费。""
+ConvergenceFestivalCoach:""这台机器不能有一个齿轮出现故障。坚持下去，整个节日就能撑住。"""
+
+convergence_festival_compliment,DialogOptionSelected,$option == ConvergenceFestivalCompliment,,"表演者终于看向你，眼中充满了无声的愤怒。“汗水并非来自节日本身，”他低声说道。“而是来自保安为了确保我参加早晨的准备工作而撞开我家门时的那一惊吓。”","ConvergenceFestivalFinalAdvice:""选择参加活动是自愿的，但一旦加入，就必须履行你的职责""
+ConvergenceFestivalApologize:代表当局道歉并离开",
+
+convergence_festival_coach,DialogOptionSelected,$option == ConvergenceFestivalCoach,,"表演者终于看向你，眼中充满了无声的沮丧。“其实并不累，”他用紧张而焦虑的声音说道。“保安已经帮助我为训练变得精力充沛且有干劲了。”","ConvergenceFestivalFinalAdvice:提醒他选择加入就意味着必须参与
+ConvergenceFestivalClarification:问他那是什么意思",
+
+convergence_festival_clarification,DialogOptionSelected,$option == ConvergenceFestivalClarification,,"他眯起眼睛，声音紧绷。“守卫几乎把我拖了出去。他们确保我为训练做好了准备。我几乎没有喘息的工夫。”","ConvergenceFestivalFinalAdvice:提醒他选择加入就意味着必须参与
+ConvergenceFestivalApologize:代表当局道歉并离开",
+
+convergence_festival_final_advice,DialogOptionSelected,$option == ConvergenceFestivalFinalAdvice,"AdjustRepNPC market $convergence_performer -5 HOSTILE
+ConvergenceFestivalCMD kill_music","你平静地告诉他：“选择参加活动是自愿的，但一旦加入，就必须履行你的职责。否则，整个节日就会分崩离析。”",ConvergenceFestivalDaze:继续,
+
+convergence_festival_daze,DialogOptionSelected,$option == ConvergenceFestivalDaze,"ConvergenceFestivalCMD start_daze","表演者猛地呼出一口气，目光投向广场上空的全息横幅。酒吧之外，鼓声与仍在排练的数千人节奏同步，人群有节奏地呼应着，仿佛节日已成为一个有生命的有机体。你暂时离开了他，感受着它的脉搏；灯光、横幅和欢呼声涌入酒吧，在你的脑海中，这个节日仿佛拥有了自己的生命。",ConvergenceFestivalLeave:回过神来,
+
+convergence_festival_apologize,DialogOptionSelected,$option == ConvergenceFestivalApologize,,"你轻声道歉并转身走开。表演者看着你离开，一边啜饮着酒，一边低声咒骂了一句。",barHRE_goToNormalBar:继续,
+
+convergence_festival_leave,DialogOptionSelected,$option == ConvergenceFestivalLeave,ConvergenceFestivalCMD end_daze,"突然间，节日的欢呼声安静下来，你发现自己又回到了酒吧。",barHRE_goToNormalBar:继续,

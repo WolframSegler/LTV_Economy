@@ -1,0 +1,116 @@
+{
+    "worker_allocation_plans": [
+        {
+            "description": "优先满足派系需求。剩余工人分配给成本最低的生产。",
+            "goals": [
+                {
+                    "id": "faction_demand_coverage",
+                    "params": [{
+                        "id": "penalty",
+                        "name": "生产不足惩罚",
+                        "value": "3000.0"
+                    }]
+                },
+                {
+                    "id": "profit_export",
+                    "params": [
+                        {
+                            "id": "metric",
+                            "name": "价值计量方式",
+                            "value": "Base value"
+                        },
+                        {
+                            "id": "weight",
+                            "name": "折扣强度",
+                            "value": "0.0"
+                        },
+                        {
+                            "id": "targetFraction",
+                            "name": "目标（全球需求比例）",
+                            "value": "1.0"
+                        },
+                        {
+                            "id": "penalty",
+                            "name": "短缺惩罚",
+                            "value": "100.0"
+                        }
+                    ]
+                }
+            ],
+            "id": "Self-Sufficiency",
+            "objective_config": {
+                "goalType": "MINIMIZE",
+                "maxIter": 10000
+            },
+            "segments": [
+                {
+                    "cost": 0.3,
+                    "id": "fair"
+                },
+                {
+                    "cost": 0.1,
+                    "id": "local"
+                },
+                {
+                    "cost": 0.15,
+                    "id": "faction"
+                },
+                {
+                    "cost": 1,
+                    "id": "global"
+                }
+            ]
+        },
+        {
+            "description": "在满足全球需求的前提下，最大化高价值商品的出口。",
+            "goals": [{
+                "id": "profit_export",
+                "params": [
+                    {
+                        "id": "metric",
+                        "name": "价值计量方式",
+                        "value": "Base value"
+                    },
+                    {
+                        "id": "weight",
+                        "name": "折扣强度",
+                        "value": "0.5"
+                    },
+                    {
+                        "id": "targetFraction",
+                        "name": "目标（全球需求比例）",
+                        "value": "1.0"
+                    },
+                    {
+                        "id": "penalty",
+                        "name": "短缺惩罚",
+                        "value": "2000.0"
+                    }
+                ]
+            }],
+            "id": "Max Profit",
+            "objective_config": {
+                "goalType": "MINIMIZE",
+                "maxIter": 10000
+            },
+            "segments": [
+                {
+                    "cost": 0.3,
+                    "id": "fair"
+                },
+                {
+                    "cost": 0.1,
+                    "id": "local"
+                },
+                {
+                    "cost": 1,
+                    "id": "global"
+                },
+                {
+                    "cost": 0.15,
+                    "id": "faction"
+                }
+            ]
+        }
+    ]
+}

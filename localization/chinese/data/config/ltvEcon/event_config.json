@@ -1,0 +1,28 @@
+{
+  "events": [
+    {
+      "id": "localized_gang_skirmishes",
+      "name": "局部帮派冲突",
+      "class": "wfg.ltv_econ.intel.market.events.LocalizedGangSkirmishesEvent",
+      "iconPath": "graphics/events/gang_violence.png",
+      "description": "敌对派系在街头发生冲突，扰乱工业生产，引发恐慌，并因居民避开危险区域而导致移民流入减少。",
+      "tags": ["cohesion_sensitive", "violence", "negative"]
+    },
+    {
+      "id": "miasma_in_the_streets",
+      "name": "街头瘴气",
+      "class": "wfg.ltv_econ.intel.market.events.MiasmaInTheStreetsEvent",
+      "iconPath": "graphics/events/miasma.png",
+      "description": "一种神秘的疾病在殖民地蔓延，令居民感到不安并扰乱日常生活。其来源不明，但每个人都感受到了它的影响。",
+      "tags": ["health_sensitive", "negative"]
+    },
+    {
+      "id": "general_strike",
+      "name": "总罢工",
+      "class": "wfg.ltv_econ.intel.market.events.GeneralStrikeEvent",
+      "iconPath": "graphics/events/general_strike.png",
+      "description": "纠察线在殖民地各处涌现。标语上写着：“一人受伤，众人皆伤。”工人们高呼“团结则能谈判，分裂则只能乞求”，放下工具，停产停工。",
+      "tags": ["class_consciousness_sensitive", "economic", "negative"]
+    }
+  ]
+}

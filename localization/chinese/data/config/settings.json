@@ -1,0 +1,56 @@
+{
+  "plugins": {
+    "TitleScreenWarning": "wfg.ltv_econ.plugin.TitleScreenWarningPlugin"
+  },
+  "graphics": {
+    "ui": {
+      "cargoTooltipArrow": "graphics/ui/cargoTooltipArrow.png",
+      "glow_bg": "graphics/ui/text_glow.png",
+      "warning_button": "graphics/ui/news.png",
+      "worker_helmet": "graphics/ui/worker_helmet.png",
+      "three_workers": "graphics/ui/three_workers.png",
+      "health": "graphics/ui/health.png",
+      "smiling_face": "graphics/ui/smiling_face.png",
+      "society": "graphics/ui/society.png",
+      "solidarity_colored": "graphics/ui/solidarity_colored.png",
+      "restricted": "graphics/ui/restricted.png",
+      "forbidden": "graphics/ui/forbidden.png",
+      "settings": "graphics/ui/settings_cog.png",
+      "arrow": "graphics/ui/arrow1.png",
+      "customize": "graphics/ui/customize.png",
+      "blueprint": "graphics/ui/blueprint.png"
+    },
+    "icons": {
+      "policy_icon": "graphics/icons/intel/policy_icon.png",
+      "bombardment": "graphics/icons/intel/tactical_bombardment.png",
+      "ratio_chart": "graphics/icons/reports/ratio_chart.png",
+      "checklist": "graphics/icons/reports/checklist.png",
+      "stopwatch": "graphics/icons/reports/stopwatch.png",
+      "stockpiles_full": "graphics/icons/industry/stockpiles_full.png",
+      "stockpiles_medium": "graphics/icons/industry/stockpiles_medium.png",
+      "stockpiles_low": "graphics/icons/industry/stockpiles_low.png",
+      "stockpiles_empty": "graphics/icons/industry/stockpiles_empty.png",
+      "stockpiles_no_demand": "graphics/icons/industry/stockpiles_no_demand.png",
+      "events_button": "graphics/icons/buttons/events.png",
+      "management_button": "graphics/icons/buttons/management.png",
+      "stockpiles_button": "graphics/icons/buttons/stockpiles.png",
+      "smuggling": "graphics/icons/intel/smuggling.png",
+      "ship_outline": "graphics/icons/intel/freighter_outline.png",
+      "cargo_crates": "graphics/icons/industry/cargo_crates.png",
+      "berth": "graphics/icons/intel/berth.png",
+      "healthcare": "graphics/icons/industry/healthcare.png",
+      "radio_tower": "graphics/icons/industry/radio_tower.png",
+      "theater_mask": "graphics/icons/industry/theater_mask.png"
+    },
+    "map": {
+      "star": "graphics/map/star.png",
+      "star_underlay": "graphics/map/star_underlay.png",
+      "ship_arrow": "graphics/map/ship_arrow.png",
+      "bg1": "graphics/map/map_bg_1.jpg",
+      "bg2": "graphics/map/map_bg_2.jpg"
+    },
+    "fleetScreen": {
+      "icon_transfer_hangar": "graphics/ui/fleet/transfer_hangar.png"
+    }
+  }
+}

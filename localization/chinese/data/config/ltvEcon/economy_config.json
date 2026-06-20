@@ -1,0 +1,106 @@
+{
+    "MULTI_THREADING": true,
+    "ASSIGN_WORKERS_ON_LOAD": false,
+
+    "STARTING_CREDITS_FOR_MARKET": 50000,
+    "CREDIT_WITHDRAWAL_LIMIT": 100000,
+    "AUTO_TRANSFER_PROFIT_LIMIT": 0.3,
+    "OPEN_MARKET_TO_STOCKPILES_RATIO": 0.3,
+
+    "DEBT_DEBUFF_TIERS": [
+        {
+            "threshold": -1e6,
+            "stabilityPenalty": -1,
+            "upkeepMultiplierPercent": 5,
+            "immigrationModifier": -3
+        },
+        {
+            "threshold": -1e7,
+            "stabilityPenalty": -2,
+            "upkeepMultiplierPercent": 10,
+            "immigrationModifier": -8
+        },
+        {
+            "threshold": -1e8,
+            "stabilityPenalty": -3,
+            "upkeepMultiplierPercent": 15,
+            "immigrationModifier": -12
+        },
+        {
+            "threshold": -5e8,
+            "stabilityPenalty": -4,
+            "upkeepMultiplierPercent": 20,
+            "immigrationModifier": -18
+        },
+        {
+            "threshold": -1e10,
+            "stabilityPenalty": -5,
+            "upkeepMultiplierPercent": 40,
+            "immigrationModifier": -25
+        }
+    ],
+
+    "MANUFACTURING_EXCLUSION_LIST": [
+        "epiphany",
+        "arcadia_station",
+        "cruor",
+        "gilead",
+        "tartessus",
+        "station_kapteyn",
+        "chalcedon",
+        "sphinx",
+        "qaras"
+    ],
+    
+    "WORKER_ASSIGN_INTERVAL": 20,
+    "ECON_DEFICIT_COST": 3000,
+    "LOCAL_WORKER_COST_MULT": 0.1,
+    "FACTION_WORKER_COST_MULT": 0.15,
+    "LOCAL_PROD_BUFFER": 0.1,
+    "FACTION_PROD_BUFFER": 0.1,
+    "PRODUCTION_BUFFER": 0.05,
+    "ECON_ALLOCATION_PASSES": 3,
+
+    "TRADE_INTERVAL": 15,
+    "DAYS_TO_COVER": 60,
+    "DAYS_TO_COVER_PER_IMPORT": 28,
+    "HISTORY_LENGTH": 90,
+    "EXPORT_THRESHOLD_FACTOR": 1.8,
+    "FACTION_EXCHANGE_MULT": 0.3,
+    "PRODUCTION_HOLD_FACTOR": 5,
+    "MIN_RELATION_TO_TRADE": -0.75,
+
+    "SHOW_MARKET_POLICIES": true,
+    "EMBARGO_REP_DROP": 0.4,
+
+    "IDLE_SHIP_MAINTENANCE_MULT": 0.2,
+    "CREW_WAGE_PER_MONTH": 10.0,
+    "IDLE_CREW_WAGE_MULT": 0.3,
+    "TRAVEL_SPEED_LY_DAY": 7,
+    "FORCED_FUEL_IMPORT_COST_MULT": 2.0,
+
+    "INDEPENDENT_TRADE_FLEET_BASE_FEE": 1200.0,
+    "INDEPENDENT_TRADE_FLEET_PER_TON_FEE": 1.5,
+    "INDEPENDENT_TRADE_FLEET_PERCENT_CUT": 0.08,
+    "INDEPENDENT_TRADE_FLEET_HAZARD_BASE": 600.0,
+    "INDEPENDENT_TRADE_FLEET_HAZARD_MULT": 7.0,
+
+    "INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP": 8000.0,
+
+    "RAID_STOCKPILES_ACCESS_RATIO": 0.15,
+    "RAID_BASE_EFF": 0.4,
+
+    "TRADE_MISSION_MAX_DISPLAYED_SHIPS": 20,
+    "TRADE_MAP_MIN_AMOUNT_FILTER": 10000,
+    "MAX_VISIBLE_PLANNED_ORDERS": 500,
+    "INFORMAL_TRADE_SHARE": 0.03,
+    "NPC_FACTION_ASSEMBLY_LINES": 60,
+    "PLAYER_FACTION_ASSEMBLY_LINES": 3,
+    "SHIP_ALLOC_CAPACITY_TARGET_BUFFER": 1.2,
+    "SHIP_ALLOC_MARKET_WEIGHT_PER_SIZE": 150.0,
+    "SHIP_ALLOC_MARKET_SIZE_EXPONENT": 1.5,
+    "SHIP_ALLOC_AGGRESSION_COMBAT_MULT": 0.2,
+    "SHIP_ALLOC_THREAT_RELATIONSHIP_MULT": 2.0,
+    "SHIP_ALLOC_MIN_COMBAT_POWER": 50.0,
+    "SCRAP_REFUND_FRACTION": 0.5
+}

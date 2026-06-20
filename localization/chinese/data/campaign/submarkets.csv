@@ -1,0 +1,5 @@
+id,name,faction,desc,script,icon,order
+stockpiles,本地储备,,"本地储备显示所有已生产或进口的储存贸易商品的预览。放置在此处的商品会被纳入殖民地储备，自动用于支持生产并防止短缺。玩家可以从储备中提取货物。向储备提供物资有助于工业获得生产所需的供应。",wfg.ltv_econ.submarket.StockpilesSubmarketPlugin,graphics/icons/submarkets/stockpiles1.png,50
+open_market,公开市场,,"公开市场。此处仅可交易合法商品，且交易需缴纳关税。稳定度较高时，可供商品更多。公开市场的交易不会直接影响政府储备。所有交易的关税均纳入殖民地预算。",wfg.ltv_econ.submarket.OpenSubmarketPlugin,,0
+black_market,黑市,pirates,"黑市。任何东西都可以在此买卖，且不征收关税。稳定度较低时，可供商品更多。黑市活动不会增加政府储备或殖民地收入。黑市交易可能会引起当局注意，导致货物扫描和派系好感度下降，除非交易时关闭应答器。以合法贸易作为“掩护”进行交易，也能降低引起当局注意的概率。",wfg.ltv_econ.submarket.BlackSubmarketPlugin,graphics/factions/black_market.png,999
+generic_military,,,"与$theFaction军事基地进行贸易。此处可以买卖武器及其他军用硬件，即使它们在公开市场上属于非法品。获得佣金以及与$theFaction关系良好时，可获得更高级的硬件。作为不问来源的回购计划的一部分，会购买本地非法商品。军事采购直接影响基地的内部库存。",wfg.ltv_econ.submarket.MilitarySubmarketPlugin,,100

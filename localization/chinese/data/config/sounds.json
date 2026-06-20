@@ -1,0 +1,8 @@
+{
+    "music":{
+        "music_convergence_festival":[	
+			{"file":"convergence_festival_theme.ogg","source":"sounds/bar/","volume":0.6, "pitch":1.0} 
+		]
+    }
+}
+    
