@@ -4,6 +4,7 @@ Version 0.4.2-beta | SAVE COMPATIBLE
 - Reduced LunaLib config bloat.
 - Added a new setting to faction administration to toggle periodic re-assignment of workers for player faction.
 - Fixed string keys to be more consistent and remove grammatical errors.
+- Added a Chinese translation (experimental). Can be found on github releases.
 
 Version 0.4.1-beta | NOT SAVE COMPATIBLE
 - UI bug and alignment fixes
