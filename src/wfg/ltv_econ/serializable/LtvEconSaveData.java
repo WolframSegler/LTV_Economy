@@ -42,7 +42,7 @@ public class LtvEconSaveData implements Serializable {
 
     // TODO remove after incompat update
     private Object readResolve() {
-        poolRegistry = new WorkerPoolRegistry();
+        if (poolRegistry == null) poolRegistry = new WorkerPoolRegistry();
 
         return this;
     }

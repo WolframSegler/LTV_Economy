@@ -15,6 +15,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 
 public class Manufacturing extends BaseIndustry {
     private static final String NANO = "nanoforge";
+	public static final String id = "manufacturing";
 
     public void apply() {
         super.apply(true);

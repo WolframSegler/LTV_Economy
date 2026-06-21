@@ -32,6 +32,7 @@ import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
+import wfg.ltv_econ.industry.Manufacturing;
 import wfg.ltv_econ.plugin.industries.AddWorkerIndustryOption;
 import wfg.ltv_econ.plugin.industries.ServiceSectorIndustryOption;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -97,9 +98,9 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     private static final void addManufacturingToMarkets() {
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            if (market.hasIndustry("manufacturing")) continue;
+            if (market.hasIndustry(Manufacturing.id)) continue;
             if (market.getSize() < 4 || market.isPlayerOwned()) continue;
-            if (market.getPlanetEntity() == null || market.getPlanetEntity().isGasGiant()) continue;
+            if (market.getPlanetEntity() == null) continue;
 
             if (EconConfig.MANUFACTURING_EXCLUSION_LIST.contains(market.getId())) continue;
 
@@ -117,7 +118,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             if (!hasRequiredIndustry) continue;
             if (Misc.getNumIndustries(market) >= Misc.getMaxIndustries(market)) continue;
 
-            market.addIndustry("manufacturing");
+            market.addIndustry(Manufacturing.id);
         }
     }
 

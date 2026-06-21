@@ -40,6 +40,7 @@ import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.economy.raids.CommodityCellGroundRaidObjective;
 import wfg.ltv_econ.economy.raids.LtvShipWeaponsGroundRaidObjective;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
@@ -185,6 +186,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         final String marketID = market.getId();
         WorkerPoolCondition.addToMarket(market);
         WorkerRegistry.instance().register(market);
+        WorkerPoolRegistry.instance().register(marketID);
         MarketFinanceRegistry.instance().register(marketID);
         if (!registeredMarkets.add(marketID)) return;
 

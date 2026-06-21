@@ -1,3 +1,10 @@
+Version 0.4.3-beta | SAVE COMPATIBLE
+- Fixed more serialization bugs.
+- Added more data to the Population menu inside the Economy tab.
+- Cleaned up the Commodity Flow menu.
+- Improved the worker allocator.
+- Reduced crew and supplies demand for orbital stations.
+
 Version 0.4.2-beta | SAVE COMPATIBLE
 - Fixed a serialization bug concerning the worker pool. The economy should have less bugs now.
 - Fixed a concurrency issue related to immigration modifiers.

@@ -251,7 +251,42 @@ public class WorkforceAllocator {
                 default -> 1d;
             };
         }
-        Arrays.fill(objective, idxSlackStr, nVars, EconConfig.ECON_DEFICIT_COST);
+
+        final boolean[] isProductionGood = new boolean[C];
+        final double[] workersPerUnit = new double[C];
+        { // Slack weights
+            for (int c = 0; c < C; c++) {
+                for (int o = 0; o < O; o++) {
+                    if (A[c][o] < 0d) {
+                        isProductionGood[c] = true;
+                        break;
+                    }
+                }
+            }
+            final double[] maxWorkersPerOutput = new double[O];
+            for (int orgIdx = 0; orgIdx < N / T; orgIdx++) {
+                final int o = denseData.columnOutputIndex[orgIdx];
+                final double cap = denseData.columnWorkerLimitFrac[orgIdx] * denseData.columnMarketCap[orgIdx];
+                maxWorkersPerOutput[o] += cap;
+            }
+            for (int c = 0; c < C; c++) {
+                double weightedSum = 0d;
+                double totalWeight = 0d;
+                for (int o = 0; o < O; o++) {
+                    if (A[c][o] > 0d) {
+                        double w = maxWorkersPerOutput[o];
+                        weightedSum += A[c][o] * w;
+                        totalWeight += w;
+                    }
+                }
+                workersPerUnit[c] = totalWeight > 0d ? totalWeight / weightedSum : 1d;
+            }
+        }
+
+        for (int c = 0; c < C; c++) {
+            final double laborFactor = workersPerUnit[c] / 5d;
+            objective[idxSlack.apply(c)] = EconConfig.ECON_DEFICIT_COST * laborFactor * (isProductionGood[c] ? 5d : 1d);
+        }
 
         final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0d);
         final List<LinearConstraint> const_constraints = new ArrayList<>(nVars);

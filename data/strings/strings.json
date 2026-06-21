@@ -245,8 +245,6 @@
         "uiTpTxtSectorTradeValue": "The total monetary value (in credits) of all %1$s trades across the entire sector for the last %2$s days. This includes both in-faction and global trade, calculated using the prices at which commodities were exchanged.",
         "uiTitleGlobalAvgPrice": "Global average price",
         "uiTpTxtGlobalAvgPrice": "The average price of %1$s across all markets in the sector on the previous day, weighted by the quantities traded. This provides a sector-wide benchmark price, reflecting both in-faction and out-of-faction transactions.",
-        "uiTitleSectorTradeVolatility": "Trade volatility",
-        "uiTpTxtSectorTradeVolatility": "Trade Volatility for the last %1$s days. Indicates how much the daily export volume for %2$s fluctuates relative to its average.",
         "uiTitleGlobalStockpiles": "Global stockpiles",
         "uiTpTxtGlobalStockpiles": "Shows the total amount of %1$s currently stored across all markets in the sector. This value reflects available stock and does not account for daily production or consumption. High stockpiles indicate abundance, while low stockpiles signal scarcity and potential trade opportunities.",
         "uiTitleGlobalWorkersAllocated": "Worker allocation",
@@ -283,7 +281,11 @@
         "uiTitleSectorWorkforce": "Sector Workforce",
         "uiTitleSectorWorkforceBreakdown": "Sector Workforce Breakdown",
         "uiTpTxtSectorWorkforceBreakdown": "Shows the worker population of the sector with the share of each faction.",
-        "uiTableWorkersTitle": "Workers",
+        "uiTitleSectorEmployment": "Sector Employment",
+        "uiTpTxtSectorEmploymentBreakdown": "Ratio of employed and unemployed workers of the sector.",
+        "uiTableStatus": "Status",
+        "uiTableRatio": "Ratio",
+        "uiTableWorkers": "Workers",
         "uiDebugAddShipTxt": "Debug add ship amount",
         "uiClearAllOrdersTxt": "Clear all orders?",
         "uiDiscardHullsTxt": "Discard all hulls? A portion of allocated resources will be recovered as scrap metal.",
@@ -537,6 +539,8 @@
         "uiTitleWorkforceEmployedTotal": "Workforce: Employed / Total",
         "uiTpTxtWorkforceEmployedTotal": "Shows how many workers are currently employed compared to the colony's total labor capacity.",
         "uiTitlePolicies": "Policies",
+        "uiTitleEmployed": "Employed",
+        "uiTitleUnemployed": "Unemployed",
         "uiBtnTitleOnCooldown": "On Cooldown",
         "uiBtnTitleAvailableIn": "Available in %1$s days",
         "uiBtnTitleAlreadyActive": "Already Active",
@@ -717,6 +721,7 @@
         "uiTpTransferToFactionInventoryTxt3": "You cannot transfer your flagship.",
         "uiTxtBonusExperience": "bonus experience",
         "uiDialogTransferToFactionInventoryTxt": "Transfer ship to the faction hangar? It cannot be undone. The transfer will grant you %1$s %2$s.",
-        "uiCheckboxTxtAutoAssignWorkers": "Re-allocate workers periodically using the most recently run plan"
+        "uiCheckboxTxtAutoAssignWorkers": "Re-allocate workers periodically using the most recently run plan",
+        "uiBtnTitleLogMarketsWithManufacturing": "Log Markets With Manufacturing"
     }
 }

@@ -57,6 +57,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ServiceSectorDialog;
 import wfg.ltv_econ.util.ArrayMutableStat;
+import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.util.ArrayMap;
 
 public class EconomyLoop {
@@ -91,8 +92,16 @@ public class EconomyLoop {
                 applyServiceSectorEffects(); // run before player faction plan so that the player allocator sees the modified demand values.
                 
                 if (playerFacSettings.automaticWorkerAllocationForFaction && playerFacSettings.factionPlan != null) {
-                    assignPlayerWorkers(playerFacSettings.factionPlan);
-                    applyServiceSectorEffects();
+                    try {
+                        assignPlayerWorkers(playerFacSettings.factionPlan);
+                        applyServiceSectorEffects();
+
+                    } catch (Exception e) {
+                        new DialogPanel(400, 100, null, str("uiTitleFailedToRunWorkerAllocationPlan") + e.toString(), str("uiDismiss"))
+                            .show(0.3f, 0.3f);
+                        log.error(e.toString());
+                        playerFacSettings.factionPlan = null;
+                    }  
                 }
 
                 poolReg.recalculateFreeWorkers();

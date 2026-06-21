@@ -1,6 +1,7 @@
 package wfg.ltv_econ.ui.economyTab;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
@@ -8,6 +9,9 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import static wfg.native_ui.util.UIConstants.*;
+
+import java.util.List;
+
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
@@ -16,23 +20,25 @@ import org.apache.log4j.Logger;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.industry.Manufacturing;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI {
-    private static final Logger logger = Global.getLogger(EconomySettingsPanel.class); 
+public class DebugPanel extends CustomPanel implements UIBuildableAPI {
+    private static final Logger logger = Global.getLogger(DebugPanel.class); 
 
     public static final int LABEL_W = 150;
     public static final int LABEL_H = 50;
     public static final int BUTTON_W = 250;
     public static final int BUTTON_H = 25;
 
-    public EconomySettingsPanel(UIPanelAPI parent, int width, int height) {
+    public DebugPanel(UIPanelAPI parent, int width, int height) {
         super(parent, width, height);
 
         buildUI();
@@ -215,6 +221,18 @@ public class EconomySettingsPanel extends CustomPanel implements UIBuildableAPI 
             button.tooltip.builder = (tp, expanded) -> {
                 tp.addPara(str("uiTpTxtAllocateShips"), pad);
             };
+        }
+
+        { // SHIP ALLOCATION
+            final CallbackRunnable<Button> run = (btn) -> {
+                final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
+                markets.removeIf(m -> m.getIndustry(Manufacturing.id) == null);
+                logger.info(markets.stream().map(m -> m.getName()).toList());
+            };
+            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+                str("uiBtnTitleLogMarketsWithManufacturing"), Fonts.DEFAULT_SMALL, run
+            );
+            add(button).inTL(opad, SECTION_I + pad*20 + lblH + BUTTON_H*9);
         }
         }
     }

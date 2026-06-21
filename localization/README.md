@@ -3,8 +3,8 @@
 This document explains how to keep the translation files in sync when the mod is updated.  
 The golden rule: **Always update the English source first, then propagate the changes to each language.**
 
-*The `data/` folder at the root is always the **English reference**.  
-Each language has its own `data/` folder with the exact same file structure – only the text inside the files is translated.*
+The `data/` folder at the root is always the **English reference**.  
+Each language has its own `data/` folder with the exact same file structure – only the text inside the files is translated.
 
 <br>
 

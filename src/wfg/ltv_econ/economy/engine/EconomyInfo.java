@@ -449,6 +449,17 @@ public class EconomyInfo {
         return total;
     }
 
+    public static final long getGlobalUnemployedWorkerCount(boolean includePlayerMarkets) {
+        long total = 0;
+        for (MarketAPI market : getMarketsCopy()) {
+            if (!includePlayerMarkets && market.isPlayerOwned()) continue;
+            final WorkerPool pool = WorkerPoolRegistry.get(market);
+
+            total += (long) (pool.getFreeWorkerRatio() * pool.getWorkerPool());
+        }
+        return total;
+    }
+
     public static final long getFactionWorkerCount(String factionID) {
         long total = 0;
         for (MarketAPI market : getMarketsCopy()) {

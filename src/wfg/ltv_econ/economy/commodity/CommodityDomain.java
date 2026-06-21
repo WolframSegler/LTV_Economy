@@ -174,29 +174,6 @@ public class CommodityDomain implements Serializable {
         return total;
     }
 
-    public final float getTradeVolatility() {
-        final int len = tradeVolumeHistory.length;
-        if (len == 0) return 0f;
-
-        final int head = (historyIndex - 1 + len) % len;
-
-        float sum = 0f;
-        float sumSq = 0f;
-        int idx = head;
-        for (int i = 0; i < len; i++) {
-            float val = tradeVolumeHistory[idx];
-            sum += val;
-            sumSq += val * val;
-            idx = (idx - 1 + len) % len;
-        }
-
-        final float mean = sum / len;
-        if (mean == 0f) return 0f;
-        final float variance = (sumSq / len) - (mean * mean);
-        final float stdDev = (float) Math.sqrt(Math.max(0f, variance));
-        return stdDev / mean;
-    }
-
     public final void createFormalTradeFlows() {
         final MarketFinanceRegistry registry = MarketFinanceRegistry.instance();
         final PlayerFactionSettings facSettings = LtvEconSaveData.instance().playerFactionSettings;

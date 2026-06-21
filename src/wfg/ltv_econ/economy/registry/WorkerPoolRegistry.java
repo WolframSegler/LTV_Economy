@@ -1,5 +1,6 @@
 package wfg.ltv_econ.economy.registry;
 
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fs.starfarer.api.Global;
@@ -20,12 +21,6 @@ public class WorkerPoolRegistry {
         return LtvEconSaveData.instance().poolRegistry;
     }
 
-    public WorkerPoolRegistry() {
-        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            registry.put(market.getId(), new WorkerPool(market.getId()));
-        }
-    }
-
     public static final WorkerPool get(MarketAPI market) {
         return get(market.getId());
     }
@@ -42,6 +37,14 @@ public class WorkerPoolRegistry {
         return registry.computeIfAbsent(marketID, p -> new WorkerPool(marketID));
     }
 
+    public final void register(MarketAPI market) {
+        register(market.getId());
+    }
+
+    public final void register(String marketID) {
+        registry.putIfAbsent(marketID, new WorkerPool(marketID));
+    }
+
     public final void recalculate() {
         registry.values().forEach(WorkerPool::recalculate);
     }
@@ -52,6 +55,10 @@ public class WorkerPoolRegistry {
 
     public final void recalculateFreeWorkers() {
         registry.values().forEach(WorkerPool::recalculateFreeWorkers);
+    }
+
+    public final ArrayList<WorkerPool> getRegistry() {
+        return new ArrayList<>(registry.values());
     }
 
     public static class WorkerPool {

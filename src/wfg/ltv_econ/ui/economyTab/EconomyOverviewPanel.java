@@ -68,7 +68,7 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
 
         defs.add(new NavButtonDef(str("uiBtnTitleDebug"), Keyboard.KEY_S,
             () -> {
-                final EconomySettingsPanel content = new EconomySettingsPanel(
+                final DebugPanel content = new DebugPanel(
                     contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
                 );
                 contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);

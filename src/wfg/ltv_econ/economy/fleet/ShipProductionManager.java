@@ -29,7 +29,7 @@ import wfg.native_ui.util.ArrayMap;
 
 public class ShipProductionManager {
     private ShipProductionManager() {}
-    private static final float MAX_TARGET_FOR_PLANNED_ORDERS = 70_000f;
+    private static final float MAX_TARGET_FOR_PLANNED_ORDERS = 60_000f;
 
     private static final CommoditySpecAPI shipSpec = settings.getCommoditySpec(Commodities.SHIPS);
     private static final CommoditySpecAPI metalsSpec = settings.getCommoditySpec(Commodities.METALS);

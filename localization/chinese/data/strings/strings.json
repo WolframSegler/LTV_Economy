@@ -283,7 +283,7 @@
         "uiTitleSectorWorkforce": "星区劳动力",
         "uiTitleSectorWorkforceBreakdown": "星区劳动力结构",
         "uiTpTxtSectorWorkforceBreakdown": "显示星区工人人口及各派系所占份额。",
-        "uiTableWorkersTitle": "工人",
+        "uiTableWorkers": "工人",
         "uiDebugAddShipTxt": "调试添加舰船数量",
         "uiClearAllOrdersTxt": "清除所有订单？",
         "uiDiscardHullsTxt": "废弃所有船体？部分分配的资源将作为废金属回收。",

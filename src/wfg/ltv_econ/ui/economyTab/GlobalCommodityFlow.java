@@ -241,38 +241,6 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         add(textPanel).inTL(LEFT_WALL, pad + LABEL_H);
         }
 
-        { // Trade volatility (month-over-month volume change)
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
-
-            public void buildUI() {
-                final float value = dom.getTradeVolatility();
-                final String txt = str("uiTitleSectorTradeVolatility");
-                final String valueTxt = (int) (value * 100f) + "%";
-
-                Color volatilityColor;
-                if (value <= 0.1f) volatilityColor = Color.GREEN;
-                else if (value <= 0.3f) volatilityColor = Color.YELLOW;
-                else if (value <= 0.5f) volatilityColor = Color.ORANGE;
-                else volatilityColor = Color.RED;
-
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt,
-                    base, volatilityColor, LABEL_W
-                );
-            }
-
-            {
-                tooltip.width = 460f;
-                tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiTpTxtSectorTradeVolatility"), pad, new Color[] {base, highlight},
-                        Integer.toString(EconConfig.HISTORY_LENGTH), com.getName()
-                    );
-                };
-            }
-        };
-
-        add(textPanel).inTL(Right_WALL - LABEL_W, pad + LABEL_H);
-        }
-
         { // Global stockpiles
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
