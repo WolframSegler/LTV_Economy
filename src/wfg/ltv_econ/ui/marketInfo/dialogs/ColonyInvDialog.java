@@ -84,7 +84,7 @@ public class ColonyInvDialog extends DialogPanel {
                 final String credits = NumFormat.formatCredit(colonyCredits);
 
                 label1 = settings.createLabel(
-                    strf("colonyBalanceTitle", credits), Fonts.ORBITRON_16
+                    strf("colonyBalanceTitle", credits), Fonts.INSIGNIA_LARGE
                 );
                 label1.setHighlight(credits);
                 label1.setHighlightColor(highlight);
@@ -110,7 +110,7 @@ public class ColonyInvDialog extends DialogPanel {
                 final String credits = NumFormat.formatCredit(playerCredits.get());
 
                 label1 = settings.createLabel(
-                    strf("playerBalanceTitle", credits), Fonts.ORBITRON_16
+                    strf("playerBalanceTitle", credits), Fonts.INSIGNIA_LARGE
                 );
                 label1.setHighlight(credits);
                 label1.setHighlightColor(highlight);
@@ -137,7 +137,7 @@ public class ColonyInvDialog extends DialogPanel {
                 final String ratio = Math.round(data.playerProfitRatio * 100) + "%";
 
                 label1 = settings.createLabel(
-                    strf("autoTransferTitle", ratio), Fonts.ORBITRON_16
+                    strf("autoTransferTitle", ratio), Fonts.INSIGNIA_LARGE
                 );
                 label1.setHighlight(ratio);
                 label1.setHighlightColor(base);
@@ -227,19 +227,13 @@ public class ColonyInvDialog extends DialogPanel {
 
             colonyLbl.setText(strf("colonyBalanceTitle", NumFormat.formatCredit(colonyCred)));
             colonyLbl.setHighlight(NumFormat.formatCredit(colonyCred));
-            colonyLbl.autoSizeToWidth(colonyLbl.computeTextWidth(colonyLbl.getText()));
-            colonyCreditPanel.getPos().setSize(colonyLbl.getPosition().getWidth(), sliderH);
 
             playerLbl.setText(strf("playerBalanceTitle", NumFormat.formatCredit(playerCred)));
             playerLbl.setHighlight(NumFormat.formatCredit(playerCred));
-            playerLbl.autoSizeToWidth(playerLbl.computeTextWidth(playerLbl.getText()));
-            playerCreditPanel.getPos().setSize(playerLbl.getPosition().getWidth(), sliderH);
 
             if (data != null) {
                 profitLbl.setText(strf("autoTransferTitle", profitRatio + "%"));
                 profitLbl.setHighlight(profitRatio + "%");
-                profitLbl.autoSizeToWidth(profitLbl.computeTextWidth(profitLbl.getText()));
-                playerProfitPanel.getPos().setSize(profitLbl.getPosition().getWidth(), sliderH);
             }
         };
 
@@ -289,11 +283,11 @@ public class ColonyInvDialog extends DialogPanel {
             "", 55, null, true, false, 1,
             str("uiTableCommodityTitle"), 150, null, true, true, 1,
             str("uiTableStored"), 95, null, false, false, -1,
-            str("uiTableConsumed"), 100, str("uiTableConsumedTpTxt"), false, false, -1,
-            str("uiTableBaseProd"), 140, str("uiTableBaseProdTpTxt"), false, false, -1,
-            str("uiTableRealProd"), 140, str("uiTableRealProdTpTxt"), false, false, -1,
-            str("uiTableBaseBalance"), 130, str("uiTableBaseBalanceTpTxt"), false, false, -1,
-            str("uiTableRealBalance"), 120, str("uiTableRealBalanceTpTxt"), false, false, -1
+            str("uiTableConsumed"), 110, str("uiTableConsumedTpTxt"), false, false, -1,
+            str("uiTableBaseProd"), 130, str("uiTableBaseProdTpTxt"), false, false, -1,
+            str("uiTableRealProd"), 130, str("uiTableRealProdTpTxt"), false, false, -1,
+            str("uiTableBaseBalance"), 135, str("uiTableBaseBalanceTpTxt"), false, false, -1,
+            str("uiTableRealBalance"), 125, str("uiTableRealBalanceTpTxt"), false, false, -1
         );
 
         for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {
@@ -319,14 +313,22 @@ public class ColonyInvDialog extends DialogPanel {
                 negative : realBalance > 0 ?
                 positive : text_color;
 
+            boolean failed = false;
+            try {
+                Global.getSettings().loadFont("graphics/fonts/insignia17LTaa.fnt");
+            } catch (Exception e) {
+                failed = true;
+            }
+            final String numFont = failed ? Fonts.DEFAULT_SMALL : "graphics/fonts/insignia17LTaa.fnt";
+
             table.addCell(comIcon, cellAlg.MID, null, null);
             table.addCell(com.getName(), cellAlg.LEFT, com.getName(), base);
-            table.addCell(NumFormat.engNotate(stored), cellAlg.LEFTOPAD, stored, null);
-            table.addCell(NumFormat.engNotate(demand), cellAlg.LEFTOPAD, demand, negative);
-            table.addCell(NumFormat.engNotate(baseProd), cellAlg.LEFTOPAD, baseProd, highlight);
-            table.addCell(NumFormat.engNotate(modifiedProd), cellAlg.LEFTOPAD, modifiedProd, highlight);
-            table.addCell(NumFormat.engNotate(baseBalance), cellAlg.LEFTOPAD, baseBalance, baseBlcColor);
-            table.addCell(NumFormat.engNotate(realBalance), cellAlg.LEFTOPAD, realBalance, realBlcColor);
+            table.addCell(settings.createLabel(NumFormat.engNotate(stored), numFont), cellAlg.LEFTOPAD, stored, null);
+            table.addCell(settings.createLabel(NumFormat.engNotate(demand), numFont), cellAlg.LEFTOPAD, demand, negative);
+            table.addCell(settings.createLabel(NumFormat.engNotate(baseProd), numFont), cellAlg.LEFTOPAD, baseProd, highlight);
+            table.addCell(settings.createLabel(NumFormat.engNotate(modifiedProd), numFont), cellAlg.LEFTOPAD, modifiedProd, highlight);
+            table.addCell(settings.createLabel(NumFormat.engNotate(baseBalance), numFont), cellAlg.LEFTOPAD, baseBalance, baseBlcColor);
+            table.addCell(settings.createLabel(NumFormat.engNotate(realBalance), numFont), cellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             final ClickHandler<TableRow> rowSelectedRun = (row, isLeftClick) -> {
                 new SetNotExportableStockDialog(cell).show(0.3f, 0.3f);
