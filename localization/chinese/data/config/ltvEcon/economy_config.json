@@ -45,11 +45,9 @@
         "arcadia_station",
         "cruor",
         "gilead",
-        "tartessus",
         "station_kapteyn",
         "chalcedon",
-        "sphinx",
-        "qaras"
+        "sphinx"
     ],
     
     "WORKER_ASSIGN_INTERVAL": 20,

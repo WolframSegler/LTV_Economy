@@ -396,8 +396,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 7,
-					"crew": 4
+					"supplies": 6,
+					"crew": 3
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -410,8 +410,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 7,
-					"crew": 4
+					"supplies": 6,
+					"crew": 3
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -424,8 +424,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 7,
-					"crew": 4
+					"supplies": 6,
+					"crew": 3
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -438,8 +438,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 12.5,
-					"crew": 7
+					"supplies": 11,
+					"crew": 5
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -452,8 +452,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 12.5,
-					"crew": 7
+					"supplies": 11,
+					"crew": 5
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -466,8 +466,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 12.5,
-					"crew": 7
+					"supplies": 11,
+					"crew": 5
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -480,8 +480,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 21,
-					"crew": 10.4
+					"supplies": 18,
+					"crew": 8
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -494,8 +494,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 21,
-					"crew": 10.4
+					"supplies": 18,
+					"crew": 8
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -508,8 +508,8 @@
 		"outputList": {
 			"operation": {
 				"InputsPerUnitOutput": {
-					"supplies": 21,
-					"crew": 10.4
+					"supplies": 18,
+					"crew": 8
 				},
 				"scaleWithMarketSize": true,
 				"marketScaleBase": 3
@@ -587,7 +587,7 @@
 				"marketScaleBase": 2
 			},
 			"crew": {
-				"baseProd": 0.75,
+				"baseProd": 0.85,
 				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
@@ -621,7 +621,7 @@
 				"marketScaleBase": 2
 			},
 			"crew": {
-				"baseProd": 0.75,
+				"baseProd": 0.85,
 				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
@@ -631,7 +631,7 @@
 				"workerAssignableLimit": 0.12
 			},
 			"marines": {
-				"baseProd": 0.75,
+				"baseProd": 0.85,
 				"CCMoneyDist": {
 					"supplies": 0.1,
 					"fuel": 0.2,
@@ -666,7 +666,7 @@
 				"marketScaleBase": 2
 			},
 			"crew": {
-				"baseProd": 0.9,
+				"baseProd": 1.0,
 				"CCMoneyDist": {
 					"supplies": 0.3,
 					"fuel": 0.6,
@@ -676,7 +676,7 @@
 				"workerAssignableLimit": 0.3
 			},
 			"marines": {
-				"baseProd": 0.9,
+				"baseProd": 1.0,
 				"CCMoneyDist": {
 					"supplies": 0.1,
 					"fuel": 0.2,

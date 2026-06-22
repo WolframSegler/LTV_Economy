@@ -20,11 +20,11 @@ Each language has its own `data/` folder with the exact same file structure – 
 
 - If a **new file** was added, it **must** be copied manually.
 
-- Run `diff` to see exactly what changed compared to the translation.
+- Run `diff` to see exactly what changed compared to the cutoff date.
 
 ```bash
 # For Chinese
-diff -urN data/ localization/chinese/data/ > changes_zh.diff
+git diff HEAD@{2026-06-01} -- data/ > source_changes.diff
 ```
 
 - `---` / `+++` --> lines that changed.  

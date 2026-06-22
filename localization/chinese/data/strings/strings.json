@@ -245,8 +245,6 @@
         "uiTpTxtSectorTradeValue": "过去%2$s天星区范围内所有%1$s贸易的货币总值（星币）。包括派系内部和全球贸易，按商品交易价格计算。",
         "uiTitleGlobalAvgPrice": "全球平均价格",
         "uiTpTxtGlobalAvgPrice": "前一日星区所有市场中%1$s的加权平均价格。提供星区范围的基准价格，反映派系内部和外部交易。",
-        "uiTitleSectorTradeVolatility": "贸易波动性",
-        "uiTpTxtSectorTradeVolatility": "过去%1$s天的贸易波动性。表示%2$s日出口量相对于其平均值的波动程度。",
         "uiTitleGlobalStockpiles": "全球储备",
         "uiTpTxtGlobalStockpiles": "显示星区所有市场中当前存储的%1$s总量。该值反映可用库存，不计算日产量或消耗量。高储备表示充裕，低储备表示稀缺和潜在的贸易机会。",
         "uiTitleGlobalWorkersAllocated": "工人分配",
@@ -717,6 +715,13 @@
         "uiTpTransferToFactionInventoryTxt3": "您无法转移您的旗舰。",
         "uiTxtBonusExperience": "额外经验",
         "uiDialogTransferToFactionInventoryTxt": "将舰船转移至派系机库？此操作不可逆。转移将奖励您 %1$s %2$s。",
-        "uiCheckboxTxtAutoAssignWorkers": "使用最近执行的方案定期重新分配工人"
+        "uiCheckboxTxtAutoAssignWorkers": "使用最近执行的方案定期重新分配工人",
+        "uiTitleSectorEmployment": "行业就业",
+        "uiTpTxtSectorEmploymentBreakdown": "该行业就业与非就业人员比例。",
+        "uiTableStatus": "状态",
+        "uiTableRatio": "比例",
+        "uiTitleEmployed": "就业",
+        "uiTitleUnemployed": "失业",
+        "uiBtnTitleLogMarketsWithManufacturing": "记录所有拥有制造厂的市场"
     }
 }

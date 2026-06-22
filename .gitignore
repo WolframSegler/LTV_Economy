@@ -23,5 +23,5 @@
 /api/
 /jars/main/
 /ProjectFiles/Diagrams
-
+source_changes.diff
 /.vscode/settings.json
