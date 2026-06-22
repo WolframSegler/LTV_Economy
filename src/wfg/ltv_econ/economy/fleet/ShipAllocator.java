@@ -77,7 +77,7 @@ public class ShipAllocator {
                 final LocationDanger d = WarSimScript.getDangerFor(factionID, dest);
                 if (d.ordinal() > danger.ordinal()) danger = d;
             }
-        } catch (ConcurrentModificationException e) {}
+        } catch (ConcurrentModificationException | NullPointerException e) {}
 
         return danger;
     } 

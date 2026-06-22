@@ -116,7 +116,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public final Object readResolve() {
         mainLoopExecutor = Executors.newSingleThreadExecutor(r -> {
-            final Thread t = new Thread(r, "LTV-MainLoop");
+            final Thread t = new Thread(r, "Thread-mainLoop");
             t.setDaemon(true);
             return t;
         });

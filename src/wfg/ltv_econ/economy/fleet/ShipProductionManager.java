@@ -5,6 +5,7 @@ import static wfg.ltv_econ.constant.strings.Income.getDesc;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ import wfg.native_ui.util.ArrayMap;
 
 public class ShipProductionManager {
     private ShipProductionManager() {}
-    private static final float MAX_TARGET_FOR_PLANNED_ORDERS = 60_000f;
+    private static final float MAX_TARGET_FOR_PLANNED_ORDERS = 65_000f;
 
     private static final CommoditySpecAPI shipSpec = settings.getCommoditySpec(Commodities.SHIPS);
     private static final CommoditySpecAPI metalsSpec = settings.getCommoditySpec(Commodities.METALS);
@@ -48,8 +49,8 @@ public class ShipProductionManager {
             workers += WorkerPoolRegistry.get(market).getWorkerPool();
         }
 
-        final long shipmentTarget = workers / 25l;
-        final long combatTarget = pop / 90l;
+        final long shipmentTarget = workers / 20l;
+        final long combatTarget = pop / 80l + (long) computeDesiredCombat(Collections.emptyList(), faction);
 
         final ArrayMap<String, Integer> buildList = new ArrayMap<>(32);
         ShipAllocator.allocateShipsForTarget(shipmentTarget, shipmentTarget, shipmentTarget, combatTarget, faction, buildList);
@@ -77,7 +78,7 @@ public class ShipProductionManager {
         deficitCargo = Math.min(deficitCargo, MAX_TARGET_FOR_PLANNED_ORDERS);
         deficitFuel = Math.min(deficitFuel, MAX_TARGET_FOR_PLANNED_ORDERS);
         deficitCrew = Math.min(deficitCrew, MAX_TARGET_FOR_PLANNED_ORDERS);
-        deficitCombat = Math.min(deficitCombat, MAX_TARGET_FOR_PLANNED_ORDERS);
+        deficitCombat = Math.min(deficitCombat, MAX_TARGET_FOR_PLANNED_ORDERS / 8f);
 
         for (ShipProductionOrder order : activeQueue) {
             final ShipTypeData data = inv.get(order.hullId);

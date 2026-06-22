@@ -378,12 +378,12 @@ public class EconomyLoop {
         }
 
         final HashMap<MarketAPI, Float> fuelDemands = new HashMap<>(EconomyInfo.getMarketsCount());
-        final int totalMissions = missions.size();
-        engine.activeMissions.ensureCapacity(engine.activeMissions.size() + totalMissions);
-        for (int i = 0; i < totalMissions; i++) {
+        final int missionCount = missions.size();
+        engine.activeMissions.ensureCapacity(engine.activeMissions.size() + missionCount);
+        for (int i = 0; i < missionCount; i++) {
 
             final TradeMission mission = missions.valueAt(i);
-            mission.startOffset = (i * EconConfig.TRADE_INTERVAL) / totalMissions;
+            mission.startOffset = (i * EconConfig.TRADE_INTERVAL) / missionCount;
             mission.combatPowerTarget = ShipAllocator.getRequiredCombatPower(mission);
 
             final FactionShipInventory inv = engine.getFactionShipInventory(
@@ -404,7 +404,7 @@ public class EconomyLoop {
         engine.info.tradeFlowCache.clear();
 
         final String time = ((System.nanoTime() - startTime) / 1_000_000) + " ms";
-        log.info("Dispatched " + totalMissions + " new trade missions in "+ time +" and added them to the queue");
+        log.info("Dispatched " + missionCount + " new trade missions in "+ time +" and added them to the queue");
     }
 
     private final void advanceMissions() {
@@ -673,6 +673,8 @@ public class EconomyLoop {
 
     final void applyServiceSectorEffectsToMarket(MarketAPI market) {
         final String marketID = market.getId();
+        if (!engine.registeredMarkets.contains(marketID)) return;
+
         final WorkerIndustryData idata = WorkerRegistry.instance().getRegisterData(marketID, Industries.POPULATION);
 
         final float logiRatio = idata.getAssignedRatioForOutput(SERVICE_LOGISTICS);

@@ -4,6 +4,9 @@ Version 0.4.3-beta | SAVE COMPATIBLE
 - Cleaned up the Commodity Flow menu.
 - Improved the worker allocator.
 - Reduced crew and supplies demand for orbital stations.
+- Increased crew production efficiency of patrolHQ and its upgrades slightly.
+- Reduced ship queue sizes of NPC factions significantly.
+- Ship allocation bug fixes.
 
 Version 0.4.2-beta | SAVE COMPATIBLE
 - Fixed a serialization bug concerning the worker pool. The economy should have less bugs now.
