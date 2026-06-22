@@ -282,9 +282,9 @@ public class ShipAllocator {
             remCombat -= combatCap[picked];
         }
 
-        if (remCargo > eps) log.warn(faction.getId() + " - Not enough cargo capacity after allocation, remaining: " + remCargo);
-        if (remFuel > eps) log.warn(faction.getId() + " - Not enough fuel capacity after allocation, remaining: " + remFuel);
-        if (remCrew > eps) log.warn(faction.getId() + " - Not enough crew capacity after allocation, remaining: " + remCrew);
+        if (remCargo > eps) log.warn(faction.getId() + " - Not enough cargo capacity after allocation, remaining: " + (long) remCargo);
+        if (remFuel > eps) log.warn(faction.getId() + " - Not enough fuel capacity after allocation, remaining: " + (long) remFuel);
+        if (remCrew > eps) log.warn(faction.getId() + " - Not enough crew capacity after allocation, remaining: " + (long) remCrew);
 
         for (int i = 0; i < N; i++) {
             final int count = counts[i];

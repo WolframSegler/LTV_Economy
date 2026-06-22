@@ -43,7 +43,7 @@ import static wfg.native_ui.util.Globals.settings;
 public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
     private static final float PIE_CHART_THRESHOLD = 0.001f;
 
-    public static final int ICON_SIZE = 135;
+    public static final int ICON_SIZE = 120;
     public static final int LABEL_W = 150;
     public static final int LABEL_H = 50;
     public static final int TABLE_W = 240;
@@ -238,7 +238,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             }
         };
 
-        add(textPanel).inTL(LEFT_WALL, pad + LABEL_H);
+        add(textPanel).inTL(Right_WALL + LABEL_W, pad);
         }
 
         { // Global stockpiles
@@ -260,7 +260,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             }
         };
 
-        add(textPanel).inTL(LEFT_WALL, pad + LABEL_H*2);
+        add(textPanel).inTL(LEFT_WALL, pad + LABEL_H);
         }
 
         { // Worker allocation (total workers producing it)
@@ -285,51 +285,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             }
         };
 
-        add(textPanel).inTL(Right_WALL - LABEL_W, pad + LABEL_H*2);
-        }
-
-        { // Number of exporting markets
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
-
-            public void buildUI() {
-                final long value = engine.info.getGlobalExporterCount(comID);
-                final String txt = str("uiTitleGlobalExporters");
-                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
-
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
-            }
-
-            {
-                tooltip.width = 460f;
-                tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiTpTxtGlobalExporters"), pad, highlight, com.getName());
-                };
-            }
-        };
-
-        add(textPanel).inTL(Right_WALL + LABEL_W, pad);
-        }
-
-        { // Number of importing markets
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
-
-            public void buildUI() {
-                final long value = engine.info.getGlobalImporterCount(comID);
-                final String txt = str("uiTitleGlobalImporters");
-                final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
-
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
-            }
-
-            {
-                tooltip.width = 460f;
-                tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiTpTxtGlobalImporters"), pad, highlight, com.getName());
-                };
-            }
-        };
-
-        add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H);
+        add(textPanel).inTL(Right_WALL - LABEL_W, pad + LABEL_H);
         }
 
         { // Informal production
@@ -351,7 +307,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             }
         };
 
-        add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H*2);
+        add(textPanel).inTL(Right_WALL + LABEL_W, pad + LABEL_H);
         }
 
         final TooltipBuilder tableTp = (tp, exp) -> {

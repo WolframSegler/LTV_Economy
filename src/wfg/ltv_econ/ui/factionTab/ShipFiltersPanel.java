@@ -4,7 +4,11 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
+import java.util.List;
 
+import org.lwjgl.input.Keyboard;
+
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TextFieldAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -16,8 +20,10 @@ import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.util.NativeUiUtils;
 
 public class ShipFiltersPanel extends CustomPanel {
+    private static final String emptyNameFieldTxt = "Ctrl-F to search";
     private static final int btnH = 24;
     private static final Color nearBlack = new Color(20, 20, 25);
 
@@ -133,9 +139,31 @@ public class ShipFiltersPanel extends CustomPanel {
 
         if (nameField.hasFocus()) {
             final String current = nameField.getText();
-            if (!current.equals(ShipFilters.searchQuery)) {
+            final boolean equalsEmptyFieldTxt = current.equals(emptyNameFieldTxt);
+
+            if (!current.equals(ShipFilters.searchQuery) && !equalsEmptyFieldTxt) {
                 ShipFilters.searchQuery = current;
                 target.buildUI();
+            } else if (equalsEmptyFieldTxt) {
+                nameField.setText("");
+                nameField.setColor(base);
+            }
+        } else {
+            nameField.setColor(gray);
+            if (nameField.getText().isBlank()) {
+                nameField.setText(emptyNameFieldTxt);
+            }
+        }
+    }
+
+    @Override
+    public void processInput(List<InputEventAPI> events) {
+        super.processInput(events);
+
+        for (InputEventAPI event : events) {
+            if (event.isConsumed()) continue;
+            if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F) {
+                if (NativeUiUtils.isCtrlDown()) nameField.grabFocus(true);
             }
         }
     }

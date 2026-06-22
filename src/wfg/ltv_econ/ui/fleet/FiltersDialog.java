@@ -55,7 +55,7 @@ public class FiltersDialog extends DockPanel {
         final LabelAPI modeLblb = settings.createLabel(str("uiFilterDirModeTxt"), Fonts.DEFAULT_SMALL);
         add(modeLblb).inTL(0f, SECT_I_H + opad);
 
-        final RadioPanel modeRadio = new RadioPanel(contentContainer, (int) pos.getWidth() - hpad*3, BTN_H, LayoutMode.HORIZONTAL)
+        final RadioPanel modeRadio = new RadioPanel(contentContainer, (int) pos.getWidth() - opad*2, BTN_H, LayoutMode.HORIZONTAL)
             .addOption(str("uiAllTxt"))
             .addOption(str("uiExportersTxt"))
             .addOption(str("uiImportersTxt"))

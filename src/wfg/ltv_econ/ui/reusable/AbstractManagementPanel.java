@@ -21,7 +21,7 @@ public abstract class AbstractManagementPanel extends CustomPanel implements UIB
     protected static final int MAIN_PANEL_W = 1250;
     protected static final int MAIN_PANEL_H = screenH - 140;
     protected static final int NAVBAR_W = 200;
-    protected static final int NAV_BUTTON_W = NAVBAR_W - opad*2;
+    protected static final int NAV_BUTTON_W = NAVBAR_W - hpad*2;
     protected static final int NAV_BUTTON_H = 28;
     protected static final int CONTENT_PANEL_W = MAIN_PANEL_W - NAVBAR_W - hpad;
     protected static final int CONTENT_PANEL_H = MAIN_PANEL_H;
@@ -62,12 +62,12 @@ public abstract class AbstractManagementPanel extends CustomPanel implements UIB
         createNavButtons();
 
         final UIPanelAPI navbar = settings.createCustom(NAVBAR_W, 0, null);
-        int currentY = opad * 2;
+        int currentY = hpad;
         for (Button btn : navButtons) {
-            navbar.addComponent(btn.getPanel()).inTL(opad, currentY);
+            navbar.addComponent(btn.getPanel()).inTL(hpad, currentY);
             currentY += pad * 2 + NAV_BUTTON_H;
         }
-        currentY += opad * 2;
+        currentY += hpad - pad * 2;
         navbar.getPosition().setSize(NAVBAR_W, currentY);
 
         final float navbarY = subtitleY + subtitleH + pad * 2;

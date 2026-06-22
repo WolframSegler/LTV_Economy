@@ -23,7 +23,6 @@ import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.OutlineComp;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.component.OutlineComp.OutlineType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
@@ -52,9 +51,6 @@ public class CommoditySelectionPanel extends CustomPanel implements
         super(parent, width, height);
 
         targetPanel = content;
-
-        outline.type = OutlineType.TEX_THIN;
-        outline.color = dark;
 
         buildUI();
     }

@@ -18,10 +18,10 @@ import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
  * <p>
- * <strong>CompatibilityLayer</strong> exists to provide a compatibility layer between vanilla/modded
- * industries and the <em>LTV</em> economy system. In the LTV system, all production and consumption
- * modifiers are treated multiplicatively, whereas vanilla Starsector and many mods use additive
- * (flat) or percentage-based bonuses.
+ * The <strong>Compatibility Layer</strong> between vanilla/modded industries and
+ * the LTV-economy system. In the LTV system, all production and consumption modifiers are
+ * treated multiplicatively, whereas vanilla Starsector and many mods use additive
+ * or percentage-based bonuses.
  * </p>
  *
  * <p>

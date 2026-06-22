@@ -7,6 +7,7 @@ Version 0.4.3-beta | SAVE COMPATIBLE
 - Increased crew production efficiency of patrolHQ and its upgrades slightly.
 - Reduced ship queue sizes of NPC factions significantly.
 - Ship allocation bug fixes.
+- Ctrl-F now focuses on the search bar inside the faction hangar.
 
 Version 0.4.2-beta | SAVE COMPATIBLE
 - Fixed a serialization bug concerning the worker pool. The economy should have less bugs now.
