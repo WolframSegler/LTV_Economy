@@ -1,6 +1,7 @@
 Version 0.4.4-beta | SAVE COMPATIBLE
 - Colony inventory UI changes.
 - Bug fixes in worker assignment.
+- New game industry injection bug fix.
 
 Version 0.4.3-beta | SAVE COMPATIBLE
 - Fixed more serialization bugs.
