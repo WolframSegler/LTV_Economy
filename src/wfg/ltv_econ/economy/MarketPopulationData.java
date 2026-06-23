@@ -255,6 +255,8 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
         classConsciousnessDelta.modifyFlat(
             happinessID, (BASELINE_VALUE - popHappiness) * 0.00016f, str("marketPopDataHappinessTxt")
         );
+
+        classConsciousnessDelta.modifyFlat(socialCohesionID, (BASELINE_VALUE - popSocialCohesion) * 0.003f, str("marketPopDataCohesionTxt"));
     }
 
     @Override
@@ -294,26 +296,8 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
         }
     }
 
-    private final void applySocialCohesionModifiers() {
-        // TODO create apply social cohesion modifiers
-        // final String desc = str("marketPopDataCohesionTxt");
-
-        /*
-        Crisis response speed
-        Effect:
-            high cohesion → shortages, raids, instability resolve faster
-            low cohesion → problems linger
-
-        Expedition / event resistance
-        Effect:
-            low cohesion → hostile events advance faster
-            high cohesion → events stall or fail
-        */
-    }
-
-    private final void applyClassConsciousnessModifiers() {
-        
-    }
+    private final void applySocialCohesionModifiers() {}
+    private final void applyClassConsciousnessModifiers() {}
 
     private static final float clamp(float value) {
         return Arithmetic.clamp(value, 0f, 100f);

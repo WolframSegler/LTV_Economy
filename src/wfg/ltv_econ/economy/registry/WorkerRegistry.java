@@ -18,12 +18,12 @@ import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 /**
- * The registry always uses IndustryIOs.getBaseIndustryID() internally to manage industry IDs
+ * The registry always uses {@link IndustryConfigManager#getBaseIndustryID()} internally to manage industry IDs
  */
 public class WorkerRegistry implements Serializable {
     public static final String KEY = "::";
 
-    private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>(EconomyInfo.getMarketsCount() * 4);
+    private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>(EconomyInfo.getMarketsCount() * 5);
 
     public static final WorkerRegistry instance() {
         return LtvEconSaveData.instance().workerRegistry;
@@ -254,9 +254,11 @@ public class WorkerRegistry implements Serializable {
          * @return presence status
          */
         public final boolean ensurePresence() {
-            for (Industry ind : market.getIndustries()) {
-                if (IndustryConfigManager.getBaseIndustryID(ind).equals(indID)) {
-                    return true;
+            if (market != null) {
+                for (Industry ind : market.getIndustries()) {
+                    if (IndustryConfigManager.getBaseIndustryID(ind).equals(indID)) {
+                        return true;
+                    }
                 }
             }
 

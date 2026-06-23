@@ -177,7 +177,7 @@ public class EconomyLoop {
     }
 
     private final void discoverInputsOutputs() {
-        // TODO maybe replace with the industry apply hooks after the update
+        // TODO replace with the industry apply hooks after the update
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
                 for (var supply : ind.getAllSupply()) {
