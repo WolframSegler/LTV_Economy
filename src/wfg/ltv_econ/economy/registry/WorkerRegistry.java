@@ -168,10 +168,9 @@ public class WorkerRegistry implements Serializable {
         public final String indID;
         
         public transient MarketAPI market;
-        public transient Industry ind;
         
         private final ArrayMap<String, Float> outputRatios = new ArrayMap<>(2);
-        private float outputRatioSum = 0;
+        private float outputRatioSum = 0f;
 
         public WorkerIndustryData(String marketID, String industryID) {
             this.marketID = marketID;
@@ -182,7 +181,6 @@ public class WorkerRegistry implements Serializable {
 
         public Object readResolve() {
             market = Global.getSector().getEconomy().getMarket(marketID);
-            ind = market.getIndustry(indID);
 
             return this;
         }
@@ -197,7 +195,6 @@ public class WorkerRegistry implements Serializable {
             this.outputRatioSum = other.outputRatioSum;
 
             this.market = other.market;
-            this.ind = other.ind;
         }
 
         @Override
@@ -205,7 +202,7 @@ public class WorkerRegistry implements Serializable {
             return "["+marketID+KEY+indID+outputRatioSum+"]";
         }
 
-        public String toStringWithOutputs() {
+        public final String toStringWithOutputs() {
             return "["+marketID+KEY+indID+"] -> "+outputRatios;
         }
 
@@ -251,10 +248,26 @@ public class WorkerRegistry implements Serializable {
             for (float value : outputRatios.values()) outputRatioSum += value;
         }
 
+        /**
+         * Checks presence on the market. Resets {@link #outputRatios} if not present.
+         * 
+         * @return presence status
+         */
+        public final boolean ensurePresence() {
+            for (Industry ind : market.getIndustries()) {
+                if (IndustryConfigManager.getBaseIndustryID(ind).equals(indID)) {
+                    return true;
+                }
+            }
+
+            resetWorkersAssigned();
+            return false;
+        }
+
         public final void resetWorkersAssigned() {
             outputRatios.replaceAll((k, v) -> 0f);
 
-            outputRatioSum = 0;
+            outputRatioSum = 0f;
         }
 
         public final Set<String> getRegisteredOutputs() {

@@ -120,6 +120,14 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
             market.addIndustry(Manufacturing.id);
         }
+
+        // Exception for chicomoztoc to balance sector production better.
+        // TODO find a more elegant solution like automatic industry injection when certain commodity deficits arise.
+        final MarketAPI chico = Global.getSector().getEconomy().getMarket("chicomoztoc"); 
+        if (!chico.hasIndustry(Manufacturing.id) && chico.hasIndustry(Industries.MINING)) {
+            chico.removeIndustry(Industries.MINING, null, false);
+            chico.addIndustry(Manufacturing.id);
+        }
     }
 
     private static final void injectStockpiles() {

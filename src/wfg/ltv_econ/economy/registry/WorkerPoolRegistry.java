@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -112,11 +111,9 @@ public class WorkerPoolRegistry {
             if (reg == null) return 0f;
 
             float totalAssigned = 0f;
-            for (Industry ind : market.getIndustries()) {
-                final WorkerIndustryData data = reg.getData(ind);
-                if (data != null) {
-                    totalAssigned += data.getWorkerAssignedRatio(false);
-                }
+            for (WorkerIndustryData data : reg.getIndustriesUsingWorkers(market.getId())) {
+                data.ensurePresence();
+                totalAssigned += data.getWorkerAssignedRatio(false);
             }
 
             return Math.max(0f, 1f - totalAssigned);

@@ -21,6 +21,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
     @Override
     protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
         final WorkerPool pool = WorkerPoolRegistry.get(market);
+        pool.recalculate();
 
         tooltip.addPara(str("workerPoolConditionDesc"), opad);
 
