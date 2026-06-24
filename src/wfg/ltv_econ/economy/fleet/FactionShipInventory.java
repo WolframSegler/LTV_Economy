@@ -356,9 +356,15 @@ public class FactionShipInventory implements Serializable {
         final MarketAPI oldCapital = econ.getMarket(capitalID);
 
         if (oldCapital != null) {
-            final CommodityCell suppliesCell = EconomyEngine.instance().getComCell(Commodities.SUPPLIES, capitalID);
+            final EconomyEngine engine = EconomyEngine.instance();
+            final CommodityCell suppliesCell = engine.getComCell(Commodities.SUPPLIES, capitalID);
             suppliesCell.getConsumptionStat().unmodifyFlat(FACTION_FLEET_MAINTENANCE_KEY);
             suppliesCell.getTargetQuantumStat().unmodifyFlat(FACTION_FLEET_MAINTENANCE_KEY);
+
+            for (String comID : lastDemandCommodities) {
+                engine.getComCell(comID, capitalID).getTargetQuantumStat().unmodifyFlat(ORDERS_DEMAND_KEY);
+            }
+            lastDemandCommodities.clear();
         }
 
         capitalID = marketID;

@@ -263,14 +263,19 @@ public class ArrayMutableStat implements Serializable {
 		percentMod = 0f;
 		mult = 1f;
 
-		for (StatMod mod : baseMods.values()) base += mod.value;
+		for (StatMod mod : baseMods.values()) {
+			if (mod != null) base += mod.value;
+		}
+		for (StatMod mod : percentMods.values()) {
+			if (mod != null) percentMod += mod.value;
+		}
+		for (StatMod mod : flatMods.values()) {
+			if (mod != null) flatMod += mod.value;
+		}
+		for (StatMod mod : multMods.values()) {
+			if (mod != null) mult *= mod.value;
+		}
 
-        for (StatMod mod : percentMods.values()) percentMod += mod.value;
-        
-        for (StatMod mod : flatMods.values()) flatMod += mod.value;
-        
-        for (StatMod mod : multMods.values()) mult *= mod.value;
-        
 		modified = (base + flatMod + (base * percentMod / 100f)) * mult;
 		needsRecompute = false;
 	}
