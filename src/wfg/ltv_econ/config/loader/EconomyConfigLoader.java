@@ -39,8 +39,6 @@ public class EconomyConfigLoader {
         EconConfig.MULTI_THREADING = root.getBoolean("MULTI_THREADING");
         EconConfig.ASSIGN_WORKERS_ON_LOAD = root.getBoolean("ASSIGN_WORKERS_ON_LOAD");
         EconConfig.STARTING_CREDITS_FOR_MARKET = root.getInt("STARTING_CREDITS_FOR_MARKET");
-        EconConfig.LOCAL_WORKER_COST_MULT = root.getDouble("LOCAL_WORKER_COST_MULT");
-        EconConfig.FACTION_WORKER_COST_MULT = root.getDouble("FACTION_WORKER_COST_MULT");
         EconConfig.ECON_DEFICIT_COST = root.getDouble("ECON_DEFICIT_COST");
         EconConfig.LOCAL_PROD_BUFFER = 1f + root.getDouble("LOCAL_PROD_BUFFER");
         EconConfig.FACTION_PROD_BUFFER = 1f + root.getDouble("FACTION_PROD_BUFFER");
@@ -123,8 +121,6 @@ public class EconomyConfigLoader {
         EconConfig.CREDIT_WITHDRAWAL_LIMIT = LunaSettings.getInt(LTV_ECON, "CREDIT_WITHDRAWAL_LIMIT");
         EconConfig.AUTO_TRANSFER_PROFIT_LIMIT = LunaSettings.getDouble(LTV_ECON, "AUTO_TRANSFER_PROFIT_LIMIT").floatValue();
         EconConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "ECON_DEFICIT_COST");
-        EconConfig.LOCAL_WORKER_COST_MULT = LunaSettings.getDouble(LTV_ECON, "LOCAL_WORKER_COST_MULT");
-        EconConfig.FACTION_WORKER_COST_MULT = LunaSettings.getDouble(LTV_ECON, "FACTION_WORKER_COST_MULT");
         EconConfig.LOCAL_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "LOCAL_PROD_BUFFER");
         EconConfig.FACTION_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "FACTION_PROD_BUFFER");
         EconConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "PRODUCTION_BUFFER");

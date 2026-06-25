@@ -1,5 +1,6 @@
 Version 0.4.5-beta | SAVE COMPATIBLE
 - Fixed a potencial corrupt entry inside ArrayMutableStat bug.
+- Removed some solver options.
 
 Version 0.4.4-beta | SAVE COMPATIBLE
 - Colony inventory UI changes.

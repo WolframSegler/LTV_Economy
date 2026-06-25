@@ -7,7 +7,7 @@ LTV-Economy replaces abstract production values with a **unit-based simulation**
 
 
 ## Forum Page
-Content details related to the mod can be found on [the fractalsoftworks forums](https://fractalsoftworks.com/forum/index.php?topic=34632.0).
+Content details related to the mod can be found on [the fractalsoftworks forums](https://fractalsoftworks.com/forum/index.php?topic=34632).
 
 
 ## Incompatible Mods

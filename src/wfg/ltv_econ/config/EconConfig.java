@@ -33,16 +33,6 @@ public class EconConfig {
     public static double ECON_DEFICIT_COST;
 
     /**
-     * The cost multiplier for workers used to satisfy local demand.
-     */
-    public static double LOCAL_WORKER_COST_MULT;
-
-    /**
-     * The cost multiplier for workers used to satisfy Faction demand.
-     */
-    public static double FACTION_WORKER_COST_MULT;
-
-    /**
      * Applied to the ceiling of local production coefficient.
      */
     public static double LOCAL_PROD_BUFFER;

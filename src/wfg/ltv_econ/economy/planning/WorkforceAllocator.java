@@ -245,8 +245,8 @@ public class WorkforceAllocator {
         for (int i = 0; i < N; i++) {
             objective[i] = WORKER_COST * switch (i % T) {
                 case 0 -> 0.3;
-                case 1 -> EconConfig.LOCAL_WORKER_COST_MULT;
-                case 2 -> EconConfig.FACTION_WORKER_COST_MULT;
+                case 1 -> 0.08;
+                case 2 -> 0.2;
                 case 3 -> 1d;
                 default -> 1d;
             };
@@ -289,7 +289,7 @@ public class WorkforceAllocator {
         }
 
         final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0d);
-        final List<LinearConstraint> const_constraints = new ArrayList<>(nVars);
+        final List<LinearConstraint> const_constraints = new ArrayList<>(nVars + N);
 
         const_constraints.addAll(getBaseConstraints(denseData, nVars, N, T)); // Market and industry capacity.
 
