@@ -11,6 +11,8 @@ public class Consumption {
     public static final String FUEL_TARGET_TRADE_DESC = str("FUEL_TARGET_TRADE_DESC");
     public static final String DEMAND_ONLY_KEY = "dok";
     public static final String DEMAND_ONLY_DESC = str("uiStatDescDemandNoConsumption");
+    public static final String CELL_CONSUMPTION_TARGET_KEY = "cctk";
+    public static final String CELL_CONSUMPTION_TARGET_DESC = str("uiStatDescTargetFromConsumption");
 
     public static final String getDesc(String key) {
         switch (key) {
@@ -18,6 +20,7 @@ public class Consumption {
         case ORDERS_DEMAND_KEY: return ORDERS_DEMAND_DESC;
         case FUEL_TARGET_TRADE_KEY: return FUEL_TARGET_TRADE_DESC;
         case DEMAND_ONLY_KEY: return DEMAND_ONLY_DESC;
+        case CELL_CONSUMPTION_TARGET_KEY: return CELL_CONSUMPTION_TARGET_DESC;
         default: return "";
         }
     }

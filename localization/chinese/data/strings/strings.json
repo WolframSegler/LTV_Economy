@@ -722,6 +722,7 @@
         "uiTableRatio": "比例",
         "uiTitleEmployed": "就业",
         "uiTitleUnemployed": "失业",
-        "uiBtnTitleLogMarketsWithManufacturing": "记录所有拥有制造厂的市场"
+        "uiBtnTitleLogMarketsWithManufacturing": "记录所有拥有制造厂的市场",
+        "uiStatDescTargetFromConsumption": "消耗"
     }
 }

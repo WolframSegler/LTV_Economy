@@ -1,6 +1,8 @@
 Version 0.4.5-beta | SAVE COMPATIBLE
 - Fixed a potencial corrupt entry inside ArrayMutableStat bug.
 - Removed some solver options.
+- Adjusted the import demand to account for shipment delay.
+- Demand from consumption in the commodities tooltip now displays the final value instead of per-industry values. 
 
 Version 0.4.4-beta | SAVE COMPATIBLE
 - Colony inventory UI changes.

@@ -1,6 +1,7 @@
 package wfg.ltv_econ.economy.commodity;
 
 import static wfg.native_ui.util.Globals.settings;
+import static wfg.ltv_econ.constant.strings.Consumption.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -149,8 +150,11 @@ public class CommodityCell implements Serializable {
         );
     }
     public final float computeImportAmount() {
-        final double cap = EconConfig.DAYS_TO_COVER_PER_IMPORT * getTargetQuantum(true);
-        final float target = (float) Arithmetic.clamp(getTargetStockpiles() - stored, 0d, cap);
+        final float targetQuantum = getTargetQuantum(true);
+        final double cap = EconConfig.DAYS_TO_COVER_PER_IMPORT * targetQuantum;
+        final float target = (float) Arithmetic.clamp(
+            getTargetStockpiles() + EconConfig.TRADE_INTERVAL * targetQuantum - stored, 0d, cap
+        );
 
         return Math.max(target - getTotalImports() - virtualImports, 0f);
     }
@@ -252,7 +256,7 @@ public class CommodityCell implements Serializable {
             }
         }
 
-        targetQuantum.applyMods(consumption);
+        targetQuantum.modifyBase(CELL_CONSUMPTION_TARGET_KEY, consumption.getModifiedValue(), getDesc(CELL_CONSUMPTION_TARGET_KEY));
     }
 
     public final void reset() {
