@@ -38,6 +38,8 @@ rolfosian - for providing the [reflection library](https://github.com/rolfosian/
 
 Kaysaar - for advice on UI design, creative direction and reflection help.
 
+fgdfgfthgr-fox - for their relentless work providing bug reports and helping me polish the mod.
+
 <br>
 
 ## Attributes
