@@ -338,7 +338,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
 
             final ClickHandler<TableRow> run = (row, isLeftClick) -> {
-                if (!NativeUiUtils.isCtrlDown()) return;
+                if (!NativeUiUtils.isCtrlDown() || !isLeftClick) return;
 
                 final SectorEntityToken target = cell.market.getPrimaryEntity();
                 if (target != null) {
@@ -385,7 +385,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
 
             final ClickHandler<TableRow> run = (row, isLeftClick) -> {
-                if (!NativeUiUtils.isCtrlDown()) return;
+                if (!NativeUiUtils.isCtrlDown() || !isLeftClick) return;
 
                 final SectorEntityToken target = cell.market.getPrimaryEntity();
                 if (target != null) {
