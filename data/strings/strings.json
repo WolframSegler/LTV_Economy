@@ -720,7 +720,7 @@
         "uiTpTransferToFactionInventoryTxt2": "This action is permanent and cannot be undone.",
         "uiTpTransferToFactionInventoryTxt3": "You cannot transfer your flagship.",
         "uiTxtBonusExperience": "bonus experience",
-        "uiDialogTransferToFactionInventoryTxt": "Transfer ship to the faction hangar? It cannot be undone. The transfer will grant you %1$s %2$s.",
+        "uiDialogTransferToFactionInventoryTxt": "Transfer ship to the faction hangar? It cannot be undone. The transfer will grant you %1$s %2$s. You need %3$s crew for the transfer.",
         "uiCheckboxTxtAutoAssignWorkers": "Re-allocate workers periodically using the most recently run plan",
         "uiBtnTitleLogMarketsWithManufacturing": "Log Markets With Manufacturing",
         "uiStatDescTargetFromConsumption": "consumption"

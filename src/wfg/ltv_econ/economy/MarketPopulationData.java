@@ -256,7 +256,7 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
             happinessID, (BASELINE_VALUE - popHappiness) * 0.00016f, str("marketPopDataHappinessTxt")
         );
 
-        classConsciousnessDelta.modifyFlat(socialCohesionID, (BASELINE_VALUE - popSocialCohesion) * 0.003f, str("marketPopDataCohesionTxt"));
+        classConsciousnessDelta.modifyFlat(socialCohesionID, (popSocialCohesion - BASELINE_VALUE) * 0.003f, str("marketPopDataCohesionTxt"));
     }
 
     @Override

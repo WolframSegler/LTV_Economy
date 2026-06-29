@@ -1,5 +1,7 @@
 Version 0.4.6-beta | SAVE COMPATIBLE
 - Fixed a crash related to the worker pool.
+- Fixed inverted cohesion effect on consciousness.
+- Now putting ships to faction inventory removes the needed crew from cargo.
 
 Version 0.4.5-beta | SAVE COMPATIBLE
 - Fixed a potencial corrupt entry inside ArrayMutableStat bug.

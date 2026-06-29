@@ -714,7 +714,7 @@
         "uiTpTransferToFactionInventoryTxt2": "此操作不可逆。",
         "uiTpTransferToFactionInventoryTxt3": "您无法转移您的旗舰。",
         "uiTxtBonusExperience": "额外经验",
-        "uiDialogTransferToFactionInventoryTxt": "将舰船转移至派系机库？此操作不可逆。转移将奖励您 %1$s %2$s。",
+        "uiDialogTransferToFactionInventoryTxt": "将舰船转移至派系机库？此操作不可逆。转移将奖励您 %1$s %2$s。您需要 %3$s 名船员才能进行转移。",
         "uiCheckboxTxtAutoAssignWorkers": "使用最近执行的方案定期重新分配工人",
         "uiTitleSectorEmployment": "行业就业",
         "uiTpTxtSectorEmploymentBreakdown": "该行业就业与非就业人员比例。",

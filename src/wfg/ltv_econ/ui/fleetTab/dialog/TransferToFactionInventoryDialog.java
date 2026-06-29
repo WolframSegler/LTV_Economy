@@ -12,10 +12,12 @@ import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.characters.MutableCharacterStatsAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.loading.HullModSpecAPI;
 import com.fs.starfarer.api.plugins.LevelupPlugin;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -23,6 +25,7 @@ import com.fs.starfarer.loading.specs.HullVariantSpec;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.util.Globals;
 
@@ -46,18 +49,22 @@ public class TransferToFactionInventoryDialog extends DialogPanel {
 
     @Override
     public void buildUI() {
+        final int crewNeeded = ShipTypeData.getCrewPerShip(member.getHullSpec());
         final String highlightStr1 = Integer.toString(Math.round(getBonusXpFraction(member.getVariant()) * 100f)) + "%";
         final String highlightStr2 = str("uiTxtBonusExperience");
+        final String highlightStr3 = Integer.toString(crewNeeded);
         final LabelAPI txtLbl = Globals.settings.createLabel(
-            strf("uiDialogTransferToFactionInventoryTxt", highlightStr1, highlightStr2),
-            "graphics/fonts/insignia21LTaa.fnt"
+            strf("uiDialogTransferToFactionInventoryTxt", highlightStr1, highlightStr2, highlightStr3), Fonts.INSIGNIA_LARGE
         );
         add(txtLbl);
         txtLbl.setColor(text_color);
         txtLbl.setHighlightColor(Misc.getStoryBrightColor());
-        txtLbl.setHighlight(highlightStr1, highlightStr2);
+        txtLbl.setHighlight(highlightStr1, highlightStr2, highlightStr3);
         txtLbl.getPosition().setSize(pos.getWidth(), pos.getHeight() - BUTTON_H).inTL(0f, 0f);
         txtLbl.setAlignment(Alignment.TL);
+
+        final boolean hasEnoughCrew = Global.getSector().getPlayerFleet().getCargo().getCrew() >= crewNeeded;
+        getButton(0).setEnabled(hasEnoughCrew);
     }
 
     @Override
@@ -85,6 +92,8 @@ public class TransferToFactionInventoryDialog extends DialogPanel {
         for (String wingId : variant.getNonBuiltInWings()) {
             playerCargo.addFighters(wingId, 1);
         }
+
+        playerCargo.removeCommodity(Commodities.CREW, ShipTypeData.getCrewPerShip(member.getHullSpec()));
 
         grantTransferBonusXp(variant);
 
