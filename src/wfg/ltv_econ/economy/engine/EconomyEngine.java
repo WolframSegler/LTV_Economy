@@ -214,6 +214,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         marketPopData.remove(marketID);
         marketCredits.remove(marketID);
         MarketFinanceRegistry.instance().remove(marketID);
+        WorkerPoolRegistry.instance().remove(marketID);
         WorkerRegistry.instance().remove(marketID);
         for (TradeMission m : activeMissions) {
 

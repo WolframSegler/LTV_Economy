@@ -20,6 +20,12 @@ public class WorkerPoolRegistry {
         return LtvEconSaveData.instance().poolRegistry;
     }
 
+    private final Object readResolve() {
+        registry.values().removeIf(p -> p.market == null);
+
+        return this;
+    }
+
     public static final WorkerPool get(MarketAPI market) {
         return get(market.getId());
     }
@@ -42,6 +48,14 @@ public class WorkerPoolRegistry {
 
     public final void register(String marketID) {
         registry.putIfAbsent(marketID, new WorkerPool(marketID));
+    }
+
+    public final void remove(MarketAPI market) {
+        remove(market.getId());
+    }
+
+    public final void remove(String marketID) {
+        registry.remove(marketID);
     }
 
     public final void recalculate() {
