@@ -27,7 +27,6 @@ MULTI_THREADING,多线程,Boolean,true,,在独立线程中运行经济循环。,
 ASSIGN_WORKERS_ON_LOAD,加载时分配工人,Boolean,false,,加载存档后重新分配工人。包括快速存档。,,,经济
 STARTING_CREDITS_FOR_MARKET,殖民地初始资金,Int,50000,,每个殖民地的初始星币。也用于玩家殖民地。,0,1000000,经济
 CREDIT_WITHDRAWAL_LIMIT,每月提款限额,Int,100000,,您每月可以从殖民地提取的最大星币数量。,0,1000000000,经济
-AUTO_TRANSFER_PROFIT_LIMIT,利润自动转移比例,Double,0.3,,可自动转移给玩家的殖民地利润的最大比例。,0,1,经济
 ,,,,,,,,
 TRADE_INTERVAL,贸易周期,Int,15,,市场每隔x天进行一次贸易。,7,30,贸易
 DAYS_TO_COVER,储备覆盖天数,Int,60,,"市场目标储备天数，影响进出口及基准价格。",1,360,贸易
