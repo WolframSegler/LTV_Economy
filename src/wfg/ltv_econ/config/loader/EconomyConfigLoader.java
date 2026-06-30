@@ -119,7 +119,6 @@ public class EconomyConfigLoader {
         EconConfig.ASSIGN_WORKERS_ON_LOAD = LunaSettings.getBoolean(LTV_ECON, "ASSIGN_WORKERS_ON_LOAD");
         EconConfig.STARTING_CREDITS_FOR_MARKET = LunaSettings.getInt(LTV_ECON, "STARTING_CREDITS_FOR_MARKET");
         EconConfig.CREDIT_WITHDRAWAL_LIMIT = LunaSettings.getInt(LTV_ECON, "CREDIT_WITHDRAWAL_LIMIT");
-        EconConfig.AUTO_TRANSFER_PROFIT_LIMIT = LunaSettings.getDouble(LTV_ECON, "AUTO_TRANSFER_PROFIT_LIMIT").floatValue();
         EconConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "ECON_DEFICIT_COST");
         EconConfig.LOCAL_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "LOCAL_PROD_BUFFER");
         EconConfig.FACTION_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "FACTION_PROD_BUFFER");

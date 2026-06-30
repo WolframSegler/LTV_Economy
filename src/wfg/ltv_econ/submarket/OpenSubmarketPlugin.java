@@ -64,12 +64,12 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
             final float shipProd = (float) Math.log10(Math.max(1f, shipsCell.getInflowQuantum()));
             final float fuelProd = (float) Math.log10(Math.max(1f, fuelCell.getInflowQuantum()));
 
-            final float combatShips = Math.min(10f + 5f * shipProd, 70);
-            final float freighters  = Math.min(10f + 10f * shipProd, 40f);
-            final float tankers     = Math.min(10f + 10f * fuelProd, 50f);
-            final float transports  = 10f + 2f * shipProd + 1f * fuelProd;
-            final float liners      = 5f + 2f * shipProd;
-            final float utilityPts  = 5f + 1f * shipProd + 1f * fuelProd;
+            final float combatShips = Math.min(10f + 5f * shipProd, 60f);
+            final float freighters = Math.min(10f + 10f * shipProd, 35f);
+            final float tankers = Math.min(10f + 10f * fuelProd, 40f);
+            final float transports = 10f + 2f * shipProd + 1f * fuelProd;
+            final float liners = 5f + 2f * shipProd;
+            final float utilityPts = 5f + 1f * shipProd + 1f * fuelProd;
 			
 			addShips(market.getFactionId(),
                 10f + extraShips,
@@ -153,8 +153,8 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 	public static final float ECON_UNIT_MULT_IMPORTS = 1.2f;
 	public static final float ECON_UNIT_MULT_DEFICIT = 1.3f;
 
-	private static final float STOCKPILE_BASELINE = 900f;
-	private static final float RATIO_EXP = 0.6f;
+	private static final float STOCKPILE_BASELINE = 800f;
+	private static final float RATIO_EXP = 0.5f;
 	private static final float STOCKPILE_SCALE_MIN = 0.01f;
 	private static final float STOCKPILE_SCALE_MAX = 4f;
 

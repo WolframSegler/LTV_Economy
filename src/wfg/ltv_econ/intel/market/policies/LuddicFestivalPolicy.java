@@ -1,5 +1,6 @@
 package wfg.ltv_econ.intel.market.policies;
 
+import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.MarketPopulationData;
@@ -22,6 +23,11 @@ public class LuddicFestivalPolicy extends MarketPolicy {
         data.happinessDelta.unmodifyFlat(id);
         data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
+    }
+
+    @Override
+    public boolean isEnabled(MarketPopulationData data) {
+        return data.market.hasCondition(Conditions.LUDDIC_MAJORITY);
     }
 
     @Override

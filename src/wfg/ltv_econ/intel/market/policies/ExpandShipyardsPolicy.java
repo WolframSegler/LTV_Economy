@@ -84,6 +84,6 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
         final double removedFromCell = Math.min(amount, cell.getStored());
         cell.addStoredAmount(-removedFromCell);
 
-        market.getSubmarket(Submarkets.SUBMARKET_STORAGE).getCargo().removeCommodity(comID, (float) -(amount - removedFromCell));
+        market.getSubmarket(Submarkets.SUBMARKET_STORAGE).getCargo().removeCommodity(comID, (float) (amount - removedFromCell));
     }
 }

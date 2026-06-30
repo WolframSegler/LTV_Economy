@@ -1,7 +1,11 @@
 Version 0.4.6-beta | SAVE COMPATIBLE
 - Fixed a crash related to the worker pool.
 - Fixed inverted cohesion effect on consciousness.
-- Now putting ships to faction inventory removes the needed crew from cargo.
+- Putting ships to faction inventory now removes the needed crew from cargo.
+- Fixed expand the yards policy not consuming from storage.
+- Adjusted submarket stockpiles. Smaller markets now have more goods and larger markets have less goods.
+- Removed some settings from LunaLib for balance reasons.
+- Updated some policy pre-requisites.
 
 Version 0.4.5-beta | SAVE COMPATIBLE
 - Fixed a potencial corrupt entry inside ArrayMutableStat bug.

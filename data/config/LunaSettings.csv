@@ -27,7 +27,6 @@ MULTI_THREADING,Multi Threading,Boolean,true,,Runs the economy loop inside a sep
 ASSIGN_WORKERS_ON_LOAD,Assign Workers On Load,Boolean,false,,Re-allocates the workers after loading a save. Includes quick-saves as well.,,,Economy
 STARTING_CREDITS_FOR_MARKET,Starting Credits Colonies,Int,50000,,The starting credits each colony has. Used for player colonies as well.,0,1000000,Economy
 CREDIT_WITHDRAWAL_LIMIT,Monthly Withdrawal Limit,Int,100000,,Sets the maximum amount of credits you can withdraw from your colonies per month.,0,1000000000,Economy
-AUTO_TRANSFER_PROFIT_LIMIT,Profit Transfer Limit,Double,0.3,,The maximum share of the profit made by colonies that can automatically be transferred to the player.,0,1,Economy
 ,,,,,,,,
 TRADE_INTERVAL,Trade Interval,Int,15,,Markets will trade goods every x days.,7,30,Trade
 DAYS_TO_COVER,Stockpile Coverage Days,Int,60,,"Days of demand markets aim to stockpile, affecting imports, exports, and base prices.",1,360,Trade

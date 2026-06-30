@@ -509,7 +509,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                     for (String val : multiParam.getValue()) {
                         multiPanel.selectFirst(val);
                     }
-                    multiPanel.onSelected = (multi) -> {
+                    multiPanel.onSelected = (button) -> {
                         multiParam.setValue(new HashSet<>(multiPanel.getSelectedStrings()));
                     };
                     multiPanel.buildUI();
