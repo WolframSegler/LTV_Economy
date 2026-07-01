@@ -137,7 +137,7 @@
       "posterPath": "graphics/policies/expand_the_yards.png",
       "cost": 600000,
       "durationDays": 120,
-      "cooldownDays": 240,
+      "cooldownDays": 90,
       "description": "A massive industrial undertaking to construct additional orbital drydocks and assembly gantries. Requires enormous quantities of resources. Upon completion, the faction's fleet construction capacity is permanently increased by one assembly line."
     }
   ]

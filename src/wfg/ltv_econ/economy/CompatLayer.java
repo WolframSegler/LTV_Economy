@@ -62,11 +62,11 @@ public final class CompatLayer {
     }
 
     private static final void copyMods(Industry ind, MutableStat base, MutableStat dest,
-        String comID, boolean isDemand) {
-
-        float value = getBaseValue(ind, comID, isDemand);
+        String comID, boolean isDemand
+    ) {
+        final float value = getBaseValue(ind, comID, isDemand);
         dest.setBaseValue(value);
-        if (value == 0) return;
+        if (value == 0f) return;
 
         dest.applyMods(getModifiers(ind, comID, base, isDemand ? getDemandReductionMutable(ind, comID) : ind.getSupplyBonus()));
     }

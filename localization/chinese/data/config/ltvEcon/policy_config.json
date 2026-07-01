@@ -137,7 +137,7 @@
       "posterPath": "graphics/policies/expand_the_yards.png",
       "cost": 600000,
       "durationDays": 120,
-      "cooldownDays": 240,
+      "cooldownDays": 90,
       "description": "一项建造额外轨道干船坞和装配龙门架的大型工业工程。需要大量资源。完成后，派系的舰队建造能力将永久增加一条装配线。"
     }
   ]

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 
+// TODO move to serializable after incompatible update
 public class PlayerFactionSettings implements Serializable {
     public boolean redistributeCredits = false;
     public boolean automaticShipProductionForFaction = false;

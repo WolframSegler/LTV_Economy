@@ -234,11 +234,9 @@ public class CommodityDomain implements Serializable {
             final boolean sameFaction = expCell.market.getFaction().equals(impCell.market.getFaction());
             final double amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
-            // Weighted price: price leans toward importer if deficit is high, toward exporter if low;
             final double exporterPrice = expCell.getUnitPrice(PriceType.MARKET_SELLING, (long)amountToSend);
             final double importerPrice = impCell.getUnitPrice(PriceType.MARKET_BUYING, (long)amountToSend);
-            final double weight = Math.min(1d, impCell.getTargetQuantumPreTrade() / amountToSend);
-            final double unitPrice = exporterPrice * (1f - weight) + importerPrice * weight;
+            final double unitPrice = Math.max(exporterPrice, importerPrice);
             final double price = unitPrice * amountToSend;
 
             impCell.virtualImports += amountToSend;
