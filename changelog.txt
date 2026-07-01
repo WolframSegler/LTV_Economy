@@ -1,3 +1,8 @@
+Version 0.4.7-beta | SAVE COMPATIBLE
+- Fixed issue where the service sector was over-utilized by NPC colonies.
+- Local production now has 5x priority over faction prod, which has 5x priority over global prod. Noticebly reduced deficits as a result.
+- Fixed ship allocator for trade fleets pre-maturely exiting process.
+
 Version 0.4.6-beta | SAVE COMPATIBLE
 - Fixed a crash related to the worker pool.
 - Fixed inverted cohesion effect on consciousness.

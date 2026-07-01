@@ -542,13 +542,15 @@ public class EconomyLoop {
         );
     }
 
-    private final void updateFuelDemands(HashMap<MarketAPI, Float> fuelDemands) {
+    private final void updateFuelDemands(Map<MarketAPI, Float> fuelDemands) {
         for (Map.Entry<MarketAPI, Float> entry : fuelDemands.entrySet()) {
             final ArrayMutableStat mutable = engine.getComCell(Commodities.FUEL, entry.getKey().getId()).getTargetQuantumStat();
-
             final StatMod statMod = mutable.getFlatStatMod(Consumption.FUEL_TARGET_TRADE_KEY);
+            final float dailyDemand = entry.getValue() / EconConfig.TRADE_INTERVAL;
+
             final float oldTarget = statMod != null ? statMod.value : 0f;
-            final float newTarget = FUEL_TARGET_TRADE_ALPHA * entry.getValue() / EconConfig.TRADE_INTERVAL + (1f - FUEL_TARGET_TRADE_ALPHA) * oldTarget;
+            final float newTarget = oldTarget == 0f ? dailyDemand :
+                FUEL_TARGET_TRADE_ALPHA * dailyDemand + (1f - FUEL_TARGET_TRADE_ALPHA) * oldTarget;
             mutable.modifyFlat(
                 Consumption.FUEL_TARGET_TRADE_KEY, newTarget,
                 Consumption.getDesc(Consumption.FUEL_TARGET_TRADE_KEY)

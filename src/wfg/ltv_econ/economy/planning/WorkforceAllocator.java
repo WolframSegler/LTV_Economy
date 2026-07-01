@@ -244,9 +244,9 @@ public class WorkforceAllocator {
 
         for (int i = 0; i < N; i++) {
             objective[i] = WORKER_COST * switch (i % T) {
-                case 0 -> 0.3;
-                case 1 -> 0.08;
-                case 2 -> 0.2;
+                case 0 -> 0.4d;
+                case 1 -> 0.04d;
+                case 2 -> 0.20d;
                 case 3 -> 1d;
                 default -> 1d;
             };

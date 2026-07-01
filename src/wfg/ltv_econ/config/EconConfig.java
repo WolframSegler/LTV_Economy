@@ -73,7 +73,7 @@ public class EconConfig {
     public static int WORKER_ASSIGN_INTERVAL;
 
     /**
-     * The trade methods will be called once every <code>x</code> days.S
+     * Trade methods will be called once every <code>x</code> days.
      */
     public static int TRADE_INTERVAL;
 

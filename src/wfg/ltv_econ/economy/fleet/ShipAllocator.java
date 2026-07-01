@@ -276,10 +276,10 @@ public class ShipAllocator {
             counts[picked]++;
             idleRemaining[picked]--;
 
-            remCargo -= cargoCap[picked];
-            remFuel -= fuelCap[picked];
-            remCrew -= crewCap[picked];
-            remCombat -= combatCap[picked];
+            remCargo = Math.max(0d, remCargo - cargoCap[picked]);
+            remFuel = Math.max(0d, remFuel - fuelCap[picked]);
+            remCrew = Math.max(0d, remCrew - crewCap[picked]);
+            remCombat = Math.max(0d, remCombat- combatCap[picked]);
         }
 
         if (remCargo > eps) log.warn(faction.getId() + " - Not enough cargo capacity after allocation, remaining: " + (long) remCargo);

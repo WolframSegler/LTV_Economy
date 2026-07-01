@@ -49,7 +49,7 @@ public class ShipProductionManager {
             workers += WorkerPoolRegistry.get(market).getWorkerPool();
         }
 
-        final long shipmentTarget = workers / 8l;
+        final long shipmentTarget = workers / 6l;
         final long combatTarget = pop / 80l + (long) computeDesiredCombat(Collections.emptyList(), faction);
 
         final ArrayMap<String, Integer> buildList = new ArrayMap<>(32);
