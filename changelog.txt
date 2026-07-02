@@ -1,7 +1,3 @@
-Version 0.4.8-beta | SAVE COMPATIBLE
-- Changed how trade prices are calculated to make it more fair.
-- Expand the yards policy now takes less time to cooldown.
-
 Version 0.4.7-beta | SAVE COMPATIBLE
 - Fixed issue where the service sector was over-utilized by NPC colonies.
 - Local production now has 5x priority over faction prod, which has 5x priority over global prod. Noticebly reduced deficits as a result.
