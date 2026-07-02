@@ -11,6 +11,7 @@ import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
@@ -45,7 +46,9 @@ public class GeneralStrikeEvent extends MarketEvent {
 
         final String marketID = data.marketID;
         for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
-            dom.getCell(marketID).getProductionStat().modifyMult(id, PROD_MULT, spec.name);
+            final CommodityCell cell = dom.getCell(marketID);
+            cell.getProductionStat().modifyMult(id, PROD_MULT, spec.name);
+            cell.getConsumptionStat().modifyMult(id, PROD_MULT, spec.name);
         }
 
         Global.getSector().getIntelManager().addIntel(
@@ -69,7 +72,9 @@ public class GeneralStrikeEvent extends MarketEvent {
 
         final String marketID = data.marketID;
         for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
-            dom.getCell(marketID).getProductionStat().unmodifyMult(id);
+            final CommodityCell cell = dom.getCell(marketID);
+            cell.getProductionStat().unmodifyMult(id);
+            cell.getConsumptionStat().unmodifyMult(id);
         }
     }
 
