@@ -116,7 +116,7 @@ public class TransferToFactionInventoryDialog extends DialogPanel {
         final int currentLevel = stats.getLevel();
         final long xpForNextLevel = plugin.getXPForLevel(currentLevel + 1) - plugin.getXPForLevel(currentLevel);
         
-        long bonusXp = (long)(xpForNextLevel * totalFraction);
+        long bonusXp = (long)(xpForNextLevel * totalFraction / plugin.getStoryPointsPerLevel());
         if (bonusXp > 0) {
             stats.addBonusXP(bonusXp, true, null, true);
         }
@@ -132,7 +132,6 @@ public class TransferToFactionInventoryDialog extends DialogPanel {
             totalFraction += variant.getSModdedBuiltIns().contains(modId) ?
                 0f : 1f - Misc.getBuildInBonusXP(spec, variant.getHullSize());
         }
-        totalFraction /= 4;
 
         return totalFraction;
     }
