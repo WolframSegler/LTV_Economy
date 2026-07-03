@@ -29,6 +29,12 @@ public class WorkerRegistry implements Serializable {
         return LtvEconSaveData.instance().workerRegistry;
     }
 
+    private final Object readResolve() {
+        registry.values().removeIf(p -> p.market == null);
+
+        return this;
+    }
+
     public final void resetWorkersAssigned(boolean resetPlayerIndustries) {
         for (WorkerIndustryData data : registry.values()) {
             if (!resetPlayerIndustries && data.market.isPlayerOwned()) continue;
