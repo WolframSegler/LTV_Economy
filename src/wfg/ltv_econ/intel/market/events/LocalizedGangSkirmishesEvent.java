@@ -34,7 +34,7 @@ public class LocalizedGangSkirmishesEvent extends MarketEvent {
         if (cohesion >= 25f) return;
 
         final float factor = (25f - cohesion) / 25f;
-        final float maxDailyChance = 0.0334f; // ~3.3% per day at cohesion = 0
+        final float maxDailyChance = 0.033f;
         if (Math.random() >= factor * maxDailyChance) return;
 
         active = true;

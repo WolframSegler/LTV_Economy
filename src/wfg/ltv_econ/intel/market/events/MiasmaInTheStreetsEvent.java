@@ -18,7 +18,7 @@ public class MiasmaInTheStreetsEvent extends MarketEvent {
     public void preAdvance(MarketPopulationData data) {
         if (active || cooldownDaysRemaining > 0) return;
 
-        final float dailyChance = 0.002f;
+        final float dailyChance = 0.0015f;
         if (Math.random() >= dailyChance) return;
 
         active = true;

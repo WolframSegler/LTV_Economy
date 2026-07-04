@@ -37,7 +37,8 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
 
     @Override
     public boolean isEnabled(MarketPopulationData data) {
-        return EconomyEngine.instance().getFactionShipInventory(data.market.getFactionId()).getCapital().equals(data.market);
+        return EconomyEngine.instance().getFactionShipInventory(data.market.getFactionId()).getCapital().equals(data.market)
+            || data.market.getSize() >= 4;
     }
 
     @Override

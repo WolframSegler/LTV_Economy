@@ -34,14 +34,14 @@ public class ShipAllocator {
 
     private static final double DIVERSITY_PENALTY = 0.4;
     private static final double REF_SHIPMENT = 500d;
-    private static final float COMBAT_POWER_BASE_PER_100_TONS = 9f;
+    private static final float COMBAT_POWER_BASE_PER_100_TONS = 5f;
     private static final float[] COMBAT_POWER_DANGER_MULT = {
         0.1f, // NONE
         0.4f, // MINIMAL
         0.8f, // LOW
         1.4f, // MEDIUM
         2.5f, // HIGH
-        3.7f  // EXTREME
+        3.5f  // EXTREME
     };
 
     public static final float getRequiredCombatPower(TradeMission mission) {

@@ -30,8 +30,8 @@ public class GeneralStrikeEvent extends MarketEvent {
         final float consciousness = data.getClassConsciousness();
         if (consciousness <= 70f) return;
 
-        final float factor = (consciousness - 70f) / 50f;
-        final float maxDailyChance = 0.05f;
+        final float factor = (consciousness - 70f) / 30f;
+        final float maxDailyChance = 0.02f;
         if (Math.random() >= factor * maxDailyChance) return;
 
         activate(data);
