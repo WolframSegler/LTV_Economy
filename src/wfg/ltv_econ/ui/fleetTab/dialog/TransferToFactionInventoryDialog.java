@@ -52,14 +52,13 @@ public class TransferToFactionInventoryDialog extends DialogPanel {
         final int crewNeeded = ShipTypeData.getCrewPerShip(member.getHullSpec());
         final String highlightStr1 = Integer.toString(Math.round(getBonusXpFraction(member.getVariant()) * 100f)) + "%";
         final String highlightStr2 = str("uiTxtBonusExperience");
-        final String highlightStr3 = Integer.toString(crewNeeded);
         final LabelAPI txtLbl = Globals.settings.createLabel(
-            strf("uiDialogTransferToFactionInventoryTxt", highlightStr1, highlightStr2, highlightStr3), Fonts.INSIGNIA_LARGE
+            strf("uiDialogTransferToFactionInventoryTxt", highlightStr1, highlightStr2, Integer.toString(crewNeeded)), Fonts.INSIGNIA_LARGE
         );
         add(txtLbl);
         txtLbl.setColor(text_color);
         txtLbl.setHighlightColor(Misc.getStoryBrightColor());
-        txtLbl.setHighlight(highlightStr1, highlightStr2, highlightStr3);
+        txtLbl.setHighlight(highlightStr1, highlightStr2);
         txtLbl.getPosition().setSize(pos.getWidth(), pos.getHeight() - BUTTON_H).inTL(0f, 0f);
         txtLbl.setAlignment(Alignment.TL);
 

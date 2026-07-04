@@ -28,9 +28,9 @@ public class GeneralStrikeEvent extends MarketEvent {
         if (active || cooldownDaysRemaining > 0) return;
 
         final float consciousness = data.getClassConsciousness();
-        if (consciousness < 50f) return;
+        if (consciousness <= 70f) return;
 
-        final float factor = (consciousness - 50f) / 50f;
+        final float factor = (consciousness - 70f) / 50f;
         final float maxDailyChance = 0.05f;
         if (Math.random() >= factor * maxDailyChance) return;
 

@@ -281,6 +281,13 @@ public class CommodityCell implements Serializable {
         addStoredAmount(getQuantumRealBalance());
     }
 
+    public final float getUnitPriceForTrade(PriceType type, long amount) {
+        return getUnitPrice(type, amount,
+            stored + getTotalImports() + virtualImports - getTotalExports(),
+            spec.getBasePrice(), getTargetStockpiles()
+        );
+    }
+
     public final float getUnitPrice(PriceType type, long amount) {
         return getUnitPrice(type, amount, stored, spec.getBasePrice(), getTargetStockpiles());
     }

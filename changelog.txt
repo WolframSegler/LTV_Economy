@@ -5,6 +5,7 @@ Version 0.4.8-beta | SAVE COMPATIBLE
 - Reduced the feedback loop strength between cohesion and consciousness.
 - Fixed bug where worker registry held removed market entries, causing a crash upon info retrievel.
 - Fixed bonusXp fraction text when transferring ships to faction hangar.
+- Reduced the change of the general strike event.
 
 Version 0.4.7-beta | SAVE COMPATIBLE
 - Fixed issue where the service sector was over-utilized by NPC colonies.

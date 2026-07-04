@@ -234,10 +234,9 @@ public class CommodityDomain implements Serializable {
             final boolean sameFaction = expCell.market.getFaction().equals(impCell.market.getFaction());
             final double amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
-            // TODO work on the price function more
-            final double exporterPrice = expCell.getUnitPrice(PriceType.MARKET_SELLING, (long)amountToSend);
-            final double importerPrice = impCell.getUnitPrice(PriceType.MARKET_BUYING, (long)amountToSend);
-            final double unitPrice = Math.max(exporterPrice, importerPrice);
+            final double exporterPrice = expCell.getUnitPriceForTrade(PriceType.MARKET_SELLING, (long)amountToSend);
+            final double importerPrice = impCell.getUnitPriceForTrade(PriceType.MARKET_BUYING, (long)amountToSend);
+            final double unitPrice = (exporterPrice + importerPrice) / 2d;
             final double price = unitPrice * amountToSend;
 
             impCell.virtualImports += amountToSend;
@@ -295,7 +294,7 @@ public class CommodityDomain implements Serializable {
             final double exportable = exporter.computeExportAmount();
             final float share = (float) (exportable / sumExportable);
             final float amount = Math.min((float) exportable, share * informalNode.imports);
-            final int price = (int) (exporter.getUnitPrice(PriceType.MARKET_SELLING, (int)amount)
+            final int price = (int) (exporter.getUnitPriceForTrade(PriceType.MARKET_SELLING, (int)amount)
                 * informalNode.priceMultImporting * amount * (1f + exporter.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementImporting)
             );
 
@@ -313,7 +312,7 @@ public class CommodityDomain implements Serializable {
             final float share = (float) (importable / sumImportable);
             final float amount = Math.min((float) importable, importer.getInformalImportMods()
                 .computeEffective(share * informalNode.exports));
-            final int price = (int) (importer.getUnitPrice(PriceType.MARKET_BUYING, (int)amount)
+            final int price = (int) (importer.getUnitPriceForTrade(PriceType.MARKET_BUYING, (int)amount)
                 * informalNode.priceMultExporting * amount * (1f + importer.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementExporting)
             );
 

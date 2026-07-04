@@ -237,7 +237,7 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
         );
 
         socialCohesionDelta.modifyFlat(
-            "consciousness", popClassConsciousness * 0.0004f, str("marketPopDataConsciousness")
+            "consciousness", popClassConsciousness * 0.0002f, str("marketPopDataConsciousness")
         );
 
         socialCohesionDelta.modifyFlat(
@@ -256,7 +256,7 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
             happinessID, (BASELINE_VALUE - popHappiness) * 0.00016f, str("marketPopDataHappinessTxt")
         );
 
-        classConsciousnessDelta.modifyFlat(socialCohesionID, (popSocialCohesion - BASELINE_VALUE) * 0.001f, str("marketPopDataCohesionTxt"));
+        classConsciousnessDelta.modifyFlat(socialCohesionID, (popSocialCohesion - BASELINE_VALUE) * 0.0008f, str("marketPopDataCohesionTxt"));
     }
 
     @Override
