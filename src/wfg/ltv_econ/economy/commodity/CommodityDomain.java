@@ -234,6 +234,7 @@ public class CommodityDomain implements Serializable {
             final boolean sameFaction = expCell.market.getFaction().equals(impCell.market.getFaction());
             final double amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
+            // TODO work on the price function more
             final double exporterPrice = expCell.getUnitPrice(PriceType.MARKET_SELLING, (long)amountToSend);
             final double importerPrice = impCell.getUnitPrice(PriceType.MARKET_BUYING, (long)amountToSend);
             final double unitPrice = Math.max(exporterPrice, importerPrice);

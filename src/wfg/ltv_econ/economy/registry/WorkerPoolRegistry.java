@@ -125,7 +125,7 @@ public class WorkerPoolRegistry {
             if (reg == null) return 0f;
 
             float totalAssigned = 0f;
-            for (WorkerIndustryData data : reg.getIndustriesUsingWorkers(market.getId())) {
+            for (WorkerIndustryData data : reg.getIndustriesUsingWorkers(marketID)) {
                 data.ensurePresence();
                 totalAssigned += data.getWorkerAssignedRatio(false);
             }

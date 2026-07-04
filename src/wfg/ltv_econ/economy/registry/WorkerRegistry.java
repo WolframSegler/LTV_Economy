@@ -118,8 +118,8 @@ public class WorkerRegistry implements Serializable {
         return list;
     }
 
-    public static final long getWorkerCap(MarketAPI market) {
-        return WorkerPoolRegistry.get(market).getWorkerPool();
+    public static final long getWorkerCap(String marketID) {
+        return WorkerPoolRegistry.get(marketID).getWorkerPool();
     }
 
     public final WorkerIndustryData getData(String marketID, String industryID) {
@@ -222,11 +222,11 @@ public class WorkerRegistry implements Serializable {
         }
 
         public final long getWorkersAssigned() {
-            return (long) (outputRatioSum * WorkerRegistry.getWorkerCap(market));
+            return (long) (outputRatioSum * WorkerRegistry.getWorkerCap(marketID));
         }
 
         public final long getAssignedForOutput(String comID) {
-            return (long) (WorkerRegistry.getWorkerCap(market) * outputRatios.getOrDefault(comID, 0f));
+            return (long) (WorkerRegistry.getWorkerCap(marketID) * outputRatios.getOrDefault(comID, 0f));
         }
 
         public final float getAssignedRatioForOutput(String comID) {
