@@ -139,6 +139,16 @@
       "durationDays": 120,
       "cooldownDays": 90,
       "description": "A massive industrial undertaking to construct additional orbital drydocks and assembly gantries. Requires enormous quantities of resources. Upon completion, the faction's fleet construction capacity is permanently increased by one assembly line."
+    },
+    {
+      "id": "arrest_strike_organizers",
+      "name": "Strike the Agitators",
+      "class": "wfg.ltv_econ.intel.market.policies.ArrestStrikeOrganizersPolicy",
+      "posterPath": "graphics/policies/arrest_strike_organizers.jpg",
+      "cost": 90000,
+      "durationDays": 7,
+      "cooldownDays": 180,
+      "description": "Authorizes a covert one-week operation to detain identified strike agitators. At midnight, MUNISEC tactical teams sweep through targeted districts, utilizing drone surveillance and non-lethal munitions to neutralize primary targets. Decapitation of the movement's leadership effectively suppresses strike activity and discourages further public dissent."
     }
   ]
 }

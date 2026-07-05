@@ -139,6 +139,16 @@
       "durationDays": 120,
       "cooldownDays": 90,
       "description": "一项建造额外轨道干船坞和装配龙门架的大型工业工程。需要大量资源。完成后，派系的舰队建造能力将永久增加一条装配线。"
+    },
+    {
+      "id": "arrest_strike_organizers",
+      "name": "清剿煽动者",
+      "class": "wfg.ltv_econ.intel.market.policies.ArrestStrikeOrganizersPolicy",
+      "posterPath": "graphics/policies/arrest_strike_organizers.jpg",
+      "cost": 90000,
+      "durationDays": 7,
+      "cooldownDays": 180,
+      "description": "授权展开为期一周的秘密行动，以拘留已查明的罢工煽动分子。午夜时分，MUNISEC战术小队在无人机侦察与非致命性武器的配合下突袭目标区域，迅速压制主要头目。斩断运动领导层后，罢工活动将得到有效遏制，公众的进一步异议也将被震慑。"
     }
   ]
 }

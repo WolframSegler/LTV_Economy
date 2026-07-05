@@ -7,6 +7,7 @@ Version 0.4.8-beta | SAVE COMPATIBLE
 - Fixed bonusXp fraction text when transferring ships to faction hangar.
 - Reduced the change of the general strike event.
 - Reduced required combat power for trade fleets.
+- Added a new policy to reduce consciousness.
 
 Version 0.4.7-beta | SAVE COMPATIBLE
 - Fixed issue where the service sector was over-utilized by NPC colonies.
