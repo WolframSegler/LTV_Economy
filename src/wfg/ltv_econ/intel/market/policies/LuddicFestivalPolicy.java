@@ -39,7 +39,7 @@ public class LuddicFestivalPolicy extends MarketPolicy {
         tp.beginGridFlipped(250f, cols, 60f, pad);
         tp.addToGrid(0, 0, str("marketPopDataHappinessTxt"), String.format("%+.1f", HAPPINESS_BUFF));
         tp.addToGrid(0, 1, str("marketPopDataCohesionTxt"), String.format("%+.1f", COHESION_BUFF));
-        tp.addToGrid(0, 2, str("marketPopDataConsciousness"), String.format("%+.3f", CLASS_BUFF), negative);
+        tp.addToGrid(0, 2, str("marketPopDataConsciousnessTxt"), String.format("%+.3f", CLASS_BUFF), negative);
 
         tp.addGrid(0);
     }

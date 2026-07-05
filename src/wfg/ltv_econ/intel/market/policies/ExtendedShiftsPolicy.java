@@ -54,7 +54,7 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
         tp.addToGrid(0, 0, str("marketPolicyLocalProductionTxt"), "+" + PRODUCTION_BUFF + "%");
         tp.addToGrid(0, 1, str("marketPopDataHealthTxt"), String.format("%+.2f", HEALTH_DEBUFF), negative);
         tp.addToGrid(0, 2, str("marketPopDataHappinessTxt"), String.format("%+.1f", HAPPINESS_DEBUFF), negative);
-        tp.addToGrid(0, 3, str("marketPopDataConsciousness"), String.format("%+.2f", CLASS_BUFF), negative);
+        tp.addToGrid(0, 3, str("marketPopDataConsciousnessTxt"), String.format("%+.2f", CLASS_BUFF), negative);
 
         tp.addGrid(0);
     }

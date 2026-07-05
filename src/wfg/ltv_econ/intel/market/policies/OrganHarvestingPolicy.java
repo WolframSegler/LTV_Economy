@@ -70,7 +70,7 @@ public class OrganHarvestingPolicy extends MarketPolicy {
         tp.addToGrid(0, 2, str("marketPolicyAssetLiquidated"), NumFormat.formatCredit(ASSET_SEIZURE_CREDITS_BUFF));
         tp.addToGrid(0, 3, str("marketPopDataHealthTxt"), String.format("%+.2f", HEALTH_BUFF));
         tp.addToGrid(0, 4, str("marketPopDataHappinessTxt"), String.format("%+.2f", HAPPINESS_DEBUFF), negative);
-        tp.addToGrid(0, 5, str("marketPopDataConsciousness"), String.format("%+.3f", CLASS_BUFF), negative);
+        tp.addToGrid(0, 5, str("marketPopDataConsciousnessTxt"), String.format("%+.3f", CLASS_BUFF), negative);
 
         tp.addGrid(0);
     }

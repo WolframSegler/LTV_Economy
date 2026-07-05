@@ -237,7 +237,7 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
         );
 
         socialCohesionDelta.modifyFlat(
-            "consciousness", popClassConsciousness * 0.0002f, str("marketPopDataConsciousness")
+            "consciousness", popClassConsciousness * 0.0002f, str("marketPopDataConsciousnessTxt")
         );
 
         socialCohesionDelta.modifyFlat(

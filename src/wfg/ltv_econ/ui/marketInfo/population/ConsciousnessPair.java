@@ -25,7 +25,7 @@ public class ConsciousnessPair extends IconValuePairTp {
         lbl.setHighlightOnMouseover(true);
         lbl.setAlignment(Alignment.MID);
         tooltip.builder = (tp, exp) -> {
-            tp.addTitle(str("marketPopDataConsciousness"), base);
+            tp.addTitle(str("marketPopDataConsciousnessTxt"), base);
 
             tp.addPara(str("uiTpTxtClassConsciousness"), opad);
 

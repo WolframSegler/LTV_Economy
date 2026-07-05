@@ -52,7 +52,7 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         tp.beginGridFlipped(250f, cols, 60f, pad);
         tp.addToGrid(0, 0, str("marketPopDataHappinessTxt"), String.format("%+.2f", HAPPINESS_BUFF));
         tp.addToGrid(0, 1, str("marketPopDataCohesionTxt"), String.format("%+.2f", COHESION_BUFF));
-        tp.addToGrid(0, 2, str("marketPopDataConsciousness"), String.format("%.3f", CLASS_DEBUFF));
+        tp.addToGrid(0, 2, str("marketPopDataConsciousnessTxt"), String.format("%.3f", CLASS_DEBUFF));
         tp.addToGrid(0, 3, str("marketPolicyLocalProductionTxt"), Integer.toString(PRODUCTION_DEBUFF) + "%", negative);
 
         tp.addGrid(0);
