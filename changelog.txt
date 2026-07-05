@@ -3,7 +3,7 @@ Version 0.4.8-beta | SAVE COMPATIBLE
 - Expand the yards policy now takes less time to cooldown and can be activated on size 4 or larger colonies that are not the capital.
 - General strike now decreases consumption in proportion as well.
 - Reduced the feedback loop strength between cohesion and consciousness.
-- Fixed bug where worker registry held removed market entries, causing a crash upon info retrievel.
+- Fixed bug where worker registry held removed market entries, causing a crash upon info retrieval.
 - Fixed bonusXp fraction text when transferring ships to faction hangar.
 - Reduced the change of the general strike event.
 - Reduced required combat power for trade fleets.
