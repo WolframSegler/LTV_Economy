@@ -74,8 +74,5 @@ public class LaborConfigLoader {
 
         LaborConfig.NPC_WORKER_POOL_VISIBLE = LunaSettings.getBoolean(LTV_ECON, "NPC_WORKER_POOL_VISIBLE");
         LaborConfig.GROWTH_EFFECT_WORKER_POOL = LunaSettings.getBoolean(LTV_ECON, "GROWTH_EFFECT_WORKER_POOL");
-
-        final float avgValue = LunaSettings.getDouble(LTV_ECON, "RoVC_average").floatValue();
-        LaborConfig.RoVC_average = avgValue;
     }
 }
