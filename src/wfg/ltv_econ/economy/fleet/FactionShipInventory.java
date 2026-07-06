@@ -212,6 +212,30 @@ public class FactionShipInventory implements Serializable {
         return total;
     }
 
+    public final int getOwnedShips() {
+        int total = 0;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getOwned();
+        }
+        return total;
+    }
+
+    public final int getIdleShips() {
+        int total = 0;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getIdle();
+        }
+        return total;
+    }
+
+    public final int getInUseShips() {
+        int total = 0;
+        for (ShipTypeData data : ships.values()) {
+            total += data.getInUse();
+        }
+        return total;
+    }
+
     public final Map<String, ShipTypeData> getShips() {
         return Collections.unmodifiableMap(ships);
     }

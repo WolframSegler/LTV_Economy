@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI.ShipTypeHints;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
@@ -64,8 +65,8 @@ public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget
     }
 
     private static final boolean shouldFilterOut(ShipTypeData data) {
-        if (!ShipFilters.showCivilian && data.spec.getDesignation().equals(ShipTypeData.CIVILIAN)) return true;
-        if (!ShipFilters.showCombat && !data.spec.getDesignation().equals(ShipTypeData.CIVILIAN)) return true;
+        if (!ShipFilters.showCivilian && data.spec.getHints().contains(ShipTypeHints.CIVILIAN)) return true;
+        if (!ShipFilters.showCombat && !data.spec.getHints().contains(ShipTypeHints.CIVILIAN)) return true;
         if (ShipFilters.showOnlyIdle && data.getIdle() < 1) return true;
 
         final HullSize size = data.spec.getHullSize();

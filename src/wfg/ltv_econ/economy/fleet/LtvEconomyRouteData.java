@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.fleet;
 
+import java.util.List;
+
 import com.fs.starfarer.api.impl.campaign.fleets.EconomyFleetAssignmentAI.EconomyRouteData;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteData;
 
@@ -20,9 +22,15 @@ public class LtvEconomyRouteData extends EconomyRouteData {
 
     public final TradeMission getMission() {
         if (mission == null) {
-            for (TradeMission m : EconomyEngine.instance().getActiveMissions()) {
-                if (m.uniqueID == uniqueID) {
-                    mission = m;
+            final List<TradeMission> list = EconomyEngine.instance().getActiveMissions();
+            for (int i = 0; i < list.size(); i++) {
+                try {
+                    final TradeMission m = list.get(i);
+                    if (m.uniqueID == uniqueID) {
+                        mission = m;
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
                     break;
                 }
             }

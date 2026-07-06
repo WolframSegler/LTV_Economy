@@ -9,6 +9,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI.ShipTypeHints;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -17,6 +18,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
+import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
@@ -75,7 +77,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final int perPairW = ((w - flagW)/2 - opad) / 4;
         final int iconS = 32;
 
-        final LabelAPI shipmentLbl = settings.createLabel(str("uiTitleShipmentCapacities"), Fonts.INSIGNIA_LARGE);
+        final LabelAPI shipmentLbl = settings.createLabel(str("uiTitleHullCapacities"), Fonts.INSIGNIA_LARGE);
         add(shipmentLbl).inTL(GAP_LEFT_1, GAP_TOP_1);
 
         final IconValuePairTp cargoPair = new IconValuePairTp(m_panel, perPairW, iconS, CRATES, inv.getTotalCargoCapacity(), true, null);
@@ -98,10 +100,12 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final IconValuePairTp suppliesPair = new IconValuePairTp(m_panel, perPairW, iconS, SUPPLIES, inv.getTotalDailyMaintenance(), true, null);
         final IconValuePairTp operatorPair = new IconValuePairTp(m_panel, perPairW, iconS, CREW, inv.getTotalCrew(), true, null);
         final IconValuePairTp wagePair = new IconValuePairTp(m_panel, perPairW, iconS, WAGES, inv.getTotalMonthlyCrewWage(), false, null);
+        final IconValuePairTp hullPair = new IconValuePairTp(m_panel, perPairW, iconS, SHIPS, inv.getOwnedShips(), true, null);
 
         add(suppliesPair).inTL(GAP_LEFT_2, GAP_TOP_2);
         add(operatorPair).inTL(GAP_LEFT_2 + perPairW, GAP_TOP_2);
         add(wagePair).inTL(GAP_LEFT_2 + perPairW*2, GAP_TOP_2);
+        add(hullPair).inTL(GAP_LEFT_2 + perPairW*3, GAP_TOP_2);
 
         cargoPair.icon().texColor = UIColors.CARGO_COLOR;
         wagePair.label().setText(wagePair.label().getText() + Strings.C);
@@ -166,11 +170,48 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         wagePair.tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiTitleMonthlyCrewWages"), base);
+            int civilianCount = 0;
+            int frigateCount = 0;
+            int destroyerCount = 0;
+            int cruiserCount = 0;
+            int capitalCount = 0;
+            for (ShipTypeData data : inv.getShips().values()) {
+                if (data.spec.getHints().contains(ShipTypeHints.CIVILIAN)) civilianCount += data.getOwned();
+                switch (data.spec.getHullSize()) {
+                    case FRIGATE -> ++frigateCount;
+                    case DESTROYER -> ++destroyerCount;
+                    case CRUISER -> ++cruiserCount;
+                    case CAPITAL_SHIP -> ++capitalCount;
+                    default -> {}
+                }
+            }
+            final int totalCount = inv.getOwnedShips();
+            final int combatCount = totalCount - civilianCount;
+
+            tp.addTitle(str("uiTitleOwnedHulls"), base);
             
-            tp.addPara(str("uiTpTxtMonthlyCrewWages1"), pad, highlight, (int)(EconConfig.IDLE_CREW_WAGE_MULT * 100) + "%");
-            float wages = inv.getTotalMonthlyCrewWage();
-            tp.addPara(str("uiTpTxtMonthlyCrewWages2"), pad, highlight, NumFormat.formatCreditAbs(wages));
+            tp.addPara(str("uiTpTxtOwnedHulls"), pad, highlight, Integer.toString(totalCount), Integer.toString(inv.getIdleShips()));
+            
+            final int gridWidth = 390;
+            final int valueWidth = 40;
+
+            tp.addPara(str("uiTpTitleOwnedHulls1"), base, opad);
+            tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
+            tp.addToGrid(0, 0, str("uiTitleCivilianShipType"), NumFormat.engNotate(civilianCount));
+            tp.addToGrid(0, 1, str("uiTitleCombatShipType"), NumFormat.engNotate(combatCount));
+            tp.addGrid(0);
+
+            tp.addPara(str("uiTpTitleOwnedHulls1"), base, opad);
+            tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
+            tp.addToGrid(0, 0, str("uiTitleFrigatesShipType"), NumFormat.engNotate(frigateCount));
+            tp.addToGrid(0, 1, str("uiTitleDestroyersShipType"), NumFormat.engNotate(destroyerCount));
+            tp.addToGrid(0, 2, str("uiTitleCruisersShipType"), NumFormat.engNotate(cruiserCount));
+            tp.addToGrid(0, 3, str("uiTitleCapitalsShipType"), NumFormat.engNotate(capitalCount));
+            tp.addGrid(opad);
+        };
+
+        hullPair.tooltip.builder = (tp, expanded) -> {
+
         };
 
         cargoPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
@@ -187,5 +228,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
             tp, operatorPair.getPanel(), AnchorType.LeftTop, opad);
         wagePair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
             tp, wagePair.getPanel(), AnchorType.LeftTop, opad);
+        hullPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
+            tp, hullPair.getPanel(), AnchorType.LeftTop, opad);
     }
 }

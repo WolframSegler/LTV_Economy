@@ -1,6 +1,5 @@
 package wfg.ltv_econ.economy.fleet;
 
-import static wfg.ltv_econ.economy.fleet.ShipTypeData.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import com.fs.starfarer.api.Global;
@@ -31,6 +30,13 @@ public class ShipAllocator {
     private static final double eps = 1e-3;
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
     private static final char DOCT_PREF_KEY = '|';
+
+    private static final String FRIGATES = "Frigates";
+	private static final String DESTROYERS = "Destroyers";
+	private static final String CAPITALS = "Capitals";
+	private static final String PHASE_SHIPS = "Phase ships";
+	private static final String CARRIERS = "Carriers";
+	private static final String CIVILIAN = "Civilian";
 
     private static final double DIVERSITY_PENALTY = 0.4;
     private static final double REF_SHIPMENT = 500d;

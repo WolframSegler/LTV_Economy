@@ -72,7 +72,7 @@ public class TransferToFactionInventoryDialog extends DialogPanel {
 
         if (option != 0) return;
 
-        EconomyEngine.instance().getFactionShipInventory(Factions.PLAYER).addShip(member.getHullId(), 1);
+        EconomyEngine.instance().getFactionShipInventory(Factions.PLAYER).addShip(member.getHullSpec().getBaseHullId(), 1);
 
         final CargoAPI playerCargo = Global.getSector().getPlayerFleet().getCargo();
         final HullVariantSpec variant = (HullVariantSpec) member.getVariant();

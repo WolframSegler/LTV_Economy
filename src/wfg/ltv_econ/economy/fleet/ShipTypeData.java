@@ -5,21 +5,14 @@ import static wfg.native_ui.util.Globals.settings;
 
 import java.io.Serializable;
 
+import com.fs.starfarer.api.combat.ShieldAPI.ShieldType;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI.ShipTypeHints;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.native_ui.util.Arithmetic;
 
 public class ShipTypeData implements Serializable {
-    public static final String FRIGATES = "Frigates";
-	public static final String DESTROYERS = "Destroyers";
-	public static final String CRUISERS = "Cruisers";
-	public static final String CAPITALS = "Capitals";
-	public static final String COMBAT_SHIPS = "Warships";
-	public static final String PHASE_SHIPS = "Phase ships";
-	public static final String CARRIERS = "Carriers";
-	public static final String CIVILIAN = "Civilian";
-    
     public final String hullID;
     public transient ShipHullSpecAPI spec;
 
@@ -127,23 +120,23 @@ public class ShipTypeData implements Serializable {
             + (1f - spec.getShieldSpec().getFluxPerDamageAbsorbed()) * 3f
             + (spec.getEngineSpec().getMaxSpeed() - 80) / 30f;
             
-        final float mult = getCombatMult(spec.getDesignation()) * stats;
+        final float mult = getCombatMult(spec) * stats;
         return spec.getFleetPoints() * mult;
     }
 
-    private static final float getCombatMult(String designation) {
-        if (designation == null) return 0f;
+    private static final float getCombatMult(ShipHullSpecAPI spec) {
+        if (spec.getShieldSpec().getType() == ShieldType.PHASE) {
+            return 0.7f;
+        }
 
-        return switch (designation) {
-            case CIVILIAN -> 0.08f;
-            case COMBAT_SHIPS -> 1f;
-            case FRIGATES -> 0.7f;
-            case DESTROYERS -> 1.2f;
-            case CRUISERS -> 1.1f;
-            case CAPITALS -> 1f;
-            case PHASE_SHIPS -> 0.7f;
-            case CARRIERS -> 0.4f;
-            default -> 0.5f;
-        };
+        if (spec.getHints().contains(ShipTypeHints.CIVILIAN)) {
+            return 0.05f;
+        }
+
+        if (spec.getHints().contains(ShipTypeHints.CARRIER)) {
+            return 0.4f;
+        }
+
+        return 1.0f;
     }
 }
