@@ -170,6 +170,14 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         wagePair.tooltip.builder = (tp, expanded) -> {
+            tp.addTitle(str("uiTitleMonthlyCrewWages"), base);
+            
+            tp.addPara(str("uiTpTxtMonthlyCrewWages1"), pad, highlight, (int)(EconConfig.IDLE_CREW_WAGE_MULT * 100) + "%");
+            float wages = inv.getTotalMonthlyCrewWage();
+            tp.addPara(str("uiTpTxtMonthlyCrewWages2"), pad, highlight, NumFormat.formatCreditAbs(wages));
+        };
+
+        hullPair.tooltip.builder = (tp, expanded) -> {
             int civilianCount = 0;
             int frigateCount = 0;
             int destroyerCount = 0;
@@ -208,10 +216,6 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
             tp.addToGrid(0, 2, str("uiTitleCruisersShipType"), NumFormat.engNotate(cruiserCount));
             tp.addToGrid(0, 3, str("uiTitleCapitalsShipType"), NumFormat.engNotate(capitalCount));
             tp.addGrid(opad);
-        };
-
-        hullPair.tooltip.builder = (tp, expanded) -> {
-
         };
 
         cargoPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
