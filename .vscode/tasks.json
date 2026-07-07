@@ -13,6 +13,16 @@
     {
       "label": "compile",
       "type": "shell",
+      "command": "mvn clean package",
+      "dependsOn": "delete-logs",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "compile-no-tests",
+      "type": "shell",
       "command": "mvn clean package -DskipTests",
       "dependsOn": "delete-logs",
       "group": {

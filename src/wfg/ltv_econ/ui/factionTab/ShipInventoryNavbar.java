@@ -207,15 +207,15 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
             tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
             tp.addToGrid(0, 0, str("uiTitleCivilianShipType"), NumFormat.engNotate(civilianCount));
             tp.addToGrid(0, 1, str("uiTitleCombatShipType"), NumFormat.engNotate(combatCount));
-            tp.addGrid(0);
+            tp.addGrid(0f);
 
-            tp.addPara(str("uiTpTitleOwnedHulls1"), base, opad);
+            tp.addPara(str("uiTpTitleOwnedHulls2"), base, opad);
             tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
             tp.addToGrid(0, 0, str("uiTitleFrigatesShipType"), NumFormat.engNotate(frigateCount));
             tp.addToGrid(0, 1, str("uiTitleDestroyersShipType"), NumFormat.engNotate(destroyerCount));
             tp.addToGrid(0, 2, str("uiTitleCruisersShipType"), NumFormat.engNotate(cruiserCount));
             tp.addToGrid(0, 3, str("uiTitleCapitalsShipType"), NumFormat.engNotate(capitalCount));
-            tp.addGrid(opad);
+            tp.addGrid(0f);
         };
 
         cargoPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(

@@ -51,25 +51,29 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
 
     @Override
     protected String getStartingActionText(RouteSegment segment) {
-        if (getMission().src == null) return super.getStartingActionText(segment);
+        final TradeMission mission = getMission();
+        if (mission == null || mission.src == null) return super.getStartingActionText(segment);
         return strf("econFleetAIStartingActionTxt", getCargoList(segment), getMission().src.getName());
     }
 
     @Override
     protected String getEndingActionText(RouteSegment segment) {
-        if (getMission().src == null) return super.getEndingActionText(segment);
+        final TradeMission mission = getMission();
+        if (mission == null || mission.src == null) return super.getEndingActionText(segment);
         return strf("econFleetAIEndingActionTxt", getCargoList(segment), getMission().dest.getName());
     }
 
     @Override
     protected String getTravelActionText(RouteSegment segment) {
-        if (getMission().dest == null) return super.getTravelActionText(segment);
+        final TradeMission mission = getMission();
+        if (mission == null || mission.dest == null) return super.getTravelActionText(segment);
         return strf("econFleetAITravelActionTxt", getCargoList(segment), getMission().dest.getName());
     }
 
     @Override
     protected String getInSystemActionText(RouteSegment segment) {
-        if (getMission().dest == null) return super.getInSystemActionText(segment);
+        final TradeMission mission = getMission();
+        if (mission == null || mission.dest == null) return super.getInSystemActionText(segment);
         if (segment.getId() == MissionStatus.IN_DST_ORBIT_UNLOADING.ordinal()) {
             return strf("econFleetAIEndingActionTxt", getCargoList(segment), getMission().dest.getName());
         }

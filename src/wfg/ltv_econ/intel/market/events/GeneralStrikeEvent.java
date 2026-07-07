@@ -49,6 +49,7 @@ public class GeneralStrikeEvent extends MarketEvent {
             final CommodityCell cell = dom.getCell(marketID);
             cell.getProductionStat().modifyMult(id, PROD_MULT, spec.name);
             cell.getConsumptionStat().modifyMult(id, PROD_MULT, spec.name);
+            cell.getTargetQuantumStat().modifyPercent(id, 100f / PROD_MULT, spec.name); // to counter-balance the reduction in consumption.
         }
 
         Global.getSector().getIntelManager().addIntel(
@@ -75,6 +76,7 @@ public class GeneralStrikeEvent extends MarketEvent {
             final CommodityCell cell = dom.getCell(marketID);
             cell.getProductionStat().unmodifyMult(id);
             cell.getConsumptionStat().unmodifyMult(id);
+            cell.getTargetQuantumStat().unmodifyPercent(id);
         }
     }
 
