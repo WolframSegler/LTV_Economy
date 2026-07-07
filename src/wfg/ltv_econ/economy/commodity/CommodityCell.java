@@ -20,6 +20,7 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.constant.strings.Consumption;
 import wfg.ltv_econ.economy.CompatLayer;
+import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
 import wfg.native_ui.util.Arithmetic;
@@ -281,62 +282,15 @@ public class CommodityCell implements Serializable {
         addStoredAmount(getQuantumRealBalance());
     }
 
-    public final float getUnitPriceForTrade(PriceType type, long amount) {
-        return getUnitPrice(type, amount,
+    public final float getUnitPriceForTrade(TransactionDirection type, long amount) {
+        return BasePriceCalculator.getUnitPrice(type, amount,
             stored + getTotalImports() + virtualImports - getTotalExports(),
             spec.getBasePrice(), getTargetStockpiles()
         );
     }
 
-    public final float getUnitPrice(PriceType type, long amount) {
-        return getUnitPrice(type, amount, stored, spec.getBasePrice(), getTargetStockpiles());
-    }
-    
-    private static final float INHERENT_DEMAND = 4f;
-    private static final float SHIFT_FRACTION = 0.002f;
-    private static final double epsilon = 1e-3d;
-    private static final double scarcityExpBuy = 0.85;
-    private static final double scarcityExpNeutral = 1d;
-    private static final double scarcityExpSell = 1.15;
-    public static final float getUnitPrice(PriceType type, long amount, double stored, float basePrice,
-        float preferred
-    ) {
-        final boolean buying = (type == PriceType.MARKET_BUYING);
-
-        final long n = Math.abs(amount);
-        final long sn = buying ? n : -n;
-        final float d = Math.max(preferred, INHERENT_DEMAND);
-        final double s = Math.max(stored, INHERENT_DEMAND);
-        final float shift = SHIFT_FRACTION * d;
-        final double exp = switch (type) {
-            case MARKET_BUYING -> scarcityExpBuy;
-            case MARKET_SELLING -> scarcityExpSell;
-            case NEUTRAL -> scarcityExpNeutral;
-        };
-
-        final double s0 = s + shift;
-        final double s1 = Math.max(s + sn + shift, epsilon);
-        final double a = Math.min(s0, s1);
-        final double b = Math.max(s0, s1);
-        final double delta = b - a;
-        final float sd = d + shift;
-
-        final float avgMult;
-        if (n <= 0) {
-            avgMult = (float) Math.pow(sd / s0, exp);
-        } else {
-            final double I;
-            if (exp == 1d) {
-                I = sd * Math.log(b / a);
-            } else {
-                final double prefactor = Math.pow(sd, exp) / (1d - exp);
-                I = prefactor * (Math.pow(b, 1d - exp) - Math.pow(a, 1d - exp));
-            }
-            avgMult = (float) (I / delta);
-        }
-
-        final float priceMult = Math.max(0.1f, Math.min(4f, avgMult));
-        return Math.max(1f, basePrice * priceMult);
+    public final float getUnitPrice(TransactionDirection type, long amount) {
+        return BasePriceCalculator.getUnitPrice(type, amount, stored, spec.getBasePrice(), getTargetStockpiles());
     }
 
     public final float computeVanillaPrice(long amount, boolean isSellingToMarket, boolean isPlayer) {
@@ -350,8 +304,8 @@ public class CommodityCell implements Serializable {
             );
         }
 
-        final PriceType type = isSellingToMarket ? PriceType.MARKET_BUYING : PriceType.MARKET_SELLING;
-        final float unitPrice = getUnitPrice(
+        final TransactionDirection type = isSellingToMarket ? TransactionDirection.ENTITY_BUYING : TransactionDirection.ENTITY_SELLING;
+        final float unitPrice = BasePriceCalculator.getUnitPrice(
             type, amount, stored + market.getCommodityData(comID).getCombinedTradeModQuantity(),
             spec.getBasePrice(), getTargetStockpiles()
         );
@@ -419,14 +373,5 @@ public class CommodityCell implements Serializable {
         sb.append(" remainingExportableAfterTargetQuantum: ").append(getRemainingExportableAfterTargetQuantum()).append("\n");
 
         Global.getLogger(getClass()).info(sb.toString());
-    }
-
-    public static enum PriceType {
-        /** Buying from the player. Stock increases. */
-        MARKET_BUYING,
-        /** Selling to the player. Stock decreases. */
-        MARKET_SELLING,
-        /** Internal baseline */
-        NEUTRAL
     }
 }

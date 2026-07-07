@@ -23,7 +23,7 @@ import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
-import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
+import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
@@ -617,7 +617,7 @@ public class EconomyInfo {
         float total = 0;
 
         final Collection<CommodityCell> allCells = engine.getComDomain(comID).getAllCells();
-        for (CommodityCell cell : allCells) total += cell.getUnitPrice(PriceType.NEUTRAL, units);
+        for (CommodityCell cell : allCells) total += cell.getUnitPrice(TransactionDirection.NEUTRAL, units);
 
         return total / (float) allCells.size();
     }

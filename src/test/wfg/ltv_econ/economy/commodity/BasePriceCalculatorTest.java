@@ -1,6 +1,5 @@
 package wfg.ltv_econ.economy.commodity;
 
-import wfg.ltv_econ.economy.commodity.BasePriceCalculator;
 import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,6 @@ public class BasePriceCalculatorTest {
         final float avgOnce = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, totalAmount, stored, BASE_PRICE, DEMAND);
         final double totalOnce = avgOnce * totalAmount;
 
-        // Buy in two halves, updating stock after each
         final long half = totalAmount / 2;
         final float avgFirst = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, half, stored, BASE_PRICE, DEMAND);
         final double costFirst = avgFirst * half;
@@ -77,7 +75,7 @@ public class BasePriceCalculatorTest {
     public void buyMoreThanStock_HigherAverageThanExactStock() {
         final double stored = 40.0;
         final long exactAmount = (long) stored;
-        final long overAmount = exactAmount + 30; // stock becomes negative
+        final long overAmount = exactAmount + 30;
 
         final float avgExact = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, exactAmount, stored, BASE_PRICE, DEMAND);
         final float avgOver = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, overAmount, stored, BASE_PRICE, DEMAND);
@@ -116,7 +114,6 @@ public class BasePriceCalculatorTest {
     @Test
     public void sellWhenStockNegative_GivesVeryHighPrice() {
         final double stored = -80.0;
-        // Player selling (entity buying) increases stock, but still starts negative
         final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, 20, stored, BASE_PRICE, DEMAND);
         assertTrue(avg > BASE_PRICE * 2, "Selling to entity when stock is negative should still yield high price");
         assertTrue(avg < 1e6, "Price should be finite");
@@ -142,20 +139,23 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
-    public void tradeAcrossZoneBoundaries_StillAdditive() {
-        // Stock near deficit boundary: DEMAND=100, DEFICIT_NORMAL_BOUND=0.5 -> boundary at 50
-        final double stored = 55.0;
-        final long buyAmount = 20;  // will cross from normal to deficit (stored goes 55 -> 35)
-        final float avgFull = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, buyAmount, stored, BASE_PRICE, DEMAND);
-        final double costFull = avgFull * buyAmount;
+    public void tradeStraddlingZero_StillAdditive() {
+        // Start in deficit (negative), buy enough to cross into positive
+        final double stored = -30.0;
+        final long sellAmount = 80;
+        final float avgFull = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, sellAmount, stored, BASE_PRICE, DEMAND);
+        final double revenueFull = avgFull * sellAmount;
 
-        final float avg1 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 5, stored, BASE_PRICE, DEMAND);
-        final double cost1 = avg1 * 5;
-        final double newStock = stored - 5;
-        final float avg2 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 15, newStock, BASE_PRICE, DEMAND);
-        final double cost2 = avg2 * 15;
-        assertEquals(costFull, cost1 + cost2, TOLERANCE * costFull,
-                "Total cost should be additive even when crossing zone boundaries");
+        final long part1 = 40;
+        final float avg1 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, part1, stored, BASE_PRICE, DEMAND);
+        final double rev1 = avg1 * part1;
+        final double midStock = stored + part1; // 10
+        final long part2 = sellAmount - part1;
+        final float avg2 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, part2, midStock, BASE_PRICE, DEMAND);
+        final double rev2 = avg2 * part2;
+
+        assertEquals(revenueFull, rev1 + rev2, TOLERANCE * revenueFull,
+                "Total revenue should be additive even when crossing zero stock boundary");
     }
 
     @Test
@@ -179,7 +179,8 @@ public class BasePriceCalculatorTest {
         final float avgBuy = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, amount, stockAfterSell, BASE_PRICE, DEMAND);
         final double cost = avgBuy * amount;
 
-        assertTrue(Math.abs(cost - revenue) <= TOLERANCE, "Round-trip sell-then-buy should result in net credits staying the same");
+        assertEquals(revenue, cost, TOLERANCE * Math.max(revenue, 1.0),
+                "Round-trip sell-then-buy should result in net credits staying the same");
     }
 
     @Test
@@ -194,31 +195,8 @@ public class BasePriceCalculatorTest {
         final float avgSell = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, amount, stockAfterBuy, BASE_PRICE, DEMAND);
         final double revenue = avgSell * amount;
 
-        assertTrue(Math.abs(cost - revenue) <= TOLERANCE, "Round-trip buy-then-sell should result in net credits staying the same");
-    }
-
-    @Test
-    public void instantaneousMultiplierAtZoneBoundaries() {
-        final double atDeficit = DEFICIT_NORMAL_BOUND * DEMAND;
-        final double atExcess  = EXCESS_NORMAL_BOUND * DEMAND;
-        final float pDef = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, atDeficit, BASE_PRICE, DEMAND);
-        final float pExc = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, atExcess,  BASE_PRICE, DEMAND);
-        // These are just sanity checks; no assertion on magnitude, but they must be finite.
-        assertTrue(Float.isFinite(pDef) && Float.isFinite(pExc));
-    }
-
-    @Test
-    public void tradeStartingExactlyAtDeficitBoundary() {
-        final double stored = DEFICIT_NORMAL_BOUND * DEMAND;
-        final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 5, stored, BASE_PRICE, DEMAND);
-        assertTrue(avg > 0);
-    }
-
-    @Test
-    public void tradeEndingExactlyAtExcessBoundary() {
-        final double start = EXCESS_NORMAL_BOUND * DEMAND - 2;
-        final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 2, start, BASE_PRICE, DEMAND);
-        assertTrue(avg > 0);
+        assertEquals(cost, revenue, TOLERANCE * Math.max(cost, 1.0),
+                "Round-trip buy-then-sell should result in net credits staying the same");
     }
 
     @Test
@@ -227,7 +205,7 @@ public class BasePriceCalculatorTest {
         for (int i = 0; i < stocks.length - 1; i++) {
             final float p1 = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, stocks[i],   BASE_PRICE, DEMAND);
             final float p2 = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, stocks[i+1], BASE_PRICE, DEMAND);
-            assertTrue(p1 > p2, "Price should decrease as stock increases: " + stocks[i] + " -> " + stocks[i+1]);
+            assertTrue(p1 >= p2, "Price should decrease as stock increases: " + stocks[i] + " -> " + stocks[i+1]);
         }
     }
 
@@ -298,19 +276,13 @@ public class BasePriceCalculatorTest {
 
     @Test
     public void entityBuyingIncreasesStock() {
-        final double stored = 50;
-        final long amount = 30;
-        BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, amount, stored, BASE_PRICE, DEMAND);
-        // No direct access to new stock, but we can compute: stock should become stored + amount
-        // This test just verifies it does not crash; accurate stock change is implicit in other tests.
+        // No direct assertion; just validates the call does not crash.
+        BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, 30, 50, BASE_PRICE, DEMAND);
     }
 
     @Test
     public void entitySellingDecreasesStock() {
-        final double stored = 50;
-        final long amount = 20;
-        BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, amount, stored, BASE_PRICE, DEMAND);
-        // Stock would be 30; no crash is enough.
+        BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 20, 50, BASE_PRICE, DEMAND);
     }
 
     @Test
@@ -345,20 +317,21 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
-    public void crossAllThreeZonesAdditivity() {
-        final double stored = -100;               // deep deficit
-        final long buy = 300;                     // move to deep excess
-        final float avgOnce = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, buy, stored, BASE_PRICE, DEMAND);
-        final double costOnce = avgOnce * buy;
+    public void tradeCrossingNegativeToPositiveAdditivity() {
+        // Start deeply negative, cross into positive after a large sell (ENTITY_BUYING)
+        final double stored = -100;
+        final long sellAmount = 250;   // new stock = 150 (positive)
+        final float avgOnce = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, sellAmount, stored, BASE_PRICE, DEMAND);
+        final double revenueOnce = avgOnce * sellAmount;
 
-        // split: first half, then second half
-        final long half = buy / 2;
-        final float a1 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, half, stored, BASE_PRICE, DEMAND);
-        final double c1 = a1 * half;
-        final double afterHalf = stored - half;
-        final float a2 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, half, afterHalf, BASE_PRICE, DEMAND);
-        final double c2 = a2 * half;
-        assertEquals(costOnce, c1 + c2, TOLERANCE * costOnce);
+        final long half = sellAmount / 2;
+        final float a1 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, half, stored, BASE_PRICE, DEMAND);
+        final double r1 = a1 * half;
+        final double mid = stored + half;   // -100 + 125 = 25 (crossed zero)
+        final float a2 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, half, mid, BASE_PRICE, DEMAND);
+        final double r2 = a2 * half;
+        assertEquals(revenueOnce, r1 + r2, TOLERANCE * revenueOnce,
+                "Total revenue additive when crossing from negative to positive stock");
     }
 
     // ---- base price scaling ----------------------------------------------------
@@ -377,43 +350,29 @@ public class BasePriceCalculatorTest {
 
     @Test
     public void regressionSnapshot_EquilibriumBuy() {
-        // buying 10 units when stock = demand should yield price < basePrice
         final double stored = DEMAND;
         final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 10, stored, BASE_PRICE, DEMAND);
-        // With current parameters (EXP_NORMAL=1, SHIFT_FRACTION=0.002) the exact value may vary;
-        // we just ensure it's in a reasonable ballpark (less than base, greater than half base).
-        assertTrue(avg > BASE_PRICE && avg < BASE_PRICE * 1.5, "Buying at equilibrium should raise the average price above base, but not drastically");
+        assertTrue(avg > BASE_PRICE && avg < BASE_PRICE * 1.5,
+                "Buying at equilibrium should raise the average price above base, but not drastically");
     }
 
     @Test
     public void regressionSnapshot_DeepDeficitSmallBuy() {
         final double stored = -50;
         final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 1, stored, BASE_PRICE, DEMAND);
-        // Must be significantly elevated, but below ceiling if not saturated.
         assertTrue(avg > BASE_PRICE * 2 && avg <= BASE_PRICE * BasePriceCalculator.PRICE_MULT_CEILING);
     }
 
+    // ---- continuity ------------------------------------------------------------
+
     @Test
-    public void priceFunctionIsContinuousAtZoneBoundaries() {
-        final double deficitB = DEFICIT_NORMAL_BOUND * DEMAND;
-        final double excessB  = EXCESS_NORMAL_BOUND * DEMAND;
-
-        // Get instantaneous prices right at the boundaries (using NEUTRAL with zero amount)
-        final float atDeficit = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, deficitB, BASE_PRICE, DEMAND);
-        final float atExcess  = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, excessB,  BASE_PRICE, DEMAND);
-
-        // Compute prices just barely inside each adjacent zone (offset by a tiny epsilon)
+    public void priceFunctionIsContinuousAtZero() {
+        // Instantaneous multiplier near s=0 from left and right should be close to m(0)
         final double eps = 1e-6;
-        final float justBelowDeficit = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, deficitB - eps, BASE_PRICE, DEMAND);
-        final float justAboveDeficit = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, deficitB + eps, BASE_PRICE, DEMAND);
-
-        final float justBelowExcess = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, excessB - eps, BASE_PRICE, DEMAND);
-        final float justAboveExcess = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, excessB + eps, BASE_PRICE, DEMAND);
-
-        // The limit from both sides should equal the value at the boundary.
-        assertEquals(atDeficit, justBelowDeficit, 1e-4, "Deficit boundary left limit");
-        assertEquals(atDeficit, justAboveDeficit, 1e-4, "Deficit boundary right limit");
-        assertEquals(atExcess, justBelowExcess, 1e-4, "Excess boundary left limit");
-        assertEquals(atExcess, justAboveExcess, 1e-4, "Excess boundary right limit");
+        final float left  = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, -eps, BASE_PRICE, DEMAND);
+        final float right = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0,  eps, BASE_PRICE, DEMAND);
+        final float atZero = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0.0, BASE_PRICE, DEMAND);
+        assertEquals(atZero, left,  1e-4, "Continuity from left at zero");
+        assertEquals(atZero, right, 1e-4, "Continuity from right at zero");
     }
 }

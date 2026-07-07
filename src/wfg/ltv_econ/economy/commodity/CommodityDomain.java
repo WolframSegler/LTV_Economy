@@ -20,7 +20,7 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.constant.TradeWeights;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
-import wfg.ltv_econ.economy.commodity.CommodityCell.PriceType;
+import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -234,8 +234,8 @@ public class CommodityDomain implements Serializable {
             final boolean sameFaction = expCell.market.getFaction().equals(impCell.market.getFaction());
             final double amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
-            final double exporterPrice = expCell.getUnitPriceForTrade(PriceType.MARKET_SELLING, (long)amountToSend);
-            final double importerPrice = impCell.getUnitPriceForTrade(PriceType.MARKET_BUYING, (long)amountToSend);
+            final double exporterPrice = expCell.getUnitPriceForTrade(TransactionDirection.ENTITY_SELLING, (long)amountToSend);
+            final double importerPrice = impCell.getUnitPriceForTrade(TransactionDirection.ENTITY_BUYING, (long)amountToSend);
             final double unitPrice = (exporterPrice + importerPrice) / 2d;
             final double price = unitPrice * amountToSend;
 
@@ -294,7 +294,7 @@ public class CommodityDomain implements Serializable {
             final double exportable = exporter.computeExportAmount();
             final float share = (float) (exportable / sumExportable);
             final float amount = Math.min((float) exportable, share * informalNode.imports);
-            final int price = (int) (exporter.getUnitPriceForTrade(PriceType.MARKET_SELLING, (int)amount)
+            final int price = (int) (exporter.getUnitPriceForTrade(TransactionDirection.ENTITY_SELLING, (int)amount)
                 * informalNode.priceMultImporting * amount * (1f + exporter.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementImporting)
             );
 
@@ -312,7 +312,7 @@ public class CommodityDomain implements Serializable {
             final float share = (float) (importable / sumImportable);
             final float amount = Math.min((float) importable, importer.getInformalImportMods()
                 .computeEffective(share * informalNode.exports));
-            final int price = (int) (importer.getUnitPriceForTrade(PriceType.MARKET_BUYING, (int)amount)
+            final int price = (int) (importer.getUnitPriceForTrade(TransactionDirection.ENTITY_BUYING, (int)amount)
                 * informalNode.priceMultExporting * amount * (1f + importer.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementExporting)
             );
 
@@ -425,7 +425,7 @@ public class CommodityDomain implements Serializable {
 
     private static final float priceFactor(CommodityCell importer) {
 
-        final float price = importer.getUnitPrice(PriceType.MARKET_BUYING, 1);
+        final float price = importer.getUnitPrice(TransactionDirection.ENTITY_BUYING, 1);
         final float base = importer.spec.getBasePrice();
 
         final float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
