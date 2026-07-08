@@ -38,6 +38,7 @@ import com.fs.starfarer.api.util.TimeoutTracker;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
@@ -276,10 +277,35 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		final float crewRemainingRatio = (cargo.getFreeCrewSpace() / mission.crewAmount) / mission.spawnedFleetCrewCapRatio;
 		mission.setSpawnedFleetCapRatios(cargo);
 
+		final EconomyEngine engine = EconomyEngine.instance();
 		for (TradeCom com : mission.cargo) {
-			if (com.comID.equals(Commodities.FUEL)) com.amount *= fuelRemainingRatio;
-			else if (com.comID.equals(Commodities.CREW) || com.comID.equals(Commodities.MARINES)) com.amount *= crewRemainingRatio;
-			else com.amount *= cargoRemainingRatio;
+			final double oldAmount = com.amount;
+			if (com.comID.equals(Commodities.FUEL)) {
+				com.amount *= fuelRemainingRatio;
+			} else if (com.comID.equals(Commodities.CREW) || com.comID.equals(Commodities.MARINES)) {
+				com.amount *= crewRemainingRatio;
+			} else {
+				com.amount *= cargoRemainingRatio;
+			}
+			final double lost = oldAmount - com.amount;
+			if (lost > 0d) {
+				final CommodityCell srcCell = engine.getComCell(com.comID, mission.srcID);
+				if (srcCell != null) {
+					if (mission.inFaction) {
+						srcCell.inFactionExports -= lost;
+					} else {
+						srcCell.globalExports -= lost;
+					}
+				}
+				final CommodityCell destCell = engine.getComCell(com.comID, mission.destID);
+				if (destCell != null) {
+					if (mission.inFaction) {
+						destCell.inFactionImports -= lost;
+					} else {
+						destCell.globalImports -= lost;
+					}
+				}
+			}
 		}
 
 		final float lossFraction = 0.5f;
@@ -295,7 +321,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 		final TradeMission mission = LtvEconomyRouteData.getMission(route);
 		if (mission != null) mission.spawnedFleetFinishedJob = true;
-		if (route.isExpired()) return;
+		// if (route.isExpired()) return;
 
 		switch (reason) {
 		case DESTROYED_BY_BATTLE, NO_MEMBERS:

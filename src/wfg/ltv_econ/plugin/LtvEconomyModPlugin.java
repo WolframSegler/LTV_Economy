@@ -136,7 +136,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         final EconomyEngine engine = EconomyEngine.instance();
         for (CommodityDomain dom : engine.getComDomains()) {
             for (CommodityCell cell : dom.getAllCells()) {
-                cell.addStoredAmount(cell.getTargetStockpiles());
+                cell.addStoredAmount(cell.getTargetStored());
             }
         }
     }

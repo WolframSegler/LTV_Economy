@@ -28,8 +28,8 @@ public class EconomyLogger {
             long totalPendingExports = 0;
             long totalInformalImports = 0;
             long totalInformalExports = 0;
-            long totalStockpile = 0;
-            long totalTargetStockpile = 0;
+            long totalStored = 0;
+            long totalTargetStored = 0;
             long totalShortfall = 0;
             long totalSurplus = 0;
             long totalExportable = 0;
@@ -42,8 +42,8 @@ public class EconomyLogger {
                 totalPendingExports += cell.getPendingExports();
                 totalInformalImports += cell.informalImports;
                 totalInformalExports += cell.informalExports;
-                totalStockpile += cell.getStored();
-                totalTargetStockpile += cell.getTargetStockpiles();
+                totalStored += cell.getStored();
+                totalTargetStored += cell.getTargetStored();
                 totalShortfall += cell.getStoredShortfall();
                 totalSurplus += cell.getStoredSurplus();
                 totalExportable += cell.computeExportAmount();
@@ -57,10 +57,10 @@ public class EconomyLogger {
             .append("pending exports: ").append(NumFormat.engNotate(totalPendingExports)).append("\n")
             .append("informal imports (daily): ").append(NumFormat.engNotate(totalInformalImports)).append("\n")
             .append("informal exports (daily): ").append(NumFormat.engNotate(totalInformalExports)).append("\n")
-            .append("stockpile: ").append(NumFormat.engNotate(totalStockpile)).append("\n")
-            .append("targetStockpile: ").append(NumFormat.engNotate(totalTargetStockpile)).append("\n")
-            .append("stockpileShortfall: ").append(NumFormat.engNotate(totalShortfall)).append("\n")
-            .append("stockpileSurplus: ").append(NumFormat.engNotate(totalSurplus)).append("\n")
+            .append("total stored: ").append(NumFormat.engNotate(totalStored)).append("\n")
+            .append("target stored: ").append(NumFormat.engNotate(totalTargetStored)).append("\n")
+            .append("storedShortfall: ").append(NumFormat.engNotate(totalShortfall)).append("\n")
+            .append("storedSurplus: ").append(NumFormat.engNotate(totalSurplus)).append("\n")
             .append("exportable amount: ").append(NumFormat.engNotate(totalExportable)).append("\n")
             .append("---------------------------------------\n");
         }
@@ -71,7 +71,7 @@ public class EconomyLogger {
 
     public final void logEconomySnapshotAsCSV() {
         final StringBuilder csv = new StringBuilder(2048);
-        csv.append("Commodity,Production,Consumption,TargetQuantum,PendingImports,PendingExports,InformalImports,InformalExports,Stockpile,TargetStockpile,Shortfall,Surplus,Exportable\n");
+        csv.append("Commodity,Production,Consumption,TargetQuantum,PendingImports,PendingExports,InformalImports,InformalExports,stored,TargetStored,Shortfall,Surplus,Exportable\n");
 
         for (Map.Entry<String, CommodityDomain> entry : engine.comDomains.entrySet()) {
             final String comID = entry.getKey();
@@ -90,7 +90,7 @@ public class EconomyLogger {
                 infImp += cell.informalImports;
                 infExp += cell.informalExports;
                 stock += cell.getStored();
-                targetStock += cell.getTargetStockpiles();
+                targetStock += cell.getTargetStored();
                 shortfall += cell.getStoredShortfall();
                 surplus += cell.getStoredSurplus();
                 exportable += cell.computeExportAmount();

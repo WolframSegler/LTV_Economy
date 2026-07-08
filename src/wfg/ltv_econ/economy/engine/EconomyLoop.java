@@ -449,28 +449,52 @@ public class EconomyLoop {
                 m.durRemaining++;
                 if (!m.spawnedFleetFinishedJob && m.durRemaining <= DAYS_AFTER_SHIP_FREE_IN_COMPLETED) break;
 
+                for (TradeCom cargo : m.cargo) {
+                    final CommodityCell src = engine.getComCell(cargo.comID, m.srcID);
+                    if (src != null) {
+                        if (m.inFaction) {
+                            src.inFactionExports -= cargo.amount;
+                        } else {
+                            src.globalExports -= cargo.amount;
+                        }
+                    }
+
+                    final CommodityCell dest = engine.getComCell(cargo.comID, m.destID);
+                    if (dest != null) {
+                        dest.addStoredAmount(cargo.amount);
+                        if (m.inFaction) {
+                            dest.inFactionImports -= cargo.amount;
+                        } else {
+                            dest.globalImports -= cargo.amount;
+                        }
+                    }
+                }
                 for (Entry<String, Integer> entry : m.allocatedShips.singleEntrySet()) {
                     inv.freeShip(entry.getKey(), entry.getValue());
-                }
-                
-                for (TradeCom cargo : m.cargo) {
-                    final CommodityCell cell = engine.getComCell(cargo.comID, m.destID);
-                    if (cell == null) continue;
-
-                    if (m.inFaction) {
-                        cell.inFactionImports += cargo.amount;
-                    } else {
-                        cell.globalImports += cargo.amount;
-                    }
                 }
                 putMissionToPast(activeIt, m);
                 break;
 
             case CANCELLED:
                 for (TradeCom cargo : m.cargo) {
-                    final CommodityCell cell = engine.getComCell(cargo.comID, m.srcID);
-                    if (cell == null) continue;
-                    cell.inFactionImports += cargo.amount;
+                    final CommodityCell src = engine.getComCell(cargo.comID, m.srcID);
+                    if (src != null) {
+                        src.addStoredAmount(cargo.amount);
+                        if (m.inFaction) {
+                            src.inFactionExports -= cargo.amount;
+                        } else {
+                            src.globalExports -= cargo.amount;
+                        }
+                    }
+
+                    final CommodityCell dest = engine.getComCell(cargo.comID, m.destID);
+                    if (dest != null) {
+                        if (m.inFaction) {
+                            dest.inFactionImports -= cargo.amount;
+                        } else {
+                            dest.globalImports -= cargo.amount;
+                        }
+                    }
                 }
                 for (Entry<String, Integer> entry : m.allocatedShips.singleEntrySet()) {
                     inv.freeShip(entry.getKey(), entry.getValue());
@@ -479,6 +503,16 @@ public class EconomyLoop {
                 break;
 
             case LOST:
+                for (TradeCom cargo : m.cargo) {
+                    final CommodityCell dest = engine.getComCell(cargo.comID, m.destID);
+                    if (dest != null) {
+                        if (m.inFaction) {
+                            dest.inFactionImports -= cargo.amount;
+                        } else {
+                            dest.globalImports -= cargo.amount;
+                        }
+                    }
+                }
                 for (Entry<String, Integer> entry : m.allocatedShips.singleEntrySet()) {
                     inv.registerShipLoss(entry.getKey(), entry.getValue());
                 }

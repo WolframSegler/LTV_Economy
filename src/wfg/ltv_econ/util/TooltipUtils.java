@@ -108,7 +108,7 @@ public class TooltipUtils {
                     if (countingMap.getCount(market.getFactionId()) >= 3) continue;
                     countingMap.add(market.getFactionId());
 
-                    final int target = (int) ((cell.getTargetStockpiles() / 100f) * 100f);
+                    final int target = (int) ((cell.getTargetStored() / 100f) * 100f);
                     final boolean lowTarget = target < 100;
                     final String lessThanSymbol = lowTarget ? "<" : "";
                     final Color labelColor = lowTarget ? gray : highlight;
@@ -259,7 +259,7 @@ public class TooltipUtils {
         tp.beginGridFlipped(GRID_W, 2, VALUE_W, hpad);
 
         tp.addToGrid(0, rowCount++, str("uiDesiredStockpilesTxt"),
-            NumFormat.engNotate(cell.getTargetStockpiles())
+            NumFormat.engNotate(cell.getTargetStored())
         );
         tp.addToGrid(0, rowCount++, str("uiLatestChange"), NumFormat.engNotate(cell.getQuantumNetChange()),
             cell.getQuantumNetChange() < 0f ? negative : highlight

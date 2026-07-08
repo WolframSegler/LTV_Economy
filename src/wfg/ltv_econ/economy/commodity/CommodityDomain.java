@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -179,6 +180,7 @@ public class CommodityDomain implements Serializable {
         final PlayerFactionSettings facSettings = LtvEconSaveData.instance().playerFactionSettings;
         final List<CommodityCell> importers = getImporters();
         final List<CommodityCell> exporters = getExporters();
+        final Map<CommodityCell, Double> cycleAllocated = new HashMap<>(importers.size());
 
         tradeFlows.clear();
 
@@ -227,7 +229,7 @@ public class CommodityDomain implements Serializable {
             }
 
             final double exportableRemaining = expCell.computeExportAmount();
-            final double deficitRemaining = impCell.computeImportAmount();
+            final double deficitRemaining = impCell.computeImportAmount() - cycleAllocated.getOrDefault(impCell, 0d);
 
             if (exportableRemaining < MIN_TRADE_AMOUNT || deficitRemaining < MIN_TRADE_AMOUNT) continue;
 
@@ -247,6 +249,7 @@ public class CommodityDomain implements Serializable {
                 expCell.globalExports += amountToSend;
             }
             expCell.addStoredAmount(-amountToSend);
+            cycleAllocated.merge(impCell, amountToSend, Double::sum);
 
             final long credits = (long) (sameFaction ? price * EconConfig.FACTION_EXCHANGE_MULT : price);
             tradeCreditActivity += credits;
@@ -427,7 +430,7 @@ public class CommodityDomain implements Serializable {
 
     private static final float priceFactor(CommodityCell importer) {
 
-        final float price = importer.getUnitPrice(TransactionDirection.ENTITY_BUYING, 1);
+        final float price = importer.getUnitPrice(TransactionDirection.NEUTRAL, 1);
         final float base = importer.spec.getBasePrice();
 
         final float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below

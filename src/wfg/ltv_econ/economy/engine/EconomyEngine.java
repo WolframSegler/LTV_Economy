@@ -34,6 +34,7 @@ import wfg.ltv_econ.constant.SubmarketsID;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
+import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
@@ -126,6 +127,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         loop = new EconomyLoop(this);
 
         pastMissions = new ArrayList<>(1024);
+
+        recomputePendingDeliveries();
 
         return this;
     }
@@ -311,6 +314,32 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public final int getCyclesSinceTrade() {
         return cyclesSinceTrade;
+    }
+
+    private final void recomputePendingDeliveries() {
+        for (TradeMission mission : activeMissions) {
+            if (mission.status == MissionStatus.LOST || mission.status == MissionStatus.CANCELLED) continue;
+
+            for (TradeCom cargo : mission.cargo) {
+                CommodityCell destCell = getComCell(cargo.comID, mission.destID);
+                if (destCell != null) {
+                    if (mission.inFaction) {
+                        destCell.inFactionImports += cargo.amount;
+                    } else {
+                        destCell.globalImports += cargo.amount;
+                    }
+                }
+
+                CommodityCell srcCell = getComCell(cargo.comID, mission.srcID);
+                if (srcCell != null) {
+                    if (mission.inFaction) {
+                        srcCell.inFactionExports += cargo.amount;
+                    } else {
+                        srcCell.globalExports += cargo.amount;
+                    }
+                }
+            }
+        }
     }
 
     public final void applyPopulationStabilityMods(MarketAPI market) {

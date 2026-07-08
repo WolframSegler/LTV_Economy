@@ -107,7 +107,7 @@ public class CommodityCell implements Serializable {
     public final float getInflowQuantum() {
         return getProduction(true) + getTotalImports();
     }
-    public final float getTargetStockpiles() {
+    public final float getTargetStored() {
         return EconConfig.DAYS_TO_COVER * getTargetQuantum(true);
     }
     public final float getSurplusAfterTargetQuantum() {
@@ -116,17 +116,17 @@ public class CommodityCell implements Serializable {
     public final double computeExportAmount() {
         return Math.max(0d, stored + getSurplusAfterTargetQuantum()
             - getProduction(true) * EconConfig.PRODUCTION_HOLD_FACTOR
-            - getTargetStockpiles() * EconConfig.EXPORT_THRESHOLD_FACTOR
+            - getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR
             - nonExportableStock - informalExports
         );
     }
     public final double computeImportAmount() {
         final float targetQuantum = getTargetQuantum(true);
         final float absoluteCap = EconConfig.DAYS_TO_COVER_PER_IMPORT * targetQuantum;
-        final float maxStockBeforeExport = getTargetStockpiles() * EconConfig.EXPORT_THRESHOLD_FACTOR;
+        final float maxStockBeforeExport = getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR;
         
         final double target = Math.max(0d,
-            getTargetStockpiles() + EconConfig.TRADE_INTERVAL * targetQuantum - stored - informalImports
+            getTargetStored() + EconConfig.TRADE_INTERVAL * targetQuantum - stored - informalImports
         );
 
         final double maxAdditional = Math.max(0d, maxStockBeforeExport - stored - getPendingImports());
@@ -137,7 +137,7 @@ public class CommodityCell implements Serializable {
         return getProduction(true) + getConsumption(true) + getTotalImports() + getTotalExports();
     }
     public final double getStoredEconomicFootprint() {
-        return Math.max(stored, getTargetStockpiles());
+        return Math.max(stored, getTargetStored());
     }
     public final float getQuantumNetChange() {
         return getProduction(true) - getConsumption(true) + informalImports - informalExports;
@@ -147,19 +147,19 @@ public class CommodityCell implements Serializable {
         return demand <= 0f ? 1f : (float) Math.min(stored / demand, 1f);
     }
     public final float getDesiredAvailabilityRatio() {
-        final double target = getTargetStockpiles();
+        final double target = getTargetStored();
         return target <= 0f ? 1f : (float) Math.min(stored / target, 1f);
     }
     public final double getStoredShortfall() {
-        return Math.max(0d, getTargetStockpiles() - stored);
+        return Math.max(0d, getTargetStored() - stored);
     }
     public final double getStoredDeficit() {
         final float DEFICIT_THRESHOLD = 0.25f; // TODO define in config.
-        final double threshold = getTargetStockpiles() * DEFICIT_THRESHOLD;
+        final double threshold = getTargetStored() * DEFICIT_THRESHOLD;
         return Math.max(0d, threshold - stored);
     }
     public final double getStoredSurplus() {
-        return Math.max(0d, stored - getTargetStockpiles());
+        return Math.max(0d, stored - getTargetStored());
     }
     public final double getStoredExcess() {
         return computeExportAmount();
@@ -261,13 +261,13 @@ public class CommodityCell implements Serializable {
     public final float getUnitPriceForTrade(TransactionDirection type, long amount) {
         return BasePriceCalculator.getUnitPrice(type, amount,
             stored + informalImports - informalExports,
-            spec.getBasePrice(), getTargetStockpiles()
+            spec.getBasePrice(), getTargetStored()
         );
     }
 
     /** symmetrical */
     public final float getUnitPrice(TransactionDirection type, long amount) {
-        return BasePriceCalculator.getUnitPrice(type, amount, stored, spec.getBasePrice(), getTargetStockpiles());
+        return BasePriceCalculator.getUnitPrice(type, amount, stored, spec.getBasePrice(), getTargetStored());
     }
 
     public final float computeVanillaPrice(long amount, double stockpileMod, boolean isSellingToMarket, boolean isPlayer) {
@@ -283,7 +283,7 @@ public class CommodityCell implements Serializable {
 
         final TransactionDirection type = isSellingToMarket ? TransactionDirection.ENTITY_BUYING : TransactionDirection.ENTITY_SELLING;
         final double stock = stored + stockpileMod + market.getCommodityData(comID).getCombinedTradeModQuantity();
-        final float unitPrice = BasePriceCalculator.getUnitPrice(type, amount, stock, spec.getBasePrice(), getTargetStockpiles());
+        final float unitPrice = BasePriceCalculator.getUnitPrice(type, amount, stock, spec.getBasePrice(), getTargetStored());
 
         final StatBonus priceMod;
         if (isPlayer) {
@@ -327,7 +327,7 @@ public class CommodityCell implements Serializable {
         // Stockpile
         sb.append("[Stockpile]\n");
         sb.append(" stored: ").append(stored).append("\n");
-        sb.append(" targetStockpiles (desired stock): ").append(getTargetStockpiles()).append("\n");
+        sb.append(" targetStockpiles (desired stock): ").append(getTargetStored()).append("\n");
         sb.append(" storedShortfall (gap to target): ").append(getStoredShortfall()).append("\n");
         sb.append(" storedDeficit: ").append(getStoredDeficit()).append("\n");
         sb.append(" storedSurplus (gap beyond target): ").append(getStoredSurplus()).append("\n");
