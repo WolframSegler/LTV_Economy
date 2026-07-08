@@ -40,6 +40,24 @@
       },
       "group": {
         "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "launch-game-no-tests",
+      "type": "shell",
+      "command": "\"${workspaceFolder}/../../starsector.sh\"",
+      "dependsOn": "compile-no-tests",
+      "options": {
+        "cwd": "${workspaceFolder}/../.."
+      },
+      "group": {
+        "kind": "build",
         "isDefault": true
       },
       "presentation": {

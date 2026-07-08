@@ -72,35 +72,41 @@ public class MarketWrapper extends Market {
         );
     }
 
+	/**
+	 * @param commodityId
+	 * @param quantity
+	 * @param existingTransactionValue positive for stuff sold to market, negative for stuff bought from market.
+	 * @param isPlayerPrice
+	 */
     @Override
     public float getDemandPriceAssumingExistingTransaction(
         String comID, double quantity, double existingTransactionValue, boolean isPlayer
     ) {
         return getDemandPriceAssumingStockpileUtility(
-            original.getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
+            original.getCommodityData(comID), existingTransactionValue, quantity, isPlayer
         );
     }
 
     @Override
     public float getDemandPriceAssumingStockpileUtility(
-        CommodityOnMarket com, double stockpiles, double quantity, boolean isPlayer
+        CommodityOnMarket com, double stockpileMod, double quantity, boolean isPlayer
     ) {
         if (quantity <= 0) return 0f;
 
         final CommoditySpecAPI spec = ((CommodityOnMarketAPI)com).getCommodity();
         if (spec.isNonEcon() || spec.isExotic()) {
-            return original.getDemandPriceAssumingStockpileUtility(com, stockpiles, quantity, isPlayer);
+            return original.getDemandPriceAssumingExistingTransaction(spec.getId(), quantity, stockpileMod, isPlayer);
         }
         if (spec.getPriceVariability() == PriceVariability.V0) {
             return spec.getBasePrice() * (float) quantity;
         }
 
         final CommodityCell cell = EconomyEngine.instance().getComCell(
-            com.getId(), com.getMarket().getId()
+            spec.getId(), com.getMarket().getId()
         );
 
         return cell.computeVanillaPrice(
-            (int) quantity, true, isPlayer
+            (long) quantity, stockpileMod, true, isPlayer
         );
     }
 
@@ -111,35 +117,41 @@ public class MarketWrapper extends Market {
         );
     }
 
+    /**
+	 * @param commodityId
+	 * @param quantity
+	 * @param existingTransactionValue positive for stuff sold to market, negative for stuff bought from market.
+	 * @param isPlayerPrice
+	 */
     @Override
     public float getSupplyPriceAssumingExistingTransaction(
         String comID, double quantity, double existingTransactionValue, boolean isPlayer
     ) {
         return getSupplyPriceAssumingStockpileUtility(
-            original.getCommodityData(comID), 0, quantity + existingTransactionValue, isPlayer
+            original.getCommodityData(comID), existingTransactionValue, quantity, isPlayer
         );
     }
 
     @Override
     public float getSupplyPriceAssumingStockpileUtility(
-        CommodityOnMarket com, double stockpiles, double quantity, boolean isPlayer
+        CommodityOnMarket com, double stockpileMod, double quantity, boolean isPlayer
     ) {
         if (quantity <= 0) return 0f;
 
         final CommoditySpecAPI spec = ((CommodityOnMarketAPI)com).getCommodity();
         if (spec.isNonEcon() || spec.isExotic()) {
-            return original.getSupplyPriceAssumingStockpileUtility(com, stockpiles, quantity, isPlayer);
+            return original.getSupplyPriceAssumingExistingTransaction(spec.getId(), quantity, stockpileMod, isPlayer);
         }
         if (spec.getPriceVariability() == PriceVariability.V0) {
             return spec.getBasePrice() * (float) quantity;
         }
 
         final CommodityCell cell = EconomyEngine.instance().getComCell(
-            com.getId(), com.getMarket().getId()
+            spec.getId(), com.getMarket().getId()
         );
 
         return cell.computeVanillaPrice(
-            (int) quantity, false, isPlayer
+            (long) quantity, stockpileMod, false, isPlayer
         );
     }
 

@@ -699,8 +699,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             TooltipUtils.createComConsumptionBreakdown(tp, cell);
     
             final float econUnit = m_com.getEconUnit();
-            final int sellPrice = (int) (cell.computeVanillaPrice((int)econUnit, true, true) / econUnit);
-            final int buyPrice = (int) (cell.computeVanillaPrice((int)econUnit, false, true) / econUnit);
+            final int sellPrice = (int) (cell.computeVanillaPrice((int)econUnit, 0d, true, true) / econUnit);
+            final int buyPrice = (int) (cell.computeVanillaPrice((int)econUnit, 0d, false, true) / econUnit);
     
             if (!m_com.isMeta()) {
                 if (cell.getStoredExcess() > 0f) {

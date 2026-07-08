@@ -282,6 +282,7 @@ public class CommodityCell implements Serializable {
         addStoredAmount(getQuantumRealBalance());
     }
 
+    /** symmetrical */
     public final float getUnitPriceForTrade(TransactionDirection type, long amount) {
         return BasePriceCalculator.getUnitPrice(type, amount,
             stored + getTotalImports() + virtualImports - getTotalExports(),
@@ -289,11 +290,12 @@ public class CommodityCell implements Serializable {
         );
     }
 
+    /** symmetrical */
     public final float getUnitPrice(TransactionDirection type, long amount) {
         return BasePriceCalculator.getUnitPrice(type, amount, stored, spec.getBasePrice(), getTargetStockpiles());
     }
 
-    public final float computeVanillaPrice(long amount, boolean isSellingToMarket, boolean isPlayer) {
+    public final float computeVanillaPrice(long amount, double stockpileMod, boolean isSellingToMarket, boolean isPlayer) {
         if (amount < 1l || market == null) return 0f;
 
         final Market mkt = (Market) market;
@@ -305,10 +307,8 @@ public class CommodityCell implements Serializable {
         }
 
         final TransactionDirection type = isSellingToMarket ? TransactionDirection.ENTITY_BUYING : TransactionDirection.ENTITY_SELLING;
-        final float unitPrice = BasePriceCalculator.getUnitPrice(
-            type, amount, stored + market.getCommodityData(comID).getCombinedTradeModQuantity(),
-            spec.getBasePrice(), getTargetStockpiles()
-        );
+        final double stock = stored + stockpileMod + market.getCommodityData(comID).getCombinedTradeModQuantity();
+        final float unitPrice = BasePriceCalculator.getUnitPrice(type, amount, stock, spec.getBasePrice(), getTargetStockpiles());
 
         final StatBonus priceMod;
         if (isPlayer) {
