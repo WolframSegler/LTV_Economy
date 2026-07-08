@@ -45,11 +45,11 @@ public class InformalExchangeNode {
         final EconomyEngine engine = EconomyEngine.instance();
         final float informalFraction = EconConfig.INFORMAL_TRADE_SHARE / EconConfig.TRADE_INTERVAL;
 
-        final float totalDemand;
-        final float totalExcess;
+        final double totalDemand;
+        final double totalExcess;
         { // calculate demand & excess
-            float demand = 0f;
-            float excess = 0f;
+            double demand = 0f;
+            double excess = 0f;
             for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
                 demand += cell.computeImportAmount();
                 excess += cell.computeExportAmount();
@@ -58,20 +58,20 @@ public class InformalExchangeNode {
             totalExcess = excess * informalFraction;
         }
 
-        final float imbalance = totalDemand - totalExcess;
+        final double imbalance = totalDemand - totalExcess;
         final float baselineActivity = baseActivity * (float) Math.sqrt(totalDemand + totalExcess + 1);
 
-        prod = imbalance > 0f ?
-            baselineActivity + (float) Math.pow(shortageResponse * imbalance, shortageExp) :
-            baselineActivity * (1f + 1f / (1f + glutResistance * -imbalance));
+        prod = (float) (imbalance > 0f ?
+            baselineActivity +  Math.pow(shortageResponse * imbalance, shortageExp) :
+            baselineActivity * (1f + 1f / (1f + glutResistance * -imbalance)));
 
-        imports = importAppetite * totalExcess / (1f + totalExcess / importSaturationPoint)
-            + Math.min(arbitrageDrive * Math.max(imbalance, 0f), totalExcess);
+        imports = (float) (importAppetite * totalExcess / (1f + totalExcess / importSaturationPoint)
+            + Math.min(arbitrageDrive * Math.max(imbalance, 0f), totalExcess));
 
-        exports = Math.min(prod + imports, totalDemand * marketReach);
+        exports = (float) (Math.min(prod + imports, totalDemand * marketReach));
 
-        final float pressure = totalExcess / (1f + totalDemand);
-        final float scarcity = totalDemand / (1f + totalExcess);
+        final float pressure = (float) (totalExcess / (1f + totalDemand));
+        final float scarcity = (float) (totalDemand / (1f + totalExcess));
 
         priceMultImporting = 1f - Arithmetic.clamp(0.05f + 0.35f * pressure, 0.05f, 0.40f);
         priceMultExporting = 1f + Arithmetic.clamp(0.10f + 0.40f * scarcity, 0.10f, 0.60f);

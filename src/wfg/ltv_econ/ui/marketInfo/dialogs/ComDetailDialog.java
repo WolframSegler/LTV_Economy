@@ -574,7 +574,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final Base iconPanel = new Base(section, iconSize, iconSize,
                 iconPath, null, null
             );
-            iconPanel.outline.enabled = cell.getTargetQuantumUnmet() > 0;
+            iconPanel.outline.enabled = cell.getStoredDeficit() > 0;
             iconPanel.outline.color = Color.RED;
             iconPanel.outline.offset.setOffset(-1, -1, 2, 2);
 

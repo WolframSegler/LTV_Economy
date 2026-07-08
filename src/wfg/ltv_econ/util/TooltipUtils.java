@@ -261,8 +261,8 @@ public class TooltipUtils {
         tp.addToGrid(0, rowCount++, str("uiDesiredStockpilesTxt"),
             NumFormat.engNotate(cell.getTargetStockpiles())
         );
-        tp.addToGrid(0, rowCount++, str("uiLatestChange"), NumFormat.engNotate(cell.getQuantumRealBalance()),
-            cell.getQuantumRealBalance() < 0f ? negative : highlight
+        tp.addToGrid(0, rowCount++, str("uiLatestChange"), NumFormat.engNotate(cell.getQuantumNetChange()),
+            cell.getQuantumNetChange() < 0f ? negative : highlight
         );
 
         { // Exports

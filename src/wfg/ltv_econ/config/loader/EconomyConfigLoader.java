@@ -127,7 +127,6 @@ public class EconomyConfigLoader {
         EconConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "DAYS_TO_COVER_PER_IMPORT");
         EconConfig.FACTION_EXCHANGE_MULT = LunaSettings.getDouble(LTV_ECON, "FACTION_EXCHANGE_MULT").floatValue();
         EconConfig.WORKER_ASSIGN_INTERVAL = LunaSettings.getInt(LTV_ECON, "WORKER_ASSIGN_INTERVAL");
-        EconConfig.EXPORT_THRESHOLD_FACTOR = LunaSettings.getDouble(LTV_ECON, "EXPORT_THRESHOLD_FACTOR").floatValue();
         EconConfig.EMBARGO_REP_DROP = LunaSettings.getDouble(LTV_ECON, "EMBARGO_REP_DROP").floatValue();
         EconConfig.MIN_RELATION_TO_TRADE = LunaSettings.getDouble(LTV_ECON,"MIN_RELATION_TO_TRADE").floatValue();
         EconConfig.ECON_ALLOCATION_PASSES = LunaSettings.getInt(LTV_ECON, "ECON_ALLOCATION_PASSES");

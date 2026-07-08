@@ -28,7 +28,7 @@ import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 public class CommodityDomain implements Serializable {
-    private static final float MIN_TRADE_AMOUNT = 5f;
+    private static final double MIN_TRADE_AMOUNT = 5d;
 
     public final String comID;
     public transient CommoditySpecAPI spec;
@@ -239,12 +239,14 @@ public class CommodityDomain implements Serializable {
             final double unitPrice = (exporterPrice + importerPrice) / 2d;
             final double price = unitPrice * amountToSend;
 
-            impCell.virtualImports += amountToSend;
             if (sameFaction) {
+                impCell.inFactionImports += amountToSend;
                 expCell.inFactionExports += amountToSend;
             } else {
+                impCell.globalImports += amountToSend;
                 expCell.globalExports += amountToSend;
             }
+            expCell.addStoredAmount(-amountToSend);
 
             final long credits = (long) (sameFaction ? price * EconConfig.FACTION_EXCHANGE_MULT : price);
             tradeCreditActivity += credits;

@@ -16,16 +16,16 @@ public class StockpileInfoBar extends GenericInfoBar {
             throw new IllegalStateException("StockpileInfoBar cannot display: economic footprint is zero for " + cell.comID);
         }
 
-        final double deficit = cell.getStoredDeficit();
-        final double excess = cell.getStoredExcess();
-        final double preferred = footprint - deficit - excess;
+        final double shortfall = cell.getStoredShortfall();
+        final double surplus = cell.getStoredSurplus();
+        final double preferred = footprint - shortfall - surplus;
 
-        final double deficitRatio = deficit / footprint;
+        final double shortfallRatio = shortfall / footprint;
         final double targetRatio = preferred / footprint;
-        final double excessRatio = excess / footprint;
+        final double surplusRatio = surplus / footprint;
 
-        barMap.put(UIColors.STOCKPILES_DEFICIT, (float) deficitRatio);
+        barMap.put(UIColors.STOCKPILES_DEFICIT, (float) shortfallRatio);
         barMap.put(UIColors.STOCKPILES_TARGET, (float) targetRatio);
-        barMap.put(UIColors.STOCKPILES_EXCESS, (float) excessRatio);
+        barMap.put(UIColors.STOCKPILES_EXCESS, (float) surplusRatio);
     }
 }

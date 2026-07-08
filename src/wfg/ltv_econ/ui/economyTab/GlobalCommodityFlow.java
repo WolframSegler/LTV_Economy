@@ -128,7 +128,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalSurplus(comID);
+                final long value = engine.info.getGlobalProductionSurplus(comID);
                 final String txt = str("uiTitleGlobalSurplus");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 

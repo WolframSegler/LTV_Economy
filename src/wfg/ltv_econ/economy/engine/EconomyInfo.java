@@ -341,7 +341,7 @@ public class EconomyInfo {
 
         for (CommodityCell cell : engine.comDomains.get(comID).getAllCells()) {
             if (cell.market.getFaction().getId().equals(factionID)) {
-                balance += cell.getQuantumRealBalance();
+                balance += cell.getQuantumNetChange();
             }
         }
         return balance;
@@ -489,7 +489,7 @@ public class EconomyInfo {
         return (long) (total + dom.getInformalNode().prod);
     }
 
-    public final long getGlobalSurplus(String comID) {
+    public final long getGlobalProductionSurplus(String comID) {
         long total = 0;
 
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
@@ -498,11 +498,38 @@ public class EconomyInfo {
         return total;
     }
 
+    public final long getGlobalSurplus(String comID) {
+        long total = 0;
+
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
+        total += cell.getStoredSurplus();
+
+        return total;
+    }
+
+    public final long getGlobalExcess(String comID) {
+        long total = 0;
+
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
+        total += cell.getStoredExcess();
+
+        return total;
+    }
+
+    public final long getGlobalShortfall(String comID) {
+        long total = 0;
+
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
+        total += cell.getStoredShortfall();
+
+        return total;
+    }
+
     public final long getGlobalDeficit(String comID) {
         long total = 0;
 
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
-        total += cell.getTargetQuantumUnmet();
+        total += cell.getStoredDeficit();
 
         return total;
     }

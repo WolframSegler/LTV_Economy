@@ -23,7 +23,6 @@ import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
-import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
 /**
@@ -49,8 +48,6 @@ public class CommodityCell implements Serializable {
     private transient ArrayMap<String, MutableStat> productionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
     private transient ArrayMap<String, MutableStat> consumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
     
-    /** used by {@link CommodityDomain#createFormalTradeFlows} for accounting */ 
-    transient float virtualImports = 0f;
     public transient float inFactionImports = 0f;
     public transient float inFactionExports = 0f;
     public transient float globalImports = 0f;
@@ -101,32 +98,11 @@ public class CommodityCell implements Serializable {
     public final float getTotalExports() {
         return inFactionExports + globalExports + informalExports;
     }
-    public final float getTargetQuantumMetLocally() {
-        return Math.min(getProduction(true), getTargetQuantum(true));
+    public float getPendingImports() {
+        return inFactionImports + globalImports;
     }
-    public final float getTargetQuantumPreTrade() {
-        return getTargetQuantum(true) - getTargetQuantumMetLocally();
-    }
-    public final float getTargetQuantumMetViaFactionTrade() {
-        return Math.min(inFactionImports, getTargetQuantumPreTrade());
-    }
-    public final float getTargetQuantumMetViaGlobalTrade() {
-        return Math.min(globalImports, getTargetQuantumPreTrade() - getTargetQuantumMetViaFactionTrade());
-    }
-    public final float getTargetQuantumMetViaInformalTrade() {
-        return Math.min(informalImports, getTargetQuantumPreTrade()
-            - getTargetQuantumMetViaFactionTrade() - getTargetQuantumMetViaGlobalTrade()
-        );
-    }
-    public final float getTargetQuantumMetViaTrade() {
-        return getTargetQuantumMetViaFactionTrade() + getTargetQuantumMetViaGlobalTrade() +
-            getTargetQuantumMetViaInformalTrade();
-    }
-    public final float getTargetQuantumMet() {
-        return getTargetQuantumMetLocally() + getTargetQuantumMetViaTrade();
-    }
-    public final float getTargetQuantumUnmet() {
-        return getTargetQuantum(true) - getTargetQuantumMet();
+    public float getPendingExports() {
+        return inFactionExports + globalExports;
     }
     public final float getInflowQuantum() {
         return getProduction(true) + getTotalImports();
@@ -137,37 +113,34 @@ public class CommodityCell implements Serializable {
     public final float getSurplusAfterTargetQuantum() {
         return Math.max(0f, getProduction(true) - getTargetQuantum(true));
     }
-    public final float getRemainingExportableAfterTargetQuantum() {
-        return Math.max(0f, getSurplusAfterTargetQuantum() - getTotalExports());
-    }
-    public final float getOverImports() {
-        return Math.max(0f, getTotalImports() - getTargetQuantumMetViaTrade());
-    }
     public final double computeExportAmount() {
         return Math.max(0d, stored + getSurplusAfterTargetQuantum()
             - getProduction(true) * EconConfig.PRODUCTION_HOLD_FACTOR
             - getTargetStockpiles() * EconConfig.EXPORT_THRESHOLD_FACTOR
-            - getTotalExports() - nonExportableStock
+            - nonExportableStock - informalExports
         );
     }
-    public final float computeImportAmount() {
+    public final double computeImportAmount() {
         final float targetQuantum = getTargetQuantum(true);
-        final double cap = EconConfig.DAYS_TO_COVER_PER_IMPORT * targetQuantum;
-        final float target = (float) Arithmetic.clamp(
-            getTargetStockpiles() + EconConfig.TRADE_INTERVAL * targetQuantum - stored, 0d, cap
+        final float absoluteCap = EconConfig.DAYS_TO_COVER_PER_IMPORT * targetQuantum;
+        final float maxStockBeforeExport = getTargetStockpiles() * EconConfig.EXPORT_THRESHOLD_FACTOR;
+        
+        final double target = Math.max(0d,
+            getTargetStockpiles() + EconConfig.TRADE_INTERVAL * targetQuantum - stored - informalImports
         );
 
-        return Math.max(target - getTotalImports() - virtualImports, 0f);
+        final double maxAdditional = Math.max(0d, maxStockBeforeExport - stored - getPendingImports());
+
+        return Math.min(target, Math.min(absoluteCap, maxAdditional));
     }
-    public final float getFlowEconomicFootprint() {
-        return getTargetQuantumMet() + getTargetQuantumUnmet() + getOverImports()
-            + getTotalExports() + getRemainingExportableAfterTargetQuantum();
+    public final float getActivityIndicator() {
+        return getProduction(true) + getConsumption(true) + getTotalImports() + getTotalExports();
     }
     public final double getStoredEconomicFootprint() {
         return Math.max(stored, getTargetStockpiles());
     }
-    public final float getQuantumRealBalance() {
-        return getInflowQuantum() - getConsumption(true) - getTotalExports();
+    public final float getQuantumNetChange() {
+        return getProduction(true) - getConsumption(true) + informalImports - informalExports;
     }
     public final float getStoredAvailabilityRatio() {
         final float demand = getConsumption(true);
@@ -177,8 +150,16 @@ public class CommodityCell implements Serializable {
         final double target = getTargetStockpiles();
         return target <= 0f ? 1f : (float) Math.min(stored / target, 1f);
     }
-    public final double getStoredDeficit() {
+    public final double getStoredShortfall() {
         return Math.max(0d, getTargetStockpiles() - stored);
+    }
+    public final double getStoredDeficit() {
+        final float DEFICIT_THRESHOLD = 0.25f; // TODO define in config.
+        final double threshold = getTargetStockpiles() * DEFICIT_THRESHOLD;
+        return Math.max(0d, threshold - stored);
+    }
+    public final double getStoredSurplus() {
+        return Math.max(0d, stored - getTargetStockpiles());
     }
     public final double getStoredExcess() {
         return computeExportAmount();
@@ -261,13 +242,7 @@ public class CommodityCell implements Serializable {
     }
 
     public final void reset() {
-        inFactionImports = 0f;
-        globalImports = 0f;
         informalImports = 0f;
-        virtualImports = 0f;
-
-        inFactionExports = 0f;
-        globalExports = 0f;
         informalExports = 0f;
 
         productionMutables.clear();
@@ -279,13 +254,13 @@ public class CommodityCell implements Serializable {
     }
 
     public final void advance() {
-        addStoredAmount(getQuantumRealBalance());
+        addStoredAmount(getQuantumNetChange());
     }
 
     /** symmetrical */
     public final float getUnitPriceForTrade(TransactionDirection type, long amount) {
         return BasePriceCalculator.getUnitPrice(type, amount,
-            stored + getTotalImports() + virtualImports - getTotalExports(),
+            stored + informalImports - informalExports,
             spec.getBasePrice(), getTargetStockpiles()
         );
     }
@@ -347,14 +322,16 @@ public class CommodityCell implements Serializable {
         sb.append(" totalImports: ").append(getTotalImports()).append("\n");
         sb.append(" totalExports: ").append(getTotalExports()).append("\n");
         sb.append(" inflowQuantum (prod + imports): ").append(getInflowQuantum()).append("\n");
-        sb.append(" realBalance (inflow - consumption - exports): ").append(getQuantumRealBalance()).append("\n\n");
+        sb.append(" netChange (excluding formal trade): ").append(getQuantumNetChange()).append("\n\n");
 
         // Stockpile
         sb.append("[Stockpile]\n");
         sb.append(" stored: ").append(stored).append("\n");
         sb.append(" targetStockpiles (desired stock): ").append(getTargetStockpiles()).append("\n");
-        sb.append(" storedDeficit (gap to target): ").append(getStoredDeficit()).append("\n");
-        sb.append(" storedExcess (exportable surplus): ").append(computeExportAmount()).append("\n");
+        sb.append(" storedShortfall (gap to target): ").append(getStoredShortfall()).append("\n");
+        sb.append(" storedDeficit: ").append(getStoredDeficit()).append("\n");
+        sb.append(" storedSurplus (gap beyond target): ").append(getStoredSurplus()).append("\n");
+        sb.append(" storedExcess (exportable surplus): ").append(getStoredExcess()).append("\n");
         sb.append(" storedAvailabilityRatio (days of consumption): ").append(getStoredAvailabilityRatio()).append("\n");
         sb.append(" desiredAvailabilityRatio (fill level): ").append(getDesiredAvailabilityRatio()).append("\n\n");
 
@@ -370,7 +347,6 @@ public class CommodityCell implements Serializable {
         // Derived metrics
         sb.append("[Derived]\n");
         sb.append(" surplusAfterTargetQuantum (prod - target): ").append(getSurplusAfterTargetQuantum()).append("\n");
-        sb.append(" remainingExportableAfterTargetQuantum: ").append(getRemainingExportableAfterTargetQuantum()).append("\n");
 
         Global.getLogger(getClass()).info(sb.toString());
     }

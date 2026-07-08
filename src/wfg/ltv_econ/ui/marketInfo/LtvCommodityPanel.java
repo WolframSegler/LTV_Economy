@@ -74,7 +74,7 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
         final List<CommoditySpecAPI> commodities = new ArrayList<>(EconomyConstants.econCommoditySpecs);
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
-            return EconomyEngine.instance().getComCell(com.getId(), m_market.getId()).getFlowEconomicFootprint() <= 0;
+            return EconomyEngine.instance().getComCell(com.getId(), m_market.getId()).getActivityIndicator() <= 0f;
         });
 
         final TooltipMakerAPI headerTp = ComponentFactory.createTooltip(
