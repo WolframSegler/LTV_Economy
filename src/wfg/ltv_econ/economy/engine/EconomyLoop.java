@@ -401,8 +401,6 @@ public class EconomyLoop {
         }
         updateFuelDemands(fuelDemands);
 
-        engine.info.tradeFlowCache.clear();
-
         final String time = ((System.nanoTime() - startTime) / 1_000_000l) + " ms";
         log.info("Dispatched " + missionCount + " new trade missions in "+ time +" and added them to the queue");
     }

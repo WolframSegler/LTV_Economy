@@ -11,7 +11,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.ui.reusable.CommodityInfoBar;
+import wfg.ltv_econ.ui.reusable.CommodityBarPanel;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.NumFormat;
@@ -80,7 +80,7 @@ public class CommodityRowPanel extends CustomPanel implements
     }
 
     public void buildUI() {
-        final int textW = 75;
+        final int textW = 80;
         final int rowH = (int) getPos().getHeight();
 
         final Base comIcon = new Base(m_panel, rowH, rowH, cell.spec.getIconName(), null, null);
@@ -104,11 +104,11 @@ public class CommodityRowPanel extends CustomPanel implements
         );
         add(stockIcon).inBL(pad*3 + rowH + textW, (rowH - iconSize) / 2f);
 
-        final UIPanelAPI infoBar = new CommodityInfoBar(null, 85, iconSize,
+        final UIPanelAPI infoBar = new CommodityBarPanel(null, 85, iconSize,
             true, cell).getPanel();
         add(infoBar).inBL(pad*4 + rowH + textW + iconSize, (rowH - iconSize) / 2f);
 
-        if (EconomyEngine.instance().info.getExportAmount(cell.comID, cell.marketID) > 0d) {
+        if (cell.getTotalExports() > 0d) {
             final Base iconPanel = new Base(m_panel, rowH - 4, rowH - 4,
                 EXPORTS_ICON, null, null);
 
@@ -169,51 +169,48 @@ public class CommodityRowPanel extends CustomPanel implements
      * Renders the legend icons and their descriptions in the given tooltip at the specified starting y-position.
      * 
      * <br></br> MODE_0: shows everything.
-     * <br></br> MODE_1: shows only the CommodityInfoBar relevant info.
+     * <br></br> MODE_1: shows only the CommodityBarPanel relevant info.
      */
     public static final void legendRowCreator(int mode, TooltipMakerAPI tp, int y, int iconSize) {
 
         if (mode == 0) {
-            legendRowHelper(tp, y, UIUtils.STOCKPILES_FULL, str("uiDescLegendRow1"), iconSize, false, null);
+            legendRowHelper(tp, y, UIUtils.STOCKPILES_FULL, str("uiDescLegendStockpilesIcon"), iconSize, false, null);
             
             y += iconSize + pad;
 
-            legendRowHelper(tp, y, EXPORTS_ICON, str("uiDescLegendRow2"), iconSize, false, null);
-            
-            y += iconSize + pad;
-    
-            legendRowHelper(tp, y, null, str("uiDescLegendRow3"), iconSize, true, null);
+            legendRowHelper(tp, y, EXPORTS_ICON, str("uiDescLegendExportIcon"), iconSize, false, null);
             
             y += iconSize + pad;
         }
 
-        legendRowHelper(tp, y, null, str("uiDescLegendRow4"), iconSize, false, UIColors.COM_NOT_EXPORTED);
-        
+        legendRowHelper(tp, y, null, str("uiDescLegendStored"), iconSize, false, UIColors.BAR_STORED);
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiDescLegendRow5"), iconSize, false, UIColors.COM_EXPORT);
-        
+        legendRowHelper(tp, y, null, str("uiDescLegendSurplus"), iconSize, false, UIColors.BAR_SURPLUS);
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiDescLegendRow6"), iconSize, false, UIColors.COM_LOCAL_PROD);
-        
+        legendRowHelper(tp, y, null, str("uiDescLegendInFacImport"), iconSize, false, UIColors.BAR_INFAC_IMPORT);
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiDescLegendRow7"), iconSize, false, UIColors.COM_FACTION_IMPORT);
-        
+        legendRowHelper(tp, y, null, str("uiDescLegendGlobalImport"), iconSize, false, UIColors.BAR_GLOBAL_IMPORT);
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiDescLegendRow8"), iconSize, false, UIColors.COM_IMPORT);
-        
+        legendRowHelper(tp, y, null, str("uiDescLegendDeficit"), iconSize, false, UIColors.BAR_DEFICIT);
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiDescLegendRow9"), iconSize, false, UIColors.COM_OVER_IMPORT);
-        
+        legendRowHelper(tp, y, null, str("uiDescLegendExport"), iconSize, false, UIColors.BAR_EXPORT);
         y += iconSize + pad;
 
-        legendRowHelper(tp, y, null, str("uiDescLegendRow10"), iconSize, false, UIColors.COM_DEFICIT);
-    
-        tp.setHeightSoFar(y + opad*2);
+        legendRowHelper(tp, y, null, str("uiDescLegendFlowSatisfied"), iconSize, false, UIColors.FLOW_SATISFIED);
+        y += iconSize + pad;
+
+        legendRowHelper(tp, y, null, str("uiDescLegendFlowExcess"), iconSize, false, UIColors.FLOW_EXCESS);
+        y += iconSize + pad;
+
+        legendRowHelper(tp, y, null, str("uiDescLegendFlowShortfall"), iconSize, false, UIColors.FLOW_SHORTFALL);
+        y += iconSize + pad;
+
+        tp.setHeightSoFar(y + opad * 2);
     }
 
     public static final void legendRowHelper(TooltipMakerAPI tp, int y, SpriteAPI icon, String desc,

@@ -230,7 +230,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 	protected static final RaidDangerLevel getDangerLevel(CommoditySpecAPI spec, CommodityCell cell, Industry source) {
 		RaidDangerLevel danger = cell.spec.getBaseDanger();
 
-        if (cell.getDesiredAvailabilityRatio() < 0.7f) {
+        if (cell.getStoredDeficit() > 0d) {
             danger = danger.next();
         }
         if (cell.getStoredExcess() > 0d) {
@@ -246,13 +246,13 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		final int iconSize = CommodityRowPanel.iconSize;
         int y = (int) tp.getHeightSoFar() + pad;
 
-        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockLocalDemand"), iconSize, false, UIColors.STOCKPILES_TARGET);
+        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockLocalDemand"), iconSize, false, UIColors.BAR_STORED);
         y += iconSize + pad;
 
-        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockShortages"), iconSize, false, UIColors.STOCKPILES_DEFICIT);
+        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockShortages"), iconSize, false, UIColors.BAR_DEFICIT);
         y += iconSize + pad;
 
-        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockSurplus"), iconSize, false, UIColors.STOCKPILES_EXCESS);
+        CommodityRowPanel.legendRowHelper(tp, y, null, str("comCellRaidObjectiveStockSurplus"), iconSize, false, UIColors.BAR_SURPLUS);
         y += iconSize + pad;
     
         tp.setHeightSoFar(y);

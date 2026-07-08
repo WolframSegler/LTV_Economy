@@ -24,8 +24,8 @@ public class StockpileInfoBar extends GenericInfoBar {
         final double targetRatio = preferred / footprint;
         final double surplusRatio = surplus / footprint;
 
-        barMap.put(UIColors.STOCKPILES_DEFICIT, (float) shortfallRatio);
-        barMap.put(UIColors.STOCKPILES_TARGET, (float) targetRatio);
-        barMap.put(UIColors.STOCKPILES_EXCESS, (float) surplusRatio);
+        barMap.put(UIColors.BAR_DEFICIT, (float) shortfallRatio);
+        barMap.put(UIColors.BAR_STORED, (float) targetRatio);
+        barMap.put(UIColors.BAR_SURPLUS, (float) surplusRatio);
     }
 }

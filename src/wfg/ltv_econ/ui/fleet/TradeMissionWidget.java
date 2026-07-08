@@ -95,7 +95,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         if (mission.usedFactionFleet && !mission.usedFuelFromStockpiles) {
             final Base fuelWarningIcon = new Base(m_panel, 20, 20, FUEL, null, null);
-            fuelWarningIcon.texHaloColor = UIColors.COM_DEFICIT;
+            fuelWarningIcon.texHaloColor = UIColors.FLOW_SHORTFALL;
             fuelWarningIcon.drawTextureHalo = true;
             add(fuelWarningIcon).inTR(opad*2 + hpad + 30, opad);
         }
@@ -146,14 +146,14 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
         add(timeSlider).inTL(opad, GAP_TOP_3);
         switch (mission.status) {
         case LOST:
-            timeSlider.setBarColor(UIColors.COM_DEFICIT);
+            timeSlider.setBarColor(UIColors.FLOW_SHORTFALL);
             break;
         case DELIVERED:
-            timeSlider.setBarColor(UIColors.COM_EXPORT);
+            timeSlider.setBarColor(UIColors.BAR_EXPORT);
             timeSlider.setProgress(mission.totalDur);
             break;
         case CANCELLED:
-            timeSlider.setBarColor(UIColors.COM_IMPORT);
+            timeSlider.setBarColor(UIColors.BAR_GLOBAL_IMPORT);
             break;
         default:
             timeSlider.setProgress(mission.totalDur - mission.durRemaining);

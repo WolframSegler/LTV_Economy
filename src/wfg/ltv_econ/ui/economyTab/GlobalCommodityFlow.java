@@ -531,7 +531,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             
         data.add(new PieSlice(
             null,
-            UIColors.COM_IMPORT,
+            UIColors.BAR_GLOBAL_IMPORT,
             globalTradeShare
         ));
         data.add(new PieSlice(

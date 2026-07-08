@@ -237,10 +237,10 @@ public class UIUtils {
         final boolean addRatioColors
     ) {
         if (!addRatioColors) return faction.getBaseUIColor();
-        if (ratio <= 0.25f) return UIColors.COM_DEFICIT;
-        if (ratio <= 0.5f) return UIColors.COM_IMPORT;
-        if (ratio <= 0.75f) return UIColors.COM_LOCAL_PROD;
-        return UIColors.COM_NOT_EXPORTED;
+        if (ratio <= 0.25f) return UIColors.BAR_DEFICIT;
+        if (ratio <= 0.5f) return UIColors.BAR_GLOBAL_IMPORT;
+        if (ratio <= 0.75f) return UIColors.BAR_SURPLUS;
+        return UIColors.BAR_STORED;
     }
 
     private static final String dayOrDays(boolean isSingular, boolean capitalized) {

@@ -173,7 +173,7 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 		final float prod = cell.getProduction(true);
         final float target = cell.getTargetQuantum(true);
-		final float imports = (float) (engine.info.getImportAmount(comID, marketID) / EconConfig.TRADE_INTERVAL);
+		final float imports = cell.getTotalImports() / EconConfig.TRADE_INTERVAL;
 
         final float demandMetLocally = Math.min(prod, target);
         final float demandMetViaTrade = (float) Math.min(imports, target - demandMetLocally);

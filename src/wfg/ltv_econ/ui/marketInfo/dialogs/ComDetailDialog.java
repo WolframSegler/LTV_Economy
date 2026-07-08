@@ -36,7 +36,7 @@ import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
 import wfg.ltv_econ.ui.marketInfo.LtvCommodityPanel;
 import wfg.ltv_econ.ui.reusable.ComIconPanel;
-import wfg.ltv_econ.ui.reusable.CommodityInfoBar;
+import wfg.ltv_econ.ui.reusable.CommodityBarPanel;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.ui.ComponentFactory;
@@ -61,13 +61,13 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
-    private static final int PANEL_W = 1166;
+    private static final int PANEL_W = 1200;
     private static final int PANEL_H = 678;
 
-    private static final int SECT1_WIDTH = (int) (PANEL_W * 0.76f - opad);
-    private static final int SECT2_WIDTH = (int) (PANEL_W * 0.24f - opad);
-    private static final int SECT3_WIDTH = (int) (PANEL_W * 0.76f - opad);
-    private static final int SECT4_WIDTH = (int) (PANEL_W * 0.24f - opad);
+    private static final int SECT1_WIDTH = (int) (PANEL_W * 0.75f - opad);
+    private static final int SECT2_WIDTH = (int) (PANEL_W * 0.25f - opad);
+    private static final int SECT3_WIDTH = (int) (PANEL_W * 0.75f - opad);
+    private static final int SECT4_WIDTH = (int) (PANEL_W * 0.25f - opad);
 
     private static final int SECT1_HEIGHT = (int) (PANEL_H * 0.28f - opad);
     private static final int SECT2_HEIGHT = (int) (PANEL_H * 0.28f - opad);
@@ -565,9 +565,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 continue;
             }
 
-            final double quantity = mode == 0 ?
-                engine.info.getExportAmount(comID, marketID):
-                engine.info.getImportAmount(comID, marketID);
+            final double quantity = mode == 0 ? cell.getTotalExports(): cell.getTotalImports();
             if (quantity <= 0d) continue;
 
             final String iconPath = market.getFaction().getCrest();
@@ -580,7 +578,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
             final String factionName = market.getFaction().getDisplayName();
 
-            final UIPanelAPI infoBar = new CommodityInfoBar(null, 75, iconSize,
+            final UIPanelAPI infoBar = new CommodityBarPanel(null, 75, iconSize,
                 true, cell).getPanel();
 
             final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);

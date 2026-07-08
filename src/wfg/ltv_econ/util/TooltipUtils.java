@@ -504,11 +504,10 @@ public class TooltipUtils {
 
         final long exportIncomeLastMonth = ledger.getLastMonth(TRADE_EXPORT_KEY + comID);
         final long exportIncomeThisMonth = ledger.getCurrentMonth(TRADE_EXPORT_KEY + comID);
-        final double exportAmount = engine.info.getExportAmount(comID, marketID);
 
         if (exportIncomeLastMonth > 0l || exportIncomeThisMonth > 0l) {
             tp.addPara(strf("uiTpTxtLedger1", marketName, comName), opad, highlight,
-                NumFormat.formatMagnitudeAware(exportAmount),
+                NumFormat.formatMagnitudeAware(cell.getTotalExports()),
                 engine.info.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
@@ -519,11 +518,10 @@ public class TooltipUtils {
 
         final long importExpenseLastMonth = ledger.getLastMonth(TRADE_IMPORT_KEY + comID);
         final long importExpenseThisMonth = ledger.getCurrentMonth(TRADE_IMPORT_KEY + comID);
-        final double importAmount = engine.info.getImportAmount(comID, marketID);
 
         if (importExpenseLastMonth > 0l || importExpenseThisMonth > 0l) {
             tp.addPara(strf("uiTpTxtLedger3", marketName, comName), opad, highlight,
-                NumFormat.formatMagnitudeAware(importAmount),
+                NumFormat.formatMagnitudeAware(cell.getTotalImports()),
                 engine.info.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)

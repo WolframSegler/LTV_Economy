@@ -114,12 +114,12 @@ public class TradeMission implements Serializable {
         
         public Color getDisplayColor() {
             switch (this) {
-                case SCHEDULED: return UIColors.STOCKPILES_TARGET;
+                case SCHEDULED: return UIColors.BAR_STORED;
                 case IN_TRANSIT: return UIColors.CARGO_COLOR;
-                case DELIVERED: return UIColors.COM_EXPORT;
-                case CANCELLED: return UIColors.COM_IMPORT;
-                case LOST: return UIColors.COM_DEFICIT;
-                default: return UIColors.COM_FACTION_IMPORT;
+                case DELIVERED: return UIColors.BAR_EXPORT;
+                case CANCELLED: return UIColors.BAR_GLOBAL_IMPORT;
+                case LOST: return UIColors.FLOW_SHORTFALL;
+                default: return UIColors.BAR_INFAC_IMPORT;
             }
         }
         
