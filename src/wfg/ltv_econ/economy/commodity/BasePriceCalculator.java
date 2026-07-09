@@ -28,7 +28,7 @@ public class BasePriceCalculator {
     static final double SHIFT_FRACTION;
     static final double NEGATIVE_TAIL_FACTOR;
 
-    static final float INHERENT_DEMAND = 50f;
+    static final float INHERENT_DEMAND = 10f;
     static final float PRICE_MULT_FLOOR = 0.1f;
     static final float PRICE_MULT_CEILING = 10f;
     static final double MAX_MULT = Double.MAX_VALUE;

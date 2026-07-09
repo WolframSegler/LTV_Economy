@@ -1,6 +1,7 @@
 package wfg.ltv_econ.intel.market.events;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.Global;
@@ -114,7 +115,15 @@ public class GeneralStrikeEvent extends MarketEvent {
             tp.addPara(spec.description, pad);
         }
 
-        public final String getIcon() { return spec.iconPath;}
+        public final String getIcon() {
+            try {
+                settings.loadTexture(spec.iconPath);
+            } catch (Exception e) {
+                Global.getLogger(getClass()).warn(e);
+            }
+
+            return spec.iconPath;
+        }
         public final boolean isImportant() { return false;}
         public final IntelSortTier getSortTier() { return IntelSortTier.TIER_3;}
         public final boolean isEnding() { return true;}

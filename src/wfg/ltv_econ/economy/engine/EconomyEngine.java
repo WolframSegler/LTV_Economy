@@ -516,11 +516,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
      */
     public void reportEconomyMonthEnd() {}
 
+    /** Only works when interacting with the market */
     public void reportPlayerOpenedMarket(MarketAPI market) {
-        fakeAdvance();
         applyPopulationStabilityMods(market);
     }
 
+    /** Only works when interacting with the market */
     public void reportPlayerClosedMarket(MarketAPI market) {
         applyPopulationStabilityMods(market);
     }
@@ -530,7 +531,6 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     public void reportPlayerOpenedMarketAndCargoUpdated(MarketAPI market) {};
-
     public void reportPlayerMarketTransaction(PlayerMarketTransaction trs) {};
 
     public void reportPlayerAbandonedColony(MarketAPI market) {

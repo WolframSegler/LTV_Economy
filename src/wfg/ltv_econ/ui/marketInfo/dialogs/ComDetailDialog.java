@@ -579,7 +579,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
             final String factionName = market.getFaction().getDisplayName();
 
-            final UIPanelAPI infoBar = new CommodityBarPanel(null, 85, iconSize,
+            final UIPanelAPI infoBar = new CommodityBarPanel(null, 90, iconSize,
                 true, cell).getPanel();
 
             final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
@@ -630,7 +630,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         table.sortRows(6);
 
-        ((HeaderPanelWithTooltip) table.getColumns().get(4).headerPanel).tooltip.width = 450f;
+        ((HeaderPanelWithTooltip) table.getColumns().get(4).headerPanel).tooltip.width = 450f; // TODO after WrapUI update change to use SortableTable field tooltipWidth
     }
 
     private void createSection4(UIPanelAPI section) {
