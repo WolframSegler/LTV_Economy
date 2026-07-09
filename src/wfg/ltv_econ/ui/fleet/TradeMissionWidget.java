@@ -93,12 +93,10 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
         fleetIcon.drawTextureHalo = true;
         add(fleetIcon).inTR(opad*2 + 20, opad);
 
-        if (mission.usedFactionFleet && !mission.usedFuelFromStockpiles) {
-            final Base fuelWarningIcon = new Base(m_panel, 20, 20, FUEL, null, null);
-            fuelWarningIcon.texHaloColor = UIColors.FLOW_SHORTFALL;
-            fuelWarningIcon.drawTextureHalo = true;
-            add(fuelWarningIcon).inTR(opad*2 + hpad + 30, opad);
-        }
+        final Base fuelWarningIcon = new Base(m_panel, 20, 20, FUEL, null, null);
+        fuelWarningIcon.texHaloColor = mission.usedFuelFromStockpiles ? UIColors.IN_FACTION : UIColors.FLOW_SHORTFALL;
+        fuelWarningIcon.drawTextureHalo = true;
+        add(fuelWarningIcon).inTR(opad*2 + hpad + 30, opad);
 
         final int GAP_TOP_1 = 40;
         final int nameGap = 32;

@@ -466,7 +466,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         
         params.positionToShowAllMarkersAndSystems(false, mapHeight);
 
-        UIPanelAPI map = tooltip.createSectorMap(
+        final UIPanelAPI map = tooltip.createSectorMap(
             section.getPosition().getWidth(),
             mapHeight,
             params,

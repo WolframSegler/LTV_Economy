@@ -128,7 +128,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalProductionSurplus(comID);
+                final long value = engine.info.getGlobalSurplus(comID);
                 final String txt = str("uiTitleGlobalSurplus");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -152,8 +152,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalDeficit(comID);
-                final String txt = str("uiTitleGlobalDeficit");
+                final long value = engine.info.getGlobalShortfall(comID);
+                final String txt = str("uiTitleGlobalShortfall");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
@@ -162,7 +162,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("uiTpTxtGlobalDeficit"), pad);
+                    tp.addPara(str("uiTpTxtGlobalShortfall"), pad);
                 };
             }
         };
@@ -411,11 +411,11 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
       
         { // Global export share per faction (percent)
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final double globalExports = engine.info.getGlobalExports(comID);
+        final double globalExports = engine.info.getGlobalExportsWithInformal(comID);
 
         if (globalExports > 0) {
             for (FactionAPI faction : factionList) {
-                final double factionFormalExports = engine.info.getFactionFormalGlobalExports(comID, faction.getId());
+                final double factionFormalExports = engine.info.getFactionGlobalExports(comID, faction.getId());
                 final float share = (float) (factionFormalExports / globalExports);
                 if (share >= PIE_CHART_THRESHOLD) {
                     data.add(new PieSlice(faction.getId(), faction.getBaseUIColor(), share));
@@ -434,20 +434,16 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
         chart.tooltip.builder = (tp, exp) -> {
             tp.addTitle(str("uiTitleGlobalExportShareFaction"), base);
-
             tp.addPara(str("uiTpTxtGlobalExportShareFaction"), pad);
-
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
                     str("uiTableFaction"), 200, str("uiTableShareTitle"), 100
                 }
             );
-
             for (PieSlice slice : data) {
                 String label = (slice.color == UIColors.INFORMAL_SECTOR)
                     ? str("uiTitleInformalSector")
                     : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
-
                 tp.addRow(new Object[] {
                     slice.color,
                     label,
@@ -466,17 +462,17 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
         { // Global import share per faction (percent)
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final double globalImports = engine.info.getGlobalImports(comID);
+        final double globalImports = engine.info.getGlobalImportsWithInformal(comID);
 
         if (globalImports > 0d) {
             for (FactionAPI faction : factionList) {
-                final double factionFormalImports = engine.info.getFactionFormalGlobalImports(comID, faction.getId());
+                final double factionFormalImports = engine.info.getFactionGlobalImports(comID, faction.getId());
                 final float share = (float) (factionFormalImports / globalImports);
                 if (share >= PIE_CHART_THRESHOLD) {
                     data.add(new PieSlice(faction.getId(), faction.getBaseUIColor(), share));
                 }
             }
-    
+
             final double informalImports = dom.getInformalImports().values().stream().mapToDouble(d -> d).sum();
             final float informalShare = (float) (informalImports / globalImports);
             if (informalShare >= PIE_CHART_THRESHOLD) {
@@ -489,20 +485,16 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
         chart.tooltip.builder = (tp, exp) -> {
             tp.addTitle(str("uiTitleGlobalImportShareFaction"), base);
-            
             tp.addPara(str("uiTpTxtGlobalImportShareFaction"), pad);
-
             tp.beginTable(
                 base, dark, highlight, 20, true, true, new Object[] {
                     str("uiTableFaction"), 200, str("uiTableShareTitle"), 100
                 }
             );
-
             for (PieSlice slice : data) {
                 String label = (slice.color == UIColors.INFORMAL_SECTOR)
                     ? str("uiTitleInformalSector")
                     : Global.getSector().getFaction(slice.uniqueID).getDisplayName();
-
                 tp.addRow(new Object[] {
                     slice.color,
                     label,

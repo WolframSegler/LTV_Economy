@@ -267,17 +267,17 @@ public class TooltipUtils {
 
         { // Exports
             if (cell.inFactionExports > 0f) {
-                tp.addToGrid(0, rowCount++, str("uiLatestInFactionExports"), "+" +
+                tp.addToGrid(0, rowCount++, str("uiDispatchedInFactionExports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.inFactionExports)
                 );
             }
             if (cell.globalExports > 0f) {
-                tp.addToGrid(0, rowCount++, str("uiLatestGlobalExports"), "+" +
+                tp.addToGrid(0, rowCount++, str("uiDispatchedGlobalExports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.globalExports)
                 );
             }
             if (cell.informalExports > 0f) {
-                tp.addToGrid(0, rowCount++, str("uiLatestInformalExports"), "+" +
+                tp.addToGrid(0, rowCount++, str("uiDailyInformalExports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.informalExports)
                 );
             }
@@ -285,17 +285,17 @@ public class TooltipUtils {
 
         { // Imports
             if (cell.inFactionImports > 0f) {
-                tp.addToGrid(0, rowCount++, str("uiLatestInFactionImports"), "+" +
+                tp.addToGrid(0, rowCount++, str("uiIncomingInFactionImports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.inFactionImports)
                 );
             }
             if (cell.globalImports > 0f) {
-                tp.addToGrid(0, rowCount++, str("uiLatestGlobalImports"), "+" +
+                tp.addToGrid(0, rowCount++, str("uiIncomingGlobalImports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.globalImports)
                 );
             }
             if (cell.informalImports > 0f) {
-                tp.addToGrid(0, rowCount++, str("uiLatestInformalImports"), "+" +
+                tp.addToGrid(0, rowCount++, str("uiDailyInformalImports"), "+" +
                     NumFormat.formatMagnitudeAware(cell.informalImports)
                 );
             }

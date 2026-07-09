@@ -87,12 +87,9 @@ public class CommodityRowPanel extends CustomPanel implements
         add(comIcon).inBL(2f, 0f);
 
         final float consumption = cell.getConsumption(true);
-        final String amountStr;
-        if (consumption <= 0f) {
-            amountStr = str("notApplicable");
-        } else {
-            amountStr = NumFormat.engNotate(cell.getStored() / consumption) + str("uiSingleLetterDay");
-        }
+        final String amountStr = consumption <= 0f ? str("notApplicable"):
+            NumFormat.engNotate(cell.getStored() / consumption) + str("uiSingleLetterDay");
+
         final LabelAPI amountLbl = settings.createLabel(Strings.X + amountStr, Fonts.INSIGNIA_LARGE);
         amountLbl.autoSizeToWidth(textW);
         final float textHeight = amountLbl.computeTextHeight(amountLbl.getText());
