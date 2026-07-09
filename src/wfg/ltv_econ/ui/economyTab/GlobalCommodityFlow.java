@@ -422,7 +422,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 }
             }
 
-            final double informalExports = dom.getInformalExports().values().stream().mapToDouble(d -> d).sum();
+            final double informalExports = engine.info.getGlobalInformalImports(comID);
             final float informalShare = (float) (informalExports / globalExports);
             if (informalShare >= PIE_CHART_THRESHOLD) {
                 data.add(new PieSlice(null, UIColors.INFORMAL_SECTOR, informalShare));
@@ -448,7 +448,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                     slice.color,
                     label,
                     highlight,
-                    (int) (slice.fraction * 100) + "%"
+                    Math.round(slice.fraction * 100f) + "%"
                 });
             }
             tp.addTable("", 0, opad);
@@ -473,7 +473,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 }
             }
 
-            final double informalImports = dom.getInformalImports().values().stream().mapToDouble(d -> d).sum();
+            final double informalImports = engine.info.getGlobalInformalExports(comID);
             final float informalShare = (float) (informalImports / globalImports);
             if (informalShare >= PIE_CHART_THRESHOLD) {
                 data.add(new PieSlice(null, UIColors.INFORMAL_SECTOR, informalShare));
@@ -499,7 +499,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                     slice.color,
                     label,
                     highlight,
-                    (int) (slice.fraction * 100) + "%"
+                    Math.round(slice.fraction * 100f) + "%"
                 });
             }
             tp.addTable("", 0, opad);

@@ -104,9 +104,6 @@ public class CommodityCell implements Serializable {
     public float getPendingExports() {
         return inFactionExports + globalExports;
     }
-    public final float getInflowQuantum() {
-        return getProduction(true) + getTotalImports();
-    }
     public final float getTargetStored() {
         return EconConfig.DAYS_TO_COVER * getTargetQuantum(true);
     }
@@ -154,8 +151,7 @@ public class CommodityCell implements Serializable {
         return Math.max(0d, getTargetStored() - stored);
     }
     public final double getStoredDeficit() {
-        final float DEFICIT_THRESHOLD = 0.25f; // TODO define in config.
-        final double threshold = getTargetStored() * DEFICIT_THRESHOLD;
+        final double threshold = getTargetStored() * EconConfig.DEFICIT_THRESHOLD;
         return Math.max(0d, threshold - stored);
     }
     public final double getStoredSurplus() {
@@ -307,47 +303,50 @@ public class CommodityCell implements Serializable {
         return industries;
     }
 
-    public final void logAllInfo() {
+    @Override
+    public final String toString() {
         final StringBuilder sb = new StringBuilder(512);
-        sb.append("\n---- COMMODITY STATS LOG ----\n");
-        sb.append("Commodity&market: ").append(comID).append("__").append(marketID).append("\n\n");
+        sb.append("{\n");
+        sb.append("  \"commodity\": \"").append(comID).append("\",\n");
+        sb.append("  \"market\": \"").append(marketID).append("\",\n");
 
-        sb.append("[Daily Flows]\n");
-        sb.append(" production (base): ").append(getProduction(false)).append("\n");
-        sb.append(" consumption (base): ").append(getConsumption(false)).append("\n");
-        sb.append(" production (modified): ").append(getProduction(true)).append("\n");
-        sb.append(" consumption (modified): ").append(getConsumption(true)).append("\n");
-        sb.append(" targetQuantum (desired inflow base): ").append(getTargetQuantum(false)).append("\n");
-        sb.append(" targetQuantum (desired inflow modified): ").append(getTargetQuantum(true)).append("\n");
-        sb.append(" totalImports: ").append(getTotalImports()).append("\n");
-        sb.append(" totalExports: ").append(getTotalExports()).append("\n");
-        sb.append(" inflowQuantum (prod + imports): ").append(getInflowQuantum()).append("\n");
-        sb.append(" netChange (excluding formal trade): ").append(getQuantumNetChange()).append("\n\n");
+        // Daily flows
+        sb.append("  \"daily\": {\n");
+        sb.append("    \"productionBase\": ").append(getProduction(false)).append(",\n");
+        sb.append("    \"productionMod\": ").append(getProduction(true)).append(",\n");
+        sb.append("    \"consumptionBase\": ").append(getConsumption(false)).append(",\n");
+        sb.append("    \"consumptionMod\": ").append(getConsumption(true)).append(",\n");
+        sb.append("    \"targetBase\": ").append(getTargetQuantum(false)).append(",\n");
+        sb.append("    \"targetMod\": ").append(getTargetQuantum(true)).append(",\n");
+        sb.append("    \"totalImports\": ").append(getTotalImports()).append(",\n");
+        sb.append("    \"totalExports\": ").append(getTotalExports()).append(",\n");
+        sb.append("    \"netChange\": ").append(getQuantumNetChange()).append("\n");
+        sb.append("    \"surplusAfterTarget\": ").append(getSurplusAfterTargetQuantum()).append("\n");
+        sb.append("  },\n");
 
         // Stockpile
-        sb.append("[Stockpile]\n");
-        sb.append(" stored: ").append(stored).append("\n");
-        sb.append(" targetStockpiles (desired stock): ").append(getTargetStored()).append("\n");
-        sb.append(" storedShortfall (gap to target): ").append(getStoredShortfall()).append("\n");
-        sb.append(" storedDeficit: ").append(getStoredDeficit()).append("\n");
-        sb.append(" storedSurplus (gap beyond target): ").append(getStoredSurplus()).append("\n");
-        sb.append(" storedExcess (exportable surplus): ").append(getStoredExcess()).append("\n");
-        sb.append(" storedAvailabilityRatio (days of consumption): ").append(getStoredAvailabilityRatio()).append("\n");
-        sb.append(" desiredAvailabilityRatio (fill level): ").append(getDesiredAvailabilityRatio()).append("\n\n");
+        sb.append("  \"stockpile\": {\n");
+        sb.append("    \"stored\": ").append(stored).append(",\n");
+        sb.append("    \"target\": ").append(getTargetStored()).append(",\n");
+        sb.append("    \"shortfall\": ").append(getStoredShortfall()).append(",\n");
+        sb.append("    \"deficit\": ").append(getStoredDeficit()).append(",\n");
+        sb.append("    \"surplus\": ").append(getStoredSurplus()).append(",\n");
+        sb.append("    \"excess\": ").append(getStoredExcess()).append(",\n");
+        sb.append("    \"availRatio\": ").append(getStoredAvailabilityRatio()).append(",\n");
+        sb.append("    \"desiredRatio\": ").append(getDesiredAvailabilityRatio()).append("\n");
+        sb.append("  },\n");
 
-        // Import/Export breakdown (daily)
-        sb.append("[Trade Breakdown]\n");
-        sb.append(" inFactionImports: ").append(inFactionImports).append("\n");
-        sb.append(" globalImports: ").append(globalImports).append("\n");
-        sb.append(" informalImports: ").append(informalImports).append("\n");
-        sb.append(" inFactionExports: ").append(inFactionExports).append("\n");
-        sb.append(" globalExports: ").append(globalExports).append("\n");
-        sb.append(" informalExports: ").append(informalExports).append("\n\n");
+        // Trade breakdown
+        sb.append("  \"trade\": {\n");
+        sb.append("    \"inFactionImports\": ").append(inFactionImports).append(",\n");
+        sb.append("    \"globalImports\": ").append(globalImports).append(",\n");
+        sb.append("    \"informalImports\": ").append(informalImports).append(",\n");
+        sb.append("    \"inFactionExp\": ").append(inFactionExports).append(",\n");
+        sb.append("    \"globalExp\": ").append(globalExports).append(",\n");
+        sb.append("    \"informalExp\": ").append(informalExports).append("\n");
+        sb.append("  },\n");
 
-        // Derived metrics
-        sb.append("[Derived]\n");
-        sb.append(" surplusAfterTargetQuantum (prod - target): ").append(getSurplusAfterTargetQuantum()).append("\n");
-
-        Global.getLogger(getClass()).info(sb.toString());
+        sb.append("}");
+        return sb.toString();
     }
 }

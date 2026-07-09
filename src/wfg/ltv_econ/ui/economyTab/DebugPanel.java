@@ -141,11 +141,20 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
 
         { // LOG ALL COMMODITY CELLS
             final CallbackRunnable<Button> run = (btn) -> {
+                final StringBuilder sb = new StringBuilder();
+                sb.append("[\n");
+                boolean first = true;
                 for (CommodityDomain dom : engine.getComDomains()) {
-                for (CommodityCell cell : dom.getAllCells()) {
-                    cell.logAllInfo();
+                    for (CommodityCell cell : dom.getAllCells()) {
+                        if (!first) {
+                            sb.append(",\n");
+                        }
+                        sb.append(cell.toString());
+                        first = false;
+                    }
                 }
-                }
+                sb.append("\n]");
+                logger.info(sb.toString());
             };
             final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
                 str("uiBtnTitleLogAllComCells"), Fonts.DEFAULT_SMALL, run

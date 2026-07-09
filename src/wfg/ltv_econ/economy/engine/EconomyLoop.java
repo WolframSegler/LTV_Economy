@@ -345,11 +345,11 @@ public class EconomyLoop {
             engine.cyclesSinceTrade = 0;
             engine.lastTradeCycle = EconConfig.TRADE_INTERVAL;
             dispatchTrade();
-            engine.comDomains.values().parallelStream().forEach(d -> d.informalTrade(true));
         } else {
             engine.cyclesSinceTrade++;
-            engine.comDomains.values().parallelStream().forEach(d -> d.informalTrade(false));
         }
+
+        engine.comDomains.values().parallelStream().forEach(CommodityDomain::informalTrade);
     }
 
     private final void dispatchTrade() {

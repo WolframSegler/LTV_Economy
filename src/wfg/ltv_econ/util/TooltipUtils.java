@@ -502,12 +502,15 @@ public class TooltipUtils {
         final EconomyEngine engine = EconomyEngine.instance();
         final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
 
-        final long exportIncomeLastMonth = ledger.getLastMonth(TRADE_EXPORT_KEY + comID);
-        final long exportIncomeThisMonth = ledger.getCurrentMonth(TRADE_EXPORT_KEY + comID);
+        final float totalExports = cell.getTotalExports();
+        final float totalImports = cell.getTotalImports();
 
-        if (exportIncomeLastMonth > 0l || exportIncomeThisMonth > 0l) {
+        if (totalExports > 0f) {
+            final long exportIncomeLastMonth = ledger.getLastMonth(TRADE_EXPORT_KEY + comID);
+            final long exportIncomeThisMonth = ledger.getCurrentMonth(TRADE_EXPORT_KEY + comID);
+
             tp.addPara(strf("uiTpTxtLedger1", marketName, comName), opad, highlight,
-                NumFormat.formatMagnitudeAware(cell.getTotalExports()),
+                NumFormat.formatMagnitudeAware(totalExports),
                 engine.info.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
@@ -516,12 +519,12 @@ public class TooltipUtils {
             tp.addPara(str("uiTpTxtLedger2"), opad);
         }
 
-        final long importExpenseLastMonth = ledger.getLastMonth(TRADE_IMPORT_KEY + comID);
-        final long importExpenseThisMonth = ledger.getCurrentMonth(TRADE_IMPORT_KEY + comID);
+        if (totalImports > 0f) {
+            final long importExpenseLastMonth = Math.abs(ledger.getLastMonth(TRADE_IMPORT_KEY + comID));
+            final long importExpenseThisMonth = Math.abs(ledger.getCurrentMonth(TRADE_IMPORT_KEY + comID));
 
-        if (importExpenseLastMonth > 0l || importExpenseThisMonth > 0l) {
             tp.addPara(strf("uiTpTxtLedger3", marketName, comName), opad, highlight,
-                NumFormat.formatMagnitudeAware(cell.getTotalImports()),
+                NumFormat.formatMagnitudeAware(totalImports),
                 engine.info.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)
@@ -568,7 +571,7 @@ public class TooltipUtils {
             });
 
             tp.addSectionHeading(str("uiTitleTradeCycle"), facBase, faction.getDarkUIColor(), Alignment.MID, opad);
-            tp.addPara(str("uiTpTxtTradeCycle"), opad, new Color[] {highlight, base},
+            tp.addPara(str("uiTpTxtTradeCycle"), opad, new Color[] {highlight, facBase},
                 Integer.toString(EconConfig.TRADE_INTERVAL), str("uiBtnTitleEconomy")
             );
 

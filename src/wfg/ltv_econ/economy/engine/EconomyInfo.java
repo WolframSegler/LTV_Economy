@@ -236,15 +236,6 @@ public class EconomyInfo {
         return (long) (total + dom.getInformalNode().prod);
     }
 
-    public final long getGlobalProductionSurplus(String comID) {
-        long total = 0;
-
-        for (CommodityCell cell : engine.getComDomain(comID).getAllCells())
-        total += cell.getSurplusAfterTargetQuantum();
-
-        return total;
-    }
-
     public final long getGlobalSurplus(String comID) {
         long total = 0;
 
@@ -313,18 +304,20 @@ public class EconomyInfo {
         return total;
     }
 
+    /** Informal imports by cells. The amount informals exported. */
     public final double getGlobalInformalImports(String comID) {
         double total = 0d;
-        for (double amount : engine.getComDomain(comID).getInformalImports().values()) {
-            total += amount;
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
+            total += cell.informalImports;
         }
         return total;
     }
 
+    /** Informal exports by cells. The amount informals imported. */
     public final double getGlobalInformalExports(String comID) {
         double total = 0d;
-        for (double amount : engine.getComDomain(comID).getInformalExports().values()) {
-            total += amount;
+        for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
+            total += cell.informalExports;
         }
         return total;
     }
@@ -510,7 +503,7 @@ public class EconomyInfo {
     public final double getGlobalExportsWithInformal(String comID) {
         double total = 0d;
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
-            total += cell.globalExports + cell.informalExports;
+            total += cell.globalExports + cell.informalImports;
         }
         return total;
     }
@@ -518,7 +511,7 @@ public class EconomyInfo {
     public final double getGlobalImportsWithInformal(String comID) {
         double total = 0d;
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
-            total += cell.globalImports + cell.informalImports;
+            total += cell.globalImports + cell.informalExports;
         }
         return total;
     }
@@ -527,7 +520,7 @@ public class EconomyInfo {
         double total = 0d;
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
             if (cell.market.getFactionId().equals(factionID)) {
-                total += cell.globalExports + cell.informalExports;
+                total += cell.globalExports + cell.informalImports;
             }
         }
         return total;
@@ -537,7 +530,7 @@ public class EconomyInfo {
         double total = 0d;
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
             if (cell.market.getFactionId().equals(factionID)) {
-                total += cell.globalImports + cell.informalImports;
+                total += cell.globalImports + cell.informalExports;
             }
         }
         return total;

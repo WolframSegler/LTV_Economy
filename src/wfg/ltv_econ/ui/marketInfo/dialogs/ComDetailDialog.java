@@ -51,6 +51,7 @@ import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.CheckboxButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.table.SortableTable;
+import wfg.native_ui.ui.table.SortableTable.HeaderPanelWithTooltip;
 import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
@@ -547,9 +548,9 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             str("uiTableSize"), 0.09 * SECT3_WIDTH, str("uiTableSizeTpTxt"), false, false, -1,
             str("uiTableFaction"), 0.17 * SECT3_WIDTH, str("uiTableFactionTpTxt"), false, false, -1,
             str("uiTableQuantity"), 0.05 * SECT3_WIDTH, quantityTooltip, true, true, 2,
-            "", 0.1 * SECT3_WIDTH, null, true, false, 2,
+            "", 0.13 * SECT3_WIDTH, null, true, false, 2,
             str("uiTableAccessibility"), 0.11 * SECT3_WIDTH, str("uiTableAccessibilityTpTxt"), false, false, -1,
-            str("uiTableMarketShare"), 0.15 * SECT3_WIDTH, marketTpDesc, false, false, -1,
+            str("uiTableMarketShare"), 0.12 * SECT3_WIDTH, marketTpDesc, false, false, -1,
             creditHeader, 0.11 * SECT3_WIDTH, creditTpDesc, false, false, -1
         );
 
@@ -565,8 +566,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                 continue;
             }
 
-            final double quantity = mode == 0 ? cell.getTotalExports(): cell.getTotalImports();
-            if (quantity <= 0d) continue;
+            final double quantity = mode == 0 ? cell.getTotalExports() : cell.getTotalImports();
+            if (quantity <= 1d) continue;
 
             final String iconPath = market.getFaction().getCrest();
             final Base iconPanel = new Base(section, iconSize, iconSize,
@@ -578,7 +579,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
             final String factionName = market.getFaction().getDisplayName();
 
-            final UIPanelAPI infoBar = new CommodityBarPanel(null, 75, iconSize,
+            final UIPanelAPI infoBar = new CommodityBarPanel(null, 85, iconSize,
                 true, cell).getPanel();
 
             final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
@@ -600,7 +601,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             table.addCell(infoBar, cellAlg.MID, null, null);
             table.addCell(accessibility + "%", cellAlg.MID, accessibility, null);
             table.addCell(marketShare + "%", cellAlg.MID, marketShare, null);
-            table.addCell(NumFormat.formatCredit(incomeValue), cellAlg.MID, incomeValue, null);
+            table.addCell(NumFormat.formatCredit(Math.abs(incomeValue)), cellAlg.MID, Math.abs(incomeValue), null);
 
             // Tooltip
             table.getPendingRow().tooltip.width = 450f;
@@ -628,6 +629,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         section.addComponent(table.getPanel()).inTL(pad, 0f);
 
         table.sortRows(6);
+
+        ((HeaderPanelWithTooltip) table.getColumns().get(4).headerPanel).tooltip.width = 450f;
     }
 
     private void createSection4(UIPanelAPI section) {

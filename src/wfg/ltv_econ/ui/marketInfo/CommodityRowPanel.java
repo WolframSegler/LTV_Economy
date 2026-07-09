@@ -198,6 +198,8 @@ public class CommodityRowPanel extends CustomPanel implements
         legendRowHelper(tp, y, null, str("uiDescLegendExport"), iconSize, false, UIColors.BAR_EXPORT);
         y += iconSize + pad;
 
+        y += opad;
+
         legendRowHelper(tp, y, null, str("uiDescLegendFlowSatisfied"), iconSize, false, UIColors.FLOW_SATISFIED);
         y += iconSize + pad;
 
@@ -205,7 +207,6 @@ public class CommodityRowPanel extends CustomPanel implements
         y += iconSize + pad;
 
         legendRowHelper(tp, y, null, str("uiDescLegendFlowShortfall"), iconSize, false, UIColors.FLOW_SHORTFALL);
-        y += iconSize + pad;
 
         tp.setHeightSoFar(y + opad * 2);
     }

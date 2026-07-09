@@ -84,6 +84,7 @@ public class EconomyConfigLoader {
         EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER = (float) root.getDouble("SHIP_ALLOC_MIN_COMBAT_POWER");
         EconConfig.SCRAP_REFUND_FRACTION = (float) root.getDouble("SCRAP_REFUND_FRACTION");
         EconConfig.INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP = (float) root.getDouble("INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP");
+        EconConfig.DEFICIT_THRESHOLD = (float) root.getDouble("DEFICIT_THRESHOLD");
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());

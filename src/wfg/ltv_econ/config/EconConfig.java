@@ -237,6 +237,9 @@ public class EconConfig {
      */
     public static float SCRAP_REFUND_FRACTION;
 
+    /** Multiplier for target stockpiles defining the start of shortages. */
+    public static float DEFICIT_THRESHOLD;
+
     public static record DebtDebuffTier(
         long threshold,
         int stabilityPenalty,

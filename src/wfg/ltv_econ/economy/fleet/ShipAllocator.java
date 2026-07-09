@@ -40,7 +40,7 @@ public class ShipAllocator {
 
     private static final double DIVERSITY_PENALTY = 0.4;
     private static final double REF_SHIPMENT = 500d;
-    private static final float COMBAT_POWER_BASE_PER_100_TONS = 5f;
+    private static final float COMBAT_POWER_BASE_PER_100_TONS = 2f;
     private static final float[] COMBAT_POWER_DANGER_MULT = {
         0.1f, // NONE
         0.4f, // MINIMAL

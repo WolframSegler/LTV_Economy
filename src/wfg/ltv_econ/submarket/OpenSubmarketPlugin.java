@@ -61,8 +61,8 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 
 			getCargo().getMothballedShips().clear();
 
-            final float shipProd = (float) Math.log10(Math.max(1f, shipsCell.getInflowQuantum()));
-            final float fuelProd = (float) Math.log10(Math.max(1f, fuelCell.getInflowQuantum()));
+            final float shipProd = (float) Math.log10(Math.max(1f, getInflowQuantumNormalized(shipsCell)));
+            final float fuelProd = (float) Math.log10(Math.max(1f, getInflowQuantumNormalized(fuelCell)));
 
             final float combatShips = Math.min(10f + 5f * shipProd, 60f);
             final float freighters = Math.min(10f + 10f * shipProd, 35f);
@@ -259,5 +259,9 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 			return h;
 		}
 		return super.getTooltipAppendixHighlights(ui);
+	}
+
+	private static final float getInflowQuantumNormalized(final CommodityCell cell) {
+		return cell.getProduction(true) + cell.informalImports + (cell.inFactionImports + cell.globalImports) / EconConfig.TRADE_INTERVAL;
 	}
 }

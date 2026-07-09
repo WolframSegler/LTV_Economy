@@ -10,6 +10,7 @@ Version 0.4.9-beta | SAVE COMPATIBLE
 - Huge backend refactors for a more reliable simulation.
 - Overhauled the info bar to display stockpiles directly, as the old info bar didn't really communicate relevant information.
 - Fixed trade breakdown pie chart double-counting informal exports.
+- Increased starting stockpiles of colonies for a more stable start.
 
 Version 0.4.8-beta | SAVE COMPATIBLE
 - Changed how trade prices are calculated to make it more fair.
