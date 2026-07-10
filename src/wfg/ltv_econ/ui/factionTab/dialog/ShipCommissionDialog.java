@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -172,7 +173,7 @@ public class ShipCommissionDialog extends DockPanel {
             
             for (InputEventAPI e : events) {
                 if (!e.isConsumed() && e.isKeyboardEvent() && e.getEventValue() == Keyboard.KEY_F2) {
-                    settings.showCodex(spec.getCodexVariantId());
+                    settings.showCodex(CodexDataV2.getShipEntryId(spec.getHullId()));
                 }
             }
         }
