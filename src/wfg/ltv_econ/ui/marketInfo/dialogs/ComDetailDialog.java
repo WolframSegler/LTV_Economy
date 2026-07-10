@@ -630,7 +630,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         table.sortRows(6);
 
-        ((HeaderPanelWithTooltip) table.getColumns().get(4).headerPanel).tooltip.width = 450f; // TODO after WrapUI update change to use SortableTable field tooltipWidth
+        final HeaderPanelWithTooltip header = (HeaderPanelWithTooltip) table.getColumns().get(4).headerPanel;
+        if (header != null) header.tooltip.width = 450f; // TODO after WrapUI update change to use SortableTable field tooltipWidth
     }
 
     private void createSection4(UIPanelAPI section) {

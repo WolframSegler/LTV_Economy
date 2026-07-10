@@ -15,6 +15,8 @@ import wfg.ltv_econ.ui.marketInfo.dialogs.MarketEventsDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class MarketEventsButton extends DockButton<MarketEventsDialog> {
     private static final SpriteAPI ICON = settings.getSprite("icons", "events_button");
@@ -29,7 +31,10 @@ public class MarketEventsButton extends DockButton<MarketEventsDialog> {
         bgDisabledAlpha = 0f;
 
         tooltip.builder = (tp, expanded) -> {
-            tp.addPara(LocalizedStrings.str("uiBtnTitleMarketEvents"), pad, highlight, Keyboard.getKeyName(interaction.shortcut));
+            tp.addPara(LocalizedStrings.str("uiBtnTitleMarketEvents"), 0f, highlight, Keyboard.getKeyName(interaction.shortcut));
+        };
+        tooltip.positioner = (tp, expanded) -> {
+            NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.LeftTop, 50);
         };
 
         final Base icon = new Base(m_panel, width, height, ICON, null, null);

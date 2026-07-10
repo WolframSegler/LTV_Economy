@@ -577,6 +577,7 @@
         "uiTitleTradeLedger": "贸易账目",
         "uiTpTxtCommodityWidget1": "产量和通达性较高的市场在进出口方面优先。",
         "uiTitleInfoLegend": "图例",
+        "uiTpTxtInfoLegend": "上方条显示生产与消耗对比。下方条显示库存、进口和出口相对于期望存量的情况。",
         "uiDescLegendStockpilesIcon": "库存与目标储备的比例。",
         "uiDescLegendExportIcon": "可供出口的过剩产量。",
         "uiDescLegendStored": "已满足期望水平的库存。",

@@ -583,6 +583,7 @@
         "uiTitleTradeLedger": "Trade Ledger",
         "uiTpTxtCommodityWidget1": "Markets with higher production and accessibility are prioritized for exports and imports.",
         "uiTitleInfoLegend": "Legend",
+        "uiTpTxtInfoLegend": "Upper bar shows production versus consumption. Lower bar shows stored supplies, inbound imports, and outgoing exports against the desired stock level.",
         "uiDescLegendStockpilesIcon": "Proportion of stockpiles compared to the desired amount.",
         "uiDescLegendExportIcon": "Excess production that is exported.",
         "uiDescLegendStored": "Stock within the desired level.",

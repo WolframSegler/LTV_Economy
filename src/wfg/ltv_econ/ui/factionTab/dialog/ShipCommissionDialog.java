@@ -6,12 +6,17 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
+import java.util.List;
+
+import org.lwjgl.input.Keyboard;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -158,6 +163,18 @@ public class ShipCommissionDialog extends DockPanel {
             add(timePair).inLMid(iconSize + opad + nameW + pairW);
 
             costPair.label().setText(costPair.label().getText() + Strings.C);
+        }
+
+        @Override
+        public void processInput(List<InputEventAPI> events) {
+            super.processInput(events);
+            if (!NativeUiUtils.containsMouse(pos)) return;
+            
+            for (InputEventAPI e : events) {
+                if (!e.isConsumed() && e.isKeyboardEvent() && e.getEventValue() == Keyboard.KEY_F2) {
+                    settings.showCodex(spec.getCodexVariantId());
+                }
+            }
         }
     }
 }

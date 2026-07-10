@@ -124,9 +124,9 @@ public class CommodityRowPanel extends CustomPanel implements
             tp.addPara(comDesc, opad);
 
             if (UIUtils.canViewPrices()) {
-                tp.addPara(str("uiViewGlobalMarketInfo"), opad, positive);
+                tp.addPara(str("uiViewGlobalMarketInfo"), positive, opad);
             } else {
-                tp.addPara(str("uiCannotViewGlobalMarketInfo"), opad, negative);
+                tp.addPara(str("uiCannotViewGlobalMarketInfo"), negative, opad);
             }
             
             if (!expanded) {
@@ -157,7 +157,11 @@ public class CommodityRowPanel extends CustomPanel implements
                 final int y = (int)tp.getHeightSoFar() + pad;
 
                 legendRowCreator(0, tp, y, iconSize); 
-                tp.addSpacer(pad);
+
+                NativeUiUtils.resetFlowLeft(tp, hpad);
+                tp.addPara("*" + str("uiTpTxtInfoLegend"), gray, pad);
+
+                tp.addSpacer(opad);
             }
         };
     }

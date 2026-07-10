@@ -8,6 +8,7 @@ import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.fleet.TradeMissionsDialog;
@@ -18,11 +19,12 @@ import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.visual.SpritePanel.Base;
 import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
     private static final SpriteAPI ICON = settings.getSprite("icons", "stockpiles_button");
 
-    public ColonyStockpilesButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
+    public ColonyStockpilesButton(UIPanelAPI parent, int width, int height, MarketAPI market, UIComponentAPI tpAnchor) {
         super(parent, width, height, null, null, () -> new TradeMissionsDialog(market, true));
 
         final CallbackRunnable<Button> dockRun = onClicked;
@@ -40,13 +42,16 @@ public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
         bgDisabledAlpha = 0f;
 
         tooltip.builder = (tp, expanded) -> {
-            tp.addPara(str("uiBtnTpTxtColonyStockpiles1"), pad,
+            tp.addPara(str("uiBtnTpTxtColonyStockpiles1"), 0f,
                 highlight, Keyboard.getKeyName(interaction.shortcut)
             );
 
             tp.addPara(str("uiBtnTpTxtColonyStockpiles2"), pad,
                 highlight, str("uiCtrlTxt"), Keyboard.getKeyName(interaction.shortcut)
             );
+        };
+        tooltip.positioner = (tp, expanded) -> {
+            NativeUiUtils.anchorPanel(tp, tpAnchor, AnchorType.LeftTop, 50);
         };
 
         final Base icon = new Base(m_panel, width, height, ICON, null, null);

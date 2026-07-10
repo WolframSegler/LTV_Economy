@@ -150,8 +150,8 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
         final int buttonHeight = (int) (buttonWidth / 1.63f);
 
         final MarketEventsButton eventsBtn = new MarketEventsButton(managementPanel, buttonWidth, buttonHeight, market);
-        final ColonyStockpilesButton stockpilesBtn = new ColonyStockpilesButton(managementPanel, buttonWidth, buttonHeight, market);
-        final ManagePopButton popBtn = new ManagePopButton(managementPanel, buttonWidth, buttonHeight, market);
+        final ColonyStockpilesButton stockpilesBtn = new ColonyStockpilesButton(managementPanel, buttonWidth, buttonHeight, market, eventsBtn.getPanel());
+        final ManagePopButton popBtn = new ManagePopButton(managementPanel, buttonWidth, buttonHeight, market, eventsBtn.getPanel());
 
         final int gap = (LtvCommodityPanel.STANDARD_WIDTH - buttonWidth * 3) / 2;
 
