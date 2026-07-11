@@ -86,7 +86,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		extra.factionId = factionId;
 
 		final RouteData route = RouteManager.getInstance().addRoute(getRouteSourceId(), src, mission.uniqueID,
-			extra, this,new LtvEconomyRouteData(mission)
+			extra, this, new LtvEconomyRouteData(mission)
 		);
 
 		final StarSystemAPI sysFrom = src.getStarSystem();
@@ -156,6 +156,8 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 			if (excludeList.contains(m.src.getId()) || excludeList.contains(m.dest.getId())) continue;
 
 			if (recentlySentTradeFleet.contains(m.src.getId())) continue;
+
+			if (m.src.getFaction().isHostileTo(m.dest.getFaction())) continue;
 
 			missionPicker.add(m, m.src.getSize());
 		}

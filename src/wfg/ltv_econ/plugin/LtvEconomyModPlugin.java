@@ -72,7 +72,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
-        LtvEconSaveData.loadInstance(false, newGame);
+        final LtvEconSaveData data = LtvEconSaveData.loadInstance(false, newGame);
 
         final ListenerManagerAPI listenerManager = Global.getSector().getListenerManager();
 
@@ -83,6 +83,8 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         if (newGame) {
             injectStockpiles();
             injectShips();
+
+            for (int i = 0; i < 7; i++) data.economyEngine.realAdvance();
         }
     }
 

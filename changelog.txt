@@ -1,3 +1,9 @@
+Version 0.4.10-beta | SAVE COMPATIBLE
+- Modified the Commodity Detail Dialog to display all producing and demanding markets instead of exporting and importing ones only.
+- Trade fleets can no longer spawn between hostile factions.
+- Colonies now hold a small buffer of locally produced goods even if there is no consumption.
+- The economy will now be simulated for a week when starting a new game.
+
 Version 0.4.9-beta | SAVE COMPATIBLE
 - Fixed a rare concurrency error concerning trade fleets.
 - Fixed d-modded ships transferred to faction hangar not using the base hull.

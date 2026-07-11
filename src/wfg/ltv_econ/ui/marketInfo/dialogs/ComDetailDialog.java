@@ -259,9 +259,8 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             final TextPanel textPanel = new TextPanel(section, 170, 0) {
                 @Override
                 public void buildUI() {
-                    final String valueTxt = NumFormat.engNotate(
-                        engine.info.getGlobalExports(comID)
-                    );
+                    final double value = engine.info.getGlobalExports(comID);
+                    final String valueTxt = value < 1d ? "---" :  NumFormat.engNotate(value);
 
                     ComponentFactory.addCaptionValueBlock(
                         m_panel, str("uiTitleGlobalExports"),
@@ -536,11 +535,19 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
         final String comID = m_com.getId();
         final String creditHeader = mode == 0 ? str("uiTableIncomeTitle") : str("uiTableValue");
 
-        final TooltipBuilder quantityTooltip = createSection3QuantityHeaderTooltip(mode, table);
-
         final String marketTpDesc = mode == 0 ? str("uiTpTxtMarketShare1") : str("uiTpTxtMarketShare2");
         
         final String creditTpDesc = mode == 0 ? str("uiTpTxtCreditHeader1") : str("uiTpTxtCreditHeader2");
+
+        final TooltipBuilder quantityTooltip = (tp, exp) -> {
+            tp.addPara(mode == 0 ? str("uiTableQuantityTpTxt1") : str("uiTableQuantityTpTxt2"), pad);
+
+            final int y = (int) tp.getHeightSoFar() + pad + opad;
+
+            CommodityRowPanel.legendRowCreator(
+                1, tp, y, 26
+            );
+        };
 
         table.addHeaders( // 876 pixels wide
             "", 0.04 * SECT3_WIDTH, null, true, false, 1,
@@ -565,9 +572,10 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             if (footer != null && footer.isChecked() && !(cell.getStoredDeficit() + cell.getStoredExcess() > 0f)) {
                 continue;
             }
+            final float interest = mode == 0 ? cell.getProduction(true) : cell.getTargetQuantum(true) * Math.signum(cell.getConsumption(false));
+            if (interest < 1f) continue;
 
             final double quantity = mode == 0 ? cell.getTotalExports() : cell.getTotalImports();
-            if (quantity <= 1d) continue;
 
             final String iconPath = market.getFaction().getCrest();
             final Base iconPanel = new Base(section, iconSize, iconSize,
@@ -747,22 +755,6 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                             "%" : Math.round(value.value * 100) + "%";
                     }
                 }
-            );
-        };
-    }
-
-    private static final TooltipBuilder createSection3QuantityHeaderTooltip(
-        int mode, SortableTable table
-    ) {
-        final String quantityDesc = mode == 0 ? str("uiTableQuantityTpTxt1") : str("uiTableQuantityTpTxt2");
-
-        return (tp, exp) -> {
-            tp.addPara(quantityDesc, pad);
-
-            final int y = (int) tp.getHeightSoFar() + pad + opad;
-
-            CommodityRowPanel.legendRowCreator(
-                1, tp, y, 26
             );
         };
     }

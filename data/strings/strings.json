@@ -480,7 +480,7 @@
         "uiTitleGlobalMarketValue": "Global market value",
         "uiTpTxtGlobalMarketValue": "Total sector-wide spending on %1$s exports that are currently in transit or part of daily informal trade. Colonies with higher accessibility, better faction relations, and shorter distances to importers are prioritised when trade missions are dispatched.\n\nThe value includes demand from your colonies, as they must import goods as well. In-faction trade receives a %2$s discount.",
         "uiTitleGlobalExports": "Global exports",
-        "uiTpTxtGlobalExports": "Total number of %1$s that have already been dispatched for export, including both formal trade fleet deliveries and daily informal exports.\n\nThis reflects all supply that has been committed beyond local needs.",
+        "uiTpTxtGlobalExports": "Total number of %1$s that have been dispatched for export, including both formal trade fleet deliveries and daily informal exports but excluding in-faction exports.",
         "uiTitleTotalFactionExports": "Total %1$s exports",
         "uiTpTxtTotalFactionExports": "Total %2$s currently being exported by %1$s. The first figure shows cross-faction exports already dispatched, while the second shows in-faction shipments that have left the source market.\n\nExport volumes are influenced by colony accessibility, faction relations, and other trade factors.",
         "uiTotalFactionExportsTpGlobalConsumersTxt": "global consumers",
@@ -729,6 +729,7 @@
         "uiDialogTransferToFactionInventoryTxt": "Transfer ship to the faction hangar? It cannot be undone. The transfer will grant you %1$s %2$s. You need %3$s crew for the transfer.",
         "uiCheckboxTxtAutoAssignWorkers": "Re-allocate workers periodically using the most recently run plan",
         "uiBtnTitleLogMarketsWithManufacturing": "Log Markets With Manufacturing",
-        "uiStatDescTargetFromConsumption": "consumption"
+        "uiStatDescTargetFromConsumption": "Consumption",
+        "uiStatDescTargetFromProduction": "Export buffer"
     }
 }

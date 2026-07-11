@@ -112,7 +112,6 @@ public class CommodityCell implements Serializable {
     }
     public final double computeExportAmount() {
         return Math.max(0d, stored + getSurplusAfterTargetQuantum()
-            - getProduction(true) * EconConfig.PRODUCTION_HOLD_FACTOR
             - getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR
             - nonExportableStock - informalExports
         );
@@ -234,6 +233,8 @@ public class CommodityCell implements Serializable {
             }
         }
 
+        final float prodHoldFactor = (production.getModifiedValue() * EconConfig.PRODUCTION_HOLD_FACTOR) / (float) EconConfig.DAYS_TO_COVER;
+        targetQuantum.modifyBase(CELL_PRODUCTION_TARGET_KEY, prodHoldFactor, getDesc(CELL_PRODUCTION_TARGET_KEY));
         targetQuantum.modifyBase(CELL_CONSUMPTION_TARGET_KEY, consumption.getModifiedValue(), getDesc(CELL_CONSUMPTION_TARGET_KEY));
     }
 

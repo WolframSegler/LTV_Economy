@@ -476,7 +476,7 @@
         "uiTitleGlobalMarketValue": "全球市场价值",
         "uiTpTxtGlobalMarketValue": "全星域用于购买已发出的%1$s的总花费，包括正规贸易舰队与日常非正规贸易。可及性更高、势力关系更好且距离客户更近的殖民地在发布贸易任务时享有优先权。\n\n该数值包含你的殖民地的需求，因为它们同样需要进口货物。同势力贸易享有%2$s的折扣。",
         "uiTitleGlobalExports": "全球出口",
-        "uiTpTxtGlobalExports": "已发出的%1$s总出口量，包括正规贸易舰队交付与日常非正规出口。\n\n此数据反映所有已超出本地需求、且已承诺供应的资源。",
+        "uiTpTxtGlobalExports": "已发出的%1$s出口总量，包括正规贸易舰队交付和日常非正规出口，但不包括派系内部出口。",
         "uiTitleTotalFactionExports": "%1$s总出口",
         "uiTpTxtTotalFactionExports": "当前%1$s正在出口的%2$s总量。第一个数字显示已发出的跨势力出口，第二个数字显示已离开来源市场的同势力发运量。\n\n出口量受殖民地可及性、势力关系及其他贸易因素影响。",
         "uiTotalFactionExportsTpGlobalConsumersTxt": "全球消费者",
@@ -729,6 +729,7 @@
         "uiTitleEmployed": "就业",
         "uiTitleUnemployed": "失业",
         "uiBtnTitleLogMarketsWithManufacturing": "记录所有拥有制造厂的市场",
-        "uiStatDescTargetFromConsumption": "消耗"
+        "uiStatDescTargetFromConsumption": "消耗",
+        "uiStatDescTargetFromProduction": "出口缓冲"
     }
 }

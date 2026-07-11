@@ -15,7 +15,7 @@ public class BasePriceCalculator {
     /** Stock/demand ratio with maximum deficit. */
     static final double ABSOLUTE_DEFICIT_BOUND = 0d;
     /** Stock/demand ratio with maximum excess. */
-    static final double ABSOLUTE_EXCESS_BOUND = 4d;
+    static final double ABSOLUTE_EXCESS_BOUND = 5d;
 
     /** Multiplier when stock is at {@link #ABSOLUTE_DEFICIT_BOUND}. */
     static final double ABSOLUTE_DEFICIT_MULT = 3d;
@@ -28,7 +28,7 @@ public class BasePriceCalculator {
     static final double SHIFT_FRACTION;
     static final double NEGATIVE_TAIL_FACTOR;
 
-    static final float INHERENT_DEMAND = 10f;
+    static final float INHERENT_DEMAND = 100f;
     static final float PRICE_MULT_FLOOR = 0.1f;
     static final float PRICE_MULT_CEILING = 10f;
     static final double MAX_MULT = Double.MAX_VALUE;
