@@ -30,6 +30,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.intel.events.PiracyRespiteScript;
 import com.fs.starfarer.api.impl.campaign.rulecmd.KantaCMD;
 import com.fs.starfarer.api.impl.campaign.shared.SharedData;
@@ -217,7 +218,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 		final float usageFraction = (float) Arithmetic.clamp(
 			(1d / Math.log10(totalAllocated * 2)) * (mission.smuggling ? 0.5 : 1d), 
-			0.1, 1.0
+			0.1, 1d
 		);
 		final int targetShips = Math.min(Math.round(totalAllocated * usageFraction), Math.min(totalAllocated, maxShipsInFleet));
 
@@ -233,7 +234,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 			fleetType = FleetTypes.TRADE;
 		}
 
-		final float numShipsMult = src.getStats().getDynamic().getMod("combat_fleet_size_mult").computeEffective(0.0F);
+		final float numShipsMult = src.getStats().getDynamic().getMod(Stats.COMBAT_FLEET_SIZE_MULT).computeEffective(0.0F);
 		final float combatPts = mission.combatPowerTarget * numShipsMult;
 
 		final CampaignFleetAPI fleet;

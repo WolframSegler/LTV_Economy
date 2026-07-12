@@ -63,7 +63,7 @@ public class FleetFactoryHelpers {
                     final ShipHullSpecAPI spec = settings.getHullSpec(e.getKey());
                     if (banPhaseShips && spec.isPhase()) continue;
     
-                    totalWeight += e.getValue() * Math.max(1d, spec.getFleetPoints());
+                    totalWeight += e.getValue();
                 }
                 if (totalWeight <= 0d) break;
     
@@ -76,7 +76,7 @@ public class FleetFactoryHelpers {
                     final ShipHullSpecAPI spec = settings.getHullSpec(e.getKey());
                     if (banPhaseShips && spec.isPhase()) continue;
     
-                    accum += e.getValue() * Math.max(1d, spec.getFleetPoints());
+                    accum += e.getValue();
                     if (accum >= r) {
                         selection.add(spec);
                         final int newCount = e.getValue() - 1;

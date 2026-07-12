@@ -5,6 +5,7 @@ Version 0.4.10-beta | SAVE COMPATIBLE
 - The economy will now be simulated for a week when starting a new game.
 - Formatting errors fixed.
 - Removed some more settings from LunaLib (config file exclusive).
+- Trade and patrol fleet ship allocator improvements.
 
 Version 0.4.9-beta | SAVE COMPATIBLE
 - Fixed a rare concurrency error concerning trade fleets.

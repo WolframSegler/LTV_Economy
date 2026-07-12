@@ -10,10 +10,6 @@ import wfg.native_ui.util.ArrayMap;
 public class EconConfig {
     private EconConfig() {};
 
-    static {
-        EconomyConfigLoader.loadConfig();
-    }
-
     /**
      * Multi Threading used for the main loop. The simplex solver expensive.
      */
@@ -263,6 +259,10 @@ public class EconConfig {
 
     public static final float getRoCC(final String tag) {
         return 1f - RoVC_map.getOrDefault(tag, RoVC_average);
+    }
+
+    static {
+        EconomyConfigLoader.loadConfig();
     }
 
     public static record DebtDebuffTier(

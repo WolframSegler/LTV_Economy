@@ -6,8 +6,10 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FactionDoctrineAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.combat.ShieldAPI.ShieldType;
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI.ShipTypeHints;
 import com.fs.starfarer.api.impl.campaign.command.WarSimScript;
 import com.fs.starfarer.api.impl.campaign.command.WarSimScript.LocationDanger;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
@@ -30,13 +32,6 @@ public class ShipAllocator {
     private static final double eps = 1e-3;
     private static final HashMap<String, Double> DOCTRINE_PREF_CACHE = new HashMap<>();
     private static final char DOCT_PREF_KEY = '|';
-
-    private static final String FRIGATES = "Frigates";
-	private static final String DESTROYERS = "Destroyers";
-	private static final String CAPITALS = "Capitals";
-	private static final String PHASE_SHIPS = "Phase ships";
-	private static final String CARRIERS = "Carriers";
-	private static final String CIVILIAN = "Civilian";
 
     private static final double DIVERSITY_PENALTY = 0.4;
     private static final double REF_SHIPMENT = 500d;
@@ -260,7 +255,7 @@ public class ShipAllocator {
                     + crewContrib * crewNeed
                     + combatContrib * combatNeed;
 
-                final double w = weight[i] * Math.pow(utility, 1.4) / (1d + DIVERSITY_PENALTY * counts[i]);
+                final double w = weight[i] * Math.pow(utility, 0.75) / (1d + DIVERSITY_PENALTY * counts[i]);
 
                 weights[i] = w;
                 totalWeight += w;
@@ -384,14 +379,14 @@ public class ShipAllocator {
 
         final FactionDoctrineAPI doctrine = faction.getDoctrine();
         if (faction.knowsShip(data.hullID)) {
-            mult *= 0.7;
+            mult *= 1.8d;
         }
 
         final int shipSizeWeight = hullSizeToWeight(data.spec.getHullSize());
         final int diff = Math.abs(doctrine.getShipSize() - shipSizeWeight); // [1, 5]
         mult *= getSizeMatchMultiplier(diff);
-        mult *= getHullSizePreferenceMult(doctrine, data.spec.getDesignation());
-        mult *= faction.isShipPriority(data.hullID) ? 0.5 : 1d;
+        mult *= getHullTypePreferenceMult(doctrine, data.spec);
+        mult *= faction.isShipPriority(data.hullID) ? 1.8d : 1d;
 
         if (!faction.getId().equals(Factions.PLAYER)) DOCTRINE_PREF_CACHE.put(key, mult);
         return mult;
@@ -409,25 +404,30 @@ public class ShipAllocator {
 
     private static final double getSizeMatchMultiplier(int diff) {
         switch (diff) {
-            case 0: return 0.6;
-            case 1: return 0.8;
+            case 0: return 1.5d;
+            case 1: return 1.25d;
             case 2: return 1d;
-            default: return 1.2;
+            case 3: return 0.75d;
+            default: return 0.5d;
         }
     }
 
-    private static final double getHullSizePreferenceMult(FactionDoctrineAPI doctrine, String designation) {
-        if (designation == null) return 1d;
+    private static final double getHullTypePreferenceMult(FactionDoctrineAPI doctrine, ShipHullSpecAPI spec) {
+        double mult = 1d;
 
-        return 1d / switch (designation) {
-            case CIVILIAN -> 1d + doctrine.getCombatFreighterProbability();
-            case FRIGATES -> 1d + doctrine.getNumShips() * 0.3; // [1, 5]
-            case DESTROYERS -> 1d + doctrine.getNumShips() * 0.5; // [1, 5]
-            case CAPITALS -> 1d + doctrine.getWarships() * 0.3; // [1, 5]
-            case PHASE_SHIPS -> 1d + doctrine.getPhaseShips() * 0.3; // [1, 5]
-            case CARRIERS -> 1d + doctrine.getCarriers() * 0.3; // [1, 5]
-            default -> 1d;
-        };
+        if (spec.getShieldSpec().getType() == ShieldType.PHASE) {
+            mult *= 0.4 + doctrine.getPhaseShips() * 0.3; // [1, 5]
+        }
+
+        if (spec.getHints().contains(ShipTypeHints.CARRIER)) {
+            mult *= 0.4 + doctrine.getCarriers() * 0.3; // [1, 5]
+        }
+
+        if (!spec.getHints().contains(ShipTypeHints.CIVILIAN)) {
+            mult *= 0.4 + doctrine.getWarships() * 0.3; // [1, 5]
+        }
+
+        return mult;
     }
 
     private static final double[] buildTargetWeights(List<ShipTypeData> candidates, FactionAPI faction,
@@ -448,7 +448,7 @@ public class ShipAllocator {
             final ShipTypeData data = candidates.get(i);
             final ShipHullSpecAPI spec = data.spec;
             
-            final double transportScore = 1.0
+            final double transportScore = 1d
                 + crewWeight * (data.getCrewCapacityPerShip() / REF_SHIPMENT)
                 + cargoWeight * (spec.getCargo() / REF_SHIPMENT)
                 + fuelWeight * (spec.getFuel() / REF_SHIPMENT);
@@ -460,7 +460,7 @@ public class ShipAllocator {
             
             final double baseCost = combinedScore / data.spec.getFleetPoints();
             final double doctrineFactor = getDoctrinePreference(faction, data);
-            final double randFactor = 0.7 + 0.6 * Math.random();
+            final double randFactor = 0.75d + 0.5d * Math.random();
             
             coeffs[i] = baseCost * doctrineFactor * randFactor;
         }
@@ -471,15 +471,13 @@ public class ShipAllocator {
     private static final double[] buildFleetPointWeights(List<ShipTypeData> candidates, FactionAPI faction) {
         final int N = candidates.size();
 
-        final double sizeBiasExponent = 0.5;
-
         final double[] coeffs = new double[N];
         for (int i = 0; i < N; i++) {
             final ShipTypeData data = candidates.get(i);
 
-            final double baseCost = data.getCombatPower() / Math.pow(data.spec.getFleetPoints(), 1d + sizeBiasExponent);
+            final double baseCost = data.getCombatPower() / Math.pow(data.spec.getFleetPoints(), 2d);
             final double doctrineFactor = getDoctrinePreference(faction, data);
-            final double randFactor = 0.7 + 0.6 * Math.random();
+            final double randFactor = 0.75d + 0.5d * Math.random();
             
             coeffs[i] = baseCost * doctrineFactor * randFactor;
         }
