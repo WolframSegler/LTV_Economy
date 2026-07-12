@@ -15,10 +15,10 @@ import org.json.JSONObject;
 
 import com.fs.starfarer.api.Global;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
-import wfg.ltv_econ.config.LaborConfig;
 import wfg.native_ui.util.ArrayMap;
 
 public class IndustryConfigLoader {
@@ -58,7 +58,7 @@ public class IndustryConfigLoader {
             final String indID = indJson.getString("industryId");
             final boolean workerAssignable = indJson.optBoolean("workerAssignable", false);
             final boolean demandOnly = indJson.optBoolean("demandOnly", false);
-            final String occTag = indJson.optString("occTag", LaborConfigLoader.AVERAGE_OCC_TAG);
+            final String occTag = indJson.optString("occTag", EconomyConfigLoader.AVERAGE_OCC_TAG);
 
             final JSONObject outputList = indJson.getJSONObject("outputList");
             final ArrayMap<String, OutputConfig> commodityMap = new ArrayMap<>(4);
@@ -71,7 +71,7 @@ public class IndustryConfigLoader {
                 final float baseProd = (float) outputData.optDouble("baseProd", 1);
                 final long target = outputData.optLong("target", -1);
                 final float workerAssignableLimit = (float) outputData.optDouble(
-                    "workerAssignableLimit", LaborConfig.defaultWorkerCapPerOutput
+                    "workerAssignableLimit", EconConfig.defaultWorkerCapPerOutput
                 );
                 final float marketScaleBase = (float) outputData.optDouble(
                     "marketScaleBase", 10.0

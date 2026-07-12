@@ -4,6 +4,7 @@ Version 0.4.10-beta | SAVE COMPATIBLE
 - Colonies now hold a small buffer of locally produced goods even if there is no consumption.
 - The economy will now be simulated for a week when starting a new game.
 - Formatting errors fixed.
+- Removed some more settings from LunaLib (config file exclusive).
 
 Version 0.4.9-beta | SAVE COMPATIBLE
 - Fixed a rare concurrency error concerning trade fleets.

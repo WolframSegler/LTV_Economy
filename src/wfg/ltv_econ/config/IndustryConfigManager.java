@@ -10,8 +10,8 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
+import wfg.ltv_econ.config.loader.EconomyConfigLoader;
 import wfg.ltv_econ.config.loader.IndustryConfigLoader;
-import wfg.ltv_econ.config.loader.LaborConfigLoader;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
@@ -471,7 +471,7 @@ public class IndustryConfigManager {
                         scaleWithMarketSize.contains(outputID),
                         usesWorkers, isAbstract, isIllegal,
                         Collections.emptyList(), Collections.emptyList(),
-                        InputsPerUnitOutput, LaborConfig.dynamicWorkerCapPerOutput,
+                        InputsPerUnitOutput, EconConfig.dynamicWorkerCapPerOutput,
                         dynamicIndMarketScaleBase, -1, false
                     );
                     configOutputs.put(outputID, optCom);
@@ -481,7 +481,7 @@ public class IndustryConfigManager {
                 illegalOutputs.forEach(addOutput);
     
                 final IndustryConfig config = new IndustryConfig(
-                    usesWorkers, configOutputs, LaborConfigLoader.AVERAGE_OCC_TAG, false
+                    usesWorkers, configOutputs, EconomyConfigLoader.AVERAGE_OCC_TAG, false
                 );
                 config.dynamic = true;
     
@@ -489,7 +489,7 @@ public class IndustryConfigManager {
 
             } else {
                 final IndustryConfig config = new IndustryConfig(
-                    false, configOutputs, LaborConfigLoader.AVERAGE_OCC_TAG, false
+                    false, configOutputs, EconomyConfigLoader.AVERAGE_OCC_TAG, false
                 );
                 config.dynamic = true;
     

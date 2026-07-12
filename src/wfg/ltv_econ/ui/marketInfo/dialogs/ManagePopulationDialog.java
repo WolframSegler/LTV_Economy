@@ -26,7 +26,6 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constant.SubmarketsID;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.MarketPopulationData;
@@ -187,7 +186,7 @@ public class ManagePopulationDialog extends DialogPanel {
         final TextPanel avgWageLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
             public void buildUI() {
                 final String txt = str("uiTitleAvgWage");
-                final float value = LaborConfig.LPV_month / data.getRoSV();
+                final float value = EconConfig.LPV_month / data.getRoSV();
                 final String valueTxt = String.format("%.2f%s", value, Strings.C);
 
                 label1 = settings.createLabel(txt, Fonts.ORBITRON_12);
@@ -221,15 +220,15 @@ public class ManagePopulationDialog extends DialogPanel {
         add(avgWageLabel.getPanel()).inTL(opad + LABEL_W, LABEL_H + opad*4 + SECT_I_H);
 
         exploitationSlider = new Slider(
-            m_panel, null, 1, LaborConfig.MAX_RoSV, sliderW, sliderH
+            m_panel, null, 1, EconConfig.MAX_RoSV, sliderW, sliderH
         );
         exploitationSlider.setHighlightOnMouseover(true);
         exploitationSlider.setProgress(data.getRoSV());
-        exploitationSlider.maxValue = LaborConfig.MAX_RoSV;
+        exploitationSlider.maxValue = EconConfig.MAX_RoSV;
         exploitationSlider.clampCurrToMax = true;
         exploitationSlider.roundBarValue = true;
         exploitationSlider.setBarColor(NativeUiUtils.lerpColor(
-            positiveColor, negativeColor, data.getRoSV()/(float)(LaborConfig.MAX_RoSV - 1)
+            positiveColor, negativeColor, data.getRoSV()/(float)(EconConfig.MAX_RoSV - 1)
         ));
         exploitationSlider.showValueOnly = true;
         add(exploitationSlider.getPanel()).inTL(opad*2 + LABEL_W, opad*3 + SECT_I_H);
@@ -246,7 +245,7 @@ public class ManagePopulationDialog extends DialogPanel {
             );
 
             avgWageLabel.label2.setText(
-                String.format("%.2f%s", LaborConfig.LPV_month / data.getRoSV(), Strings.C)
+                String.format("%.2f%s", EconConfig.LPV_month / data.getRoSV(), Strings.C)
             );
         };
 
@@ -564,7 +563,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
         sliderValue = exploitationSlider.getProgressInterpolated();
         exploitationSlider.setBarColor(NativeUiUtils.lerpColor(
-            positiveColor, negativeColor, sliderValue/(float)(LaborConfig.MAX_RoSV - 1)
+            positiveColor, negativeColor, sliderValue/(float)(EconConfig.MAX_RoSV - 1)
         ));
     }
 }

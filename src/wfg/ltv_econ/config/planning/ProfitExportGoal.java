@@ -12,8 +12,8 @@ import java.util.Map;
 import org.apache.commons.math4.legacy.optim.linear.LinearConstraint;
 import org.apache.commons.math4.legacy.optim.linear.Relationship;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
-import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.planning.DenseModel;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
@@ -149,7 +149,7 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
     private double computeScore(String comID, String indID) {
         return switch (metric) {
             case BASE_VALUE -> settings.getCommoditySpec(comID).getBasePrice();
-            case MARGIN -> LaborConfig.getRoVC(IndustryConfigManager.getIndConfig(indID).occTag);
+            case MARGIN -> EconConfig.getRoVC(IndustryConfigManager.getIndConfig(indID).occTag);
         };
     }
 }

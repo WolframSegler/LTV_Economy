@@ -6,7 +6,7 @@ import com.fs.starfarer.api.impl.campaign.econ.BaseMarketConditionPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.config.LaborConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
@@ -37,7 +37,7 @@ public class WorkerPoolCondition extends BaseMarketConditionPlugin {
 
     @Override
     public boolean showIcon() {
-        return DebugFlags.COLONY_DEBUG || LaborConfig.NPC_WORKER_POOL_VISIBLE || market.isPlayerOwned();
+        return DebugFlags.COLONY_DEBUG || EconConfig.NPC_WORKER_POOL_VISIBLE || market.isPlayerOwned();
     }
 
     public static final void addToMarket(MarketAPI market) {

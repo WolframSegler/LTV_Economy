@@ -18,7 +18,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.ltv_econ.config.LaborConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
@@ -147,8 +147,8 @@ public class ServiceSectorDialog extends DialogPanel {
                     final String max1 = String.format("%.3f", CULTURE_LIM / 4f);
                     final String eff2 = String.format("%.2f", slider.getProgress() / 50f);
                     final String max2 = String.format("%.2f", CULTURE_LIM * 2f);
-                    final String eff3 = String.format("%.0f", slider.getProgress() * workerPool * LaborConfig.LPV_month * 0.5f / 100f);
-                    final String max3 = String.format("%.0f", CULTURE_LIM * workerPool * LaborConfig.LPV_month * 0.5f);
+                    final String eff3 = String.format("%.0f", slider.getProgress() * workerPool * EconConfig.LPV_month * 0.5f / 100f);
+                    final String max3 = String.format("%.0f", CULTURE_LIM * workerPool * EconConfig.LPV_month * 0.5f);
                     final String txt = strf("uiTpTxtCulture", eff1, max1, eff2, max2, eff3, max3);
 
                     final LabelAPI lbl = settings.createLabel(txt, Fonts.DEFAULT_SMALL);

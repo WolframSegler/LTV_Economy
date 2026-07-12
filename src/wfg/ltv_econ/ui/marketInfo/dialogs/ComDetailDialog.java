@@ -500,12 +500,12 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
 
         producerButton = new Button(
             section, btnWidth, btnHeight,
-            str("uiBtnTitleProducers"), Fonts.ORBITRON_12,
+            str("uiBtnTitleExporters"), Fonts.ORBITRON_12,
             producerRunnable
         );
         consumerButton = new Button(
             section, btnWidth, btnHeight,
-            str("uiBtnTitleConsumers"), Fonts.ORBITRON_12,
+            str("uiBtnTitleImporters"), Fonts.ORBITRON_12,
             consumerRunnable
         );
         producerButton.setLabelColor(base);
@@ -572,7 +572,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
             if (footer != null && footer.isChecked() && !(cell.getStoredDeficit() + cell.getStoredExcess() > 0f)) {
                 continue;
             }
-            final float interest = mode == 0 ? cell.getProduction(true) : cell.getTargetQuantum(true) * Math.signum(cell.getConsumption(false));
+            final float interest = mode == 0 ? cell.getProduction(true) : cell.getConsumption(false);
             if (interest < 1f) continue;
 
             final double quantity = mode == 0 ? cell.getTotalExports() : cell.getTotalImports();

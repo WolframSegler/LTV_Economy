@@ -20,11 +20,11 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.campaign.econ.Market;
 
 import rolflectionlib.util.RolfLectionUtil;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
-import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
@@ -111,7 +111,7 @@ public class IndustryIOs {
 
         if (useCCMoneyDist) {
             final CommoditySpecAPI spec = settings.getCommoditySpec(outputID);
-            final float Vcc = spec.getBasePrice() * LaborConfig.getRoCC(occTag);
+            final float Vcc = spec.getBasePrice() * EconConfig.getRoCC(occTag);
 
             float totalWeight = 0;
             for (float weight : output.CCMoneyDist.values()) totalWeight += weight;
@@ -254,7 +254,7 @@ public class IndustryIOs {
             outputID, 1, CCMoneyDist,
             scaleWithSize, useWorkers, false, false,
             Collections.emptyList(), Collections.emptyList(),
-            InputsPerUnitOutput, LaborConfig.dynamicWorkerCapPerOutput,
+            InputsPerUnitOutput, EconConfig.dynamicWorkerCapPerOutput,
             IndustryConfigManager.dynamicIndMarketScaleBase, -1, false
         );
         outputConfig.dynamic = true;
@@ -321,7 +321,7 @@ public class IndustryIOs {
             outputID, 1, null,
             scaleWithSize, false, true, false,
             Collections.emptyList(), Collections.emptyList(),
-            InputsPerUnitOutput, LaborConfig.dynamicWorkerCapPerOutput,
+            InputsPerUnitOutput, EconConfig.dynamicWorkerCapPerOutput,
             IndustryConfigManager.dynamicIndMarketScaleBase, -1, false
         );
         output.dynamic = true;

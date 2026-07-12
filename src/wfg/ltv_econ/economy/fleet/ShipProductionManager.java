@@ -19,7 +19,6 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
@@ -147,8 +146,8 @@ public class ShipProductionManager {
 
     public static final PlannedOrder getProductionCost(ShipHullSpecAPI spec) {
         final ArrayMap<String, Float> commodities = new ArrayMap<>(1);
-        final float rocc = LaborConfig.getRoCC("industry");
-        final float rovc = LaborConfig.getRoVC("industry");
+        final float rocc = EconConfig.getRoCC("industry");
+        final float rovc = EconConfig.getRoVC("industry");
 
         final int days = getBaseDays(spec);
         final long credits = (long) (spec.getBaseValue() * rovc);
@@ -253,7 +252,7 @@ public class ShipProductionManager {
     private static final ArrayMap<String, Float> getScrapAmounts(float baseValue) {
         final ArrayMap<String, Float> map = new ArrayMap<>(2);
 
-        final float materialValuePerShip = baseValue * LaborConfig.getRoCC("industry");
+        final float materialValuePerShip = baseValue * EconConfig.getRoCC("industry");
         final float scrapValue = materialValuePerShip * EconConfig.SCRAP_REFUND_FRACTION;
 
         map.put(Commodities.METALS, (scrapValue * 0.5f) / metalsSpec.getBasePrice());

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import static wfg.ltv_econ.constant.EconomyConstants.MONTH;
 import static wfg.ltv_econ.constant.Mods.*;
 import static wfg.native_ui.util.Globals.settings;
 
@@ -15,6 +16,7 @@ import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 public class EconomyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";
     private static final String FAILURE_MESSAGE = "Failed to load economy config: " + CONFIG_PATH;
+    public static final String AVERAGE_OCC_TAG = "average"; 
 
     private static JSONObject config;
 
@@ -85,6 +87,15 @@ public class EconomyConfigLoader {
         EconConfig.SCRAP_REFUND_FRACTION = (float) root.getDouble("SCRAP_REFUND_FRACTION");
         EconConfig.INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP = (float) root.getDouble("INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP");
         EconConfig.DEFICIT_THRESHOLD = (float) root.getDouble("DEFICIT_THRESHOLD");
+        EconConfig.defaultWorkerCapPerOutput = (float) root.getDouble("defaultWorkerCapPerOutput");
+        EconConfig.dynamicWorkerCapPerOutput = (float) root.getDouble("dynamicWorkerCapPerOutput");
+        EconConfig.NPC_WORKER_POOL_VISIBLE = root.getBoolean("NPC_WORKER_POOL_VISIBLE");
+        EconConfig.GROWTH_EFFECT_WORKER_POOL = root.getBoolean("GROWTH_EFFECT_WORKER_POOL");
+        EconConfig.RoSV = root.getInt("RoSV");
+        EconConfig.MAX_RoSV = root.getInt("MAX_RoSV");
+        EconConfig.LPV_month = root.getInt("LPV_month");
+        EconConfig.LPV_day = EconConfig.LPV_month / (float) MONTH;
+        EconConfig.avg_wage = EconConfig.LPV_month / EconConfig.RoSV;
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());
@@ -106,6 +117,16 @@ public class EconomyConfigLoader {
             EconConfig.MANUFACTURING_EXCLUSION_LIST.add(exclusionArr.getString(i));
         }
 
+        final JSONArray RoVCList = root.getJSONArray("RoVC_list");
+        for (int i = 0; i < RoVCList.length(); i++) {
+            final JSONObject RoVCObj = RoVCList.getJSONObject(i);
+            final float value = (float) RoVCObj.getDouble("value");
+            final String type = RoVCObj.getString("type");
+            EconConfig.RoVC_map.put(type, value);
+
+            if (type.equals(AVERAGE_OCC_TAG)) EconConfig.RoVC_average = value;
+        }
+
         if (settings.getModManager().isModEnabled(LUNA_LIB)) {
             loadFromLunaSettings();
         }
@@ -121,9 +142,6 @@ public class EconomyConfigLoader {
         EconConfig.STARTING_CREDITS_FOR_MARKET = LunaSettings.getInt(LTV_ECON, "STARTING_CREDITS_FOR_MARKET");
         EconConfig.CREDIT_WITHDRAWAL_LIMIT = LunaSettings.getInt(LTV_ECON, "CREDIT_WITHDRAWAL_LIMIT");
         EconConfig.ECON_DEFICIT_COST = LunaSettings.getDouble(LTV_ECON, "ECON_DEFICIT_COST");
-        EconConfig.LOCAL_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "LOCAL_PROD_BUFFER");
-        EconConfig.FACTION_PROD_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "FACTION_PROD_BUFFER");
-        EconConfig.PRODUCTION_BUFFER = 1f + LunaSettings.getDouble(LTV_ECON, "PRODUCTION_BUFFER");
         EconConfig.DAYS_TO_COVER = LunaSettings.getInt(LTV_ECON, "DAYS_TO_COVER");
         EconConfig.DAYS_TO_COVER_PER_IMPORT = LunaSettings.getInt(LTV_ECON, "DAYS_TO_COVER_PER_IMPORT");
         EconConfig.FACTION_EXCHANGE_MULT = LunaSettings.getDouble(LTV_ECON, "FACTION_EXCHANGE_MULT").floatValue();
@@ -157,5 +175,12 @@ public class EconomyConfigLoader {
         EconConfig.SHIP_ALLOC_MIN_COMBAT_POWER = LunaSettings.getDouble(LTV_ECON, "SHIP_ALLOC_MIN_COMBAT_POWER").floatValue();
         EconConfig.SCRAP_REFUND_FRACTION = LunaSettings.getDouble(LTV_ECON, "SCRAP_REFUND_FRACTION").floatValue();
         EconConfig.INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP = LunaSettings.getDouble(LTV_ECON, "INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP").floatValue();
+        EconConfig.NPC_WORKER_POOL_VISIBLE = LunaSettings.getBoolean(LTV_ECON, "NPC_WORKER_POOL_VISIBLE");
+        EconConfig.GROWTH_EFFECT_WORKER_POOL = LunaSettings.getBoolean(LTV_ECON, "GROWTH_EFFECT_WORKER_POOL");
+        EconConfig.RoSV = LunaSettings.getInt(LTV_ECON, "RoSV");
+        EconConfig.MAX_RoSV = LunaSettings.getInt(LTV_ECON, "MAX_RoSV");
+        EconConfig.LPV_month = LunaSettings.getInt(LTV_ECON, "LPV_month");
+        EconConfig.LPV_day = EconConfig.LPV_month / (float) MONTH;
+        EconConfig.avg_wage = EconConfig.LPV_month / EconConfig.RoSV;
     }
 }

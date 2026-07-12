@@ -16,7 +16,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.config.PolicyConfigLoader.PolicyConfig;
 import wfg.ltv_econ.config.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.config.EconConfig;
@@ -49,7 +48,7 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
     public static final String socialCohesionID = "cohesion";
     public static final String classConscID = "classConsc";
 
-    private float RoSV = LaborConfig.RoSV;
+    private float RoSV = EconConfig.RoSV;
     private float popHealth = BASELINE_VALUE;
     private float popHappiness = BASELINE_VALUE;
     private float popSocialCohesion = BASELINE_VALUE;
@@ -201,7 +200,7 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
 
         healthDelta.modifyFlat("hazard", (1f - market.getHazardValue()) * 0.16f, str("marketPopDataHazardTxt"));
 
-        healthDelta.modifyFlat("wage", (LaborConfig.LPV_month / RoSV - 1f) * 0.08f, str("wagesTitle"));
+        healthDelta.modifyFlat("wage", (EconConfig.LPV_month / RoSV - 1f) * 0.08f, str("wagesTitle"));
     }
 
     private final void updateHappinessDelta() {
@@ -211,7 +210,7 @@ public class MarketPopulationData implements Serializable, MarketImmigrationModi
             "stability", (market.getStability().getModifiedValue() - 5f) * 0.025f, str("marketPopDataStabilityTxt")
         );
 
-        happinessDelta.modifyFlat("wage", (LaborConfig.RoSV - RoSV) * 0.04f, str("wagesTitle"));
+        happinessDelta.modifyFlat("wage", (EconConfig.RoSV - RoSV) * 0.04f, str("wagesTitle"));
 
         happinessDelta.modifyFlat(
             socialCohesionID, (popSocialCohesion - BASELINE_VALUE) * 0.0008f, str("marketPopDataCohesionTxt")

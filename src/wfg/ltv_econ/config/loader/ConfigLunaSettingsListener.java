@@ -19,7 +19,6 @@ public class ConfigLunaSettingsListener implements LunaSettingsListener {
         
         // LOAD CONFIGS
         EconomyConfigLoader.loadFromLunaSettings();
-        LaborConfigLoader.loadFromLunaSettings();
 
         // REFRESH CONFIG DEPENDENT STATE (ORDER MATTERS)
         IndustryConfigManager.reload();

@@ -7,7 +7,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import wfg.ltv_econ.config.LaborConfig;
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -111,7 +111,7 @@ public class WorkerPoolRegistry {
         public final synchronized long getWorkerPoolUncached() {
             final int size = market.getSize();
             final double base = getWorkerRatio(size) * Math.pow(10, size);
-            if (LaborConfig.GROWTH_EFFECT_WORKER_POOL) {
+            if (EconConfig.GROWTH_EFFECT_WORKER_POOL) {
                 final float t = Misc.getMarketSizeProgress(market);
                 final double dest = getWorkerRatio(size+1) * Math.pow(10, size+1);
                 return (long) Arithmetic.lerp(base, dest, t);

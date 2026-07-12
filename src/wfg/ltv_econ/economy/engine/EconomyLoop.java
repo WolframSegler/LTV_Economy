@@ -35,7 +35,6 @@ import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.constant.strings.Consumption;
-import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
@@ -737,7 +736,7 @@ public class EconomyLoop {
         market.getAccessibilityMod().modifyFlat(SERVICE_PUBLIC_INFO, pubInfoRatio, str("serviceSectorPublicInfoDesc"));
 
         final float workerPool = WorkerPoolRegistry.get(market).getWorkerPool();
-        final double monthlyRevenue = cultureRatio * workerPool * LaborConfig.LPV_month * 0.5f / EconomyConstants.MONTH;
+        final double monthlyRevenue = cultureRatio * workerPool * EconConfig.LPV_month * 0.5f / EconomyConstants.MONTH;
         if (monthlyRevenue > 0d) {
             MarketFinanceRegistry.instance().getLedger(marketID).add(SERVICE_CULTURE, monthlyRevenue, str("serviceSectorCultureDesc"));
         }

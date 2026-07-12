@@ -17,9 +17,6 @@ SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,50.0,,"Comba
 ,,,,,,,,
 header_workerAllocator,Worker Allocator,Header,Worker Allocator,,,,,Solver
 ECON_DEFICIT_COST,Deficit Penalty,Double,3000,,Higher values encourage more demand fulfillment.,0,100000,Solver
-LOCAL_PROD_BUFFER,Local Production Buffer,Double,0.1,,Allocation is prioritized to meet local demand by a factor of 1 + x.,0,3,Solver
-FACTION_PROD_BUFFER,Faction Production Buffer,Double,0.1,,Allocation is prioritized to meet faction demand by a factor of 1 + x.,0,3,Solver
-PRODUCTION_BUFFER,Target Production Buffer,Double,0.05,,Workers are allocated to meet demand by a factor of 1 + x.,0,10,Solver
 ECON_ALLOCATION_PASSES,Allocation Refinement Passes,Int,3,,Number of times the solver re-evaluates deficits and adjusts worker assignments. Computation time grows linearly with the value. Gains become minimal after 6 passes.,1,10,Solver
 WORKER_ASSIGN_INTERVAL,Worker Assignment Interval,Int,20,,"Workers of NPC markets will be re-allocated every x days.",1,360,Solver
 ,,,,,,,,

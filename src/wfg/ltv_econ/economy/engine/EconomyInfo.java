@@ -12,8 +12,8 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 
+import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
-import wfg.ltv_econ.config.LaborConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
@@ -412,8 +412,8 @@ public class EconomyInfo {
 
         final WorkerPool cond = WorkerPoolRegistry.get(marketID);
         final float wage = cond.getWorkerPool() * (1f - cond.getFreeWorkerRatio()) *
-            (LaborConfig.LPV_day / (engine.isPlayerMarket(marketID) ?
-            engine.marketPopData.get(marketID).getRoSV() : LaborConfig.RoSV)
+            (EconConfig.LPV_day / (engine.isPlayerMarket(marketID) ?
+            engine.marketPopData.get(marketID).getRoSV() : EconConfig.RoSV)
         );
 
         return wage * market.getUpkeepMult().getModifiedValue();
@@ -465,9 +465,9 @@ public class EconomyInfo {
 
     public static final float getWorkersPerUnit(String comID, String tag) {
         final float Pout = settings.getCommoditySpec(comID).getBasePrice();
-        final float RoVC = LaborConfig.getRoVC(tag);
+        final float RoVC = EconConfig.getRoVC(tag);
 
-        return (Pout * RoVC) / LaborConfig.LPV_day;
+        return (Pout * RoVC) / EconConfig.LPV_day;
     }
 
     public static final List<MarketAPI> getMarketsCopy() {
