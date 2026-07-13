@@ -115,7 +115,7 @@ public class ShipTypeData implements Serializable {
         final float stats = 1f
             + spec.getFighterBays() * 0.04f
             + spec.getArmorRating() / 750f
-            + spec.getFluxCapacity() / 6000f
+            + spec.getFluxCapacity() / 7500f
             + spec.getFluxDissipation() / 750f
             + (1f - spec.getShieldSpec().getFluxPerDamageAbsorbed()) * 3f
             + (spec.getEngineSpec().getMaxSpeed() - 80) / 30f;
@@ -134,9 +134,9 @@ public class ShipTypeData implements Serializable {
         }
 
         if (spec.getHints().contains(ShipTypeHints.CARRIER)) {
-            return 0.4f;
+            return 0.5f;
         }
 
-        return 1.0f;
+        return 1f;
     }
 }

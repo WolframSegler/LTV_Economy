@@ -122,7 +122,7 @@ public class CommodityCell implements Serializable {
         final float maxStockBeforeExport = getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR;
         
         final double target = Math.max(0d,
-            getTargetStored() + EconConfig.TRADE_INTERVAL * targetQuantum - stored - informalImports
+            getTargetStored() + 1.5f * EconConfig.TRADE_INTERVAL * targetQuantum - stored - informalImports
         );
 
         final double maxAdditional = Math.max(0d, maxStockBeforeExport - stored - getPendingImports());
