@@ -233,9 +233,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     ComponentFactory.addCaptionValueBlock(
                         m_panel, txt, valueTxt, baseColor
                     );
-                }
 
-                {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         final int discount = (int)((1f - EconConfig.FACTION_EXCHANGE_MULT)*100);
@@ -266,9 +264,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                         m_panel, str("uiTitleGlobalExports"),
                         valueTxt, baseColor
                     );
-                }
 
-                {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(strf("uiTpTxtGlobalExports",  m_com.getName()), pad);
@@ -320,9 +316,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                     ComponentFactory.layoutCaptionValueLabels(
                         m_panel, lbl1, lbl2
                     );
-                }
 
-                {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(strf("uiTpTxtTotalFactionExports", currFaction.getPersonNamePrefix()),
@@ -356,9 +350,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                         m_panel, txt, valueTxt,
                         baseColor, baseColor
                     );
-                }
 
-                {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(strf("uiTpTxtFactionMarketShare", m_com.getName(), m_faction.getPersonNamePrefix()), pad);
@@ -390,9 +382,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                         selectedMarket.getFaction().getBaseUIColor(),
                         selectedMarket.getFaction().getBaseUIColor()
                     );
-                }
 
-                {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(strf("uiTpTxtFactionMarketShare", m_com.getName(), selectedMarket.getFaction().getDisplayName()), pad);
@@ -418,9 +408,7 @@ public class ComDetailDialog extends DialogPanel implements HasInputSnapshot {
                         m_panel, txt, valueTxt,
                         baseColor, baseColor
                     );
-                }
 
-                {
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
                         tp.addPara(strf("uiTpTxtFactionMarketShare", m_com.getName(), m_faction.getPersonNamePrefix()), pad);

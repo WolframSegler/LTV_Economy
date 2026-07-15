@@ -140,9 +140,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
                 add(label1).inTL(0, 0).setSize(LABEL_W, textH1);
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
-            }
 
-            {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtRateOfExploitation"), pad);
                 };
@@ -171,9 +169,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
                 add(label1).inTL(0, 0).setSize(LABEL_W, textH1);
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
-            }
 
-            {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtMonthlyWages"), pad);
                 };
@@ -203,9 +199,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
                 add(label1).inTL(0, 0).setSize(LABEL_W, textH1);
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W, label2.getPosition().getHeight());
-            }
 
-            {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(strf("uiTpTxtAvgWage", Strings.C), pad);
                 };
@@ -285,9 +279,7 @@ public class ManagePopulationDialog extends DialogPanel {
                     m_panel, ICON_S, ICON_S, WORKER_ICON, base, null
                 );
                 add(workerIcon).inBL(0, (LABEL_H - ICON_S)/2f);
-            }
 
-            {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtWorkforceEmployedTotal"), pad);
                 };

@@ -172,9 +172,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 				);
 
 				add(creditLbl).inBL(0, 0);
-			}
 
-			{
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara(str("uiTpTxtPlayerCredits"), 0);
 				};
@@ -201,9 +199,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 				);
 
 				add(creditLbl).inBL(0, 0);
-			}
 
-			{
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara(str("uiTpTxtColonyCredits"), 0);
 				};
@@ -228,9 +224,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 				);
 
 				add(maxIndLbl).inBL(0, 0);
-			}
 
-			{
 				tooltip.builder = (tp, exp) -> {
 					tp.addPara(str("uiTpTxtIndustryMaxNum1"), 0f);
 

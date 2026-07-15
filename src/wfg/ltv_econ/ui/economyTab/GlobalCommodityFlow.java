@@ -85,9 +85,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtGlobalProd"),
@@ -109,9 +107,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtGlobalDemand"),
@@ -133,9 +129,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtGlobalSurplus"),
@@ -157,9 +151,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtGlobalShortfall"), pad);
@@ -180,9 +172,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtSectorTradeVolume"),pad, new Color[] {highlight, base},
@@ -204,9 +194,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = value < 1 ? "---" : NumFormat.formatCredit(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtSectorTradeValue"),
@@ -228,9 +216,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = com.isExotic() ? "Localized" : NumFormat.formatCredit(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtGlobalAvgPrice"), pad, highlight, com.getName());
@@ -250,9 +236,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String txt = str("uiTitleGlobalStockpiles");
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtGlobalStockpiles"), pad, highlight, com.getName());
@@ -275,9 +259,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = value < 0l ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtGlobalWorkersAllocated"), pad, highlight, com.getName());
@@ -297,9 +279,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
                 ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
-            }
 
-            {
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("uiTpTxtInformalProd"), pad, highlight, com.getName());

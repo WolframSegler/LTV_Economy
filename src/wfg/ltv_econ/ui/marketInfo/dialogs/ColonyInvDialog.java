@@ -91,9 +91,7 @@ public class ColonyInvDialog extends DialogPanel {
                 final float height = label1.computeTextHeight(label1.getText());
                 add(label1).inTL(0, (sliderH - height) / 2f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
-            }
 
-            {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("colonyBalanceTpTxt1") + (m_market.isPlayerOwned() ? str("colonyBalanceTpTxt2") : ""), pad);
                 };
@@ -117,9 +115,7 @@ public class ColonyInvDialog extends DialogPanel {
                 label1.setAlignment(Alignment.LMID);
                 add(label1).setSize(label1.getPosition().getWidth(), sliderH).inTL(0f, 0f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
-            }
 
-            {
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("playerBalanceTpTxt"), pad);
                 };
@@ -144,9 +140,7 @@ public class ColonyInvDialog extends DialogPanel {
                 final float height = label1.computeTextHeight(label1.getText());
                 add(label1).inTL(0, (sliderH - height) / 2f);
                 getPos().setSize(label1.getPosition().getWidth(), sliderH);
-            }
-            
-            {
+
                 tooltip.enabled = data == null;
                 tooltip.builder = (tp, exp) -> {
                     tp.addPara(str("autoTransferTpTxt1"), pad);
