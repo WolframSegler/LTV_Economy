@@ -9,7 +9,7 @@
         "../../fs.common_obf.jar",
         "../../starfarer_obf.jar",
         "../../xstream-1.4.10.jar",
-        "../WrapUI/jars/libs/RolflectionLib.jar"
+        "../NativeUI/jars/libs/RolflectionLib.jar"
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
     "search.useIgnoreFiles": false,

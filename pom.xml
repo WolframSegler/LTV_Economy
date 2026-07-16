@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>wfg_ltv_econ</groupId>
   <artifactId>LTV-Economy</artifactId>
-  <version>0.4.10</version>
+  <version>0.5.0</version>
   <packaging>jar</packaging>
   <name>LTV Economy</name>
 
@@ -82,7 +82,7 @@
       <artifactId>native_ui</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../WrapUI/jars/main/native_ui.jar</systemPath>
+      <systemPath>${project.basedir}/../NativeUI/jars/main/native_ui.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>
@@ -145,7 +145,7 @@
       <artifactId>reflection</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../WrapUI/jars/libs/RolflectionLib.jar</systemPath>
+      <systemPath>${project.basedir}/../NativeUI/jars/libs/RolflectionLib.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>local</groupId>

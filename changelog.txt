@@ -1,3 +1,6 @@
+Version 0.5.0-beta | NOT SAVE COMPATIBLE
+- Switched to NativeUI (formerly WrapUI) v0.5.0 for this update. Previous versions will not work.
+
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.
 - Trade fleets can no longer spawn between hostile factions.

@@ -8,7 +8,7 @@ Run tests:
 
 Extra:
 
-- Word Wrap shortcut: Alt + Z
+- Word wrap shortcut: Alt + Z
 
 - Use VisualVM OQL Console to look for strings in the game to find and update broken obfuscated code
   -> select s from java.lang.String s where s.toString().contains("target_string")
