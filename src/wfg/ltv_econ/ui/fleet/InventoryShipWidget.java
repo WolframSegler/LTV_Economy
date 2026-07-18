@@ -14,8 +14,6 @@ import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
@@ -25,6 +23,7 @@ import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.dialog.AddShipDialog;
 import wfg.ltv_econ.ui.factionTab.dialog.RemoveShipDialog;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.HoverGlowComp;
@@ -38,17 +37,16 @@ import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.ui.panel.BasePanel;
-import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.container.BaseContainer;
 import wfg.native_ui.ui.system.NativeSystems;
 import wfg.native_ui.ui.system.TooltipSystem;
 import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.IconValuePair;
-import wfg.native_ui.ui.visual.SpritePanelWithTp;
+import wfg.native_ui.ui.visual.InteractiveSprite;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 
-public class InventoryShipWidget extends CustomPanel implements WidgetAPI<InventoryShipWidget>,
+public final class InventoryShipWidget extends UIContainer implements WidgetAPI<InventoryShipWidget>,
     HasAudioFeedback, HasHoverGlow, HasTooltip
 {
     public static final int WIDTH = 180;
@@ -64,15 +62,16 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
 
     public WidgetSelectionState selectionState = WidgetSelectionState.NONE;
 
-    public InventoryShipWidget(UIPanelAPI parent, ShipTypeData data, UIBuildableAPI navbar) {
-        super(parent, WIDTH, HEIGHT);
+    public InventoryShipWidget(ShipTypeData data, UIBuildableAPI navbar) {
+        super(WIDTH, HEIGHT);
         this.data = data;
         this.navbar = navbar;
 
         audio.hoverOnly = true;
 
         glow.type = GlowType.UNDERLAY;
-        glow.overlayBrightness = 0.6f;
+        glow.glowBrightness = 0.6f;
+        glow.flashBrightness = 0.9f;
         glow.color = UIColors.IN_FACTION;
 
         border.centerColor = UIColors.WIDGET_BG;
@@ -114,13 +113,14 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         final int scaledW = (int) (spriteW * scale);
         final int scaledH = (int) (spriteH * scale);
         
-        final SpritePanelWithTp shipSprite = new SpritePanelWithTp(m_panel, scaledW, scaledH, sprite, null, null);
+        final InteractiveSprite shipSprite = new InteractiveSprite(scaledW, scaledH, sprite, null, null);
         shipSprite.tooltip.enabled = false;
         shipSprite.audio.enabled = false;
         shipSprite.glow.isFaderOwner = false;
         shipSprite.glow.fader = glow.fader;
         shipSprite.glow.type = GlowType.ADDITIVE;
-        shipSprite.glow.additiveBrightness = 0.8f;
+        shipSprite.glow.glowBrightness = 0.8f;
+        shipSprite.glow.flashBrightness = 1.2f;
         add(shipSprite).inTMid(hpad + (maxSize - scaledH) / 2);
 
         final LabelAPI nameLbl = settings.createLabel(data.spec.getHullNameWithDashClass(), Fonts.DEFAULT_SMALL);
@@ -129,9 +129,7 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         nameLbl.autoSizeToWidth(WIDTH);
         add(nameLbl).inTL(0f, WIDTH - opad*2);
 
-        final BasePanel separator = new BasePanel(
-            m_panel, WIDTH, 1
-        ) {{ bg.color = gray;}};
+        final BaseContainer separator = new BaseContainer(WIDTH, 1f) {{ bg.color = gray;}};
         add(separator).inTL(0f, WIDTH);
 
         final int GAP_TOP_1 = WIDTH + hpad;
@@ -151,27 +149,27 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         final int GAP_TOP_2 = GAP_TOP_1 + 20;
         final int iconS = 28;
 
-        final IconValuePair crewPair = new IconValuePair(m_panel, gapFor2Lbl, iconS, CREW, data.getTotalCrew(), true, null);
-        final IconValuePair combatPair = new IconValuePair(m_panel, gapFor2Lbl, iconS, COMBAT, data.getTotalCombatPower(), true, null);
+        final IconValuePair crewPair = new IconValuePair(gapFor2Lbl, iconS, CREW, data.getTotalCrew(), true, null);
+        final IconValuePair combatPair = new IconValuePair(gapFor2Lbl, iconS, COMBAT, data.getTotalCombatPower(), true, null);
 
         add(crewPair).inTL(hpad*3, GAP_TOP_2);
         add(combatPair).inTL(hpad*3 + gapFor2Lbl, GAP_TOP_2);
 
         final int GAP_TOP_3 = GAP_TOP_2 + 30;
 
-        final IconValuePair suppliesPair = new IconValuePair(m_panel, gapFor2Lbl, iconS, SUPPLIES, data.getDailyMaintenanceCost(), true, null);
-        final IconValuePair wagesPair = new IconValuePair(m_panel, gapFor2Lbl, iconS, WAGES, data.getMonthlyCrewWages(), false, null);
+        final IconValuePair suppliesPair = new IconValuePair(gapFor2Lbl, iconS, SUPPLIES, data.getDailyMaintenanceCost(), true, null);
+        final IconValuePair wagesPair = new IconValuePair(gapFor2Lbl, iconS, WAGES, data.getMonthlyCrewWages(), false, null);
         wagesPair.label().setText(wagesPair.label().getText() + Strings.C);
 
         add(suppliesPair).inTL(hpad*3, GAP_TOP_3);
         add(wagesPair).inTL(hpad*3 + gapFor2Lbl, GAP_TOP_3);
 
-        final Button removeBtn = new Button(m_panel, 30, 30, NumFormat.MINUS, Fonts.DEFAULT_SMALL, null);
+        final Button removeBtn = new Button(30, 30, NumFormat.MINUS, Fonts.DEFAULT_SMALL, null);
         removeBtn.bgColor = UIColors.REMOVE_COLOR;
         removeBtn.bgDisabledColor = UIColors.REMOVE_COLOR;
         removeBtn.bgDisabledAlpha = 0.6f;
         removeBtn.setEnabled(data.getIdle() > 0);
-        removeBtn.cutStyle = CutStyle.TL;
+        removeBtn.setCutStyle(CutStyle.TL);
         add(removeBtn).inBR(pad, pad);
         removeBtn.onClicked = (btn) -> {
             if (NativeUiUtils.isShiftDown()) {
@@ -197,9 +195,9 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
         };
 
         if (DebugFlags.COLONY_DEBUG) {
-            final Button addBtn = new Button(m_panel, 30, 30, "+", Fonts.DEFAULT_SMALL, null);
+            final Button addBtn = new Button(30, 30, "+", Fonts.DEFAULT_SMALL, null);
             addBtn.bgColor = UIColors.ADD_COLOR;
-            addBtn.cutStyle = CutStyle.TR;
+            addBtn.setCutStyle(CutStyle.TR);
             add(addBtn).inBL(pad, pad);
             addBtn.onClicked = (btn) -> {
                 if (NativeUiUtils.isCtrlDown()) {
@@ -225,14 +223,8 @@ public class InventoryShipWidget extends CustomPanel implements WidgetAPI<Invent
     }
 
     @Override
-    public void renderBelow(float alpha) {
-        super.renderBelow(alpha);
-
-        border.render(pos.getX(), pos.getY(), alpha);
-    }
-
-    public UIComponentAPI getElement() {
-        return m_panel;
+    public void renderBelowImpl(float alpha) {
+        border.render(getX(), getY(), alpha);
     }
 
     public InteractionComp<InventoryShipWidget> getInteraction() {

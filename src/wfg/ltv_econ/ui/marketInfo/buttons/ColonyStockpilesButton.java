@@ -16,16 +16,16 @@ import wfg.ltv_econ.ui.marketInfo.dialogs.ColonyInvDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.DockButton;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
+public final class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
     private static final SpriteAPI ICON = settings.getSprite("icons", "stockpiles_button");
 
-    public ColonyStockpilesButton(UIPanelAPI parent, int width, int height, MarketAPI market, UIComponentAPI tpAnchor) {
-        super(parent, width, height, null, null, () -> new TradeMissionsDialog(market, true));
+    public ColonyStockpilesButton(int width, int height, MarketAPI market, UIComponentAPI tpAnchor) {
+        super(width, height, null, null, () -> new TradeMissionsDialog(market, true));
 
         final CallbackRunnable<Button> dockRun = onClicked;
         onClicked = (btn) -> {
@@ -54,7 +54,7 @@ public class ColonyStockpilesButton extends DockButton<TradeMissionsDialog> {
             NativeUiUtils.anchorPanel(tp, tpAnchor, AnchorType.LeftTop, 50);
         };
 
-        final Base icon = new Base(m_panel, width, height, ICON, null, null);
+        final SpriteElement icon = new SpriteElement(width, height, ICON, null, null);
         add(icon).inBL(0f, 0f);
         glow.type = GlowType.ADDITIVE;
         glow.additiveSprite = icon.getSprite();

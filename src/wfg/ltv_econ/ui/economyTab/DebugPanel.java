@@ -6,7 +6,6 @@ import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import static wfg.native_ui.util.UIConstants.*;
 
@@ -25,12 +24,12 @@ import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.Manufacturing;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public class DebugPanel extends CustomPanel implements UIBuildableAPI {
+public final class DebugPanel extends UIContainer implements UIBuildableAPI {
     private static final Logger logger = Global.getLogger(DebugPanel.class); 
 
     public static final int LABEL_W = 150;
@@ -38,8 +37,8 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
     public static final int BUTTON_W = 250;
     public static final int BUTTON_H = 25;
 
-    public DebugPanel(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height);
+    public DebugPanel(int width, int height) {
+        super(width, height);
 
         buildUI();
     }
@@ -59,7 +58,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
             final CallbackRunnable<Button> run = (btn) -> {
                 engine.refreshMarketsHard();
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 str("uiBtnTitleRefreshMarkets"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + lblH + pad*2);
@@ -83,7 +82,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
                 logger.info(str("uiElapsedTimeTxt") + time);
                 btn.setText(btnText + " - " + time);
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 btnText, Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*4 + lblH + BUTTON_H);
@@ -105,7 +104,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
                 logger.info(str("uiElapsedTimeTxt") + time);
                 btn.setText(btnText + " - " + time);
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 btnText, Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*6 + lblH + BUTTON_H*2);
@@ -127,7 +126,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
                 logger.info(str("uiElapsedTimeTxt") + time);
                 btn.setText(btnText + " - " + time);
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 btnText, Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*8 + lblH + BUTTON_H*3);
@@ -156,7 +155,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
                 sb.append("\n]");
                 logger.info(sb.toString());
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 str("uiBtnTitleLogAllComCells"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*10 + lblH + BUTTON_H*4);
@@ -171,7 +170,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
                 engine.logger.logEconomySnapshot();
                 engine.logger.logCreditsSnapshot();
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 str("uiBtnTitleLogEconInfo"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*12 + lblH + BUTTON_H*5);
@@ -185,7 +184,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
             final CallbackRunnable<Button> run = (btn) -> {
                 logger.info(engine.getMarketPopulationData().values());
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 str("uiBtnTitleLogMarketPopData"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*14 + lblH + BUTTON_H*6);
@@ -198,7 +197,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
             final CallbackRunnable<Button> run = (btn) -> {
                 IndustryIOs.logMaps();
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 str("uiBtnTitleLogIndIO"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*16 + lblH + BUTTON_H*7);
@@ -220,7 +219,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
                 logger.info(str("uiElapsedTimeTxt") + time);
                 btn.setText(btnText + " - " + time);
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 btnText, Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*18 + lblH + BUTTON_H*8);
@@ -238,7 +237,7 @@ public class DebugPanel extends CustomPanel implements UIBuildableAPI {
                 markets.removeIf(m -> m.getIndustry(Manufacturing.id) == null);
                 logger.info(markets.stream().map(m -> m.getName()).toList());
             };
-            final Button button = new Button(m_panel, BUTTON_W, BUTTON_H,
+            final Button button = new Button(BUTTON_W, BUTTON_H,
                 str("uiBtnTitleLogMarketsWithManufacturing"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*20 + lblH + BUTTON_H*9);

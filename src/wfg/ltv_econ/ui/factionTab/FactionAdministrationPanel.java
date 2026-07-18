@@ -6,22 +6,21 @@ import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel;
 import wfg.ltv_econ.ui.factionTab.dialog.WorkerAllocationDialog;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public class FactionAdministrationPanel extends CustomPanel implements UIBuildableAPI {
+public final class FactionAdministrationPanel extends UIContainer implements UIBuildableAPI {
 
-    public FactionAdministrationPanel(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height);
+    public FactionAdministrationPanel(int width, int height) {
+        super(width, height);
 
         buildUI();
     }
@@ -43,7 +42,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         lblW += (int) embargoListLbl.getPosition().getHeight();
         
         final FactionSelectionPanel factionEmbargoPanel = new FactionSelectionPanel(
-            m_panel, 220, 320 
+            220, 320 
         );
         add(factionEmbargoPanel).inTL(opad + pad, SECTION_I + lblW + opad + pad*2);
         }
@@ -58,7 +57,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
             factionSettings.redistributeCredits = btn.isChecked();
         };
 
-        final Button redistributeBtn = ComponentFactory.createCheckboxWithText(m_panel, 22,
+        final Button redistributeBtn = ComponentFactory.createCheckboxWithText(22,
             str("uiCheckboxRedistributeCreditsTxt"),
             Fonts.DEFAULT_SMALL, redistributeRun, base, pad
         );
@@ -70,7 +69,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
             factionSettings.automaticWorkerAllocationForFaction = btn.isChecked();
         };
 
-        final Button autoAllocatoWorkersBtn = ComponentFactory.createCheckboxWithText(m_panel, 22,
+        final Button autoAllocatoWorkersBtn = ComponentFactory.createCheckboxWithText(22,
             str("uiCheckboxTxtAutoAssignWorkers"), Fonts.DEFAULT_SMALL, automaticAssignWorkers, base, pad
         );
         autoAllocatoWorkersBtn.setChecked(factionSettings.automaticWorkerAllocationForFaction);
@@ -88,7 +87,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
             factionSettings.automaticShipProductionForFaction = btn.isChecked();
         };
 
-        final Button automaticProdBtn = ComponentFactory.createCheckboxWithText(m_panel, 22,
+        final Button automaticProdBtn = ComponentFactory.createCheckboxWithText(22,
             str("uiShipProdCheckboxTxt"), Fonts.DEFAULT_SMALL, automaticProdRun, base, pad
         );
         automaticProdBtn.setChecked(factionSettings.automaticShipProductionForFaction);
@@ -96,7 +95,7 @@ public class FactionAdministrationPanel extends CustomPanel implements UIBuildab
         }
 
         { // SECTION IV
-        final Button workerAllocatorBtn = new Button(m_panel, 150, 35, str("uiDialogBtnTitleWorkforceAllocator"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button workerAllocatorBtn = new Button(150, 35, str("uiDialogBtnTitleWorkforceAllocator"), Fonts.DEFAULT_SMALL, (btn) -> {
             new WorkerAllocationDialog().show(0.3f, 0.3f);
         });
         add(workerAllocatorBtn).inTR(0f, 0f);

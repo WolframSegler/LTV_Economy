@@ -40,14 +40,14 @@ import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.dialog.DialogPanel;
-import wfg.native_ui.ui.panel.BasePanel;
+import wfg.native_ui.ui.container.BaseContainer;
 import wfg.native_ui.ui.widget.Slider;
-import wfg.native_ui.ui.visual.SpritePanelWithTp;
+import wfg.native_ui.ui.visual.InteractiveSprite;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class AssignWorkersDialog extends DialogPanel {
+public final class AssignWorkersDialog extends DialogPanel {
     private static final SpriteAPI WARNING_BUTTON = settings.getSprite("ui", "warning_button");
     private static final int PANEL_W = 540;
     private static final int PANEL_H = 400;
@@ -58,7 +58,7 @@ public class AssignWorkersDialog extends DialogPanel {
     private final WorkerIndustryData previewData;
     private final ArrayMap<String, Slider> outputSliders;
 
-    private BasePanel inputOutputContainer;
+    private BaseContainer inputOutputContainer;
 
     private final float initialFreeWorkerRatio;
 
@@ -95,36 +95,34 @@ public class AssignWorkersDialog extends DialogPanel {
         titleLbl.autoSizeToWidth(PANEL_W);
         add(titleLbl).inTL(0f, pad*2);
 
-        inputOutputContainer = new BasePanel(
-            m_panel, (int) pos.getWidth(), 180
-        ) {{ bg.alpha = 0f;}};
+        inputOutputContainer = new BaseContainer(PANEL_W, 180) {{ bg.alpha = 0f;}};
 
-        drawProductionAndConsumption(inputOutputContainer.getPanel());
+        drawProductionAndConsumption(inputOutputContainer);
 
-        add(inputOutputContainer.getPanel()).inTL(0, titleLbl.computeTextHeight(txt) + opad);
+        add(inputOutputContainer).inTL(0, titleLbl.computeTextHeight(txt) + opad);
 
-        final BasePanel separator = new BasePanel(
-            m_panel, PANEL_W, 1
+        final BaseContainer separator = new BaseContainer(
+            PANEL_W, 1
         ) {{ bg.color = gray;}};
         
-        separator.getPos().inTL(0, sliderY - opad);
-        add(separator.getPanel());
+        separator.pos().inTL(0, sliderY - opad);
+        add(separator);
 
-        final SpritePanelWithTp help_button = new SpritePanelWithTp(m_panel, 20 , 20,
+        final InteractiveSprite help_button = new InteractiveSprite(20 , 20,
             WARNING_BUTTON, null, null
         ) {{
             tooltip.builder = (tp, exp) -> {
                 tp.addPara(str("uiDialogTpTxtAssignWorkers"), pad);
             };
             tooltip.positioner = (tp, exp) -> {
-                NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.TopLeft, 0);
+                NativeUiUtils.anchorPanelWithBounds(tp, this, AnchorType.TopLeft, 0);
             };
 
             glow.type = GlowType.ADDITIVE;
-            glow.additiveSprite = m_sprite;
+            glow.additiveSprite = mSprite;
         }};
 
-        add(help_button.getPanel()).inTR(pad, sliderY + pad);
+        add(help_button).inTR(pad, sliderY + pad);
 
         final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(PANEL_W, true);
         
@@ -137,7 +135,7 @@ public class AssignWorkersDialog extends DialogPanel {
             outputsTp.getPrev().getPosition().inTL(pad, cumulativeYOffset);
 
             final Slider outputSlider = new Slider(
-                m_panel, null, 0, 100, sliderW, sliderH
+                null, 0, 100, sliderW, sliderH
             );
             outputSliders.put(output.comID, outputSlider);
 
@@ -162,12 +160,12 @@ public class AssignWorkersDialog extends DialogPanel {
 
             outputSlider.setProgress(data.getAssignedRatioForOutput(output.comID) * 100);
 
-            outputsTp.addComponent(outputSlider.getPanel()).inTL(iconSize + pad, cumulativeYOffset);
+            outputsTp.addComponent(outputSlider).inTL(iconSize + pad, cumulativeYOffset);
             cumulativeYOffset += pad + sliderH;
         }
 
         outputsTp.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(outputsTp, 180, true, m_panel).inTL(opad, sliderY);
+        ComponentFactory.addTooltip(outputsTp, 180, true, this).inTL(opad, sliderY);
     }
 
     public void drawProductionAndConsumption(UIPanelAPI panel) {
@@ -300,8 +298,8 @@ public class AssignWorkersDialog extends DialogPanel {
     }
 
     @Override
-    public void advance(float amount) {
-        super.advance(amount);
+    public void advanceImpl(float amount) {
+        super.advanceImpl(amount);
 
         boolean update = false;
 
@@ -323,7 +321,7 @@ public class AssignWorkersDialog extends DialogPanel {
 
         if (update) {
             inputOutputContainer.clearChildren();
-            drawProductionAndConsumption(inputOutputContainer.getPanel());
+            drawProductionAndConsumption(inputOutputContainer);
         }
     }
 

@@ -11,25 +11,24 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NumFormat;
 
-public class FactionResourcesTable extends CustomPanel implements HasBackground {
+public final class FactionResourcesTable extends UIContainer implements HasBackground {
     protected final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
-    public FactionResourcesTable(UIPanelAPI parent, int height) {
-        super(parent, ColonyPopulationTable.PANEL_W, height);
+    public FactionResourcesTable(int height) {
+        super(ColonyPopulationTable.PANEL_W, height);
 
         bg.alpha = 1f;
 
@@ -42,9 +41,7 @@ public class FactionResourcesTable extends CustomPanel implements HasBackground 
         final int rowH = 30;
         
         clearChildren();
-        final SortableTable table = new SortableTable(m_panel, (int) pos.getWidth(),
-            (int) pos.getHeight(), 18, rowH
-        );
+        final SortableTable table = new SortableTable(getWidth(), getHeight(), 18, rowH);
 
         table.addHeaders(
             "", 40, null, true, false, 1,
@@ -61,9 +58,7 @@ public class FactionResourcesTable extends CustomPanel implements HasBackground 
         if (engine.getMarketPopulationData().size() > 0) {
             for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {
                 final String comID = com.getId();
-                final Base icon = new Base(
-                    m_panel, 26, 26, com.getIconName(), null, null
-                );
+                final SpriteElement icon = new SpriteElement(26, 26, com.getIconName(), null, null);
     
                 final double stored = info.getFactionComStockpiles(comID, Factions.PLAYER);
                 final float demand = info.getFactionTargetQuantum(comID, Factions.PLAYER);

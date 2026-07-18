@@ -24,17 +24,18 @@ import wfg.ltv_econ.ui.marketInfo.population.CohesionPair;
 import wfg.ltv_econ.ui.marketInfo.population.ConsciousnessPair;
 import wfg.ltv_econ.ui.marketInfo.population.HappinessPair;
 import wfg.ltv_econ.ui.marketInfo.population.HealthPair;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
 import wfg.native_ui.util.NumFormat;
-public class ColonyPopulationTable extends CustomPanel implements HasBackground {
+
+public final class ColonyPopulationTable extends UIContainer implements HasBackground {
     static final int PANEL_W = 935;
 
     private static final PlanetInfoParams params = new PlanetInfoParams();
@@ -47,8 +48,8 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
 
     private final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
-    public ColonyPopulationTable(UIPanelAPI parent, int height) {
-        super(parent, PANEL_W, height);
+    public ColonyPopulationTable(int height) {
+        super(PANEL_W, height);
 
         bg.alpha = 1f;
 
@@ -62,9 +63,7 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
         final int iconW = 120;
         
         clearChildren();
-        final SortableTable table = new SortableTable(m_panel, (int) pos.getWidth(),
-            (int) pos.getHeight(), 18, rowH
-        );
+        final SortableTable table = new SortableTable(getWidth(), getHeight(), 18, rowH);
 
         table.addHeaders(
             str("uiTableColonyNameTitle"), nameW + pad, null, false, false, -1,
@@ -79,7 +78,7 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
 
         if (engine.getMarketPopulationData().size() > 0) {
             for (MarketPopulationData data : engine.getMarketPopulationData().values()) {
-                final UIPanelAPI namePanel = settings.createCustom(nameW, rowH, null);
+                final UIPanelAPI namePanel = new UIContainer(nameW, rowH);
                 final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(nameW, false);
                 final MarketAPI market = data.market;
                 final SectorEntityToken entity = market.getPrimaryEntity();
@@ -96,10 +95,10 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
     
                 final int iconS = rowH/3;
                 final int PairW = iconW - opad;
-                final HealthPair healthPair = new HealthPair(m_panel, PairW, iconS, data, base, null);
-                final HappinessPair happinessPair = new HappinessPair(m_panel, PairW, iconS, data, base, null);
-                final CohesionPair cohesionPair = new CohesionPair(m_panel, PairW, iconS, data, base, null);
-                final ConsciousnessPair consciousnessPair = new ConsciousnessPair(m_panel, PairW, iconS, data, base, null);
+                final HealthPair healthPair = new HealthPair(PairW, iconS, data, base, null);
+                final HappinessPair happinessPair = new HappinessPair(PairW, iconS, data, base, null);
+                final CohesionPair cohesionPair = new CohesionPair(PairW, iconS, data, base, null);
+                final ConsciousnessPair consciousnessPair = new ConsciousnessPair(PairW, iconS, data, base, null);
 
                 final var cond = WorkerPoolRegistry.get(market);
                 final int employment = Math.round(100f - cond.getFreeWorkerRatio()*100f);
@@ -109,10 +108,10 @@ public class ColonyPopulationTable extends CustomPanel implements HasBackground 
 
                 table.addCell(namePanel, cellAlg.LEFT, market.getDaysInExistence(), null);
                 table.addCell(market.getSize(), cellAlg.MID, null, null);
-                table.addCell(healthPair.getPanel(), cellAlg.LEFTOPAD, data.getHealth(), null);
-                table.addCell(happinessPair.getPanel(), cellAlg.LEFTOPAD, data.getHappiness(), null);
-                table.addCell(cohesionPair.getPanel(), cellAlg.LEFTOPAD, data.getSocialCohesion(), null);
-                table.addCell(consciousnessPair.getPanel(), cellAlg.LEFTOPAD, data.getClassConsciousness(), null);
+                table.addCell(healthPair, cellAlg.LEFTOPAD, data.getHealth(), null);
+                table.addCell(happinessPair, cellAlg.LEFTOPAD, data.getHappiness(), null);
+                table.addCell(cohesionPair, cellAlg.LEFTOPAD, data.getSocialCohesion(), null);
+                table.addCell(consciousnessPair, cellAlg.LEFTOPAD, data.getClassConsciousness(), null);
                 table.addCell(NumFormat.formatCredit(credits), cellAlg.MID, credits, creditColor);
                 table.addCell(employment + "%", cellAlg.MID, employment, null);
 

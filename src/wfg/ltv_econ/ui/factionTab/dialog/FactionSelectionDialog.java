@@ -12,12 +12,12 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.native_ui.internal.ui.Side;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
@@ -28,10 +28,9 @@ import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
-import wfg.native_ui.ui.panel.CustomPanel;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
-public class FactionSelectionDialog extends DockPanel {
+public final class FactionSelectionDialog extends DockPanel {
     private static final int ROW_H = 32;
     
     private final UIBuildableAPI content;
@@ -48,7 +47,7 @@ public class FactionSelectionDialog extends DockPanel {
     public void buildUI() {
         clearChildren();
 
-        final int width = (int) contentContainer.getPosition().getWidth();
+        final int width = (int) contentContainer.getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
         final List<FactionSpecAPI> factions = new ArrayList<>(EconomyConstants.visibleFactions);
         factions.add(settings.getFactionSpec(Factions.PLAYER));
@@ -56,13 +55,13 @@ public class FactionSelectionDialog extends DockPanel {
         float yCoord = 0f;
         for (FactionSpecAPI faction : factions) {
             final DebugFactionRow row = new DebugFactionRow(
-                container, width, ROW_H, faction, this::onFactionSelected
+                width, ROW_H, faction, this::onFactionSelected
             );
-            container.addCustom(row.getPanel(), 0f).getPosition().inTL(0f, yCoord);
+            container.addCustom(row, 0f).getPosition().inTL(0f, yCoord);
             yCoord += ROW_H + pad;
         }
         container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, contentContainer.getPosition().getHeight(), true, contentContainer).inTL(0f, 0f);
+        ComponentFactory.addTooltip(container, contentContainer.getHeight(), true, contentContainer).inTL(0f, 0f);
     }
 
     private void onFactionSelected(FactionSpecAPI faction) {
@@ -70,7 +69,7 @@ public class FactionSelectionDialog extends DockPanel {
         content.buildUI();
     }
 
-    private static class DebugFactionRow extends CustomPanel implements UIBuildableAPI,
+    private static class DebugFactionRow extends UIContainer implements UIBuildableAPI,
         HasInteraction, HasHoverGlow, HasAudioFeedback
     {
         public final InteractionComp<DebugFactionRow> interaction = comp().get(NativeComponents.INTERACTION);
@@ -78,10 +77,10 @@ public class FactionSelectionDialog extends DockPanel {
 
         private final FactionSpecAPI faction;
 
-        public DebugFactionRow(UIPanelAPI parent, int width, int height, FactionSpecAPI faction,
+        public DebugFactionRow(int width, int height, FactionSpecAPI faction,
             Consumer<FactionSpecAPI> onSelect
         ) {
-            super(parent, width, height);
+            super(width, height);
             this.faction = faction;
 
             interaction.onClicked = (row, isLeftClick) -> onSelect.accept(faction);
@@ -97,7 +96,7 @@ public class FactionSelectionDialog extends DockPanel {
             clearChildren();
             final int iconSize = 28;
 
-            final Base crestIcon = new Base(m_panel, iconSize, iconSize, faction.getCrest(), null, null);
+            final SpriteElement crestIcon = new SpriteElement(iconSize, iconSize, faction.getCrest(), null, null);
             add(crestIcon).inBL(pad, (ROW_H - iconSize) / 2f);
 
             final LabelAPI nameLabel = settings.createLabel(faction.getDisplayName(), Fonts.ORBITRON_12);

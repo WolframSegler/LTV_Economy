@@ -16,7 +16,6 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
@@ -25,16 +24,16 @@ import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.dialog.DialogPanel;
-import wfg.native_ui.ui.panel.CustomPanel;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.util.Arithmetic;
 
-public class ServiceSectorDialog extends DialogPanel {
+public final class ServiceSectorDialog extends DialogPanel {
     private static final int PANEL_W = 700;
     private static final int PANEL_H = 500;
     private static final Color MED_GREEN = new Color(1, 110, 52);
@@ -83,7 +82,7 @@ public class ServiceSectorDialog extends DialogPanel {
         
         int cumulativeYOffset = opad;
         { // Sectors
-            final SectorCard logistics = new SectorCard(sectorsCont, SERVICE_LOGISTICS, LOGISTICS_LIM, LOGISTICS,
+            final SectorCard logistics = new SectorCard(SERVICE_LOGISTICS, LOGISTICS_LIM, LOGISTICS,
                 str("uiTitleLogistics"), (slider) -> {
                     final String eff1 = Integer.toString(Math.round(slider.getProgress()));
                     final String max1 = Integer.toString(Math.round(LOGISTICS_LIM * 100f));
@@ -96,7 +95,7 @@ public class ServiceSectorDialog extends DialogPanel {
                     return lbl;
                 }, null
             );
-            final SectorCard healthcare = new SectorCard(sectorsCont, SERVICE_HEALTHCARE, HEALTHCARE_LIM, HEALTHCARE,
+            final SectorCard healthcare = new SectorCard(SERVICE_HEALTHCARE, HEALTHCARE_LIM, HEALTHCARE,
                 str("uiTitleHealthcare"), (slider) -> {
                     final String eff1 = Integer.toString((int) (slider.getProgress() / 5f));
                     final String max1 = Integer.toString(Math.round(HEALTHCARE_LIM * 20f));
@@ -111,7 +110,7 @@ public class ServiceSectorDialog extends DialogPanel {
                     return lbl;
                 }, MED_GREEN
             );
-            final SectorCard security = new SectorCard(sectorsCont, SERVICE_SECURITY, SECURITY_LIM, SECURITY,
+            final SectorCard security = new SectorCard(SERVICE_SECURITY, SECURITY_LIM, SECURITY,
                 str("uiTitleSecurity"), (slider) -> {
                     final String eff1 = String.format("%.3f", slider.getProgress() / 1000f);
                     final String max1 = String.format("%.3f", SECURITY_LIM / 10f);
@@ -126,7 +125,7 @@ public class ServiceSectorDialog extends DialogPanel {
                     return lbl;
                 }, grid
             );
-            final SectorCard publicInfo = new SectorCard(sectorsCont, SERVICE_PUBLIC_INFO, PUBLIC_INFO_LIM, PUBLIC_INFO,
+            final SectorCard publicInfo = new SectorCard(SERVICE_PUBLIC_INFO, PUBLIC_INFO_LIM, PUBLIC_INFO,
                 str("uiTitlePublicInfo"), (slider) -> {
                     final String eff1 = String.format("%.3f", slider.getProgress() / 200f);
                     final String max1 = String.format("%.3f", PUBLIC_INFO_LIM / 2f);
@@ -141,7 +140,7 @@ public class ServiceSectorDialog extends DialogPanel {
                     return lbl;
                 }, grid
             );
-            final SectorCard culture = new SectorCard(sectorsCont, SERVICE_CULTURE, CULTURE_LIM, CULTURE,
+            final SectorCard culture = new SectorCard(SERVICE_CULTURE, CULTURE_LIM, CULTURE,
                 str("uiTitleCulture"), (slider) -> {
                     final String eff1 = String.format("%.3f", slider.getProgress() / 400f);
                     final String max1 = String.format("%.3f", CULTURE_LIM / 4f);
@@ -159,15 +158,15 @@ public class ServiceSectorDialog extends DialogPanel {
                 }, grid
             );
 
-            sectorsCont.addComponent(logistics.getPanel()).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            sectorsCont.addComponent(logistics).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
-            sectorsCont.addComponent(healthcare.getPanel()).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            sectorsCont.addComponent(healthcare).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
-            sectorsCont.addComponent(security.getPanel()).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            sectorsCont.addComponent(security).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
-            sectorsCont.addComponent(publicInfo.getPanel()).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            sectorsCont.addComponent(publicInfo).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
-            sectorsCont.addComponent(culture.getPanel()).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            sectorsCont.addComponent(culture).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
 
             logistics.slider.setProgress(data.getAssignedRatioForOutput(SERVICE_LOGISTICS) * 100f);
@@ -190,7 +189,7 @@ public class ServiceSectorDialog extends DialogPanel {
         }
 
         sectorsCont.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(sectorsCont, PANEL_H - 20 - BUTTON_H - opad, true, m_panel).inBL(0f, BUTTON_H + opad);
+        ComponentFactory.addTooltip(sectorsCont, PANEL_H - 20 - BUTTON_H - opad, true, this).inBL(0f, BUTTON_H + opad);
     }
 
     private final float getNewFreeWorkerRatio() {
@@ -199,8 +198,8 @@ public class ServiceSectorDialog extends DialogPanel {
     }
 
     @Override
-    public void advance(float amount) {
-        super.advance(amount);
+    public void advanceImpl(float amount) {
+        super.advanceImpl(amount);
 
         for (SectorCard card : sectorCards) {
             final String sectorID = card.sectorID;
@@ -231,7 +230,7 @@ public class ServiceSectorDialog extends DialogPanel {
         LtvIndustryListPanel.refreshPanel();
     }
 
-    private static class SectorCard extends CustomPanel implements UIBuildableAPI {
+    private static class SectorCard extends UIContainer implements UIBuildableAPI {
         private static final int CARD_W = PANEL_W - opad*4;
         private static final int CARD_H = 150;
         private static final int borderMargin = opad;
@@ -247,10 +246,10 @@ public class ServiceSectorDialog extends DialogPanel {
         public final float workerLimit;
         public final Slider slider;
 
-        public SectorCard(UIPanelAPI parent, String sectorID, float limit, SpriteAPI icon, String title,
+        public SectorCard(String sectorID, float limit, SpriteAPI icon, String title,
             LabelSupplier<Slider> desc, Color iconColor
         ) {
-            super(parent, CARD_W, CARD_H);
+            super(CARD_W, CARD_H);
 
             border.setSize(CARD_W + borderMargin*2, CARD_H + borderMargin*2);
             border.centerColor = borderBgColor;
@@ -262,7 +261,7 @@ public class ServiceSectorDialog extends DialogPanel {
             this.desc = desc;
             this.iconColor = iconColor;
 
-            slider = new Slider(m_panel, null, 0, limit * 100, 200, 16);
+            slider = new Slider(null, 0, limit * 100, 200, 16);
             slider.setHighlightOnMouseover(true);
             slider.setBarColor(UIColors.SLIDER_BASE);
             slider.showNoText = true;
@@ -276,7 +275,7 @@ public class ServiceSectorDialog extends DialogPanel {
             clearChildren();
             final int iconS = 32;
 
-            final Base iconElement = new Base(m_panel, iconS, iconS, icon, iconColor, null);
+            final SpriteElement iconElement = new SpriteElement(iconS, iconS, icon, iconColor, null);
             add(iconElement).inTL(0f, 0f);
 
             final LabelAPI titleLbl = settings.createLabel(title, Fonts.INSIGNIA_LARGE);
@@ -297,10 +296,8 @@ public class ServiceSectorDialog extends DialogPanel {
         }
 
         @Override
-        public void renderBelow(float alpha) {
-            super.renderBelow(alpha);
-
-            border.render(pos.getX() - borderMargin, pos.getY() - borderMargin, alpha);
+        public void renderBelowImpl(float alpha) {
+            border.render(getX() - borderMargin, getY() - borderMargin, alpha);
         }
     }
 

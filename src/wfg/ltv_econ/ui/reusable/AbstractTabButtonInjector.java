@@ -10,17 +10,15 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.ui.ButtonAPI;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.scripts.CoreTabUIBuilder;
 import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
 public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, CallbackRunnable<Button> {
@@ -34,8 +32,8 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
     protected UIComponentAPI injectedComp = null;
 
     protected UIPanelAPI targetTab = null;
-    protected List<Object> targetChildren = null;
-    protected List<UIPanelAPI> hiddenPanels = new ArrayList<>(6);
+    protected List<UIComponentAPI> targetChildren = null;
+    protected List<UIComponentAPI> hiddenPanels = new ArrayList<>(6);
 
     protected abstract int getCurrentTabIndex();
     protected abstract void setCurrentTabIndex(int index);
@@ -54,14 +52,13 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
      */
     protected void onPostInject() {}
 
-    @SuppressWarnings("unchecked")
     @Override
     public void advance(float amount) {
         if (Global.getCurrentState() != GameState.CAMPAIGN) return;
         final CampaignUIAPI campaignUI = Global.getSector().getCampaignUI();
         if (!campaignUI.isShowingDialog()) return;
 
-        for (UIPanelAPI panel : hiddenPanels) {
+        for (UIComponentAPI panel : hiddenPanels) {
             if (panel.getOpacity() > 0f && getCurrentTabIndex() == buttonTabId) panel.setOpacity(0f);
         }
 
@@ -74,8 +71,7 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
         targetTab = Attachments.getCurrentTab();
         if (targetTab == null || campaignUI.getCurrentCoreTab() != getTargetCoreTabId()) return;
 
-        targetChildren = (List<Object>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, targetTab);
+        targetChildren = MethodFields.getChildrenNonCopy(targetTab);
 
         if (!uiInjected) {
             createButtonAndComponent();
@@ -89,35 +85,28 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
     private final void createButtonAndComponent() {
         UIComponentAPI lastBtn = null;
         buttonTabId = 0;
-        for (Object child : targetChildren) {
-            if (child instanceof ButtonAPI button) {
+        for (UIComponentAPI child : targetChildren) {
+            if (child instanceof ButtonAPI button && injectedBtn != button) {
                 buttonTabId++;
                 if (lastBtn == null || lastBtn.getPosition().getX() < button.getPosition().getX()) {
                     lastBtn = button;
-                }
-            } else if (child instanceof CustomPanelAPI custom && custom.getPlugin() instanceof Button btn && injectedBtn != btn) {
-                buttonTabId++;
-                if (lastBtn == null || lastBtn.getPosition().getX() < custom.getPosition().getX()) {
-                    lastBtn = custom;
                 }
             }
         }
         if (lastBtn == null) return;
 
-        injectedBtn = new Button(
-            targetTab, BUTTON_WIDTH, BUTTON_HEIGHT, getButtonLabel(), Fonts.ORBITRON_12, this
-        );
+        injectedBtn = new Button(BUTTON_WIDTH, BUTTON_HEIGHT, getButtonLabel(), Fonts.ORBITRON_12, this);
         injectedBtn.setShortcutAndAppendToText(getKeyFromIndex(buttonTabId));
-        injectedBtn.cutStyle = CutStyle.TL_TR;
+        injectedBtn.setCutStyle(CutStyle.TL_TR);
         injectedBtn.overrideCutSize = 6;
         injectedBtn.setHighlightBrightness(0.3f);
         injectedBtn.tooltip.enabled = false;
 
-        targetTab.addComponent(injectedBtn.getPanel());
-        injectedBtn.getPos().rightOfTop(lastBtn, 1);
+        targetTab.addComponent(injectedBtn);
+        injectedBtn.pos().rightOfTop(lastBtn, 1f);
 
         injectedComp = createCustomComponent(targetTab);
-        targetTab.addComponent(injectedComp).inTL(0, 20);
+        targetTab.addComponent(injectedComp).inTL(0f, 20f);
 
         onPostBtnInject(injectedBtn);
     }
@@ -127,11 +116,7 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
             if (injectedBtn != null) injectedBtn.setChecked(false);
             if (injectedComp != null) injectedComp.setOpacity(0f);
 
-            hiddenPanels.forEach(p -> {
-                if (!(p instanceof CustomPanelAPI custom && custom.getPlugin() instanceof CustomPanel)) {
-                    p.setOpacity(1f);
-                }
-            });
+            hiddenPanels.forEach(p -> p.setOpacity(1f));
             hiddenPanels.clear();
         }
     }
@@ -144,15 +129,13 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
         setCurrentTabIndex(buttonTabId);
         if (injectedComp != null) injectedComp.setOpacity(1f);
 
-        for (Object child : targetChildren) {
-            if (child instanceof ButtonAPI button) {
+        for (UIComponentAPI child : targetChildren) {
+            if (child instanceof ButtonAPI button && injectedBtn != button) {
                 button.setChecked(false);
                 button.unhighlight();
-            } else if (child instanceof UIPanelAPI panel && child != injectedComp
-                && !(child instanceof CustomPanelAPI custom && custom.getPlugin() instanceof Button)
-            ) {
-                panel.setOpacity(0f);
-                hiddenPanels.add(panel);
+            } else if (child != injectedComp) {
+                child.setOpacity(0f);
+                hiddenPanels.add(child);
             }
         }
     }

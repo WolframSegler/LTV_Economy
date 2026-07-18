@@ -10,14 +10,15 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import rolflectionlib.util.RolfLectionUtil;
+import wfg.native_ui.internal.ui.core.UIContainer;
+import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.CallbackRunnable;
 
-public abstract class AbstractManagementPanel extends CustomPanel implements UIBuildableAPI {
+public abstract class AbstractManagementPanel extends UIContainer implements UIBuildableAPI {
     protected static final int MAIN_PANEL_W = 1250;
     protected static final int MAIN_PANEL_H = screenH - 140;
     protected static final int NAVBAR_W = 200;
@@ -35,12 +36,12 @@ public abstract class AbstractManagementPanel extends CustomPanel implements UIB
     protected List<Button> navButtons = new ArrayList<>();
     protected Button firstButton;
 
-    protected AbstractManagementPanel(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height);
+    protected AbstractManagementPanel(int width, int height) {
+        super(width, height);
     }
 
-    protected AbstractManagementPanel(UIPanelAPI parent) {
-        this(parent, MAIN_PANEL_W, MAIN_PANEL_H);
+    protected AbstractManagementPanel() {
+        this(MAIN_PANEL_W, MAIN_PANEL_H);
     }
 
     protected abstract String getTitle();
@@ -61,20 +62,20 @@ public abstract class AbstractManagementPanel extends CustomPanel implements UIB
 
         createNavButtons();
 
-        final UIPanelAPI navbar = settings.createCustom(NAVBAR_W, 0, null);
+        final UIContainerAPI navbar = new UIContainer(NAVBAR_W, 0f);
         int currentY = hpad;
         for (Button btn : navButtons) {
-            navbar.addComponent(btn.getPanel()).inTL(hpad, currentY);
+            navbar.addComponent(btn).inTL(hpad, currentY);
             currentY += pad * 2 + NAV_BUTTON_H;
         }
         currentY += hpad - pad * 2;
-        navbar.getPosition().setSize(NAVBAR_W, currentY);
+        navbar.setSize(NAVBAR_W, currentY);
 
         final float navbarY = subtitleY + subtitleH + pad * 2;
         add(navbar).inTL(pad, navbarY);
 
-        contentPanel = settings.createCustom(CONTENT_PANEL_W, CONTENT_PANEL_H, null);
-        optionsPanel = settings.createCustom(OPTIONS_PANEL_W, OPTIONS_PANEL_H, null);
+        contentPanel = new UIContainer(CONTENT_PANEL_W, CONTENT_PANEL_H);
+        optionsPanel = new UIContainer(OPTIONS_PANEL_W, OPTIONS_PANEL_H);
         add(contentPanel).inTL(pad + NAVBAR_W + opad, titleY);
         add(optionsPanel).inBL(pad, 0);
 
@@ -92,11 +93,11 @@ public abstract class AbstractManagementPanel extends CustomPanel implements UIB
                 def.contentSupplier.run();
             };
             final Button button = new Button(
-                m_panel, NAV_BUTTON_W, NAV_BUTTON_H, def.label,
+                NAV_BUTTON_W, NAV_BUTTON_H, def.label,
                 Fonts.ORBITRON_12, runnable
             );
             button.setShortcutAndAppendToText(def.shortcut);
-            button.cutStyle = CutStyle.TL_BR;
+            button.setCutStyle(CutStyle.TL_BR);
             button.bgAlpha = 1f;
             navButtons.add(button);
             if (firstButton == null) firstButton = button;
@@ -106,8 +107,8 @@ public abstract class AbstractManagementPanel extends CustomPanel implements UIB
     private final void clearPanelAndButtonState(Button caller) {
         navButtons.forEach(b -> b.setChecked(false));
         caller.setChecked(true);
-        RolfLectionUtil.invokeMethodDirectly(CustomPanel.clearChildrenMethod, contentPanel);
-        RolfLectionUtil.invokeMethodDirectly(CustomPanel.clearChildrenMethod, optionsPanel);
+        MethodFields.clearChildren(contentPanel);
+        MethodFields.clearChildren(optionsPanel);
     }
 
     protected static class NavButtonDef {

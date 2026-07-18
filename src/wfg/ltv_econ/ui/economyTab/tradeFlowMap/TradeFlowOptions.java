@@ -2,31 +2,29 @@ package wfg.ltv_econ.ui.economyTab.tradeFlowMap;
 
 import org.lwjgl.input.Keyboard;
 
-import com.fs.starfarer.api.ui.UIPanelAPI;
-
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.ui.fleet.FiltersDialog;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 
-public class TradeFlowOptions extends CustomPanel {
+public final class TradeFlowOptions extends UIContainer {
     private static final int FILTERS_BTN_H = 32;
 
-    public TradeFlowOptions(UIPanelAPI parent, int width, int height, UIBuildableAPI content) {
-        super(parent, width, height);
+    public TradeFlowOptions(int width, int height, UIBuildableAPI content) {
+        super(width, height);
 
         final CommoditySelectionPanel options = new CommoditySelectionPanel(
-            m_panel, (int) pos.getWidth(), (int) pos.getHeight() - FILTERS_BTN_H - 2, content
+            (int) getWidth(), (int) getHeight() - FILTERS_BTN_H - 2, content
         );
-        add(options.getPanel()).inBL(0f, 0f);
+        add(options).inBL(0f, 0f);
 
-        final DockButton<FiltersDialog> filterBtn = new DockButton<>(m_panel, width, FILTERS_BTN_H, LocalizedStrings.str("filtersTitle"),
+        final DockButton<FiltersDialog> filterBtn = new DockButton<>(width, FILTERS_BTN_H, LocalizedStrings.str("filtersTitle"),
             null, () -> new FiltersDialog(content)
         );
-        filterBtn.cutStyle = CutStyle.TL_TR;
+        filterBtn.setCutStyle(CutStyle.TL_TR);
         filterBtn.bgAlpha = 1f;
         filterBtn.setShortcutAndAppendToText(Keyboard.KEY_T);
         add(filterBtn).inTL(0f, 0f);

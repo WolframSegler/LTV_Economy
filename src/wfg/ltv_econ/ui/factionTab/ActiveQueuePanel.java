@@ -24,6 +24,7 @@ import wfg.ltv_econ.ui.factionTab.dialog.DiscardAllDialog;
 import wfg.ltv_econ.ui.factionTab.dialog.FactionSelectionDialog;
 import wfg.ltv_econ.ui.fleet.ShipProductionWidget;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.core.UIBuildableAPI;
@@ -31,13 +32,12 @@ import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.table.GridTable;
 import wfg.native_ui.ui.visual.IconValuePairTp;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, HasInteraction {
+public final class ActiveQueuePanel extends UIContainer implements UIBuildableAPI, HasInteraction {
     private static final SpriteAPI PRODUCTION = settings.getSprite("income_report", "production");
     private static final int HEADER_HEIGHT = 50;
 
@@ -45,8 +45,8 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
 
     private ActiveQueueGrid grid;
 
-    public ActiveQueuePanel(UIPanelAPI parent, int w, int h) {
-        super(parent, w, h);
+    public ActiveQueuePanel(int w, int h) {
+        super(w, h);
 
         interaction.onClicked = (panel, isLeftClick) -> {
             grid.clearSelection();
@@ -76,10 +76,10 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         final int totalTime = orders.stream().mapToInt(o -> o.daysRemaining).sum();
         final int estimatedTime = prodLines < 1 ? 0 : totalTime / prodLines;
 
-        final Button clearAllBtn = new Button(m_panel, 120, entryH, str("uiBtnTitleClearAll"), null, (btn) -> {
+        final Button clearAllBtn = new Button(120, entryH, str("uiBtnTitleClearAll"), null, (btn) -> {
             new DiscardAllDialog(this).show(0.3f, 0.3f);
         });
-        clearAllBtn.cutStyle = CutStyle.ALL;
+        clearAllBtn.setCutStyle(CutStyle.ALL);
         clearAllBtn.setEnabled(orders.size() > 0);
         add(clearAllBtn).inTR(BUTTON_W, hpad);
 
@@ -87,9 +87,9 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         add(title).inTL(hpad, hpad).setSize(titleW, entryH);
         title.setAlignment(Alignment.LMID);
 
-        final IconValuePairTp ordersPair = new IconValuePairTp(m_panel, entryW, entryH, CHECKLIST, orders.size(), true, null);
-        final IconValuePairTp timePair = new IconValuePairTp(m_panel, entryW, entryH, STOPWATCH, estimatedTime, true, null);
-        final IconValuePairTp prodPair = new IconValuePairTp(m_panel, entryW, entryH, PRODUCTION, prodLines, true, null);
+        final IconValuePairTp ordersPair = new IconValuePairTp(entryW, entryH, CHECKLIST, orders.size(), true, null);
+        final IconValuePairTp timePair = new IconValuePairTp(entryW, entryH, STOPWATCH, estimatedTime, true, null);
+        final IconValuePairTp prodPair = new IconValuePairTp(entryW, entryH, PRODUCTION, prodLines, true, null);
 
         add(ordersPair).inTL(hpad + titleW, hpad);
         add(timePair).inTL(hpad + titleW + entryW, hpad);
@@ -108,25 +108,25 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
             tp.addPara(str("uiTpTxtHullsAssemblyLines"), pad, highlight, String.valueOf(StaticData.inv.getAssemblyLines()));
         };
 
-        ordersPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, ordersPair.getPanel(), AnchorType.RightTop, hpad);
-        timePair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, timePair.getPanel(), AnchorType.RightTop, hpad);
-        prodPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, prodPair.getPanel(), AnchorType.RightTop, hpad);
+        ordersPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, ordersPair, AnchorType.RightTop, hpad);
+        timePair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, timePair, AnchorType.RightTop, hpad);
+        prodPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, prodPair, AnchorType.RightTop, hpad);
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
+                120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
             );
-            factionSelection.cutStyle = CutStyle.ALL;
+            factionSelection.setCutStyle(CutStyle.ALL);
             add(factionSelection).inTR(hpad, hpad);
         }
 
-        grid = new ActiveQueueGrid(m_panel, (int) pos.getWidth(), (int) (pos.getHeight() - HEADER_HEIGHT));
+        grid = new ActiveQueueGrid((int) getWidth(), (int) (getHeight() - HEADER_HEIGHT));
         add(grid).inTL(0, HEADER_HEIGHT);
     }
 
     private class ActiveQueueGrid extends GridTable<ShipProductionOrder, ShipProductionWidget> {
-        public ActiveQueueGrid(UIPanelAPI parent, int width, int height) {
-            super(parent, width, height, ShipProductionWidget.WIDTH, ShipProductionWidget.HEIGHT, opad*2);
+        public ActiveQueueGrid(int width, int height) {
+            super(width, height, ShipProductionWidget.WIDTH, ShipProductionWidget.HEIGHT, opad*2);
             uniformOuterGap = true;
             justifyGrid = false;
             isSelectionEnabled = true;
@@ -142,7 +142,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
         }
 
         protected ShipProductionWidget createWidget(ShipProductionOrder item, int index) {
-            return new ShipProductionWidget(m_panel, item, index);
+            return new ShipProductionWidget(item, index);
         }
 
         @Override
@@ -173,7 +173,7 @@ public class ActiveQueuePanel extends CustomPanel implements UIBuildableAPI, Has
 
             case SWAP:
                 StaticData.inv.swapActiveOrders(source.index, selectedWidget.index);
-                NativeUiUtils.swapPositions(source.getPanel(), selectedWidget.getPanel());
+                NativeUiUtils.swapPositions(source, selectedWidget);
 
                 source.buildUI();
                 selectedWidget.buildUI();

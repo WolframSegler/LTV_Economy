@@ -7,14 +7,12 @@ import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
-import com.fs.starfarer.api.ui.UIPanelAPI;
-
 import wfg.ltv_econ.ui.reusable.AbstractManagementPanel;
 
-public class FactionManagementPanel extends AbstractManagementPanel {
+public final class FactionManagementPanel extends AbstractManagementPanel {
 
-    public FactionManagementPanel(UIPanelAPI parent) {
-        super(parent);
+    public FactionManagementPanel() {
+        super();
 
         buildUI();
     }
@@ -32,30 +30,30 @@ public class FactionManagementPanel extends AbstractManagementPanel {
 
         defs.add(new NavButtonDef(str("uiTitleShipHangar"), Keyboard.KEY_Q, () -> {
             final ShipInventoryPanel content = new ShipInventoryPanel(
-                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                CONTENT_PANEL_W, CONTENT_PANEL_H
             );
-            contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+            contentPanel.addComponent(content).inBL(0f, 0f);
         }));
 
         defs.add(new NavButtonDef(str("uiTitleFactionShipPlannedOrders"), Keyboard.KEY_W, () -> {
             final PlannedOrdersPanel content = new PlannedOrdersPanel(
-                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                CONTENT_PANEL_W, CONTENT_PANEL_H
             );
-            contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+            contentPanel.addComponent(content).inBL(0f, 0f);
         }));
 
         defs.add(new NavButtonDef(str("uiTitleAssemblyLine"), Keyboard.KEY_A, () -> {
             final ActiveQueuePanel content = new ActiveQueuePanel(
-                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                CONTENT_PANEL_W, CONTENT_PANEL_H
             );
-            contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+            contentPanel.addComponent(content).inBL(0f, 0f);
         }));
 
         defs.add(new NavButtonDef(str("uiBtnTitleAdministration"), Keyboard.KEY_S, () -> {
             final FactionAdministrationPanel content = new FactionAdministrationPanel(
-                contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                CONTENT_PANEL_W, CONTENT_PANEL_H
             );
-            contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+            contentPanel.addComponent(content).inBL(0f, 0f);
         }));
 
         return defs;

@@ -13,7 +13,7 @@ import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.economyTab.FactionSelectionPanel.RowPanel;
 import wfg.native_ui.ui.dialog.DialogPanel;
 
-public class ConfirmEmbargoDialog extends DialogPanel  {
+public final class ConfirmEmbargoDialog extends DialogPanel  {
 
     final String factionID;
     final boolean alreadyEmbargoed;

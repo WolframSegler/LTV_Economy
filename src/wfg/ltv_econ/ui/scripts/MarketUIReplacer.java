@@ -23,8 +23,8 @@ import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
+import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
-import wfg.native_ui.ui.panel.CustomPanel;
 
 import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;
@@ -37,11 +37,12 @@ import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.ui.MarketConditionsWidget;
 import com.fs.starfarer.campaign.ui.marketinfo.CommodityPanel;
 
-public class MarketUIReplacer implements CoreTabUIBuilder {
+public final class MarketUIReplacer implements CoreTabUIBuilder {
 
     private static final Class<?> knownClass1 = IndustryListPanel.class;
     private static final Class<?> knownClass2 = LtvIndustryListPanel.class;
@@ -70,34 +71,27 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
         market = (MarketAPI) RolfLectionUtil.getPrivateVariable(marketAPIField, tradePanel);
         if (!market.isInEconomy()) return;
 
-        final List<?> outpostChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, tradePanel);
-        final UIPanelAPI overviewPanel = outpostChildren.stream()
+        final List<UIComponentAPI> outpostChildren = MethodFields.getChildrenNonCopy(tradePanel);
+        final UIPanelAPI overviewPanel = (UIPanelAPI) outpostChildren.stream()
             .filter(c -> RolfLectionUtil.hasMethodOfName("showOverview", c))
-            .map(child -> (UIPanelAPI) child)
             .findFirst().orElse(null);
         if (overviewPanel == null) return;
 
-        final UIPanelAPI marketStatsPanel = outpostChildren.stream()
+        final UIPanelAPI marketStatsPanel = (UIPanelAPI) outpostChildren.stream()
             .filter(c -> RolfLectionUtil.getAllFields(c.getClass()).stream()
                 .anyMatch(f -> RolfLectionUtil.getFieldType(f).equals(MarketConditionsWidget.class)))
-            .map(child -> (UIPanelAPI) child)
             .findFirst().orElse(null);
         if (marketStatsPanel == null) return;
 
-        final List<?> overviewChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, overviewPanel);
-        final UIPanelAPI managementPanel = overviewChildren.stream()
+        final UIPanelAPI managementPanel = (UIPanelAPI) MethodFields.getChildrenNonCopy(overviewPanel).stream()
             .filter(c -> RolfLectionUtil.hasMethodOfName("recreateWithEconUpdate", c))
-            .map(child -> (UIPanelAPI) child)
             .findFirst().orElse(null);
         if (managementPanel == null) return;
 
         if (IdentityMarker.isPresent(managementPanel)) return;
         IdentityMarker.attach(managementPanel);
 
-        final List<?> managementChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, managementPanel);
+        final List<UIComponentAPI> managementChildren = MethodFields.getChildrenNonCopy(managementPanel);
 
         UIPanelAPI anchorChild = null;
 
@@ -129,7 +123,7 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
     }
 
     private static final void addManagementButtons(
-        UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
+        UIPanelAPI managementPanel, List<UIComponentAPI> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
         if (!RolfLectionUtil.hasMethodOfName("getShipping", colonyInfoPanel)) return;
         final ShippingPanel shipPanel = (ShippingPanel) RolfLectionUtil.invokeMethod(
@@ -149,19 +143,19 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
         final int buttonWidth = (int) (LtvCommodityPanel.STANDARD_WIDTH / 3f - 4f);
         final int buttonHeight = (int) (buttonWidth / 1.63f);
 
-        final MarketEventsButton eventsBtn = new MarketEventsButton(managementPanel, buttonWidth, buttonHeight, market);
-        final ColonyStockpilesButton stockpilesBtn = new ColonyStockpilesButton(managementPanel, buttonWidth, buttonHeight, market, eventsBtn.getPanel());
-        final ManagePopButton popBtn = new ManagePopButton(managementPanel, buttonWidth, buttonHeight, market, eventsBtn.getPanel());
+        final MarketEventsButton eventsBtn = new MarketEventsButton(buttonWidth, buttonHeight, market);
+        final ColonyStockpilesButton stockpilesBtn = new ColonyStockpilesButton(buttonWidth, buttonHeight, market, eventsBtn);
+        final ManagePopButton popBtn = new ManagePopButton(buttonWidth, buttonHeight, market, eventsBtn);
 
         final int gap = (LtvCommodityPanel.STANDARD_WIDTH - buttonWidth * 3) / 2;
 
-        colonyInfoPanel.addComponent(eventsBtn.getPanel());
-        colonyInfoPanel.addComponent(stockpilesBtn.getPanel());
-        colonyInfoPanel.addComponent(popBtn.getPanel());
+        colonyInfoPanel.addComponent(eventsBtn);
+        colonyInfoPanel.addComponent(stockpilesBtn);
+        colonyInfoPanel.addComponent(popBtn);
 
-        NativeUiUtils.anchorPanel(popBtn.getPanel(), colonyInfoPanel, AnchorType.BottomRight, -100);
-        NativeUiUtils.anchorPanel(stockpilesBtn.getPanel(), popBtn.getPanel(), AnchorType.LeftBottom, gap);
-        NativeUiUtils.anchorPanel(eventsBtn.getPanel(), stockpilesBtn.getPanel(), AnchorType.LeftBottom, gap);
+        NativeUiUtils.anchorPanel(popBtn, colonyInfoPanel, AnchorType.BottomRight, -100);
+        NativeUiUtils.anchorPanel(stockpilesBtn, popBtn, AnchorType.LeftBottom, gap);
+        NativeUiUtils.anchorPanel(eventsBtn, stockpilesBtn, AnchorType.LeftBottom, gap);
 
         if (settings.isDevMode()) {
             Global.getLogger(MarketUIReplacer.class).info("Added Market Buttons");
@@ -169,33 +163,33 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
     }
 
     private static final void replaceMarketCreditsLabel(
-        UIPanelAPI managementPanel, List<?> managementChildren, UIPanelAPI colonyInfoPanel
+        UIPanelAPI managementPanel, List<UIComponentAPI> managementChildren, UIPanelAPI colonyInfoPanel
     ) {
         if (!DebugFlags.COLONY_DEBUG && !market.isPlayerOwned()) return;
         if (!RolfLectionUtil.hasMethodOfName("getIncome", colonyInfoPanel)) return;
         
         final UIPanelAPI incomePanel = (UIPanelAPI) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getIncome", colonyInfoPanel);
-        final List<?> incomePanelChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, incomePanel);
         
-        final var Buttons = (List<ButtonAPI>) incomePanelChildren.stream()
+        final var buttons = (List<ButtonAPI>) MethodFields
+            .getChildrenNonCopy(incomePanel).stream()
             .filter(c -> c instanceof ButtonAPI).map(c -> (ButtonAPI) c).toList();
-        final ButtonAPI creditBtn = Buttons.get(0);
-        final ButtonAPI hazardBtn = Buttons.get(1);
+
+        final ButtonAPI creditBtn = buttons.get(0);
+        final ButtonAPI hazardBtn = buttons.get(1);
         incomePanel.removeComponent(creditBtn);
 
-        final IncomeLabel colonyCreditLabel = new IncomeLabel(colonyInfoPanel, 150, 50, market);
+        final IncomeLabel colonyCreditLabel = new IncomeLabel(150, 50, market);
 
-        final PositionAPI posS = colonyCreditLabel.getPos();
+        final PositionAPI posS = colonyCreditLabel.pos();
         final PositionAPI posA = hazardBtn.getPosition();
-        colonyInfoPanel.addComponent(colonyCreditLabel.getPanel()).inTL(
+        colonyInfoPanel.addComponent(colonyCreditLabel).inTL(
             (posA.getX() - posS.getX()) + (posA.getWidth() - posS.getWidth()) / 2f, 0
         );
     }
 
     private static final void replaceIndustryListPanel(UIPanelAPI managementPanel,
-        List<?> managementChildren, UIPanelAPI anchor
+        List<UIComponentAPI> managementChildren, UIPanelAPI anchor
     ) {
         UIPanelAPI industryPanel = null;
         for (Object child : managementChildren) {
@@ -211,12 +205,11 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
         final int height = (int) industryPanel.getPosition().getHeight();
 
         final LtvIndustryListPanel replacement = new LtvIndustryListPanel(
-            managementPanel, width, height,
-            market, industryPanel
+            width, height, market, industryPanel
         );
 
-        managementPanel.addComponent(replacement.getPanel());
-        NativeUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomLeft, 25);
+        managementPanel.addComponent(replacement);
+        NativeUiUtils.anchorPanel(replacement, anchor, AnchorType.BottomLeft, 25);
 
         if (LtvIndustryListPanel.indOptCtor == null) {
             // Acquire the popup class from one of the widgets
@@ -233,12 +226,9 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
 
             // Now the popup class is a child of:
             final UIPanelAPI dialogParent = Attachments.getCampaignScreenPanel();
-            final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-                CustomPanel.getChildrenNonCopyMethod, dialogParent);
 
-            final UIPanelAPI indOps = children.stream()
+            final UIPanelAPI indOps = (UIPanelAPI) MethodFields.getChildrenNonCopy(dialogParent).stream()
                 .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
-                .map(child -> (UIPanelAPI) child)
                 .findFirst().orElse(null);
 
             LtvIndustryListPanel.indOptCtor = RolfLectionUtil.getConstructor(indOps.getClass(),
@@ -261,7 +251,7 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
     }
 
     private static final void replaceCommodityPanel(UIPanelAPI managementPanel,
-        List<?> managementChildren,UIPanelAPI anchor
+        List<UIComponentAPI> managementChildren,UIPanelAPI anchor
     ) {
         UIPanelAPI commodityPanel = null;
         for (Object child : managementChildren) {
@@ -275,7 +265,7 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
         final int height = (int) commodityPanel.getPosition().getHeight();
 
         final LtvCommodityPanel replacement = new LtvCommodityPanel(
-            managementPanel, LtvCommodityPanel.STANDARD_WIDTH, height, market
+            LtvCommodityPanel.STANDARD_WIDTH, height, market
         );
 
         final ClickHandler<CommodityRowPanel> listener = (source, isLeftClick) -> {
@@ -299,8 +289,8 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
         // Got the Y offset by looking at the getY() difference of replacement and
         // commodityPanel
         // Might automate the getY() difference later
-        managementPanel.addComponent(replacement.getPanel());
-        NativeUiUtils.anchorPanel(replacement.getPanel(), anchor, AnchorType.BottomRight, -43);
+        managementPanel.addComponent(replacement);
+        NativeUiUtils.anchorPanel(replacement, anchor, AnchorType.BottomRight, -43);
 
         managementPanel.removeComponent(commodityPanel);
 
@@ -327,9 +317,8 @@ public class MarketUIReplacer implements CoreTabUIBuilder {
     }
 
     private static final void replaceAccessLabelTooltip(UIPanelAPI statsPanel) {
-        final List<?> statsChilren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, statsPanel);
-        final List<ButtonAPI> buttons = statsChilren.stream()
+        final List<ButtonAPI> buttons = MethodFields
+            .getChildrenNonCopy(statsPanel).stream()
             .filter(c -> c instanceof ButtonAPI)
             .map(child -> (ButtonAPI) child)
             .toList();

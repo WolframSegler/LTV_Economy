@@ -13,7 +13,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.util.TooltipUtils;
 
-public class UIInjectorListener implements CoreUITabListener, CommodityTooltipModifier {
+public final class UIInjectorListener implements CoreUITabListener, CommodityTooltipModifier {
     
     @Override
     public void reportAboutToOpenCoreTab(CoreUITabId tabID, Object param) {

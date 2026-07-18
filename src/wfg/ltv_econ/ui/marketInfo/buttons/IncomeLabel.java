@@ -12,7 +12,6 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
@@ -36,13 +35,13 @@ import static wfg.ltv_econ.constant.strings.Income.*;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements HasTooltip, UIBuildableAPI {
+public final class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements HasTooltip, UIBuildableAPI {
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
     private final MarketAPI market;
 
-    public IncomeLabel(UIPanelAPI parent, int width, int height, MarketAPI market) {
-        super(parent, width, height, () -> new IncomeBreakdownDialog(market));
+    public IncomeLabel(int width, int height, MarketAPI market) {
+        super(width, height, () -> new IncomeBreakdownDialog(market));
 
         this.market = market;
 
@@ -54,7 +53,7 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
         tooltip.unexpandTxt = str("uiHide");
         tooltip.width = TP_WIDTH;
         tooltip.positioner = (tp, expanded) -> {
-            NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.LeftTop, 50);
+            NativeUiUtils.anchorPanel(tp, this, AnchorType.LeftTop, 50);
         };
         tooltip.builder = (tp, expanded) -> {
             final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(market);
@@ -259,7 +258,7 @@ public class IncomeLabel extends DockClickable<IncomeBreakdownDialog> implements
         final String valueTxt = NumFormat.formatCredit(value);
         final Color valueColor = value < 0l ? negative : market.getFaction().getBrightUIColor();
 
-        ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt,
+        ComponentFactory.addCaptionValueBlock(this, txt, valueTxt,
             market.getFaction().getBaseUIColor(), valueColor
         );
     }

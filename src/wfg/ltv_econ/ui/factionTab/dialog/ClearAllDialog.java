@@ -7,7 +7,7 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 
 import wfg.ltv_econ.serializable.StaticData;
 
-public class ClearAllDialog extends DialogPanel {
+public final class ClearAllDialog extends DialogPanel {
     private final UIBuildableAPI content;
 
     public ClearAllDialog(UIBuildableAPI content) {

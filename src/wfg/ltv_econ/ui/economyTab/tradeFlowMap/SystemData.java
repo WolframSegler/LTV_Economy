@@ -7,7 +7,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 import wfg.native_ui.util.ArrayMap;
 
-public class SystemData {
+public final class SystemData {
     private final ArrayMap<Color, Double> colorWeights = new ArrayMap<>(2);
     private float totalColorWeight = 0f;
 

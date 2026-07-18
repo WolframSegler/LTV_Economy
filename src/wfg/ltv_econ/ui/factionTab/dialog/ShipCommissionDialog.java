@@ -21,7 +21,6 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.PlannedOrder;
@@ -29,6 +28,7 @@ import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.PlannedOrdersPanel;
 import wfg.native_ui.internal.ui.Side;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
@@ -41,13 +41,12 @@ import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.IconValuePair;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 
-public class ShipCommissionDialog extends DockPanel {
+public final class ShipCommissionDialog extends DockPanel {
     private static final int ROW_H = 36;
 
     private final PlannedOrdersPanel content;
@@ -66,17 +65,17 @@ public class ShipCommissionDialog extends DockPanel {
 
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
 
-        final int width = (int) contentContainer.getPosition().getWidth();
+        final int width = (int) contentContainer.getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
 
         float yCoord = 0f;
         for (String hullId : faction.getKnownShips()) {
-            final HullRow row = new HullRow(container, width, ROW_H, settings.getHullSpec(hullId));
-            container.addCustom(row.getPanel(), 0f).getPosition().inTL(0f, yCoord);
+            final HullRow row = new HullRow(width, ROW_H, settings.getHullSpec(hullId));
+            container.addCustom(row, 0f).getPosition().inTL(0f, yCoord);
             yCoord += ROW_H + pad;
         }
         container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, contentContainer.getPosition().getHeight() - hpad*4, true, contentContainer).inTL(0f, hpad);
+        ComponentFactory.addTooltip(container, contentContainer.getHeight() - hpad*4, true, contentContainer).inTL(0f, hpad);
     }
 
     private final void addOrder(String hullId, int count) {
@@ -89,7 +88,7 @@ public class ShipCommissionDialog extends DockPanel {
         content.grid.scrollToBottom();
     }
 
-    private class HullRow extends CustomPanel implements UIBuildableAPI,
+    private class HullRow extends UIContainer implements UIBuildableAPI,
         HasInteraction, HasHoverGlow, HasTooltip, HasAudioFeedback
     {
         public final InteractionComp<HullRow> interaction = comp().get(NativeComponents.INTERACTION);
@@ -99,8 +98,8 @@ public class ShipCommissionDialog extends DockPanel {
         private final ShipHullSpecAPI spec;
         private final PlannedOrder order;
 
-        public HullRow(UIPanelAPI parent, int width, int height, ShipHullSpecAPI spec) {
-            super(parent, width, height);
+        public HullRow(int width, int height, ShipHullSpecAPI spec) {
+            super(width, height);
             this.spec = spec;
             this.order =  ShipProductionManager.getProductionCost(spec);
 
@@ -150,7 +149,7 @@ public class ShipCommissionDialog extends DockPanel {
             final float scale = Math.min(iconSize / sprite.getWidth(), iconSize / sprite.getHeight());
             final int scaledW = (int) (sprite.getWidth() * scale);
             final int scaledH = (int) (sprite.getHeight() * scale);
-            final Base shipIcon = new Base(m_panel, scaledW, scaledH, sprite, null, null);
+            final SpriteElement shipIcon = new SpriteElement(scaledW, scaledH, sprite, null, null);
             add(shipIcon).inLMid(pad + (iconSize - scaledW) / 2);
 
             final String name = spec.getHullNameWithDashClass();
@@ -158,8 +157,8 @@ public class ShipCommissionDialog extends DockPanel {
             nameLabel.setColor(base);
             add(nameLabel).inLMid(iconSize + opad);
 
-            final IconValuePair costPair = new IconValuePair(m_panel, pairW, iconSize, WAGES, order.credits, false, null);
-            final IconValuePair timePair = new IconValuePair(m_panel, pairW, iconSize, STOPWATCH, order.days, false, null);
+            final IconValuePair costPair = new IconValuePair(pairW, iconSize, WAGES, order.credits, false, null);
+            final IconValuePair timePair = new IconValuePair(pairW, iconSize, STOPWATCH, order.days, false, null);
             add(costPair).inLMid(iconSize + opad + nameW);
             add(timePair).inLMid(iconSize + opad + nameW + pairW);
 
@@ -167,9 +166,9 @@ public class ShipCommissionDialog extends DockPanel {
         }
 
         @Override
-        public void processInput(List<InputEventAPI> events) {
-            super.processInput(events);
-            if (!NativeUiUtils.containsMouse(pos)) return;
+        public void processInputImpl(List<InputEventAPI> events) {
+            super.processInputImpl(events);
+            if (!NativeUiUtils.containsMouse(mPos)) return;
             
             for (InputEventAPI e : events) {
                 if (!e.isConsumed() && e.isKeyboardEvent() && e.getEventValue() == Keyboard.KEY_F2) {

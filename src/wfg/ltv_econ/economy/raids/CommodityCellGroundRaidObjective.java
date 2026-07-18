@@ -29,15 +29,14 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
 import wfg.ltv_econ.ui.reusable.StockpileInfoBar;
+import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.util.Arithmetic;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.NumFormat;
 
 public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePluginImpl {
@@ -165,12 +164,9 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		return QUANTITY_SORT_TIER_0 + getQuantity(1);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected static final void addInfoBar(final UIPanelAPI panel, final CommodityCell cell) {
 		if (panel == null) return;
-		final List<UIComponentAPI> children = (List<UIComponentAPI>)
-			RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, panel
-		);
+		final List<UIComponentAPI> children = MethodFields.getChildrenNonCopy(panel);
 		for (UIComponentAPI child : children) {
 			if (child instanceof CustomPanelAPI custom) {
 				if (custom.getPlugin() instanceof StockpileInfoBar) return;
@@ -178,8 +174,8 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		}
 
 		final int h = 24;
-		final StockpileInfoBar infoBar = new StockpileInfoBar(panel, 130, h, true, cell);
-        panel.addComponent(infoBar.getPanel()).inBL(opad + pad, -h/2);
+		final StockpileInfoBar infoBar = new StockpileInfoBar(130, h, true, cell);
+        panel.addComponent(infoBar).inBL(opad + pad, -h/2);
 	}
 
     protected static final Industry computeCommoditySource(CommodityCell cell) {

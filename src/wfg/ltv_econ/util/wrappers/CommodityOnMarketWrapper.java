@@ -13,7 +13,7 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 
-public class CommodityOnMarketWrapper extends CommodityOnMarket {
+public final class CommodityOnMarketWrapper extends CommodityOnMarket {
 
     final CommodityOnMarket org;
 

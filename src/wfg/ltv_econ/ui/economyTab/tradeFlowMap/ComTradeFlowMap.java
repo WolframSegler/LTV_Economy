@@ -25,7 +25,6 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -36,20 +35,20 @@ import wfg.ltv_econ.ui.fleet.TradeFilters;
 import wfg.ltv_econ.ui.fleet.TradeMissionWidget;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.TooltipComp.TooltipBuilder;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.system.NativeSystems;
 import wfg.native_ui.ui.system.TooltipSystem;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.RenderUtils;
 
-public class ComTradeFlowMap extends CustomPanel implements
+public final class ComTradeFlowMap extends UIContainer implements
     HasOutline, UIBuildableAPI, HasTooltip
 {
     private static final Random random = new Random();
@@ -108,8 +107,8 @@ public class ComTradeFlowMap extends CustomPanel implements
     private float time = 0f;
     private int hoverRegistered = 0;
 
-    public ComTradeFlowMap(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height);
+    public ComTradeFlowMap(int width, int height) {
+        super(width, height);
 
         tooltip.bgAlpha = 0.85f;
 
@@ -238,13 +237,11 @@ public class ComTradeFlowMap extends CustomPanel implements
     }
 
     @Override
-    public void renderBelow(float alpha) {
-        super.renderBelow(alpha);
-
-        final float x = pos.getX();
-        final float y = pos.getY();
-        final float w = pos.getWidth();
-        final float h = pos.getHeight();
+    public void renderBelowImpl(float alpha) {
+        final float x = getX();
+        final float y = getY();
+        final float w = getWidth();
+        final float h = getHeight();
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor((int) (x * uiScale), (int) (y * uiScale), (int) (w * uiScale), (int) (h * uiScale));
@@ -253,9 +250,7 @@ public class ComTradeFlowMap extends CustomPanel implements
     }
 
     @Override
-    public void render(float alpha) {
-        super.render(alpha);
-
+    public void renderAboveImpl(float alpha) {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -277,8 +272,9 @@ public class ComTradeFlowMap extends CustomPanel implements
     }
 
     @Override
-    public void processInput(List<InputEventAPI> events) {
-        super.processInput(events);
+    public void processInputImpl(List<InputEventAPI> events) {
+        super.processInputImpl(events);
+
         for (InputEventAPI event : events) {
             if (event.isMouseScrollEvent()) {
                 // Zoom
@@ -289,11 +285,11 @@ public class ComTradeFlowMap extends CustomPanel implements
                 zoom = Math.max(ZOOM_MIN, Math.min(zoom, ZOOM_MAX));
 
                 final float r = zoom / oldZoom;
-                final float localMouseX = event.getX() - pos.getX();
-                final float localMouseY = event.getY() - pos.getY();
+                final float localMouseX = event.getX() - getX();
+                final float localMouseY = event.getY() - getY();
 
-                final float centerX = pos.getWidth() * 0.5f;
-                final float centerY = pos.getHeight() * 0.5f;
+                final float centerX = getWidth() * 0.5f;
+                final float centerY = getHeight() * 0.5f;
 
                 panOffsetX = (1f - r) * (localMouseX - centerX) + r * panOffsetX;
                 panOffsetY = (1f - r) * (localMouseY - centerY) + r * panOffsetY;
@@ -318,14 +314,15 @@ public class ComTradeFlowMap extends CustomPanel implements
     }
 
     @Override
-    public void advance(float amount) {
-        super.advance(amount);
+    public void advanceImpl(float amount) {
+        super.advanceImpl(amount);
+
         time += amount;
     }
 
     private final void renderBg(float alpha) {
-        final float panelW = pos.getWidth();
-        final float panelH = pos.getHeight();
+        final float panelW = getWidth();
+        final float panelH = getHeight();
         final float imgW = bgImg.getWidth();
         final float imgH = bgImg.getHeight();
 
@@ -334,8 +331,8 @@ public class ComTradeFlowMap extends CustomPanel implements
         final float drawW = imgW * scale;
         final float drawH = imgH * scale;
 
-        final float x = (panelW - drawW) / 2f + pos.getX();
-        final float y = (panelH - drawH) / 2f + pos.getY();
+        final float x = (panelW - drawW) / 2f + getX();
+        final float y = (panelH - drawH) / 2f + getY();
 
         bgImg.setSize(drawW, drawH);
         bgImg.setAlphaMult(alpha * 0.2f);
@@ -349,10 +346,10 @@ public class ComTradeFlowMap extends CustomPanel implements
         final Color minorColor = dark;
         final Color majorColor = NativeUiUtils.adjustBrightness(dark, 1.2f);
 
-        final float panelX = pos.getX();
-        final float panelY = pos.getY();
-        final float panelW = pos.getWidth();
-        final float panelH = pos.getHeight();
+        final float panelX = getX();
+        final float panelY = getY();
+        final float panelW = getWidth();
+        final float panelH = getHeight();
 
         final Vector2f worldBL = reverseProject(0f, 0f);
         final Vector2f worldTR = reverseProject(panelW, panelH);
@@ -437,10 +434,10 @@ public class ComTradeFlowMap extends CustomPanel implements
             final Vector2f bLocal = project(data.destination.getLocation());
 
             // convert to SCREEN coords by adding panel origin
-            final float srcX = pos.getX() + aLocal.x;
-            final float srcY = pos.getY() + aLocal.y;
-            final float destX = pos.getX() + bLocal.x;
-            final float destY = pos.getY() + bLocal.y;
+            final float srcX = getX() + aLocal.x;
+            final float srcY = getY() + aLocal.y;
+            final float destX = getX() + bLocal.x;
+            final float destY = getY() + bLocal.y;
 
             final float diffX = destX - srcX;
             final float diffY = destY - srcY;
@@ -513,13 +510,13 @@ public class ComTradeFlowMap extends CustomPanel implements
             final Vector2f sysPos = project(data.system.getLocation());
             final float nodeSize = data.nodeSize;
 
-            final float x = pos.getX() + sysPos.x;
-            final float y = pos.getY() + sysPos.y;
+            final float x = getX() + sysPos.x;
+            final float y = getY() + sysPos.y;
 
-            if (x < pos.getX() - nodeSize * 2f ||
-                x > pos.getX() + pos.getWidth() + nodeSize * 2f ||
-                y < pos.getY() - nodeSize * 2f ||
-                y > pos.getY() + pos.getHeight() + nodeSize * 2f)
+            if (x < getX() - nodeSize * 2f ||
+                x > getX() + getWidth() + nodeSize * 2f ||
+                y < getY() - nodeSize * 2f ||
+                y > getY() + getHeight() + nodeSize * 2f)
             { continue; }
 
             final boolean isHovering = mx >= x - nodeSize/2 && mx <= x + nodeSize/2 &&
@@ -562,10 +559,10 @@ public class ComTradeFlowMap extends CustomPanel implements
             final Vector2f aLocal = project(m.src.getLocation());
             final Vector2f bLocal = project(m.dest.getLocation());
 
-            final float srcX = pos.getX() + aLocal.x;
-            final float srcY = pos.getY() + aLocal.y;
-            final float destX = pos.getX() + bLocal.x;
-            final float destY = pos.getY() + bLocal.y;
+            final float srcX = getX() + aLocal.x;
+            final float srcY = getY() + aLocal.y;
+            final float destX = getX() + bLocal.x;
+            final float destY = getY() + bLocal.y;
 
             final float diffX = destX - srcX;
             final float diffY = destY - srcY;
@@ -617,13 +614,13 @@ public class ComTradeFlowMap extends CustomPanel implements
     }
 
     private final void renderIcon(float alpha) {
-        comSprite.render(pos.getX() + opad, pos.getY() + pos.getHeight() - opad - COM_ICON_SIZE);
+        comSprite.render(getX() + opad, getY() + getHeight() - opad - COM_ICON_SIZE);
     }
 
     private final Vector2f project(Vector2f starCoord) {
         final float sectorW = BOUNDS_PAD + sectorMaxXCoord - sectorMinXCoord;
         final float sectorH = BOUNDS_PAD + sectorMaxYCoord - sectorMinYCoord;
-        final float panelSize = Math.min(pos.getWidth(), pos.getHeight());
+        final float panelSize = Math.min(getWidth(), getHeight());
 
         final float scale = panelSize / Math.max(sectorW, sectorH) * zoom;
 
@@ -633,8 +630,8 @@ public class ComTradeFlowMap extends CustomPanel implements
         final float normX = (starCoord.x - sectorCenterX) * scale;
         final float normY = (starCoord.y - sectorCenterY) * scale;
 
-        final float px = normX + pos.getWidth() / 2f + panOffsetX;
-        final float py = normY + pos.getHeight() / 2f + panOffsetY;
+        final float px = normX + getWidth() / 2f + panOffsetX;
+        final float py = normY + getHeight() / 2f + panOffsetY;
 
         return new Vector2f(px, py);
     }
@@ -642,15 +639,15 @@ public class ComTradeFlowMap extends CustomPanel implements
     private final Vector2f reverseProject(float panelLocalX, float panelLocalY) {
         final float sectorW = BOUNDS_PAD + sectorMaxXCoord - sectorMinXCoord;
         final float sectorH = BOUNDS_PAD + sectorMaxYCoord - sectorMinYCoord;
-        final float panelSize = Math.min(pos.getWidth(), pos.getHeight());
+        final float panelSize = Math.min(getWidth(), getHeight());
 
         final float scale = panelSize / Math.max(sectorW, sectorH) * zoom;
 
         final float sectorCenterX = (sectorMinXCoord + sectorMaxXCoord) / 2f;
         final float sectorCenterY = (sectorMinYCoord + sectorMaxYCoord) / 2f;
 
-        final float normX = panelLocalX - pos.getWidth() / 2f - panOffsetX;
-        final float normY = panelLocalY - pos.getHeight() / 2f - panOffsetY;
+        final float normX = panelLocalX - getWidth() / 2f - panOffsetX;
+        final float normY = panelLocalY - getHeight() / 2f - panOffsetY;
 
         final float worldOffsetX = normX / scale;
         final float worldOffsetY = normY / scale;

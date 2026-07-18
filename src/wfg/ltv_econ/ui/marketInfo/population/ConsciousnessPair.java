@@ -9,7 +9,6 @@ import java.awt.Color;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.native_ui.ui.visual.IconValuePairTp;
@@ -19,8 +18,8 @@ import wfg.native_ui.util.NativeUiUtils.AnchorType;
 public class ConsciousnessPair extends IconValuePairTp {
     private static final SpriteAPI SOLIDARITY_ICON = settings.getSprite("ui", "solidarity_colored");
 
-    public ConsciousnessPair(UIPanelAPI parent, int w, int h, MarketPopulationData data, Color color, String font) {
-        super(parent, w, h, SOLIDARITY_ICON, data.getClassConsciousness(), false, color, font);
+    public ConsciousnessPair(int w, int h, MarketPopulationData data, Color color, String font) {
+        super(w, h, SOLIDARITY_ICON, data.getClassConsciousness(), false, color, font);
         final LabelAPI lbl = label();
         lbl.setHighlightOnMouseover(true);
         lbl.setAlignment(Alignment.MID);
@@ -37,7 +36,7 @@ public class ConsciousnessPair extends IconValuePairTp {
             );
         };
         tooltip.positioner = (tp, exp) -> {
-            NativeUiUtils.anchorPanelWithBounds(tp, getPanel(), AnchorType.RightTop, 0);
+            NativeUiUtils.anchorPanelWithBounds(tp, this, AnchorType.RightTop, 0);
         };
     }
 }

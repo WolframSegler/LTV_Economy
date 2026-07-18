@@ -7,19 +7,18 @@ import static wfg.native_ui.util.UIConstants.*;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.factionTab.dialog.FactionSelectionDialog;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.ui.panel.CustomPanel;
 
-public class ShipInventoryPanel extends CustomPanel implements UIBuildableAPI {
+public final class ShipInventoryPanel extends UIContainer implements UIBuildableAPI {
     
-    public ShipInventoryPanel(UIPanelAPI parent, int w, int h) {
-        super(parent, w, h);
+    public ShipInventoryPanel(int w, int h) {
+        super(w, h);
 
         buildUI();
     }
@@ -35,23 +34,23 @@ public class ShipInventoryPanel extends CustomPanel implements UIBuildableAPI {
             add(lbl).inMid();
             return;
         }
-        final int panelW = (int) pos.getWidth();
-        final int panelH = (int) pos.getHeight();
+        final int panelW = (int) getWidth();
+        final int panelH = (int) getHeight();
 
-        final ShipInventoryNavbar navbar = new ShipInventoryNavbar(m_panel, panelW, 130);
+        final ShipInventoryNavbar navbar = new ShipInventoryNavbar(panelW, 130);
         add(navbar).inTL(0f, 0f);
 
-        final FactionShipGrid grid = new FactionShipGrid(m_panel, panelW, panelH - 160, navbar);
+        final FactionShipGrid grid = new FactionShipGrid(panelW, panelH - 160, navbar);
         add(grid).inTL(0f, 170f);
 
-        final ShipFiltersPanel filters = new ShipFiltersPanel(m_panel, panelW, grid);
+        final ShipFiltersPanel filters = new ShipFiltersPanel(panelW, grid);
         add(filters).inTL(0f, 140f);
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
+                120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
             );
-            factionSelection.cutStyle = CutStyle.ALL;
+            factionSelection.setCutStyle(CutStyle.ALL);
             add(factionSelection).inTMid(pad);
         }
     }

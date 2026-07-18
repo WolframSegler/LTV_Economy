@@ -16,13 +16,11 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.fleet.PlannedOrder;
 import wfg.ltv_econ.serializable.StaticData;
-import wfg.ltv_econ.ui.factionTab.PlannedOrdersPanel;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.util.BorderRenderer;
@@ -34,14 +32,14 @@ import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.functional.UIClickable;
-import wfg.native_ui.ui.panel.BasePanel;
+import wfg.native_ui.ui.container.BaseContainer;
 import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.IconValuePair;
-import wfg.native_ui.ui.visual.SpritePanelWithTp;
+import wfg.native_ui.ui.visual.InteractiveSprite;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 
-public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implements
+public final class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implements
     WidgetAPI<PlannedOrderWidget>, HasTooltip, HasHoverGlow
 {
     public static final int WIDTH = 320;
@@ -58,13 +56,14 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
     public WidgetSelectionState selectionState = WidgetSelectionState.NONE;
     public int index = 0;
 
-    public PlannedOrderWidget(PlannedOrdersPanel parent, PlannedOrder order, int index) {
-        super(parent.getPanel(), WIDTH, HEIGHT, null);
+    public PlannedOrderWidget(PlannedOrder order, int index) {
+        super(WIDTH, HEIGHT, null);
         this.order = order;
         this.index = index;
 
         glow.type = GlowType.UNDERLAY;
-        glow.overlayBrightness = 0.6f;
+        glow.glowBrightness = 0.6f;
+        glow.flashBrightness = 0.9f;
         glow.color = UIColors.IN_FACTION;
 
         border.centerColor = UIColors.WIDGET_BG;
@@ -118,13 +117,14 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
         final int scaledW = (int) (spriteW * scale);
         final int scaledH = (int) (spriteH * scale);
 
-        final SpritePanelWithTp shipSprite = new SpritePanelWithTp(m_panel, scaledW, scaledH, sprite, null, null);
+        final InteractiveSprite shipSprite = new InteractiveSprite(scaledW, scaledH, sprite, null, null);
         shipSprite.tooltip.enabled = false;
         shipSprite.audio.enabled = false;
         shipSprite.glow.isFaderOwner = false;
         shipSprite.glow.fader = glow.fader;
         shipSprite.glow.type = GlowType.ADDITIVE;
-        shipSprite.glow.additiveBrightness = 0.8f;
+        shipSprite.glow.glowBrightness = 0.8f;
+        shipSprite.glow.flashBrightness = 1.2f;
         add(shipSprite).inLMid(hpad + (maxSize - scaledW) / 2);
 
         final String shipStr = spec.getHullNameWithDashClass();
@@ -145,7 +145,7 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
         int currW = HEIGHT + opad;
         for (var e : order.commodities.singleEntrySet()) {
             final CommoditySpecAPI spec = settings.getCommoditySpec(e.getKey());
-            final IconValuePair pair = new IconValuePair(m_panel, pairW, iconS, spec.getIconName(), e.getValue(),
+            final IconValuePair pair = new IconValuePair(pairW, iconS, spec.getIconName(), e.getValue(),
                 true, null
             );
 
@@ -158,21 +158,19 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
             }
         }
     
-        addSelectionUI(m_panel, selectionState);
+        addSelectionUI(this, selectionState);
     }
 
     @Override
-    public void renderBelow(float alpha) {
-        super.renderBelow(alpha);
-
-        border.render(pos.getX(), pos.getY(), alpha);
+    public void renderBelowImpl(float alpha) {
+        border.render(getX(), getY(), alpha);
     }
 
     public static final void addSelectionUI(UIPanelAPI container, WidgetSelectionState state) {
         if (state != WidgetSelectionState.NONE) {
             final PositionAPI cPos = container.getPosition();
-            final BasePanel bgPanel = new BasePanel(container, (int) cPos.getWidth(), (int) cPos.getHeight());
-            container.addComponent(bgPanel.getPanel());
+            final BaseContainer bgPanel = new BaseContainer(cPos.getWidth(), cPos.getHeight());
+            container.addComponent(bgPanel);
             bgPanel.bg.alpha = 0.8f;
             bgPanel.bg.color = AMBER_BG;
             bgPanel.bg.offset.setOffset(4, 4, -8, -8);
@@ -198,9 +196,5 @@ public class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implemen
 
     public InteractionComp<PlannedOrderWidget> getInteraction() {
         return interaction;
-    }
-
-    public UIComponentAPI getElement() {
-        return m_panel;
     }
 }

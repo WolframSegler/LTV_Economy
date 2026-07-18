@@ -12,7 +12,6 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
@@ -22,25 +21,25 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.ui.reusable.ComIconPanel;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.component.TooltipComp.TooltipBuilder;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.PieChart;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.cellAlg;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.visual.PieChart.PieSlice;
-import wfg.native_ui.ui.visual.TextPanel;
+import wfg.native_ui.ui.visual.TextWrapper;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
-public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
+public final class GlobalCommodityFlow extends UIContainer implements UIBuildableAPI {
     private static final float PIE_CHART_THRESHOLD = 0.001f;
 
     public static final int ICON_SIZE = 120;
@@ -54,8 +53,8 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
     public static final int LEFT_WALL = 320;
     public static final int Right_WALL = 720;
 
-    public GlobalCommodityFlow(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height);
+    public GlobalCommodityFlow(int width, int height) {
+        super(width, height);
 
         buildUI();
     }
@@ -71,20 +70,20 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         clearChildren();
 
         final ComIconPanel comIcon = new ComIconPanel(
-            m_panel, ICON_SIZE, ICON_SIZE, null, null, com,
+            ICON_SIZE, ICON_SIZE, null, null, com,
             sector.getPlayerFaction().getFactionSpec()
         );
         add(comIcon).inTL((LABEL_W*2 - ICON_SIZE) / 2f, 0);
 
         { // Total global production
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalProduction(comID);
                 final String txt = str("uiTitleGlobalProd");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, LABEL_W);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -99,14 +98,14 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Total global demand
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalDemand(comID);
                 final String txt = str("uiTitleGlobalDemand");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, LABEL_W);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -121,14 +120,14 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Total global surplus
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalSurplus(comID);
                 final String txt = str("uiTitleGlobalSurplus");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, LABEL_W);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -143,14 +142,14 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Total global deficit
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalShortfall(comID);
                 final String txt = str("uiTitleGlobalShortfall");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, LABEL_W);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -164,14 +163,14 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
 
         final int largeLabelShift = 30;
         { // Total trade volume (units)
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W + largeLabelShift, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W + largeLabelShift, LABEL_H) {
 
             public void buildUI() {
                 final float value = dom.getTradeVolumeHistory();
                 final String txt = str("uiTitleSectorTradeVolume");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, LABEL_W + largeLabelShift);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -186,14 +185,14 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Total trade value (credits)
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W + largeLabelShift, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W + largeLabelShift, LABEL_H) {
 
             public void buildUI() {
                 final long value = dom.getCreditActivityHistory();
                 final String txt = str("uiTitleSectorTradeValue");
                 final String valueTxt = value < 1 ? "---" : NumFormat.formatCredit(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W + largeLabelShift);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, LABEL_W + largeLabelShift);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -208,14 +207,14 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Average sector price
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
                 final int value = (int) engine.info.getGlobalAveragePrice(comID, 0);
                 final String txt = str("uiTitleGlobalAvgPrice");
                 final String valueTxt = com.isExotic() ? "Localized" : NumFormat.formatCredit(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, LABEL_W);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -228,14 +227,14 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Global stockpiles
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
                 final long value = engine.info.getGlobalStockpiles(comID);
                 final String valueTxt = NumFormat.engNotate(value);
                 final String txt = str("uiTitleGlobalStockpiles");
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, base, LABEL_W);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -248,7 +247,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Worker allocation (total workers producing it)
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
                 long value = 0;
@@ -258,7 +257,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
                 final String txt = str("uiTitleGlobalWorkersAllocated");
                 final String valueTxt = value < 0l ? "---" : NumFormat.engNotate(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, base, LABEL_W);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -271,14 +270,14 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Informal production
-        final TextPanel textPanel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
                 final float value = dom.getInformalNode().prod;
                 final String txt = str("uiTitleInformalProd");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
-                ComponentFactory.addCaptionValueBlock(m_panel, txt, valueTxt, base, LABEL_W);
+                ComponentFactory.addCaptionValueBlock(this, txt, valueTxt, base, LABEL_W);
 
                 tooltip.width = 460f;
                 tooltip.builder = (tp, exp) -> {
@@ -296,7 +295,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             });
         };
         { // Top 5 producers
-        final SortableTable table = new SortableTable(m_panel, TABLE_W, TABLE_H);
+        final SortableTable table = new SortableTable(TABLE_W, TABLE_H);
 
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
@@ -309,7 +308,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         for (CommodityCell cell : producers) {
 
             final String iconPath = cell.market.getFaction().getCrest();
-            final Base iconPanel = new Base(table.getPanel(), 24, 24, iconPath, null, null);
+            final SpriteElement iconPanel = new SpriteElement(24, 24, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
             final float value = cell.getProduction(true);
 
@@ -343,7 +342,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         }
 
         { // Top 5 consumers
-        final SortableTable table = new SortableTable(getParent(), TABLE_W, TABLE_H);
+        final SortableTable table = new SortableTable(TABLE_W, TABLE_H);
 
         table.addHeaders(
             "", 40, null, true, false, 1, // Icon header
@@ -356,7 +355,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
         for (CommodityCell cell : consumers) {
 
             final String iconPath = cell.market.getFaction().getCrest();
-            final Base iconPanel = new Base(table.getPanel(), 24, 24, iconPath, null, null);
+            final SpriteElement iconPanel = new SpriteElement(24, 24, iconPath, null, null);
             final Color textColor = cell.market.getFaction().getBaseUIColor();
             final float value = cell.getConsumption(true);
 
@@ -409,7 +408,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             }
         }
 
-        final PieChart chart = new PieChart(m_panel, PIECHART_W, PIECHART_H, data);
+        final PieChart chart = new PieChart(PIECHART_W, PIECHART_H, data);
         add(chart).inBL(360, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
@@ -460,7 +459,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             }
         }
 
-        final PieChart chart = new PieChart(m_panel, PIECHART_W, PIECHART_H, data);
+        final PieChart chart = new PieChart(PIECHART_W, PIECHART_H, data);
         add(chart).inBL(580, pad);
 
         chart.tooltip.builder = (tp, exp) -> {
@@ -517,7 +516,7 @@ public class GlobalCommodityFlow extends CustomPanel implements UIBuildableAPI {
             informalTradeShare
         ));
 
-        final PieChart chart = new PieChart(m_panel, PIECHART_W, PIECHART_H, data);
+        final PieChart chart = new PieChart(PIECHART_W, PIECHART_H, data);
         add(chart).inBL(800, pad);
 
         chart.tooltip.builder = (tp, exp) -> {

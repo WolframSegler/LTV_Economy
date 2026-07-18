@@ -11,13 +11,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import com.fs.starfarer.api.EveryFrameScript;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.native_ui.ui.Attachments;
-import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.MethodFields;
 
-public class UiHierarchyTree implements EveryFrameScript {
+public final class UiHierarchyTree implements EveryFrameScript {
     private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
     private final DefaultTreeModel treeModel = new DefaultTreeModel(root);
     private final JTree tree = new JTree(treeModel);
@@ -50,9 +50,7 @@ public class UiHierarchyTree implements EveryFrameScript {
 
         final UIPanelAPI masterTab = Attachments.getCurrentTab();
         if (masterTab == null) return;
-        final List<?> listChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, masterTab);
-        if (listChildren == null) return;
+        final List<UIComponentAPI> listChildren = MethodFields.getChildrenNonCopy(masterTab);
 
         root.setUserObject("[ROOT] - " + masterTab.getClass().getName());
 
@@ -71,13 +69,10 @@ public class UiHierarchyTree implements EveryFrameScript {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(className);
 
         // Recursively add children
-        final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, panel);
-        if (children != null) {
-            for (Object child : children) {
-                if (child instanceof UIPanelAPI) {
-                    node.add(traverseUI((UIPanelAPI) child));
-                }
+        final List<UIComponentAPI> children = MethodFields.getChildrenNonCopy(panel);
+        for (Object child : children) {
+            if (child instanceof UIPanelAPI) {
+                node.add(traverseUI((UIPanelAPI) child));
             }
         }
 

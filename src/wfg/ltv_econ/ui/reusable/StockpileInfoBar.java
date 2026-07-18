@@ -7,8 +7,8 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 
 public class StockpileInfoBar extends GenericInfoBar {
 
-    public StockpileInfoBar(UIPanelAPI parent, int width, int height, boolean hasOutline, CommodityCell cell) {
-        super(parent, width, height, hasOutline);
+    public StockpileInfoBar(int width, int height, boolean hasOutline, CommodityCell cell) {
+        super(width, height, hasOutline);
 
         final double footprint = cell.getStoredEconomicFootprint();
 

@@ -11,7 +11,7 @@ import wfg.ltv_econ.serializable.StaticData;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.dialog.DialogPanel;
 
-public class DiscardAllDialog extends DialogPanel {
+public final class DiscardAllDialog extends DialogPanel {
     private final UIBuildableAPI content;
 
     public DiscardAllDialog(UIBuildableAPI content) {

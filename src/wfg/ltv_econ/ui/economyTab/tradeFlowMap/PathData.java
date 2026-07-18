@@ -7,7 +7,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 
 import wfg.native_ui.util.ArrayMap;
 
-public class PathData {
+public final class PathData {
     private final ArrayMap<Color, Double> colorWeights = new ArrayMap<>(2);
     private double totalColorWeight = 0f;
 

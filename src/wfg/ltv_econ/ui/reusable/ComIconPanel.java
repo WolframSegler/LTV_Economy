@@ -8,7 +8,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.loading.Description.Type;
 import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.native_ui.ui.component.HoverGlowComp;
@@ -17,13 +16,13 @@ import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.visual.SpritePanel;
+import wfg.native_ui.ui.visual.AbstractSpriteElement;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class ComIconPanel extends SpritePanel<ComIconPanel> implements
+public class ComIconPanel extends AbstractSpriteElement<ComIconPanel> implements
     HasTooltip, HasHoverGlow
 {
     public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -32,16 +31,16 @@ public class ComIconPanel extends SpritePanel<ComIconPanel> implements
     public FactionSpecAPI m_faction;
     protected CommoditySpecAPI m_com;
 
-    public ComIconPanel(UIPanelAPI parent, int width, int height, Color color,
+    public ComIconPanel(int width, int height, Color color,
         Color fillColor, CommoditySpecAPI spec,FactionSpecAPI faction
     ) {
-        super(parent, width, height, spec.getIconName(), color, fillColor);
+        super(width, height, spec.getIconName(), color, fillColor);
         m_faction = faction;
         m_com = spec;
 
         glow.type = GlowType.ADDITIVE;
         glow.color = Color.WHITE;
-        glow.additiveSprite = m_sprite;
+        glow.additiveSprite = mSprite;
         tooltip.width = 720f;
         tooltip.expandable = true;
         tooltip.codexID = CodexDataV2.getCommodityEntryId(spec.getId());

@@ -8,7 +8,6 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
@@ -17,6 +16,7 @@ import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.util.UIUtils;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
@@ -25,9 +25,8 @@ import wfg.native_ui.ui.component.TooltipComp.TooltipBuilder;
 import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.IconValuePair;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
@@ -38,7 +37,7 @@ import static wfg.ltv_econ.constant.Sprites.*;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
-public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, HasTooltip {
+public final class TradeMissionWidget extends UIContainer implements UIBuildableAPI, HasTooltip {
     private static final SpriteAPI SHIP_OUTLINE = settings.getSprite("icons", "ship_outline");
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -47,8 +46,8 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
     private final TradeMission mission;
     private final boolean isSrcMarket;
 
-    public TradeMissionWidget(UIPanelAPI parent, int w, int h, TradeMission mission, boolean isSrcMarket, DockPanel dock) {
-        super(parent, w, h);
+    public TradeMissionWidget(int w, int h, TradeMission mission, boolean isSrcMarket, DockPanel dock) {
+        super(w, h);
 
         border.setSize(w, h);
         border.centerColor = new Color(30, 45, 40, 220);
@@ -58,7 +57,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         tooltip.width = 500f;
         tooltip.positioner = (tp, exp) -> {
-            NativeUiUtils.anchorPanel(tp, dock.getPanel(), AnchorType.RightTop, pad*2);
+            NativeUiUtils.anchorPanel(tp, dock, AnchorType.RightTop, pad*2);
         };
         tooltip.builder = createMissionTp(mission, true);
         
@@ -67,7 +66,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
     @Override
     public void buildUI() {
-        final int panelW = (int) pos.getWidth();
+        final int panelW = (int) getWidth();
 
         final LabelAPI statusLabel = settings.createLabel(mission.status.getDisplayText(), Fonts.ORBITRON_12);
         statusLabel.setColor(mission.status.getDisplayColor());
@@ -75,12 +74,12 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         if (mission.smuggling) {
             final int statusW = (int) statusLabel.getPosition().getWidth();
-            final Base smugglingIcon = new Base(m_panel, 19, 9, SMUGGLING, null, null);
+            final SpriteElement smugglingIcon = new SpriteElement(19, 9, SMUGGLING, null, null);
             add(smugglingIcon).inTL(opad + pad + statusW, opad);
         }
 
         final String crestID = (isSrcMarket ? mission.dest : mission.src).getFaction().getCrest();
-        final Base factionIcon = new Base(m_panel, 20, 20, crestID, null, null);
+        final SpriteElement factionIcon = new SpriteElement(20, 20, crestID, null, null);
         add(factionIcon).inTR(opad, opad);
         if (mission.inFaction) {
             factionIcon.outline.type = OutlineType.VERY_THIN;
@@ -88,12 +87,12 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
             factionIcon.outline.enabled = true;
         }
 
-        final Base fleetIcon = new Base(m_panel, 10, 20, SHIP_OUTLINE, null, null);
+        final SpriteElement fleetIcon = new SpriteElement(10, 20, SHIP_OUTLINE, null, null);
         fleetIcon.texHaloColor = mission.usedFactionFleet ? UIColors.IN_FACTION : gray; 
         fleetIcon.drawTextureHalo = true;
         add(fleetIcon).inTR(opad*2 + 20, opad);
 
-        final Base fuelWarningIcon = new Base(m_panel, 20, 20, FUEL, null, null);
+        final SpriteElement fuelWarningIcon = new SpriteElement(20, 20, FUEL, null, null);
         fuelWarningIcon.texHaloColor = mission.usedFuelFromStockpiles ? UIColors.IN_FACTION : UIColors.FLOW_SHORTFALL;
         fuelWarningIcon.drawTextureHalo = true;
         add(fuelWarningIcon).inTR(opad*2 + hpad + 30, opad);
@@ -104,7 +103,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
 
         final LabelAPI srcLbl = settings.createLabel(mission.src.getName(), Fonts.DEFAULT_SMALL);
         final LabelAPI destLbl = settings.createLabel(mission.dest.getName(), Fonts.DEFAULT_SMALL);
-        final Base destArrow = new Base(m_panel, arrowS, arrowS, ARROW, null, null);
+        final SpriteElement destArrow = new SpriteElement(arrowS, arrowS, ARROW, null, null);
         srcLbl.setColor(mission.src.getFaction().getBaseUIColor());
         destLbl.setColor(mission.dest.getFaction().getBaseUIColor());
         final float srcLblW = srcLbl.getPosition().getWidth();
@@ -138,7 +137,7 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
             case SCHEDULED, DELIVERED, CANCELLED, LOST -> mission.status.getDisplayText();
             default -> UIUtils.getTimeWithDay(mission.durRemaining, true);
         };
-        final Slider timeSlider = new Slider(m_panel, sliderTxt, 0f, mission.totalDur, panelW - opad*2, 32);
+        final Slider timeSlider = new Slider(sliderTxt, 0f, mission.totalDur, panelW - opad*2, 32);
         timeSlider.showLabelOnly = true;
         timeSlider.setUserAdjustable(false);
         add(timeSlider).inTL(opad, GAP_TOP_3);
@@ -162,10 +161,10 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
         final int perEntryW = (panelW - opad*2) / 4;
         final int iconS = 28;
 
-        final IconValuePair cargoPair = new IconValuePair(m_panel, perEntryW, iconS, CRATES, mission.cargoAmount, true, null);
-        final IconValuePair fuelPair = new IconValuePair(m_panel, perEntryW, iconS, FUEL, mission.fuelAmount, true, null);
-        final IconValuePair crewPair = new IconValuePair(m_panel, perEntryW, iconS, BERTH, mission.crewAmount, true, null);
-        final IconValuePair combatPair = new IconValuePair(m_panel, perEntryW, iconS, COMBAT, mission.combatPowerTarget, true, null);
+        final IconValuePair cargoPair = new IconValuePair(perEntryW, iconS, CRATES, mission.cargoAmount, true, null);
+        final IconValuePair fuelPair = new IconValuePair(perEntryW, iconS, FUEL, mission.fuelAmount, true, null);
+        final IconValuePair crewPair = new IconValuePair(perEntryW, iconS, BERTH, mission.crewAmount, true, null);
+        final IconValuePair combatPair = new IconValuePair(perEntryW, iconS, COMBAT, mission.combatPowerTarget, true, null);
 
         cargoPair.icon().texColor = UIColors.CARGO_COLOR;
 
@@ -183,10 +182,8 @@ public class TradeMissionWidget extends CustomPanel implements UIBuildableAPI, H
     }
 
     @Override
-    public void renderBelow(float alpha) {
-        super.renderBelow(alpha);
-
-        border.render(pos.getX(), pos.getY(), alpha);
+    public void renderBelowImpl(float alpha) {
+        border.render(getX(), getY(), alpha);
     }
 
     public static final TooltipBuilder createMissionTp(TradeMission mission, boolean detailed) {

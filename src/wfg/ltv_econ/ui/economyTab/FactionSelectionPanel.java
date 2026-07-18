@@ -12,9 +12,9 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
@@ -32,10 +32,9 @@ import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.panel.CustomPanel;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
-public class FactionSelectionPanel extends CustomPanel implements
+public final class FactionSelectionPanel extends UIContainer implements
     HasOutline, HasBackground, UIBuildableAPI
 {
     public static final SpriteAPI restrictedPath = settings.getSprite("ui", "restricted");
@@ -44,8 +43,8 @@ public class FactionSelectionPanel extends CustomPanel implements
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
-    public FactionSelectionPanel(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height);
+    public FactionSelectionPanel(int width, int height) {
+        super(width, height);
 
         outline.type = OutlineType.TEX_THIN;
         outline.color = dark;
@@ -54,23 +53,21 @@ public class FactionSelectionPanel extends CustomPanel implements
     }
 
     public void buildUI() {
-        final int width = (int) pos.getWidth();
+        final int width = (int) getWidth();
         final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
 
         float yCoord = pad;
         for (FactionSpecAPI faction : visibleFactions) {
-            final RowPanel row = new RowPanel(
-                container, width - pad*2, ROW_H, faction
-            );
-            container.addCustom(row.getPanel(), 0).getPosition().inTL(pad, yCoord);
+            final RowPanel row = new RowPanel(width - pad*2, ROW_H, faction);
+            container.addCustom(row, 0f).getPosition().inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }
         container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, getPos().getHeight(), true, m_panel).inTL(0f, 0f);
+        ComponentFactory.addTooltip(container, getHeight(), true, this).inTL(0f, 0f);
     }
 
-    public class RowPanel extends CustomPanel implements UIBuildableAPI,
+    public class RowPanel extends UIContainer implements UIBuildableAPI,
         HasInteraction, HasHoverGlow, HasAudioFeedback, HasBackground, HasTooltip
     {
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -82,8 +79,8 @@ public class FactionSelectionPanel extends CustomPanel implements
         private final FactionSpecAPI faction;
         public boolean alreadyEmbargoed;
 
-        public RowPanel(UIPanelAPI parent, int width, int height, FactionSpecAPI faction) {
-            super(parent, width, height);
+        public RowPanel(int width, int height, FactionSpecAPI faction) {
+            super(width, height);
 
             this.faction = faction;
             alreadyEmbargoed = LtvEconSaveData.instance().playerFactionSettings
@@ -116,13 +113,13 @@ public class FactionSelectionPanel extends CustomPanel implements
 
             bg.enabled = alreadyEmbargoed;
 
-            final Base comIcon = new Base(m_panel, iconSize, iconSize, faction.getCrest(),
+            final SpriteElement comIcon = new SpriteElement(iconSize, iconSize, faction.getCrest(),
                 null, null
             );
             add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
 
             if (alreadyEmbargoed) {
-                final Base restrictedIcon = new Base(m_panel, iconSize, iconSize, restrictedPath,
+                final SpriteElement restrictedIcon = new SpriteElement(iconSize, iconSize, restrictedPath,
                     null, null
                 );
                 add(restrictedIcon).inBR(pad, (ROW_H - iconSize) / 2f);

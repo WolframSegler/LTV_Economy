@@ -1,38 +1,34 @@
 package wfg.ltv_econ.ui.reusable;
 
-import static wfg.native_ui.util.Globals.settings;
-
 import java.util.List;
 
-import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
-import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import rolflectionlib.util.RolfLectionUtil;
-import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.internal.ui.core.UIElement;
+import wfg.native_ui.ui.MethodFields;
+import wfg.native_ui.ui.core.UIElementAPI;
 
 /**
  * Gets injected to vanilla UI hierarchies. Its presence indicates that the UI has yet to be refreshed.
  * Used to prevent constant UI-replacement.
  */
-public class IdentityMarker extends BaseCustomUIPanelPlugin {
+public class IdentityMarker extends UIElement {
     private IdentityMarker() {}
-    private static final UIComponentAPI element = settings.createCustom(0f, 0f, new IdentityMarker());
+    private static final UIElementAPI element = new UIElement(0f, 0f);
 
     public static final void attach(UIPanelAPI parent) {
         parent.addComponent(element);
     }
 
     public static final boolean isMarker(Object obj) {
-        return obj instanceof CustomPanelAPI custom && custom.getPlugin() instanceof IdentityMarker;
+        return obj instanceof IdentityMarker;
     }
 
     public static final boolean isPresent(UIPanelAPI parent) {
-        final List<?> children = (List<?>) RolfLectionUtil.invokeMethodDirectly(
-            CustomPanel.getChildrenNonCopyMethod, parent);
+        final List<UIComponentAPI> children = MethodFields.getChildrenNonCopy(parent);
         
-        for (Object child : children) {
+        for (UIComponentAPI child : children) {
             if (isMarker(child)) return true;
         }
         return false;

@@ -33,6 +33,7 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
@@ -48,10 +49,9 @@ import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.widget.Slider;
-import wfg.native_ui.ui.visual.SpritePanel;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 
@@ -59,7 +59,7 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class IndustryWidget extends CustomPanel implements
+public final class IndustryWidget extends UIContainer implements
     HasBackground, HasHoverGlow, UIBuildableAPI
 {
     public final static int PANEL_WIDTH = 190;
@@ -86,13 +86,13 @@ public class IndustryWidget extends CustomPanel implements
     private final MarketAPI market;
     protected final List<LabelAPI> labels = new ArrayList<>();
 
-    public IndustryWidget(UIPanelAPI parent, MarketAPI market, Industry ind,
+    public IndustryWidget(MarketAPI market, Industry ind,
         LtvIndustryListPanel indPanel
-    ) { this(parent, market, ind, indPanel, -1); }
+    ) { this(market, ind, indPanel, -1); }
 
-    public IndustryWidget(UIPanelAPI parent, MarketAPI market, Industry ind,
+    public IndustryWidget(MarketAPI market, Industry ind,
         LtvIndustryListPanel indPanel, int queue
-    ) { super(parent, PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT);
+    ) { super(PANEL_WIDTH, IMAGE_HEIGHT + TITLE_HEIGHT);
 
         this.market = market;
         this.ind = ind;
@@ -135,7 +135,7 @@ public class IndustryWidget extends CustomPanel implements
 
 
         indIcon = new IndustryImagePanel(
-            m_panel, PANEL_WIDTH, IMAGE_HEIGHT,
+            PANEL_WIDTH, IMAGE_HEIGHT,
             ind.getCurrentImage(),
             Color.WHITE, null
         );
@@ -257,7 +257,7 @@ public class IndustryWidget extends CustomPanel implements
                         "show", dialog, 0f, 0f);
 
                     NativeUiUtils.anchorPanel(
-                        ((UIPanelAPI)dialog), indIcon.getPanel(), AnchorType.MidTopLeft, 0
+                        ((UIPanelAPI)dialog), indIcon, AnchorType.MidTopLeft, 0
                     );
 
                 }
@@ -307,20 +307,20 @@ public class IndustryWidget extends CustomPanel implements
 
             final SpecialItemSpecAPI spec = settings.getSpecialItemSpec(item.getId());
 
-            final Base itemPanel = new Base(m_panel, 28, 28, spec.getIconName(), Color.WHITE, null);
+            final SpriteElement itemPanel = new SpriteElement(28, 28, spec.getIconName(), Color.WHITE, null);
             itemPanel.drawTextureHalo = true;
             itemPanel.texHaloColor = baseColor;
 
             add(itemPanel).inTR(pad*2 + totalW, TITLE_HEIGHT + pad*2);
             
-            totalW += itemPanel.getPos().getWidth() + pad*2;
+            totalW += itemPanel.getWidth() + pad*2;
         }
 
         if (ind.getAICoreId() != null) {
 
             final CommoditySpecAPI spec = settings.getCommoditySpec(ind.getAICoreId());
 
-            final Base aiCorePanel = new Base(m_panel, 28, 28, spec.getIconName(), Color.WHITE, null);
+            final SpriteElement aiCorePanel = new SpriteElement(28, 28, spec.getIconName(), Color.WHITE, null);
             aiCorePanel.drawTextureHalo = true;
             aiCorePanel.texHaloColor = baseColor;
 
@@ -343,9 +343,7 @@ public class IndustryWidget extends CustomPanel implements
             }
 
             final int sliderHeight = 12;
-            final Slider slider = new Slider(
-                tp, null, 0, 100, PANEL_WIDTH, sliderHeight
-            );
+            final Slider slider = new Slider(null, 0, 100, PANEL_WIDTH, sliderHeight);
 
             slider.setLabelFont(Fonts.VICTOR_10);
             slider.label.getPosition().setYAlignOffset(1);
@@ -355,11 +353,11 @@ public class IndustryWidget extends CustomPanel implements
             slider.labelText = ind.getBuildOrUpgradeProgressText();
             slider.showLabelOnly = true;
             
-            tp.addComponent(slider.getPanel()).inBL(0, -sliderHeight - 2);
+            tp.addComponent(slider).inBL(0, -sliderHeight - 2);
         }
 
         tp.setHeightSoFar(IMAGE_HEIGHT);
-        ComponentFactory.addTooltip(tp, IMAGE_HEIGHT, false, m_panel).inBL(0, 0);
+        ComponentFactory.addTooltip(tp, IMAGE_HEIGHT, false, this).inBL(0, 0);
 
         if (constructionQueueIndex >= 0) setNormalMode();
     }
@@ -503,7 +501,7 @@ public class IndustryWidget extends CustomPanel implements
 
         if (indIcon != null) {
             final Color gColor = mode == WidgetSelectionState.NONE ? Color.WHITE : Color.BLACK;
-            indIcon.ImgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
+            indIcon.imgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
         }
     }
 
@@ -512,8 +510,7 @@ public class IndustryWidget extends CustomPanel implements
     }
 
     @Override
-    public void renderBelow(float alpha) {
-        super.renderBelow(alpha);
+    public void renderBelowImpl(float alpha) {
         if (glow.fader.getBrightness() > 0f) {
             buiTitleldingHeader.setHighlight(buiTitleldingHeader.getText());
 
@@ -543,28 +540,29 @@ public class IndustryWidget extends CustomPanel implements
             indPanel.dummyWidget, null, 0);
     }
 
-    public class IndustryImagePanel extends SpritePanel<IndustryImagePanel> implements
+    public class IndustryImagePanel extends AbstractSpriteElement<IndustryImagePanel> implements
         HasHoverGlow, HasInteraction, HasTooltip, HasAudioFeedback
     {
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
-        public final HoverGlowComp ImgGlow = comp().get(NativeComponents.HOVER_GLOW);
+        public final HoverGlowComp imgGlow = comp().get(NativeComponents.HOVER_GLOW);
         public final InteractionComp<IndustryImagePanel> interaction = comp().get(
             NativeComponents.INTERACTION
         ); 
 
-        public IndustryImagePanel(UIPanelAPI parent, int width, int height,
+        public IndustryImagePanel(int width, int height,
             String spriteID, Color color, Color fillColor
         ) {
-            super(parent, width, height, spriteID, color, fillColor);
+            super(width, height, spriteID, color, fillColor);
 
             final Color gColor = constructionMode == WidgetSelectionState.NONE ? Color.WHITE : Color.BLACK;
 
-            ImgGlow.fader = glow.fader;
-            ImgGlow.type = GlowType.ADDITIVE;
-            ImgGlow.additiveBrightness = 1f;
-            ImgGlow.additiveSprite = m_sprite;
-            ImgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
+            imgGlow.fader = glow.fader;
+            imgGlow.type = GlowType.ADDITIVE;
+            imgGlow.glowBrightness = 1f;
+            imgGlow.flashBrightness = 1.5f;
+            imgGlow.additiveSprite = mSprite;
+            imgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
 
             audio.useDisabledSound = (!DebugFlags.COLONY_DEBUG && !ind.getMarket().isPlayerOwned());
         }

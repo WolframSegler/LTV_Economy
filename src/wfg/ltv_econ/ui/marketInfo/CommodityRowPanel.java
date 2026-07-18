@@ -17,6 +17,7 @@ import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.InteractionComp;
@@ -28,8 +29,7 @@ import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.panel.CustomPanel;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
@@ -40,7 +40,7 @@ import static wfg.native_ui.util.UIConstants.*;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
-public class CommodityRowPanel extends CustomPanel implements
+public final class CommodityRowPanel extends UIContainer implements
     HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction, UIBuildableAPI
 {
     private static final SpriteAPI EXPORTS_ICON = settings.getSprite("commodity_markers", "exports");
@@ -55,10 +55,10 @@ public class CommodityRowPanel extends CustomPanel implements
     public final CommodityCell cell;
     private final MarketAPI market;
 
-    public CommodityRowPanel(UIPanelAPI parent, MarketAPI market, String comID,
+    public CommodityRowPanel(MarketAPI market, String comID,
         int width, int height, boolean ignoreUIContext
     ) {
-        super(parent, width, height);
+        super(width, height);
 
         final EconomyEngine engine = EconomyEngine.instance();
         cell = engine.getComCell(comID, market.getId());
@@ -70,7 +70,7 @@ public class CommodityRowPanel extends CustomPanel implements
         tooltip.width = 500f;
         tooltip.expandable = true;
         tooltip.positioner = (tp, expanded) -> {
-            NativeUiUtils.anchorPanel(tp, m_parent, AnchorType.LeftTop, pad*4);
+            NativeUiUtils.anchorPanel(tp, this, AnchorType.LeftTop, pad*4);
         };
         tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
         tooltip.expandTxt = str("uiTpShowLegend");
@@ -81,9 +81,9 @@ public class CommodityRowPanel extends CustomPanel implements
 
     public void buildUI() {
         final int textW = 80;
-        final int rowH = (int) getPos().getHeight();
+        final int rowH = (int) getHeight();
 
-        final Base comIcon = new Base(m_panel, rowH, rowH, cell.spec.getIconName(), null, null);
+        final SpriteElement comIcon = new SpriteElement(rowH, rowH, cell.spec.getIconName(), null, null);
         add(comIcon).inBL(2f, 0f);
 
         final float consumption = cell.getConsumption(true);
@@ -96,17 +96,15 @@ public class CommodityRowPanel extends CustomPanel implements
         amountLbl.setColor(market.getFaction().getBaseUIColor());
         add(amountLbl).inBL(pad*2 + rowH, (rowH - textHeight) / 2f);
 
-        final Base stockIcon = UIUtils.getStockpilesIcon(cell,
-            iconSize, m_panel, base
-        );
+        final SpriteElement stockIcon = UIUtils.getStockpilesIcon(cell, iconSize, base);
         add(stockIcon).inBL(pad*3 + rowH + textW, (rowH - iconSize) / 2f);
 
-        final UIPanelAPI infoBar = new CommodityBarPanel(null, 85, iconSize,
-            true, cell).getPanel();
+        final UIPanelAPI infoBar = new CommodityBarPanel(85, iconSize,
+            true, cell);
         add(infoBar).inBL(pad*4 + rowH + textW + iconSize, (rowH - iconSize) / 2f);
 
         if (cell.getTotalExports() > 0d) {
-            final Base iconPanel = new Base(m_panel, rowH - 4, rowH - 4,
+            final SpriteElement iconPanel = new SpriteElement(rowH - 4, rowH - 4,
                 EXPORTS_ICON, null, null);
 
             add(iconPanel).inRMid(pad);
@@ -218,16 +216,14 @@ public class CommodityRowPanel extends CustomPanel implements
     public static final void legendRowHelper(TooltipMakerAPI tp, int y, SpriteAPI icon, String desc,
         int lgdIconSize, boolean drawRedBorder, Color fillColor
     ) {
-        final Base iconPanel = new Base(tp, lgdIconSize, lgdIconSize,
-            icon, null, fillColor
-        );
+        final SpriteElement iconPanel = new SpriteElement(lgdIconSize, lgdIconSize, icon, null, fillColor);
         if (drawRedBorder) {
             iconPanel.outline.enabled = true;
             iconPanel.outline.color = Color.RED;
             iconPanel.outline.offset.setOffset(2, 2, -4, -4);
         }
             
-        tp.addCustom(iconPanel.getPanel(), 0f).getPosition().inTL(pad, y);
+        tp.addCustom(iconPanel, 0f).getPosition().inTL(pad, y);
 
 		final LabelAPI lbl = tp.addPara(desc, 0f);
 		final float textX = opad + lgdIconSize;

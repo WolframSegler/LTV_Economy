@@ -10,12 +10,11 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 
 import com.fs.starfarer.api.graphics.SpriteAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
-import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.util.RenderUtils;
 
-public class GenericInfoBar extends CustomPanel {
+public class GenericInfoBar extends UIContainer {
     protected static final Color TRANSPARENT_BLACK = new Color(0, 0, 0, 100);
     protected static final Color TRANSPARENT_WHITE = new Color(255, 255, 255, 20);
     protected static final SpriteAPI GLOW_BG = settings.getSprite("ui", "glow_bg");
@@ -23,18 +22,18 @@ public class GenericInfoBar extends CustomPanel {
     protected final Map<Color, Float> barMap = new LinkedHashMap<>(8);
     protected boolean hasOutline;
 
-    public GenericInfoBar(UIPanelAPI parent, int width, int height, boolean hasOutline) {
-        super(parent, width, height);
+    public GenericInfoBar(int width, int height, boolean hasOutline) {
+        super(width, height);
 
         this.hasOutline = hasOutline;
     }
 
     @Override
-    public void render(float alpha) {
-        final float x = pos.getX();
-        final float y = pos.getY();
-        final float w = pos.getWidth();
-        final float h = pos.getHeight();
+    public void renderBelowImpl(float alpha) {
+        final float x = getX();
+        final float y = getY();
+        final float w = getWidth();
+        final float h = getHeight();
 
         if (hasOutline) {
             RenderUtils.drawFramedBorder(

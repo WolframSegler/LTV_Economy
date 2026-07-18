@@ -9,7 +9,6 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
-import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.fleet.FleetMember;
@@ -18,11 +17,11 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.fleetTab.button.TransferToFactionInventoryBtn;
 import wfg.ltv_econ.ui.reusable.IdentityMarker;
 import wfg.native_ui.ui.Attachments;
-import wfg.native_ui.ui.panel.CustomPanel;
+import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class FleetTabUIBuilder implements CoreTabUIBuilder {
+public final class FleetTabUIBuilder implements CoreTabUIBuilder {
     
     @SuppressWarnings("unchecked")
     public void advance(float delta) {
@@ -52,21 +51,21 @@ public class FleetTabUIBuilder implements CoreTabUIBuilder {
             }
             IdentityMarker.attach(widget);
 
-            final List<?> widgetChildren = (List<?>) RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, widget);
+            final List<UIComponentAPI> widgetChildren = MethodFields.getChildrenNonCopy(widget);
 
             final UIPanelAPI buttonsPanel = widgetChildren.stream()
                 .filter(c -> RolfLectionUtil.hasMethodOfName("updateTooltip", c))
                 .map(child -> (UIPanelAPI) child).findFirst().orElse(null);
             if (buttonsPanel == null) continue;
-            final List<ButtonAPI> buttons = (List<ButtonAPI>) RolfLectionUtil.invokeMethodDirectly(CustomPanel.getChildrenNonCopyMethod, buttonsPanel);
+            final List<UIComponentAPI> buttons = MethodFields.getChildrenNonCopy(buttonsPanel);
             if (buttons == null) continue;
 
             final Fader widgetFader = (Fader) RolfLectionUtil.getMethodAndInvokeDirectly("getHoverFader", widget);
             final FleetMemberAPI member = (FleetMember) RolfLectionUtil.getMethodAndInvokeDirectly("getMember", widget);
-            final var btn = new TransferToFactionInventoryBtn(widget, widgetFader, member, fleetPanel);
+            final var btn = new TransferToFactionInventoryBtn(widgetFader, member, fleetPanel);
 
-            widget.addComponent(btn.getPanel());
-            NativeUiUtils.anchorPanel(btn.getPanel(), buttons.get(buttons.size() - 1), AnchorType.LeftMid, pad);
+            widget.addComponent(btn);
+            NativeUiUtils.anchorPanel(btn, buttons.get(buttons.size() - 1), AnchorType.LeftMid, pad);
         }
     }
 }

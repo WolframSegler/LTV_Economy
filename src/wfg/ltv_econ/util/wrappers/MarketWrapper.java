@@ -52,7 +52,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 
-public class MarketWrapper extends Market {
+public final class MarketWrapper extends Market {
     public final Market original;
 
     private boolean ready;

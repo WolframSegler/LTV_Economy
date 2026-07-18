@@ -30,7 +30,7 @@ import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 
-public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
+public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
     private static final Object outpostRowMarketWrapperField = findMarketHolder();
     private static final Class<?> outpostRowMarketWrapperClass = RolfLectionUtil.getFieldType(outpostRowMarketWrapperField);
     private static final Object wrapperMarketField = findMarketField(outpostRowMarketWrapperField);
@@ -54,7 +54,7 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
     }
 
     protected UIComponentAPI createCustomComponent(UIPanelAPI parent) {
-        return new FactionManagementPanel(parent).getPanel();
+        return new FactionManagementPanel();
     }
 
     @Override
@@ -76,28 +76,28 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
             .findFirst().get();
 
         final int tableH = (int) marketTable.getHeight() + 2;
-        final ColonyPopulationTable popTable = new ColonyPopulationTable(colonyPanel, tableH);
-        final FactionResourcesTable facTable = new FactionResourcesTable(colonyPanel, tableH);
-        colonyPanel.addComponent(popTable.getPanel()).inTL(1, opad + 1);
-        colonyPanel.addComponent(facTable.getPanel()).inTL(1, opad + 1);
-        popTable.getPanel().setOpacity(0f);
-        facTable.getPanel().setOpacity(0f);
+        final ColonyPopulationTable popTable = new ColonyPopulationTable(tableH);
+        final FactionResourcesTable facTable = new FactionResourcesTable(tableH);
+        colonyPanel.addComponent(popTable).inTL(1, opad + 1);
+        colonyPanel.addComponent(facTable).inTL(1, opad + 1);
+        popTable.setOpacity(0f);
+        facTable.setOpacity(0f);
 
         final String coloniesTxt = str("uiBtnTitleOwnedColonies");
         final String populationTxt = str("uiBtnTitlePopulationList");
         final String factionTxt = str("uiBtnTitleFactionResources");
 
-        final Button showColoniesButton = new Button(colonyPanel, 280, 24, coloniesTxt,
+        final Button showColoniesButton = new Button(280, 24, coloniesTxt,
             Fonts.ORBITRON_12, null);
-        final Button showPopButton = new Button(colonyPanel, 280, 24, populationTxt,
+        final Button showPopButton = new Button(280, 24, populationTxt,
             Fonts.ORBITRON_12, null);
-        final Button showFacButton = new Button(colonyPanel, 280, 24, factionTxt,
+        final Button showFacButton = new Button(280, 24, factionTxt,
             Fonts.ORBITRON_12, null);
 
         final Runnable resetState = () -> {
             marketTable.setOpacity(0f);
-            popTable.getPanel().setOpacity(0f);
-            facTable.getPanel().setOpacity(0f);
+            popTable.setOpacity(0f);
+            facTable.setOpacity(0f);
             showColoniesButton.setChecked(false);
             showPopButton.setChecked(false);
             showFacButton.setChecked(false);
@@ -110,18 +110,18 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         };
         showPopButton.onClicked = (btn) -> {
             resetState.run();
-            popTable.getPanel().setOpacity(1f);
+            popTable.setOpacity(1f);
             showPopButton.setChecked(true);
         };
         showFacButton.onClicked = (btn) -> {
             resetState.run();
-            facTable.getPanel().setOpacity(1f);
+            facTable.setOpacity(1f);
             showFacButton.setChecked(true);
         };
 
-        showColoniesButton.cutStyle = CutStyle.TL_BR;
-        showPopButton.cutStyle = CutStyle.TL_BR;
-        showFacButton.cutStyle = CutStyle.TL_BR;
+        showColoniesButton.setCutStyle(CutStyle.TL_BR);
+        showPopButton.setCutStyle(CutStyle.TL_BR);
+        showFacButton.setCutStyle(CutStyle.TL_BR);
         showColoniesButton.overrideCutSize = 8;
         showPopButton.overrideCutSize = 8;
         showFacButton.overrideCutSize = 8;
@@ -132,9 +132,9 @@ public class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         showPopButton.setShortcutAndAppendToText(Keyboard.KEY_A);
         showFacButton.setShortcutAndAppendToText(Keyboard.KEY_S);
 
-        colonyPanel.addComponent(showColoniesButton.getPanel()).belowMid(anchor, opad);
-        colonyPanel.addComponent(showPopButton.getPanel()).belowMid(showColoniesButton.getPanel(), opad);
-        colonyPanel.addComponent(showFacButton.getPanel()).belowMid(showPopButton.getPanel(), opad);
+        colonyPanel.addComponent(showColoniesButton).belowMid(anchor, opad);
+        colonyPanel.addComponent(showPopButton).belowMid(showColoniesButton, opad);
+        colonyPanel.addComponent(showFacButton).belowMid(showPopButton, opad);
 
         showColoniesButton.setChecked(true);
     }

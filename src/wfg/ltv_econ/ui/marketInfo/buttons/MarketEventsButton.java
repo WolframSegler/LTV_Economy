@@ -14,15 +14,15 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.MarketEventsDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.functional.DockButton;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class MarketEventsButton extends DockButton<MarketEventsDialog> {
+public final class MarketEventsButton extends DockButton<MarketEventsDialog> {
     private static final SpriteAPI ICON = settings.getSprite("icons", "events_button");
 
-    public MarketEventsButton(UIPanelAPI parent, int width, int height, MarketAPI market) {
-        super(parent, width, height, null, null, () -> new MarketEventsDialog(market));
+    public MarketEventsButton(int width, int height, MarketAPI market) {
+        super(width, height, null, null, () -> new MarketEventsDialog(market));
 
         setShortcut(Keyboard.KEY_2);
         setAppendShortcutToText(false);
@@ -34,10 +34,10 @@ public class MarketEventsButton extends DockButton<MarketEventsDialog> {
             tp.addPara(LocalizedStrings.str("uiBtnTitleMarketEvents"), 0f, highlight, Keyboard.getKeyName(interaction.shortcut));
         };
         tooltip.positioner = (tp, expanded) -> {
-            NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.LeftTop, 50);
+            NativeUiUtils.anchorPanel(tp, this, AnchorType.LeftTop, 50);
         };
 
-        final Base icon = new Base(m_panel, width, height, ICON, null, null);
+        final SpriteElement icon = new SpriteElement(width, height, ICON, null, null);
         add(icon).inBL(0f, 0f);
         glow.type = GlowType.ADDITIVE;
         glow.additiveSprite = icon.getSprite();

@@ -10,7 +10,7 @@ import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.ui.economyTab.EconomyOverviewPanel;
 import wfg.ltv_econ.ui.reusable.AbstractTabButtonInjector;
 
-public class IntelTabUIBuilder extends AbstractTabButtonInjector {
+public final class IntelTabUIBuilder extends AbstractTabButtonInjector {
     private final IntelTabData tabData = CampaignEngine.getInstance().getUIData().getIntelData();
 
     protected int getCurrentTabIndex() {
@@ -30,6 +30,6 @@ public class IntelTabUIBuilder extends AbstractTabButtonInjector {
     }
 
     protected UIComponentAPI createCustomComponent(UIPanelAPI parent) {
-        return new EconomyOverviewPanel(parent).getPanel();
+        return new EconomyOverviewPanel();
     }
 }

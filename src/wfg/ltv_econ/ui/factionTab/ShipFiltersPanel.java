@@ -12,17 +12,16 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TextFieldAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.fleet.ShipFilters;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.util.NativeUiUtils;
 
-public class ShipFiltersPanel extends CustomPanel {
+public final class ShipFiltersPanel extends UIContainer {
     private static final String emptyNameFieldTxt = "Ctrl-F to search";
     private static final int btnH = 24;
     private static final Color nearBlack = new Color(20, 20, 25);
@@ -30,8 +29,8 @@ public class ShipFiltersPanel extends CustomPanel {
     private final UIBuildableAPI target;
     private final TextFieldAPI nameField;
     
-    public ShipFiltersPanel(UIPanelAPI parent, int w, UIBuildableAPI target) {
-        super(parent, w, btnH);
+    public ShipFiltersPanel(int w, UIBuildableAPI target) {
+        super(w, btnH);
 
         this.target = target;
 
@@ -48,73 +47,73 @@ public class ShipFiltersPanel extends CustomPanel {
 
         float btnX = 200 + hpad*3;
 
-        final Button civilianBtn = new Button(m_panel, btnW, btnH, str("uiTitleCivilianShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button civilianBtn = new Button(btnW, btnH, str("uiTitleCivilianShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showCivilian = !ShipFilters.showCivilian;
             btn.setChecked(ShipFilters.showCivilian);
             target.buildUI();
         });
-        civilianBtn.cutStyle = CutStyle.TL_BL;
+        civilianBtn.setCutStyle(CutStyle.TL_BL);
         civilianBtn.setChecked(ShipFilters.showCivilian);
-        add(civilianBtn.getPanel()).inBL(btnX, 0f);
+        add(civilianBtn).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button combatBtn = new Button(m_panel, btnW, btnH, str("uiTitleCombatShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button combatBtn = new Button(btnW, btnH, str("uiTitleCombatShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showCombat = !ShipFilters.showCombat;
             btn.setChecked(ShipFilters.showCombat);
             target.buildUI();
         });
         combatBtn.setChecked(ShipFilters.showCombat);
-        add(combatBtn.getPanel()).inBL(btnX, 0f);
+        add(combatBtn).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button idleBtn = new Button(m_panel, btnW, btnH, str("uiTitleIdleOnlyShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button idleBtn = new Button(btnW, btnH, str("uiTitleIdleOnlyShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showOnlyIdle = !ShipFilters.showOnlyIdle;
             btn.setChecked(ShipFilters.showOnlyIdle);
             target.buildUI();
         });
-        idleBtn.cutStyle = CutStyle.TR_BR;
+        idleBtn.setCutStyle(CutStyle.TR_BR);
         idleBtn.setChecked(ShipFilters.showOnlyIdle);
-        add(idleBtn.getPanel()).inBL(btnX, 0f);
+        add(idleBtn).inBL(btnX, 0f);
         btnX += btnW + opad*2;
 
-        final Button frigateBtn = new Button(m_panel, btnW, btnH, str("uiTitleFrigatesShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button frigateBtn = new Button(btnW, btnH, str("uiTitleFrigatesShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showFrigates = !ShipFilters.showFrigates;
             btn.setChecked(ShipFilters.showFrigates);
             target.buildUI();
         });
-        frigateBtn.cutStyle = CutStyle.TL_BL;
+        frigateBtn.setCutStyle(CutStyle.TL_BL);
         frigateBtn.setChecked(ShipFilters.showFrigates);
-        add(frigateBtn.getPanel()).inBL(btnX, 0f);
+        add(frigateBtn).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button destroyerBtn = new Button(m_panel, btnW, btnH, str("uiTitleDestroyersShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button destroyerBtn = new Button(btnW, btnH, str("uiTitleDestroyersShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showDestroyers = !ShipFilters.showDestroyers;
             btn.setChecked(ShipFilters.showDestroyers);
             target.buildUI();
         });
         destroyerBtn.setChecked(ShipFilters.showDestroyers);
-        add(destroyerBtn.getPanel()).inBL(btnX, 0f);
+        add(destroyerBtn).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button cruiserBtn = new Button(m_panel, btnW, btnH, str("uiTitleCruisersShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button cruiserBtn = new Button(btnW, btnH, str("uiTitleCruisersShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showCruisers = !ShipFilters.showCruisers;
             btn.setChecked(ShipFilters.showCruisers);
             target.buildUI();
         });
         cruiserBtn.setChecked(ShipFilters.showCruisers);
-        add(cruiserBtn.getPanel()).inBL(btnX, 0f);
+        add(cruiserBtn).inBL(btnX, 0f);
         btnX += btnW + pad;
 
-        final Button capitalBtn = new Button(m_panel, btnW, btnH, str("uiTitleCapitalsShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button capitalBtn = new Button(btnW, btnH, str("uiTitleCapitalsShipType"), Fonts.DEFAULT_SMALL, (btn) -> {
             ShipFilters.showCapitals = !ShipFilters.showCapitals;
             btn.setChecked(ShipFilters.showCapitals);
             target.buildUI();
         });
-        capitalBtn.cutStyle = CutStyle.TR_BR;
+        capitalBtn.setCutStyle(CutStyle.TR_BR);
         capitalBtn.setChecked(ShipFilters.showCapitals);
-        add(capitalBtn.getPanel()).inBL(btnX, 0f);
+        add(capitalBtn).inBL(btnX, 0f);
 
-        ComponentFactory.addTooltip(uiBuilder, btnH, false, m_panel);
+        ComponentFactory.addTooltip(uiBuilder, btnH, false, this);
 
         civilianBtn.bgColor = nearBlack;
         combatBtn.bgColor = nearBlack;
@@ -134,8 +133,8 @@ public class ShipFiltersPanel extends CustomPanel {
     }
 
     @Override
-    public void advance(float delta) {
-        super.advance(delta);
+    public void advanceImpl(float delta) {
+        super.advanceImpl(delta);
 
         if (nameField.hasFocus()) {
             final String current = nameField.getText();
@@ -157,8 +156,8 @@ public class ShipFiltersPanel extends CustomPanel {
     }
 
     @Override
-    public void processInput(List<InputEventAPI> events) {
-        super.processInput(events);
+    public void processInputImpl(List<InputEventAPI> events) {
+        super.processInputImpl(events);
 
         for (InputEventAPI event : events) {
             if (event.isConsumed()) continue;

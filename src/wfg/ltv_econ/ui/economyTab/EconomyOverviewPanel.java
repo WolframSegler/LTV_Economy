@@ -7,16 +7,15 @@ import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
-import com.fs.starfarer.api.ui.UIPanelAPI;
-
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.ComTradeFlowMap;
 import wfg.ltv_econ.ui.economyTab.tradeFlowMap.TradeFlowOptions;
 import wfg.ltv_econ.ui.reusable.AbstractManagementPanel;
 
-public class EconomyOverviewPanel extends AbstractManagementPanel {
+public final class EconomyOverviewPanel extends AbstractManagementPanel {
 
-    public EconomyOverviewPanel(UIPanelAPI parent) {
-        super(parent);
+    public EconomyOverviewPanel() {
+        super();
+
         buildUI();
     }
 
@@ -34,44 +33,44 @@ public class EconomyOverviewPanel extends AbstractManagementPanel {
         defs.add(new NavButtonDef(str("uiBtnTitleComFlows"), Keyboard.KEY_Q,
             () -> {
                 final GlobalCommodityFlow content = new GlobalCommodityFlow(
-                    contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                    CONTENT_PANEL_W, CONTENT_PANEL_H
                 );
                 CommoditySelectionPanel options = new CommoditySelectionPanel(
-                    optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
+                    OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
                 );
-                contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
-                optionsPanel.addComponent(options.getPanel()).inBL(0f, 0f);
+                contentPanel.addComponent(content).inBL(0f, 0f);
+                optionsPanel.addComponent(options).inBL(0f, 0f);
             }
         ));
 
         defs.add(new NavButtonDef(str("uiTableBtnTitleTradeRoutes"), Keyboard.KEY_W,
             () -> {
                 final ComTradeFlowMap content = new ComTradeFlowMap(
-                    contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                    CONTENT_PANEL_W, CONTENT_PANEL_H
                 );
                 final TradeFlowOptions options = new TradeFlowOptions(
-                    optionsPanel, OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
+                    OPTIONS_PANEL_W, OPTIONS_PANEL_H, content
                 );
-                contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
-                optionsPanel.addComponent(options.getPanel()).inBL(0f, 0f);
+                contentPanel.addComponent(content).inBL(0f, 0f);
+                optionsPanel.addComponent(options).inBL(0f, 0f);
             }
         ));
 
         defs.add(new NavButtonDef(str("uiBtnTitlePopulation"), Keyboard.KEY_A,
             () -> {
                 final SectorPopulationPanel content = new SectorPopulationPanel(
-                    contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                    CONTENT_PANEL_W, CONTENT_PANEL_H
                 );
-                contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+                contentPanel.addComponent(content).inBL(0f, 0f);
             }
         ));
 
         defs.add(new NavButtonDef(str("uiBtnTitleDebug"), Keyboard.KEY_S,
             () -> {
                 final DebugPanel content = new DebugPanel(
-                    contentPanel, CONTENT_PANEL_W, CONTENT_PANEL_H
+                    CONTENT_PANEL_W, CONTENT_PANEL_H
                 );
-                contentPanel.addComponent(content.getPanel()).inBL(0f, 0f);
+                contentPanel.addComponent(content).inBL(0f, 0f);
             }
         ));
 

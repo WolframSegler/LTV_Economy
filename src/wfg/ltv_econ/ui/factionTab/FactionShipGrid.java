@@ -8,7 +8,6 @@ import java.util.List;
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI.ShipTypeHints;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.fleet.ShipTypeData;
@@ -20,12 +19,12 @@ import wfg.native_ui.ui.table.GridTable;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget> {
+public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget> {
     
     private final UIBuildableAPI navbar;
 
-    public FactionShipGrid(UIPanelAPI parent, int w, int h, UIBuildableAPI navbar) {
-        super(parent, w, h, InventoryShipWidget.WIDTH, InventoryShipWidget.HEIGHT, opad*2);
+    public FactionShipGrid(int w, int h, UIBuildableAPI navbar) {
+        super(w, h, InventoryShipWidget.WIDTH, InventoryShipWidget.HEIGHT, opad*2);
         this.navbar = navbar;
 
         uniformOuterGap = true;
@@ -46,11 +45,11 @@ public class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget
     }
 
     protected InventoryShipWidget createWidget(ShipTypeData item, int index) {
-        final InventoryShipWidget widget = new InventoryShipWidget(container, item, navbar);
+        final InventoryShipWidget widget = new InventoryShipWidget(item, navbar);
 
         final int col = index % calculateColumns();
         widget.tooltip.positioner = (tp, exp) -> {
-            NativeUiUtils.anchorPanel(tp, widget.getPanel(), (col > 2 ?
+            NativeUiUtils.anchorPanel(tp, widget, (col > 2 ?
                 AnchorType.LeftTop : AnchorType.RightTop), opad
             );
         };

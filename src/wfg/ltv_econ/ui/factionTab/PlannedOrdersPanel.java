@@ -18,7 +18,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -29,6 +28,7 @@ import wfg.ltv_econ.ui.factionTab.dialog.FactionSelectionDialog;
 import wfg.ltv_econ.ui.factionTab.dialog.ShipCommissionDialog;
 import wfg.ltv_econ.ui.fleet.PlannedOrderWidget;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.core.UIBuildableAPI;
@@ -36,21 +36,20 @@ import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.DockButton;
 import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.table.GridTable;
 import wfg.native_ui.ui.visual.IconValuePairTp;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, HasInteraction {
+public final class PlannedOrdersPanel extends UIContainer implements UIBuildableAPI, HasInteraction {
     private static final int HEADER_HEIGHT = 50;
 
     private final InteractionComp<PlannedOrdersPanel> interaction = comp().get(NativeComponents.INTERACTION); 
 
     public PlannedOrderGrid grid;
     
-    public PlannedOrdersPanel(UIPanelAPI parent, int w, int h) {
-        super(parent, w, h);
+    public PlannedOrdersPanel(int w, int h) {
+        super(w, h);
 
         interaction.onClicked = (panel, isLeftClick) -> {
             grid.clearSelection();
@@ -81,16 +80,16 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         final int entryH = 32;
 
         final DockButton<ShipCommissionDialog> commissionBtn = new DockButton<>(
-            m_panel, 120, entryH, str("uiBtnTitleHullOrder"), null, () -> new ShipCommissionDialog(this)
+            120, entryH, str("uiBtnTitleHullOrder"), null, () -> new ShipCommissionDialog(this)
         );
-        commissionBtn.cutStyle = CutStyle.ALL;
+        commissionBtn.setCutStyle(CutStyle.ALL);
         commissionBtn.setShortcutAndAppendToText(Keyboard.KEY_T);
         add(commissionBtn).inTR(BUTTON_W, hpad);
 
-        final Button clearAllBtn = new Button(m_panel, 120, entryH, str("uiBtnTitleClearAll"), null, (btn) -> {
+        final Button clearAllBtn = new Button(120, entryH, str("uiBtnTitleClearAll"), null, (btn) -> {
             new ClearAllDialog(this).show(0.3f, 0.3f);
         });
-        clearAllBtn.cutStyle = CutStyle.ALL;
+        clearAllBtn.setCutStyle(CutStyle.ALL);
         clearAllBtn.setEnabled(orders.size() > 0);
         add(clearAllBtn).inTR(BUTTON_W*2, hpad);
 
@@ -98,10 +97,10 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         add(title).inTL(hpad, hpad).setSize(titleW, entryH);
         title.setAlignment(Alignment.LMID);
 
-        final IconValuePairTp ordersPair = new IconValuePairTp(m_panel, entryW, entryH, CHECKLIST, orders.size(), true, null);
-        final IconValuePairTp costPair = new IconValuePairTp(m_panel, entryW, entryH, WAGES, totalCost, false, null);
-        final IconValuePairTp timePair = new IconValuePairTp(m_panel, entryW, entryH, STOPWATCH, totalTime, true, null);
-        final IconValuePairTp shipsPair = new IconValuePairTp(m_panel, entryW, entryH, SHIPS, totalShips, true, null);
+        final IconValuePairTp ordersPair = new IconValuePairTp(entryW, entryH, CHECKLIST, orders.size(), true, null);
+        final IconValuePairTp costPair = new IconValuePairTp(entryW, entryH, WAGES, totalCost, false, null);
+        final IconValuePairTp timePair = new IconValuePairTp(entryW, entryH, STOPWATCH, totalTime, true, null);
+        final IconValuePairTp shipsPair = new IconValuePairTp(entryW, entryH, SHIPS, totalShips, true, null);
         costPair.label().setText(costPair.label().getText() + Strings.C);
 
         add(ordersPair).inTL(hpad + titleW, hpad);
@@ -126,27 +125,27 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
             tp.addPara(str("uiTpTxtShipsCommodityCost"), pad);
         };
 
-        ordersPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, ordersPair.getPanel(), AnchorType.RightTop, hpad);
-        costPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, costPair.getPanel(), AnchorType.RightTop, hpad);
-        timePair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, timePair.getPanel(), AnchorType.RightTop, hpad);
-        shipsPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, shipsPair.getPanel(), AnchorType.RightTop, hpad);
+        ordersPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, ordersPair, AnchorType.RightTop, hpad);
+        costPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, costPair, AnchorType.RightTop, hpad);
+        timePair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, timePair, AnchorType.RightTop, hpad);
+        shipsPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, shipsPair, AnchorType.RightTop, hpad);
 
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
-                m_panel, 120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
+                120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
             );
-            factionSelection.cutStyle = CutStyle.ALL;
+            factionSelection.setCutStyle(CutStyle.ALL);
             add(factionSelection).inTR(hpad, hpad);
         }
 
-        grid = new PlannedOrderGrid(m_panel, (int) pos.getWidth(), (int) (pos.getHeight() - HEADER_HEIGHT));
+        grid = new PlannedOrderGrid((int) getWidth(), (int) (getHeight() - HEADER_HEIGHT));
         add(grid).inTL(0, HEADER_HEIGHT);
     }
 
     public class PlannedOrderGrid extends GridTable<PlannedOrder, PlannedOrderWidget> {
 
-        public PlannedOrderGrid(UIPanelAPI parent, int width, int height) {
-            super(parent, width, height, PlannedOrderWidget.WIDTH, PlannedOrderWidget.HEIGHT, opad*2);
+        public PlannedOrderGrid(int width, int height) {
+            super(width, height, PlannedOrderWidget.WIDTH, PlannedOrderWidget.HEIGHT, opad*2);
             uniformOuterGap = true;
             justifyGrid = true;
             isSelectionEnabled = true;
@@ -170,7 +169,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
         }
 
         protected PlannedOrderWidget createWidget(PlannedOrder item, int index) {
-            return new PlannedOrderWidget(PlannedOrdersPanel.this, item, index);
+            return new PlannedOrderWidget(item, index);
         }
 
         protected void onWidgetClicked(PlannedOrderWidget source) {
@@ -199,7 +198,7 @@ public class PlannedOrdersPanel extends CustomPanel implements UIBuildableAPI, H
 
             case SWAP:
                 StaticData.inv.swapPlannedOrders(source.index, selectedWidget.index);
-                NativeUiUtils.swapPositions(source.getPanel(), selectedWidget.getPanel());
+                NativeUiUtils.swapPositions(source, selectedWidget);
 
                 clearSelection();
                 break;

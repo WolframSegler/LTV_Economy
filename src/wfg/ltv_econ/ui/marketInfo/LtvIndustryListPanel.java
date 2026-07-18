@@ -33,19 +33,19 @@ import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.panel.CustomPanel;
-import wfg.native_ui.ui.visual.TextPanel;
+import wfg.native_ui.ui.visual.TextWrapper;
 import wfg.native_ui.ui.functional.Button.CutStyle;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI {
+public final class LtvIndustryListPanel extends UIContainer implements UIBuildableAPI {
 
 	public static final int BUTTON_SECTION_HEIGHT = 45;
 
@@ -63,9 +63,9 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 
 	private Button buildButton;
 
-	public LtvIndustryListPanel(UIPanelAPI parent, int width, int height, MarketAPI market, 
+	public LtvIndustryListPanel(int width, int height, MarketAPI market, 
 		UIPanelAPI industryPanel) {
-		super(parent, width, height);
+		super(width, height);
 
 		m_market = market;
 
@@ -97,7 +97,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 		final byte columnAmount = 4;
 
 		final TooltipMakerAPI wrappertp = ComponentFactory.createTooltip(
-            getPos().getWidth(), true
+            getWidth(), true
         );
 
 		int wrapperTpHeight = 0;
@@ -109,13 +109,10 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 			Industry ind = industries.get(index);
 
 			final IndustryWidget widget = new IndustryWidget(
-				m_panel,
-				m_market,
-				ind,
-				this
+				m_market, ind, this
 			);
 
-			wrappertp.addComponent(widget.getPanel()).inTL(
+			wrappertp.addComponent(widget).inTL(
 				i * (IndustryWidget.PANEL_WIDTH + opad) + pad,
 				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + hpad*3)
 			);
@@ -132,14 +129,10 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 			Industry ind = m_market.instantiateIndustry(queuedIndustries.get(index).id);
 
 			final IndustryWidget widget = new IndustryWidget(
-				m_panel,
-				m_market,
-				ind,
-				this,
-				index
+				m_market, ind, this, index
 			);
 
-			wrappertp.addComponent(widget.getPanel()).inTL(
+			wrappertp.addComponent(widget).inTL(
 				i * (IndustryWidget.PANEL_WIDTH + opad) + pad,
 				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + hpad*3)
 			);
@@ -150,26 +143,23 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 		}
 		wrappertp.setHeightSoFar(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + hpad*3);
 
-		ComponentFactory.addTooltip(wrappertp, getPos().getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
-			true, m_panel
+		ComponentFactory.addTooltip(wrappertp, getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
+			true, this
 		).inTL(-pad, 0);
 		
-		TextPanel playerCreditLblPanel = null;
-		TextPanel colonyCreditLblPanel = null;
-		TextPanel maxIndLblPanel = null;
+		TextWrapper playerCreditLblPanel = null;
+		TextWrapper colonyCreditLblPanel = null;
+		TextWrapper maxIndLblPanel = null;
 
 		{ // player creditLbl
-		playerCreditLblPanel = new TextPanel(m_panel, 200, 25) {
+		playerCreditLblPanel = new TextWrapper(200, 25) {
 
 			@Override
 			public void buildUI() {
 				LabelAPI creditLbl = UIUtils.createPlayerCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
 				creditLbl.setHighlightOnMouseover(true);
 
-				getPos().setSize(
-					creditLbl.computeTextWidth(creditLbl.getText()),
-					getPos().getHeight()
-				);
+				setWidth(creditLbl.computeTextWidth(creditLbl.getText()));
 
 				add(creditLbl).inBL(0, 0);
 
@@ -177,14 +167,14 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 					tp.addPara(str("uiTpTxtPlayerCredits"), 0);
 				};
 				tooltip.positioner = (tp, exp) -> {
-					NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+					NativeUiUtils.anchorPanel(tp, this, AnchorType.TopLeft, 0);
 				};
 			}
 		};
         }
 
 		{ // colony creditLbl
-		colonyCreditLblPanel = new TextPanel(m_panel, 200, 25) {
+		colonyCreditLblPanel = new TextWrapper(200, 25) {
 
 			@Override
 			public void buildUI() {
@@ -193,10 +183,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 				);
 				creditLbl.setHighlightOnMouseover(true);
 
-				getPos().setSize(
-					creditLbl.computeTextWidth(creditLbl.getText()),
-					getPos().getHeight()
-				);
+				setWidth(creditLbl.computeTextWidth(creditLbl.getText()));
 
 				add(creditLbl).inBL(0, 0);
 
@@ -204,24 +191,21 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 					tp.addPara(str("uiTpTxtColonyCredits"), 0);
 				};
 				tooltip.positioner = (tp, exp) -> {
-					NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+					NativeUiUtils.anchorPanel(tp, this, AnchorType.TopLeft, 0);
 				};
 			}
 		};
         }
 
 		{ // maxIndLbl
-		maxIndLblPanel = new TextPanel(m_panel, 200, 25) {
+		maxIndLblPanel = new TextWrapper(200, 25) {
 
 			@Override
 			public void buildUI() {
 				LabelAPI maxIndLbl = UIUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
 				maxIndLbl.setHighlightOnMouseover(true);
 
-				getPos().setSize(
-					maxIndLbl.computeTextWidth(maxIndLbl.getText()),
-					getPos().getHeight()
-				);
+				setWidth(maxIndLbl.computeTextWidth(maxIndLbl.getText()));
 
 				add(maxIndLbl).inBL(0, 0);
 
@@ -287,7 +271,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 					}
 				};
 				tooltip.positioner = (tp, exp) -> {
-					NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.TopLeft, 0);
+					NativeUiUtils.anchorPanel(tp, this, AnchorType.TopLeft, 0);
 				};
 			}
 		};
@@ -313,11 +297,11 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 		};
 
 		final int buildBtnWidth = 350;
-		buildButton = new Button(m_panel, buildBtnWidth, 25,
+		buildButton = new Button(buildBtnWidth, 25,
 			str("uiBtnTitleAddIndustry"), Fonts.ORBITRON_20AABOLD,
 			buildBtnRunnable
 		);
-		buildButton.cutStyle = CutStyle.TL_BR;
+		buildButton.setCutStyle(CutStyle.TL_BR);
 		buildButton.setLabelColor(base);
 		buildButton.setShortcutAndAppendToText(Keyboard.KEY_A);
 		
@@ -328,9 +312,9 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 
 		if (!m_market.isPlayerOwned() && !DebugFlags.COLONY_DEBUG) {
 			buildButton.setEnabled(false);
-			playerCreditLblPanel.getPanel().setOpacity(0f);
-			colonyCreditLblPanel.getPanel().setOpacity(0f);
-			if (DebugFlags.HIDE_COLONY_CONTROLS) buildButton.getPanel().setOpacity(0f);
+			playerCreditLblPanel.setOpacity(0f);
+			colonyCreditLblPanel.setOpacity(0f);
+			if (DebugFlags.HIDE_COLONY_CONTROLS) buildButton.setOpacity(0f);
 		}
 	}
 
@@ -341,8 +325,8 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 	}
 
 	@Override
-	public final void processInput(List<InputEventAPI> events) {
-		super.processInput(events);
+	public final void processInputImpl(List<InputEventAPI> events) {
+		super.processInputImpl(events);
 
 		boolean anyWidgetNotNormal = false;
 		for (Object widgetObj : widgets) {
@@ -359,7 +343,7 @@ public class LtvIndustryListPanel extends CustomPanel implements UIBuildableAPI 
 			boolean mouseOverWidget = events.stream()
 				.filter(InputEventAPI::isMouseMoveEvent)
 				.anyMatch(event -> widgets.stream()
-				.anyMatch(widget -> ((IndustryWidget) widget).indIcon.getPos()
+				.anyMatch(widget -> ((IndustryWidget) widget).indIcon.pos()
 				.containsEvent(event))
 			);
 

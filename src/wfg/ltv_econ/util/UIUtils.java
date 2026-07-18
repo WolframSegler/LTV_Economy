@@ -17,16 +17,15 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
-public class UIUtils {
+public final class UIUtils {
     private static final String DAY_S_L = str("uiTxtDayLowercase");
     private static final String DAY_P_L = str("uiTxtDaysLowercase");
     private static final String DAY_S_C = str("uiTxtDayCapitalized");
@@ -129,23 +128,23 @@ public class UIUtils {
 		}
 	}
 
-    public static final Base getStockpilesIcon(final float ratio, final int size,
-        final UIPanelAPI parent, final FactionSpecAPI faction, final boolean addRatioColors
+    public static final SpriteElement getStockpilesIcon(final float ratio, final int size,
+        final FactionSpecAPI faction, final boolean addRatioColors
     ) {
         final Color color = getStockpileColor(ratio, faction, addRatioColors);
-        return getStockpilesIcon(ratio, size, parent, color, null, false, false);
+        return getStockpilesIcon(ratio, size, color, null, false, false);
     }
 
-    public static final Base getStockpilesIcon(final CommodityCell cell, final int size,
-        final UIPanelAPI parent, final Color iconColor
+    public static final SpriteElement getStockpilesIcon(final CommodityCell cell, final int size,
+        final Color iconColor
     ) {
-        return getStockpilesIcon(cell.getDesiredAvailabilityRatio(), size, parent, iconColor,
+        return getStockpilesIcon(cell.getDesiredAvailabilityRatio(), size, iconColor,
             null, false, cell.getTargetQuantum(true) < 0.1f
         );
     }
 
-    public static final Base getStockpilesIcon(final float ratio, final int size,
-        final UIPanelAPI parent, final Color iconColor, final Color bgColor, final boolean drawBorder,
+    public static final SpriteElement getStockpilesIcon(final float ratio, final int size,
+        final Color iconColor, final Color bgColor, final boolean drawBorder,
         final boolean useNoDemandIcon
     ) {
         final SpriteAPI iconPath;
@@ -160,7 +159,7 @@ public class UIUtils {
         } else {
             iconPath = STOCKPILES_FULL;
         }
-        final Base icon = new Base(parent, size, size, iconPath, iconColor, bgColor);
+        final SpriteElement icon = new SpriteElement(size, size, iconPath, iconColor, bgColor);
         icon.outline.enabled = drawBorder;
         return icon;
     }

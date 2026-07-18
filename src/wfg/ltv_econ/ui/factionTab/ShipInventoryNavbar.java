@@ -13,31 +13,30 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI.ShipTypeHints;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.ltv_econ.serializable.StaticData;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.IconValuePairTp;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, HasBackground {
+public final class ShipInventoryNavbar extends UIContainer implements UIBuildableAPI, HasBackground {
     private static final float flagRatio = 410f / 256f;
 
     private final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
-    public ShipInventoryNavbar(UIPanelAPI parent, int w, int h) {
-        super(parent, w, h);
+    public ShipInventoryNavbar(int w, int h) {
+        super(w, h);
 
         bg.alpha = 0.6f;
         
@@ -48,8 +47,8 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
     public void buildUI() {
         clearChildren();
 
-        final int w = (int) pos.getWidth();
-        final int h = (int) pos.getHeight();
+        final int w = (int) getWidth();
+        final int h = (int) getHeight();
         final int flagH = h - hpad*2;
         final int flagW = (int) (flagH * flagRatio);
 
@@ -57,7 +56,7 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final FactionSpecAPI factionSpec = settings.getFactionSpec(inv.factionID);
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
 
-        final Base banner = new Base(m_panel, flagW, flagH, faction.getLogo(), null, null);
+        final SpriteElement banner = new SpriteElement(flagW, flagH, faction.getLogo(), null, null);
         add(banner).inTL(hpad, hpad);
 
         final int GAP_LEFT_1 = flagW + opad*2 + pad;
@@ -80,10 +79,10 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final LabelAPI shipmentLbl = settings.createLabel(str("uiTitleHullCapacities"), Fonts.INSIGNIA_LARGE);
         add(shipmentLbl).inTL(GAP_LEFT_1, GAP_TOP_1);
 
-        final IconValuePairTp cargoPair = new IconValuePairTp(m_panel, perPairW, iconS, CRATES, inv.getTotalCargoCapacity(), true, null);
-        final IconValuePairTp fuelPair = new IconValuePairTp(m_panel, perPairW, iconS, FUEL, inv.getTotalFuelCapacity(), true, null);
-        final IconValuePairTp crewPair = new IconValuePairTp(m_panel, perPairW, iconS, BERTH, inv.getTotalCrewCapacity(), true, null);
-        final IconValuePairTp combatPair = new IconValuePairTp(m_panel, perPairW, iconS, COMBAT, inv.getTotalCombatPower(), true, null);
+        final IconValuePairTp cargoPair = new IconValuePairTp(perPairW, iconS, CRATES, inv.getTotalCargoCapacity(), true, null);
+        final IconValuePairTp fuelPair = new IconValuePairTp(perPairW, iconS, FUEL, inv.getTotalFuelCapacity(), true, null);
+        final IconValuePairTp crewPair = new IconValuePairTp(perPairW, iconS, BERTH, inv.getTotalCrewCapacity(), true, null);
+        final IconValuePairTp combatPair = new IconValuePairTp(perPairW, iconS, COMBAT, inv.getTotalCombatPower(), true, null);
 
         final int GAP_TOP_2 = GAP_TOP_1 + 25;
 
@@ -97,10 +96,10 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         final LabelAPI operationLbl = settings.createLabel(str("uiTitleOperations"), Fonts.INSIGNIA_LARGE);
         add(operationLbl).inTL(GAP_LEFT_2, GAP_TOP_1);
 
-        final IconValuePairTp suppliesPair = new IconValuePairTp(m_panel, perPairW, iconS, SUPPLIES, inv.getTotalDailyMaintenance(), true, null);
-        final IconValuePairTp operatorPair = new IconValuePairTp(m_panel, perPairW, iconS, CREW, inv.getTotalCrew(), true, null);
-        final IconValuePairTp wagePair = new IconValuePairTp(m_panel, perPairW, iconS, WAGES, inv.getTotalMonthlyCrewWage(), false, null);
-        final IconValuePairTp hullPair = new IconValuePairTp(m_panel, perPairW, iconS, SHIPS, inv.getOwnedShips(), true, null);
+        final IconValuePairTp suppliesPair = new IconValuePairTp(perPairW, iconS, SUPPLIES, inv.getTotalDailyMaintenance(), true, null);
+        final IconValuePairTp operatorPair = new IconValuePairTp(perPairW, iconS, CREW, inv.getTotalCrew(), true, null);
+        final IconValuePairTp wagePair = new IconValuePairTp(perPairW, iconS, WAGES, inv.getTotalMonthlyCrewWage(), false, null);
+        final IconValuePairTp hullPair = new IconValuePairTp(perPairW, iconS, SHIPS, inv.getOwnedShips(), true, null);
 
         add(suppliesPair).inTL(GAP_LEFT_2, GAP_TOP_2);
         add(operatorPair).inTL(GAP_LEFT_2 + perPairW, GAP_TOP_2);
@@ -219,20 +218,20 @@ public class ShipInventoryNavbar extends CustomPanel implements UIBuildableAPI, 
         };
 
         cargoPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
-            tp, cargoPair.getPanel(), AnchorType.RightTop, opad);
+            tp, cargoPair, AnchorType.RightTop, opad);
         fuelPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
-            tp, fuelPair.getPanel(), AnchorType.RightTop, opad);
+            tp, fuelPair, AnchorType.RightTop, opad);
         crewPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
-            tp, crewPair.getPanel(), AnchorType.RightTop, opad);
+            tp, crewPair, AnchorType.RightTop, opad);
         combatPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
-            tp, combatPair.getPanel(), AnchorType.RightTop, opad);
+            tp, combatPair, AnchorType.RightTop, opad);
         suppliesPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
-            tp, suppliesPair.getPanel(), AnchorType.LeftTop, opad);
+            tp, suppliesPair, AnchorType.LeftTop, opad);
         operatorPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
-            tp, operatorPair.getPanel(), AnchorType.LeftTop, opad);
+            tp, operatorPair, AnchorType.LeftTop, opad);
         wagePair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
-            tp, wagePair.getPanel(), AnchorType.LeftTop, opad);
+            tp, wagePair, AnchorType.LeftTop, opad);
         hullPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanelWithBounds(
-            tp, hullPair.getPanel(), AnchorType.LeftTop, opad);
+            tp, hullPair, AnchorType.LeftTop, opad);
     }
 }

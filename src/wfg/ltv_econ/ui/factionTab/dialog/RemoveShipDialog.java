@@ -8,7 +8,7 @@ import wfg.ltv_econ.ui.fleet.InventoryShipWidget;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.widget.Slider;
 
-public class RemoveShipDialog extends DialogPanel {
+public final class RemoveShipDialog extends DialogPanel {
     private final InventoryShipWidget widget;
     private final Slider slider;
 
@@ -22,7 +22,7 @@ public class RemoveShipDialog extends DialogPanel {
 
         setConfirmShortcut();
 
-        slider = new Slider(m_panel, null, 0f, widget.data.getIdle(), 450, 32);
+        slider = new Slider(null, 0f, widget.data.getIdle(), 450, 32);
         slider.roundBarValue = true;
         slider.roundingIncrement = 1;
         slider.showValueOnly = true;

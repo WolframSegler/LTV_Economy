@@ -8,7 +8,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Planets;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 
-public class ConfigUtils {
+public final class ConfigUtils {
     private static final String HIDDEN_SYSTEM_ID = "ltv_dynamic_ind_test_system";
     private static final String HIDDEN_PLANET_ID = "ltv_dynamic_ind_test_planet";
     

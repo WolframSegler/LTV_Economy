@@ -9,8 +9,6 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.fleet.ShipProductionOrder;
@@ -27,10 +25,10 @@ import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.functional.UIClickable;
 import wfg.native_ui.ui.table.WidgetAPI;
-import wfg.native_ui.ui.visual.SpritePanelWithTp;
+import wfg.native_ui.ui.visual.InteractiveSprite;
 import wfg.native_ui.ui.widget.Slider;
 
-public class ShipProductionWidget extends UIClickable<ShipProductionWidget> implements WidgetAPI<ShipProductionWidget>,
+public final class ShipProductionWidget extends UIClickable<ShipProductionWidget> implements WidgetAPI<ShipProductionWidget>,
     HasTooltip, HasHoverGlow
 {
     public static final int WIDTH = 460;
@@ -46,8 +44,8 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
 
     public WidgetSelectionState selectionState = WidgetSelectionState.NONE;
 
-    public ShipProductionWidget(UIPanelAPI parent, ShipProductionOrder order, int index) {
-        super(parent, WIDTH, HEIGHT, null);
+    public ShipProductionWidget(ShipProductionOrder order, int index) {
+        super(WIDTH, HEIGHT, null);
 
         this.order = order;
         this.index = index;
@@ -56,7 +54,8 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
         border.centerColor = UIColors.WIDGET_BG;
 
         glow.type = GlowType.UNDERLAY;
-        glow.overlayBrightness = 0.6f;
+        glow.glowBrightness = 0.6f;
+        glow.flashBrightness = 1.2f;
         glow.color = UIColors.IN_FACTION;
 
         final boolean isBeingProduced = index <= StaticData.inv.getAssemblyLines() - 1;
@@ -86,13 +85,14 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
         final int scaledW = (int) (spriteW * scale);
         final int scaledH = (int) (spriteH * scale);
 
-        final SpritePanelWithTp shipSprite = new SpritePanelWithTp(m_panel, scaledW, scaledH, sprite, null, null);
+        final InteractiveSprite shipSprite = new InteractiveSprite(scaledW, scaledH, sprite, null, null);
         shipSprite.tooltip.enabled = false;
         shipSprite.audio.enabled = false;
         shipSprite.glow.isFaderOwner = false;
         shipSprite.glow.fader = glow.fader;
         shipSprite.glow.type = GlowType.ADDITIVE;
-        shipSprite.glow.additiveBrightness = 0.8f;
+        shipSprite.glow.glowBrightness = 0.8f;
+        shipSprite.glow.flashBrightness = 1.2f;
         add(shipSprite).inLMid(hpad + (maxSize - scaledW) / 2);
 
         final String shipStr = spec.getHullNameWithDashClass();
@@ -109,25 +109,19 @@ public class ShipProductionWidget extends UIClickable<ShipProductionWidget> impl
         final boolean isBeingProduced = index <= StaticData.inv.getAssemblyLines() - 1;
 
         final String sliderTxt = isBeingProduced ? order.daysRemaining + str("uiSingleLetterDay") +" / " + order.days + str("uiSingleLetterDay") : str("waitingTitle");
-        final Slider timeSlider = new Slider(m_panel, sliderTxt, 0f, order.days, CONTENT_W - opad, 32);
+        final Slider timeSlider = new Slider(sliderTxt, 0f, order.days, CONTENT_W - opad, 32);
         timeSlider.showLabelOnly = true;
         timeSlider.setUserAdjustable(false);
         timeSlider.setProgress(isBeingProduced ? order.days - order.daysRemaining : order.days);
         if (!isBeingProduced) timeSlider.setBarColor(UIColors.CARGO_COLOR);
         add(timeSlider).inBL(HEIGHT, hpad);
 
-        PlannedOrderWidget.addSelectionUI(m_panel, selectionState);
+        PlannedOrderWidget.addSelectionUI(this, selectionState);
     }
 
     @Override
-    public void renderBelow(float alpha) {
-        super.renderBelow(alpha);
-
-        border.render(pos.getX(), pos.getY(), alpha);
-    }
-
-    public UIComponentAPI getElement() {
-        return m_panel;
+    public void renderBelowImpl(float alpha) {
+        border.render(getX(), getY(), alpha);
     }
 
     public InteractionComp<ShipProductionWidget> getInteraction() {

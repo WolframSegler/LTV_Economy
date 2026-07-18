@@ -9,13 +9,13 @@ import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.native_ui.internal.ui.Side;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
@@ -28,11 +28,10 @@ import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.container.DockPanel;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
-public class MarketEventsDialog extends DockPanel {
+public final class MarketEventsDialog extends DockPanel {
     private static final int ROW_H = 48;
     private final MarketPopulationData data;
 
@@ -48,7 +47,7 @@ public class MarketEventsDialog extends DockPanel {
 
     @Override
     public void buildUI() {
-        final int width = (int) contentContainer.getPosition().getWidth();
+        final int width = (int) contentContainer.getWidth();
 
         final LabelAPI title = settings.createLabel(LocalizedStrings.str("uiTitleCurrentEvents"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
@@ -59,20 +58,18 @@ public class MarketEventsDialog extends DockPanel {
         for (MarketEvent event : data.getEvents()) {
             if (!event.isVisible(data) && !DebugFlags.COLONY_DEBUG) continue;
 
-            final RowPanel row = new RowPanel(
-                eventsList, width - pad*2, ROW_H, event
-            );
-            eventsList.addCustom(row.getPanel(), 0).getPosition().inTL(pad, yCoord);
+            final RowPanel row = new RowPanel(width - pad*2, ROW_H, event);
+            eventsList.addCustom(row, 0).getPosition().inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }
 
         eventsList.setHeightSoFar(yCoord);
-        final float scrollPanelH = contentContainer.getPosition().getHeight() - 30 - opad*2;
+        final float scrollPanelH = contentContainer.getHeight() - 30 - opad*2;
         ComponentFactory.addTooltip(eventsList, scrollPanelH, true, contentContainer).inBL(0f, 0f);
     }
 
-    public class RowPanel extends CustomPanel implements HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground {
+    public class RowPanel extends UIContainer implements HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground {
         public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
@@ -80,8 +77,8 @@ public class MarketEventsDialog extends DockPanel {
 
         private final MarketEvent event;
 
-        public RowPanel(UIPanelAPI parent, int width, int height, MarketEvent event) {
-            super(parent, width, height);
+        public RowPanel(int width, int height, MarketEvent event) {
+            super(width, height);
 
             this.event = event;
 
@@ -106,8 +103,8 @@ public class MarketEventsDialog extends DockPanel {
                 Global.getLogger(getClass()).warn(e);
             }
 
-            final Base comIcon = new Base(
-                m_panel, iconSize, iconSize, event.spec.iconPath,
+            final SpriteElement comIcon = new SpriteElement(
+                iconSize, iconSize, event.spec.iconPath,
                 null, null
             );
             RowPanel.this.add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);

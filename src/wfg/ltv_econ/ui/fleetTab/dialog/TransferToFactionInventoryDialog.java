@@ -29,7 +29,7 @@ import wfg.ltv_econ.economy.fleet.ShipTypeData;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.util.Globals;
 
-public class TransferToFactionInventoryDialog extends DialogPanel {
+public final class TransferToFactionInventoryDialog extends DialogPanel {
 
     private final FleetMemberAPI member;
     private final UIPanelAPI fleetList;
@@ -59,7 +59,7 @@ public class TransferToFactionInventoryDialog extends DialogPanel {
         txtLbl.setColor(text_color);
         txtLbl.setHighlightColor(Misc.getStoryBrightColor());
         txtLbl.setHighlight(highlightStr1, highlightStr2);
-        txtLbl.getPosition().setSize(pos.getWidth(), pos.getHeight() - BUTTON_H).inTL(0f, 0f);
+        txtLbl.getPosition().setSize(getWidth(), getHeight() - BUTTON_H).inTL(0f, 0f);
         txtLbl.setAlignment(Alignment.TL);
 
         final boolean hasEnoughCrew = Global.getSector().getPlayerFleet().getCargo().getCrew() >= crewNeeded;

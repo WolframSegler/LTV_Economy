@@ -10,10 +10,10 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
@@ -22,12 +22,11 @@ import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
-import wfg.native_ui.ui.panel.CustomPanel;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class LtvCommodityPanel extends CustomPanel implements HasBackground, HasOutline,
+public final class LtvCommodityPanel extends UIContainer implements HasBackground, HasOutline,
     UIBuildableAPI
 {
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
@@ -40,24 +39,24 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
     public final MarketAPI m_market;
     public ClickHandler<CommodityRowPanel> selectionListener;
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height, String headerTxt, MarketAPI market) {
-        this(parent, width, height, headerTxt, false, market);
+    public LtvCommodityPanel(int width, int height, String headerTxt, MarketAPI market) {
+        this(width, height, headerTxt, false, market);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
+    public LtvCommodityPanel(int width, int height,
         MarketAPI market) {
-        this(parent, width, height, str("uiTitleCommodities"), false, market);
+        this(width, height, str("uiTitleCommodities"), false, market);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
+    public LtvCommodityPanel(int width, int height,
         boolean rowsIgnoreUIState, MarketAPI market
     ) {
-        this(parent, width, height, str("uiTitleCommodities"), rowsIgnoreUIState, market);
+        this(width, height, str("uiTitleCommodities"), rowsIgnoreUIState, market);
     }
 
-    public LtvCommodityPanel(UIPanelAPI parent, int width, int height,
+    public LtvCommodityPanel(int width, int height,
         String headerTxt, boolean rowsIgnoreUIState, MarketAPI market
-    ) { super(parent, width, height);
+    ) { super(width, height);
 
         m_market = market;
         m_headerTxt = headerTxt;
@@ -78,31 +77,31 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
         });
 
         final TooltipMakerAPI headerTp = ComponentFactory.createTooltip(
-            pos.getWidth(), false
+            getWidth(), false
         );
         headerTp.addSectionHeading(m_headerTxt, Alignment.MID, pad);
 
         final int headerHeight = (int) headerTp.getPrev().getPosition().getHeight();
         headerTp.setHeightSoFar(headerHeight);
-        ComponentFactory.addTooltip(headerTp, headerHeight, false, m_panel).inTL(0, 0);
+        ComponentFactory.addTooltip(headerTp, headerHeight, false, this).inTL(0, 0);
         bg.offset.setOffset(1, 1, -2, -headerHeight - 2);
         outline.offset.setOffset(1, 1, -2, -headerHeight - 2);
 
         final TooltipMakerAPI rowTp = ComponentFactory.createTooltip(
-            pos.getWidth(), true
+            getWidth(), true
         );
         
-        final int rowWidth = (int) pos.getWidth() - opad * 2;
+        final int rowWidth = (int) getWidth() - opad * 2;
         final int rowHeight = 28;
         int cumulativeYOffset = opad;
 
         for (CommoditySpecAPI com : commodities) {
             final CommodityRowPanel comRow = new CommodityRowPanel(
-                m_panel, m_market, com.getId(), rowWidth, 
+                m_market, com.getId(), rowWidth, 
                 rowHeight, rowsIgnoreUIState
             );
 
-            rowTp.addComponent(comRow.getPanel()).inTL(opad, cumulativeYOffset);
+            rowTp.addComponent(comRow).inTL(opad, cumulativeYOffset);
 
             cumulativeYOffset += pad + 2 + rowHeight;
 
@@ -111,7 +110,7 @@ public class LtvCommodityPanel extends CustomPanel implements HasBackground, Has
             commodityRows.add(comRow);
         }
         rowTp.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(rowTp, pos.getHeight() - headerHeight, true, m_panel)
+        ComponentFactory.addTooltip(rowTp, getHeight() - headerHeight, true, this)
             .inTL(0, headerHeight);
     }
 

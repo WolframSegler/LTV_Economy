@@ -37,6 +37,7 @@ import wfg.ltv_econ.ui.marketInfo.population.CohesionPair;
 import wfg.ltv_econ.ui.marketInfo.population.ConsciousnessPair;
 import wfg.ltv_econ.ui.marketInfo.population.HappinessPair;
 import wfg.ltv_econ.ui.marketInfo.population.HealthPair;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
@@ -49,15 +50,15 @@ import wfg.native_ui.ui.visual.PieChart.PieSlice;
 import wfg.native_ui.ui.container.ScrollPanel;
 import wfg.native_ui.ui.container.ScrollPanel.ScrollType;
 import wfg.native_ui.ui.widget.Slider;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
-import wfg.native_ui.ui.visual.SpritePanelWithTp;
-import wfg.native_ui.ui.visual.TextPanel;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
+import wfg.native_ui.ui.visual.InteractiveSprite;
+import wfg.native_ui.ui.visual.TextWrapper;
 import wfg.native_ui.util.CallbackRunnable;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class ManagePopulationDialog extends DialogPanel {
+public final class ManagePopulationDialog extends DialogPanel {
     private static final Logger log = Global.getLogger(ManagePopulationDialog.class);
     private static final SpriteAPI WORKER_ICON = settings.getSprite("ui", "three_workers");
     private static final Color negativeColor = new Color(210, 115, 90);
@@ -121,7 +122,7 @@ public class ManagePopulationDialog extends DialogPanel {
         subtitle.setAlignment(Alignment.LMID);
         add(subtitle).inTL(opad, SECT_I_H);
 
-        final TextPanel RoSVLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper RoSVLabel = new TextWrapper(LABEL_W, LABEL_H) {
             public void buildUI() {
                 final String txt = str("uiTitleRateOfExploitation");
                 final String valueTxt = new DecimalFormat("#.#").format(data.getRoSV());
@@ -145,12 +146,12 @@ public class ManagePopulationDialog extends DialogPanel {
                     tp.addPara(str("uiTpTxtRateOfExploitation"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, this, AnchorType.RightTop, opad);
                 };
             }
         };
 
-        final TextPanel wagesLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper wagesLabel = new TextWrapper(LABEL_W, LABEL_H) {
             public void buildUI() {
                 final String txt = str("uiTitleMonthlyWages");
                 final String valueTxt = NumFormat.formatCredit((int)(engine.info.getDailyWages(m_market)*MONTH));
@@ -174,12 +175,12 @@ public class ManagePopulationDialog extends DialogPanel {
                     tp.addPara(str("uiTpTxtMonthlyWages"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, this, AnchorType.RightTop, opad);
                 };
             }
         };
 
-        final TextPanel avgWageLabel = new TextPanel(m_panel, LABEL_W, LABEL_H) {
+        final TextWrapper avgWageLabel = new TextWrapper(LABEL_W, LABEL_H) {
             public void buildUI() {
                 final String txt = str("uiTitleAvgWage");
                 final float value = EconConfig.LPV_month / data.getRoSV();
@@ -204,17 +205,17 @@ public class ManagePopulationDialog extends DialogPanel {
                     tp.addPara(strf("uiTpTxtAvgWage", Strings.C), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, this, AnchorType.RightTop, opad);
                 };
             }
         };
 
-        add(RoSVLabel.getPanel()).inTL(opad, opad*3 + SECT_I_H);
-        add(wagesLabel.getPanel()).inTL(opad, LABEL_H + opad*4 + SECT_I_H);
-        add(avgWageLabel.getPanel()).inTL(opad + LABEL_W, LABEL_H + opad*4 + SECT_I_H);
+        add(RoSVLabel).inTL(opad, opad*3 + SECT_I_H);
+        add(wagesLabel).inTL(opad, LABEL_H + opad*4 + SECT_I_H);
+        add(avgWageLabel).inTL(opad + LABEL_W, LABEL_H + opad*4 + SECT_I_H);
 
         exploitationSlider = new Slider(
-            m_panel, null, 1, EconConfig.MAX_RoSV, sliderW, sliderH
+            null, 1, EconConfig.MAX_RoSV, sliderW, sliderH
         );
         exploitationSlider.setHighlightOnMouseover(true);
         exploitationSlider.setProgress(data.getRoSV());
@@ -225,7 +226,7 @@ public class ManagePopulationDialog extends DialogPanel {
             positiveColor, negativeColor, data.getRoSV()/(float)(EconConfig.MAX_RoSV - 1)
         ));
         exploitationSlider.showValueOnly = true;
-        add(exploitationSlider.getPanel()).inTL(opad*2 + LABEL_W, opad*3 + SECT_I_H);
+        add(exploitationSlider).inTL(opad*2 + LABEL_W, opad*3 + SECT_I_H);
 
         final CallbackRunnable<Button> exploitationRunnable = (btn) -> {
             data.setRoSV(exploitationSlider.getProgress());
@@ -244,14 +245,14 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final Button exploitationBtn = new Button(
-            m_panel, buttonW, buttonH, str("uiConfirm"), Fonts.ORBITRON_12, exploitationRunnable
+            buttonW, buttonH, str("uiConfirm"), Fonts.ORBITRON_12, exploitationRunnable
         );
 
         exploitationBtn.setQuickMode(true);
-        exploitationBtn.cutStyle = CutStyle.ALL;
-        add(exploitationBtn.getPanel()).inTL(opad*3 + LABEL_W + sliderW, opad*3 + SECT_I_H);
+        exploitationBtn.setCutStyle(CutStyle.ALL);
+        add(exploitationBtn).inTL(opad*3 + LABEL_W + sliderW, opad*3 + SECT_I_H);
 
-        final TextPanel workerAmount = new TextPanel(m_panel, LABEL_W+100, LABEL_H) {
+        final TextWrapper workerAmount = new TextWrapper(LABEL_W+100, LABEL_H) {
             public void buildUI() {
                 final String txt = str("uiTitleWorkforceEmployedTotal");
                 final long value2 = cond.getWorkerPool();
@@ -275,8 +276,8 @@ public class ManagePopulationDialog extends DialogPanel {
                 add(label1).inTL(0, 0).setSize(LABEL_W+100, textH1);
                 add(label2).inTL(0, textH1 + pad).setSize(LABEL_W+100, label2.getPosition().getHeight());
 
-                final Base workerIcon = new Base(
-                    m_panel, ICON_S, ICON_S, WORKER_ICON, base, null
+                final SpriteElement workerIcon = new SpriteElement(
+                    ICON_S, ICON_S, WORKER_ICON, base, null
                 );
                 add(workerIcon).inBL(0, (LABEL_H - ICON_S)/2f);
 
@@ -284,12 +285,12 @@ public class ManagePopulationDialog extends DialogPanel {
                     tp.addPara(str("uiTpTxtWorkforceEmployedTotal"), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
-                    NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.LeftTop, opad);
+                    NativeUiUtils.anchorPanelWithBounds(tp, this, AnchorType.LeftTop, opad);
                 };
             }
         };
 
-        add(workerAmount.getPanel()).inTR(opad, opad*3 + SECT_I_H);
+        add(workerAmount).inTR(opad, opad*3 + SECT_I_H);
         }
     
         { // SECTION II
@@ -298,10 +299,10 @@ public class ManagePopulationDialog extends DialogPanel {
         subtitle.setAlignment(Alignment.LMID);
         add(subtitle).inTL(opad, SECT_II_H);
 
-        final HealthPair healthPair = new HealthPair(m_panel, LABEL_W - opad*2, LABEL_H, data, null, Fonts.INSIGNIA_VERY_LARGE);
-        final HappinessPair happinessPair = new HappinessPair(m_panel, LABEL_W - opad*2, LABEL_H, data, null, Fonts.INSIGNIA_VERY_LARGE);
-        final CohesionPair cohesionPair = new CohesionPair(m_panel, LABEL_W - opad*2, LABEL_H, data, null, Fonts.INSIGNIA_VERY_LARGE);
-        final ConsciousnessPair consciousnessPair = new ConsciousnessPair(m_panel, LABEL_W - opad*2, LABEL_H, data, null, Fonts.INSIGNIA_VERY_LARGE);
+        final HealthPair healthPair = new HealthPair(LABEL_W - opad*2, LABEL_H, data, null, Fonts.INSIGNIA_VERY_LARGE);
+        final HappinessPair happinessPair = new HappinessPair(LABEL_W - opad*2, LABEL_H, data, null, Fonts.INSIGNIA_VERY_LARGE);
+        final CohesionPair cohesionPair = new CohesionPair(LABEL_W - opad*2, LABEL_H, data, null, Fonts.INSIGNIA_VERY_LARGE);
+        final ConsciousnessPair consciousnessPair = new ConsciousnessPair(LABEL_W - opad*2, LABEL_H, data, null, Fonts.INSIGNIA_VERY_LARGE);
 
         add(healthPair).inTL(opad, SECT_II_H + opad*3);
         add(happinessPair).inTL(opad + LABEL_W + pad, SECT_II_H + opad*3);
@@ -316,9 +317,9 @@ public class ManagePopulationDialog extends DialogPanel {
         add(subtitle).inTL(opad, SECT_III_H);
         final int subtitleH = (int) subtitle.computeTextHeight(subtitle.getText());
 
-        final ScrollPanel policyContainer = new ScrollPanel(m_panel, PANEL_W - opad, policyHeight + opad);
+        final ScrollPanel policyContainer = new ScrollPanel(PANEL_W - opad, policyHeight + opad);
         policyContainer.scrollType = ScrollType.HORIZONTAL;
-        add(policyContainer.getPanel()).inTL(hpad, SECT_III_H + subtitleH + pad*2);
+        add(policyContainer).inTL(hpad, SECT_III_H + subtitleH + pad*2);
 
         int posterCount = 0;
         for (MarketPolicy policy : data.getPolicies()) {
@@ -330,9 +331,7 @@ public class ManagePopulationDialog extends DialogPanel {
 
                 selectedPolicy = policy;
                 remove(selectedPolicyCont);
-                selectedPolicyCont = settings.createCustom(
-                    PANEL_W, SELECTED_P_H, null
-                );
+                selectedPolicyCont = new UIContainer(PANEL_W, SELECTED_P_H);
                 add(selectedPolicyCont).inTL(
                     opad, SECT_III_H + subtitleH + opad*2 + policyHeight
                 );
@@ -346,14 +345,12 @@ public class ManagePopulationDialog extends DialogPanel {
                     ).inBL(pad + posterIndex*(policyWidth + pad), hpad);
 
                     remove(selectedPolicyCont);
-                    selectedPolicyCont = settings.createCustom(
-                        PANEL_W, SELECTED_P_H, null
-                    );
+                    selectedPolicyCont = new UIContainer(PANEL_W, SELECTED_P_H);
                     add(selectedPolicyCont).inTL(
                         opad, SECT_III_H + subtitleH + opad*2 + policyHeight
                     );
 
-                    source.getParent().removeComponent(source.getPanel());
+                    source.getParent().removeComponent(source);
                     buildSelectedPosterMenu(selectedPolicyCont, policy, data, this);
                 };
 
@@ -379,11 +376,9 @@ public class ManagePopulationDialog extends DialogPanel {
             log.warn(e);
         }
 
-        final ListenerProviderPanel posterWrap = new ListenerProviderPanel(
-            cont, width, height
-        ) {{ interaction.onClicked = listener;}};
+        final ListenerProviderPanel posterWrap = new ListenerProviderPanel(width, height) {{ interaction.onClicked = listener;}};
 
-        final SpritePanelWithTp poster = new SpritePanelWithTp(posterWrap.getPanel(), width, height,
+        final InteractiveSprite poster = new InteractiveSprite(width, height,
             policy.spec.posterPath, policy.isOnCooldown(mData) ? gray : null, null
         ) {
             public void buildUI() {
@@ -397,7 +392,7 @@ public class ManagePopulationDialog extends DialogPanel {
                     );
                     final int clockD = 30;
                     final PieChart cooldownClock = new PieChart(
-                        m_panel, clockD, clockD, pieData
+                        clockD, clockD, pieData
                     );
     
                     add(cooldownClock).inBL(
@@ -412,7 +407,7 @@ public class ManagePopulationDialog extends DialogPanel {
                 outline.enabled = policy.isActive(mData);
 
                 glow.type = GlowType.ADDITIVE;
-                glow.additiveSprite = m_sprite;
+                glow.additiveSprite = mSprite;
 
                 tooltip.builder = (tp, exp) -> policy.createTooltip(mData, tp);
 
@@ -420,8 +415,8 @@ public class ManagePopulationDialog extends DialogPanel {
             }
         };
 
-        posterWrap.add(poster).inBL(0, 0);
-        return cont.addComponent(posterWrap.getPanel());
+        posterWrap.add(poster).inBL(0f, 0f);
+        return cont.addComponent(posterWrap);
     }
 
     private final void buildSelectedPosterMenu(UIPanelAPI cont,
@@ -460,10 +455,10 @@ public class ManagePopulationDialog extends DialogPanel {
             break;
         }
         final Button activateButton = new Button(
-            cont, buttonW, buttonH, buttonTxt, Fonts.ORBITRON_12, activateRun
+            buttonW, buttonH, buttonTxt, Fonts.ORBITRON_12, activateRun
         );
         activateButton.setQuickMode(true);
-        activateButton.cutStyle = CutStyle.TL_BR;
+        activateButton.setCutStyle(CutStyle.TL_BR);
         activateButton.bgAlpha = 1f;
         activateButton.setShortcutAndAppendToText(Keyboard.KEY_G);
         final long marketCredits = EconomyEngine.instance().getCredits(m_market.getId());
@@ -487,10 +482,10 @@ public class ManagePopulationDialog extends DialogPanel {
             };
 
             activateButton.tooltip.positioner = (tp, exp) ->
-                NativeUiUtils.anchorPanel(tp, activateButton.getPanel(), AnchorType.TopLeft, pad);
+                NativeUiUtils.anchorPanel(tp, activateButton, AnchorType.TopLeft, pad);
         }
 
-        cont.addComponent(activateButton.getPanel()).inBR(opad + PANEL_W/2f, pad);
+        cont.addComponent(activateButton).inBR(opad + PANEL_W/2f, pad);
 
         final String costTxt = policy.spec.cost > 0 ? " - "+NumFormat.formatCredit(policy.spec.cost) : "";
         final LabelAPI title = settings.createLabel(policy.spec.name + costTxt, Fonts.ORBITRON_12);
@@ -527,29 +522,29 @@ public class ManagePopulationDialog extends DialogPanel {
         };
 
         final Button notifyAvailableBtn = ComponentFactory.createCheckboxWithText(
-            cont, 18, str("uiPolicyWidgetCheckboxTxt1"),
+            18, str("uiPolicyWidgetCheckboxTxt1"),
             Fonts.DEFAULT_SMALL, availableRn, base, pad
         );
         final Button notifyFinishedBtn = ComponentFactory.createCheckboxWithText(
-            cont, 18, str("uiPolicyWidgetCheckboxTxt2"),
+            18, str("uiPolicyWidgetCheckboxTxt2"),
             Fonts.DEFAULT_SMALL, finishedRn, base, pad
         );
         final Button repeatAfterCooldownBtn = ComponentFactory.createCheckboxWithText(
-            cont, 18, str("uiPolicyWidgetCheckboxTxt3"),
+            18, str("uiPolicyWidgetCheckboxTxt3"),
             Fonts.DEFAULT_SMALL, repeatRn, base, pad
         );
 
         notifyAvailableBtn.setChecked(policy.notifyWhenAvailable);
         notifyFinishedBtn.setChecked(policy.notifyWhenFinished);
         repeatAfterCooldownBtn.setChecked(policy.repeatAfterCooldown);
-        cont.addComponent(notifyAvailableBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*4);
-        cont.addComponent(notifyFinishedBtn.getPanel()).inBL(PANEL_W/2f + opad, pad + opad*2);
-        cont.addComponent(repeatAfterCooldownBtn.getPanel()).inBL(PANEL_W/2f + opad, pad);
+        cont.addComponent(notifyAvailableBtn).inBL(PANEL_W/2f + opad, pad + opad*4);
+        cont.addComponent(notifyFinishedBtn).inBL(PANEL_W/2f + opad, pad + opad*2);
+        cont.addComponent(repeatAfterCooldownBtn).inBL(PANEL_W/2f + opad, pad);
     }
 
     @Override
-    public void advance(float delta) {
-        super.advance(delta);
+    public void advanceImpl(float delta) {
+        super.advanceImpl(delta);
 
         if (exploitationSlider.getProgressInterpolated() == sliderValue) return;
 

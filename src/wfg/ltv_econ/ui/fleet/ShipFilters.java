@@ -1,6 +1,6 @@
 package wfg.ltv_econ.ui.fleet;
 
-public class ShipFilters {
+public final class ShipFilters {
     public static String searchQuery = "";
 
     public static SortMode sortMode = SortMode.NAME;

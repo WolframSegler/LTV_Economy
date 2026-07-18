@@ -37,7 +37,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry.MarketLedger;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 
@@ -46,7 +46,7 @@ import static wfg.ltv_econ.constant.strings.Income.*;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
-public class TooltipUtils {
+public final class TooltipUtils {
     private static final String TP_ARROW = settings.getSpriteName("ui", "cargoTooltipArrow");
     private static final int GRID_W = 430;
     private static final int VALUE_W = 50;
@@ -146,7 +146,7 @@ public class TooltipUtils {
                         Misc.getRoundedValueMaxOneAfterDecimal(distanceToPlayer)
                     );
 
-                    final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW, null, null);
+                    final SpriteElement arrowPanel = new SpriteElement(20, 20, TP_ARROW, null, null);
 
                     final Vector2f playerLoc = sector.getPlayerFleet().getLocationInHyperspace();
                     final Vector2f targetLoc = market.getLocationInHyperspace();
@@ -154,7 +154,7 @@ public class TooltipUtils {
                     NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
 
                     final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
-                    tp.addCustom(arrowPanel.getPanel(), 0f).getPosition().inTL(610, arrowY);
+                    tp.addCustom(arrowPanel, 0f).getPosition().inTL(610, arrowY);
 
                     ++rowCount;
                     if (rowCount >= rowsPerTable) break;
@@ -222,7 +222,7 @@ public class TooltipUtils {
                         Misc.getRoundedValueMaxOneAfterDecimal(distance)
                     );
 
-                    final Base arrowPanel = new Base(tp, 20, 20, TP_ARROW, null, null);
+                    final SpriteElement arrowPanel = new SpriteElement(20, 20, TP_ARROW, null, null);
 
                     final Vector2f playerLoc = sector.getPlayerFleet().getLocationInHyperspace();
                     final Vector2f targetLoc = market.getLocationInHyperspace();
@@ -230,7 +230,7 @@ public class TooltipUtils {
                     NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
 
                     final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
-                    tp.addCustom(arrowPanel.getPanel(), 0f).getPosition().inTL(610, arrowY);
+                    tp.addCustom(arrowPanel, 0f).getPosition().inTL(610, arrowY);
                     NativeUiUtils.resetFlowLeft(tp, hpad);
 
                     rowCount++;

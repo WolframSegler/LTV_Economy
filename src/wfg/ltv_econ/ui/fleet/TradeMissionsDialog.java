@@ -25,7 +25,7 @@ import wfg.native_ui.ui.functional.Button.CutStyle;
 import wfg.native_ui.ui.widget.RadioPanel;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 
-public class TradeMissionsDialog extends DockPanel {
+public final class TradeMissionsDialog extends DockPanel {
     private static final int WIDTH = 420;
     private static final int GAP = 100;
     private static final int ROW_H = 200;
@@ -55,7 +55,7 @@ public class TradeMissionsDialog extends DockPanel {
 
         final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(WIDTH, true);
 
-        final RadioPanel monthSwitch = new RadioPanel(contentContainer, 110, 18, LayoutMode.HORIZONTAL)
+        final RadioPanel monthSwitch = new RadioPanel(110, 18, LayoutMode.HORIZONTAL)
             .addOption(str("activeTitle"), activeMissions)
             .addOption(str("pastTitle"), !activeMissions);
         monthSwitch.optionSelected = code -> {
@@ -66,10 +66,10 @@ public class TradeMissionsDialog extends DockPanel {
         monthSwitch.buildUI();
         add(monthSwitch).inTR(opad - pad, opad);
 
-        final DockButton<FiltersDialog> filterBtn = new DockButton<>(contentContainer, 90, 18, str("filtersTitle"),
+        final DockButton<FiltersDialog> filterBtn = new DockButton<>(90, 18, str("filtersTitle"),
             Fonts.DEFAULT_SMALL, () -> new FiltersDialog(this)
         );
-        filterBtn.cutStyle = CutStyle.ALL;
+        filterBtn.setCutStyle(CutStyle.ALL);
         filterBtn.bgAlpha = 1f;
         filterBtn.setShortcutAndAppendToText(Keyboard.KEY_Q);
         add(filterBtn).inTR(opad + 110 + hpad - pad, opad);
@@ -88,10 +88,10 @@ public class TradeMissionsDialog extends DockPanel {
 
             final boolean isSrcMarket = market != null && market == m.src;
             final TradeMissionWidget row = new TradeMissionWidget(
-                scrollPanel, WIDTH - pad*3, ROW_H - opad, m, isSrcMarket, this
+                WIDTH - pad*3, ROW_H - opad, m, isSrcMarket, this
             );
 
-            scrollPanel.addCustom(row.getPanel(), 0).getPosition().inTL(pad, yCoord);
+            scrollPanel.addCustom(row, 0).getPosition().inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }
@@ -106,7 +106,7 @@ public class TradeMissionsDialog extends DockPanel {
 
         final int offset = opad + 30;
         scrollPanel.setHeightSoFar(yCoord);
-        final float scrollPanelH = contentContainer.getPosition().getHeight() - offset - opad;
+        final float scrollPanelH = contentContainer.getHeight() - offset - opad;
         ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, contentContainer).inTL(0f, offset);
 
         scrollPanel.getExternalScroller().setYOffset(Arithmetic.clamp(

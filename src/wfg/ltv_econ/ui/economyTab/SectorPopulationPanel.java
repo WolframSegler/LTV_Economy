@@ -14,23 +14,22 @@ import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.visual.PieChart;
 import wfg.native_ui.ui.visual.PieChart.PieSlice;
 import wfg.native_ui.util.NumFormat;
 
-public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI {
+public final class SectorPopulationPanel extends UIContainer implements UIBuildableAPI {
     private static final int PIECHART_S = 250;
     private static final int TITLE_H = 35;
 
-    public SectorPopulationPanel(UIPanelAPI parent, int width, int height) {
-        super(parent, width, height);
+    public SectorPopulationPanel(int width, int height) {
+        super(width, height);
 
         buildUI();
     }
@@ -61,7 +60,7 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
         title.setAlignment(Alignment.TMID);
         add(title).inTL(opad*2, opad*2).setSize(PIECHART_S, TITLE_H);
 
-        final PieChart chart = new PieChart(m_panel, PIECHART_S, PIECHART_S, data);
+        final PieChart chart = new PieChart(PIECHART_S, PIECHART_S, data);
         add(chart).inTL(opad*2, opad*2 + TITLE_H + hpad);
 
         chart.tooltip.width = 360;
@@ -108,7 +107,7 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
         title.setAlignment(Alignment.TMID);
         add(title).inTL(opad*4 + PIECHART_S, opad*2).setSize(PIECHART_S, TITLE_H);
 
-        final PieChart chart = new PieChart(m_panel, PIECHART_S, PIECHART_S, data);
+        final PieChart chart = new PieChart(PIECHART_S, PIECHART_S, data);
         add(chart).inTL(opad*4 + PIECHART_S, opad*2 + TITLE_H + hpad);
 
         chart.tooltip.width = 360;
@@ -151,7 +150,7 @@ public class SectorPopulationPanel extends CustomPanel implements UIBuildableAPI
         title.setAlignment(Alignment.TMID);
         add(title).inTL(opad*6 + PIECHART_S*2, opad*2).setSize(PIECHART_S, TITLE_H);
 
-        final PieChart chart = new PieChart(m_panel, PIECHART_S, PIECHART_S, data);
+        final PieChart chart = new PieChart(PIECHART_S, PIECHART_S, data);
         add(chart).inTL(opad*6 + PIECHART_S*2, opad*2 + TITLE_H + hpad);
 
         chart.tooltip.width = 360;

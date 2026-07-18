@@ -13,19 +13,19 @@ import com.fs.starfarer.api.util.Misc;
 import wfg.ltv_econ.ui.fleetTab.dialog.TransferToFactionInventoryDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class TransferToFactionInventoryBtn extends Button {
+public final class TransferToFactionInventoryBtn extends Button {
     private static final int SIZE = 32;
     private static final SpriteAPI ICON = settings.getSprite("fleetScreen", "icon_transfer_hangar");
 
     private final Fader parentWidgetFader;
-    private final Base icon;
+    private final SpriteElement icon;
 
-    public TransferToFactionInventoryBtn(UIPanelAPI parent, Fader parentWidgetFader, FleetMemberAPI member, UIPanelAPI fleetList) {
-        super(parent, SIZE, SIZE, null, null, (btn) -> {
+    public TransferToFactionInventoryBtn(Fader parentWidgetFader, FleetMemberAPI member, UIPanelAPI fleetList) {
+        super(SIZE, SIZE, null, null, (btn) -> {
             new TransferToFactionInventoryDialog(member, fleetList).show(0.3f, 0.3f);
         });
 
@@ -35,7 +35,7 @@ public class TransferToFactionInventoryBtn extends Button {
         bgAlpha = 0f;
         bgDisabledAlpha = 0f;
 
-        tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, m_panel, AnchorType.BottomLeft, pad);
+        tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, this, AnchorType.BottomLeft, pad);
         tooltip.builder = (tp, expanded) -> {
             tp.addTitle(str("uiTpTitleTransferToFactionInventory"), base);
 
@@ -48,11 +48,12 @@ public class TransferToFactionInventoryBtn extends Button {
             }
         };
 
-        icon = new Base(m_panel, SIZE, SIZE, ICON, dark, null);
+        icon = new SpriteElement(SIZE, SIZE, ICON, dark, null);
         add(icon).inBL(0f, 0f);
 
         glow.type = GlowType.ADDITIVE;
-        glow.additiveBrightness = 1.05f;
+        glow.glowBrightness = 1.05f;
+        glow.flashBrightness = 1.6f;
         glow.additiveSprite = icon.getSprite();
         glow.color = dark;
 
@@ -60,10 +61,9 @@ public class TransferToFactionInventoryBtn extends Button {
     }
 
     @Override
-    public void renderBelow(float delta) {
-        super.renderBelow(delta);
+    public void renderBelowImpl(float delta) {
+        super.renderBelowImpl(delta);
 
-        
         icon.texColor = NativeUiUtils.setAlpha(dark, 0.55f + parentWidgetFader.getBrightness() * 1.1f);
     }
 }

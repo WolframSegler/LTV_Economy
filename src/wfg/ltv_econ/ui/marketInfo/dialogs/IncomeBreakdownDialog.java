@@ -40,7 +40,7 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public class IncomeBreakdownDialog extends DockPanel {
+public final class IncomeBreakdownDialog extends DockPanel {
     private static final int WIDTH = 420;
     private static final int GAP = 100;
 
@@ -67,7 +67,7 @@ public class IncomeBreakdownDialog extends DockPanel {
 
         final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(WIDTH, true);
 
-        final RadioPanel monthSwitch = new RadioPanel(contentContainer, 110, 18, LayoutMode.HORIZONTAL)
+        final RadioPanel monthSwitch = new RadioPanel(110, 18, LayoutMode.HORIZONTAL)
             .addOption(str("uiPrevious"), lastMonth)
             .addOption(str("uiCurrent"), !lastMonth);
         monthSwitch.optionSelected = code -> {
@@ -78,12 +78,12 @@ public class IncomeBreakdownDialog extends DockPanel {
         monthSwitch.buildUI();
         add(monthSwitch).inTR(opad - pad, opad);
 
-        final Button rawToggle = new Button(contentContainer, 60, 18, str("uiRawTxt"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button rawToggle = new Button(60, 18, str("uiRawTxt"), Fonts.DEFAULT_SMALL, (btn) -> {
             scrollLen = 0f;
             raw = !raw;
             buildUI();
         });
-        rawToggle.cutStyle = CutStyle.ALL;
+        rawToggle.setCutStyle(CutStyle.ALL);
         rawToggle.setEnabled(DebugFlags.COLONY_DEBUG);
         if (!rawToggle.isEnabled()) {
             rawToggle.setShowTooltipWhileInactive(true);
@@ -92,7 +92,7 @@ public class IncomeBreakdownDialog extends DockPanel {
                 tp.addPara(str("uiDebugOnly"), 0f);
             };
             rawToggle.tooltip.positioner = (tp, e) -> {
-                NativeUiUtils.anchorPanel(tp, rawToggle.getPanel(), AnchorType.LeftMid, opad);
+                NativeUiUtils.anchorPanel(tp, rawToggle, AnchorType.LeftMid, opad);
             };
         }
         add(rawToggle).inTR(opad*2 + 110 - pad, opad);
@@ -100,7 +100,7 @@ public class IncomeBreakdownDialog extends DockPanel {
         incomeBreakdownUI(scrollPanel);
 
         final int offset = opad + 30;
-        final float scrollPanelH = contentContainer.getPosition().getHeight() - offset - opad;
+        final float scrollPanelH = contentContainer.getHeight() - offset - opad;
         ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, contentContainer).inTL(0f, offset);
 
         scrollPanel.getExternalScroller().setYOffset(Arithmetic.clamp(

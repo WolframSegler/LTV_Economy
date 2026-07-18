@@ -39,6 +39,8 @@ import wfg.ltv_econ.economy.planning.custom.goalParams.MultiSelectParameter;
 import wfg.ltv_econ.economy.planning.custom.goalParams.RadioParameter;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.ltv_econ.ui.factionTab.dialog.WorkerAllocationDialog.AddGoalDialog;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp;
@@ -55,17 +57,16 @@ import wfg.native_ui.ui.functional.Button;
 import wfg.native_ui.ui.functional.CheckboxButton;
 import wfg.native_ui.ui.functional.UIClickable;
 import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.ui.panel.CustomPanel;
 import wfg.native_ui.ui.table.GridTable;
 import wfg.native_ui.ui.table.WidgetAPI;
-import wfg.native_ui.ui.visual.SpritePanel.Base;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.widget.MultiSelect;
 import wfg.native_ui.ui.widget.RadioPanel;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 import wfg.native_ui.util.NativeUiUtils;
 
-public class WorkerAllocationDialog extends DialogPanel {
+public final class WorkerAllocationDialog extends DialogPanel {
     private static final Logger log = Global.getLogger(WorkerAllocationDialog.class);
     private static final SpriteAPI CUSTOM = settings.getSprite("ui", "customize");
     private static final SpriteAPI PRESET = settings.getSprite("ui", "blueprint");
@@ -101,10 +102,10 @@ public class WorkerAllocationDialog extends DialogPanel {
     public void buildUI() {
         clearChildren();
 
-        final Button excludedBtn = new Button(m_panel, 200, BUTTON_H, str("uiBtnTitleClickToExcludeMarkets"), Fonts.DEFAULT_SMALL, (btn) -> {
+        final Button excludedBtn = new Button(200, BUTTON_H, str("uiBtnTitleClickToExcludeMarkets"), Fonts.DEFAULT_SMALL, (btn) -> {
             new ExcludedMarketsDialog().show(0.3f, 0.3f);
         });
-        excludedBtn.cutStyle = CutStyle.ALL;
+        excludedBtn.setCutStyle(CutStyle.ALL);
         add(excludedBtn).inTR(pad, pad);
 
         final LabelAPI title = settings.createLabel(str("uiTitleWorkerAllocPlanner"), Fonts.INSIGNIA_VERY_LARGE);
@@ -112,10 +113,10 @@ public class WorkerAllocationDialog extends DialogPanel {
         title.setAlignment(Alignment.MID);
         add(title).inTL(0f, 0f).setSize(PANEL_W, TITLE_H);
 
-        contentPanel = new ContentPanel(m_panel, null); 
+        contentPanel = new ContentPanel(null); 
         add(contentPanel).inBR(0f, 0f);
 
-        final Button createPlanBtn = new Button(m_panel, LEFT_SIDE_W, CREATE_PLAN_BTN_H, str("uiBtnTitleCreateWorkerAllocationPlan"), Fonts.ORBITRON_20AA, (btn) -> {
+        final Button createPlanBtn = new Button(LEFT_SIDE_W, CREATE_PLAN_BTN_H, str("uiBtnTitleCreateWorkerAllocationPlan"), Fonts.ORBITRON_20AA, (btn) -> {
             contentPanel.selectedPlan = new WorkerAllocationPlan();
             contentPanel.selectedPlan.isCustom = true;
             contentPanel.selectedPlan.id = Long.toString(Misc.genRandomSeed());
@@ -123,14 +124,14 @@ public class WorkerAllocationDialog extends DialogPanel {
         });
         add(createPlanBtn).inTL(0f, TITLE_H);
 
-        gridPanel = new PlanSelectionGrid(m_panel, contentPanel);
+        gridPanel = new PlanSelectionGrid(contentPanel);
         add(gridPanel).inBL(0f, 0f);
     }
 
     public class PlanSelectionGrid extends GridTable<WorkerAllocationPlan, PlanSelectionWidget> implements HasOutline {
 
-        public PlanSelectionGrid(UIPanelAPI parent, ContentPanel content) {
-            super(parent, LEFT_SIDE_W, PANEL_H - CREATE_PLAN_BTN_H, WIDGET_W, WIDGET_H, pad);
+        public PlanSelectionGrid(ContentPanel content) {
+            super(LEFT_SIDE_W, PANEL_H - CREATE_PLAN_BTN_H, WIDGET_W, WIDGET_H, pad);
 
             uniformOuterGap = true;
             isSelectionEnabled = true;
@@ -143,7 +144,7 @@ public class WorkerAllocationDialog extends DialogPanel {
         }
 
         protected PlanSelectionWidget createWidget(WorkerAllocationPlan item, int index) {
-            return new PlanSelectionWidget(PlanSelectionGrid.this, item);
+            return new PlanSelectionWidget(item);
         }
 
         protected void onWidgetClicked(PlanSelectionWidget source) {
@@ -174,12 +175,13 @@ public class WorkerAllocationDialog extends DialogPanel {
 
         public boolean isSelected = false;
 
-        public PlanSelectionWidget(PlanSelectionGrid parent, WorkerAllocationPlan plan) {
-            super(parent.getPanel(), WIDGET_W, WIDGET_H, null);
+        public PlanSelectionWidget(WorkerAllocationPlan plan) {
+            super(WIDGET_W, WIDGET_H, null);
             this.plan = plan;
 
             glow.type = GlowType.UNDERLAY;
-            glow.overlayBrightness = 0.6f;
+            glow.glowBrightness = 0.6f;
+            glow.flashBrightness = 0.9f;
             glow.color = base;
 
             border.centerColor = UIColors.WIDGET_BG;
@@ -203,7 +205,7 @@ public class WorkerAllocationDialog extends DialogPanel {
             final int iconS = 32;
 
             border.centerColor = isSelected ? UIColors.WIDGET_BG_SELECTED : UIColors.WIDGET_BG;
-            final Base icon = new Base(m_panel, iconS, iconS, plan.isCustom ? CUSTOM : PRESET, base, null);
+            final SpriteElement icon = new SpriteElement(iconS, iconS, plan.isCustom ? CUSTOM : PRESET, base, null);
             add(icon).inLMid(pad);
 
             final LabelAPI title = settings.createLabel(plan.id, Fonts.ORBITRON_20AA);
@@ -212,30 +214,24 @@ public class WorkerAllocationDialog extends DialogPanel {
         }
 
         @Override
-        public void renderBelow(float alpha) {
-            super.renderBelow(alpha);
-
-            border.render(pos.getX(), pos.getY(), alpha);
+        public void renderBelowImpl(float alpha) {
+            border.render(getX(), getY(), alpha);
         }
 
         public InteractionComp<PlanSelectionWidget> getInteraction() {
             return interaction;
         }
-
-        public UIComponentAPI getElement() {
-            return m_panel;
-        }
     }
 
-    public class ContentPanel extends CustomPanel implements UIBuildableAPI {
+    public class ContentPanel extends UIContainer implements UIBuildableAPI {
         private TextFieldAPI titleTextField = null;
         private TextFieldAPI descTextField = null;
         private boolean invalidId = false;
 
         public WorkerAllocationPlan selectedPlan;
 
-        public ContentPanel(UIPanelAPI parent, WorkerAllocationPlan plan) {
-            super(parent, CONTENT_PANEL_W, CONTENT_PANEL_H);
+        public ContentPanel(WorkerAllocationPlan plan) {
+            super(CONTENT_PANEL_W, CONTENT_PANEL_H);
 
             selectedPlan = plan;
             buildUI();
@@ -285,7 +281,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                 if (editable) {
                     container.addSectionHeading(str("uiTpTitleWorkerAllocationObjectiveSettings"), Alignment.MID, opad);
                     
-                    final RadioPanel objectiveRadio = new RadioPanel(container, 150, 45, LayoutMode.VERTICAL);
+                    final RadioPanel objectiveRadio = new RadioPanel(150, 45, LayoutMode.VERTICAL);
                     for (GoalType type : GoalType.values()) {
                         objectiveRadio.addOption(type.name(), selectedPlan.objConfig.goal == type);
                     }
@@ -296,9 +292,9 @@ public class WorkerAllocationDialog extends DialogPanel {
                     objectiveRadio.checkboxSize = 20;
                     objectiveRadio.buildUI();
                     
-                    container.addCustom(objectiveRadio.getPanel(), opad);
+                    container.addCustom(objectiveRadio, opad);
 
-                    final Slider iterCountSlider = new Slider(container, null, 100, 100000, 300, 32);
+                    final Slider iterCountSlider = new Slider(null, 100, 100000, 300, 32);
                     iterCountSlider.roundBarValue = true;
                     iterCountSlider.roundingIncrement = 1;
                     iterCountSlider.showValueOnly = true;
@@ -307,41 +303,41 @@ public class WorkerAllocationDialog extends DialogPanel {
                         selectedPlan.objConfig.maxIter = (int) iterCountSlider.getProgress();
                         return String.format("%.0f", iterCountSlider.getProgress());
                     };
-                    container.addCustom(iterCountSlider.getPanel(), pad).getPosition().rightOfBottom(objectiveRadio.getPanel(), opad);
-                    container.addPara(str("uiTpTitleSimplexSolverIterCount"), base, pad).getPosition().aboveLeft(iterCountSlider.getPanel(), pad);
+                    container.addCustom(iterCountSlider, pad).getPosition().rightOfBottom(objectiveRadio, opad);
+                    container.addPara(str("uiTpTitleSimplexSolverIterCount"), base, pad).getPosition().aboveLeft(iterCountSlider, pad);
 
                     container.setHeightSoFar(container.getHeightSoFar() - 50);
                     NativeUiUtils.resetFlowLeft(container, hpad);
 
                     container.addSectionHeading(str("uiTpTitleWorkerAllocationPlanSegments"), Alignment.MID, opad);
 
-                    final Button addSegmentBtn = new Button(container, 100, 25, str("uiBtnTitleAddWorkerAllocationPlanSegment"), Fonts.DEFAULT_SMALL, (btn) -> {
+                    final Button addSegmentBtn = new Button(100, 25, str("uiBtnTitleAddWorkerAllocationPlanSegment"), Fonts.DEFAULT_SMALL, (btn) -> {
                         selectedPlan.segments.segments.put("segment", new PiecewiseSegment(1d, "segment"));
                         buildUI();
                     });
-                    container.addCustom(addSegmentBtn.getPanel(), pad);
+                    container.addCustom(addSegmentBtn, pad);
 
                     for (PiecewiseSegment seg : selectedPlan.segments.segments.values()) {
-                        final SegmentPanel segPanel = new SegmentPanel(container, seg, selectedPlan.segments);
-                        container.addCustom(segPanel.getPanel(), hpad);
+                        final SegmentPanel segPanel = new SegmentPanel(seg, selectedPlan.segments);
+                        container.addCustom(segPanel, hpad);
                     }
 
                     container.addSectionHeading(str("uiTpTitleWorkerAllocationPlanGoals"), Alignment.MID, opad);
 
-                    final Button addGoalBtn = new Button(container, 100, 25, str("uiBtnTitleAddWorkerAllocationPlanGoal"), Fonts.DEFAULT_SMALL, (btn) -> {
+                    final Button addGoalBtn = new Button(100, 25, str("uiBtnTitleAddWorkerAllocationPlanGoal"), Fonts.DEFAULT_SMALL, (btn) -> {
                         new AddGoalDialog(this).show(0.3f, 0.3f);
                     });
-                    container.addCustom(addGoalBtn.getPanel(), pad);
+                    container.addCustom(addGoalBtn, pad);
 
                     for (CustomGoal goal : selectedPlan.goals) {
-                        final GoalPanel goalPanel = new GoalPanel(container, this, goal);
-                        container.addCustom(goalPanel.getPanel(), opad);
+                        final GoalPanel goalPanel = new GoalPanel(this, goal);
+                        container.addCustom(goalPanel, opad);
                     }
                 }
 
                 if (editable) {
-                    final Button savePlanBtn = new Button(container, 100, 30, str("uiBtnTitleSaveWorkerAllocationPlan"), null, null);
-                    container.addCustom(savePlanBtn.getPanel(), 0f).getPosition().inBL(hpad, hpad);
+                    final Button savePlanBtn = new Button(100, 30, str("uiBtnTitleSaveWorkerAllocationPlan"), null, null);
+                    container.addCustom(savePlanBtn, 0f).getPosition().inBL(hpad, hpad);
                     savePlanBtn.onClicked = (btn) -> {
                         try {
                             PlanConfig.map.put(selectedPlan.id, selectedPlan);
@@ -354,8 +350,8 @@ public class WorkerAllocationDialog extends DialogPanel {
                         }
                     };
 
-                    final Button deletePlanBtn = new Button(container, 100, 30, str("uiBtnTitleDeleteWorkerAllocationPlan"), null, null);
-                    container.addCustom(deletePlanBtn.getPanel(), 0f).getPosition().rightOfMid(savePlanBtn.getPanel(), hpad);
+                    final Button deletePlanBtn = new Button(100, 30, str("uiBtnTitleDeleteWorkerAllocationPlan"), null, null);
+                    container.addCustom(deletePlanBtn, 0f).getPosition().rightOfMid(savePlanBtn, hpad);
                     deletePlanBtn.onClicked = (btn) -> {
                         try {
                             PlanConfig.map.remove(selectedPlan.id);
@@ -370,8 +366,8 @@ public class WorkerAllocationDialog extends DialogPanel {
                         }
                     };
                 }
-                final Button runPlanBtn = new Button(container, 100, 30, str("uiBtnTitleRunWorkerAllocationPlan"), null, null);
-                container.addCustom(runPlanBtn.getPanel(), 0f).getPosition().inBR(hpad, hpad);
+                final Button runPlanBtn = new Button(100, 30, str("uiBtnTitleRunWorkerAllocationPlan"), null, null);
+                container.addCustom(runPlanBtn, 0f).getPosition().inBR(hpad, hpad);
                 runPlanBtn.onClicked = (btn) -> {
                     try {
                         EconomyEngine.instance().assignPlayerWorkers(selectedPlan);
@@ -388,12 +384,12 @@ public class WorkerAllocationDialog extends DialogPanel {
                 };
             }
 
-            ComponentFactory.addTooltip(container, CONTENT_PANEL_H, true, m_panel).inBL(0f, 0f);
+            ComponentFactory.addTooltip(container, CONTENT_PANEL_H, true, this).inBL(0f, 0f);
         }
 
         @Override
-        public void advance(float delta) {
-            super.advance(delta);
+        public void advanceImpl(float delta) {
+            super.advanceImpl(delta);
 
             if (selectedPlan == null || !selectedPlan.isCustom) return;
             if (titleTextField == null || descTextField == null) return;
@@ -414,14 +410,14 @@ public class WorkerAllocationDialog extends DialogPanel {
         }
     }
 
-    public static class SegmentPanel extends CustomPanel {
+    public static class SegmentPanel extends UIContainer {
         private final PiecewiseSegment segment;
         private final PiecewiseSegments segments;
         private final TextFieldAPI idField;
         private final TextFieldAPI valueField;
 
-        public SegmentPanel(UIPanelAPI parent, PiecewiseSegment seg, PiecewiseSegments segs) {
-            super(parent, SEGMENT_PANEL_W, SEGMENT_PANEL_H);
+        public SegmentPanel(PiecewiseSegment seg, PiecewiseSegments segs) {
+            super(SEGMENT_PANEL_W, SEGMENT_PANEL_H);
 
             segment = seg;
             segments = segs;
@@ -438,12 +434,12 @@ public class WorkerAllocationDialog extends DialogPanel {
             valueField.setText(Double.toString(seg.cost));
             valueField.getPosition().inBR(hpad, hpad);
 
-            ComponentFactory.addTooltip(tp, SEGMENT_PANEL_H - opad, false, m_panel).inBL(0f, 0f);
+            ComponentFactory.addTooltip(tp, SEGMENT_PANEL_H - opad, false, this).inBL(0f, 0f);
         }
 
         @Override
-        public void advance(float delta) {
-            super.advance(delta);
+        public void advanceImpl(float delta) {
+            super.advanceImpl(delta);
 
             if (!idField.getText().isBlank() && !segment.id.equals(idField.getText()))  {
                 segments.segments.remove(segment.id);
@@ -458,18 +454,18 @@ public class WorkerAllocationDialog extends DialogPanel {
         }
     }
 
-    public static class GoalPanel extends CustomPanel {
-        public GoalPanel(UIPanelAPI parent, ContentPanel content, CustomGoal goal) {
-            super(parent, GOAL_PANEL_W, GOAL_PANEL_H);
+    public static class GoalPanel extends UIContainer {
+        public GoalPanel(ContentPanel content, CustomGoal goal) {
+            super(GOAL_PANEL_W, GOAL_PANEL_H);
 
             final LabelAPI title = settings.createLabel(goal.getSerializationId(), Fonts.INSIGNIA_LARGE);
             add(title).inTL(hpad, hpad);
 
-            final RemoveGoalBtn removeBtn = new RemoveGoalBtn(m_panel, content, goal);
+            final RemoveGoalBtn removeBtn = new RemoveGoalBtn(content, goal);
             add(removeBtn).inTR(hpad, hpad);
 
             if (goal.getIcon() != null) {
-                final Base icon = new Base(m_panel, 28, 28, goal.getIcon(), null, null);
+                final SpriteElement icon = new SpriteElement(28, 28, goal.getIcon(), null, null);
                 add(icon).rightOfMid((UIComponentAPI) title, opad);
             }
 
@@ -483,7 +479,7 @@ public class WorkerAllocationDialog extends DialogPanel {
                 switch (param.getParamType()) {
                 case BOOLEAN:
                     final BooleanParameter boolParam = (BooleanParameter) param;
-                    final CheckboxButton btn = new CheckboxButton(m_panel, 22, param.name, Fonts.DEFAULT_SMALL, null, UICheckboxSize.SMALL, false);
+                    final CheckboxButton btn = new CheckboxButton(22, param.name, Fonts.DEFAULT_SMALL, null, UICheckboxSize.SMALL, false);
                     btn.onClicked = (button) -> {
                         button.setChecked(!button.isChecked());
                         boolParam.setter.accept(button.isChecked());
@@ -494,7 +490,7 @@ public class WorkerAllocationDialog extends DialogPanel {
 
                 case DOUBLE:
                     final DoubleParameter doubleParam = (DoubleParameter) param;
-                    final Slider slider = new Slider(m_panel, null, (float)doubleParam.getMin(), (float)doubleParam.getMax(), GOAL_PANEL_W - opad*2, 32);
+                    final Slider slider = new Slider(null, (float)doubleParam.getMin(), (float)doubleParam.getMax(), GOAL_PANEL_W - opad*2, 32);
                     slider.customText = () -> {
                         doubleParam.setValue(slider.getProgress()); // using the custom text setter as a listener.
                         return String.format("%.2f", slider.getProgress());
@@ -505,7 +501,7 @@ public class WorkerAllocationDialog extends DialogPanel {
 
                 case MULTI_SELECT:
                     final MultiSelectParameter multiParam = (MultiSelectParameter) param;
-                    final MultiSelect multiPanel = new MultiSelect(m_panel, GOAL_PANEL_W - opad*2, GOAL_PANEL_H - 25, multiParam.getAllOptions(), LayoutMode.VERTICAL);
+                    final MultiSelect multiPanel = new MultiSelect(GOAL_PANEL_W - opad*2, GOAL_PANEL_H - 25, multiParam.getAllOptions(), LayoutMode.VERTICAL);
                     for (String val : multiParam.getValue()) {
                         multiPanel.selectFirst(val);
                     }
@@ -518,7 +514,7 @@ public class WorkerAllocationDialog extends DialogPanel {
 
                 case RADIO:
                     final RadioParameter radioParam = (RadioParameter) param;
-                    final RadioPanel radioPanel = new RadioPanel(m_panel, GOAL_PANEL_W - opad*2, GOAL_PANEL_H - 25, LayoutMode.VERTICAL);
+                    final RadioPanel radioPanel = new RadioPanel(GOAL_PANEL_W - opad*2, GOAL_PANEL_H - 25, LayoutMode.VERTICAL);
                     for (String opt : radioParam.getAllOptions()) {
                         radioPanel.addOption(opt, opt.equals(radioParam.getter.get()));
                     }
@@ -560,7 +556,7 @@ public class WorkerAllocationDialog extends DialogPanel {
         private final DialogPanel dialog;
 
         public GoalRegistryGrid(DialogPanel dialog, ContentPanel content) {
-            super(dialog.getPanel(), 460, 330, 450, 30, hpad);
+            super(460, 330, 450, 30, hpad);
             this.content = content;
             this.dialog = dialog;
 
@@ -574,7 +570,7 @@ public class WorkerAllocationDialog extends DialogPanel {
         }
 
         protected GoalRegistryWidget createWidget(String id, int index) {
-            return new GoalRegistryWidget(m_panel, id);
+            return new GoalRegistryWidget(id);
         }
 
         @Override
@@ -595,8 +591,8 @@ public class WorkerAllocationDialog extends DialogPanel {
 
         private final String goalId;
 
-        public GoalRegistryWidget(UIPanelAPI parent, String goalId) {
-            super(parent, 450, 30, null);
+        public GoalRegistryWidget(String goalId) {
+            super(450, 30, null);
 
             glow.color = base;
             glow.type = GlowType.UNDERLAY;
@@ -609,7 +605,7 @@ public class WorkerAllocationDialog extends DialogPanel {
         public void buildUI() {
             final CustomGoal goal = PlanningGoalRegistry.createGoal(goalId);
             if (goal.getIcon() != null) {
-                final Base icon = new Base(m_panel, 28, 28, goal.getIcon(), null, null);
+                final SpriteElement icon = new SpriteElement(28, 28, goal.getIcon(), null, null);
                 add(icon).inLMid(0f);
             }
 
@@ -621,17 +617,13 @@ public class WorkerAllocationDialog extends DialogPanel {
         public InteractionComp<GoalRegistryWidget> getInteraction() {
             return interaction;
         }
-
-        public UIComponentAPI getElement() {
-            return m_panel;
-        }
     }
 
     public static class RemoveGoalBtn extends Button {
         private static final SpriteAPI ICON = settings.getSprite("warroom", "icon_close");
 
-        public RemoveGoalBtn(final UIPanelAPI parent, final ContentPanel content, final CustomGoal goal) {
-            super(parent, 20, 20, null, null, (btn) -> {
+        public RemoveGoalBtn(final ContentPanel content, final CustomGoal goal) {
+            super(20, 20, null, null, (btn) -> {
                 content.selectedPlan.goals.remove(goal);
                 content.buildUI();
             });
@@ -639,7 +631,7 @@ public class WorkerAllocationDialog extends DialogPanel {
             bgAlpha = 0f;
             bgDisabledAlpha = 0f;
 
-            final Base icon = new Base(m_panel, 20, 20, ICON, Color.RED, null);
+            final SpriteElement icon = new SpriteElement(20, 20, ICON, Color.RED, null);
             add(icon).inBL(0f, 0f);
             glow.type = GlowType.ADDITIVE;
             glow.additiveSprite = icon.getSprite();

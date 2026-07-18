@@ -35,8 +35,6 @@ public class CommodityDomain implements Serializable {
 
     private final ArrayMap<String, CommodityCell> comCells = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
     private final List<ComTradeFlow> tradeFlows = new ArrayList<>(EconomyInfo.getMarketsCount());
-    private final ArrayMap<String, Float> informalExportFlows = new ArrayMap<>(EconomyInfo.getMarketsCount()); // TODO remove after incompat update
-    private final ArrayMap<String, Float> informalImportFlows = new ArrayMap<>(EconomyInfo.getMarketsCount()); // TODO remove after incompat update
     private InformalExchangeNode informalNode;
 
     private float[] tradeVolumeHistory = new float[EconConfig.HISTORY_LENGTH];

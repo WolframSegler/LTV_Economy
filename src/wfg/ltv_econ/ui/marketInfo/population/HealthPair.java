@@ -19,8 +19,8 @@ import wfg.native_ui.util.NativeUiUtils.AnchorType;
 public class HealthPair extends IconValuePairTp {
     private static final SpriteAPI HEALTH_ICON = settings.getSprite("ui", "health");
 
-    public HealthPair(UIPanelAPI parent, int w, int h, MarketPopulationData data, Color color, String font) {
-        super(parent, w, h, HEALTH_ICON, data.getHealth(), false, color, font);
+    public HealthPair(int w, int h, MarketPopulationData data, Color color, String font) {
+        super(w, h, HEALTH_ICON, data.getHealth(), false, color, font);
         final LabelAPI lbl = label();
         lbl.setHighlightOnMouseover(true);
         lbl.setAlignment(Alignment.MID);
@@ -37,7 +37,7 @@ public class HealthPair extends IconValuePairTp {
             );
         };
         tooltip.positioner = (tp, exp) -> {
-            NativeUiUtils.anchorPanelWithBounds(tp, m_panel, AnchorType.RightTop, opad);
+            NativeUiUtils.anchorPanelWithBounds(tp, this, AnchorType.RightTop, opad);
         };
     }
 }

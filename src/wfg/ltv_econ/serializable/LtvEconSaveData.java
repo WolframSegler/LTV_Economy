@@ -23,7 +23,7 @@ public class LtvEconSaveData implements Serializable {
     // SERIALIZABLE DATA
     public final PlayerFactionSettings playerFactionSettings;
     public final WorkerRegistry workerRegistry;
-    public WorkerPoolRegistry poolRegistry; // TODO make final after incompat update
+    public final WorkerPoolRegistry poolRegistry;
     public final MarketFinanceRegistry financeRegistry;
     public final EconomyEngine economyEngine;
     public final LtvEconFleetRouteManager econRouteManager;
@@ -38,13 +38,6 @@ public class LtvEconSaveData implements Serializable {
         economyEngine = new EconomyEngine();
         econRouteManager = new LtvEconFleetRouteManager();
         patrolRouteManager = new PatrolFleetRouteManager();
-    }
-
-    // TODO remove after incompat update
-    private Object readResolve() {
-        if (poolRegistry == null) poolRegistry = new WorkerPoolRegistry();
-
-        return this;
     }
 
     public static final LtvEconSaveData loadInstance(boolean forceRefresh, boolean newGame) {
