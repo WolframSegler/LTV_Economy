@@ -1,6 +1,11 @@
 Version 0.5.0-beta | NOT SAVE COMPATIBLE
 - Switched to NativeUI (formerly WrapUI) v0.5.0 for this update. Previous versions will not work.
 - New worker pool icon and mod icon by Sakura.
+- The price for imports between colonies now account for imports en-route when calculating local prices.
+- Reduced the time it takes for trade convoys to load and unload goods.
+- Colonies in debt will reduce their import targets and their import price.
+- Added a background "private sector" economic loop: credits paid to independent captains, patrols, and other services are gradually recycled back into colony vaults.
+- The overall credit supply now grows slowly with population.
 
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.

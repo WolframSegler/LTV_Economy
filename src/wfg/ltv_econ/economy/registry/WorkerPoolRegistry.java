@@ -110,10 +110,10 @@ public class WorkerPoolRegistry {
 
         public final synchronized long getWorkerPoolUncached() {
             final int size = market.getSize();
-            final double base = getWorkerRatio(size) * Math.pow(10, size);
+            final double base = getWorkerRatio(size) * Math.pow(10d, size);
             if (EconConfig.GROWTH_EFFECT_WORKER_POOL) {
                 final float t = Misc.getMarketSizeProgress(market);
-                final double dest = getWorkerRatio(size+1) * Math.pow(10, size+1);
+                final double dest = getWorkerRatio(size+1) * Math.pow(10d, size+1);
                 return (long) Arithmetic.lerp(base, dest, t);
             } else {
                 return (long) base;

@@ -172,9 +172,27 @@ public class CommodityDomain implements Serializable {
 
         for (int expInd = 0; expInd < exporters.size(); expInd++) {
             for (int impInd = 0; impInd < importers.size(); impInd++) {
-                pairScores[expInd * importers.size() + impInd] = computePairScore(
-                    exporters.get(expInd), importers.get(impInd)
-                );
+                final CommodityCell exporter = exporters.get(expInd);
+                final CommodityCell importer = importers.get(impInd);
+
+                { // ABORT CONDITIONS
+                    if (exporter.market.getFaction().getRelationship(importer.market.getFactionId()) <
+                        EconConfig.MIN_RELATION_TO_TRADE
+                    ) { continue;}
+        
+                    if (exporter.market.isPlayerOwned()^importer.market.isPlayerOwned()) {
+                        final String tradingFactionID = exporter.market.isPlayerOwned() ?
+                            importer.market.getFaction().getId() : exporter.market.getFaction().getId();
+        
+                        if (facSettings.embargoedFactions.contains(tradingFactionID)) {
+                            continue;
+                        }
+                    }
+
+                    if (!exporter.market.hasSpaceport() || !importer.market.hasSpaceport()) continue;
+                }
+
+                pairScores[expInd * importers.size() + impInd] = computePairScore(exporter, importer);
             }
         }
 
@@ -191,23 +209,6 @@ public class CommodityDomain implements Serializable {
 
             final CommodityCell expCell = expImp.one;
             final CommodityCell impCell = expImp.two;
-
-            { // ABORT CONDITIONS
-                if (expCell.market.getFaction().getRelationship(impCell.market.getFactionId()) <
-                    EconConfig.MIN_RELATION_TO_TRADE
-                ) { continue;}
-    
-                if (expCell.market.isPlayerOwned()^impCell.market.isPlayerOwned()) {
-                    final String tradingFactionID = expCell.market.isPlayerOwned() ?
-                        impCell.market.getFaction().getId() : expCell.market.getFaction().getId();
-    
-                    if (facSettings.embargoedFactions.contains(tradingFactionID)) {
-                        continue;
-                    }
-                }
-
-                if (!expCell.market.hasSpaceport() || !impCell.market.hasSpaceport()) continue;
-            }
 
             final double exportableRemaining = expCell.computeExportAmount();
             final double deficitRemaining = impCell.computeImportAmount() - cycleAllocated.getOrDefault(impCell, 0d);
@@ -388,9 +389,13 @@ public class CommodityDomain implements Serializable {
     }
 
     private static final float accessibilityFactor(MarketAPI exporter, MarketAPI importer) {
-        float expValue = smoothAroundOne(exporter.getAccessibilityMod().computeEffective(0)) * 0.3f;
-        float impValue = smoothAroundOne(importer.getAccessibilityMod().computeEffective(0)) * 0.7f;
+        final float expValue = accessibilityFactor(exporter) * 0.3f;
+        final float impValue = accessibilityFactor(importer) * 0.7f;
         return expValue + impValue;
+    }
+
+    public static final float accessibilityFactor(MarketAPI market) {
+        return smoothAroundOne(market.getAccessibilityMod().computeEffective(0f));
     }
 
     private static final float smoothAroundOne(float value) {
@@ -426,10 +431,8 @@ public class CommodityDomain implements Serializable {
         return score;
     }
 
-    private static final float sizeFactor(MarketAPI exporter) {
-        final int size = exporter.getSize();
-        final int maxSize = 10;
-        return (float) Math.sqrt(size / (float) maxSize);
+    public static final float sizeFactor(MarketAPI exporter) {
+        return (float) Math.sqrt(exporter.getSize() / (float) 10f);
     }
 
     private final void resizeHistoryArrays() {

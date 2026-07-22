@@ -21,6 +21,7 @@ import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.constant.strings.Consumption;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
 import wfg.native_ui.util.ArrayMap;
@@ -41,6 +42,8 @@ public class CommodityCell implements Serializable {
 
     private double stored = 0d;
 
+    public float nonExportableStock;
+
     private final ArrayMutableStat production = new ArrayMutableStat(0f);
     private final ArrayMutableStat consumption = new ArrayMutableStat(0f);
     private final ArrayMutableStat targetQuantum = new ArrayMutableStat(0f);
@@ -54,8 +57,6 @@ public class CommodityCell implements Serializable {
     public transient float globalExports = 0f;
     public transient float informalImports = 0f;
     public transient float informalExports = 0f;
-
-    public float nonExportableStock;
 
     public final ArrayMap<String, MutableStat> getIndProductionStats() {
         return productionMutables;
@@ -122,7 +123,7 @@ public class CommodityCell implements Serializable {
         final float maxStockBeforeExport = getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR;
         
         final double target = Math.max(0d,
-            getTargetStored() + 1.5f * EconConfig.TRADE_INTERVAL * targetQuantum - stored - informalImports
+            getTargetStored() * getDebtStressFactor() + 1.5f * EconConfig.TRADE_INTERVAL * targetQuantum - stored - informalImports
         );
 
         final double maxAdditional = Math.max(0d, maxStockBeforeExport - stored - getPendingImports());
@@ -254,12 +255,22 @@ public class CommodityCell implements Serializable {
         addStoredAmount(getQuantumNetChange());
     }
 
-    /** symmetrical */
     public final float getUnitPriceForTrade(TransactionDirection type, long amount) {
         return BasePriceCalculator.getUnitPrice(type, amount,
-            stored + informalImports - informalExports,
-            spec.getBasePrice(), getTargetStored()
+            stored + informalImports - informalExports
+            + getPendingImports() / 2d, // imports en-route also influence price, but not as strongly
+            spec.getBasePrice(), getTargetStored() * getDebtStressFactor()
         );
+    }
+
+    private final float getDebtStressFactor() {
+        final long debt = Math.max(0l, -EconomyEngine.instance().getCredits(marketID));
+        if (debt <= 0l) return 1f;
+
+        final long debtCap = EconConfig.DEBT_DEBUFF_TIERS.get(EconConfig.DEBT_DEBUFF_TIERS.size() - 1).threshold();
+        final float stress = (float) Math.min(1d, (double) debt / (double) debtCap);
+
+        return 1f - (1f - EconConfig.DEFICIT_THRESHOLD) * stress;
     }
 
     /** symmetrical */

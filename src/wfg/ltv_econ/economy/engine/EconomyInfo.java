@@ -101,7 +101,7 @@ public class EconomyInfo {
         
         for (MarketLedger ledger : MarketFinanceRegistry.instance().getRegistry()) {
             final MarketAPI market = econ.getMarket(ledger.marketID);
-            if (!market.getFactionId().equals(factionID)) continue;
+            if (market == null || !market.getFactionId().equals(factionID)) continue;
 
             netCreditFlow += ledger.getLastMonth(TRADE_EXPORT_KEY + comID);
             netCreditFlow += ledger.getLastMonth(TRADE_IMPORT_KEY + comID);

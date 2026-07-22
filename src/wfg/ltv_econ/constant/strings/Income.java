@@ -55,6 +55,9 @@ public class Income {
     public static final String TRADE_IMPORT_KEY = "trade_import_";
     public static final String TRADE_IMPORT_DESC = str("TRADE_IMPORT_DESC");
 
+    public static final String PRIVATE_SECTOR_KEY = "private_sector";
+    public static final String PRIVATE_SECTOR_DESC = str("PRIVATE_SECTOR_EARNINGS_DESC");
+
     public static final String INDUSTRY_INCOME_KEY = "industry_income_";
     public static final String INDUSTRY_INCOME_DESC = str("INDUSTRY_INCOME_DESC");
     public static final String INDUSTRY_UPKEEP_KEY = "industry_upkeep";
@@ -85,6 +88,7 @@ public class Income {
             case INDUSTRY_UPKEEP_KEY: return INDUSTRY_UPKEEP_DESC;
             case COLONY_HAZARD_PAY_KEY: return COLONY_HAZARD_PAY_DESC;
             case INDEPENDENT_PATROL_COST_KEY: return INDEPENDENT_PATROL_COST_DESC;
+            case PRIVATE_SECTOR_KEY: return PRIVATE_SECTOR_DESC;
             default: return "";
         }
     }

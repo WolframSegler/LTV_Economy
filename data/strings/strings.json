@@ -28,6 +28,7 @@
         "REDISTRIBUTION_DISCLAIMER": "* If the redistribute credits option is enabled, credit reserves may differ from the calculated net income due to internal reallocation.",
         "TRADE_FUEL_PREMIUM_DESC": "Fuel premium (%1$s)",
         "INDEPENDENT_VALUE_PERCENT_DESC": "Percentage of cargo value (%1$s)",
+        "PRIVATE_SECTOR_EARNINGS_DESC": "Private sector earnings",
         "incomeReportExportsDesc": "Income from exports by this outpost or colony. Smuggling exports do not produce income. In-faction imports are %1$s cheaper than normal",
         "domesticDemandMetTxt": "Domestic goods demand met",
         "luxuryDemandMetTxt": "Luxury goods demand met",

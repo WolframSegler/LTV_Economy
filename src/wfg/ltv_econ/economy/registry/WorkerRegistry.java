@@ -67,8 +67,9 @@ public class WorkerRegistry implements Serializable {
     public final void register(Industry ind) {
         if (!IndustryConfigManager.getIndConfig(ind).workerAssignable) return;
 
-        final String key = makeKey(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
-        registry.putIfAbsent(key, new WorkerIndustryData(ind.getMarket().getId(), ind.getId()));
+        final String marketID = ind.getMarket().getId();
+        final String key = makeKey(marketID, IndustryConfigManager.getBaseIndustryID(ind));
+        registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind.getId()));
     }
 
     public final void register(MarketAPI market) {

@@ -11,6 +11,7 @@ import com.fs.starfarer.api.campaign.listeners.CommodityTooltipModifier;
 import com.fs.starfarer.api.campaign.listeners.CoreUITabListener;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.util.TooltipUtils;
 
 public final class UIInjectorListener implements CoreUITabListener, CommodityTooltipModifier {
@@ -18,6 +19,8 @@ public final class UIInjectorListener implements CoreUITabListener, CommodityToo
     @Override
     public void reportAboutToOpenCoreTab(CoreUITabId tabID, Object param) {
         final SectorAPI sector = Global.getSector();
+
+        EconomyEngine.instance().fakeAdvance();
 
         sector.removeTransientScriptsOfClass(CoreTabUIBuilder.class);
 

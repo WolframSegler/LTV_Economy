@@ -26,7 +26,6 @@ STARTING_CREDITS_FOR_MARKET,殖民地初始资金,Int,50000,,每个殖民地的�
 CREDIT_WITHDRAWAL_LIMIT,每月提款限额,Int,100000,,您每月可以从殖民地提取的最大星币数量。,0,1000000000,经济
 ,,,,,,,,
 TRADE_INTERVAL,贸易周期,Int,15,,市场每隔x天进行一次贸易。,7,30,贸易
-DAYS_TO_COVER_PER_IMPORT,单次贸易覆盖上限,Int,28,,限制每次贸易可满足的需求天数，以减少波动。低于贸易周期将导致持续短缺。,1,360,贸易
 FACTION_EXCHANGE_MULT,派系内部价格乘数,Double,0.3,,调整同派系市场之间贸易的商品价格。设为0则派系内部贸易免费。,0,1,贸易
 EMBARGO_REP_DROP,禁运声望惩罚,Double,0.4,,实施禁运造成的关系惩罚。1代表100点关系值。,0,1,贸易
 MIN_RELATION_TO_TRADE,最低贸易关系,Double,-0.75,,派系间能够进行贸易的最低关系值。低于该阈值的派系将无法贸易。,-1,0,贸易

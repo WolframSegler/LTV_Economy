@@ -595,10 +595,10 @@ public class EconomyLoop {
 
         for (String marketID : engine.registeredMarkets) {
             final MarketAPI market = econ.getMarket(marketID);
-            if (market != null) {
-                final float wageCost = engine.info.getDailyWages(market);
-                registry.getLedger(marketID).add(WORKER_WAGES_KEY, -wageCost, getDesc(WORKER_WAGES_KEY));
-            }
+            if (market == null) continue;
+            
+            final float wageCost = engine.info.getDailyWages(market);
+            registry.getLedger(marketID).add(WORKER_WAGES_KEY, -wageCost, getDesc(WORKER_WAGES_KEY));
         }
     }
 

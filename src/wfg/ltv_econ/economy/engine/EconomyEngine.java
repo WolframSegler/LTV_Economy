@@ -300,6 +300,10 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return marketCredits.getOrDefault(marketID, 0l);
     }
 
+    public final long getCredits(MarketAPI market) {
+        return getCredits(market.getId());
+    }
+
     public final FactionShipInventory getFactionShipInventory(String factionID) {
         return factionShipInventories.computeIfAbsent(factionID, k -> new FactionShipInventory(factionID));
     }
@@ -625,11 +629,19 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 		return result;
 	}
 
+    /** Called before {@link MarketFinanceRegistry#endMonth()} */
     private final void endMonth() {
         final MarketFinanceRegistry reg = MarketFinanceRegistry.instance();
 
+        final List<MarketAPI> markets = new ArrayList<>(EconomyInfo.getMarketsCount());
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            if (!registeredMarkets.contains(market.getId())) continue;
+            if (registeredMarkets.contains(market.getId())) {
+                markets.add(market);
+            }
+        }
+        final int N = markets.size();
+
+        for (MarketAPI market : markets) {
             final MarketLedger ledger = reg.getLedger(market.getId());
 
             for (Industry ind : market.getIndustries()) {
@@ -641,6 +653,60 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
                 final int indUpkeep = info.getIndustryUpkeep(ind).getModifiedInt();
                 if (indUpkeep != 0) {
                     ledger.add(INDUSTRY_UPKEEP_KEY + ind.getId(), -indUpkeep, strf("incomeReportIndustryUpkeepTxt", ind.getCurrentName()));
+                }
+            }
+        }
+
+        long globalNet = 0l;
+        for (MarketLedger ledger : reg.getRegistry()) {
+            globalNet += ledger.getNetCurrentMonth();
+        }
+        final long pool = Math.max(0l, -globalNet);
+
+        if (pool > 0l) {
+            final double[] weights = new double[N];
+            double totalWeight = 0d;
+
+            for (int i = 0; i < N; i++) {
+                final MarketAPI m = markets.get(i);
+                final double w = CommodityDomain.sizeFactor(m) * CommodityDomain.accessibilityFactor(m) * (m.isPlayerOwned() ? 0.3f : 1f);
+                weights[i] = w;
+                totalWeight += w;
+            }
+
+            for (int i = 0; i < N; i++) {
+                final long share = (long) (pool * (weights[i] / totalWeight));
+                if (share > 0l) {
+                    reg.getLedger(markets.get(i)).add(PRIVATE_SECTOR_KEY, share, getDesc(PRIVATE_SECTOR_KEY));
+                }
+            }
+        }
+
+        final long[] npcPops = new long[N];
+        long totalPop = 0l;
+        long totalNpcCredits = 0l;
+
+        for (int i = 0; i < N; i++) {
+            final MarketAPI market = markets.get(i);
+            if (market.isPlayerOwned()) continue;
+            final long pop = (long) Math.pow(10d, market.getSize());
+            npcPops[i] = pop;
+            totalPop += pop;
+            totalNpcCredits += EconomyEngine.instance().getCredits(market);
+        }
+
+        final long targetMoney = (long)(totalPop * EconConfig.avg_wage);
+        final long gap = Math.max(0l, targetMoney - totalNpcCredits);
+        final float convergenceRate = 0.01f;
+        final long injection = (long)(gap * convergenceRate);
+
+        if (injection > 0l && totalPop > 0l) {
+            for (int i = 0; i < N; i++) {
+                final long popShare = npcPops[i];
+                if (popShare == 0l) continue;
+                final long add = (long)(injection * ((double) popShare / totalPop));
+                if (add > 0l) {
+                    reg.getLedger(markets.get(i)).add(PRIVATE_SECTOR_KEY, add, getDesc(PRIVATE_SECTOR_KEY));
                 }
             }
         }

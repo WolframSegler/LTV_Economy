@@ -28,6 +28,7 @@
         "REDISTRIBUTION_DISCLAIMER": "* 如果启用了重新分配星币选项，由于内部再分配，星币储备可能与计算出的净收入存在差异。",
         "TRADE_FUEL_PREMIUM_DESC": "燃料溢价（%1$s）",
         "INDEPENDENT_VALUE_PERCENT_DESC": "货物价值百分比（%1$s）",
+        "PRIVATE_SECTOR_EARNINGS_DESC": "私营经济收益",
         "incomeReportExportsDesc": "此前哨站或殖民地的出口收入。走私出口不产生收入。派系内部进口比正常便宜%1$s",
         "domesticDemandMetTxt": "国内商品需求已满足",
         "luxuryDemandMetTxt": "奢侈品需求已满足",

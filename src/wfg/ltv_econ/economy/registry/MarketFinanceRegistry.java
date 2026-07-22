@@ -73,10 +73,10 @@ public class MarketFinanceRegistry implements Serializable {
     }
 
     public static class MarketLedger implements Serializable {
-        private final ArrayMap<String, Long> currentMonth = new ArrayMap<>(8);
-        private final ArrayMap<String, Long> lastMonth = new ArrayMap<>(8);
-        private final ArrayMap<String, String> currentMonthDesc = new ArrayMap<>(8);
-        private final ArrayMap<String, String> lastMonthDesc = new ArrayMap<>(8);
+        private final ArrayMap<String, Long> currentMonth = new ArrayMap<>(16);
+        private final ArrayMap<String, Long> lastMonth = new ArrayMap<>(16);
+        private final ArrayMap<String, String> currentMonthDesc = new ArrayMap<>(16);
+        private final ArrayMap<String, String> lastMonthDesc = new ArrayMap<>(16);
         public final String marketID;
 
         public MarketLedger(String marketID) {

@@ -20,7 +20,7 @@ public class BasePriceCalculator {
     /** Multiplier when stock is at {@link #ABSOLUTE_DEFICIT_BOUND}. */
     static final double ABSOLUTE_DEFICIT_MULT = 3d;
     /** Multiplier when stock is at {@link #ABSOLUTE_EXCESS_BOUND}. */
-    static final double ABSOLUTE_EXCESS_MULT = 0.3;
+    static final double ABSOLUTE_EXCESS_MULT = 0.3d;
 
     // ------------------------ TUNABLE END ------------------------
 

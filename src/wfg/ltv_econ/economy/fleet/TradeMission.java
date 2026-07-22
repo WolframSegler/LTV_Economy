@@ -60,10 +60,10 @@ public class TradeMission implements Serializable {
         this.dest = dest;
         this.inFaction = inFaction;
 
-        final float meanSize = (float) Math.sqrt(source.getSize()*source.getSize() + dest.getSize()*dest.getSize());
+        final float minSize = Math.min(source.getSize(), dest.getSize());
         dist = Misc.getDistanceLY(source.getLocationInHyperspace(), dest.getLocationInHyperspace());
         travelDur = dist / EconConfig.TRAVEL_SPEED_LY_DAY;
-        transferDur = meanSize * (0.75f + (float) Math.random() * 0.5f);
+        transferDur = minSize * (0.5f + (float) Math.random() * 0.25f);
         totalDur = (int) Math.ceil(travelDur + transferDur * 2);
         
         durRemaining = totalDur;

@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.fs.starfarer.api.Global;
 
-import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
 import wfg.ltv_econ.ui.marketInfo.LtvCommodityPanel;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
@@ -106,8 +105,6 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
             }
         }
         if (anchorChild == null) return;
-
-        EconomyEngine.instance().fakeAdvance();
 
         addManagementButtons(managementPanel, managementChildren, anchorChild);
 
