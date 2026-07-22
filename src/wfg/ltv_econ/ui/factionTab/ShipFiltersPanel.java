@@ -17,8 +17,8 @@ import wfg.ltv_econ.ui.fleet.ShipFilters;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.functional.Button.CutStyle;
+import wfg.native_ui.ui.widget.Button;
+import wfg.native_ui.ui.widget.Button.CutStyle;
 import wfg.native_ui.util.NativeUiUtils;
 
 public final class ShipFiltersPanel extends UIContainer {

@@ -29,7 +29,7 @@ import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.dialog.DialogPanel;
-import wfg.native_ui.ui.functional.UIClickable;
+import wfg.native_ui.ui.interaction.UIClickable;
 import wfg.native_ui.ui.table.GridTable;
 import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;

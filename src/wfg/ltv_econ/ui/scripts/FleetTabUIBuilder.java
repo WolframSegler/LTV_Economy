@@ -15,9 +15,9 @@ import com.fs.starfarer.campaign.fleet.FleetMember;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.fleetTab.button.TransferToFactionInventoryBtn;
-import wfg.ltv_econ.ui.reusable.IdentityMarker;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.MethodFields;
+import wfg.native_ui.ui.util.IdentityMarker;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 

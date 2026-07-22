@@ -13,7 +13,7 @@ import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.marketInfo.dialogs.MarketEventsDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.functional.DockButton;
+import wfg.native_ui.ui.widget.DockButton;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;

@@ -12,7 +12,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.ui.fleetTab.dialog.TransferToFactionInventoryDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.functional.Button;
+import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;

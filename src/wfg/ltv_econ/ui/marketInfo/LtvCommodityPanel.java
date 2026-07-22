@@ -18,7 +18,7 @@ import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.OutlineComp;
-import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.functional.ClickHandler;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;

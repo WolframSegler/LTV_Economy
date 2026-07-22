@@ -14,10 +14,10 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.ui.fleet.TradeMissionsDialog;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ColonyInvDialog;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.functional.DockButton;
+import wfg.native_ui.ui.widget.Button;
+import wfg.native_ui.ui.widget.DockButton;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
-import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.ui.functional.CallbackRunnable;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 

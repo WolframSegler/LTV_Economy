@@ -12,8 +12,8 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.ui.factionTab.dialog.FactionSelectionDialog;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.functional.DockButton;
-import wfg.native_ui.ui.functional.Button.CutStyle;
+import wfg.native_ui.ui.widget.DockButton;
+import wfg.native_ui.ui.widget.Button.CutStyle;
 
 public final class ShipInventoryPanel extends UIContainer implements UIBuildableAPI {
     

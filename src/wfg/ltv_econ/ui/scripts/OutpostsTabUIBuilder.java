@@ -27,8 +27,8 @@ import wfg.ltv_econ.ui.outpostsTab.ColonyPopulationTable;
 import wfg.ltv_econ.ui.outpostsTab.FactionResourcesTable;
 import wfg.ltv_econ.ui.reusable.AbstractTabButtonInjector;
 import wfg.ltv_econ.util.wrappers.MarketWrapper;
-import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.functional.Button.CutStyle;
+import wfg.native_ui.ui.widget.Button;
+import wfg.native_ui.ui.widget.Button.CutStyle;
 
 public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
     private static final Object outpostRowMarketWrapperField = findMarketHolder();

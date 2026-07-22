@@ -17,9 +17,9 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.ui.scripts.CoreTabUIBuilder;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.MethodFields;
-import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.ui.widget.Button;
+import wfg.native_ui.ui.widget.Button.CutStyle;
+import wfg.native_ui.ui.functional.CallbackRunnable;
 
 public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, CallbackRunnable<Button> {
     protected static final int BUTTON_HEIGHT = 18;

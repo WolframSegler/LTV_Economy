@@ -15,7 +15,6 @@ import wfg.ltv_econ.ui.marketInfo.buttons.IncomeLabel;
 import wfg.ltv_econ.ui.marketInfo.buttons.ManagePopButton;
 import wfg.ltv_econ.ui.marketInfo.buttons.MarketEventsButton;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ComDetailDialog;
-import wfg.ltv_econ.ui.reusable.IdentityMarker;
 import wfg.ltv_econ.util.TooltipUtils;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.ltv_econ.util.wrappers.MarketWrapper;
@@ -23,7 +22,8 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.MethodFields;
-import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.functional.ClickHandler;
+import wfg.native_ui.ui.util.IdentityMarker;
 
 import com.fs.starfarer.campaign.econ.Market;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryListPanel;

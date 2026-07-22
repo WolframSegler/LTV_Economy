@@ -14,8 +14,8 @@ import wfg.ltv_econ.ui.factionTab.dialog.WorkerAllocationDialog;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.ui.widget.Button;
+import wfg.native_ui.ui.functional.CallbackRunnable;
 
 public final class FactionAdministrationPanel extends UIContainer implements UIBuildableAPI {
 

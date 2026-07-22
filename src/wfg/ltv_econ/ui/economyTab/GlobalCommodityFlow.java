@@ -23,7 +23,7 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.ui.reusable.ComIconPanel;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.component.InteractionComp.ClickHandler;
+import wfg.native_ui.ui.functional.ClickHandler;
 import wfg.native_ui.ui.component.TooltipComp.TooltipBuilder;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.visual.PieChart;

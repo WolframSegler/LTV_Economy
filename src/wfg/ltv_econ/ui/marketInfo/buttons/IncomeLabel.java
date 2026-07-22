@@ -25,7 +25,7 @@ import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.functional.DockClickable;
+import wfg.native_ui.ui.widget.DockClickable;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;

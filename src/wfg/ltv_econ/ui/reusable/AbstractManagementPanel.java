@@ -14,9 +14,9 @@ import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIContainerAPI;
-import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.ui.functional.Button.CutStyle;
-import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.ui.widget.Button;
+import wfg.native_ui.ui.widget.Button.CutStyle;
+import wfg.native_ui.ui.functional.CallbackRunnable;
 
 public abstract class AbstractManagementPanel extends UIContainer implements UIBuildableAPI {
     protected static final int MAIN_PANEL_W = 1250;

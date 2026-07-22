@@ -31,7 +31,7 @@ import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
-import wfg.native_ui.ui.functional.UIClickable;
+import wfg.native_ui.ui.interaction.UIClickable;
 import wfg.native_ui.ui.container.BaseContainer;
 import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.IconValuePair;

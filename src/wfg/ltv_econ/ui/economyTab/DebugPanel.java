@@ -26,8 +26,8 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.Manufacturing;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.functional.Button;
-import wfg.native_ui.util.CallbackRunnable;
+import wfg.native_ui.ui.widget.Button;
+import wfg.native_ui.ui.functional.CallbackRunnable;
 
 public final class DebugPanel extends UIContainer implements UIBuildableAPI {
     private static final Logger logger = Global.getLogger(DebugPanel.class); 

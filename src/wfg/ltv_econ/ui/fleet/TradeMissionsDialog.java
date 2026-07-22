@@ -20,8 +20,8 @@ import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.container.DockPanel;
-import wfg.native_ui.ui.functional.DockButton;
-import wfg.native_ui.ui.functional.Button.CutStyle;
+import wfg.native_ui.ui.widget.DockButton;
+import wfg.native_ui.ui.widget.Button.CutStyle;
 import wfg.native_ui.ui.widget.RadioPanel;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 

@@ -7,8 +7,8 @@ import wfg.ltv_econ.ui.economyTab.CommoditySelectionPanel;
 import wfg.ltv_econ.ui.fleet.FiltersDialog;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.functional.DockButton;
-import wfg.native_ui.ui.functional.Button.CutStyle;
+import wfg.native_ui.ui.widget.DockButton;
+import wfg.native_ui.ui.widget.Button.CutStyle;
 
 public final class TradeFlowOptions extends UIContainer {
     private static final int FILTERS_BTN_H = 32;
