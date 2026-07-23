@@ -22,7 +22,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
@@ -39,16 +38,18 @@ import wfg.ltv_econ.ui.marketInfo.population.HappinessPair;
 import wfg.ltv_econ.ui.marketInfo.population.HealthPair;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.ui.component.InteractionComp;
+import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.functional.ClickHandler;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
-import wfg.native_ui.ui.container.ListenerProviderPanel;
 import wfg.native_ui.ui.visual.PieChart;
 import wfg.native_ui.ui.visual.PieChart.PieSlice;
 import wfg.native_ui.ui.container.ScrollPanel;
 import wfg.native_ui.ui.container.ScrollPanel.ScrollType;
+import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.visual.InteractiveSprite;
@@ -326,7 +327,7 @@ public final class ManagePopulationDialog extends DialogPanel {
             if (!policy.isEnabled(data)) continue;
 
             final int posterIndex = posterCount;
-            final ClickHandler<ListenerProviderPanel> listener = (source, isLeftClick) -> {
+            final ClickHandler<PosterPanel> listener = (source, isLeftClick) -> {
                 if (selectedPolicy == policy) return;
 
                 selectedPolicy = policy;
@@ -340,9 +341,15 @@ public final class ManagePopulationDialog extends DialogPanel {
                     if (!policy.isActive(data)) policy.activate(data);
                     m_market.getSubmarket(SubmarketsID.STOCKPILES).getPlugin().updateCargoPrePlayerInteraction();
 
-                    buildPoster(policyContainer.getContentPanel(), policy, data,
-                        source.interaction.onClicked, policyWidth, policyHeight
-                    ).inBL(pad + posterIndex*(policyWidth + pad), hpad);
+                    try {
+                        settings.loadTexture(policy.spec.posterPath);
+                    } catch (Exception e) {
+                        log.warn(e);
+                    }
+
+                    policyContainer.getContentPanel()
+                        .add(new PosterPanel(policyWidth, policyHeight, policy, data, source.interaction.onClicked))
+                        .inBL(pad + posterIndex*(policyWidth + pad), hpad);
 
                     remove(selectedPolicyCont);
                     selectedPolicyCont = new UIContainer(PANEL_W, SELECTED_P_H);
@@ -357,9 +364,15 @@ public final class ManagePopulationDialog extends DialogPanel {
                 buildSelectedPosterMenu(selectedPolicyCont, policy, data, activateRun);
             };
 
-            buildPoster(policyContainer.getContentPanel(), policy, data, listener,  
-                policyWidth, policyHeight
-            ).inBL(pad + posterCount*(policyWidth + pad), hpad);
+            try {
+                settings.loadTexture(policy.spec.posterPath);
+            } catch (Exception e) {
+                log.warn(e);
+            }
+
+            policyContainer.getContentPanel()
+                .add(new PosterPanel(policyWidth, policyHeight, policy, data, listener))
+                .inBL(pad + posterIndex*(policyWidth + pad), hpad);
 
             posterCount++;
         }
@@ -367,68 +380,14 @@ public final class ManagePopulationDialog extends DialogPanel {
         }
     }
 
-    private final PositionAPI buildPoster(UIPanelAPI cont, MarketPolicy policy,
-        MarketPopulationData mData, ClickHandler<ListenerProviderPanel> listener, int width, int height
-    ) {
-        try {
-            settings.loadTexture(policy.spec.posterPath);
-        } catch (Exception e) {
-            log.warn(e);
-        }
-
-        final ListenerProviderPanel posterWrap = new ListenerProviderPanel(width, height) {{ interaction.onClicked = listener;}};
-
-        final InteractiveSprite poster = new InteractiveSprite(width, height,
-            policy.spec.posterPath, policy.isOnCooldown(mData) ? gray : null, null
-        ) {
-            public void buildUI() {
-                if (policy.isOnCooldown(mData)) {
-                    final float cooledRatio = (float) policy.cooldownDaysRemaining/policy.spec.cooldownDays;
-                    final ArrayList<PieSlice> pieData = new ArrayList<>(
-                        List.of(
-                            new PieSlice(null, gray, cooledRatio),
-                            new PieSlice(null, Color.ORANGE, 1f - cooledRatio)
-                        )
-                    );
-                    final int clockD = 30;
-                    final PieChart cooldownClock = new PieChart(
-                        clockD, clockD, pieData
-                    );
-    
-                    add(cooldownClock).inBL(
-                        (width - clockD) / 2f,
-                        (height - clockD) / 2f
-                    );
-                }
-            }
-
-            {
-                outline.color = Color.ORANGE;
-                outline.enabled = policy.isActive(mData);
-
-                glow.type = GlowType.ADDITIVE;
-                glow.additiveSprite = mSprite;
-
-                tooltip.builder = (tp, exp) -> policy.createTooltip(mData, tp);
-
-                buildUI();
-            }
-        };
-
-        posterWrap.add(poster).inBL(0f, 0f);
-        return cont.addComponent(posterWrap);
-    }
-
     private final void buildSelectedPosterMenu(UIPanelAPI cont,
-        MarketPolicy policy, MarketPopulationData mData, CallbackRunnable<Button> activateRun
+        MarketPolicy policy, MarketPopulationData data, CallbackRunnable<Button> activateRun
     ) {
         final int posterW = 163;
         final int buttonW = 140;
         final int buttonH = 30;
 
-        buildPoster(cont, policy, mData, null,  
-            posterW, SELECTED_P_H
-        ).inTL(opad*2, 0);
+        cont.addComponent(new PosterPanel(posterW, SELECTED_P_H, policy, data, null)).inTL(opad*2, 0);
 
         final String buttonTxt;
         final String buttonSideTxt;
@@ -464,15 +423,15 @@ public final class ManagePopulationDialog extends DialogPanel {
         final long marketCredits = EconomyEngine.instance().getCredits(m_market.getId());
         final boolean hasSufficientCredits = Math.max(0, marketCredits) >= policy.spec.cost;
 
-        final boolean cantActivate = !policy.isAvailable(mData) || !hasSufficientCredits;
-        final boolean shouldDisable = (cantActivate && !DebugFlags.COLONY_DEBUG) || policy.isActive(mData);
+        final boolean cantActivate = !policy.isAvailable(data) || !hasSufficientCredits;
+        final boolean shouldDisable = (cantActivate && !DebugFlags.COLONY_DEBUG) || policy.isActive(data);
 
         if (shouldDisable) {
             activateButton.setEnabled(false);
             activateButton.setShowTooltipWhileInactive(true);
 
             activateButton.tooltip.builder = (tp, exp) -> {
-                if (policy.isActive(mData)) {
+                if (policy.isActive(data)) {
                     tp.addPara(str("uiTpTxtPolicyWidget1"), pad);
                 } else if (!hasSufficientCredits) {
                     tp.addPara(str("uiTpTxtPolicyWidget2"), pad);
@@ -552,5 +511,46 @@ public final class ManagePopulationDialog extends DialogPanel {
         exploitationSlider.setBarColor(NativeUiUtils.lerpColor(
             positiveColor, negativeColor, sliderValue/(float)(EconConfig.MAX_RoSV - 1)
         ));
+    }
+
+    private static class PosterPanel extends InteractiveSprite implements HasInteraction {
+        public final InteractionComp<PosterPanel> interaction = comp().get(NativeComponents.INTERACTION);
+
+        private final PieChart cooldownClock;
+        private static final int CLOCK_D = 30;
+
+        public PosterPanel(float width, float height, MarketPolicy policy, MarketPopulationData mData, ClickHandler<PosterPanel> listener) {
+            super(width, height, policy.spec.posterPath, policy.isOnCooldown(mData) ? gray : null, null);
+
+            interaction.onClicked = listener;
+
+            outline.color = Color.ORANGE;
+            outline.enabled = policy.isActive(mData);
+
+            glow.type = GlowType.ADDITIVE;
+            glow.additiveSprite = mSprite;
+
+            tooltip.builder = (tp, exp) -> policy.createTooltip(mData, tp);
+
+            if (policy.isOnCooldown(mData)) {
+                final float cooledRatio = (float) policy.cooldownDaysRemaining/policy.spec.cooldownDays;
+                final ArrayList<PieSlice> pieData = new ArrayList<>(
+                    List.of(
+                        new PieSlice(null, gray, cooledRatio),
+                        new PieSlice(null, Color.ORANGE, 1f - cooledRatio)
+                    )
+                );
+                cooldownClock = new PieChart(CLOCK_D, CLOCK_D, pieData);
+            } else {
+                cooldownClock = null;
+            }
+        }
+
+        @Override
+        public void renderImpl(float alpha) {
+            super.renderImpl(alpha);
+
+            if (cooldownClock != null) cooldownClock.render(alpha,(getWidth() - CLOCK_D) / 2f, (getHeight() - CLOCK_D) / 2f);
+        }
     }
 }

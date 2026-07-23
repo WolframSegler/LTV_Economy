@@ -20,7 +20,6 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TextFieldAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
@@ -39,7 +38,6 @@ import wfg.ltv_econ.economy.planning.custom.goalParams.MultiSelectParameter;
 import wfg.ltv_econ.economy.planning.custom.goalParams.RadioParameter;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
-import wfg.ltv_econ.ui.factionTab.dialog.WorkerAllocationDialog.AddGoalDialog;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.ComponentFactory;
