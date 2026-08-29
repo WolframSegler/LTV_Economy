@@ -17,8 +17,6 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.PlanetInfoParams;
-import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.serializable.LtvEconSaveData;

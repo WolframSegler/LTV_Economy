@@ -9,7 +9,6 @@ import org.lwjgl.input.Keyboard;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.ui.fleet.TradeMissionsDialog;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ColonyInvDialog;

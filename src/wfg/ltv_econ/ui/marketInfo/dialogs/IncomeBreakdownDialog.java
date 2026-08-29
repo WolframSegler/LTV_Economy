@@ -128,7 +128,7 @@ public final class IncomeBreakdownDialog extends DockPanel {
         long totalIndustryIncome = 0l;
         long totalIndustryUpkeep = 0l;
         for (Industry ind : industries) {
-            final String indID = ind.getId();
+            final String indID = ind.getSpec().getId();
             final String incKey = INDUSTRY_INCOME_KEY + indID;
             final long inc = lastMonth ? ledger.getLastMonth(incKey) : ledger.getCurrentMonth(incKey);
             totalIndustryIncome += inc;
@@ -205,9 +205,9 @@ public final class IncomeBreakdownDialog extends DockPanel {
                 Alignment.LMID, text_color,
                 ind.getCurrentName(),
                 Alignment.MID, highlight,
-                NumFormat.formatCreditAbs(indIncomeMap.get(ind.getId())),
+                NumFormat.formatCreditAbs(indIncomeMap.get(ind.getSpec().getId())),
                 Alignment.MID, negative,
-                NumFormat.formatCreditAbs(-indUpkeepMap.get(ind.getId()))
+                NumFormat.formatCreditAbs(-indUpkeepMap.get(ind.getSpec().getId()))
             );
         }
         tp.addTable("", 0, pad);

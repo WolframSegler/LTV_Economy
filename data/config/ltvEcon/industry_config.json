@@ -161,24 +161,21 @@
 					"food": 0.4,
 					"domestic_goods": 0.2,
 					"luxury_goods": 0.1,
-					"supplies": 0.1,
-					"abstract": 0.2
+					"supplies": 0.1
 				},
 				"scaleWithMarketSize": true
 			},
 			"organs": {
 				"baseProd": 0.0000256849,
 				"InputsPerUnitOutput": {
-					"food": 0.7,
-					"abstract": 0.3
+					"food": 0.7
 				},
 				"scaleWithMarketSize": true
 			},
 			"drugs": {
 				"baseProd": 0.00025,
 				"InputsPerUnitOutput": {
-					"domestic_goods": 0.5,
-					"abstract": 0.5
+					"domestic_goods": 0.5
 				},
 				"scaleWithMarketSize": true
 			}
@@ -340,7 +337,6 @@
 			"crew": {
 				"baseProd": 0.01,
 				"InputsPerUnitOutput": {
-					"abstract": 0.7,
 					"supplies": 0.1,
 					"fuel": 0.2
 				},

@@ -320,6 +320,10 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return cyclesSinceTrade;
     }
 
+    public final int getMainLoopCycle() {
+        return loop.cycleCounter;
+    }
+
     private final void recomputePendingDeliveries() {
         for (TradeMission mission : activeMissions) {
             if (mission.status == MissionStatus.LOST || mission.status == MissionStatus.CANCELLED) continue;
@@ -647,12 +651,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             for (Industry ind : market.getIndustries()) {
                 final int indIncome = info.getIndustryIncome(ind).getModifiedInt();
                 if (indIncome != 0) {
-                    ledger.add(INDUSTRY_INCOME_KEY + ind.getId(), indIncome, strf("incomeReportIndustryIncomeTxt", ind.getCurrentName()));
+                    ledger.add(INDUSTRY_INCOME_KEY + ind.getSpec().getId(), indIncome, strf("incomeReportIndustryIncomeTxt", ind.getCurrentName()));
                 }
 
                 final int indUpkeep = info.getIndustryUpkeep(ind).getModifiedInt();
                 if (indUpkeep != 0) {
-                    ledger.add(INDUSTRY_UPKEEP_KEY + ind.getId(), -indUpkeep, strf("incomeReportIndustryUpkeepTxt", ind.getCurrentName()));
+                    ledger.add(INDUSTRY_UPKEEP_KEY + ind.getSpec().getId(), -indUpkeep, strf("incomeReportIndustryUpkeepTxt", ind.getCurrentName()));
                 }
             }
         }

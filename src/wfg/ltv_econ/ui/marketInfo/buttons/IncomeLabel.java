@@ -83,15 +83,15 @@ public final class IncomeLabel extends DockClickable<IncomeBreakdownDialog> impl
             long totalIndustryIncome = 0;
             long totalIndustryUpkeep = 0;
             for (Industry ind : industries) {
-                final String incKey = INDUSTRY_INCOME_KEY + ind.getId();
+                final String incKey = INDUSTRY_INCOME_KEY + ind.getSpec().getId();
                 final long inc = ledger.getLastMonth(incKey);
                 totalIndustryIncome += inc;
-                indIncomeMap.put(ind.getId(), inc);
+                indIncomeMap.put(ind.getSpec().getId(), inc);
                 
-                final String upKey = INDUSTRY_UPKEEP_KEY + ind.getId();
+                final String upKey = INDUSTRY_UPKEEP_KEY + ind.getSpec().getId();
                 final long up = ledger.getLastMonth(upKey);
                 totalIndustryUpkeep += up;
-                indUpkeepMap.put(ind.getId(), up);
+                indUpkeepMap.put(ind.getSpec().getId(), up);
             }
             final String indIncome = NumFormat.formatCredit(totalIndustryIncome);
             final String indUpkeep = NumFormat.formatCredit(-totalIndustryUpkeep);
@@ -129,9 +129,9 @@ public final class IncomeLabel extends DockClickable<IncomeBreakdownDialog> impl
                         Alignment.LMID, text_color,
                         ind.getCurrentName(),
                         Alignment.MID, highlight,
-                        Misc.getDGSCredits(indIncomeMap.get(ind.getId())),
+                        Misc.getDGSCredits(indIncomeMap.get(ind.getSpec().getId())),
                         Alignment.MID, negative,
-                        Misc.getDGSCredits(-indUpkeepMap.get(ind.getId()))
+                        Misc.getDGSCredits(-indUpkeepMap.get(ind.getSpec().getId()))
                     );
                 }
                 tp.addTable("", 0, pad);

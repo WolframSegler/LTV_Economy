@@ -13,7 +13,6 @@ import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyEngine;

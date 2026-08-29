@@ -324,7 +324,6 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 		final TradeMission mission = LtvEconomyRouteData.getMission(route);
 		if (mission != null) mission.spawnedFleetFinishedJob = true;
-		// if (route.isExpired()) return;
 
 		switch (reason) {
 		case DESTROYED_BY_BATTLE, NO_MEMBERS:
@@ -340,9 +339,11 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 	}
 
 	private static final void onRouteLost(RouteData route, TradeMission mission) {
+		RouteManager.getInstance().removeRoute(route);
+		if (mission == null) return;
+		
 		mission.status = MissionStatus.LOST;
 		mission.spawnedFleetFinishedJob = true;
-		RouteManager.getInstance().removeRoute(route);
 			
 		if (mission.src != null) {
 			ShippingDisruption.getDisruption(mission.src).addShippingLost(1);

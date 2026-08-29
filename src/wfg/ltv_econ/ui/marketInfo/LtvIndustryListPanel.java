@@ -46,6 +46,7 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 public final class LtvIndustryListPanel extends UIContainer implements UIBuildableAPI {
+	private static final Comparator<Industry> indComparator = Comparator.comparingInt(ind -> ind.getSpec().getOrder());
 
 	public static final int BUTTON_SECTION_HEIGHT = 45;
 
@@ -91,7 +92,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 		widgets.clear();
 
 		final List<Industry> industries = WorkerRegistry.getVisibleIndustries(m_market);
-		Collections.sort(industries, getIndustryOrderComparator());
+		Collections.sort(industries, indComparator);
 		List<ConstructionQueueItem> queuedIndustries = m_market.getConstructionQueue().getItems();
 	
 		final byte columnAmount = 4;
@@ -156,7 +157,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 			@Override
 			public void buildUI() {
-				LabelAPI creditLbl = UIUtils.createPlayerCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
+				final LabelAPI creditLbl = UIUtils.createPlayerCreditsLabel(Fonts.INSIGNIA_LARGE, 25);
 				creditLbl.setHighlightOnMouseover(true);
 
 				setWidth(creditLbl.computeTextWidth(creditLbl.getText()));
@@ -178,7 +179,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 			@Override
 			public void buildUI() {
-				LabelAPI creditLbl = UIUtils.createColonyCreditsLabel(
+				final LabelAPI creditLbl = UIUtils.createColonyCreditsLabel(
 					Fonts.INSIGNIA_LARGE, 25, m_market.getId()
 				);
 				creditLbl.setHighlightOnMouseover(true);
@@ -202,7 +203,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 			@Override
 			public void buildUI() {
-				LabelAPI maxIndLbl = UIUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
+				final LabelAPI maxIndLbl = UIUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
 				maxIndLbl.setHighlightOnMouseover(true);
 
 				setWidth(maxIndLbl.computeTextWidth(maxIndLbl.getText()));
@@ -230,7 +231,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 					);
 
 					final List<Industry> industries = WorkerRegistry.getVisibleIndustries(m_market);
-					Collections.sort(industries, getIndustryOrderComparator());
+					Collections.sort(industries, indComparator);
 
 					final String indent = "    ";
 					boolean anyIndustryAdded = false;
@@ -384,7 +385,6 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 		final int buildCost = (int) selectedIndustry.getBuildCost();
 
-		Misc.getCurrentlyBeingConstructed(m_market);
 		m_market.getConstructionQueue().addToEnd(selectedIndustry.getId(), buildCost);
 
 		final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
@@ -397,9 +397,5 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 		);
 
 		buildUI();
-	}
-
-	private static final Comparator<Industry> getIndustryOrderComparator() {
-		return Comparator.comparingInt(ind -> ind.getSpec().getOrder());
 	}
 }

@@ -213,9 +213,9 @@ public final class ColonyInvDialog extends DialogPanel {
             final LabelAPI playerLbl = playerCreditPanel.label1;
             final LabelAPI profitLbl = playerProfitPanel.label1;
 
-            depositSlider.setProgress(0);
+            depositSlider.setProgress(0f);
             depositSlider.maxRange = playerCred;
-            withdrawSlider.setProgress(0);
+            withdrawSlider.setProgress(0f);
             withdrawSlider.maxRange = hasData ? data.getWithdrawLimit() : colonyCred;
             profitSlider.setProgress(profitRatio);
 

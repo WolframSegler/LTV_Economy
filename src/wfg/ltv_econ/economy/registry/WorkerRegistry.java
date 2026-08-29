@@ -69,7 +69,7 @@ public class WorkerRegistry implements Serializable {
 
         final String marketID = ind.getMarket().getId();
         final String key = makeKey(marketID, IndustryConfigManager.getBaseIndustryID(ind));
-        registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind.getId()));
+        registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind.getSpec().getId()));
     }
 
     public final void register(MarketAPI market) {
@@ -281,6 +281,10 @@ public class WorkerRegistry implements Serializable {
 
         public final Set<String> getRegisteredOutputs() {
             return outputRatios.keySet();
+        }
+
+        public final ArrayMap<String, Float> getRegistry() {
+            return outputRatios;
         }
     }
 }

@@ -12,8 +12,9 @@ import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
-import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
@@ -79,6 +80,14 @@ public final class CompatLayer {
             : IndustryIOs.getRealOutput(ind, comID);
         final boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
         return hasRelevantCondition ? value : 0f;
+    }
+
+    public static final float getEffectiveDemandForInputWithData(Industry ind, String comID, WorkerIndustryData data, boolean validOnly) {
+        final float baseVal = IndustryIOs.getRealSumInput(data, ind, comID, validOnly);
+
+        final MutableStat demandStat = getDemandReductionMutable(ind, data, comID, baseVal, validOnly);
+        final StatBonus modified = getModifiers(ind, comID, ind.getDemand(comID).getQuantity(), demandStat);
+        return modified.computeEffective(baseVal);
     }
     
     public static final StatBonus getModifiers(
@@ -245,6 +254,11 @@ public final class CompatLayer {
     }
 
     private static final MutableStat getDemandReductionMutable(Industry ind, String inputID) {
+        return getDemandReductionMutable(ind, WorkerRegistry.instance().getRegisterData(ind), inputID,
+            IndustryIOs.getRealSumInput(ind, inputID), false);
+    }
+
+    private static final MutableStat getDemandReductionMutable(Industry ind, WorkerIndustryData data, String inputID, float sumInput, boolean validOnly) {
         final MutableStat modifier = ind.getDemandReduction().createCopy();
 
         /*
@@ -255,49 +269,55 @@ public final class CompatLayer {
             if (mod.value > 0) mod.value = -mod.value;
         }
 
-        final float totalInput = IndustryIOs.getRealSumInput(ind, inputID);
-        float nonAbstractInput = 0f;
+        final float nonAbstractRatio = computeNonAbstractInputRatio(ind, data, inputID, sumInput, validOnly);
 
-        final Map<String, OutputConfig> outputs = IndustryConfigManager.getIndConfig(ind).outputs;
-
-        for (String outputID : IndustryIOs.getRealOutputs(ind, true).keySet()) {
-            OutputConfig output = outputs.get(outputID);
-
-            Map<String, Float> inputs = IndustryIOs.getRealInputs(ind, outputID, false);
-
-            if (inputs.containsKey(inputID) && !output.isAbstract) {
-                nonAbstractInput += inputs.get(inputID);
-            }
-        }
-        final float ratio = totalInput > 0 ? nonAbstractInput / totalInput : 0f;
-
-
-        if (ind.getSupplyBonus() != null && ratio > 0) {
-            final MutableStat scaledBonus = ind.getSupplyBonus().createCopy();
-
-            for (Iterator<StatMod> it = scaledBonus.getFlatMods().values().iterator(); it.hasNext();) {
-                StatMod mod = it.next();
-                scaledBonus.modifyMult(
-                    mod.source, industryModConverter((int) mod.value), mod.desc
-                );
-                it.remove();
-            }
-
-            for (StatMod mod : scaledBonus.getMultMods().values()) {
-                if (ratio < 1) {
-                    mod.value = 1f + (mod.value - 1f) * ratio;
-                }
-            }
-
-            for (StatMod mod : scaledBonus.getPercentMods().values()) {
-                if (ratio < 1) {
-                    mod.value *= ratio;
-                }
-            }
-
-            modifier.applyMods(scaledBonus);
+        if (ind.getSupplyBonus() != null && nonAbstractRatio > 0f) {
+            MutableStat scaledSupplyBonus = scaleSupplyBonusToRatio(ind.getSupplyBonus(), nonAbstractRatio);
+            modifier.applyMods(scaledSupplyBonus);
         }
 
         return modifier;
+    }
+
+    /**
+     * Computes the fraction of total input demand that comes from non-abstract outputs.
+     * Supply bonuses only apply to that portion.
+     */
+    private static final float computeNonAbstractInputRatio(Industry ind, WorkerIndustryData data, String inputID, float totalInput, boolean validOnly) {
+        if (totalInput <= 0f) return 0f;
+
+        float nonAbstractInput = 0f;
+
+        for (String outputID : IndustryIOs.getRealOutputs(ind, data, false, validOnly).keySet()) {
+            final Map<String, Float> inputs = IndustryIOs.getRealInputs(ind, data, outputID, false, validOnly);
+            nonAbstractInput += inputs.getOrDefault(inputID, 0f);
+        }
+
+        return nonAbstractInput / totalInput;
+    }
+
+    /**
+     * Scales the supply bonus so that its effect is proportional to the ratio
+     * of non-abstract input demand. Flat bonuses are converted to multiplicative ones.
+     */
+    private static final MutableStat scaleSupplyBonusToRatio(MutableStat supplyBonus, float ratio) {
+        final MutableStat scaled = supplyBonus.createCopy();
+
+        for (final Iterator<StatMod> it = scaled.getFlatMods().values().iterator(); it.hasNext();) {
+            final StatMod mod = it.next();
+            scaled.modifyMult(mod.source, industryModConverter((int) mod.value), mod.desc);
+            it.remove();
+        }
+
+        if (ratio < 1f) {
+            for (StatMod mod : scaled.getMultMods().values()) {
+                mod.value = 1f + (mod.value - 1f) * ratio;
+            }
+            for (StatMod mod : scaled.getPercentMods().values()) {
+                mod.value *= ratio;
+            }
+        }
+
+        return scaled;
     }
 }

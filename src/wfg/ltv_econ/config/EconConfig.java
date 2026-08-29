@@ -238,6 +238,9 @@ public class EconConfig {
     /** Multiplier for target stockpiles defining the start of shortages. */
     public static float DEFICIT_THRESHOLD;
 
+    /** The ratio of assigned workers that the player is predicted to allocate to the newly constructed industry. */
+    public static float PREDICTED_WORKER_REALLOCATION_FRACTION;
+
     public static boolean NPC_WORKER_POOL_VISIBLE;
     public static boolean GROWTH_EFFECT_WORKER_POOL;
 

@@ -4,9 +4,7 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.str;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.math4.legacy.optim.nonlinear.scalar.GoalType;
 import org.apache.log4j.Logger;
@@ -36,14 +34,13 @@ public class PlanConfigLoader {
     private static JSONObject dynamic_config;    
 
     public static final void loadConfig() {
-        final Set<String> seenIds = new HashSet<>();
+        if (!PlanConfig.map.isEmpty()) PlanConfig.map.clear();
 
-        processConfig(getConfig(false), false, seenIds);
-
-        processConfig(getConfig(true), true, seenIds);
+        processConfig(getConfig(false), false);
+        processConfig(getConfig(true), true);
     }
 
-    private static final void processConfig(JSONObject config, boolean isCustom, Set<String> seenIds) {
+    private static final void processConfig(JSONObject config, boolean isCustom) {
         final JSONArray plansArray = config.optJSONArray("worker_allocation_plans");
         if (plansArray == null) return;
 
@@ -53,7 +50,7 @@ public class PlanConfigLoader {
                 final WorkerAllocationPlan plan = new WorkerAllocationPlan();
 
                 final String planId = planJson.getString("id");
-                if (!seenIds.add(planId)) {
+                if (PlanConfig.map.containsKey(planId)) {
                     throw new RuntimeException("Duplicate worker allocation plan ID: " + planId);
                 }
                 plan.id = planId;
@@ -116,7 +113,7 @@ public class PlanConfigLoader {
             );
         } catch (Exception e) {
             throw new RuntimeException(
-                "Failed to write custom plan configuration to common JSON file '"
+                "Failed to write custom plan configuration to common JSON file "
                 + DYNAMIC_CONFIG_NAME, e
             );
         }

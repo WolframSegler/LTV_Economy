@@ -25,7 +25,7 @@ public class ServiceSectorIndustryOption implements IndustryOptionProvider {
         if (ind == null || ind.getMarket() == null) return false;
         if (!DebugFlags.COLONY_DEBUG && !ind.getMarket().isPlayerOwned()) return false;
 
-        return ind.getId().equals(Industries.POPULATION);
+        return ind.getSpec().getId().equals(Industries.POPULATION);
     }
 
     @Override

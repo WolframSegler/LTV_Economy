@@ -66,11 +66,14 @@ public class EconomyLoop {
     public static final String KEY = "::";
 
     transient EconomyEngine engine;
+    transient volatile int cycleCounter = 0;
 
     public EconomyLoop(EconomyEngine engine) { this.engine = engine; }    
 
     /** Not order agnostic */
     final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
+        if (!fakeAdvance) cycleCounter++;
+
         final PlayerFactionSettings playerFacSettings = LtvEconSaveData.instance().playerFactionSettings;
         final WorkerPoolRegistry poolReg = WorkerPoolRegistry.instance();
 
@@ -300,7 +303,7 @@ public class EconomyLoop {
             final MutableStat industryStat = industryEntry.getValue();
 
             final float industryOutput = industryStat.getModifiedValue();
-            if (industryOutput <= 0 || totalMarketOutput <= 0) continue;
+            if (industryOutput <= 0f || totalMarketOutput <= 0f) continue;
 
             final float industryShare = industryOutput * invMarketOutput;
 
@@ -318,13 +321,13 @@ public class EconomyLoop {
             float industryDeficit = 0f;
             for (Map.Entry<String, Float> inputEntry : inputWeights.singleEntrySet()) {
                 final String inputID = inputEntry.getKey();
-                if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
+                if (IndustryIOs.ABSTRACT_COM.equals(inputID)) continue;
                 
                 final CommodityCell inputCell = engine.getComCell(inputID, cell.market.getId());
 
                 final float weightNorm = inputEntry.getValue() / sum;
 
-                industryDeficit += weightNorm * (1 - inputCell.getStoredAvailabilityRatio());
+                industryDeficit += weightNorm * (1f - inputCell.getStoredAvailabilityRatio());
             }
 
             totalDeficit += industryDeficit * industryShare;

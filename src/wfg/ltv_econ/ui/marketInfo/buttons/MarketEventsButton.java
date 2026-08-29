@@ -7,7 +7,6 @@ import org.lwjgl.input.Keyboard;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.engine.EconomyEngine;

@@ -54,6 +54,7 @@ public class IndustryConfigManager {
     }
 
     public static class IndustryConfig {
+        public final String indID;
         public final boolean workerAssignable;
         public final boolean demandOnly;
         public final String occTag;
@@ -61,9 +62,10 @@ public class IndustryConfigManager {
 
         public boolean dynamic = false;
 
-        public IndustryConfig(boolean workerAssignable, ArrayMap<String, OutputConfig> outputs, String occTag,
-            boolean demandOnly
+        public IndustryConfig(String indID, boolean workerAssignable, ArrayMap<String, OutputConfig> outputs,
+            String occTag, boolean demandOnly
         ) {
+            this.indID = indID;
             this.workerAssignable = workerAssignable;
             this.demandOnly = demandOnly;
             this.outputs = outputs;
@@ -74,6 +76,7 @@ public class IndustryConfigManager {
          * Copy Constructor
          */
         public IndustryConfig(IndustryConfig config) {
+            this.indID = config.indID;
             this.workerAssignable = config.workerAssignable;
             this.demandOnly = config.demandOnly;
             this.occTag = config.occTag;
@@ -262,8 +265,8 @@ public class IndustryConfigManager {
     }
 
     public static final boolean hasConfig(String indID) {
-        return IndustryConfigManager.ind_config.containsKey(indID) 
-            || IndustryConfigManager.ind_config.containsKey(getBaseIndustryID(indID));
+        return ind_config.containsKey(indID) 
+            || ind_config.containsKey(getBaseIndustryID(indID));
     }
 
     public static final String getBaseIndustryID(String id) {
@@ -275,7 +278,7 @@ public class IndustryConfigManager {
     }
 
     public static final String getBaseIndustryID(Industry ind) {
-        return getBaseIndustryID(ind.getId());
+        return getBaseIndustryID(ind.getSpec());
     }
 
     public static final String getBaseIndIDifNoConfig(IndustrySpecAPI ind) {
@@ -283,10 +286,7 @@ public class IndustryConfigManager {
     }
 
     public static final String getBaseIndIDifNoConfig(String indID) {
-        if (IndustryConfigManager.ind_config.containsKey(indID)) {
-            return indID;
-        }
-        return getBaseIndustryID(indID);
+        return ind_config.containsKey(indID) ? indID : getBaseIndustryID(indID);
     }
 
     public static final IndustryConfig getIndConfig(Industry ind) {
@@ -298,16 +298,13 @@ public class IndustryConfigManager {
     }
 
     public static final IndustryConfig getIndConfig(String indID) {
-        final IndustryConfig indConfig = IndustryConfigManager.ind_config.get(indID);
-
-        return indConfig != null ? indConfig :
-            IndustryConfigManager.ind_config.get(getBaseIndustryID(indID));
+        return ind_config.get(getBaseIndIDifNoConfig(indID));
     }
 
     private static final void buildBaseIdMapping() {
         IndToBaseInd.clear();
         for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
-            IndToBaseInd.put(spec.getId(), IndustryConfigManager.getBaseIndustryIDSpec(spec));
+            IndToBaseInd.put(spec.getId(), getBaseIndustryIDSpec(spec));
         }
     }
 
@@ -481,7 +478,7 @@ public class IndustryConfigManager {
                 illegalOutputs.forEach(addOutput);
     
                 final IndustryConfig config = new IndustryConfig(
-                    usesWorkers, configOutputs, EconomyConfigLoader.AVERAGE_OCC_TAG, false
+                    indID, usesWorkers, configOutputs, EconomyConfigLoader.AVERAGE_OCC_TAG, false
                 );
                 config.dynamic = true;
     
@@ -489,7 +486,7 @@ public class IndustryConfigManager {
 
             } else {
                 final IndustryConfig config = new IndustryConfig(
-                    false, configOutputs, EconomyConfigLoader.AVERAGE_OCC_TAG, false
+                    indID, false, configOutputs, EconomyConfigLoader.AVERAGE_OCC_TAG, false
                 );
                 config.dynamic = true;
     

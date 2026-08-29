@@ -19,6 +19,7 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
+import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
 public class IndustryConfigLoader {
@@ -45,8 +46,8 @@ public class IndustryConfigLoader {
     }
 
     @SuppressWarnings("unchecked")
-    public static final ArrayMap<String, IndustryConfig> loadAsMap(boolean dynamicConfig) {
-        final JSONObject root = getConfig(dynamicConfig);
+    public static final ArrayMap<String, IndustryConfig> loadAsMap(boolean isDynamicConfig) {
+        final JSONObject root = getConfig(isDynamicConfig);
         final ArrayMap<String, IndustryConfig> result = new ArrayMap<>(32);
 
         try { if (root.has("industryList")) {
@@ -85,7 +86,7 @@ public class IndustryConfigLoader {
 
                 final List<String> marketCondsAllFalse = new ArrayList<>();
                 if (outputData.has("ifMarketCondsAllFalse")) {
-                    JSONArray conds = outputData.getJSONArray("ifMarketCondsAllFalse");
+                    final JSONArray conds = outputData.getJSONArray("ifMarketCondsAllFalse");
                     for (int i = 0; i < conds.length(); i++) {
                         marketCondsAllFalse.add(conds.getString(i));
                     }
@@ -93,7 +94,7 @@ public class IndustryConfigLoader {
 
                 final List<String> marketCondsAllTrue = new ArrayList<>();
                 if (outputData.has("ifMarketCondsAllTrue")) {
-                    JSONArray conds = outputData.getJSONArray("ifMarketCondsAllTrue");
+                    final JSONArray conds = outputData.getJSONArray("ifMarketCondsAllTrue");
                     for (int i = 0; i < conds.length(); i++) {
                         marketCondsAllTrue.add(conds.getString(i));
                     }
@@ -101,22 +102,26 @@ public class IndustryConfigLoader {
 
                 final ArrayMap<String, Float> ConsumptionMap = new ArrayMap<>(4);
                 if (outputData.has("InputsPerUnitOutput")) {
-                    JSONObject consumption = outputData.getJSONObject("InputsPerUnitOutput");
-                    Iterator<String> inputIds = consumption.keys();
+                    final JSONObject consumption = outputData.getJSONObject("InputsPerUnitOutput");
+                    final Iterator<String> inputIds = consumption.keys();
                     while (inputIds.hasNext()) {
-                        String inputId = inputIds.next();
-                        float weight = (float) consumption.getDouble(inputId);
+                        final String inputId = inputIds.next();
+                        if (inputId.equals(IndustryIOs.ABSTRACT_COM)) {
+                            throw new IllegalArgumentException("InputsPerUnitOutput cannot have an abstract input");
+                        }
+
+                        final float weight = (float) consumption.getDouble(inputId);
                         ConsumptionMap.put(inputId, weight);
                     }
                 }
 
                 final ArrayMap<String, Float> CCMoneyDist = new ArrayMap<>(4);
                 if (outputData.has("CCMoneyDist")) {
-                    JSONObject consumption = outputData.getJSONObject("CCMoneyDist");
-                    Iterator<String> inputIds = consumption.keys();
+                    final JSONObject consumption = outputData.getJSONObject("CCMoneyDist");
+                    final Iterator<String> inputIds = consumption.keys();
                     while (inputIds.hasNext()) {
-                        String inputId = inputIds.next();
-                        float alloc = (float) consumption.getDouble(inputId);
+                        final String inputId = inputIds.next();
+                        final float alloc = (float) consumption.getDouble(inputId);
                         CCMoneyDist.put(inputId, alloc);
                     }
                 }
@@ -150,7 +155,7 @@ public class IndustryConfigLoader {
         }} catch (Exception e) {
             throw new RuntimeException(
                 "Failed to load industry configuration from " +
-                (dynamicConfig ? DYNAMIC_CONFIG_PATH : CONFIG_PATH), e
+                (isDynamicConfig ? DYNAMIC_CONFIG_PATH : CONFIG_PATH), e
             );
         }
 

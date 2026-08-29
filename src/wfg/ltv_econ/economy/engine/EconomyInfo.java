@@ -482,7 +482,7 @@ public class EconomyInfo {
         long total = 0l;
 
         for (MarketAPI market : getMarketsCopy()) {
-            total += Math.pow(10, market.getSize());
+            total += Math.pow(10d, market.getSize());
         }
 
         return total;
@@ -493,7 +493,7 @@ public class EconomyInfo {
 
         for (MarketAPI market : getMarketsCopy()) {
             if (market.getFactionId().equals(factionID)) {
-                total += Math.pow(10, market.getSize());
+                total += Math.pow(10d, market.getSize());
             }
         }
 

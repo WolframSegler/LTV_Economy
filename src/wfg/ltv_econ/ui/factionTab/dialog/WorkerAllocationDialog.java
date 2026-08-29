@@ -394,15 +394,18 @@ public final class WorkerAllocationDialog extends DialogPanel {
 
             selectedPlan.description = descTextField.getText();
 
+            final boolean wasInvalid = invalidId;
             invalidId = false;
             final String titleText = titleTextField.getText();
             for (WorkerAllocationPlan plan : PlanConfig.getPlansCopy()) {
                 if (!plan.equals(selectedPlan) && plan.id.equals(titleText)) {
                     invalidId = true;
+                    break;
                 }
             }
             if (!selectedPlan.id.equals(titleText)) {
-                if (invalidId) buildUI();
+                if (invalidId && !wasInvalid) buildUI();
+                if (!invalidId && wasInvalid) buildUI();
                 else selectedPlan.id = titleText;
             }
         }

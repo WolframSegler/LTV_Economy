@@ -39,7 +39,8 @@ import wfg.native_ui.util.ArrayMap;
  * It stores base production values and input requirements for all industries, 
  * allowing fast, reusable access.</p>
  */
-public class IndustryIOs {
+public final class IndustryIOs {
+    private IndustryIOs() {};
     private static final Object MARKET_SIZE_FIELD = RolfLectionUtil.getFieldByName("size", Market.class);
 
     /**
@@ -64,7 +65,6 @@ public class IndustryIOs {
     public static final String ABSTRACT_COM = "abstract";
     public static final String DYNAMIC_OUTPUT = "output_for_input::";
 
-    private IndustryIOs() {}
     static {
         reload();
     }
@@ -185,8 +185,6 @@ public class IndustryIOs {
             }
         }
     }
-
-    
 
     /**
      * @return <ul>
@@ -342,18 +340,24 @@ public class IndustryIOs {
         return 0;
     }
 
-    public static final boolean isOutputValidForMarket(final OutputConfig output, Industry ind) {
-        final MarketAPI market = ind.getMarket();
-        if (output.checkLegality && market.isIllegal(output.comID)) return false;
-        if (output.dynamic && !output.dynamicOutputActive.isActive(ind)) return false;
-
+    public static final boolean isOutputActiveForMarket(final OutputConfig output, Industry ind) {
         if (output == null || ind.isDisrupted()) return false;
         final boolean buildingOnly = ind.isBuilding() && !ind.isUpgrading();
 
         if (buildingOnly && !output.activeDuringBuilding &&
-            !ind.getId().contains(Industries.POPULATION)
+            !ind.getSpec().getId().contains(Industries.POPULATION)
         ) return false;
         if (!buildingOnly && output.activeDuringBuilding) return false;
+
+        return isOutputValidForMarket(output, ind);
+    }
+
+    public static final boolean isOutputValidForMarket(final OutputConfig output, Industry ind) {
+        if (output == null) return false;
+
+        final MarketAPI market = ind.getMarket();
+        if (output.checkLegality && market.isIllegal(output.comID)) return false;
+        if (output.dynamic && !output.dynamicOutputActive.isActive(ind)) return false;
 
         for (String cond : output.ifMarketCondsAllFalse) {
             if (market.hasCondition(cond)) return false;
@@ -366,23 +370,41 @@ public class IndustryIOs {
         return true;
     }
 
-    public static final float calculateScale(OutputConfig output, Industry ind) {
-        final MarketAPI market = ind.getMarket();
+    public static final float computeScale(OutputConfig output, Industry ind) {
+        return computeScale(ind.getSpec().getId(), ind.getMarket().getId(), ind.getMarket().getSize(), output);
+    }
+
+    public static final float computeScale(final WorkerIndustryData data, OutputConfig output, MarketAPI market) {
+        return computeScale(data, market.getId(), market.getSize(), output);
+    }
+
+    public static final float computeScale(String industryId, String marketId, int marketSize, OutputConfig output) {
+        return computeScale(WorkerRegistry.instance().getRegisterData(marketId, industryId), marketId, marketSize, output);
+    }
+
+    public static final float computeScale(final WorkerIndustryData data, String marketId, int marketSize, OutputConfig output) {
         if (!output.isAbstract) {
-            final CommodityCell cell = EconomyEngine.instance().getComCell(output.comID, market.getId()); 
-            if (cell != null && output.target > 0 && output.target < cell.getStored()) return 0f;
+            final CommodityCell cell = EconomyEngine.instance().getComCell(output.comID, marketId); 
+            if (cell != null && output.target > 0l && output.target < cell.getStored()) return 0f;
         }
 
         float scale = 1f;
 
         if (output.usesWorkers && !output.isAbstract) {
-            final WorkerIndustryData data = WorkerRegistry.instance().getRegisterData(ind);
             scale *= data.getAssignedForOutput(output.comID);
         }
 
-        if (output.scaleWithMarketSize) scale *= Math.pow(output.marketScaleBase, market.getSize() - 3);
+        if (output.scaleWithMarketSize) scale *= Math.pow(output.marketScaleBase, marketSize - 3);
 
         return scale;
+    }
+
+    private static final boolean getIsOutputActive(boolean validOnly, OutputConfig output, Industry ind) {
+        return validOnly ? isOutputValidForMarket(output, ind) : isOutputActiveForMarket(output, ind);
+    }
+
+    public static final float getRealOutput(Industry ind, String outputID) {
+        return getRealOutput(ind, WorkerRegistry.instance().getRegisterData(ind), outputID, false);
     }
 
     /**
@@ -390,19 +412,23 @@ public class IndustryIOs {
      * Returns 0 if the output does not exist, if the market conditions are not met,
      * or if legality prevents the output from being produced.
      */
-    public static final float getRealOutput(Industry ind, String outputID) {
+    public static final float getRealOutput(Industry ind, WorkerIndustryData data, String outputID, boolean validOnly) {
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         final OutputConfig output = cfg.outputs.get(outputID);
 
         if (output == null || output.isAbstract) return 0f;
         final float value = getBaseOutput(ind.getSpec(), outputID);
-        if (value == 0) return 0f;
+        if (value == 0f) return 0f;
 
-        if (!isOutputValidForMarket(output, ind)) return 0f;
+        if (!getIsOutputActive(validOnly, output, ind)) return 0f;
 
-        final float scale = calculateScale(output, ind);
+        final float scale = computeScale(data, output, ind.getMarket());
 
         return value * scale;
+    }
+
+    public static final float getRealInput(Industry ind, String outputID, String inputID) {
+        return getRealInput(ind, WorkerRegistry.instance().getRegisterData(ind), outputID, inputID, false);
     }
 
     /**
@@ -410,70 +436,87 @@ public class IndustryIOs {
      * Returns 0 if the output or input does not exist, if the market conditions are not met,
      * or if legality prevents the output from being produced.
      */
-    public static final float getRealInput(Industry ind, String outputID, String inputID) {
+    public static final float getRealInput(Industry ind, WorkerIndustryData data,  String outputID, String inputID, boolean validOnly) {
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         final OutputConfig output = cfg.outputs.get(outputID);
 
         final float value = getBaseInput(ind.getSpec(), outputID, inputID);
         if (value == 0f) return 0f;
 
-        if (!isOutputValidForMarket(output, ind)) return 0f;
+        if (!getIsOutputActive(validOnly, output, ind)) return 0f;
 
-        final float scale = calculateScale(output, ind);
+        final float scale = computeScale(data, output, ind.getMarket());
 
         return value * scale;
     }
 
+    public static final float getRealSumInput(Industry ind, String inputID) {
+        return getRealSumInput(WorkerRegistry.instance().getRegisterData(ind),
+            ind, inputID, false);
+    }
+
     /**
      * Get the total demand of an industry for a given commodity across all outputs.
+     * @param validOnly does not check if the outputs are active, only that they are allowed.
      */
-    public static final float getRealSumInput(Industry ind, String inputID) {
+    public static final float getRealSumInput(WorkerIndustryData data, Industry ind, String inputID, boolean validOnly) {
         final Map<String, ArrayMap<String, Float>> indMap = getBaseInputs(ind.getSpec().getId());
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
 
         float total = 0f;
         for (Map.Entry<String, ArrayMap<String,Float>> inputMap : indMap.entrySet()) {
+            final float qty = inputMap.getValue().getOrDefault(inputID, 0f);
+            if (qty == 0f) continue;
+
             final OutputConfig output = cfg.outputs.get(inputMap.getKey());
+            if (!getIsOutputActive(validOnly, output, ind)) continue;
 
-            for (Map.Entry<String, Float> entry : inputMap.getValue().singleEntrySet()) {
-                if (entry.getKey().equals(inputID)) {
-                    if (!isOutputValidForMarket(output, ind)) continue;
+            final float scale = computeScale(data, output, ind.getMarket());
 
-                    final float scale = calculateScale(output, ind);
-
-                    total += entry.getValue() * scale;
-                }
-            }
+            total += qty * scale;
         }
+
         return total;
+    }
+
+    public static final Map<String, Float> getRealOutputs(Industry ind, boolean includeAbstract) {
+        return getRealOutputs(ind, WorkerRegistry.instance().getRegisterData(ind), includeAbstract, false);
     }
 
     /** 
      * Returns the modified output map for a given industry.
      */
-    public static final Map<String, Float> getRealOutputs(Industry ind, boolean includeAbstract) {
+    public static final Map<String, Float> getRealOutputs(Industry ind, WorkerIndustryData data, boolean includeAbstract, boolean validOnly) {
         final Map<String, Float> outputs = getBaseOutputs(ind.getSpec().getId());
 
-        Map<String, Float> scaledOutputs = new ArrayMap<>(outputs.size());
+        final ArrayMap<String, Float> scaledOutputs = new ArrayMap<>(outputs.size());
         for (String output : outputs.keySet()) {
-            float value = getRealOutput(ind, output);
+
+            final float value = getRealOutput(ind, data, output, validOnly);
+
             if (includeAbstract || value > 0) scaledOutputs.put(output, value);
         }
 
         return scaledOutputs;
     }
 
+    public static final ArrayMap<String, Float> getRealInputs(Industry ind, String outputID, boolean includeAbstract) {
+        return getRealInputs(ind, WorkerRegistry.instance().getRegisterData(ind), outputID, includeAbstract, false);
+    }
+
     /** 
      * Returns the modified inputs map for a given industry and output.
      */
-    public static final ArrayMap<String, Float> getRealInputs(Industry ind, String outputID, boolean includeAbstract) {
+    public static final ArrayMap<String, Float> getRealInputs(Industry ind, WorkerIndustryData data,
+        String outputID, boolean includeAbstract, boolean validOnly
+    ) {
         final Map<String, ArrayMap<String, Float>> outputs = getBaseInputs(ind.getSpec().getId());
 
         final ArrayMap<String, Float> inputs = outputs.get(outputID);
-        ArrayMap<String, Float> scaledInputs = new ArrayMap<>(inputs.size());
-        for (String output : inputs.keySet()) {
-            float value = getRealInput(ind, outputID, output);
-            if (includeAbstract || value > 0) scaledInputs.put(output, value);
+        final ArrayMap<String, Float> scaledInputs = new ArrayMap<>(inputs.size());
+        for (String input : inputs.keySet()) {
+            final float value = getRealInput(ind, data, outputID, input, validOnly);
+            if (includeAbstract || value > 0) scaledInputs.put(input, value);
         }
 
         return scaledInputs;
@@ -483,7 +526,7 @@ public class IndustryIOs {
      * Returns a list of all the inputs for a given industry.
      */
     public static final Set<String> getRealInputs(Industry ind, boolean includeAbstract) {
-        if (ind == null || ind.getId() == null) return Collections.emptySet();
+        if (ind == null || ind.getSpec() == null) return Collections.emptySet();
 
         final String indID = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
 
@@ -540,20 +583,6 @@ public class IndustryIOs {
     }
 
     /**
-     * Get total pre-calculated demand for a specific input across all outputs.
-     */
-    public static final float getBaseSumInput(String indID, String inputID) {
-        final ArrayMap<String, ArrayMap<String, Float>> indMap = baseInputs.get(IndustryConfigManager.getBaseIndIDifNoConfig(indID));
-        if (indMap == null) return 0f;
-
-        float total = 0f;
-        for (ArrayMap<String, Float> inputMap : indMap.values()) {
-            total += inputMap.getOrDefault(inputID, 0f);
-        }
-        return total;
-    }
-
-    /**
      * Get the map of pre-calculated outputs for an industry.
      */
     public static final Map<String, Float> getBaseOutputs(String indID) {
@@ -582,9 +611,37 @@ public class IndustryIOs {
         return outputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
     }
 
-    public static final boolean hasInput(String indID, String comID) {
+    public static final boolean hasInput(String indID, String inputID) {
         final String id = IndustryConfigManager.getBaseIndIDifNoConfig(indID);
-        return inputToInd.getOrDefault(comID, Collections.emptySet()).contains(id);
+        return inputToInd.getOrDefault(inputID, Collections.emptySet()).contains(id);
+    }
+
+    /**
+     * @param outputID cannot be abstract.
+     * @param productivity multiplier to inputs and outputs but not to workers.
+     * 
+     * @return the marginal profit per worker for a given output of an industry.
+     */
+    public static final float getMarginalProfitPerWorker(String indID, String outputID, float productivity) {
+        final IndustryConfig indCfg = IndustryConfigManager.getIndConfig(indID);
+        final OutputConfig output = indCfg.outputs.get(outputID);
+        if (output == null || !output.usesWorkers || !indCfg.workerAssignable) {
+            return Float.NEGATIVE_INFINITY;
+        }
+
+        final float outputAmount = getBaseOutput(indID, outputID);
+        final float outputVal = settings.getCommoditySpec(outputID).getBasePrice() * outputAmount;
+
+        float inputValSum = 0f;
+        final ArrayMap<String, Float> inputs = getBaseInputs(indID).get(outputID);
+        if (inputs != null) {
+            for (Map.Entry<String, Float> entry : inputs.singleEntrySet()) {
+                inputValSum += settings.getCommoditySpec(entry.getKey()).getBasePrice() * entry.getValue();
+            }
+        }
+
+        final float wagePerWorker = EconConfig.avg_wage / EconomyConstants.MONTH;
+        return (outputVal - inputValSum) * productivity - wagePerWorker;
     }
 
     /**

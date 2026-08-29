@@ -87,6 +87,7 @@ public class EconomyConfigLoader {
         EconConfig.SCRAP_REFUND_FRACTION = (float) root.getDouble("SCRAP_REFUND_FRACTION");
         EconConfig.INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP = (float) root.getDouble("INDEPENDENT_PATROL_FLEET_FEE_PER_100_FP");
         EconConfig.DEFICIT_THRESHOLD = (float) root.getDouble("DEFICIT_THRESHOLD");
+        EconConfig.PREDICTED_WORKER_REALLOCATION_FRACTION = (float) root.getDouble("PREDICTED_WORKER_REALLOCATION_FRACTION");
         EconConfig.defaultWorkerCapPerOutput = (float) root.getDouble("defaultWorkerCapPerOutput");
         EconConfig.dynamicWorkerCapPerOutput = (float) root.getDouble("dynamicWorkerCapPerOutput");
         EconConfig.NPC_WORKER_POOL_VISIBLE = root.getBoolean("NPC_WORKER_POOL_VISIBLE");
