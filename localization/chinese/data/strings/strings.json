@@ -731,6 +731,7 @@
         "uiTitleUnemployed": "失业",
         "uiBtnTitleLogMarketsWithManufacturing": "记录所有拥有制造厂的市场",
         "uiStatDescTargetFromConsumption": "消耗",
-        "uiStatDescTargetFromProduction": "出口缓冲"
+        "uiStatDescTargetFromProduction": "出口缓冲",
+        "uiStatDescTargetFromPrediction": "建造期储备缓冲"
     }
 }

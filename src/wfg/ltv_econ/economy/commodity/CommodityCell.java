@@ -14,6 +14,7 @@ import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.StatBonus;
+import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.campaign.econ.Market;
 
 import wfg.ltv_econ.config.EconConfig;
@@ -22,6 +23,7 @@ import wfg.ltv_econ.constant.strings.Consumption;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.industry.ConstructionDemandPredictor;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
 import wfg.native_ui.util.ArrayMap;
@@ -225,12 +227,23 @@ public class CommodityCell implements Serializable {
                 
                 if (IndustryConfigManager.getIndConfig(ind).demandOnly) {
                     targetQuantum.modifyBase(Consumption.DEMAND_ONLY_KEY + "_" + indID, demandStat.getModifiedValue(),
-                        Consumption.DEMAND_ONLY_DESC + " - " + ind.getCurrentName()
+                        getDesc(DEMAND_ONLY_KEY) + " - " + ind.getCurrentName()
                     );
                 } else {
                     consumptionMutables.put(indID, demandStat);
                     consumption.modifyBase(indID, demandStat.getModifiedValue(), ind.getCurrentName());
                 }
+            }
+            // Predict input demand
+            // TODO test this
+            if (!ind.getSpec().getId().equals(Industries.POPULATION) && ind.isBuilding() && !ind.isUpgrading()) {
+                final float progress = ind.getBuildOrUpgradeProgress();
+                final float predictedQuantum = ConstructionDemandPredictor.computePredictedDailyDemand(ind, comID);
+                final float activeQuantum = IndustryIOs.getRealSumInput(ind, comID); // building only demand.
+                final float extraQuantum = Math.max(0f, predictedQuantum - activeQuantum);
+                final float demand = extraQuantum * progress;
+                targetQuantum.modifyBase(CELL_TARGET_PREDICTION_KEY, demand,
+                    getDesc(CELL_TARGET_PREDICTION_KEY) + " - " + ind.getCurrentName());
             }
         }
 

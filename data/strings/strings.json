@@ -731,6 +731,7 @@
         "uiCheckboxTxtAutoAssignWorkers": "Re-allocate workers periodically using the most recently run plan",
         "uiBtnTitleLogMarketsWithManufacturing": "Log Markets With Manufacturing",
         "uiStatDescTargetFromConsumption": "Consumption",
-        "uiStatDescTargetFromProduction": "Export buffer"
+        "uiStatDescTargetFromProduction": "Export buffer",
+        "uiStatDescTargetFromPrediction": "Construction stock buffer"
     }
 }
