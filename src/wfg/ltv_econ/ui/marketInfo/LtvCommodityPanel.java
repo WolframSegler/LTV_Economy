@@ -31,6 +31,7 @@ import wfg.native_ui.ui.visual.InteractiveSprite;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.dialog.DialogPanel;
@@ -101,9 +102,7 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
         bg.offset.setOffset(1, 1, -2, -headerHeight - 2);
         outline.offset.setOffset(1, 1, -2, -headerHeight - 2);
 
-        final TooltipMakerAPI rowTp = ComponentFactory.createTooltip(
-            getWidth(), true
-        );
+        final UIContainerAPI rowContainer = new UIContainer(getWidth(), 0f);
         
         final int rowWidth = (int) getWidth() - opad * 2;
         final int rowHeight = 28;
@@ -115,7 +114,7 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
                 rowHeight, rowsIgnoreUIState
             );
 
-            rowTp.addComponent(comRow).inTL(opad, cumulativeYOffset);
+            rowContainer.add(comRow).inTL(opad, cumulativeYOffset);
 
             cumulativeYOffset += pad + 2 + rowHeight;
 
@@ -123,8 +122,8 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
 
             commodityRows.add(comRow);
         }
-        rowTp.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(rowTp, getHeight() - headerHeight, true, this)
+        rowContainer.setHeight(cumulativeYOffset);
+        add(ComponentFactory.wrapWithScrollPanel(rowContainer, getWidth(), getHeight() - headerHeight))
             .inTL(0, headerHeight);
   
         if (MarketTradeDisruptionData.shouldSuspendTrade(mMarket)) {

@@ -15,7 +15,6 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
@@ -28,6 +27,7 @@ import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.widget.Slider;
@@ -76,7 +76,7 @@ public final class ServiceSectorDialog extends DialogPanel {
         titleLbl.autoSizeToWidth(PANEL_W);
         add(titleLbl).inTL(0f, pad*2);
 
-        final TooltipMakerAPI sectorsCont = ComponentFactory.createTooltip(PANEL_W, true);
+        final UIContainerAPI content = new UIContainer(PANEL_W, 0f);
 
         final float workerPool = WorkerPoolRegistry.get(market).getWorkerPool();
         
@@ -158,15 +158,15 @@ public final class ServiceSectorDialog extends DialogPanel {
                 }, grid
             );
 
-            sectorsCont.addComponent(logistics).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            content.add(logistics).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
-            sectorsCont.addComponent(healthcare).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            content.add(healthcare).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
-            sectorsCont.addComponent(security).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            content.add(security).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
-            sectorsCont.addComponent(publicInfo).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            content.add(publicInfo).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
-            sectorsCont.addComponent(culture).inTL(SectorCard.borderMargin, cumulativeYOffset);
+            content.add(culture).inTL(SectorCard.borderMargin, cumulativeYOffset);
             cumulativeYOffset += SectorCard.borderMargin*2 + SectorCard.CARD_H + hpad;
 
             logistics.slider.setProgress(data.getAssignedRatioForOutput(SERVICE_LOGISTICS) * 100f);
@@ -188,8 +188,8 @@ public final class ServiceSectorDialog extends DialogPanel {
             sectorCards.add(culture);
         }
 
-        sectorsCont.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(sectorsCont, PANEL_H - 20 - BUTTON_H - opad, true, this).inBL(0f, BUTTON_H + opad);
+        content.setHeight(cumulativeYOffset);
+        add(ComponentFactory.wrapWithScrollPanel(content, PANEL_W, PANEL_H - 20 - BUTTON_H - opad)).inBL(0f, BUTTON_H + opad);
     }
 
     private final float getNewFreeWorkerRatio() {

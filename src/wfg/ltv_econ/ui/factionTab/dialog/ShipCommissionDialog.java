@@ -20,7 +20,6 @@ import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.PlannedOrder;
@@ -37,6 +36,7 @@ import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
@@ -66,16 +66,16 @@ public final class ShipCommissionDialog extends DockPanel {
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
 
         final int width = (int) contentContainer.getWidth();
-        final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
+        final UIContainerAPI content = new UIContainer(width, 0f);
 
         float yCoord = 0f;
         for (String hullId : faction.getKnownShips()) {
             final HullRow row = new HullRow(width, ROW_H, settings.getHullSpec(hullId));
-            container.addCustom(row, 0f).getPosition().inTL(0f, yCoord);
+            content.add(row).inTL(0f, yCoord);
             yCoord += ROW_H + pad;
         }
-        container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, contentContainer.getHeight() - hpad*4, true, contentContainer).inTL(0f, hpad);
+        content.setHeight(yCoord);
+        add(ComponentFactory.wrapWithScrollPanel(content, width, contentContainer.getHeight())).inTL(0f, hpad);
     }
 
     private final void addOrder(String hullId, int count) {

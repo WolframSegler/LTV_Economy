@@ -18,7 +18,6 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
@@ -37,6 +36,7 @@ import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.visual.TextWrapper;
 import wfg.native_ui.ui.widget.Button.CutStyle;
@@ -97,9 +97,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 	
 		final byte columnAmount = 4;
 
-		final TooltipMakerAPI wrappertp = ComponentFactory.createTooltip(
-            getWidth(), true
-        );
+		final UIContainerAPI gridContainer = new UIContainer(getWidth(), 0f);
 
 		int wrapperTpHeight = 0;
 
@@ -113,7 +111,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 				m_market, ind, this
 			);
 
-			wrappertp.addComponent(widget).inTL(
+			gridContainer.add(widget).inTL(
 				i * (IndustryWidget.PANEL_WIDTH + opad) + pad,
 				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + hpad*3)
 			);
@@ -133,7 +131,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 				m_market, ind, this, index
 			);
 
-			wrappertp.addComponent(widget).inTL(
+			gridContainer.add(widget).inTL(
 				i * (IndustryWidget.PANEL_WIDTH + opad) + pad,
 				wrapperTpHeight = j * (IndustryWidget.TOTAL_HEIGHT + hpad*3)
 			);
@@ -142,11 +140,9 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 			widgets.add(widget);
 		}
-		wrappertp.setHeightSoFar(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + hpad*3);
+		gridContainer.setHeight(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + hpad*3);
 
-		ComponentFactory.addTooltip(wrappertp, getHeight() - BUTTON_SECTION_HEIGHT*1.4f,
-			true, this
-		).inTL(-pad, 0);
+		add(ComponentFactory.wrapWithScrollPanel(gridContainer, getWidth(), getHeight() - BUTTON_SECTION_HEIGHT*1.4f)).inTL(-pad, 0);
 		
 		TextWrapper playerCreditLblPanel = null;
 		TextWrapper colonyCreditLblPanel = null;

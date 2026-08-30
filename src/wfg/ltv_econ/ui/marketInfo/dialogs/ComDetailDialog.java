@@ -186,9 +186,6 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
         section4 = new UIContainer(SECT4_WIDTH, SECT4_HEIGHT);
 
-        final TooltipMakerAPI tp = ComponentFactory.createTooltip(SECT4_WIDTH, false);
-        ComponentFactory.addTooltip(tp, SECT4_HEIGHT, false, section4).inTL(0, 0);
-
         createSection4(section4);
         add(section4).inBR(pad, BUTTON_H + pad*2 + opad);
     }

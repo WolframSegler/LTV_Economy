@@ -11,7 +11,6 @@ import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -25,6 +24,7 @@ import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
@@ -48,7 +48,7 @@ public final class FactionSelectionDialog extends DockPanel {
         clearChildren();
 
         final int width = (int) contentContainer.getWidth();
-        final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
+        final UIContainerAPI content = new UIContainer(width, 0f);
         final List<FactionSpecAPI> factions = new ArrayList<>(EconomyConstants.visibleFactions);
         factions.add(settings.getFactionSpec(Factions.PLAYER));
 
@@ -57,11 +57,11 @@ public final class FactionSelectionDialog extends DockPanel {
             final DebugFactionRow row = new DebugFactionRow(
                 width, ROW_H, faction, this::onFactionSelected
             );
-            container.addCustom(row, 0f).getPosition().inTL(0f, yCoord);
+            content.add(row).inTL(0f, yCoord);
             yCoord += ROW_H + pad;
         }
-        container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, contentContainer.getHeight(), true, contentContainer).inTL(0f, 0f);
+        content.setHeight(yCoord);
+        add(ComponentFactory.wrapWithScrollPanel(content, width, contentContainer.getHeight())).inTL(0f, 0f);
     }
 
     private void onFactionSelected(FactionSpecAPI faction) {

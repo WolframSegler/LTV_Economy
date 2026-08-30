@@ -11,15 +11,17 @@ import org.lwjgl.input.Keyboard;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.ScrollPanelAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.internal.ui.Side;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.container.DockPanel;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.widget.DockButton;
 import wfg.native_ui.ui.widget.Button.CutStyle;
 import wfg.native_ui.ui.widget.RadioPanel;
@@ -53,16 +55,9 @@ public final class TradeMissionsDialog extends DockPanel {
         EconomyEngine engine = EconomyEngine.instance();
         final List<TradeMission> missions = activeMissions ? engine.getActiveMissions() : engine.getPastMissions();
 
-        final TooltipMakerAPI scrollPanel = ComponentFactory.createTooltip(WIDTH, true);
-
         final RadioPanel monthSwitch = new RadioPanel(110, 18, LayoutMode.HORIZONTAL)
             .addOption(str("activeTitle"), activeMissions)
             .addOption(str("pastTitle"), !activeMissions);
-        monthSwitch.optionSelected = code -> {
-            activeMissions = code == 0;
-            scrollLen = scrollPanel.getExternalScroller().getYOffset();
-            buildUI();
-        };
         monthSwitch.buildUI();
         add(monthSwitch).inTR(opad - pad, opad);
 
@@ -73,6 +68,8 @@ public final class TradeMissionsDialog extends DockPanel {
         filterBtn.bgAlpha = 1f;
         filterBtn.setShortcutAndAppendToText(Keyboard.KEY_Q);
         add(filterBtn).inTR(opad + 110 + hpad - pad, opad);
+
+        final UIContainerAPI content = new UIContainer(WIDTH, 0f);
 
         float yCoord = pad;
         for (TradeMission m : missions) {
@@ -91,7 +88,7 @@ public final class TradeMissionsDialog extends DockPanel {
                 WIDTH - pad*3, ROW_H - opad, m, isSrcMarket, this
             );
 
-            scrollPanel.addCustom(row, 0).getPosition().inTL(pad, yCoord);
+            content.add(row).inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }
@@ -105,12 +102,19 @@ public final class TradeMissionsDialog extends DockPanel {
         }
 
         final int offset = opad + 30;
-        scrollPanel.setHeightSoFar(yCoord);
+        content.setHeight(yCoord);
         final float scrollPanelH = contentContainer.getHeight() - offset - opad;
-        ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, contentContainer).inTL(0f, offset);
+        final ScrollPanelAPI scrollPanel = ComponentFactory.wrapWithScrollPanel(content, WIDTH, scrollPanelH);
+        add(scrollPanel).inTL(0f, offset);
 
-        scrollPanel.getExternalScroller().setYOffset(Arithmetic.clamp(
-            scrollLen, 0f, scrollPanel.getHeightSoFar() - scrollPanelH
+        scrollPanel.setYOffset(Arithmetic.clamp(
+            scrollLen, 0f, yCoord - scrollPanelH
         ));
+
+        monthSwitch.optionSelected = code -> {
+            activeMissions = code == 0;
+            scrollLen = scrollPanel.getYOffset();
+            buildUI();
+        };
     }
 }

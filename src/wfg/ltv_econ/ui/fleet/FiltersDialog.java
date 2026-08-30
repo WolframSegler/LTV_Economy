@@ -9,14 +9,15 @@ import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.native_ui.internal.ui.Side;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.CheckboxButton;
 import wfg.native_ui.ui.container.DockPanel;
@@ -97,8 +98,8 @@ public class FiltersDialog extends DockPanel {
         final float halfW = (getWidth() - opad*3) * 0.5f;
         add(importersLbl).inTL(halfW + opad, SECT_II_H);
 
-        final TooltipMakerAPI exportersContainer = ComponentFactory.createTooltip((int)halfW, true);
-        final TooltipMakerAPI importersContainer = ComponentFactory.createTooltip((int)halfW, true);
+        final UIContainerAPI exportersContainer = new UIContainer(halfW, 0f);
+        final UIContainerAPI importersContainer = new UIContainer(halfW, 0f);
 
         float yLeft = pad;
         float yRight = pad;
@@ -119,7 +120,7 @@ public class FiltersDialog extends DockPanel {
             cbExp.setChecked(initiallyAllowedExport);
             cbExp.setLabelColor(spec.getBaseUIColor());
 
-            exportersContainer.addCustom(cbExp, 0).getPosition().inTL(pad, yLeft);
+            exportersContainer.add(cbExp).inTL(pad, yLeft);
             yLeft += cbExp.getHeight() + pad;
 
             final boolean initiallyAllowedImport = !TradeFilters.importerFactionBlacklist.contains(factionId);
@@ -134,15 +135,15 @@ public class FiltersDialog extends DockPanel {
             cbImp.setChecked(initiallyAllowedImport);
             cbImp.setLabelColor(spec.getBaseUIColor());
 
-            importersContainer.addCustom(cbImp, 0).getPosition().inTL(pad, yRight);
+            importersContainer.add(cbImp).inTL(pad, yRight);
             yRight += cbImp.getHeight() + pad;
         }
 
-        exportersContainer.setHeightSoFar(yLeft);
-        importersContainer.setHeightSoFar(yRight);
+        exportersContainer.setHeight(yLeft);
+        importersContainer.setHeight(yRight);
 
-        ComponentFactory.addTooltip(exportersContainer, LIST_H, true, contentContainer).inTL(opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
-        ComponentFactory.addTooltip(importersContainer, LIST_H, true, contentContainer).inTL(opad + halfW + opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
+        add(ComponentFactory.wrapWithScrollPanel(exportersContainer, halfW, LIST_H)).inTL(opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
+        add(ComponentFactory.wrapWithScrollPanel(importersContainer, halfW, LIST_H)).inTL(opad + halfW + opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
 
         final float btnW = 80;
         final Button enableAllExporters = new Button(btnW, S_BTN_H, str("uiEnableAll"), Fonts.DEFAULT_SMALL, (b) -> {

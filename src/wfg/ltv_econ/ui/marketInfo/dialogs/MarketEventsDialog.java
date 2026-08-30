@@ -8,7 +8,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.economy.MarketPopulationData;
@@ -24,6 +23,7 @@ import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
@@ -52,21 +52,21 @@ public final class MarketEventsDialog extends DockPanel {
         final LabelAPI title = settings.createLabel(LocalizedStrings.str("uiTitleCurrentEvents"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
 
-        final TooltipMakerAPI eventsList = ComponentFactory.createTooltip(width, true);
+        final UIContainerAPI content = new UIContainer(width, 0f);
 
         float yCoord = 0f;
         for (MarketEvent event : data.getEvents()) {
             if (!event.isVisible(data) && !DebugFlags.COLONY_DEBUG) continue;
 
             final RowPanel row = new RowPanel(width - pad*2, ROW_H, event);
-            eventsList.addCustom(row, 0).getPosition().inTL(pad, yCoord);
+            content.add(row).inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }
 
-        eventsList.setHeightSoFar(yCoord);
+        content.setHeight(yCoord);
         final float scrollPanelH = contentContainer.getHeight() - 30 - opad*2;
-        ComponentFactory.addTooltip(eventsList, scrollPanelH, true, contentContainer).inBL(0f, 0f);
+        add(ComponentFactory.wrapWithScrollPanel(content, width, scrollPanelH)).inBL(0f, 0f);
     }
 
     public class RowPanel extends UIContainer implements HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground {

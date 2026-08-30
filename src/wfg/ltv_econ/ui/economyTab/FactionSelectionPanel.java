@@ -11,7 +11,6 @@ import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.internal.ui.core.UIContainer;
@@ -24,6 +23,7 @@ import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.OutlineComp;
 import wfg.native_ui.ui.component.OutlineComp.OutlineType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
@@ -54,17 +54,17 @@ public final class FactionSelectionPanel extends UIContainer implements
 
     public void buildUI() {
         final int width = (int) getWidth();
-        final TooltipMakerAPI container = ComponentFactory.createTooltip(width, true);
+        final UIContainerAPI content = new UIContainer(width, 0f);
 
         float yCoord = pad;
         for (FactionSpecAPI faction : visibleFactions) {
             final RowPanel row = new RowPanel(width - pad*2, ROW_H, faction);
-            container.addCustom(row, 0f).getPosition().inTL(pad, yCoord);
+            content.add(row).inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }
-        container.setHeightSoFar(yCoord);
-        ComponentFactory.addTooltip(container, getHeight(), true, this).inTL(0f, 0f);
+        content.setHeight(yCoord);
+        add(ComponentFactory.wrapWithScrollPanel(content, width, getHeight())).inTL(0f, 0f);
     }
 
     public class RowPanel extends UIContainer implements UIBuildableAPI,
