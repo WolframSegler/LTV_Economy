@@ -12,7 +12,7 @@ import wfg.ltv_econ.economy.planning.IndustryMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 
-public class ConfigLunaSettingsListener implements LunaSettingsListener {
+public final class ConfigLunaSettingsListener implements LunaSettingsListener {
     @Override
     public void settingsChanged(String modID) {
         if (!Mods.LTV_ECON.equals(modID)) return;

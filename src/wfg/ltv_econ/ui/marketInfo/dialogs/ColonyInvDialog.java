@@ -206,7 +206,7 @@ public final class ColonyInvDialog extends DialogPanel {
         }
 
         final Runnable refreshUI = () -> {
-            final long colonyCred = engine.getCredits(m_market.getId());
+            final long colonyCred = engine.getCredits(mMarket.getId());
             final float playerCred = playerCredits.get();
             final int profitRatio = data != null ? (int) (data.playerProfitRatio * 100) : 0;
             final LabelAPI colonyLbl = colonyCreditPanel.label1;

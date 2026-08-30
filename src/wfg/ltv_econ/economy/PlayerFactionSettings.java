@@ -10,6 +10,7 @@ public class PlayerFactionSettings implements Serializable {
     public boolean redistributeCredits = false;
     public boolean automaticShipProductionForFaction = false;
     public boolean automaticWorkerAllocationForFaction = false;
+    public boolean tradeSuspensionWhenConvoysRaided = true;
 
     public final Set<String> embargoedFactions = new HashSet<>();
 

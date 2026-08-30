@@ -2,7 +2,8 @@ package wfg.ltv_econ.constant;
 
 import java.awt.Color;
 
-public class UIColors {
+public final class UIColors {
+    private UIColors() {};
     public static final Color IN_FACTION = new Color(35, 70, 130);
     public static final Color INFORMAL_SECTOR = new Color(150, 110, 70);
 

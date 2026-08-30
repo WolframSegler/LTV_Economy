@@ -13,7 +13,7 @@ public final class RemoveShipDialog extends DialogPanel {
     private final Slider slider;
 
     public RemoveShipDialog(InventoryShipWidget widget) {
-        super(500, 150, null, str("uiScuttleVesselsTxt"), str("uiConfirm"), str("uiCancel"));
+        super(500, 150, null, str("uiTxtScuttleVessels"), str("uiConfirm"), str("uiCancel"));
 
         this.widget = widget;
 

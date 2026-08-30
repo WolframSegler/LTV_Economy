@@ -88,7 +88,7 @@ public final class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> im
             final int valueWidth = 40;
             int rowCount = 0;
 
-            tp.addPara(str("uiRequiredResourcesTxt"), base, opad);
+            tp.addPara(str("uiTxtRequiredResources"), base, opad);
             tp.beginGridFlipped(gridWidth, 2, valueWidth, hpad);
             for (var e : order.commodities.singleEntrySet()) {
                 final CommoditySpecAPI com = settings.getCommoditySpec(e.getKey());

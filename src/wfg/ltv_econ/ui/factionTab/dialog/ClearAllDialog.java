@@ -11,7 +11,7 @@ public final class ClearAllDialog extends DialogPanel {
     private final UIBuildableAPI content;
 
     public ClearAllDialog(UIBuildableAPI content) {
-        super(500, 100, null, str("uiClearAllOrdersTxt"), str("uiConfirm"), str("uiCancel"));
+        super(500, 100, null, str("uiTxtClearAllOrders"), str("uiConfirm"), str("uiCancel"));
 
         this.content = content;
 

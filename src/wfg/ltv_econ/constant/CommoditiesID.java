@@ -1,6 +1,7 @@
 package wfg.ltv_econ.constant;
 
-public class CommoditiesID {
+public final class CommoditiesID {
+    private CommoditiesID() {};
     public static final String LIGHT_MACHINERY = "light_machinery";
     public static final String STRUCTURAL_COMPONENTS = "components_structural";
     public static final String PRECISION_COMPONENTS = "components_precision";

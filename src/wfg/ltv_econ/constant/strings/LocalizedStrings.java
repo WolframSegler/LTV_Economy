@@ -4,7 +4,8 @@ import com.fs.starfarer.api.Global;
 
 import wfg.ltv_econ.constant.Mods;
 
-public class LocalizedStrings {
+public final class LocalizedStrings {
+    private LocalizedStrings() {};
     public static final String str(String id) {
         return Global.getSettings().getString(Mods.LTV_ECON, id);
     }

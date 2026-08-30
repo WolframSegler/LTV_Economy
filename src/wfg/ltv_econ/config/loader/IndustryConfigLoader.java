@@ -22,7 +22,7 @@ import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
-public class IndustryConfigLoader {
+public final class IndustryConfigLoader {
     private static final Logger log = Global.getLogger(IndustryConfigLoader.class);
 
     private static final String CONFIG_PATH = "./data/config/ltvEcon/industry_config.json";
@@ -32,7 +32,7 @@ public class IndustryConfigLoader {
     private static JSONObject config;
     private static JSONObject dynamic_config;
 
-    private IndustryConfigLoader() {}
+    private IndustryConfigLoader() {};
     public static final String getDynamicConfigVersion() {
         final JSONObject root = getConfig(true);
         try {
@@ -147,7 +147,7 @@ public class IndustryConfigLoader {
             }
             
             IndustryConfig indConfig = new IndustryConfig(
-                workerAssignable, commodityMap, occTag, demandOnly
+                indID, workerAssignable, commodityMap, occTag, demandOnly
             );
             result.put(indID, indConfig);
         }

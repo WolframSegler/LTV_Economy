@@ -74,6 +74,17 @@ public final class FactionAdministrationPanel extends UIContainer implements UIB
         );
         autoAllocatoWorkersBtn.setChecked(factionSettings.automaticWorkerAllocationForFaction);
         add(autoAllocatoWorkersBtn).inTL(opad + pad, SECTION_II + (lblW + pad) * 2);
+
+        final CallbackRunnable<Button> tradeSuspensionRunnable = (btn) -> {
+            btn.setChecked(!btn.isChecked());
+            factionSettings.tradeSuspensionWhenConvoysRaided = btn.isChecked();
+        };
+
+        final Button tradeSuspensionBtn = ComponentFactory.createCheckboxWithText(22,
+            str("uiCheckboxTxtTradeSuspensionRaid"), Fonts.DEFAULT_SMALL, tradeSuspensionRunnable, base, pad
+        );
+        tradeSuspensionBtn.setChecked(factionSettings.tradeSuspensionWhenConvoysRaided);
+        add(tradeSuspensionBtn).inTL(opad + pad, SECTION_II + (lblW + pad) * 3);
         }
 
         { // SECTION III

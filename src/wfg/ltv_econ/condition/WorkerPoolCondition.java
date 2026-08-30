@@ -15,7 +15,7 @@ import wfg.native_ui.util.NumFormat;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
 
-public class WorkerPoolCondition extends BaseMarketConditionPlugin {
+public final class WorkerPoolCondition extends BaseMarketConditionPlugin {
     private static final String ConditionID = "worker_pool";
 
     @Override

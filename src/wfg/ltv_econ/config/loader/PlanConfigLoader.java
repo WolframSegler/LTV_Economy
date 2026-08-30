@@ -23,8 +23,8 @@ import wfg.ltv_econ.economy.planning.custom.goalParams.GoalParameter;
 import wfg.ltv_econ.economy.registry.PlanningGoalRegistry;
 import wfg.native_ui.ui.dialog.DialogPanel;
 
-public class PlanConfigLoader {
-    private PlanConfigLoader() {}
+public final class PlanConfigLoader {
+    private PlanConfigLoader() {};
     private static final Logger log = Global.getLogger(IndustryConfigLoader.class);
 
     private static final String CONFIG_PATH = "./data/config/ltvEcon/plan_config.json";

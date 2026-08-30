@@ -88,6 +88,8 @@ Forbidden by Kosong Tujuh from <a href="https://thenounproject.com/browse/icons/
 
 The Fairest of the Fair by <a href="https://www.youtube.com/@usnavyband" target="_blank" title="Forbidden Icons">United States Navy Band</a>
 
+Warning by Amazona Adorada from <a href="https://thenounproject.com/browse/icons/term/warning/" target="_blank" title="Warning Icons">Noun Project</a> (CC BY 3.0)
+
 <br>
 
 ## AI Generated Assets

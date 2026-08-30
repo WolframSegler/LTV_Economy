@@ -9,7 +9,8 @@ import wfg.ltv_econ.config.EventConfig;
 import wfg.ltv_econ.config.EventConfig.EventSpec;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 
-public class EventConfigLoader {
+public final class EventConfigLoader {
+    private EventConfigLoader() {};
     private static final String CONFIG_PATH = "./data/config/ltvEcon/event_config.json";
     private static final String FAILURE_MESSAGE = "Failed to load event config: " + CONFIG_PATH;
 

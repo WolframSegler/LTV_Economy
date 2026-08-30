@@ -6,7 +6,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Strings;
 
 import wfg.ltv_econ.config.EconConfig;
 
-public class Income {
+public final class Income {
+    private Income() {};
     public static final String FACTION_CREW_WAGES_KEY = "faction_fleet_crew_wages";
     public static final String FACTION_CREW_WAGES_DESC = str("FACTION_CREW_WAGES_DESC");
 

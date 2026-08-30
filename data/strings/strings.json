@@ -287,13 +287,13 @@
         "uiTableStatus": "Status",
         "uiTableRatio": "Ratio",
         "uiTableWorkers": "Workers",
-        "uiDebugAddShipTxt": "Debug add ship amount",
-        "uiClearAllOrdersTxt": "Clear all orders?",
-        "uiDiscardHullsTxt": "Discard all hulls? A portion of allocated resources will be recovered as scrap metal.",
-        "uiScuttleVesselsTxt": "Scuttle vessels? A portion of the hull materials will be recovered as scrap metal.",
-        "uiHullsCostBuildTimeTxt": "Cost: %1$s  •  Build time: %2$s days",
-        "uiRequiredResourcesTxt": "Required Resources",
-        "uiHullsCommissionShortcutsTxt": "%1$s + %3$s: 5  •  %2$s + %3$s: 10  •  %1$s + %2$s + %3$s: 50",
+        "uiTxtDebugAddShip": "Debug add ship amount",
+        "uiTxtClearAllOrders": "Clear all orders?",
+        "uiTxtDiscardHulls": "Discard all hulls? A portion of allocated resources will be recovered as scrap metal.",
+        "uiTxtScuttleVessels": "Scuttle vessels? A portion of the hull materials will be recovered as scrap metal.",
+        "uiTxtHullsCostBuildTime": "Cost: %1$s  •  Build time: %2$s days",
+        "uiTxtRequiredResources": "Required Resources",
+        "uiTxtHullsCommissionShortcuts": "%1$s + %3$s: 5  •  %2$s + %3$s: 10  •  %1$s + %2$s + %3$s: 50",
         "uiNoStaticAssets": "No static assets",
         "uiBtnTitleClearAll": "Clear All",
         "uiTitleAssemblyLine": "Assembly Lines",
@@ -732,6 +732,10 @@
         "uiBtnTitleLogMarketsWithManufacturing": "Log Markets With Manufacturing",
         "uiStatDescTargetFromConsumption": "Consumption",
         "uiStatDescTargetFromProduction": "Export buffer",
-        "uiStatDescTargetFromPrediction": "Construction stock buffer"
+        "uiStatDescTargetFromPrediction": "Construction stock buffer",
+        "uiCheckboxTxtTradeSuspensionRaid": "Suspend imports and exports after repeated convoy losses",
+        "uiTpTxtTradeSuspensionIconInfo": "Trade suspended due to repeated convoy losses. Remaining: %1$s %2$s.",
+        "uiTpTxtTradeSuspensionIconClick": "Click to resume trade.",
+        "uiTxtResetTradeSuspension": "Resume trade? Convoys may be attacked again."
     }
 }

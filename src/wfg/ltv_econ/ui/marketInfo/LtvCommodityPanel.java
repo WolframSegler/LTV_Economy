@@ -1,5 +1,6 @@
 package wfg.ltv_econ.ui.marketInfo;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,16 +13,27 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.constant.EconomyConstants;
+import wfg.ltv_econ.constant.Sprites;
+import wfg.ltv_econ.constant.UIColors;
+import wfg.ltv_econ.economy.commodity.MarketTradeDisruptionData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
+import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.OutlineComp;
 import wfg.native_ui.ui.functional.ClickHandler;
+import wfg.native_ui.ui.system.InteractionSystem;
+import wfg.native_ui.ui.system.NativeSystems;
+import wfg.native_ui.ui.visual.InteractiveSprite;
+import wfg.native_ui.util.NativeUiUtils;
+import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
+import wfg.native_ui.ui.dialog.DialogPanel;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
@@ -36,7 +48,7 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
     public String m_headerTxt;
     public boolean rowsIgnoreUIState = false;
     public final List<CommodityRowPanel> commodityRows = new ArrayList<>();
-    public final MarketAPI m_market;
+    public final MarketAPI mMarket;
     public ClickHandler<CommodityRowPanel> selectionListener;
 
     public LtvCommodityPanel(int width, int height, String headerTxt, MarketAPI market) {
@@ -58,7 +70,7 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
         String headerTxt, boolean rowsIgnoreUIState, MarketAPI market
     ) { super(width, height);
 
-        m_market = market;
+        mMarket = market;
         m_headerTxt = headerTxt;
         this.rowsIgnoreUIState = rowsIgnoreUIState;
 
@@ -70,10 +82,12 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
     }
 
     public void buildUI() {
+        clearChildren();
+
         final List<CommoditySpecAPI> commodities = new ArrayList<>(EconomyConstants.econCommoditySpecs);
         Collections.sort(commodities, getCommodityOrderComparator());
         commodities.removeIf(com -> {
-            return EconomyEngine.instance().getComCell(com.getId(), m_market.getId()).getActivityIndicator() <= 0f;
+            return EconomyEngine.instance().getComCell(com.getId(), mMarket.getId()).getActivityIndicator() <= 0f;
         });
 
         final TooltipMakerAPI headerTp = ComponentFactory.createTooltip(
@@ -97,7 +111,7 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
 
         for (CommoditySpecAPI com : commodities) {
             final CommodityRowPanel comRow = new CommodityRowPanel(
-                m_market, com.getId(), rowWidth, 
+                mMarket, com.getId(), rowWidth, 
                 rowHeight, rowsIgnoreUIState
             );
 
@@ -112,10 +126,32 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
         rowTp.setHeightSoFar(cumulativeYOffset);
         ComponentFactory.addTooltip(rowTp, getHeight() - headerHeight, true, this)
             .inTL(0, headerHeight);
+  
+        if (MarketTradeDisruptionData.shouldSuspendTrade(mMarket)) {
+            // TODO test this.
+            final InteractiveSprite tradeSuspensionIcon = new InteractiveSprite(20, 20, Sprites.WARNING, UIColors.CARGO_COLOR, null);
+            add(tradeSuspensionIcon).inTL(-20 - opad, pad);
+            tradeSuspensionIcon.tooltip.positioner = (tp, isExpanded) -> {
+                NativeUiUtils.anchorPanel(tp, tradeSuspensionIcon, AnchorType.LeftTop, opad);
+            };
+            tradeSuspensionIcon.tooltip.builder = (tp, isExpanded) -> {
+                final var data = MarketTradeDisruptionData.get(mMarket);
+                final String daysStr = Integer.toString(data.getSuspendedDays());
+                final String dayDays = UIUtils.getDayOrDays(data.getSuspendedDays());
+                tp.addPara(str("uiTpTxtTradeSuspensionIconInfo"), 0f, new Color[]{highlight, text_color}, daysStr, dayDays);
+
+                tp.addPara(str("uiTpTxtTradeSuspensionIconClick"), pad);
+            };
+            tradeSuspensionIcon.system().setIfNotPresent(NativeSystems.INTERACTION, InteractionSystem.get(), tradeSuspensionIcon);
+            final InteractionComp<InteractiveSprite> suspensionComp = tradeSuspensionIcon.comp().get(NativeComponents.INTERACTION);
+            suspensionComp.onClicked = (icon, isLeftClick) -> {
+                new ClearSuspensionDialog().show(0.3f, 0.3f);
+            };
+        }
     }
 
     public void selectRow(String comID) {
-        final CommodityOnMarketAPI com = m_market.getCommodityData(comID);
+        final CommodityOnMarketAPI com = mMarket.getCommodityData(comID);
         for (CommodityRowPanel row : commodityRows) {
             row.glow.persistent = row.cell.spec == com;
         }
@@ -124,6 +160,28 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
     public void selectRow(CommodityRowPanel selectedRow) {
         for (CommodityRowPanel row : commodityRows) {
             row.glow.persistent = row == selectedRow;
+        }
+    }
+
+    public final class ClearSuspensionDialog extends DialogPanel {
+        
+        public ClearSuspensionDialog() {
+            super(500, 100, null, str("uiTxtResetTradeSuspension"), str("uiConfirm"), str("uiCancel"));
+
+            backgroundDimAmount = 0.1f;
+            holo.borderAlpha = 0.66f;
+
+            setConfirmShortcut();
+        }
+
+        @Override
+        public void dismiss(int option) {
+            super.dismiss(option);
+
+            if (option == 0) {
+                MarketTradeDisruptionData.get(mMarket).resetLosses();
+                LtvCommodityPanel.this.buildUI();
+            }
         }
     }
 }

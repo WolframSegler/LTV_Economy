@@ -7,7 +7,7 @@ package wfg.ltv_econ.economy.commodity;
  * For s >= 0 the multiplier follows a shifted power law that passes through the two anchor points.
  * For s < 0 the multiplier extends smoothly using a decaying exponential.
  */
-public class BasePriceCalculator {
+public final class BasePriceCalculator {
     private BasePriceCalculator() {}
 
     // ------------------------ TUNABLE START ------------------------

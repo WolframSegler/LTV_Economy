@@ -13,7 +13,7 @@ import wfg.ltv_econ.economy.planning.custom.ObjectiveConfig;
 import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments;
 import wfg.ltv_econ.economy.planning.custom.PiecewiseSegments.PiecewiseSegment;
 
-public class PlanConfig {
+public final class PlanConfig {
     private PlanConfig() {}
     public static final Map<String, WorkerAllocationPlan> map = new LinkedHashMap<>(16);
 

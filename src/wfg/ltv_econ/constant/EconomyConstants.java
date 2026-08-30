@@ -8,7 +8,8 @@ import java.util.List;
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 
-public class EconomyConstants {
+public final class EconomyConstants {
+    private EconomyConstants() {};
     public static final int MONTH = 30;
     public static final List<String> factionIDs = Collections.unmodifiableList(
         settings.getAllFactionSpecs().stream().map(f -> f.getId()).toList()

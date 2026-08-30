@@ -6,6 +6,8 @@ Version 0.5.0-beta | NOT SAVE COMPATIBLE
 - Colonies in debt will reduce their import targets and their import price.
 - Added a background "private sector" economic loop: credits paid to independent captains, patrols, and other services are gradually recycled back into colony vaults.
 - The overall credit supply now grows slowly with population.
+- Colonies now suspend imports and exports after repeated trade convoy losses, preventing endless spending on doomed shipments. Trade automatically resumes after a configurable cooldown, and it can be resumed from the colony screen.
+- Industries under construction now gradually pre-import a buffer of their required inputs. The buffer is based on a predicted worker allocation.
 
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.

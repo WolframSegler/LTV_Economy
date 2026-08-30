@@ -12,7 +12,7 @@ import org.json.JSONObject;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.native_ui.util.ArrayMap;
 
-public class PolicyConfigLoader {
+public final class PolicyConfigLoader {
     private PolicyConfigLoader() {}
     private static final String CONFIG_PATH = "./data/config/ltvEcon/policy_config.json";
 

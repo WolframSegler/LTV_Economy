@@ -15,6 +15,7 @@ import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Pair;
+import com.fs.starfarer.campaign.econ.Market;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
@@ -115,6 +116,10 @@ public class CommodityDomain implements Serializable {
         final List <CommodityCell> importers = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
+            // TODO switch to API method once available
+            if (!((Market) cell.market).isAllowImport()) continue;
+            if (!cell.market.hasSpaceport()) continue;
+            if (MarketTradeDisruptionData.shouldSuspendTrade(cell.market)) continue;
             if (cell.computeImportAmount() > 0d) importers.add(cell);
         }
 
@@ -125,6 +130,10 @@ public class CommodityDomain implements Serializable {
         final List <CommodityCell> exporters = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
+            // TODO switch to API method once available
+            if (!((Market) cell.market).isAllowExport()) continue;
+            if (!cell.market.hasSpaceport()) continue;
+            if (MarketTradeDisruptionData.shouldSuspendTrade(cell.market)) continue;
             if (cell.computeExportAmount() > 0d) exporters.add(cell);
         }
 
@@ -188,8 +197,6 @@ public class CommodityDomain implements Serializable {
                             continue;
                         }
                     }
-
-                    if (!exporter.market.hasSpaceport() || !importer.market.hasSpaceport()) continue;
                 }
 
                 pairScores[expInd * importers.size() + impInd] = computePairScore(exporter, importer);

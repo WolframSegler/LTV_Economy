@@ -4,7 +4,8 @@ package wfg.ltv_econ.constant;
 /**
  * Base Deficit weights for each indicator. 
  */
-public class TradeWeights {
+public final class TradeWeights {
+    private TradeWeights() {};
     public static final int IN_FACTION = 35;
     public static final int POLITICAL = 18;
     public static final int TRADE_AGREEMENTS = 15;

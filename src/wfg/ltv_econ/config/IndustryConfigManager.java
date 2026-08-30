@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-public class IndustryConfigManager {
+public final class IndustryConfigManager {
     private IndustryConfigManager() {}
     private static final ArrayMap<String, String> IndToBaseInd = new ArrayMap<>(EconomyConstants.industryIDs.size());
 
@@ -53,7 +53,7 @@ public class IndustryConfigManager {
         validateOrRebuildDynamicConfigs();
     }
 
-    public static class IndustryConfig {
+    public static final class IndustryConfig {
         public final String indID;
         public final boolean workerAssignable;
         public final boolean demandOnly;

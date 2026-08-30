@@ -7,7 +7,7 @@ import wfg.ltv_econ.config.loader.EconomyConfigLoader;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
 import wfg.native_ui.util.ArrayMap;
 
-public class EconConfig {
+public final class EconConfig {
     private EconConfig() {};
 
     /**
@@ -240,6 +240,21 @@ public class EconConfig {
 
     /** The ratio of assigned workers that the player is predicted to allocate to the newly constructed industry. */
     public static float PREDICTED_WORKER_REALLOCATION_FRACTION;
+
+    /** Number of days a destroyed trade convoy is remembered for the trade suspension threshold. */
+    public static int CONVOY_LOSS_WINDOW_DAYS;
+
+    /**
+     * Number of trade convoy losses within {@link #CONVOY_LOSS_WINDOW_DAYS} that triggers
+     * suspension of imports and exports for the affected market.
+     */
+    public static int CONVOY_LOSS_SUSPENSION_THRESHOLD;
+
+    /**
+     * Cooldown in days after trade suspension is triggered.
+     * During this cooldown, trade remains blocked.
+     */
+    public static int CONVOY_LOSS_SUSPENSION_DAYS;
 
     public static boolean NPC_WORKER_POOL_VISIBLE;
     public static boolean GROWTH_EFFECT_WORKER_POOL;

@@ -40,6 +40,7 @@ import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
+import wfg.ltv_econ.economy.commodity.MarketTradeDisruptionData;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipAllocator;
@@ -78,6 +79,8 @@ public class EconomyLoop {
         final WorkerPoolRegistry poolReg = WorkerPoolRegistry.instance();
 
         refreshMarkets();
+
+        if (!fakeAdvance) EconomyInfo.getMarketsCopy().forEach(m -> MarketTradeDisruptionData.get(m).advance(1));
 
         poolReg.recalculateWorkerPool();
 
@@ -517,6 +520,9 @@ public class EconomyLoop {
                     inv.registerShipLoss(entry.getKey(), entry.getValue());
                 }
                 putMissionToPast(activeIt, m);
+
+                MarketTradeDisruptionData.get(m.src).recordLoss();
+                MarketTradeDisruptionData.get(m.dest).recordLoss();
                 break;
             }
         }

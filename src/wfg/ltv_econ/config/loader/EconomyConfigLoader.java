@@ -13,7 +13,7 @@ import lunalib.lunaSettings.LunaSettings;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 
-public class EconomyConfigLoader {
+public final class EconomyConfigLoader {
     private static final String CONFIG_PATH = "./data/config/ltvEcon/economy_config.json";
     private static final String FAILURE_MESSAGE = "Failed to load economy config: " + CONFIG_PATH;
     public static final String AVERAGE_OCC_TAG = "average"; 
@@ -97,6 +97,9 @@ public class EconomyConfigLoader {
         EconConfig.LPV_month = root.getInt("LPV_month");
         EconConfig.LPV_day = EconConfig.LPV_month / (float) MONTH;
         EconConfig.avg_wage = EconConfig.LPV_month / EconConfig.RoSV;
+        EconConfig.CONVOY_LOSS_WINDOW_DAYS = root.getInt("CONVOY_LOSS_WINDOW_DAYS");
+        EconConfig.CONVOY_LOSS_SUSPENSION_THRESHOLD = root.getInt("CONVOY_LOSS_SUSPENSION_THRESHOLD");
+        EconConfig.CONVOY_LOSS_SUSPENSION_DAYS = Math.max(1, root.getInt("CONVOY_LOSS_SUSPENSION_DAYS"));
 
         final JSONArray debtArr = root.getJSONArray("DEBT_DEBUFF_TIERS");
         EconConfig.DEBT_DEBUFF_TIERS = new ArrayList<>(debtArr.length());

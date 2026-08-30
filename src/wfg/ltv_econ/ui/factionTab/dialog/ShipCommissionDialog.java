@@ -116,12 +116,12 @@ public final class ShipCommissionDialog extends DockPanel {
 
             tooltip.builder = (tp, expanded) -> {
                 tp.addTitle(spec.getHullNameWithDashClass(), base);
-                tp.addPara(str("uiHullsCostBuildTimeTxt"), pad, highlight,
+                tp.addPara(str("uiTxtHullsCostBuildTime"), pad, highlight,
                     NumFormat.formatCreditAbs(order.credits), String.valueOf(order.days)
                 );
 
                 int row = 0;
-                tp.addPara(str("uiRequiredResourcesTxt"), base, opad);
+                tp.addPara(str("uiTxtRequiredResources"), base, opad);
                 tp.beginGridFlipped(300, 2, 50, hpad);
                 for (var e : order.commodities.singleEntrySet()) {
                     final CommoditySpecAPI com = settings.getCommoditySpec(e.getKey());
@@ -130,7 +130,7 @@ public final class ShipCommissionDialog extends DockPanel {
                 }
                 tp.addGrid(0);
 
-                tp.addPara(str("uiHullsCommissionShortcutsTxt"),
+                tp.addPara(str("uiTxtHullsCommissionShortcuts"),
                     opad*2, highlight, str("uiCtrlTxt"), str("uiShift"), str("uiClickTxt")
                 );
             };

@@ -283,13 +283,13 @@
         "uiTitleSectorWorkforceBreakdown": "星区劳动力结构",
         "uiTpTxtSectorWorkforceBreakdown": "显示星区工人人口及各派系所占份额。",
         "uiTableWorkers": "工人",
-        "uiDebugAddShipTxt": "调试添加舰船数量",
-        "uiClearAllOrdersTxt": "清除所有订单？",
-        "uiDiscardHullsTxt": "废弃所有船体？部分分配的资源将作为废金属回收。",
-        "uiScuttleVesselsTxt": "凿沉舰船？部分船体材料将作为废金属回收。",
-        "uiHullsCostBuildTimeTxt": "费用：%1$s  ·  建造时间：%2$s天",
-        "uiRequiredResourcesTxt": "所需资源",
-        "uiHullsCommissionShortcutsTxt": "%1$s + %3$s：5  ·  %2$s + %3$s：10  ·  %1$s + %2$s + %3$s：50",
+        "uiTxtDebugAddShip": "调试添加舰船数量",
+        "uiTxtClearAllOrders": "清除所有订单？",
+        "uiTxtDiscardHulls": "废弃所有船体？部分分配的资源将作为废金属回收。",
+        "uiTxtScuttleVessels": "凿沉舰船？部分船体材料将作为废金属回收。",
+        "uiTxtHullsCostBuildTime": "费用：%1$s  ·  建造时间：%2$s天",
+        "uiTxtRequiredResources": "所需资源",
+        "uiTxtHullsCommissionShortcuts": "%1$s + %3$s：5  ·  %2$s + %3$s：10  ·  %1$s + %2$s + %3$s：50",
         "uiNoStaticAssets": "无静态资产",
         "uiBtnTitleClearAll": "全部清除",
         "uiTitleAssemblyLine": "装配线",
@@ -732,6 +732,10 @@
         "uiBtnTitleLogMarketsWithManufacturing": "记录所有拥有制造厂的市场",
         "uiStatDescTargetFromConsumption": "消耗",
         "uiStatDescTargetFromProduction": "出口缓冲",
-        "uiStatDescTargetFromPrediction": "建造期储备缓冲"
+        "uiStatDescTargetFromPrediction": "建造期储备缓冲",
+        "uiCheckboxTxtTradeSuspensionRaid": "多次商队损失后暂停进出口贸易",
+        "uiTpTxtTradeSuspensionIconInfo": "因多次商队损失，贸易暂停。剩余：%1$s%2$s。",
+        "uiTpTxtTradeSuspensionIconClick": "点击恢复贸易。",
+        "uiTxtResetTradeSuspension": "恢复贸易？商队可能会再次遭到袭击。"
     }
 }

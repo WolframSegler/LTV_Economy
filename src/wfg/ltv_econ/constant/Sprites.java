@@ -5,7 +5,8 @@ import static wfg.native_ui.util.Globals.settings;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 
-public class Sprites {
+public final class Sprites {
+    private Sprites() {};
     public static final SpriteAPI CRATES = settings.getSprite("icons", "cargo_crates");
     public static final SpriteAPI SUPPLIES = settings.getSprite(settings.getCommoditySpec(Commodities.SUPPLIES).getIconName());
     public static final SpriteAPI FUEL = settings.getSprite(settings.getCommoditySpec(Commodities.FUEL).getIconName());
@@ -23,4 +24,5 @@ public class Sprites {
     public static final SpriteAPI SECURITY = settings.getSprite("simulator", "behavior_defensive");
     public static final SpriteAPI PUBLIC_INFO = settings.getSprite("icons", "radio_tower");
     public static final SpriteAPI CULTURE = settings.getSprite("icons", "theater_mask");
+    public static final SpriteAPI WARNING = settings.getSprite("ui", "warning");
 }
