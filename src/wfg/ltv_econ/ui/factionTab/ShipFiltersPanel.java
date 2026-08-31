@@ -2,6 +2,7 @@ package wfg.ltv_econ.ui.factionTab;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;
+import static wfg.native_ui.util.Globals.settings;
 
 import java.awt.Color;
 import java.util.List;
@@ -11,11 +12,9 @@ import org.lwjgl.input.Keyboard;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.TextFieldAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.ui.fleet.ShipFilters;
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
@@ -23,6 +22,7 @@ import wfg.native_ui.util.NativeUiUtils;
 
 public final class ShipFiltersPanel extends UIContainer {
     private static final String emptyNameFieldTxt = "Ctrl-F to search";
+    private static final int btnW = 100;
     private static final int btnH = 24;
     private static final Color nearBlack = new Color(20, 20, 25);
 
@@ -34,16 +34,12 @@ public final class ShipFiltersPanel extends UIContainer {
 
         this.target = target;
 
-        final TooltipMakerAPI uiBuilder = ComponentFactory.createTooltip(w, false);
-        final int btnW = 100;
-        
-
-        nameField = uiBuilder.addTextField(192, btnH, Fonts.DEFAULT_SMALL, pad);
-        nameField.setText(ShipFilters.searchQuery);
+        nameField = settings.createTextField(ShipFilters.searchQuery, Fonts.DEFAULT_SMALL);
+        nameField.getPosition().setSize(192, btnH);
         nameField.setMaxChars(30);
         nameField.setLimitByStringWidth(true);
         nameField.setUndoOnEscape(true);
-        nameField.getPosition().inBL(hpad, 0f);
+        add(nameField).inBL(hpad, 0f);
 
         float btnX = 200 + hpad*3;
 
@@ -112,8 +108,6 @@ public final class ShipFiltersPanel extends UIContainer {
         capitalBtn.setCutStyle(CutStyle.TR_BR);
         capitalBtn.setChecked(ShipFilters.showCapitals);
         add(capitalBtn).inBL(btnX, 0f);
-
-        ComponentFactory.addTooltip(uiBuilder, btnH, false, this);
 
         civilianBtn.bgColor = nearBlack;
         combatBtn.bgColor = nearBlack;
