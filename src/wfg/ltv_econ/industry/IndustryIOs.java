@@ -379,7 +379,7 @@ public final class IndustryIOs {
     }
 
     public static final float computeScale(String industryId, String marketId, int marketSize, OutputConfig output) {
-        return computeScale(WorkerRegistry.instance().getRegisterData(marketId, industryId), marketId, marketSize, output);
+        return computeScale(WorkerRegistry.get(marketId, industryId), marketId, marketSize, output);
     }
 
     public static final float computeScale(final WorkerIndustryData data, String marketId, int marketSize, OutputConfig output) {
@@ -404,7 +404,7 @@ public final class IndustryIOs {
     }
 
     public static final float getRealOutput(Industry ind, String outputID) {
-        return getRealOutput(ind, WorkerRegistry.instance().getRegisterData(ind), outputID, false);
+        return getRealOutput(ind, WorkerRegistry.get(ind), outputID, false);
     }
 
     /**
@@ -428,7 +428,7 @@ public final class IndustryIOs {
     }
 
     public static final float getRealInput(Industry ind, String outputID, String inputID) {
-        return getRealInput(ind, WorkerRegistry.instance().getRegisterData(ind), outputID, inputID, false);
+        return getRealInput(ind, WorkerRegistry.get(ind), outputID, inputID, false);
     }
 
     /**
@@ -451,8 +451,7 @@ public final class IndustryIOs {
     }
 
     public static final float getRealSumInput(Industry ind, String inputID) {
-        return getRealSumInput(WorkerRegistry.instance().getRegisterData(ind),
-            ind, inputID, false);
+        return getRealSumInput(WorkerRegistry.get(ind), ind, inputID, false);
     }
 
     /**
@@ -480,7 +479,7 @@ public final class IndustryIOs {
     }
 
     public static final Map<String, Float> getRealOutputs(Industry ind, boolean includeAbstract) {
-        return getRealOutputs(ind, WorkerRegistry.instance().getRegisterData(ind), includeAbstract, false);
+        return getRealOutputs(ind, WorkerRegistry.get(ind), includeAbstract, false);
     }
 
     /** 
@@ -501,7 +500,7 @@ public final class IndustryIOs {
     }
 
     public static final ArrayMap<String, Float> getRealInputs(Industry ind, String outputID, boolean includeAbstract) {
-        return getRealInputs(ind, WorkerRegistry.instance().getRegisterData(ind), outputID, includeAbstract, false);
+        return getRealInputs(ind, WorkerRegistry.get(ind), outputID, includeAbstract, false);
     }
 
     /** 

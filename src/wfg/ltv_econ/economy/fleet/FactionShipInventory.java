@@ -394,7 +394,7 @@ public class FactionShipInventory implements Serializable {
         capitalID = marketID;
     } 
 
-    private MarketAPI computeCapital() {
+    private final MarketAPI computeCapital() {
         MarketAPI best = null;
         for (MarketAPI market : econ.getMarketsCopy()) {
             if (!market.getFactionId().equals(factionID)) continue;

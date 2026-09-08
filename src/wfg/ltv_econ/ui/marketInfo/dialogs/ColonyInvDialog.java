@@ -46,13 +46,13 @@ public final class ColonyInvDialog extends DialogPanel {
     public static final int PANEL_W = 950;
     public static final int PANEL_H = 650;
 
-    private final MarketAPI m_market;
+    private final MarketAPI mMarket;
 
     public ColonyInvDialog(MarketAPI market) {
         super(PANEL_W, PANEL_H, null, null, str("uiDismiss"));
         getButton(0).setShortcutAndAppendToText(Keyboard.KEY_3);
 
-        m_market = market;
+        mMarket = market;
 
         backgroundDimAmount = 0.2f;
         holo.borderAlpha = 0.8f;
@@ -63,7 +63,7 @@ public final class ColonyInvDialog extends DialogPanel {
     @Override
     public void buildUI() {
         final EconomyEngine engine = EconomyEngine.instance();
-        final MarketPopulationData data = engine.getMarketPopulationData(m_market.getId());
+        final MarketPopulationData data = engine.getMarketPopulationData(mMarket.getId());
         final boolean hasData = data != null;
 
         final int sliderH = 32;
@@ -75,7 +75,7 @@ public final class ColonyInvDialog extends DialogPanel {
         final Color withdrawColor = new Color(180, 110, 90);
         final Color depositColor = new Color(90, 150, 110);
 
-        final long colonyCredits = engine.getCredits(m_market.getId());
+        final long colonyCredits = engine.getCredits(mMarket.getId());
         final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 
         final TextWrapper colonyCreditPanel = new TextWrapper(200, 1) {
@@ -93,7 +93,7 @@ public final class ColonyInvDialog extends DialogPanel {
                 setSize(label1.getPosition().getWidth(), sliderH);
 
                 tooltip.builder = (tp, exp) -> {
-                    tp.addPara(str("colonyBalanceTpTxt1") + (m_market.isPlayerOwned() ? str("colonyBalanceTpTxt2") : ""), pad);
+                    tp.addPara(str("colonyBalanceTpTxt1") + (mMarket.isPlayerOwned() ? str("colonyBalanceTpTxt2") : ""), pad);
                 };
                 tooltip.positioner = (tp, exp) -> {
                     NativeUiUtils.anchorPanel(tp, this, AnchorType.RightTop, hpad);
@@ -147,7 +147,7 @@ public final class ColonyInvDialog extends DialogPanel {
 
                     tp.addPara(str("autoTransferTpTxt2"), pad, highlight,
                         NumFormat.formatCredit(Math.max(0f, data.playerProfitRatio *
-                            MarketFinanceRegistry.instance().getLedger(m_market).getNetCurrentMonth()
+                            MarketFinanceRegistry.instance().getLedger(mMarket).getNetCurrentMonth()
                         ))
                     );
                 };
@@ -232,13 +232,13 @@ public final class ColonyInvDialog extends DialogPanel {
         };
 
         final CallbackRunnable<Button> withdrawRunnable = (btn) -> {
-            engine.addCredits(m_market.getId(), (int) -withdrawSlider.getProgress());
+            engine.addCredits(mMarket.getId(), (int) -withdrawSlider.getProgress());
             playerCredits.add((int) withdrawSlider.getProgress());
             if (data != null) data.withdrewCreditsThisMonth = true;
             refreshUI.run();
         };
         final CallbackRunnable<Button> depositRunnable = (btn) -> {
-            engine.addCredits(m_market.getId(), (int) depositSlider.getProgress());
+            engine.addCredits(mMarket.getId(), (int) depositSlider.getProgress());
             playerCredits.add((int) -depositSlider.getProgress());
             refreshUI.run();
         };
@@ -286,7 +286,7 @@ public final class ColonyInvDialog extends DialogPanel {
 
         for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {
 
-            final CommodityCell cell = engine.getComCell(com.getId(), m_market.getId());
+            final CommodityCell cell = engine.getComCell(com.getId(), mMarket.getId());
 
             final SpriteElement comIcon = new SpriteElement(
                 42, 42, com.getIconName(), null, null

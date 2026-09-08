@@ -38,7 +38,8 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
     public LtvEconFleetAssignmentAI(CampaignFleetAPI fleet, RouteData route) {
         super(fleet, route);
 
-        if (getMission().smuggling) {
+        final TradeMission mission = getMission();
+        if (mission != null && mission.smuggling) {
             origFaction = route.getFactionId();
             factionChangeTracker = new IntervalUtil(0.1F, 0.3F);
             factionChangeTracker.forceIntervalElapsed();
@@ -191,8 +192,10 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
     private final void updateCargo(RouteSegment segment) {
         if (route.isExpired()) return;
 
-        final int id = segment.getId();
         final TradeMission mission = getMission();
+        if (mission == null) return;
+
+        final int id = segment.getId();
         final CargoAPI cargo = fleet.getCargo();
         cargo.clear();
 
@@ -227,9 +230,10 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         }
 
         if (tons <= 0f) return;
+        final TradeMission mission = getMission();
+        if (mission == null) return;
 
         final Random random = route.getRandom();
-        final TradeMission mission = getMission();
         final float shipValue = settings.getCommoditySpec(Commodities.SHIPS).getBasePrice();
         final ShipPickParams params = !mission.inFaction ? ShipPickParams.imported() : ShipPickParams.priority();
 

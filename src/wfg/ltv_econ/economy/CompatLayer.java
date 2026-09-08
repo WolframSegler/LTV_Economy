@@ -45,49 +45,50 @@ public final class CompatLayer {
     public static final String SUPPLY_BONUS_MOD = "ind_sb";
 
     public static final MutableStat convertIndDemandStat(Industry ind, String inputID) {
-        final MutableStat src = ind.getDemand(inputID).getQuantity();
-        final MutableStat dest = new MutableStat(0f);
-
-        copyMods(ind, src, dest, inputID, true);
-        return dest;
+        return convertIndDemandStat(ind, inputID, WorkerRegistry.get(ind), false);
     }
 
     public static final MutableStat convertIndSupplyStat(Industry ind, String outputID) {
+        return convertIndSupplyStat(ind, outputID, WorkerRegistry.get(ind), false);
+    }
+
+    public static final MutableStat convertIndDemandStat(Industry ind, String inputID, WorkerIndustryData data, boolean validOnly) {
+        final MutableStat src = ind.getDemand(inputID).getQuantity();
+        final MutableStat dest = new MutableStat(0f);
+
+        copyMods(data, ind, src, dest, inputID, true, validOnly);
+        return dest;
+    }
+
+    public static final MutableStat convertIndSupplyStat(Industry ind, String outputID, WorkerIndustryData data, boolean validOnly) {
         if (IndustryConfigManager.getIndConfig(ind).demandOnly) return new MutableStat(0f);
         
         final MutableStat src = ind.getSupply(outputID).getQuantity();
         final MutableStat dest = new MutableStat(0f);
 
-        copyMods(ind, src, dest, outputID, false);
+        copyMods(data, ind, src, dest, outputID, false, validOnly);
         return dest;
     }
 
-    private static final void copyMods(Industry ind, MutableStat base, MutableStat dest,
-        String comID, boolean isDemand
+    private static final void copyMods(WorkerIndustryData data, Industry ind, MutableStat base, MutableStat dest,
+        String comID, boolean isDemand, boolean validOnly
     ) {
-        final float value = getBaseValue(ind, comID, isDemand);
-        dest.setBaseValue(value);
-        if (value == 0f) return;
+        final float baseVal = getBaseValue(ind, data, comID, isDemand, validOnly);
+        dest.setBaseValue(baseVal);
+        if (baseVal == 0f) return;
 
-        dest.applyMods(getModifiers(ind, comID, base, isDemand ? getDemandReductionMutable(ind, comID) : ind.getSupplyBonus()));
+        final MutableStat bonus = isDemand ? getDemandReductionMutable(ind, data, comID, baseVal, validOnly) : ind.getSupplyBonus();
+        dest.applyMods(getModifiers(ind, comID, base, bonus));
     }
 
     /**
      * Retrieve the base value (worker-dependent) of an industry for a given commodity.
      */
-    public static final float getBaseValue(Industry ind, String comID, boolean isDemand) {
-        final float value = isDemand ? IndustryIOs.getRealSumInput(ind, comID)
-            : IndustryIOs.getRealOutput(ind, comID);
+    public static final float getBaseValue(Industry ind, WorkerIndustryData data, String comID, boolean isDemand, boolean validOnly) {
+        final float value = isDemand ? IndustryIOs.getRealSumInput(data, ind, comID, validOnly) :
+            IndustryIOs.getRealOutput(ind, data, comID, validOnly);
         final boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
         return hasRelevantCondition ? value : 0f;
-    }
-
-    public static final float getEffectiveDemandForInputWithData(Industry ind, String comID, WorkerIndustryData data, boolean validOnly) {
-        final float baseVal = IndustryIOs.getRealSumInput(data, ind, comID, validOnly);
-
-        final MutableStat demandStat = getDemandReductionMutable(ind, data, comID, baseVal, validOnly);
-        final StatBonus modified = getModifiers(ind, comID, ind.getDemand(comID).getQuantity(), demandStat);
-        return modified.computeEffective(baseVal);
     }
     
     public static final StatBonus getModifiers(
@@ -254,7 +255,7 @@ public final class CompatLayer {
     }
 
     private static final MutableStat getDemandReductionMutable(Industry ind, String inputID) {
-        return getDemandReductionMutable(ind, WorkerRegistry.instance().getRegisterData(ind), inputID,
+        return getDemandReductionMutable(ind, WorkerRegistry.get(ind), inputID,
             IndustryIOs.getRealSumInput(ind, inputID), false);
     }
 

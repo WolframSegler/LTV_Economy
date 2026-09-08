@@ -47,6 +47,7 @@ import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
+// TODO make sure modifications here are correct.
 public final class AssignWorkersDialog extends DialogPanel {
     private static final SpriteAPI WARNING_BUTTON = settings.getSprite("ui", "warning_button");
     private static final int PANEL_W = 540;
@@ -73,7 +74,6 @@ public final class AssignWorkersDialog extends DialogPanel {
         previewData = new WorkerIndustryData(data);
         outputSliders = new ArrayMap<>(IndustryConfigManager.getIndConfig(industry).outputs.size());
 
-        reg.setData(previewData);
         initialFreeWorkerRatio = WorkerPoolRegistry.get(market).getFreeWorkerRatio();
 
         holo.borderAlpha = 0.7f;
@@ -178,8 +178,8 @@ public final class AssignWorkersDialog extends DialogPanel {
         final Color color = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
 
-        final Map<String, Float> outputs = IndustryIOs.getRealOutputs(industry, false);
-        final Set<String> inputs = IndustryIOs.getRealInputs(industry, false);
+        final Map<String, Float> outputs = IndustryIOs.getRealOutputs(industry, previewData, false, false);
+        final Set<String> inputs = IndustryIOs.getRealInputs(industry,  false);
 
         final ArrayMap<String, MutableStat> supplyList = new ArrayMap<>(outputs.size());
         final ArrayMap<String, MutableStat> demandList = new ArrayMap<>(inputs.size());
@@ -188,13 +188,13 @@ public final class AssignWorkersDialog extends DialogPanel {
 
         if (!importing) {
             for (String comID : outputs.keySet()) {
-                final var stat = CompatLayer.convertIndSupplyStat(industry, comID);
+                final var stat = CompatLayer.convertIndSupplyStat(industry, comID, previewData, false);
                 if (stat.getModifiedValue() > 0f) supplyList.put(comID, stat);
             }
         }
 
         for (String comID : inputs) {
-            final var stat = CompatLayer.convertIndDemandStat(industry, comID);
+            final var stat = CompatLayer.convertIndDemandStat(industry, comID, previewData, false);
             if (stat.getModifiedValue() > 0f) demandList.put(comID, stat);
         }
 
@@ -329,7 +329,7 @@ public final class AssignWorkersDialog extends DialogPanel {
     public void dismiss(int option) {
         super.dismiss(option);
 
-        if (option == 1) WorkerRegistry.instance().setData(data);
+        if (option == 0) WorkerRegistry.instance().setData(previewData);
 
         WorkerPoolRegistry.get(market).recalculate();
         LtvIndustryListPanel.refreshPanel();

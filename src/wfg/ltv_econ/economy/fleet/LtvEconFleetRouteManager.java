@@ -189,6 +189,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		if (fleet == null) return null;
 		
 		final TradeMission mission = LtvEconomyRouteData.getMission(route);
+		if (mission == null) return null;
 		mission.setSpawnedFleetCapRatios(fleet.getCargo());
 
 		if (KantaCMD.playerHasProtection()) {

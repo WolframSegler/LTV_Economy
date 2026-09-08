@@ -46,7 +46,7 @@ public final class ConstructionDemandPredictor {
         if (!IndustryIOs.hasInput(ind.getSpec().getId(), inputID)) return 0f;
 
         final WorkerIndustryData data = getIndustryWorkerPrediction(ind);
-        return CompatLayer.getEffectiveDemandForInputWithData(ind, inputID, data, true);
+        return CompatLayer.convertIndDemandStat(ind, inputID, data, true).getModifiedValue();
     }
 
     public static synchronized WorkerIndustryData getIndustryWorkerPrediction(Industry ind) {

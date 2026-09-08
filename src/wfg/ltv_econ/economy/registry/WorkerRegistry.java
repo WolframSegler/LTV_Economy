@@ -135,6 +135,19 @@ public class WorkerRegistry implements Serializable {
         return getData(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
     }
 
+
+    public static final WorkerIndustryData get(String marketID, String industryID) {
+        return instance().getData(marketID, industryID);
+    }
+
+    public static final WorkerIndustryData get(String marketID, IndustrySpecAPI ind) {
+        return instance().getData(marketID, ind);
+    }
+
+    public static final WorkerIndustryData get(Industry ind) {
+        return instance().getData(ind);
+    }
+
     public final synchronized WorkerIndustryData getRegisterData(String marketID, String industryID) {
         return registry.computeIfAbsent(makeKey(marketID, industryID), a -> new WorkerIndustryData(marketID, industryID));
     }
