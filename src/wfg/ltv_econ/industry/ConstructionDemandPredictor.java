@@ -19,7 +19,7 @@ import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.native_ui.util.Arithmetic;
 
 public final class ConstructionDemandPredictor {
@@ -28,10 +28,10 @@ public final class ConstructionDemandPredictor {
     private static final WeakHashMap<Industry, PredictionCache> industryCache = new WeakHashMap<>(6);
 
     private static final class PredictionCache {
-        public final WorkerIndustryData data;
+        public final IndustryWorkerData data;
         public final int loopCycle; 
 
-        public PredictionCache(WorkerIndustryData data, int loopCycle) {
+        public PredictionCache(IndustryWorkerData data, int loopCycle) {
             this.data = data;
             this.loopCycle = loopCycle;
         }
@@ -45,22 +45,22 @@ public final class ConstructionDemandPredictor {
     public static final float computePredictedDailyDemand(Industry ind, String inputID) {
         if (!IndustryIOs.hasInput(ind.getSpec().getId(), inputID)) return 0f;
 
-        final WorkerIndustryData data = getIndustryWorkerPrediction(ind);
+        final IndustryWorkerData data = getIndustryWorkerPrediction(ind);
         return CompatLayer.convertIndDemandStat(ind, inputID, data, true).getModifiedValue();
     }
 
-    public static synchronized WorkerIndustryData getIndustryWorkerPrediction(Industry ind) {
+    public static synchronized IndustryWorkerData getIndustryWorkerPrediction(Industry ind) {
         final int currentCycle = EconomyEngine.instance().getMainLoopCycle();
         PredictionCache cache = industryCache.get(ind);
         if (cache == null || cache.loopCycle != currentCycle) {
-            WorkerIndustryData freshData = computeIndustryWorkerPrediction(ind);
+            IndustryWorkerData freshData = computeIndustryWorkerPrediction(ind);
             cache = new PredictionCache(freshData, currentCycle);
             industryCache.put(ind, cache);
         }
         return cache.data;
     }
 
-    private static final WorkerIndustryData computeIndustryWorkerPrediction(Industry ind) {
+    private static final IndustryWorkerData computeIndustryWorkerPrediction(Industry ind) {
         final MarketAPI market = ind.getMarket();
         final String indID = ind.getSpec().getId();
         final IndustryConfig indCfg = IndustryConfigManager.getIndConfig(indID);
@@ -106,7 +106,7 @@ public final class ConstructionDemandPredictor {
 
         for (Industry ind : market.getIndustries()) {
             if (ind == targetInd) continue;
-            final WorkerIndustryData data = reg.getRegisterData(ind);
+            final IndustryWorkerData data = reg.getRegisterData(ind);
 
             for (Map.Entry<String, Float> entry : data.getRegistry().singleEntrySet()) {
                 final String outputId = entry.getKey();
@@ -129,8 +129,8 @@ public final class ConstructionDemandPredictor {
         return toBeReallocated;
     }
 
-    private static final WorkerIndustryData getPredictedAssignments(MarketAPI market, IndustryConfig config, Industry ind, float budget) {
-        final WorkerIndustryData data = new WorkerIndustryData(market.getId(), config.indID);
+    private static final IndustryWorkerData getPredictedAssignments(MarketAPI market, IndustryConfig config, Industry ind, float budget) {
+        final IndustryWorkerData data = new IndustryWorkerData(market.getId(), config.indID);
         final EconomyInfo info = EconomyEngine.instance().info;
         final Collection<OutputConfig> outputs = config.outputs.values();
         final String factionID = market.getFactionId();

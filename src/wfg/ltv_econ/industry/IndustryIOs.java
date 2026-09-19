@@ -29,7 +29,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.native_ui.util.ArrayMap;
 
 /**
@@ -374,7 +374,7 @@ public final class IndustryIOs {
         return computeScale(ind.getSpec().getId(), ind.getMarket().getId(), ind.getMarket().getSize(), output);
     }
 
-    public static final float computeScale(final WorkerIndustryData data, OutputConfig output, MarketAPI market) {
+    public static final float computeScale(final IndustryWorkerData data, OutputConfig output, MarketAPI market) {
         return computeScale(data, market.getId(), market.getSize(), output);
     }
 
@@ -382,7 +382,7 @@ public final class IndustryIOs {
         return computeScale(WorkerRegistry.get(marketId, industryId), marketId, marketSize, output);
     }
 
-    public static final float computeScale(final WorkerIndustryData data, String marketId, int marketSize, OutputConfig output) {
+    public static final float computeScale(final IndustryWorkerData data, String marketId, int marketSize, OutputConfig output) {
         if (!output.isAbstract) {
             final CommodityCell cell = EconomyEngine.instance().getComCell(output.comID, marketId); 
             if (cell != null && output.target > 0l && output.target < cell.getStored()) return 0f;
@@ -412,7 +412,7 @@ public final class IndustryIOs {
      * Returns 0 if the output does not exist, if the market conditions are not met,
      * or if legality prevents the output from being produced.
      */
-    public static final float getRealOutput(Industry ind, WorkerIndustryData data, String outputID, boolean validOnly) {
+    public static final float getRealOutput(Industry ind, IndustryWorkerData data, String outputID, boolean validOnly) {
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         final OutputConfig output = cfg.outputs.get(outputID);
 
@@ -436,7 +436,7 @@ public final class IndustryIOs {
      * Returns 0 if the output or input does not exist, if the market conditions are not met,
      * or if legality prevents the output from being produced.
      */
-    public static final float getRealInput(Industry ind, WorkerIndustryData data,  String outputID, String inputID, boolean validOnly) {
+    public static final float getRealInput(Industry ind, IndustryWorkerData data,  String outputID, String inputID, boolean validOnly) {
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         final OutputConfig output = cfg.outputs.get(outputID);
 
@@ -458,7 +458,7 @@ public final class IndustryIOs {
      * Get the total demand of an industry for a given commodity across all outputs.
      * @param validOnly does not check if the outputs are active, only that they are allowed.
      */
-    public static final float getRealSumInput(WorkerIndustryData data, Industry ind, String inputID, boolean validOnly) {
+    public static final float getRealSumInput(IndustryWorkerData data, Industry ind, String inputID, boolean validOnly) {
         final Map<String, ArrayMap<String, Float>> indMap = getBaseInputs(ind.getSpec().getId());
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
 
@@ -485,7 +485,7 @@ public final class IndustryIOs {
     /** 
      * Returns the modified output map for a given industry.
      */
-    public static final Map<String, Float> getRealOutputs(Industry ind, WorkerIndustryData data, boolean includeAbstract, boolean validOnly) {
+    public static final Map<String, Float> getRealOutputs(Industry ind, IndustryWorkerData data, boolean includeAbstract, boolean validOnly) {
         final Map<String, Float> outputs = getBaseOutputs(ind.getSpec().getId());
 
         final ArrayMap<String, Float> scaledOutputs = new ArrayMap<>(outputs.size());
@@ -506,7 +506,7 @@ public final class IndustryIOs {
     /** 
      * Returns the modified inputs map for a given industry and output.
      */
-    public static final ArrayMap<String, Float> getRealInputs(Industry ind, WorkerIndustryData data,
+    public static final ArrayMap<String, Float> getRealInputs(Industry ind, IndustryWorkerData data,
         String outputID, boolean includeAbstract, boolean validOnly
     ) {
         final Map<String, ArrayMap<String, Float>> outputs = getBaseInputs(ind.getSpec().getId());

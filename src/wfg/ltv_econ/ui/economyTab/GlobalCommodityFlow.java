@@ -19,7 +19,7 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.ui.reusable.ComIconPanel;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
@@ -251,7 +251,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
 
             public void buildUI() {
                 long value = 0;
-                for (WorkerIndustryData data : WorkerRegistry.instance().getRegistry()) {
+                for (IndustryWorkerData data : WorkerRegistry.instance().getRegistry()) {
                     value += data.getAssignedForOutput(comID);
                 }
                 final String txt = str("uiTitleGlobalWorkersAllocated");

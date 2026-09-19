@@ -21,7 +21,7 @@ import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
@@ -45,8 +45,8 @@ public final class ServiceSectorDialog extends DialogPanel {
     public static final float CULTURE_LIM = 0.1f;
 
     private final MarketAPI market;
-    private final WorkerIndustryData data;
-    private final WorkerIndustryData previewData;
+    private final IndustryWorkerData data;
+    private final IndustryWorkerData previewData;
     private final ArrayList<SectorCard> sectorCards = new ArrayList<>(5);
 
     private final float initialFreeWorkerRatio;
@@ -58,7 +58,7 @@ public final class ServiceSectorDialog extends DialogPanel {
         final WorkerRegistry reg = WorkerRegistry.instance();
         market = ind.getMarket();
         data = reg.getRegisterData(ind);
-        previewData = new WorkerIndustryData(data);
+        previewData = new IndustryWorkerData(data);
 
         reg.setData(previewData);
         initialFreeWorkerRatio = WorkerPoolRegistry.get(market).getFreeWorkerRatio();

@@ -28,7 +28,7 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.ltv_econ.util.UIUtils;
@@ -265,7 +265,7 @@ public final class IndustryWidget extends UIContainer implements
             }
         };
 
-        final WorkerIndustryData data = WorkerRegistry.instance().getData(ind);
+        final IndustryWorkerData data = WorkerRegistry.instance().getData(ind);
         if (data != null && data.getWorkersAssigned() > 0l) {
             final LabelAPI workerCountLabel = settings.createLabel("", Fonts.DEFAULT_SMALL);
             workerCountLabel.setColor(highlight);

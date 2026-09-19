@@ -269,14 +269,17 @@ public final class IndustryConfigManager {
             || ind_config.containsKey(getBaseIndustryID(indID));
     }
 
+    /** @implNote this method is idempotent */
     public static final String getBaseIndustryID(String id) {
         return IndToBaseInd.get(id);
     }
 
+    /** @implNote this method is idempotent */
     public static final String getBaseIndustryID(IndustrySpecAPI ind) {
         return getBaseIndustryID(ind.getId());
     }
 
+    /** @implNote this method is idempotent */
     public static final String getBaseIndustryID(Industry ind) {
         return getBaseIndustryID(ind.getSpec());
     }

@@ -244,10 +244,10 @@ public class WorkforceAllocator {
 
         for (int i = 0; i < N; i++) {
             objective[i] = WORKER_COST * switch (i % T) {
-                case 0 -> 0.4d;
-                case 1 -> 0.04d;
-                case 2 -> 0.20d;
-                case 3 -> 1d;
+                case 0 -> 0.4d; // fair
+                case 1 -> 0.04d; // local
+                case 2 -> 0.2d; // faction
+                case 3 -> 1d; // global
                 default -> 1d;
             };
         }
@@ -594,6 +594,79 @@ public class WorkforceAllocator {
             }
         }
 
+        return assignments;
+    }
+
+    // TODO work on this
+    private static final ArrayMap<MarketAPI, float[]> solveFeasibilityLP(
+        final List<MarketAPI> markets, final double[][] A, final List<String> outputPairs,
+        final List<BitSet> outputsPerMarket
+    ) {
+        final DenseModel denseData = DenseModel.createDenseData(markets, outputPairs, outputsPerMarket);
+        final double[] demand = PlanningData.getGlobalDemandVector();
+
+        final int T = 1;
+        final int N = denseData.columnSize * T;
+        final int C = A.length;
+        final int O = outputPairs.size();
+        final int M = markets.size();
+
+        final int idxSlackStr = N;
+        final int nVars = idxSlackStr + C;
+
+        final double[] objective = new double[nVars];
+        for (int i = 0; i < N; i++) {
+            objective[i] = WORKER_COST * 1e-4d;
+        }
+        for (int c = 0; c < C; c++) {
+            objective[idxSlackStr + c] = EconConfig.ECON_DEFICIT_COST;
+        }
+
+        final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0d);
+        final List<LinearConstraint> constraints = new ArrayList<>(nVars);
+
+        constraints.addAll(getBaseConstraints(denseData, nVars, N, T));
+
+        // Global demand floor
+        for (int c = 0; c < C; c++) {
+            if (demand[c] <= 0d) continue;
+
+            final double[] coeffs = new double[nVars];
+            for (int i = 0; i < N; i++) {
+                final int o = denseData.columnOutputIndex[i];
+                final double base = A[c][o];
+                if (base == 0d) continue;
+                coeffs[i] = base * denseData.columnOutputMod[i];
+            }
+            coeffs[idxSlackStr + c] = 1d;
+            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, demand[c]));
+        }
+
+        // 4) SOLVE
+        final SimplexSolver solver = new SimplexSolver(1e-6d, 100, 1e-8d);
+        final double[] vars = solver.optimize(
+            new MaxIter(50000), objFunc,
+            new LinearConstraintSet(constraints),
+            GoalType.MINIMIZE,
+            new NonNegativeConstraint(true),
+            PivotSelectionRule.DANTZIG
+        ).getPoint();
+
+        // 5) EXTRACT — slice off the slack columns before expanding.
+        final double[] denseWorkerVars = new double[N];
+        System.arraycopy(vars, 0, denseWorkerVars, 0, N);
+
+        final double[] fullWorkers = DenseModel.expandDenseSolution(
+            denseWorkerVars, outputsPerMarket, O
+        );
+
+        final ArrayMap<MarketAPI, float[]> assignments = new ArrayMap<>(M);
+        for (int m = 0; m < M; m++) {
+            final float[] arr = new float[O];
+            final int base = m * O;
+            for (int o = 0; o < O; o++) arr[o] = (float) fullWorkers[base + o];
+            assignments.put(markets.get(m), arr);
+        }
         return assignments;
     }
 

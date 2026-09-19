@@ -52,7 +52,7 @@ import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ServiceSectorDialog;
@@ -217,7 +217,7 @@ public class EconomyLoop {
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.singleEntrySet()) {
             final MarketAPI market = entry.getKey();
             final String marketID = market.getId();
-            final WorkerIndustryData popData = reg.getRegisterData(marketID, Industries.POPULATION);
+            final IndustryWorkerData popData = reg.getRegisterData(marketID, Industries.POPULATION);
             final WorkerPool cond = WorkerPoolRegistry.get(market);
             final float[] assignments = entry.getValue();
             final long totalWorkers = cond.getWorkerPool();
@@ -230,7 +230,7 @@ public class EconomyLoop {
                 final float ratio = (assignments[i] / totalWorkers);
                 remaining -= ratio;
 
-                final WorkerIndustryData data = reg.getRegisterData(marketID, indAndOutputID[0]);
+                final IndustryWorkerData data = reg.getRegisterData(marketID, indAndOutputID[0]);
                 data.setRatioForOutput(indAndOutputID[1], ratio);
             }
 
@@ -283,7 +283,7 @@ public class EconomyLoop {
                 final String[] indAndOutputID = industryOutputPairs.get(i).split(KEY);
                 final float ratio = (assignments[i] / totalWorkers);
 
-                final WorkerIndustryData data = reg.getRegisterData(marketID, indAndOutputID[0]);
+                final IndustryWorkerData data = reg.getRegisterData(marketID, indAndOutputID[0]);
                 data.setRatioForOutput(indAndOutputID[1], ratio);
             }
         }
@@ -717,7 +717,7 @@ public class EconomyLoop {
         final String marketID = market.getId();
         if (!engine.registeredMarkets.contains(marketID)) return;
 
-        final WorkerIndustryData idata = WorkerRegistry.instance().getRegisterData(marketID, Industries.POPULATION);
+        final IndustryWorkerData idata = WorkerRegistry.instance().getRegisterData(marketID, Industries.POPULATION);
 
         final float logiRatio = idata.getAssignedRatioForOutput(SERVICE_LOGISTICS);
         final float healthRatio = idata.getAssignedRatioForOutput(SERVICE_HEALTHCARE);

@@ -32,7 +32,7 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.util.Arithmetic;
@@ -55,8 +55,8 @@ public final class AssignWorkersDialog extends DialogPanel {
 
     private final Industry industry;
     private final MarketAPI market;
-    private final WorkerIndustryData data;
-    private final WorkerIndustryData previewData;
+    private final IndustryWorkerData data;
+    private final IndustryWorkerData previewData;
     private final ArrayMap<String, Slider> outputSliders;
 
     private BaseContainer inputOutputContainer;
@@ -71,7 +71,7 @@ public final class AssignWorkersDialog extends DialogPanel {
         industry = ind;
         market = ind.getMarket();
         data = reg.getRegisterData(ind);
-        previewData = new WorkerIndustryData(data);
+        previewData = new IndustryWorkerData(data);
         outputSliders = new ArrayMap<>(IndustryConfigManager.getIndConfig(industry).outputs.size());
 
         initialFreeWorkerRatio = WorkerPoolRegistry.get(market).getFreeWorkerRatio();

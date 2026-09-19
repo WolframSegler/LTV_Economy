@@ -9,7 +9,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 
@@ -125,7 +125,7 @@ public class WorkerPoolRegistry {
             if (reg == null) return 0f;
 
             float totalAssigned = 0f;
-            for (WorkerIndustryData data : reg.getIndustriesUsingWorkers(marketID)) {
+            for (IndustryWorkerData data : reg.getIndustriesUsingWorkers(marketID)) {
                 data.ensurePresence();
                 totalAssigned += data.getWorkerAssignedRatio(false);
             }

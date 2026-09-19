@@ -2,8 +2,8 @@ package wfg.ltv_econ.economy.registry;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.fs.starfarer.api.Global;
@@ -21,39 +21,48 @@ import wfg.native_ui.util.ArrayMap;
  * The registry always uses {@link IndustryConfigManager#getBaseIndustryID()} internally to manage industry IDs
  */
 public class WorkerRegistry implements Serializable {
-    public static final String KEY = "::";
+    private static final int ESTIMATE_WORKER_INDUSTRY_PER_MARKET = 4;
 
-    private final ArrayMap<String, WorkerIndustryData> registry = new ArrayMap<>(EconomyInfo.getMarketsCount() * 5);
+    private final ArrayMap<String, ArrayMap<String, IndustryWorkerData>> registry = new ArrayMap<>(EconomyInfo.getMarketsCount());
 
     public static final WorkerRegistry instance() {
         return LtvEconSaveData.instance().workerRegistry;
     }
 
     private final Object readResolve() {
-        registry.values().removeIf(p -> p.market == null);
+        registry.values().removeIf(inner -> {
+            inner.values().removeIf(p -> p.market == null);
+            return inner.isEmpty();
+        });
 
         return this;
     }
 
     public final void resetWorkersAssigned(boolean resetPlayerIndustries) {
-        for (WorkerIndustryData data : registry.values()) {
-            if (!resetPlayerIndustries && data.market.isPlayerOwned()) continue;
-            data.resetWorkersAssigned();
-        }
-    }
-
-    public final void resetWorkersAssignedByMarket(List<MarketAPI> markets) {
-        for (WorkerIndustryData data : registry.values()) {
-            if (markets.contains(data.market)) {
+        for (ArrayMap<String, IndustryWorkerData> inner : registry.values()) {
+            for (IndustryWorkerData data : inner.values()) {
+                if (!resetPlayerIndustries && data.market.isPlayerOwned()) continue;
                 data.resetWorkersAssigned();
             }
         }
     }
 
+    public final void resetWorkersAssignedByMarket(List<MarketAPI> markets) {
+        for (ArrayMap<String, IndustryWorkerData> inner : registry.values()) {
+            for (IndustryWorkerData data : inner.values()) {
+                if (markets.contains(data.market)) {
+                    data.resetWorkersAssigned();
+                }
+            }
+        }
+    }
+
     public final void resetWorkersAssignedById(List<String> marketIDs) {
-        for (WorkerIndustryData data : registry.values()) {
-            if (marketIDs.contains(data.marketID)) {
-                data.resetWorkersAssigned();
+        for (ArrayMap<String, IndustryWorkerData> inner : registry.values()) {
+            for (IndustryWorkerData data : inner.values()) {
+                if (marketIDs.contains(data.marketID)) {
+                    data.resetWorkersAssigned();
+                }
             }
         }
     }
@@ -68,8 +77,8 @@ public class WorkerRegistry implements Serializable {
         if (!IndustryConfigManager.getIndConfig(ind).workerAssignable) return;
 
         final String marketID = ind.getMarket().getId();
-        final String key = makeKey(marketID, IndustryConfigManager.getBaseIndustryID(ind));
-        registry.putIfAbsent(key, new WorkerIndustryData(marketID, ind.getSpec().getId()));
+        final var marketMap = getOrCreateMarketMap(marketID);
+        marketMap.computeIfAbsent(IndustryConfigManager.getBaseIndustryID(ind), i -> new IndustryWorkerData(marketID, i));
     }
 
     public final void register(MarketAPI market) {
@@ -81,109 +90,94 @@ public class WorkerRegistry implements Serializable {
     }
 
     public final void remove(String marketID, IndustrySpecAPI ind) {
-        registry.remove(makeKey(marketID, IndustryConfigManager.getBaseIndustryID(ind)));
+        final var marketMap = getMarketMap(marketID);
+        if (marketMap == null) return;
+
+        marketMap.remove(IndustryConfigManager.getBaseIndustryID(ind));
     }
 
     public final void remove(String marketID) {
-        registry.keySet().removeIf(key -> key.startsWith(marketID + KEY));
-    }
-
-    public final boolean isMarketDataPresent(String marketID) {
-        for (String dataID : registry.keySet()) {
-            if (dataID.startsWith(marketID + KEY)) {
-                return true;
-            }
-        }
-        return false;
+        registry.remove(marketID);
     }
 
     public final int getIndustryCountUsingWorkers(String marketID) {
-        int count = 0;
-        for (String dataID : registry.keySet()) {
-            if (dataID.startsWith(marketID + KEY)) {
-                count++;
-            }
-        }
-
-        return count;
+        final var marketMap = getMarketMap(marketID);
+        return marketMap == null ? 0 : marketMap.size();
     }
 
-    public final List<WorkerIndustryData> getIndustriesUsingWorkers(String marketID) {
-        final ArrayList<WorkerIndustryData> list = new ArrayList<>(8); 
-        for (Map.Entry<String, WorkerIndustryData> data : registry.entrySet()) {
-            if (data.getKey().startsWith(marketID + KEY)) {
-                list.add(data.getValue());
-            }
-        }
+    public final List<IndustryWorkerData> getIndustriesUsingWorkers(String marketID) {
+        final var marketMap = getMarketMap(marketID);
+        if (marketMap == null) return Collections.emptyList();
 
-        return list;
+        return new ArrayList<>(marketMap.values());
     }
 
     public static final long getWorkerCap(String marketID) {
         return WorkerPoolRegistry.get(marketID).getWorkerPool();
     }
 
-    public final WorkerIndustryData getData(String marketID, String industryID) {
-        return registry.get(makeKey(marketID, industryID));
+    public final IndustryWorkerData getData(String marketID, String industryID) {
+        final var marketMap = getMarketMap(marketID);
+        return marketMap == null ? null : marketMap.get(IndustryConfigManager.getBaseIndustryID(industryID));
     }
 
-    public final WorkerIndustryData getData(String marketID, IndustrySpecAPI ind) {
-        return getData(marketID, IndustryConfigManager.getBaseIndustryID(ind));
+    public final IndustryWorkerData getData(String marketID, IndustrySpecAPI ind) {
+        return getData(marketID, ind.getId());
     }
 
-    public final WorkerIndustryData getData(Industry ind) {
-        return getData(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
+    public final IndustryWorkerData getData(Industry ind) {
+        return getData(ind.getMarket().getId(), ind.getSpec());
     }
 
-
-    public static final WorkerIndustryData get(String marketID, String industryID) {
+    public static final IndustryWorkerData get(String marketID, String industryID) {
         return instance().getData(marketID, industryID);
     }
 
-    public static final WorkerIndustryData get(String marketID, IndustrySpecAPI ind) {
+    public static final IndustryWorkerData get(String marketID, IndustrySpecAPI ind) {
         return instance().getData(marketID, ind);
     }
 
-    public static final WorkerIndustryData get(Industry ind) {
+    public static final IndustryWorkerData get(Industry ind) {
         return instance().getData(ind);
     }
 
-    public final synchronized WorkerIndustryData getRegisterData(String marketID, String industryID) {
-        return registry.computeIfAbsent(makeKey(marketID, industryID), a -> new WorkerIndustryData(marketID, industryID));
+    public final synchronized IndustryWorkerData getRegisterData(String marketID, String industryID) {
+        return getOrCreateMarketMap(marketID).computeIfAbsent(
+            IndustryConfigManager.getBaseIndustryID(industryID), i -> new IndustryWorkerData(marketID, i)
+        );
     }
 
-    public final WorkerIndustryData getRegisterData(String marketID, IndustrySpecAPI ind) {
-        return getRegisterData(marketID, IndustryConfigManager.getBaseIndustryID(ind));
+    public final IndustryWorkerData getRegisterData(String marketID, IndustrySpecAPI ind) {
+        return getRegisterData(marketID, ind.getId());
     }
 
-    public final WorkerIndustryData getRegisterData(Industry ind) {
-        return getRegisterData(ind.getMarket().getId(), IndustryConfigManager.getBaseIndustryID(ind));
+    public final IndustryWorkerData getRegisterData(Industry ind) {
+        return getRegisterData(ind.getMarket().getId(), ind.getSpec());
     }
 
-    public final void setData(WorkerIndustryData data) {
-        registry.put(makeKey(data.marketID, data.indID), data);
+    public final void setData(IndustryWorkerData data) {
+        getOrCreateMarketMap(data.marketID).put(data.indID, data);
     }
 
-    public final boolean hasMarket(String marketID) {
-        for (String regID : registry.keySet()) {
-            if (regID.contains(marketID + KEY)) return true;
+    public final ArrayList<IndustryWorkerData> getRegistry() {
+        final ArrayList<IndustryWorkerData> list = new ArrayList<>();
+
+        for (ArrayMap<String, IndustryWorkerData> inner : registry.values()) {
+            list.addAll(inner.values());
         }
-        return false;
+
+        return list;
     }
 
-    public final ArrayList<WorkerIndustryData> getRegistry() {
-        return new ArrayList<>(registry.values());
+    private final ArrayMap<String, IndustryWorkerData> getMarketMap(final String marketID) {
+        return registry.get(marketID);
     }
 
-    public final ArrayList<String> getKeys() {
-        return new ArrayList<>(registry.keySet());
+    private final ArrayMap<String, IndustryWorkerData> getOrCreateMarketMap(final String marketID) {
+        return registry.computeIfAbsent(marketID, m -> new ArrayMap<>(ESTIMATE_WORKER_INDUSTRY_PER_MARKET));
     }
 
-    private static final String makeKey(String marketID, String industryID) {
-        return marketID + KEY + industryID;
-    }
-
-    public static class WorkerIndustryData {
+    public static class IndustryWorkerData {
         public final String marketID;
         public final String indID;
         
@@ -192,7 +186,7 @@ public class WorkerRegistry implements Serializable {
         private final ArrayMap<String, Float> outputRatios = new ArrayMap<>(2);
         private float outputRatioSum = 0f;
 
-        public WorkerIndustryData(String marketID, String industryID) {
+        public IndustryWorkerData(String marketID, String industryID) {
             this.marketID = marketID;
             this.indID = IndustryConfigManager.getBaseIndustryID(industryID);
 
@@ -206,7 +200,7 @@ public class WorkerRegistry implements Serializable {
         }
 
         /** Copy Constructor */
-        public WorkerIndustryData(WorkerIndustryData other) {
+        public IndustryWorkerData(IndustryWorkerData other) {
             this.marketID = other.marketID;
             this.indID = other.indID;
 
@@ -219,11 +213,11 @@ public class WorkerRegistry implements Serializable {
 
         @Override
         public String toString() {
-            return "["+marketID+KEY+indID+outputRatioSum+"]";
+            return "[" + marketID + " - " + indID + outputRatioSum + "]";
         }
 
         public final String toStringWithOutputs() {
-            return "["+marketID+KEY+indID+"] -> "+outputRatios;
+            return "[" + marketID + " - " + indID + "] -> " + outputRatios;
         }
 
         public final float getWorkerAssignedRatio(boolean resetCache) {

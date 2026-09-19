@@ -14,7 +14,7 @@ import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
-import wfg.ltv_econ.economy.registry.WorkerRegistry.WorkerIndustryData;
+import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.industry.IndustryIOs;
 
 /**
@@ -52,7 +52,7 @@ public final class CompatLayer {
         return convertIndSupplyStat(ind, outputID, WorkerRegistry.get(ind), false);
     }
 
-    public static final MutableStat convertIndDemandStat(Industry ind, String inputID, WorkerIndustryData data, boolean validOnly) {
+    public static final MutableStat convertIndDemandStat(Industry ind, String inputID, IndustryWorkerData data, boolean validOnly) {
         final MutableStat src = ind.getDemand(inputID).getQuantity();
         final MutableStat dest = new MutableStat(0f);
 
@@ -60,7 +60,7 @@ public final class CompatLayer {
         return dest;
     }
 
-    public static final MutableStat convertIndSupplyStat(Industry ind, String outputID, WorkerIndustryData data, boolean validOnly) {
+    public static final MutableStat convertIndSupplyStat(Industry ind, String outputID, IndustryWorkerData data, boolean validOnly) {
         if (IndustryConfigManager.getIndConfig(ind).demandOnly) return new MutableStat(0f);
         
         final MutableStat src = ind.getSupply(outputID).getQuantity();
@@ -70,7 +70,7 @@ public final class CompatLayer {
         return dest;
     }
 
-    private static final void copyMods(WorkerIndustryData data, Industry ind, MutableStat base, MutableStat dest,
+    private static final void copyMods(IndustryWorkerData data, Industry ind, MutableStat base, MutableStat dest,
         String comID, boolean isDemand, boolean validOnly
     ) {
         final float baseVal = getBaseValue(ind, data, comID, isDemand, validOnly);
@@ -84,7 +84,7 @@ public final class CompatLayer {
     /**
      * Retrieve the base value (worker-dependent) of an industry for a given commodity.
      */
-    public static final float getBaseValue(Industry ind, WorkerIndustryData data, String comID, boolean isDemand, boolean validOnly) {
+    public static final float getBaseValue(Industry ind, IndustryWorkerData data, String comID, boolean isDemand, boolean validOnly) {
         final float value = isDemand ? IndustryIOs.getRealSumInput(data, ind, comID, validOnly) :
             IndustryIOs.getRealOutput(ind, data, comID, validOnly);
         final boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
@@ -259,7 +259,7 @@ public final class CompatLayer {
             IndustryIOs.getRealSumInput(ind, inputID), false);
     }
 
-    private static final MutableStat getDemandReductionMutable(Industry ind, WorkerIndustryData data, String inputID, float sumInput, boolean validOnly) {
+    private static final MutableStat getDemandReductionMutable(Industry ind, IndustryWorkerData data, String inputID, float sumInput, boolean validOnly) {
         final MutableStat modifier = ind.getDemandReduction().createCopy();
 
         /*
@@ -284,7 +284,7 @@ public final class CompatLayer {
      * Computes the fraction of total input demand that comes from non-abstract outputs.
      * Supply bonuses only apply to that portion.
      */
-    private static final float computeNonAbstractInputRatio(Industry ind, WorkerIndustryData data, String inputID, float totalInput, boolean validOnly) {
+    private static final float computeNonAbstractInputRatio(Industry ind, IndustryWorkerData data, String inputID, float totalInput, boolean validOnly) {
         if (totalInput <= 0f) return 0f;
 
         float nonAbstractInput = 0f;
