@@ -419,14 +419,6 @@ public final class IndustryIOs {
         return validOnly ? isOutputValidForMarket(output, ind) : isOutputActiveForMarket(output, ind);
     }
 
-    public static final boolean isOutputActive(Industry ind, String outputID) {
-        final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
-        final OutputConfig output = cfg.outputs.get(outputID);
-
-        if (output == null) return false;
-        return isOutputActive(false, output, ind);
-    }
-
     public static final float getRealOutput(Industry ind, String outputID) {
         return getRealOutput(ind, WorkerRegistry.get(ind), outputID, false);
     }

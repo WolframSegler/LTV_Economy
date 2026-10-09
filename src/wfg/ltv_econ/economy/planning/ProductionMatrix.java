@@ -66,19 +66,17 @@ public final class ProductionMatrix {
         final ArrayList<String> commodities = getWorkerRelatedCommodityIDs();
         final ArrayList<String> industries = getWorkerIndustries();
 
-        // Flatten industries into industry-output pairs
-        final ArrayList<String> industryOutputPairs = new ArrayList<>();
+        STATIC_INDUSTRY_OUTPUT_PAIRS = new ArrayList<>();
         for (String indID : industries) {
-            Map<String, Float> outputs = baseOutputs.get(indID);
+            final Map<String, Float> outputs = baseOutputs.get(indID);
             if (outputs != null) {
                 for (String outputID : outputs.keySet()) {
-                    industryOutputPairs.add(indID + EconomyLoop.KEY + outputID);
+                    STATIC_INDUSTRY_OUTPUT_PAIRS.add(indID + EconomyLoop.KEY + outputID);
                 }
             }
         }
 
-        STATIC_INDUSTRY_OUTPUT_PAIRS = new ArrayList<>();
-        double[][] A = new double[commodities.size()][industryOutputPairs.size()];
+        final double[][] A = new double[commodities.size()][STATIC_INDUSTRY_OUTPUT_PAIRS.size()];
 
         int colIndex = 0;
         for (String indID : industries) {
@@ -88,7 +86,6 @@ public final class ProductionMatrix {
 
             for (Map.Entry<String, Float> out : outputs.singleEntrySet()) {
                 final String outputID = out.getKey();
-                STATIC_INDUSTRY_OUTPUT_PAIRS.add(indID + EconomyLoop.KEY + outputID);
 
                 // Inputs
                 if (inputs != null && inputs.containsKey(outputID)) {
