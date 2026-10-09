@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
-import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.StatBonus;
@@ -85,10 +84,7 @@ public final class CompatLayer {
      * Retrieve the base value (worker-dependent) of an industry for a given commodity.
      */
     public static final float getBaseValue(Industry ind, IndustryWorkerData data, String comID, boolean isDemand, boolean validOnly) {
-        final float value = isDemand ? IndustryIOs.getRealSumInput(data, ind, comID, validOnly) :
-            IndustryIOs.getRealOutput(ind, data, comID, validOnly);
-        final boolean hasRelevantCondition = isDemand || hasRelevantCondition(comID, ind.getMarket());
-        return hasRelevantCondition ? value : 0f;
+        return isDemand ? IndustryIOs.getRealSumInput(data, ind, comID, validOnly) : IndustryIOs.getRealOutput(ind, data, comID, validOnly);
     }
     
     public static final StatBonus getModifiers(
@@ -138,20 +134,6 @@ public final class CompatLayer {
             ind.getDemand(comID).getQuantity() : ind.getSupply(comID).getQuantity();
 
         return getModifiers(ind, comID, base, bonus).computeEffective(1f);
-    }
-
-    public static final boolean hasRelevantCondition(String comID, MarketAPI market) {
-        boolean hasRelevantCondition = true;
-        if (ResourceDepositsCondition.COMMODITY.containsValue(comID)) {
-            hasRelevantCondition = false;
-            for (MarketConditionAPI cond : market.getConditions()) {
-                String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
-                if (comID.equals(condComID)) {
-                    return true;
-                }
-            }
-        }
-        return hasRelevantCondition;
     }
 
     /**

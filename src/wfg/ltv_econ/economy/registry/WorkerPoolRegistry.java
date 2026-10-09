@@ -13,7 +13,7 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 
-public class WorkerPoolRegistry {
+public final class WorkerPoolRegistry {
     private final ConcurrentHashMap<String, WorkerPool> registry = new ConcurrentHashMap<>(EconomyInfo.getMarketsCount());
 
     public static final WorkerPoolRegistry instance() {

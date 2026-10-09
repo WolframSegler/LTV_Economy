@@ -8,19 +8,19 @@ package wfg.ltv_econ.economy.commodity;
  * For s < 0 the multiplier extends smoothly using a decaying exponential.
  */
 public final class BasePriceCalculator {
-    private BasePriceCalculator() {}
+    private BasePriceCalculator() {};
 
     // ------------------------ TUNABLE START ------------------------
 
     /** Stock/demand ratio with maximum deficit. */
     static final double ABSOLUTE_DEFICIT_BOUND = 0d;
     /** Stock/demand ratio with maximum excess. */
-    static final double ABSOLUTE_EXCESS_BOUND = 5d;
+    static final double ABSOLUTE_EXCESS_BOUND = 6d;
 
     /** Multiplier when stock is at {@link #ABSOLUTE_DEFICIT_BOUND}. */
-    static final double ABSOLUTE_DEFICIT_MULT = 3d;
+    static final double ABSOLUTE_DEFICIT_MULT = 2.5d;
     /** Multiplier when stock is at {@link #ABSOLUTE_EXCESS_BOUND}. */
-    static final double ABSOLUTE_EXCESS_MULT = 0.3d;
+    static final double ABSOLUTE_EXCESS_MULT = 0.35d;
 
     // ------------------------ TUNABLE END ------------------------
 

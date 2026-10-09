@@ -284,6 +284,10 @@ public final class IndustryConfigManager {
         return getBaseIndustryID(ind.getSpec());
     }
 
+    public static final String getBaseIndIDifNoConfig(Industry ind) {
+        return getBaseIndIDifNoConfig(ind.getSpec());
+    }
+
     public static final String getBaseIndIDifNoConfig(IndustrySpecAPI ind) {
         return getBaseIndIDifNoConfig(ind.getId());
     }

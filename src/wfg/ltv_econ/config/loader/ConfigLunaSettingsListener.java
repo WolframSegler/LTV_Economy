@@ -8,7 +8,7 @@ import lunalib.lunaSettings.LunaSettingsListener;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.constant.Mods;
 import wfg.ltv_econ.economy.planning.IndustryGrouper;
-import wfg.ltv_econ.economy.planning.IndustryMatrix;
+import wfg.ltv_econ.economy.planning.ProductionMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 
@@ -24,7 +24,7 @@ public final class ConfigLunaSettingsListener implements LunaSettingsListener {
         IndustryConfigManager.reload();
         IndustryIOs.reload();
         IndustryGrouper.invalidate();
-        IndustryMatrix.invalidate();
+        ProductionMatrix.invalidate();
 
         // REFRESH THE DATA
         if (settings.getCurrentState() == GameState.CAMPAIGN) {

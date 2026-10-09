@@ -46,7 +46,7 @@ import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipAllocator;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
-import wfg.ltv_econ.economy.planning.IndustryMatrix;
+import wfg.ltv_econ.economy.planning.ProductionMatrix;
 import wfg.ltv_econ.economy.planning.WorkforceAllocator;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
@@ -206,7 +206,7 @@ public class EconomyLoop {
 
     private final void assignWorkers() {
         final WorkerRegistry reg = WorkerRegistry.instance();
-        final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
+        final List<String> industryOutputPairs = ProductionMatrix.getIndustryOutputPairs();
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         markets.removeIf(MarketAPI::isPlayerOwned);
 
@@ -264,7 +264,7 @@ public class EconomyLoop {
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         markets.removeIf(m -> !m.isPlayerOwned());
         markets.removeIf(m -> LtvEconSaveData.instance().playerFactionSettings.excludedMarketsFromWorkerAllocation.contains(m.getId()));
-        final List<String> industryOutputPairs = IndustryMatrix.getIndustryOutputPairs();
+        final List<String> industryOutputPairs = ProductionMatrix.getIndustryOutputPairs();
 
         reg.resetWorkersAssignedByMarket(markets);
 

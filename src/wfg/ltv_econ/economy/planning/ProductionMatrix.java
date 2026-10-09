@@ -5,7 +5,6 @@ import static wfg.native_ui.util.Globals.settings;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,12 +17,13 @@ import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 
-public class IndustryMatrix {
-    private IndustryMatrix() {}
+public final class ProductionMatrix {
+    private ProductionMatrix() {};
     
     private static double[][] STATIC_MATRIX;
-    private static List<String> STATIC_WORKER_COMMODITIES;
-    private static List<String> STATIC_INDUSTRY_OUTPUT_PAIRS;
+    private static ArrayList<String> STATIC_WORKER_COMMODITIES;
+    private static ArrayList<String> STATIC_WORKER_INDUSTRIES;
+    private static ArrayList<String> STATIC_INDUSTRY_OUTPUT_PAIRS;
     private static Map<String, Integer> INDUSTRY_OUTPUT_PAIR_TO_COLUMN;
 
     public static final synchronized double[][] getMatrix() {
@@ -31,14 +31,19 @@ public class IndustryMatrix {
         return STATIC_MATRIX;
     }
 
-    public static final synchronized List<String> getIndustryOutputPairs() {
+    public static final synchronized ArrayList<String> getIndustryOutputPairs() {
         if (STATIC_INDUSTRY_OUTPUT_PAIRS == null) buildMatrix();
         return STATIC_INDUSTRY_OUTPUT_PAIRS;
     }
 
-    public static final synchronized List<String> getWorkerRelatedCommodityIDs() {
+    public static final synchronized ArrayList<String> getWorkerRelatedCommodityIDs() {
         if (STATIC_WORKER_COMMODITIES == null) buildWorkerRelatedCommodityIDs();
         return STATIC_WORKER_COMMODITIES;
+    }
+
+    public static final synchronized ArrayList<String> getWorkerIndustries() {
+        if (STATIC_WORKER_INDUSTRIES == null) buildWorkerDependentIndustries();
+        return STATIC_WORKER_INDUSTRIES;
     }
 
     public static final synchronized Map<String, Integer> getIndOutputPairToColumnMap() {
@@ -51,29 +56,18 @@ public class IndustryMatrix {
         STATIC_INDUSTRY_OUTPUT_PAIRS = null;
         STATIC_WORKER_COMMODITIES = null;
         INDUSTRY_OUTPUT_PAIR_TO_COLUMN = null;
+        STATIC_WORKER_INDUSTRIES = null;
     }
 
     private static final void buildMatrix() {
         final Map<String, ArrayMap<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
         final Map<String, ArrayMap<String, ArrayMap<String, Float>>> baseInputs = IndustryIOs.getBaseInputsMap();
 
-        final List<String> commodities = getWorkerRelatedCommodityIDs();
-
-        final List<String> industries;
-        {
-            Set<String> industrySet = new LinkedHashSet<>();
-            for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
-                if (IndustryConfigManager.hasConfig(spec)) {
-                    if (IndustryConfigManager.getIndConfig(spec).workerAssignable) {
-                        industrySet.add(IndustryConfigManager.getBaseIndIDifNoConfig(spec));
-                    }
-                }
-            }
-            industries = new ArrayList<>(industrySet);
-        }
+        final ArrayList<String> commodities = getWorkerRelatedCommodityIDs();
+        final ArrayList<String> industries = getWorkerIndustries();
 
         // Flatten industries into industry-output pairs
-        final List<String> industryOutputPairs = new ArrayList<>();
+        final ArrayList<String> industryOutputPairs = new ArrayList<>();
         for (String indID : industries) {
             Map<String, Float> outputs = baseOutputs.get(indID);
             if (outputs != null) {
@@ -99,13 +93,13 @@ public class IndustryMatrix {
                 // Inputs
                 if (inputs != null && inputs.containsKey(outputID)) {
                     for (Map.Entry<String, Float> in : inputs.get(outputID).singleEntrySet()) {
-                        int row = commodities.indexOf(in.getKey());
+                        final int row = commodities.indexOf(in.getKey());
                         if (row >= 0) A[row][colIndex] -= in.getValue();
                     }
                 }
 
                 // Output
-                int row = commodities.indexOf(outputID);
+                final int row = commodities.indexOf(outputID);
                 if (row >= 0) A[row][colIndex] += out.getValue();
 
                 colIndex++;
@@ -143,5 +137,17 @@ public class IndustryMatrix {
             }
             if (remove) it.remove();
         }
+    }
+
+    private static final void buildWorkerDependentIndustries() {
+        final Set<String> industrySet = new LinkedHashSet<>();
+        for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
+            if (IndustryConfigManager.hasConfig(spec)) {
+                if (IndustryConfigManager.getIndConfig(spec).workerAssignable) {
+                    industrySet.add(IndustryConfigManager.getBaseIndIDifNoConfig(spec));
+                }
+            }
+        }
+        STATIC_WORKER_INDUSTRIES = new ArrayList<>(industrySet);
     }
 }

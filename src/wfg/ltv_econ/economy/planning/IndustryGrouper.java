@@ -17,12 +17,12 @@ import wfg.native_ui.util.ArrayMap;
 
 public final class IndustryGrouper {
     private IndustryGrouper() {}
-    private static IndustryMatrixGrouped STATIC_GROUPING;
+    private static ProductionMatrixGrouped STATIC_GROUPING;
 
-    public static synchronized IndustryMatrixGrouped getStaticGrouping() {
+    public static synchronized ProductionMatrixGrouped getStaticGrouping() {
         if (STATIC_GROUPING == null) {
-            double[][] A = IndustryMatrix.getMatrix();
-            List<String> pairs = IndustryMatrix.getIndustryOutputPairs();
+            double[][] A = ProductionMatrix.getMatrix();
+            List<String> pairs = ProductionMatrix.getIndustryOutputPairs();
             STATIC_GROUPING = groupSimilarIndustries(A, pairs, 0.01);
         }
         return STATIC_GROUPING;
@@ -37,7 +37,7 @@ public final class IndustryGrouper {
      * Industries with differing outputs or inputs are never grouped,
      * even if their matrix columns are close.
      */
-    public static IndustryMatrixGrouped groupSimilarIndustries(
+    public static ProductionMatrixGrouped groupSimilarIndustries(
         double[][] A,
         List<String> industryOutputPairs,
         double similarityTolerance
@@ -99,7 +99,7 @@ public final class IndustryGrouper {
             }
         }
 
-        return new IndustryMatrixGrouped(reduced, groupNames, groupToMembers, memberToGroup);
+        return new ProductionMatrixGrouped(reduced, groupNames, groupToMembers, memberToGroup);
     }
 
     private static boolean haveSameCommodityPattern(double[][] A, int colJ, int colK) {
@@ -160,7 +160,7 @@ public final class IndustryGrouper {
 
     public static ArrayMap<MarketAPI, float[]> expandGroupedAssignments(
         Map<MarketAPI, float[]> groupedAssignments,
-        IndustryMatrixGrouped group,
+        ProductionMatrixGrouped group,
         List<MarketAPI> markets,
         List<String> industryOutputPairs
     ) {
@@ -206,13 +206,13 @@ public final class IndustryGrouper {
         return expanded;
     }
 
-    public static class IndustryMatrixGrouped {
+    public static class ProductionMatrixGrouped {
         public final double[][] reducedMatrix;
         public final List<String> groupNames;
         public final Map<String, List<String>> groupToMembers;
         public final Map<String, String> memberToGroup;
 
-        public IndustryMatrixGrouped(
+        public ProductionMatrixGrouped(
             double[][] reducedMatrix,
             List<String> groupNames,
             Map<String, List<String>> groupToMembers,

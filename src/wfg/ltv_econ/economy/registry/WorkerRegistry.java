@@ -20,7 +20,7 @@ import wfg.native_ui.util.ArrayMap;
 /**
  * The registry always uses {@link IndustryConfigManager#getBaseIndustryID()} internally to manage industry IDs
  */
-public class WorkerRegistry implements Serializable {
+public final class WorkerRegistry implements Serializable {
     private static final int ESTIMATE_WORKER_INDUSTRY_PER_MARKET = 4;
 
     private final ArrayMap<String, ArrayMap<String, IndustryWorkerData>> registry = new ArrayMap<>(EconomyInfo.getMarketsCount());
@@ -67,8 +67,8 @@ public class WorkerRegistry implements Serializable {
         }
     }
 
-    public static final List<Industry> getVisibleIndustries(MarketAPI market) {
-        final List<Industry> industries = new ArrayList<>(market.getIndustries());
+    public static final ArrayList<Industry> getVisibleIndustries(MarketAPI market) {
+        final ArrayList<Industry> industries = new ArrayList<>(market.getIndustries());
         industries.removeIf(Industry::isHidden);
         return industries;
     }

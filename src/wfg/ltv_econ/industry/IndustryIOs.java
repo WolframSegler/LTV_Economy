@@ -14,7 +14,9 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.campaign.econ.Market;
@@ -367,7 +369,21 @@ public final class IndustryIOs {
             if (!market.hasCondition(cond)) return false;
         }
 
-        return true;
+        return hasRelevantCondition(output.comID, market);
+    }
+
+    public static final boolean hasRelevantCondition(String comID, MarketAPI market) {
+        boolean hasRelevantCondition = true;
+        if (ResourceDepositsCondition.COMMODITY.containsValue(comID)) {
+            hasRelevantCondition = false;
+            for (MarketConditionAPI cond : market.getConditions()) {
+                String condComID = ResourceDepositsCondition.COMMODITY.get(cond.getId());
+                if (comID.equals(condComID)) {
+                    return true;
+                }
+            }
+        }
+        return hasRelevantCondition;
     }
 
     public static final float computeScale(OutputConfig output, Industry ind) {
@@ -399,8 +415,16 @@ public final class IndustryIOs {
         return scale;
     }
 
-    private static final boolean getIsOutputActive(boolean validOnly, OutputConfig output, Industry ind) {
+    private static final boolean isOutputActive(boolean validOnly, OutputConfig output, Industry ind) {
         return validOnly ? isOutputValidForMarket(output, ind) : isOutputActiveForMarket(output, ind);
+    }
+
+    public static final boolean isOutputActive(Industry ind, String outputID) {
+        final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
+        final OutputConfig output = cfg.outputs.get(outputID);
+
+        if (output == null) return false;
+        return isOutputActive(false, output, ind);
     }
 
     public static final float getRealOutput(Industry ind, String outputID) {
@@ -420,7 +444,7 @@ public final class IndustryIOs {
         final float value = getBaseOutput(ind.getSpec(), outputID);
         if (value == 0f) return 0f;
 
-        if (!getIsOutputActive(validOnly, output, ind)) return 0f;
+        if (!isOutputActive(validOnly, output, ind)) return 0f;
 
         final float scale = computeScale(data, output, ind.getMarket());
 
@@ -443,7 +467,7 @@ public final class IndustryIOs {
         final float value = getBaseInput(ind.getSpec(), outputID, inputID);
         if (value == 0f) return 0f;
 
-        if (!getIsOutputActive(validOnly, output, ind)) return 0f;
+        if (!isOutputActive(validOnly, output, ind)) return 0f;
 
         final float scale = computeScale(data, output, ind.getMarket());
 
@@ -468,7 +492,7 @@ public final class IndustryIOs {
             if (qty == 0f) continue;
 
             final OutputConfig output = cfg.outputs.get(inputMap.getKey());
-            if (!getIsOutputActive(validOnly, output, ind)) continue;
+            if (!isOutputActive(validOnly, output, ind)) continue;
 
             final float scale = computeScale(data, output, ind.getMarket());
 

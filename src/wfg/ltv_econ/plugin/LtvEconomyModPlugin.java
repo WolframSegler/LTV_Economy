@@ -104,6 +104,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             if (market.getSize() < 4 || market.isPlayerOwned()) continue;
             if (market.getPlanetEntity() == null) continue;
 
+            // Used for flavor, lore fitting.
             if (EconConfig.MANUFACTURING_EXCLUSION_LIST.contains(market.getId())) continue;
 
             boolean hasRequiredIndustry = false;

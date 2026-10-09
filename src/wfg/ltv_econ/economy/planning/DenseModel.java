@@ -13,7 +13,7 @@ import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
-import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
+import wfg.ltv_econ.economy.planning.IndustryGrouper.ProductionMatrixGrouped;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -55,8 +55,8 @@ public class DenseModel {
     public static final DenseModel createDenseData(final List<MarketAPI> markets,
         final List<String> groupedOutputPairs, final List<BitSet> outputsPerMarket
     ) {
-        final IndustryMatrixGrouped MatrixData = IndustryGrouper.getStaticGrouping();
-        final List<String> commodities = IndustryMatrix.getWorkerRelatedCommodityIDs();
+        final ProductionMatrixGrouped MatrixData = IndustryGrouper.getStaticGrouping();
+        final List<String> commodities = ProductionMatrix.getWorkerRelatedCommodityIDs();
 
         final int numMarkets = markets.size();
         final int numOutputs = groupedOutputPairs.size();

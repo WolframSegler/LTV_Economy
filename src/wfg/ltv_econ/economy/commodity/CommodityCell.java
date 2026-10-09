@@ -4,7 +4,6 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.ltv_econ.constant.strings.Consumption.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +22,7 @@ import wfg.ltv_econ.constant.strings.Consumption;
 import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.ConstructionDemandPredictor;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
@@ -322,10 +322,7 @@ public class CommodityCell implements Serializable {
     }
 
     public final List<Industry> getVisibleIndustries() {
-        if (market == null) return Collections.emptyList();
-        final List<Industry> industries = new ArrayList<>(market.getIndustries());
-        industries.removeIf(Industry::isHidden);
-        return industries;
+        return market == null ? Collections.emptyList() : WorkerRegistry.getVisibleIndustries(market);
     }
 
     @Override

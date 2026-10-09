@@ -15,7 +15,7 @@ import org.apache.commons.math4.legacy.optim.linear.Relationship;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.planning.DenseModel;
-import wfg.ltv_econ.economy.planning.IndustryMatrix;
+import wfg.ltv_econ.economy.planning.ProductionMatrix;
 import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
 import wfg.ltv_econ.economy.planning.custom.CustomObjective;
 import wfg.ltv_econ.economy.planning.custom.PlanningContext;
@@ -54,7 +54,7 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
             final int comIndex = dense.columnComIdx[col];
             if (comIndex < 0) continue;
 
-            final String comID = IndustryMatrix.getWorkerRelatedCommodityIDs().get(comIndex);
+            final String comID = ProductionMatrix.getWorkerRelatedCommodityIDs().get(comIndex);
             final String indID = dense.columnIndustryId[col];
             final double s = computeScore(comID, indID);
             scores[col] = s;

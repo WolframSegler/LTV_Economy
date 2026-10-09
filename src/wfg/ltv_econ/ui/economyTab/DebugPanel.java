@@ -21,7 +21,7 @@ import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
-import wfg.ltv_econ.economy.planning.IndustryMatrix;
+import wfg.ltv_econ.economy.planning.ProductionMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.Manufacturing;
 import wfg.native_ui.internal.ui.core.UIContainer;
@@ -74,7 +74,7 @@ public final class DebugPanel extends UIContainer implements UIBuildableAPI {
             final CallbackRunnable<Button> run = (btn) -> {
                 final long startTime = System.nanoTime();
 
-                IndustryMatrix.invalidate();
+                ProductionMatrix.invalidate();
                 engine.fakeAdvanceWithAssignWorkers();
 
                 final long endTime = System.nanoTime();

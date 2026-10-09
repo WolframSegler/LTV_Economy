@@ -381,7 +381,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 		final int buildCost = (int) selectedIndustry.getBuildCost();
 
-		m_market.getConstructionQueue().addToEnd(selectedIndustry.getId(), buildCost);
+		m_market.getConstructionQueue().addToEnd(selectedIndustry.getSpec().getId(), buildCost);
 
 		final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 		playerCredits.subtract(buildCost);

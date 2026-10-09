@@ -13,7 +13,7 @@ import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
 
-public class MarketFinanceRegistry implements Serializable {
+public final class MarketFinanceRegistry implements Serializable {
     private final ArrayMap<String, MarketLedger> registry = new ArrayMap<>(EconomyInfo.getMarketsCount());
 
     public static final MarketFinanceRegistry instance() {

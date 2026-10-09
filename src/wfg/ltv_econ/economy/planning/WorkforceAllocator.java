@@ -35,7 +35,7 @@ import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
-import wfg.ltv_econ.economy.planning.IndustryGrouper.IndustryMatrixGrouped;
+import wfg.ltv_econ.economy.planning.IndustryGrouper.ProductionMatrixGrouped;
 import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
 import wfg.ltv_econ.economy.planning.custom.CustomGoal;
 import wfg.ltv_econ.economy.planning.custom.CustomObjective;
@@ -59,7 +59,7 @@ public class WorkforceAllocator {
     /**
      * For reduced / grouped matrixes
      */
-    public static final void logInputMatrix(IndustryMatrixGrouped grouped, List<String> coms) {
+    public static final void logInputMatrix(ProductionMatrixGrouped grouped, List<String> coms) {
         logInputMatrix(grouped.reducedMatrix, grouped.groupNames, coms);
     }
 
@@ -166,7 +166,7 @@ public class WorkforceAllocator {
     public static final ArrayMap<MarketAPI, float[]> computeWorkerAllocation(
         List<MarketAPI> markets, List<String> industryOutputPairs
     ) {
-        final IndustryMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
+        final ProductionMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
         final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
             markets, industryOutputPairs, PlanningData.getOutputsPerMarket(markets),
             groupedMatrix.memberToGroup
@@ -202,7 +202,7 @@ public class WorkforceAllocator {
             }
         }
 
-        final IndustryMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
+        final ProductionMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
         final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
             markets, industryOutputPairs, PlanningData.getOutputsPerMarket(markets),
             groupedMatrix.memberToGroup
@@ -252,40 +252,11 @@ public class WorkforceAllocator {
             };
         }
 
-        final boolean[] isProductionGood = new boolean[C];
-        final double[] workersPerUnit = new double[C];
-        { // Slack weights
-            for (int c = 0; c < C; c++) {
-                for (int o = 0; o < O; o++) {
-                    if (A[c][o] < 0d) {
-                        isProductionGood[c] = true;
-                        break;
-                    }
-                }
-            }
-            final double[] maxWorkersPerOutput = new double[O];
-            for (int orgIdx = 0; orgIdx < N / T; orgIdx++) {
-                final int o = denseData.columnOutputIndex[orgIdx];
-                final double cap = denseData.columnWorkerLimitFrac[orgIdx] * denseData.columnMarketCap[orgIdx];
-                maxWorkersPerOutput[o] += cap;
-            }
-            for (int c = 0; c < C; c++) {
-                double weightedSum = 0d;
-                double totalWeight = 0d;
-                for (int o = 0; o < O; o++) {
-                    if (A[c][o] > 0d) {
-                        double w = maxWorkersPerOutput[o];
-                        weightedSum += A[c][o] * w;
-                        totalWeight += w;
-                    }
-                }
-                workersPerUnit[c] = totalWeight > 0d ? totalWeight / weightedSum : 1d;
-            }
-        }
+        final SlackWeights slackData = computeSlackWeights(A, denseData, O);
 
         for (int c = 0; c < C; c++) {
-            final double laborFactor = workersPerUnit[c] / 5d;
-            objective[idxSlack.apply(c)] = EconConfig.ECON_DEFICIT_COST * laborFactor * (isProductionGood[c] ? 5d : 1d);
+            final double laborFactor = slackData.workersPerUnit[c] / 5d;
+            objective[idxSlack.apply(c)] = EconConfig.ECON_DEFICIT_COST * laborFactor * (slackData.isProductionInput[c] ? 5d : 1d);
         }
 
         final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0d);
@@ -293,7 +264,7 @@ public class WorkforceAllocator {
 
         const_constraints.addAll(getBaseConstraints(denseData, nVars, N, T)); // Market and industry capacity.
 
-        { // 2) Employment production ceiling (per market)
+        { // 2) Fair production ceiling
             final double[] coeffs = new double[nVars];
             for (int m = 0; m < denseData.marketStart.length - 1; m++) {
                 final int start = denseData.marketStart[m];
@@ -453,16 +424,7 @@ public class WorkforceAllocator {
             }
             }
 
-            final SimplexSolver solver = new SimplexSolver(
-                1e-3d, 30, 1e-6d
-            );
-            vars = solver.optimize(
-                new MaxIter(50000), objFunc,
-                new LinearConstraintSet(constraints),
-                GoalType.MINIMIZE,
-                new NonNegativeConstraint(true),
-                PivotSelectionRule.DANTZIG
-            ).getPoint();
+            vars = simplexOptimize(GoalType.MINIMIZE, objFunc, constraints, 50000);
         }
 
         final ArrayMap<MarketAPI, float[]> assignments = new ArrayMap<>(M);
@@ -562,14 +524,7 @@ public class WorkforceAllocator {
             constraints.addAll(cc.buildConstraints(layout, context, unmodifiableCustomObjData));
         }
 
-        final SimplexSolver solver = new SimplexSolver(1e-3d, 30, 1e-6d);
-        final double[] vars = solver.optimize(
-            new MaxIter(objConfig.maxIter), objFunc,
-            new LinearConstraintSet(constraints),
-            objConfig.goal,
-            new NonNegativeConstraint(true),
-            PivotSelectionRule.DANTZIG
-        ).getPoint();
+        final double[] vars = simplexOptimize(objConfig.goal, objFunc, constraints, objConfig.maxIter);
 
         final ArrayMap<MarketAPI, float[]> assignments = new ArrayMap<>(M);
         { // Extract assignments w[m,o] into map for grouped outputs
@@ -597,8 +552,7 @@ public class WorkforceAllocator {
         return assignments;
     }
 
-    // TODO work on this
-    private static final ArrayMap<MarketAPI, float[]> solveFeasibilityLP(
+    public static final FeasibilityResult solveFeasibilityLP(
         final List<MarketAPI> markets, final double[][] A, final List<String> outputPairs,
         final List<BitSet> outputsPerMarket
     ) {
@@ -613,13 +567,17 @@ public class WorkforceAllocator {
 
         final int idxSlackStr = N;
         final int nVars = idxSlackStr + C;
+        final Function<Integer, Integer> idxSlack = c -> idxSlackStr + c;
 
         final double[] objective = new double[nVars];
         for (int i = 0; i < N; i++) {
             objective[i] = WORKER_COST * 1e-4d;
         }
+
+        final SlackWeights slackData = computeSlackWeights(A, denseData, O);
         for (int c = 0; c < C; c++) {
-            objective[idxSlackStr + c] = EconConfig.ECON_DEFICIT_COST;
+            final double laborFactor = slackData.workersPerUnit[c] / 5d;
+            objective[idxSlack.apply(c)] = EconConfig.ECON_DEFICIT_COST * laborFactor * (slackData.isProductionInput[c] ? 5d : 1d);
         }
 
         final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0d);
@@ -638,23 +596,19 @@ public class WorkforceAllocator {
                 if (base == 0d) continue;
                 coeffs[i] = base * denseData.columnOutputMod[i];
             }
-            coeffs[idxSlackStr + c] = 1d;
-            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, demand[c]));
+
+            coeffs[idxSlack.apply(c)] = 1d;
+            final double target = demand[c] * EconConfig.PRODUCTION_BUFFER;
+            constraints.add(new LinearConstraint(coeffs, Relationship.GEQ, target));
         }
 
-        // 4) SOLVE
-        final SimplexSolver solver = new SimplexSolver(1e-6d, 100, 1e-8d);
-        final double[] vars = solver.optimize(
-            new MaxIter(50000), objFunc,
-            new LinearConstraintSet(constraints),
-            GoalType.MINIMIZE,
-            new NonNegativeConstraint(true),
-            PivotSelectionRule.DANTZIG
-        ).getPoint();
+        final double[] vars = simplexOptimize(GoalType.MINIMIZE, objFunc, constraints, 50000);
 
-        // 5) EXTRACT — slice off the slack columns before expanding.
         final double[] denseWorkerVars = new double[N];
         System.arraycopy(vars, 0, denseWorkerVars, 0, N);
+
+        final double[] slack = new double[C];
+        System.arraycopy(vars, idxSlackStr, slack, 0, C);
 
         final double[] fullWorkers = DenseModel.expandDenseSolution(
             denseWorkerVars, outputsPerMarket, O
@@ -667,7 +621,45 @@ public class WorkforceAllocator {
             for (int o = 0; o < O; o++) arr[o] = (float) fullWorkers[base + o];
             assignments.put(markets.get(m), arr);
         }
-        return assignments;
+
+        return new FeasibilityResult(assignments, slack, denseData, O, C);
+    }
+
+    private static final SlackWeights computeSlackWeights(
+        final double[][] A, final DenseModel denseData, int O
+    ) {
+        final int C = A.length;
+
+        final boolean[] isProductionInput = new boolean[C];
+        final double[] workersPerUnit = new double[C];
+
+        for (int c = 0; c < C; c++) {
+            for (int o = 0; o < O; o++) {
+                // If an input to another output.
+                if (A[c][o] < 0d) { isProductionInput[c] = true; break; }
+            }
+        }
+
+        final double[] maxWorkersPerOutput = new double[O];
+        for (int orgIdx = 0; orgIdx < denseData.columnSize; orgIdx++) {
+            final int o = denseData.columnOutputIndex[orgIdx];
+            maxWorkersPerOutput[o] += denseData.columnWorkerLimitFrac[orgIdx] * denseData.columnMarketCap[orgIdx];
+        }
+
+        for (int c = 0; c < C; c++) {
+            double weightedSum = 0d;
+            double totalWeight = 0d;
+            for (int o = 0; o < O; o++) {
+                if (A[c][o] > 0d) {
+                    final double w = maxWorkersPerOutput[o];
+                    weightedSum += A[c][o] * w;
+                    totalWeight += w;
+                }
+            }
+            workersPerUnit[c] = totalWeight > 0d ? totalWeight / weightedSum : 1d;
+        }
+
+        return new SlackWeights(isProductionInput, workersPerUnit);
     }
 
     private static final List<LinearConstraint> getBaseConstraints(final DenseModel denseData, int nVars, int N, int T) {
@@ -719,4 +711,29 @@ public class WorkforceAllocator {
         final float ratio = (float) Math.pow(MIN_CAP / clamped, EXPONENT);
         return Arithmetic.lerp(MIN_FRACTION, MAX_FRACTION, ratio);
     }
+
+    private static final double[] simplexOptimize(GoalType goal, LinearObjectiveFunction objective, List<LinearConstraint> constraints, int maxIter) {
+        final SimplexSolver solver = new SimplexSolver( 1e-3d, 30, 1e-6d);
+
+        return solver.optimize(
+            new MaxIter(maxIter), objective,
+            new LinearConstraintSet(constraints),
+            goal,
+            new NonNegativeConstraint(true),
+            PivotSelectionRule.DANTZIG
+        ).getPoint();
+    }
+
+    /**
+     * {@code isProductionInput[c]} is true if commodity {@code c} is consumed as an
+     * input by some industry, i.e. a deficit in {@code c} cascades into other production.
+     * {@code workersPerUnit[c]} is a labor-weighted normalization of {@code c}, so that
+     * deficit penalties scale with labor freed rather than raw unit volume.
+     */
+    private static record SlackWeights(boolean[] isProductionInput, double[] workersPerUnit) {}
+
+    public record FeasibilityResult(
+        ArrayMap<MarketAPI, float[]> assignments, double[] slack,
+        DenseModel denseData, int outputCount, int commodityCount
+    ) {}
 }
