@@ -95,16 +95,10 @@ Warning by Amazona Adorada from <a href="https://thenounproject.com/browse/icons
 ## AI Generated Assets
 
 <ul>
-    <li>graphics/events/miasma.png</li>
-    <li>graphics/events/gang_violence.png</li>
-    <li>graphics/policies/extended_shifts.png</li>
-    <li>graphics/policies/luddic_prophet_festival.png</li>
     <li>graphics/policies/bulwark_of_orichalcum.png</li>
     <li>graphics/policies/default_policy_poster.png</li>
     <li>graphics/policies/fleet_mobilization_order.png</li>
     <li>graphics/policies/iron_fist_decree.png</li>
-    <li>graphics/policies/organ_harvesting_program.png</li>
-    <li>graphics/policies/pharmaceutical_promotion.png</li>
     <li>graphics/policies/urban_renewal_initiative.png</li>
     <li>graphics/policies/public_health_education.png</li>
     <li>graphics/policies/bres_vitalis.png</li>
@@ -113,9 +107,7 @@ Warning by Amazona Adorada from <a href="https://thenounproject.com/browse/icons
     <li>graphics/policies/expand_the_yards.png</li>
     <li>graphics/icons/intel/policy_icon.png</li>
     <li>graphics/icons/industry/manufacturing.png</li>
-    <li>graphics/icons/cargo/components_light_1.png</li>
-    <li>graphics/icons/cargo/components_light_2.png</li>
-    <li>graphics/icons/cargo/components_light_3.png</li>
-    <li>graphics/icons/cargo/components_precision_1.png</li>
-    <li>graphics/icons/cargo/components_structural_1.png</li>
+    <li>graphics/icons/cargo/components_light.png</li>
+    <li>graphics/icons/cargo/components_precision.png</li>
+    <li>graphics/icons/cargo/components_structural.png</li>
 </ul>

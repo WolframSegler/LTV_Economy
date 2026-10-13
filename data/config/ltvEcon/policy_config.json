@@ -35,7 +35,7 @@
       "name": "Pharmaceutical Promotion",
       "class": "wfg.ltv_econ.intel.market.policies.PharmaceuticalPromotionPolicy",
       "posterPath": "graphics/policies/pharmaceutical_promotion.png",
-      "cost": 3000,
+      "cost": 15000,
       "durationDays": 30,
       "cooldownDays": 210,
       "description": "Legalizes and subsidizes production of local recreational substances for the populace. The program boosts public morale but takes a toll on health and subtly undermines social cohesion. Factions controlling markets where these substances are illegal may disapprove, while others welcome it."

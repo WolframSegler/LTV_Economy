@@ -165,6 +165,7 @@ public final class IndustryBalancer {
         for (final Industry ind : market.getIndustries()) {
             if (!ind.isIndustry()) continue; // must free a slot
             if (excludedId != null && ind.getSpec().getId().equals(excludedId)) continue;
+            if (!IndustryConfigManager.getIndConfig(ind).workerAssignable) continue;
             if (!isDeadweight(ind, assignments)) continue;
             return ind;
         }

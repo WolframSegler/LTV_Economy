@@ -14,11 +14,11 @@ import wfg.ltv_econ.economy.MarketPopulationData;
 
 public class PharmaceuticalPromotionPolicy extends MarketPolicy {
     public static final float HEALTH_DEBUFF = -0.4f;
-    public static final float HAPPINESS_BUFF = 0.5f;
+    public static final float HAPPINESS_BUFF = 0.8f;
     public static final float COHESION_DEBUFF = -0.03f;
     public static final float CLASS_DEBUFF = -0.001f;
-    public static final float FACTION_RELATION_DROP = 0.1f;
-    public static final float FACTION_RELATION_INCREASE = 0.07f;
+    public static final float FACTION_RELATION_DROP = 0.03f;
+    public static final float FACTION_RELATION_INCREASE = 0.02f;
 
     public void apply(MarketPopulationData data) {
         data.healthDelta.modifyFlat(id, HEALTH_DEBUFF, spec.name);

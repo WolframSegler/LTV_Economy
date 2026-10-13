@@ -10,6 +10,8 @@ Version 0.5.0-beta | NOT SAVE COMPATIBLE
 - Industries under construction now gradually pre-import a buffer of their required inputs. The buffer is based on a predicted worker allocation.
 - Fixed bugs regarding industry worker registry.
 - Modified the price calculator to reduce the price range, to make it more vanilla-like I suppose.
+- Replaced some AI slop assets with actual art.
+- Rebalanced some policies.
 
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.
