@@ -56,9 +56,9 @@
       "class": "wfg.ltv_econ.intel.market.policies.BulwarkOrichalcumPolicy",
       "posterPath": "graphics/policies/bulwark_of_orichalcum.png",
       "cost": 250000,
-      "durationDays": 50,
-      "cooldownDays": 360,
-      "description": "A top-priority planetary defense initiative. Defensive emplacements, garrisons, and fortifications are reinforced to near-mythical standards, ensuring the colony can withstand prolonged assaults. The program requires massive logistical support and sustained maintenance."
+      "durationDays": 40,
+      "cooldownDays": 480,
+      "description": "A top-priority planetary defense initiative. Defensive emplacements, garrisons, and fortifications are reinforced to mythical standards, ensuring the colony can withstand prolonged assaults. The program requires massive logistical support and sustained maintenance."
     },
     {
       "id": "iron_fist_decree",

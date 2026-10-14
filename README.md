@@ -95,9 +95,7 @@ Warning by Amazona Adorada from <a href="https://thenounproject.com/browse/icons
 ## AI Generated Assets
 
 <ul>
-    <li>graphics/policies/bulwark_of_orichalcum.png</li>
     <li>graphics/policies/bres_vitalis.png</li>
-    <li></li>
     <li>graphics/policies/fleet_mobilization_order.png</li>
     <li>graphics/policies/urban_renewal_initiative.png</li>
     <li>graphics/policies/default_policy_poster.png</li>
