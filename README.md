@@ -96,16 +96,14 @@ Warning by Amazona Adorada from <a href="https://thenounproject.com/browse/icons
 
 <ul>
     <li>graphics/policies/bulwark_of_orichalcum.png</li>
-    <li>graphics/policies/default_policy_poster.png</li>
-    <li>graphics/policies/fleet_mobilization_order.png</li>
-    <li>graphics/policies/iron_fist_decree.png</li>
-    <li>graphics/policies/urban_renewal_initiative.png</li>
-    <li>graphics/policies/public_health_education.png</li>
     <li>graphics/policies/bres_vitalis.png</li>
+    <li></li>
+    <li>graphics/policies/fleet_mobilization_order.png</li>
+    <li>graphics/policies/urban_renewal_initiative.png</li>
+    <li>graphics/policies/default_policy_poster.png</li>
     <li>graphics/policies/convergence_festival.png</li>
     <li>graphics/policies/substance_control_act.png</li>
     <li>graphics/policies/expand_the_yards.png</li>
-    <li>graphics/icons/intel/policy_icon.png</li>
     <li>graphics/icons/cargo/components_light.png</li>
     <li>graphics/icons/cargo/components_precision.png</li>
     <li>graphics/icons/cargo/components_structural.png</li>

@@ -23,7 +23,7 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.MutableValue;
 import com.fs.starfarer.campaign.ui.marketinfo.IndustryPickerDialog;
 
-import rolflectionlib.util.ListenerFactory;
+import rolflectionlib.ui.UiUtil;
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
@@ -276,10 +276,11 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 		final CallbackRunnable<Button> buildBtnRunnable = (btn) -> {
 
-			final Object listener = new ListenerFactory.DialogDismissedListener() {
+			final Object listener = new UiUtil.DialogDismissedListener() {
 				@Override
-				public void trigger(Object... args) {
-					dialogDismissed(args);
+				public void dialogDismissed(Object data, int option) {
+					if (option != 0) return; // 0 means confirm
+					addIndustryToQueue((IndustryPickerDialog) data);
 				}
 			}.getProxy();
 
@@ -370,11 +371,9 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 		}
 	}
 
-	public final void dialogDismissed(Object... args) {
-		if (((int) args[1]) != 0) return; // 0 means confirm
-		final IndustryPickerDialog buildDialog = (IndustryPickerDialog) args[0];
+	public final void addIndustryToQueue(IndustryPickerDialog data) {
 		final Object selectedObj = RolfLectionUtil.getMethodAndInvokeDirectly(
-			"getSelected", buildDialog);
+			"getSelected", data);
 		if (selectedObj == null) return;
 		final Industry selectedIndustry = (Industry) RolfLectionUtil.getMethodAndInvokeDirectly(
 			"getIndustry", selectedObj);

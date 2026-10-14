@@ -23,7 +23,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
-import rolflectionlib.util.ListenerFactory;
+import rolflectionlib.ui.UiUtil;
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -232,10 +232,10 @@ public final class IndustryWidget extends UIContainer implements
                 }
 
                 if (LtvIndustryListPanel.indOptCtor != null && indPanel.dummyWidget != null) {
-                    final Object listener = new ListenerFactory.DialogDismissedListener() {
+                    final Object listener = new UiUtil.DialogDismissedListener() {
                         @Override
-                        public void trigger(Object... args) {
-                            dialogDismissed();
+                        public void dialogDismissed(Object data, int option) {
+                            IndustryWidget.this.industryOptionMenuClosed();
                         }
                     }.getProxy();
 
@@ -534,7 +534,7 @@ public final class IndustryWidget extends UIContainer implements
         }
     }
 
-    public void dialogDismissed() {
+    public void industryOptionMenuClosed() {
         tradeInfoPanel = false;
         RolfLectionUtil.getMethodAndInvokeDirectly("dialogDismissed",
             indPanel.dummyWidget, null, 0);
