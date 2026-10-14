@@ -106,7 +106,6 @@ Warning by Amazona Adorada from <a href="https://thenounproject.com/browse/icons
     <li>graphics/policies/substance_control_act.png</li>
     <li>graphics/policies/expand_the_yards.png</li>
     <li>graphics/icons/intel/policy_icon.png</li>
-    <li>graphics/icons/industry/manufacturing.png</li>
     <li>graphics/icons/cargo/components_light.png</li>
     <li>graphics/icons/cargo/components_precision.png</li>
     <li>graphics/icons/cargo/components_structural.png</li>
