@@ -332,12 +332,12 @@ public final class IndustryConfigManager {
             .equals(IndustryConfigLoader.getDynamicConfigVersion());
 
         // 1) Check that every existing spec has a config
-        for (IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
-            final String baseId = getBaseIndustryIDSpec(spec);
+        for (String indId : EconomyConstants.industryIDs) {
+            final String baseIndId = getBaseIndustryID(indId);
 
-            if (!(dynamic_config.containsKey(spec.getId()) ||
-                (baseId != null && dynamic_config.containsKey(baseId))) &&
-                !hasConfig(spec)
+            if (!dynamic_config.containsKey(indId) &&
+                !dynamic_config.containsKey(baseIndId) &&
+                !hasConfig(indId)
             ) {
                 allIndustriesHaveConfig = false;
                 break;

@@ -204,13 +204,13 @@ public class CommodityCell implements Serializable {
             if (ind.getSupply(comID).getQuantity().getModifiedValue() > 0.01f &&
                 !IndustryIOs.hasOutput(indID, comID)
             ) {
-                IndustryIOs.createAndRegisterDynamicOutput(ind, comID, true);
+                IndustryIOs.createAndRegisterDynamicOutput(ind, comID);
             }
 
             if (ind.getDemand(comID).getQuantity().getModifiedValue() > 0.01f &&
                 !IndustryIOs.hasInput(indID, comID)
             ) {
-                IndustryIOs.createAndRegisterDynamicInput(ind, comID, true);
+                IndustryIOs.createAndRegisterDynamicInput(ind, comID);
             }
 
             // Retrieve IOs

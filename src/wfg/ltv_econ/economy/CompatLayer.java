@@ -16,6 +16,8 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.industry.IndustryIOs;
 
+// TODO move to industry package
+
 /**
  * <p>
  * The <strong>Compatibility Layer</strong> between vanilla/modded industries and

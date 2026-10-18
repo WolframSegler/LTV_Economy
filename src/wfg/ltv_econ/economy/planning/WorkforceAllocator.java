@@ -316,17 +316,13 @@ public class WorkforceAllocator {
                     else comAvailability[c] = Math.min(1d, netCommodity[c] / demand[c]);
                 }
     
-                final var byIndustry = IndustryIOs.getBaseInputsMap();
                 for (int o = 0; o < O; o++) {
                     final String pair = outputPairs.get(o);
                     final String industryID = pair.split(EconomyLoop.KEY)[0];
                     final String outputID = pair.split(EconomyLoop.KEY)[1];
     
-                    final Map<String, ArrayMap<String, Float>> byOutput = byIndustry.get(industryID);
-                    if (byOutput == null) continue;
-    
-                    final ArrayMap<String, Float> inputs = byOutput.get(outputID);
-                    if (inputs == null || inputs.isEmpty()) continue;
+                    final ArrayMap<String, Float> inputs = IndustryIOs.getBaseInputs(industryID, outputID);
+                    if (inputs.isEmpty()) continue;
     
                     double deficitWeightSum = 0d;
                     for (float v : inputs.values()) deficitWeightSum += v;

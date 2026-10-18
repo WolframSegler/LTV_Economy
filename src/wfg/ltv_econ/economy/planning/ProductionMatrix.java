@@ -60,19 +60,15 @@ public final class ProductionMatrix {
     }
 
     private static final void buildMatrix() {
-        final Map<String, ArrayMap<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
-        final Map<String, ArrayMap<String, ArrayMap<String, Float>>> baseInputs = IndustryIOs.getBaseInputsMap();
-
         final ArrayList<String> commodities = getWorkerRelatedCommodityIDs();
         final ArrayList<String> industries = getWorkerIndustries();
 
         STATIC_INDUSTRY_OUTPUT_PAIRS = new ArrayList<>();
         for (String indID : industries) {
-            final Map<String, Float> outputs = baseOutputs.get(indID);
-            if (outputs != null) {
-                for (String outputID : outputs.keySet()) {
-                    STATIC_INDUSTRY_OUTPUT_PAIRS.add(indID + EconomyLoop.KEY + outputID);
-                }
+            final Map<String, Float> outputs = IndustryIOs.getBaseOutputs(indID);
+            
+            for (String outputID : outputs.keySet()) {
+                STATIC_INDUSTRY_OUTPUT_PAIRS.add(indID + EconomyLoop.KEY + outputID);
             }
         }
 
@@ -80,19 +76,15 @@ public final class ProductionMatrix {
 
         int colIndex = 0;
         for (String indID : industries) {
-            final ArrayMap<String, Float> outputs = baseOutputs.get(indID);
-            final Map<String, ArrayMap<String, Float>> inputs = baseInputs.get(indID);
-            if (outputs == null) continue;
+            final Map<String, Float> outputs = IndustryIOs.getBaseOutputs(indID);
 
-            for (Map.Entry<String, Float> out : outputs.singleEntrySet()) {
+            for (Map.Entry<String, Float> out : outputs.entrySet()) {
                 final String outputID = out.getKey();
 
                 // Inputs
-                if (inputs != null && inputs.containsKey(outputID)) {
-                    for (Map.Entry<String, Float> in : inputs.get(outputID).singleEntrySet()) {
-                        final int row = commodities.indexOf(in.getKey());
-                        if (row >= 0) A[row][colIndex] -= in.getValue();
-                    }
+                for (var in : IndustryIOs.getBaseInputs(indID, outputID).singleEntrySet()) {
+                    final int row = commodities.indexOf(in.getKey());
+                    if (row >= 0) A[row][colIndex] -= in.getValue();
                 }
 
                 // Output
@@ -113,15 +105,13 @@ public final class ProductionMatrix {
     }
 
     private static final void buildWorkerRelatedCommodityIDs() {
-        final Map<String, ArrayMap<String, Float>> baseOutputs = IndustryIOs.getBaseOutputsMap();
-
         STATIC_WORKER_COMMODITIES = new ArrayList<>(EconomyConstants.econCommodityIDs);
 
         Iterator<String> it = STATIC_WORKER_COMMODITIES.iterator();
         while (it.hasNext()) {
             final String com = it.next();
             boolean remove = true;
-            for (String key : baseOutputs.keySet()) {
+            for (String key : EconomyConstants.industryIDs) {
                 final IndustrySpecAPI spec = settings.getIndustrySpec(key);
                 final IndustryConfig cfg = IndustryConfigManager.getIndConfig(spec);
 
