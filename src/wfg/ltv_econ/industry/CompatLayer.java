@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy;
+package wfg.ltv_econ.industry;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -14,9 +14,6 @@ import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
-import wfg.ltv_econ.industry.IndustryIOs;
-
-// TODO move to industry package
 
 /**
  * <p>

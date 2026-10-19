@@ -17,11 +17,11 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
-import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.WorkforceAllocator.FeasibilityResult;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
+import wfg.ltv_econ.industry.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.ArrayMap;
 

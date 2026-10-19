@@ -26,13 +26,13 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
-import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
+import wfg.ltv_econ.industry.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.util.Arithmetic;

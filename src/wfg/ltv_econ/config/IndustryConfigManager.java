@@ -13,8 +13,8 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import wfg.ltv_econ.config.loader.EconomyConfigLoader;
 import wfg.ltv_econ.config.loader.IndustryConfigLoader;
 import wfg.ltv_econ.constant.EconomyConstants;
-import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.industry.CompatLayer;
 import wfg.native_ui.util.ArrayMap;
 import wfg.ltv_econ.util.ConfigUtils;
 

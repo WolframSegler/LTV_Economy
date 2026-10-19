@@ -19,10 +19,10 @@ import com.fs.starfarer.campaign.econ.Market;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.constant.strings.Consumption;
-import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
+import wfg.ltv_econ.industry.CompatLayer;
 import wfg.ltv_econ.industry.ConstructionDemandPredictor;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.util.ArrayMutableStat;
@@ -200,18 +200,6 @@ public class CommodityCell implements Serializable {
 
         for (Industry ind : getVisibleIndustries()) {
             final String indID = ind.getSpec().getId();
-            // Register IOs
-            if (ind.getSupply(comID).getQuantity().getModifiedValue() > 0.01f &&
-                !IndustryIOs.hasOutput(indID, comID)
-            ) {
-                IndustryIOs.createAndRegisterDynamicOutput(ind, comID);
-            }
-
-            if (ind.getDemand(comID).getQuantity().getModifiedValue() > 0.01f &&
-                !IndustryIOs.hasInput(indID, comID)
-            ) {
-                IndustryIOs.createAndRegisterDynamicInput(ind, comID);
-            }
 
             // Retrieve IOs
             if (IndustryIOs.hasOutput(indID, comID)) {

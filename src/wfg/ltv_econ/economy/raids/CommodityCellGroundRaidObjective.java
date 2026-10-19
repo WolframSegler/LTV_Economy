@@ -31,8 +31,8 @@ import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
-import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
+import wfg.ltv_econ.industry.CompatLayer;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
 import wfg.ltv_econ.ui.reusable.StockpileInfoBar;
 import wfg.native_ui.ui.MethodFields;

@@ -13,7 +13,6 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
-import wfg.ltv_econ.economy.CompatLayer;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
