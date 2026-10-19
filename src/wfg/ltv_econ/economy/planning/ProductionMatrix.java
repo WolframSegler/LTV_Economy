@@ -15,6 +15,7 @@ import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.industry.IndustryIOs.BaseIO;
 import wfg.native_ui.util.ArrayMap;
 
 public final class ProductionMatrix {
@@ -65,7 +66,7 @@ public final class ProductionMatrix {
 
         STATIC_INDUSTRY_OUTPUT_PAIRS = new ArrayList<>();
         for (String indID : industries) {
-            final Map<String, Float> outputs = IndustryIOs.getBaseOutputs(indID);
+            final Map<String, BaseIO> outputs = IndustryIOs.getBaseIOs(indID);
             
             for (String outputID : outputs.keySet()) {
                 STATIC_INDUSTRY_OUTPUT_PAIRS.add(indID + EconomyLoop.KEY + outputID);
@@ -76,9 +77,9 @@ public final class ProductionMatrix {
 
         int colIndex = 0;
         for (String indID : industries) {
-            final Map<String, Float> outputs = IndustryIOs.getBaseOutputs(indID);
+            final Map<String, BaseIO> outputs = IndustryIOs.getBaseIOs(indID);
 
-            for (Map.Entry<String, Float> out : outputs.entrySet()) {
+            for (Map.Entry<String, BaseIO> out : outputs.entrySet()) {
                 final String outputID = out.getKey();
 
                 // Inputs
@@ -89,7 +90,7 @@ public final class ProductionMatrix {
 
                 // Output
                 final int row = commodities.indexOf(outputID);
-                if (row >= 0) A[row][colIndex] += out.getValue();
+                if (row >= 0) A[row][colIndex] += out.getValue().outputValue;
 
                 colIndex++;
             }

@@ -12,6 +12,7 @@ Version 0.5.0-beta | NOT SAVE COMPATIBLE
 - Modified the price calculator to reduce the price range, to make it more vanilla-like I suppose.
 - Replaced some AI slop assets with actual art.
 - Rebalanced some policies.
+- Huge backend refactors for computing industry production, improving stability.
 
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.
