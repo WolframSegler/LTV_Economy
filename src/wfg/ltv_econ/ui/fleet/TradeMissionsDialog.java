@@ -103,7 +103,7 @@ public final class TradeMissionsDialog extends DockPanel {
 
         final int offset = opad + 30;
         content.setHeight(yCoord);
-        final float scrollPanelH = contentContainer.getHeight() - offset - opad;
+        final float scrollPanelH = mContentContainer.getHeight() - offset - opad;
         final ScrollPanelAPI scrollPanel = ComponentFactory.wrapWithScrollPanel(content, WIDTH, scrollPanelH);
         add(scrollPanel).inTL(0f, offset);
 

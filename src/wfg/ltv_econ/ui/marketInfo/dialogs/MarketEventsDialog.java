@@ -39,15 +39,15 @@ public final class MarketEventsDialog extends DockPanel {
         super(Attachments.getCoreUI(), 400, screenH - 200, Side.LEFT, 8);
         data = EconomyEngine.instance().getMarketPopulationData(market.getId());
 
-        offsetY = 100f;
-        bgAlpha = 0.9f;
+        mOffsetY = 100f;
+        mBgAlpha = 0.9f;
 
         buildUI();
     }
 
     @Override
     public void buildUI() {
-        final int width = (int) contentContainer.getWidth();
+        final int width = (int) mContentContainer.getWidth();
 
         final LabelAPI title = settings.createLabel(LocalizedStrings.str("uiTitleCurrentEvents"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
@@ -65,7 +65,7 @@ public final class MarketEventsDialog extends DockPanel {
         }
 
         content.setHeight(yCoord);
-        final float scrollPanelH = contentContainer.getHeight() - 30 - opad*2;
+        final float scrollPanelH = mContentContainer.getHeight() - 30 - opad*2;
         add(ComponentFactory.wrapWithScrollPanel(content, width, scrollPanelH)).inBL(0f, 0f);
     }
 

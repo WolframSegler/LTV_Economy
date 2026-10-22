@@ -65,7 +65,7 @@ public final class ShipCommissionDialog extends DockPanel {
 
         final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
 
-        final int width = (int) contentContainer.getWidth();
+        final int width = (int) mContentContainer.getWidth();
         final UIContainerAPI content = new UIContainer(width, 0f);
 
         float yCoord = 0f;
@@ -75,7 +75,7 @@ public final class ShipCommissionDialog extends DockPanel {
             yCoord += ROW_H + pad;
         }
         content.setHeight(yCoord);
-        add(ComponentFactory.wrapWithScrollPanel(content, width, contentContainer.getHeight())).inTL(0f, hpad);
+        add(ComponentFactory.wrapWithScrollPanel(content, width, mContentContainer.getHeight())).inTL(0f, hpad);
     }
 
     private final void addOrder(String hullId, int count) {

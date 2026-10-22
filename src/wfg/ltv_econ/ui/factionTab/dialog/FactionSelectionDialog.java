@@ -47,7 +47,7 @@ public final class FactionSelectionDialog extends DockPanel {
     public void buildUI() {
         clearChildren();
 
-        final int width = (int) contentContainer.getWidth();
+        final int width = (int) mContentContainer.getWidth();
         final UIContainerAPI content = new UIContainer(width, 0f);
         final List<FactionSpecAPI> factions = new ArrayList<>(EconomyConstants.visibleFactions);
         factions.add(settings.getFactionSpec(Factions.PLAYER));
@@ -61,7 +61,7 @@ public final class FactionSelectionDialog extends DockPanel {
             yCoord += ROW_H + pad;
         }
         content.setHeight(yCoord);
-        add(ComponentFactory.wrapWithScrollPanel(content, width, contentContainer.getHeight())).inTL(0f, 0f);
+        add(ComponentFactory.wrapWithScrollPanel(content, width, mContentContainer.getHeight())).inTL(0f, 0f);
     }
 
     private void onFactionSelected(FactionSpecAPI faction) {

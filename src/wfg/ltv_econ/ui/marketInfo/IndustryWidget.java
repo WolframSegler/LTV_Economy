@@ -353,7 +353,7 @@ public final class IndustryWidget extends UIContainer implements
             slider.labelText = ind.getBuildOrUpgradeProgressText();
             slider.showLabelOnly = true;
             
-            tp.addComponent(slider).inBL(0, -sliderHeight - 2);
+            slider.wrap(tp).inBL(0f, -sliderHeight - 2f);
         }
 
         tp.setHeightSoFar(IMAGE_HEIGHT);

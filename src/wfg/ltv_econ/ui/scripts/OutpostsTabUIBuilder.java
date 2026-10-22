@@ -12,7 +12,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.command.CommandTabData;
@@ -28,6 +27,7 @@ import wfg.ltv_econ.ui.outpostsTab.FactionResourcesTable;
 import wfg.ltv_econ.ui.reusable.AbstractTabButtonInjector;
 import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.ui.MethodFields;
+import wfg.native_ui.ui.core.UIElementAPI;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
 
@@ -54,7 +54,7 @@ public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         return str("uiTableFaction");
     }
 
-    protected UIComponentAPI createCustomComponent(UIPanelAPI parent) {
+    protected UIElementAPI createCustomComponent(UIPanelAPI parent) {
         return new FactionManagementPanel();
     }
 
@@ -80,8 +80,8 @@ public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         final int tableH = (int) marketTable.getHeight() + 2;
         final ColonyPopulationTable popTable = new ColonyPopulationTable(tableH);
         final FactionResourcesTable facTable = new FactionResourcesTable(tableH);
-        colonyPanel.addComponent(popTable).inTL(1, opad + 1);
-        colonyPanel.addComponent(facTable).inTL(1, opad + 1);
+        popTable.wrap(colonyPanel).inTL(1, opad + 1);
+        facTable.wrap(colonyPanel).inTL(1, opad + 1);
         popTable.setOpacity(0f);
         facTable.setOpacity(0f);
 
@@ -134,9 +134,9 @@ public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         showPopButton.setShortcutAndAppendToText(Keyboard.KEY_A);
         showFacButton.setShortcutAndAppendToText(Keyboard.KEY_S);
 
-        colonyPanel.addComponent(showColoniesButton).belowMid(anchor, opad);
-        colonyPanel.addComponent(showPopButton).belowMid(showColoniesButton, opad);
-        colonyPanel.addComponent(showFacButton).belowMid(showPopButton, opad);
+        showColoniesButton.wrap(colonyPanel).belowMid(anchor, opad);
+        showPopButton.wrap(colonyPanel).belowMid(showColoniesButton, opad);
+        showFacButton.wrap(colonyPanel).belowMid(showPopButton, opad);
 
         showColoniesButton.setChecked(true);
     }

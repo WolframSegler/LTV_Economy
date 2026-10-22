@@ -247,7 +247,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            tooltip.addComponent(textPanel).inTL(
+            textPanel.wrap(tooltip).inTL(
                 (SECT1_WIDTH / 3f) - textPanel.getWidth(), baseY
             );
         }
@@ -273,7 +273,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            tooltip.addComponent(textPanel).inTL(
+            textPanel.wrap(tooltip).inTL(
                 (SECT1_WIDTH - textPanel.getWidth()) / 2f, baseY
             );
         }
@@ -328,7 +328,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            tooltip.addComponent(textPanel).inTL(SECT1_WIDTH*2 / 3f, baseY);
+            textPanel.wrap(tooltip).inTL(SECT1_WIDTH*2 / 3f, baseY);
         }
 
         final int baseRow2Y = baseY * 3 + pad;
@@ -359,7 +359,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            tooltip.addComponent(textPanel).inTL(
+            textPanel.wrap(tooltip).inTL(
                 (SECT1_WIDTH - textPanel.getWidth()) / 2f, baseRow2Y
             );
         }
@@ -417,10 +417,10 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            tooltip.addComponent(textPanelLeft).inTL(
+            textPanelLeft.wrap(tooltip).inTL(
                 (SECT1_WIDTH / 3f) - (textPanelLeft.getWidth() / 2f), baseRow2Y
             );
-            tooltip.addComponent(textPanelRight).inTL(
+            textPanelRight.wrap(tooltip).inTL(
                 (SECT1_WIDTH*2 / 3f) - (textPanelRight.getWidth() / 2f), baseRow2Y
             );
         }

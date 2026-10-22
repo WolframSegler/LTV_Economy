@@ -17,6 +17,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import wfg.ltv_econ.ui.scripts.CoreTabUIBuilder;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.MethodFields;
+import wfg.native_ui.ui.core.UIElementAPI;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
 import wfg.native_ui.ui.functional.CallbackRunnable;
@@ -29,7 +30,7 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
     private boolean uiInjected = false;
 
     protected Button injectedBtn = null;
-    protected UIComponentAPI injectedComp = null;
+    protected UIElementAPI injectedComp = null;
 
     protected UIPanelAPI targetTab = null;
     protected List<UIComponentAPI> targetChildren = null;
@@ -39,7 +40,7 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
     protected abstract void setCurrentTabIndex(int index);
     protected abstract CoreUITabId getTargetCoreTabId();
     protected abstract String getButtonLabel();
-    protected abstract UIComponentAPI createCustomComponent(UIPanelAPI parent);
+    protected abstract UIElementAPI createCustomComponent(UIPanelAPI parent);
 
     /**
      * Hook for subclasses to modify the button once it is added.
@@ -102,11 +103,10 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
         injectedBtn.setHighlightBrightness(0.3f);
         injectedBtn.tooltip.enabled = false;
 
-        targetTab.addComponent(injectedBtn);
-        injectedBtn.pos().rightOfTop(lastBtn, 1f);
+        injectedBtn.wrap(targetTab).rightOfTop(lastBtn, 1f);
 
         injectedComp = createCustomComponent(targetTab);
-        targetTab.addComponent(injectedComp).inTL(0f, 20f);
+        injectedComp.wrap(targetTab).inTL(0f, 20f);
 
         onPostBtnInject(injectedBtn);
     }

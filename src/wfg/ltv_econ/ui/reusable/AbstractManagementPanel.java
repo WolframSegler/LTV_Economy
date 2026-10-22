@@ -65,7 +65,7 @@ public abstract class AbstractManagementPanel extends UIContainer implements UIB
         final UIContainerAPI navbar = new UIContainer(NAVBAR_W, 0f);
         int currentY = hpad;
         for (Button btn : navButtons) {
-            navbar.addComponent(btn).inTL(hpad, currentY);
+            navbar.add(btn).inTL(hpad, currentY);
             currentY += pad * 2 + NAV_BUTTON_H;
         }
         currentY += hpad - pad * 2;

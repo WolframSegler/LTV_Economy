@@ -160,7 +160,7 @@ public final class AssignWorkersDialog extends DialogPanel {
 
             outputSlider.setProgress(data.getAssignedRatioForOutput(output.comID) * 100);
 
-            outputsTp.addComponent(outputSlider).inTL(iconSize + pad, cumulativeYOffset);
+            outputSlider.wrap(outputsTp).inTL(iconSize + pad, cumulativeYOffset);
             cumulativeYOffset += pad + sliderH;
         }
 

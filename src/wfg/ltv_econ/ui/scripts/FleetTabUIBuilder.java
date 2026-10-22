@@ -64,7 +64,7 @@ public final class FleetTabUIBuilder implements CoreTabUIBuilder {
             final FleetMemberAPI member = (FleetMember) RolfLectionUtil.getMethodAndInvokeDirectly("getMember", widget);
             final var btn = new TransferToFactionInventoryBtn(widgetFader, member, fleetPanel);
 
-            widget.addComponent(btn);
+            btn.wrap(widget);
             NativeUiUtils.anchorPanel(btn, buttons.get(buttons.size() - 1), AnchorType.LeftMid, pad);
         }
     }

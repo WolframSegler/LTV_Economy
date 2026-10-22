@@ -49,6 +49,7 @@ import wfg.native_ui.ui.visual.PieChart;
 import wfg.native_ui.ui.visual.PieChart.PieSlice;
 import wfg.native_ui.ui.container.ScrollPanel;
 import wfg.native_ui.ui.container.ScrollPanel.ScrollType;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
@@ -77,7 +78,7 @@ public final class ManagePopulationDialog extends DialogPanel {
     private float sliderValue = 0f;
 
     private MarketPolicy selectedPolicy = null;
-    private UIPanelAPI selectedPolicyCont = null;
+    private UIContainerAPI selectedPolicyCont = null;
     
     public ManagePopulationDialog(MarketAPI market) {
         super(PANEL_W, PANEL_H, null, null, str("uiDismiss"));
@@ -380,14 +381,14 @@ public final class ManagePopulationDialog extends DialogPanel {
         }
     }
 
-    private final void buildSelectedPosterMenu(UIPanelAPI cont,
+    private final void buildSelectedPosterMenu(UIContainerAPI cont,
         MarketPolicy policy, MarketPopulationData data, CallbackRunnable<Button> activateRun
     ) {
         final int posterW = 163;
         final int buttonW = 140;
         final int buttonH = 30;
 
-        cont.addComponent(new PosterPanel(posterW, SELECTED_P_H, policy, data, null)).inTL(opad*2, 0);
+        cont.add(new PosterPanel(posterW, SELECTED_P_H, policy, data, null)).inTL(opad*2, 0);
 
         final String buttonTxt;
         final String buttonSideTxt;
@@ -444,7 +445,7 @@ public final class ManagePopulationDialog extends DialogPanel {
                 NativeUiUtils.anchorPanel(tp, activateButton, AnchorType.TopLeft, pad);
         }
 
-        cont.addComponent(activateButton).inBR(opad + PANEL_W/2f, pad);
+        cont.add(activateButton).inBR(opad + PANEL_W/2f, pad);
 
         final String costTxt = policy.spec.cost > 0 ? " - "+NumFormat.formatCredit(policy.spec.cost) : "";
         final LabelAPI title = settings.createLabel(policy.spec.name + costTxt, Fonts.ORBITRON_12);
@@ -452,11 +453,11 @@ public final class ManagePopulationDialog extends DialogPanel {
         title.setHighlightColor(hasSufficientCredits ? highlight : negative);
         title.setHighlight(NumFormat.formatCredit(policy.spec.cost));
         title.setColor(base);
-        cont.addComponent((UIComponentAPI)title).inTL(posterW + opad*3, pad);
+        cont.add((UIComponentAPI)title).inTL(posterW + opad*3, pad);
         
         final LabelAPI desc = settings.createLabel(policy.spec.description, Fonts.DEFAULT_SMALL);
         desc.autoSizeToWidth(PANEL_W/1.5f - 4*opad - posterW);
-        cont.addComponent((UIComponentAPI)desc);
+        cont.add((UIComponentAPI)desc);
         NativeUiUtils.anchorPanel((UIComponentAPI)desc, (UIComponentAPI)title, AnchorType.BottomLeft, pad*2);
 
         final LabelAPI buttonSide = settings.createLabel(buttonSideTxt, Fonts.DEFAULT_SMALL);
@@ -464,7 +465,7 @@ public final class ManagePopulationDialog extends DialogPanel {
         buttonSide.setHighlight(buttonSideHighlight);
         buttonSide.setColor(base);
         buttonSide.getPosition().setSize(posterW/2f + opad, 30);
-        cont.addComponent((UIComponentAPI)buttonSide).inBR(opad*2 + buttonW + PANEL_W/2f, pad);
+        cont.add((UIComponentAPI)buttonSide).inBR(opad*2 + buttonW + PANEL_W/2f, pad);
 
         // OPTION BUTTONS
         final CallbackRunnable<Button> availableRn = (btn) -> {
@@ -496,9 +497,9 @@ public final class ManagePopulationDialog extends DialogPanel {
         notifyAvailableBtn.setChecked(policy.notifyWhenAvailable);
         notifyFinishedBtn.setChecked(policy.notifyWhenFinished);
         repeatAfterCooldownBtn.setChecked(policy.repeatAfterCooldown);
-        cont.addComponent(notifyAvailableBtn).inBL(PANEL_W/2f + opad, pad + opad*4);
-        cont.addComponent(notifyFinishedBtn).inBL(PANEL_W/2f + opad, pad + opad*2);
-        cont.addComponent(repeatAfterCooldownBtn).inBL(PANEL_W/2f + opad, pad);
+        cont.add(notifyAvailableBtn).inBL(PANEL_W/2f + opad, pad + opad*4);
+        cont.add(notifyFinishedBtn).inBL(PANEL_W/2f + opad, pad + opad*2);
+        cont.add(repeatAfterCooldownBtn).inBL(PANEL_W/2f + opad, pad);
     }
 
     @Override

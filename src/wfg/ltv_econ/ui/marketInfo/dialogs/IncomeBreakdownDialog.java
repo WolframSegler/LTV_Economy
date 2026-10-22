@@ -53,8 +53,8 @@ public final class IncomeBreakdownDialog extends DockPanel {
         super(Attachments.getCoreUI(), WIDTH, screenH - GAP * 2, Side.LEFT, 8);
         this.market = market;
 
-        offsetY = GAP;
-        bgAlpha = 0.95f;
+        mOffsetY = GAP;
+        mBgAlpha = 0.95f;
 
         buildUI();
     }
@@ -100,8 +100,8 @@ public final class IncomeBreakdownDialog extends DockPanel {
         incomeBreakdownUI(scrollPanel);
 
         final int offset = opad + 30;
-        final float scrollPanelH = contentContainer.getHeight() - offset - opad;
-        ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, contentContainer).inTL(0f, offset);
+        final float scrollPanelH = mContentContainer.getHeight() - offset - opad;
+        ComponentFactory.addTooltip(scrollPanel, scrollPanelH, true, mContentContainer).inTL(0f, offset);
 
         scrollPanel.getExternalScroller().setYOffset(Arithmetic.clamp(
             scrollLen, 0f, scrollPanel.getHeightSoFar() - scrollPanelH
