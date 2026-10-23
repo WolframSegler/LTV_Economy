@@ -7,7 +7,6 @@ import com.fs.starfarer.api.GameState;
 import lunalib.lunaSettings.LunaSettingsListener;
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.constant.Mods;
-import wfg.ltv_econ.economy.planning.IndustryGrouper;
 import wfg.ltv_econ.economy.planning.ProductionMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
@@ -23,7 +22,6 @@ public final class ConfigLunaSettingsListener implements LunaSettingsListener {
         // REFRESH CONFIG DEPENDENT STATE (ORDER MATTERS)
         IndustryConfigManager.reload();
         IndustryIOs.reload();
-        IndustryGrouper.invalidate();
         ProductionMatrix.invalidate();
 
         // REFRESH THE DATA

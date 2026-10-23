@@ -1,6 +1,5 @@
 package wfg.ltv_econ.economy.planning;
 
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
-import wfg.ltv_econ.economy.planning.IndustryGrouper.ProductionMatrixGrouped;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.industry.CompatLayer;
@@ -55,7 +53,6 @@ public class DenseModel {
     public static final DenseModel createDenseData(final List<MarketAPI> markets,
         final List<String> groupedOutputPairs, final List<BitSet> outputsPerMarket
     ) {
-        final ProductionMatrixGrouped MatrixData = IndustryGrouper.getStaticGrouping();
         final List<String> commodities = ProductionMatrix.getWorkerRelatedCommodityIDs();
 
         final int numMarkets = markets.size();
@@ -80,7 +77,7 @@ public class DenseModel {
         final long[] baseCapacities = new long[numMarkets];
         final long[] weightSum = new long[numOutputs];
         final String[] outputIDs = new String[numOutputs];
-        final Object[] industryKeys = new Object[numOutputs]; 
+        final String[] industryKeys = new String[numOutputs];
 
         for (int m = 0; m < numMarkets; m++) {
             final WorkerPool pool = WorkerPoolRegistry.get(markets.get(m));
@@ -104,22 +101,11 @@ public class DenseModel {
             final String pair = groupedOutputPairs.get(o);
 
             final int sep = pair.indexOf(EconomyLoop.KEY);
-            final String indGroupID = pair.substring(0, sep);
+            final String indID = pair.substring(0, sep);
             final String outputID = pair.substring(sep + EconomyLoop.KEY.length());
 
             outputIDs[o] = outputID;
-
-            final List<String> members = MatrixData.groupToMembers.get(pair);
-            if (members == null) {
-                industryKeys[o] = indGroupID;
-            } else {
-                final ArrayList<String> baseIDs = new ArrayList<>(members.size());
-                for (String p : members) {
-                    final int s = p.indexOf(EconomyLoop.KEY);
-                    baseIDs.add(p.substring(0, s));
-                }
-                industryKeys[o] = baseIDs;
-            }
+            industryKeys[o] = indID;
         }
 
         int denseIdx = 0;
@@ -131,7 +117,7 @@ public class DenseModel {
             final int factionIdx = EconomyConstants.factionIDs.indexOf(market.getFactionId());
             final BitSet bits = outputsPerMarket.get(m);
             for (int o = bits.nextSetBit(0); o >= 0; o = bits.nextSetBit(o + 1)) {
-                final Object indKey = industryKeys[o];
+                final String indID = industryKeys[o];
                 final String outputID = outputIDs[o];
 
                 columnOutputIndex[denseIdx] = o;
@@ -140,10 +126,7 @@ public class DenseModel {
                 columnFaction[denseIdx] = factionIdx;
                 columnComIdx[denseIdx] = commodityIndex.getOrDefault(outputID, -1);
                 
-                @SuppressWarnings("unchecked")
-                final Industry ind = (indKey instanceof String s)
-                    ? IndustryIOs.getRealIndustryFromBaseID(market, s)
-                    : IndustryIOs.getRealIndustryFromBaseID(market, (List<String>) indKey);
+                final Industry ind = IndustryIOs.getRealIndustryFromBaseID(market, indID);
                 final OutputConfig output = IndustryConfigManager.getIndConfig(ind).outputs.get(outputID);
 
                 columnWorkerLimitFrac[denseIdx] = output.workerAssignableLimit;

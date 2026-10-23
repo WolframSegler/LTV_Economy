@@ -28,14 +28,12 @@ import org.apache.log4j.Logger;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
-import com.fs.starfarer.api.util.Pair;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
-import wfg.ltv_econ.economy.planning.IndustryGrouper.ProductionMatrixGrouped;
 import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
 import wfg.ltv_econ.economy.planning.custom.CustomGoal;
 import wfg.ltv_econ.economy.planning.custom.CustomObjective;
@@ -55,13 +53,6 @@ public class WorkforceAllocator {
     private static final Logger logger = Global.getLogger(WorkforceAllocator.class);
 
     private static final double WORKER_COST = 1d;
-
-    /**
-     * For reduced / grouped matrixes
-     */
-    public static final void logInputMatrix(ProductionMatrixGrouped grouped, List<String> coms) {
-        logInputMatrix(grouped.reducedMatrix, grouped.groupNames, coms);
-    }
 
     /**
      * For non-reduced / non-grouped Matrixes
@@ -166,15 +157,11 @@ public class WorkforceAllocator {
     public static final ArrayMap<MarketAPI, float[]> computeWorkerAllocation(
         List<MarketAPI> markets, List<String> industryOutputPairs
     ) {
-        final ProductionMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
-        final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
-            markets, industryOutputPairs, PlanningData.getOutputsPerMarket(markets),
-            groupedMatrix.memberToGroup
-        );
-
-        return IndustryGrouper.expandGroupedAssignments(
-            optimizePiecewiseWorkerAlloc(markets, groupedMatrix.reducedMatrix, groupedData.one, groupedData.two),
-            groupedMatrix, markets, industryOutputPairs
+        return optimizePiecewiseWorkerAlloc(
+            markets,
+            ProductionMatrix.getMatrix(),
+            industryOutputPairs,
+            PlanningData.getOutputsPerMarket(markets)
         );
     }
 
@@ -202,19 +189,13 @@ public class WorkforceAllocator {
             }
         }
 
-        final ProductionMatrixGrouped groupedMatrix = IndustryGrouper.getStaticGrouping();
-        final Pair<List<String>, List<BitSet>> groupedData = IndustryGrouper.applyGroupingToMarketData(
-            markets, industryOutputPairs, PlanningData.getOutputsPerMarket(markets),
-            groupedMatrix.memberToGroup
-        );
-
-        return IndustryGrouper.expandGroupedAssignments(
-            optimizeCustomWorkerAlloc(
-                markets, groupedMatrix.reducedMatrix, groupedData.one,
-                groupedData.two, plan.objConfig, plan.segments,
-                objectives, constraints
-            ),
-            groupedMatrix, markets, industryOutputPairs
+        return optimizeCustomWorkerAlloc(
+            markets,
+            ProductionMatrix.getMatrix(),
+            industryOutputPairs,
+            PlanningData.getOutputsPerMarket(markets),
+            plan.objConfig, plan.segments,
+            objectives, constraints
         );
     }
 
