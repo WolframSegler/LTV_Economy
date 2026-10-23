@@ -121,7 +121,6 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
         }
     }
 
-    @Override
     public final void run(Button btn) {
         if (injectedBtn != null) injectedBtn.setChecked(true);
         if (getCurrentTabIndex() == buttonTabId) return;
@@ -129,11 +128,14 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
         setCurrentTabIndex(buttonTabId);
         if (injectedComp != null) injectedComp.setOpacity(1f);
 
+        final UIComponentAPI btnWrapper = injectedBtn != null ? injectedBtn.getSelfInParent() : null;
+        final UIComponentAPI compWrapper = injectedComp != null ? injectedComp.getSelfInParent() : null;
+
         for (UIComponentAPI child : targetChildren) {
-            if (child instanceof ButtonAPI button && injectedBtn != button) {
+            if (child instanceof ButtonAPI button) {
                 button.setChecked(false);
                 button.unhighlight();
-            } else if (child != injectedComp) {
+            } else if (child != compWrapper && child != btnWrapper) {
                 child.setOpacity(0f);
                 hiddenPanels.add(child);
             }

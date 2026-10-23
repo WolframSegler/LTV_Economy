@@ -8,10 +8,8 @@ import java.util.List;
 
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.widget.Button;
@@ -31,8 +29,8 @@ public abstract class AbstractManagementPanel extends UIContainer implements UIB
 
     protected LabelAPI titleLabel;
     protected LabelAPI subtitleLabel;
-    protected UIPanelAPI contentPanel;
-    protected UIPanelAPI optionsPanel;
+    protected UIContainerAPI contentPanel;
+    protected UIContainerAPI optionsPanel;
     protected List<Button> navButtons = new ArrayList<>();
     protected Button firstButton;
 
@@ -107,8 +105,8 @@ public abstract class AbstractManagementPanel extends UIContainer implements UIB
     private final void clearPanelAndButtonState(Button caller) {
         navButtons.forEach(b -> b.setChecked(false));
         caller.setChecked(true);
-        MethodFields.clearChildren(contentPanel);
-        MethodFields.clearChildren(optionsPanel);
+        contentPanel.clearChildren();
+        optionsPanel.clearChildren();
     }
 
     protected static class NavButtonDef {

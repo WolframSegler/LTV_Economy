@@ -276,6 +276,7 @@ public final class ComTradeFlowMap extends UIContainer implements
         super.processInputImpl(events);
 
         for (InputEventAPI event : events) {
+            if (event.isConsumed()) continue;
             if (event.isMouseScrollEvent()) {
                 // Zoom
                 final float scrollAmount = event.getEventValue();
