@@ -10,7 +10,7 @@ import wfg.ltv_econ.economy.MarketPopulationData;
 public class BresVitalisPolicy extends MarketPolicy {
     private static final String memKey = "$policy_bres_vitalis";
     public static final float HEALTH_DEBUFF = -0.05f;
-    public static final float HAPPINESS_BUFF = 0.1f;
+    public static final float HAPPINESS_BUFF = 0.15f;
     public static final float CLASS_BUFF = 0.001f;
 
     public void apply(MarketPopulationData data) {
