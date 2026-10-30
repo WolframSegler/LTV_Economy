@@ -33,12 +33,12 @@ import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 public final class FactionSelectionDialog extends DockPanel {
     private static final int ROW_H = 32;
     
-    private final UIBuildableAPI content;
+    private final UIBuildableAPI mContent;
 
     public FactionSelectionDialog(UIBuildableAPI content) {
         super(300, 400, Side.BOTTOM);
 
-        this.content = content;
+        mContent = content;
 
         buildUI();
     }
@@ -66,7 +66,7 @@ public final class FactionSelectionDialog extends DockPanel {
 
     private void onFactionSelected(FactionSpecAPI faction) {
         StaticData.inv = EconomyEngine.instance().getFactionShipInventory(faction.getId());
-        content.buildUI();
+        mContent.buildUI();
     }
 
     private static class DebugFactionRow extends UIContainer implements UIBuildableAPI,

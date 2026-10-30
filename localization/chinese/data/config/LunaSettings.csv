@@ -17,7 +17,7 @@ SHIP_ALLOC_MIN_COMBAT_POWER,最低战斗力量,Double,50.0,,"派系订购舰船�
 ,,,,,,,,
 header_workerAllocator,工人分配器,Header,工人分配器,,,,,规划求解
 ECON_DEFICIT_COST,赤字惩罚,Double,3000,,数值越高越鼓励满足需求。,0,100000,规划求解
-ECON_ALLOCATION_PASSES,分配优化迭代次数,Int,3,,求解器重新评估赤字并调整工人分配的次数。计算时间随数值线性增长。6次以上迭代后收益甚微。,1,10,规划求解
+ECON_ALLOCATION_PASSES,分配优化迭代次数,Int,2,,求解器重新评估赤字并调整工人分配的次数。计算时间随数值线性增长。超过3次迭代后不稳定性加剧。,1,5,规划求解
 WORKER_ASSIGN_INTERVAL,工人重分配间隔,Int,20,,"NPC市场的工人将每隔x天重新分配一次。",1,360,规划求解
 ,,,,,,,,
 MULTI_THREADING,多线程,Boolean,true,,在独立线程中运行经济循环。,,,经济

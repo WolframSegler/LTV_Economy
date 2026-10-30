@@ -30,7 +30,7 @@ public final class FactionAdministrationPanel extends UIContainer implements UIB
 
         final int SECTION_I = opad;
         final int SECTION_II = SECTION_I + 420;
-        final int SECTION_III = SECTION_II + 80;
+        final int SECTION_III = SECTION_II + 120;
 
         { // SECTION I
         final LabelAPI tradeDiploLbl = settings.createLabel(str("uiTitleTradeDiplo"), Fonts.INSIGNIA_VERY_LARGE);

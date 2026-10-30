@@ -84,6 +84,7 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/../NativeUI/jars/main/native_ui.jar</systemPath>
     </dependency>
+
     <dependency>
       <groupId>local</groupId>
       <artifactId>lwjgl</artifactId>

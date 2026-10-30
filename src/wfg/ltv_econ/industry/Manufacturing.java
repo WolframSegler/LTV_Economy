@@ -13,7 +13,7 @@ import com.fs.starfarer.api.impl.campaign.econ.impl.ItemEffectsRepo;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 
-public class Manufacturing extends BaseIndustry {
+public final class Manufacturing extends BaseIndustry {
     private static final String NANO = "nanoforge";
 	public static final String id = "manufacturing";
 

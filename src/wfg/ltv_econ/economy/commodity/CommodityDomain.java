@@ -23,6 +23,7 @@ import wfg.ltv_econ.constant.TradeWeights;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
+import wfg.ltv_econ.economy.market.MarketTradeDisruptionData;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;

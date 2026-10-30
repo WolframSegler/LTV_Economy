@@ -8,7 +8,7 @@ import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 
 public class UrbanRenewalPolicy extends MarketPolicy {
     public static final float HEALTH_BUFF = 0.4f;

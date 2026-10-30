@@ -3,7 +3,7 @@ package wfg.ltv_econ.intel.market.policies;
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.UIConstants.*;

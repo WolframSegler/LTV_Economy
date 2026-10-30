@@ -35,17 +35,18 @@ import wfg.ltv_econ.config.EconConfig.DebtDebuffTier;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.constant.strings.Consumption;
-import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.PlayerFactionSettings;
 import wfg.ltv_econ.economy.commodity.ComTradeFlow;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
-import wfg.ltv_econ.economy.commodity.MarketTradeDisruptionData;
+import wfg.ltv_econ.economy.commodity.DeficitCalculator;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.ShipAllocator;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
+import wfg.ltv_econ.economy.market.MarketTradeDisruptionData;
 import wfg.ltv_econ.economy.planning.ProductionMatrix;
 import wfg.ltv_econ.economy.planning.WorkforceAllocator;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -217,7 +218,7 @@ public class EconomyLoop {
         for (Map.Entry<MarketAPI, float[]> entry : assignedWorkersPerMarket.singleEntrySet()) {
             final MarketAPI market = entry.getKey();
             final String marketID = market.getId();
-            final IndustryWorkerData popData = reg.getRegisterData(marketID, Industries.POPULATION);
+            final IndustryWorkerData popData = reg.getForceRegisterData(marketID, Industries.POPULATION);
             final WorkerPool cond = WorkerPoolRegistry.get(market);
             final float[] assignments = entry.getValue();
             final long totalWorkers = cond.getWorkerPool();
@@ -290,57 +291,47 @@ public class EconomyLoop {
     }
 
     private final void weightedOutputDeficitMods() {
-        engine.comDomains.values().stream()
+        engine.comDomains.values().stream().parallel()
             .flatMap(dom -> dom.getCellsMap().values().stream())
-            .parallel()
             .forEach(this::computeComDeficits);
+
+        engine.comDomains.values().stream().parallel()
+            .flatMap(dom -> dom.getCellsMap().values().stream())
+            .forEach(cell -> {
+                final ArrayMutableStat prodStat = cell.getProductionStat();
+                for (final var entry : cell.getIndProductionStats().singleEntrySet()) {
+                    prodStat.modifyBase(entry.getKey(), entry.getValue().getModifiedValue());
+                }
+            });
     }
 
-    private final void computeComDeficits(CommodityCell cell) {
-        float totalDeficit = 0f;
-        final float totalMarketOutput = cell.getProduction(false);
-        final float invMarketOutput = 1f / totalMarketOutput;
+    private final void computeComDeficits(final CommodityCell cell) {
+        if (cell.getProduction(false) <= 0f) return;
 
-        for (Map.Entry<String, MutableStat> industryEntry : cell.getIndProductionStats().singleEntrySet()) {
+        for (final Map.Entry<String, MutableStat> industryEntry : cell.getIndProductionStats().singleEntrySet()) {
             final String industryID = industryEntry.getKey();
-            final MutableStat industryStat = industryEntry.getValue();
+            final MutableStat supplyStat = industryEntry.getValue();
 
-            final float industryOutput = industryStat.getModifiedValue();
-            if (industryOutput <= 0f || totalMarketOutput <= 0f) continue;
-
-            final float industryShare = industryOutput * invMarketOutput;
+            final float industryOutput = supplyStat.getModifiedValue();
+            if (industryOutput <= 0f) {
+                supplyStat.unmodifyMult("deficits");
+                continue;
+            }
 
             final Industry ind = cell.market.getIndustry(industryID);
-
-            float sum = 0f;
             final ArrayMap<String, Float> inputWeights = IndustryIOs.getRealInputs(ind, cell.comID, true);
-            if (inputWeights.isEmpty()) continue;
-            for (float value : inputWeights.values()) {
-                sum += value;
-            }
 
-            if (sum <= 0f) continue;
-
-            float industryDeficit = 0f;
-            for (Map.Entry<String, Float> inputEntry : inputWeights.singleEntrySet()) {
-                final String inputID = inputEntry.getKey();
-                if (IndustryIOs.ABSTRACT_COM.equals(inputID)) continue;
-                
-                final CommodityCell inputCell = engine.getComCell(inputID, cell.market.getId());
-
-                final float weightNorm = inputEntry.getValue() / sum;
-
-                industryDeficit += weightNorm * (1f - inputCell.getStoredAvailabilityRatio());
-            }
-
-            totalDeficit += industryDeficit * industryShare;
-        }
-
-        if (totalDeficit > 0f) {
-            cell.getProductionStat().modifyMult(
-                "deficits", Math.max(1f - totalDeficit, 0.01f), str("econLoopInputShortages")
+            final float industryDeficit = DeficitCalculator.computeWeightedDeficit(
+                inputWeights,
+                inputID -> engine.getComCell(inputID, cell.market.getId()).getStoredAvailabilityRatio()
             );
-        } else cell.getProductionStat().unmodifyMult("deficits");
+
+            if (industryDeficit > 0f) {
+                supplyStat.modifyMult("deficits", DeficitCalculator.deficitToMultiplier(industryDeficit), str("econLoopInputShortages"));
+            } else {
+                supplyStat.unmodifyMult("deficits");
+            }
+        }
     }
 
     private final void handleTrade() {
@@ -717,7 +708,7 @@ public class EconomyLoop {
         final String marketID = market.getId();
         if (!engine.registeredMarkets.contains(marketID)) return;
 
-        final IndustryWorkerData idata = WorkerRegistry.instance().getRegisterData(marketID, Industries.POPULATION);
+        final IndustryWorkerData idata = WorkerRegistry.instance().getForceRegisterData(marketID, Industries.POPULATION);
 
         final float logiRatio = idata.getAssignedRatioForOutput(SERVICE_LOGISTICS);
         final float healthRatio = idata.getAssignedRatioForOutput(SERVICE_HEALTHCARE);

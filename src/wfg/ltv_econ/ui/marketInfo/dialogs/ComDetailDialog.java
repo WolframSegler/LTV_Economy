@@ -247,7 +247,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanel.wrap(tooltip).inTL(
+            textPanel.attachTo(tooltip).inTL(
                 (SECT1_WIDTH / 3f) - textPanel.getWidth(), baseY
             );
         }
@@ -273,7 +273,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanel.wrap(tooltip).inTL(
+            textPanel.attachTo(tooltip).inTL(
                 (SECT1_WIDTH - textPanel.getWidth()) / 2f, baseY
             );
         }
@@ -328,7 +328,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanel.wrap(tooltip).inTL(SECT1_WIDTH*2 / 3f, baseY);
+            textPanel.attachTo(tooltip).inTL(SECT1_WIDTH*2 / 3f, baseY);
         }
 
         final int baseRow2Y = baseY * 3 + pad;
@@ -359,7 +359,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanel.wrap(tooltip).inTL(
+            textPanel.attachTo(tooltip).inTL(
                 (SECT1_WIDTH - textPanel.getWidth()) / 2f, baseRow2Y
             );
         }
@@ -417,10 +417,10 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanelLeft.wrap(tooltip).inTL(
+            textPanelLeft.attachTo(tooltip).inTL(
                 (SECT1_WIDTH / 3f) - (textPanelLeft.getWidth() / 2f), baseRow2Y
             );
-            textPanelRight.wrap(tooltip).inTL(
+            textPanelRight.attachTo(tooltip).inTL(
                 (SECT1_WIDTH*2 / 3f) - (textPanelRight.getWidth() / 2f), baseRow2Y
             );
         }
@@ -632,11 +632,11 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
         final LtvCommodityPanel section4ComPanel = new LtvCommodityPanel(
             (int) section.getWidth(), (int) section.getHeight(),
             m_market.getName() + str("uiTitleCommoditiesSuffix"),
-            true, m_market
+            m_market
         );
         section4ComPanel.selectRow(m_com.getId());
 
-        section4ComPanel.selectionListener = (source, isLeftClick) -> {
+        section4ComPanel.mSelectionListener = (source, isLeftClick) -> {
             if (!isLeftClick) return;
 
             m_com = source.cell.spec;

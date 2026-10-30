@@ -786,7 +786,7 @@ public final class ComTradeFlowMap extends UIContainer implements
 
     private final void updateTpState(Object dataObj) {
         if (hoveredElement == null || hoveredElement != dataObj) {
-            tooltipSys.hideTooltip(tooltip);
+            tooltipSys.focusLost(this);
             hoveredElement = dataObj;
         }
         if (dataObj instanceof PathData data) {

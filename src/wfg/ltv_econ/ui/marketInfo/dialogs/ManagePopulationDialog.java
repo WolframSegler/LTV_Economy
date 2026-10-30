@@ -23,12 +23,11 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.constant.SubmarketsID;
 import wfg.ltv_econ.config.EconConfig;
-import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;

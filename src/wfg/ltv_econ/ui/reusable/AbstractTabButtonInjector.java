@@ -100,13 +100,13 @@ public abstract class AbstractTabButtonInjector implements CoreTabUIBuilder, Cal
         injectedBtn.setShortcutAndAppendToText(getKeyFromIndex(buttonTabId));
         injectedBtn.setCutStyle(CutStyle.TL_TR);
         injectedBtn.overrideCutSize = 6;
-        injectedBtn.setHighlightBrightness(0.3f);
+        injectedBtn.setHighlightBrightness(0.6f);
         injectedBtn.tooltip.enabled = false;
 
-        injectedBtn.wrap(targetTab).rightOfTop(lastBtn, 1f);
+        injectedBtn.attachTo(targetTab).rightOfTop(lastBtn, 1f);
 
         injectedComp = createCustomComponent(targetTab);
-        injectedComp.wrap(targetTab).inTL(0f, 20f);
+        injectedComp.attachTo(targetTab).inTL(0f, 20f);
 
         onPostBtnInject(injectedBtn);
     }

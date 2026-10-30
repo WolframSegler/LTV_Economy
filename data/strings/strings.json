@@ -323,7 +323,7 @@
         "uiTpTitleTotalCreditCostPendingOrders": "The sum of credits required to fulfill all pending orders. This amount will be deducted from the faction's capital as each order is activated.",
         "uiTpTxtActiveHullsTotalBuildTime": "The cumulative number of days needed to construct all pending vessels, assuming they are built sequentially. Actual completion may be shorter (up to %1$s production lines may operate concurrently).",
         "uiTitleShipsCommodityCost": "Ships Commodity Cost",
-        "uiTpTxtShipsCommodityCost": "The total amount of the \"Ships\" commodity required across all pending orders. This resource represents the hull components and prefabricated sections needed for construction.",
+        "uiTpTxtShipsCommodityCost": "The total amount of \"Ships\" commodity required across all pending orders. This resource represents the hull components and prefabricated sections needed for construction.",
         "uiTitleNoPlannedOrders": "No planned orders",
         "uiTitleCivilianShipType": "Civilian",
         "uiTitleCombatShipType": "Combat",
@@ -737,6 +737,7 @@
         "uiTpTxtTradeSuspensionIconInfo": "Trade suspended due to repeated convoy losses. Remaining: %1$s %2$s.",
         "uiTpTxtTradeSuspensionIconClick": "Click to resume trade.",
         "uiTxtResetTradeSuspension": "Resume trade? Convoys may be attacked again.",
+        
         "uiDialogTitleSectorIndustryImbalanceWarning": "Global Deficit Detected",
         "uiDialogTxtSectorIndustryImbalanceWarning": "The current industry set of the Sector is insufficient to meet demand. Should the Sector's industries be adjusted to fix this? This cannot be undone. The game will pause while the balancer runs.",
         "uiDialogTxtTotalDeficitCounter": "Total Deficit - %1$s",

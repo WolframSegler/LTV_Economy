@@ -47,7 +47,6 @@ import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-// TODO make sure modifications here are correct.
 public final class AssignWorkersDialog extends DialogPanel {
     private static final SpriteAPI WARNING_BUTTON = settings.getSprite("ui", "warning_button");
     private static final int PANEL_W = 540;
@@ -160,7 +159,7 @@ public final class AssignWorkersDialog extends DialogPanel {
 
             outputSlider.setProgress(data.getAssignedRatioForOutput(output.comID) * 100);
 
-            outputSlider.wrap(outputsTp).inTL(iconSize + pad, cumulativeYOffset);
+            outputSlider.attachTo(outputsTp).inTL(iconSize + pad, cumulativeYOffset);
             cumulativeYOffset += pad + sliderH;
         }
 

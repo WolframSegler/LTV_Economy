@@ -9,7 +9,7 @@ import java.awt.Color;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 
 public class ArrestStrikeOrganizersPolicy extends MarketPolicy {
     public static final float HAPPINESS_DEBUFF = -2f;

@@ -10,8 +10,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.native_ui.util.NumFormat;
 

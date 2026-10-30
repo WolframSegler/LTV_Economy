@@ -12,7 +12,7 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 
 public class PlayerMarketBombardedIntel extends BaseIntelPlugin {
     private static final String ICON = settings.getSpriteName("icons", "bombardment");

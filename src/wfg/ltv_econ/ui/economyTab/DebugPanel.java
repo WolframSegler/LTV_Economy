@@ -231,7 +231,7 @@ public final class DebugPanel extends UIContainer implements UIBuildableAPI {
             };
         }
 
-        { // SHIP ALLOCATION
+        { // LOG MARKETS WITH MANUFACTURING
             final CallbackRunnable<Button> run = (btn) -> {
                 final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
                 markets.removeIf(m -> m.getIndustry(Manufacturing.id) == null);

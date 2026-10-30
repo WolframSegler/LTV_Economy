@@ -1,16 +1,22 @@
 {
     "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
-    "java.project.referencedLibraries": [
-        "../../lwjgl.jar",
-        "../../starfarer.api.jar",
-        "../../log4j-1.2.9.jar",
-        "../../lwjgl_util.jar",
-        "../../json.jar",
-        "../../fs.common_obf.jar",
-        "../../starfarer_obf.jar",
-        "../../xstream-1.4.10.jar",
-        "../NativeUI/jars/libs/RolflectionLib.jar"
-    ],
+    "java.project.referencedLibraries": {
+        "include": [
+            "../../lwjgl.jar",
+            "../../starfarer.api.jar",
+            "../../log4j-1.2.9.jar",
+            "../../lwjgl_util.jar",
+            "../../json.jar",
+            "../../fs.common_obf.jar",
+            "../../starfarer_obf.jar",
+            "../../xstream-1.4.10.jar",
+            "../NativeUI/jars/libs/RolflectionLib.jar",
+            "../NativeUI/jars/main/native_ui.jar"
+        ],
+        "sources": {
+            "../NativeUI/jars/main/native_ui.jar": "../NativeUI/jars/main/native_ui-sources.jar"
+        }
+    },
     "java.configuration.updateBuildConfiguration": "automatic",
     "search.useIgnoreFiles": false,
     "java.referencesCodeLens.enabled": false,
@@ -22,5 +28,9 @@
             "name": "JavaSE-17",
             "path": "/usr/lib/jvm/java-17-openjdk-amd64"
         }
-    ]
+    ],
+    "java.format.settings.url": ".vscode/java-formatter.xml",
+    "[java]": {
+        "editor.detectIndentation": false
+    }
 }

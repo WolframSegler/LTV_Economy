@@ -5,7 +5,7 @@ import static wfg.native_ui.util.UIConstants.*;
 
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 
 public class WellnessCompliancePolicy extends MarketPolicy {
     private static final String memKey = "$policy_wellness_compliance";

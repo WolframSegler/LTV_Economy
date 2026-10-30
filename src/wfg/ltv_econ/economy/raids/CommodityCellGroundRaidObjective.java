@@ -175,7 +175,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
 		final int h = 24;
 		final StockpileInfoBar infoBar = new StockpileInfoBar(130, h, true, cell);
-        infoBar.wrap(panel).inBL(opad + pad, -h/2);
+        infoBar.attachTo(panel).inBL(opad + pad, -h/2);
 	}
 
     protected static final Industry computeCommoditySource(CommodityCell cell) {

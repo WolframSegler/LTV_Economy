@@ -6,7 +6,7 @@ import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.intel.market.events.LocalizedGangSkirmishesEvent;
 import wfg.native_ui.util.Arithmetic;

@@ -120,8 +120,9 @@ public final class ShipProductionWidget extends UIClickable<ShipProductionWidget
     }
 
     @Override
-    public void renderBelowImpl(float alpha) {
+    public void renderImpl(float alpha) {
         border.render(getX(), getY(), alpha);
+        super.renderImpl(alpha);
     }
 
     public InteractionComp<ShipProductionWidget> getInteraction() {

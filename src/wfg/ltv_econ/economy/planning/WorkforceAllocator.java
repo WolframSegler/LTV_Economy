@@ -32,6 +32,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constant.EconomyConstants;
+import wfg.ltv_econ.economy.commodity.DeficitCalculator;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.custom.CustomConstraint;
@@ -48,8 +49,8 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 
-public class WorkforceAllocator {
-    private WorkforceAllocator() {}
+public final class WorkforceAllocator {
+    private WorkforceAllocator() {};
     private static final Logger logger = Global.getLogger(WorkforceAllocator.class);
 
     private static final double WORKER_COST = 1d;
@@ -267,62 +268,52 @@ public class WorkforceAllocator {
         final double[] comAvailability = new double[C];
         final double[] shortage_mult = new double[O];
 
+        Arrays.fill(shortage_mult, 1d);
+
         for (int pass = 0; pass < EconConfig.ECON_ALLOCATION_PASSES; pass++) {
             final List<LinearConstraint> constraints = new ArrayList<>();
             constraints.addAll(const_constraints);
             Arrays.fill(netCommodity, 0d);
             Arrays.fill(comAvailability, 0d);
-            Arrays.fill(shortage_mult, 1d);
 
             if (pass != 0 && vars != null) {
+                final double[] prod = new double[C];
+                final double[] consumed = new double[C];
                 for (int i = 0; i < N; i+=T) {
-                    final int orgIdx = i/T;
+                    final int orgIdx = i / T;
                     double wTotal = 0d;
-                    for (int z = 0; z < T; z++) wTotal += vars[orgIdx + z];
+                    for (int z = 0; z < T; z++) wTotal += vars[i + z];
                     if (wTotal == 0d) continue;
 
                     final int o = denseData.columnOutputIndex[orgIdx];
-                    final double mod = denseData.columnOutputMod[orgIdx];
-                    final double wEff = mod * wTotal;
+                    final double wEff = denseData.columnOutputMod[orgIdx] * wTotal;
 
                     for (int c = 0; c < C; c++) {
                         final double base = A[c][o];
                         if (base == 0d) continue;
-                        netCommodity[c] += base * wEff;
+                        final double contribution = base * wEff;
+                        if (contribution > 0d) prod[c] += contribution;
+                        else consumed[c] += Math.abs(contribution);
                     }
                 }
-    
+
                 for (int c = 0; c < C; c++) {
-                    if (demand[c] <= 0d) comAvailability[c] = 1d;
-                    else comAvailability[c] = Math.min(1d, netCommodity[c] / demand[c]);
+                    final double totalDemand = demand[c] + consumed[c];
+                    if (totalDemand <= 0d) comAvailability[c] = 1d;
+                    else comAvailability[c] = Math.min(1d, prod[c] / totalDemand);
                 }
     
                 for (int o = 0; o < O; o++) {
                     final String pair = outputPairs.get(o);
                     final String industryID = pair.split(EconomyLoop.KEY)[0];
                     final String outputID = pair.split(EconomyLoop.KEY)[1];
-    
-                    final ArrayMap<String, Float> inputs = IndustryIOs.getBaseInputs(industryID, outputID);
-                    if (inputs.isEmpty()) continue;
-    
-                    double deficitWeightSum = 0d;
-                    for (float v : inputs.values()) deficitWeightSum += v;
-                    if (deficitWeightSum <= 0d) continue;
-    
-                    double deficit = 0d;
-    
-                    for (Map.Entry<String, Float> e : inputs.singleEntrySet()) {
-                        final String inputID = e.getKey();
-                        if (IndustryIOs.ABSTRACT_COM.contains(inputID)) continue;
-    
-                        final int c = denseData.commodityIndex.get(inputID);
-                        final double availability = comAvailability[c];
-    
-                        final double weightNorm = e.getValue() / deficitWeightSum;
-                        deficit += weightNorm * (1d - availability);
-                    }
-    
-                    shortage_mult[o] = Math.max(1d - deficit, 0.01);
+
+                    final float mult = DeficitCalculator.deficitToMultiplier(DeficitCalculator.computeWeightedDeficit(
+                        IndustryIOs.getBaseInputs(industryID, outputID),
+                        inputID -> comAvailability[denseData.commodityIndex.get(inputID)]
+                    ));
+
+                    shortage_mult[o] = Math.max(0.8d, 0.5d * shortage_mult[o] + 0.5d * mult);
                 }
             }
 

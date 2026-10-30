@@ -47,7 +47,7 @@ public class ServiceSectorIndustryOption implements IndustryOptionProvider {
 
         tooltip.addPara(str("serviceSectorTpTxt1"), 0f);
 
-        final long assignedWorkers = WorkerRegistry.instance().getRegisterData(opt.ind).getWorkersAssigned();
+        final long assignedWorkers = WorkerRegistry.instance().getForceRegisterData(opt.ind).getWorkersAssigned();
         tooltip.addPara(str("serviceSectorTpTxt2"), 0f, new Color[] {highlight}, NumFormat.engNotate(assignedWorkers));
     }
 

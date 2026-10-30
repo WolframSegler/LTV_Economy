@@ -70,8 +70,8 @@ public final class InventoryShipWidget extends UIContainer implements WidgetAPI<
         audio.hoverOnly = true;
 
         glow.type = GlowType.UNDERLAY;
-        glow.glowBrightness = 0.6f;
-        glow.flashBrightness = 0.9f;
+        glow.glowBrightness = 0.4f;
+        glow.flashBrightness = 0.65f;
         glow.color = UIColors.IN_FACTION;
 
         border.centerColor = UIColors.WIDGET_BG;
@@ -223,8 +223,9 @@ public final class InventoryShipWidget extends UIContainer implements WidgetAPI<
     }
 
     @Override
-    public void renderBelowImpl(float alpha) {
+    public void renderImpl(float alpha) {
         border.render(getX(), getY(), alpha);
+        super.renderImpl(alpha);
     }
 
     public InteractionComp<InventoryShipWidget> getInteraction() {

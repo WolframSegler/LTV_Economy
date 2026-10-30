@@ -12,9 +12,9 @@ import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.constant.CommoditiesID;
-import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 
 public class ExpandShipyardsPolicy extends MarketPolicy {
     private static final int METALS_COST = 5000;

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
@@ -52,7 +53,7 @@ public final class ConstructionDemandPredictor {
         final int currentCycle = EconomyEngine.instance().getMainLoopCycle();
         PredictionCache cache = industryCache.get(ind);
         if (cache == null || cache.loopCycle != currentCycle) {
-            IndustryWorkerData freshData = computeIndustryWorkerPrediction(ind);
+            final IndustryWorkerData freshData = computeIndustryWorkerPrediction(ind);
             cache = new PredictionCache(freshData, currentCycle);
             industryCache.put(ind, cache);
         }
@@ -94,6 +95,8 @@ public final class ConstructionDemandPredictor {
         int currIndex = 0;
 
         for (OutputConfig output : config.outputs.values()) {
+            if (output.isAbstract || !output.usesWorkers) continue;
+
             final float prod = CompatLayer.getModifiersMult(targetInd, output.comID, false);
             margins[currIndex] = IndustryIOs.getMarginalProfitPerWorker(config.indID, output.comID, prod);
             capacitiesRemaining[currIndex] = output.workerAssignableLimit;
@@ -105,6 +108,7 @@ public final class ConstructionDemandPredictor {
 
         for (Industry ind : market.getIndustries()) {
             if (ind == targetInd) continue;
+            if (!IndustryConfigManager.getIndConfig(ind).workerAssignable) continue;
             final IndustryWorkerData data = reg.getRegisterData(ind);
 
             for (Map.Entry<String, Float> entry : data.getRegistry().singleEntrySet()) {

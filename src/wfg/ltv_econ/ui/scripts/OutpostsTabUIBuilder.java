@@ -71,7 +71,6 @@ public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
     private final void addColonyInfoButtons(final UIPanelAPI colonyPanel) {
         final UITable marketTable = (UITable) RolfLectionUtil.getAllVariables(colonyPanel).stream()
             .filter(e -> e instanceof UITable).findFirst().get();
-        // TODO test this
         final ButtonAPI anchor = MethodFields.getChildrenNonCopy(colonyPanel).stream()
             .filter(e -> e instanceof ButtonAPI).map(e -> (ButtonAPI) e)
             .filter(e -> e.getPosition().getHeight() == 24f)
@@ -80,8 +79,8 @@ public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         final int tableH = (int) marketTable.getHeight() + 2;
         final ColonyPopulationTable popTable = new ColonyPopulationTable(tableH);
         final FactionResourcesTable facTable = new FactionResourcesTable(tableH);
-        popTable.wrap(colonyPanel).inTL(1, opad + 1);
-        facTable.wrap(colonyPanel).inTL(1, opad + 1);
+        popTable.attachTo(colonyPanel).inTL(1, opad + 1);
+        facTable.attachTo(colonyPanel).inTL(1, opad + 1);
         popTable.setOpacity(0f);
         facTable.setOpacity(0f);
 
@@ -134,9 +133,9 @@ public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         showPopButton.setShortcutAndAppendToText(Keyboard.KEY_A);
         showFacButton.setShortcutAndAppendToText(Keyboard.KEY_S);
 
-        showColoniesButton.wrap(colonyPanel).belowMid(anchor, opad);
-        showPopButton.wrap(colonyPanel).belowMid(showColoniesButton, opad);
-        showFacButton.wrap(colonyPanel).belowMid(showPopButton, opad);
+        showColoniesButton.attachTo(colonyPanel).belowMid(anchor, opad);
+        showPopButton.attachTo(colonyPanel).belowMid(showColoniesButton, opad);
+        showFacButton.attachTo(colonyPanel).belowMid(showPopButton, opad);
 
         showColoniesButton.setChecked(true);
     }

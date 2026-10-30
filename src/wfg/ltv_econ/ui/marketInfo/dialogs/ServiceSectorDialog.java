@@ -57,7 +57,7 @@ public final class ServiceSectorDialog extends DialogPanel {
 
         final WorkerRegistry reg = WorkerRegistry.instance();
         market = ind.getMarket();
-        data = reg.getRegisterData(ind);
+        data = reg.getForceRegisterData(ind);
         previewData = new IndustryWorkerData(data);
 
         reg.setData(previewData);

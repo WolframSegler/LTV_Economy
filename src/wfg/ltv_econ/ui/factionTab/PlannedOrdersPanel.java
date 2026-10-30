@@ -11,7 +11,7 @@ import static wfg.native_ui.util.UIConstants.*;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
-
+ 
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -130,6 +130,9 @@ public final class PlannedOrdersPanel extends UIContainer implements UIBuildable
         timePair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, timePair, AnchorType.RightTop, hpad);
         shipsPair.tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, shipsPair, AnchorType.RightTop, hpad);
 
+        grid = new PlannedOrderGrid((int) getWidth(), (int) (getHeight() - HEADER_HEIGHT));
+        add(grid).inTL(0, HEADER_HEIGHT);
+
         if (DebugFlags.COLONY_DEBUG) {
             final DockButton<FactionSelectionDialog> factionSelection = new DockButton<>(
                 120, 28, str("uiBtnTitlePickFaction"), null, () -> new FactionSelectionDialog(this)
@@ -137,9 +140,6 @@ public final class PlannedOrdersPanel extends UIContainer implements UIBuildable
             factionSelection.setCutStyle(CutStyle.ALL);
             add(factionSelection).inTR(hpad, hpad);
         }
-
-        grid = new PlannedOrderGrid((int) getWidth(), (int) (getHeight() - HEADER_HEIGHT));
-        add(grid).inTL(0, HEADER_HEIGHT);
     }
 
     public class PlannedOrderGrid extends GridTable<PlannedOrder, PlannedOrderWidget> {

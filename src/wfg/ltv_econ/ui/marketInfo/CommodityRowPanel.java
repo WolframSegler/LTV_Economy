@@ -56,7 +56,7 @@ public final class CommodityRowPanel extends UIContainer implements
     private final MarketAPI market;
 
     public CommodityRowPanel(MarketAPI market, String comID,
-        int width, int height, boolean ignoreUIContext
+        int width, int height, UIPanelAPI tpAnchor
     ) {
         super(width, height);
 
@@ -70,7 +70,7 @@ public final class CommodityRowPanel extends UIContainer implements
         tooltip.width = 500f;
         tooltip.expandable = true;
         tooltip.positioner = (tp, expanded) -> {
-            NativeUiUtils.anchorPanel(tp, this, AnchorType.LeftTop, pad*4);
+            NativeUiUtils.anchorPanel(tp, tpAnchor, AnchorType.LeftTop, pad*4);
         };
         tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
         tooltip.expandTxt = str("uiTpShowLegend");
@@ -223,7 +223,7 @@ public final class CommodityRowPanel extends UIContainer implements
             iconPanel.outline.offset.setOffset(2, 2, -4, -4);
         }
             
-        tp.addCustom(iconPanel, 0f).getPosition().inTL(pad, y);
+        tp.addCustom(iconPanel.wrapDetached(), 0f).getPosition().inTL(pad, y);
 
 		final LabelAPI lbl = tp.addPara(desc, 0f);
 		final float textX = opad + lgdIconSize;

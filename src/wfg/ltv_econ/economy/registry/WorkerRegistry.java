@@ -76,9 +76,7 @@ public final class WorkerRegistry implements Serializable {
     public final void register(Industry ind) {
         if (!IndustryConfigManager.getIndConfig(ind).workerAssignable) return;
 
-        final String marketID = ind.getMarket().getId();
-        final var marketMap = getOrCreateMarketMap(marketID);
-        marketMap.computeIfAbsent(IndustryConfigManager.getBaseIndustryID(ind), i -> new IndustryWorkerData(marketID, i));
+        getForceRegisterData(ind);
     }
 
     public final void register(MarketAPI market) {
@@ -142,6 +140,12 @@ public final class WorkerRegistry implements Serializable {
     }
 
     public final synchronized IndustryWorkerData getRegisterData(String marketID, String industryID) {
+        if (!IndustryConfigManager.getIndConfig(industryID).workerAssignable) return null;
+
+        return getForceRegisterData(marketID, industryID);
+    }
+
+    public final synchronized IndustryWorkerData getForceRegisterData(String marketID, String industryID) {
         return getOrCreateMarketMap(marketID).computeIfAbsent(
             IndustryConfigManager.getBaseIndustryID(industryID), i -> new IndustryWorkerData(marketID, i)
         );
@@ -153,6 +157,14 @@ public final class WorkerRegistry implements Serializable {
 
     public final IndustryWorkerData getRegisterData(Industry ind) {
         return getRegisterData(ind.getMarket().getId(), ind.getSpec());
+    }
+
+    public final IndustryWorkerData getForceRegisterData(String marketID, IndustrySpecAPI ind) {
+        return getForceRegisterData(marketID, ind.getId());
+    }
+
+    public final IndustryWorkerData getForceRegisterData(Industry ind) {
+        return getForceRegisterData(ind.getMarket().getId(), ind.getSpec());
     }
 
     public final void setData(IndustryWorkerData data) {

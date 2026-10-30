@@ -31,13 +31,14 @@ import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.constant.SubmarketsID;
-import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.commodity.TradeCom;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
 import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
+import wfg.ltv_econ.economy.market.ConcurrentMarketData;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 import wfg.ltv_econ.economy.raids.CommodityCellGroundRaidObjective;
 import wfg.ltv_econ.economy.raids.LtvShipWeaponsGroundRaidObjective;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -91,6 +92,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     final ArrayMap<String, CommodityDomain> comDomains = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
     final ArrayMap<String, MarketPopulationData> marketPopData = new ArrayMap<>();
     final ArrayMap<String, Long> marketCredits = new ArrayMap<>(EconomyInfo.getMarketsCount());
+    final ArrayMap<String, ConcurrentMarketData> marketData = new ArrayMap<>(EconomyInfo.getMarketsCount());
     final ArrayMap<String, FactionShipInventory> factionShipInventories = new ArrayMap<>(EconomyConstants.visibleFactionIDs.size());
     final ArrayList<TradeMission> activeMissions = new ArrayList<>(2048);
     transient ArrayList<TradeMission> pastMissions = new ArrayList<>(1024);
@@ -199,6 +201,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             market.addSubmarket(SubmarketsID.STOCKPILES);
             market.removeSubmarket(Submarkets.LOCAL_RESOURCES);
         }
+        marketData.put(marketID, new ConcurrentMarketData());
 
         comDomains.values().forEach(c -> c.addMarket(marketID));
     }
@@ -214,6 +217,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             dom.removeMarket(marketID);
         }
 
+        marketData.remove(marketID);
         marketPopData.remove(marketID);
         marketCredits.remove(marketID);
         MarketFinanceRegistry.instance().remove(marketID);
@@ -254,6 +258,10 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public final MarketPopulationData addMarketPopulationData(String marketID) {
         return marketPopData.computeIfAbsent(marketID, m -> new MarketPopulationData(marketID));
+    }
+
+    public final ConcurrentMarketData getMarketData(String marketID) {
+        return marketData.get(marketID);
     }
 
     public final List<CommodityDomain> getComDomains() {

@@ -1,5 +1,7 @@
 Version 0.5.0-beta | NOT SAVE COMPATIBLE
+- Please reset your LunaLib settings for this mod.
 - Switched to NativeUI (formerly WrapUI) v0.5.0 for this update. Previous versions will not work.
+
 - New worker pool icon and mod icon by Sakura.
 - The price for imports between colonies now account for imports en-route when calculating local prices.
 - Reduced the time it takes for trade convoys to load and unload goods.
@@ -15,6 +17,7 @@ Version 0.5.0-beta | NOT SAVE COMPATIBLE
 - Huge backend refactors for computing industry production, improving stability.
 - Removed a concurrency bug by moving new input/output detection to a single thread.
 - Fixed reliance of button text for identification that failed on Chinese translations.
+- Fixed deficit prediction algorithm not working at all (oops).
 
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.

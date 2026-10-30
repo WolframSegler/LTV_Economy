@@ -37,7 +37,6 @@ import wfg.ltv_econ.plugin.industries.AddWorkerIndustryOption;
 import wfg.ltv_econ.plugin.industries.ServiceSectorIndustryOption;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.ltv_econ.ui.scripts.UIInjectorListener;
-import wfg.ltv_econ.ui.scripts.UiHierarchyTree;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
 
@@ -86,9 +85,10 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             injectShips();
 
             for (int i = 0; i < 7; i++) data.economyEngine.realAdvance();
+            data.economyEngine.fakeAdvanceWithAssignWorkers();
         }
 
-        Global.getSector().addTransientScript(new UiHierarchyTree());
+        // Global.getSector().addTransientScript(new UiHierarchyTree());
     }
 
     @Override

@@ -16,8 +16,8 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.PlanetInfoParams;
 
-import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ManagePopulationDialog;
 import wfg.ltv_econ.ui.marketInfo.population.CohesionPair;

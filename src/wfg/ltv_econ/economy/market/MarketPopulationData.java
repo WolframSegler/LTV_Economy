@@ -1,4 +1,4 @@
-package wfg.ltv_econ.economy;
+package wfg.ltv_econ.economy.market;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 
@@ -29,7 +29,7 @@ import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.ltv_econ.intel.market.policies.MarketPolicy;
 import wfg.native_ui.util.Arithmetic;
 
-public class MarketPopulationData implements Serializable, MarketImmigrationModifier {
+public final class MarketPopulationData implements Serializable, MarketImmigrationModifier {
     public final String marketID;
     public transient MarketAPI market;
 

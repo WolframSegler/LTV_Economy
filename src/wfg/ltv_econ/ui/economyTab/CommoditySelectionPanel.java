@@ -55,18 +55,18 @@ public final class CommoditySelectionPanel extends UIContainer implements
     }
 
     public void buildUI() {
-        final int width = (int) getWidth();
-        final UIContainerAPI content = new UIContainer(width, 0f);
+        final int contentW = (int) getWidth() - 5;
+        final UIContainerAPI content = new UIContainer(contentW, 0f);
 
         float yCoord = pad;
         for (CommoditySpecAPI spec : EconomyConstants.econCommoditySpecs) {
-            final RowPanel row = new RowPanel(width - pad*2, ROW_H, spec);
+            final RowPanel row = new RowPanel(contentW - pad*2, ROW_H, spec);
             content.add(row).inTL(pad, yCoord);
 
             yCoord += ROW_H + pad;
         }
         content.setHeight(yCoord);
-        add(ComponentFactory.wrapWithScrollPanel(content, width, getHeight())).inTL(0f, 0f);
+        add(ComponentFactory.wrapWithScrollPanel(content, contentW, getHeight())).inTL(0f, 0f);
     }
 
     public class RowPanel extends UIContainer 

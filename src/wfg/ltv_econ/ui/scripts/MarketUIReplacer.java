@@ -146,9 +146,9 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
 
         final int gap = (LtvCommodityPanel.STANDARD_WIDTH - buttonWidth * 3) / 2;
 
-        eventsBtn.wrap(colonyInfoPanel);
-        stockpilesBtn.wrap(colonyInfoPanel);
-        popBtn.wrap(colonyInfoPanel);
+        eventsBtn.attachTo(colonyInfoPanel);
+        stockpilesBtn.attachTo(colonyInfoPanel);
+        popBtn.attachTo(colonyInfoPanel);
 
         NativeUiUtils.anchorPanel(popBtn, colonyInfoPanel, AnchorType.BottomRight, -100);
         NativeUiUtils.anchorPanel(stockpilesBtn, popBtn, AnchorType.LeftBottom, gap);
@@ -180,7 +180,7 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
 
         final PositionAPI posS = colonyCreditLabel.pos();
         final PositionAPI posA = hazardBtn.getPosition();
-        colonyCreditLabel.wrap(colonyInfoPanel).inTL(
+        colonyCreditLabel.attachTo(colonyInfoPanel).inTL(
             (posA.getX() - posS.getX()) + (posA.getWidth() - posS.getWidth()) / 2f, 0
         );
     }
@@ -205,10 +205,10 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
             width, height, market, industryPanel
         );
 
-        replacement.wrap(managementPanel);
+        replacement.attachTo(managementPanel);
         NativeUiUtils.anchorPanel(replacement, anchor, AnchorType.BottomLeft, 25);
 
-        if (LtvIndustryListPanel.indOptCtor == null) {
+        if (LtvIndustryListPanel.mIndOptCtor == null) {
             // Acquire the popup class from one of the widgets
             final List<?> widgets = (List<?>) RolfLectionUtil.getMethodAndInvokeDirectly(
                 "getWidgets", industryPanel);
@@ -228,7 +228,7 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
                 .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
                 .findFirst().orElse(null);
 
-            LtvIndustryListPanel.indOptCtor = RolfLectionUtil.getConstructor(indOps.getClass(),
+            LtvIndustryListPanel.mIndOptCtor = RolfLectionUtil.getConstructor(indOps.getClass(),
                 RolfLectionUtil.getConstructorParamTypesSingleConstructor(indOps.getClass())
             );
 
@@ -280,13 +280,13 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
             }
         };
 
-        replacement.selectionListener = listener;
+        replacement.mSelectionListener = listener;
         replacement.buildUI();
 
         // Got the Y offset by looking at the getY() difference of replacement and
         // commodityPanel
         // Might automate the getY() difference later
-        replacement.wrap(managementPanel);
+        replacement.attachTo(managementPanel);
         NativeUiUtils.anchorPanel(replacement, anchor, AnchorType.BottomRight, -43);
 
         managementPanel.removeComponent(commodityPanel);

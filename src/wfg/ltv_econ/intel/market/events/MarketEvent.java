@@ -6,7 +6,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.config.EventConfig;
 import wfg.ltv_econ.config.EventConfig.EventSpec;
-import wfg.ltv_econ.economy.MarketPopulationData;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 
 public abstract class MarketEvent {
     public String id;

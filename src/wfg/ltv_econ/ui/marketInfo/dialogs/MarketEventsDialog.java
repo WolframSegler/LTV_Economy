@@ -10,8 +10,8 @@ import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
-import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.internal.ui.core.UIContainer;

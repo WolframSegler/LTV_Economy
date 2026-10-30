@@ -43,11 +43,11 @@ public final class CompatLayer {
     public static final String SUPPLY_BONUS_MOD = "ind_sb";
 
     public static final MutableStat convertIndDemandStat(Industry ind, String inputID) {
-        return convertIndDemandStat(ind, inputID, WorkerRegistry.get(ind), false);
+        return convertIndDemandStat(ind, inputID, WorkerRegistry.instance().getRegisterData(ind), false);
     }
 
     public static final MutableStat convertIndSupplyStat(Industry ind, String outputID) {
-        return convertIndSupplyStat(ind, outputID, WorkerRegistry.get(ind), false);
+        return convertIndSupplyStat(ind, outputID, WorkerRegistry.instance().getRegisterData(ind), false);
     }
 
     public static final MutableStat convertIndDemandStat(Industry ind, String inputID, IndustryWorkerData data, boolean validOnly) {

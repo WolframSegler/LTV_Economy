@@ -21,9 +21,9 @@ import com.fs.starfarer.api.util.MutableValue;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
-import wfg.ltv_econ.economy.MarketPopulationData;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.market.MarketPopulationData;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.ui.functional.ClickHandler;

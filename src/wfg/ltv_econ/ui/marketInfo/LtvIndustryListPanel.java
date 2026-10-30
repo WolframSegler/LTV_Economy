@@ -55,12 +55,12 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 		RolfLectionUtil.getConstructorParamTypesSingleConstructor(IndustryPickerDialog.class)
 	);
 
-	private static LtvIndustryListPanel instance;
-	public static Object indOptCtor = null;
+	private static LtvIndustryListPanel mInstance;
+	public static Object mIndOptCtor = null;
 	
-	public final List<Object> widgets = new ArrayList<>();
-	public final MarketAPI m_market;
-	public final UIPanelAPI dummyWidget;
+	public final List<Object> mWidgets = new ArrayList<>();
+	public final MarketAPI mMarket;
+	public final UIPanelAPI mDummyWidget;
 
 	private Button buildButton;
 
@@ -68,32 +68,32 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 		UIPanelAPI industryPanel) {
 		super(width, height);
 
-		m_market = market;
+		mMarket = market;
 
 		final List<?> widgets = (List<?>) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getWidgets", industryPanel);
 		if (!widgets.isEmpty()) {
-			dummyWidget = (UIPanelAPI) widgets.get(0);
-			dummyWidget.setOpacity(0);
-		} else { dummyWidget = null; }
+			mDummyWidget = (UIPanelAPI) widgets.get(0);
+			mDummyWidget.setOpacity(0);
+		} else { mDummyWidget = null; }
 
 		buildUI();
 
-		instance = this;
+		mInstance = this;
    	}
 
 	public static final void refreshPanel() {
-		if (instance == null) return;
-		instance.buildUI();
+		if (mInstance == null) return;
+		mInstance.buildUI();
 	}
 
 	public void buildUI() {
 		clearChildren();
-		widgets.clear();
+		mWidgets.clear();
 
-		final List<Industry> industries = WorkerRegistry.getVisibleIndustries(m_market);
+		final List<Industry> industries = WorkerRegistry.getVisibleIndustries(mMarket);
 		Collections.sort(industries, indComparator);
-		List<ConstructionQueueItem> queuedIndustries = m_market.getConstructionQueue().getItems();
+		List<ConstructionQueueItem> queuedIndustries = mMarket.getConstructionQueue().getItems();
 	
 		final byte columnAmount = 4;
 
@@ -108,7 +108,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 			Industry ind = industries.get(index);
 
 			final IndustryWidget widget = new IndustryWidget(
-				m_market, ind, this
+				mMarket, ind, this
 			);
 
 			gridContainer.add(widget).inTL(
@@ -118,17 +118,17 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 			addWidgetTooltip(IndustryTooltipMode.NORMAL, ind, widget);
 
-			widgets.add(widget);
+			mWidgets.add(widget);
 		}
 
 		// Queued industries
 		for (int index = 0; index < queuedIndustries.size(); index++) {
 			int i = (index + industries.size()) % columnAmount;
 			int j = (index + industries.size()) / columnAmount;
-			Industry ind = m_market.instantiateIndustry(queuedIndustries.get(index).id);
+			Industry ind = mMarket.instantiateIndustry(queuedIndustries.get(index).id);
 
 			final IndustryWidget widget = new IndustryWidget(
-				m_market, ind, this, index
+				mMarket, ind, this, index
 			);
 
 			gridContainer.add(widget).inTL(
@@ -138,7 +138,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 			addWidgetTooltip(IndustryTooltipMode.QUEUED, ind, widget);
 
-			widgets.add(widget);
+			mWidgets.add(widget);
 		}
 		gridContainer.setHeight(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + hpad*3);
 
@@ -176,7 +176,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 			@Override
 			public void buildUI() {
 				final LabelAPI creditLbl = UIUtils.createColonyCreditsLabel(
-					Fonts.INSIGNIA_LARGE, 25, m_market.getId()
+					Fonts.INSIGNIA_LARGE, 25, mMarket.getId()
 				);
 				creditLbl.setHighlightOnMouseover(true);
 
@@ -199,7 +199,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 			@Override
 			public void buildUI() {
-				final LabelAPI maxIndLbl = UIUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, m_market);
+				final LabelAPI maxIndLbl = UIUtils.createMaxIndustriesLabel(Fonts.INSIGNIA_LARGE, 25, mMarket);
 				maxIndLbl.setHighlightOnMouseover(true);
 
 				setWidth(maxIndLbl.computeTextWidth(maxIndLbl.getText()));
@@ -210,10 +210,10 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 					tp.addPara(str("uiTpTxtIndustryMaxNum1"), 0f);
 
 					tp.beginTable(
-						m_market.getFaction(), 20, new Object[]{str("uiTableSize"), 120, str("uiTableBaseIndustries"), 120}
+						mMarket.getFaction(), 20, new Object[]{str("uiTableSize"), 120, str("uiTableBaseIndustries"), 120}
 					);
 
-					for(int i = 3; i <= Misc.getMaxMarketSize(m_market); i++) {
+					for(int i = 3; i <= Misc.getMaxMarketSize(mMarket); i++) {
 						tp.addRow(new Object[]{highlight, Integer.toString(i), highlight,
 						Integer.toString(PopulationAndInfrastructure.getMaxIndustries(i))});
 					}
@@ -222,11 +222,11 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 					tp.addPara(str("uiTpTxtIndustryMaxNum2"), 20,
 						highlight, Integer.toString(Misc.OVER_MAX_INDUSTRIES_PENALTY)
 					);
-					tp.addPara(str("uiPrefixIndustriesOn"), 10, m_market.getFaction().getBaseUIColor(),
-						m_market.getName()
+					tp.addPara(str("uiPrefixIndustriesOn"), 10, mMarket.getFaction().getBaseUIColor(),
+						mMarket.getName()
 					);
 
-					final List<Industry> industries = WorkerRegistry.getVisibleIndustries(m_market);
+					final List<Industry> industries = WorkerRegistry.getVisibleIndustries(mMarket);
 					Collections.sort(industries, indComparator);
 
 					final String indent = "    ";
@@ -241,7 +241,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 						} else if (industry.isUpgrading()) {
 							String upgradeId = industry.getSpec().getUpgrade();
 							if (upgradeId != null) {
-								Industry upgradedIndustry = m_market.instantiateIndustry(upgradeId);
+								Industry upgradedIndustry = mMarket.instantiateIndustry(upgradeId);
 								if (upgradedIndustry.isIndustry()) {
 									tp.addPara(indent +
 										strf("uiTxtIndustryUpgradingTo", industry.getCurrentName(), upgradedIndustry.getCurrentName()), paraSpacing
@@ -253,10 +253,10 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 						}
 					}
 
-					for (ConstructionQueueItem item : m_market.getConstructionQueue().getItems()) {
+					for (ConstructionQueueItem item : mMarket.getConstructionQueue().getItems()) {
 						final IndustrySpecAPI spec = settings.getIndustrySpec(item.id);
 						if (spec.hasTag("industry")) {
-							Industry ind = m_market.instantiateIndustry(item.id);
+							Industry ind = mMarket.instantiateIndustry(item.id);
 							tp.addPara(indent + strf("uiTxtIndustryQueued", ind.getCurrentName()), paraSpacing);
 							paraSpacing = pad;
 							anyIndustryAdded = true;
@@ -287,7 +287,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 			final UIPanelAPI coreUI = Attachments.getCoreUI();
 			final IndustryPickerDialog dialog = (IndustryPickerDialog) RolfLectionUtil.instantiateClass(
 				indPickCtor,
-				m_market,
+				mMarket,
 				coreUI,
 				listener
 			);
@@ -308,7 +308,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 		add(colonyCreditLblPanel).inBL(buildBtnWidth + 40, BUTTON_SECTION_HEIGHT - 18);
 		add(maxIndLblPanel).inBR(40, BUTTON_SECTION_HEIGHT);
 
-		if (!m_market.isPlayerOwned() && !DebugFlags.COLONY_DEBUG) {
+		if (!mMarket.isPlayerOwned() && !DebugFlags.COLONY_DEBUG) {
 			buildButton.setEnabled(false);
 			playerCreditLblPanel.setOpacity(0f);
 			colonyCreditLblPanel.setOpacity(0f);
@@ -327,7 +327,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 		super.processInputImpl(events);
 
 		boolean anyWidgetNotNormal = false;
-		for (Object widgetObj : widgets) {
+		for (Object widgetObj : mWidgets) {
 			if (widgetObj instanceof IndustryWidget widget) {
 				if (widget.getMode() != WidgetSelectionState.NONE) {
 					anyWidgetNotNormal = true;
@@ -339,8 +339,8 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 		if (anyWidgetNotNormal) {
 			boolean mouseOverWidget = events.stream()
-				.filter(InputEventAPI::isMouseMoveEvent)
-				.anyMatch(event -> widgets.stream()
+				.filter(i -> !i.isConsumed() && i.isMouseMoveEvent())
+				.anyMatch(event -> mWidgets.stream()
 				.anyMatch(widget -> ((IndustryWidget) widget).indIcon.pos()
 				.containsEvent(event))
 			);
@@ -361,7 +361,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 			}
 
 			if (targetEvent != null) {
-				for (Object widgetObj : widgets) {
+				for (Object widgetObj : mWidgets) {
 					if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
 						widget.setNormalMode();
 					}
@@ -380,7 +380,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 
 		final int buildCost = (int) selectedIndustry.getBuildCost();
 
-		m_market.getConstructionQueue().addToEnd(selectedIndustry.getSpec().getId(), buildCost);
+		mMarket.getConstructionQueue().addToEnd(selectedIndustry.getSpec().getId(), buildCost);
 
 		final MutableValue playerCredits = Global.getSector().getPlayerFleet().getCargo().getCredits();
 		playerCredits.subtract(buildCost);

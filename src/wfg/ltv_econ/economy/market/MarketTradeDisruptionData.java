@@ -1,17 +1,18 @@
-package wfg.ltv_econ.economy.commodity;
+package wfg.ltv_econ.economy.market;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 import wfg.ltv_econ.config.EconConfig;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 
-public final class MarketTradeDisruptionData implements java.io.Serializable {
+public final class MarketTradeDisruptionData implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final String DISRUPTION_KEY = "$ltv_trade_disruption";
 
-    private final ArrayList<Integer> mLossRemainingDays = new ArrayList<>();
+    private final ArrayList<Integer> mLossRemainingDays = new ArrayList<>(6);
     private int mTradeSuspendedDays = 0;
 
     public final void recordLoss() {
@@ -45,15 +46,13 @@ public final class MarketTradeDisruptionData implements java.io.Serializable {
         mTradeSuspendedDays = 0;
     }
 
-    public static final MarketTradeDisruptionData get(MarketAPI market) {
-        final Object obj = market.getMemory().get(DISRUPTION_KEY);
-        if (obj instanceof MarketTradeDisruptionData) {
-            return (MarketTradeDisruptionData) obj;
-        }
+    public static synchronized final MarketTradeDisruptionData get(String marketID) {
+        final ConcurrentMarketData data = EconomyEngine.instance().getMarketData(marketID);
+        return data.mTradeDisruptionData;
+    }
 
-        final MarketTradeDisruptionData data = new MarketTradeDisruptionData();
-        market.getMemory().set(DISRUPTION_KEY, data);
-        return data;
+    public static final MarketTradeDisruptionData get(MarketAPI market) {
+        return get(market.getId());
     }
 
     public static final boolean shouldSuspendTrade(MarketAPI market) {

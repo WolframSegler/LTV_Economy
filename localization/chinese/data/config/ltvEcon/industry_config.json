@@ -2,6 +2,19 @@
 	"modVersion": "0.0.0",
 	"industryList": [
 	{
+		"industryId": "wfg_test_blackhole",
+		"workerAssignable": false,
+		"occTag": "industry",
+		"outputList": {
+			"artificial_demand": {
+				"InputsPerUnitOutput": {
+					"supplies": 1e6
+				},
+				"scaleWithMarketSize": false
+			}
+		}
+	},
+	{
 		"industryId": "heavyindustry",
 		"workerAssignable": true,
 		"occTag": "industry",

@@ -516,7 +516,7 @@ public final class IndustryIOs {
         final Set<String> inputSet = new HashSet<>();
         for (BaseIO baseIO : baseIOs.get(indID).values()) {
             for (String input : baseIO.inputs.keySet()) {
-                if (ABSTRACT_COM.contains(input) && !includeAbstract) continue;
+                if (ABSTRACT_COM.equals(input) && !includeAbstract) continue;
                 inputSet.add(input);
             }
         }
@@ -604,7 +604,9 @@ public final class IndustryIOs {
         final BaseIO inputs = getBaseIOs(indID).get(outputID);
         if (inputs != null) {
             for (Map.Entry<String, Float> entry : inputs.inputs.singleEntrySet()) {
-                inputValSum += settings.getCommoditySpec(entry.getKey()).getBasePrice() * entry.getValue();
+                final String inputID = entry.getKey();
+                if (ABSTRACT_COM.equals(inputID)) continue;
+                inputValSum += settings.getCommoditySpec(inputID).getBasePrice() * entry.getValue();
             }
         }
 

@@ -13,6 +13,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.econ.impl.ConstructionQueue.ConstructionQueueItem;
+import com.fs.starfarer.api.impl.campaign.ids.Industries;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.IconRenderMode;
@@ -25,8 +26,11 @@ import com.fs.starfarer.api.util.Misc;
 
 import rolflectionlib.ui.UiUtil;
 import rolflectionlib.util.RolfLectionUtil;
+import wfg.ltv_econ.constant.Sprites;
+import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.market.MarketTradeDisruptionData;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry.IndustryWorkerData;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -49,9 +53,13 @@ import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
+import wfg.native_ui.ui.dialog.DialogPanel;
+import wfg.native_ui.ui.system.InteractionSystem;
+import wfg.native_ui.ui.system.NativeSystems;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.visual.AbstractSpriteElement;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
+import wfg.native_ui.ui.visual.InteractiveSprite;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 
@@ -120,6 +128,8 @@ public final class IndustryWidget extends UIContainer implements
     }
 
     public void buildUI() {
+        clearChildren();
+
         buiTitleldingHeader = settings.createLabel(
             ind.getCurrentName(), Fonts.DEFAULT_SMALL
         );
@@ -156,7 +166,7 @@ public final class IndustryWidget extends UIContainer implements
 
             if (constructionQueueIndex >= 0) {
                 if (!isLeftClick) {
-                    for (Object widgetObj : indPanel.widgets) {
+                    for (Object widgetObj : indPanel.mWidgets) {
                         if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                             widget.setNormalMode();
                         }
@@ -166,7 +176,7 @@ public final class IndustryWidget extends UIContainer implements
                 }
 
                 if (constructionMode == WidgetSelectionState.NONE) {
-                    for (Object widgetObj : indPanel.widgets) {
+                    for (Object widgetObj : indPanel.mWidgets) {
                     if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                         if (widget == this) {
                             widget.setRemoveMode();
@@ -179,7 +189,7 @@ public final class IndustryWidget extends UIContainer implements
                 } else if (constructionMode == WidgetSelectionState.SWAP) {
                     targetInd = null;
 
-                    for (Object widgetObj : indPanel.widgets) {
+                    for (Object widgetObj : indPanel.mWidgets) {
                         if (widgetObj instanceof IndustryWidget widget &&
                             widget.getQueueIndex() >= 0 &&
                             widget.constructionMode == WidgetSelectionState.REMOVE
@@ -225,13 +235,13 @@ public final class IndustryWidget extends UIContainer implements
                     }
                 }
             } else {
-                for (Object widgetObj : indPanel.widgets) {
+                for (Object widgetObj : indPanel.mWidgets) {
                     if (widgetObj instanceof IndustryWidget widget && widget.getQueueIndex() >= 0) {
                         widget.setNormalMode();
                     }
                 }
 
-                if (LtvIndustryListPanel.indOptCtor != null && indPanel.dummyWidget != null) {
+                if (LtvIndustryListPanel.mIndOptCtor != null && indPanel.mDummyWidget != null) {
                     final Object listener = new UiUtil.DialogDismissedListener() {
                         @Override
                         public void dialogDismissed(Object data, int option) {
@@ -246,9 +256,9 @@ public final class IndustryWidget extends UIContainer implements
                     //     this
                     // );
                     final DialogCreatorUI dialog = (DialogCreatorUI) RolfLectionUtil.instantiateClass(
-                        LtvIndustryListPanel.indOptCtor,
+                        LtvIndustryListPanel.mIndOptCtor,
                         ind,
-                        indPanel.dummyWidget,
+                        indPanel.mDummyWidget,
                         UIUtils.getMarketInteractionMode(market),
                         Attachments.getCampaignScreenPanel(),
                         listener
@@ -280,10 +290,10 @@ public final class IndustryWidget extends UIContainer implements
             add(workerCountLabel).inTL(pad*2, TITLE_HEIGHT + pad*2);
         }
 
-        final TooltipMakerAPI tp = ComponentFactory.createTooltip(PANEL_WIDTH, false);
+        final TooltipMakerAPI contentTp = ComponentFactory.createTooltip(PANEL_WIDTH, false);
 
-        tp.beginIconGroup();
-        tp.setIconSpacingMedium();
+        contentTp.beginIconGroup();
+        contentTp.setIconSpacingMedium();
 
         final EconomyEngine engine = EconomyEngine.instance();
 
@@ -292,15 +302,15 @@ public final class IndustryWidget extends UIContainer implements
             final CommodityCell cell = engine.getComCell(comID, market.getId());
             if (cell == null || cell.getStoredAvailabilityRatio() > 0.9f) continue;
 
-            tp.addIcons(cell.spec, 1, IconRenderMode.RED);
+            contentTp.addIcons(cell.spec, 1, IconRenderMode.RED);
         }
         }
-        tp.addIconGroup(24, 1, pad);
-        tp.getPrev().getPosition().inBL(pad + 2, pad);
+        contentTp.addIconGroup(24, 1, pad);
+        contentTp.getPrev().getPosition().inBL(pad + 2, pad);
 
 
-        tp.beginIconGroup();
-        tp.setIconSpacingWide();
+        contentTp.beginIconGroup();
+        contentTp.setIconSpacingWide();
 
         int totalW = 0;
         for (SpecialItemData item : ind.getVisibleInstalledItems()) {
@@ -332,8 +342,8 @@ public final class IndustryWidget extends UIContainer implements
         if (isIndNotFunctional) {
             if (ind.isBuilding() && !ind.isUpgrading() && !ind.isDisrupted()) {
 
-                tp.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
-                constructionStatusText = tp.createLabel(str("uiTxtIndustryBeingBuilt"), baseColor);
+                contentTp.setParaFont(Fonts.INSIGNIA_VERY_LARGE);
+                constructionStatusText = contentTp.createLabel(str("uiTxtIndustryBeingBuilt"), baseColor);
                 constructionStatusText.setHighlightColor(
                     NativeUiUtils.adjustBrightness(constructionStatusText.getColor(), 1.33f)
                 );
@@ -353,13 +363,37 @@ public final class IndustryWidget extends UIContainer implements
             slider.labelText = ind.getBuildOrUpgradeProgressText();
             slider.showLabelOnly = true;
             
-            slider.wrap(tp).inBL(0f, -sliderHeight - 2f);
+            slider.attachTo(contentTp).inBL(0f, -sliderHeight - 2f);
         }
 
-        tp.setHeightSoFar(IMAGE_HEIGHT);
-        ComponentFactory.addTooltip(tp, IMAGE_HEIGHT, false, this).inBL(0, 0);
+        contentTp.setHeightSoFar(IMAGE_HEIGHT);
+        ComponentFactory.addTooltip(contentTp, IMAGE_HEIGHT, false, this).inBL(0, 0);
 
         if (constructionQueueIndex >= 0) setNormalMode();
+
+        if (ind.getSpec().hasTag(Industries.TAG_SPACEPORT) && MarketTradeDisruptionData.shouldSuspendTrade(market)) {
+            final boolean canInteract = market.isPlayerOwned() || DebugFlags.COLONY_DEBUG;
+
+            final InteractiveSprite tradeSuspensionIcon = new InteractiveSprite(TITLE_HEIGHT, TITLE_HEIGHT, Sprites.WARNING, UIColors.CARGO_COLOR, null);
+            add(tradeSuspensionIcon).inTR(0f, 0f);
+            tradeSuspensionIcon.glow.type = GlowType.ADDITIVE;
+            tradeSuspensionIcon.audio.useDisabledSound = !canInteract;
+
+            tradeSuspensionIcon.tooltip.builder = (tp, isExpanded) -> {
+                final var tradeData = MarketTradeDisruptionData.get(market);
+                final String daysStr = Integer.toString(tradeData.getSuspendedDays());
+                final String dayDays = UIUtils.getDayOrDays(tradeData.getSuspendedDays());
+                tp.addPara(str("uiTpTxtTradeSuspensionIconInfo"), 0f, new Color[]{highlight, text_color}, daysStr, dayDays);
+
+                if (canInteract) tp.addPara(str("uiTpTxtTradeSuspensionIconClick"), pad);
+            };
+            tradeSuspensionIcon.system().setIfNotPresent(NativeSystems.INTERACTION, InteractionSystem.get(), tradeSuspensionIcon);
+            final InteractionComp<InteractiveSprite> suspensionComp = tradeSuspensionIcon.comp().get(NativeComponents.INTERACTION);
+            suspensionComp.enabled = canInteract;
+            suspensionComp.onClicked = (icon, isLeftClick) -> {
+                new ClearSuspensionDialog().show(0.3f, 0.3f);
+            };
+        }
     }
 
     public void clearLabels() {
@@ -537,7 +571,7 @@ public final class IndustryWidget extends UIContainer implements
     public void industryOptionMenuClosed() {
         tradeInfoPanel = false;
         RolfLectionUtil.getMethodAndInvokeDirectly("dialogDismissed",
-            indPanel.dummyWidget, null, 0);
+            indPanel.mDummyWidget, null, 0);
     }
 
     public class IndustryImagePanel extends AbstractSpriteElement<IndustryImagePanel> implements
@@ -565,6 +599,28 @@ public final class IndustryWidget extends UIContainer implements
             imgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
 
             audio.useDisabledSound = (!DebugFlags.COLONY_DEBUG && !ind.getMarket().isPlayerOwned());
+        }
+    }
+
+    public final class ClearSuspensionDialog extends DialogPanel {
+        
+        public ClearSuspensionDialog() {
+            super(500, 100, null, str("uiTxtResetTradeSuspension"), str("uiConfirm"), str("uiCancel"));
+
+            backgroundDimAmount = 0.1f;
+            holo.borderAlpha = 0.66f;
+
+            setConfirmShortcut();
+        }
+
+        @Override
+        public void dismiss(int option) {
+            super.dismiss(option);
+
+            if (option == 0) {
+                MarketTradeDisruptionData.get(market).resetLosses();
+                IndustryWidget.this.buildUI();
+            }
         }
     }
 }

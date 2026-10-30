@@ -154,7 +154,7 @@ public final class TooltipUtils {
                     NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
 
                     final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
-                    tp.addCustom(arrowPanel, 0f).getPosition().inTL(610, arrowY);
+                    tp.addCustom(arrowPanel.wrapDetached(), 0f).getPosition().inTL(610, arrowY);
 
                     ++rowCount;
                     if (rowCount >= rowsPerTable) break;
@@ -230,7 +230,7 @@ public final class TooltipUtils {
                     NativeUiUtils.rotateSprite(playerLoc, targetLoc, arrowPanel.getSprite());
 
                     final int arrowY = relativeY + rowH * (2 + rowCount) + pad;
-                    tp.addCustom(arrowPanel, 0f).getPosition().inTL(610, arrowY);
+                    tp.addCustom(arrowPanel.wrapDetached(), 0f).getPosition().inTL(610, arrowY);
                     NativeUiUtils.resetFlowLeft(tp, hpad);
 
                     rowCount++;

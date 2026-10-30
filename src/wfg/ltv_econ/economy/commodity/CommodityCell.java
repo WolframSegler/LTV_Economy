@@ -133,7 +133,7 @@ public class CommodityCell implements Serializable {
         return Math.min(target, Math.min(absoluteCap, maxAdditional));
     }
     public final float getActivityIndicator() {
-        return getProduction(true) + getConsumption(true) + getTotalImports() + getTotalExports();
+        return getProduction(true) + getTargetQuantum(true) + getTotalImports() + getTotalExports();
     }
     public final double getStoredEconomicFootprint() {
         return Math.max(stored, getTargetStored());
@@ -223,7 +223,6 @@ public class CommodityCell implements Serializable {
                 }
             }
             // Predict input demand
-            // TODO test this
             if (!ind.getSpec().getId().equals(Industries.POPULATION) && ind.isBuilding() && !ind.isUpgrading()) {
                 final float progress = ind.getBuildOrUpgradeProgress();
                 final float predictedQuantum = ConstructionDemandPredictor.computePredictedDailyDemand(ind, comID);
