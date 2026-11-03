@@ -24,6 +24,7 @@ import wfg.ltv_econ.economy.fleet.ShipProductionManager;
 import wfg.ltv_econ.economy.planning.ProductionMatrix;
 import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.industry.Manufacturing;
+import wfg.ltv_econ.ui.economyTab.industryBalancer.IndustryBalancerHolo;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.widget.Button;
@@ -241,6 +242,17 @@ public final class DebugPanel extends UIContainer implements UIBuildableAPI {
                 str("uiBtnTitleLogMarketsWithManufacturing"), Fonts.DEFAULT_SMALL, run
             );
             add(button).inTL(opad, SECTION_I + pad*20 + lblH + BUTTON_H*9);
+        }
+
+        { // SHOW THE INDUSTRY BALANCER DIALOG
+            final CallbackRunnable<Button> run = (btn) -> {
+                final IndustryBalancerHolo holo = new IndustryBalancerHolo();
+                holo.showBalancerDialog(true);
+            };
+            final Button button = new Button(BUTTON_W, BUTTON_H,
+                str("uiBtnTitleIndustryBalancer"), Fonts.DEFAULT_SMALL, run
+            );
+            add(button).inTL(opad, SECTION_I + pad*22 + lblH + BUTTON_H*10);
         }
         }
     }

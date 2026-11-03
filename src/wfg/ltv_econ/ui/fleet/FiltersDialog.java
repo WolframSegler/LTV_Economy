@@ -1,6 +1,10 @@
 package wfg.ltv_econ.ui.fleet;
 
 import static wfg.native_ui.util.UIConstants.*;
+
+import java.util.List;
+import java.util.Set;
+
 import static wfg.ltv_econ.constant.EconomyConstants.visibleFactions;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
@@ -12,12 +16,10 @@ import com.fs.starfarer.api.ui.LabelAPI;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.native_ui.internal.ui.Side;
-import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.CheckboxButton;
 import wfg.native_ui.ui.container.DockPanel;
@@ -26,6 +28,7 @@ import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.widget.Button.CutStyle;
 import wfg.native_ui.ui.system.NativeSystems;
 import wfg.native_ui.ui.system.TooltipSystem;
+import wfg.native_ui.ui.table.ListTable;
 import wfg.native_ui.ui.widget.RadioPanel.LayoutMode;
 
 public class FiltersDialog extends DockPanel {
@@ -95,55 +98,12 @@ public class FiltersDialog extends DockPanel {
         add(exportersLbl).inTL(0f, SECT_II_H);
 
         final LabelAPI importersLbl = settings.createLabel(str("uiImportersTxt"), Fonts.INSIGNIA_LARGE);
-        final float halfW = (getWidth() - opad*3) * 0.5f;
+        final float halfW = (getWidth() - opad*3) * 0.5f - ComponentFactory.SCROLL_PANEL_WIDTH_PAD;
         add(importersLbl).inTL(halfW + opad, SECT_II_H);
 
-        final UIContainerAPI exportersContainer = new UIContainer(halfW, 0f);
-        final UIContainerAPI importersContainer = new UIContainer(halfW, 0f);
-
-        float yLeft = pad;
-        float yRight = pad;
-
-        for (FactionSpecAPI spec : visibleFactions) {
-            final String factionName = spec.getDisplayName();
-            final String factionId = spec.getId();
-
-            final boolean initiallyAllowedExport = !TradeFilters.exporterFactionBlacklist.contains(factionId);
-            final CheckboxButton cbExp = new CheckboxButton(20, factionName, Fonts.DEFAULT_SMALL, 
-                (btn) -> {
-                    btn.setChecked(!btn.isChecked());
-                    if (btn.isChecked()) TradeFilters.exporterFactionBlacklist.remove(factionId);
-                    else TradeFilters.exporterFactionBlacklist.add(factionId);
-                    content.buildUI();
-                }, UICheckboxSize.SMALL, false
-            );
-            cbExp.setChecked(initiallyAllowedExport);
-            cbExp.setLabelColor(spec.getBaseUIColor());
-
-            exportersContainer.add(cbExp).inTL(pad, yLeft);
-            yLeft += cbExp.getHeight() + pad;
-
-            final boolean initiallyAllowedImport = !TradeFilters.importerFactionBlacklist.contains(factionId);
-            final CheckboxButton cbImp = new CheckboxButton(20, factionName, Fonts.DEFAULT_SMALL,
-                (btn) -> {
-                    btn.setChecked(!btn.isChecked());
-                    if (btn.isChecked()) TradeFilters.importerFactionBlacklist.remove(factionId);
-                    else TradeFilters.importerFactionBlacklist.add(factionId);
-                    content.buildUI();
-                }, UICheckboxSize.SMALL, false
-            );
-            cbImp.setChecked(initiallyAllowedImport);
-            cbImp.setLabelColor(spec.getBaseUIColor());
-
-            importersContainer.add(cbImp).inTL(pad, yRight);
-            yRight += cbImp.getHeight() + pad;
-        }
-
-        exportersContainer.setHeight(yLeft);
-        importersContainer.setHeight(yRight);
-
-        add(ComponentFactory.wrapWithScrollPanel(exportersContainer, halfW, LIST_H)).inTL(opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
-        add(ComponentFactory.wrapWithScrollPanel(importersContainer, halfW, LIST_H)).inTL(opad + halfW + opad, SECT_II_H + LABEL_H + S_BTN_H + opad*2);
+        final int listTop = SECT_II_H + LABEL_H + S_BTN_H + opad * 2;
+        add(new FactionFilterList(halfW, LIST_H, TradeFilters.exporterFactionBlacklist)).inTL(opad, listTop);
+        add(new FactionFilterList(halfW, LIST_H, TradeFilters.importerFactionBlacklist)).inTL(opad + halfW + opad, listTop);
 
         final float btnW = 80;
         final Button enableAllExporters = new Button(btnW, S_BTN_H, str("uiEnableAll"), Fonts.DEFAULT_SMALL, (b) -> {
@@ -202,5 +162,41 @@ public class FiltersDialog extends DockPanel {
             minAmountSliderValueCache = minAmountSlider.getProgress();
             content.buildUI();
         }
+    }
+
+    private class FactionFilterList extends ListTable<FactionSpecAPI, Button> {
+        private static final int ROW_H = 20;
+        private final Set<String> mBlacklist;
+
+        FactionFilterList(float width, float height, Set<String> blacklist) {
+            super(width, height, ROW_H, pad);
+            mBlacklist = blacklist;
+            mAddRowGap = true;
+            buildUI();
+        }
+
+        protected List<FactionSpecAPI> getDataList() {
+            return visibleFactions;
+        }
+
+        protected Button createWidget(FactionSpecAPI spec, int index) {
+            final String factionId = spec.getId();
+            final CheckboxButton cb = new CheckboxButton(
+                20, spec.getDisplayName(), Fonts.DEFAULT_SMALL,
+                (btn) -> {
+                    btn.setChecked(!btn.isChecked());
+                    if (btn.isChecked()) mBlacklist.remove(factionId);
+                    else mBlacklist.add(factionId);
+                    content.buildUI();
+                },
+                UICheckboxSize.SMALL, false
+            );
+            cb.setChecked(!mBlacklist.contains(factionId));
+            cb.setLabelColor(spec.getBaseUIColor());
+            return cb;
+        }
+
+        protected void onWidgetClicked(Button source) {}
+        protected String getEmptyMessage() { return ""; }
     }
 }

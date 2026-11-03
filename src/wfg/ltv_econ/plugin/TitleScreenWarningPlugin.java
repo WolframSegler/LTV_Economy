@@ -43,7 +43,7 @@ public class TitleScreenWarningPlugin extends BaseEveryFrameCombatPlugin {
         final DialogPanel warningPanel = new DialogPanel(null, txt.toString(), str("uiDismiss"));
         warningPanel.setConfirmShortcut();
         warningPanel.backgroundDimAmount = 0f;
-        warningPanel.holo.borderAlpha = 0.6f;
+        warningPanel.mHolo.borderAlpha = 0.6f;
         warningPanel.show(0.3f, 0.3f);
     }
 }

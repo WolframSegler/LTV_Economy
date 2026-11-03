@@ -31,7 +31,7 @@ import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
 import wfg.native_ui.ui.table.SortableTable.TableRow;
-import wfg.native_ui.ui.table.SortableTable.cellAlg;
+import wfg.native_ui.ui.table.SortableTable.CellAlg;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
@@ -55,7 +55,7 @@ public final class ColonyInvDialog extends DialogPanel {
         mMarket = market;
 
         backgroundDimAmount = 0.2f;
-        holo.borderAlpha = 0.8f;
+        mHolo.borderAlpha = 0.8f;
 
         buildUI();
     }
@@ -315,14 +315,14 @@ public final class ColonyInvDialog extends DialogPanel {
             }
             final String numFont = failed ? Fonts.DEFAULT_SMALL : "graphics/fonts/insignia17LTaa.fnt";
 
-            table.addCell(comIcon, cellAlg.MID, null, null);
-            table.addCell(com.getName(), cellAlg.LEFT, com.getName(), base);
-            table.addCell(settings.createLabel(NumFormat.engNotate(stored), numFont), cellAlg.LEFTOPAD, stored, null);
-            table.addCell(settings.createLabel(NumFormat.engNotate(demand), numFont), cellAlg.LEFTOPAD, demand, negative);
-            table.addCell(settings.createLabel(NumFormat.engNotate(baseProd), numFont), cellAlg.LEFTOPAD, baseProd, highlight);
-            table.addCell(settings.createLabel(NumFormat.engNotate(modifiedProd), numFont), cellAlg.LEFTOPAD, modifiedProd, highlight);
-            table.addCell(settings.createLabel(NumFormat.engNotate(baseBalance), numFont), cellAlg.LEFTOPAD, baseBalance, baseBlcColor);
-            table.addCell(settings.createLabel(NumFormat.engNotate(realBalance), numFont), cellAlg.LEFTOPAD, realBalance, realBlcColor);
+            table.addCell(comIcon, CellAlg.MID, null, null);
+            table.addCell(com.getName(), CellAlg.LEFT, com.getName(), base);
+            table.addCell(settings.createLabel(NumFormat.engNotate(stored), numFont), CellAlg.LEFTOPAD, stored, null);
+            table.addCell(settings.createLabel(NumFormat.engNotate(demand), numFont), CellAlg.LEFTOPAD, demand, negative);
+            table.addCell(settings.createLabel(NumFormat.engNotate(baseProd), numFont), CellAlg.LEFTOPAD, baseProd, highlight);
+            table.addCell(settings.createLabel(NumFormat.engNotate(modifiedProd), numFont), CellAlg.LEFTOPAD, modifiedProd, highlight);
+            table.addCell(settings.createLabel(NumFormat.engNotate(baseBalance), numFont), CellAlg.LEFTOPAD, baseBalance, baseBlcColor);
+            table.addCell(settings.createLabel(NumFormat.engNotate(realBalance), numFont), CellAlg.LEFTOPAD, realBalance, realBlcColor);
 
             final ClickHandler<TableRow> rowSelectedRun = (row, isLeftClick) -> {
                 new SetNotExportableStockDialog(cell).show(0.3f, 0.3f);
@@ -357,7 +357,7 @@ public final class ColonyInvDialog extends DialogPanel {
             this.cell = cell;
 
             backgroundDimAmount = 0.1f;
-            holo.borderAlpha = 0.66f;
+            mHolo.borderAlpha = 0.66f;
 
             setConfirmShortcut();
 

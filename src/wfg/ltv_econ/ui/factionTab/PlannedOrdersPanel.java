@@ -146,18 +146,18 @@ public final class PlannedOrdersPanel extends UIContainer implements UIBuildable
 
         public PlannedOrderGrid(int width, int height) {
             super(width, height, PlannedOrderWidget.WIDTH, PlannedOrderWidget.HEIGHT, opad*2);
-            uniformOuterGap = true;
-            justifyGrid = true;
-            isSelectionEnabled = true;
+            mUniformOuterGap = true;
+            mJustifyGrid = true;
+            mIsSelectionEnabled = true;
             buildUI();
         }
 
         public final void clearSelection() {
-            for (PlannedOrderWidget w : widgets) {
+            for (PlannedOrderWidget w : mWidgets) {
                 w.selectionState = WidgetSelectionState.NONE;
                 w.buildUI();
             }
-            selectedWidget = null;
+            mSelectedWidget = null;
         }
 
         protected List<PlannedOrder> getDataList() {
@@ -182,8 +182,8 @@ public final class PlannedOrdersPanel extends UIContainer implements UIBuildable
                 }
                 source.selectionState = WidgetSelectionState.REMOVE;
                 source.buildUI();
-                selectedWidget = source;
-                for (PlannedOrderWidget widget : widgets) {
+                mSelectedWidget = source;
+                for (PlannedOrderWidget widget : mWidgets) {
                     if (widget == source) continue;
 
                     widget.selectionState = WidgetSelectionState.SWAP;
@@ -197,8 +197,8 @@ public final class PlannedOrdersPanel extends UIContainer implements UIBuildable
                 break;
 
             case SWAP:
-                StaticData.inv.swapPlannedOrders(source.index, selectedWidget.index);
-                NativeUiUtils.swapPositions(source, selectedWidget);
+                StaticData.inv.swapPlannedOrders(source.index, mSelectedWidget.index);
+                NativeUiUtils.swapPositions(source, mSelectedWidget);
 
                 clearSelection();
                 break;

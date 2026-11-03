@@ -12,6 +12,7 @@ import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.industry.IndustryIOs;
@@ -108,22 +109,26 @@ public final class ProductionMatrix {
     private static final void buildWorkerRelatedCommodityIDs() {
         STATIC_WORKER_COMMODITIES = new ArrayList<>(EconomyConstants.econCommodityIDs);
 
-        Iterator<String> it = STATIC_WORKER_COMMODITIES.iterator();
-        while (it.hasNext()) {
-            final String com = it.next();
-            boolean remove = true;
-            for (String key : EconomyConstants.industryIDs) {
-                final IndustrySpecAPI spec = settings.getIndustrySpec(key);
+        final Iterator<String> commodities = STATIC_WORKER_COMMODITIES.iterator();
+        while (commodities.hasNext()) {
+            final String com = commodities.next();
+            boolean relevant = false;
+            for (final IndustrySpecAPI spec : settings.getAllIndustrySpecs()) {
                 final IndustryConfig cfg = IndustryConfigManager.getIndConfig(spec);
+                if (!cfg.workerAssignable) continue;
 
-                if (!cfg.workerAssignable || !cfg.outputs.containsKey(com) ||
-                    !cfg.outputs.get(com).usesWorkers
-                ) continue;
+                for (final OutputConfig output : cfg.outputs.values()) {
+                    if (!output.usesWorkers) continue;
 
-                remove = false;
-                break;
+                    if (com.equals(output.comID)) { relevant = true; break; }
+
+                    if (IndustryIOs.getBaseInputs(spec.getId(), output.comID).containsKey(com)) {
+                        relevant = true; break;
+                    }
+                }
+                if (relevant) break;
             }
-            if (remove) it.remove();
+            if (!relevant) commodities.remove();
         }
     }
 

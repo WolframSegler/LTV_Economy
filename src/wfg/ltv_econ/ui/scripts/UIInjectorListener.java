@@ -13,6 +13,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.util.TooltipUtils;
+import wfg.utils.ui.CoreTabUIBuilder;
 
 public final class UIInjectorListener implements CoreUITabListener, CommodityTooltipModifier {
     

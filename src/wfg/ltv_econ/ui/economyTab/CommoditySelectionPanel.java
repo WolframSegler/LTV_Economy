@@ -13,7 +13,6 @@ import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ComDetailDialog;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.HoverGlowComp;
@@ -23,20 +22,24 @@ import wfg.native_ui.ui.component.OutlineComp;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
+import wfg.native_ui.ui.table.ListTable;
+import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
 
 import static wfg.native_ui.util.UIConstants.*;
 
-public final class CommoditySelectionPanel extends UIContainer implements
-    HasOutline, HasBackground, UIBuildableAPI
+import java.util.List;
+
+public final class CommoditySelectionPanel
+    extends ListTable<CommoditySpecAPI, CommoditySelectionPanel.RowPanel>
+    implements HasOutline, HasBackground
 {
     private static final int ROW_H = 32;
     private static UIBuildableAPI targetPanel = null;
@@ -47,30 +50,30 @@ public final class CommoditySelectionPanel extends UIContainer implements
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
     public CommoditySelectionPanel(int width, int height, UIBuildableAPI content) {
-        super(width, height);
-
+        super(width, height, ROW_H, pad);
         targetPanel = content;
-
+        mAddRowGap = true;
         buildUI();
     }
 
-    public void buildUI() {
-        final int contentW = (int) getWidth() - 5;
-        final UIContainerAPI content = new UIContainer(contentW, 0f);
-
-        float yCoord = pad;
-        for (CommoditySpecAPI spec : EconomyConstants.econCommoditySpecs) {
-            final RowPanel row = new RowPanel(contentW - pad*2, ROW_H, spec);
-            content.add(row).inTL(pad, yCoord);
-
-            yCoord += ROW_H + pad;
-        }
-        content.setHeight(yCoord);
-        add(ComponentFactory.wrapWithScrollPanel(content, contentW, getHeight())).inTL(0f, 0f);
+    protected List<CommoditySpecAPI> getDataList() {
+        return EconomyConstants.econCommoditySpecs;
     }
 
-    public class RowPanel extends UIContainer 
-        implements HasInteraction, HasHoverGlow, HasAudioFeedback, HasTooltip
+    protected RowPanel createWidget(CommoditySpecAPI item, int index) {
+        return new RowPanel(item);
+    }
+
+    protected void onWidgetClicked(RowPanel source) {
+        // Never invoked: mIsSelectionEnabled is false; RowPanel manages its own click handler.
+    }
+
+    protected String getEmptyMessage() {
+        return "";
+    }
+
+    public class RowPanel extends UIContainer implements
+        WidgetAPI<RowPanel>, HasInteraction, HasHoverGlow, HasAudioFeedback, HasTooltip
     {
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
@@ -79,9 +82,7 @@ public final class CommoditySelectionPanel extends UIContainer implements
 
         private final CommoditySpecAPI spec;
 
-        public RowPanel(int width, int height, CommoditySpecAPI com) {
-            super(width, height);
-
+        public RowPanel(CommoditySpecAPI com) {
             spec = com;
 
             glow.type = GlowType.UNDERLAY;
@@ -109,23 +110,23 @@ public final class CommoditySelectionPanel extends UIContainer implements
                     tp.addPara(text, pad, negative, text);
                 }
             };
-
-            buildUI();
         }
 
+        public InteractionComp<RowPanel> getInteraction() { return interaction; }
+
         public void buildUI() {
+            clearChildren();
+
             final int iconSize = 28;
 
             final SpriteElement comIcon = new SpriteElement(
-                iconSize, iconSize, spec.getIconName(),
-                null, null
+                iconSize, iconSize, spec.getIconName(), null, null
             );
-            RowPanel.this.add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
+            add(comIcon).inLMid(pad);
 
             final LabelAPI comNameLabel = settings.createLabel(spec.getName(), Fonts.ORBITRON_12);
             comNameLabel.setColor(base);
-            final float labelW = comNameLabel.computeTextHeight(spec.getName());
-            RowPanel.this.add(comNameLabel).inBL(iconSize + opad, (ROW_H - labelW) / 2f);
+            add(comNameLabel).inLMid(iconSize + opad);
         }
     }
 }

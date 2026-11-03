@@ -97,7 +97,8 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 	
 		final byte columnAmount = 4;
 
-		final UIContainerAPI gridContainer = new UIContainer(getWidth(), 0f);
+        final float containerW = getWidth() - ComponentFactory.SCROLL_PANEL_WIDTH_PAD;
+		final UIContainerAPI gridContainer = new UIContainer(containerW, 0f);
 
 		int wrapperTpHeight = 0;
 
@@ -142,7 +143,7 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 		}
 		gridContainer.setHeight(wrapperTpHeight + IndustryWidget.TOTAL_HEIGHT + hpad*3);
 
-		add(ComponentFactory.wrapWithScrollPanel(gridContainer, getWidth(), getHeight() - BUTTON_SECTION_HEIGHT*1.4f)).inTL(-pad, 0);
+		add(ComponentFactory.wrapWithScrollPanel(gridContainer, containerW, getHeight() - BUTTON_SECTION_HEIGHT*1.4f)).inTL(-pad, 0);
 		
 		TextWrapper playerCreditLblPanel = null;
 		TextWrapper colonyCreditLblPanel = null;

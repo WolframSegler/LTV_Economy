@@ -177,13 +177,13 @@ public final class WorkerPoolRegistry {
                 case 1, 2: return 1f;
                 case 3: return 0.9f;
                 case 4: return 0.8f;
-                case 5: return 0.68f;
-                case 6: return 0.52f;
-                case 7: return 0.4f;
-                case 8: return 0.26f;
-                case 9: return 0.15f;
-                case 10: return 0.08f;
-                default: return 1f/(2f * size);
+                case 5: return 0.7f;
+                case 6: return 0.54f;
+                case 7: return 0.41f;
+                case 8: return 0.3f;
+                case 9: return 0.2f;
+                case 10: return 0.1f;
+                default: return 0.05f;
             }
         }
     }

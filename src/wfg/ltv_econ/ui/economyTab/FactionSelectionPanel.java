@@ -6,6 +6,7 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
+import java.util.List;
 
 import com.fs.starfarer.api.campaign.FactionSpecAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -14,7 +15,6 @@ import com.fs.starfarer.api.ui.LabelAPI;
 
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.HoverGlowComp;
@@ -22,20 +22,21 @@ import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.OutlineComp;
 import wfg.native_ui.ui.component.OutlineComp.OutlineType;
-import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
+import wfg.native_ui.ui.table.ListTable;
+import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
-public final class FactionSelectionPanel extends UIContainer implements
-    HasOutline, HasBackground, UIBuildableAPI
+public final class FactionSelectionPanel extends
+    ListTable<FactionSpecAPI, FactionSelectionPanel.RowPanel>
+    implements HasOutline, HasBackground
 {
     public static final SpriteAPI restrictedPath = settings.getSprite("ui", "restricted");
     private static final int ROW_H = 32;
@@ -44,30 +45,30 @@ public final class FactionSelectionPanel extends UIContainer implements
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
     public FactionSelectionPanel(int width, int height) {
-        super(width, height);
+        super(width, height, ROW_H, pad);
 
         outline.type = OutlineType.TEX_THIN;
         outline.color = dark;
+        mAddRowGap = true;
 
         buildUI();
     }
 
-    public void buildUI() {
-        final int width = (int) getWidth();
-        final UIContainerAPI content = new UIContainer(width, 0f);
-
-        float yCoord = pad;
-        for (FactionSpecAPI faction : visibleFactions) {
-            final RowPanel row = new RowPanel(width - pad*2, ROW_H, faction);
-            content.add(row).inTL(pad, yCoord);
-
-            yCoord += ROW_H + pad;
-        }
-        content.setHeight(yCoord);
-        add(ComponentFactory.wrapWithScrollPanel(content, width, getHeight())).inTL(0f, 0f);
+    protected List<FactionSpecAPI> getDataList() {
+        return visibleFactions;
     }
 
-    public class RowPanel extends UIContainer implements UIBuildableAPI,
+    protected RowPanel createWidget(FactionSpecAPI faction, int index) {
+        return new RowPanel(faction);
+    }
+
+    protected void onWidgetClicked(RowPanel source) {}
+
+    protected String getEmptyMessage() {
+        return "";
+    }
+
+    public class RowPanel extends UIContainer implements WidgetAPI<RowPanel>,
         HasInteraction, HasHoverGlow, HasAudioFeedback, HasBackground, HasTooltip
     {
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -75,13 +76,11 @@ public final class FactionSelectionPanel extends UIContainer implements
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
         public final InteractionComp<RowPanel> interaction = comp().get(NativeComponents.INTERACTION);
-        
+
         private final FactionSpecAPI faction;
         public boolean alreadyEmbargoed;
 
-        public RowPanel(int width, int height, FactionSpecAPI faction) {
-            super(width, height);
-
+        public RowPanel(FactionSpecAPI faction) {
             this.faction = faction;
             alreadyEmbargoed = LtvEconSaveData.instance().playerFactionSettings
                 .embargoedFactions.contains(faction.getId());
@@ -103,33 +102,37 @@ public final class FactionSelectionPanel extends UIContainer implements
 
             bg.color = Color.RED;
             bg.alpha = 0.15f;
-
-            buildUI();
         }
 
+        @Override
+        public InteractionComp<RowPanel> getInteraction() {
+            return interaction;
+        }
+
+        @Override
         public void buildUI() {
             clearChildren();
             final int iconSize = 28;
 
             bg.enabled = alreadyEmbargoed;
 
-            final SpriteElement comIcon = new SpriteElement(iconSize, iconSize, faction.getCrest(),
-                null, null
+            final SpriteElement comIcon = new SpriteElement(
+                iconSize, iconSize, faction.getCrest(), null, null
             );
-            add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
+            add(comIcon).inBL(pad, (getHeight() - iconSize) / 2f);
 
             if (alreadyEmbargoed) {
-                final SpriteElement restrictedIcon = new SpriteElement(iconSize, iconSize, restrictedPath,
-                    null, null
+                final SpriteElement restrictedIcon = new SpriteElement(
+                    iconSize, iconSize, restrictedPath, null, null
                 );
-                add(restrictedIcon).inBR(pad, (ROW_H - iconSize) / 2f);
+                add(restrictedIcon).inBR(pad, (getHeight() - iconSize) / 2f);
             }
 
-            final LabelAPI nameLabel = settings.createLabel(faction.getDisplayName(), Fonts.ORBITRON_12);
+            final LabelAPI nameLabel = settings.createLabel(
+                faction.getDisplayName(), Fonts.ORBITRON_12);
             nameLabel.setColor(faction.getBaseUIColor());
             if (alreadyEmbargoed) nameLabel.setOpacity(0.6f);
-            final float labelW = nameLabel.computeTextHeight(faction.getDisplayName());
-            add(nameLabel).inBL(iconSize + opad, (ROW_H - labelW) / 2f);
+            add(nameLabel).inLMid(iconSize + opad);
         }
     }
 }

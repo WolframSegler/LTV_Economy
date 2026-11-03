@@ -9,38 +9,127 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Industries;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
+import wfg.ltv_econ.config.IndustryConfigManager.IndustryConfig;
+import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
+import wfg.ltv_econ.economy.commodity.CommodityDomain;
+import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.economy.engine.EconomyLoop;
 import wfg.ltv_econ.economy.planning.WorkforceAllocator.FeasibilityResult;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
+import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.ui.economyTab.industryBalancer.IndustryBalancerHolo;
 import wfg.native_ui.util.ArrayMap;
 
-// TODO test this
 public final class IndustryBalancer {
-    private IndustryBalancer() {};
-    
+    public enum BalancerStatus { RUNNING, SUCCESS, CYCLE, STUCK }
+    public enum ChangeType { ADDED, REMOVED, UPGRADED }
+    public enum MoveType { ADD_INDUSTRY, FREE_SLOT, }
+
+    public record IndustryChange(
+        MarketAPI market,
+        String sourceIndustryId,
+        String targetIndustryId,
+        ChangeType type
+    ) {}
+
     public record IndustryCandidate(
         MarketAPI market,
         Industry industry,
         BitSet outputs
     ) {}
 
-    private static final int MAX_ITERATIONS = 200;
+    public static final class BalancerState {
+        private volatile BalancerStatus status = BalancerStatus.RUNNING;
+        private volatile int iteration = 0;
+        private volatile String currentComId = null;
+        private volatile MoveType currentMoveType = MoveType.ADD_INDUSTRY;
+        private volatile double currentSlack = 0d;
+        private volatile Throwable mFailure = null;
+        private volatile boolean sigStop = false;
+        private final List<IndustryChange> changes = new ArrayList<>();
+
+        public final BalancerStatus status() { return status; }
+        public final int iteration() { return iteration; }
+        public final String currentComId() { return currentComId; }
+        public final MoveType currentMoveType() { return currentMoveType; }
+        public final double currentSlack() { return currentSlack; }
+        public final Throwable failure() { return mFailure; }
+        public final void sigStop() { sigStop = true; }
+
+        public final List<IndustryChange> changes() {
+            if (status == BalancerStatus.RUNNING) throw new IllegalStateException("Cannot view changes while the balancer is running");
+            return changes;
+        }
+    }
+
+    public  static final double SLACK_TOLERANCE = 1d;
+
+    private static final int MAX_ITERATIONS = 500;
     private static final double MIN_WORKERS = 50d;
+    private static final double USELESS_USAGE_FRACTION  = 0.1d;
+    private static final double SLOT_SATURATION_THRESHOLD = 1.2d;
     private static final long FNV_OFFSET = 0xcbf29ce484222325l;
     private static final long FNV_PRIME  = 0x100000001b3l;
+    private static final long MIN_ITERATION_BUDGET_MS = 400l;
 
-    public static final void balance(boolean includePlayerColonies) {
+    private final BalancerState mState = new BalancerState();
+    private volatile boolean mStarted = false;
+
+    public static final boolean showIfSlackDetected() {
+        final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
+        markets.removeIf(MarketAPI::isPlayerOwned);
+
+        final FeasibilityResult result = WorkforceAllocator.solveFeasibilityLP(
+            markets, ProductionMatrix.getMatrix(),
+            ProductionMatrix.getIndustryOutputPairs(),
+            PlanningData.getOutputsPerMarket(markets));
+
+        if (worstCommoditySlackIndex(result.slack()) < 0) return false;
+
+        new IndustryBalancerHolo().showBalancerDialog(false);
+        return true;
+    }
+
+    public final void runAsync(boolean includePlayerColonies) {
+        if (mStarted) throw new IllegalStateException("Cannot start a new run while a run is in progress.");
+
+        final Thread t = new Thread(() -> {
+            try {
+                WorkerRegistry.instance().resetWorkersAssigned(false);
+                EconomyEngine.instance().getComDomains().forEach(CommodityDomain::update);
+
+                mState.status = balance(includePlayerColonies);
+
+                EconomyEngine.instance().fakeAdvanceWithAssignWorkers();
+
+            } catch (Throwable ex) {
+                mState.mFailure = ex;
+                mState.status = BalancerStatus.STUCK;
+                throw ex;
+            }
+        }, "IndustryBalancer");
+
+        t.setDaemon(true);
+        t.setPriority(Thread.MIN_PRIORITY);
+        t.start();
+    }
+
+    public final BalancerState state() { return mState; }
+
+    private final BalancerStatus balance(boolean includePlayerColonies) {
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         if (!includePlayerColonies) markets.removeIf(MarketAPI::isPlayerOwned);
 
@@ -48,26 +137,63 @@ public final class IndustryBalancer {
         final List<String> outputPairs = ProductionMatrix.getIndustryOutputPairs();
         final Set<Long> visited = new HashSet<>();
 
+        long lastTop = System.nanoTime();
         for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-            if (!visited.add(stateHash(markets))) return; // cycle detected
+            if (iteration > 0) {
+                final long elapsedMs = (System.nanoTime() - lastTop) / 1_000_000l;
+                final long remaining = MIN_ITERATION_BUDGET_MS - elapsedMs;
+                if (remaining > 0) {
+                    try {
+                        Thread.sleep(remaining);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+            lastTop = System.nanoTime();
+
+            mState.iteration = iteration;
+
+            if (mState.sigStop) break;
+
+            if (!visited.add(stateHash(markets))) return BalancerStatus.CYCLE;
 
             final FeasibilityResult result = WorkforceAllocator.solveFeasibilityLP(
-                markets, A, outputPairs, PlanningData.getOutputsPerMarket(markets)
-            );
-
+                markets, A, outputPairs, PlanningData.getOutputsPerMarket(markets));
+            mState.currentSlack = sumArray(result.slack());
+            
             final int worst = worstCommoditySlackIndex(result.slack());
-            if (worst < 0) return; // no slack left, success
+            if (worst < 0) return BalancerStatus.SUCCESS;
 
-            if (tryAdd(worst, result, markets, A)) continue;
-            if (tryFreeSlotAndAdd(worst, result, markets, A)) continue;
+            final int[] ordered = commoditiesWithSlackDescending(result.slack());
 
-            return; // no possible change
+            boolean committed = false;
+            for (final int candidate : ordered) {
+                mState.currentComId = ProductionMatrix.getWorkerRelatedCommodityIDs().get(candidate);
+
+                mState.currentMoveType = MoveType.ADD_INDUSTRY;
+                if (tryAddWithPhase(candidate, result, markets, A, 1)) { committed = true; break; }
+
+                mState.currentMoveType = MoveType.FREE_SLOT;
+                if (tryAddWithPhase(candidate, result, markets, A, 2)) { committed = true; break; }
+            }
+
+            if (!committed) return BalancerStatus.STUCK;
         }
+        return BalancerStatus.STUCK;
     }
 
-    private static final boolean tryAdd(int worstCommIdx, FeasibilityResult result, List<MarketAPI> markets, double[][] A) {
+    private final void recordChange(MarketAPI market, String sourceIndId, String targetIndId, ChangeType type) {
+        mState.changes.add(new IndustryChange(market, sourceIndId, targetIndId, type));
+    }
+
+    private boolean tryAddWithPhase(
+        int worstCommIdx, FeasibilityResult result, List<MarketAPI> markets,
+        double[][] A, int phase
+    ) {
         final String targetComId = ProductionMatrix.getWorkerRelatedCommodityIDs().get(worstCommIdx);
-        final ArrayList<IndustryCandidate> candidates = getCandidates(targetComId, result, markets, 1);
+        final ArrayList<IndustryCandidate> candidates = getCandidates(targetComId, result, markets, phase);
         if (candidates.isEmpty()) return false;
 
         sortCandidates(candidates, result.slack(), result, A);
@@ -78,77 +204,41 @@ public final class IndustryBalancer {
             final boolean needsSlot = candidate.industry().isIndustry();
             final boolean hasFreeSlot = Misc.getMaxIndustries(market) - Misc.getNumIndustries(market) > 0;
             final IndustrySpecAPI predecessorSpec = getPredecessor(targetId, market);
+            final Industry predecessor = predecessorSpec != null
+                ? market.getIndustry(predecessorSpec.getId()) : null;
+
+            if (phase == 1) {
+                if (needsSlot && !hasFreeSlot) {
+                    if (predecessorSpec == null) continue;
+                    if (predecessor == null && !predecessorSpec.hasTag(Industries.TAG_INDUSTRY)) continue;
+                    if (predecessor != null && !predecessor.isIndustry()) continue;
+                }
+            } else {
+                final Industry removable = findRemovableIndustry(market, result.assignments(), predecessorSpec);
+                if (removable == null) continue;
+                recordChange(market, removable.getId(), null, ChangeType.REMOVED);
+                market.removeIndustry(removable.getId(), null, false);
+            }
 
             if (predecessorSpec == null) {
-                if (needsSlot && !hasFreeSlot) continue;
+                recordChange(market, null, targetId, ChangeType.ADDED);
                 market.addIndustry(targetId);
                 return true;
             }
-
-            final Industry predecessor = market.getIndustry(predecessorSpec.getId());
-
-            if (predecessor == null) { // predecessor in queue
-                final boolean predWasTakingSlot = predecessorSpec.hasTag(Industries.TAG_INDUSTRY);
-                final int netDelta = (needsSlot ? 1 : 0) - (predWasTakingSlot ? 1 : 0);
-                if (netDelta > 0 && !hasFreeSlot) continue;
-
-                market.getConstructionQueue().removeItem(predecessorSpec.getId());
-                market.addIndustry(targetId);
-                return true;
-            }
-
-            final boolean predNeedsSlot = predecessor.isIndustry();
-            if (!predNeedsSlot && needsSlot && !hasFreeSlot) continue;
-
-            market.addIndustry(targetId);
-            final Industry added = market.getIndustry(targetId);
-
-            copyIndustryState(predecessor, added);
-            market.removeIndustry(predecessorSpec.getId(), null, false);
-            return true;
-        }
-
-        return false;
-    }
-
-    private static final boolean tryFreeSlotAndAdd(int worstCommIdx, FeasibilityResult result, List<MarketAPI> markets, double[][] A) {
-        final String targetComId = ProductionMatrix.getWorkerRelatedCommodityIDs().get(worstCommIdx);
-        final ArrayList<IndustryCandidate> candidates = getCandidates(targetComId, result, markets, 2);
-        if (candidates.isEmpty()) return false;
-
-        sortCandidates(candidates, result.slack(), result, A);
-
-        for (final IndustryCandidate candidate : candidates) {
-            final MarketAPI market = candidate.market();
-            final String targetId = candidate.industry().getSpec().getId();
-            final IndustrySpecAPI predecessorSpec = getPredecessor(targetId, market);
-
-            final Industry removable = findRemovableIndustry(market, result.assignments(), predecessorSpec);
-            if (removable == null) continue;
-
-            market.removeIndustry(removable.getId(), null, false);
-
-            if (predecessorSpec == null) {
-                market.addIndustry(targetId);
-                return true;
-            }
-
-            final Industry predecessor = market.getIndustry(predecessorSpec.getId());
-
             if (predecessor == null) {
+                recordChange(market, predecessorSpec.getId(), targetId, ChangeType.UPGRADED);
                 market.getConstructionQueue().removeItem(predecessorSpec.getId());
                 market.addIndustry(targetId);
                 return true;
             }
-
+            recordChange(market, predecessorSpec.getId(), targetId, ChangeType.UPGRADED);
             market.addIndustry(targetId);
             final Industry added = market.getIndustry(targetId);
-
             copyIndustryState(predecessor, added);
             market.removeIndustry(predecessorSpec.getId(), null, false);
+
             return true;
         }
-
         return false;
     }
 
@@ -165,6 +255,7 @@ public final class IndustryBalancer {
         for (final Industry ind : market.getIndustries()) {
             if (!ind.isIndustry()) continue; // must free a slot
             if (excludedId != null && ind.getSpec().getId().equals(excludedId)) continue;
+            if (!isBalancerEligible(ind.getSpec())) continue;
             if (!IndustryConfigManager.getIndConfig(ind).workerAssignable) continue;
             if (!isDeadweight(ind, assignments)) continue;
             return ind;
@@ -175,12 +266,31 @@ public final class IndustryBalancer {
     private static final boolean isDeadweight(
         final Industry ind, final ArrayMap<MarketAPI, float[]> assignments
     ) {
-        final float[] arr = assignments.get(ind.getMarket());
+        final MarketAPI market = ind.getMarket();
+        final double poolSize = WorkerPoolRegistry.get(market).getWorkerPool();
+        final double threshold = Math.max(MIN_WORKERS, poolSize * USELESS_USAGE_FRACTION);
+
+        final float[] arr = assignments.get(market);
         final BitSet cols = PlanningData.getOutputForIndustry(ind);
+        double indUsage = 0d;
         for (int col = cols.nextSetBit(0); col >= 0; col = cols.nextSetBit(col + 1)) {
-            if (arr[col] >= MIN_WORKERS) return false;
+            indUsage += arr[col];
         }
-        return true;
+
+        double slotsFrac = 0d;
+        for (Industry i : market.getIndustries()) {
+            final IndustryConfig config = IndustryConfigManager.getIndConfig(i);
+            if (!config.workerAssignable) continue;
+            for (OutputConfig output : config.outputs.values()) {
+                slotsFrac += output.workerAssignableLimit;
+            }
+        }
+        if (slotsFrac > SLOT_SATURATION_THRESHOLD
+                && spareWorkersAt(market, assignments) + indUsage < MIN_WORKERS) {
+            return false;
+        }
+
+        return indUsage < threshold;
     }
 
     private static final ArrayList<IndustryCandidate> getCandidates(
@@ -197,6 +307,7 @@ public final class IndustryBalancer {
 
                 if (isPresent(indId, market)) continue;
                 if (getSuccessor(indId, market) != null) continue;
+                if (!isBalancerEligible(settings.getIndustrySpec(indId))) continue;
                 if (!IndustryIOs.hasOutput(indId, targetComId)) continue;
 
                 final Industry instance = market.instantiateIndustry(indId);
@@ -318,7 +429,18 @@ public final class IndustryBalancer {
             if (slack[idx] < slack[i]) idx = i;
         }
 
-        return slack[idx] > 1d ? idx : -1; // ignore up to 1 slack.
+        return slack[idx] > SLACK_TOLERANCE ? idx : -1; // ignore up to 1 slack.
+    }
+
+    private static final int[] commoditiesWithSlackDescending(final double[] slack) {
+        return IntStream.range(0, slack.length)
+            .filter(i -> slack[i] > SLACK_TOLERANCE)
+            .boxed().sorted((a, b) -> Double.compare(slack[b], slack[a]))
+            .mapToInt(Integer::intValue).toArray();
+    }
+
+    private static final boolean isBalancerEligible(final IndustrySpecAPI spec) {
+        return !spec.hasTag(Tags.CODEX_UNLOCKABLE);
     }
 
     private static final long fnv1a(long h, final String s) {
@@ -355,5 +477,11 @@ public final class IndustryBalancer {
         }
 
         return h;
+    }
+
+    private static final double sumArray(final double[] arr) {
+        double sum = 0d;
+        for (int i = 0; i < arr.length; i++) sum += arr[i];
+        return sum;
     }
 }

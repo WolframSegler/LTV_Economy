@@ -75,7 +75,7 @@ public final class AssignWorkersDialog extends DialogPanel {
 
         initialFreeWorkerRatio = WorkerPoolRegistry.get(market).getFreeWorkerRatio();
 
-        holo.borderAlpha = 0.7f;
+        mHolo.borderAlpha = 0.7f;
         backgroundDimAmount = 0.2f;
 
         buildUI();
@@ -123,7 +123,8 @@ public final class AssignWorkersDialog extends DialogPanel {
 
         add(help_button).inTR(pad, sliderY + pad);
 
-        final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(PANEL_W, true);
+        final int contentW = PANEL_W - ComponentFactory.SCROLL_PANEL_WIDTH_PAD;
+        final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(contentW, true);
         
         int cumulativeYOffset = pad;
         for (OutputConfig output : IndustryConfigManager.getIndConfig(industry).outputs.values()) {

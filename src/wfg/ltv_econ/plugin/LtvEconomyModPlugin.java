@@ -126,16 +126,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
 
             market.addIndustry(Manufacturing.id);
         }
-
-        // Exception for chicomoztoc to balance sector production better.
-        // TODO find a more elegant solution like automatic industry injection when certain commodity deficits arise.
-        // Create a new game setup phase where industries are added and removed to markets to balance the economy.
-        // Or create a market AI that builds industries over time depending on global/faction/local demand.
-        final MarketAPI chico = Global.getSector().getEconomy().getMarket("chicomoztoc"); 
-        if (!chico.hasIndustry(Manufacturing.id) && chico.hasIndustry(Industries.MINING)) {
-            chico.removeIndustry(Industries.MINING, null, false);
-            chico.addIndustry(Manufacturing.id);
-        }
     }
 
     private static final void injectStockpiles() {

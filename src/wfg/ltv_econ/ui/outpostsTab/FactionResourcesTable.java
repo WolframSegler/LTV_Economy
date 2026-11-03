@@ -20,7 +20,7 @@ import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.table.SortableTable;
-import wfg.native_ui.ui.table.SortableTable.cellAlg;
+import wfg.native_ui.ui.table.SortableTable.CellAlg;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NumFormat;
 
@@ -74,15 +74,15 @@ public final class FactionResourcesTable extends UIContainer implements HasBackg
                 final Color creditsColor = credits < 0 ? negative : highlight;
                 final Color balanceColor = balance < 0d ? negative : highlight;
     
-                table.addCell(icon, cellAlg.MID, null, null);
-                table.addCell(com.getName(), cellAlg.LEFT, null, base);
-                table.addCell(NumFormat.engNotate(stored), cellAlg.LEFTOPAD, stored, base);
-                table.addCell(NumFormat.engNotate(demand), cellAlg.LEFTOPAD, demand, demandColor);
-                table.addCell(NumFormat.engNotate(prod), cellAlg.LEFTOPAD, prod, highlight);
-                table.addCell(exportShare + "%", cellAlg.LEFTOPAD, exportShare, base);
-                table.addCell(NumFormat.formatCredit(credits), cellAlg.LEFTOPAD, credits, creditsColor);
-                table.addCell(NumFormat.engNotate(balance), cellAlg.LEFTOPAD, balance, balanceColor);
-                table.addCell(autarky + "%", cellAlg.LEFTOPAD, autarky, base);
+                table.addCell(icon, CellAlg.MID, null, null);
+                table.addCell(com.getName(), CellAlg.LEFT, null, base);
+                table.addCell(NumFormat.engNotate(stored), CellAlg.LEFTOPAD, stored, base);
+                table.addCell(NumFormat.engNotate(demand), CellAlg.LEFTOPAD, demand, demandColor);
+                table.addCell(NumFormat.engNotate(prod), CellAlg.LEFTOPAD, prod, highlight);
+                table.addCell(exportShare + "%", CellAlg.LEFTOPAD, exportShare, base);
+                table.addCell(NumFormat.formatCredit(credits), CellAlg.LEFTOPAD, credits, creditsColor);
+                table.addCell(NumFormat.engNotate(balance), CellAlg.LEFTOPAD, balance, balanceColor);
+                table.addCell(autarky + "%", CellAlg.LEFTOPAD, autarky, base);
     
                 table.pushRow(
                     null, null, null, CodexDataV2.getCommodityEntryId(com.getId()), null, null

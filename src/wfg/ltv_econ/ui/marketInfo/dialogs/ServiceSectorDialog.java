@@ -63,7 +63,7 @@ public final class ServiceSectorDialog extends DialogPanel {
         reg.setData(previewData);
         initialFreeWorkerRatio = WorkerPoolRegistry.get(market).getFreeWorkerRatio();
 
-        holo.borderAlpha = 0.7f;
+        mHolo.borderAlpha = 0.7f;
         backgroundDimAmount = 0.2f;
 
         buildUI();
@@ -76,7 +76,8 @@ public final class ServiceSectorDialog extends DialogPanel {
         titleLbl.autoSizeToWidth(PANEL_W);
         add(titleLbl).inTL(0f, pad*2);
 
-        final UIContainerAPI content = new UIContainer(PANEL_W, 0f);
+        final int contentW = PANEL_W - ComponentFactory.SCROLL_PANEL_WIDTH_PAD;
+        final UIContainerAPI content = new UIContainer(contentW, 0f);
 
         final float workerPool = WorkerPoolRegistry.get(market).getWorkerPool();
         
@@ -189,7 +190,7 @@ public final class ServiceSectorDialog extends DialogPanel {
         }
 
         content.setHeight(cumulativeYOffset);
-        add(ComponentFactory.wrapWithScrollPanel(content, PANEL_W, PANEL_H - 20 - BUTTON_H - opad)).inBL(0f, BUTTON_H + opad);
+        add(ComponentFactory.wrapWithScrollPanel(content, contentW, PANEL_H - 20 - BUTTON_H - opad)).inBL(0f, BUTTON_H + opad);
     }
 
     private final float getNewFreeWorkerRatio() {

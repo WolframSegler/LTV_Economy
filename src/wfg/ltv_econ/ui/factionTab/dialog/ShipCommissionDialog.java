@@ -6,6 +6,7 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
@@ -28,19 +29,18 @@ import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.PlannedOrdersPanel;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.container.DockPanel;
-import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
+import wfg.native_ui.ui.table.ListTable;
+import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.IconValuePair;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
@@ -60,22 +60,7 @@ public final class ShipCommissionDialog extends DockPanel {
     @Override
     public void buildUI() {
         clearChildren();
-
-        final FactionShipInventory inv = StaticData.inv;
-
-        final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
-
-        final int width = (int) mContentContainer.getWidth();
-        final UIContainerAPI content = new UIContainer(width, 0f);
-
-        float yCoord = 0f;
-        for (String hullId : faction.getKnownShips()) {
-            final HullRow row = new HullRow(width, ROW_H, settings.getHullSpec(hullId));
-            content.add(row).inTL(0f, yCoord);
-            yCoord += ROW_H + pad;
-        }
-        content.setHeight(yCoord);
-        add(ComponentFactory.wrapWithScrollPanel(content, width, mContentContainer.getHeight())).inTL(0f, hpad);
+        add(new HullList()).inTL(0f, 0f);
     }
 
     private final void addOrder(String hullId, int count) {
@@ -88,8 +73,33 @@ public final class ShipCommissionDialog extends DockPanel {
         content.grid.scrollToBottom();
     }
 
-    private class HullRow extends UIContainer implements UIBuildableAPI,
-        HasInteraction, HasHoverGlow, HasTooltip, HasAudioFeedback
+    private final class HullList extends ListTable<String, HullRow> {
+
+        HullList() {
+            super(mContentContainer.getWidth(), mContentContainer.getHeight(), ROW_H, pad);
+            mAddRowGap = true;
+            buildUI();
+        }
+
+        protected List<String> getDataList() {
+            final FactionShipInventory inv = StaticData.inv;
+            final FactionAPI faction = Global.getSector().getFaction(inv.factionID);
+            return new ArrayList<>(faction.getKnownShips());
+        }
+
+        protected HullRow createWidget(String hullId, int index) {
+            return new HullRow(settings.getHullSpec(hullId));
+        }
+
+        protected void onWidgetClicked(HullRow source) {}
+
+        protected String getEmptyMessage() {
+            return "";
+        }
+    }
+
+    private class HullRow extends UIContainer
+        implements WidgetAPI<HullRow>, HasInteraction, HasHoverGlow, HasTooltip, HasAudioFeedback
     {
         public final InteractionComp<HullRow> interaction = comp().get(NativeComponents.INTERACTION);
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
@@ -98,10 +108,9 @@ public final class ShipCommissionDialog extends DockPanel {
         private final ShipHullSpecAPI spec;
         private final PlannedOrder order;
 
-        public HullRow(int width, int height, ShipHullSpecAPI spec) {
-            super(width, height);
+        public HullRow(ShipHullSpecAPI spec) {
             this.spec = spec;
-            this.order =  ShipProductionManager.getProductionCost(spec);
+            this.order = ShipProductionManager.getProductionCost(spec);
 
             interaction.onClicked = (row, isLeftClick) -> {
                 int count = 1;
@@ -134,11 +143,12 @@ public final class ShipCommissionDialog extends DockPanel {
                     opad*2, highlight, str("uiCtrlTxt"), str("uiShift"), str("uiClickTxt")
                 );
             };
-
-            buildUI();
         }
 
-        @Override
+        public InteractionComp<HullRow> getInteraction() {
+            return interaction;
+        }
+
         public void buildUI() {
             clearChildren();
             final int nameW = 150;
@@ -169,7 +179,7 @@ public final class ShipCommissionDialog extends DockPanel {
         public void processInputImpl(List<InputEventAPI> events) {
             super.processInputImpl(events);
             if (!NativeUiUtils.containsMouse(mPos)) return;
-            
+
             for (InputEventAPI e : events) {
                 if (!e.isConsumed() && e.isKeyboardEvent() && e.getEventValue() == Keyboard.KEY_F2) {
                     settings.showCodex(CodexDataV2.getShipEntryId(spec.getHullId()));

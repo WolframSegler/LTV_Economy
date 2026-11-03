@@ -85,7 +85,7 @@ public final class ManagePopulationDialog extends DialogPanel {
 
         m_market = market;
 
-        holo.borderAlpha = 0.8f;
+        mHolo.borderAlpha = 0.8f;
         backgroundDimAmount = 0.2f;
 
         buildUI();
@@ -347,7 +347,7 @@ public final class ManagePopulationDialog extends DialogPanel {
                         log.warn(e);
                     }
 
-                    policyContainer.getContentPanel()
+                    policyContainer.getContentContainer()
                         .add(new PosterPanel(policyWidth, policyHeight, policy, data, source.interaction.onClicked))
                         .inBL(pad + posterIndex*(policyWidth + pad), hpad);
 
@@ -370,7 +370,7 @@ public final class ManagePopulationDialog extends DialogPanel {
                 log.warn(e);
             }
 
-            policyContainer.getContentPanel()
+            policyContainer.getContentContainer()
                 .add(new PosterPanel(policyWidth, policyHeight, policy, data, listener))
                 .inBL(pad + posterIndex*(policyWidth + pad), hpad);
 

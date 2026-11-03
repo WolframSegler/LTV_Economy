@@ -16,7 +16,7 @@ public final class AddShipDialog extends DialogPanel {
         this.widget = widget;
 
         backgroundDimAmount = 0.1f;
-        holo.borderAlpha = 0.66f;
+        mHolo.borderAlpha = 0.66f;
 
         setConfirmShortcut();
 

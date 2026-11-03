@@ -608,7 +608,7 @@ public final class IndustryWidget extends UIContainer implements
             super(500, 100, null, str("uiTxtResetTradeSuspension"), str("uiConfirm"), str("uiCancel"));
 
             backgroundDimAmount = 0.1f;
-            holo.borderAlpha = 0.66f;
+            mHolo.borderAlpha = 0.66f;
 
             setConfirmShortcut();
         }

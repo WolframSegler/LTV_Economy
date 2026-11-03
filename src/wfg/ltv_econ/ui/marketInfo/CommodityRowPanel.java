@@ -24,11 +24,11 @@ import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
+import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -41,7 +41,7 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
 public final class CommodityRowPanel extends UIContainer implements
-    HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction, UIBuildableAPI
+    HasTooltip, HasHoverGlow, HasAudioFeedback, HasInteraction, WidgetAPI<CommodityRowPanel>
 {
     private static final SpriteAPI EXPORTS_ICON = settings.getSprite("commodity_markers", "exports");
 
@@ -52,17 +52,14 @@ public final class CommodityRowPanel extends UIContainer implements
     public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
     public final InteractionComp<CommodityRowPanel> interaction = comp().get(NativeComponents.INTERACTION);
 
-    public final CommodityCell cell;
-    private final MarketAPI market;
+    public final CommodityCell mCell;
+    private final MarketAPI mMarket;
 
-    public CommodityRowPanel(MarketAPI market, String comID,
-        int width, int height, UIPanelAPI tpAnchor
-    ) {
-        super(width, height);
+    public CommodityRowPanel(MarketAPI market, String comID, UIPanelAPI tpAnchor) {
+        super();
 
-        final EconomyEngine engine = EconomyEngine.instance();
-        cell = engine.getComCell(comID, market.getId());
-        this.market = market;
+        mCell = EconomyEngine.instance().getComCell(comID, market.getId());
+        mMarket = market;
 
         glow.color = base;
         glow.type = GlowType.UNDERLAY;
@@ -75,35 +72,33 @@ public final class CommodityRowPanel extends UIContainer implements
         tooltip.codexID = CodexDataV2.getCommodityEntryId(comID);
         tooltip.expandTxt = str("uiTpShowLegend");
         tooltip.unexpandTxt = str("uiHide");
-
-        buildUI();
     }
 
     public void buildUI() {
         final int textW = 80;
         final int rowH = (int) getHeight();
 
-        final SpriteElement comIcon = new SpriteElement(rowH, rowH, cell.spec.getIconName(), null, null);
+        final SpriteElement comIcon = new SpriteElement(rowH, rowH, mCell.spec.getIconName(), null, null);
         add(comIcon).inBL(2f, 0f);
 
-        final float consumption = cell.getConsumption(true);
+        final float consumption = mCell.getConsumption(true);
         final String amountStr = consumption <= 0f ? str("notApplicable"):
-            NumFormat.engNotate(cell.getStored() / consumption) + str("uiSingleLetterDay");
+            NumFormat.engNotate(mCell.getStored() / consumption) + str("uiSingleLetterDay");
 
         final LabelAPI amountLbl = settings.createLabel(Strings.X + amountStr, Fonts.INSIGNIA_LARGE);
         amountLbl.autoSizeToWidth(textW);
         final float textHeight = amountLbl.computeTextHeight(amountLbl.getText());
-        amountLbl.setColor(market.getFaction().getBaseUIColor());
+        amountLbl.setColor(mMarket.getFaction().getBaseUIColor());
         add(amountLbl).inBL(pad*2 + rowH, (rowH - textHeight) / 2f);
 
-        final SpriteElement stockIcon = UIUtils.getStockpilesIcon(cell, iconSize, base);
+        final SpriteElement stockIcon = UIUtils.getStockpilesIcon(mCell, iconSize, base);
         add(stockIcon).inBL(pad*3 + rowH + textW, (rowH - iconSize) / 2f);
 
         final UIPanelAPI infoBar = new CommodityBarPanel(85, iconSize,
-            true, cell);
+            true, mCell);
         add(infoBar).inBL(pad*4 + rowH + textW + iconSize, (rowH - iconSize) / 2f);
 
-        if (cell.getTotalExports() > 0d) {
+        if (mCell.getTotalExports() > 0d) {
             final SpriteElement iconPanel = new SpriteElement(rowH - 4, rowH - 4,
                 EXPORTS_ICON, null, null);
 
@@ -111,11 +106,11 @@ public final class CommodityRowPanel extends UIContainer implements
         }
 
         tooltip.builder = (tp, expanded) -> {
-            final String comDesc = settings.getDescription(cell.comID, Type.RESOURCE).getText1();
+            final String comDesc = settings.getDescription(mCell.comID, Type.RESOURCE).getText1();
             final String timerStr = "    -   " + strf("uiSuffixDaysOfStock", amountStr);
 
             tp.setParaFont(Fonts.ORBITRON_12);
-            final LabelAPI title = tp.addPara(cell.spec.getName(), market.getFaction().getBaseUIColor(), pad);
+            final LabelAPI title = tp.addPara(mCell.spec.getName(), mMarket.getFaction().getBaseUIColor(), pad);
             title.setText(title.getText() + timerStr);
 
             tp.setParaFontDefault();
@@ -130,20 +125,20 @@ public final class CommodityRowPanel extends UIContainer implements
             if (!expanded) {
                 tp.setParaFont(Fonts.ORBITRON_12);
                 tp.addSectionHeading(str("uiTitleStockpilesTradeDemand"), Alignment.MID, opad);
-                TooltipUtils.createComStockpilesChangeBreakdown(tp, cell);
+                TooltipUtils.createComStockpilesChangeBreakdown(tp, mCell);
                 tp.addSpacer(opad);
-                TooltipUtils.createComTargetBreakdown(tp, cell);
+                TooltipUtils.createComTargetBreakdown(tp, mCell);
 
                 tp.setParaFont(Fonts.ORBITRON_12);
                 tp.addSectionHeading(str("uiTitleProductionConsumption"), Alignment.MID, opad);
-                TooltipUtils.createComProductionBreakdown(tp, cell);
+                TooltipUtils.createComProductionBreakdown(tp, mCell);
                 
                 tp.addSpacer(hpad);
                 tp.setParaFont(Fonts.ORBITRON_12);
-                TooltipUtils.createComConsumptionBreakdown(tp, cell);
+                TooltipUtils.createComConsumptionBreakdown(tp, mCell);
 
                 tp.addSectionHeading(str("uiTitleTradeLedger"), Alignment.MID, opad);
-                TooltipUtils.createComTradeLedgerSection(tp, cell);
+                TooltipUtils.createComTradeLedgerSection(tp, mCell);
                 
                 tp.addPara(str("uiTpTxtCommodityWidget1"), gray, opad);
 
@@ -162,6 +157,10 @@ public final class CommodityRowPanel extends UIContainer implements
                 tp.addSpacer(opad);
             }
         };
+    }
+
+    public InteractionComp<CommodityRowPanel> getInteraction() {
+        return interaction;
     }
 
     /**

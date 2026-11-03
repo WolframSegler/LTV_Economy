@@ -39,6 +39,7 @@ import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.economy.fleet.TradeMission.MissionStatus;
 import wfg.ltv_econ.economy.market.ConcurrentMarketData;
 import wfg.ltv_econ.economy.market.MarketPopulationData;
+import wfg.ltv_econ.economy.planning.IndustryBalancer;
 import wfg.ltv_econ.economy.raids.CommodityCellGroundRaidObjective;
 import wfg.ltv_econ.economy.raids.LtvShipWeaponsGroundRaidObjective;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
@@ -48,6 +49,7 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.intel.PlayerMarketBombardedIntel;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
@@ -103,6 +105,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     protected int lastTradeCycle = EconConfig.TRADE_INTERVAL;
     protected boolean midDayApplied = false;
 
+    private boolean mBalancerCheckPending = true;
+
     public static EconomyEngine instance() {
         return LtvEconSaveData.instance().economyEngine;
     }
@@ -138,6 +142,11 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     public boolean isDone() { return false;}
     public boolean runWhilePaused() { return false;}
     public final void advance(float delta) {
+        if (mBalancerCheckPending && Attachments.getScreenPanel() != null) {
+            mBalancerCheckPending = false;
+            IndustryBalancer.showIfSlackDetected();
+        }
+
         final CampaignClockAPI clock = Global.getSector().getClock();
         final int hour = clock.getHour();
         final int dayKey = (clock.getCycle() << 10) + (clock.getMonth() << 5) + clock.getDay();

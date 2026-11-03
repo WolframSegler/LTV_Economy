@@ -56,7 +56,7 @@ import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.CheckboxButton;
 import wfg.native_ui.ui.interaction.UIClickable;
 import wfg.native_ui.ui.widget.Button.CutStyle;
-import wfg.native_ui.ui.table.GridTable;
+import wfg.native_ui.ui.table.ListTable;
 import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.widget.MultiSelect;
@@ -72,7 +72,6 @@ public final class WorkerAllocationDialog extends DialogPanel {
     private static final int PANEL_H = 690;
     private static final int TITLE_H = 30;
     private static final int LEFT_SIDE_W = 200;
-    private static final int WIDGET_W =  LEFT_SIDE_W - pad * 2;
     private static final int CREATE_PLAN_BTN_H = 50;
     private static final int WIDGET_H = 40;
     private static final int CONTENT_PANEL_W = PANEL_W - LEFT_SIDE_W - hpad;
@@ -84,13 +83,13 @@ public final class WorkerAllocationDialog extends DialogPanel {
     private static final int GOAL_PANEL_H = 70;
 
     private ContentPanel contentPanel;
-    private PlanSelectionGrid gridPanel;
+    private PlanSelectionList gridPanel;
 
     public WorkerAllocationDialog() {
         super(PANEL_W, PANEL_H, null, null, str("uiDismiss"));
 
         backgroundDimAmount = 0.2f;
-        holo.borderAlpha = 0.8f;
+        mHolo.borderAlpha = 0.8f;
 
         setConfirmShortcut();
 
@@ -123,17 +122,17 @@ public final class WorkerAllocationDialog extends DialogPanel {
         });
         add(createPlanBtn).inTL(0f, TITLE_H);
 
-        gridPanel = new PlanSelectionGrid(contentPanel);
+        gridPanel = new PlanSelectionList(contentPanel);
         add(gridPanel).inBL(0f, 0f);
     }
 
-    public class PlanSelectionGrid extends GridTable<WorkerAllocationPlan, PlanSelectionWidget> implements HasOutline {
+    public class PlanSelectionList extends ListTable<WorkerAllocationPlan, PlanSelectionWidget> implements HasOutline {
 
-        public PlanSelectionGrid(ContentPanel content) {
-            super(LEFT_SIDE_W, PANEL_H - CREATE_PLAN_BTN_H, WIDGET_W, WIDGET_H, pad);
+        public PlanSelectionList(ContentPanel content) {
+            super(LEFT_SIDE_W, PANEL_H - CREATE_PLAN_BTN_H, WIDGET_H, pad);
 
-            uniformOuterGap = true;
-            isSelectionEnabled = true;
+            mIsSelectionEnabled = true;
+            mAddRowGap = true;
 
             buildUI();
         }
@@ -147,11 +146,11 @@ public final class WorkerAllocationDialog extends DialogPanel {
         }
 
         protected void onWidgetClicked(PlanSelectionWidget source) {
-            if (selectedWidget != null) {
-                selectedWidget.isSelected = false;
-                selectedWidget.buildUI();
+            if (mSelectedWidget != null) {
+                mSelectedWidget.isSelected = false;
+                mSelectedWidget.buildUI();
             }
-            selectedWidget = source;
+            mSelectedWidget = source;
             source.isSelected = true;
             contentPanel.selectedPlan = source.plan.copy();
 
@@ -169,21 +168,19 @@ public final class WorkerAllocationDialog extends DialogPanel {
     {
         private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
         private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
-        private final BorderRenderer border = new BorderRenderer(UI_BORDER_4, true, WIDGET_W, WIDGET_H);
+        private final BorderRenderer border = new BorderRenderer(UI_BORDER_4, true, 0f, 0f);
         private final WorkerAllocationPlan plan;
 
         public boolean isSelected = false;
 
         public PlanSelectionWidget(WorkerAllocationPlan plan) {
-            super(WIDGET_W, WIDGET_H, null);
+            super(0f, 0f, null);
             this.plan = plan;
 
             glow.type = GlowType.UNDERLAY;
             glow.glowBrightness = 0.6f;
             glow.flashBrightness = 0.9f;
             glow.color = base;
-
-            border.centerColor = UIColors.WIDGET_BG;
 
             tooltip.width = 500f;
             tooltip.builder = (tp, expanded) -> {
@@ -193,13 +190,15 @@ public final class WorkerAllocationDialog extends DialogPanel {
 
                 tp.addPara(str(plan.isCustom ? "uiTpTxtCustomWorkerAllocationPlanNotice" : "uiTpTxtDefaultWorkerAllocationPlanNotice"), gray, pad);
             };
-
-            buildUI();
         }
 
         @Override
         public void buildUI() {
             clearChildren();
+
+            final float w = getWidth();
+            final float h = getHeight();
+            border.setSize(w, h);
 
             final int iconS = 32;
 
@@ -209,7 +208,7 @@ public final class WorkerAllocationDialog extends DialogPanel {
 
             final LabelAPI title = settings.createLabel(plan.id, Fonts.ORBITRON_20AA);
             title.setAlignment(Alignment.MID);
-            add(title).inRMid(pad).setSize(WIDGET_W - iconS - pad, WIDGET_H);
+            add(title).inRMid(pad).setSize(w - iconS - pad, h);
         }
 
         @Override
@@ -646,26 +645,26 @@ public final class WorkerAllocationDialog extends DialogPanel {
             super(460, 350, null, str("uiDialogTitleSelectWorkerAllocationPlanGoal"), str("uiCancel"));
 
             backgroundDimAmount = 0.1f;
-            holo.borderAlpha = 0.66f;
+            mHolo.borderAlpha = 0.66f;
 
             setConfirmShortcut();
 
-            final GoalRegistryGrid grid = new GoalRegistryGrid(this, content);
+            final GoalRegistryList grid = new GoalRegistryList(this, content);
             add(grid).inTL(0f, 25f);
         }
     }
 
-    public static class GoalRegistryGrid extends GridTable<String, GoalRegistryWidget> {
+    public static class GoalRegistryList extends ListTable<String, GoalRegistryWidget> {
         private final ContentPanel content;
         private final DialogPanel dialog;
 
-        public GoalRegistryGrid(DialogPanel dialog, ContentPanel content) {
-            super(460, 330, 450, 30, hpad);
+        public GoalRegistryList(DialogPanel dialog, ContentPanel content) {
+            super(460, 330, 30, hpad);
             this.content = content;
             this.dialog = dialog;
 
-            uniformOuterGap = true;
-            isSelectionEnabled = true;
+            mIsSelectionEnabled = true;
+            mAddRowGap = true;
             buildUI();
         }
 
@@ -677,7 +676,6 @@ public final class WorkerAllocationDialog extends DialogPanel {
             return new GoalRegistryWidget(id);
         }
 
-        @Override
         protected void onWidgetClicked(GoalRegistryWidget source) {
             content.selectedPlan.goals.add(PlanningGoalRegistry.createGoal(source.goalId));
             content.buildUI();

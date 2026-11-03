@@ -24,12 +24,12 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.factionTab.FactionManagementPanel;
 import wfg.ltv_econ.ui.outpostsTab.ColonyPopulationTable;
 import wfg.ltv_econ.ui.outpostsTab.FactionResourcesTable;
-import wfg.ltv_econ.ui.reusable.AbstractTabButtonInjector;
 import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.core.UIElementAPI;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
+import wfg.utils.ui.AbstractTabButtonInjector;
 
 public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
     private static final Object outpostRowMarketWrapperField = findMarketHolder();

@@ -17,51 +17,34 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.HoverGlowComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
+import wfg.native_ui.ui.table.ListTable;
+import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
 public final class FactionSelectionDialog extends DockPanel {
     private static final int ROW_H = 32;
-    
+
     private final UIBuildableAPI mContent;
 
     public FactionSelectionDialog(UIBuildableAPI content) {
         super(300, 400, Side.BOTTOM);
-
         mContent = content;
-
         buildUI();
     }
 
     @Override
     public void buildUI() {
         clearChildren();
-
-        final int width = (int) mContentContainer.getWidth();
-        final UIContainerAPI content = new UIContainer(width, 0f);
-        final List<FactionSpecAPI> factions = new ArrayList<>(EconomyConstants.visibleFactions);
-        factions.add(settings.getFactionSpec(Factions.PLAYER));
-
-        float yCoord = 0f;
-        for (FactionSpecAPI faction : factions) {
-            final DebugFactionRow row = new DebugFactionRow(
-                width, ROW_H, faction, this::onFactionSelected
-            );
-            content.add(row).inTL(0f, yCoord);
-            yCoord += ROW_H + pad;
-        }
-        content.setHeight(yCoord);
-        add(ComponentFactory.wrapWithScrollPanel(content, width, mContentContainer.getHeight())).inTL(0f, 0f);
+        add(new FactionList()).inTL(0f, 0f);
     }
 
     private void onFactionSelected(FactionSpecAPI faction) {
@@ -69,26 +52,49 @@ public final class FactionSelectionDialog extends DockPanel {
         mContent.buildUI();
     }
 
-    private static class DebugFactionRow extends UIContainer implements UIBuildableAPI,
-        HasInteraction, HasHoverGlow, HasAudioFeedback
+    private final class FactionList extends ListTable<FactionSpecAPI, DebugFactionRow> {
+        FactionList() {
+            super(mContentContainer.getWidth(), mContentContainer.getHeight(), ROW_H, 0);
+            mAddRowGap = false;
+            buildUI();
+        }
+
+        protected List<FactionSpecAPI> getDataList() {
+            final List<FactionSpecAPI> factions = new ArrayList<>(EconomyConstants.visibleFactions);
+            factions.add(settings.getFactionSpec(Factions.PLAYER));
+            return factions;
+        }
+
+        protected DebugFactionRow createWidget(FactionSpecAPI faction, int index) {
+            return new DebugFactionRow(faction, f -> onFactionSelected(f));
+        }
+
+        protected void onWidgetClicked(DebugFactionRow source) {}
+
+        protected String getEmptyMessage() {
+            return "";
+        }
+    }
+
+    private static final class DebugFactionRow extends UIContainer
+        implements WidgetAPI<DebugFactionRow>, HasInteraction, HasHoverGlow, HasAudioFeedback
     {
         public final InteractionComp<DebugFactionRow> interaction = comp().get(NativeComponents.INTERACTION);
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
 
         private final FactionSpecAPI faction;
 
-        public DebugFactionRow(int width, int height, FactionSpecAPI faction,
-            Consumer<FactionSpecAPI> onSelect
-        ) {
-            super(width, height);
+        DebugFactionRow(FactionSpecAPI faction, Consumer<FactionSpecAPI> onSelect) {
             this.faction = faction;
 
             interaction.onClicked = (row, isLeftClick) -> onSelect.accept(faction);
 
             glow.type = GlowType.UNDERLAY;
             glow.color = base;
+        }
 
-            buildUI();
+        public InteractionComp<DebugFactionRow> getInteraction() {
+            return interaction;
         }
 
         @Override
@@ -97,7 +103,7 @@ public final class FactionSelectionDialog extends DockPanel {
             final int iconSize = 28;
 
             final SpriteElement crestIcon = new SpriteElement(iconSize, iconSize, faction.getCrest(), null, null);
-            add(crestIcon).inBL(pad, (ROW_H - iconSize) / 2f);
+            add(crestIcon).inBL(pad, (getHeight() - iconSize) / 2f);
 
             final LabelAPI nameLabel = settings.createLabel(faction.getDisplayName(), Fonts.ORBITRON_12);
             nameLabel.setColor(faction.getBaseUIColor());

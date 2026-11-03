@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -16,13 +15,12 @@ import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.OutlineComp;
 import wfg.native_ui.ui.functional.ClickHandler;
+import wfg.native_ui.ui.table.ListTable;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 
@@ -30,18 +28,18 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-public final class LtvCommodityPanel extends UIContainer implements HasBackground, HasOutline,
-    UIBuildableAPI
-{
+public final class LtvCommodityPanel extends UIContainer implements HasBackground, HasOutline, UIBuildableAPI {
     public static final int STANDARD_WIDTH = 284;
+    private static final int ROW_H = 28;
 
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
     public final OutlineComp outline = comp().get(NativeComponents.OUTLINE);
 
-    public String mHeaderTxt;
-    public final List<CommodityRowPanel> mCommodityRows = new ArrayList<>();
+    public final String mHeaderTxt;
     public final MarketAPI mMarket;
     public ClickHandler<CommodityRowPanel> mSelectionListener;
+
+    private CommodityList mCommodityList;
 
     public LtvCommodityPanel(int width, int height, MarketAPI market) {
         this(width, height, str("uiTitleCommodities"), market);
@@ -49,25 +47,16 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
 
     public LtvCommodityPanel(int width, int height, String headerTxt, MarketAPI market) {
         super(width, height);
-
         mMarket = market;
         mHeaderTxt = headerTxt;
 
         bg.alpha = 0.65f;
-    }
 
-    public static Comparator<CommoditySpecAPI> getCommodityOrderComparator() {
-        return Comparator.comparingDouble(com -> com.getOrder());
+        buildUI();
     }
 
     public void buildUI() {
         clearChildren();
-
-        final List<CommoditySpecAPI> commodities = new ArrayList<>(EconomyConstants.econCommoditySpecs);
-        Collections.sort(commodities, getCommodityOrderComparator());
-        commodities.removeIf(com -> {
-            return EconomyEngine.instance().getComCell(com.getId(), mMarket.getId()).getActivityIndicator() <= 0f;
-        });
 
         final LabelAPI headerLbl = settings.createLabel(mHeaderTxt, Fonts.ORBITRON_12);
         RolfLectionUtil.getMethodAndInvokeDirectly("setBackgroundColor", headerLbl, dark);
@@ -81,41 +70,54 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
         bg.offset.setOffset(1, 1, -2, -headerH - 2);
         outline.offset.setOffset(1, 1, -2, -headerH - 2);
 
-        final int contentW = (int) getWidth() - 5;
-        final UIContainerAPI rowContainer = new UIContainer(contentW, 0f);
-        
-        final int rowWidth = (int) contentW - opad * 2;
-        final int rowHeight = 28;
-        int cumulativeYOffset = opad;
+        final float contentH = getHeight() - headerH;
 
-        for (CommoditySpecAPI com : commodities) {
-            final CommodityRowPanel comRow = new CommodityRowPanel(
-                mMarket, com.getId(), rowWidth, 
-                rowHeight, this
-            );
-
-            rowContainer.add(comRow).inTL(opad, cumulativeYOffset);
-
-            cumulativeYOffset += pad + 2 + rowHeight;
-
-            comRow.interaction.onClicked = mSelectionListener;
-
-            mCommodityRows.add(comRow);
-        }
-        rowContainer.setHeight(cumulativeYOffset);
-        add(ComponentFactory.wrapWithScrollPanel(rowContainer, contentW, getHeight() - headerH)).inTL(0f, headerH);
+        mCommodityList = new CommodityList(getWidth(), contentH);
+        add(mCommodityList).inTL(0f, headerH);
     }
 
     public void selectRow(String comID) {
-        final CommodityOnMarketAPI com = mMarket.getCommodityData(comID);
-        for (CommodityRowPanel row : mCommodityRows) {
-            row.glow.persistent = row.cell.spec == com;
+        for (CommodityRowPanel row : mCommodityList.rows()) {
+            row.glow.persistent = row.mCell.comID.equals(comID);
         }
     }
 
     public void selectRow(CommodityRowPanel selectedRow) {
-        for (CommodityRowPanel row : mCommodityRows) {
+        for (CommodityRowPanel row : mCommodityList.rows()) {
             row.glow.persistent = row == selectedRow;
+        }
+    }
+
+    private final class CommodityList extends ListTable<CommoditySpecAPI, CommodityRowPanel> {
+        CommodityList(float width, float height) {
+            super(width, height, ROW_H, pad);
+            mAddRowGap = true;
+            buildUI();
+        }
+
+        protected List<CommoditySpecAPI> getDataList() {
+            final List<CommoditySpecAPI> commodities = new ArrayList<>(EconomyConstants.econCommoditySpecs);
+            Collections.sort(commodities, Comparator.comparingDouble(com -> com.getOrder()));
+            commodities.removeIf(com ->
+                EconomyEngine.instance().getComCell(com.getId(), mMarket.getId()).getActivityIndicator() <= 0f
+            );
+            return commodities;
+        }
+
+        protected CommodityRowPanel createWidget(CommoditySpecAPI com, int index) {
+            final CommodityRowPanel row = new CommodityRowPanel(mMarket, com.getId(), LtvCommodityPanel.this);
+            row.interaction.onClicked = mSelectionListener;
+            return row;
+        }
+
+        protected void onWidgetClicked(CommodityRowPanel source) {}
+
+        protected String getEmptyMessage() {
+            return "";
+        }
+
+        final List<CommodityRowPanel> rows() {
+            return mWidgets;
         }
     }
 }

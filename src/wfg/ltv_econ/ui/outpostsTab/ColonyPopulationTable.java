@@ -9,11 +9,11 @@ import java.awt.Color;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.PlanetInfoParams;
 
 import wfg.ltv_econ.economy.engine.EconomyEngine;
@@ -29,22 +29,25 @@ import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.functional.ClickHandler;
+import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.TableRow;
-import wfg.native_ui.ui.table.SortableTable.cellAlg;
+import wfg.native_ui.ui.table.SortableTable.CellAlg;
 import wfg.native_ui.util.NumFormat;
 
 public final class ColonyPopulationTable extends UIContainer implements HasBackground {
     static final int PANEL_W = 935;
 
-    private static final PlanetInfoParams params = new PlanetInfoParams();
-    static {
-        params.showName = true;
-        params.showConditions = false;
-        params.showHazardRating = false;
-        params.scaleEvenWhenShowingName = true;
-    }
+    // TODO with the new update there will be label font options. Update to match vanilla fonts.
+    private static final PlanetInfoParams params = new PlanetInfoParams() {
+        {
+            showName = true;
+            showConditions = false;
+            showHazardRating = false;
+            scaleEvenWhenShowingName = true;
+        }
+    };
 
     private final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
@@ -78,20 +81,10 @@ public final class ColonyPopulationTable extends UIContainer implements HasBackg
 
         if (engine.getMarketPopulationData().size() > 0) {
             for (MarketPopulationData data : engine.getMarketPopulationData().values()) {
-                final UIPanelAPI namePanel = new UIContainer(nameW, rowH);
-                final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(nameW, false);
+                final UIContainerAPI colonyPanel = new UIContainer(nameW, rowH);
                 final MarketAPI market = data.market;
-                final SectorEntityToken entity = market.getPrimaryEntity();
     
-                if (entity instanceof PlanetAPI) {
-                    nameTp.showPlanetInfo(market.getPlanetEntity(), nameW, rowH, params, 0f);
-                } else {
-                    nameTp.addImage(entity.getCustomEntitySpec().getIconName(), nameW, rowH, 0f);
-                    final LabelAPI lbl = nameTp.addPara(market.getName(), 0f);
-                    lbl.autoSizeToWidth(nameW).inBL(0f, pad);
-                    lbl.setAlignment(Alignment.MID);
-                }
-                ComponentFactory.addTooltip(nameTp, rowH, false, namePanel);
+                colonyPanel.add(getPlanetInfoContainer(market, nameW, rowH));
     
                 final int iconS = rowH/3;
                 final int PairW = iconW - opad;
@@ -106,14 +99,14 @@ public final class ColonyPopulationTable extends UIContainer implements HasBackg
                 final long credits = engine.getCredits(data.marketID);
                 final Color creditColor = credits < 0l ? negative : highlight;
 
-                table.addCell(namePanel, cellAlg.LEFT, market.getDaysInExistence(), null);
-                table.addCell(market.getSize(), cellAlg.MID, null, null);
-                table.addCell(healthPair, cellAlg.LEFTOPAD, data.getHealth(), null);
-                table.addCell(happinessPair, cellAlg.LEFTOPAD, data.getHappiness(), null);
-                table.addCell(cohesionPair, cellAlg.LEFTOPAD, data.getSocialCohesion(), null);
-                table.addCell(consciousnessPair, cellAlg.LEFTOPAD, data.getClassConsciousness(), null);
-                table.addCell(NumFormat.formatCredit(credits), cellAlg.MID, credits, creditColor);
-                table.addCell(employment + "%", cellAlg.MID, employment, null);
+                table.addCell(colonyPanel, CellAlg.LEFT, market.getDaysInExistence(), null);
+                table.addCell(market.getSize(), CellAlg.MID, null, null);
+                table.addCell(healthPair, CellAlg.LEFTOPAD, data.getHealth(), null);
+                table.addCell(happinessPair, CellAlg.LEFTOPAD, data.getHappiness(), null);
+                table.addCell(cohesionPair, CellAlg.LEFTOPAD, data.getSocialCohesion(), null);
+                table.addCell(consciousnessPair, CellAlg.LEFTOPAD, data.getClassConsciousness(), null);
+                table.addCell(NumFormat.formatCredit(credits), CellAlg.MID, credits, creditColor);
+                table.addCell(employment + "%", CellAlg.MID, employment, null);
 
                 final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                     final ManagePopulationDialog dialogPanel = new ManagePopulationDialog(market);
@@ -131,5 +124,33 @@ public final class ColonyPopulationTable extends UIContainer implements HasBackg
         table.outline.enabled = true;
         add(table).inTL(0f, 0f);
         table.sortRows(0, false);
+    }
+
+    public static final TooltipMakerAPI getPlanetInfoContainer(final MarketAPI market, float width, float height) {
+        final TooltipMakerAPI nameTp = ComponentFactory.createTooltip(width, false);
+        final SectorEntityToken entity = market.getPrimaryEntity();
+
+        if (entity instanceof PlanetAPI planet) {
+            nameTp.showPlanetInfo(planet, width, height, params, 0f);
+            nameTp.getPrev().getPosition().inTMid(0f);
+        } else {
+            nameTp.setParaFont(Fonts.ORBITRON_20AABOLD);
+            final LabelAPI lbl = nameTp.addPara(market.getName(), 0f);
+            lbl.autoSizeToWidth(width).inBMid(pad);
+            lbl.setAlignment(Alignment.MID);
+            lbl.setColor(settings.getColor("textNeutralColor")); // standardUIIconColor
+            final float lblH = lbl.getPosition().getHeight();
+
+            final float spriteH = Math.max(0f, height - lblH - pad*2);
+            final SpriteAPI sprite = settings.getSprite(entity.getCustomEntitySpec().getSpriteName());
+            final float sh = sprite.getHeight();
+            final float sw = sprite.getWidth();
+            final float fitHeight = Math.min(spriteH, sh * width / sw);
+
+            nameTp.addImage(entity.getCustomEntitySpec().getSpriteName(), width, fitHeight, 0f);
+            nameTp.getPrev().getPosition().inTMid(0f);
+        }
+
+        return nameTp;
     }
 }

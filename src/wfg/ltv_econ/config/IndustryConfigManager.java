@@ -34,7 +34,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 public final class IndustryConfigManager {
-    private IndustryConfigManager() {}
+    private IndustryConfigManager() {};
     private static final ArrayMap<String, String> IndToBaseInd = new ArrayMap<>(EconomyConstants.industryIDs.size());
 
     public static final float dynamicIndMarketScaleBase = 6f;
@@ -214,31 +214,34 @@ public final class IndustryConfigManager {
         float cumulativeBase = 0f;
 
         for (StatMod mod : base.getFlatMods().values()) {
-            if (mod.source.endsWith(CompatLayer.BASE_MOD_SUFFIX) && mod.value > 0) {
+            if (mod.source.endsWith(CompatLayer.BASE_MOD_SUFFIX) && mod.value > 0f) {
                 baseMod = baseMod == null ? mod : baseMod;
 
             } else {
                 if (!mod.source.equals(CompatLayer.DEMAND_RED_MOD) && 
                     !mod.source.endsWith(CompatLayer.MARKET_COND_MOD_SUFFIX) &&
-                    mod.value >= 0
+                    mod.value >= 0f
                 ) { cumulativeBase += mod.value; }
             }
         }
 
         // Since vanilla values are discrete integers
         final int vanillaValue = Math.round(baseMod != null ? baseMod.value : cumulativeBase);
-        final double expBase = 2;
+        final double expBase = 1.5d;
+        final double maxExponent = 3d;
 
         float value = vanillaValue;
         if (scaleWithMarketSize) {
             value = value - (ConfigUtils.TEST_MARKET_SIZE - 3);
-            final float zeroCount = Math.max(0f, value) - 1f;
+            final float rawExp = Math.max(0f, value) - 1f;
+            final float cappedExp = (float) Math.min(rawExp, maxExponent);
             if (value <= 1f) {
                 value = (float) Math.pow(10f, -1f * (1f - value)); 
             }
-            value = value * (float) Math.max(1f, Math.pow(expBase, zeroCount));
+            value *= (float) Math.max(1f, Math.pow(expBase, cappedExp));
         } else {
-            value *= Math.pow(expBase, Math.max(0, vanillaValue - 1));
+            final double cappedExp = Math.min(Math.max(0, vanillaValue - 1), maxExponent);
+            value *= Math.pow(expBase, cappedExp);
         }
         return value;
     }

@@ -29,7 +29,7 @@ import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.visual.PieChart;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.TableRow;
-import wfg.native_ui.ui.table.SortableTable.cellAlg;
+import wfg.native_ui.ui.table.SortableTable.CellAlg;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.visual.PieChart.PieSlice;
 import wfg.native_ui.ui.visual.TextWrapper;
@@ -312,9 +312,9 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
             final Color textColor = cell.market.getFaction().getBaseUIColor();
             final float value = cell.getProduction(true);
 
-            table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
-            table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
-            table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
+            table.addCell(iconPanel, CellAlg.LEFTPAD, null, null);
+            table.addCell(cell.market.getName(), CellAlg.LEFT, null, textColor);
+            table.addCell(NumFormat.engNotate(value), CellAlg.MID, value, textColor);
 
             final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                 if (!NativeUiUtils.isCtrlDown() || !isLeftClick) return;
@@ -359,9 +359,9 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
             final Color textColor = cell.market.getFaction().getBaseUIColor();
             final float value = cell.getConsumption(true);
 
-            table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
-            table.addCell(cell.market.getName(), cellAlg.LEFT, null, textColor);
-            table.addCell(NumFormat.engNotate(value), cellAlg.MID, value, textColor);
+            table.addCell(iconPanel, CellAlg.LEFTPAD, null, null);
+            table.addCell(cell.market.getName(), CellAlg.LEFT, null, textColor);
+            table.addCell(NumFormat.engNotate(value), CellAlg.MID, value, textColor);
 
             final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                 if (!NativeUiUtils.isCtrlDown() || !isLeftClick) return;

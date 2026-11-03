@@ -27,8 +27,8 @@ public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShip
         super(w, h, InventoryShipWidget.WIDTH, InventoryShipWidget.HEIGHT, opad*2);
         this.navbar = navbar;
 
-        uniformOuterGap = true;
-        justifyGrid = true;
+        mUniformOuterGap = true;
+        mJustifyGrid = true;
         
         buildUI();
     }
@@ -47,7 +47,7 @@ public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShip
     protected InventoryShipWidget createWidget(ShipTypeData item, int index) {
         final InventoryShipWidget widget = new InventoryShipWidget(item, navbar);
 
-        final int col = index % calculateColumns();
+        final int col = index % computeColCount();
         widget.tooltip.positioner = (tp, exp) -> {
             NativeUiUtils.anchorPanel(tp, widget, (col > 2 ?
                 AnchorType.LeftTop : AnchorType.RightTop), opad

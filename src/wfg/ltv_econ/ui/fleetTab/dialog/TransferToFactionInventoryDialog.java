@@ -41,7 +41,7 @@ public final class TransferToFactionInventoryDialog extends DialogPanel {
         this.fleetList = fleetList;
 
         backgroundDimAmount = 0.5f;
-        holo.borderAlpha = 0.66f;
+        mHolo.borderAlpha = 0.66f;
         setConfirmShortcut();
 
         buildUI();

@@ -31,9 +31,9 @@ public final class ConfirmEmbargoDialog extends DialogPanel  {
         this.caller = caller;
 
         backgroundDimAmount = 0f;
-        holo.setBackgroundAlpha(150, 175);
+        mHolo.setBackgroundAlpha(150, 175);
 
-        holo.borderAlpha = 0.85f;
+        mHolo.borderAlpha = 0.85f;
     }
 
     @Override

@@ -7,8 +7,8 @@ import com.fs.starfarer.campaign.comms.IntelTabData;
 
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
 import wfg.ltv_econ.ui.economyTab.EconomyOverviewPanel;
-import wfg.ltv_econ.ui.reusable.AbstractTabButtonInjector;
 import wfg.native_ui.ui.core.UIElementAPI;
+import wfg.utils.ui.AbstractTabButtonInjector;
 
 public final class IntelTabUIBuilder extends AbstractTabButtonInjector {
     private final IntelTabData tabData = CampaignEngine.getInstance().getUIData().getIntelData();

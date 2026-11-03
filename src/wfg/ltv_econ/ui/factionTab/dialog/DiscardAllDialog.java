@@ -20,7 +20,7 @@ public final class DiscardAllDialog extends DialogPanel {
         this.content = content;
 
         backgroundDimAmount = 0.1f;
-        holo.borderAlpha = 0.66f;
+        mHolo.borderAlpha = 0.66f;
 
         setConfirmShortcut();
     }

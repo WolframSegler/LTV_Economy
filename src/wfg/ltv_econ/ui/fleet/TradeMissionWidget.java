@@ -8,6 +8,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
@@ -18,13 +19,13 @@ import wfg.ltv_econ.economy.fleet.TradeMission;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
+import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.component.OutlineComp.OutlineType;
 import wfg.native_ui.ui.component.TooltipComp.TooltipBuilder;
-import wfg.native_ui.ui.container.DockPanel;
-import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
+import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.IconValuePair;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.widget.Slider;
@@ -37,7 +38,7 @@ import static wfg.ltv_econ.constant.Sprites.*;
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
-public final class TradeMissionWidget extends UIContainer implements UIBuildableAPI, HasTooltip {
+public final class TradeMissionWidget extends UIContainer implements WidgetAPI<TradeMissionWidget>, HasTooltip {
     private static final SpriteAPI SHIP_OUTLINE = settings.getSprite("icons", "ship_outline");
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
@@ -46,7 +47,7 @@ public final class TradeMissionWidget extends UIContainer implements UIBuildable
     private final TradeMission mission;
     private final boolean isSrcMarket;
 
-    public TradeMissionWidget(int w, int h, TradeMission mission, boolean isSrcMarket, DockPanel dock) {
+    public TradeMissionWidget(float w, float h, TradeMission mission, boolean isSrcMarket, UIComponentAPI tpAnchor) {
         super(w, h);
 
         border.setSize(w, h);
@@ -57,11 +58,15 @@ public final class TradeMissionWidget extends UIContainer implements UIBuildable
 
         tooltip.width = 500f;
         tooltip.positioner = (tp, exp) -> {
-            NativeUiUtils.anchorPanel(tp, dock, AnchorType.RightTop, pad*2);
+            NativeUiUtils.anchorPanel(tp, tpAnchor, AnchorType.RightTop, pad*2);
         };
         tooltip.builder = createMissionTp(mission, true);
         
         buildUI();
+    }
+
+    public InteractionComp<TradeMissionWidget> getInteraction() {
+        return null;
     }
 
     @Override

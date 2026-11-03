@@ -126,9 +126,9 @@ public final class ActiveQueuePanel extends UIContainer implements UIBuildableAP
     private class ActiveQueueGrid extends GridTable<ShipProductionOrder, ShipProductionWidget> {
         public ActiveQueueGrid(int width, int height) {
             super(width, height, ShipProductionWidget.WIDTH, ShipProductionWidget.HEIGHT, opad*2);
-            uniformOuterGap = true;
-            justifyGrid = false;
-            isSelectionEnabled = true;
+            mUniformOuterGap = true;
+            mJustifyGrid = false;
+            mIsSelectionEnabled = true;
             buildUI();
         }
 
@@ -155,8 +155,8 @@ public final class ActiveQueuePanel extends UIContainer implements UIBuildableAP
                 }
                 source.selectionState = WidgetSelectionState.REMOVE;
                 source.buildUI();
-                selectedWidget = source;
-                for (ShipProductionWidget widget : widgets) {
+                mSelectedWidget = source;
+                for (ShipProductionWidget widget : mWidgets) {
                     if (widget == source) continue;
 
                     widget.selectionState = WidgetSelectionState.SWAP;
@@ -171,11 +171,11 @@ public final class ActiveQueuePanel extends UIContainer implements UIBuildableAP
                 break;
 
             case SWAP:
-                StaticData.inv.swapActiveOrders(source.index, selectedWidget.index);
-                NativeUiUtils.swapPositions(source, selectedWidget);
+                StaticData.inv.swapActiveOrders(source.index, mSelectedWidget.index);
+                NativeUiUtils.swapPositions(source, mSelectedWidget);
 
                 source.buildUI();
-                selectedWidget.buildUI();
+                mSelectedWidget.buildUI();
 
                 clearSelection();
                 break;
@@ -187,11 +187,11 @@ public final class ActiveQueuePanel extends UIContainer implements UIBuildableAP
         }
 
         public final void clearSelection() {
-            for (ShipProductionWidget w : widgets) {
+            for (ShipProductionWidget w : mWidgets) {
                 w.selectionState = WidgetSelectionState.NONE;
                 w.buildUI();
             }
-            selectedWidget = null;
+            mSelectedWidget = null;
         }
     }
 }

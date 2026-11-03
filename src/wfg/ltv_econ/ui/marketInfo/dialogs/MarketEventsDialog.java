@@ -1,6 +1,10 @@
 package wfg.ltv_econ.ui.marketInfo.dialogs;
 
 import static wfg.native_ui.util.UIConstants.*;
+
+import java.util.ArrayList;
+
+import static wfg.ltv_econ.constant.strings.LocalizedStrings.str;
 import static wfg.native_ui.util.Globals.settings;
 
 import com.fs.starfarer.api.Global;
@@ -16,18 +20,19 @@ import wfg.ltv_econ.intel.market.events.MarketEvent;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.Attachments;
-import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
+import wfg.native_ui.ui.table.ListTable;
+import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
@@ -45,31 +50,48 @@ public final class MarketEventsDialog extends DockPanel {
         buildUI();
     }
 
-    @Override
     public void buildUI() {
-        final int width = (int) mContentContainer.getWidth();
+        clearChildren();
 
-        final LabelAPI title = settings.createLabel(LocalizedStrings.str("uiTitleCurrentEvents"), Fonts.INSIGNIA_LARGE);
+        final LabelAPI title = settings.createLabel(
+            LocalizedStrings.str("uiTitleCurrentEvents"), Fonts.INSIGNIA_LARGE);
         add(title).inTL(0f, opad);
 
-        final UIContainerAPI content = new UIContainer(width, 0f);
-
-        float yCoord = 0f;
-        for (MarketEvent event : data.getEvents()) {
-            if (!event.isVisible(data) && !DebugFlags.COLONY_DEBUG) continue;
-
-            final RowPanel row = new RowPanel(width - pad*2, ROW_H, event);
-            content.add(row).inTL(pad, yCoord);
-
-            yCoord += ROW_H + pad;
-        }
-
-        content.setHeight(yCoord);
-        final float scrollPanelH = mContentContainer.getHeight() - 30 - opad*2;
-        add(ComponentFactory.wrapWithScrollPanel(content, width, scrollPanelH)).inBL(0f, 0f);
+        final float listH = mContentContainer.getHeight() - 30 - opad * 2;
+        final EventList list = new EventList(mContentContainer.getWidth(), listH);
+        add(list).inBL(0f, 0f);
     }
 
-    public class RowPanel extends UIContainer implements HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground {
+    private final class EventList extends ListTable<MarketEvent, RowPanel> {
+        EventList(float width, float height) {
+            super(width, height, ROW_H, pad);
+            mAddRowGap = true;
+            buildUI();
+        }
+
+        protected ArrayList<MarketEvent> getDataList() {
+            final ArrayList<MarketEvent> events = new ArrayList<>();
+            for (MarketEvent event : data.getEvents()) {
+                if (!event.isVisible(data) && !DebugFlags.COLONY_DEBUG) continue;
+                events.add(event);
+            }
+            return events;
+        }
+
+        protected RowPanel createWidget(MarketEvent event, int index) {
+            return new RowPanel(event);
+        }
+
+        protected void onWidgetClicked(RowPanel source) {}
+
+        protected String getEmptyMessage() {
+            return str("uiDialogTxtMarketEventEmpty");
+        }
+    }
+
+    public final class RowPanel extends UIContainer implements
+        WidgetAPI<RowPanel>, HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground
+    {
         public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
         public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
@@ -77,9 +99,7 @@ public final class MarketEventsDialog extends DockPanel {
 
         private final MarketEvent event;
 
-        public RowPanel(int width, int height, MarketEvent event) {
-            super(width, height);
-
+        public RowPanel(MarketEvent event) {
             this.event = event;
 
             glow.type = GlowType.UNDERLAY;
@@ -87,14 +107,16 @@ public final class MarketEventsDialog extends DockPanel {
             bg.alpha = 0.1f;
 
             tooltip.width = 500f;
-            tooltip.builder = (tp, exp) -> {
-                event.createTooltip(data, tp);
-            };
+            tooltip.builder = (tp, exp) -> event.createTooltip(data, tp);
+        }
 
-            buildUI();
+        public InteractionComp<RowPanel> getInteraction() {
+            return null;
         }
 
         public void buildUI() {
+            clearChildren();
+
             final int iconSize = ROW_H - 4;
 
             try {
@@ -104,15 +126,14 @@ public final class MarketEventsDialog extends DockPanel {
             }
 
             final SpriteElement comIcon = new SpriteElement(
-                iconSize, iconSize, event.spec.iconPath,
-                null, null
+                iconSize, iconSize, event.spec.iconPath, null, null
             );
-            RowPanel.this.add(comIcon).inBL(pad, (ROW_H - iconSize) / 2f);
+            add(comIcon).inBL(pad, (getHeight() - iconSize) / 2f);
 
-            final LabelAPI comNameLabel = settings.createLabel(event.spec.name, Fonts.INSIGNIA_LARGE);
+            final LabelAPI comNameLabel = settings.createLabel(
+                event.spec.name, Fonts.INSIGNIA_LARGE);
             comNameLabel.setColor(event.spec.tags.contains("negative") ? negative : base);
-            final float labelW = comNameLabel.computeTextHeight(event.spec.name);
-            RowPanel.this.add(comNameLabel).inBL(iconSize + opad, (ROW_H - labelW) / 2f);
+            add(comNameLabel).inLMid(iconSize + opad);
         }
     }
 }

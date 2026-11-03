@@ -20,9 +20,9 @@ import wfg.ltv_econ.util.UIUtils;
 import wfg.ltv_econ.util.wrappers.MarketWrapper;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.utils.ui.CoreTabUIBuilder;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.MethodFields;
-import wfg.native_ui.ui.functional.ClickHandler;
 import wfg.native_ui.ui.util.IdentityMarker;
 
 import com.fs.starfarer.campaign.econ.Market;
@@ -265,7 +265,7 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
             LtvCommodityPanel.STANDARD_WIDTH, height, market
         );
 
-        final ClickHandler<CommodityRowPanel> listener = (source, isLeftClick) -> {
+        replacement.mSelectionListener = (source, isLeftClick) -> {
             if (!isLeftClick) return;
 
             CommodityRowPanel panel = ((CommodityRowPanel) source);
@@ -274,13 +274,11 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
 
             if (UIUtils.canViewPrices()) {
                 final ComDetailDialog dialogPanel = new ComDetailDialog(
-                    market, market.getFaction().getFactionSpec(), panel.cell.spec
+                    market, market.getFaction().getFactionSpec(), panel.mCell.spec
                 );
                 dialogPanel.show(0.3f, 0.3f);
             }
         };
-
-        replacement.mSelectionListener = listener;
         replacement.buildUI();
 
         // Got the Y offset by looking at the getY() difference of replacement and

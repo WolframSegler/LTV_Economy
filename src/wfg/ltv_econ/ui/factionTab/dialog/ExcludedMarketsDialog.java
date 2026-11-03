@@ -28,14 +28,13 @@ import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
 import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.interaction.UIClickable;
-import wfg.native_ui.ui.table.GridTable;
+import wfg.native_ui.ui.table.ListTable;
 import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 
 public final class ExcludedMarketsDialog extends DialogPanel {
     private static final SpriteAPI FORBIDDEN = settings.getSprite("ui", "forbidden");
     private static final int GRID_W = 400;
-    private static final int WIDGET_W = GRID_W - opad;
     private static final int WIDGET_H = 50;
 
     private static final PlanetInfoParams params = new PlanetInfoParams();
@@ -50,7 +49,7 @@ public final class ExcludedMarketsDialog extends DialogPanel {
         super(GRID_W, 600, null, null, str("uiDismiss"));
 
         backgroundDimAmount = 0.1f;
-        holo.borderAlpha = 0.66f;
+        mHolo.borderAlpha = 0.66f;
 
         setConfirmShortcut();
 
@@ -59,17 +58,17 @@ public final class ExcludedMarketsDialog extends DialogPanel {
         title.autoSizeToWidth(400);
         add(title).inTL(0f, 0f);
 
-        final PlayerMarketsGrid grid = new PlayerMarketsGrid();
-        add(grid).inTMid(30f);
+        final PlayerMarketsList list = new PlayerMarketsList();
+        add(list).inTMid(30f);
     }
 
-    public static class PlayerMarketsGrid extends GridTable<MarketAPI, PlayerMarketWidget> {
+    public static class PlayerMarketsList extends ListTable<MarketAPI, PlayerMarketWidget> {
 
-        public PlayerMarketsGrid() {
-            super(GRID_W, 500, WIDGET_W, WIDGET_H, hpad);
+        public PlayerMarketsList() {
+            super(GRID_W, 500, WIDGET_H, hpad);
 
-            uniformOuterGap = true;
-            isSelectionEnabled = true;
+            mIsSelectionEnabled = true;
+            mAddRowGap = true;
             buildUI();
         }
 
@@ -94,27 +93,34 @@ public final class ExcludedMarketsDialog extends DialogPanel {
             source.buildUI();
         }
 
+        @Override
         protected final String getEmptyMessage() {
             return str("uiNoStaticAssets");
         }
     }
 
-    public static class PlayerMarketWidget extends UIClickable<PlayerMarketWidget> implements WidgetAPI<PlayerMarketWidget>, HasHoverGlow {
+    public static class PlayerMarketWidget extends UIClickable<PlayerMarketWidget>
+        implements WidgetAPI<PlayerMarketWidget>, HasHoverGlow
+    {
         private final MarketAPI market;
 
         private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
 
         public PlayerMarketWidget(MarketAPI market) {
-            super(WIDGET_W, WIDGET_H, null);
+            super(WIDGET_H, WIDGET_H, null);
 
             this.market = market;
 
             glow.type = GlowType.UNDERLAY;
             glow.color = base;
-
-            buildUI();
         }
 
+        @Override
+        public InteractionComp<PlayerMarketWidget> getInteraction() {
+            return interaction;
+        }
+
+        @Override
         public void buildUI() {
             clearChildren();
 
@@ -131,16 +137,12 @@ public final class ExcludedMarketsDialog extends DialogPanel {
                 lbl.autoSizeToWidth(nameW).inBL(0f, pad);
                 lbl.setAlignment(Alignment.MID);
             }
-            ComponentFactory.addTooltip(nameTp, WIDGET_H, false, this).inBL(0f, 0f);
+            add(nameTp).inBL(0f, 0f);
 
             if (LtvEconSaveData.instance().playerFactionSettings.excludedMarketsFromWorkerAllocation.contains(market.getId())) {
                 final SpriteElement icon = new SpriteElement(36, 36, FORBIDDEN, Color.RED, null);
                 add(icon).inRMid(pad);
             }
-        }
-
-        public InteractionComp<PlayerMarketWidget> getInteraction() {
-            return interaction;
         }
     }
 }

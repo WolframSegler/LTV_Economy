@@ -20,6 +20,7 @@ import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.util.IdentityMarker;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
+import wfg.utils.ui.CoreTabUIBuilder;
 
 public final class FleetTabUIBuilder implements CoreTabUIBuilder {
     

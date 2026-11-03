@@ -4,8 +4,8 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>wfg_ltv_econ</groupId>
-  <artifactId>LTV-Economy</artifactId>
+  <groupId>wfg</groupId>
+  <artifactId>wfg-ltv-econ</artifactId>
   <version>0.5.0</version>
   <packaging>jar</packaging>
   <name>LTV Economy</name>
@@ -55,6 +55,22 @@
         <version>3.1.0</version>
         <executions>
           <execution>
+            <id>unpack-wfg-utils</id>
+            <phase>process-classes</phase>
+            <goals><goal>run</goal></goals>
+            <configuration>
+              <target>
+                <unzip src="${project.basedir}/../WfgUtils/jars/main/wfg_utils.jar"
+                      dest="${project.build.outputDirectory}">
+                  <patternset>
+                    <include name="**/*.class"/>
+                  </patternset>
+                </unzip>
+              </target>
+            </configuration>
+          </execution>
+
+          <execution>
             <id>cleanup-target</id>
             <phase>package</phase>
             <goals><goal>run</goal></goals>
@@ -83,6 +99,13 @@
       <version>1.0</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/../NativeUI/jars/main/native_ui.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>local</groupId>
+      <artifactId>wfg_utils</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/../WfgUtils/jars/main/wfg_utils.jar</systemPath>
     </dependency>
 
     <dependency>

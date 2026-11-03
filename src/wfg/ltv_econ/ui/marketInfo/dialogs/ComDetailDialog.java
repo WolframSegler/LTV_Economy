@@ -54,7 +54,7 @@ import wfg.native_ui.ui.widget.CheckboxButton;
 import wfg.native_ui.ui.widget.Button.CutStyle;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.TableRow;
-import wfg.native_ui.ui.table.SortableTable.cellAlg;
+import wfg.native_ui.ui.table.SortableTable.CellAlg;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.visual.TextWrapper;
 import wfg.native_ui.ui.functional.CallbackRunnable;
@@ -85,10 +85,10 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
     public final static int iconSize = 24;
 
-    private final MarketAPI m_market;
-    private final FactionSpecAPI m_faction;
+    private final MarketAPI mMarket;
+    private final FactionSpecAPI mFaction;
 
-    private CommoditySpecAPI m_com;
+    private CommoditySpecAPI mCom;
     public MarketAPI selectedMarket = null;
 
     public CheckboxButton footer = null;
@@ -101,9 +101,9 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
     public ComDetailDialog(MarketAPI market, FactionSpecAPI faction, CommoditySpecAPI com) {
         super(PANEL_W, PANEL_H, null, null, str("uiDismiss"));
 
-        m_market = market;
-        m_faction = faction;
-        m_com = com;
+        mMarket = market;
+        mFaction = faction;
+        mCom = com;
 
         setConfirmShortcut();
 
@@ -191,17 +191,17 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
     }
 
     private void createSection1(UIContainerAPI section, TooltipMakerAPI tooltip) {
-        if (m_com == null) return;
+        if (mCom == null) return;
         final EconomyEngine engine = EconomyEngine.instance();
 
-        tooltip.addSectionHeading(m_com.getName(), Alignment.MID, pad);
+        tooltip.addSectionHeading(mCom.getName(), Alignment.MID, pad);
         final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
 
         // Icons
         final int iconSize = (int) (section.getHeight() / 2.2f);
 
         final ComIconPanel iconLeft = new ComIconPanel(iconSize, iconSize,
-            null, null, m_com, m_faction
+            null, null, mCom, mFaction
         );
 
         iconLeft.pos().inTL(opad * 3,
@@ -209,7 +209,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
         section.add(iconLeft);
 
         final ComIconPanel iconRight = new ComIconPanel(iconSize, iconSize,
-            null, null, m_com, m_faction
+            null, null, mCom, mFaction
         );
 
         iconRight.pos().inTL(SECT1_WIDTH - iconSize - opad * 3,
@@ -217,9 +217,9 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
         section.add(iconRight);
 
         // Text
-        final String comID = m_com.getId();
+        final String comID = mCom.getId();
         final int baseY = (int) (headerHeight + hpad*3);
-        final Color baseColor = m_faction.getBaseUIColor();
+        final Color baseColor = mFaction.getBaseUIColor();
         { // Global market value
             final TextWrapper textPanel = new TextWrapper(170, 0) {
                 @Override
@@ -236,7 +236,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                     tooltip.builder = (tp, exp) -> {
                         final int discount = (int)((1f - EconConfig.FACTION_EXCHANGE_MULT)*100);
 
-                        tp.addPara(strf("uiTpTxtGlobalMarketValue", m_com.getName()),
+                        tp.addPara(strf("uiTpTxtGlobalMarketValue", mCom.getName()),
                             pad, new Color[] {base, highlight},
                             Integer.toString(EconConfig.HISTORY_LENGTH), discount + "%"
                         );
@@ -265,7 +265,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        tp.addPara(strf("uiTpTxtGlobalExports",  m_com.getName()), pad);
+                        tp.addPara(strf("uiTpTxtGlobalExports",  mCom.getName()), pad);
                     };
                     tooltip.positioner = (tp, exp) -> {
                         NativeUiUtils.anchorPanel(tp, this, AnchorType.RightTop, opad);
@@ -282,7 +282,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
             final FactionAPI currFaction;
 
             if (selectedMarket != null) currFaction = selectedMarket.getFaction();
-            else currFaction = Global.getSector().getFaction(m_faction.getId());
+            else currFaction = Global.getSector().getFaction(mFaction.getId());
 
             final TextWrapper textPanel = new TextWrapper(210, 0) {
                 @Override
@@ -337,11 +337,11 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
             final TextWrapper textPanel = new TextWrapper(250, 0) {
                 @Override
                 public void buildUI() {
-                    final String factionName = m_faction.getDisplayName();
+                    final String factionName = mFaction.getDisplayName();
                     final String txt = strf("uiTitleFactionMarketShare", factionName);
 
                     final String valueTxt = (int)(engine.info.getFactionExportShare(
-                        comID, m_faction.getId()
+                        comID, mFaction.getId()
                     ) * 100) + "%";
 
                     ComponentFactory.addCaptionValueBlock(
@@ -351,7 +351,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        tp.addPara(strf("uiTpTxtFactionMarketShare", m_com.getName(), m_faction.getPersonNamePrefix()), pad);
+                        tp.addPara(strf("uiTpTxtFactionMarketShare", mCom.getName(), mFaction.getPersonNamePrefix()), pad);
                     };
                     tooltip.positioner = (tp, exp) -> {
                         NativeUiUtils.anchorPanel(tp, this, AnchorType.RightTop, opad);
@@ -383,7 +383,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        tp.addPara(strf("uiTpTxtFactionMarketShare", m_com.getName(), selectedMarket.getFaction().getDisplayName()), pad);
+                        tp.addPara(strf("uiTpTxtFactionMarketShare", mCom.getName(), selectedMarket.getFaction().getDisplayName()), pad);
                     };
                     tooltip.positioner = (tp, exp) -> {
                         NativeUiUtils.anchorPanel(tp, this, AnchorType.RightTop, opad);
@@ -395,11 +395,11 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
             final TextWrapper textPanelRight = new TextWrapper(250, 0) {
                 @Override
                 public void buildUI() {
-                    final String factionName = m_faction.getDisplayName();
+                    final String factionName = mFaction.getDisplayName();
                     final String txt = strf("uiTitleFactionMarketShare", factionName);
 
                     final String valueTxt = (int) (engine.info.getFactionExportShare(
-                        comID, m_faction.getId()
+                        comID, mFaction.getId()
                     ) * 100) + "%";
 
                     ComponentFactory.addCaptionValueBlock(
@@ -409,7 +409,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
                     tooltip.width = 460f;
                     tooltip.builder = (tp, exp) -> {
-                        tp.addPara(strf("uiTpTxtFactionMarketShare", m_com.getName(), m_faction.getPersonNamePrefix()), pad);
+                        tp.addPara(strf("uiTpTxtFactionMarketShare", mCom.getName(), mFaction.getPersonNamePrefix()), pad);
                     };
                     tooltip.positioner = (tp, exp) -> {
                         NativeUiUtils.anchorPanel(tp, this, AnchorType.RightTop, opad);
@@ -427,13 +427,13 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
     }
 
     private void createSection2(UIContainerAPI section, TooltipMakerAPI tooltip) {
-        if (m_market == null) return;
+        if (mMarket == null) return;
 
         final int mapHeight = (int) section.getHeight() - 2 * opad;
 
-        final StarSystemAPI starSystem = m_market.getStarSystem();
-        final String title = selectedMarket == null ? m_market.getName() :
-            strf("uiTwoNameAndSeparator", m_market.getName(), selectedMarket.getName());
+        final StarSystemAPI starSystem = mMarket.getStarSystem();
+        final String title = selectedMarket == null ? mMarket.getName() :
+            strf("uiTwoNameAndSeparator", mMarket.getName(), selectedMarket.getName());
 
         final MapParams params = new MapParams();
         params.showFilter = false;
@@ -443,7 +443,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
         params.starSelectionRadiusMult = 0f;
 
         params.showSystem(starSystem);
-        params.showMarket(m_market, 1);
+        params.showMarket(mMarket, 1);
 
         if (selectedMarket != null) {
             params.showSystem(selectedMarket.getStarSystem());
@@ -518,7 +518,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
             SECT3_WIDTH, SECT3_HEIGHT, 20, 30
         );
 
-        final String comID = m_com.getId();
+        final String comID = mCom.getId();
         final String creditHeader = mode == 0 ? str("uiTableIncomeTitle") : str("uiTableValue");
 
         final String marketTpDesc = mode == 0 ? str("uiTpTxtMarketShare1") : str("uiTpTxtMarketShare2");
@@ -588,21 +588,21 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
             final Color textColor = market.getFaction().getBaseUIColor();
 
-            table.addCell(iconPanel, cellAlg.LEFTPAD, null, null);
-            table.addCell(market.getName(), cellAlg.LEFTPAD, null, textColor);
-            table.addCell(market.getSize(), cellAlg.MID, null, textColor);
-            table.addCell(factionName, cellAlg.MID, null, textColor);
-            table.addCell(NumFormat.engNotate(quantity), cellAlg.MID, quantity, null);
-            table.addCell(infoBar, cellAlg.MID, null, null);
-            table.addCell(accessibility + "%", cellAlg.MID, accessibility, null);
-            table.addCell(marketShare + "%", cellAlg.MID, marketShare, null);
-            table.addCell(NumFormat.formatCredit(Math.abs(incomeValue)), cellAlg.MID, Math.abs(incomeValue), null);
+            table.addCell(iconPanel, CellAlg.LEFTPAD, null, null);
+            table.addCell(market.getName(), CellAlg.LEFTPAD, null, textColor);
+            table.addCell(market.getSize(), CellAlg.MID, null, textColor);
+            table.addCell(factionName, CellAlg.MID, null, textColor);
+            table.addCell(NumFormat.engNotate(quantity), CellAlg.MID, quantity, null);
+            table.addCell(infoBar, CellAlg.MID, null, null);
+            table.addCell(accessibility + "%", CellAlg.MID, accessibility, null);
+            table.addCell(marketShare + "%", CellAlg.MID, marketShare, null);
+            table.addCell(NumFormat.formatCredit(Math.abs(incomeValue)), CellAlg.MID, Math.abs(incomeValue), null);
 
             // Tooltip
             table.getPendingRow().tooltip.width = 450f;
             final TooltipBuilder tp = createSection3RowsTooltip(market, market.getName(), textColor);
 
-            if (m_market == market) {
+            if (mMarket == market) {
                 table.getPendingRow().outline.type = OutlineType.TEX_THIN;
                 table.getPendingRow().outline.color = base;
             }
@@ -615,10 +615,10 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
             table.pushRow(
                 market, tp, rowSelectedRunnable, null,
-                null, m_faction.getDarkUIColor()
+                null, mFaction.getDarkUIColor()
             );
 
-            if (m_market == market) table.selectLastRow();
+            if (mMarket == market) table.selectLastRow();
         }
 
         section.add(table).inTL(pad, 0f);
@@ -627,19 +627,17 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
     }
 
     private void createSection4(UIContainerAPI section) {
-        if (m_market == null) return;
+        if (mMarket == null) return;
 
         final LtvCommodityPanel section4ComPanel = new LtvCommodityPanel(
             (int) section.getWidth(), (int) section.getHeight(),
-            m_market.getName() + str("uiTitleCommoditiesSuffix"),
-            m_market
+            mMarket.getName() + str("uiTitleCommoditiesSuffix"),
+            mMarket
         );
-        section4ComPanel.selectRow(m_com.getId());
-
         section4ComPanel.mSelectionListener = (source, isLeftClick) -> {
             if (!isLeftClick) return;
 
-            m_com = source.cell.spec;
+            mCom = source.mCell.spec;
 
             section4ComPanel.selectRow(source);
 
@@ -652,6 +650,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
             } 
         };
         section4ComPanel.buildUI();
+        section4ComPanel.selectRow(mCom.getId());
 
         section.add(section4ComPanel);
     }
@@ -660,13 +659,13 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
         return (tp, exp) -> {
             final FactionAPI faction = market.getFaction();
             final CommodityCell cell = EconomyEngine.instance().getComCell(
-                m_com.getId(), market.getId()
+                mCom.getId(), market.getId()
             );
     
             final Color darkColor = faction.getDarkUIColor();
             
             tp.setTitleSmallOrbitron();
-            tp.addTitle(marketName + " - " + m_com.getName(), baseColor);
+            tp.addTitle(marketName + " - " + mCom.getName(), baseColor);
     
             String locString = strf("uiLocationPrefix", market.getContainingLocation().getNameWithLowercaseType());
             if (market.getContainingLocation().isHyperspace()) {
@@ -682,7 +681,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             );
     
-            tp.addSectionHeading(strf("uiProductionConsumptionSuffix", m_com.getName()),
+            tp.addSectionHeading(strf("uiProductionConsumptionSuffix", mCom.getName()),
                 baseColor, darkColor, Alignment.MID, opad
             );
                 
@@ -690,11 +689,11 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
     
             TooltipUtils.createComConsumptionBreakdown(tp, cell);
     
-            final float econUnit = m_com.getEconUnit();
+            final float econUnit = mCom.getEconUnit();
             final int sellPrice = (int) (cell.computeVanillaPrice((int)econUnit, 0d, true, true) / econUnit);
             final int buyPrice = (int) (cell.computeVanillaPrice((int)econUnit, 0d, false, true) / econUnit);
     
-            if (!m_com.isMeta()) {
+            if (!mCom.isMeta()) {
                 if (cell.getStoredExcess() > 0f) {
                     tp.addPara(str("uiExcessStockSuffix"), opad, positive, 
                     highlight, NumFormat.engNotate(cell.getStoredExcess()));
