@@ -16,7 +16,6 @@
       "restricted": "graphics/ui/restricted.png",
       "forbidden": "graphics/ui/forbidden.png",
       "warning": "graphics/ui/warning.png",
-      "settings": "graphics/ui/settings_cog.png",
       "arrow": "graphics/ui/arrow1.png",
       "customize": "graphics/ui/customize.png",
       "blueprint": "graphics/ui/blueprint.png"
