@@ -20,7 +20,7 @@ Version 0.5.0-beta | NOT SAVE COMPATIBLE
 - Fixed deficit prediction algorithm not working at all (oops).
 - Increased worker to population ratio. The sector now has more workers.
 - Reduced luxury goods demand scale for Population & Infrastructure.
-- Added an industry balancer, which adds or removes industries to optimize it for less deficits.
+- Added an industry balancer, which adds or removes industries to reduce sector deficit.
 
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.

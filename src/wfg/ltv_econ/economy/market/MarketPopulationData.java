@@ -16,11 +16,11 @@ import com.fs.starfarer.api.impl.campaign.ids.Stats;
 import com.fs.starfarer.api.impl.campaign.population.PopulationComposition;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.ltv_econ.config.PolicyConfigLoader.PolicyConfig;
-import wfg.ltv_econ.config.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.config.EventConfig;
 import wfg.ltv_econ.config.EventConfig.EventSpec;
+import wfg.ltv_econ.config.loader.PolicyConfigLoader.PolicyConfig;
+import wfg.ltv_econ.config.loader.PolicyConfigLoader.PolicySpec;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.commodity.CommodityDomain;
 import wfg.ltv_econ.economy.engine.EconomyEngine;

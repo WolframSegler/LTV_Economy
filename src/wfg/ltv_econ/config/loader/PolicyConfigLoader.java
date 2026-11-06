@@ -1,4 +1,4 @@
-package wfg.ltv_econ.config;
+package wfg.ltv_econ.config.loader;
 
 import static wfg.native_ui.util.Globals.settings;
 

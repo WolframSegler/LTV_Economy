@@ -87,8 +87,6 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
             for (int i = 0; i < 7; i++) data.economyEngine.realAdvance();
             data.economyEngine.fakeAdvanceWithAssignWorkers();
         }
-
-        // Global.getSector().addTransientScript(new UiHierarchyTree());
     }
 
     @Override

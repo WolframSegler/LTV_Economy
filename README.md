@@ -95,12 +95,8 @@ Warning by Amazona Adorada from <a href="https://thenounproject.com/browse/icons
 ## AI Generated Assets
 
 <ul>
-    <li>graphics/policies/bres_vitalis.png</li>
-    <li>graphics/policies/fleet_mobilization_order.png</li>
     <li>graphics/policies/urban_renewal_initiative.png</li>
-    <li>graphics/policies/default_policy_poster.png</li>
     <li>graphics/policies/convergence_festival.png</li>
-    <li>graphics/policies/substance_control_act.png</li>
     <li>graphics/policies/expand_the_yards.png</li>
     <li>graphics/icons/cargo/components_light.png</li>
     <li>graphics/icons/cargo/components_precision.png</li>
