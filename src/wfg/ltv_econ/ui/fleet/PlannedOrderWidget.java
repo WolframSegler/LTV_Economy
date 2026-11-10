@@ -24,12 +24,12 @@ import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.util.BorderRenderer;
-import wfg.native_ui.ui.component.HoverGlowComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.interaction.UIClickable;
 import wfg.native_ui.ui.container.BaseContainer;
@@ -40,14 +40,14 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 
 public final class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> implements
-    WidgetAPI<PlannedOrderWidget>, HasTooltip, HasHoverGlow
+    WidgetAPI<PlannedOrderWidget>, HasTooltip, HasGlow
 {
     public static final int WIDTH = 320;
     public static final int HEIGHT = 60;
     public static final Color AMBER_BG = new Color(84, 61, 32);
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
-    private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+    private final GlowComp glow = comp().get(NativeComponents.GLOW);
     private final BorderRenderer border = new BorderRenderer(UI_BORDER_4, true, WIDTH, HEIGHT);
 
     private final PlannedOrder order;
@@ -63,7 +63,7 @@ public final class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> im
 
         glow.type = GlowType.UNDERLAY;
         glow.glowBrightness = 0.4f;
-        glow.flashBrightness = 0.65f;
+        glow.flashBrightness = 0.2f;
         glow.color = UIColors.IN_FACTION;
 
         border.centerColor = UIColors.WIDGET_BG;
@@ -120,11 +120,10 @@ public final class PlannedOrderWidget extends UIClickable<PlannedOrderWidget> im
         final InteractiveSprite shipSprite = new InteractiveSprite(scaledW, scaledH, sprite, null, null);
         shipSprite.tooltip.enabled = false;
         shipSprite.audio.enabled = false;
-        shipSprite.glow.isFaderOwner = false;
-        shipSprite.glow.fader = glow.fader;
+        shipSprite.glow.setOwner(glow);
         shipSprite.glow.type = GlowType.ADDITIVE;
-        shipSprite.glow.glowBrightness = 0.8f;
-        shipSprite.glow.flashBrightness = 1.2f;
+        shipSprite.glow.glowBrightness = 0.6f;
+        shipSprite.glow.flashBrightness = 0.6f;
         add(shipSprite).inLMid(hpad + (maxSize - scaledW) / 2);
 
         final String shipStr = spec.getHullNameWithDashClass();

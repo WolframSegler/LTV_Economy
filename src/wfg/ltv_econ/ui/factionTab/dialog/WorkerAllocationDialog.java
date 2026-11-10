@@ -42,13 +42,13 @@ import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.ui.core.UIElement;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.component.HoverGlowComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIBuildableAPI;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.dialog.DialogPanel;
@@ -164,10 +164,10 @@ public final class WorkerAllocationDialog extends DialogPanel {
     }
 
     public static class PlanSelectionWidget extends UIClickable<PlanSelectionWidget> implements
-        WidgetAPI<PlanSelectionWidget>, HasTooltip, HasHoverGlow
+        WidgetAPI<PlanSelectionWidget>, HasTooltip, HasGlow
     {
         private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
-        private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+        private final GlowComp glow = comp().get(NativeComponents.GLOW);
         private final BorderRenderer border = new BorderRenderer(UI_BORDER_4, true, 0f, 0f);
         private final WorkerAllocationPlan plan;
 
@@ -179,7 +179,7 @@ public final class WorkerAllocationDialog extends DialogPanel {
 
             glow.type = GlowType.UNDERLAY;
             glow.glowBrightness = 0.6f;
-            glow.flashBrightness = 0.9f;
+            glow.flashBrightness = 0.4f;
             glow.color = base;
 
             tooltip.width = 500f;
@@ -687,9 +687,9 @@ public final class WorkerAllocationDialog extends DialogPanel {
         }
     }
 
-    public static class GoalRegistryWidget extends UIClickable<GoalRegistryWidget> implements WidgetAPI<GoalRegistryWidget>, HasHoverGlow {
+    public static class GoalRegistryWidget extends UIClickable<GoalRegistryWidget> implements WidgetAPI<GoalRegistryWidget>, HasGlow {
 
-        final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+        final GlowComp glow = comp().get(NativeComponents.GLOW);
 
         private final String goalId;
 

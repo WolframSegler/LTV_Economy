@@ -12,7 +12,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 
 import wfg.ltv_econ.ui.fleet.TradeMissionsDialog;
 import wfg.ltv_econ.ui.marketInfo.dialogs.ColonyInvDialog;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.DockButton;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;

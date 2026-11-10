@@ -21,7 +21,6 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.Misc;
 
 import rolflectionlib.ui.UiUtil;
@@ -42,15 +41,15 @@ import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
-import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.GlowComp;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.dialog.DialogPanel;
@@ -68,7 +67,7 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 public final class IndustryWidget extends UIContainer implements
-    HasBackground, HasHoverGlow, UIBuildableAPI
+    HasBackground, HasGlow, UIBuildableAPI
 {
     public final static int PANEL_WIDTH = 190;
     public final static int TITLE_HEIGHT = 15 + pad;
@@ -77,7 +76,7 @@ public final class IndustryWidget extends UIContainer implements
     public final static int ICON_SIZE = 32;
 
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
-    public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+    public final GlowComp glow = comp().get(NativeComponents.GLOW);
 
     public final Color baseColor;
     public final Color darkColor;
@@ -119,8 +118,6 @@ public final class IndustryWidget extends UIContainer implements
         bg.alpha = 1f;
 
         glow.offset.setOffset(-1, -1, 2, 2 - hOffset);
-        glow.fader = new FaderUtil(0.3f, 0.1f, 0.4f, true, false);
-        glow.isFaderOwner = false;
         glow.type = GlowType.UNDERLAY;
         glow.color = baseColor;        
 
@@ -545,7 +542,7 @@ public final class IndustryWidget extends UIContainer implements
 
     @Override
     public void renderBelowImpl(float alpha) {
-        if (glow.fader.getBrightness() > 0f) {
+        if (glow.glowFader.getBrightness() > 0f) {
             buiTitleldingHeader.setHighlight(buiTitleldingHeader.getText());
 
             if (constructionStatusText != null) {
@@ -575,11 +572,11 @@ public final class IndustryWidget extends UIContainer implements
     }
 
     public class IndustryImagePanel extends AbstractSpriteElement<IndustryImagePanel> implements
-        HasHoverGlow, HasInteraction, HasTooltip, HasAudioFeedback
+        HasGlow, HasInteraction, HasTooltip, HasAudioFeedback
     {
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
-        public final HoverGlowComp imgGlow = comp().get(NativeComponents.HOVER_GLOW);
+        public final GlowComp imgGlow = comp().get(NativeComponents.GLOW);
         public final InteractionComp<IndustryImagePanel> interaction = comp().get(
             NativeComponents.INTERACTION
         ); 
@@ -591,10 +588,12 @@ public final class IndustryWidget extends UIContainer implements
 
             final Color gColor = constructionMode == WidgetSelectionState.NONE ? Color.WHITE : Color.BLACK;
 
-            imgGlow.fader = glow.fader;
+            imgGlow.glowFader.setBrightness(0.3f);
+            imgGlow.glowFader.setDuration(0.1f, 0.4f);
+            glow.setOwner(imgGlow);
             imgGlow.type = GlowType.ADDITIVE;
-            imgGlow.glowBrightness = 1f;
-            imgGlow.flashBrightness = 1.5f;
+            imgGlow.glowBrightness = 0.75f;
+            imgGlow.flashBrightness = 0.25f;
             imgGlow.additiveSprite = mSprite;
             imgGlow.color = NativeUiUtils.adjustBrightness(gColor, 0.33f);
 

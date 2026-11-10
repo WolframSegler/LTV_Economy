@@ -11,7 +11,7 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.ui.fleetTab.dialog.TransferToFactionInventoryDialog;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NativeUiUtils;
@@ -37,7 +37,7 @@ public final class TransferToFactionInventoryBtn extends Button {
 
         tooltip.positioner = (tp, exp) -> NativeUiUtils.anchorPanel(tp, this, AnchorType.BottomLeft, pad);
         tooltip.builder = (tp, expanded) -> {
-            tp.addTitle(str("uiTpTitleTransferToFactionInventory"), base);
+            tp.addTitle(str("uiTpTitleTransferToFactionInventory"), base);  
 
             tp.addPara(str("uiTpTransferToFactionInventoryTxt1"), opad, Misc.getStoryBrightColor(), str("uiTxtBonusExperience"));
 
@@ -52,8 +52,8 @@ public final class TransferToFactionInventoryBtn extends Button {
         add(icon).inBL(0f, 0f);
 
         glow.type = GlowType.ADDITIVE;
-        glow.glowBrightness = 1.05f;
-        glow.flashBrightness = 1.6f;
+        glow.glowBrightness = 1f;
+        glow.flashBrightness = 0.5f;
         glow.additiveSprite = icon.getSprite();
         glow.color = dark;
 

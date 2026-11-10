@@ -15,16 +15,16 @@ import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
-import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.GlowComp;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.OutlineComp;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasOutline;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
@@ -73,9 +73,9 @@ public final class CommoditySelectionPanel
     }
 
     public class RowPanel extends UIContainer implements
-        WidgetAPI<RowPanel>, HasInteraction, HasHoverGlow, HasAudioFeedback, HasTooltip
+        WidgetAPI<RowPanel>, HasInteraction, HasGlow, HasAudioFeedback, HasTooltip
     {
-        public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+        public final GlowComp glow = comp().get(NativeComponents.GLOW);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
         public final InteractionComp<RowPanel> interaction = comp().get(NativeComponents.INTERACTION);
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);

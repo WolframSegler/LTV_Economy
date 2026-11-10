@@ -16,12 +16,12 @@ import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.internal.util.BorderRenderer;
-import wfg.native_ui.ui.component.HoverGlowComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.interaction.UIClickable;
 import wfg.native_ui.ui.table.WidgetAPI;
@@ -29,13 +29,13 @@ import wfg.native_ui.ui.visual.InteractiveSprite;
 import wfg.native_ui.ui.widget.Slider;
 
 public final class ShipProductionWidget extends UIClickable<ShipProductionWidget> implements WidgetAPI<ShipProductionWidget>,
-    HasTooltip, HasHoverGlow
+    HasTooltip, HasGlow
 {
     public static final int WIDTH = 460;
     public static final int HEIGHT = 60;
 
     private final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
-    private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+    private final GlowComp glow = comp().get(NativeComponents.GLOW);
     private final BorderRenderer border = new BorderRenderer(UI_BORDER_4, true, WIDTH, HEIGHT);
 
     public final ShipHullSpecAPI spec;
@@ -55,7 +55,7 @@ public final class ShipProductionWidget extends UIClickable<ShipProductionWidget
 
         glow.type = GlowType.UNDERLAY;
         glow.glowBrightness = 0.6f;
-        glow.flashBrightness = 1.2f;
+        glow.flashBrightness = 0.2f;
         glow.color = UIColors.IN_FACTION;
 
         final boolean isBeingProduced = index <= StaticData.inv.getAssemblyLines() - 1;
@@ -75,6 +75,8 @@ public final class ShipProductionWidget extends UIClickable<ShipProductionWidget
 
     @Override
     public void buildUI() {
+        clearChildren();
+
         final SpriteAPI sprite = settings.getSprite(spec.getSpriteName());
 
         final int CONTENT_W = WIDTH - HEIGHT;
@@ -88,11 +90,10 @@ public final class ShipProductionWidget extends UIClickable<ShipProductionWidget
         final InteractiveSprite shipSprite = new InteractiveSprite(scaledW, scaledH, sprite, null, null);
         shipSprite.tooltip.enabled = false;
         shipSprite.audio.enabled = false;
-        shipSprite.glow.isFaderOwner = false;
-        shipSprite.glow.fader = glow.fader;
+        shipSprite.glow.setOwner(glow);
         shipSprite.glow.type = GlowType.ADDITIVE;
-        shipSprite.glow.glowBrightness = 0.8f;
-        shipSprite.glow.flashBrightness = 1.2f;
+        shipSprite.glow.glowBrightness = 0.6f;
+        shipSprite.glow.flashBrightness = 0.6f;
         add(shipSprite).inLMid(hpad + (maxSize - scaledW) / 2);
 
         final String shipStr = spec.getHullNameWithDashClass();

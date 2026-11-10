@@ -3,8 +3,6 @@
 *.zip
 *.rar
 
-# Custom
-/api/
 /jars/main/
 /ProjectFiles/Diagrams
 source_changes.diff

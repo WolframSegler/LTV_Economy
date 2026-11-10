@@ -10,11 +10,11 @@ import com.fs.starfarer.api.loading.Description.Type;
 import com.fs.starfarer.api.ui.Fonts;
 
 import wfg.ltv_econ.util.TooltipUtils;
-import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.GlowComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.visual.AbstractSpriteElement;
 
@@ -23,10 +23,10 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 public class ComIconPanel extends AbstractSpriteElement<ComIconPanel> implements
-    HasTooltip, HasHoverGlow
+    HasTooltip, HasGlow
 {
     public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
-    public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+    public final GlowComp glow = comp().get(NativeComponents.GLOW);
 
     public FactionSpecAPI m_faction;
     protected CommoditySpecAPI m_com;

@@ -26,14 +26,14 @@ import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.internal.util.BorderRenderer;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
-import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.GlowComp;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
@@ -47,13 +47,13 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NumFormat;
 
 public final class InventoryShipWidget extends UIContainer implements WidgetAPI<InventoryShipWidget>,
-    HasAudioFeedback, HasHoverGlow, HasTooltip
+    HasAudioFeedback, HasGlow, HasTooltip
 {
     public static final int WIDTH = 180;
     public static final int HEIGHT = 300;
 
     private final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
-    private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+    private final GlowComp glow = comp().get(NativeComponents.GLOW);
     private final BorderRenderer border = new BorderRenderer(UI_BORDER_3, true, WIDTH, HEIGHT);
     public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
 
@@ -71,7 +71,7 @@ public final class InventoryShipWidget extends UIContainer implements WidgetAPI<
 
         glow.type = GlowType.UNDERLAY;
         glow.glowBrightness = 0.4f;
-        glow.flashBrightness = 0.65f;
+        glow.flashBrightness = 0.2f;
         glow.color = UIColors.IN_FACTION;
 
         border.centerColor = UIColors.WIDGET_BG;
@@ -116,11 +116,10 @@ public final class InventoryShipWidget extends UIContainer implements WidgetAPI<
         final InteractiveSprite shipSprite = new InteractiveSprite(scaledW, scaledH, sprite, null, null);
         shipSprite.tooltip.enabled = false;
         shipSprite.audio.enabled = false;
-        shipSprite.glow.isFaderOwner = false;
-        shipSprite.glow.fader = glow.fader;
+        shipSprite.glow.setOwner(glow);
         shipSprite.glow.type = GlowType.ADDITIVE;
-        shipSprite.glow.glowBrightness = 0.8f;
-        shipSprite.glow.flashBrightness = 1.2f;
+        shipSprite.glow.glowBrightness = 0.6f;
+        shipSprite.glow.flashBrightness = 0.6f;
         add(shipSprite).inTMid(hpad + (maxSize - scaledH) / 2);
 
         final LabelAPI nameLbl = settings.createLabel(data.spec.getHullNameWithDashClass(), Fonts.DEFAULT_SMALL);

@@ -29,14 +29,14 @@ import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.PlannedOrdersPanel;
 import wfg.native_ui.internal.ui.Side;
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.component.HoverGlowComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.container.DockPanel;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasInteraction;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.table.ListTable;
@@ -99,10 +99,10 @@ public final class ShipCommissionDialog extends DockPanel {
     }
 
     private class HullRow extends UIContainer
-        implements WidgetAPI<HullRow>, HasInteraction, HasHoverGlow, HasTooltip, HasAudioFeedback
+        implements WidgetAPI<HullRow>, HasInteraction, HasGlow, HasTooltip, HasAudioFeedback
     {
         public final InteractionComp<HullRow> interaction = comp().get(NativeComponents.INTERACTION);
-        public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+        public final GlowComp glow = comp().get(NativeComponents.GLOW);
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
 
         private final ShipHullSpecAPI spec;

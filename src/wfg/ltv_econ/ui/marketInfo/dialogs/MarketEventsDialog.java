@@ -22,14 +22,14 @@ import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
-import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.GlowComp;
 import wfg.native_ui.ui.component.InteractionComp;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.component.NativeComponents;
 import wfg.native_ui.ui.component.TooltipComp;
 import wfg.native_ui.ui.core.UIElementFlags.HasAudioFeedback;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.core.UIElementFlags.HasTooltip;
 import wfg.native_ui.ui.table.ListTable;
 import wfg.native_ui.ui.table.WidgetAPI;
@@ -90,10 +90,10 @@ public final class MarketEventsDialog extends DockPanel {
     }
 
     public final class RowPanel extends UIContainer implements
-        WidgetAPI<RowPanel>, HasHoverGlow, HasAudioFeedback, HasTooltip, HasBackground
+        WidgetAPI<RowPanel>, HasGlow, HasAudioFeedback, HasTooltip, HasBackground
     {
         public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
-        public final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+        public final GlowComp glow = comp().get(NativeComponents.GLOW);
         public final AudioFeedbackComp audio = comp().get(NativeComponents.AUDIO_FEEDBACK);
         public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
 

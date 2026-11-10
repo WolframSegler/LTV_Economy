@@ -78,13 +78,13 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
 
     public void selectRow(String comID) {
         for (CommodityRowPanel row : mCommodityList.rows()) {
-            row.glow.persistent = row.mCell.comID.equals(comID);
+            row.glow.setHighlighted(row.mCell.comID.equals(comID));
         }
     }
 
     public void selectRow(CommodityRowPanel selectedRow) {
         for (CommodityRowPanel row : mCommodityList.rows()) {
-            row.glow.persistent = row == selectedRow;
+            row.glow.setHighlighted(row == selectedRow);
         }
     }
 

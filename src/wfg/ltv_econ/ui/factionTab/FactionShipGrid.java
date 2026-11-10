@@ -49,7 +49,7 @@ public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShip
 
         final int col = index % computeColCount();
         widget.tooltip.positioner = (tp, exp) -> {
-            NativeUiUtils.anchorPanel(tp, widget, (col > 2 ?
+            NativeUiUtils.anchorPanel(tp, widget, (col >= 2 ?
                 AnchorType.LeftTop : AnchorType.RightTop), opad
             );
         };

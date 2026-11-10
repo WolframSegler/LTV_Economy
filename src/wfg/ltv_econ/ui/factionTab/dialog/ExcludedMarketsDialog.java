@@ -21,11 +21,11 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI.PlanetInfoParams;
 import wfg.ltv_econ.economy.engine.EconomyInfo;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.component.HoverGlowComp;
+import wfg.native_ui.ui.component.GlowComp;
 import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.component.NativeComponents;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
-import wfg.native_ui.ui.core.UIElementFlags.HasHoverGlow;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
+import wfg.native_ui.ui.core.UIElementFlags.HasGlow;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.interaction.UIClickable;
 import wfg.native_ui.ui.table.ListTable;
@@ -100,11 +100,11 @@ public final class ExcludedMarketsDialog extends DialogPanel {
     }
 
     public static class PlayerMarketWidget extends UIClickable<PlayerMarketWidget>
-        implements WidgetAPI<PlayerMarketWidget>, HasHoverGlow
+        implements WidgetAPI<PlayerMarketWidget>, HasGlow
     {
         private final MarketAPI market;
 
-        private final HoverGlowComp glow = comp().get(NativeComponents.HOVER_GLOW);
+        private final GlowComp glow = comp().get(NativeComponents.GLOW);
 
         public PlayerMarketWidget(MarketAPI market) {
             super(WIDGET_H, WIDGET_H, null);

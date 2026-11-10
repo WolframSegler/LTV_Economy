@@ -38,7 +38,7 @@ import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.ui.ComponentFactory;
-import wfg.native_ui.ui.component.HoverGlowComp.GlowType;
+import wfg.native_ui.ui.component.GlowComp.GlowType;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.container.BaseContainer;
 import wfg.native_ui.ui.widget.Slider;
