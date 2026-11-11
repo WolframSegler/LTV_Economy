@@ -142,7 +142,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     public boolean isDone() { return false;}
     public boolean runWhilePaused() { return false;}
     public final void advance(float delta) {
-        if (mBalancerCheckPending && Attachments.getScreenPanel() != null) {
+        if (mBalancerCheckPending && delta > 0f && Attachments.getScreenPanel() != null) {
             mBalancerCheckPending = false;
             IndustryBalancer.showIfSlackDetected();
         }

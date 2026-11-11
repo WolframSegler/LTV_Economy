@@ -5,8 +5,11 @@ import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
+import java.util.List;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.util.FaderUtil.State;
@@ -14,9 +17,11 @@ import com.fs.starfarer.api.util.FaderUtil.State;
 import wfg.ltv_econ.economy.planning.IndustryBalancer;
 import wfg.ltv_econ.economy.planning.IndustryBalancer.BalancerState;
 import wfg.ltv_econ.economy.planning.IndustryBalancer.BalancerStatus;
+import wfg.ltv_econ.economy.planning.IndustryBalancer.CommoditySlack;
 import wfg.ltv_econ.economy.planning.IndustryBalancer.MoveType;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.core.UIBuildableAPI;
+import wfg.native_ui.ui.visual.IconValuePair;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.widget.Button.CutStyle;
@@ -26,7 +31,7 @@ import wfg.native_ui.util.NumFormat;
 public final class BalancerProgressPanel extends UIContainer implements UIBuildableAPI {
     private static final Color REMAINING_NONE_COLOR = new Color(210, 115, 90);
     private static final Color REMAINING_FULL_COLOR = new Color(90, 150, 110);
-    private static final float TIME_BEFORE_CANCEL_OPTION = 60f; 
+    private static final float TIME_BEFORE_CANCEL_OPTION = 60f;
 
     private final IndustryBalancerHolo mHolo;
     private final BalancerState mState;
@@ -35,6 +40,9 @@ public final class BalancerProgressPanel extends UIContainer implements UIBuilda
     private LabelAPI deficitAddressedLbl;
     private LabelAPI currMoveLbl;
     private Slider deficitSlider;
+    private IconValuePair slackIcon1;
+    private IconValuePair slackIcon2;
+    private IconValuePair slackIcon3;
     private Button cancelBtn;
 
     private boolean finishedInit = false;
@@ -67,12 +75,13 @@ public final class BalancerProgressPanel extends UIContainer implements UIBuilda
         final String statusFont = failed ? Fonts.DEFAULT_SMALL : "graphics/fonts/insignia17LTaa.fnt";
         final String deficitSliderTxt = str("uiDialogTxtIndustryBalancerRemainingDeficit");
 
-        final float maxDeficit = (float) mState.currentSlack();
+        final float maxDeficit = (float) mState.totalSlack();
 
         final int panelW = IndustryBalancerHolo.CONTENT_PANEL_W;
         final int titleH = 30;
         final int statusLblH = 30;
         final int sliderH = 32;
+        final int iconS = 32;
 
         final LabelAPI title = settings.createLabel(str("uiDialogTitleIndustryBalancerRunning"), Fonts.INSIGNIA_LARGE);
         add(title).inTMid(pad);
@@ -93,15 +102,22 @@ public final class BalancerProgressPanel extends UIContainer implements UIBuilda
         deficitSlider.roundBarValue = false;
         deficitSlider.setUserAdjustable(false);
         deficitSlider.customText = () -> {
-            final float currDeficit = (float) mState.currentSlack();
+            final float currDeficit = (float) mState.totalSlack();
             final float ratio = currDeficit > IndustryBalancer.SLACK_TOLERANCE ? currDeficit / maxDeficit : 0f;
             final Color color = NativeUiUtils.lerpColor(REMAINING_FULL_COLOR, REMAINING_NONE_COLOR, ratio);
             deficitSlider.setBarColor(color);
             return String.format(deficitSliderTxt, NumFormat.engNotate(deficitSlider.getProgressInterpolated()));
         };
 
+        slackIcon1 = new IconValuePair(iconS + 90f, iconS, (SpriteAPI) null, 0d, false, base);
+        slackIcon2 = new IconValuePair(iconS + 90f, iconS, (SpriteAPI) null, 0d, false, base);
+        slackIcon3 = new IconValuePair(iconS + 90f, iconS, (SpriteAPI) null, 0d, false, base);
+        add(slackIcon1).belowLeft(deficitSlider, opad * 2);
+        add(slackIcon2).belowLeft(slackIcon1, opad);
+        add(slackIcon3).belowLeft(slackIcon2, opad);
+
         cancelBtn = new Button(BUTTON_W, BUTTON_H, str("uiCancel"), Fonts.ORBITRON_20AA, (btn) -> {
-            mState.sigStop(); cancelBtn.setEnabled(false);
+            mState.sigstop(); cancelBtn.setEnabled(false);
         });
         cancelBtn.setCutStyle(CutStyle.TL_BR);
         cancelBtn.getFader().forceOut();
@@ -148,10 +164,27 @@ public final class BalancerProgressPanel extends UIContainer implements UIBuilda
         currMoveLbl.setText(currMoveTxt);
         currMoveLbl.autoSizeToWidth(currMoveLbl.computeTextWidth(currMoveTxt));
 
-        deficitSlider.setProgress((float) mState.currentSlack());
+        deficitSlider.setProgress((float) mState.totalSlack());
+
+        final List<CommoditySlack> top = mState.topSlack();
+        for (int i = 0; i < 3; i++) {
+            final IconValuePair row = (i == 0) ? slackIcon1 : (i == 1) ? slackIcon2 : slackIcon3;
+            if (top.size() <= i) {
+                row.label().setText("");
+                row.icon().setSprite((SpriteAPI) null);
+                continue;
+            }
+
+            final CommoditySlack slack = top.get(i);
+            final CommoditySpecAPI spec = settings.getCommoditySpec(slack.comId());
+
+            final LabelAPI lbl = row.label();
+            lbl.setText(NumFormat.engNotate(slack.slack()));
+            lbl.autoSizeToWidth(lbl.computeTextWidth(lbl.getText()));
+            row.icon().setSprite(spec.getIconName());
+        }
 
         totalTimeInSec += delta;
-
         if (totalTimeInSec > TIME_BEFORE_CANCEL_OPTION) {
             if (cancelBtn.getFader().getState() != State.IN) {
                 cancelBtn.getFader().fadeIn();

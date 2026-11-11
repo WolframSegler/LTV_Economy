@@ -72,7 +72,7 @@ public class FactionDemandCoverageGoal implements CustomObjective, CustomConstra
 
     public String getSerializationId() { return SERIAL_ID; }
     public List<String> getRequiredSegmentIds() {
-        return Arrays.asList("fair", "local", "faction");
+        return Arrays.asList("local", "faction");
     }
     public List<String> getRequiredObjectiveIds() {
         return Collections.singletonList(SERIAL_ID);

@@ -33,7 +33,7 @@ public final class BalancerResultPanel extends UIContainer implements UIBuildabl
         clearChildren();
 
         final boolean industriesChanged = mState.changes().size() > 0;
-        final double remainingDeficit = mState.currentSlack();
+        final double remainingDeficit = mState.totalSlack();
         final boolean hasDeficit = remainingDeficit > IndustryBalancer.SLACK_TOLERANCE;
 
         final String titleTxt = switch(mState.status()) {

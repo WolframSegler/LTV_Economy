@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -51,23 +52,30 @@ public final class IndustryBalancer {
         BitSet outputs
     ) {}
 
+    public record CommoditySlack(
+        String comId,
+        double slack
+    ) {}
+
     public static final class BalancerState {
         private volatile BalancerStatus status = BalancerStatus.RUNNING;
         private volatile int iteration = 0;
         private volatile String currentComId = null;
         private volatile MoveType currentMoveType = MoveType.ADD_INDUSTRY;
-        private volatile double currentSlack = 0d;
+        private volatile double totalSlack = 0d;
         private volatile Throwable mFailure = null;
         private volatile boolean sigStop = false;
+        private volatile List<CommoditySlack> topSlack = List.of();
         private final List<IndustryChange> changes = new ArrayList<>();
 
         public final BalancerStatus status() { return status; }
         public final int iteration() { return iteration; }
         public final String currentComId() { return currentComId; }
         public final MoveType currentMoveType() { return currentMoveType; }
-        public final double currentSlack() { return currentSlack; }
+        public final double totalSlack() { return totalSlack; }
+        public final List<CommoditySlack> topSlack() { return topSlack; }
         public final Throwable failure() { return mFailure; }
-        public final void sigStop() { sigStop = true; }
+        public final void sigstop() { sigStop = true; }
 
         public final List<IndustryChange> changes() {
             if (status == BalancerStatus.RUNNING) throw new IllegalStateException("Cannot view changes while the balancer is running");
@@ -83,7 +91,6 @@ public final class IndustryBalancer {
     private static final double SLOT_SATURATION_THRESHOLD = 1.2d;
     private static final long FNV_OFFSET = 0xcbf29ce484222325l;
     private static final long FNV_PRIME  = 0x100000001b3l;
-    private static final long MIN_ITERATION_BUDGET_MS = 400l;
 
     private final BalancerState mState = new BalancerState();
     private volatile boolean mStarted = false;
@@ -92,10 +99,12 @@ public final class IndustryBalancer {
         final List<MarketAPI> markets = EconomyInfo.getMarketsCopy();
         markets.removeIf(MarketAPI::isPlayerOwned);
 
-        final FeasibilityResult result = WorkforceAllocator.solveFeasibilityLP(
+        final FeasibilityResult result = WorkforceAllocator.optimizePiecewiseWorkerAlloc(
             markets, ProductionMatrix.getMatrix(),
             ProductionMatrix.getIndustryOutputPairs(),
-            PlanningData.getOutputsPerMarket(markets));
+            PlanningData.getOutputsPerMarket(markets),
+            false
+        );
 
         if (worstCommoditySlackIndex(result.slack()) < 0) return false;
 
@@ -137,31 +146,18 @@ public final class IndustryBalancer {
         final List<String> outputPairs = ProductionMatrix.getIndustryOutputPairs();
         final Set<Long> visited = new HashSet<>();
 
-        long lastTop = System.nanoTime();
         for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-            if (iteration > 0) {
-                final long elapsedMs = (System.nanoTime() - lastTop) / 1_000_000l;
-                final long remaining = MIN_ITERATION_BUDGET_MS - elapsedMs;
-                if (remaining > 0) {
-                    try {
-                        Thread.sleep(remaining);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
-                }
-            }
-            lastTop = System.nanoTime();
-
             mState.iteration = iteration;
 
             if (mState.sigStop) break;
 
             if (!visited.add(stateHash(markets))) return BalancerStatus.CYCLE;
 
-            final FeasibilityResult result = WorkforceAllocator.solveFeasibilityLP(
-                markets, A, outputPairs, PlanningData.getOutputsPerMarket(markets));
-            mState.currentSlack = sumArray(result.slack());
+            final FeasibilityResult result = WorkforceAllocator.optimizePiecewiseWorkerAlloc(
+                markets, A, outputPairs, PlanningData.getOutputsPerMarket(markets), false
+            );
+            mState.totalSlack = sumArray(result.slack());
+            mState.topSlack = topSlackCommodities(result.slack(), 3);
             
             final int worst = worstCommoditySlackIndex(result.slack());
             if (worst < 0) return BalancerStatus.SUCCESS;
@@ -437,6 +433,16 @@ public final class IndustryBalancer {
             .filter(i -> slack[i] > SLACK_TOLERANCE)
             .boxed().sorted((a, b) -> Double.compare(slack[b], slack[a]))
             .mapToInt(Integer::intValue).toArray();
+    }
+
+    private static final List<CommoditySlack> topSlackCommodities(final double[] slack, final int n) {
+        final List<String> ids = ProductionMatrix.getWorkerRelatedCommodityIDs();
+        return IntStream.range(0, slack.length)
+            .filter(c -> slack[c] > SLACK_TOLERANCE).boxed()
+            .sorted((a, b) -> Double.compare(slack[b], slack[a]))
+            .limit(n)
+            .map(c -> new CommoditySlack(ids.get(c), slack[c]))
+            .collect(Collectors.toList());
     }
 
     private static final boolean isBalancerEligible(final IndustrySpecAPI spec) {

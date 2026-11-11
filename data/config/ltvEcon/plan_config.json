@@ -44,15 +44,11 @@
             },
             "segments": [
                 {
-                    "cost": 0.3,
-                    "id": "fair"
-                },
-                {
-                    "cost": 0.1,
+                    "cost": 0.04,
                     "id": "local"
                 },
                 {
-                    "cost": 0.15,
+                    "cost": 0.2,
                     "id": "faction"
                 },
                 {
@@ -95,11 +91,7 @@
             },
             "segments": [
                 {
-                    "cost": 0.3,
-                    "id": "fair"
-                },
-                {
-                    "cost": 0.1,
+                    "cost": 0.04,
                     "id": "local"
                 },
                 {
@@ -107,7 +99,7 @@
                     "id": "global"
                 },
                 {
-                    "cost": 0.15,
+                    "cost": 0.2,
                     "id": "faction"
                 }
             ]
