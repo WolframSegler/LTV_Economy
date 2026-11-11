@@ -10,7 +10,7 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI.ShipTypeHints;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
-import wfg.ltv_econ.economy.fleet.ShipTypeData;
+import wfg.ltv_econ.economy.fleet.InventoryShip;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.fleet.InventoryShipWidget;
 import wfg.ltv_econ.ui.fleet.ShipFilters;
@@ -19,7 +19,7 @@ import wfg.native_ui.ui.table.GridTable;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
-public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShipWidget> {
+public final class FactionShipGrid extends GridTable<InventoryShip, InventoryShipWidget> {
     
     private final UIBuildableAPI navbar;
 
@@ -33,8 +33,8 @@ public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShip
         buildUI();
     }
 
-    protected final List<ShipTypeData> getDataList() {
-        final List<ShipTypeData> list = new ArrayList<>(StaticData.inv.getShips().values());
+    protected final List<InventoryShip> getDataList() {
+        final List<InventoryShip> list = new ArrayList<>(StaticData.inv.getShips().values());
         if (!DebugFlags.COLONY_DEBUG) {
             list.removeIf(d -> d.getOwned() < 1);
         }
@@ -44,7 +44,7 @@ public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShip
         return list;
     }
 
-    protected InventoryShipWidget createWidget(ShipTypeData item, int index) {
+    protected InventoryShipWidget createWidget(InventoryShip item, int index) {
         final InventoryShipWidget widget = new InventoryShipWidget(item, navbar);
 
         final int col = index % computeColCount();
@@ -63,7 +63,7 @@ public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShip
         return LocalizedStrings.str("uiNoMatchTxt");
     }
 
-    private static final boolean shouldFilterOut(ShipTypeData data) {
+    private static final boolean shouldFilterOut(InventoryShip data) {
         if (!ShipFilters.showCivilian && data.spec.getHints().contains(ShipTypeHints.CIVILIAN)) return true;
         if (!ShipFilters.showCombat && !data.spec.getHints().contains(ShipTypeHints.CIVILIAN)) return true;
         if (ShipFilters.showOnlyIdle && data.getIdle() < 1) return true;
@@ -84,7 +84,7 @@ public final class FactionShipGrid extends GridTable<ShipTypeData, InventoryShip
         return false;
     }
 
-    private static final int compareShips(ShipTypeData a, ShipTypeData b) {
+    private static final int compareShips(InventoryShip a, InventoryShip b) {
         return switch (ShipFilters.sortMode) {
             case NAME -> a.spec.getHullName().compareToIgnoreCase(b.spec.getHullName());
             case CARGO -> Float.compare(b.spec.getCargo(), a.spec.getCargo());

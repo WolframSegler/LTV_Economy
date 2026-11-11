@@ -92,7 +92,7 @@ public class ShipAllocator {
     public static final void allocateShipsForTrade(
         FactionShipInventory inventory, TradeMission mission
     ) {
-        final List<ShipTypeData> ships = new ArrayList<>(inventory.getShips().values());
+        final List<InventoryShip> ships = new ArrayList<>(inventory.getShips().values());
         ships.removeIf(s -> s.getIdle() <= 0);
         allocateShipsForTarget(mission.cargoAmount, mission.fuelAmount, mission.crewAmount, mission.combatPowerTarget,
             Global.getSector().getFaction(inventory.factionID), mission.allocatedShips, ships
@@ -108,7 +108,7 @@ public class ShipAllocator {
     public static final void allocateShipsForPatrol(
         FactionShipInventory inventory, PatrolMission mission, double fleetPoints
     ) {
-        final List<ShipTypeData> candidates = new ArrayList<>(inventory.getShips().values());
+        final List<InventoryShip> candidates = new ArrayList<>(inventory.getShips().values());
         candidates.removeIf(s -> s.getIdle() <= 0);
         allocateShipsForFleetPoints(fleetPoints,
             Global.getSector().getFaction(inventory.factionID), mission.allocatedShips, candidates
@@ -151,9 +151,9 @@ public class ShipAllocator {
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
         FactionAPI faction, Map<String, Integer> allocation
     ) {
-        final List<ShipTypeData> candidates = new ArrayList<>();
+        final List<InventoryShip> candidates = new ArrayList<>();
         for (String hullId : faction.getKnownShips()) {
-            final ShipTypeData dummy = new ShipTypeData(hullId);
+            final InventoryShip dummy = new InventoryShip(hullId);
             dummy.addShip(4096);
             candidates.add(dummy);
         }
@@ -172,9 +172,9 @@ public class ShipAllocator {
      * @param allocation the allocation to be populated.
      */
     public static final void allocateShipsForFleetPoints(double fleetPoints, FactionAPI faction, Map<String, Integer> allocation) {
-        final List<ShipTypeData> candidates = new ArrayList<>();
+        final List<InventoryShip> candidates = new ArrayList<>();
         for (String hullId : faction.getKnownShips()) {
-            final ShipTypeData dummy = new ShipTypeData(hullId);
+            final InventoryShip dummy = new InventoryShip(hullId);
             dummy.addShip(4096);
             candidates.add(dummy);
         }
@@ -196,7 +196,7 @@ public class ShipAllocator {
      */
     public static final void allocateShipsForTarget(
         double targetCargo, double targetFuel, double targetCrew, double targetCombat,
-        FactionAPI faction, Map<String, Integer> allocation, List<ShipTypeData> candidates
+        FactionAPI faction, Map<String, Integer> allocation, List<InventoryShip> candidates
     ) {
         final double totalTarget = targetCargo + targetFuel + targetCrew + targetCombat;
         if (totalTarget <= 0d) return;
@@ -212,7 +212,7 @@ public class ShipAllocator {
         final double[] combatCap = new double[N];
 
         for (int i = 0; i < N; i++) {
-            final ShipTypeData data = candidates.get(i);
+            final InventoryShip data = candidates.get(i);
             cargoCap[i] = data.spec.getCargo();
             fuelCap[i] = data.spec.getFuel();
             crewCap[i] = data.getCrewCapacityPerShip();
@@ -291,7 +291,7 @@ public class ShipAllocator {
             final int count = counts[i];
             if (count <= 0) continue;
 
-            final ShipTypeData data = candidates.get(i);
+            final InventoryShip data = candidates.get(i);
             data.useShip(count);
             allocation.put(data.hullID, count);
         }
@@ -306,7 +306,7 @@ public class ShipAllocator {
      * @param candidates the pool of hulls to choose from
      */
     public static final void allocateShipsForFleetPoints(
-        double targetFp, FactionAPI faction, Map<String, Integer> allocation, List<ShipTypeData> candidates
+        double targetFp, FactionAPI faction, Map<String, Integer> allocation, List<InventoryShip> candidates
     ) {
         if (targetFp <= 0d) return;
 
@@ -318,7 +318,7 @@ public class ShipAllocator {
         final int[] idleRemaining = new int[N];
 
         for (int i = 0; i < N; i++) {
-            final ShipTypeData ship = candidates.get(i);
+            final InventoryShip ship = candidates.get(i);
             idleRemaining[i] = ship.getIdle();
             fleetPoints[i] = ship.spec.getFleetPoints();
         }
@@ -364,13 +364,13 @@ public class ShipAllocator {
             final int count = counts[i];
             if (count <= 0) continue;
 
-            final ShipTypeData data = candidates.get(i);
+            final InventoryShip data = candidates.get(i);
             data.useShip(count);
             allocation.put(data.hullID, count);
         }
     }
 
-    private static final double getDoctrinePreference(FactionAPI faction, ShipTypeData data) {
+    private static final double getDoctrinePreference(FactionAPI faction, InventoryShip data) {
         final String key = faction.getId() + DOCT_PREF_KEY + data.hullID;
         final Double cached = DOCTRINE_PREF_CACHE.get(key);
         if (cached != null) return cached.doubleValue();
@@ -430,7 +430,7 @@ public class ShipAllocator {
         return mult;
     }
 
-    private static final double[] buildTargetWeights(List<ShipTypeData> candidates, FactionAPI faction,
+    private static final double[] buildTargetWeights(List<InventoryShip> candidates, FactionAPI faction,
         double targetCargo, double targetFuel, double targetCrew, double targetCombat
     ) {
         final int N = candidates.size();
@@ -445,7 +445,7 @@ public class ShipAllocator {
 
         final double[] coeffs = new double[N];
         for (int i = 0; i < N; i++) {
-            final ShipTypeData data = candidates.get(i);
+            final InventoryShip data = candidates.get(i);
             final ShipHullSpecAPI spec = data.spec;
             
             final double transportScore = 1d
@@ -468,14 +468,14 @@ public class ShipAllocator {
         return coeffs;
     }
 
-    private static final double[] buildFleetPointWeights(List<ShipTypeData> candidates, FactionAPI faction) {
+    private static final double[] buildFleetPointWeights(List<InventoryShip> candidates, FactionAPI faction) {
         final int N = candidates.size();
 
         final double[] coeffs = new double[N];
         for (int i = 0; i < N; i++) {
-            final ShipTypeData data = candidates.get(i);
+            final InventoryShip data = candidates.get(i);
 
-            final double baseCost = data.getCombatPower() / Math.pow(data.spec.getFleetPoints(), 2d);
+            final double baseCost = data.getCombatPower() / Math.pow(data.spec.getFleetPoints(), 1.6d);
             final double doctrineFactor = getDoctrinePreference(faction, data);
             final double randFactor = 0.75d + 0.5d * Math.random();
             

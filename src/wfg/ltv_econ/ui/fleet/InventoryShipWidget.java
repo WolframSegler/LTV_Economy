@@ -18,7 +18,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.fleet.ShipProductionManager;
-import wfg.ltv_econ.economy.fleet.ShipTypeData;
+import wfg.ltv_econ.economy.fleet.InventoryShip;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.ltv_econ.ui.factionTab.dialog.AddShipDialog;
 import wfg.ltv_econ.ui.factionTab.dialog.RemoveShipDialog;
@@ -58,11 +58,11 @@ public final class InventoryShipWidget extends UIContainer implements WidgetAPI<
     public final TooltipComp tooltip = comp().get(NativeComponents.TOOLTIP);
 
     private final UIBuildableAPI navbar;
-    public final ShipTypeData data;
+    public final InventoryShip data;
 
     public WidgetSelectionState selectionState = WidgetSelectionState.NONE;
 
-    public InventoryShipWidget(ShipTypeData data, UIBuildableAPI navbar) {
+    public InventoryShipWidget(InventoryShip data, UIBuildableAPI navbar) {
         super(WIDTH, HEIGHT);
         this.data = data;
         this.navbar = navbar;

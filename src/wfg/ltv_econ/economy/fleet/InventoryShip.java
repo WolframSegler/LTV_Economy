@@ -12,7 +12,7 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI.ShipTypeHints;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.native_ui.util.Arithmetic;
 
-public class ShipTypeData implements Serializable {
+public class InventoryShip implements Serializable {
     public final String hullID;
     public transient ShipHullSpecAPI spec;
 
@@ -20,7 +20,7 @@ public class ShipTypeData implements Serializable {
 
     private transient float combatPower = 0f;
 
-    public ShipTypeData(String hullID) {
+    public InventoryShip(String hullID) {
         this.hullID = hullID;
 
         readResolve();
@@ -112,16 +112,21 @@ public class ShipTypeData implements Serializable {
     }
 
     public static final float getCombatPower(ShipHullSpecAPI spec) {
-        final float stats = 1f
+        final float stats = Math.max(0.1f, 1f
             + spec.getFighterBays() * 0.04f
             + spec.getArmorRating() / 750f
             + spec.getFluxCapacity() / 7500f
             + spec.getFluxDissipation() / 750f
             + (1f - spec.getShieldSpec().getFluxPerDamageAbsorbed()) * 3f
-            + (spec.getEngineSpec().getMaxSpeed() - 80) / 30f;
+            + (spec.getEngineSpec().getMaxSpeed() - 80) / 30f
+        );
             
         final float mult = getCombatMult(spec) * stats;
         return spec.getFleetPoints() * mult;
+    }
+
+    public static final boolean isCivilian(ShipHullSpecAPI spec) {
+        return spec.getHints().contains(ShipTypeHints.CIVILIAN);
     }
 
     private static final float getCombatMult(ShipHullSpecAPI spec) {
@@ -129,7 +134,7 @@ public class ShipTypeData implements Serializable {
             return 0.7f;
         }
 
-        if (spec.getHints().contains(ShipTypeHints.CIVILIAN)) {
+        if (isCivilian(spec)) {
             return 0.05f;
         }
 

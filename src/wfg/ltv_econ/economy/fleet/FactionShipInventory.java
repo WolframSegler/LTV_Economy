@@ -28,7 +28,7 @@ import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.ArrayMap;
 
 public class FactionShipInventory implements Serializable {
-    private final ArrayMap<String, ShipTypeData> ships = new ArrayMap<>(4);
+    private final ArrayMap<String, InventoryShip> ships = new ArrayMap<>(4);
     final List<ShipProductionOrder> activeQueue = new ArrayList<>();
     final List<PlannedOrder> plannedOrders = new ArrayList<>();
 
@@ -60,8 +60,8 @@ public class FactionShipInventory implements Serializable {
         return this;
     }
 
-    public final ShipTypeData get(final String hullId) {
-        return ships.computeIfAbsent(hullId, k -> new ShipTypeData(hullId));
+    public final InventoryShip get(final String hullId) {
+        return ships.computeIfAbsent(hullId, k -> new InventoryShip(hullId));
     }
 
     public final void addShip(final String hullId, int count) {
@@ -86,7 +86,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalCargoCapacity() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getOwned() * data.spec.getCargo();
         }
         return total;
@@ -94,7 +94,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getIdleCargoCapacity() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getIdle() * data.spec.getCargo();
         }
         return total;
@@ -102,7 +102,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalFuelCapacity() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getOwned() * data.spec.getFuel();
         }
         return total;
@@ -110,7 +110,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getIdleFuelCapacity() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getIdle() * data.spec.getFuel();
         }
         return total;
@@ -118,7 +118,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalCrewCapacity() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getOwned() * data.getCrewCapacityPerShip();
         }
         return total;
@@ -126,7 +126,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getIdleCrewCapacity() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getIdle() * data.getCrewCapacityPerShip();
         }
         return total;
@@ -134,7 +134,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalCombatPower() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getOwned() * data.getCombatPower();
         }
         return total;
@@ -142,7 +142,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getIdleCombatPower() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getIdle() * data.getCombatPower();
         }
         return total;
@@ -150,7 +150,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalFleetPoints() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getOwned() * data.spec.getFleetPoints();
         }
         return total;
@@ -158,7 +158,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getIdleFleetPoints() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getIdle() * data.spec.getFleetPoints();
         }
         return total;
@@ -166,7 +166,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalDailyMaintenance() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getDailyMaintenanceCost();
         }
         return total;
@@ -174,7 +174,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalMonthlyMaintenance() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getMonthlyMaintenanceCost();
         }
         return total;
@@ -182,7 +182,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalMonthlyCrewWage() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getMonthlyCrewWages();
         }
         return total;
@@ -190,7 +190,7 @@ public class FactionShipInventory implements Serializable {
 
     public final float getTotalDailyCrewWage() {
         float total = 0f;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getMonthlyCrewWages();
         }
         return total / MONTH;
@@ -198,7 +198,7 @@ public class FactionShipInventory implements Serializable {
 
     public final int getTotalCrew() {
         int total = 0;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getTotalCrew();
         }
         return total;
@@ -206,7 +206,7 @@ public class FactionShipInventory implements Serializable {
 
     public final int getIdleCrew() {
         int total = 0;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getIdleCrew();
         }
         return total;
@@ -214,7 +214,7 @@ public class FactionShipInventory implements Serializable {
 
     public final int getOwnedShips() {
         int total = 0;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getOwned();
         }
         return total;
@@ -222,7 +222,7 @@ public class FactionShipInventory implements Serializable {
 
     public final int getIdleShips() {
         int total = 0;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getIdle();
         }
         return total;
@@ -230,13 +230,13 @@ public class FactionShipInventory implements Serializable {
 
     public final int getInUseShips() {
         int total = 0;
-        for (ShipTypeData data : ships.values()) {
+        for (InventoryShip data : ships.values()) {
             total += data.getInUse();
         }
         return total;
     }
 
-    public final Map<String, ShipTypeData> getShips() {
+    public final Map<String, InventoryShip> getShips() {
         return Collections.unmodifiableMap(ships);
     }
 

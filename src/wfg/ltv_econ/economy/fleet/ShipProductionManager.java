@@ -80,7 +80,7 @@ public class ShipProductionManager {
         deficitCombat = Math.min(deficitCombat, MAX_TARGET_FOR_PLANNED_ORDERS / 8f);
 
         for (ShipProductionOrder order : activeQueue) {
-            final ShipTypeData data = inv.get(order.hullId);
+            final InventoryShip data = inv.get(order.hullId);
             deficitCargo -= data.spec.getCargo();
             deficitFuel -= data.spec.getFuel();
             deficitCrew -= data.getCrewCapacityPerShip();
@@ -88,7 +88,7 @@ public class ShipProductionManager {
         }
 
         for (PlannedOrder order : plannedOrders) {
-            final ShipTypeData data = inv.get(order.hullId);
+            final InventoryShip data = inv.get(order.hullId);
             deficitCargo -= data.spec.getCargo();
             deficitFuel -= data.spec.getFuel();
             deficitCrew -= data.getCrewCapacityPerShip();
@@ -152,7 +152,7 @@ public class ShipProductionManager {
         final int days = getBaseDays(spec);
         final long credits = (long) (spec.getBaseValue() * rovc);
         final float shipsCost = (spec.getBaseValue() / shipSpec.getBasePrice()) * rocc;
-        final float crewCost = ShipTypeData.getCrewPerShip(spec);
+        final float crewCost = InventoryShip.getCrewPerShip(spec);
         
         commodities.put(Commodities.SHIPS, shipsCost);
         commodities.put(Commodities.CREW, crewCost);

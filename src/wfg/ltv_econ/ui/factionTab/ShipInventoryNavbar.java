@@ -17,7 +17,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.UIColors;
 import wfg.ltv_econ.economy.fleet.FactionShipInventory;
-import wfg.ltv_econ.economy.fleet.ShipTypeData;
+import wfg.ltv_econ.economy.fleet.InventoryShip;
 import wfg.ltv_econ.serializable.StaticData;
 import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.BackgroundComp;
@@ -182,7 +182,7 @@ public final class ShipInventoryNavbar extends UIContainer implements UIBuildabl
             int destroyerCount = 0;
             int cruiserCount = 0;
             int capitalCount = 0;
-            for (ShipTypeData data : inv.getShips().values()) {
+            for (InventoryShip data : inv.getShips().values()) {
                 if (data.spec.getHints().contains(ShipTypeHints.CIVILIAN)) civilianCount += data.getOwned();
                 switch (data.spec.getHullSize()) {
                     case FRIGATE -> ++frigateCount;

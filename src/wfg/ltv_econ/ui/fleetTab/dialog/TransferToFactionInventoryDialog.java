@@ -25,7 +25,7 @@ import com.fs.starfarer.loading.specs.HullVariantSpec;
 
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
-import wfg.ltv_econ.economy.fleet.ShipTypeData;
+import wfg.ltv_econ.economy.fleet.InventoryShip;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.util.Globals;
 
@@ -49,7 +49,7 @@ public final class TransferToFactionInventoryDialog extends DialogPanel {
 
     @Override
     public void buildUI() {
-        final int crewNeeded = ShipTypeData.getCrewPerShip(member.getHullSpec());
+        final int crewNeeded = InventoryShip.getCrewPerShip(member.getHullSpec());
         final String highlightStr1 = Integer.toString(Math.round(getBonusXpFraction(member.getVariant()) * 100f)) + "%";
         final String highlightStr2 = str("uiTxtBonusExperience");
         final LabelAPI txtLbl = Globals.settings.createLabel(
@@ -92,7 +92,7 @@ public final class TransferToFactionInventoryDialog extends DialogPanel {
             playerCargo.addFighters(wingId, 1);
         }
 
-        playerCargo.removeCommodity(Commodities.CREW, ShipTypeData.getCrewPerShip(member.getHullSpec()));
+        playerCargo.removeCommodity(Commodities.CREW, InventoryShip.getCrewPerShip(member.getHullSpec()));
 
         grantTransferBonusXp(variant);
 
