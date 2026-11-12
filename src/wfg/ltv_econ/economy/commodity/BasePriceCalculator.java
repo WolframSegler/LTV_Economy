@@ -29,9 +29,9 @@ public final class BasePriceCalculator {
     static final double NEGATIVE_TAIL_FACTOR;
 
     static final float INHERENT_DEMAND = 100f;
-    static final float PRICE_MULT_FLOOR = 0.1f;
-    static final float PRICE_MULT_CEILING = 10f;
-    static final double MAX_MULT = Double.MAX_VALUE;
+    static final double PRICE_MULT_FLOOR = 0.2d;
+    static final double PRICE_MULT_CEILING = 5d;
+    static final double MAX_MULT = PRICE_MULT_CEILING;
 
     static {
         final double m0 = ABSOLUTE_DEFICIT_MULT;
@@ -49,9 +49,9 @@ public final class BasePriceCalculator {
             final double left = Math.log(m0) / L0;
             final double right = Math.log(m1) / L4;
             if (left < right) {
-                hi = mid;
-            } else {
                 lo = mid;
+            } else {
+                hi = mid;
             }
         }
         SHIFT_FRACTION = (lo + hi) * 0.5;
