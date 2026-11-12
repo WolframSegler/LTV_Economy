@@ -285,11 +285,10 @@ public final class LtvIndustryListPanel extends UIContainer implements UIBuildab
 				}
 			}.getProxy();
 
-			final UIPanelAPI coreUI = Attachments.getCoreUI();
 			final IndustryPickerDialog dialog = (IndustryPickerDialog) RolfLectionUtil.instantiateClass(
 				indPickCtor,
 				mMarket,
-				coreUI,
+				Attachments.getCoreUI(),
 				listener
 			);
 			dialog.show(0.3f, 0.2f);

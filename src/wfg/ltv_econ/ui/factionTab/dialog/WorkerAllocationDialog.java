@@ -22,7 +22,6 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.ButtonAPI.UICheckboxSize;
 import com.fs.starfarer.api.util.Misc;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.config.PlanConfig;
 import wfg.ltv_econ.config.PlanConfig.WorkerAllocationPlan;
 import wfg.ltv_econ.config.loader.PlanConfigLoader;
@@ -501,7 +500,7 @@ public final class WorkerAllocationDialog extends DialogPanel {
             headLbl.autoSizeToWidth(CONTENT_PANEL_W);
             final int headLblH = (int) headLbl.getPosition().getHeight() + 3;
             headLbl.getPosition().setSize(CONTENT_PANEL_W, headLblH);
-            RolfLectionUtil.getMethodAndInvokeDirectly("setBackgroundColor", headLbl, dark);
+            headLbl.setBackgroundColor(dark);
 
             final UIElement spacer = new UIElement(CONTENT_PANEL_W, headLblH);
             if (prev != null) {

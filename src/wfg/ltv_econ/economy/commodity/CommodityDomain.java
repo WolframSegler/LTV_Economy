@@ -117,7 +117,6 @@ public class CommodityDomain implements Serializable {
         final List <CommodityCell> importers = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
-            // TODO switch to API method once available
             if (!((Market) cell.market).isAllowImport()) continue;
             if (!cell.market.hasSpaceport()) continue;
             if (MarketTradeDisruptionData.shouldSuspendTrade(cell.market)) continue;
@@ -131,7 +130,6 @@ public class CommodityDomain implements Serializable {
         final List <CommodityCell> exporters = new ArrayList<>(32);
 
         for (CommodityCell cell : comCells.values()) {
-            // TODO switch to API method once available
             if (!((Market) cell.market).isAllowExport()) continue;
             if (!cell.market.hasSpaceport()) continue;
             if (MarketTradeDisruptionData.shouldSuspendTrade(cell.market)) continue;

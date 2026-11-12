@@ -209,14 +209,18 @@ public final class IndustryIOs {
      *             <li>{@code 2} – output is abstract</li>
      *         </ul>
      */
-    public static final int createAndRegisterDynamicOutput(final Industry ind, String outputID) {
+    public static synchronized final int createAndRegisterDynamicOutput(final Industry ind, String outputID) {
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         if (cfg.outputs.containsKey(outputID)) return 1;
         if (settings.getCommoditySpec(outputID) == null) return 2;
 
         final boolean useWorkers = cfg.workerAssignable;
         final boolean scaleWithSize = getIndApplyDeltaWithMarketSizeChange(ind.getMarket(),
-            () -> { ind.reapply(); return ind.getSupply(outputID).getQuantity().getModifiedValue(); }
+            () -> {
+                ind.unapply();
+                ind.apply();
+                return ind.getSupply(outputID).getQuantity().getModifiedValue();
+            }
         ) > 0.01f;
 
         final ArrayMap<String, Float> inputs = new ArrayMap<>(4);
@@ -271,7 +275,7 @@ public final class IndustryIOs {
      *             <li>{@code 2} – input is abstract</li>
      *         </ul>
      */
-    public static final int createAndRegisterDynamicInput(final Industry ind, String inputID) {
+    public static synchronized final int createAndRegisterDynamicInput(final Industry ind, String inputID) {
         final IndustryConfig cfg = IndustryConfigManager.getIndConfig(ind);
         final String outputID = DYNAMIC_OUTPUT + inputID;
 
@@ -279,7 +283,11 @@ public final class IndustryIOs {
         if (settings.getCommoditySpec(inputID) == null) return 2;
 
         final boolean scaleWithSize = getIndApplyDeltaWithMarketSizeChange(ind.getMarket(),
-            () -> { ind.reapply(); return ind.getDemand(inputID).getQuantity().getModifiedValue(); }
+            () -> {
+                ind.unapply();
+                ind.apply();
+                return ind.getDemand(inputID).getQuantity().getModifiedValue();
+            }
         ) > 0.01f;
 
         

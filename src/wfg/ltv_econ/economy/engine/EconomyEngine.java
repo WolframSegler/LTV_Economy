@@ -14,10 +14,8 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignClockAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
-import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
-import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -49,7 +47,6 @@ import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.IndustryTooltips;
 import wfg.ltv_econ.intel.PlayerMarketBombardedIntel;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
-import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
 import wfg.native_ui.util.NumFormat;
@@ -75,14 +72,14 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator;
 import com.fs.starfarer.campaign.econ.Economy;
 import com.fs.starfarer.api.campaign.listeners.ColonyDecivListener;
-import com.fs.starfarer.api.campaign.listeners.ColonyInteractionListener;
 import com.fs.starfarer.api.campaign.listeners.ColonyPlayerHostileActListener;
-import com.fs.starfarer.api.campaign.listeners.CoreUITabListener;
 import com.fs.starfarer.api.campaign.listeners.EconomyTickListener;
 import com.fs.starfarer.api.campaign.listeners.GroundRaidObjectivesListener;
+import com.fs.starfarer.api.campaign.listeners.IndustryApplyListener;
 
 public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColonizationListener, ColonyDecivListener,
-    GroundRaidObjectivesListener, CoreUITabListener, EconomyTickListener, ColonyInteractionListener, ColonyPlayerHostileActListener
+    GroundRaidObjectivesListener, EconomyTickListener, ColonyPlayerHostileActListener,
+    IndustryApplyListener
 {
     public transient EconomyInfo info;
     public transient EconomyLogger logger;
@@ -103,7 +100,6 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     protected int cyclesSinceWorkerAssign = EconConfig.WORKER_ASSIGN_INTERVAL;
     protected int cyclesSinceTrade = EconConfig.TRADE_INTERVAL;
     protected int lastTradeCycle = EconConfig.TRADE_INTERVAL;
-    protected boolean midDayApplied = false;
 
     private boolean mBalancerCheckPending = true;
 
@@ -142,26 +138,18 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     public boolean isDone() { return false;}
     public boolean runWhilePaused() { return false;}
     public final void advance(float delta) {
-        if (mBalancerCheckPending && delta > 0f && Attachments.getScreenPanel() != null) {
+        if (mBalancerCheckPending && delta > 0f && settings.getScreenPanel() != null) {
             mBalancerCheckPending = false;
             IndustryBalancer.showIfSlackDetected();
         }
 
         final CampaignClockAPI clock = Global.getSector().getClock();
-        final int hour = clock.getHour();
         final int dayKey = (clock.getCycle() << 10) + (clock.getMonth() << 5) + clock.getDay();
-
-        // TODO replace with population industry apply listener after new update.
-        if (hour >= 6 && !midDayApplied) {
-            applyPopulationStabilityMods();
-            midDayApplied = true;
-        }
 
         if (dayKeyTracker == -1) { dayKeyTracker = dayKey; return;}
         if (dayKeyTracker == dayKey) return;
 
         dayKeyTracker = dayKey;
-        midDayApplied = false;
 
         if (EconConfig.MULTI_THREADING) {
             mainLoopExecutor.execute(this::realAdvance);
@@ -367,39 +355,46 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         }
     }
 
-    public final void applyPopulationStabilityMods(MarketAPI market) {
-        // TODO Call this using industry post apply hook after update
-        if (!registeredMarkets.contains(market.getId())) return;
+    public void reportIndustryAboutToBeApplied(Industry ind) {}
+    public void reportIndustryApplied(Industry ind) {
+        loop.discoverInputsOutputs(ind);
+        applyPopulationStabilityMods(ind); // must come after discoverInputsOutputs
+    }
+
+    public final void applyPopulationStabilityMods(Industry ind) {
+        final MarketAPI market = ind.getMarket();
         final String marketID = market.getId();
+        if (!registeredMarkets.contains(marketID)) return;
+        if (!ind.getSpec().getTags().contains(Industries.POPULATION)) return;
+
         final String popID = "ind_" + Industries.POPULATION + "_";
         final CommodityCell domCell = getComCell(Commodities.DOMESTIC_GOODS, marketID);
         final CommodityCell luxCell = getComCell(Commodities.LUXURY_GOODS, marketID);
         final CommodityCell foodCell = getComCell(Commodities.FOOD, marketID);
         final CommodityCell orgCell = getComCell(Commodities.ORGANICS, marketID);
         
-        if (domCell.getStoredAvailabilityRatio() > 0.9) { // 90% or more
-            market.getStability().modifyFlat(popID + 0, 1, str("domesticDemandMetTxt"));
+        if (domCell.getStoredAvailabilityRatio() > 0.9f) { // 90% or more
+            market.getStability().modifyFlat(popID + 0, 1f, str("domesticDemandMetTxt"));
         } else market.getStability().unmodifyFlat(popID + 0);
 
         final int luxuryThreshold = 3;
-        if (luxCell.getStoredAvailabilityRatio() > 0.9 && market.getSize() > luxuryThreshold) {
-            market.getStability().modifyFlat(popID + 1, 1, str("luxuryDemandMetTxt"));
+        if (luxCell.getStoredAvailabilityRatio() > 0.9f && market.getSize() > luxuryThreshold) {
+            market.getStability().modifyFlat(popID + 1, 1f, str("luxuryDemandMetTxt"));
         } else market.getStability().unmodifyFlat(popID + 1);
 
         final boolean useOrganicsValues = foodCell.getStoredAvailabilityRatio() >
             orgCell.getStoredAvailabilityRatio() && !market.hasCondition(Conditions.HABITABLE);
         
-        final String com = useOrganicsValues ? Commodities.FOOD : Commodities.ORGANICS;
+        final String com = useOrganicsValues ? Commodities.ORGANICS : Commodities.FOOD;
         final float ratio = useOrganicsValues ? orgCell.getStoredAvailabilityRatio() :
            foodCell.getStoredAvailabilityRatio();
 
-        if (ratio < 0.9) { // less than 90%
-            final int stabilityPenalty = 
-                ratio < 0.1 ? -3 :
-                ratio < 0.4 ? -2 :
-                ratio < 0.7 ? -1 : 0;
+        if (ratio < 0.7f) {
+            final int stabilityPenalty = ratio < 0.1f ? -3 : ratio < 0.4f ? -2 : -1;
             market.getStability().modifyFlat(popID + 2, stabilityPenalty, BaseIndustry.getDeficitText(com));
-        } else market.getStability().unmodifyFlat(popID + 2);
+        } else {
+            market.getStability().unmodifyFlat(popID + 2);
+        }
     }
 
     public final void applyServiceSectorEffectsToMarket(MarketAPI market) {
@@ -541,22 +536,9 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
      */
     public void reportEconomyMonthEnd() {}
 
-    /** Only works when interacting with the market */
-    public void reportPlayerOpenedMarket(MarketAPI market) {
-        applyPopulationStabilityMods(market);
-    }
-
-    /** Only works when interacting with the market */
-    public void reportPlayerClosedMarket(MarketAPI market) {
-        applyPopulationStabilityMods(market);
-    }
-
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
         registerMarket(planet.getMarket());
     }
-
-    public void reportPlayerOpenedMarketAndCargoUpdated(MarketAPI market) {};
-    public void reportPlayerMarketTransaction(PlayerMarketTransaction trs) {};
 
     public void reportPlayerAbandonedColony(MarketAPI market) {
         removeMarket(market);
@@ -587,10 +569,6 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 	
 	public void reportRaidObjectivesAchieved(RaidResultData data, InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {}
-    
-    public void reportAboutToOpenCoreTab(CoreUITabId tabID, Object param) {
-        if (tabID == CoreUITabId.CARGO) applyPopulationStabilityMods();
-    }
 
     public void reportRaidForValuablesFinishedBeforeCargoShown(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, CargoAPI cargo) {}
 	public void reportRaidToDisruptFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, Industry industry) {}
@@ -630,12 +608,6 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
                 new PlayerMarketBombardedIntel(data, reduction, penalty, isSaturation),
                 false
             );
-        }
-    }
-
-    private final void applyPopulationStabilityMods() {
-        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            applyPopulationStabilityMods(market);
         }
     }
     

@@ -22,6 +22,7 @@ import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketImmigrationModifier;
+import com.fs.starfarer.api.campaign.econ.MutableCommodityQuantity;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
@@ -73,7 +74,7 @@ public class EconomyLoop {
     public EconomyLoop(EconomyEngine engine) { this.engine = engine; }    
 
     /** Not order agnostic */
-    final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
+    synchronized final void mainLoop(boolean fakeAdvance, boolean forceWorkerAssignment) {
         if (!fakeAdvance) cycleCounter++;
 
         final PlayerFactionSettings playerFacSettings = LtvEconSaveData.instance().playerFactionSettings;
@@ -84,8 +85,6 @@ public class EconomyLoop {
         if (!fakeAdvance) EconomyInfo.getMarketsCopy().forEach(m -> MarketTradeDisruptionData.get(m).advance(1));
 
         poolReg.recalculateWorkerPool();
-
-        discoverInputsOutputs();
 
         engine.comDomains.values().forEach(CommodityDomain::reset);
         engine.factionShipInventories.values().forEach(FactionShipInventory::update);
@@ -182,27 +181,31 @@ public class EconomyLoop {
         }
     }
 
-    private final void discoverInputsOutputs() {
-        // TODO replace with the industry apply hooks after the update
-        for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
-                for (var supply : ind.getAllSupply()) {
-                    if (supply.getQuantity().getModifiedValue() > 0.01f) {
-                        if (!IndustryIOs.hasOutput(ind.getSpec().getId(), supply.getCommodityId())) {
-                            IndustryIOs.createAndRegisterDynamicOutput(ind, supply.getCommodityId());
-                        }
-                    }
-                }
+    final void discoverInputsOutputs(Industry ind) {
+        final List<MutableCommodityQuantity> supplies = new ArrayList<>(ind.getAllSupply());
+        final List<MutableCommodityQuantity> demands = new ArrayList<>(ind.getAllDemand());
 
-                for (var demand : ind.getAllDemand()) {
-                    if (demand.getQuantity().getModifiedValue() > 0.01f) {
-                        if (!IndustryIOs.hasInput(ind.getSpec().getId(), demand.getCommodityId())) {
-                            IndustryIOs.createAndRegisterDynamicInput(ind, demand.getCommodityId());
-                        }
-                    }
+        boolean discoveredIO = false;
+        Global.getLogger(getClass()).error(ind.getSpec().getId());
+        for (MutableCommodityQuantity supply : supplies) {
+            if (supply.getQuantity().getModifiedValue() > 0.01f) {
+                if (!IndustryIOs.hasOutput(ind.getSpec().getId(), supply.getCommodityId())) {
+                    IndustryIOs.createAndRegisterDynamicOutput(ind, supply.getCommodityId());
+                    discoveredIO = true;
                 }
             }
         }
+
+        for (MutableCommodityQuantity demand : demands) {
+            if (demand.getQuantity().getModifiedValue() > 0.01f) {
+                if (!IndustryIOs.hasInput(ind.getSpec().getId(), demand.getCommodityId())) {
+                    IndustryIOs.createAndRegisterDynamicInput(ind, demand.getCommodityId());
+                    discoveredIO = true;
+                }
+            }
+        }
+
+        if (discoveredIO) engine.fakeAdvance();
     }
 
     private final void assignWorkers() {
@@ -698,7 +701,6 @@ public class EconomyLoop {
     }
 
     private final void applyServiceSectorEffects() {
-        // TODO make the solver give value to these outputs
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
             applyServiceSectorEffectsToMarket(market);
         }

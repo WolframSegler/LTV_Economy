@@ -37,7 +37,6 @@ import wfg.ltv_econ.ui.reusable.WidgetSelectionState;
 import wfg.ltv_econ.util.UIUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.native_ui.internal.ui.core.UIContainer;
-import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.AudioFeedbackComp;
 import wfg.native_ui.ui.component.BackgroundComp;
@@ -257,7 +256,7 @@ public final class IndustryWidget extends UIContainer implements
                         ind,
                         indPanel.mDummyWidget,
                         UIUtils.getMarketInteractionMode(market),
-                        Attachments.getCampaignScreenPanel(),
+                        settings.getScreenPanel(),
                         listener
                     );
                     RolfLectionUtil.getMethodAndInvokeDirectly(

@@ -4,7 +4,6 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -35,7 +34,6 @@ import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.industry.CompatLayer;
 import wfg.ltv_econ.ui.marketInfo.CommodityRowPanel;
 import wfg.ltv_econ.ui.reusable.StockpileInfoBar;
-import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.NumFormat;
 
@@ -166,8 +164,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
 	protected static final void addInfoBar(final UIPanelAPI panel, final CommodityCell cell) {
 		if (panel == null) return;
-		final List<UIComponentAPI> children = MethodFields.getChildrenNonCopy(panel);
-		for (UIComponentAPI child : children) {
+		for (UIComponentAPI child : panel.getChildrenCopy2()) {
 			if (child instanceof CustomPanelAPI custom) {
 				if (custom.getPlugin() instanceof StockpileInfoBar) return;
 			}

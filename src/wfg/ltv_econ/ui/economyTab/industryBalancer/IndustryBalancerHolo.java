@@ -1,5 +1,6 @@
 package wfg.ltv_econ.ui.economyTab.industryBalancer;
 
+import static wfg.native_ui.util.Globals.settings;
 import static wfg.native_ui.util.UIConstants.*;
 
 import java.awt.Color;
@@ -10,7 +11,6 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import wfg.native_ui.internal.ui.dialog.FoldingPanel;
 import wfg.native_ui.internal.ui.interaction.EventInterceptor;
 import wfg.native_ui.internal.ui.interaction.EventInterceptor.EventInterceptorListener;
-import wfg.native_ui.ui.Attachments;
 import wfg.native_ui.util.RenderUtils;
 
 public final class IndustryBalancerHolo extends FoldingPanel implements EventInterceptorListener {
@@ -34,7 +34,7 @@ public final class IndustryBalancerHolo extends FoldingPanel implements EventInt
     }
 
     public void showBalancerDialog(boolean manualTrigger) {
-        mInterceptor.attachTo(Attachments.getScreenPanel());
+        mInterceptor.attachTo(settings.getScreenPanel());
         mInterceptor.bringToFront();
         mInterceptor.pos().inBL(0f, 0f);
 

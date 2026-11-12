@@ -11,7 +11,6 @@ import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
 import com.fs.starfarer.api.ui.LabelAPI;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.native_ui.internal.ui.core.UIContainer;
@@ -59,7 +58,7 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
         clearChildren();
 
         final LabelAPI headerLbl = settings.createLabel(mHeaderTxt, Fonts.ORBITRON_12);
-        RolfLectionUtil.getMethodAndInvokeDirectly("setBackgroundColor", headerLbl, dark);
+        headerLbl.setBackgroundColor(dark);
         headerLbl.setAlignment(Alignment.MID);
         headerLbl.setColor(base);
         headerLbl.autoSizeToWidth(getWidth());

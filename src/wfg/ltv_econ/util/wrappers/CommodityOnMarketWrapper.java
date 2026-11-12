@@ -9,11 +9,11 @@ import com.fs.starfarer.campaign.econ.MarketDemand;
 import com.fs.starfarer.campaign.econ.PriceCalculator;
 import com.fs.starfarer.campaign.econ.reach.CommodityMarketData;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.utils.RuntimeOnly;
 
-public final class CommodityOnMarketWrapper extends CommodityOnMarket {
+public final class CommodityOnMarketWrapper extends CommodityOnMarket implements RuntimeOnly {
 
     final CommodityOnMarket org;
 
@@ -35,14 +35,6 @@ public final class CommodityOnMarketWrapper extends CommodityOnMarket {
         if (cell == null) return org.getExcessQuantity();
 
         return (int) cell.getStoredExcess();
-    }
-
-
-    // WRAPPER DELEGATORS
-    @SuppressWarnings("all")
-    Object readResolve() {
-        return RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
-            "readResolve", org);
     }
 
     public CommodityMarketData getCommodityMarketData() {

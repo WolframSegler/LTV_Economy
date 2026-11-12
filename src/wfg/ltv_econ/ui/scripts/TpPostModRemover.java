@@ -13,7 +13,6 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.ui.impl.StandardTooltipV2Expandable;
 
 import rolflectionlib.util.RolfLectionUtil;
-import wfg.native_ui.ui.MethodFields;
 
 public class TpPostModRemover implements EveryFrameScript {
     private boolean isDone = false;
@@ -38,10 +37,10 @@ public class TpPostModRemover implements EveryFrameScript {
         if(tp.getPrev() instanceof LabelAPI label){
         if(!label.getText().contains("Per unit prices assume")) return;
 
-        final var panel = (UIPanelAPI) RolfLectionUtil.getMethodAndInvokeDirectly(
+        final UIPanelAPI panel = (UIPanelAPI) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getPanel", tp
         );
-        final List<UIComponentAPI> children = MethodFields.getChildrenNonCopy(panel);
+        final List<UIComponentAPI> children = panel.getChildrenCopy2();
 
         final int index = children.size() - 1;
         for (int i = index; i >= 0; i--) {

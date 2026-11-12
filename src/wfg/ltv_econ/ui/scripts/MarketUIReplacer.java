@@ -22,7 +22,6 @@ import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
 import wfg.utils.ui.CoreTabUIBuilder;
 import wfg.native_ui.ui.Attachments;
-import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.util.IdentityMarker;
 
 import com.fs.starfarer.campaign.econ.Market;
@@ -70,7 +69,7 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
         market = (MarketAPI) RolfLectionUtil.getPrivateVariable(marketAPIField, tradePanel);
         if (!market.isInEconomy()) return;
 
-        final List<UIComponentAPI> outpostChildren = MethodFields.getChildrenNonCopy(tradePanel);
+        final List<UIComponentAPI> outpostChildren = tradePanel.getChildrenCopy2();
         final UIPanelAPI overviewPanel = (UIPanelAPI) outpostChildren.stream()
             .filter(c -> RolfLectionUtil.hasMethodOfName("showOverview", c))
             .findFirst().orElse(null);
@@ -82,7 +81,7 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
             .findFirst().orElse(null);
         if (marketStatsPanel == null) return;
 
-        final UIPanelAPI managementPanel = (UIPanelAPI) MethodFields.getChildrenNonCopy(overviewPanel).stream()
+        final UIPanelAPI managementPanel = (UIPanelAPI) overviewPanel.getChildrenCopy2().stream()
             .filter(c -> RolfLectionUtil.hasMethodOfName("recreateWithEconUpdate", c))
             .findFirst().orElse(null);
         if (managementPanel == null) return;
@@ -90,7 +89,7 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
         if (IdentityMarker.isPresent(managementPanel)) return;
         IdentityMarker.attach(managementPanel);
 
-        final List<UIComponentAPI> managementChildren = MethodFields.getChildrenNonCopy(managementPanel);
+        final List<UIComponentAPI> managementChildren = managementPanel.getChildrenCopy2();
 
         UIPanelAPI anchorChild = null;
 
@@ -168,8 +167,7 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
         final UIPanelAPI incomePanel = (UIPanelAPI) RolfLectionUtil.getMethodAndInvokeDirectly(
             "getIncome", colonyInfoPanel);
         
-        final var buttons = (List<ButtonAPI>) MethodFields
-            .getChildrenNonCopy(incomePanel).stream()
+        final var buttons = (List<ButtonAPI>) incomePanel.getChildrenCopy2().stream()
             .filter(c -> c instanceof ButtonAPI).map(c -> (ButtonAPI) c).toList();
 
         final ButtonAPI creditBtn = buttons.get(0);
@@ -222,9 +220,9 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
             );
 
             // Now the popup class is a child of:
-            final UIPanelAPI dialogParent = Attachments.getCampaignScreenPanel();
+            final UIPanelAPI dialogParent = settings.getScreenPanel();
 
-            final UIPanelAPI indOps = (UIPanelAPI) MethodFields.getChildrenNonCopy(dialogParent).stream()
+            final UIPanelAPI indOps = (UIPanelAPI) dialogParent.getChildrenCopy2().stream()
                 .filter(child -> child instanceof DialogCreatorUI && child instanceof UIPanelAPI)
                 .findFirst().orElse(null);
 
@@ -312,8 +310,8 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
     }
 
     private static final void replaceAccessLabelTooltip(UIPanelAPI statsPanel) {
-        final List<ButtonAPI> buttons = MethodFields
-            .getChildrenNonCopy(statsPanel).stream()
+        final List<ButtonAPI> buttons = statsPanel.getChildrenCopy2()
+            .stream()
             .filter(c -> c instanceof ButtonAPI)
             .map(child -> (ButtonAPI) child)
             .toList();

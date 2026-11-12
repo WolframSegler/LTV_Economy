@@ -16,7 +16,6 @@ import com.fs.starfarer.campaign.fleet.FleetMember;
 import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.ui.fleetTab.button.TransferToFactionInventoryBtn;
 import wfg.native_ui.ui.Attachments;
-import wfg.native_ui.ui.MethodFields;
 import wfg.native_ui.ui.util.IdentityMarker;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
@@ -52,13 +51,11 @@ public final class FleetTabUIBuilder implements CoreTabUIBuilder {
             }
             IdentityMarker.attach(widget);
 
-            final List<UIComponentAPI> widgetChildren = MethodFields.getChildrenNonCopy(widget);
-
-            final UIPanelAPI buttonsPanel = widgetChildren.stream()
+            final UIPanelAPI buttonsPanel = widget.getChildrenCopy2().stream()
                 .filter(c -> RolfLectionUtil.hasMethodOfName("updateTooltip", c))
                 .map(child -> (UIPanelAPI) child).findFirst().orElse(null);
             if (buttonsPanel == null) continue;
-            final List<UIComponentAPI> buttons = MethodFields.getChildrenNonCopy(buttonsPanel);
+            final List<UIComponentAPI> buttons = buttonsPanel.getChildrenCopy2();
             if (buttons == null) continue;
 
             final Fader widgetFader = (Fader) RolfLectionUtil.getMethodAndInvokeDirectly("getHoverFader", widget);

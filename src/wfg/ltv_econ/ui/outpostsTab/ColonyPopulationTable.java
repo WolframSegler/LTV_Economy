@@ -39,7 +39,6 @@ import wfg.native_ui.util.NumFormat;
 public final class ColonyPopulationTable extends UIContainer implements HasBackground {
     static final int PANEL_W = 935;
 
-    // TODO with the new update there will be label font options. Update to match vanilla fonts.
     private static final PlanetInfoParams params = new PlanetInfoParams() {
         {
             showName = true;

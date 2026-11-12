@@ -47,12 +47,12 @@ import com.fs.starfarer.campaign.econ.Submarket;
 import com.fs.starfarer.campaign.fleet.MutableMarketStats;
 import com.fs.starfarer.rpg.Person;
 
-import rolflectionlib.util.RolfLectionUtil;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
+import wfg.utils.RuntimeOnly;
 
-public final class MarketWrapper extends Market {
+public final class MarketWrapper extends Market implements RuntimeOnly {
     public final Market original;
 
     private boolean ready;
@@ -425,12 +425,6 @@ public final class MarketWrapper extends Market {
         return original.getAccessibilityMod();
     }
 
-    @SuppressWarnings("all")
-    private Object readResolve() {
-        return RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
-            "readResolve", original);
-    }
-
     public boolean isUseStockpilesForShortages() {
         return original.isUseStockpilesForShortages();
     }
@@ -441,12 +435,6 @@ public final class MarketWrapper extends Market {
 
     public void clearCommodities() {
         original.clearCommodities();
-    }
-
-    @SuppressWarnings("all")
-    private Object writeReplace() {
-        return RolfLectionUtil.getMethodDeclaredAndInvokeDirectly(
-            "writeReplace", original);
     }
 
     public Market clone() {
