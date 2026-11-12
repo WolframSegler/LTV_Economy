@@ -5,6 +5,8 @@ import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.function.DoubleUnaryOperator;
+
 public class BasePriceCalculatorTest {
     private static final float BASE_PRICE = 18.0f;
     private static final float DEMAND = 100.0f;
@@ -256,9 +258,11 @@ public class BasePriceCalculatorTest {
 
     @Test
     public void demandBelowInherentFloorIsIgnored() {
-        final float tinyDemand = 2f;
-        // stock = INHERENT_DEMAND -> equilibrium
-        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, BasePriceCalculator.INHERENT_DEMAND, BASE_PRICE, tinyDemand);
+        final double tinyDemand = BasePriceCalculator.INHERENT_DEMAND / 2d;
+        // Stock = floored demand → s/d = 1 → equilibrium
+        final float p = BasePriceCalculator.getUnitPrice(
+            TransactionDirection.NEUTRAL, 0,
+            BasePriceCalculator.INHERENT_DEMAND, BASE_PRICE, tinyDemand);
         assertEquals(BASE_PRICE, p, 0.01);
     }
 
@@ -268,11 +272,10 @@ public class BasePriceCalculatorTest {
             TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND);
         assertTrue(avg > 0 && Float.isFinite(avg));
 
-        // For r0 >= 0, s=0 is in the deficit branch (at or below the anchor).
-        // Bound between m0 and C, not exactly m0.
+        // m(0) is bounded by the asymptotes for any anchor configuration.
         final double m = avg / BASE_PRICE;
-        assertTrue(m >= BasePriceCalculator.DEFICIT_ANCHOR_MULT - 0.01);
-        assertTrue(m <= BasePriceCalculator.PRICE_MULT_CEILING + 0.01);
+        assertTrue(m > BasePriceCalculator.PRICE_MULT_FLOOR);
+        assertTrue(m < BasePriceCalculator.PRICE_MULT_CEILING);
     }
 
     @Test
@@ -374,14 +377,55 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
-    public void derivativeIsContinuousAtZero() {
-        final double h = 0.05;
-        final double leftSlope = (BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND)
-                            - BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, -h, BASE_PRICE, DEMAND)) / h;
-        final double rightSlope = (BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, h, BASE_PRICE, DEMAND)
-                                - BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND)) / h;
+    public void derivativeIsContinuousAtAnchor() {
+        final double anchorStock = BasePriceCalculator.DEFICIT_ANCHOR_RATIO * DEMAND;
+
+        final DoubleUnaryOperator gapAt = h -> {
+            final double leftSlope = (BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, anchorStock, BASE_PRICE, DEMAND)
+                                    - BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, anchorStock - h, BASE_PRICE, DEMAND)) / h;
+            final double rightSlope = (BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, anchorStock + h, BASE_PRICE, DEMAND)
+                                    - BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, anchorStock, BASE_PRICE, DEMAND)) / h;
+            return Math.abs(leftSlope - rightSlope);
+        };
+
+        final double h = 1.0;
+        final double gapBig = gapAt.applyAsDouble(h);
+        final double gapSmall = gapAt.applyAsDouble(h / 2);
+        final double ratio = gapBig / gapSmall;
+
+        assertEquals(2.0, ratio, 0.3,
+            "Gap should halve when h halves (C¹ signature). "
+            + "ratio=" + ratio + " gapBig=" + gapBig + " gapSmall=" + gapSmall);
+    }
+
+    @Test
+    public void derivativeIsContinuousAtAnchor_numeric() {
+        final double anchorStock = BasePriceCalculator.DEFICIT_ANCHOR_RATIO * DEMAND;
+
+        // Compute h from the second-derivative jump so the O(h·jump) error stays
+        // well below tolerance. Clamp to a range where float roundoff doesn't dominate.
+        final double a = BasePriceCalculator.BLEND_SHIFT_FRACTION * DEMAND;
+        final double r0d = anchorStock;
+        final double m0 = BasePriceCalculator.DEFICIT_ANCHOR_MULT;
+        final double C  = BasePriceCalculator.PRICE_MULT_CEILING;
+        final double F  = BasePriceCalculator.PRICE_MULT_FLOOR;
+        final double E  = BasePriceCalculator.EXCESS_EXPONENT;
+        final double NTF = BasePriceCalculator.NEGATIVE_TAIL_FACTOR;
+
+        final double mSecondLeft  = -(C - m0) * (NTF / DEMAND) * (NTF / DEMAND);
+        final double mSecondRight = (m0 - F) * E * (E + 1) / ((r0d + a) * (r0d + a));
+        final double jump = Math.abs(mSecondLeft + mSecondRight);
+
+        // Target: (h/2)·jump·basePrice < tolerance/2
+        final double target = TOLERANCE * 0.5 / (jump * BASE_PRICE);
+        final double h = Math.max(1e-3, Math.min(0.5, target));
+
+        final double leftSlope = (BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, anchorStock, BASE_PRICE, DEMAND)
+                                - BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, anchorStock - h, BASE_PRICE, DEMAND)) / h;
+        final double rightSlope = (BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, anchorStock + h, BASE_PRICE, DEMAND)
+                                - BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, anchorStock, BASE_PRICE, DEMAND)) / h;
         assertEquals(leftSlope, rightSlope, TOLERANCE,
-            "Derivative should be continuous at s=0 (C¹). "
+            "Numeric derivative continuity at anchor (h=" + h + "). "
             + "leftSlope=" + leftSlope + " rightSlope=" + rightSlope);
     }
 
@@ -394,19 +438,20 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
-    public void anchor_SixTimesDemand_IsExcessMult() {
-        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 6 * DEMAND, BASE_PRICE, DEMAND);
+    public void anchor_AtExcessAnchor_IsExcessMult() {
+        final double stock = BasePriceCalculator.EXCESS_ANCHOR_RATIO * DEMAND;
+        final float p = BasePriceCalculator.getUnitPrice(
+            TransactionDirection.NEUTRAL, 0, stock, BASE_PRICE, DEMAND);
         assertEquals(BASE_PRICE * BasePriceCalculator.EXCESS_ANCHOR_MULT, p, 0.01);
     }
 
     @Test
     public void demandFloorAppliesToDeficitBranch() {
-        final float tinyDemand = 2f;
-        // With floor (d=100): s=-10 is 0.3d below anchor (0.2d), m ≈ 3.29 < ceiling
-        // Without floor (d=2): s=-10 is 5.2d below anchor (0.4), m ≈ ceiling
-        final float p = BasePriceCalculator.getUnitPrice(
-            TransactionDirection.NEUTRAL, 0, -10, BASE_PRICE, tinyDemand);
-        assertTrue(p < BASE_PRICE * BasePriceCalculator.PRICE_MULT_CEILING - 1f,
-            "With demand floor applied, deficit value should be meaningfully below ceiling");
+        // With the floor, both tiny demand values should produce identical prices
+        // (both floor to INHERENT_DEMAND). Without the floor, they'd differ.
+        final float p1 = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, -50, BASE_PRICE, 2f);
+        final float p2 = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, -50, BASE_PRICE, 5f);
+        assertEquals(p1, p2, 0.001f,
+            "Both below INHERENT_DEMAND should floor to the same value");
     }
 }

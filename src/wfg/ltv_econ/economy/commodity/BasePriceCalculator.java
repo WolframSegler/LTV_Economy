@@ -17,8 +17,8 @@ package wfg.ltv_econ.economy.commodity;
  *   <p>
  *   <p>
  * <p>
- * For s ≥ 0 the multiplier is a shifted power law blended with an additive floor,
- * asymptotically approaching {@link #PRICE_MULT_FLOOR} as s -> ∞. For s < 0 it is a
+ * For s ≥ {@link #DEFICIT_ANCHOR_RATIO} the multiplier is a shifted power law blended with an additive floor,
+ * asymptotically approaching {@link #PRICE_MULT_FLOOR} as s -> ∞. For s < {@link #DEFICIT_ANCHOR_RATIO} it is a
  * saturating exponential, asymptotically approaching {@link #PRICE_MULT_CEILING} as s -> -∞.
  * Neither asymptote is ever reached.
  * <p>
@@ -32,7 +32,7 @@ public final class BasePriceCalculator {
     /* ------------------------ TUNABLE START ------------------------ */
 
     /** Stock/demand ratio at the deficit anchor (m = {@link #DEFICIT_ANCHOR_MULT}). */
-    static final double DEFICIT_ANCHOR_RATIO = 0.2d;
+    static final double DEFICIT_ANCHOR_RATIO = 0d;
     /** Stock/demand ratio at the excess anchor (m = {@link #EXCESS_ANCHOR_MULT}). */
     static final double EXCESS_ANCHOR_RATIO = 6d;
 
@@ -41,10 +41,10 @@ public final class BasePriceCalculator {
     /** Multiplier when stock is at {@link #EXCESS_ANCHOR_RATIO}. */
     static final double EXCESS_ANCHOR_MULT = 0.35d;
 
-    /** Minimum price multiplier used by {@link #multiplier}. Never reached exactly. */
-    static final double PRICE_MULT_FLOOR = 0.2d;
     /** Maximum price multiplier used by {@link #multiplier}. Never reached exactly. */
     static final double PRICE_MULT_CEILING = 3.5d;
+    /** Minimum price multiplier used by {@link #multiplier}. Never reached exactly. */
+    static final double PRICE_MULT_FLOOR = 0.2d;
 
     /** Minimum demand used for price calculations. Must be > {@code 0d}. */
     static final double INHERENT_DEMAND = 100d;
@@ -55,7 +55,20 @@ public final class BasePriceCalculator {
     static final double NEGATIVE_TAIL_FACTOR;
     static final double BLEND_SHIFT_FRACTION;
 
+    private static final boolean TUNABLES_CORRECT =
+        DEFICIT_ANCHOR_RATIO < 1d &&
+        EXCESS_ANCHOR_RATIO > 1d &&
+        DEFICIT_ANCHOR_MULT > 1d &&
+        EXCESS_ANCHOR_MULT < 1d &&
+        DEFICIT_ANCHOR_MULT > EXCESS_ANCHOR_MULT &&
+        DEFICIT_ANCHOR_MULT < PRICE_MULT_CEILING &&
+        EXCESS_ANCHOR_MULT > PRICE_MULT_FLOOR &&
+        PRICE_MULT_FLOOR > 0d &&
+        INHERENT_DEMAND >= 1d;
+
     static {
+        if (!TUNABLES_CORRECT) throw new IllegalArgumentException("Parameters incorrectly tuned");
+
         final double F = PRICE_MULT_FLOOR;
         final double C = PRICE_MULT_CEILING;
         final double m0 = DEFICIT_ANCHOR_MULT;
