@@ -4,12 +4,11 @@ import wfg.ltv_econ.economy.commodity.BasePriceCalculator.TransactionDirection;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import static wfg.ltv_econ.economy.commodity.BasePriceCalculator.*;
 
 public class BasePriceCalculatorTest {
     private static final float BASE_PRICE = 18.0f;
     private static final float DEMAND = 100.0f;
-    private static final double TOLERANCE = 0.01;   // 1% relative tolerance for integral comparisons
+    private static final double TOLERANCE = 0.005d;
 
     @Test
     public void sellToEntity_MoreUnits_LowerAveragePrice() {
@@ -95,12 +94,11 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
-    public void neutralPrice_ReturnsInstantaneousPrice() {
-        final double stored = 80.0;
-        final float neutral = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, stored, BASE_PRICE, DEMAND);
-        final float buy1 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 0, stored, BASE_PRICE, DEMAND);
-        assertEquals(neutral, buy1, 1e-6,
-                "Neutral with zero amount should return instantaneous price, same as zero buy");
+    public void zeroAmount_ReturnsInstantaneousPrice() {
+        final double stored = 70.0;
+        final float p1 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, 0, stored, BASE_PRICE, DEMAND);
+        final float p2 = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, stored, BASE_PRICE, DEMAND);
+        assertEquals(p1, p2, 1e-6, "Neutral with zero amount should return instantaneous price, same as zero buy");
     }
 
     @Test
@@ -128,14 +126,6 @@ public class BasePriceCalculatorTest {
         assertTrue(avgBuy >= 1.0f, "Price floor should be at least 1");
         assertTrue(avgSell >= 1.0f, "Price floor should be at least 1");
         assertTrue(neutral >= 1.0f, "Price floor should be at least 1");
-    }
-
-    @Test
-    public void zeroAmount_ReturnsInstantaneousPrice() {
-        final double stored = 70.0;
-        final float p1 = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, 0, stored, BASE_PRICE, DEMAND);
-        final float p2 = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, stored, BASE_PRICE, DEMAND);
-        assertEquals(p1, p2, 1e-6);
     }
 
     @Test
@@ -168,7 +158,7 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
-    public void sellThenBuy_NetLoss() {
+    public void sellThenBuy_NetZero() {
         final double stored = DEMAND + 20;
         final long amount = 50;
 
@@ -184,7 +174,7 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
-    public void buyThenSell_NetLoss() {
+    public void buyThenSell_NetZero() {
         final double stored = DEMAND - 20;
         final long amount = 40;
 
@@ -210,6 +200,17 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
+    public void averagePriceDecreasesWithStoredStock() {
+        final long amount = 20;
+        float last = Float.POSITIVE_INFINITY;
+        for (double stored : new double[]{-100, -10, 0, 100, 500, 5000}) {
+            final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, amount, stored, BASE_PRICE, DEMAND);
+            assertTrue(avg < last, "Avg should decrease as stored increases: stored=" + stored);
+            last = avg;
+        }
+    }
+
+    @Test
     public void tinyBuyInExcessGivesLowPrice() {
         final double stored = DEMAND * 1000;
         final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 1, stored, BASE_PRICE, DEMAND);
@@ -231,8 +232,6 @@ public class BasePriceCalculatorTest {
         assertTrue(Float.isFinite(avg) && avg > 0);
     }
 
-    // ---- clamping enforcement --------------------------------------------------
-
     @Test
     public void massiveExcessHitsFloor() {
         final double stored = 1e9;
@@ -247,22 +246,27 @@ public class BasePriceCalculatorTest {
         assertEquals(BASE_PRICE * BasePriceCalculator.PRICE_MULT_CEILING, avg, 0.01);
     }
 
-    // ---- demand flooring -------------------------------------------------------
+    @Test
+    public void integralNeverExceedsCeiling() {
+        // Buying from deep deficit into deeper deficit. Average must not exceed ceiling
+        final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 100, -10_000, BASE_PRICE, DEMAND);
+        assertTrue(avg <= BASE_PRICE * BasePriceCalculator.PRICE_MULT_CEILING + 0.01,
+            "Integral average must respect ceiling");
+    }
 
     @Test
     public void demandBelowInherentFloorIsIgnored() {
         final float tinyDemand = 2f;
         // stock = INHERENT_DEMAND -> equilibrium
-        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, INHERENT_DEMAND, BASE_PRICE, tinyDemand);
+        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, BasePriceCalculator.INHERENT_DEMAND, BASE_PRICE, tinyDemand);
         assertEquals(BASE_PRICE, p, 0.01);
     }
-
-    // ---- edge numbers ----------------------------------------------------------
 
     @Test
     public void stockZeroIsValid() {
         final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND);
         assertTrue(avg > 0 && Float.isFinite(avg));
+        assertEquals(BASE_PRICE * BasePriceCalculator.ABSOLUTE_DEFICIT_MULT, avg, 0.01);
     }
 
     @Test
@@ -272,17 +276,12 @@ public class BasePriceCalculatorTest {
         assertTrue(avg >= BASE_PRICE * BasePriceCalculator.PRICE_MULT_FLOOR);
     }
 
-    // ---- transaction direction consistency ------------------------------------
-
     @Test
     public void entityBuyingIncreasesStock() {
-        // No direct assertion; just validates the call does not crash.
         BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, 30, 50, BASE_PRICE, DEMAND);
-    }
-
-    @Test
-    public void entitySellingDecreasesStock() {
-        BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 20, 50, BASE_PRICE, DEMAND);
+        final float buyAvg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_BUYING, 30, DEMAND, BASE_PRICE, DEMAND);
+        final float neutral = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, DEMAND, BASE_PRICE, DEMAND);
+        assertTrue(buyAvg < neutral);
     }
 
     @Test
@@ -292,8 +291,6 @@ public class BasePriceCalculatorTest {
         final float p2 = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 100, stored, BASE_PRICE, DEMAND);
         assertEquals(p1, p2, 0.01);
     }
-
-    // ---- additivity for complex splits -----------------------------------------
 
     @Test
     public void threeWaySplitSameTotalCost() {
@@ -334,8 +331,6 @@ public class BasePriceCalculatorTest {
                 "Total revenue additive when crossing from negative to positive stock");
     }
 
-    // ---- base price scaling ----------------------------------------------------
-
     @Test
     public void priceScalesLinearlyWithBasePrice() {
         final double stored = DEMAND - 10;
@@ -346,10 +341,8 @@ public class BasePriceCalculatorTest {
         assertEquals(p1 * 2.0, p2, 0.01);
     }
 
-    // ---- regression safety (snapshot a few known points) -----------------------
-
     @Test
-    public void regressionSnapshot_EquilibriumBuy() {
+    public void equilibriumBuy_RaisesAveragePrice() {
         final double stored = DEMAND;
         final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.ENTITY_SELLING, 10, stored, BASE_PRICE, DEMAND);
         assertTrue(avg > BASE_PRICE && avg < BASE_PRICE * 1.5,
@@ -363,8 +356,6 @@ public class BasePriceCalculatorTest {
         assertTrue(avg > BASE_PRICE * 2 && avg <= BASE_PRICE * BasePriceCalculator.PRICE_MULT_CEILING);
     }
 
-    // ---- continuity ------------------------------------------------------------
-
     @Test
     public void priceFunctionIsContinuousAtZero() {
         // Instantaneous multiplier near s=0 from left and right should be close to m(0)
@@ -374,5 +365,39 @@ public class BasePriceCalculatorTest {
         final float atZero = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0.0, BASE_PRICE, DEMAND);
         assertEquals(atZero, left,  1e-4, "Continuity from left at zero");
         assertEquals(atZero, right, 1e-4, "Continuity from right at zero");
+    }
+
+    @Test
+    public void derivativeIsContinuousAtZero() {
+        final double h = 0.05;
+        final double leftSlope = (BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND)
+                            - BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, -h, BASE_PRICE, DEMAND)) / h;
+        final double rightSlope = (BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, h, BASE_PRICE, DEMAND)
+                                - BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND)) / h;
+        assertEquals(leftSlope, rightSlope, TOLERANCE,
+            "Derivative should be continuous at s=0 (C¹). "
+            + "leftSlope=" + leftSlope + " rightSlope=" + rightSlope);
+    }
+
+    @Test
+    public void anchor_ZeroStock_IsDeficitMult() {
+        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND);
+        assertEquals(BASE_PRICE * BasePriceCalculator.ABSOLUTE_DEFICIT_MULT, p, 0.01);
+    }
+
+    @Test
+    public void anchor_SixTimesDemand_IsExcessMult() {
+        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 6 * DEMAND, BASE_PRICE, DEMAND);
+        assertEquals(BASE_PRICE * BasePriceCalculator.ABSOLUTE_EXCESS_MULT, p, 0.01);
+    }
+
+    @Test
+    public void demandFloorAppliesToDeficitBranch() {
+        final float tinyDemand = 2f;
+        // With floor: d=100, s=-50 → m ≈ 5 - 2.5·exp(-0.965) ≈ 4.05
+        // Without floor: d=2, s=-50 → m ≈ 5 - 2.5·exp(-48) ≈ 5 (essentially at ceiling)
+        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, -50, BASE_PRICE, tinyDemand);
+        assertTrue(p < BASE_PRICE * BasePriceCalculator.PRICE_MULT_CEILING - 1f,
+            "With demand floor, deep deficit should still be below the ceiling");
     }
 }

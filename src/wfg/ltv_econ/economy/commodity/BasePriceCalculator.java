@@ -31,7 +31,6 @@ public final class BasePriceCalculator {
     static final float INHERENT_DEMAND = 100f;
     static final double PRICE_MULT_FLOOR = 0.2d;
     static final double PRICE_MULT_CEILING = 5d;
-    static final double MAX_MULT = PRICE_MULT_CEILING;
 
     static {
         final double m0 = ABSOLUTE_DEFICIT_MULT;
@@ -42,7 +41,7 @@ public final class BasePriceCalculator {
         // solve: ln(m0)/ln((1+f)/(r0+f)) == ln(m1)/ln((1+f)/(r1+f))
         // bisection on f ∈ [0.0001, 10]
         double lo = 0.0001, hi = 10d;
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 80; i++) {
             final double mid = (lo + hi) * 0.5;
             final double L0 = Math.log((1 + mid) / (r0 + mid));
             final double L4 = Math.log((1 + mid) / (r1 + mid));
@@ -59,7 +58,8 @@ public final class BasePriceCalculator {
         final double L0 = Math.log((1d + SHIFT_FRACTION) / (r0 + SHIFT_FRACTION));
         EXPONENT = Math.log(m0) / L0;
 
-        NEGATIVE_TAIL_FACTOR = EXPONENT / SHIFT_FRACTION;
+        NEGATIVE_TAIL_FACTOR = EXPONENT * ABSOLUTE_DEFICIT_MULT
+            / (SHIFT_FRACTION * (PRICE_MULT_CEILING - ABSOLUTE_DEFICIT_MULT));
     }
 
     /**
@@ -97,24 +97,19 @@ public final class BasePriceCalculator {
     }
 
     private static final double clampMult(double mult) {
-        return Math.max(PRICE_MULT_FLOOR, Math.min(PRICE_MULT_CEILING, mult));
+        return Math.max(PRICE_MULT_FLOOR, mult);
+        // return Math.max(PRICE_MULT_FLOOR, Math.min(PRICE_MULT_CEILING, mult));
     }
 
-    /**
-     * Piecewise multiplier function:
-     *   s >= 0 : m(s) = ((d+shift)/(s+shift))^EXPONENT
-     *   s < 0 : m(s) = m(0) * exp(-NEGATIVE_TAIL_FACTOR * s / d)
-     */
     private static final double multiplier(double s, float demand, double shift) {
         if (s < 0) {
-            // m(0) is exactly ABSOLUTE_DEFICIT_MULT by construction
-            final double raw = ABSOLUTE_DEFICIT_MULT * Math.exp(-NEGATIVE_TAIL_FACTOR * s / demand);
-            return Math.min(raw, MAX_MULT);
-        } else {
-            final double ratio = (demand + shift) / (s + shift);
-            final double raw = Math.pow(ratio, EXPONENT);
-            return Math.min(raw, MAX_MULT);
+            final double C = PRICE_MULT_CEILING;
+            final double m0 = ABSOLUTE_DEFICIT_MULT;
+            // Bounded below C for all s < 0; no min() needed.
+            return C - (C - m0) * Math.exp(NEGATIVE_TAIL_FACTOR * s / demand);
         }
+        final double ratio = (demand + shift) / (s + shift);
+        return Math.pow(ratio, EXPONENT);
     }
 
     /**
@@ -131,22 +126,13 @@ public final class BasePriceCalculator {
         }
     }
 
-    /** Integral of the capped exponential tail m(s) = min( m0 * exp(-β*s), MAX_MULT) from a to b. */
     private static final double expIntegral(double a, double b, float demand) {
-        final double beta = NEGATIVE_TAIL_FACTOR / demand;
-        final double satStock = -Math.log(MAX_MULT / ABSOLUTE_DEFICIT_MULT) / beta;
-
-        if (b <= satStock) {
-            // entirely saturated
-            return MAX_MULT * (b - a);
-        } else if (a >= satStock) {
-            // entirely safe
-            return (ABSOLUTE_DEFICIT_MULT / beta) * (Math.exp(-beta * a) - Math.exp(-beta * b));
-        } else {
-            final double satPart = MAX_MULT * (satStock - a);
-            final double expPart = (ABSOLUTE_DEFICIT_MULT / beta) * (Math.exp(-beta * satStock) - Math.exp(-beta * b));
-            return satPart + expPart;
-        }
+        final double C = PRICE_MULT_CEILING;
+        final double m0 = ABSOLUTE_DEFICIT_MULT;
+        final double NTF = NEGATIVE_TAIL_FACTOR;
+        return C * (b - a)
+            - (C - m0) * (demand / NTF)
+            * (Math.exp(NTF * b / demand) - Math.exp(NTF * a / demand));
     }
 
     /** ∫_a^b K * (s + shift)^{-exp} ds for exp != 1 (and exp == 1 handled). */
