@@ -264,9 +264,15 @@ public class BasePriceCalculatorTest {
 
     @Test
     public void stockZeroIsValid() {
-        final float avg = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND);
+        final float avg = BasePriceCalculator.getUnitPrice(
+            TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND);
         assertTrue(avg > 0 && Float.isFinite(avg));
-        assertEquals(BASE_PRICE * BasePriceCalculator.ABSOLUTE_DEFICIT_MULT, avg, 0.01);
+
+        // For r0 >= 0, s=0 is in the deficit branch (at or below the anchor).
+        // Bound between m0 and C, not exactly m0.
+        final double m = avg / BASE_PRICE;
+        assertTrue(m >= BasePriceCalculator.DEFICIT_ANCHOR_MULT - 0.01);
+        assertTrue(m <= BasePriceCalculator.PRICE_MULT_CEILING + 0.01);
     }
 
     @Test
@@ -380,24 +386,27 @@ public class BasePriceCalculatorTest {
     }
 
     @Test
-    public void anchor_ZeroStock_IsDeficitMult() {
-        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 0, BASE_PRICE, DEMAND);
-        assertEquals(BASE_PRICE * BasePriceCalculator.ABSOLUTE_DEFICIT_MULT, p, 0.01);
+    public void anchor_AtDeficitBound_IsDeficitMult() {
+        final double stock = BasePriceCalculator.DEFICIT_ANCHOR_RATIO * DEMAND;
+        final float p = BasePriceCalculator.getUnitPrice(
+            TransactionDirection.NEUTRAL, 0, stock, BASE_PRICE, DEMAND);
+        assertEquals(BASE_PRICE * BasePriceCalculator.DEFICIT_ANCHOR_MULT, p, 0.01);
     }
 
     @Test
     public void anchor_SixTimesDemand_IsExcessMult() {
         final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, 6 * DEMAND, BASE_PRICE, DEMAND);
-        assertEquals(BASE_PRICE * BasePriceCalculator.ABSOLUTE_EXCESS_MULT, p, 0.01);
+        assertEquals(BASE_PRICE * BasePriceCalculator.EXCESS_ANCHOR_MULT, p, 0.01);
     }
 
     @Test
     public void demandFloorAppliesToDeficitBranch() {
         final float tinyDemand = 2f;
-        // With floor: d=100, s=-50 → m ≈ 5 - 2.5·exp(-0.965) ≈ 4.05
-        // Without floor: d=2, s=-50 → m ≈ 5 - 2.5·exp(-48) ≈ 5 (essentially at ceiling)
-        final float p = BasePriceCalculator.getUnitPrice(TransactionDirection.NEUTRAL, 0, -50, BASE_PRICE, tinyDemand);
+        // With floor (d=100): s=-10 is 0.3d below anchor (0.2d), m ≈ 3.29 < ceiling
+        // Without floor (d=2): s=-10 is 5.2d below anchor (0.4), m ≈ ceiling
+        final float p = BasePriceCalculator.getUnitPrice(
+            TransactionDirection.NEUTRAL, 0, -10, BASE_PRICE, tinyDemand);
         assertTrue(p < BASE_PRICE * BasePriceCalculator.PRICE_MULT_CEILING - 1f,
-            "With demand floor, deep deficit should still be below the ceiling");
+            "With demand floor applied, deficit value should be meaningfully below ceiling");
     }
 }

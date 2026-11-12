@@ -1,65 +1,90 @@
 package wfg.ltv_econ.economy.commodity;
 
 /**
- * Price calculator for trade with tunable parameters. The price function is piecewise‑defined,
- * continuous, monotonic, decreasing, symmetric and positive for all real s.
+ * Price calculator for trade with tunable parameters. The price function m(s) is
+ * piecewise-defined, continuous, monotonically decreasing, and bounded by
+ * {@link #PRICE_MULT_FLOOR} < m(s) < {@link #PRICE_MULT_CEILING} for all real s, where s = stock/demand.
+ * 
+ * The function passes through three anchors:
+ * <ul>
+ *   <li>m({@link #DEFICIT_ANCHOR_RATIO} × {@code demand}) = {@link #DEFICIT_ANCHOR_MULT}</li>
+ *   <li>m({@code demand}) = {@code 1} (stock equals demand -> base price)</li>
+ *   <li>m({@link #EXCESS_ANCHOR_RATIO} × {@code demand}) = {@link #EXCESS_ANCHOR_MULT}</li>
+ * </ul>
  * <p>
- * For s >= 0 the multiplier follows a shifted power law that passes through the two anchor points.
- * For s < 0 the multiplier extends smoothly using a decaying exponential.
+ *
+ *   <p>
+ *   <p>
+ *   <p>
+ * <p>
+ * For s ≥ 0 the multiplier is a shifted power law blended with an additive floor,
+ * asymptotically approaching {@link #PRICE_MULT_FLOOR} as s -> ∞. For s < 0 it is a
+ * saturating exponential, asymptotically approaching {@link #PRICE_MULT_CEILING} as s -> -∞.
+ * Neither asymptote is ever reached.
+ * <p>
+ * The integral over any [a, b] is closed-form (see {@link #integrateMultiplier}), which
+ * makes the average price for a transaction path-independent: splitting a trade
+ * into N sub-trades yields the same total cost as a single trade.
  */
 public final class BasePriceCalculator {
     private BasePriceCalculator() {};
 
-    // ------------------------ TUNABLE START ------------------------
+    /* ------------------------ TUNABLE START ------------------------ */
 
-    /** Stock/demand ratio with maximum deficit. */
-    static final double ABSOLUTE_DEFICIT_BOUND = 0d;
-    /** Stock/demand ratio with maximum excess. */
-    static final double ABSOLUTE_EXCESS_BOUND = 6d;
+    /** Stock/demand ratio at the deficit anchor (m = {@link #DEFICIT_ANCHOR_MULT}). */
+    static final double DEFICIT_ANCHOR_RATIO = 0.2d;
+    /** Stock/demand ratio at the excess anchor (m = {@link #EXCESS_ANCHOR_MULT}). */
+    static final double EXCESS_ANCHOR_RATIO = 6d;
 
-    /** Multiplier when stock is at {@link #ABSOLUTE_DEFICIT_BOUND}. */
-    static final double ABSOLUTE_DEFICIT_MULT = 2.5d;
-    /** Multiplier when stock is at {@link #ABSOLUTE_EXCESS_BOUND}. */
-    static final double ABSOLUTE_EXCESS_MULT = 0.35d;
+    /** Multiplier when stock is at {@link #DEFICIT_ANCHOR_RATIO}. */
+    static final double DEFICIT_ANCHOR_MULT = 2.5d;
+    /** Multiplier when stock is at {@link #EXCESS_ANCHOR_RATIO}. */
+    static final double EXCESS_ANCHOR_MULT = 0.35d;
 
-    // ------------------------ TUNABLE END ------------------------
-
-    static final double EXPONENT;
-    static final double SHIFT_FRACTION;
-    static final double NEGATIVE_TAIL_FACTOR;
-
-    static final float INHERENT_DEMAND = 100f;
+    /** Minimum price multiplier used by {@link #multiplier}. Never reached exactly. */
     static final double PRICE_MULT_FLOOR = 0.2d;
-    static final double PRICE_MULT_CEILING = 5d;
+    /** Maximum price multiplier used by {@link #multiplier}. Never reached exactly. */
+    static final double PRICE_MULT_CEILING = 3.5d;
+
+    /** Minimum demand used for price calculations. Must be > {@code 0d}. */
+    static final double INHERENT_DEMAND = 100d;
+
+    /* ------------------------ TUNABLE END ------------------------ */
+
+    static final double EXCESS_EXPONENT;
+    static final double NEGATIVE_TAIL_FACTOR;
+    static final double BLEND_SHIFT_FRACTION;
 
     static {
-        final double m0 = ABSOLUTE_DEFICIT_MULT;
-        final double m1 = ABSOLUTE_EXCESS_MULT;
-        final double r0 = ABSOLUTE_DEFICIT_BOUND;
-        final double r1 = ABSOLUTE_EXCESS_BOUND;
+        final double F = PRICE_MULT_FLOOR;
+        final double C = PRICE_MULT_CEILING;
+        final double m0 = DEFICIT_ANCHOR_MULT;
+        final double m1 = EXCESS_ANCHOR_MULT;
+        final double r0 = DEFICIT_ANCHOR_RATIO;
+        final double r1 = EXCESS_ANCHOR_RATIO;
 
-        // solve: ln(m0)/ln((1+f)/(r0+f)) == ln(m1)/ln((1+f)/(r1+f))
-        // bisection on f ∈ [0.0001, 10]
-        double lo = 0.0001, hi = 10d;
-        for (int i = 0; i < 80; i++) {
-            final double mid = (lo + hi) * 0.5;
-            final double L0 = Math.log((1 + mid) / (r0 + mid));
-            final double L4 = Math.log((1 + mid) / (r1 + mid));
-            final double left = Math.log(m0) / L0;
-            final double right = Math.log(m1) / L4;
-            if (left < right) {
-                lo = mid;
-            } else {
-                hi = mid;
-            }
+        final double P1 = (1d - F) / (m0 - F);
+        final double P2 = (m1 - F) / (m0 - F);
+        final double target = Math.log(P1) / Math.log(P2);
+
+        final double gInf = (1d - r0) / (r1 - r0);
+        if (target <= gInf) {
+            throw new IllegalArgumentException(
+                "No solution for blend shift: target=" + target + " must exceed limit=" + gInf
+                + " (adjust DEFICIT_BOUND/EXCESS_BOUND/MULT constants)");
         }
-        SHIFT_FRACTION = (lo + hi) * 0.5;
 
-        final double L0 = Math.log((1d + SHIFT_FRACTION) / (r0 + SHIFT_FRACTION));
-        EXPONENT = Math.log(m0) / L0;
+        double lo = 1e-6, hi = 1e6;
+        for (int i = 0; i < 100; i++) {
+            final double mid = Math.sqrt(lo * hi);
+            final double g = Math.log((r0 + mid) / (1d + mid))
+                / Math.log((r0 + mid) / (r1 + mid));
+            if (g > target) lo = mid; else hi = mid;
+        }
 
-        NEGATIVE_TAIL_FACTOR = EXPONENT * ABSOLUTE_DEFICIT_MULT
-            / (SHIFT_FRACTION * (PRICE_MULT_CEILING - ABSOLUTE_DEFICIT_MULT));
+        BLEND_SHIFT_FRACTION = Math.sqrt(lo * hi);
+        EXCESS_EXPONENT = Math.log(P1) / Math.log((r0 + BLEND_SHIFT_FRACTION) / (1d + BLEND_SHIFT_FRACTION));
+        NEGATIVE_TAIL_FACTOR = (m0 - F) * EXCESS_EXPONENT / ((C - m0) * (r0 + BLEND_SHIFT_FRACTION));
     }
 
     /**
@@ -72,15 +97,14 @@ public final class BasePriceCalculator {
      * @param preferred The demand value.
      * @return the average unit price for this transaction.
      */
-    public static final float getUnitPrice(TransactionDirection type, long amount, double stored, float basePrice, float preferred) {
+    public static final float getUnitPrice(TransactionDirection type, long amount, double stored, float basePrice, double preferred) {
         if (amount < 0l) throw new IllegalArgumentException("Amount cannot be negative: " + amount);
 
-        final float d = Math.max(preferred, INHERENT_DEMAND);
-        final double shift = SHIFT_FRACTION * d;
+        final double d = Math.max(preferred, INHERENT_DEMAND);
 
         if (amount == 0l || type == TransactionDirection.NEUTRAL) {
-            final double mult = multiplier(stored, d, shift);
-            return Math.max(1f, basePrice * (float) clampMult(mult));
+            final double mult = multiplier(stored, d);
+            return Math.max(1f, basePrice * (float) mult);
         }
 
         final double deltaStock = (type == TransactionDirection.ENTITY_BUYING) ? amount : -amount;
@@ -89,61 +113,59 @@ public final class BasePriceCalculator {
         final double lower = Math.min(stored, newStock);
         final double upper = Math.max(stored, newStock);
 
-        final double integralMult = integrateMultiplier(lower, upper, d, shift);
+        final double integralMult = integrateMultiplier(lower, upper, d);
         final double avgMult = integralMult / Math.abs(deltaStock);
-        final double clamped = clampMult(avgMult);
 
-        return Math.max(1f, basePrice * (float) clamped);
+        return Math.max(1f, basePrice * (float) avgMult);
     }
 
-    private static final double clampMult(double mult) {
-        return Math.max(PRICE_MULT_FLOOR, mult);
-        // return Math.max(PRICE_MULT_FLOOR, Math.min(PRICE_MULT_CEILING, mult));
-    }
+    private static final double multiplier(double s, double demand) {
+        final double F = PRICE_MULT_FLOOR;
+        final double m0 = DEFICIT_ANCHOR_MULT;
+        final double r0 = DEFICIT_ANCHOR_RATIO;
+        final double r0d = r0 * demand;
 
-    private static final double multiplier(double s, float demand, double shift) {
-        if (s < 0) {
+        if (s < r0d) {
             final double C = PRICE_MULT_CEILING;
-            final double m0 = ABSOLUTE_DEFICIT_MULT;
-            // Bounded below C for all s < 0; no min() needed.
-            return C - (C - m0) * Math.exp(NEGATIVE_TAIL_FACTOR * s / demand);
+            return C - (C - m0) * Math.exp(NEGATIVE_TAIL_FACTOR * (s - r0d) / demand);
         }
-        final double ratio = (demand + shift) / (s + shift);
-        return Math.pow(ratio, EXPONENT);
+        final double sh = BLEND_SHIFT_FRACTION * demand;
+        return F + (m0 - F) * Math.pow((r0d + sh) / (s + sh), EXCESS_EXPONENT);
     }
 
-    /**
-     * Integrates the multiplier over [a, b], splitting at 0 if necessary
-     * so that the exponential and power‑law branches are handled correctly.
-     */
-    private static final double integrateMultiplier(double a, double b, float demand, double shift) {
-        if (b <= 0) {
-            return expIntegral(a, b, demand);
-        } else {
-            final double K = Math.pow(demand + shift, EXPONENT);
-            return a >= 0d ? powerIntegral(a, b, shift, EXPONENT, K) :
-                expIntegral(a, 0d, demand) + powerIntegral(0d, b, shift, EXPONENT, Math.pow(demand + shift, EXPONENT));
-        }
+    private static final double integrateMultiplier(double lo, double hi, double demand) {
+        final double r0d = DEFICIT_ANCHOR_RATIO * demand;
+        if (hi <= r0d) return expIntegral(lo, hi, demand);
+        if (lo >= r0d) return excessIntegral(lo, hi, demand);
+        return expIntegral(lo, r0d, demand) + excessIntegral(r0d, hi, demand);
     }
 
-    private static final double expIntegral(double a, double b, float demand) {
+    private static final double expIntegral(double lo, double hi, double demand) {
         final double C = PRICE_MULT_CEILING;
-        final double m0 = ABSOLUTE_DEFICIT_MULT;
+        final double m0 = DEFICIT_ANCHOR_MULT;
         final double NTF = NEGATIVE_TAIL_FACTOR;
-        return C * (b - a)
+        final double r0d = DEFICIT_ANCHOR_RATIO * demand;
+        return C * (hi - lo)
             - (C - m0) * (demand / NTF)
-            * (Math.exp(NTF * b / demand) - Math.exp(NTF * a / demand));
+            * (Math.exp(NTF * (hi - r0d) / demand) - Math.exp(NTF * (lo - r0d) / demand));
     }
 
-    /** ∫_a^b K * (s + shift)^{-exp} ds for exp != 1 (and exp == 1 handled). */
-    private static final double powerIntegral(double a, double b, double shift, double exp, double K) {
-        if (exp == 1d) {
-            return K * Math.log((b + shift) / (a + shift));
+    private static final double excessIntegral(double lo, double hi, double demand) {
+        final double F = PRICE_MULT_FLOOR;
+        final double m0 = DEFICIT_ANCHOR_MULT;
+        final double E = EXCESS_EXPONENT;
+        final double sh = BLEND_SHIFT_FRACTION * demand;
+        final double shift = DEFICIT_ANCHOR_RATIO * demand + sh;
+
+        final double linearPart = F * (hi - lo);
+        final double powerPart;
+        if (Math.abs(E - 1d) < 1e-9) {
+            powerPart = (m0 - F) * shift * Math.log((hi + sh) / (lo + sh));
         } else {
-            final double powA = Math.pow(a + shift, 1d - exp);
-            final double powB = Math.pow(b + shift, 1d - exp);
-            return K / (1d - exp) * (powB - powA);
+            powerPart = (m0 - F) * Math.pow(shift, E) / (1d - E)
+                * (Math.pow(hi + sh, 1d - E) - Math.pow(lo + sh, 1d - E));
         }
+        return linearPart + powerPart;
     }
 
     public enum TransactionDirection {
