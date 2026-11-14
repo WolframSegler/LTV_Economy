@@ -106,7 +106,7 @@ public final class MarketWrapper extends Market implements RuntimeOnly {
         );
 
         return cell.computeVanillaPrice(
-            (long) quantity, stockpileMod, true, isPlayer
+            (long) quantity, stockpileMod, true, isPlayer, false
         );
     }
 
@@ -151,7 +151,7 @@ public final class MarketWrapper extends Market implements RuntimeOnly {
         );
 
         return cell.computeVanillaPrice(
-            (long) quantity, stockpileMod, false, isPlayer
+            (long) quantity, stockpileMod, false, isPlayer, false
         );
     }
 

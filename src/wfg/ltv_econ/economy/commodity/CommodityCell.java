@@ -259,7 +259,7 @@ public class CommodityCell implements Serializable {
         return BasePriceCalculator.getUnitPrice(type, amount,
             stored + informalImports - informalExports
             + getPendingImports() / 2d, // imports en-route also influence price, but not as strongly
-            spec.getBasePrice(), getTargetStored() * getDebtStressFactor()
+            spec.getUnmodifiedBasePrice(), getTargetStored() * getDebtStressFactor()
         );
     }
 
@@ -275,10 +275,12 @@ public class CommodityCell implements Serializable {
 
     /** symmetrical */
     public final float getUnitPrice(TransactionDirection type, long amount) {
-        return BasePriceCalculator.getUnitPrice(type, amount, stored, spec.getBasePrice(), getTargetStored());
+        return BasePriceCalculator.getUnitPrice(type, amount, stored, spec.getUnmodifiedBasePrice(), getTargetStored());
     }
 
-    public final float computeVanillaPrice(long amount, double stockpileMod, boolean isSellingToMarket, boolean isPlayer) {
+    public final float computeVanillaPrice(long amount, double stockpileMod, boolean isSellingToMarket, boolean isPlayer,
+        boolean useUnmodifiedPrice
+    ) {
         if (amount < 1l || market == null) return 0f;
 
         final Market mkt = (Market) market;
@@ -291,7 +293,9 @@ public class CommodityCell implements Serializable {
 
         final TransactionDirection type = isSellingToMarket ? TransactionDirection.ENTITY_BUYING : TransactionDirection.ENTITY_SELLING;
         final double stock = stored + stockpileMod + market.getCommodityData(comID).getCombinedTradeModQuantity();
-        final float unitPrice = BasePriceCalculator.getUnitPrice(type, amount, stock, spec.getBasePrice(), getTargetStored());
+        final float price = useUnmodifiedPrice ? spec.getUnmodifiedBasePrice() : spec.getBasePrice();
+
+        final float unitPrice = BasePriceCalculator.getUnitPrice(type, amount, stock, price, getTargetStored());
 
         final StatBonus priceMod;
         if (isPlayer) {

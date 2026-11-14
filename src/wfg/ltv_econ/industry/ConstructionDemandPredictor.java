@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
@@ -180,7 +179,7 @@ public final class ConstructionDemandPredictor {
             final float prod = info.getFactionComProd(output.comID, factionID);
             final float autarkyRatio = demand + prod == 0f ? 0f : Math.min(1f, demand == 0f ? 1f : prod/demand);
 
-            final float price = settings.getCommoditySpec(output.comID).getBasePrice();
+            final float price = settings.getCommoditySpec(output.comID).getUnmodifiedBasePrice();
 
             final float squared = margins[i] * margins[i];
             final float autarky = (float) Arithmetic.clamp(Math.sqrt(100f - autarkyRatio * 100f), 0.1f, 0.9f);

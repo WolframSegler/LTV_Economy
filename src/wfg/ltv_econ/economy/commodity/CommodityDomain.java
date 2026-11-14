@@ -416,7 +416,7 @@ public class CommodityDomain implements Serializable {
     private static final float priceFactor(CommodityCell importer) {
 
         final float price = importer.getUnitPrice(TransactionDirection.NEUTRAL, 1);
-        final float base = importer.spec.getBasePrice();
+        final float base = importer.spec.getUnmodifiedBasePrice();
 
         final float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
         final float scaled = diff >= 0 ? (float) Math.sqrt(diff) : (float) -Math.sqrt(-diff);

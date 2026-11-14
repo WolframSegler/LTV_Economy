@@ -37,6 +37,8 @@ public final class CommodityOnMarketWrapper extends CommodityOnMarket implements
         return (int) cell.getStoredExcess();
     }
 
+    // UNMODIFIED FUNCTIONS
+
     public CommodityMarketData getCommodityMarketData() {
         return org.getCommodityMarketData();
     }

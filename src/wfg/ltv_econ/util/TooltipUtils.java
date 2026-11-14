@@ -132,7 +132,7 @@ public final class TooltipUtils {
 
                     tp.addRow(
                         highlight,
-                        Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, 0d, true, true) / econUnit),
+                        Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, 0d, true, true, false) / econUnit),
                         labelColor,
                         lessThanSymbol + NumFormat.engNotate(target),
                         deficitColor,
@@ -208,7 +208,7 @@ public final class TooltipUtils {
 
                     tp.addRow(
                         highlight,
-                        Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, 0d, false, true) / econUnit),
+                        Misc.getDGSCredits(cell.computeVanillaPrice(econUnit, 0d, false, true, false) / econUnit),
                         highlight,
                         availableStr + NumFormat.engNotate(availableValue),
                         hasExcess ? positive : gray,
@@ -585,16 +585,16 @@ public final class TooltipUtils {
     // PRIVATE METHODS
     private static final Comparator<CommodityCell> createSellComparator(int econUnit) {
         return (s1, s2) -> {
-            int price1 = (int) s1.computeVanillaPrice(econUnit, 0d, true, true);
-            int price2 = (int) s2.computeVanillaPrice(econUnit, 0d, true, true);
+            int price1 = (int) s1.computeVanillaPrice(econUnit, 0d, true, true, false);
+            int price2 = (int) s2.computeVanillaPrice(econUnit, 0d, true, true, false);
             return Integer.compare(price2, price1);
         };
     }
 
     private static final Comparator<CommodityCell> createBuyComparator(int econUnit) {
         return (s1, s2) -> {
-            int price1 = (int) s1.computeVanillaPrice(econUnit, 0d, false, true);
-            int price2 = (int) s2.computeVanillaPrice(econUnit, 0d, false, true);
+            int price1 = (int) s1.computeVanillaPrice(econUnit, 0d, false, true, false);
+            int price2 = (int) s2.computeVanillaPrice(econUnit, 0d, false, true, false);
             return Integer.compare(price1, price2);
         };
     }

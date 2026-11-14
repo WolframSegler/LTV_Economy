@@ -1,13 +1,12 @@
 package wfg.ltv_econ.submarket;
 
-import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CoreUIAPI;
 import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
-import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
+import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.submarkets.BaseSubmarketPlugin;
 import com.fs.starfarer.api.ui.Alignment;
@@ -25,27 +24,22 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 
 	public StockpilesSubmarketPlugin() {}
 
-	public void init(SubmarketAPI submarket) {
-		super.init(submarket);
-	}
-
+    @Override
 	public boolean showInFleetScreen() {
 		return false;
 	}
 
+    @Override
 	public boolean showInCargoScreen() {
 		return true;
 	}
 
+    @Override
 	public boolean isEnabled(CoreUIAPI ui) {
 		return true;
 	}
 
-	@Override
-	public void advance(float amount) {
-		super.advance(amount);
-	}
-
+    @Override
 	public boolean shouldHaveCommodity(CommodityOnMarketAPI commodity) {
 		if (commodity.isNonEcon() || commodity.isMeta()) return false;
 		return true;
@@ -77,12 +71,10 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		return 0f;
 	}
 
-	public boolean isParticipatesInEconomy() { return false; }
-	public boolean isHidden() { return !market.isPlayerOwned(); }
-	public float getTariff() { return 0f; }
-	public boolean isFreeTransfer() { return true;}
-
-	protected transient CargoAPI preTransactionCargoCopy = null;
+    @Override public boolean isParticipatesInEconomy() { return false; }
+	@Override public boolean isHidden() { return !market.isPlayerOwned() && !DebugFlags.COLONY_DEBUG; }
+	@Override public float getTariff() { return 0f; }
+	@Override public boolean isFreeTransfer() { return true; }
 
 	public void updateCargoPrePlayerInteraction() {
 		final EconomyEngine engine = EconomyEngine.instance();
@@ -121,14 +113,15 @@ public class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		}
 	}
 
-	public String getBuyVerb() { return str("submarketTakeTxt"); }
-	public String getSellVerb() { return str("submarketGiveTxt"); }
-	public String getTotalTextOverride() { return str("submarketTransferTxt"); }
-	public String getTotalValueOverride() { return ""; }
-	public float getTooltipWidth() { return 500f;}
+	@Override public String getBuyVerb() { return str("submarketTakeTxt"); }
+	@Override public String getSellVerb() { return str("submarketGiveTxt"); }
+	@Override public String getTotalTextOverride() { return str("submarketTransferTxt"); }
+	@Override public String getTotalValueOverride() { return ""; }
+	@Override public float getTooltipWidth() { return 500f;}
 
+    @Override
 	protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {
-		tooltip.addSectionHeading("Player Interaction", market.getFaction().getBaseUIColor(),
+		tooltip.addSectionHeading(str("uiTpTitlePlayerInteraction"), market.getFaction().getBaseUIColor(),
 			market.getFaction().getDarkUIColor(), Alignment.MID, opad);
 
 		tooltip.addPara(str("submarketStockpilesTpTxt1"), opad, highlight, NumFormat.engNotate(getStockpileLimit(null)));

@@ -151,7 +151,7 @@ public class ShipProductionManager {
 
         final int days = getBaseDays(spec);
         final long credits = (long) (spec.getBaseValue() * rovc);
-        final float shipsCost = (spec.getBaseValue() / shipSpec.getBasePrice()) * rocc;
+        final float shipsCost = (spec.getBaseValue() / shipSpec.getUnmodifiedBasePrice()) * rocc;
         final float crewCost = InventoryShip.getCrewPerShip(spec);
         
         commodities.put(Commodities.SHIPS, shipsCost);
@@ -255,8 +255,8 @@ public class ShipProductionManager {
         final float materialValuePerShip = baseValue * EconConfig.getRoCC("industry");
         final float scrapValue = materialValuePerShip * EconConfig.SCRAP_REFUND_FRACTION;
 
-        map.put(Commodities.METALS, (scrapValue * 0.5f) / metalsSpec.getBasePrice());
-        map.put(Commodities.RARE_METALS, (scrapValue * 0.5f) / rareMetalsSpec.getBasePrice());
+        map.put(Commodities.METALS, (scrapValue * 0.5f) / metalsSpec.getUnmodifiedBasePrice());
+        map.put(Commodities.RARE_METALS, (scrapValue * 0.5f) / rareMetalsSpec.getUnmodifiedBasePrice());
 
         return map;
     }

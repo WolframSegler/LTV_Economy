@@ -3,7 +3,6 @@ package wfg.ltv_econ.submarket;
 import static wfg.ltv_econ.constant.strings.Income.PLAYER_MARKET_TRANSACTION_KEY;
 import static wfg.ltv_econ.constant.strings.Income.getDesc;
 import static wfg.native_ui.util.Globals.settings;
-import static wfg.native_ui.util.UIConstants.negative;
 
 import java.util.Random;
 
@@ -11,15 +10,12 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI.CoreUITradeMode;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CoreUIAPI;
-import com.fs.starfarer.api.campaign.FactionAPI.ShipPickMode;
 import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
-import com.fs.starfarer.api.impl.campaign.ids.Submarkets;
-import com.fs.starfarer.api.impl.campaign.submarkets.BaseSubmarketPlugin;
 import com.fs.starfarer.api.impl.campaign.submarkets.OpenMarketPlugin;
-import com.fs.starfarer.api.util.Highlights;
-import com.fs.starfarer.api.util.Misc;
 
 import wfg.ltv_econ.config.EconConfig;
 import wfg.ltv_econ.constant.strings.LocalizedStrings;
@@ -29,143 +25,75 @@ import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
 import wfg.native_ui.util.Arithmetic;
 
-public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
+public class OpenSubmarketPlugin extends OpenMarketPlugin {
 
-	public void updateCargoPrePlayerInteraction() {
-		final float seconds = Global.getSector().getClock().convertToSeconds(sinceLastCargoUpdate);
-		addAndRemoveStockpiledResources(seconds, false, true, true);
-		sinceLastCargoUpdate = 0f;
+    @Override 
+    public void updateCargoPrePlayerInteraction() {
+        final EconomyEngine engine = EconomyEngine.instance();
+        final CommodityCell shipsCell = engine.getOrCreateComCell(Commodities.SHIPS, market);
+        final CommodityCell fuelCell = engine.getOrCreateComCell(Commodities.FUEL, market);
+        final CommodityOnMarketAPI shipsCom = market.getCommodityData(Commodities.SHIPS);
+        final CommodityOnMarketAPI fuelCom = market.getCommodityData(Commodities.FUEL);
 
-		if (okToUpdateShipsAndWeapons()) {
-			sinceSWUpdate = 0f;
+        final int originalShipsMaxSupply = shipsCom.getMaxSupply();
+        final int originalFuelMaxSupply = fuelCom.getMaxSupply();
+        final int shipsInflow = (int) Math.round(Math.log10(Math.max(1f, getInflowQuantumNormalized(shipsCell))));
+        final int fuelInflow = (int) Math.round(Math.log10(Math.max(1f, getInflowQuantumNormalized(fuelCell))));
 
-            final boolean isMilitary = Misc.isMilitary(market);
-
-			float extraShips = 0f;
-			if (isMilitary && market.isHidden() && !market.hasSubmarket(Submarkets.GENERIC_MILITARY)) {
-				extraShips = 150f;
-			}
-			
-			pruneWeapons(0f);
-			
-			final int weapons = 5 + Math.max(0, market.getSize() - 1) + (isMilitary ? 5 : 0);
-			final int fighters = 1 + Math.max(0, (market.getSize() - 3) / 2) + (isMilitary ? 2 : 0);
-			
-			addWeapons(weapons, weapons + 2, 0, market.getFactionId());
-			addFighters(fighters, fighters + 2, 0, market.getFactionId());
-			
-
-            final EconomyEngine engine = EconomyEngine.instance(); 
-            final CommodityCell shipsCell = engine.getOrCreateComCell(Commodities.SHIPS, market);
-            final CommodityCell fuelCell = engine.getOrCreateComCell(Commodities.FUEL,  market);
-
-			getCargo().getMothballedShips().clear();
-
-            final float shipProd = (float) Math.log10(Math.max(1f, getInflowQuantumNormalized(shipsCell)));
-            final float fuelProd = (float) Math.log10(Math.max(1f, getInflowQuantumNormalized(fuelCell)));
-
-            final float combatShips = Math.min(10f + 5f * shipProd, 60f);
-            final float freighters = Math.min(10f + 10f * shipProd, 35f);
-            final float tankers = Math.min(10f + 10f * fuelProd, 40f);
-            final float transports = 10f + 2f * shipProd + 1f * fuelProd;
-            final float liners = 5f + 2f * shipProd;
-            final float utilityPts = 5f + 1f * shipProd + 1f * fuelProd;
-			
-			addShips(market.getFactionId(),
-                10f + extraShips,
-                freighters,
-                0f, // tanker
-                transports,
-                liners,
-                utilityPts,
-                null, // qualityOverride
-                0f, // qualityMod
-                ShipPickMode.PRIORITY_THEN_ALL,
-                null
-            );
-			
-			addShips(market.getFactionId(),
-                combatShips,
-                0f, // freighter 
-                0f, // tanker
-                0f, // transport
-                0f, // liner
-                0f, // utilityPts
-                null, // qualityOverride
-                -1f, // qualityMod
-                null,
-                null,
-                4
-            );
-			
-			addShips(market.getFactionId(),
-                0f, // combat
-                0f, // freighter 
-                tankers, // tanker
-                0f, // transport
-                0f, // liner
-                0f, // utilityPts
-                null, // qualityOverride
-                0f, // qualityMod
-                ShipPickMode.PRIORITY_THEN_ALL,
-                null
-            );
-			addHullMods(1, 1 + itemGenRandom.nextInt(3), market.getFactionId());
-		}
+        shipsCom.setMaxSupply(shipsInflow);
+        fuelCom.setMaxSupply(fuelInflow);
+        try {
+            super.updateCargoPrePlayerInteraction();
+        } finally {
+            shipsCom.setMaxSupply(originalShipsMaxSupply);
+            fuelCom.setMaxSupply(originalFuelMaxSupply);
+        }
+    }
 		
-		getCargo().sort();
-	}
-	
-	protected Object writeReplace() {
-		if (okToUpdateShipsAndWeapons()) {
-			pruneWeapons(0f);
-			getCargo().getMothballedShips().clear();
-		}
-		return this;
-	}
-	
-	
-	public boolean shouldHaveCommodity(CommodityOnMarketAPI com) {
-		return !market.isIllegal(com);
-	}
-	
 	@Override
 	public int getStockpileLimit(CommodityOnMarketAPI com) {
-		final Random random = new Random(
+		return getStockpileLimit(com, market, submarket, false);
+	}
+
+    public static final int getStockpileLimit(
+        CommodityOnMarketAPI com, MarketAPI market,
+        SubmarketAPI submarket, boolean invertStability
+    ) {
+        final Random random = new Random(
             market.getId().hashCode() +
             submarket.getSpecId().hashCode() +
             Global.getSector().getClock().getMonth() * 170000
         );
 
-        float limit = getBaseStockpileLimit(com, market.getId());
-		
-		limit *= 0.9f + 0.2f * random.nextFloat();
-		
-		final float sm = market.getStabilityValue() / 10f;
-		limit *= (0.25f + 0.75f * sm);
-		
-		return (int) Math.max(0f, limit);
-	}
-	
-    public static final float ECON_UNIT_MULT_BASE = 0.4f;
-	public static final float ECON_UNIT_MULT_EXTRA = 2f;
-	public static final float ECON_UNIT_MULT_PRODUCTION = 1.5f;
-	public static final float ECON_UNIT_MULT_IMPORTS = 1.2f;
-	public static final float ECON_UNIT_MULT_DEFICIT = 1.3f;
+        final float limit = getBaseStockpileLimit(com, market.getId());
+        final float randFactor = 0.9f + 0.2f * random.nextFloat();
+        final float stabilityRaw = invertStability ?
+            1f - market.getStabilityValue() / 10f :
+            market.getStabilityValue() / 10f;
+        final float stabilityFactor = 0.25f + 0.75f * stabilityRaw;
 
-	private static final float STOCKPILE_BASELINE = 800f;
-	private static final float RATIO_EXP = 0.5f;
-	private static final float STOCKPILE_SCALE_MIN = 0.01f;
-	private static final float STOCKPILE_SCALE_MAX = 4f;
+        return (int) Math.max(0f, limit * randFactor * stabilityFactor);
+    }
 
-	public static float getBaseStockpileLimit(CommodityOnMarketAPI com, String marketID) {
+	public static final float getBaseStockpileLimit(CommodityOnMarketAPI com, String marketID) {
 		if (!LtvEconSaveData.isInitialized() || EconomyEngine.instance().getComCell(com.getId(), marketID) == null) {
 			return OpenMarketPlugin.getBaseStockpileLimit(com);
 		}
 		return getBaseStockpileLimit(com.getId(), marketID);
 	}
+
+    public static final float LTV_ECON_UNIT_MULT_BASE = 0.4f;
+	public static final float LTV_ECON_UNIT_MULT_EXTRA = 2f;
+	public static final float LTV_ECON_UNIT_MULT_PRODUCTION = 1.5f;
+	public static final float LTV_ECON_UNIT_MULT_IMPORTS = 1.2f;
+	public static final float LTV_ECON_UNIT_MULT_DEFICIT = 0.8f;
+
+	private static final float STOCKPILE_BASELINE = 800f;
+	private static final float RATIO_EXP = 0.5f;
+	private static final float STOCKPILE_SCALE_MIN = 0.01f;
+	private static final float STOCKPILE_SCALE_MAX = 4f;
 	
-	public static float getBaseStockpileLimit(String comID, String marketID) {
+	public static final float getBaseStockpileLimit(String comID, String marketID) {
 		final EconomyEngine engine = EconomyEngine.instance();
         final CommodityCell cell = engine.getComCell(
             comID, marketID
@@ -187,13 +115,13 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
 		final float defRatio = demandUnmet / base;
 
 		final float mult = 1f
-			+ impRatio  * ECON_UNIT_MULT_IMPORTS
-			+ prodRatio * ECON_UNIT_MULT_PRODUCTION
-			+ extraRatio * ECON_UNIT_MULT_EXTRA
-			- defRatio  * ECON_UNIT_MULT_DEFICIT
+			+ impRatio  * LTV_ECON_UNIT_MULT_IMPORTS
+			+ prodRatio * LTV_ECON_UNIT_MULT_PRODUCTION
+			+ extraRatio * LTV_ECON_UNIT_MULT_EXTRA
+			- defRatio  * LTV_ECON_UNIT_MULT_DEFICIT
 		;
 
-		final float baseLinear = Math.max(0f, base * ECON_UNIT_MULT_BASE * mult);
+		final float baseLinear = Math.max(0f, base * LTV_ECON_UNIT_MULT_BASE * mult);
 		if (baseLinear <= 0f) return 0f;
 
 		final float ratio = STOCKPILE_BASELINE / baseLinear;
@@ -230,35 +158,11 @@ public class OpenSubmarketPlugin extends BaseSubmarketPlugin {
     }
 
 	@Override
-	public PlayerEconomyImpactMode getPlayerEconomyImpactMode() {
-		return PlayerEconomyImpactMode.PLAYER_SELL_ONLY;
-	}
-
-	@Override
-	public boolean isOpenMarket() {
-		return true;
-	}
-
-	@Override
 	public String getTooltipAppendix(CoreUIAPI ui) {
 		if (ui.getTradeMode() == CoreUITradeMode.SNEAK) {
 			return LocalizedStrings.str("submarketProperDockingTransponderTxt");
 		}
 		return super.getTooltipAppendix(ui);
-	}
-
-	@Override
-	public Highlights getTooltipAppendixHighlights(CoreUIAPI ui) {
-		if (ui.getTradeMode() == CoreUITradeMode.SNEAK) {
-			String appendix = getTooltipAppendix(ui);
-			if (appendix == null) return null;
-			
-			Highlights h = new Highlights();
-			h.setText(appendix);
-			h.setColors(negative);
-			return h;
-		}
-		return super.getTooltipAppendixHighlights(ui);
 	}
 
 	private static final float getInflowQuantumNormalized(final CommodityCell cell) {

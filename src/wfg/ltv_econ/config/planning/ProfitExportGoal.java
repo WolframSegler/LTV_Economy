@@ -148,7 +148,7 @@ public class ProfitExportGoal implements CustomObjective, CustomConstraint {
 
     private double computeScore(String comID, String indID) {
         return switch (metric) {
-            case BASE_VALUE -> settings.getCommoditySpec(comID).getBasePrice();
+            case BASE_VALUE -> settings.getCommoditySpec(comID).getUnmodifiedBasePrice();
             case MARGIN -> EconConfig.getRoVC(IndustryConfigManager.getIndConfig(indID).occTag);
         };
     }

@@ -53,6 +53,9 @@ public class LtvMilitaryBase extends MilitaryBase {
 		}
 		if (Global.getSector().getEconomy().isSimMode()) return;
 		if (!isFunctional()) return;
+
+        sinceReturn += days;
+        if (sinceReturn < PATROL_NO_SPAWN_AFTER_RETURN_TIMEOUT_DAYS) return;
 		
 		final float baseSpawnRate = market.getStats().getDynamic().getStat(Stats.COMBAT_FLEET_SPAWN_RATE_MULT).getModifiedValue();
 		final float spawnRate = baseSpawnRate * (Global.getSector().isInNewGameAdvance() ? 3f : 1f);
@@ -127,6 +130,7 @@ public class LtvMilitaryBase extends MilitaryBase {
 		switch (reason) {
 		case REACHED_DESTINATION, PLAYER_FAR_AWAY:
 			manager.freePatrol(route);
+            sinceReturn = 0f;
 			break;
 
 		case DESTROYED_BY_BATTLE, NO_MEMBERS:
@@ -135,6 +139,7 @@ public class LtvMilitaryBase extends MilitaryBase {
 
 		case OTHER, NO_REASON_PROVIDED:
 			manager.freePatrol(route);
+            sinceReturn = 0f;
 			break;
 		}
 
@@ -154,7 +159,7 @@ public class LtvMilitaryBase extends MilitaryBase {
 		final PatrolType type = custom.type;
 		
 		final CampaignFleetAPI fleet = createPatrol(type, market.getFactionId(), route, market, route.getRandom());
-		if (fleet == null) return null;
+		if (fleet == null || fleet.isEmpty()) return null;
 		
 		fleet.addEventListener(this);
 		
@@ -166,7 +171,10 @@ public class LtvMilitaryBase extends MilitaryBase {
 		
 		fleet.addScript(new PatrolAssignmentAIV4(fleet, route));
 		
-		fleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true, 0.3f);
+		fleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true, PATROL_IGNORE_OTHER_FLEETS_DELAY_DAYS);
+        fleet.getStats().addTemporaryModMult(PATROL_IGNORE_OTHER_FLEETS_DELAY_DAYS, "preparingForPatrol", "Preparing for patrol duty", 0f,
+            fleet.getStats().getSensorRangeMod()
+        );
 		
 		custom.spawnFP = Math.max(0, fleet.getFleetPoints());
 		

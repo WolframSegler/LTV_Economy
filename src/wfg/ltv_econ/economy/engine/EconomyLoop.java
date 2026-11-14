@@ -546,7 +546,7 @@ public class EconomyLoop {
             fuelCell.addStoredAmount(-mission.fuelCost);
             
         } else {
-            final float fuelCostFee = mission.fuelCost * fuelCell.spec.getBasePrice()
+            final float fuelCostFee = mission.fuelCost * fuelCell.spec.getUnmodifiedBasePrice()
                 * (isFactionFleet ? EconConfig.FORCED_FUEL_IMPORT_COST_MULT : 1f);
             
             mission.credits.modifyFlat(

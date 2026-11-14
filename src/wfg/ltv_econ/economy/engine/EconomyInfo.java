@@ -464,7 +464,7 @@ public class EconomyInfo {
     }
 
     public static final float getWorkersPerUnit(String comID, String tag) {
-        final float Pout = settings.getCommoditySpec(comID).getBasePrice();
+        final float Pout = settings.getCommoditySpec(comID).getUnmodifiedBasePrice();
         final float RoVC = EconConfig.getRoVC(tag);
 
         return (Pout * RoVC) / EconConfig.LPV_day;

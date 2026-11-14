@@ -60,7 +60,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		loot.addCommodity(id, quantityLooted);
 		cell.addStoredAmount(-quantityLooted);
 		
-		xpGained = (int) (quantityLooted * cell.spec.getBasePrice() * XP_GAIN_VALUE_MULT);
+		xpGained = (int) (quantityLooted * cell.spec.getUnmodifiedBasePrice() * XP_GAIN_VALUE_MULT);
 		return xpGained;
 	}
 
@@ -154,7 +154,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
     @Override
 	public final int getValue(int marines) {
-		return (int) (getQuantity(marines) * cell.spec.getBasePrice());
+		return (int) (getQuantity(marines) * cell.spec.getUnmodifiedBasePrice());
 	}
 
     @Override

@@ -131,7 +131,7 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
 		lootMult *= 0.9f + random.nextFloat() * 0.2f;
 		final float quantity = getQuantity(marinesAssigned, lootMult);
 
-        final float value = quantity * cell.spec.getBasePrice() * 0.2f;
+        final float value = quantity * cell.spec.getUnmodifiedBasePrice() * 0.2f;
 		quantityLooted = (int) quantity;
 
         cell.addStoredAmount(-quantity);

@@ -1,0 +1,3 @@
+The submarkets represent the flow of commodities within a market.
+They do not represent government stockpiles.
+The submarket faces the player, not the entire theoretical merchants. Thus, it does not scale linearly with market production, but is compressed for larger markets.

@@ -234,7 +234,7 @@ public class LtvEconFleetAssignmentAI extends RouteFleetAssignmentAI {
         if (mission == null) return;
 
         final Random random = route.getRandom();
-        final float shipValue = settings.getCommoditySpec(Commodities.SHIPS).getBasePrice();
+        final float shipValue = settings.getCommoditySpec(Commodities.SHIPS).getUnmodifiedBasePrice();
         final ShipPickParams params = !mission.inFaction ? ShipPickParams.imported() : ShipPickParams.priority();
 
         final WeightedRandomPicker<String> roles = new WeightedRandomPicker<>(random);

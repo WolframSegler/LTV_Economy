@@ -124,7 +124,7 @@ public final class IndustryIOs {
 
         if (useCCMoneyDist) {
             final CommoditySpecAPI spec = settings.getCommoditySpec(outputID);
-            final float Vcc = spec.getBasePrice() * EconConfig.getRoCC(occTag);
+            final float Vcc = spec.getUnmodifiedBasePrice() * EconConfig.getRoCC(occTag);
 
             float totalWeight = 0f;
             for (float weight : output.CCMoneyDist.values()) totalWeight += weight;
@@ -138,7 +138,7 @@ public final class IndustryIOs {
                 }
                 final float weight = inputEntry.getValue() / totalWeight;
                 final float inputValue = Vcc * weight;
-                final float unitPrice = settings.getCommoditySpec(inputID).getBasePrice();
+                final float unitPrice = settings.getCommoditySpec(inputID).getUnmodifiedBasePrice();
                 final float qty = inputValue * base / unitPrice;
                 inputMap.put(inputID, qty);
             }
@@ -606,7 +606,7 @@ public final class IndustryIOs {
         }
 
         final float outputAmount = getBaseOutput(indID, outputID);
-        final float outputVal = settings.getCommoditySpec(outputID).getBasePrice() * outputAmount;
+        final float outputVal = settings.getCommoditySpec(outputID).getUnmodifiedBasePrice() * outputAmount;
 
         float inputValSum = 0f;
         final BaseIO inputs = getBaseIOs(indID).get(outputID);
@@ -614,7 +614,7 @@ public final class IndustryIOs {
             for (Map.Entry<String, Float> entry : inputs.inputs.singleEntrySet()) {
                 final String inputID = entry.getKey();
                 if (ABSTRACT_COM.equals(inputID)) continue;
-                inputValSum += settings.getCommoditySpec(inputID).getBasePrice() * entry.getValue();
+                inputValSum += settings.getCommoditySpec(inputID).getUnmodifiedBasePrice() * entry.getValue();
             }
         }
 

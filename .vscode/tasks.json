@@ -40,7 +40,7 @@
       },
       "group": {
         "kind": "build",
-        "isDefault": true
+        "isDefault": false
       },
       "presentation": {
         "reveal": "always",
@@ -58,7 +58,7 @@
       },
       "group": {
         "kind": "build",
-        "isDefault": false
+        "isDefault": true
       },
       "presentation": {
         "reveal": "always",
