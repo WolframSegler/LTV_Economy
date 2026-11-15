@@ -69,6 +69,9 @@ public final class Income {
     public static final String DEBT_UPKEEP_DEBUFF_DESC = str("DEBT_UPKEEP_DEBUFF_DESC");
     public static final String DEBT_IMMIGRATION_DEBUFF_DESC = str("DEBT_IMMIGRATION_DEBUFF_DESC");
 
+    public static final String STOCKPILE_MARKUP_KEY = "stockpile_markup";
+    public static final String STOCKPILE_MARKUP_DESC = str("STOCKPILE_MARKUP_DESC");
+
     public static String getDesc(String key) {
         switch (key) {
             case FACTION_CREW_WAGES_KEY: return FACTION_CREW_WAGES_DESC;
@@ -90,6 +93,7 @@ public final class Income {
             case COLONY_HAZARD_PAY_KEY: return COLONY_HAZARD_PAY_DESC;
             case INDEPENDENT_PATROL_COST_KEY: return INDEPENDENT_PATROL_COST_DESC;
             case PRIVATE_SECTOR_KEY: return PRIVATE_SECTOR_DESC;
+            case STOCKPILE_MARKUP_KEY: return STOCKPILE_MARKUP_DESC;
             default: return "";
         }
     }

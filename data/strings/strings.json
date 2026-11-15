@@ -762,6 +762,8 @@
         "uiDialogTitleIndustryBalancerInit": "Initializing...",
         "uiBtnTitleIndustryBalancer": "Industry Balancer",
         "uiDialogTxtMarketEventEmpty": "No current events",
-        "uiTpTitlePlayerInteraction": "Player Interaction"
+        "uiTpTitlePlayerInteraction": "Player Interaction",
+        "STOCKPILE_MARKUP_DESC": "Stockpile markup",
+        "submarketStockpileChargeTxt": "To ledger"
     }
 }

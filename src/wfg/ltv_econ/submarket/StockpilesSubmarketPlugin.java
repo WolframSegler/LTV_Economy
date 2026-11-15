@@ -17,9 +17,11 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import wfg.ltv_econ.constant.EconomyConstants;
 import wfg.ltv_econ.economy.commodity.CommodityCell;
 import wfg.ltv_econ.economy.engine.EconomyEngine;
+import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.native_ui.util.NumFormat;
 
 import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
+import static wfg.ltv_econ.constant.strings.Income.*;
 import static wfg.native_ui.util.UIConstants.*;
 
 public final class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
@@ -119,27 +121,44 @@ public final class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
 		cargo.sort();
 	}
 
-	@Override
-	public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
-		final EconomyEngine engine = EconomyEngine.instance();
-		final String marketID = market.getId();
+    @Override
+    public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
+        final EconomyEngine engine = EconomyEngine.instance();
+        final String marketID = market.getId();
 
-		for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
-			final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
-			cell.addStoredAmount(stack.getSize());
-		}
+        for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
+            final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
 
-		for (CargoStackAPI stack : transaction.getBought().getStacksCopy()) {
-			final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
-			cell.addStoredAmount(-stack.getSize());
-		}
-	}
+            final float premium = Math.max(0f, cell.spec.getBasePrice() - cell.spec.getUnmodifiedBasePrice());
+            if (premium > 0f) {
+                MarketFinanceRegistry.instance().getLedger(marketID).add(
+                    STOCKPILE_MARKUP_KEY, premium * stack.getSize(), STOCKPILE_MARKUP_DESC
+                );
+            }
+
+            cell.addStoredAmount(stack.getSize());
+        }
+
+        for (CargoStackAPI stack : transaction.getBought().getStacksCopy()) {
+            final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
+
+            final float premium = Math.max(0f, cell.spec.getBasePrice() - cell.spec.getUnmodifiedBasePrice());
+            if (premium > 0f) {
+                MarketFinanceRegistry.instance().getLedger(marketID).add(
+                    STOCKPILE_MARKUP_KEY, -premium * stack.getSize(), STOCKPILE_MARKUP_DESC
+                );
+            }
+
+            cell.addStoredAmount(-stack.getSize());
+        }
+    }
 
 	@Override public String getBuyVerb() { return str("submarketTakeTxt"); }
 	@Override public String getSellVerb() { return str("submarketGiveTxt"); }
 	@Override public String getTotalTextOverride() { return str("submarketTransferTxt"); }
 	@Override public String getTotalValueOverride() { return ""; }
-	@Override public float getTooltipWidth() { return 500f;}
+    @Override public String getTariffTextOverride() { return str("submarketStockpileChargeTxt"); }
+	@Override public float getTooltipWidth() { return 500f; }
 
     @Override
 	protected void createTooltipAfterDescription(TooltipMakerAPI tooltip, boolean expanded) {

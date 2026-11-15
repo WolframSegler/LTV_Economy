@@ -762,6 +762,8 @@
         "uiDialogTitleIndustryBalancerInit": "正在初始化...",
         "uiBtnTitleIndustryBalancer": "产业平衡器",
         "uiDialogTxtMarketEventEmpty": "暂无当前事件",
-        "uiTpTitlePlayerInteraction": "玩家交互"
+        "uiTpTitlePlayerInteraction": "玩家交互",
+        "STOCKPILE_MARKUP_DESC": "库存差价",
+        "submarketStockpileChargeTxt": "记入账簿"
     }
 }

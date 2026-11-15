@@ -606,7 +606,7 @@ public class EconomyLoop {
     }
 
     private final void redistributeFactionCredits(boolean includePlayerFaction) {
-        final double REDISTRIBUTION_STRENGTH = 0.2;
+        final double REDISTRIBUTION_STRENGTH = 0.2d;
         final int DAYS_AFTER_REDISTRIBUTION = 30;
 
         for (FactionAPI faction : Global.getSector().getAllFactions()) {

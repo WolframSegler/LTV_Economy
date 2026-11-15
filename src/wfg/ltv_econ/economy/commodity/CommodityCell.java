@@ -305,7 +305,7 @@ public class CommodityCell implements Serializable {
             priceMod = isSellingToMarket ? mkt.getDemandPriceMod() : mkt.getSupplyPriceMod();
         }
 
-        final float directionMult = isSellingToMarket ? 0.85f : 1.15f;
+        final float directionMult = isSellingToMarket ? 0.9f : 1.1f;
 
         final float totalPrice = priceMod.computeEffective(unitPrice) * amount * directionMult;
 
