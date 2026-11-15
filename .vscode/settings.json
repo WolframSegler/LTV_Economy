@@ -32,5 +32,6 @@
     "java.format.settings.url": ".vscode/java-formatter.xml",
     "[java]": {
         "editor.detectIndentation": false
-    }
+    },
+    "todo-tree.ripgrep.ripgrep": "/usr/bin/rg"
 }
