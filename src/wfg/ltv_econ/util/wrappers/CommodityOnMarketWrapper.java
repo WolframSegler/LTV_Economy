@@ -1,5 +1,6 @@
 package wfg.ltv_econ.util.wrappers;
 
+import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.MutableStatWithTempMods;
 import com.fs.starfarer.api.combat.StatBonus;
@@ -24,17 +25,19 @@ public final class CommodityOnMarketWrapper extends CommodityOnMarket implements
 
     // MODIFIED FUNCTIONS
     public int getDeficitQuantity() {
-        final CommodityCell cell = EconomyEngine.instance().getComCell(getId(), getMarket().getId());
+        if (((CommodityOnMarketAPI)this).getCommodity().isNonEcon()) return org.getDeficitQuantity();
+        final CommodityCell cell = EconomyEngine.instance().getOrCreateComCell(getId(), getMarket());
         if (cell == null) return org.getDeficitQuantity();
 
-        return (int) cell.getStoredDeficit();
+        return (int) (cell.getStoredDeficit() + getCombinedTradeModQuantity());
     }
 
     public int getExcessQuantity() {
-        final CommodityCell cell = EconomyEngine.instance().getComCell(getId(), getMarket().getId());
+        if (((CommodityOnMarketAPI)this).getCommodity().isNonEcon()) return org.getDeficitQuantity();
+        final CommodityCell cell = EconomyEngine.instance().getOrCreateComCell(getId(), getMarket());
         if (cell == null) return org.getExcessQuantity();
 
-        return (int) cell.getStoredExcess();
+        return (int) (cell.getStoredExcess() + getCombinedTradeModQuantity());
     }
 
     // UNMODIFIED FUNCTIONS

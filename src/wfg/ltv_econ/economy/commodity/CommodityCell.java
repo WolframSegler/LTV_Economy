@@ -142,8 +142,8 @@ public class CommodityCell implements Serializable {
         return getProduction(true) - getConsumption(true) + informalImports - informalExports;
     }
     public final float getStoredAvailabilityRatio() {
-        final float demand = getConsumption(true);
-        return demand <= 0f ? 1f : (float) Math.min(stored / demand, 1f);
+        final float consumption = getConsumption(true);
+        return consumption <= 0f ? 1f : (float) Math.min(stored / consumption, 1f);
     }
     public final float getDesiredAvailabilityRatio() {
         final double target = getTargetStored();

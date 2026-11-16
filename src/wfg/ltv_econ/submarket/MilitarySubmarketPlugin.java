@@ -38,4 +38,9 @@ public class MilitarySubmarketPlugin extends com.fs.starfarer.api.impl.campaign.
 		}
 		return null;
 	}
+
+    @Override
+    public PlayerEconomyImpactMode getPlayerEconomyImpactMode() {
+        return PlayerEconomyImpactMode.BOTH;
+    }
 }

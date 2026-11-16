@@ -31,6 +31,7 @@ import com.fs.starfarer.campaign.ui.marketinfo.ShippingPanel;
 import rolflectionlib.util.RolfLectionUtil;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.campaign.listeners.DialogCreatorUI;
 import com.fs.starfarer.api.impl.campaign.DebugFlags;
 import com.fs.starfarer.api.ui.ButtonAPI;
@@ -117,6 +118,8 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
 
         replaceAccessLabelTooltip(marketStatsPanel);
     }
+
+    
 
     private static final void addManagementButtons(
         UIPanelAPI managementPanel, List<UIComponentAPI> managementChildren, UIPanelAPI colonyInfoPanel
@@ -306,7 +309,19 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
         final Market original = (Market) RolfLectionUtil.getPrivateVariable(marketField, handler);
         if (original instanceof MarketWrapper) return;
 
-        RolfLectionUtil.setPrivateVariable(marketField, handler, new MarketWrapper(original));
+        final MarketWrapper wrapper;
+        if (original instanceof MarketWrapper w) {
+            wrapper = w;
+        } else {
+            wrapper = new MarketWrapper(original);
+            RolfLectionUtil.setPrivateVariable(marketField, handler, wrapper);
+        }
+
+        for (SubmarketAPI sub : original.getSubmarketsCopy()) {
+            if (!(sub.getMarket() instanceof MarketWrapper)) {
+                SubmarketMarketRestorer.setMarketField(sub, wrapper);
+            }
+        }
     }
 
     private static final void replaceAccessLabelTooltip(UIPanelAPI statsPanel) {

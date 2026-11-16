@@ -6,9 +6,12 @@ import static wfg.ltv_econ.constant.strings.LocalizedStrings.*;
 import static wfg.native_ui.util.Globals.settings;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
@@ -18,16 +21,11 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.Fonts;
-import com.fs.starfarer.api.ui.IconRenderMode;
 import com.fs.starfarer.api.ui.LabelAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
 import wfg.ltv_econ.config.IndustryConfigManager.OutputConfig;
-import wfg.ltv_econ.economy.commodity.CommodityCell;
-import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.economy.registry.WorkerPoolRegistry.WorkerPool;
@@ -37,12 +35,16 @@ import wfg.ltv_econ.industry.IndustryIOs;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
 import wfg.native_ui.util.Arithmetic;
 import wfg.native_ui.util.ArrayMap;
-import wfg.native_ui.ui.ComponentFactory;
+import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.component.GlowComp.GlowType;
+import wfg.native_ui.ui.component.InteractionComp;
 import wfg.native_ui.ui.dialog.DialogPanel;
+import wfg.native_ui.ui.table.ListTable;
+import wfg.native_ui.ui.table.WidgetAPI;
 import wfg.native_ui.ui.container.BaseContainer;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.visual.InteractiveSprite;
+import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.util.NumFormat;
 import wfg.native_ui.util.NativeUiUtils;
 import wfg.native_ui.util.NativeUiUtils.AnchorType;
@@ -83,10 +85,8 @@ public final class AssignWorkersDialog extends DialogPanel {
 
     @Override
     public void buildUI() {
-        final int sliderH = 32;
-        final int sliderW = 380;
+        
         final int sliderY = 225;
-        final int iconSize = 26;
 
         final String txt = strf("uiTitleAssignWorkersTo", industry.getCurrentName());
         final LabelAPI titleLbl = settings.createLabel(txt, Fonts.ORBITRON_20AA);
@@ -123,63 +123,17 @@ public final class AssignWorkersDialog extends DialogPanel {
 
         add(help_button).inTR(pad, sliderY + pad);
 
-        final int contentW = PANEL_W - ComponentFactory.SCROLL_PANEL_WIDTH_PAD;
-        final TooltipMakerAPI outputsTp = ComponentFactory.createTooltip(contentW, true);
-        
-        int cumulativeYOffset = pad;
-        for (OutputConfig output : IndustryConfigManager.getIndConfig(industry).outputs.values()) {
-            if (!output.usesWorkers) continue;
-
-            final CommoditySpecAPI spec = settings.getCommoditySpec(output.comID);
-            outputsTp.addImage(spec.getIconName(), iconSize, iconSize, pad);
-            outputsTp.getPrev().getPosition().inTL(pad, cumulativeYOffset);
-
-            final Slider outputSlider = new Slider(
-                null, 0, 100, sliderW, sliderH
-            );
-            outputSliders.put(output.comID, outputSlider);
-
-            outputSlider.setHighlightOnMouseover(true);
-            outputSlider.setBarColor(SLIDER_BASE);
-            outputSlider.showValueOnly = true;
-            outputSlider.roundBarValue = true;
-            outputSlider.clampCurrToMax = true;
-            outputSlider.roundingIncrement = 1;
-
-            final WorkerPool pool = WorkerPoolRegistry.get(market);
-            pool.recalculate();
-
-            final float max = Math.max(0,
-                data.getAssignedRatioForOutput(output.comID) + pool.getFreeWorkerRatio()
-            );
-            
-            outputSlider.maxValue = Math.min(
-                max,
-                IndustryConfigManager.getIndConfig(industry).outputs.get(output.comID).workerAssignableLimit
-            ) * 100;
-
-            outputSlider.setProgress(data.getAssignedRatioForOutput(output.comID) * 100);
-
-            outputSlider.attachTo(outputsTp).inTL(iconSize + pad, cumulativeYOffset);
-            cumulativeYOffset += pad + sliderH;
-        }
-
-        outputsTp.setHeightSoFar(cumulativeYOffset);
-        ComponentFactory.addTooltip(outputsTp, 180, true, this).inTL(opad, sliderY);
+        final float listWidth = PANEL_W - opad*2;
+        add(new OutputList(listWidth, 180f)).inTL(opad, sliderY);
     }
 
     public void drawProductionAndConsumption(UIPanelAPI panel) {
-        final float iconSize = 32f;
-        final int itemsPerRow = 2;
-        final float sectionWidth = ((PANEL_W / 2) / itemsPerRow) - opad;
-        final EconomyEngine engine = EconomyEngine.instance();
-
         final FactionAPI faction = market.getFaction();
         final Color color = faction.getBaseUIColor();
         final Color dark = faction.getDarkUIColor();
 
         final Map<String, Float> outputs = IndustryIOs.getRealOutputs(industry, previewData, false, false);
-        final Set<String> inputs = IndustryIOs.getRealInputs(industry,  false);
+        final Set<String> inputs = IndustryIOs.getRealInputs(industry, false);
 
         final ArrayMap<String, MutableStat> supplyList = new ArrayMap<>(outputs.size());
         final ArrayMap<String, MutableStat> demandList = new ArrayMap<>(inputs.size());
@@ -198,98 +152,77 @@ public final class AssignWorkersDialog extends DialogPanel {
             if (stat.getModifiedValue() > 0f) demandList.put(comID, stat);
         }
 
-        TooltipMakerAPI tp = ComponentFactory.createTooltip((PANEL_W / 2) - opad, false);
-        tp.addSectionHeading(importing ? "---" : str("uiTableProductionTitle"), color, dark, Alignment.MID, opad);
-        final float startY = tp.getHeightSoFar() + pad;
+        final float sectionHeadW = (PANEL_W / 2) - opad;
 
-        // Supply
+        final UIContainer supplySection = new UIContainer(sectionHeadW, 0f);
+        final LabelAPI supplyHead = createSectionLabel(
+            importing ? "---" : str("uiTableProductionTitle"), color, dark, sectionHeadW);
+        supplySection.add(supplyHead).inTL(0f, 0f);
+
+        final float startY = supplyHead.getPosition().getHeight() + hpad;
+        final float supplyBottom = layoutSectionRows(supplySection, supplyList, startY);
+        supplySection.setHeight(supplyBottom);
+        supplySection.attachTo(panel).inTL(hpad, 0);
+
+        final UIContainer demandSection = new UIContainer(sectionHeadW, 0f);
+        final LabelAPI demandHead = createSectionLabel(
+            importing ? str("uiTableImport") : str("uiTableDemandTitle"), color, dark, sectionHeadW);
+        demandSection.add(demandHead).inTL(0f, 0f);
+
+        final float demandBottom = layoutSectionRows(demandSection, demandList, startY);
+        demandSection.setHeight(demandBottom);
+        demandSection.attachTo(panel).inTR(hpad, 0);
+    }
+
+    private static final LabelAPI createSectionLabel(String text, Color color, Color dark, float width) {
+        final LabelAPI head = settings.createLabel(text, Fonts.ORBITRON_12);
+        head.setColor(color);
+        head.setAlignment(Alignment.MID);
+        final int headLblH = (int) head.getPosition().getHeight() + 3;
+        head.getPosition().setSize(width, headLblH);
+        head.setBackgroundColor(dark);
+        return head;
+    }
+
+    private static final float layoutSectionRows(
+        UIContainer section, ArrayMap<String, MutableStat> items, float startY
+    ) {
+        final int itemsPerRow = 2;
+        final float sectionW = ((PANEL_W / 2) / itemsPerRow) - opad;
+        final float iconSize = 32f;
+
         float x = opad;
         float y = startY;
         int count = -1;
 
-        for (Map.Entry<String, MutableStat> entry : supplyList.singleEntrySet()) {
-            final CommoditySpecAPI com = settings.getCommoditySpec(entry.getKey());
-            final long pAmount = entry.getValue().getModifiedInt();
+        for (Map.Entry<String, MutableStat> entry : items.singleEntrySet()) {
+            final CommoditySpecAPI spec = settings.getCommoditySpec(entry.getKey());
+            final long amount = entry.getValue().getModifiedInt();
 
-            // wrap to next line if needed
             count++;
             if (count % itemsPerRow == 0 && count != 0) {
                 x = opad;
                 y += iconSize + hpad;
             }
 
-            // draw icon
-            tp.beginIconGroup();
-            tp.setIconSpacingMedium();
-            tp.addIcons(com, 1, IconRenderMode.NORMAL);
-            tp.addIconGroup(0f);
-            final UIComponentAPI iconComp = tp.getPrev();
+            final float actualIconW = iconSize * spec.getIconWidthMult();
+            final SpriteElement icon = new SpriteElement(actualIconW, iconSize, spec.getIconName(), null, null);
+            section.add(icon).inTL(x + (iconSize - actualIconW) * 0.5f, y);
 
-            // Add extra padding for thinner icons
-            final float actualIconWidth = iconSize * com.getIconWidthMult();
-            iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
-
-            // draw text
-            final String txt = Strings.X + NumFormat.engNotate(pAmount);
-            final LabelAPI lbl = tp.addPara(txt + str("industryPerDayProductionSuffix"), 0f, highlight, txt);
+            final String txt = Strings.X + NumFormat.engNotate(amount);
+            final LabelAPI lbl = settings.createLabel(
+                txt + str("industryPerDayProductionSuffix"), Fonts.DEFAULT_SMALL);
+            lbl.setColor(Global.getSettings().getColor("standardTextColor"));
+            lbl.setHighlightColor(highlight);
+            lbl.setHighlight(txt);
 
             final float textH = lbl.computeTextHeight(txt);
-            final float textX = x + iconSize + pad;
-            final float textY = y + (iconSize - textH) * 0.5f;
-            lbl.getPosition().inTL(textX, textY);
+            section.add(lbl).inTL(x + iconSize + pad, y + (iconSize - textH) * 0.5f);
 
-            x += sectionWidth + hpad;
+            x += sectionW + hpad;
         }
-        tp.setHeightSoFar(y);
-        ComponentFactory.addTooltip(tp, PANEL_H, false, panel).inTL(hpad, 0);
 
-        tp = ComponentFactory.createTooltip((PANEL_W / 2) - opad, false);
-        tp.addSectionHeading(importing ? str("uiTableImport") : str("uiTableDemandTitle"), color, dark, Alignment.MID, opad);
-
-        // Demand
-        x = opad;
-        y = startY;
-        count = -1;
-
-        for (Map.Entry<String, MutableStat> entry : demandList.singleEntrySet()) {
-            final CommodityCell cell = engine.getComCell(entry.getKey(), market.getId());
-            final long dAmount = entry.getValue().getModifiedInt();
-
-            // wrap to next line if needed
-            count++;
-            if (count % itemsPerRow == 0 && count != 0) {
-                x = opad;
-                y += iconSize + hpad;
-            }
-            final float availability = cell.getStoredAvailabilityRatio();
-
-            // draw icon
-            tp.beginIconGroup();
-            tp.setIconSpacingMedium();
-            final IconRenderMode renderMode = availability < 0.9f && !importing ?
-                IconRenderMode.DIM_RED : IconRenderMode.NORMAL;
-            tp.addIcons(cell.spec, 1, renderMode);
-            tp.addIconGroup(0f);
-            final UIComponentAPI iconComp = tp.getPrev();
-
-            // Add extra padding for thinner icons
-            final float actualIconWidth = iconSize * cell.spec.getIconWidthMult();
-            iconComp.getPosition().inTL(x + ((iconSize - actualIconWidth) * 0.5f), y);
-
-            // draw text
-            final String txt = Strings.X + NumFormat.engNotate(dAmount);
-            final LabelAPI lbl = tp.addPara(txt + str("industryPerDayProductionSuffix"), 0f, highlight, txt);
-
-            final float textH = lbl.computeTextHeight(txt);
-            final float textX = x + iconSize + pad;
-            final float textY = y + (iconSize - textH) * 0.5f;
-            lbl.getPosition().inTL(textX, textY);
-
-            x += sectionWidth + hpad;
-        }
-        tp.setHeightSoFar(y);
-        ComponentFactory.addTooltip(tp, PANEL_H, false, panel).inTR(hpad, 0);
-
+        return y + iconSize;
     }
 
     private final float getNewFreeWorkerRatio() {
@@ -333,5 +266,73 @@ public final class AssignWorkersDialog extends DialogPanel {
 
         WorkerPoolRegistry.get(market).recalculate();
         LtvIndustryListPanel.refreshPanel();
+    }
+
+    private final class OutputList extends ListTable<OutputConfig, OutputRow> {
+        private static final int SLIDER_W = 380;
+        private static final int SLIDER_H = 32;
+
+        public OutputList(float width, float height) {
+            super(width, height, SLIDER_H, pad);
+            mAddRowGap = true;
+            buildUI();
+        }
+
+        @Override
+        protected List<OutputConfig> getDataList() {
+            final List<OutputConfig> result = new ArrayList<>();
+            for (OutputConfig o : IndustryConfigManager.getIndConfig(industry).outputs.values()) {
+                if (o.usesWorkers) result.add(o);
+            }
+            return result;
+        }
+
+        @Override
+        protected OutputRow createWidget(OutputConfig output, int index) {
+            final Slider s = new Slider(null, 0, 100, SLIDER_W, SLIDER_H);
+            outputSliders.put(output.comID, s);
+
+            s.setHighlightOnMouseover(true);
+            s.setBarColor(SLIDER_BASE);
+            s.showValueOnly = true;
+            s.roundBarValue = true;
+            s.clampCurrToMax = true;
+            s.roundingIncrement = 1;
+
+            final WorkerPool pool = WorkerPoolRegistry.get(market);
+            pool.recalculate();
+
+            final float max = Math.max(0f,
+                data.getAssignedRatioForOutput(output.comID) + pool.getFreeWorkerRatio()
+            );
+            s.maxValue = Math.min(max, output.workerAssignableLimit) * 100;
+            s.setProgress(data.getAssignedRatioForOutput(output.comID) * 100);
+
+            return new OutputRow(settings.getCommoditySpec(output.comID), s);
+        }
+
+        protected void onWidgetClicked(OutputRow source) {}
+        protected String getEmptyMessage() {return null; }
+    }
+
+    private static final class OutputRow extends UIContainer implements WidgetAPI<OutputRow> {
+        private static final int ICON_SIZE = 26;
+
+        public final SpriteElement mSprite;
+        public final Slider mSlider;
+
+        public OutputRow(CommoditySpecAPI spec, Slider slider) {
+            mSprite = new SpriteElement(ICON_SIZE, ICON_SIZE, spec.getIconName(), null, null);
+            mSlider = slider;
+        }
+
+        @Override public InteractionComp<OutputRow> getInteraction() { return null; }
+
+        @Override
+        public void buildUI() {
+            clearChildren();
+            add(mSprite).inLMid(0f);
+            add(mSlider).rightOfMid(mSprite, pad);
+        }
     }
 }

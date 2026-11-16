@@ -186,7 +186,6 @@ public class EconomyLoop {
         final List<MutableCommodityQuantity> demands = new ArrayList<>(ind.getAllDemand());
 
         boolean discoveredIO = false;
-        Global.getLogger(getClass()).error(ind.getSpec().getId());
         for (MutableCommodityQuantity supply : supplies) {
             if (supply.getQuantity().getModifiedValue() > 0.01f) {
                 if (!IndustryIOs.hasOutput(ind.getSpec().getId(), supply.getCommodityId())) {

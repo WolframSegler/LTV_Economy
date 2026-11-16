@@ -36,6 +36,7 @@ import wfg.ltv_econ.industry.Manufacturing;
 import wfg.ltv_econ.plugin.industries.AddWorkerIndustryOption;
 import wfg.ltv_econ.plugin.industries.ServiceSectorIndustryOption;
 import wfg.ltv_econ.serializable.LtvEconSaveData;
+import wfg.ltv_econ.ui.scripts.SubmarketMarketRestorer;
 import wfg.ltv_econ.ui.scripts.UIInjectorListener;
 
 public class LtvEconomyModPlugin extends BaseModPlugin {
@@ -79,6 +80,7 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         listenerManager.addListener(new UIInjectorListener(), true);
         listenerManager.addListener(new AddWorkerIndustryOption(), true);
         listenerManager.addListener(new ServiceSectorIndustryOption(), true);
+        listenerManager.addListener(new SubmarketMarketRestorer(), true);
 
         if (newGame) {
             injectStockpiles();

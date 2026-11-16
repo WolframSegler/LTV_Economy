@@ -57,4 +57,9 @@ public class BlackSubmarketPlugin extends BlackMarketPlugin {
 
 		return null;
 	}
+
+    @Override
+    public PlayerEconomyImpactMode getPlayerEconomyImpactMode() {
+        return PlayerEconomyImpactMode.BOTH;
+    }
 }

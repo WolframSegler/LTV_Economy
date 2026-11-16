@@ -134,7 +134,7 @@ public class OpenSubmarketPlugin extends OpenMarketPlugin {
 	
     @Override
     public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
-		super.reportPlayerMarketTransaction(transaction);
+        super.reportPlayerMarketTransaction(transaction);
 		final EconomyEngine engine = EconomyEngine.instance();
 		final String marketID = market.getId();
 
@@ -168,4 +168,9 @@ public class OpenSubmarketPlugin extends OpenMarketPlugin {
 	private static final float getInflowQuantumNormalized(final CommodityCell cell) {
 		return cell.getProduction(true) + cell.informalImports + (cell.inFactionImports + cell.globalImports) / EconConfig.TRADE_INTERVAL;
 	}
+
+    @Override
+    public PlayerEconomyImpactMode getPlayerEconomyImpactMode() {
+        return PlayerEconomyImpactMode.BOTH;
+    }
 }
