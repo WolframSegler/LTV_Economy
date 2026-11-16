@@ -60,14 +60,15 @@ public class PatrolFleetRouteManager {
 
         final FactionShipInventory inv = EconomyEngine.instance().getFactionShipInventory(mission.factionID);
         final FactionAPI faction = Global.getSector().getFaction(mission.factionID);
-        final float idleFp = inv.getIdleFleetPoints();
-
         final PatrolFleetData custom = (PatrolFleetData) route.getCustom();
-        final PatrolType type = custom.type;
-        final Predicate<ShipHullSpecAPI> filter = PatrolFilters.forType(type);
+        final Predicate<ShipHullSpecAPI> filter = PatrolFilters.forType(custom.type);
+
+        final float idleFp = inv.getIdleFleetPoints(filter);
+        final boolean useIndependentPatrol = fp > idleFp;
 
         final List<InventoryShip> candidates = new ArrayList<>();
-        if (fp > idleFp) {
+        if (candidates.isEmpty()) return;
+        if (useIndependentPatrol) {
             for (String hullId : faction.getKnownShips()) {
                 final InventoryShip dummy = new InventoryShip(hullId);
                 if (!filter.test(dummy.spec)) continue;
@@ -84,7 +85,7 @@ public class PatrolFleetRouteManager {
 
         ShipAllocator.allocateShipsForFleetPoints(fp, faction, mission.allocatedShips, candidates);
 
-        if (fp > idleFp) {
+        if (useIndependentPatrol) {
             float totalValue = 0f;
             for (Entry<String, Integer> e : mission.allocatedShips.singleEntrySet()) {
                 totalValue += inv.get(e.getKey()).spec.getFleetPoints() * e.getValue();
@@ -123,7 +124,7 @@ public class PatrolFleetRouteManager {
         }
 
         private static final boolean isFastEligible(ShipHullSpecAPI spec) {
-            if (InventoryShip.isCivilian(spec)) return false;
+            if (!isCombatEligible(spec)) return false;
             final HullSize size = spec.getHullSize();
             return size == HullSize.FRIGATE
                 || size == HullSize.DESTROYER

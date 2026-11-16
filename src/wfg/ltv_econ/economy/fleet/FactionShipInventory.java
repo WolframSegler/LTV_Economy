@@ -12,10 +12,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
@@ -152,6 +154,15 @@ public class FactionShipInventory implements Serializable {
         float total = 0f;
         for (InventoryShip data : ships.values()) {
             total += data.getOwned() * data.spec.getFleetPoints();
+        }
+        return total;
+    }
+
+    public final float getIdleFleetPoints(final Predicate<ShipHullSpecAPI> filter) {
+        float total = 0f;
+        for (InventoryShip data : ships.values()) {
+            if (!filter.test(data.spec)) continue;
+            total += data.getIdle() * data.spec.getFleetPoints();
         }
         return total;
     }
