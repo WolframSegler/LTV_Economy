@@ -341,6 +341,6 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
         }
         if (accessBtn == null) return;
 
-        UIUtils.getTpForStaticAccess().addTooltipTo(TooltipUtils.createAccessTp(market), accessBtn, BELOW, false);
+        UIUtils.getStaticTp().addTooltipTo(TooltipUtils.createAccessTp(market), accessBtn, BELOW, false);
     }
 }

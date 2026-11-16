@@ -149,10 +149,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
         section1 = new UIContainer(SECT1_WIDTH, SECT1_HEIGHT);
 
-        final TooltipMakerAPI tp = ComponentFactory.createTooltip(SECT1_WIDTH, false);
-        ComponentFactory.addTooltip(tp, SECT1_HEIGHT, false, section1).inTL(0, 0);
-
-        createSection1(section1, tp);
+        createSection1(section1);
         add(section1).inTL(pad, pad);
     }
 
@@ -190,35 +187,38 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
         add(section4).inBR(pad, BUTTON_H + pad*2 + opad);
     }
 
-    private void createSection1(UIContainerAPI section, TooltipMakerAPI tooltip) {
+    private void createSection1(UIContainerAPI section) {
         if (mCom == null) return;
         final EconomyEngine engine = EconomyEngine.instance();
 
-        tooltip.addSectionHeading(mCom.getName(), Alignment.MID, pad);
-        final int headerHeight = (int) tooltip.getPrev().getPosition().getHeight();
+        final LabelAPI head = settings.createLabel(mCom.getName(), Fonts.ORBITRON_12);
+        head.setColor(base);
+        head.setAlignment(Alignment.MID);
+        final int headLblH = (int) head.getPosition().getHeight() + 3;
+        head.getPosition().setSize(SECT1_WIDTH, headLblH);
+        head.setBackgroundColor(dark);
+        section.add(head).inTL(0f, 0f);
 
         // Icons
         final int iconSize = (int) (section.getHeight() / 2.2f);
+        final int iconX = 3 * opad;
+        final int iconYInverted = (SECT1_HEIGHT - iconSize) / 2 + headLblH;
 
         final ComIconPanel iconLeft = new ComIconPanel(iconSize, iconSize,
             null, null, mCom, mFaction
         );
 
-        iconLeft.pos().inTL(opad * 3,
-            (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
-        section.add(iconLeft);
+        section.add(iconLeft).inTL(iconX, iconYInverted);
 
         final ComIconPanel iconRight = new ComIconPanel(iconSize, iconSize,
             null, null, mCom, mFaction
         );
 
-        iconRight.pos().inTL(SECT1_WIDTH - iconSize - opad * 3,
-            (SECT1_HEIGHT - iconSize) / 2 + headerHeight);
-        section.add(iconRight);
+        section.add(iconRight).inTR(iconX, iconYInverted);
 
         // Text
         final String comID = mCom.getId();
-        final int baseY = (int) (headerHeight + hpad*3);
+        final int baseY = (int) (headLblH + hpad*3);
         final Color baseColor = mFaction.getBaseUIColor();
         { // Global market value
             final TextWrapper textPanel = new TextWrapper(170, 0) {
@@ -247,7 +247,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanel.attachTo(tooltip).inTL(
+            section.add(textPanel).inTL(
                 (SECT1_WIDTH / 3f) - textPanel.getWidth(), baseY
             );
         }
@@ -273,7 +273,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanel.attachTo(tooltip).inTL(
+            section.add(textPanel).inTL(
                 (SECT1_WIDTH - textPanel.getWidth()) / 2f, baseY
             );
         }
@@ -328,7 +328,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanel.attachTo(tooltip).inTL(SECT1_WIDTH*2 / 3f, baseY);
+            section.add(textPanel).inTL(SECT1_WIDTH*2 / 3f, baseY);
         }
 
         final int baseRow2Y = baseY * 3 + pad;
@@ -359,7 +359,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanel.attachTo(tooltip).inTL(
+            section.add(textPanel).inTL(
                 (SECT1_WIDTH - textPanel.getWidth()) / 2f, baseRow2Y
             );
         }
@@ -417,10 +417,10 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                 }
             };
 
-            textPanelLeft.attachTo(tooltip).inTL(
+            section.add(textPanelLeft).inTL(
                 (SECT1_WIDTH / 3f) - (textPanelLeft.getWidth() / 2f), baseRow2Y
             );
-            textPanelRight.attachTo(tooltip).inTL(
+            section.add(textPanelRight).inTL(
                 (SECT1_WIDTH*2 / 3f) - (textPanelRight.getWidth() / 2f), baseRow2Y
             );
         }

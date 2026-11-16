@@ -228,7 +228,7 @@ public final class UIUtils {
         return dayOrDays(Math.abs(val - 1d) < 1e-2d, capitalized);
     }
 
-    public static final TooltipMakerAPI getTpForStaticAccess() {
+    public static final TooltipMakerAPI getStaticTp() {
         return settings.createCustom(1f, 1f, null).createUIElement(1f, 1f, false);
     }
 
