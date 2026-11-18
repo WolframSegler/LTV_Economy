@@ -307,6 +307,7 @@ public final class IndustryBalancer {
                 if (!IndustryIOs.hasOutput(indId, targetComId)) continue;
 
                 final Industry instance = market.instantiateIndustry(indId);
+                if (!instance.isAvailableToBuild()) continue;
                 final BitSet columns = PlanningData.getOutputForIndustry(instance);
                 final Integer colIdx = ProductionMatrix.getIndOutputPairToColumnMap().get(indId + EconomyLoop.KEY + targetComId);
                 if (colIdx == null || !columns.get(colIdx)) continue;

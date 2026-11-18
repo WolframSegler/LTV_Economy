@@ -20,6 +20,7 @@ Version 0.5.0-beta | NOT SAVE COMPATIBLE
 - Increased worker-to-population ratio, adding more workers sector-wide.
 - Reduced luxury goods demand scale for Population & Infrastructure.
 - Rebalanced some policies.
+- Industry config loader now warns modders when illegal configs are entered.
 
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.

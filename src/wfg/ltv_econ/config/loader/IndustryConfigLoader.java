@@ -70,13 +70,16 @@ public final class IndustryConfigLoader {
                 final JSONObject outputData = outputList.getJSONObject(outputId);
 
                 final float baseProd = (float) outputData.optDouble("baseProd", 1);
+                if (baseProd <= 0f) throw new IllegalArgumentException("baseProd must be greater than 0");
                 final long target = outputData.optLong("target", -1);
                 final float workerAssignableLimit = (float) outputData.optDouble(
                     "workerAssignableLimit", EconConfig.defaultWorkerCapPerOutput
                 );
                 final float marketScaleBase = (float) outputData.optDouble(
-                    "marketScaleBase", 10.0
+                    "marketScaleBase", 10d
                 );
+                if (workerAssignableLimit <= 0f) throw new IllegalArgumentException("workerAssignableLimit must be greater than 0");
+                if (marketScaleBase <= 0f) throw new IllegalArgumentException("marketScalebase  must be greater than 0");
 
                 final boolean isAbstract = !EconomyConstants.econCommodityIDs.contains(outputId);
                 final boolean scaleWSize = outputData.optBoolean("scaleWithMarketSize", false);
@@ -110,8 +113,9 @@ public final class IndustryConfigLoader {
                             throw new IllegalArgumentException("InputsPerUnitOutput cannot have an abstract input");
                         }
 
-                        final float weight = (float) consumption.getDouble(inputId);
-                        ConsumptionMap.put(inputId, weight);
+                        final float amount = (float) consumption.getDouble(inputId);
+                        if (amount < 0f) throw new IllegalArgumentException("InputsPerUnitOutput input amounts must be > 0");
+                        ConsumptionMap.put(inputId, amount);
                     }
                 }
 
@@ -122,6 +126,7 @@ public final class IndustryConfigLoader {
                     while (inputIds.hasNext()) {
                         final String inputId = inputIds.next();
                         final float alloc = (float) consumption.getDouble(inputId);
+                        if (alloc <= 0f) throw new IllegalArgumentException("CC money weight must be > 0");
                         CCMoneyDist.put(inputId, alloc);
                     }
                 }

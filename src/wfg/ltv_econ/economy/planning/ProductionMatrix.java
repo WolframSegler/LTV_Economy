@@ -5,9 +5,12 @@ import static wfg.native_ui.util.Globals.settings;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.loading.IndustrySpecAPI;
 
 import wfg.ltv_econ.config.IndustryConfigManager;
@@ -61,15 +64,63 @@ public final class ProductionMatrix {
         STATIC_WORKER_INDUSTRIES = null;
     }
 
+    public static void logProductionMatrix() {
+        final double[][] A = getMatrix();
+        final List<String> industryOutputs = getIndustryOutputPairs();
+        final List<String> coms = getWorkerRelatedCommodityIDs();
+        final int O = industryOutputs.size();
+        final int C = coms.size();
+
+        final StringBuilder csv = new StringBuilder(64 + (O + 1) * (C + 1) * 12);
+
+        csv.append("Production Matrix");
+        for (String indOut : industryOutputs) {
+            csv.append(',').append(csvField(indOut));
+        }
+        csv.append('\n');
+
+        for (int i = 0; i < C; i++) {
+            csv.append(csvField(coms.get(i)));
+            for (int o = 0; o < O; o++) {
+                csv.append(',').append(String.format(Locale.ROOT, "%.4f", A[i][o]));
+            }
+            csv.append('\n');
+        }
+
+        Global.getLogger(ProductionMatrix.class).info("=== Input Matrix A (Industry_Output Columns) ===\n" + csv);
+    }
+
+    private static final String csvField(String s) {
+        if (s.indexOf(',') >= 0 || s.indexOf('"') >= 0 ||
+            s.indexOf('\n') >= 0 || s.indexOf('\r') >= 0) {
+            return '"' + s.replace("\"", "\"\"") + '"';
+        }
+        return s;
+    }
+
+    /**
+     * Each method has exactly one output, so the output row is the column's only
+     * possible positive entry; this comparison is therefore equivalent to the
+     * strict all-rows-<=0 prune.
+     */
+    static final boolean isNetProductive(final String indID, final String outputID) {
+        final float outputVal = IndustryIOs.getBaseOutput(indID, outputID);
+        final float inputVal = IndustryIOs.getBaseInput(indID, outputID, outputID);
+        return outputVal > inputVal;
+    }
+
     private static final void buildMatrix() {
         final ArrayList<String> commodities = getWorkerRelatedCommodityIDs();
         final ArrayList<String> industries = getWorkerIndustries();
 
         STATIC_INDUSTRY_OUTPUT_PAIRS = new ArrayList<>();
-        for (String indID : industries) {
+        for (final String indID : industries) {
             final Map<String, BaseIO> outputs = IndustryIOs.getBaseIOs(indID);
+            final IndustryConfig indCfg = IndustryConfigManager.getIndConfig(indID);
             
-            for (String outputID : outputs.keySet()) {
+            for (final String outputID : outputs.keySet()) {
+                if (!indCfg.outputs.get(outputID).usesWorkers) continue;
+                if (!isNetProductive(indID, outputID)) continue;
                 STATIC_INDUSTRY_OUTPUT_PAIRS.add(indID + EconomyLoop.KEY + outputID);
             }
         }
@@ -77,11 +128,14 @@ public final class ProductionMatrix {
         final double[][] A = new double[commodities.size()][STATIC_INDUSTRY_OUTPUT_PAIRS.size()];
 
         int colIndex = 0;
-        for (String indID : industries) {
+        for (final String indID : industries) {
             final Map<String, BaseIO> outputs = IndustryIOs.getBaseIOs(indID);
+            final IndustryConfig indCfg = IndustryConfigManager.getIndConfig(indID);
 
-            for (Map.Entry<String, BaseIO> out : outputs.entrySet()) {
+            for (final Map.Entry<String, BaseIO> out : outputs.entrySet()) {
                 final String outputID = out.getKey();
+                if (!indCfg.outputs.get(outputID).usesWorkers) continue;
+                if (!isNetProductive(indID, outputID)) continue;
 
                 // Inputs
                 for (var in : IndustryIOs.getBaseInputs(indID, outputID).singleEntrySet()) {
@@ -126,7 +180,6 @@ public final class ProductionMatrix {
                         relevant = true; break;
                     }
                 }
-                if (relevant) break;
             }
             if (!relevant) commodities.remove();
         }

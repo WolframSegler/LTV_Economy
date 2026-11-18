@@ -29,26 +29,11 @@ public final class PlanningData {
         return outputsPerMarket;
     }
 
-    public static final BitSet getOutputForMarket(final MarketAPI market) {
-        final var indOutputPairToColumn = ProductionMatrix.getIndOutputPairToColumnMap();
-
-        final BitSet outputMask = new BitSet(indOutputPairToColumn.size());
+    public static BitSet getOutputForMarket(final MarketAPI market) {
+        final BitSet outputMask = new BitSet(ProductionMatrix.getIndOutputPairToColumnMap().size());
         for (Industry ind : WorkerRegistry.getVisibleIndustries(market)) {
-            if (!ind.isFunctional()) continue;
-
-            final IndustryConfig config = IndustryConfigManager.getIndConfig(ind);
-            if (!config.workerAssignable) continue;
-
-            final String indID = IndustryConfigManager.getBaseIndIDifNoConfig(ind.getSpec());
-
-            for (String outputID : config.outputs.keySet()) {
-                if (!IndustryIOs.isOutputValidForMarket(config.outputs.get(outputID), ind)) continue;
-
-                final int idx = indOutputPairToColumn.getOrDefault(indID + EconomyLoop.KEY + outputID, -1);
-                if (idx >= 0) outputMask.set(idx);
-            }
+            outputMask.or(getOutputForIndustry(ind));
         }
-
         return outputMask;
     }
 
@@ -65,6 +50,7 @@ public final class PlanningData {
 
         for (String outputID : config.outputs.keySet()) {
             if (!IndustryIOs.isOutputValidForMarket(config.outputs.get(outputID), ind)) continue;
+            if (!ProductionMatrix.isNetProductive(indID, outputID)) continue;
 
             final int idx = indOutputPairToColumn.getOrDefault(indID + EconomyLoop.KEY + outputID, -1);
             if (idx >= 0) outputMask.set(idx);

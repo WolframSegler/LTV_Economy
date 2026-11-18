@@ -254,6 +254,14 @@ public final class DebugPanel extends UIContainer implements UIBuildableAPI {
             );
             add(button).inTL(opad, SECTION_I + pad*22 + lblH + BUTTON_H*10);
         }
+
+        { // LOG PRODUCTION MATRIX
+            final CallbackRunnable<Button> run = (btn) -> ProductionMatrix.logProductionMatrix();
+            final Button button = new Button(BUTTON_W, BUTTON_H,
+                str("uiBtnTitleLogProdMatrix"), Fonts.DEFAULT_SMALL, run
+            );
+            add(button).inTL(opad, SECTION_I + pad*24 + lblH + BUTTON_H*11);
+        }   
         }
     }
 }

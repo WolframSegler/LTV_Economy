@@ -55,34 +55,6 @@ public final class WorkforceAllocator {
 
     private static final double WORKER_COST = 1d;
 
-    /**
-     * For non-reduced / non-grouped Matrixes
-     */
-    public static final void logInputMatrix(double[][] A, List<String> industryOutputs, List<String> coms) {
-        StringBuilder csv = new StringBuilder(4096);
-        csv.append("Commodity/IndustryOutput,");
-
-        // Header: industry_output pairs
-        for (String indOut : industryOutputs) {
-            csv.append(indOut).append(",");
-        }
-        csv.append("\n");
-
-        // Matrix rows
-        for (int i = 0; i < coms.size(); i++) {
-            String commodity = coms.get(i);
-            csv.append(commodity).append(",");
-
-            for (int o = 0; o < A[i].length; o++) {
-                csv.append(String.format("%.2f", A[i][o]));
-                if (o < A[i].length - 1) csv.append(",");
-            }
-            csv.append("\n");
-        }
-
-        logger.info("=== Input Matrix A (Industry_Output Columns) ===\n" + csv);
-    }
-
     public static final void logDemandVector(double[] d, List<String> commodities) {
         StringBuilder demandLog = new StringBuilder("\n=== Demand Vector d ===\n");
         for (int i = 0; i < commodities.size(); i++) {
