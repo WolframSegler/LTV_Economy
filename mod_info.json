@@ -19,7 +19,7 @@
         {
             "id": "wfg_native_ui",
             "name": "NativeUI",
-			"version": "0.5.0"
+			"version": "0.5.1"
         }
     ]
 }

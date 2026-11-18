@@ -42,7 +42,7 @@ fgdfgfthgr-fox - for their relentless work providing bug reports and helping me 
 
 <br>
 
-## Attributes
+## Attributions
 
 <a href="https://www.flaticon.com/free-icons/measurements" title="measurements icons">Measurements icons created by Vectors Tank - Flaticon</a>
 

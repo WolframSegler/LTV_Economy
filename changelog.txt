@@ -1,26 +1,25 @@
 Version 0.5.0-beta | NOT SAVE COMPATIBLE
-- Please reset your LunaLib settings for this mod.
-- Switched to NativeUI (formerly WrapUI) v0.5.0 for this update. Previous versions will not work.
-
+- Reset your LunaLib settings for this mod.
+- Switched to NativeUI (formerly WrapUI) v0.5.1 for this update. Previous versions will not work.
+- Now compatible with the Demand Indicators mod.
 - New worker pool icon and mod icon by Sakura.
-- The price for imports between colonies now account for imports en-route when calculating local prices.
-- Reduced the time it takes for trade convoys to load and unload goods.
-- Colonies in debt will reduce their import targets and their import price.
-- Added a background "private sector" economic loop: credits paid to independent captains, patrols, and other services are gradually recycled back into colony vaults.
-- The overall credit supply now grows slowly with population.
-- Colonies now suspend imports and exports after repeated trade convoy losses, preventing endless spending on doomed shipments. Trade automatically resumes after a configurable cooldown, and it can be resumed from the colony screen.
-- Industries under construction now gradually pre-import a buffer of their required inputs. The buffer is based on a predicted worker allocation.
-- Fixed bugs regarding industry worker registry.
-- Modified the price calculator to reduce the price range, to make it more vanilla-like I suppose.
 - Replaced some AI slop assets with actual art.
-- Rebalanced some policies.
-- Huge backend refactors for computing industry production, improving stability.
-- Removed a concurrency bug by moving new input/output detection to a single thread.
-- Fixed reliance of button text for identification that failed on Chinese translations.
-- Fixed deficit prediction algorithm not working at all (oops).
-- Increased worker to population ratio. The sector now has more workers.
+- Fixed UI button identification relying on label text, which broke with Chinese translations.
+- Reworked local import pricing: prices now account for goods already en route between colonies, and the broken price-curve construction has been fixed.
+- Reduced trade convoy load/unload times.
+- Colonies in debt now reduce their import targets and the price they will pay for imports.
+- Added a background “private sector” credit loop: credits paid to independent captains, patrols, and other services are gradually recycled back into colony vaults.
+- Overall credit supply now grows slowly with population.
+- Colonies now suspend imports and exports after repeated trade convoy losses. Trade resumes automatically after a configurable cooldown, or manually from the colony screen.
+- Industries under construction gradually pre-import a buffer of required inputs, based on predicted worker allocation.
+- Fixed bugs in the industry worker registry.
+- Major backend refactor of industry production computation for improved stability.
+- Fixed a concurrency bug by moving new input/output detection to a single thread.
+- Fixed the deficit prediction algorithm, which was nonfunctional (oops).
+- Added an industry balancer that adds or removes industries to reduce sector deficit.
+- Increased worker-to-population ratio, adding more workers sector-wide.
 - Reduced luxury goods demand scale for Population & Infrastructure.
-- Added an industry balancer, which adds or removes industries to reduce sector deficit.
+- Rebalanced some policies.
 
 Version 0.4.10-beta | SAVE COMPATIBLE
 - Modified the Commodity Detail Dialog to display all producing and consuming markets instead of exporting and importing ones only.
