@@ -118,7 +118,7 @@ public final class IndustryBalancer {
         final Thread t = new Thread(() -> {
             try {
                 WorkerRegistry.instance().resetWorkersAssigned(false);
-                EconomyEngine.instance().getComDomains().forEach(CommodityDomain::update);
+                EconomyEngine.instance().getmComDomains().forEach(CommodityDomain::update);
 
                 mState.status = balance(includePlayerColonies);
 

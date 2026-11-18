@@ -84,8 +84,8 @@ public final class TooltipUtils {
 
         final ArrayList<CommodityCell> marketList = new ArrayList<>();
         for (CommodityCell cell : engine.getComDomain(comID).getAllCells()) {
-            if (!cell.market.isHidden() && cell.market.getEconGroup() == null &&
-                cell.market.hasSubmarket(Submarkets.SUBMARKET_OPEN)
+            if (!cell.mMarket.isHidden() && cell.mMarket.getEconGroup() == null &&
+                cell.mMarket.hasSubmarket(Submarkets.SUBMARKET_OPEN)
             ) { marketList.add(cell); }
         }
 
@@ -104,7 +104,7 @@ public final class TooltipUtils {
 
                 int rowCount = 0;
                 for (CommodityCell cell : marketList) {
-                    final MarketAPI market = cell.market;
+                    final MarketAPI market = cell.mMarket;
                     if (countingMap.getCount(market.getFactionId()) >= 3) continue;
                     countingMap.add(market.getFactionId());
 
@@ -181,7 +181,7 @@ public final class TooltipUtils {
 
                 int rowCount = 0;
                 for (CommodityCell cell : marketList) {
-                    final MarketAPI market = cell.market;
+                    final MarketAPI market = cell.mMarket;
                     if (countingMap.getCount(market.getFactionId()) >= 3) continue;
                     countingMap.add(market.getFactionId());
 
@@ -266,37 +266,37 @@ public final class TooltipUtils {
         );
 
         { // Exports
-            if (cell.inFactionExports > 0f) {
+            if (cell.mInFactionExports > 0f) {
                 tp.addToGrid(0, rowCount++, str("uiDispatchedInFactionExports"), "+" +
-                    NumFormat.formatMagnitudeAware(cell.inFactionExports)
+                    NumFormat.formatMagnitudeAware(cell.mInFactionExports)
                 );
             }
-            if (cell.globalExports > 0f) {
+            if (cell.mGlobalExports > 0f) {
                 tp.addToGrid(0, rowCount++, str("uiDispatchedGlobalExports"), "+" +
-                    NumFormat.formatMagnitudeAware(cell.globalExports)
+                    NumFormat.formatMagnitudeAware(cell.mGlobalExports)
                 );
             }
-            if (cell.informalExports > 0f) {
+            if (cell.mInformalExports > 0f) {
                 tp.addToGrid(0, rowCount++, str("uiDailyInformalExports"), "+" +
-                    NumFormat.formatMagnitudeAware(cell.informalExports)
+                    NumFormat.formatMagnitudeAware(cell.mInformalExports)
                 );
             }
         }
 
         { // Imports
-            if (cell.inFactionImports > 0f) {
+            if (cell.mInFactionImports > 0f) {
                 tp.addToGrid(0, rowCount++, str("uiIncomingInFactionImports"), "+" +
-                    NumFormat.formatMagnitudeAware(cell.inFactionImports)
+                    NumFormat.formatMagnitudeAware(cell.mInFactionImports)
                 );
             }
-            if (cell.globalImports > 0f) {
+            if (cell.mGlobalImports > 0f) {
                 tp.addToGrid(0, rowCount++, str("uiIncomingGlobalImports"), "+" +
-                    NumFormat.formatMagnitudeAware(cell.globalImports)
+                    NumFormat.formatMagnitudeAware(cell.mGlobalImports)
                 );
             }
-            if (cell.informalImports > 0f) {
+            if (cell.mInformalImports > 0f) {
                 tp.addToGrid(0, rowCount++, str("uiDailyInformalImports"), "+" +
-                    NumFormat.formatMagnitudeAware(cell.informalImports)
+                    NumFormat.formatMagnitudeAware(cell.mInformalImports)
                 );
             }
         }
@@ -497,8 +497,8 @@ public final class TooltipUtils {
     public static final void createComTradeLedgerSection(TooltipMakerAPI tp, CommodityCell cell) {
         final String comID = cell.comID;
         final String marketID = cell.marketID;
-        final String comName = cell.spec.getName();
-        final String marketName = cell.market.getName();
+        final String comName = cell.mSpec.getName();
+        final String marketName = cell.mMarket.getName();
         final EconomyEngine engine = EconomyEngine.instance();
         final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(marketID);
 
@@ -511,7 +511,7 @@ public final class TooltipUtils {
 
             tp.addPara(strf("uiTpTxtLedger1", marketName, comName), opad, highlight,
                 NumFormat.formatMagnitudeAware(totalExports),
-                engine.info.getExportMarketShare(comID, marketID) + "%",
+                engine.mInfo.getExportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(exportIncomeLastMonth),
                 NumFormat.formatCredit(exportIncomeThisMonth)
             );
@@ -525,7 +525,7 @@ public final class TooltipUtils {
 
             tp.addPara(strf("uiTpTxtLedger3", marketName, comName), opad, highlight,
                 NumFormat.formatMagnitudeAware(totalImports),
-                engine.info.getImportMarketShare(comID, marketID) + "%",
+                engine.mInfo.getImportMarketShare(comID, marketID) + "%",
                 NumFormat.formatCredit(importExpenseLastMonth),
                 NumFormat.formatCredit(importExpenseThisMonth)
             );
@@ -577,7 +577,7 @@ public final class TooltipUtils {
 
             tp.addPara(str("uiTpTxtAccessibility2"), opad, highlight,Strings.X + Float.toString(EconConfig.FORCED_FUEL_IMPORT_COST_MULT));
 
-            tp.addPara(str("uiTpTxtAccessibility3"), pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getActiveMissions().size()));
+            tp.addPara(str("uiTpTxtAccessibility3"), pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getmActiveMissions().size()));
         }
         };
     }

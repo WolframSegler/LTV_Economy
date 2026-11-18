@@ -129,7 +129,7 @@ public final class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
         for (CargoStackAPI stack : transaction.getSold().getStacksCopy()) {
             final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
 
-            final float premium = Math.max(0f, cell.spec.getBasePrice() - cell.spec.getUnmodifiedBasePrice());
+            final float premium = Math.max(0f, cell.mSpec.getBasePrice() - cell.mSpec.getUnmodifiedBasePrice());
             if (premium > 0f) {
                 MarketFinanceRegistry.instance().getLedger(marketID).add(
                     STOCKPILE_MARKUP_KEY, premium * stack.getSize(), STOCKPILE_MARKUP_DESC
@@ -142,7 +142,7 @@ public final class StockpilesSubmarketPlugin extends BaseSubmarketPlugin {
         for (CargoStackAPI stack : transaction.getBought().getStacksCopy()) {
             final CommodityCell cell = engine.getComCell(stack.getCommodityId(), marketID);
 
-            final float premium = Math.max(0f, cell.spec.getBasePrice() - cell.spec.getUnmodifiedBasePrice());
+            final float premium = Math.max(0f, cell.mSpec.getBasePrice() - cell.mSpec.getUnmodifiedBasePrice());
             if (premium > 0f) {
                 MarketFinanceRegistry.instance().getLedger(marketID).add(
                     STOCKPILE_MARKUP_KEY, -premium * stack.getSize(), STOCKPILE_MARKUP_DESC

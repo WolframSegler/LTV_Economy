@@ -156,7 +156,7 @@ public final class MarketWrapper extends Market implements RuntimeOnly {
     }
 
     public float getExportIncome(boolean var1) {
-        return EconomyEngine.instance().info.getExportIncome(original, true);
+        return EconomyEngine.instance().mInfo.getExportIncome(original, true);
     }
 
     public float getNetIncome() {

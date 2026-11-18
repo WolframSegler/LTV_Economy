@@ -330,7 +330,7 @@ public final class ColonyInvDialog extends DialogPanel {
 
             table.pushRow(
                 null, (tp, exp) -> {
-                    final String value = NumFormat.engNotate(cell.nonExportableStock);
+                    final String value = NumFormat.engNotate(cell.mNonExportableStock);
                     tp.addPara(str("uiTpTxtPressToSetNotExportableStock") + " • " + value, 0f, highlight, value);
                 }, rowSelectedRun, CodexDataV2.getCommodityEntryId(com.getId()), null, null
             );
@@ -364,11 +364,11 @@ public final class ColonyInvDialog extends DialogPanel {
             final LabelAPI title = settings.createLabel(str("uiDialogTitleNotExportableStock"), Fonts.INSIGNIA_LARGE);
             add(title).inTL(0f, 0f);
 
-            final SpriteElement icon = new SpriteElement(28, 28, cell.spec.getIconName(), null, null);
+            final SpriteElement icon = new SpriteElement(28, 28, cell.mSpec.getIconName(), null, null);
             add(icon).inTR(0f, 0f);
 
             slider = new Slider(null, 0f, 100_000f, 370, 32);
-            slider.setProgress(cell.nonExportableStock);
+            slider.setProgress(cell.mNonExportableStock);
             slider.customText = () -> NumFormat.engNotate(slider.getProgress());
             add(slider).inBMid(35f);
         }
@@ -377,7 +377,7 @@ public final class ColonyInvDialog extends DialogPanel {
         public void dismiss(int option) {
             super.dismiss(option);
 
-            if (option == 0) cell.nonExportableStock = slider.getProgress();
+            if (option == 0) cell.mNonExportableStock = slider.getProgress();
         }
     }
 }

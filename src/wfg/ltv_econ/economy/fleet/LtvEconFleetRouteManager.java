@@ -111,7 +111,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		route.addSegment(new RouteSegment(MissionStatus.IN_TRANSIT.ordinal(), mission.travelDur, src.getPrimaryEntity(), dest.getPrimaryEntity()));
 		route.addSegment(new RouteSegment(MissionStatus.IN_DST_ORBIT_UNLOADING.ordinal(), mission.transferDur, dest.getPrimaryEntity()));
 
-		final int currentDay = EconomyEngine.instance().getCyclesSinceTrade();
+		final int currentDay = EconomyEngine.instance().getmCyclesSinceTrade();
 		route.setDelay(Math.max(0, mission.startOffset - currentDay));
 		mission.spawnedFleetFinishedJob = false;
 
@@ -148,7 +148,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	private final TradeMission pickTradeMission() {
 		final Set<String> excludeList = SharedData.getData().getMarketsWithoutTradeFleetSpawn();
-		final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
+		final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getmActiveMissions());
 		final WeightedRandomPicker<TradeMission> missionPicker = new WeightedRandomPicker<>();
 
 		for (TradeMission m : missions) {
@@ -296,17 +296,17 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 				final CommodityCell srcCell = engine.getComCell(com.comID, mission.srcID);
 				if (srcCell != null) {
 					if (mission.inFaction) {
-						srcCell.inFactionExports -= lost;
+						srcCell.mInFactionExports -= lost;
 					} else {
-						srcCell.globalExports -= lost;
+						srcCell.mGlobalExports -= lost;
 					}
 				}
 				final CommodityCell destCell = engine.getComCell(com.comID, mission.destID);
 				if (destCell != null) {
 					if (mission.inFaction) {
-						destCell.inFactionImports -= lost;
+						destCell.mInFactionImports -= lost;
 					} else {
-						destCell.globalImports -= lost;
+						destCell.mGlobalImports -= lost;
 					}
 				}
 			}

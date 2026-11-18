@@ -166,7 +166,7 @@ public class OpenSubmarketPlugin extends OpenMarketPlugin {
 	}
 
 	private static final float getInflowQuantumNormalized(final CommodityCell cell) {
-		return cell.getProduction(true) + cell.informalImports + (cell.inFactionImports + cell.globalImports) / EconConfig.TRADE_INTERVAL;
+		return cell.getProduction(true) + cell.mInformalImports + (cell.mInFactionImports + cell.mGlobalImports) / EconConfig.TRADE_INTERVAL;
 	}
 
     @Override

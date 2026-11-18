@@ -298,7 +298,7 @@ public final class IndustryWidget extends UIContainer implements
             final CommodityCell cell = engine.getComCell(comID, market.getId());
             if (cell == null || cell.getStoredAvailabilityRatio() > 0.9f) continue;
 
-            contentTp.addIcons(cell.spec, 1, IconRenderMode.RED);
+            contentTp.addIcons(cell.mSpec, 1, IconRenderMode.RED);
         }
         }
         contentTp.addIconGroup(24, 1, pad);

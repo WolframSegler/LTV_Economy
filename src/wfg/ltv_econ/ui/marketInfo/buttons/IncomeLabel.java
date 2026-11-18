@@ -57,8 +57,8 @@ public final class IncomeLabel extends DockClickable<IncomeBreakdownDialog> impl
         };
         tooltip.builder = (tp, expanded) -> {
             final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(market);
-            final EconomyInfo info = EconomyEngine.instance().info;
-            final List<CommodityDomain> domains = EconomyEngine.instance().getComDomains();
+            final EconomyInfo info = EconomyEngine.instance().mInfo;
+            final List<CommodityDomain> domains = EconomyEngine.instance().getmComDomains();
             final FactionAPI faction = market.getFaction();
             final Color base = faction.getBaseUIColor();
             final Color dark = faction.getDarkUIColor();
@@ -148,25 +148,25 @@ public final class IncomeLabel extends DockClickable<IncomeBreakdownDialog> impl
                 tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 200f + extraPad, str("uiTableMarketShare"), 100f + extraPad, str("uiTableIncomeTitle"), 100f + extraPad);
                 int exportedCount = 0;
                 for (CommodityDomain com : domains) {
-                    if (ledger.getLastMonth(TRADE_EXPORT_KEY + com.comID) > 0l) {
+                    if (ledger.getLastMonth(TRADE_EXPORT_KEY + com.mComID) > 0l) {
                         ++exportedCount;
                     }
                 }
 
                 domains.sort((c1, c2) ->
                     Long.compare(
-                        ledger.getLastMonth(TRADE_EXPORT_KEY + c2.comID),
-                        ledger.getLastMonth(TRADE_EXPORT_KEY + c1.comID)
+                        ledger.getLastMonth(TRADE_EXPORT_KEY + c2.mComID),
+                        ledger.getLastMonth(TRADE_EXPORT_KEY + c1.mComID)
                     )
                 );
                 int comCount = 0;
                 for (CommodityDomain com : domains) {
-                    final String name = com.spec.getName();
-                    final long comExportIncome = ledger.getLastMonth(TRADE_EXPORT_KEY + com.comID);
+                    final String name = com.mSpec.getName();
+                    final long comExportIncome = ledger.getLastMonth(TRADE_EXPORT_KEY + com.mComID);
                     if (comExportIncome < 1) continue;
 
                     final int exportMarketShare = info.getExportMarketShare(
-                        com.spec.getId(), market.getId()
+                        com.mSpec.getId(), market.getId()
                     );
 
                     tp.addRow(Alignment.LMID, text_color, " " + name, highlight, exportMarketShare + "%", highlight, NumFormat.formatCredit(comExportIncome));
@@ -185,25 +185,25 @@ public final class IncomeLabel extends DockClickable<IncomeBreakdownDialog> impl
                 tp.beginTable(faction, rowH, str("uiTableCommodityTitle"), 200f + extraPad, str("uiTableMarketShare"), 100f + extraPad, str("uiTableExpense"), 100f + extraPad);
                 int importedCount = 0;
                 for (CommodityDomain com : domains) {
-                    if (ledger.getLastMonth(TRADE_IMPORT_KEY + com.comID) < 0l) {
+                    if (ledger.getLastMonth(TRADE_IMPORT_KEY + com.mComID) < 0l) {
                         ++importedCount;
                     }
                 }
 
                 domains.sort((c1, c2) ->
                     Long.compare(
-                        ledger.getLastMonth(TRADE_IMPORT_KEY + c2.comID),
-                        ledger.getLastMonth(TRADE_IMPORT_KEY + c1.comID)
+                        ledger.getLastMonth(TRADE_IMPORT_KEY + c2.mComID),
+                        ledger.getLastMonth(TRADE_IMPORT_KEY + c1.mComID)
                     )
                 );
                 int comCount = 0;
                 for (CommodityDomain com : domains) {
-                    final String name = com.spec.getName();
-                    final long comImportExpense = -ledger.getLastMonth(TRADE_IMPORT_KEY + com.comID);
+                    final String name = com.mSpec.getName();
+                    final long comImportExpense = -ledger.getLastMonth(TRADE_IMPORT_KEY + com.mComID);
                     if (comImportExpense < 1l) continue;
 
                     final int importMarketShare = info.getImportMarketShare(
-                        com.spec.getId(), market.getId()
+                        com.mSpec.getId(), market.getId()
                     );
 
                     tp.addRow(Alignment.LMID, text_color, " " + name, negative, importMarketShare + "%", negative, NumFormat.formatCredit(comImportExpense));

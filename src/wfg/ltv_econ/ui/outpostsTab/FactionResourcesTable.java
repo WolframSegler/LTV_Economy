@@ -37,7 +37,7 @@ public final class FactionResourcesTable extends UIContainer implements HasBackg
 
     public void buildUI() {
         final EconomyEngine engine = EconomyEngine.instance();
-        final EconomyInfo info = engine.info;
+        final EconomyInfo info = engine.mInfo;
         final int rowH = 30;
         
         clearChildren();

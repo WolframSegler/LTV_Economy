@@ -86,13 +86,13 @@ public class EconomyLoop {
 
         poolReg.recalculateWorkerPool();
 
-        engine.comDomains.values().forEach(CommodityDomain::reset);
-        engine.factionShipInventories.values().forEach(FactionShipInventory::update);
+        engine.mComDomains.values().forEach(CommodityDomain::reset);
+        engine.mFactionShipInventories.values().forEach(FactionShipInventory::update);
 
         if (!fakeAdvance || forceWorkerAssignment) {
-            if (engine.cyclesSinceWorkerAssign >= EconConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment) {
+            if (engine.mCyclesSinceWorkerAssign >= EconConfig.WORKER_ASSIGN_INTERVAL || forceWorkerAssignment) {
                 WorkerRegistry.instance().resetWorkersAssigned(false);
-                engine.comDomains.values().parallelStream().forEach(CommodityDomain::update);
+                engine.mComDomains.values().parallelStream().forEach(CommodityDomain::update);
                 assignWorkers();
                 applyServiceSectorEffects(); // run before player faction plan so that the player allocator sees the modified demand values.
                 
@@ -111,25 +111,25 @@ public class EconomyLoop {
 
                 poolReg.recalculateFreeWorkers();
 
-                engine.cyclesSinceWorkerAssign = 0;
+                engine.mCyclesSinceWorkerAssign = 0;
             } else {
-                engine.cyclesSinceWorkerAssign++;
+                engine.mCyclesSinceWorkerAssign++;
             }
         }
 
-        engine.comDomains.values().parallelStream().forEach(CommodityDomain::update);
+        engine.mComDomains.values().parallelStream().forEach(CommodityDomain::update);
         
         weightedOutputDeficitMods();
 
-        engine.marketPopData.values().forEach(MarketPopulationData::apply);
+        engine.mMarketPopData.values().forEach(MarketPopulationData::apply);
 
         if (!fakeAdvance) {
-            engine.marketPopData.values().forEach(MarketPopulationData::advance);
+            engine.mMarketPopData.values().forEach(MarketPopulationData::advance);
 
             handleTrade();
             
-            engine.comDomains.values().forEach(CommodityDomain::advance);
-            engine.factionShipInventories.values().forEach(FactionShipInventory::advance);
+            engine.mComDomains.values().forEach(CommodityDomain::advance);
+            engine.mFactionShipInventories.values().forEach(FactionShipInventory::advance);
 
             applyWages();
             redistributeFactionCredits(LtvEconSaveData.instance().playerFactionSettings.redistributeCredits);
@@ -142,7 +142,7 @@ public class EconomyLoop {
         final Set<String> econMarketIDs = econMarkets.stream()
             .map(MarketAPI::getId)
             .collect(Collectors.toSet());
-        final Set<String> registeredMarkets = new HashSet<>(engine.registeredMarkets);
+        final Set<String> registeredMarkets = new HashSet<>(engine.mRegisteredMarkets);
 
         for (MarketAPI market : econMarkets) {
             if (!registeredMarkets.contains(market.getId())) engine.registerMarket(market);
@@ -158,7 +158,7 @@ public class EconomyLoop {
         final Set<String> econMarketIDs = econMarkets.stream()
             .map(MarketAPI::getId)
             .collect(Collectors.toSet());
-        final Set<String> registeredMarkets = new HashSet<>(engine.registeredMarkets);
+        final Set<String> registeredMarkets = new HashSet<>(engine.mRegisteredMarkets);
 
         for (MarketAPI market : econMarkets) {
             if (!registeredMarkets.contains(market.getId())) engine.registerMarket(market);
@@ -172,10 +172,10 @@ public class EconomyLoop {
             if (!market.isPlayerOwned()) continue;
 
             final String marketID = market.getId();
-            if (!engine.marketPopData.containsKey(marketID)) {
+            if (!engine.mMarketPopData.containsKey(marketID)) {
                 engine.addMarketPopulationData(marketID);
             }
-            for (CommodityDomain dom : engine.getComDomains()) {
+            for (CommodityDomain dom : engine.getmComDomains()) {
                 if (dom.getCell(marketID) == null) dom.addMarket(marketID);
             }
         }
@@ -293,11 +293,11 @@ public class EconomyLoop {
     }
 
     private final void weightedOutputDeficitMods() {
-        engine.comDomains.values().stream().parallel()
+        engine.mComDomains.values().stream().parallel()
             .flatMap(dom -> dom.getCellsMap().values().stream())
             .forEach(this::computeComDeficits);
 
-        engine.comDomains.values().stream().parallel()
+        engine.mComDomains.values().stream().parallel()
             .flatMap(dom -> dom.getCellsMap().values().stream())
             .forEach(cell -> {
                 final ArrayMutableStat prodStat = cell.getProductionStat();
@@ -320,12 +320,12 @@ public class EconomyLoop {
                 continue;
             }
 
-            final Industry ind = cell.market.getIndustry(industryID);
+            final Industry ind = cell.mMarket.getIndustry(industryID);
             final ArrayMap<String, Float> inputWeights = IndustryIOs.getRealInputs(ind, cell.comID, true);
 
             final float industryDeficit = DeficitCalculator.computeWeightedDeficit(
                 inputWeights,
-                inputID -> engine.getComCell(inputID, cell.market.getId()).getStoredAvailabilityRatio()
+                inputID -> engine.getComCell(inputID, cell.mMarket.getId()).getStoredAvailabilityRatio()
             );
 
             if (industryDeficit > 0f) {
@@ -339,25 +339,25 @@ public class EconomyLoop {
     private final void handleTrade() {
         advanceMissions();
 
-        if (engine.cyclesSinceTrade >= engine.lastTradeCycle) {
-            engine.cyclesSinceTrade = 0;
-            engine.lastTradeCycle = EconConfig.TRADE_INTERVAL;
+        if (engine.mCyclesSinceTrade >= engine.mLastTradeCycle) {
+            engine.mCyclesSinceTrade = 0;
+            engine.mLastTradeCycle = EconConfig.TRADE_INTERVAL;
             dispatchTrade();
         } else {
-            engine.cyclesSinceTrade++;
+            engine.mCyclesSinceTrade++;
         }
 
-        engine.comDomains.values().parallelStream().forEach(CommodityDomain::informalTrade);
+        engine.mComDomains.values().parallelStream().forEach(CommodityDomain::informalTrade);
     }
 
     private final void dispatchTrade() {
         final long startTime = System.nanoTime();
-        engine.comDomains.values().forEach(CommodityDomain::createFormalTradeFlows);
+        engine.mComDomains.values().forEach(CommodityDomain::createFormalTradeFlows);
 
         final ArrayMap<String, TradeMission> missions = new ArrayMap<>(32);
 
-        for (CommodityDomain dom : engine.comDomains.values()) {
-            final String comID = dom.comID;
+        for (CommodityDomain dom : engine.mComDomains.values()) {
+            final String comID = dom.mComID;
             for (ComTradeFlow flow : dom.getSanitizedTradeFlows()) {
                 final TradeMission mission = missions.computeIfAbsent(
                     flow.exporterID + KEY + flow.importerID,
@@ -377,7 +377,7 @@ public class EconomyLoop {
 
         final HashMap<MarketAPI, Float> fuelDemands = new HashMap<>(EconomyInfo.getMarketsCount());
         final int missionCount = missions.size();
-        engine.activeMissions.ensureCapacity(engine.activeMissions.size() + missionCount);
+        engine.mActiveMissions.ensureCapacity(engine.mActiveMissions.size() + missionCount);
         for (int i = 0; i < missionCount; i++) {
 
             final TradeMission mission = missions.valueAt(i);
@@ -393,7 +393,7 @@ public class EconomyLoop {
                 && inv.getIdleCombatPower() >= mission.combatPowerTarget;
 
             allocShipsAndFuelToTradeMission(inv, mission, canUseFactionFleet);
-            engine.activeMissions.add(mission);
+            engine.mActiveMissions.add(mission);
 
             fuelDemands.merge(mission.src, mission.fuelCost, Float::sum);
         }
@@ -404,7 +404,7 @@ public class EconomyLoop {
     }
 
     private final void advanceMissions() {
-        final Iterator<TradeMission> activeIt = engine.activeMissions.iterator();
+        final Iterator<TradeMission> activeIt = engine.mActiveMissions.iterator();
         while (activeIt.hasNext()) {
             final TradeMission m = activeIt.next();
             if (m.src == null || m.dest == null) {
@@ -415,7 +415,7 @@ public class EconomyLoop {
 
             switch (m.status) {
             case SCHEDULED:
-                if (engine.cyclesSinceTrade == m.startOffset) {
+                if (engine.mCyclesSinceTrade == m.startOffset) {
                     m.status = MissionStatus.IN_SRC_ORBIT_LOADING;
                 }
                 break;
@@ -449,9 +449,9 @@ public class EconomyLoop {
                     final CommodityCell src = engine.getComCell(cargo.comID, m.srcID);
                     if (src != null) {
                         if (m.inFaction) {
-                            src.inFactionExports -= cargo.amount;
+                            src.mInFactionExports -= cargo.amount;
                         } else {
-                            src.globalExports -= cargo.amount;
+                            src.mGlobalExports -= cargo.amount;
                         }
                     }
 
@@ -459,9 +459,9 @@ public class EconomyLoop {
                     if (dest != null) {
                         dest.addStoredAmount(cargo.amount);
                         if (m.inFaction) {
-                            dest.inFactionImports -= cargo.amount;
+                            dest.mInFactionImports -= cargo.amount;
                         } else {
-                            dest.globalImports -= cargo.amount;
+                            dest.mGlobalImports -= cargo.amount;
                         }
                     }
                 }
@@ -477,18 +477,18 @@ public class EconomyLoop {
                     if (src != null) {
                         src.addStoredAmount(cargo.amount);
                         if (m.inFaction) {
-                            src.inFactionExports -= cargo.amount;
+                            src.mInFactionExports -= cargo.amount;
                         } else {
-                            src.globalExports -= cargo.amount;
+                            src.mGlobalExports -= cargo.amount;
                         }
                     }
 
                     final CommodityCell dest = engine.getComCell(cargo.comID, m.destID);
                     if (dest != null) {
                         if (m.inFaction) {
-                            dest.inFactionImports -= cargo.amount;
+                            dest.mInFactionImports -= cargo.amount;
                         } else {
-                            dest.globalImports -= cargo.amount;
+                            dest.mGlobalImports -= cargo.amount;
                         }
                     }
                 }
@@ -503,9 +503,9 @@ public class EconomyLoop {
                     final CommodityCell dest = engine.getComCell(cargo.comID, m.destID);
                     if (dest != null) {
                         if (m.inFaction) {
-                            dest.inFactionImports -= cargo.amount;
+                            dest.mInFactionImports -= cargo.amount;
                         } else {
-                            dest.globalImports -= cargo.amount;
+                            dest.mGlobalImports -= cargo.amount;
                         }
                     }
                 }
@@ -520,7 +520,7 @@ public class EconomyLoop {
             }
         }
     
-        final Iterator<TradeMission> pastIt = engine.pastMissions.iterator();
+        final Iterator<TradeMission> pastIt = engine.mPastMissions.iterator();
         while (pastIt.hasNext()) {
             final TradeMission m = pastIt.next();
 
@@ -540,12 +540,12 @@ public class EconomyLoop {
         mission.usedFactionFleet = isFactionFleet;
 
         final CommodityCell fuelCell = engine.getComCell(Commodities.FUEL, marketID);
-        if (fuelCell.getStored() >= mission.fuelCost) {
+        if (fuelCell.getmStored() >= mission.fuelCost) {
             mission.usedFuelFromStockpiles = true;
             fuelCell.addStoredAmount(-mission.fuelCost);
             
         } else {
-            final float fuelCostFee = mission.fuelCost * fuelCell.spec.getUnmodifiedBasePrice()
+            final float fuelCostFee = mission.fuelCost * fuelCell.mSpec.getUnmodifiedBasePrice()
                 * (isFactionFleet ? EconConfig.FORCED_FUEL_IMPORT_COST_MULT : 1f);
             
             mission.credits.modifyFlat(
@@ -595,11 +595,11 @@ public class EconomyLoop {
         final MarketFinanceRegistry registry = MarketFinanceRegistry.instance();
         final EconomyAPI econ = Global.getSector().getEconomy();
 
-        for (String marketID : engine.registeredMarkets) {
+        for (String marketID : engine.mRegisteredMarkets) {
             final MarketAPI market = econ.getMarket(marketID);
             if (market == null) continue;
             
-            final float wageCost = engine.info.getDailyWages(market);
+            final float wageCost = engine.mInfo.getDailyWages(market);
             registry.getLedger(marketID).add(WORKER_WAGES_KEY, -wageCost, getDesc(WORKER_WAGES_KEY));
         }
     }
@@ -693,7 +693,7 @@ public class EconomyLoop {
     }
 
     private final void putMissionToPast(Iterator<TradeMission> it, TradeMission mission) {
-        engine.pastMissions.add(mission);
+        engine.mPastMissions.add(mission);
         it.remove();
 
         mission.durRemaining = EconConfig.HISTORY_LENGTH;
@@ -707,7 +707,7 @@ public class EconomyLoop {
 
     final void applyServiceSectorEffectsToMarket(MarketAPI market) {
         final String marketID = market.getId();
-        if (!engine.registeredMarkets.contains(marketID)) return;
+        if (!engine.mRegisteredMarkets.contains(marketID)) return;
 
         final IndustryWorkerData idata = WorkerRegistry.instance().getForceRegisterData(marketID, Industries.POPULATION);
 
@@ -717,7 +717,7 @@ public class EconomyLoop {
         final float pubInfoRatio = idata.getAssignedRatioForOutput(SERVICE_PUBLIC_INFO);
         final float cultureRatio = idata.getAssignedRatioForOutput(SERVICE_CULTURE);
 
-        for (CommodityDomain dom : engine.comDomains.values()) {
+        for (CommodityDomain dom : engine.mComDomains.values()) {
             final CommodityCell cell = dom.getCell(marketID);
             cell.getConsumptionStat().modifyMult(SERVICE_LOGISTICS, 1f - logiRatio, str("serviceSectorLogisticsDesc"));
         }

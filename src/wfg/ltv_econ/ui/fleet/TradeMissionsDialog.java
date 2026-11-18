@@ -88,8 +88,8 @@ public final class TradeMissionsDialog extends DockPanel {
         protected List<TradeMission> getDataList() {
             final EconomyEngine engine = EconomyEngine.instance();
             final List<TradeMission> missions = activeMissions
-                ? engine.getActiveMissions()
-                : engine.getPastMissions();
+                ? engine.getmActiveMissions()
+                : engine.getmPastMissions();
 
             final List<TradeMission> filtered = new ArrayList<>();
             for (TradeMission m : missions) {

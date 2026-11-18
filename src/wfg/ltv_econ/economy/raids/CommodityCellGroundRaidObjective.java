@@ -44,7 +44,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 	private UIPanelAPI iconPanel = null;
 	
 	public CommodityCellGroundRaidObjective(CommodityCell cell) {
-		super(cell.market, cell.comID);
+		super(cell.mMarket, cell.comID);
 
 		this.cell = cell;
 		setSource(computeCommoditySource(cell));
@@ -60,7 +60,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		loot.addCommodity(id, quantityLooted);
 		cell.addStoredAmount(-quantityLooted);
 		
-		xpGained = (int) (quantityLooted * cell.spec.getUnmodifiedBasePrice() * XP_GAIN_VALUE_MULT);
+		xpGained = (int) (quantityLooted * cell.mSpec.getUnmodifiedBasePrice() * XP_GAIN_VALUE_MULT);
 		return xpGained;
 	}
 
@@ -71,23 +71,23 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
     @Override
 	public final int getCargoSpaceNeeded() {
-		if (!cell.spec.isFuel() && !cell.spec.isPersonnel()) {
-			return (int) (cell.spec.getCargoSpace() * getQuantity(getMarinesAssigned()));
+		if (!cell.mSpec.isFuel() && !cell.mSpec.isPersonnel()) {
+			return (int) (cell.mSpec.getCargoSpace() * getQuantity(getMarinesAssigned()));
 		}
 		return 0;
 	}
 	
     @Override
 	public final int getFuelSpaceNeeded() {
-		if (cell.spec.isFuel()) {
-			return (int) (cell.spec.getCargoSpace() * getQuantity(getMarinesAssigned()));
+		if (cell.mSpec.isFuel()) {
+			return (int) (cell.mSpec.getCargoSpace() * getQuantity(getMarinesAssigned()));
 		}
 		return 0;
 	}
 	
     @Override
 	public final int getProjectedCreditsValue() {
-		return (int) (cell.spec.getBasePrice() * getQuantity(getMarinesAssigned()));
+		return (int) (cell.mSpec.getBasePrice() * getQuantity(getMarinesAssigned()));
 	}
 
     @Override
@@ -105,7 +105,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 		
 		tp.addPara(comDesc.getText1FirstPara(), 0f);
 		
-		tp.addPara(str("comCellRaidObjectiveBaseValueTxt"), opad, highlight, Misc.getDGSCredits(cell.spec.getBasePrice()));
+		tp.addPara(str("comCellRaidObjectiveBaseValueTxt"), opad, highlight, Misc.getDGSCredits(cell.mSpec.getBasePrice()));
 
         if (expanded) addStockpileLegend(tp, expanded);
 	}
@@ -117,7 +117,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
     @Override
 	public final RaidDangerLevel getDangerLevel() {
-		return getDangerLevel(cell.spec, cell, source);
+		return getDangerLevel(cell.mSpec, cell, source);
 	}
 
     @Override
@@ -144,7 +144,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
     @Override
 	public final String getName() {
-		return cell.spec.getName();
+		return cell.mSpec.getName();
 	}
 
     @Override
@@ -154,7 +154,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 
     @Override
 	public final int getValue(int marines) {
-		return (int) (getQuantity(marines) * cell.spec.getUnmodifiedBasePrice());
+		return (int) (getQuantity(marines) * cell.mSpec.getUnmodifiedBasePrice());
 	}
 
     @Override
@@ -176,8 +176,8 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 	}
 
     protected static final Industry computeCommoditySource(CommodityCell cell) {
-		final RaidDangerLevel base = cell.spec.getBaseDanger();
-        final MarketAPI market = cell.market;
+		final RaidDangerLevel base = cell.mSpec.getBaseDanger();
+        final MarketAPI market = cell.mMarket;
 		Industry best = null;
 		float bestScore = 0;
 
@@ -209,7 +209,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 	}
 
 	protected static final float getQuantity(CommodityCell cell, int marines, double mult) {
-        final double stored = cell.getStored();
+        final double stored = cell.getmStored();
 		final double maxQuantity = stored * EconConfig.RAID_STOCKPILES_ACCESS_RATIO;
         final double marineQuantity = maxQuantity * marines / MarketCMD.MAX_MARINE_TOKENS;
         final double deficitMult = 1d / (2d - cell.getStoredAvailabilityRatio());
@@ -221,7 +221,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 	}
 
 	protected static final RaidDangerLevel getDangerLevel(CommoditySpecAPI spec, CommodityCell cell, Industry source) {
-		RaidDangerLevel danger = cell.spec.getBaseDanger();
+		RaidDangerLevel danger = cell.mSpec.getBaseDanger();
 
         if (cell.getStoredDeficit() > 0d) {
             danger = danger.next();

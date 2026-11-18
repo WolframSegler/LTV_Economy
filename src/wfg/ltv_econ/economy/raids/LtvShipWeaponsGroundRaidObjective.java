@@ -131,7 +131,7 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
 		lootMult *= 0.9f + random.nextFloat() * 0.2f;
 		final float quantity = getQuantity(marinesAssigned, lootMult);
 
-        final float value = quantity * cell.spec.getUnmodifiedBasePrice() * 0.2f;
+        final float value = quantity * cell.mSpec.getUnmodifiedBasePrice() * 0.2f;
 		quantityLooted = (int) quantity;
 
         cell.addStoredAmount(-quantity);
@@ -293,7 +293,7 @@ public class LtvShipWeaponsGroundRaidObjective extends BaseGroundRaidObjectivePl
 
     @Override
     public final void createTooltip(TooltipMakerAPI tp, boolean expanded) {
-        tp.addPara(strf("weaponsRaidObjectiveTp1", cell.spec.getName()), 0f);
+        tp.addPara(strf("weaponsRaidObjectiveTp1", cell.mSpec.getName()), 0f);
         tp.addPara(str("weaponsRaidObjectiveTp2"), opad);
 
         if (!Misc.hasHeavyIndustry(market) && !Misc.isMilitary(market)) {

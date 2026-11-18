@@ -196,7 +196,7 @@ public final class TradeMissionWidget extends UIContainer implements WidgetAPI<T
             final EconomyEngine engine = EconomyEngine.instance();
             tp.addTitle(detailed ? str("tradeMissionTitle") : str("tradeFleetTitle"), base);
 
-            final int beginTime = mission.startOffset - engine.getCyclesSinceTrade();
+            final int beginTime = mission.startOffset - engine.getmCyclesSinceTrade();
             final int arrivalTime = mission.durRemaining - (int) mission.transferDur;
 
             final String statusStr = switch(mission.status) {

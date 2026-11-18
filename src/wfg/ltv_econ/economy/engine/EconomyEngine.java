@@ -81,25 +81,25 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     GroundRaidObjectivesListener, EconomyTickListener, ColonyPlayerHostileActListener,
     IndustryApplyListener
 {
-    public transient EconomyInfo info;
-    public transient EconomyLogger logger;
-    transient EconomyLoop loop;
-    private transient ExecutorService mainLoopExecutor;
-    private volatile boolean mainLoopExecutorRunning = false;
+    public transient EconomyInfo mInfo;
+    public transient EconomyLogger mLogger;
+    transient EconomyLoop mLoop;
+    private transient ExecutorService mMainLoopExecutor;
+    private volatile boolean mMainLoopExecutorRunning = false;
     
-    final Set<String> registeredMarkets = new HashSet<>();
-    final ArrayMap<String, CommodityDomain> comDomains = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
-    final ArrayMap<String, MarketPopulationData> marketPopData = new ArrayMap<>();
-    final ArrayMap<String, Long> marketCredits = new ArrayMap<>(EconomyInfo.getMarketsCount());
-    final ArrayMap<String, ConcurrentMarketData> marketData = new ArrayMap<>(EconomyInfo.getMarketsCount());
-    final ArrayMap<String, FactionShipInventory> factionShipInventories = new ArrayMap<>(EconomyConstants.visibleFactionIDs.size());
-    final ArrayList<TradeMission> activeMissions = new ArrayList<>(2048);
-    transient ArrayList<TradeMission> pastMissions = new ArrayList<>(1024);
+    final Set<String> mRegisteredMarkets = new HashSet<>();
+    final ArrayMap<String, CommodityDomain> mComDomains = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
+    final ArrayMap<String, MarketPopulationData> mMarketPopData = new ArrayMap<>();
+    final ArrayMap<String, Long> mMarketCredits = new ArrayMap<>(EconomyInfo.getMarketsCount());
+    final ArrayMap<String, ConcurrentMarketData> mMarketData = new ArrayMap<>(EconomyInfo.getMarketsCount());
+    final ArrayMap<String, FactionShipInventory> mFactionShipInventories = new ArrayMap<>(EconomyConstants.visibleFactionIDs.size());
+    final ArrayList<TradeMission> mActiveMissions = new ArrayList<>(2048);
+    transient ArrayList<TradeMission> mPastMissions = new ArrayList<>(1024);
 
-    protected int dayKeyTracker = -1;
-    protected int cyclesSinceWorkerAssign = EconConfig.WORKER_ASSIGN_INTERVAL;
-    protected int cyclesSinceTrade = EconConfig.TRADE_INTERVAL;
-    protected int lastTradeCycle = EconConfig.TRADE_INTERVAL;
+    protected int mDayKeyTracker = -1;
+    protected int mCyclesSinceWorkerAssign = EconConfig.WORKER_ASSIGN_INTERVAL;
+    protected int mCyclesSinceTrade = EconConfig.TRADE_INTERVAL;
+    protected int mLastTradeCycle = EconConfig.TRADE_INTERVAL;
 
     private boolean mBalancerCheckPending = true;
 
@@ -109,7 +109,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public EconomyEngine() {
         for (String comID : EconomyConstants.econCommodityIDs) {
-            comDomains.put(comID, new CommodityDomain(comID));
+            mComDomains.put(comID, new CommodityDomain(comID));
         }
 
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) registerMarket(market);
@@ -118,17 +118,17 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     public final Object readResolve() {
-        mainLoopExecutor = Executors.newSingleThreadExecutor(r -> {
+        mMainLoopExecutor = Executors.newSingleThreadExecutor(r -> {
             final Thread t = new Thread(r, "Thread-mainLoop");
             t.setDaemon(true);
             return t;
         });
 
-        info = new EconomyInfo(this);
-        logger = new EconomyLogger(this);
-        loop = new EconomyLoop(this);
+        mInfo = new EconomyInfo(this);
+        mLogger = new EconomyLogger(this);
+        mLoop = new EconomyLoop(this);
 
-        pastMissions = new ArrayList<>(1024);
+        mPastMissions = new ArrayList<>(1024);
 
         recomputePendingDeliveries();
 
@@ -146,13 +146,13 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         final CampaignClockAPI clock = Global.getSector().getClock();
         final int dayKey = (clock.getCycle() << 10) + (clock.getMonth() << 5) + clock.getDay();
 
-        if (dayKeyTracker == -1) { dayKeyTracker = dayKey; return;}
-        if (dayKeyTracker == dayKey) return;
+        if (mDayKeyTracker == -1) { mDayKeyTracker = dayKey; return;}
+        if (mDayKeyTracker == dayKey) return;
 
-        dayKeyTracker = dayKey;
+        mDayKeyTracker = dayKey;
 
         if (EconConfig.MULTI_THREADING) {
-            mainLoopExecutor.execute(this::realAdvance);
+            mMainLoopExecutor.execute(this::realAdvance);
         } else {
             realAdvance();
         }
@@ -160,27 +160,27 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public final void realAdvance() {
         try {
-            mainLoopExecutorRunning = true;
-            loop.mainLoop(false, false);
+            mMainLoopExecutorRunning = true;
+            mLoop.mainLoop(false, false);
         } finally {
-            mainLoopExecutorRunning = false;
+            mMainLoopExecutorRunning = false;
         }
     }
 
     public final void fakeAdvance() {
-        loop.mainLoop(true, false);
+        mLoop.mainLoop(true, false);
     }
 
     public final void fakeAdvanceWithAssignWorkers() {
-        loop.mainLoop(true, true);
+        mLoop.mainLoop(true, true);
     }
 
-    public final boolean isMainLoopExecutorRunning() {
-        return mainLoopExecutorRunning;
+    public final boolean ismMainLoopExecutorRunning() {
+        return mMainLoopExecutorRunning;
     }
 
     public final void assignPlayerWorkers(WorkerAllocationPlan plan) {
-        loop.assignPlayerWorkers(plan);
+        mLoop.assignPlayerWorkers(plan);
     }
 
     public final synchronized void registerMarket(MarketAPI market) {
@@ -190,17 +190,17 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         WorkerRegistry.instance().register(market);
         WorkerPoolRegistry.instance().register(marketID);
         MarketFinanceRegistry.instance().register(marketID);
-        if (!registeredMarkets.add(marketID)) return;
+        if (!mRegisteredMarkets.add(marketID)) return;
 
         addCredits(marketID, EconConfig.STARTING_CREDITS_FOR_MARKET);
         if (market.isPlayerOwned()) {
-            marketPopData.put(marketID, new MarketPopulationData(marketID));
+            mMarketPopData.put(marketID, new MarketPopulationData(marketID));
             market.addSubmarket(SubmarketsID.STOCKPILES);
             market.removeSubmarket(Submarkets.LOCAL_RESOURCES);
         }
-        marketData.put(marketID, new ConcurrentMarketData());
+        mMarketData.put(marketID, new ConcurrentMarketData());
 
-        comDomains.values().forEach(c -> c.addMarket(marketID));
+        mComDomains.values().forEach(c -> c.addMarket(marketID));
     }
 
     public final void removeMarket(MarketAPI market) {
@@ -208,73 +208,73 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     public final synchronized void removeMarket(String marketID) {
-        if (!registeredMarkets.remove(marketID)) return;
+        if (!mRegisteredMarkets.remove(marketID)) return;
 
-        for (CommodityDomain dom : comDomains.values()) {
+        for (CommodityDomain dom : mComDomains.values()) {
             dom.removeMarket(marketID);
         }
 
-        marketData.remove(marketID);
-        marketPopData.remove(marketID);
-        marketCredits.remove(marketID);
+        mMarketData.remove(marketID);
+        mMarketPopData.remove(marketID);
+        mMarketCredits.remove(marketID);
         MarketFinanceRegistry.instance().remove(marketID);
         WorkerPoolRegistry.instance().remove(marketID);
         WorkerRegistry.instance().remove(marketID);
-        for (TradeMission m : activeMissions) {
+        for (TradeMission m : mActiveMissions) {
 
             if (m.src == null || m.dest == null || m.src.getId().equals(marketID) || m.dest.getId().equals(marketID)) {
                 m.status = MissionStatus.CANCELLED;
             }
         }
-        pastMissions.removeIf(m -> m.src == null || m.dest == null || m.src.getId().equals(marketID) || m.dest.getId().equals(marketID));
+        mPastMissions.removeIf(m -> m.src == null || m.dest == null || m.src.getId().equals(marketID) || m.dest.getId().equals(marketID));
     }
 
     public final void refreshMarkets() {
-        loop.refreshMarkets();
+        mLoop.refreshMarkets();
     }
 
     public final void refreshMarketsHard() {
-        loop.refreshMarketsHard();
+        mLoop.refreshMarketsHard();
     }
 
-    public Set<String> getRegisteredMarkets() {
-        return Collections.unmodifiableSet(registeredMarkets);
+    public Set<String> getmRegisteredMarkets() {
+        return Collections.unmodifiableSet(mRegisteredMarkets);
     }
 
     public Map<String, MarketPopulationData> getMarketPopulationData() {
-        return Collections.unmodifiableMap(marketPopData);
+        return Collections.unmodifiableMap(mMarketPopData);
     }
 
     public final boolean isPlayerMarket(String marketID) {
-        return marketPopData.containsKey(marketID);
+        return mMarketPopData.containsKey(marketID);
     }
 
     public final MarketPopulationData getMarketPopulationData(String marketID) {
-        return marketPopData.get(marketID);
+        return mMarketPopData.get(marketID);
     }
 
     public final MarketPopulationData addMarketPopulationData(String marketID) {
-        return marketPopData.computeIfAbsent(marketID, m -> new MarketPopulationData(marketID));
+        return mMarketPopData.computeIfAbsent(marketID, m -> new MarketPopulationData(marketID));
     }
 
     public final ConcurrentMarketData getMarketData(String marketID) {
-        return marketData.get(marketID);
+        return mMarketData.get(marketID);
     }
 
-    public final List<CommodityDomain> getComDomains() {
-        return new ArrayList<>(comDomains.values());
+    public final List<CommodityDomain> getmComDomains() {
+        return new ArrayList<>(mComDomains.values());
     }
 
     public final CommodityDomain getComDomain(String comID) {
-        return comDomains.get(comID);
+        return mComDomains.get(comID);
     }
 
     public final boolean hasCommodity(String comID) {
-        return comDomains.containsKey(comID);
+        return mComDomains.containsKey(comID);
     }
 
     public final CommodityCell getComCell(String comID, String marketID) {
-        final CommodityDomain dom = comDomains.get(comID);
+        final CommodityDomain dom = mComDomains.get(comID);
 
         if (dom == null) {
             throw new IllegalArgumentException("Referencing a non-econ or missing commodity: " + comID);
@@ -288,7 +288,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         if (cell != null) return cell;
 
         registerMarket(market);
-        return comDomains.get(comID).getCell(market.getId());
+        return mComDomains.get(comID).getCell(market.getId());
     }
 
     public final void addCredits(String marketID, double amount) {
@@ -296,13 +296,13 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     public final void addCredits(String marketID, long amount) {
-        final long current = marketCredits.getOrDefault(marketID, 0l);
+        final long current = mMarketCredits.getOrDefault(marketID, 0l);
         final long newValue = Arithmetic.clamp(current + amount, Long.MIN_VALUE, Long.MAX_VALUE);
-        marketCredits.put(marketID, newValue);
+        mMarketCredits.put(marketID, newValue);
     }
 
     public final long getCredits(String marketID) {
-        return marketCredits.getOrDefault(marketID, 0l);
+        return mMarketCredits.getOrDefault(marketID, 0l);
     }
 
     public final long getCredits(MarketAPI market) {
@@ -310,45 +310,45 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     public final FactionShipInventory getFactionShipInventory(String factionID) {
-        return factionShipInventories.computeIfAbsent(factionID, k -> new FactionShipInventory(factionID));
+        return mFactionShipInventories.computeIfAbsent(factionID, k -> new FactionShipInventory(factionID));
     }
 
-    public final List<TradeMission> getActiveMissions() {
-        return Collections.unmodifiableList(activeMissions);
+    public final List<TradeMission> getmActiveMissions() {
+        return Collections.unmodifiableList(mActiveMissions);
     }
 
-    public final List<TradeMission> getPastMissions() {
-        return Collections.unmodifiableList(pastMissions);
+    public final List<TradeMission> getmPastMissions() {
+        return Collections.unmodifiableList(mPastMissions);
     }
 
-    public final int getCyclesSinceTrade() {
-        return cyclesSinceTrade;
+    public final int getmCyclesSinceTrade() {
+        return mCyclesSinceTrade;
     }
 
     public final int getMainLoopCycle() {
-        return loop.cycleCounter;
+        return mLoop.cycleCounter;
     }
 
     private final void recomputePendingDeliveries() {
-        for (TradeMission mission : activeMissions) {
+        for (TradeMission mission : mActiveMissions) {
             if (mission.status == MissionStatus.LOST || mission.status == MissionStatus.CANCELLED) continue;
 
             for (TradeCom cargo : mission.cargo) {
                 CommodityCell destCell = getComCell(cargo.comID, mission.destID);
                 if (destCell != null) {
                     if (mission.inFaction) {
-                        destCell.inFactionImports += cargo.amount;
+                        destCell.mInFactionImports += cargo.amount;
                     } else {
-                        destCell.globalImports += cargo.amount;
+                        destCell.mGlobalImports += cargo.amount;
                     }
                 }
 
                 CommodityCell srcCell = getComCell(cargo.comID, mission.srcID);
                 if (srcCell != null) {
                     if (mission.inFaction) {
-                        srcCell.inFactionExports += cargo.amount;
+                        srcCell.mInFactionExports += cargo.amount;
                     } else {
-                        srcCell.globalExports += cargo.amount;
+                        srcCell.mGlobalExports += cargo.amount;
                     }
                 }
             }
@@ -357,14 +357,14 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
     public void reportIndustryAboutToBeApplied(Industry ind) {}
     public void reportIndustryApplied(Industry ind) {
-        loop.discoverInputsOutputs(ind);
+        mLoop.discoverInputsOutputs(ind);
         applyPopulationStabilityMods(ind); // must come after discoverInputsOutputs
     }
 
     public final void applyPopulationStabilityMods(Industry ind) {
         final MarketAPI market = ind.getMarket();
         final String marketID = market.getId();
-        if (!registeredMarkets.contains(marketID)) return;
+        if (!mRegisteredMarkets.contains(marketID)) return;
         if (!ind.getSpec().getTags().contains(Industries.POPULATION)) return;
 
         final String popID = "ind_" + Industries.POPULATION + "_";
@@ -398,7 +398,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     }
 
     public final void applyServiceSectorEffectsToMarket(MarketAPI market) {
-        loop.applyServiceSectorEffectsToMarket(market);
+        mLoop.applyServiceSectorEffectsToMarket(market);
     }
 
     // LISTENERS ------------------------------------------------------------------------------------
@@ -410,8 +410,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         final MonthlyReport report = SharedData.getData().getCurrentReport();
 
         endMonth();
-        marketPopData.values().forEach(MarketPopulationData::endMonth);
-        factionShipInventories.values().forEach(FactionShipInventory::endMonth);
+        mMarketPopData.values().forEach(MarketPopulationData::endMonth);
+        mFactionShipInventories.values().forEach(FactionShipInventory::endMonth);
         financeReg.endMonth();
         
         final FDNode marketsNode = report.getNode(MonthlyReport.OUTPOSTS);
@@ -419,7 +419,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         marketsNode.custom = MonthlyReport.OUTPOSTS;
         marketsNode.tooltipCreator = report.getMonthlyReportTooltip();
 
-        for (MarketPopulationData data : marketPopData.values()) {
+        for (MarketPopulationData data : mMarketPopData.values()) {
             final MarketAPI market = data.market;
             final long netIncome = financeReg.getLedger(market).getNetLastMonth();
             final float r = data.getEffectiveProfitRatio();
@@ -440,8 +440,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             for (Industry ind : market.getIndustries()) {
                 final FDNode iNode = report.getNode(indNode, ind.getId());
                 iNode.name = ind.getCurrentName();
-                iNode.income += info.getIndustryIncome(ind).getModifiedInt() * r;
-                iNode.upkeep += info.getIndustryUpkeep(ind).getModifiedInt() * r;
+                iNode.income += mInfo.getIndustryIncome(ind).getModifiedInt() * r;
+                iNode.upkeep += mInfo.getIndustryUpkeep(ind).getModifiedInt() * r;
                 iNode.custom = ind;
                 iNode.mapEntity = market.getPrimaryEntity();
                 iNode.tooltipCreator = new TooltipCreator() {
@@ -485,8 +485,8 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
                 final FDNode eNode = report.getNode(exportNode, com.getId());
                 final String comID = com.getId();
                 eNode.name = com.getName();
-                eNode.income += info.getExportIncome(market, comID, true) * r;
-                eNode.upkeep += info.getImportExpense(market, comID, true) * r;
+                eNode.income += mInfo.getExportIncome(market, comID, true) * r;
+                eNode.upkeep += mInfo.getImportExpense(market, comID, true) * r;
                 eNode.mapEntity = market.getPrimaryEntity();
                 eNode.icon = com.getIconName();
             }
@@ -496,7 +496,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             wageNode.name = str("wagesTitle");
             wageNode.mapEntity = market.getPrimaryEntity();
             wageNode.icon = settings.getSpriteName("income_report", "generic_expense");
-            wageNode.upkeep = info.getDailyWages(market) * MONTH * r;
+            wageNode.upkeep = mInfo.getDailyWages(market) * MONTH * r;
             wageNode.tooltipCreator = new TooltipCreator() {
                 public boolean isTooltipExpandable(Object params) {return false;}
 
@@ -556,7 +556,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         if (priority != 1 || type != RaidType.VALUABLE || market == null) return;
 		final List<CommodityCell> raidValuables = computeRaidValuables(market);
 
-        objectives.removeIf(o -> comDomains.containsKey(o.getId()));
+        objectives.removeIf(o -> mComDomains.containsKey(o.getId()));
 
         for (CommodityCell cell : raidValuables) {
             final CommodityCellGroundRaidObjective curr = new CommodityCellGroundRaidObjective(cell);
@@ -591,11 +591,11 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         reduction += (float) Math.random() * 0.2f - 0.1f;
         reduction = Arithmetic.clamp(reduction, 0.1f, 0.95f);
         
-        for (CommodityDomain dom : comDomains.values()) {
+        for (CommodityDomain dom : mComDomains.values()) {
             final CommodityCell cell = dom.getCell(marketID);
             if (cell == null) continue;
 
-            cell.addStoredAmount(-reduction * cell.getStored());
+            cell.addStoredAmount(-reduction * cell.getmStored());
         }
 
         if (isPlayerMarket(marketID)) {
@@ -613,11 +613,11 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     
     private final List<CommodityCell> computeRaidValuables(MarketAPI market) {
 		final List<CommodityCell> result = new ArrayList<>();
-        for (CommodityDomain dom : comDomains.values()) {
-            if (dom.spec.isPersonnel() || dom.spec.isMeta()) continue;
+        for (CommodityDomain dom : mComDomains.values()) {
+            if (dom.mSpec.isPersonnel() || dom.mSpec.isMeta()) continue;
             final CommodityCell cell = dom.getCell(market.getId());
 
-            if (cell != null && cell.getStored() > 1d) result.add(cell);
+            if (cell != null && cell.getmStored() > 1d) result.add(cell);
         }
 		return result;
 	}
@@ -628,7 +628,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
 
         final List<MarketAPI> markets = new ArrayList<>(EconomyInfo.getMarketsCount());
         for (MarketAPI market : EconomyInfo.getMarketsCopy()) {
-            if (registeredMarkets.contains(market.getId())) {
+            if (mRegisteredMarkets.contains(market.getId())) {
                 markets.add(market);
             }
         }
@@ -638,12 +638,12 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             final MarketLedger ledger = reg.getLedger(market.getId());
 
             for (Industry ind : market.getIndustries()) {
-                final int indIncome = info.getIndustryIncome(ind).getModifiedInt();
+                final int indIncome = mInfo.getIndustryIncome(ind).getModifiedInt();
                 if (indIncome != 0) {
                     ledger.add(INDUSTRY_INCOME_KEY + ind.getSpec().getId(), indIncome, strf("incomeReportIndustryIncomeTxt", ind.getCurrentName()));
                 }
 
-                final int indUpkeep = info.getIndustryUpkeep(ind).getModifiedInt();
+                final int indUpkeep = mInfo.getIndustryUpkeep(ind).getModifiedInt();
                 if (indUpkeep != 0) {
                     ledger.add(INDUSTRY_UPKEEP_KEY + ind.getSpec().getId(), -indUpkeep, strf("incomeReportIndustryUpkeepTxt", ind.getCurrentName()));
                 }

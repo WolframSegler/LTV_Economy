@@ -39,73 +39,73 @@ public class CommodityCell implements Serializable {
     public final String comID;
     public final String marketID;
 
-    public transient MarketAPI market;
-    public transient CommoditySpecAPI spec;
+    public transient MarketAPI mMarket;
+    public transient CommoditySpecAPI mSpec;
 
-    private double stored = 0d;
+    private double mStored = 0d;
 
-    public float nonExportableStock;
+    public float mNonExportableStock;
 
-    private final ArrayMutableStat production = new ArrayMutableStat(0f);
-    private final ArrayMutableStat consumption = new ArrayMutableStat(0f);
-    private final ArrayMutableStat targetQuantum = new ArrayMutableStat(0f);
-    private final StatBonus informalImportMods = new StatBonus();
-    private transient ArrayMap<String, MutableStat> productionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
-    private transient ArrayMap<String, MutableStat> consumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
+    private final ArrayMutableStat mProduction = new ArrayMutableStat(0f);
+    private final ArrayMutableStat mConsumption = new ArrayMutableStat(0f);
+    private final ArrayMutableStat mTargetQuantum = new ArrayMutableStat(0f);
+    private final StatBonus mInformalImportMods = new StatBonus();
+    private transient ArrayMap<String, MutableStat> mProductionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
+    private transient ArrayMap<String, MutableStat> mConsumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
     
-    public transient float inFactionImports = 0f;
-    public transient float inFactionExports = 0f;
-    public transient float globalImports = 0f;
-    public transient float globalExports = 0f;
-    public transient float informalImports = 0f;
-    public transient float informalExports = 0f;
+    public transient float mInFactionImports = 0f;
+    public transient float mInFactionExports = 0f;
+    public transient float mGlobalImports = 0f;
+    public transient float mGlobalExports = 0f;
+    public transient float mInformalImports = 0f;
+    public transient float mInformalExports = 0f;
 
     public final ArrayMap<String, MutableStat> getIndProductionStats() {
-        return productionMutables;
+        return mProductionMutables;
     }
     public final ArrayMap<String, MutableStat> getIndConsumptionStats() {
-        return consumptionMutables;
+        return mConsumptionMutables;
     }
     public final MutableStat getIndProdStat(String industryID) {
-        final MutableStat mutable = productionMutables.get(industryID);
+        final MutableStat mutable = mProductionMutables.get(industryID);
         return mutable == null ? new MutableStat(0f) : mutable;
     }
     public final MutableStat getIndDemandStat(String industryID) {
-        final MutableStat mutable = consumptionMutables.get(industryID);
+        final MutableStat mutable = mConsumptionMutables.get(industryID);
         return mutable == null ? new MutableStat(0f) : mutable;
     }
     public final float getProduction(boolean modified) {
-        return modified ? production.getModifiedValue() : production.getBaseValue();
+        return modified ? mProduction.getModifiedValue() : mProduction.getBaseValue();
     }
     public final float getConsumption(boolean modified) {
-        return modified ? consumption.getModifiedValue() : consumption.getBaseValue();
+        return modified ? mConsumption.getModifiedValue() : mConsumption.getBaseValue();
     }
     public final float getTargetQuantum(boolean modified) {
-        return modified ? targetQuantum.getModifiedValue() : targetQuantum.getBaseValue();
+        return modified ? mTargetQuantum.getModifiedValue() : mTargetQuantum.getBaseValue();
     }
     public final ArrayMutableStat getProductionStat() {
-        return production;
+        return mProduction;
     }
     public final ArrayMutableStat getConsumptionStat() {
-        return consumption;
+        return mConsumption;
     }
     public final ArrayMutableStat getTargetQuantumStat() {
-        return targetQuantum;
+        return mTargetQuantum;
     }
-    public final StatBonus getInformalImportMods() {
-        return informalImportMods;
+    public final StatBonus getmInformalImportMods() {
+        return mInformalImportMods;
     }
     public final float getTotalImports() {
-        return inFactionImports + globalImports + informalImports;
+        return mInFactionImports + mGlobalImports + mInformalImports;
     }
     public final float getTotalExports() {
-        return inFactionExports + globalExports + informalExports;
+        return mInFactionExports + mGlobalExports + mInformalExports;
     }
     public float getPendingImports() {
-        return inFactionImports + globalImports;
+        return mInFactionImports + mGlobalImports;
     }
     public float getPendingExports() {
-        return inFactionExports + globalExports;
+        return mInFactionExports + mGlobalExports;
     }
     public final float getTargetStored() {
         return EconConfig.DAYS_TO_COVER * getTargetQuantum(true);
@@ -114,9 +114,9 @@ public class CommodityCell implements Serializable {
         return Math.max(0f, getProduction(true) - getTargetQuantum(true));
     }
     public final double computeExportAmount() {
-        return Math.max(0d, stored + getSurplusAfterTargetQuantum()
+        return Math.max(0d, mStored + getSurplusAfterTargetQuantum()
             - getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR
-            - nonExportableStock - informalExports
+            - mNonExportableStock - mInformalExports
         );
     }
     public final double computeImportAmount() {
@@ -125,10 +125,10 @@ public class CommodityCell implements Serializable {
         final float maxStockBeforeExport = getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR;
         
         final double target = Math.max(0d,
-            getTargetStored() * getDebtStressFactor() + 1.5f * EconConfig.TRADE_INTERVAL * targetQuantum - stored - informalImports
+            getTargetStored() * getDebtStressFactor() + 1.5f * EconConfig.TRADE_INTERVAL * targetQuantum - mStored - mInformalImports
         );
 
-        final double maxAdditional = Math.max(0d, maxStockBeforeExport - stored - getPendingImports());
+        final double maxAdditional = Math.max(0d, maxStockBeforeExport - mStored - getPendingImports());
 
         return Math.min(target, Math.min(absoluteCap, maxAdditional));
     }
@@ -136,41 +136,41 @@ public class CommodityCell implements Serializable {
         return getProduction(true) + getTargetQuantum(true) + getTotalImports() + getTotalExports();
     }
     public final double getStoredEconomicFootprint() {
-        return Math.max(stored, getTargetStored());
+        return Math.max(mStored, getTargetStored());
     }
     public final float getQuantumNetChange() {
-        return getProduction(true) - getConsumption(true) + informalImports - informalExports;
+        return getProduction(true) - getConsumption(true) + mInformalImports - mInformalExports;
     }
     public final float getStoredAvailabilityRatio() {
         final float consumption = getConsumption(true);
-        return consumption <= 0f ? 1f : (float) Math.min(stored / consumption, 1f);
+        return consumption <= 0f ? 1f : (float) Math.min(mStored / consumption, 1f);
     }
     public final float getDesiredAvailabilityRatio() {
         final double target = getTargetStored();
-        return target <= 0f ? 1f : (float) Math.min(stored / target, 1f);
+        return target <= 0f ? 1f : (float) Math.min(mStored / target, 1f);
     }
     public final double getStoredShortfall() {
-        return Math.max(0d, getTargetStored() - stored);
+        return Math.max(0d, getTargetStored() - mStored);
     }
     public final double getStoredDeficit() {
         final double threshold = getTargetStored() * EconConfig.DEFICIT_THRESHOLD;
-        return Math.max(0d, threshold - stored);
+        return Math.max(0d, threshold - mStored);
     }
     public final double getStoredSurplus() {
-        return Math.max(0d, stored - getTargetStored());
+        return Math.max(0d, mStored - getTargetStored());
     }
     public final double getStoredExcess() {
         return computeExportAmount();
     }
-    public final double getStored() {
-        return stored;
+    public final double getmStored() {
+        return mStored;
     }
     public final long getRoundedStored() {
-        return (long) stored;
+        return (long) mStored;
     }
 
     public final void addStoredAmount(double a) {
-        stored = Math.max(0d, stored + a);
+        mStored = Math.max(0d, mStored + a);
     }
 
     public CommodityCell(String comID, String marketID) {
@@ -181,22 +181,22 @@ public class CommodityCell implements Serializable {
     }
 
     public Object readResolve() {
-        market = Global.getSector().getEconomy().getMarket(marketID);
-        spec = settings.getCommoditySpec(comID);
+        mMarket = Global.getSector().getEconomy().getMarket(marketID);
+        mSpec = settings.getCommoditySpec(comID);
 
-        productionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
-        consumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
+        mProductionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
+        mConsumptionMutables = new ArrayMap<>(IND_ARRAY_AVG_SIZE);
 
         return this;
     }
 
     public final void update() {
         // RESET UPDATE SPECIFIC FLAGS
-        productionMutables.clear();
-        consumptionMutables.clear();
-        production.unmodifyBase();
-        consumption.unmodifyBase();
-        targetQuantum.unmodifyBase();
+        mProductionMutables.clear();
+        mConsumptionMutables.clear();
+        mProduction.unmodifyBase();
+        mConsumption.unmodifyBase();
+        mTargetQuantum.unmodifyBase();
 
         for (Industry ind : getVisibleIndustries()) {
             final String indID = ind.getSpec().getId();
@@ -205,8 +205,8 @@ public class CommodityCell implements Serializable {
             if (IndustryIOs.hasOutput(indID, comID)) {
                 if (!IndustryConfigManager.getIndConfig(ind).demandOnly) {
                     final MutableStat supplyStat = CompatLayer.convertIndSupplyStat(ind, comID);
-                    productionMutables.put(indID, supplyStat);
-                    production.modifyBase(indID, supplyStat.getModifiedValue());
+                    mProductionMutables.put(indID, supplyStat);
+                    mProduction.modifyBase(indID, supplyStat.getModifiedValue());
                 }
 
             }
@@ -214,12 +214,12 @@ public class CommodityCell implements Serializable {
                 final MutableStat demandStat = CompatLayer.convertIndDemandStat(ind, comID);
                 
                 if (IndustryConfigManager.getIndConfig(ind).demandOnly) {
-                    targetQuantum.modifyBase(Consumption.DEMAND_ONLY_KEY + "_" + indID, demandStat.getModifiedValue(),
+                    mTargetQuantum.modifyBase(Consumption.DEMAND_ONLY_KEY + "_" + indID, demandStat.getModifiedValue(),
                         getDesc(DEMAND_ONLY_KEY) + " - " + ind.getCurrentName()
                     );
                 } else {
-                    consumptionMutables.put(indID, demandStat);
-                    consumption.modifyBase(indID, demandStat.getModifiedValue(), ind.getCurrentName());
+                    mConsumptionMutables.put(indID, demandStat);
+                    mConsumption.modifyBase(indID, demandStat.getModifiedValue(), ind.getCurrentName());
                 }
             }
             // Predict input demand
@@ -229,26 +229,26 @@ public class CommodityCell implements Serializable {
                 final float activeQuantum = IndustryIOs.getRealSumInput(ind, comID); // building only demand.
                 final float extraQuantum = Math.max(0f, predictedQuantum - activeQuantum);
                 final float demand = extraQuantum * progress;
-                targetQuantum.modifyBase(CELL_TARGET_PREDICTION_KEY, demand,
+                mTargetQuantum.modifyBase(CELL_TARGET_PREDICTION_KEY, demand,
                     getDesc(CELL_TARGET_PREDICTION_KEY) + " - " + ind.getCurrentName());
             }
         }
 
-        final float prodHoldFactor = (production.getModifiedValue() * EconConfig.PRODUCTION_HOLD_FACTOR) / (float) EconConfig.DAYS_TO_COVER;
-        targetQuantum.modifyBase(CELL_PRODUCTION_TARGET_KEY, prodHoldFactor, getDesc(CELL_PRODUCTION_TARGET_KEY));
-        targetQuantum.modifyBase(CELL_CONSUMPTION_TARGET_KEY, consumption.getModifiedValue(), getDesc(CELL_CONSUMPTION_TARGET_KEY));
+        final float prodHoldFactor = (mProduction.getModifiedValue() * EconConfig.PRODUCTION_HOLD_FACTOR) / (float) EconConfig.DAYS_TO_COVER;
+        mTargetQuantum.modifyBase(CELL_PRODUCTION_TARGET_KEY, prodHoldFactor, getDesc(CELL_PRODUCTION_TARGET_KEY));
+        mTargetQuantum.modifyBase(CELL_CONSUMPTION_TARGET_KEY, mConsumption.getModifiedValue(), getDesc(CELL_CONSUMPTION_TARGET_KEY));
     }
 
     public final void reset() {
-        informalImports = 0f;
-        informalExports = 0f;
+        mInformalImports = 0f;
+        mInformalExports = 0f;
 
-        productionMutables.clear();
-        consumptionMutables.clear();
+        mProductionMutables.clear();
+        mConsumptionMutables.clear();
 
-        production.unmodifyBase();
-        consumption.unmodifyBase();
-        targetQuantum.unmodifyBase();
+        mProduction.unmodifyBase();
+        mConsumption.unmodifyBase();
+        mTargetQuantum.unmodifyBase();
     }
 
     public final void advance() {
@@ -257,9 +257,9 @@ public class CommodityCell implements Serializable {
 
     public final float getUnitPriceForTrade(TransactionDirection type, long amount) {
         return BasePriceCalculator.getUnitPrice(type, amount,
-            stored + informalImports - informalExports
+            mStored + mInformalImports - mInformalExports
             + getPendingImports() / 2d, // imports en-route also influence price, but not as strongly
-            spec.getUnmodifiedBasePrice(), getTargetStored() * getDebtStressFactor()
+            mSpec.getUnmodifiedBasePrice(), getTargetStored() * getDebtStressFactor()
         );
     }
 
@@ -275,25 +275,25 @@ public class CommodityCell implements Serializable {
 
     /** symmetrical */
     public final float getUnitPrice(TransactionDirection type, long amount) {
-        return BasePriceCalculator.getUnitPrice(type, amount, stored, spec.getUnmodifiedBasePrice(), getTargetStored());
+        return BasePriceCalculator.getUnitPrice(type, amount, mStored, mSpec.getUnmodifiedBasePrice(), getTargetStored());
     }
 
     public final float computeVanillaPrice(long amount, double stockpileMod, boolean isSellingToMarket, boolean isPlayer,
         boolean useUnmodifiedPrice
     ) {
-        if (amount < 1l || market == null) return 0f;
+        if (amount < 1l || mMarket == null) return 0f;
 
-        final Market mkt = (Market) market;
+        final Market mkt = (Market) mMarket;
 
-        if (spec.isExotic()) {
+        if (mSpec.isExotic()) {
             return mkt.getDemandPriceAssumingStockpileUtility(
                 mkt.getCommodityData(comID), 0d, amount, isPlayer
             );
         }
 
         final TransactionDirection type = isSellingToMarket ? TransactionDirection.ENTITY_BUYING : TransactionDirection.ENTITY_SELLING;
-        final double stock = stored + stockpileMod + market.getCommodityData(comID).getCombinedTradeModQuantity();
-        final float price = useUnmodifiedPrice ? spec.getUnmodifiedBasePrice() : spec.getBasePrice();
+        final double stock = mStored + stockpileMod + mMarket.getCommodityData(comID).getCombinedTradeModQuantity();
+        final float price = useUnmodifiedPrice ? mSpec.getUnmodifiedBasePrice() : mSpec.getBasePrice();
 
         final float unitPrice = BasePriceCalculator.getUnitPrice(type, amount, stock, price, getTargetStored());
 
@@ -313,7 +313,7 @@ public class CommodityCell implements Serializable {
     }
 
     public final List<Industry> getVisibleIndustries() {
-        return market == null ? Collections.emptyList() : WorkerRegistry.getVisibleIndustries(market);
+        return mMarket == null ? Collections.emptyList() : WorkerRegistry.getVisibleIndustries(mMarket);
     }
 
     @Override
@@ -339,7 +339,7 @@ public class CommodityCell implements Serializable {
 
         // Stockpile
         sb.append("  \"stockpile\": {\n");
-        sb.append("    \"stored\": ").append(stored).append(",\n");
+        sb.append("    \"stored\": ").append(mStored).append(",\n");
         sb.append("    \"target\": ").append(getTargetStored()).append(",\n");
         sb.append("    \"shortfall\": ").append(getStoredShortfall()).append(",\n");
         sb.append("    \"deficit\": ").append(getStoredDeficit()).append(",\n");
@@ -351,12 +351,12 @@ public class CommodityCell implements Serializable {
 
         // Trade breakdown
         sb.append("  \"trade\": {\n");
-        sb.append("    \"inFactionImports\": ").append(inFactionImports).append(",\n");
-        sb.append("    \"globalImports\": ").append(globalImports).append(",\n");
-        sb.append("    \"informalImports\": ").append(informalImports).append(",\n");
-        sb.append("    \"inFactionExp\": ").append(inFactionExports).append(",\n");
-        sb.append("    \"globalExp\": ").append(globalExports).append(",\n");
-        sb.append("    \"informalExp\": ").append(informalExports).append("\n");
+        sb.append("    \"inFactionImports\": ").append(mInFactionImports).append(",\n");
+        sb.append("    \"globalImports\": ").append(mGlobalImports).append(",\n");
+        sb.append("    \"informalImports\": ").append(mInformalImports).append(",\n");
+        sb.append("    \"inFactionExp\": ").append(mInFactionExports).append(",\n");
+        sb.append("    \"globalExp\": ").append(mGlobalExports).append(",\n");
+        sb.append("    \"informalExp\": ").append(mInformalExports).append("\n");
         sb.append("  },\n");
 
         sb.append("}");

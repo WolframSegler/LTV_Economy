@@ -66,7 +66,7 @@ public class ShipProductionManager {
         final List<PlannedOrder> plannedOrders = inv.plannedOrders;
         final List<ShipProductionOrder> activeQueue = inv.activeQueue;
 
-        final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
+        final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getmActiveMissions());
         missions.removeIf(m -> !m.src.getFactionId().equals(factionID));
 
 
@@ -126,7 +126,7 @@ public class ShipProductionManager {
             boolean canAfford = true;
             for (Map.Entry<String, Float> entry : order.commodities.singleEntrySet()) {
                 final CommodityCell cell = engine.getComCell(entry.getKey(), capitalID);
-                if (cell == null || cell.getStored() < entry.getValue()) {
+                if (cell == null || cell.getmStored() < entry.getValue()) {
                     canAfford = false;
                     break;
                 }

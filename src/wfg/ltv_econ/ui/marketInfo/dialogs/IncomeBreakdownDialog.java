@@ -112,7 +112,7 @@ public final class IncomeBreakdownDialog extends DockPanel {
         final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(market);
         final EconomyEngine engine = EconomyEngine.instance();
         final MarketPopulationData data = engine.getMarketPopulationData(market.getId());
-        final List<CommodityDomain> domains = engine.getComDomains();
+        final List<CommodityDomain> domains = engine.getmComDomains();
         final List<String> policyKeys = data != null ? MarketPolicy.getPolicyLedgerKeys(data) : Collections.emptyList();
         final FactionAPI faction = market.getFaction();
         final Color base = faction.getBaseUIColor();
@@ -164,8 +164,8 @@ public final class IncomeBreakdownDialog extends DockPanel {
         final long grossExpense = lastMonth ? ledger.getExpenseLastMonth() : ledger.getExpenseCurrentMonth();
         final String indIncome = NumFormat.formatCreditAbs(totalIndustryIncome);
         final String indUpkeep = NumFormat.formatCreditAbs(totalIndustryUpkeep);
-        final long exportIncome = engine.info.getExportIncome(market, lastMonth);
-        final long importExpense = engine.info.getImportExpense(market, lastMonth);
+        final long exportIncome = engine.mInfo.getExportIncome(market, lastMonth);
+        final long importExpense = engine.mInfo.getImportExpense(market, lastMonth);
         final long monthlyWages = lastMonth ? ledger.getLastMonth(WORKER_WAGES_KEY) : ledger.getCurrentMonth(WORKER_WAGES_KEY);
         final long factionShipsCrewWages = lastMonth ? ledger.getLastMonth(FACTION_CREW_WAGES_KEY) : ledger.getCurrentMonth(FACTION_CREW_WAGES_KEY);
         final long factionShipsProd = lastMonth ? ledger.getLastMonth(FACTION_SHIP_PRODUCTION_KEY) : ledger.getCurrentMonth(FACTION_SHIP_PRODUCTION_KEY);
@@ -236,18 +236,18 @@ public final class IncomeBreakdownDialog extends DockPanel {
     
             domains.sort((c1, c2) ->
                 Long.compare(
-                    lastMonth ? ledger.getLastMonth(TRADE_EXPORT_KEY + c2.comID) : ledger.getCurrentMonth(TRADE_EXPORT_KEY + c2.comID),
-                    lastMonth ? ledger.getLastMonth(TRADE_EXPORT_KEY + c1.comID) : ledger.getCurrentMonth(TRADE_EXPORT_KEY + c1.comID)
+                    lastMonth ? ledger.getLastMonth(TRADE_EXPORT_KEY + c2.mComID) : ledger.getCurrentMonth(TRADE_EXPORT_KEY + c2.mComID),
+                    lastMonth ? ledger.getLastMonth(TRADE_EXPORT_KEY + c1.mComID) : ledger.getCurrentMonth(TRADE_EXPORT_KEY + c1.mComID)
                 )
             );
             for (CommodityDomain com : domains) {
-                final String key = TRADE_EXPORT_KEY + com.comID;
+                final String key = TRADE_EXPORT_KEY + com.mComID;
                 final long income = lastMonth ? ledger.getLastMonth(key) : ledger.getCurrentMonth(key);
                 allKeys.remove(key);
                 if (income < 1) continue;
 
                 tp.addRow(
-                    Alignment.LMID, text_color, com.spec.getName(),
+                    Alignment.LMID, text_color, com.mSpec.getName(),
                     highlight, NumFormat.formatCreditAbs(income)
                 );
             }
@@ -260,18 +260,18 @@ public final class IncomeBreakdownDialog extends DockPanel {
 
             domains.sort((c1, c2) ->
                 Long.compare(
-                    lastMonth ? ledger.getLastMonth(TRADE_IMPORT_KEY + c2.comID) : ledger.getCurrentMonth(TRADE_IMPORT_KEY + c1.comID),
-                    lastMonth ? ledger.getLastMonth(TRADE_IMPORT_KEY + c1.comID) : ledger.getCurrentMonth(TRADE_IMPORT_KEY + c2.comID)
+                    lastMonth ? ledger.getLastMonth(TRADE_IMPORT_KEY + c2.mComID) : ledger.getCurrentMonth(TRADE_IMPORT_KEY + c1.mComID),
+                    lastMonth ? ledger.getLastMonth(TRADE_IMPORT_KEY + c1.mComID) : ledger.getCurrentMonth(TRADE_IMPORT_KEY + c2.mComID)
                 )
             );
             for (CommodityDomain com : domains) {
-                final String key = TRADE_IMPORT_KEY + com.comID;
+                final String key = TRADE_IMPORT_KEY + com.mComID;
                 final long expense = lastMonth ? -ledger.getLastMonth(key) : -ledger.getCurrentMonth(key);
                 allKeys.remove(key);
                 if (expense < 1l) continue;
 
                 tp.addRow(
-                    Alignment.LMID, text_color, com.spec.getName(),
+                    Alignment.LMID, text_color, com.mSpec.getName(),
                     negative, NumFormat.formatCreditAbs(expense)
                 );
             }

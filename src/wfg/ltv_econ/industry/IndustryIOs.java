@@ -376,7 +376,7 @@ public final class IndustryIOs {
     public static final float computeScale(final IndustryWorkerData data, String marketId, int marketSize, OutputConfig output) {
         if (!output.isAbstract) {
             final CommodityCell cell = EconomyEngine.instance().getComCell(output.comID, marketId); 
-            if (cell != null && output.target > 0l && output.target < cell.getStored()) return 0f;
+            if (cell != null && output.target > 0l && output.target < cell.getmStored()) return 0f;
         }
 
         float scale = 1f;

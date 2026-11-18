@@ -133,7 +133,7 @@ public final class ConstructionDemandPredictor {
 
     private static final IndustryWorkerData getPredictedAssignments(MarketAPI market, IndustryConfig config, Industry ind, float budget) {
         final IndustryWorkerData data = new IndustryWorkerData(market.getId(), config.indID);
-        final EconomyInfo info = EconomyEngine.instance().info;
+        final EconomyInfo info = EconomyEngine.instance().mInfo;
         final Collection<OutputConfig> outputs = config.outputs.values();
         final String factionID = market.getFactionId();
         

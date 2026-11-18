@@ -275,7 +275,7 @@ public final class MarketUIReplacer implements CoreTabUIBuilder {
 
             if (UIUtils.canViewPrices()) {
                 final ComDetailDialog dialogPanel = new ComDetailDialog(
-                    market, market.getFaction().getFactionSpec(), panel.mCell.spec
+                    market, market.getFaction().getFactionSpec(), panel.mCell.mSpec
                 );
                 dialogPanel.show(0.3f, 0.3f);
             }

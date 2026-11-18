@@ -224,7 +224,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
             final TextWrapper textPanel = new TextWrapper(170, 0) {
                 @Override
                 public void buildUI() {
-                    final long value = engine.getComDomain(comID).getCreditActivityHistory();
+                    final long value = engine.getComDomain(comID).getmCreditActivityHistory();
                     final String txt = str("uiTitleGlobalMarketValue");
                     final String valueTxt = value < 1l ? "---" : NumFormat.formatCredit(value);
 
@@ -255,7 +255,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
             final TextWrapper textPanel = new TextWrapper(170, 0) {
                 @Override
                 public void buildUI() {
-                    final double value = engine.info.getGlobalExports(comID);
+                    final double value = engine.mInfo.getGlobalExports(comID);
                     final String valueTxt = value < 1d ? "---" :  NumFormat.engNotate(value);
 
                     ComponentFactory.addCaptionValueBlock(
@@ -293,10 +293,10 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                     final String txt = strf("uiTitleTotalFactionExports", factionName);
 
                     final String globalValue = NumFormat.engNotate(
-                        engine.info.getFactionGlobalExports(comID, currFaction.getId())
+                        engine.mInfo.getFactionGlobalExports(comID, currFaction.getId())
                     );
                     final String inFactionValue = NumFormat.engNotate(
-                        engine.info.getFactionInFactionExports(comID, currFaction.getId())
+                        engine.mInfo.getFactionInFactionExports(comID, currFaction.getId())
                     );
 
                     final String valueTxt = globalValue + "  |  " + inFactionValue;
@@ -340,7 +340,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                     final String factionName = mFaction.getDisplayName();
                     final String txt = strf("uiTitleFactionMarketShare", factionName);
 
-                    final String valueTxt = (int)(engine.info.getFactionExportShare(
+                    final String valueTxt = (int)(engine.mInfo.getFactionExportShare(
                         comID, mFaction.getId()
                     ) * 100) + "%";
 
@@ -371,7 +371,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                     final String factionName = selectedMarket.getFaction().getDisplayName();
                     final String txt = strf("uiTitleFactionMarketShare", factionName);
 
-                    final String valueTxt = (int) (engine.info.getFactionExportShare(
+                    final String valueTxt = (int) (engine.mInfo.getFactionExportShare(
                         comID, selectedMarket.getFactionId()
                     ) * 100) + "%";
 
@@ -398,7 +398,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
                     final String factionName = mFaction.getDisplayName();
                     final String txt = strf("uiTitleFactionMarketShare", factionName);
 
-                    final String valueTxt = (int) (engine.info.getFactionExportShare(
+                    final String valueTxt = (int) (engine.mInfo.getFactionExportShare(
                         comID, mFaction.getId()
                     ) * 100) + "%";
 
@@ -579,8 +579,8 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
             final int accessibility = (int) (market.getAccessibilityMod().computeEffective(0) * 100);
 
-            final int marketShare = mode == 0 ? engine.info.getExportMarketShare(comID, marketID) :
-                engine.info.getImportMarketShare(comID, marketID);
+            final int marketShare = mode == 0 ? engine.mInfo.getExportMarketShare(comID, marketID) :
+                engine.mInfo.getImportMarketShare(comID, marketID);
 
             final long incomeValue = MarketFinanceRegistry.instance().getLedger(marketID).getLastMonth(
                 (mode == 0 ? TRADE_EXPORT_KEY : TRADE_IMPORT_KEY) + comID
@@ -637,7 +637,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
         section4ComPanel.mSelectionListener = (source, isLeftClick) -> {
             if (!isLeftClick) return;
 
-            mCom = source.mCell.spec;
+            mCom = source.mCell.mSpec;
 
             section4ComPanel.selectRow(source);
 

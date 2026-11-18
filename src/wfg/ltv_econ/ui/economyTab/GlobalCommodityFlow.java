@@ -79,7 +79,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalProduction(comID);
+                final long value = engine.mInfo.getGlobalProduction(comID);
                 final String txt = str("uiTitleGlobalProd");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -101,7 +101,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalDemand(comID);
+                final long value = engine.mInfo.getGlobalDemand(comID);
                 final String txt = str("uiTitleGlobalDemand");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -123,7 +123,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalSurplus(comID);
+                final long value = engine.mInfo.getGlobalSurplus(comID);
                 final String txt = str("uiTitleGlobalSurplus");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -145,7 +145,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalShortfall(comID);
+                final long value = engine.mInfo.getGlobalShortfall(comID);
                 final String txt = str("uiTitleGlobalShortfall");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -166,7 +166,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W + largeLabelShift, LABEL_H) {
 
             public void buildUI() {
-                final float value = dom.getTradeVolumeHistory();
+                final float value = dom.getmTradeVolumeHistory();
                 final String txt = str("uiTitleSectorTradeVolume");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -188,7 +188,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W + largeLabelShift, LABEL_H) {
 
             public void buildUI() {
-                final long value = dom.getCreditActivityHistory();
+                final long value = dom.getmCreditActivityHistory();
                 final String txt = str("uiTitleSectorTradeValue");
                 final String valueTxt = value < 1 ? "---" : NumFormat.formatCredit(value);
 
@@ -210,7 +210,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final int value = (int) engine.info.getGlobalAveragePrice(comID, 0);
+                final int value = (int) engine.mInfo.getGlobalAveragePrice(comID, 0);
                 final String txt = str("uiTitleGlobalAvgPrice");
                 final String valueTxt = com.isExotic() ? "Localized" : NumFormat.formatCredit(value);
 
@@ -230,7 +230,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final long value = engine.info.getGlobalStockpiles(comID);
+                final long value = engine.mInfo.getGlobalStockpiles(comID);
                 final String valueTxt = NumFormat.engNotate(value);
                 final String txt = str("uiTitleGlobalStockpiles");
 
@@ -273,7 +273,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final float value = dom.getInformalNode().prod;
+                final float value = dom.getmInformalNode().prod;
                 final String txt = str("uiTitleInformalProd");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -307,19 +307,19 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
 
         for (CommodityCell cell : producers) {
 
-            final String iconPath = cell.market.getFaction().getCrest();
+            final String iconPath = cell.mMarket.getFaction().getCrest();
             final SpriteElement iconPanel = new SpriteElement(24, 24, iconPath, null, null);
-            final Color textColor = cell.market.getFaction().getBaseUIColor();
+            final Color textColor = cell.mMarket.getFaction().getBaseUIColor();
             final float value = cell.getProduction(true);
 
             table.addCell(iconPanel, CellAlg.LEFTPAD, null, null);
-            table.addCell(cell.market.getName(), CellAlg.LEFT, null, textColor);
+            table.addCell(cell.mMarket.getName(), CellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotate(value), CellAlg.MID, value, textColor);
 
             final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                 if (!NativeUiUtils.isCtrlDown() || !isLeftClick) return;
 
-                final SectorEntityToken target = cell.market.getPrimaryEntity();
+                final SectorEntityToken target = cell.mMarket.getPrimaryEntity();
                 if (target != null) {
                     Global.getSector().layInCourseFor(target);
                 }
@@ -354,19 +354,19 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
 
         for (CommodityCell cell : consumers) {
 
-            final String iconPath = cell.market.getFaction().getCrest();
+            final String iconPath = cell.mMarket.getFaction().getCrest();
             final SpriteElement iconPanel = new SpriteElement(24, 24, iconPath, null, null);
-            final Color textColor = cell.market.getFaction().getBaseUIColor();
+            final Color textColor = cell.mMarket.getFaction().getBaseUIColor();
             final float value = cell.getConsumption(true);
 
             table.addCell(iconPanel, CellAlg.LEFTPAD, null, null);
-            table.addCell(cell.market.getName(), CellAlg.LEFT, null, textColor);
+            table.addCell(cell.mMarket.getName(), CellAlg.LEFT, null, textColor);
             table.addCell(NumFormat.engNotate(value), CellAlg.MID, value, textColor);
 
             final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                 if (!NativeUiUtils.isCtrlDown() || !isLeftClick) return;
 
-                final SectorEntityToken target = cell.market.getPrimaryEntity();
+                final SectorEntityToken target = cell.mMarket.getPrimaryEntity();
                 if (target != null) {
                     Global.getSector().layInCourseFor(target);
                 }
@@ -390,18 +390,18 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
       
         { // Global export share per faction (percent)
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final double globalExports = engine.info.getGlobalExportsWithInformal(comID);
+        final double globalExports = engine.mInfo.getGlobalExportsWithInformal(comID);
 
         if (globalExports > 0) {
             for (FactionAPI faction : factionList) {
-                final double factionFormalExports = engine.info.getFactionGlobalExports(comID, faction.getId());
+                final double factionFormalExports = engine.mInfo.getFactionGlobalExports(comID, faction.getId());
                 final float share = (float) (factionFormalExports / globalExports);
                 if (share >= PIE_CHART_THRESHOLD) {
                     data.add(new PieSlice(faction.getId(), faction.getBaseUIColor(), share));
                 }
             }
 
-            final double informalExports = engine.info.getGlobalInformalImports(comID);
+            final double informalExports = engine.mInfo.getGlobalInformalImports(comID);
             final float informalShare = (float) (informalExports / globalExports);
             if (informalShare >= PIE_CHART_THRESHOLD) {
                 data.add(new PieSlice(null, UIColors.INFORMAL_SECTOR, informalShare));
@@ -441,18 +441,18 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
 
         { // Global import share per faction (percent)
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final double globalImports = engine.info.getGlobalImportsWithInformal(comID);
+        final double globalImports = engine.mInfo.getGlobalImportsWithInformal(comID);
 
         if (globalImports > 0d) {
             for (FactionAPI faction : factionList) {
-                final double factionFormalImports = engine.info.getFactionGlobalImports(comID, faction.getId());
+                final double factionFormalImports = engine.mInfo.getFactionGlobalImports(comID, faction.getId());
                 final float share = (float) (factionFormalImports / globalImports);
                 if (share >= PIE_CHART_THRESHOLD) {
                     data.add(new PieSlice(faction.getId(), faction.getBaseUIColor(), share));
                 }
             }
 
-            final double informalImports = engine.info.getGlobalInformalExports(comID);
+            final double informalImports = engine.mInfo.getGlobalInformalExports(comID);
             final float informalShare = (float) (informalImports / globalImports);
             if (informalShare >= PIE_CHART_THRESHOLD) {
                 data.add(new PieSlice(null, UIColors.INFORMAL_SECTOR, informalShare));
@@ -492,9 +492,9 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
 
         { // Trade breakdown (percent)
         final ArrayList<PieSlice> data = new ArrayList<>();
-        final double globalExports = engine.info.getGlobalExports(comID);
-        final double inFactionExports = engine.info.getInFactionExports(comID);
-        final double informalExports = engine.info.getGlobalInformalExports(comID);
+        final double globalExports = engine.mInfo.getGlobalExports(comID);
+        final double inFactionExports = engine.mInfo.getInFactionExports(comID);
+        final double informalExports = engine.mInfo.getGlobalInformalExports(comID);
         final double total = globalExports + inFactionExports + informalExports;
         final float globalTradeShare = (float) (globalExports / total);
         final float inFactionTradeShare = (float) (inFactionExports / total);

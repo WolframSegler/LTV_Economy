@@ -22,7 +22,7 @@ public class LtvEconomyRouteData extends EconomyRouteData {
 
     public final TradeMission getMission() {
         if (mission == null) {
-            final List<TradeMission> list = EconomyEngine.instance().getActiveMissions();
+            final List<TradeMission> list = EconomyEngine.instance().getmActiveMissions();
             for (int i = 0; i < list.size(); i++) {
                 try {
                     final TradeMission m = list.get(i);

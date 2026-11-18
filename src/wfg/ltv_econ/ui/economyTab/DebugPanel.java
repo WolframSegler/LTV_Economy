@@ -144,7 +144,7 @@ public final class DebugPanel extends UIContainer implements UIBuildableAPI {
                 final StringBuilder sb = new StringBuilder();
                 sb.append("[\n");
                 boolean first = true;
-                for (CommodityDomain dom : engine.getComDomains()) {
+                for (CommodityDomain dom : engine.getmComDomains()) {
                     for (CommodityCell cell : dom.getAllCells()) {
                         if (!first) {
                             sb.append(",\n");
@@ -168,8 +168,8 @@ public final class DebugPanel extends UIContainer implements UIBuildableAPI {
 
         { // LOG ECONOMY INFO
             final CallbackRunnable<Button> run = (btn) -> {
-                engine.logger.logEconomySnapshot();
-                engine.logger.logCreditsSnapshot();
+                engine.mLogger.logEconomySnapshot();
+                engine.mLogger.logCreditsSnapshot();
             };
             final Button button = new Button(BUTTON_W, BUTTON_H,
                 str("uiBtnTitleLogEconInfo"), Fonts.DEFAULT_SMALL, run

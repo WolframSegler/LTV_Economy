@@ -20,7 +20,7 @@ public class EconomyLogger {
         final StringBuilder sb = new StringBuilder();
         sb.append("---- ECONOMY SNAPSHOT START ----\n");
 
-        for (Map.Entry<String, CommodityDomain> dom : engine.comDomains.entrySet()) {
+        for (Map.Entry<String, CommodityDomain> dom : engine.mComDomains.entrySet()) {
             long totalProduction = 0;
             long totalConsumption = 0;
             long totalTargetQuantum = 0;
@@ -40,9 +40,9 @@ public class EconomyLogger {
                 totalTargetQuantum += cell.getTargetQuantum(true);
                 totalPendingImports += cell.getPendingImports();
                 totalPendingExports += cell.getPendingExports();
-                totalInformalImports += cell.informalImports;
-                totalInformalExports += cell.informalExports;
-                totalStored += cell.getStored();
+                totalInformalImports += cell.mInformalImports;
+                totalInformalExports += cell.mInformalExports;
+                totalStored += cell.getmStored();
                 totalTargetStored += cell.getTargetStored();
                 totalShortfall += cell.getStoredShortfall();
                 totalSurplus += cell.getStoredSurplus();
@@ -73,7 +73,7 @@ public class EconomyLogger {
         final StringBuilder csv = new StringBuilder(2048);
         csv.append("Commodity,Production,Consumption,TargetQuantum,PendingImports,PendingExports,InformalImports,InformalExports,stored,TargetStored,Shortfall,Surplus,Exportable\n");
 
-        for (Map.Entry<String, CommodityDomain> entry : engine.comDomains.entrySet()) {
+        for (Map.Entry<String, CommodityDomain> entry : engine.mComDomains.entrySet()) {
             final String comID = entry.getKey();
             final CommodityDomain dom = entry.getValue();
 
@@ -87,9 +87,9 @@ public class EconomyLogger {
                 targ += cell.getTargetQuantum(true);
                 pendImp += cell.getPendingImports();
                 pendExp += cell.getPendingExports();
-                infImp += cell.informalImports;
-                infExp += cell.informalExports;
-                stock += cell.getStored();
+                infImp += cell.mInformalImports;
+                infExp += cell.mInformalExports;
+                stock += cell.getmStored();
                 targetStock += cell.getTargetStored();
                 shortfall += cell.getStoredShortfall();
                 surplus += cell.getStoredSurplus();
@@ -108,7 +108,7 @@ public class EconomyLogger {
         final StringBuilder sb = new StringBuilder();
         sb.append("\n=== Market Credits Snapshot ===\n");
 
-        engine.marketCredits.entrySet().stream()
+        engine.mMarketCredits.entrySet().stream()
         .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
         .forEach(entry -> sb.append(entry.getKey())
             .append(": ")

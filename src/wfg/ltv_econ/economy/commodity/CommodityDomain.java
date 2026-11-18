@@ -32,20 +32,20 @@ import wfg.native_ui.util.ArrayMap;
 public class CommodityDomain implements Serializable {
     private static final double MIN_TRADE_AMOUNT = 5d;
 
-    public final String comID;
-    public transient CommoditySpecAPI spec;
+    public final String mComID;
+    public transient CommoditySpecAPI mSpec;
 
-    private final ArrayMap<String, CommodityCell> comCells = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
-    private final List<ComTradeFlow> tradeFlows = new ArrayList<>(EconomyInfo.getMarketsCount());
-    private InformalExchangeNode informalNode;
+    private final ArrayMap<String, CommodityCell> mCells = new ArrayMap<>(EconomyConstants.econCommodityIDs.size());
+    private final List<ComTradeFlow> mTradeFlows = new ArrayList<>(EconomyInfo.getMarketsCount());
+    private InformalExchangeNode mInformalNode;
 
-    private float[] tradeVolumeHistory = new float[EconConfig.HISTORY_LENGTH];
-    private long[] creditActivityHistory = new long[EconConfig.HISTORY_LENGTH];
-    private int historyIndex = 0;
+    private float[] mTradeVolumeHistory = new float[EconConfig.HISTORY_LENGTH];
+    private long[] mCreditActivityHistory = new long[EconConfig.HISTORY_LENGTH];
+    private int mHistoryIndex = 0;
 
     public CommodityDomain(String comID) {
-        this.comID = comID;
-        informalNode = new InformalExchangeNode(comID);
+        this.mComID = comID;
+        mInformalNode = new InformalExchangeNode(comID);
     
         readResolve();
     }
@@ -53,50 +53,50 @@ public class CommodityDomain implements Serializable {
     public Object readResolve() {
         resizeHistoryArrays();
 
-        spec = settings.getCommoditySpec(comID);
+        mSpec = settings.getCommoditySpec(mComID);
 
         return this;
     }
 
     public final void advance() {
-        comCells.values().forEach(CommodityCell::advance);
+        mCells.values().forEach(CommodityCell::advance);
 
-        historyIndex = (historyIndex + 1) % EconConfig.HISTORY_LENGTH;
+        mHistoryIndex = (mHistoryIndex + 1) % EconConfig.HISTORY_LENGTH;
     }
 
     public final void reset() {
-        comCells.values().forEach(CommodityCell::reset);
+        mCells.values().forEach(CommodityCell::reset);
 
-        tradeVolumeHistory[historyIndex] = 0f;
-        creditActivityHistory[historyIndex] = 0l;
+        mTradeVolumeHistory[mHistoryIndex] = 0f;
+        mCreditActivityHistory[mHistoryIndex] = 0l;
     }
 
     public final void update() {
-        comCells.values().forEach(CommodityCell::update);
+        mCells.values().forEach(CommodityCell::update);
     }
 
     public final void addMarket(String marketID) {
-        comCells.putIfAbsent(marketID, new CommodityCell(comID, marketID));
+        mCells.putIfAbsent(marketID, new CommodityCell(mComID, marketID));
     }
 
     public final void removeMarket(String marketID) {
-        comCells.remove(marketID);
+        mCells.remove(marketID);
     }
 
     public final CommodityCell getCell(String marketID) {
-        return comCells.get(marketID);
+        return mCells.get(marketID);
     }
 
     public final Collection<CommodityCell> getAllCells() {
-        return comCells.values();
+        return mCells.values();
     }
 
     public final Map<String, CommodityCell> getCellsMap() {
-        return comCells;
+        return mCells;
     }
 
     public final ArrayList<CommodityCell> getSortedByProduction(int listSize) {
-        return comCells.values().stream()
+        return mCells.values().stream()
             .filter(cell -> cell.getProduction(true) > 0)
             .sorted((a, b) -> Float.compare(
                 b.getProduction(true), a.getProduction(true)
@@ -105,7 +105,7 @@ public class CommodityDomain implements Serializable {
     }
 
     public final ArrayList<CommodityCell> getSortedByTargetQuantum(int listSize) {
-        return comCells.values().stream()
+        return mCells.values().stream()
             .filter(cell -> cell.getTargetQuantum(true) > 0f)
             .sorted((a, b) -> Float.compare(
                 b.getTargetQuantum(true), a.getTargetQuantum(true)
@@ -116,10 +116,10 @@ public class CommodityDomain implements Serializable {
     public final List<CommodityCell> getImporters() {
         final List <CommodityCell> importers = new ArrayList<>(32);
 
-        for (CommodityCell cell : comCells.values()) {
-            if (!((Market) cell.market).isAllowImport()) continue;
-            if (!cell.market.hasSpaceport()) continue;
-            if (MarketTradeDisruptionData.shouldSuspendTrade(cell.market)) continue;
+        for (CommodityCell cell : mCells.values()) {
+            if (!((Market) cell.mMarket).isAllowImport()) continue;
+            if (!cell.mMarket.hasSpaceport()) continue;
+            if (MarketTradeDisruptionData.shouldSuspendTrade(cell.mMarket)) continue;
             if (cell.computeImportAmount() > 0d) importers.add(cell);
         }
 
@@ -129,38 +129,38 @@ public class CommodityDomain implements Serializable {
     public final List<CommodityCell> getExporters() {
         final List <CommodityCell> exporters = new ArrayList<>(32);
 
-        for (CommodityCell cell : comCells.values()) {
-            if (!((Market) cell.market).isAllowExport()) continue;
-            if (!cell.market.hasSpaceport()) continue;
-            if (MarketTradeDisruptionData.shouldSuspendTrade(cell.market)) continue;
+        for (CommodityCell cell : mCells.values()) {
+            if (!((Market) cell.mMarket).isAllowExport()) continue;
+            if (!cell.mMarket.hasSpaceport()) continue;
+            if (MarketTradeDisruptionData.shouldSuspendTrade(cell.mMarket)) continue;
             if (cell.computeExportAmount() > 0d) exporters.add(cell);
         }
 
         return exporters;
     }
 
-    public final InformalExchangeNode getInformalNode() {
-        return informalNode;
+    public final InformalExchangeNode getmInformalNode() {
+        return mInformalNode;
     }
 
-    public final List<ComTradeFlow> getTradeFlows() {
-        return tradeFlows;
+    public final List<ComTradeFlow> getmTradeFlows() {
+        return mTradeFlows;
     }
 
     public final List<ComTradeFlow> getSanitizedTradeFlows() {
-        tradeFlows.removeIf(f -> f.exporter == null || f.importer == null);
-        return tradeFlows;
+        mTradeFlows.removeIf(f -> f.exporter == null || f.importer == null);
+        return mTradeFlows;
     }
 
-    public final float getTradeVolumeHistory() {
+    public final float getmTradeVolumeHistory() {
         float total = 0f;
-        for (int i = 0; i < tradeVolumeHistory.length; i++) total += tradeVolumeHistory[i];
+        for (int i = 0; i < mTradeVolumeHistory.length; i++) total += mTradeVolumeHistory[i];
         return total;
     }
 
-    public final long getCreditActivityHistory() {
+    public final long getmCreditActivityHistory() {
         long total = 0l;
-        for (int i = 0; i < creditActivityHistory.length; i++) total += creditActivityHistory[i];
+        for (int i = 0; i < mCreditActivityHistory.length; i++) total += mCreditActivityHistory[i];
         return total;
     }
 
@@ -171,7 +171,7 @@ public class CommodityDomain implements Serializable {
         final List<CommodityCell> exporters = getExporters();
         final Map<CommodityCell, Double> cycleAllocated = new HashMap<>(importers.size());
 
-        tradeFlows.clear();
+        mTradeFlows.clear();
 
         final int pairCount = importers.size() * exporters.size();
 
@@ -184,13 +184,13 @@ public class CommodityDomain implements Serializable {
                 final CommodityCell importer = importers.get(impInd);
 
                 { // ABORT CONDITIONS
-                    if (exporter.market.getFaction().getRelationship(importer.market.getFactionId()) <
+                    if (exporter.mMarket.getFaction().getRelationship(importer.mMarket.getFactionId()) <
                         EconConfig.MIN_RELATION_TO_TRADE
                     ) { continue;}
         
-                    if (exporter.market.isPlayerOwned()^importer.market.isPlayerOwned()) {
-                        final String tradingFactionID = exporter.market.isPlayerOwned() ?
-                            importer.market.getFaction().getId() : exporter.market.getFaction().getId();
+                    if (exporter.mMarket.isPlayerOwned()^importer.mMarket.isPlayerOwned()) {
+                        final String tradingFactionID = exporter.mMarket.isPlayerOwned() ?
+                            importer.mMarket.getFaction().getId() : exporter.mMarket.getFaction().getId();
         
                         if (facSettings.embargoedFactions.contains(tradingFactionID)) {
                             continue;
@@ -221,7 +221,7 @@ public class CommodityDomain implements Serializable {
 
             if (exportableRemaining < MIN_TRADE_AMOUNT || deficitRemaining < MIN_TRADE_AMOUNT) continue;
 
-            final boolean sameFaction = expCell.market.getFaction().equals(impCell.market.getFaction());
+            final boolean sameFaction = expCell.mMarket.getFaction().equals(impCell.mMarket.getFaction());
             final double amountToSend = Math.min(exportableRemaining, deficitRemaining);
 
             final double exporterPrice = expCell.getUnitPriceForTrade(TransactionDirection.ENTITY_SELLING, (long)amountToSend);
@@ -230,11 +230,11 @@ public class CommodityDomain implements Serializable {
             final double price = unitPrice * amountToSend;
 
             if (sameFaction) {
-                impCell.inFactionImports += amountToSend;
-                expCell.inFactionExports += amountToSend;
+                impCell.mInFactionImports += amountToSend;
+                expCell.mInFactionExports += amountToSend;
             } else {
-                impCell.globalImports += amountToSend;
-                expCell.globalExports += amountToSend;
+                impCell.mGlobalImports += amountToSend;
+                expCell.mGlobalExports += amountToSend;
             }
             expCell.addStoredAmount(-amountToSend);
             cycleAllocated.merge(impCell, amountToSend, Double::sum);
@@ -243,20 +243,20 @@ public class CommodityDomain implements Serializable {
             tradeCreditActivity += credits;
             tradeVolume += amountToSend;
 
-            tradeFlows.add(new ComTradeFlow(
-                expCell.market, impCell.market, amountToSend, credits, sameFaction
+            mTradeFlows.add(new ComTradeFlow(
+                expCell.mMarket, impCell.mMarket, amountToSend, credits, sameFaction
             ));
 
-            registry.getLedger(expCell.marketID).add(TRADE_EXPORT_KEY + comID, credits, String.format(getDesc(TRADE_EXPORT_KEY), spec.getName()));
-            registry.getLedger(impCell.marketID).add(TRADE_IMPORT_KEY + comID, -credits, String.format(getDesc(TRADE_IMPORT_KEY), spec.getName()));
+            registry.getLedger(expCell.marketID).add(TRADE_EXPORT_KEY + mComID, credits, String.format(getDesc(TRADE_EXPORT_KEY), mSpec.getName()));
+            registry.getLedger(impCell.marketID).add(TRADE_IMPORT_KEY + mComID, -credits, String.format(getDesc(TRADE_IMPORT_KEY), mSpec.getName()));
         }
 
-        tradeVolumeHistory[historyIndex] += tradeVolume;
-        creditActivityHistory[historyIndex] += tradeCreditActivity;
+        mTradeVolumeHistory[mHistoryIndex] += tradeVolume;
+        mCreditActivityHistory[mHistoryIndex] += tradeCreditActivity;
     }
 
     public final void informalTrade() {
-        informalNode.updateBeforeTrade();
+        mInformalNode.updateBeforeTrade();
 
         final MarketFinanceRegistry registry = MarketFinanceRegistry.instance();
         final List<CommodityCell> exporters = getExporters();
@@ -281,36 +281,36 @@ public class CommodityDomain implements Serializable {
         for (CommodityCell exporter : exporters) {
             final double exportable = exporter.computeExportAmount();
             final float share = (float) (exportable / sumExportable);
-            final float amount = Math.min((float) exportable, share * informalNode.imports);
+            final float amount = Math.min((float) exportable, share * mInformalNode.imports);
             final int price = (int) (exporter.getUnitPriceForTrade(TransactionDirection.ENTITY_SELLING, (int)amount)
-                * informalNode.priceMultImporting * amount * (1f + exporter.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementImporting)
+                * mInformalNode.priceMultImporting * amount * (1f + exporter.mMarket.getTariff().getModifiedValue() * mInformalNode.tariffEnforcementImporting)
             );
 
-            exporter.informalExports += amount;
+            exporter.mInformalExports += amount;
             tradeVolume += amount;
             tradeCreditActivity += price;
             
-            registry.getLedger(exporter.marketID).add(TRADE_EXPORT_KEY + comID, price, String.format(getDesc(TRADE_EXPORT_KEY), spec.getName()));
+            registry.getLedger(exporter.marketID).add(TRADE_EXPORT_KEY + mComID, price, String.format(getDesc(TRADE_EXPORT_KEY), mSpec.getName()));
         }
 
         if (sumImportable < 1f) return;
         for (CommodityCell importer : importers) {
             final double importable = importer.computeImportAmount();
             final float share = (float) (importable / sumImportable);
-            final float amount = Math.min((float) importable, importer.getInformalImportMods()
-                .computeEffective(share * informalNode.exports));
+            final float amount = Math.min((float) importable, importer.getmInformalImportMods()
+                .computeEffective(share * mInformalNode.exports));
             final int price = (int) (importer.getUnitPriceForTrade(TransactionDirection.ENTITY_BUYING, (int)amount)
-                * informalNode.priceMultExporting * amount * (1f + importer.market.getTariff().getModifiedValue() * informalNode.tariffEnforcementExporting)
+                * mInformalNode.priceMultExporting * amount * (1f + importer.mMarket.getTariff().getModifiedValue() * mInformalNode.tariffEnforcementExporting)
             );
 
-            importer.informalImports += amount;
+            importer.mInformalImports += amount;
             tradeCreditActivity += price;
             
-            registry.getLedger(importer.marketID).add(TRADE_IMPORT_KEY + comID, -price, String.format(getDesc(TRADE_IMPORT_KEY), spec.getName()));
+            registry.getLedger(importer.marketID).add(TRADE_IMPORT_KEY + mComID, -price, String.format(getDesc(TRADE_IMPORT_KEY), mSpec.getName()));
         }
 
-        tradeVolumeHistory[historyIndex] += tradeVolume;
-        creditActivityHistory[historyIndex] += tradeCreditActivity;
+        mTradeVolumeHistory[mHistoryIndex] += tradeVolume;
+        mCreditActivityHistory[mHistoryIndex] += tradeCreditActivity;
     }
 
     private static final Pair<CommodityCell, CommodityCell> getPairFromIndex(int index, List<CommodityCell> exporters,     
@@ -365,8 +365,8 @@ public class CommodityDomain implements Serializable {
     }
 
     private static final int computePairScore(CommodityCell exporter, CommodityCell importer) {
-        final MarketAPI expMarket = exporter.market;
-        final MarketAPI impMarket = importer.market;
+        final MarketAPI expMarket = exporter.mMarket;
+        final MarketAPI impMarket = importer.mMarket;
 
         int score = 0;
 
@@ -416,7 +416,7 @@ public class CommodityDomain implements Serializable {
     private static final float priceFactor(CommodityCell importer) {
 
         final float price = importer.getUnitPrice(TransactionDirection.NEUTRAL, 1);
-        final float base = importer.spec.getUnmodifiedBasePrice();
+        final float base = importer.mSpec.getUnmodifiedBasePrice();
 
         final float diff = price / base - 1f; // e.g. 0.5 means 50% above base, -0.5 means 50% below
         final float scaled = diff >= 0 ? (float) Math.sqrt(diff) : (float) -Math.sqrt(-diff);
@@ -443,8 +443,8 @@ public class CommodityDomain implements Serializable {
 
     private final void resizeHistoryArrays() {
         final int newLen = EconConfig.HISTORY_LENGTH;
-        final int oldLen = tradeVolumeHistory.length;
-        final int head = (historyIndex - 1 + oldLen) % oldLen;
+        final int oldLen = mTradeVolumeHistory.length;
+        final int head = (mHistoryIndex - 1 + oldLen) % oldLen;
 
         if (newLen == oldLen) return;
 
@@ -455,16 +455,16 @@ public class CommodityDomain implements Serializable {
         int idx = head;
 
         while (copied < newLen) {
-            newVolume[copied] = tradeVolumeHistory[idx];
-            newCredit[copied] = creditActivityHistory[idx];
+            newVolume[copied] = mTradeVolumeHistory[idx];
+            newCredit[copied] = mCreditActivityHistory[idx];
             copied++;
 
             idx = (idx - 1 + oldLen) % oldLen;
             if (idx == head) break;
         }
 
-        tradeVolumeHistory = newVolume;
-        creditActivityHistory = newCredit;
-        historyIndex = (copied == newLen) ? 0 : copied;
+        mTradeVolumeHistory = newVolume;
+        mCreditActivityHistory = newCredit;
+        mHistoryIndex = (copied == newLen) ? 0 : copied;
     }
 }

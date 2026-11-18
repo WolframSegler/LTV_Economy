@@ -284,12 +284,12 @@ public final class MarketPopulationData implements Serializable, MarketImmigrati
 
         if (baseValue != 0) {
             market.getStability().modifyFlat(happinessID, baseValue, desc);
-            for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
+            for (CommodityDomain dom : EconomyEngine.instance().getmComDomains()) {
                 dom.getCell(marketID).getProductionStat().modifyMult(happinessID, 1f + baseValue * 0.2f, desc);
             }
         } else {
             market.getStability().unmodifyFlat(happinessID);
-            for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
+            for (CommodityDomain dom : EconomyEngine.instance().getmComDomains()) {
                 dom.getCell(marketID).getProductionStat().unmodifyMult(happinessID);
             }
         }

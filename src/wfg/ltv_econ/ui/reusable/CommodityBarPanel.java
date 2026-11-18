@@ -23,17 +23,17 @@ public class CommodityBarPanel extends UIContainer {
     public static class CommodityInfoBar extends GenericInfoBar {
         public CommodityInfoBar(int width, int height, boolean hasOutline, final CommodityCell cell) {
             super(width, height, hasOutline);
-            final double stored = cell.getStored();
+            final double stored = cell.getmStored();
             final float target = cell.getTargetStored();
-            final float pendingExports = cell.inFactionExports + cell.globalExports;
+            final float pendingExports = cell.mInFactionExports + cell.mGlobalExports;
 
-            final double maxBar = Math.max(target, stored + cell.inFactionImports + cell.globalImports) + pendingExports;
+            final double maxBar = Math.max(target, stored + cell.mInFactionImports + cell.mGlobalImports) + pendingExports;
 
             final double storedWithinTarget = Math.min(stored, target) / maxBar;
-            final double inFacImportFill = cell.inFactionImports / maxBar;
-            final double globalImportFill = cell.globalImports / maxBar;
+            final double inFacImportFill = cell.mInFactionImports / maxBar;
+            final double globalImportFill = cell.mGlobalImports / maxBar;
             final double surplusFill = Math.max(0d, stored - target) / maxBar;
-            final double deficitFill = Math.max(0d, target - stored - cell.inFactionImports - cell.globalImports) / maxBar;
+            final double deficitFill = Math.max(0d, target - stored - cell.mInFactionImports - cell.mGlobalImports) / maxBar;
             final double exportFill = pendingExports / maxBar;
 
             barMap.put(UIColors.BAR_DEFICIT, (float) deficitFill);

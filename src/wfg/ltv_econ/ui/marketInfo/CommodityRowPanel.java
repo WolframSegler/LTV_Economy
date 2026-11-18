@@ -78,12 +78,12 @@ public final class CommodityRowPanel extends UIContainer implements
         final int textW = 80;
         final int rowH = (int) getHeight();
 
-        final SpriteElement comIcon = new SpriteElement(rowH, rowH, mCell.spec.getIconName(), null, null);
+        final SpriteElement comIcon = new SpriteElement(rowH, rowH, mCell.mSpec.getIconName(), null, null);
         add(comIcon).inBL(2f, 0f);
 
         final float consumption = mCell.getConsumption(true);
         final String amountStr = consumption <= 0f ? str("notApplicable"):
-            NumFormat.engNotate(mCell.getStored() / consumption) + str("uiSingleLetterDay");
+            NumFormat.engNotate(mCell.getmStored() / consumption) + str("uiSingleLetterDay");
 
         final LabelAPI amountLbl = settings.createLabel(Strings.X + amountStr, Fonts.INSIGNIA_LARGE);
         amountLbl.autoSizeToWidth(textW);
@@ -110,7 +110,7 @@ public final class CommodityRowPanel extends UIContainer implements
             final String timerStr = "    -   " + strf("uiSuffixDaysOfStock", amountStr);
 
             tp.setParaFont(Fonts.ORBITRON_12);
-            final LabelAPI title = tp.addPara(mCell.spec.getName(), mMarket.getFaction().getBaseUIColor(), pad);
+            final LabelAPI title = tp.addPara(mCell.mSpec.getName(), mMarket.getFaction().getBaseUIColor(), pad);
             title.setText(title.getText() + timerStr);
 
             tp.setParaFontDefault();
