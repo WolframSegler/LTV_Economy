@@ -297,7 +297,7 @@ public class CommodityDomain implements Serializable {
         for (CommodityCell importer : importers) {
             final double importable = importer.computeImportAmount();
             final float share = (float) (importable / sumImportable);
-            final float amount = Math.min((float) importable, importer.getmInformalImportMods()
+            final float amount = Math.min((float) importable, importer.getInformalImportMods()
                 .computeEffective(share * mInformalNode.exports));
             final int price = (int) (importer.getUnitPriceForTrade(TransactionDirection.ENTITY_BUYING, (int)amount)
                 * mInformalNode.priceMultExporting * amount * (1f + importer.mMarket.getTariff().getModifiedValue() * mInformalNode.tariffEnforcementExporting)

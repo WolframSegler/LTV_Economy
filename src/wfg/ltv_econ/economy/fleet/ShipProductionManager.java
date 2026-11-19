@@ -126,7 +126,7 @@ public class ShipProductionManager {
             boolean canAfford = true;
             for (Map.Entry<String, Float> entry : order.commodities.singleEntrySet()) {
                 final CommodityCell cell = engine.getComCell(entry.getKey(), capitalID);
-                if (cell == null || cell.getmStored() < entry.getValue()) {
+                if (cell == null || cell.getStored() < entry.getValue()) {
                     canAfford = false;
                     break;
                 }

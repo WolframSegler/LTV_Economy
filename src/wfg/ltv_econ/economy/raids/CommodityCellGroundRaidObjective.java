@@ -209,7 +209,7 @@ public class CommodityCellGroundRaidObjective extends BaseGroundRaidObjectivePlu
 	}
 
 	protected static final float getQuantity(CommodityCell cell, int marines, double mult) {
-        final double stored = cell.getmStored();
+        final double stored = cell.getStored();
 		final double maxQuantity = stored * EconConfig.RAID_STOCKPILES_ACCESS_RATIO;
         final double marineQuantity = maxQuantity * marines / MarketCMD.MAX_MARINE_TOKENS;
         final double deficitMult = 1d / (2d - cell.getStoredAvailabilityRatio());

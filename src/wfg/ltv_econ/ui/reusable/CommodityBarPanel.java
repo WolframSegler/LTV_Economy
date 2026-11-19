@@ -23,7 +23,7 @@ public class CommodityBarPanel extends UIContainer {
     public static class CommodityInfoBar extends GenericInfoBar {
         public CommodityInfoBar(int width, int height, boolean hasOutline, final CommodityCell cell) {
             super(width, height, hasOutline);
-            final double stored = cell.getmStored();
+            final double stored = cell.getStored();
             final float target = cell.getTargetStored();
             final float pendingExports = cell.mInFactionExports + cell.mGlobalExports;
 

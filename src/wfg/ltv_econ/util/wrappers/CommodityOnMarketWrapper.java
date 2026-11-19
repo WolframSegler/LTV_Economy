@@ -24,12 +24,13 @@ public final class CommodityOnMarketWrapper extends CommodityOnMarket implements
     }
 
     // MODIFIED FUNCTIONS
+    
     public int getDeficitQuantity() {
         if (((CommodityOnMarketAPI)this).getCommodity().isNonEcon()) return org.getDeficitQuantity();
         final CommodityCell cell = EconomyEngine.instance().getOrCreateComCell(getId(), getMarket());
         if (cell == null) return org.getDeficitQuantity();
 
-        return (int) (cell.getStoredDeficit() + getCombinedTradeModQuantity());
+        return (int) Math.max(0d, cell.getStoredDeficit() + getCombinedTradeModQuantity() - cell.getExcessOverDeficitThreshold());
     }
 
     public int getExcessQuantity() {
@@ -37,7 +38,7 @@ public final class CommodityOnMarketWrapper extends CommodityOnMarket implements
         final CommodityCell cell = EconomyEngine.instance().getOrCreateComCell(getId(), getMarket());
         if (cell == null) return org.getExcessQuantity();
 
-        return (int) (cell.getStoredExcess() + getCombinedTradeModQuantity());
+        return (int) Math.max(0d, cell.getStoredExcess() + getCombinedTradeModQuantity() - cell.getShortfallToExportFloor());
     }
 
     // UNMODIFIED FUNCTIONS

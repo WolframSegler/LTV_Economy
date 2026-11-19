@@ -83,7 +83,7 @@ public final class CommodityRowPanel extends UIContainer implements
 
         final float consumption = mCell.getConsumption(true);
         final String amountStr = consumption <= 0f ? str("notApplicable"):
-            NumFormat.engNotate(mCell.getmStored() / consumption) + str("uiSingleLetterDay");
+            NumFormat.engNotate(mCell.getStored() / consumption) + str("uiSingleLetterDay");
 
         final LabelAPI amountLbl = settings.createLabel(Strings.X + amountStr, Fonts.INSIGNIA_LARGE);
         amountLbl.autoSizeToWidth(textW);

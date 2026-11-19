@@ -92,7 +92,7 @@ public class CommodityCell implements Serializable {
     public final ArrayMutableStat getTargetQuantumStat() {
         return mTargetQuantum;
     }
-    public final StatBonus getmInformalImportMods() {
+    public final StatBonus getInformalImportMods() {
         return mInformalImportMods;
     }
     public final float getTotalImports() {
@@ -113,11 +113,20 @@ public class CommodityCell implements Serializable {
     public final float getSurplusAfterTargetQuantum() {
         return Math.max(0f, getProduction(true) - getTargetQuantum(true));
     }
+    public final double exportReserveFloor() {
+        return getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR + mNonExportableStock + mInformalExports;
+    }
+    private final double getStoredAndSurplusQuantum() {
+        return mStored + getSurplusAfterTargetQuantum();
+    }
+    public final double surplusOverExportFloor() {
+        return getStoredAndSurplusQuantum() - exportReserveFloor();
+    }
+    public final double getShortfallToExportFloor() {
+        return Math.max(0d, exportReserveFloor() - getStoredAndSurplusQuantum());
+    }
     public final double computeExportAmount() {
-        return Math.max(0d, mStored + getSurplusAfterTargetQuantum()
-            - getTargetStored() * EconConfig.EXPORT_THRESHOLD_FACTOR
-            - mNonExportableStock - mInformalExports
-        );
+        return Math.max(0d, surplusOverExportFloor());
     }
     public final double computeImportAmount() {
         final float targetQuantum = getTargetQuantum(true);
@@ -152,9 +161,14 @@ public class CommodityCell implements Serializable {
     public final double getStoredShortfall() {
         return Math.max(0d, getTargetStored() - mStored);
     }
+    private final double getDeficitThreshold() {
+        return getTargetStored() * EconConfig.DEFICIT_THRESHOLD;
+    }
     public final double getStoredDeficit() {
-        final double threshold = getTargetStored() * EconConfig.DEFICIT_THRESHOLD;
-        return Math.max(0d, threshold - mStored);
+        return Math.max(0d, getDeficitThreshold() - mStored);
+    }
+    public final double getExcessOverDeficitThreshold() {
+        return Math.max(0d, mStored - getDeficitThreshold());
     }
     public final double getStoredSurplus() {
         return Math.max(0d, mStored - getTargetStored());
@@ -162,15 +176,17 @@ public class CommodityCell implements Serializable {
     public final double getStoredExcess() {
         return computeExportAmount();
     }
-    public final double getmStored() {
+    public final double getStored() {
         return mStored;
     }
     public final long getRoundedStored() {
         return (long) mStored;
     }
-
     public final void addStoredAmount(double a) {
         mStored = Math.max(0d, mStored + a);
+    }
+    public final void setStoredAmount(double a) {
+        mStored = Math.max(0d, a);
     }
 
     public CommodityCell(String comID, String marketID) {

@@ -71,6 +71,11 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         WorkerPoolCondition.initialize();
     }
 
+    @Override 
+    public void onNewGameAfterTimePass() {
+        EconomyEngine.instance().mBalancerCheckPending = true; 
+    }
+
     @Override
     public void onGameLoad(boolean newGame) {
         final LtvEconSaveData data = LtvEconSaveData.loadInstance(false, newGame);
@@ -128,13 +133,13 @@ public class LtvEconomyModPlugin extends BaseModPlugin {
         }
     }
 
-    private static final void injectStockpiles() {
+    public static final void injectStockpiles() {
         final EconomyEngine engine = EconomyEngine.instance();
         for (CommodityDomain dom : engine.getmComDomains()) {
             for (CommodityCell cell : dom.getAllCells()) {
                 final double target = cell.getTargetStored();
                 final double mult = cell.getProduction(true) >= 1d ? 1d + EconConfig.EXPORT_THRESHOLD_FACTOR : 1d;
-                cell.addStoredAmount(target * mult);
+                cell.setStoredAmount(target * mult);
             }
         }
     }

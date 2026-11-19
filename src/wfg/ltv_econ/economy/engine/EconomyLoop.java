@@ -540,7 +540,7 @@ public class EconomyLoop {
         mission.usedFactionFleet = isFactionFleet;
 
         final CommodityCell fuelCell = engine.getComCell(Commodities.FUEL, marketID);
-        if (fuelCell.getmStored() >= mission.fuelCost) {
+        if (fuelCell.getStored() >= mission.fuelCost) {
             mission.usedFuelFromStockpiles = true;
             fuelCell.addStoredAmount(-mission.fuelCost);
             

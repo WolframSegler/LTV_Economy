@@ -31,6 +31,7 @@ import wfg.ltv_econ.economy.registry.WorkerPoolRegistry;
 import wfg.ltv_econ.economy.registry.WorkerRegistry;
 import wfg.ltv_econ.industry.CompatLayer;
 import wfg.ltv_econ.industry.IndustryIOs;
+import wfg.ltv_econ.plugin.LtvEconomyModPlugin;
 import wfg.ltv_econ.ui.economyTab.industryBalancer.IndustryBalancerHolo;
 import wfg.native_ui.util.ArrayMap;
 
@@ -123,6 +124,7 @@ public final class IndustryBalancer {
                 mState.status = balance(includePlayerColonies);
 
                 EconomyEngine.instance().fakeAdvanceWithAssignWorkers();
+                LtvEconomyModPlugin.injectStockpiles();
 
             } catch (Throwable ex) {
                 mState.mFailure = ex;

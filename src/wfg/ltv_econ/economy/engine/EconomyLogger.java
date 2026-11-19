@@ -42,7 +42,7 @@ public class EconomyLogger {
                 totalPendingExports += cell.getPendingExports();
                 totalInformalImports += cell.mInformalImports;
                 totalInformalExports += cell.mInformalExports;
-                totalStored += cell.getmStored();
+                totalStored += cell.getStored();
                 totalTargetStored += cell.getTargetStored();
                 totalShortfall += cell.getStoredShortfall();
                 totalSurplus += cell.getStoredSurplus();
@@ -89,7 +89,7 @@ public class EconomyLogger {
                 pendExp += cell.getPendingExports();
                 infImp += cell.mInformalImports;
                 infExp += cell.mInformalExports;
-                stock += cell.getmStored();
+                stock += cell.getStored();
                 targetStock += cell.getTargetStored();
                 shortfall += cell.getStoredShortfall();
                 surplus += cell.getStoredSurplus();

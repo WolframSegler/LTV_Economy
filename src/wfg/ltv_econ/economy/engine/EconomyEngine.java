@@ -101,7 +101,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
     protected int mCyclesSinceTrade = EconConfig.TRADE_INTERVAL;
     protected int mLastTradeCycle = EconConfig.TRADE_INTERVAL;
 
-    private boolean mBalancerCheckPending = true;
+    public boolean mBalancerCheckPending = false;
 
     public static EconomyEngine instance() {
         return LtvEconSaveData.instance().economyEngine;
@@ -595,7 +595,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             final CommodityCell cell = dom.getCell(marketID);
             if (cell == null) continue;
 
-            cell.addStoredAmount(-reduction * cell.getmStored());
+            cell.addStoredAmount(-reduction * cell.getStored());
         }
 
         if (isPlayerMarket(marketID)) {
@@ -617,7 +617,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
             if (dom.mSpec.isPersonnel() || dom.mSpec.isMeta()) continue;
             final CommodityCell cell = dom.getCell(market.getId());
 
-            if (cell != null && cell.getmStored() > 1d) result.add(cell);
+            if (cell != null && cell.getStored() > 1d) result.add(cell);
         }
 		return result;
 	}

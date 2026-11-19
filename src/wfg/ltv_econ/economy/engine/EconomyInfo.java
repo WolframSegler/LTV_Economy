@@ -114,7 +114,7 @@ public class EconomyInfo {
 
         for (CommodityCell cell : engine.mComDomains.get(comID).getAllCells()) {
             if (cell.mMarket.getFaction().getId().equals(factionID)) {
-                totalStockpiles += cell.getmStored();
+                totalStockpiles += cell.getStored();
             }
         }
         return totalStockpiles;
@@ -335,7 +335,7 @@ public class EconomyInfo {
         double total = 0;
 
         for (CommodityCell cell : engine.mComDomains.get(comID).getAllCells())
-        total += cell.getmStored();
+        total += cell.getStored();
 
         return (long) total;
     }

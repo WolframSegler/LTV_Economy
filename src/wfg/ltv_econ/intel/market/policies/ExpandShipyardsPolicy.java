@@ -77,12 +77,12 @@ public class ExpandShipyardsPolicy extends MarketPolicy {
     }
 
     protected static final double getStored(MarketAPI market, String comID) {
-        return EconomyEngine.instance().getComCell(comID, market.getId()).getmStored() + market.getSubmarket(Submarkets.SUBMARKET_STORAGE).getCargo().getCommodityQuantity(comID);
+        return EconomyEngine.instance().getComCell(comID, market.getId()).getStored() + market.getSubmarket(Submarkets.SUBMARKET_STORAGE).getCargo().getCommodityQuantity(comID);
     }
 
     protected static final void removeStored(MarketAPI market, String comID, int amount) {
         final CommodityCell cell = EconomyEngine.instance().getComCell(comID, market.getId());
-        final double removedFromCell = Math.min(amount, cell.getmStored());
+        final double removedFromCell = Math.min(amount, cell.getStored());
         cell.addStoredAmount(-removedFromCell);
 
         market.getSubmarket(Submarkets.SUBMARKET_STORAGE).getCargo().removeCommodity(comID, (float) (amount - removedFromCell));
