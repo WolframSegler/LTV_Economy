@@ -4,7 +4,7 @@ This document explains how to keep the translation files in sync when the mod is
 The golden rule: **Always update the English source first, then propagate the changes to each language.**
 
 The `data/` folder at the root is always the **English reference**.  
-Each language has its own `data/` folder with the exact same file structure – only the text inside the files is translated.
+Each language has its own `data/` folder with the exact same file structure, but only containing the modified files, wherein only the text is translated.
 
 <br>
 
@@ -44,7 +44,7 @@ git diff HEAD@{2026-06-01} -- data/ > source_changes.diff
 ## Distribution
 
 - Create a copy of the English mod.
-- For each language, copy the translated `data/` from `localization_folder/<lang>/data/` **over** the English `data/` in that ZIP.
+- For each language, merge the translated `data/` from `localization_folder/<lang>/data/` **with** the English `data/` in that ZIP, replacing all translated files.
 - Rename the ZIP file accordingly.
 
 <br>

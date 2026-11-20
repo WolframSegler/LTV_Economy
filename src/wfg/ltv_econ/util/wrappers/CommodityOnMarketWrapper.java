@@ -30,7 +30,7 @@ public final class CommodityOnMarketWrapper extends CommodityOnMarket implements
         final CommodityCell cell = EconomyEngine.instance().getOrCreateComCell(getId(), getMarket());
         if (cell == null) return org.getDeficitQuantity();
 
-        return (int) Math.max(0d, cell.getStoredDeficit() + getCombinedTradeModQuantity() - cell.getExcessOverDeficitThreshold());
+        return (int) Math.max(0d, cell.getStoredDeficit() - getCombinedTradeModQuantity() - cell.getExcessOverDeficitThreshold());
     }
 
     public int getExcessQuantity() {

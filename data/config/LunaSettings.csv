@@ -16,7 +16,7 @@ SHIP_ALLOC_THREAT_RELATIONSHIP_MULT,Ship Allocation Threat Relationship Mult,Dou
 SHIP_ALLOC_MIN_COMBAT_POWER,Ship Allocation Min Combat Power,Double,50.0,,"Combat power target floor used by factions when ordering ships.",0.0,1000.0,Solver
 ,,,,,,,,
 header_workerAllocator,Worker Allocator,Header,Worker Allocator,,,,,Solver
-ECON_DEFICIT_COST,Deficit Penalty,Double,3000,,Higher values encourage more demand fulfillment.,0,100000,Solver
+ECON_DEFICIT_COST,Deficit Penalty,Double,1,,Higher values encourage more demand fulfillment.,0,5,Solver
 ECON_ALLOCATION_PASSES,Allocation Refinement Passes,Int,1,,Number of times the solver re-evaluates deficits and adjusts worker assignments. Computation time grows linearly with the value. Gains become minimal after 6 passes.,1,5,Solver
 WORKER_ASSIGN_INTERVAL,Worker Assignment Interval,Int,20,,"Workers of NPC markets will be re-allocated every x days.",1,360,Solver
 ,,,,,,,,

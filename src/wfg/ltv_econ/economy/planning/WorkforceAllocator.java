@@ -1,5 +1,7 @@
 package wfg.ltv_econ.economy.planning;
 
+import static wfg.native_ui.util.Globals.settings;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -206,11 +208,10 @@ public final class WorkforceAllocator {
             };
         }
 
-        final SlackWeights slackData = computeSlackWeights(A, denseData, O);
+        final double[] commoditySlackMult = computeSlackMult(A, denseData, O);
 
         for (int c = 0; c < C; c++) {
-            final double laborFactor = slackData.workersPerUnit[c] / 5d;
-            objective[idxSlack.apply(c)] = EconConfig.ECON_DEFICIT_COST * laborFactor * (slackData.isProductionInput[c] ? 5d : 1d);
+            objective[idxSlack.apply(c)] = EconConfig.ECON_DEFICIT_COST * commoditySlackMult[c];
         }
 
         final LinearObjectiveFunction objFunc = new LinearObjectiveFunction(objective, 0d);
@@ -288,7 +289,13 @@ public final class WorkforceAllocator {
                         final double base = A[c][o];
                         if (base == 0d) continue;
 
-                        coeffs[idx * T] += base * denseData.columnOutputMod[idx] * shortage_mult[o];
+                        final double coeff = base * denseData.columnOutputMod[idx] * shortage_mult[o];
+                        if (base > 0d) {
+                            coeffs[idx * T] += coeff;
+                        } else {
+                            // all-tier consumption in this market relaxes the ceiling
+                            for (int z = 0; z < T; z++) coeffs[idx * T + z] += coeff;
+                        }
                     }
 
                     final double ceiling = marketDemand[m][c] * EconConfig.LOCAL_PROD_BUFFER;
@@ -303,16 +310,21 @@ public final class WorkforceAllocator {
                 for (int c = 0; c < C; c++) {
                     Arrays.fill(coeffs, 0d);
 
-                    for (int i = 0; i < N; i+=T) {
-                        final int idx = i/T;
+                    for (int i = 0; i < N; i += T) {
+                        final int idx = i / T;
                         if (denseData.columnFaction[idx] != f) continue;
                         final int o = denseData.columnOutputIndex[idx];
                         final double base = A[c][o];
                         if (base == 0d) continue;
 
                         final double coeff = base * denseData.columnOutputMod[idx] * shortage_mult[o];
-                        coeffs[i] += coeff;
-                        coeffs[i + 1] += coeff;
+                        if (base > 0) {
+                            coeffs[i] += coeff;
+                            coeffs[i + 1] += coeff;
+                        } else {
+                            // all-tier consumption in this faction relaxes the ceiling
+                            for (int z = 0; z < T; z++) coeffs[i + z] += coeff;
+                        }
                     }
 
                     final double ceiling = factionDemand[f][c] * EconConfig.FACTION_PROD_BUFFER;
@@ -333,9 +345,7 @@ public final class WorkforceAllocator {
                     if (base == 0d) continue;
 
                     final double coeff = base * denseData.columnOutputMod[orgIdx] * shortage_mult[o];
-                    coeffs[i] += coeff;
-                    coeffs[i + 1] += coeff;
-                    coeffs[i + 2] += coeff;
+                    for (int z = 0; z < T; z++) coeffs[i + z] += coeff;
                 }
 
                 coeffs[idxSlack.apply(c)] = 1d;
@@ -473,41 +483,37 @@ public final class WorkforceAllocator {
         return assignments;
     }
 
-    private static final SlackWeights computeSlackWeights(
+    private static final double[] computeSlackMult(
         final double[][] A, final DenseModel denseData, int O
     ) {
+        final List<String> commodities = ProductionMatrix.getWorkerRelatedCommodityIDs();
         final int C = A.length;
 
-        final boolean[] isProductionInput = new boolean[C];
-        final double[] workersPerUnit = new double[C];
+        final double[] productionInputMultiplier = new double[C];
+        final double[] commoditySlackMult = new double[C];
+
+        double totalInputs = 0d;
+        for (int c = 0; c < C; c++) {
+            double sumInputs = 0d;
+            for (int o = 0; o < O; o++) {
+                if (A[c][o] >= 0d) continue;
+
+                sumInputs = -A[c][o];
+            }
+            productionInputMultiplier[c] = sumInputs;
+            totalInputs += sumInputs;
+        }
+        for (int c = 0; c < C; c++) {
+            productionInputMultiplier[c] = 1d + (productionInputMultiplier[c] > 0d ? (productionInputMultiplier[c] * 2d) / totalInputs : 0d);
+        }
 
         for (int c = 0; c < C; c++) {
-            for (int o = 0; o < O; o++) {
-                // If an input to another output.
-                if (A[c][o] < 0d) { isProductionInput[c] = true; break; }
-            }
+            final double comPrice = settings.getCommoditySpec(commodities.get(c)).getUnmodifiedBasePrice();
+            final double workerValue = comPrice / EconConfig.LPV_day;
+            commoditySlackMult[c] = workerValue * 2d * productionInputMultiplier[c];
         }
 
-        final double[] maxWorkersPerOutput = new double[O];
-        for (int orgIdx = 0; orgIdx < denseData.columnSize; orgIdx++) {
-            final int o = denseData.columnOutputIndex[orgIdx];
-            maxWorkersPerOutput[o] += denseData.columnWorkerLimitFrac[orgIdx] * denseData.columnMarketCap[orgIdx];
-        }
-
-        for (int c = 0; c < C; c++) {
-            double weightedSum = 0d;
-            double totalWeight = 0d;
-            for (int o = 0; o < O; o++) {
-                if (A[c][o] > 0d) {
-                    final double w = maxWorkersPerOutput[o];
-                    weightedSum += A[c][o] * w;
-                    totalWeight += w;
-                }
-            }
-            workersPerUnit[c] = totalWeight > 0d ? totalWeight / weightedSum : 1d;
-        }
-
-        return new SlackWeights(isProductionInput, workersPerUnit);
+        return commoditySlackMult;
     }
 
     private static final List<LinearConstraint> getBaseConstraints(final DenseModel denseData, int nVars, int N, int T) {
@@ -571,14 +577,6 @@ public final class WorkforceAllocator {
             PivotSelectionRule.DANTZIG
         ).getPoint();
     }
-
-    /**
-     * {@code isProductionInput[c]} is true if commodity {@code c} is consumed as an
-     * input by some industry, i.e. a deficit in {@code c} cascades into other production.
-     * {@code workersPerUnit[c]} is a labor-weighted normalization of {@code c}, so that
-     * deficit penalties scale with labor freed rather than raw unit volume.
-     */
-    private static record SlackWeights(boolean[] isProductionInput, double[] workersPerUnit) {}
 
     public record FeasibilityResult(
         ArrayMap<MarketAPI, float[]> assignments, double[] slack,
