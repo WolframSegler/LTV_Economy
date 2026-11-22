@@ -1,7 +1,6 @@
 package wfg.ltv_econ.ui.scripts;
 
 import com.fs.starfarer.api.campaign.CoreUITabId;
-import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.campaign.CampaignEngine;
 import com.fs.starfarer.campaign.comms.IntelTabData;
 
@@ -29,7 +28,7 @@ public final class IntelTabUIBuilder extends AbstractTabButtonInjector {
         return LocalizedStrings.str("uiBtnTitleEconomy");
     }
 
-    protected UIElementAPI createCustomComponent(UIPanelAPI parent) {
+    protected UIElementAPI createContent() {
         return new EconomyOverviewPanel();
     }
 }

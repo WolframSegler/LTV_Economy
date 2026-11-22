@@ -53,7 +53,7 @@ public final class OutpostsTabUIBuilder extends AbstractTabButtonInjector {
         return str("uiTableFaction");
     }
 
-    protected UIElementAPI createCustomComponent(UIPanelAPI parent) {
+    protected UIElementAPI createContent() {
         return new FactionManagementPanel();
     }
 

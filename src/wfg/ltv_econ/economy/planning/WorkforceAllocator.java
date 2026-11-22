@@ -290,12 +290,12 @@ public final class WorkforceAllocator {
                         if (base == 0d) continue;
 
                         final double coeff = base * denseData.columnOutputMod[idx] * shortage_mult[o];
-                        if (base > 0d) {
+                        // if (base > 0d) {
                             coeffs[idx * T] += coeff;
-                        } else {
-                            // all-tier consumption in this market relaxes the ceiling
-                            for (int z = 0; z < T; z++) coeffs[idx * T + z] += coeff;
-                        }
+                        // } else {
+                        //     // all-tier consumption in this market relaxes the ceiling
+                        //     for (int z = 0; z < T; z++) coeffs[idx * T + z] += coeff;
+                        // }
                     }
 
                     final double ceiling = marketDemand[m][c] * EconConfig.LOCAL_PROD_BUFFER;
@@ -318,13 +318,13 @@ public final class WorkforceAllocator {
                         if (base == 0d) continue;
 
                         final double coeff = base * denseData.columnOutputMod[idx] * shortage_mult[o];
-                        if (base > 0) {
+                        // if (base > 0) {
                             coeffs[i] += coeff;
                             coeffs[i + 1] += coeff;
-                        } else {
-                            // all-tier consumption in this faction relaxes the ceiling
-                            for (int z = 0; z < T; z++) coeffs[i + z] += coeff;
-                        }
+                        // } else {
+                        //     // all-tier consumption in this faction relaxes the ceiling
+                        //     for (int z = 0; z < T; z++) coeffs[i + z] += coeff;
+                        // }
                     }
 
                     final double ceiling = factionDemand[f][c] * EconConfig.FACTION_PROD_BUFFER;

@@ -67,7 +67,6 @@ public class PatrolFleetRouteManager {
         final boolean useIndependentPatrol = fp > idleFp;
 
         final List<InventoryShip> candidates = new ArrayList<>();
-        if (candidates.isEmpty()) return;
         if (useIndependentPatrol) {
             for (String hullId : faction.getKnownShips()) {
                 final InventoryShip dummy = new InventoryShip(hullId);
@@ -82,6 +81,7 @@ public class PatrolFleetRouteManager {
                 candidates.add(data);
             }
         }
+        if (candidates.isEmpty()) return;
 
         ShipAllocator.allocateShipsForFleetPoints(fp, faction, mission.allocatedShips, candidates);
 
