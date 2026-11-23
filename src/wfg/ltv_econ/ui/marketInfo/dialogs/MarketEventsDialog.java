@@ -64,8 +64,9 @@ public final class MarketEventsDialog extends DockPanel {
 
     private final class EventList extends ListTable<MarketEvent, RowPanel> {
         EventList(float width, float height) {
-            super(width, height, ROW_H, pad);
-            mAddRowGap = true;
+            super(width, height, ROW_H, pad, pad);
+            mIsSelectionEnabled = false;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -82,8 +83,7 @@ public final class MarketEventsDialog extends DockPanel {
             return new RowPanel(event);
         }
 
-        protected void onWidgetClicked(RowPanel source) {}
-
+        protected void onWidgetClicked(RowPanel source, boolean isLeft, boolean isKeyboard) {}
         protected String getEmptyMessage() {
             return str("uiDialogTxtMarketEventEmpty");
         }

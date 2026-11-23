@@ -125,10 +125,10 @@ public final class ActiveQueuePanel extends UIContainer implements UIBuildableAP
 
     private class ActiveQueueGrid extends GridTable<ShipProductionOrder, ShipProductionWidget> {
         public ActiveQueueGrid(int width, int height) {
-            super(width, height, ShipProductionWidget.WIDTH, ShipProductionWidget.HEIGHT, opad*2);
-            mUniformOuterGap = true;
+            super(width, height, ShipProductionWidget.WIDTH, ShipProductionWidget.HEIGHT, opad*2, opad*2);
             mJustifyGrid = false;
             mIsSelectionEnabled = true;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -145,7 +145,8 @@ public final class ActiveQueuePanel extends UIContainer implements UIBuildableAP
         }
 
         @Override
-        protected void onWidgetClicked(ShipProductionWidget source) {
+        protected void onWidgetClicked(ShipProductionWidget source, boolean isLeft, boolean isKeyboard) {
+            if (!isLeft) return;
             switch (source.selectionState) {
             case NONE:
                 if (NativeUiUtils.isShiftDown()) {

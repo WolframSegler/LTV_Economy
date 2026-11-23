@@ -54,8 +54,9 @@ public final class FactionSelectionDialog extends DockPanel {
 
     private final class FactionList extends ListTable<FactionSpecAPI, DebugFactionRow> {
         FactionList() {
-            super(mContentContainer.getWidth(), mContentContainer.getHeight(), ROW_H, 0);
-            mAddRowGap = false;
+            super(mContentContainer.getWidth(), mContentContainer.getHeight(), ROW_H, 0, 0);
+            mIsSelectionEnabled = true;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -69,7 +70,9 @@ public final class FactionSelectionDialog extends DockPanel {
             return new DebugFactionRow(faction, f -> onFactionSelected(f));
         }
 
-        protected void onWidgetClicked(DebugFactionRow source) {}
+        protected void onWidgetClicked(DebugFactionRow source, boolean isLeft, boolean isKeyboard) {
+            source.onSelect.accept(source.faction);
+        }
 
         protected String getEmptyMessage() {
             return "";
@@ -83,11 +86,11 @@ public final class FactionSelectionDialog extends DockPanel {
         public final GlowComp glow = comp().get(NativeComponents.GLOW);
 
         private final FactionSpecAPI faction;
+        private final Consumer<FactionSpecAPI> onSelect;
 
         DebugFactionRow(FactionSpecAPI faction, Consumer<FactionSpecAPI> onSelect) {
             this.faction = faction;
-
-            interaction.onClicked = (row, isLeftClick) -> onSelect.accept(faction);
+            this.onSelect = onSelect;
 
             glow.type = GlowType.UNDERLAY;
             glow.color = base;

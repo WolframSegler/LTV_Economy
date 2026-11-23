@@ -128,10 +128,10 @@ public final class WorkerAllocationDialog extends DialogPanel {
     public class PlanSelectionList extends ListTable<WorkerAllocationPlan, PlanSelectionWidget> implements HasOutline {
 
         public PlanSelectionList(ContentPanel content) {
-            super(LEFT_SIDE_W, PANEL_H - CREATE_PLAN_BTN_H, WIDGET_H, pad);
+            super(LEFT_SIDE_W, PANEL_H - CREATE_PLAN_BTN_H, WIDGET_H, pad, pad);
 
             mIsSelectionEnabled = true;
-            mAddRowGap = true;
+            mIsHighlightingEnabled = true;
 
             buildUI();
         }
@@ -144,7 +144,8 @@ public final class WorkerAllocationDialog extends DialogPanel {
             return new PlanSelectionWidget(item);
         }
 
-        protected void onWidgetClicked(PlanSelectionWidget source) {
+        protected void onWidgetClicked(PlanSelectionWidget source, boolean isLeft, boolean isKeyboard) {
+            if (!isLeft) return;
             if (mSelectedWidget != null) {
                 mSelectedWidget.isSelected = false;
                 mSelectedWidget.buildUI();
@@ -654,16 +655,16 @@ public final class WorkerAllocationDialog extends DialogPanel {
     }
 
     public static class GoalRegistryList extends ListTable<String, GoalRegistryWidget> {
-        private final ContentPanel content;
-        private final DialogPanel dialog;
+        private final ContentPanel mContent;
+        private final DialogPanel mDialog;
 
         public GoalRegistryList(DialogPanel dialog, ContentPanel content) {
-            super(460, 330, 30, hpad);
-            this.content = content;
-            this.dialog = dialog;
+            super(460, 330, 30, hpad, hpad);
+            mContent = content;
+            mDialog = dialog;
 
             mIsSelectionEnabled = true;
-            mAddRowGap = true;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -675,10 +676,11 @@ public final class WorkerAllocationDialog extends DialogPanel {
             return new GoalRegistryWidget(id);
         }
 
-        protected void onWidgetClicked(GoalRegistryWidget source) {
-            content.selectedPlan.goals.add(PlanningGoalRegistry.createGoal(source.goalId));
-            content.buildUI();
-            dialog.dismiss(0);
+        protected void onWidgetClicked(GoalRegistryWidget source, boolean isLeft, boolean isKeyboard) {
+            if (!isLeft) return;
+            mContent.selectedPlan.goals.add(PlanningGoalRegistry.createGoal(source.goalId));
+            mContent.buildUI();
+            mDialog.dismiss(0);
         }
 
         protected String getEmptyMessage() {

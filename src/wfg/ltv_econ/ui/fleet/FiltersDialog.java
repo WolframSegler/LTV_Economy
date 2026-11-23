@@ -169,9 +169,10 @@ public class FiltersDialog extends DockPanel {
         private final Set<String> mBlacklist;
 
         FactionFilterList(float width, float height, Set<String> blacklist) {
-            super(width, height, ROW_H, pad);
+            super(width, height, ROW_H, pad, pad);
             mBlacklist = blacklist;
-            mAddRowGap = true;
+            mIsSelectionEnabled = false;
+            mIsHighlightingEnabled = false;
             buildUI();
         }
 
@@ -196,7 +197,7 @@ public class FiltersDialog extends DockPanel {
             return cb;
         }
 
-        protected void onWidgetClicked(Button source) {}
+        protected void onWidgetClicked(Button source, boolean isLeft, boolean isKeyboard) {}
         protected String getEmptyMessage() { return ""; }
     }
 }

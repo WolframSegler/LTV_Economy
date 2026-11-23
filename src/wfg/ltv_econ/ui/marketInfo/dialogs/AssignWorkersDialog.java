@@ -273,8 +273,9 @@ public final class AssignWorkersDialog extends DialogPanel {
         private static final int SLIDER_H = 32;
 
         public OutputList(float width, float height) {
-            super(width, height, SLIDER_H, pad);
-            mAddRowGap = true;
+            super(width, height, SLIDER_H, pad, pad);
+            mIsSelectionEnabled = false;
+            mIsHighlightingEnabled = false;
             buildUI();
         }
 
@@ -311,8 +312,8 @@ public final class AssignWorkersDialog extends DialogPanel {
             return new OutputRow(settings.getCommoditySpec(output.comID), s);
         }
 
-        protected void onWidgetClicked(OutputRow source) {}
-        protected String getEmptyMessage() {return null; }
+        protected void onWidgetClicked(OutputRow source, boolean isLeft, boolean isKeyboard) {}
+        protected String getEmptyMessage() { return null; }
     }
 
     private static final class OutputRow extends UIContainer implements WidgetAPI<OutputRow> {

@@ -78,9 +78,10 @@ public final class TradeMissionsDialog extends DockPanel {
 
     private final class MissionList extends ListTable<TradeMission, TradeMissionWidget> {
         MissionList(float width, float height, float initialScroll) {
-            super(width, height, ROW_H, pad);
-            mAddRowGap = true;
+            super(width, height, ROW_H, pad, pad);
             mScrollOffset = initialScroll;
+            mIsSelectionEnabled = false;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -111,7 +112,7 @@ public final class TradeMissionsDialog extends DockPanel {
             return new TradeMissionWidget(computeContentWidth(), ROW_H, m, isSrcMarket, TradeMissionsDialog.this);
         }
 
-        protected void onWidgetClicked(TradeMissionWidget source) {}
+        protected void onWidgetClicked(TradeMissionWidget source, boolean isLeft, boolean isKeyboard) {}
 
         protected String getEmptyMessage() {
             return activeMissions ? str("noActiveMissions") : str("noPastMissions");

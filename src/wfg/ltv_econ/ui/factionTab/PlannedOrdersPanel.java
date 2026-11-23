@@ -145,10 +145,10 @@ public final class PlannedOrdersPanel extends UIContainer implements UIBuildable
     public class PlannedOrderGrid extends GridTable<PlannedOrder, PlannedOrderWidget> {
 
         public PlannedOrderGrid(int width, int height) {
-            super(width, height, PlannedOrderWidget.WIDTH, PlannedOrderWidget.HEIGHT, opad*2);
-            mUniformOuterGap = true;
+            super(width, height, PlannedOrderWidget.WIDTH, PlannedOrderWidget.HEIGHT, opad*2, opad*2);
             mJustifyGrid = true;
             mIsSelectionEnabled = true;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -172,7 +172,8 @@ public final class PlannedOrdersPanel extends UIContainer implements UIBuildable
             return new PlannedOrderWidget(item, index);
         }
 
-        protected void onWidgetClicked(PlannedOrderWidget source) {
+        protected void onWidgetClicked(PlannedOrderWidget source, boolean isLeft, boolean iskeyboard) {
+            if (!isLeft) return;
             switch (source.selectionState) {
             case NONE:
                 if (NativeUiUtils.isShiftDown()) {

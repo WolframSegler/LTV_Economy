@@ -50,9 +50,10 @@ public final class CommoditySelectionPanel
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
     public CommoditySelectionPanel(int width, int height, UIBuildableAPI content) {
-        super(width, height, ROW_H, pad);
+        super(width, height, ROW_H, pad, pad);
         targetPanel = content;
-        mAddRowGap = true;
+        mIsSelectionEnabled = true;
+        mIsHighlightingEnabled = true;
         buildUI();
     }
 
@@ -64,8 +65,17 @@ public final class CommoditySelectionPanel
         return new RowPanel(item);
     }
 
-    protected void onWidgetClicked(RowPanel source) {
-        // Never invoked: mIsSelectionEnabled is false; RowPanel manages its own click handler.
+    protected void onWidgetClicked(RowPanel source, boolean isLeft, boolean isKeyboard) {
+        selectedCom = source.spec;
+        targetPanel.buildUI();
+
+        if (UIUtils.canViewPrices() && NativeUiUtils.isCtrlDown()) {
+            final ComDetailDialog dialogPanel = new ComDetailDialog(
+                null, settings.getFactionSpec(Factions.PLAYER), source.spec
+            );
+            dialogPanel.setConfirmShortcut();
+            dialogPanel.show(0.3f, 0.3f);
+        }
     }
 
     protected String getEmptyMessage() {
@@ -86,19 +96,6 @@ public final class CommoditySelectionPanel
             spec = com;
 
             glow.type = GlowType.UNDERLAY;
-
-            interaction.onClicked = (source, isLeftClick) -> {
-                selectedCom = spec;
-                targetPanel.buildUI();
-
-                if (UIUtils.canViewPrices() && NativeUiUtils.isCtrlDown()) {
-                    final ComDetailDialog dialogPanel = new ComDetailDialog(
-                        null, settings.getFactionSpec(Factions.PLAYER), com
-                    );
-                    dialogPanel.setConfirmShortcut();
-                    dialogPanel.show(0.3f, 0.3f);
-                }
-            };
 
             tooltip.builder = (tp, exp) -> {
                 if (UIUtils.canViewPrices()) {

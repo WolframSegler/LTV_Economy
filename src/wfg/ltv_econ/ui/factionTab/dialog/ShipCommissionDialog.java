@@ -76,8 +76,9 @@ public final class ShipCommissionDialog extends DockPanel {
     private final class HullList extends ListTable<String, HullRow> {
 
         HullList() {
-            super(mContentContainer.getWidth(), mContentContainer.getHeight(), ROW_H, pad);
-            mAddRowGap = true;
+            super(mContentContainer.getWidth(), mContentContainer.getHeight(), ROW_H, pad, pad);
+            mIsSelectionEnabled = true;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -91,7 +92,13 @@ public final class ShipCommissionDialog extends DockPanel {
             return new HullRow(settings.getHullSpec(hullId));
         }
 
-        protected void onWidgetClicked(HullRow source) {}
+        protected void onWidgetClicked(HullRow source, boolean isLeft, boolean isKeyboard) {
+            int count = 1;
+            if (NativeUiUtils.isCtrlDown()) count = 5;
+            if (NativeUiUtils.isShiftDown()) count = 10;
+            if (NativeUiUtils.isShiftDown() && NativeUiUtils.isCtrlDown()) count = 50;
+            ShipCommissionDialog.this.addOrder(source.order.hullId, count);
+        }
 
         protected String getEmptyMessage() {
             return "";
@@ -111,14 +118,6 @@ public final class ShipCommissionDialog extends DockPanel {
         public HullRow(ShipHullSpecAPI spec) {
             this.spec = spec;
             this.order = ShipProductionManager.getProductionCost(spec);
-
-            interaction.onClicked = (row, isLeftClick) -> {
-                int count = 1;
-                if (NativeUiUtils.isCtrlDown()) count = 5;
-                if (NativeUiUtils.isShiftDown()) count = 10;
-                if (NativeUiUtils.isShiftDown() && NativeUiUtils.isCtrlDown()) count = 50;
-                ShipCommissionDialog.this.addOrder(order.hullId, count);
-            };
 
             glow.type = GlowType.UNDERLAY;
             glow.color = base;

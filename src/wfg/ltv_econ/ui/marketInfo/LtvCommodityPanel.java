@@ -89,8 +89,9 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
 
     private final class CommodityList extends ListTable<CommoditySpecAPI, CommodityRowPanel> {
         CommodityList(float width, float height) {
-            super(width, height, ROW_H, pad);
-            mAddRowGap = true;
+            super(width, height, ROW_H, pad, pad);
+            mIsSelectionEnabled = true;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -104,12 +105,12 @@ public final class LtvCommodityPanel extends UIContainer implements HasBackgroun
         }
 
         protected CommodityRowPanel createWidget(CommoditySpecAPI com, int index) {
-            final CommodityRowPanel row = new CommodityRowPanel(mMarket, com.getId(), LtvCommodityPanel.this);
-            row.interaction.onClicked = mSelectionListener;
-            return row;
+            return new CommodityRowPanel(mMarket, com.getId(), LtvCommodityPanel.this);
         }
 
-        protected void onWidgetClicked(CommodityRowPanel source) {}
+        protected void onWidgetClicked(CommodityRowPanel source, boolean isLeft, boolean isKeyboard) {
+            mSelectionListener.handle(source, isLeft);
+        }
 
         protected String getEmptyMessage() {
             return "";

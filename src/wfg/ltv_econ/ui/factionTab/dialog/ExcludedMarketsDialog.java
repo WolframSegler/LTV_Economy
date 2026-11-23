@@ -65,10 +65,10 @@ public final class ExcludedMarketsDialog extends DialogPanel {
     public static class PlayerMarketsList extends ListTable<MarketAPI, PlayerMarketWidget> {
 
         public PlayerMarketsList() {
-            super(GRID_W, 500, WIDGET_H, hpad);
+            super(GRID_W, 500, WIDGET_H, hpad, hpad);
 
             mIsSelectionEnabled = true;
-            mAddRowGap = true;
+            mIsHighlightingEnabled = true;
             buildUI();
         }
 
@@ -82,7 +82,8 @@ public final class ExcludedMarketsDialog extends DialogPanel {
             return new PlayerMarketWidget(market);
         }
 
-        protected final void onWidgetClicked(PlayerMarketWidget source) {
+        protected final void onWidgetClicked(PlayerMarketWidget source, boolean isLeft, boolean isKeyboard) {
+            if (!isLeft) return;
             final Set<String> marketIDs = LtvEconSaveData.instance().playerFactionSettings.excludedMarketsFromWorkerAllocation;
             final String marketID = source.market.getId();
             if (marketIDs.contains(marketID)) {

@@ -45,11 +45,13 @@ public final class FactionSelectionPanel extends
     public final BackgroundComp bg = comp().get(NativeComponents.BACKGROUND);
 
     public FactionSelectionPanel(int width, int height) {
-        super(width, height, ROW_H, pad);
+        super(width, height, ROW_H, pad, pad);
 
         outline.type = OutlineType.TEX_THIN;
         outline.color = dark;
-        mAddRowGap = true;
+
+        mIsSelectionEnabled = true;
+        mIsHighlightingEnabled = false;
 
         buildUI();
     }
@@ -62,7 +64,10 @@ public final class FactionSelectionPanel extends
         return new RowPanel(faction);
     }
 
-    protected void onWidgetClicked(RowPanel source) {}
+    protected void onWidgetClicked(RowPanel source, boolean isLeft, boolean isKeyboard) {
+        if (!isLeft) return;
+        new ConfirmEmbargoDialog(source.faction, source, source.alreadyEmbargoed).show(0.3f, 0.3f);
+    }
 
     protected String getEmptyMessage() {
         return "";
@@ -84,10 +89,6 @@ public final class FactionSelectionPanel extends
             this.faction = faction;
             alreadyEmbargoed = LtvEconSaveData.instance().playerFactionSettings
                 .embargoedFactions.contains(faction.getId());
-
-            interaction.onClicked = (row, isLeftClick) -> {
-                new ConfirmEmbargoDialog(faction, this, alreadyEmbargoed).show(0.3f, 0.3f);
-            };
 
             tooltip.builder = (tp, exp) -> {
                 if (alreadyEmbargoed) {

@@ -21,14 +21,13 @@ import wfg.native_ui.util.NativeUiUtils.AnchorType;
 
 public final class FactionShipGrid extends GridTable<InventoryShip, InventoryShipWidget> {
     
-    private final UIBuildableAPI navbar;
+    private final UIBuildableAPI mNavbar;
 
     public FactionShipGrid(int w, int h, UIBuildableAPI navbar) {
-        super(w, h, InventoryShipWidget.WIDTH, InventoryShipWidget.HEIGHT, opad*2);
-        this.navbar = navbar;
-
-        mUniformOuterGap = true;
+        super(w, h, InventoryShipWidget.WIDTH, InventoryShipWidget.HEIGHT, opad*2, opad*2);
+        mNavbar = navbar;
         mJustifyGrid = true;
+        mIsHighlightingEnabled = true;
         
         buildUI();
     }
@@ -45,7 +44,7 @@ public final class FactionShipGrid extends GridTable<InventoryShip, InventoryShi
     }
 
     protected InventoryShipWidget createWidget(InventoryShip item, int index) {
-        final InventoryShipWidget widget = new InventoryShipWidget(item, navbar);
+        final InventoryShipWidget widget = new InventoryShipWidget(item, mNavbar);
 
         final int col = index % computeColCount();
         widget.tooltip.positioner = (tp, exp) -> {
@@ -57,7 +56,7 @@ public final class FactionShipGrid extends GridTable<InventoryShip, InventoryShi
         return widget;
     }
 
-    protected void onWidgetClicked(InventoryShipWidget source) {}
+    protected void onWidgetClicked(InventoryShipWidget source, boolean isLeft, boolean isKeyboard) {}
 
     protected String getEmptyMessage() {
         return LocalizedStrings.str("uiNoMatchTxt");
