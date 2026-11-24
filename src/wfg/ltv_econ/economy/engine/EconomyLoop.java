@@ -175,7 +175,7 @@ public class EconomyLoop {
             if (!engine.mMarketPopData.containsKey(marketID)) {
                 engine.addMarketPopulationData(marketID);
             }
-            for (CommodityDomain dom : engine.getmComDomains()) {
+            for (CommodityDomain dom : engine.getComDomains()) {
                 if (dom.getCell(marketID) == null) dom.addMarket(marketID);
             }
         }

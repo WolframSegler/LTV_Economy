@@ -111,7 +111,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 		route.addSegment(new RouteSegment(MissionStatus.IN_TRANSIT.ordinal(), mission.travelDur, src.getPrimaryEntity(), dest.getPrimaryEntity()));
 		route.addSegment(new RouteSegment(MissionStatus.IN_DST_ORBIT_UNLOADING.ordinal(), mission.transferDur, dest.getPrimaryEntity()));
 
-		final int currentDay = EconomyEngine.instance().getmCyclesSinceTrade();
+		final int currentDay = EconomyEngine.instance().getCyclesSinceTrade();
 		route.setDelay(Math.max(0, mission.startOffset - currentDay));
 		mission.spawnedFleetFinishedJob = false;
 
@@ -148,7 +148,7 @@ public class LtvEconFleetRouteManager extends BaseRouteFleetManager implements F
 
 	private final TradeMission pickTradeMission() {
 		final Set<String> excludeList = SharedData.getData().getMarketsWithoutTradeFleetSpawn();
-		final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getmActiveMissions());
+		final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
 		final WeightedRandomPicker<TradeMission> missionPicker = new WeightedRandomPicker<>();
 
 		for (TradeMission m : missions) {

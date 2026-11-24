@@ -22,7 +22,7 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         data.socialCohesionDelta.modifyFlat(id, COHESION_BUFF, spec.name);
         data.classConsciousnessDelta.modifyFlat(id, CLASS_DEBUFF, spec.name);
 
-        for (CommodityDomain dom : EconomyEngine.instance().getmComDomains()) {
+        for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
             dom.getCell(data.marketID).getProductionStat().modifyPercent(
                 id, PRODUCTION_DEBUFF, spec.name
             );
@@ -36,7 +36,7 @@ public class ConvergenceFestivalPolicy extends MarketPolicy {
         data.socialCohesionDelta.unmodifyFlat(id);
         data.classConsciousnessDelta.unmodifyFlat(id);
 
-        for (CommodityDomain dom : EconomyEngine.instance().getmComDomains()) {
+        for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
             dom.getCell(data.marketID).getProductionStat().unmodifyPercent(id);
         }
 

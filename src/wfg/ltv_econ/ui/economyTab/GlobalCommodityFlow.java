@@ -168,7 +168,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W + largeLabelShift, LABEL_H) {
 
             public void buildUI() {
-                final float value = dom.getmTradeVolumeHistory();
+                final float value = dom.getTradeVolumeHistory();
                 final String txt = str("uiTitleSectorTradeVolume");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 
@@ -190,7 +190,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W + largeLabelShift, LABEL_H) {
 
             public void buildUI() {
-                final long value = dom.getmCreditActivityHistory();
+                final long value = dom.getCreditActivityHistory();
                 final String txt = str("uiTitleSectorTradeValue");
                 final String valueTxt = value < 1 ? "---" : NumFormat.formatCredit(value);
 
@@ -275,7 +275,7 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final TextWrapper textPanel = new TextWrapper(LABEL_W, LABEL_H) {
 
             public void buildUI() {
-                final float value = dom.getmInformalNode().prod;
+                final float value = dom.getInformalNode().prod;
                 final String txt = str("uiTitleInformalProd");
                 final String valueTxt = value < 1 ? "---" : NumFormat.engNotate(value);
 

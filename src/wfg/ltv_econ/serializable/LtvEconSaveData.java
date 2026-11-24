@@ -66,6 +66,7 @@ public class LtvEconSaveData implements Serializable {
         sector.getListenerManager().addListener(data.economyEngine, true);
         sector.addTransientScript(data.economyEngine);
         sector.addTransientScript(data.econRouteManager);
+        sector.addTransientScript(data.patrolRouteManager);
 
         StaticData.loadData(data);
 

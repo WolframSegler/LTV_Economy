@@ -62,27 +62,27 @@ public class FactionShipInventory implements Serializable {
         return this;
     }
 
-    public final InventoryShip get(final String hullId) {
+    public synchronized final InventoryShip get(final String hullId) {
         return ships.computeIfAbsent(hullId, k -> new InventoryShip(hullId));
     }
 
-    public final void addShip(final String hullId, int count) {
+    public synchronized final void addShip(final String hullId, int count) {
         get(hullId).addShip(count);
     }
 
-    public final void removeShip(String hullId, int count) {
+    public synchronized final void removeShip(String hullId, int count) {
         get(hullId).addShip(-count);
     }
 
-    public final void useShip(String hullId, int count) {
+    public synchronized final void useShip(String hullId, int count) {
         get(hullId).useShip(count);
     }
 
-    public final void freeShip(String hullId, int count) {
+    public synchronized final void freeShip(String hullId, int count) {
         get(hullId).freeShip(count);
     }
 
-    public final void registerShipLoss(String hullId, int count) {
+    public synchronized final void registerShipLoss(String hullId, int count) {
         get(hullId).registerShipLoss(count);
     }
 

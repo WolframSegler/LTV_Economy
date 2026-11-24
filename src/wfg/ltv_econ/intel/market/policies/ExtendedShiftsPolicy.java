@@ -19,7 +19,7 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
     public static final float CLASS_BUFF = 0.01f;
 
     public void apply(MarketPopulationData data) {
-        for (CommodityDomain dom : EconomyEngine.instance().getmComDomains()) {
+        for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
             dom.getCell(data.marketID).getProductionStat().modifyPercent(
                 id, PRODUCTION_BUFF, spec.name
             );
@@ -35,7 +35,7 @@ public class ExtendedShiftsPolicy extends MarketPolicy {
             ind.getSupplyBonus().unmodifyPercent(id);
         }
 
-        for (CommodityDomain dom : EconomyEngine.instance().getmComDomains()) {
+        for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
             dom.getCell(data.marketID).getProductionStat().unmodifyPercent(id);
         }
         

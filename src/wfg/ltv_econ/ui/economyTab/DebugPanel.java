@@ -144,7 +144,7 @@ public final class DebugPanel extends UIContainer implements UIBuildableAPI {
                 final StringBuilder sb = new StringBuilder();
                 sb.append("[\n");
                 boolean first = true;
-                for (CommodityDomain dom : engine.getmComDomains()) {
+                for (CommodityDomain dom : engine.getComDomains()) {
                     for (CommodityCell cell : dom.getAllCells()) {
                         if (!first) {
                             sb.append(",\n");

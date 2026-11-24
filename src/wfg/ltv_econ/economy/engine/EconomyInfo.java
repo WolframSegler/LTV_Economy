@@ -223,7 +223,7 @@ public class EconomyInfo {
         for (CommodityCell cell : dom.getAllCells())
         total += cell.getTargetQuantum(true);
 
-        return (long) (total + dom.getmInformalNode().imports);
+        return (long) (total + dom.getInformalNode().imports);
     }
 
     public final long getGlobalProduction(String comID) {
@@ -233,7 +233,7 @@ public class EconomyInfo {
         for (CommodityCell cell : dom.getAllCells())
         total += cell.getProduction(true);
 
-        return (long) (total + dom.getmInformalNode().prod);
+        return (long) (total + dom.getInformalNode().prod);
     }
 
     public final long getGlobalSurplus(String comID) {

@@ -224,7 +224,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
             final TextWrapper textPanel = new TextWrapper(170, 0) {
                 @Override
                 public void buildUI() {
-                    final long value = engine.getComDomain(comID).getmCreditActivityHistory();
+                    final long value = engine.getComDomain(comID).getCreditActivityHistory();
                     final String txt = str("uiTitleGlobalMarketValue");
                     final String valueTxt = value < 1l ? "---" : NumFormat.formatCredit(value);
 

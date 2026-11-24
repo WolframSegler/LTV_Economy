@@ -46,7 +46,7 @@ public class GeneralStrikeEvent extends MarketEvent {
         cooldownDaysRemaining = BASE_DUR + BASE_COOLDOWN;
 
         final String marketID = data.marketID;
-        for (CommodityDomain dom : EconomyEngine.instance().getmComDomains()) {
+        for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
             final CommodityCell cell = dom.getCell(marketID);
             cell.getProductionStat().modifyMult(id, PROD_MULT, spec.name);
             cell.getConsumptionStat().modifyMult(id, PROD_MULT, spec.name);
@@ -73,7 +73,7 @@ public class GeneralStrikeEvent extends MarketEvent {
         active = false;
 
         final String marketID = data.marketID;
-        for (CommodityDomain dom : EconomyEngine.instance().getmComDomains()) {
+        for (CommodityDomain dom : EconomyEngine.instance().getComDomains()) {
             final CommodityCell cell = dom.getCell(marketID);
             cell.getProductionStat().unmodifyMult(id);
             cell.getConsumptionStat().unmodifyMult(id);

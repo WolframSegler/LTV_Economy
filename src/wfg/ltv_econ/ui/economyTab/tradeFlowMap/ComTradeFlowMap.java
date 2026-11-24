@@ -802,7 +802,7 @@ public final class ComTradeFlowMap extends UIContainer implements
     }
 
     private static final List<TradeMission> getFilteredMissions(String comID) {
-        final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getmActiveMissions());
+        final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
 
         missions.removeIf(m -> !m.cargo.stream().anyMatch(c -> c.comID.equals(comID)) || m.src == null || m.dest == null);
         missions.removeIf(m -> TradeFilters.exporterFactionBlacklist.contains(m.src.getFactionId()));

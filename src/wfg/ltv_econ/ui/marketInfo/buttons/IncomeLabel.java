@@ -58,7 +58,7 @@ public final class IncomeLabel extends DockClickable<IncomeBreakdownDialog> impl
         tooltip.builder = (tp, expanded) -> {
             final MarketLedger ledger = MarketFinanceRegistry.instance().getLedger(market);
             final EconomyInfo info = EconomyEngine.instance().mInfo;
-            final List<CommodityDomain> domains = EconomyEngine.instance().getmComDomains();
+            final List<CommodityDomain> domains = EconomyEngine.instance().getComDomains();
             final FactionAPI faction = market.getFaction();
             final Color base = faction.getBaseUIColor();
             final Color dark = faction.getDarkUIColor();

@@ -577,7 +577,7 @@ public final class TooltipUtils {
 
             tp.addPara(str("uiTpTxtAccessibility2"), opad, highlight,Strings.X + Float.toString(EconConfig.FORCED_FUEL_IMPORT_COST_MULT));
 
-            tp.addPara(str("uiTpTxtAccessibility3"), pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getmActiveMissions().size()));
+            tp.addPara(str("uiTpTxtAccessibility3"), pad, highlight, NumFormat.engNotate(EconomyEngine.instance().getActiveMissions().size()));
         }
         };
     }

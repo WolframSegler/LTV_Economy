@@ -146,7 +146,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         final CampaignClockAPI clock = Global.getSector().getClock();
         final int dayKey = (clock.getCycle() << 10) + (clock.getMonth() << 5) + clock.getDay();
 
-        if (mDayKeyTracker == -1) { mDayKeyTracker = dayKey; return;}
+        if (mDayKeyTracker == -1) { mDayKeyTracker = dayKey; return; }
         if (mDayKeyTracker == dayKey) return;
 
         mDayKeyTracker = dayKey;
@@ -237,7 +237,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         mLoop.refreshMarketsHard();
     }
 
-    public Set<String> getmRegisteredMarkets() {
+    public Set<String> getRegisteredMarkets() {
         return Collections.unmodifiableSet(mRegisteredMarkets);
     }
 
@@ -261,7 +261,7 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return mMarketData.get(marketID);
     }
 
-    public final List<CommodityDomain> getmComDomains() {
+    public final List<CommodityDomain> getComDomains() {
         return new ArrayList<>(mComDomains.values());
     }
 
@@ -313,15 +313,15 @@ public class EconomyEngine implements Serializable, EveryFrameScript, PlayerColo
         return mFactionShipInventories.computeIfAbsent(factionID, k -> new FactionShipInventory(factionID));
     }
 
-    public final List<TradeMission> getmActiveMissions() {
+    public final List<TradeMission> getActiveMissions() {
         return Collections.unmodifiableList(mActiveMissions);
     }
 
-    public final List<TradeMission> getmPastMissions() {
+    public final List<TradeMission> getPastMissions() {
         return Collections.unmodifiableList(mPastMissions);
     }
 
-    public final int getmCyclesSinceTrade() {
+    public final int getCyclesSinceTrade() {
         return mCyclesSinceTrade;
     }
 

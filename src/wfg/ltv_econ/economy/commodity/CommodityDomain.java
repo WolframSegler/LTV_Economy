@@ -139,11 +139,11 @@ public class CommodityDomain implements Serializable {
         return exporters;
     }
 
-    public final InformalExchangeNode getmInformalNode() {
+    public final InformalExchangeNode getInformalNode() {
         return mInformalNode;
     }
 
-    public final List<ComTradeFlow> getmTradeFlows() {
+    public final List<ComTradeFlow> getTradeFlows() {
         return mTradeFlows;
     }
 
@@ -152,13 +152,13 @@ public class CommodityDomain implements Serializable {
         return mTradeFlows;
     }
 
-    public final float getmTradeVolumeHistory() {
+    public final float getTradeVolumeHistory() {
         float total = 0f;
         for (int i = 0; i < mTradeVolumeHistory.length; i++) total += mTradeVolumeHistory[i];
         return total;
     }
 
-    public final long getmCreditActivityHistory() {
+    public final long getCreditActivityHistory() {
         long total = 0l;
         for (int i = 0; i < mCreditActivityHistory.length; i++) total += mCreditActivityHistory[i];
         return total;

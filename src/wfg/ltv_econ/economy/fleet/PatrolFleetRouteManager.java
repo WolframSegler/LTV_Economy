@@ -5,12 +5,15 @@ import static wfg.ltv_econ.constant.strings.Income.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignClockAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
@@ -24,14 +27,19 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.native_ui.util.ArrayMap;
 
-public class PatrolFleetRouteManager {
+public final class PatrolFleetRouteManager implements EveryFrameScript {
+    private static final int MAX_DAYS_BEFORE_PRUNING = 90;
+
     private final HashMap<Long, PatrolMission> missions = new HashMap<>(48);
+    private int mDayKeyTracker = -1;
 
     public final synchronized void freePatrol(RouteData route) {
         final PatrolMission mission = missions.get(route.getSeed());
-        if (mission == null) return;
+        if (mission != null) freePatrol(mission);
+    }
 
-        missions.remove(route.getSeed());
+    public final synchronized void freePatrol(PatrolMission mission) {
+        missions.remove(mission.uniqueID);
         if (!mission.usedFactionFleet) return;
 
         final FactionShipInventory inv = EconomyEngine.instance().getFactionShipInventory(mission.factionID);
@@ -41,10 +49,11 @@ public class PatrolFleetRouteManager {
     }
 
     public final synchronized void registerPatrolLoss(RouteData route) {
-        final PatrolMission mission = missions.get(route.getSeed());
+        final long seed = route.getSeed();
+        final PatrolMission mission = missions.get(seed);
         if (mission == null) return;
 
-        missions.remove(route.getSeed());
+        missions.remove(seed);
         if (!mission.usedFactionFleet) return;
 
         final FactionShipInventory inv = EconomyEngine.instance().getFactionShipInventory(mission.factionID);
@@ -53,10 +62,40 @@ public class PatrolFleetRouteManager {
         }
     }
 
+    @Override
+    public final void advance(float delta) {
+        final CampaignClockAPI clock = Global.getSector().getClock();
+        final int dayKey = (clock.getCycle() << 10) + (clock.getMonth() << 5) + clock.getDay();
+
+        if (mDayKeyTracker == -1) { mDayKeyTracker = dayKey; return; }
+        if (mDayKeyTracker == dayKey) return;
+
+        mDayKeyTracker = dayKey;
+        advance(1);
+    }
+
+    private final void advance(int days) {
+        final Iterator<Map.Entry<Long, PatrolMission>> it = missions.entrySet().iterator();
+        while (it.hasNext()) {
+            final PatrolMission m = it.next().getValue();
+            m.daysRemaining -= days;
+            if (m.usedFactionFleet) {
+                final FactionShipInventory inv = EconomyEngine.instance().getFactionShipInventory(m.factionID);
+                for (Map.Entry<String, Integer> entry : m.allocatedShips.singleEntrySet()) {
+                    inv.freeShip(entry.getKey(), entry.getValue());
+                }
+            }
+            it.remove();
+        }
+    }
+
+    @Override public boolean runWhilePaused() { return false; }
+    @Override public boolean isDone() { return false; }
+
     public final synchronized void registerMission(RouteData route) {
+        final long seed = route.getSeed();
         final float fp = route.getExtra().getStrengthModifiedByDamage();
-        final PatrolMission mission = new PatrolMission(route.getMarket());
-        missions.put(route.getSeed(), mission);
+        final PatrolMission mission = new PatrolMission(route.getMarket(), seed);
 
         final FactionShipInventory inv = EconomyEngine.instance().getFactionShipInventory(mission.factionID);
         final FactionAPI faction = Global.getSector().getFaction(mission.factionID);
@@ -82,6 +121,7 @@ public class PatrolFleetRouteManager {
             }
         }
         if (candidates.isEmpty()) return;
+        missions.put(seed, mission);
 
         ShipAllocator.allocateShipsForFleetPoints(fp, faction, mission.allocatedShips, candidates);
 
@@ -104,11 +144,14 @@ public class PatrolFleetRouteManager {
     public class PatrolMission implements Serializable {
         public final ArrayMap<String, Integer> allocatedShips = new ArrayMap<>(8);
         public final String factionID;
+        public final long uniqueID;
         
         public boolean usedFactionFleet = false;
+        public int daysRemaining = MAX_DAYS_BEFORE_PRUNING;
 
-        public PatrolMission(MarketAPI source) {
+        public PatrolMission(MarketAPI source, long id) {
             factionID = source.getFactionId();
+            uniqueID = id;
         }
     }
 

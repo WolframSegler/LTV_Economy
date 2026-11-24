@@ -66,7 +66,7 @@ public class ShipProductionManager {
         final List<PlannedOrder> plannedOrders = inv.plannedOrders;
         final List<ShipProductionOrder> activeQueue = inv.activeQueue;
 
-        final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getmActiveMissions());
+        final List<TradeMission> missions = new ArrayList<>(EconomyEngine.instance().getActiveMissions());
         missions.removeIf(m -> !m.src.getFactionId().equals(factionID));
 
 
