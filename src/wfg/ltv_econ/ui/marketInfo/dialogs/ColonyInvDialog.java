@@ -26,12 +26,12 @@ import wfg.ltv_econ.economy.engine.EconomyEngine;
 import wfg.ltv_econ.economy.market.MarketPopulationData;
 import wfg.ltv_econ.economy.registry.MarketFinanceRegistry;
 import wfg.ltv_econ.ui.marketInfo.LtvIndustryListPanel;
-import wfg.native_ui.ui.functional.ClickHandler;
 import wfg.native_ui.ui.dialog.DialogPanel;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
-import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.CellAlg;
+import wfg.native_ui.ui.table.SortableTable.ColumnData;
+import wfg.native_ui.ui.table.SortableTable.RowData;
 import wfg.native_ui.ui.widget.Slider;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
@@ -274,14 +274,14 @@ public final class ColonyInvDialog extends DialogPanel {
         );
 
         table.addHeaders(
-            "", 55, null, true, false, 1,
-            str("uiTableCommodityTitle"), 150, null, true, true, 1,
-            str("uiTableStored"), 95, null, false, false, -1,
-            str("uiTableConsumed"), 110, str("uiTableConsumedTpTxt"), false, false, -1,
-            str("uiTableBaseProd"), 130, str("uiTableBaseProdTpTxt"), false, false, -1,
-            str("uiTableRealProd"), 130, str("uiTableRealProdTpTxt"), false, false, -1,
-            str("uiTableBaseBalance"), 135, str("uiTableBaseBalanceTpTxt"), false, false, -1,
-            str("uiTableRealBalance"), 125, str("uiTableRealBalanceTpTxt"), false, false, -1
+            new ColumnData("", 55, null, false, true, false, 1),
+            new ColumnData(str("uiTableCommodityTitle"), 150, null, true, true, true, 1),
+            new ColumnData(str("uiTableStored"), 95, null, true, false, false, -1),
+            new ColumnData(str("uiTableConsumed"), 110, str("uiTableConsumedTpTxt"), true, false, false, -1),
+            new ColumnData(str("uiTableBaseProd"), 130, str("uiTableBaseProdTpTxt"), true, false, false, -1),
+            new ColumnData(str("uiTableRealProd"), 130, str("uiTableRealProdTpTxt"), true, false, false, -1),
+            new ColumnData(str("uiTableBaseBalance"), 135, str("uiTableBaseBalanceTpTxt"), true, false, false, -1),
+            new ColumnData(str("uiTableRealBalance"), 125, str("uiTableRealBalanceTpTxt"), true, false, false, -1)
         );
 
         for (CommoditySpecAPI com : EconomyConstants.econCommoditySpecs) {
@@ -315,24 +315,23 @@ public final class ColonyInvDialog extends DialogPanel {
             }
             final String numFont = failed ? Fonts.DEFAULT_SMALL : "graphics/fonts/insignia17LTaa.fnt";
 
-            table.addCell(comIcon, CellAlg.MID, null, null);
-            table.addCell(com.getName(), CellAlg.LEFT, com.getName(), base);
-            table.addCell(settings.createLabel(NumFormat.engNotate(stored), numFont), CellAlg.LEFTOPAD, stored, null);
-            table.addCell(settings.createLabel(NumFormat.engNotate(demand), numFont), CellAlg.LEFTOPAD, demand, negative);
-            table.addCell(settings.createLabel(NumFormat.engNotate(baseProd), numFont), CellAlg.LEFTOPAD, baseProd, highlight);
-            table.addCell(settings.createLabel(NumFormat.engNotate(modifiedProd), numFont), CellAlg.LEFTOPAD, modifiedProd, highlight);
-            table.addCell(settings.createLabel(NumFormat.engNotate(baseBalance), numFont), CellAlg.LEFTOPAD, baseBalance, baseBlcColor);
-            table.addCell(settings.createLabel(NumFormat.engNotate(realBalance), numFont), CellAlg.LEFTOPAD, realBalance, realBlcColor);
-
-            final ClickHandler<TableRow> rowSelectedRun = (row, isLeftClick) -> {
-                new SetNotExportableStockDialog(cell).show(0.3f, 0.3f);
-            };
-
-            table.pushRow(
-                null, (tp, exp) -> {
-                    final String value = NumFormat.engNotate(cell.mNonExportableStock);
-                    tp.addPara(str("uiTpTxtPressToSetNotExportableStock") + " • " + value, 0f, highlight, value);
-                }, rowSelectedRun, CodexDataV2.getCommodityEntryId(com.getId()), null, null
+            table.addRow(new RowData()
+                .cell(comIcon, CellAlg.MID, null, null)
+                .cell(com.getName(), CellAlg.LEFT, com.getName(), base)
+                .cell(settings.createLabel(NumFormat.engNotate(stored), numFont), CellAlg.LEFTOPAD, stored, null)
+                .cell(settings.createLabel(NumFormat.engNotate(demand), numFont), CellAlg.LEFTOPAD, demand, negative)
+                .cell(settings.createLabel(NumFormat.engNotate(baseProd), numFont), CellAlg.LEFTOPAD, baseProd, highlight)
+                .cell(settings.createLabel(NumFormat.engNotate(modifiedProd), numFont), CellAlg.LEFTOPAD, modifiedProd, highlight)
+                .cell(settings.createLabel(NumFormat.engNotate(baseBalance), numFont), CellAlg.LEFTOPAD, baseBalance, baseBlcColor)
+                .cell(settings.createLabel(NumFormat.engNotate(realBalance), numFont), CellAlg.LEFTOPAD, realBalance, realBlcColor)
+                .onClicked((row, isLeftClick) -> new SetNotExportableStockDialog(cell).show(0.3f, 0.3f))
+                .styler((row) -> {
+                    row.tooltip.builder = (tp, exp) -> {
+                        final String value = NumFormat.engNotate(cell.mNonExportableStock);
+                        tp.addPara(str("uiTpTxtPressToSetNotExportableStock") + " • " + value, 0f, highlight, value);
+                    };
+                    row.tooltip.codexID = CodexDataV2.getCommodityEntryId(com.getId());
+                })
             );
         }
 

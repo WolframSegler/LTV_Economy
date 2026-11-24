@@ -24,6 +24,8 @@ import wfg.native_ui.ui.core.UIBuildableAPI;
 import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.CellAlg;
+import wfg.native_ui.ui.table.SortableTable.ColumnData;
+import wfg.native_ui.ui.table.SortableTable.RowData;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.Button.CutStyle;
@@ -65,9 +67,9 @@ public final class BalancerChangesPanel extends UIContainer implements UIBuildab
         );
 
         table.addHeaders(
-            str("uiTableIndustryTitle"), indW + pad, null, false, false, -1,
-            str("uiTableIndustryBalancerMove"), actionW + pad, null, false, false, -1,
-            str("uiTableColony"), nameW, null, false, false, -1
+            new ColumnData(str("uiTableIndustryTitle"), indW + pad, null, true, false, false, -1),
+            new ColumnData(str("uiTableIndustryBalancerMove"), actionW + pad, null, true, false, false, -1),
+            new ColumnData(str("uiTableColony"), nameW, null, true, false, false, -1)
         );
 
         final List<IndustryChange> changes = mState.changes();
@@ -94,12 +96,11 @@ public final class BalancerChangesPanel extends UIContainer implements UIBuildab
             final Color actionColor = (sourceSpec != null && targetSpec != null) ?
                 UPGRADED_IND_COLOR : sourceSpec != null ? REMOVED_IND_COLOR : ADDED_IND_COLOR;
 
-            table.addCell(spriteRenderer, CellAlg.MID, changeIdx, null);
-            table.addCell(actionStr, CellAlg.MID, actionStr, actionColor);
-            table.addCell(colonyPanel, CellAlg.MID, market.getName(), null);
-
-            table.pushRow(
-                null, null, null, CodexDataV2.getIndustryEntryId(change.targetIndustryId()), null, null
+            table.addRow(new RowData()
+                .cell(spriteRenderer, CellAlg.MID, changeIdx, null)
+                .cell(actionStr, CellAlg.MID, actionStr, actionColor)
+                .cell(colonyPanel, CellAlg.MID, market.getName(), null)
+                .styler(row -> row.tooltip.codexID = CodexDataV2.getIndustryEntryId(change.targetIndustryId()))
             );
         }
 

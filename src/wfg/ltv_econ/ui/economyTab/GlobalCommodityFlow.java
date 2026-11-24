@@ -30,6 +30,8 @@ import wfg.native_ui.ui.visual.PieChart;
 import wfg.native_ui.ui.table.SortableTable;
 import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.CellAlg;
+import wfg.native_ui.ui.table.SortableTable.ColumnData;
+import wfg.native_ui.ui.table.SortableTable.RowData;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.visual.PieChart.PieSlice;
 import wfg.native_ui.ui.visual.TextWrapper;
@@ -294,27 +296,23 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
                 str("uiCtrlTxt"), str("uiClickTxt")
             });
         };
+
         { // Top 5 producers
         final SortableTable table = new SortableTable(TABLE_W, TABLE_H);
 
         table.addHeaders(
-            "", 40, null, true, false, 1, // Icon header
-            str("uiTableColony"), 100, str("uiTableColonyNameTitle"), true, true, 1,
-            str("uiTableProductionTitle"), 100, strf("uiTableDailyProdTitle", com.getName()), false, false, -1
+            new ColumnData("", 40, null, false, true, false, 1), // Icon header
+            new ColumnData(str("uiTableColony"), 100, str("uiTableColonyNameTitle"), true, true, true, 1),
+            new ColumnData(str("uiTableProductionTitle"), 100, strf("uiTableDailyProdTitle", com.getName()), true, false, false, -1)
         );
 
         final ArrayList<CommodityCell> producers = dom.getSortedByProduction(5);
 
         for (CommodityCell cell : producers) {
-
             final String iconPath = cell.mMarket.getFaction().getCrest();
             final SpriteElement iconPanel = new SpriteElement(24, 24, iconPath, null, null);
             final Color textColor = cell.mMarket.getFaction().getBaseUIColor();
             final float value = cell.getProduction(true);
-
-            table.addCell(iconPanel, CellAlg.LEFTPAD, null, null);
-            table.addCell(cell.mMarket.getName(), CellAlg.LEFT, null, textColor);
-            table.addCell(NumFormat.engNotate(value), CellAlg.MID, value, textColor);
 
             final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                 if (!NativeUiUtils.isCtrlDown() || !isLeftClick) return;
@@ -325,8 +323,12 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
                 }
             };
 
-            table.pushRow(
-                null, tableTp, run, null, null, null 
+            table.addRow(new RowData()
+                .cell(iconPanel, CellAlg.LEFTPAD, null, null)
+                .cell(cell.mMarket.getName(), CellAlg.LEFT, null, textColor)
+                .cell(NumFormat.engNotate(value), CellAlg.MID, value, textColor)
+                .styler(row -> row.tooltip.builder = tableTp)
+                .onClicked(run)
             );
         }
 
@@ -345,23 +347,18 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
         final SortableTable table = new SortableTable(TABLE_W, TABLE_H);
 
         table.addHeaders(
-            "", 40, null, true, false, 1, // Icon header
-            str("uiTableColony"), 100, str("uiTableColonyNameTitle"), true, true, 1,
-            str("uiTableDemandTitle"), 100, strf("uiTableDailyConsumptionTitle", com.getName()), false, false, -1
+            new ColumnData("", 40, null, false, true, false, 1), // Icon header
+            new ColumnData(str("uiTableColony"), 100, str("uiTableColonyNameTitle"), true, true, true, 1),
+            new ColumnData(str("uiTableDemandTitle"), 100, strf("uiTableDailyConsumptionTitle", com.getName()), true, false, false, -1)
         );
 
         final ArrayList<CommodityCell> consumers = dom.getSortedByTargetQuantum(5);
 
         for (CommodityCell cell : consumers) {
-
             final String iconPath = cell.mMarket.getFaction().getCrest();
             final SpriteElement iconPanel = new SpriteElement(24, 24, iconPath, null, null);
             final Color textColor = cell.mMarket.getFaction().getBaseUIColor();
             final float value = cell.getConsumption(true);
-
-            table.addCell(iconPanel, CellAlg.LEFTPAD, null, null);
-            table.addCell(cell.mMarket.getName(), CellAlg.LEFT, null, textColor);
-            table.addCell(NumFormat.engNotate(value), CellAlg.MID, value, textColor);
 
             final ClickHandler<TableRow> run = (row, isLeftClick) -> {
                 if (!NativeUiUtils.isCtrlDown() || !isLeftClick) return;
@@ -372,8 +369,12 @@ public final class GlobalCommodityFlow extends UIContainer implements UIBuildabl
                 }
             };
 
-            table.pushRow(
-                null, tableTp, run, null, null, null 
+            table.addRow(new RowData()
+                .cell(iconPanel, CellAlg.LEFTPAD, null, null)
+                .cell(cell.mMarket.getName(), CellAlg.LEFT, null, textColor)
+                .cell(NumFormat.engNotate(value), CellAlg.MID, value, textColor)
+                .styler(row -> row.tooltip.builder = tableTp)
+                .onClicked(run)
             );
         }
 

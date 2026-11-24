@@ -43,7 +43,6 @@ import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.InputSnapshotComp;
 import wfg.native_ui.ui.component.NativeComponents;
-import wfg.native_ui.ui.functional.ClickHandler;
 import wfg.native_ui.ui.component.OutlineComp.OutlineType;
 import wfg.native_ui.ui.component.TooltipComp.TooltipBuilder;
 import wfg.native_ui.ui.core.UIContainerAPI;
@@ -53,8 +52,9 @@ import wfg.native_ui.ui.widget.Button;
 import wfg.native_ui.ui.widget.CheckboxButton;
 import wfg.native_ui.ui.widget.Button.CutStyle;
 import wfg.native_ui.ui.table.SortableTable;
-import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.CellAlg;
+import wfg.native_ui.ui.table.SortableTable.ColumnData;
+import wfg.native_ui.ui.table.SortableTable.RowData;
 import wfg.native_ui.ui.visual.AbstractSpriteElement.SpriteElement;
 import wfg.native_ui.ui.visual.TextWrapper;
 import wfg.native_ui.ui.functional.CallbackRunnable;
@@ -504,7 +504,7 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
         consumerButton.setAppendShortcutToText(true);
 
         section.add(producerButton).inTL(0, -btnHeight);
-        section.add(consumerButton).inTL(btnWidth, -btnHeight);
+        section.add(consumerButton).leftOfBottom(producerButton, 0f);
         
         if (mode == 0) {
             producerButton.setChecked(true);
@@ -537,15 +537,15 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
         table.tooltipWidth = 500;
         table.addHeaders( // 876 pixels wide
-            "", 0.04 * SECT3_WIDTH, null, true, false, 1,
-            str("uiTableColony"), 0.18 * SECT3_WIDTH, str("uiTableTpTxtColony"), true, true, 1,
-            str("uiTableSize"), 0.09 * SECT3_WIDTH, str("uiTableSizeTpTxt"), false, false, -1,
-            str("uiTableFaction"), 0.17 * SECT3_WIDTH, str("uiTableFactionTpTxt"), false, false, -1,
-            str("uiTableQuantity"), 0.05 * SECT3_WIDTH, quantityTooltip, true, true, 2,
-            "", 0.13 * SECT3_WIDTH, null, true, false, 2,
-            str("uiTableAccessibility"), 0.11 * SECT3_WIDTH, str("uiTableAccessibilityTpTxt"), false, false, -1,
-            str("uiTableMarketShare"), 0.12 * SECT3_WIDTH, marketTpDesc, false, false, -1,
-            creditHeader, 0.11 * SECT3_WIDTH, creditTpDesc, false, false, -1
+            new ColumnData("", 0.04f * SECT3_WIDTH, null, false, true, false, 1),
+            new ColumnData(str("uiTableColony"), 0.18f * SECT3_WIDTH, str("uiTableTpTxtColony"), true, true, true, 1),
+            new ColumnData(str("uiTableSize"), 0.09f * SECT3_WIDTH, str("uiTableSizeTpTxt"), true, false, false, -1),
+            new ColumnData(str("uiTableFaction"), 0.17f * SECT3_WIDTH, str("uiTableFactionTpTxt"), true, false, false, -1),
+            new ColumnData(str("uiTableQuantity"), 0.05f * SECT3_WIDTH, quantityTooltip, true, true, true, 2),
+            new ColumnData("", 0.13f * SECT3_WIDTH, null, false, true, false, 2),
+            new ColumnData(str("uiTableAccessibility"), 0.11f * SECT3_WIDTH, str("uiTableAccessibilityTpTxt"), true, false, false, -1),
+            new ColumnData(str("uiTableMarketShare"), 0.12f * SECT3_WIDTH, marketTpDesc, true, false, false, -1),
+            new ColumnData(creditHeader, 0.11f * SECT3_WIDTH, creditTpDesc, true, false, false, -1)
         );
 
         final EconomyEngine engine = EconomyEngine.instance();
@@ -588,40 +588,38 @@ public final class ComDetailDialog extends DialogPanel implements HasInputSnapsh
 
             final Color textColor = market.getFaction().getBaseUIColor();
 
-            table.addCell(iconPanel, CellAlg.LEFTPAD, null, null);
-            table.addCell(market.getName(), CellAlg.LEFTPAD, null, textColor);
-            table.addCell(market.getSize(), CellAlg.MID, null, textColor);
-            table.addCell(factionName, CellAlg.MID, null, textColor);
-            table.addCell(NumFormat.engNotate(quantity), CellAlg.MID, quantity, null);
-            table.addCell(infoBar, CellAlg.MID, null, null);
-            table.addCell(accessibility + "%", CellAlg.MID, accessibility, null);
-            table.addCell(marketShare + "%", CellAlg.MID, marketShare, null);
-            table.addCell(NumFormat.formatCredit(Math.abs(incomeValue)), CellAlg.MID, Math.abs(incomeValue), null);
+            final RowData rowData = new RowData()
+                .cell(iconPanel, CellAlg.LEFTPAD, null, null)
+                .cell(market.getName(), CellAlg.LEFTPAD, null, textColor)
+                .cell(market.getSize(), CellAlg.MID, null, textColor)
+                .cell(factionName, CellAlg.MID, null, textColor)
+                .cell(NumFormat.engNotate(quantity), CellAlg.MID, quantity, null)
+                .cell(infoBar, CellAlg.MID, null, null)
+                .cell(accessibility + "%", CellAlg.MID, accessibility, null)
+                .cell(marketShare + "%", CellAlg.MID, marketShare, null)
+                .cell(NumFormat.formatCredit(Math.abs(incomeValue)), CellAlg.MID, Math.abs(incomeValue), null)
+                .customData(market)
+                .onClicked((row, isLeftClick) -> {
+                    selectedMarket = (MarketAPI) row.getData().customData;
+                    updateSection1();
+                    updateSection2();
+                })
+                .styler(row -> {
+                    row.tooltip.width = 450f;
+                    row.tooltip.builder = createSection3RowsTooltip(market, market.getName(), textColor);
 
-            // Tooltip
-            table.getPendingRow().tooltip.width = 450f;
-            final TooltipBuilder tp = createSection3RowsTooltip(market, market.getName(), textColor);
+                    row.glow.color = mFaction.getDarkUIColor();
+                    if (mMarket == market) {
+                        row.outline.type = OutlineType.TEX_THIN;
+                        row.outline.color = base;
+                    }
+                });
 
-            if (mMarket == market) {
-                table.getPendingRow().outline.type = OutlineType.TEX_THIN;
-                table.getPendingRow().outline.color = base;
-            }
-
-            final ClickHandler<TableRow> rowSelectedRunnable = (row, isLeftClick) -> {
-                selectedMarket = (MarketAPI) row.customData;
-                updateSection1();
-                updateSection2();
-            };
-
-            table.pushRow(
-                market, tp, rowSelectedRunnable, null,
-                null, mFaction.getDarkUIColor()
-            );
-
-            if (mMarket == market) table.selectLastRow();
+            table.addRow(rowData);
+            if (mMarket == market) table.selectRow(rowData);
         }
 
-        section.add(table).inTL(pad, 0f);
+        section.add(table).inTL(0f, 0f);
 
         table.sortRows(6);
     }

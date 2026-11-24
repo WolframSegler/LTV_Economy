@@ -28,12 +28,12 @@ import wfg.native_ui.internal.ui.core.UIContainer;
 import wfg.native_ui.ui.ComponentFactory;
 import wfg.native_ui.ui.component.BackgroundComp;
 import wfg.native_ui.ui.component.NativeComponents;
-import wfg.native_ui.ui.functional.ClickHandler;
 import wfg.native_ui.ui.core.UIContainerAPI;
 import wfg.native_ui.ui.core.UIElementFlags.HasBackground;
 import wfg.native_ui.ui.table.SortableTable;
-import wfg.native_ui.ui.table.SortableTable.TableRow;
 import wfg.native_ui.ui.table.SortableTable.CellAlg;
+import wfg.native_ui.ui.table.SortableTable.ColumnData;
+import wfg.native_ui.ui.table.SortableTable.RowData;
 import wfg.native_ui.util.NumFormat;
 
 public final class ColonyPopulationTable extends UIContainer implements HasBackground {
@@ -65,59 +65,54 @@ public final class ColonyPopulationTable extends UIContainer implements HasBackg
         final int iconW = 120;
         
         clearChildren();
-        final SortableTable table = new SortableTable(getWidth(), getHeight(), 18, rowH);
+        final SortableTable table = new SortableTable(getWidth(), getHeight(), 18, rowH) {
+            @Override
+            protected String getEmptyMessage() {
+                return str("uiNoStaticAssets");
+            }
+        };
 
         table.addHeaders(
-            str("uiTableColonyNameTitle"), nameW + pad, null, false, false, -1,
-            str("uiTableSize"), 70, null, false, false, -1,
-            str("marketPopDataHealthTxt"), iconW, str("uiTpTxtShortHealth"), false, false, -1,
-            str("marketPopDataHappinessTxt"), iconW, str("uiTpTxtShortHappiness"), false, false, -1,
-            str("marketPopDataCohesionShortTxt"), iconW, str("uiTpTxtShortCohesion"), false, false, -1,
-            str("marketPopDataConsciousnessShort"), iconW, str("uiTpTxtShortClassConsciousness"), false, false, -1,
-            str("uiTableCreditReserves"), 100, str("uiTableTpTxtCreditReserves"), false, false, -1,
-            str("uiTableEmployment"), 112, str("uiTableTpTxtEmployment"), false, false, -1
+            new ColumnData(str("uiTableColonyNameTitle"), nameW + pad, null, true, false, false, -1),
+            new ColumnData(str("uiTableSize"), 70, null, true, false, false, -1),
+            new ColumnData(str("marketPopDataHealthTxt"), iconW, str("uiTpTxtShortHealth"), true, false, false, -1),
+            new ColumnData(str("marketPopDataHappinessTxt"), iconW, str("uiTpTxtShortHappiness"), true, false, false, -1),
+            new ColumnData(str("marketPopDataCohesionShortTxt"), iconW, str("uiTpTxtShortCohesion"), true, false, false, -1),
+            new ColumnData(str("marketPopDataConsciousnessShort"), iconW, str("uiTpTxtShortClassConsciousness"), true, false, false, -1),
+            new ColumnData(str("uiTableCreditReserves"), 100, str("uiTableTpTxtCreditReserves"), true, false, false, -1),
+            new ColumnData(str("uiTableEmployment"), 112, str("uiTableTpTxtEmployment"), true, false, false, -1)
         );
 
-        if (engine.getMarketPopulationData().size() > 0) {
-            for (MarketPopulationData data : engine.getMarketPopulationData().values()) {
-                final UIContainerAPI colonyPanel = new UIContainer(nameW, rowH);
-                final MarketAPI market = data.market;
-    
-                colonyPanel.add(getPlanetInfoContainer(market, nameW, rowH));
-    
-                final int iconS = rowH/3;
-                final int PairW = iconW - opad;
-                final HealthPair healthPair = new HealthPair(PairW, iconS, data, base, null);
-                final HappinessPair happinessPair = new HappinessPair(PairW, iconS, data, base, null);
-                final CohesionPair cohesionPair = new CohesionPair(PairW, iconS, data, base, null);
-                final ConsciousnessPair consciousnessPair = new ConsciousnessPair(PairW, iconS, data, base, null);
+        for (MarketPopulationData data : engine.getMarketPopulationData().values()) {
+            final UIContainerAPI colonyPanel = new UIContainer(nameW, rowH);
+            final MarketAPI market = data.market;
 
-                final var cond = WorkerPoolRegistry.get(market);
-                final int employment = Math.round(100f - cond.getFreeWorkerRatio()*100f);
+            colonyPanel.add(getPlanetInfoContainer(market, nameW, rowH));
 
-                final long credits = engine.getCredits(data.marketID);
-                final Color creditColor = credits < 0l ? negative : highlight;
+            final int iconS = rowH/3;
+            final int PairW = iconW - opad;
+            final HealthPair healthPair = new HealthPair(PairW, iconS, data, base, null);
+            final HappinessPair happinessPair = new HappinessPair(PairW, iconS, data, base, null);
+            final CohesionPair cohesionPair = new CohesionPair(PairW, iconS, data, base, null);
+            final ConsciousnessPair consciousnessPair = new ConsciousnessPair(PairW, iconS, data, base, null);
 
-                table.addCell(colonyPanel, CellAlg.LEFT, market.getDaysInExistence(), null);
-                table.addCell(market.getSize(), CellAlg.MID, null, null);
-                table.addCell(healthPair, CellAlg.LEFTOPAD, data.getHealth(), null);
-                table.addCell(happinessPair, CellAlg.LEFTOPAD, data.getHappiness(), null);
-                table.addCell(cohesionPair, CellAlg.LEFTOPAD, data.getSocialCohesion(), null);
-                table.addCell(consciousnessPair, CellAlg.LEFTOPAD, data.getClassConsciousness(), null);
-                table.addCell(NumFormat.formatCredit(credits), CellAlg.MID, credits, creditColor);
-                table.addCell(employment + "%", CellAlg.MID, employment, null);
+            final var cond = WorkerPoolRegistry.get(market);
+            final int employment = Math.round(100f - cond.getFreeWorkerRatio()*100f);
 
-                final ClickHandler<TableRow> run = (row, isLeftClick) -> {
-                    final ManagePopulationDialog dialogPanel = new ManagePopulationDialog(market);
-                    dialogPanel.show(0.3f, 0.3f);
-                };
-    
-                table.pushRow(null, null, run, null, null, null);
-            }
-        } else {
-            final LabelAPI lbl = settings.createLabel(str("uiNoStaticAssets"), Fonts.DEFAULT_SMALL);
-            lbl.setColor(base);
-            table.add(lbl).inMid();
+            final long credits = engine.getCredits(data.marketID);
+            final Color creditColor = credits < 0l ? negative : highlight;
+
+            table.addRow(new RowData()
+                .cell(colonyPanel, CellAlg.LEFT, market.getDaysInExistence(), null)
+                .cell(market.getSize(), CellAlg.MID, null, null)
+                .cell(healthPair, CellAlg.LEFTOPAD, data.getHealth(), null)
+                .cell(happinessPair, CellAlg.LEFTOPAD, data.getHappiness(), null)
+                .cell(cohesionPair, CellAlg.LEFTOPAD, data.getSocialCohesion(), null)
+                .cell(consciousnessPair, CellAlg.LEFTOPAD, data.getClassConsciousness(), null)
+                .cell(NumFormat.formatCredit(credits), CellAlg.MID, credits, creditColor)
+                .cell(employment + "%", CellAlg.MID, employment, null)
+                .onClicked((row, isLeftClick) -> new ManagePopulationDialog(market).show(0.3f, 0.3f))
+            );
         }
 
         table.outline.enabled = true;

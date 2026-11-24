@@ -4,7 +4,7 @@
 	"author":"WolframSegler",
 	"version": "0.5.0",
 	"description":"Annals of Trade and Production, shaping the sector's construction.",
-	"gameVersion":"0.98.5a-RC8",
+	"gameVersion":"0.98.5a-RC9",
 	"utility": false,
 	"jars": [
         "jars/main/ltv_economy.jar",
@@ -19,7 +19,7 @@
         {
             "id": "wfg_native_ui",
             "name": "NativeUI",
-			"version": "0.5.1"
+			"version": "0.5.2"
         }
     ]
 }
