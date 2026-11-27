@@ -23,6 +23,7 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.log4j.Logger;
 
@@ -204,23 +205,43 @@ public class ShipAllocator {
         final int N = candidates.size();
         if (N <= 0) throw new IllegalStateException("No ship candidates: " + faction.getId());
 
+        final InventoryShip[] ships = candidates.toArray(new InventoryShip[N]);
         final int[] idleRemaining = new int[N];
-        final double[] weight = buildTargetWeights(candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat);
+        final double[] baseWeight = buildTargetWeights(candidates, faction, targetCargo, targetFuel, targetCrew, targetCombat);
+
         final double[] cargoCap = new double[N];
         final double[] fuelCap = new double[N];
         final double[] crewCap = new double[N];
         final double[] combatCap = new double[N];
 
+        final double[] cargoContrib = new double[N];
+        final double[] fuelContrib = new double[N];
+        final double[] crewContrib = new double[N];
+        final double[] combatContrib = new double[N];
+
+        final double invCargo = targetCargo > 0d ? 1d / targetCargo : 0d;
+        final double invFuel = targetFuel > 0d ? 1d / targetFuel : 0d;
+        final double invCrew = targetCrew > 0d ? 1d / targetCrew : 0d;
+        final double invCombat = targetCombat > 0d ? 1d / targetCombat : 0d;
+
         for (int i = 0; i < N; i++) {
-            final InventoryShip data = candidates.get(i);
+            final InventoryShip data = ships[i];
             cargoCap[i] = data.spec.getCargo();
             fuelCap[i] = data.spec.getFuel();
             crewCap[i] = data.getCrewCapacityPerShip();
             combatCap[i] = data.getCombatPower();
             idleRemaining[i] = data.getIdle();
+
+            cargoContrib[i] = targetCargo > 0d ? Math.min(1d, cargoCap[i] * invCargo) : 0d;
+            fuelContrib[i] = targetFuel > 0d ? Math.min(1d, fuelCap[i] * invFuel) : 0d;
+            crewContrib[i] = targetCrew > 0d ? Math.min(1d, crewCap[i] * invCrew) : 0d;
+            combatContrib[i] = targetCombat > 0d ? Math.min(1d, combatCap[i] * invCombat) : 0d;
         }
 
         final int[] counts = new int[N];
+        final double[] weights = new double[N];
+        final ThreadLocalRandom rnd = ThreadLocalRandom.current();
+
         double remCargo = targetCargo;
         double remFuel = targetFuel;
         double remCrew = targetCrew;
@@ -233,41 +254,37 @@ public class ShipAllocator {
             final double crewNeed = (targetCrew > eps) ? remCrew / targetCrew : 0d;
 
             double totalWeight = 0d;
-            double[] weights = new double[N];
 
             for (int i = 0; i < N; i++) {
-                if (idleRemaining[i] <= 0) continue;
+                if (idleRemaining[i] <= 0) {
+                    weights[i] = 0d; continue;
+                }
 
-                boolean useful = false;
-                if (remCargo > 0d && cargoCap[i] > 0d) useful = true;
-                if (remFuel > 0d && fuelCap[i] > 0d) useful = true;
-                if (remCrew > 0d && crewCap[i] > 0d) useful = true;
-                if (remCombat > 0d && combatCap[i] > 0d) useful = true;
-                if (!useful) continue;
+                final double utility =
+                    cargoContrib[i] * cargoNeed +
+                    fuelContrib[i] * fuelNeed +
+                    crewContrib[i] * crewNeed +
+                    combatContrib[i] * combatNeed;
 
-                final double cargoContrib = (targetCargo > 0) ? Math.min(1d, cargoCap[i] / targetCargo) : 0d;
-                final double fuelContrib = (targetFuel > 0) ? Math.min(1d, fuelCap[i] / targetFuel) : 0d;
-                final double crewContrib = (targetCrew > 0) ? Math.min(1d, crewCap[i] / targetCrew) : 0d;
-                final double combatContrib = (targetCombat > 0) ? Math.min(1d, combatCap[i] / targetCombat) : 0d;
+                if (utility <= 0d) {
+                    weights[i] = 0d; continue;
+                }
 
-                final double utility = cargoContrib * cargoNeed
-                    + fuelContrib * fuelNeed
-                    + crewContrib * crewNeed
-                    + combatContrib * combatNeed;
+                // Math.pow(utility, 0.75)
+                final double u75 = Math.sqrt(utility * Math.sqrt(utility));
 
-                final double w = weight[i] * Math.pow(utility, 0.75) / (1d + DIVERSITY_PENALTY * counts[i]);
-
+                final double w = baseWeight[i] * u75 / (1d + DIVERSITY_PENALTY * counts[i]);
                 weights[i] = w;
                 totalWeight += w;
             }
             if (totalWeight <= 0d) break;
 
-            final double r = Math.random() * totalWeight;
+            final double r = rnd.nextDouble(totalWeight);
             int picked = -1;
             double accum = 0;
             for (int i = 0; i < N; i++) {
                 accum += weights[i];
-                if (r <= accum) {
+                if (r < accum) {
                     picked = i;
                     break;
                 }
@@ -280,7 +297,7 @@ public class ShipAllocator {
             remCargo = Math.max(0d, remCargo - cargoCap[picked]);
             remFuel = Math.max(0d, remFuel - fuelCap[picked]);
             remCrew = Math.max(0d, remCrew - crewCap[picked]);
-            remCombat = Math.max(0d, remCombat- combatCap[picked]);
+            remCombat = Math.max(0d, remCombat - combatCap[picked]);
         }
 
         if (remCargo > eps) log.warn(faction.getId() + " - Not enough cargo capacity after allocation, remaining: " + (long) remCargo);
@@ -313,39 +330,36 @@ public class ShipAllocator {
         final int N = candidates.size();
         if (N <= 0) throw new IllegalStateException("No ship candidates: " + faction.getId());
 
+        final InventoryShip[] ships = candidates.toArray(new InventoryShip[N]);
         final double[] baseWeights = buildFleetPointWeights(candidates, faction);
         final float[] fleetPoints = new float[N];
         final int[] idleRemaining = new int[N];
+        final double[] weights = new double[N];
 
+        double totalWeight = 0d;
         for (int i = 0; i < N; i++) {
-            final InventoryShip ship = candidates.get(i);
+            final InventoryShip ship = ships[i];
             idleRemaining[i] = ship.getIdle();
             fleetPoints[i] = ship.spec.getFleetPoints();
+
+            final double w = idleRemaining[i] > 0 ? baseWeights[i] : 0d;
+            weights[i] = w;
+            totalWeight += w;
         }
 
         final int[] counts = new int[N];
         double remFp = targetFp;
 
-        while (remFp > eps) {
-            double totalWeight = 0d;
-            double[] weights = new double[N];
+        final ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
-            for (int i = 0; i < N; i++) {
-                if (idleRemaining[i] <= 0) continue;
+        while (remFp > eps && totalWeight > 0d) {
+            final double r = rnd.nextDouble(totalWeight);   
 
-                final double w = baseWeights[i] / (1d + DIVERSITY_PENALTY * counts[i]);
-
-                weights[i] = w;
-                totalWeight += w;
-            }
-            if (totalWeight <= 0d) break;
-
-            final double r = Math.random() * totalWeight;
             int picked = -1;
-            double accum = 0;
+            double accum = 0d;
             for (int i = 0; i < N; i++) {
                 accum += weights[i];
-                if (r <= accum) {
+                if (r < accum) {
                     picked = i;
                     break;
                 }
@@ -354,8 +368,14 @@ public class ShipAllocator {
 
             counts[picked]++;
             idleRemaining[picked]--;
-
             remFp -= fleetPoints[picked];
+
+            final double oldWeight = weights[picked];
+            final double newWeight = idleRemaining[picked] > 0 ?
+                baseWeights[picked] / (1d + DIVERSITY_PENALTY * counts[picked]) : 0d;
+
+            weights[picked] = newWeight;
+            totalWeight += newWeight - oldWeight;
         }
 
         if (remFp > eps) log.warn(faction.getId() + " - Not enough fleet points after allocation, remaining: " + remFp);
